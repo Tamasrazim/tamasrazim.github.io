@@ -4,12 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#080808">
+
 <title>TAMASRAZIM — Robiul Rumman Razim</title>
 
 <style>
+
 /* =========================================================
    TAMASRAZIM V4
-   Animation-first / GPU-friendly
+   ANIMATION FIRST / PERFORMANCE AWARE
    ========================================================= */
 
 :root{
@@ -27,21 +29,26 @@
 }
 
 html{
+    width:100%;
+    height:100%;
+    overflow:hidden;
     background:var(--bg);
     color:var(--fg);
-    overflow:hidden;
 }
 
 body{
-    width:100vw;
-    height:100vh;
+    width:100%;
+    height:100%;
     overflow:hidden;
     background:var(--bg);
+    color:var(--fg);
     font-family:Arial,Helvetica,sans-serif;
     cursor:none;
 }
 
-/* ---------------- CURSOR ---------------- */
+/* =========================================================
+   CURSOR
+   ========================================================= */
 
 .cursor,
 .cursor-ring{
@@ -49,7 +56,7 @@ body{
     left:0;
     top:0;
     pointer-events:none;
-    z-index:9999;
+    z-index:99999;
     border-radius:50%;
     transform:translate3d(-50%,-50%,0);
     will-change:transform;
@@ -77,78 +84,137 @@ body.hovering .cursor-ring{
     border-color:var(--fg);
 }
 
-/* ---------------- LOADER ---------------- */
+/* =========================================================
+   INTRO / KAMUI-STYLE OPENING
+   ========================================================= */
 
 .loader{
     position:fixed;
     inset:0;
     z-index:10000;
-    background:#050505;
+
     display:flex;
     align-items:center;
     justify-content:center;
+
+    background:#050505;
     overflow:hidden;
+
+    transform:translate3d(0,0,0);
     transition:transform 1.2s var(--ease);
+
+    will-change:transform;
 }
 
 .loader.exit{
-    transform:translateY(-100%);
+    transform:translate3d(0,-100%,0);
 }
 
 .loader-word{
     display:flex;
-    overflow:hidden;
+    align-items:center;
+    justify-content:center;
+
+    width:max-content;
+    white-space:nowrap;
 }
 
 .loader-letter{
     display:block;
+    flex:0 0 auto;
+
     font-size:clamp(3rem,11vw,12rem);
     font-weight:500;
-    letter-spacing:.04em;
-    transform:translateY(110%);
+    line-height:.8;
+    letter-spacing:.035em;
+
     opacity:0;
+    transform:translate3d(0,110%,0);
+
+    will-change:transform,opacity;
+
     animation:
-        letterIn 1.1s var(--ease) forwards,
+        letterIn 1.05s var(--ease) forwards,
         letterFloat 3s ease-in-out infinite;
 }
 
-.loader-letter:nth-child(1){animation-delay:.05s,1.2s}
-.loader-letter:nth-child(2){animation-delay:.10s,1.25s}
-.loader-letter:nth-child(3){animation-delay:.15s,1.3s}
-.loader-letter:nth-child(4){animation-delay:.20s,1.35s}
-.loader-letter:nth-child(5){animation-delay:.25s,1.4s}
-.loader-letter:nth-child(6){animation-delay:.30s,1.45s}
-.loader-letter:nth-child(7){animation-delay:.35s,1.5s}
-.loader-letter:nth-child(8){animation-delay:.40s,1.55s}
-.loader-letter:nth-child(9){animation-delay:.45s,1.6s}
-.loader-letter:nth-child(10){animation-delay:.50s,1.65s}
+.loader-letter:nth-child(1){
+    animation-delay:.05s,1.25s;
+}
 
-.loader-meta{
-    position:absolute;
-    bottom:35px;
-    left:40px;
-    right:40px;
-    display:flex;
-    justify-content:space-between;
-    color:var(--muted);
-    font-size:10px;
-    letter-spacing:.25em;
-    text-transform:uppercase;
+.loader-letter:nth-child(2){
+    animation-delay:.10s,1.30s;
+}
+
+.loader-letter:nth-child(3){
+    animation-delay:.15s,1.35s;
+}
+
+.loader-letter:nth-child(4){
+    animation-delay:.20s,1.40s;
+}
+
+.loader-letter:nth-child(5){
+    animation-delay:.25s,1.45s;
+}
+
+.loader-letter:nth-child(6){
+    animation-delay:.30s,1.50s;
+}
+
+.loader-letter:nth-child(7){
+    animation-delay:.35s,1.55s;
+}
+
+.loader-letter:nth-child(8){
+    animation-delay:.40s,1.60s;
+}
+
+.loader-letter:nth-child(9){
+    animation-delay:.45s,1.65s;
+}
+
+.loader-letter:nth-child(10){
+    animation-delay:.50s,1.70s;
 }
 
 @keyframes letterIn{
     to{
-        transform:translateY(0);
+        transform:translate3d(0,0,0);
         opacity:1;
     }
 }
 
 @keyframes letterFloat{
-    0%,100%{translate:0 0}
-    50%{translate:0 -7px}
+
+    0%,100%{
+        transform:translate3d(0,0,0);
+    }
+
+    50%{
+        transform:translate3d(0,-7px,0);
+    }
 }
 
-/* ---------------- APP ---------------- */
+.loader-meta{
+    position:absolute;
+    left:40px;
+    right:40px;
+    bottom:35px;
+
+    display:flex;
+    justify-content:space-between;
+
+    color:var(--muted);
+
+    font-size:10px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+}
+
+/* =========================================================
+   APP
+   ========================================================= */
 
 .app{
     position:relative;
@@ -159,37 +225,55 @@ body.hovering .cursor-ring{
 
 .track{
     display:flex;
-    height:100%;
+
     width:max-content;
-    will-change:transform;
+    height:100%;
+
     transform:translate3d(0,0,0);
+
+    will-change:transform;
 }
 
-/* ---------------- SECTION ---------------- */
+/* =========================================================
+   PANELS
+   ========================================================= */
 
 .panel{
     position:relative;
+
     width:100vw;
     height:100vh;
+
     flex:0 0 100vw;
+
     overflow:hidden;
+
     display:flex;
     align-items:center;
+
     padding:7vw;
 }
 
-/* ---------------- HEADER ---------------- */
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .header{
     position:fixed;
-    z-index:100;
+
     top:0;
     left:0;
+
     width:100%;
+
     padding:28px 38px;
+
     display:flex;
     justify-content:space-between;
     align-items:center;
+
+    z-index:500;
+
     pointer-events:none;
 }
 
@@ -197,6 +281,7 @@ body.hovering .cursor-ring{
     font-size:12px;
     font-weight:700;
     letter-spacing:.28em;
+
     pointer-events:auto;
 }
 
@@ -206,28 +291,41 @@ body.hovering .cursor-ring{
     color:var(--muted);
 }
 
-/* ---------------- BACKGROUND ---------------- */
+/* =========================================================
+   AMBIENT RING
+   ========================================================= */
 
 .ambient{
     position:absolute;
+
     width:42vw;
     height:42vw;
-    border-radius:50%;
-    border:1px solid rgba(241,238,232,.08);
+
     right:-15vw;
     top:20%;
+
+    border:1px solid rgba(241,238,232,.08);
+    border-radius:50%;
+
     transform:translate3d(0,0,0);
+
     will-change:transform;
-    animation:ambientSpin 22s linear infinite;
+
+    animation:ambientSpin 24s linear infinite;
 }
 
 .ambient::before,
 .ambient::after{
     content:"";
+
     position:absolute;
-    inset:13%;
+
     border:1px solid rgba(241,238,232,.06);
     border-radius:50%;
+}
+
+.ambient::before{
+    inset:13%;
 }
 
 .ambient::after{
@@ -235,11 +333,19 @@ body.hovering .cursor-ring{
 }
 
 @keyframes ambientSpin{
-    from{transform:rotate(0deg)}
-    to{transform:rotate(360deg)}
+
+    from{
+        transform:rotate(0deg);
+    }
+
+    to{
+        transform:rotate(360deg);
+    }
 }
 
-/* ---------------- HERO ---------------- */
+/* =========================================================
+   HERO
+   ========================================================= */
 
 .hero{
     justify-content:flex-start;
@@ -247,66 +353,149 @@ body.hovering .cursor-ring{
 
 .hero-content{
     position:relative;
-    z-index:2;
+    z-index:5;
 }
 
 .kicker{
-    margin-bottom:28px;
+    margin-bottom:30px;
+
     color:var(--muted);
+
     font-size:10px;
     letter-spacing:.32em;
+    line-height:1.6;
+
     text-transform:uppercase;
 }
 
+/*
+   IMPORTANT:
+   FLEX + NO HTML WHITESPACE BETWEEN LETTER SPANS.
+   This keeps TAMASRAZIM as one continuous word.
+*/
+
 .hero-title{
+    display:flex;
+    align-items:baseline;
+
+    width:max-content;
+    max-width:none;
+
+    white-space:nowrap;
+
     font-size:clamp(5rem,13vw,14rem);
     font-weight:500;
+
     line-height:.82;
-    letter-spacing:.045em;
-    white-space:nowrap;
+
+    letter-spacing:.035em;
+
+    transform:translate3d(0,0,0);
+
+    will-change:transform;
 }
 
 .hero-title span{
-    display:inline-block;
+    display:block;
+
+    flex:0 0 auto;
+
+    margin:0;
+    padding:0;
+
     will-change:transform;
+
     animation:titleBreath 5s ease-in-out infinite;
 }
 
-.hero-title span:nth-child(2){animation-delay:.15s}
-.hero-title span:nth-child(3){animation-delay:.3s}
-.hero-title span:nth-child(4){animation-delay:.45s}
-.hero-title span:nth-child(5){animation-delay:.6s}
+.hero-title span:nth-child(1){
+    animation-delay:0s;
+}
+
+.hero-title span:nth-child(2){
+    animation-delay:.12s;
+}
+
+.hero-title span:nth-child(3){
+    animation-delay:.24s;
+}
+
+.hero-title span:nth-child(4){
+    animation-delay:.36s;
+}
+
+.hero-title span:nth-child(5){
+    animation-delay:.48s;
+}
+
+.hero-title span:nth-child(6){
+    animation-delay:.60s;
+}
+
+.hero-title span:nth-child(7){
+    animation-delay:.72s;
+}
+
+.hero-title span:nth-child(8){
+    animation-delay:.84s;
+}
+
+.hero-title span:nth-child(9){
+    animation-delay:.96s;
+}
+
+.hero-title span:nth-child(10){
+    animation-delay:1.08s;
+}
 
 @keyframes titleBreath{
-    0%,100%{transform:translateY(0)}
-    50%{transform:translateY(-8px)}
+
+    0%,100%{
+        transform:translate3d(0,0,0);
+    }
+
+    50%{
+        transform:translate3d(0,-8px,0);
+    }
 }
 
 .hero-sub{
-    margin-top:48px;
-    margin-left:8px;
+    margin-top:50px;
+    margin-left:5px;
+
     display:flex;
     gap:60px;
+
     color:var(--muted);
+
     font-size:11px;
     letter-spacing:.16em;
-    text-transform:uppercase;
     line-height:1.8;
+
+    text-transform:uppercase;
 }
 
-/* ---------------- SIDE LABEL ---------------- */
+/* =========================================================
+   SIDE LABEL
+   ========================================================= */
 
 .side-label{
     position:absolute;
+
     right:38px;
     bottom:38px;
+
     writing-mode:vertical-rl;
+
     color:var(--muted);
+
     font-size:9px;
     letter-spacing:.3em;
 }
 
-/* ---------------- IDENTITY ---------------- */
+/* =========================================================
+   IDENTITY
+   ========================================================= */
 
 .identity{
     justify-content:center;
@@ -316,10 +505,21 @@ body.hovering .cursor-ring{
     width:min(1200px,100%);
 }
 
+.section-number{
+    color:var(--muted);
+
+    font-size:10px;
+    letter-spacing:.3em;
+
+    margin-bottom:35px;
+}
+
 .big-statement{
     font-size:clamp(3.5rem,8vw,9rem);
+
     line-height:.94;
     font-weight:500;
+
     letter-spacing:.025em;
 }
 
@@ -330,12 +530,16 @@ body.hovering .cursor-ring{
 
 .big-statement .line span{
     display:inline-block;
-    transform:translateY(110%);
+
+    transform:translate3d(0,110%,0);
+
     transition:transform 1.1s var(--ease);
+
+    will-change:transform;
 }
 
 .panel.active .big-statement .line span{
-    transform:translateY(0);
+    transform:translate3d(0,0,0);
 }
 
 .big-statement .line:nth-child(2) span{
@@ -348,16 +552,23 @@ body.hovering .cursor-ring{
 
 .identity-small{
     margin-top:70px;
+
     display:grid;
     grid-template-columns:1fr 1fr;
+
     gap:40px;
+
     max-width:700px;
+
     color:var(--muted);
-    line-height:1.8;
+
     font-size:14px;
+    line-height:1.8;
 }
 
-/* ---------------- ABOUT ---------------- */
+/* =========================================================
+   ABOUT
+   ========================================================= */
 
 .about{
     justify-content:space-between;
@@ -367,26 +578,24 @@ body.hovering .cursor-ring{
     max-width:700px;
 }
 
-.section-number{
-    color:var(--muted);
-    font-size:10px;
-    letter-spacing:.3em;
-    margin-bottom:35px;
-}
-
 .about-title{
     font-size:clamp(4rem,9vw,10rem);
+
     line-height:.85;
     font-weight:500;
+
     letter-spacing:.025em;
 }
 
 .about-copy{
     max-width:520px;
+
     margin-top:55px;
+
     color:var(--muted);
-    line-height:1.85;
+
     font-size:14px;
+    line-height:1.85;
 }
 
 .about-right{
@@ -396,13 +605,18 @@ body.hovering .cursor-ring{
 
 .data-row{
     border-top:1px solid var(--line);
+
     padding:18px 0;
+
     display:flex;
     justify-content:space-between;
+
+    color:var(--muted);
+
     font-size:10px;
     letter-spacing:.12em;
+
     text-transform:uppercase;
-    color:var(--muted);
 }
 
 .data-row strong{
@@ -410,31 +624,40 @@ body.hovering .cursor-ring{
     font-weight:500;
 }
 
-/* ---------------- WORK ---------------- */
+/* =========================================================
+   WORK
+   ========================================================= */
 
 .work{
     display:block;
+
     padding-top:15vh;
 }
 
 .work-heading{
     display:flex;
+
     justify-content:space-between;
     align-items:flex-end;
+
     margin-bottom:45px;
 }
 
 .work-heading h2{
     font-size:clamp(4rem,9vw,10rem);
+
     font-weight:500;
     line-height:.8;
+
     letter-spacing:.02em;
 }
 
 .work-heading p{
     color:var(--muted);
+
     font-size:10px;
     letter-spacing:.2em;
+
     text-transform:uppercase;
 }
 
@@ -444,12 +667,21 @@ body.hovering .cursor-ring{
 
 .work-item{
     position:relative;
+
     border-top:1px solid var(--line);
+
     padding:25px 0;
+
     display:grid;
+
     grid-template-columns:70px 1fr 200px;
+
     align-items:center;
-    transition:padding .5s var(--ease);
+
+    transition:
+        padding .5s var(--ease);
+
+    will-change:padding;
 }
 
 .work-item:last-child{
@@ -464,22 +696,30 @@ body.hovering .cursor-ring{
 .work-index,
 .work-type{
     color:var(--muted);
+
     font-size:10px;
     letter-spacing:.18em;
 }
 
 .work-name{
     font-size:clamp(1.6rem,3vw,3.5rem);
-    letter-spacing:.025em;
+
     font-weight:500;
+
+    letter-spacing:.025em;
+
     transition:transform .5s var(--ease);
+
+    will-change:transform;
 }
 
 .work-item:hover .work-name{
-    transform:translateX(20px);
+    transform:translate3d(20px,0,0);
 }
 
-/* ---------------- PRESENCE ---------------- */
+/* =========================================================
+   DIGITAL PRESENCE
+   ========================================================= */
 
 .presence{
     justify-content:center;
@@ -491,50 +731,67 @@ body.hovering .cursor-ring{
 
 .presence-title{
     font-size:clamp(4rem,10vw,11rem);
+
     line-height:.8;
     font-weight:500;
+
     letter-spacing:.025em;
 }
 
 .links{
     margin-top:75px;
+
     display:grid;
+
     grid-template-columns:repeat(4,1fr);
+
     gap:1px;
 }
 
 .link{
     min-height:130px;
+
     border:1px solid var(--line);
+
     padding:25px;
+
     color:var(--fg);
     text-decoration:none;
+
     display:flex;
     flex-direction:column;
     justify-content:space-between;
+
     transition:
         transform .55s var(--ease),
         background .55s ease;
+
+    will-change:transform;
 }
 
 .link:hover{
-    transform:translateY(-12px);
+    transform:translate3d(0,-12px,0);
     background:#111;
 }
 
 .link small{
     color:var(--muted);
+
     font-size:9px;
     letter-spacing:.2em;
 }
 
 .link strong{
     font-size:18px;
+
     font-weight:500;
+
     letter-spacing:.03em;
 }
 
-/* ---------------- CONTACT ---------------- */
+/* =========================================================
+   CONTACT
+   ========================================================= */
 
 .contact{
     justify-content:center;
@@ -543,43 +800,67 @@ body.hovering .cursor-ring{
 
 .contact-title{
     font-size:clamp(5rem,13vw,15rem);
+
     line-height:.78;
     font-weight:500;
+
     letter-spacing:.04em;
 }
 
 .contact-title span{
     display:inline-block;
+
+    will-change:transform;
+
     animation:contactFloat 4s ease-in-out infinite;
 }
 
+.contact-title span:nth-child(1){animation-delay:0s}
 .contact-title span:nth-child(2){animation-delay:.2s}
 .contact-title span:nth-child(3){animation-delay:.4s}
 .contact-title span:nth-child(4){animation-delay:.6s}
 .contact-title span:nth-child(5){animation-delay:.8s}
 .contact-title span:nth-child(6){animation-delay:1s}
 .contact-title span:nth-child(7){animation-delay:1.2s}
+.contact-title span:nth-child(8){animation-delay:1.4s}
+.contact-title span:nth-child(9){animation-delay:1.6s}
+.contact-title span:nth-child(10){animation-delay:1.8s}
+.contact-title span:nth-child(11){animation-delay:2s}
 
 @keyframes contactFloat{
-    0%,100%{transform:translateY(0) rotate(0)}
-    50%{transform:translateY(-12px) rotate(.5deg)}
+
+    0%,100%{
+        transform:translate3d(0,0,0) rotate(0deg);
+    }
+
+    50%{
+        transform:translate3d(0,-12px,0) rotate(.5deg);
+    }
 }
 
 .contact-meta{
     margin-top:60px;
+
     color:var(--muted);
+
     font-size:11px;
     letter-spacing:.2em;
+
     text-transform:uppercase;
 }
 
-/* ---------------- PROGRESS ---------------- */
+/* =========================================================
+   PROGRESS
+   ========================================================= */
 
 .progress{
     position:fixed;
+
     left:38px;
     bottom:38px;
-    z-index:100;
+
+    z-index:500;
+
     display:flex;
     gap:8px;
 }
@@ -587,7 +868,9 @@ body.hovering .cursor-ring{
 .progress span{
     width:25px;
     height:1px;
+
     background:rgba(241,238,232,.2);
+
     transition:
         width .6s var(--ease),
         background .6s ease;
@@ -598,16 +881,18 @@ body.hovering .cursor-ring{
     background:var(--fg);
 }
 
-/* ---------------- MOBILE ---------------- */
+/* =========================================================
+   MOBILE
+   ========================================================= */
 
 @media(max-width:800px){
 
-    body{
-        cursor:auto;
+    html{
         overflow:auto;
     }
 
-    html{
+    body{
+        cursor:auto;
         overflow:auto;
     }
 
@@ -622,27 +907,38 @@ body.hovering .cursor-ring{
     }
 
     .track{
+        display:block;
+
         width:100%;
         height:auto;
-        display:block;
+
         transform:none !important;
     }
 
     .panel{
         width:100%;
         height:auto;
+
         min-height:100svh;
+
         padding:100px 25px 80px;
     }
 
     .hero-title{
-        white-space:normal;
-        font-size:clamp(4rem,17vw,8rem);
+        width:100%;
+        max-width:100%;
+
+        font-size:clamp(3.2rem,16vw,8rem);
+
+        letter-spacing:.025em;
+
+        overflow:visible;
     }
 
     .hero-sub{
         display:block;
-        margin-top:35px;
+
+        margin-top:40px;
     }
 
     .hero-sub div{
@@ -652,11 +948,13 @@ body.hovering .cursor-ring{
     .ambient{
         width:80vw;
         height:80vw;
+
         right:-35vw;
     }
 
     .identity-small{
         grid-template-columns:1fr;
+
         margin-top:45px;
     }
 
@@ -666,6 +964,7 @@ body.hovering .cursor-ring{
 
     .about-right{
         width:100%;
+
         margin:60px 0 0;
     }
 
@@ -706,7 +1005,9 @@ body.hovering .cursor-ring{
     }
 }
 
-/* ---------------- REDUCED MOTION ---------------- */
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
 
 @media(prefers-reduced-motion:reduce){
 
@@ -716,21 +1017,22 @@ body.hovering .cursor-ring{
         animation-duration:.01ms !important;
         animation-iteration-count:1 !important;
         transition-duration:.01ms !important;
-        scroll-behavior:auto !important;
     }
 }
+
 </style>
 </head>
 
 <body>
 
-<!-- ======================================================
-     LOADER
-====================================================== -->
+<!-- =======================================================
+     INTRO
+======================================================= -->
 
 <div class="loader" id="loader">
 
     <div class="loader-word">
+
         <span class="loader-letter">T</span>
         <span class="loader-letter">A</span>
         <span class="loader-letter">M</span>
@@ -741,6 +1043,7 @@ body.hovering .cursor-ring{
         <span class="loader-letter">Z</span>
         <span class="loader-letter">I</span>
         <span class="loader-letter">M</span>
+
     </div>
 
     <div class="loader-meta">
@@ -751,33 +1054,43 @@ body.hovering .cursor-ring{
 </div>
 
 
-<!-- ======================================================
+<!-- =======================================================
      CURSOR
-====================================================== -->
+======================================================= -->
 
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursorRing"></div>
 
 
-<!-- ======================================================
+<!-- =======================================================
      HEADER
-====================================================== -->
+======================================================= -->
 
 <header class="header">
-    <div class="logo">T/R</div>
-    <div class="counter" id="counter">01 / 06</div>
+
+    <div class="logo">
+        T/R
+    </div>
+
+    <div class="counter" id="counter">
+        01 / 06
+    </div>
+
 </header>
 
 
-<!-- ======================================================
-     APPLICATION
-====================================================== -->
+<!-- =======================================================
+     MAIN
+======================================================= -->
 
-<main class="app" id="app">
+<main class="app">
 
 <div class="track" id="track">
 
-<!-- ================= HERO ================= -->
+
+<!-- =======================================================
+     01 — HERO
+======================================================= -->
 
 <section class="panel hero active">
 
@@ -789,15 +1102,27 @@ body.hovering .cursor-ring{
             Independent Digital Identity
         </div>
 
-        <h1 class="hero-title" id="heroTitle">
-            <span>T</span><span>A</span><span>M</span><span>A</span>
-            <span>S</span><span>R</span><span>A</span><span>Z</span>
-            <span>I</span><span>M</span>
-        </h1>
+        <!--
+            NO WHITESPACE BETWEEN THESE SPANS.
+            This prevents:
+            TAMA AR AZ IM
+
+            and produces:
+            TAMASRAZIM
+        -->
+
+        <h1 class="hero-title" id="heroTitle"><span>T</span><span>A</span><span>M</span><span>A</span><span>S</span><span>R</span><span>A</span><span>Z</span><span>I</span><span>M</span></h1>
 
         <div class="hero-sub">
-            <div>Robiul Rumman Razim</div>
-            <div>Technology / Digital / Creative</div>
+
+            <div>
+                Robiul Rumman Razim
+            </div>
+
+            <div>
+                Technology / Digital / Creative
+            </div>
+
         </div>
 
     </div>
@@ -809,21 +1134,36 @@ body.hovering .cursor-ring{
 </section>
 
 
-<!-- ================= IDENTITY ================= -->
+<!-- =======================================================
+     02 — IDENTITY
+======================================================= -->
 
 <section class="panel identity">
 
     <div class="identity-inner">
 
-        <div class="section-number">01 — IDENTITY</div>
+        <div class="section-number">
+            01 — IDENTITY
+        </div>
 
         <h2 class="big-statement">
-            <span class="line"><span>ONE NAME.</span></span>
-            <span class="line"><span>MANY DIRECTIONS.</span></span>
-            <span class="line"><span>ONE IDENTITY.</span></span>
+
+            <span class="line">
+                <span>ONE NAME.</span>
+            </span>
+
+            <span class="line">
+                <span>MANY DIRECTIONS.</span>
+            </span>
+
+            <span class="line">
+                <span>ONE IDENTITY.</span>
+            </span>
+
         </h2>
 
         <div class="identity-small">
+
             <p>
                 Tamasrazim is the digital identity of
                 Robiul Rumman Razim.
@@ -834,6 +1174,7 @@ body.hovering .cursor-ring{
                 and digital work — brought together
                 under one name.
             </p>
+
         </div>
 
     </div>
@@ -841,13 +1182,17 @@ body.hovering .cursor-ring{
 </section>
 
 
-<!-- ================= ABOUT ================= -->
+<!-- =======================================================
+     03 — ABOUT
+======================================================= -->
 
 <section class="panel about">
 
     <div class="about-left">
 
-        <div class="section-number">02 — ABOUT</div>
+        <div class="section-number">
+            02 — ABOUT
+        </div>
 
         <h2 class="about-title">
             ROBIUL<br>
@@ -890,13 +1235,17 @@ body.hovering .cursor-ring{
 </section>
 
 
-<!-- ================= WORK ================= -->
+<!-- =======================================================
+     04 — WORK
+======================================================= -->
 
 <section class="panel work">
 
     <div class="work-heading">
 
-        <h2>WORK</h2>
+        <h2>
+            WORK
+        </h2>
 
         <p>
             Selected experiments / projects
@@ -908,7 +1257,9 @@ body.hovering .cursor-ring{
 
         <div class="work-item magnetic">
 
-            <span class="work-index">01</span>
+            <span class="work-index">
+                01
+            </span>
 
             <span class="work-name">
                 Digital Systems
@@ -922,7 +1273,9 @@ body.hovering .cursor-ring{
 
         <div class="work-item magnetic">
 
-            <span class="work-index">02</span>
+            <span class="work-index">
+                02
+            </span>
 
             <span class="work-name">
                 Web Experiments
@@ -936,7 +1289,9 @@ body.hovering .cursor-ring{
 
         <div class="work-item magnetic">
 
-            <span class="work-index">03</span>
+            <span class="work-index">
+                03
+            </span>
 
             <span class="work-name">
                 Creative Projects
@@ -950,7 +1305,9 @@ body.hovering .cursor-ring{
 
         <div class="work-item magnetic">
 
-            <span class="work-index">04</span>
+            <span class="work-index">
+                04
+            </span>
 
             <span class="work-name">
                 Gaming & Media
@@ -967,7 +1324,9 @@ body.hovering .cursor-ring{
 </section>
 
 
-<!-- ================= DIGITAL PRESENCE ================= -->
+<!-- =======================================================
+     05 — DIGITAL PRESENCE
+======================================================= -->
 
 <section class="panel presence">
 
@@ -984,40 +1343,67 @@ body.hovering .cursor-ring{
 
         <div class="links">
 
-            <a class="link magnetic"
-               href="https://linkedin.com/in/Tamasrazim"
-               target="_blank">
+            <a
+                class="link magnetic"
+                href="https://linkedin.com/in/Tamasrazim"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <small>
+                    01 / PROFESSIONAL
+                </small>
 
-                <small>01 / PROFESSIONAL</small>
-                <strong>LinkedIn ↗</strong>
-
+                <strong>
+                    LinkedIn ↗
+                </strong>
             </a>
 
-            <a class="link magnetic"
-               href="https://facebook.com/Tamasrazim"
-               target="_blank">
 
-                <small>02 / SOCIAL</small>
-                <strong>Facebook ↗</strong>
+            <a
+                class="link magnetic"
+                href="https://facebook.com/Tamasrazim"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <small>
+                    02 / SOCIAL
+                </small>
 
+                <strong>
+                    Facebook ↗
+                </strong>
             </a>
 
-            <a class="link magnetic"
-               href="https://tiktok.com/@Tamasrazim"
-               target="_blank">
 
-                <small>03 / VIDEO</small>
-                <strong>TikTok ↗</strong>
+            <a
+                class="link magnetic"
+                href="https://tiktok.com/@Tamasrazim"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <small>
+                    03 / VIDEO
+                </small>
 
+                <strong>
+                    TikTok ↗
+                </strong>
             </a>
 
-            <a class="link magnetic"
-               href="https://instagram.com/Tamasrazim"
-               target="_blank">
 
-                <small>04 / VISUAL</small>
-                <strong>Instagram ↗</strong>
+            <a
+                class="link magnetic"
+                href="https://instagram.com/Tamasrazim"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <small>
+                    04 / VISUAL
+                </small>
 
+                <strong>
+                    Instagram ↗
+                </strong>
             </a>
 
         </div>
@@ -1027,7 +1413,9 @@ body.hovering .cursor-ring{
 </section>
 
 
-<!-- ================= CONTACT ================= -->
+<!-- =======================================================
+     06 — CONTACT
+======================================================= -->
 
 <section class="panel contact">
 
@@ -1039,10 +1427,20 @@ body.hovering .cursor-ring{
 
         <h2 class="contact-title">
 
-            <span>G</span><span>E</span><span>T</span>
+            <span>G</span>
+            <span>E</span>
+            <span>T</span>
+
             <br>
-            <span>I</span><span>N</span>
-            <span>T</span><span>O</span><span>U</span><span>C</span><span>H</span>
+
+            <span>I</span>
+            <span>N</span>
+
+            <span>T</span>
+            <span>O</span>
+            <span>U</span>
+            <span>C</span>
+            <span>H</span>
 
         </h2>
 
@@ -1054,21 +1452,24 @@ body.hovering .cursor-ring{
 
 </section>
 
+
 </div>
 </main>
 
 
-<!-- ======================================================
+<!-- =======================================================
      PROGRESS
-====================================================== -->
+======================================================= -->
 
 <div class="progress">
+
     <span class="active"></span>
     <span></span>
     <span></span>
     <span></span>
     <span></span>
     <span></span>
+
 </div>
 
 
@@ -1078,70 +1479,133 @@ body.hovering .cursor-ring{
    TAMASRAZIM V4 ENGINE
    ========================================================= */
 
-const track = document.getElementById("track");
-const panels = [...document.querySelectorAll(".panel")];
-const counter = document.getElementById("counter");
-const progress = [...document.querySelectorAll(".progress span")];
+const track =
+    document.getElementById("track");
 
-let current = 0;
-let targetX = 0;
-let currentX = 0;
-let animationFrame = null;
+const panels =
+    [...document.querySelectorAll(".panel")];
 
-const isMobile = () => window.innerWidth <= 800;
+const counter =
+    document.getElementById("counter");
+
+const progress =
+    [...document.querySelectorAll(".progress span")];
+
+const loader =
+    document.getElementById("loader");
+
+const cursor =
+    document.getElementById("cursor");
+
+const cursorRing =
+    document.getElementById("cursorRing");
 
 
 /* =========================================================
-   CURSOR
+   STATE
 ========================================================= */
 
-const cursor = document.getElementById("cursor");
-const cursorRing = document.getElementById("cursorRing");
+let current = 0;
+
+let targetX = 0;
+let currentX = 0;
+
+let movementFrame = null;
+
+let wheelLock = false;
 
 let mouseX = innerWidth / 2;
 let mouseY = innerHeight / 2;
+
 let ringX = mouseX;
 let ringY = mouseY;
 
-window.addEventListener("pointermove", e => {
 
-    mouseX = e.clientX;
-    mouseY = e.clientY;
+/* =========================================================
+   MOBILE CHECK
+========================================================= */
 
-    cursor.style.transform =
-        `translate3d(${mouseX}px,${mouseY}px,0)`;
+function isMobile(){
 
-}, {passive:true});
+    return window.innerWidth <= 800;
 
+}
+
+
+/* =========================================================
+   CURSOR POSITION
+========================================================= */
+
+window.addEventListener(
+    "pointermove",
+    event => {
+
+        mouseX = event.clientX;
+        mouseY = event.clientY;
+
+        cursor.style.transform =
+            `translate3d(${mouseX}px,${mouseY}px,0)`;
+
+    },
+    {
+        passive:true
+    }
+);
+
+
+/* =========================================================
+   CURSOR SMOOTH LOOP
+========================================================= */
 
 function cursorLoop(){
 
-    ringX += (mouseX - ringX) * .16;
-    ringY += (mouseY - ringY) * .16;
+    ringX +=
+        (mouseX - ringX) * .16;
+
+    ringY +=
+        (mouseY - ringY) * .16;
 
     cursorRing.style.transform =
         `translate3d(${ringX}px,${ringY}px,0)`;
 
     requestAnimationFrame(cursorLoop);
+
 }
 
 cursorLoop();
 
 
 /* =========================================================
-   HOVER DETECTION
+   HOVER STATE
 ========================================================= */
 
-document.querySelectorAll("a,.magnetic,.work-item").forEach(el => {
+document
+.querySelectorAll("a,.magnetic,.work-item")
+.forEach(element => {
 
-    el.addEventListener("mouseenter", () => {
-        document.body.classList.add("hovering");
-    });
+    element.addEventListener(
+        "mouseenter",
+        () => {
 
-    el.addEventListener("mouseleave", () => {
-        document.body.classList.remove("hovering");
-        el.style.transform = "";
-    });
+            document.body.classList.add(
+                "hovering"
+            );
+
+        }
+    );
+
+    element.addEventListener(
+        "mouseleave",
+        () => {
+
+            document.body.classList.remove(
+                "hovering"
+            );
+
+            element.style.transform = "";
+
+        }
+    );
 
 });
 
@@ -1150,80 +1614,137 @@ document.querySelectorAll("a,.magnetic,.work-item").forEach(el => {
    MAGNETIC ELEMENTS
 ========================================================= */
 
-document.querySelectorAll(".magnetic").forEach(el => {
+document
+.querySelectorAll(".magnetic")
+.forEach(element => {
 
-    el.addEventListener("pointermove", e => {
+    element.addEventListener(
+        "pointermove",
+        event => {
 
-        if(isMobile()) return;
+            if(isMobile()) return;
 
-        const rect = el.getBoundingClientRect();
+            const rect =
+                element.getBoundingClientRect();
 
-        const x =
-            (e.clientX - rect.left - rect.width / 2) * .08;
+            const x =
+                (event.clientX -
+                rect.left -
+                rect.width / 2) * .08;
 
-        const y =
-            (e.clientY - rect.top - rect.height / 2) * .08;
+            const y =
+                (event.clientY -
+                rect.top -
+                rect.height / 2) * .08;
 
-        el.style.transform =
-            `translate3d(${x}px,${y}px,0)`;
+            element.style.transform =
+                `translate3d(${x}px,${y}px,0)`;
 
-    }, {passive:true});
+        },
+        {
+            passive:true
+        }
+    );
 
-    el.addEventListener("pointerleave", () => {
-        el.style.transform = "";
-    });
+    element.addEventListener(
+        "pointerleave",
+        () => {
+
+            element.style.transform = "";
+
+        }
+    );
 
 });
 
 
 /* =========================================================
-   PANEL NAVIGATION
+   HORIZONTAL NAVIGATION
 ========================================================= */
 
 function goTo(index){
 
     if(isMobile()) return;
 
-    current = Math.max(0, Math.min(index, panels.length - 1));
+    current =
+        Math.max(
+            0,
+            Math.min(
+                index,
+                panels.length - 1
+            )
+        );
 
-    targetX = -(current * innerWidth);
+    targetX =
+        -(current * window.innerWidth);
 
-    panels.forEach((panel,i) => {
-        panel.classList.toggle("active", i === current);
-    });
+    panels.forEach(
+        (panel,index) => {
+
+            panel.classList.toggle(
+                "active",
+                index === current
+            );
+
+        }
+    );
 
     counter.textContent =
         `${String(current + 1).padStart(2,"0")} / ${String(panels.length).padStart(2,"0")}`;
 
-    progress.forEach((p,i) => {
-        p.classList.toggle("active", i === current);
-    });
+    progress.forEach(
+        (item,index) => {
 
-    if(!animationFrame){
-        animationFrame = requestAnimationFrame(moveLoop);
+            item.classList.toggle(
+                "active",
+                index === current
+            );
+
+        }
+    );
+
+    if(!movementFrame){
+
+        movementFrame =
+            requestAnimationFrame(
+                movementLoop
+            );
+
     }
+
 }
 
 
 /* =========================================================
-   ULTRA-LIGHT MOMENTUM ENGINE
+   MOMENTUM MOVEMENT
 ========================================================= */
 
-function moveLoop(){
+function movementLoop(){
 
-    const diff = targetX - currentX;
+    const difference =
+        targetX - currentX;
 
-    currentX += diff * .095;
+    currentX +=
+        difference * .095;
 
-    if(Math.abs(diff) < .1){
+    if(Math.abs(difference) < .1){
+
         currentX = targetX;
-        animationFrame = null;
+
+        movementFrame = null;
+
     }else{
-        animationFrame = requestAnimationFrame(moveLoop);
+
+        movementFrame =
+            requestAnimationFrame(
+                movementLoop
+            );
+
     }
 
     track.style.transform =
         `translate3d(${currentX}px,0,0)`;
+
 }
 
 
@@ -1231,170 +1752,264 @@ function moveLoop(){
    WHEEL
 ========================================================= */
 
-let wheelLock = false;
+window.addEventListener(
+    "wheel",
+    event => {
 
-window.addEventListener("wheel", e => {
+        if(isMobile()) return;
 
-    if(isMobile()) return;
+        event.preventDefault();
 
-    e.preventDefault();
+        if(wheelLock) return;
 
-    if(wheelLock) return;
+        wheelLock = true;
 
-    wheelLock = true;
+        const direction =
+            Math.abs(event.deltaY) >
+            Math.abs(event.deltaX)
+                ? event.deltaY
+                : event.deltaX;
 
-    if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){
-        goTo(current + (e.deltaY > 0 ? 1 : -1));
-    }else{
-        goTo(current + (e.deltaX > 0 ? 1 : -1));
+        if(direction > 0){
+
+            goTo(current + 1);
+
+        }else{
+
+            goTo(current - 1);
+
+        }
+
+        setTimeout(
+            () => {
+                wheelLock = false;
+            },
+            550
+        );
+
+    },
+    {
+        passive:false
     }
-
-    setTimeout(() => {
-        wheelLock = false;
-    }, 550);
-
-}, {passive:false});
+);
 
 
 /* =========================================================
    KEYBOARD
 ========================================================= */
 
-window.addEventListener("keydown", e => {
+window.addEventListener(
+    "keydown",
+    event => {
 
-    if(e.key === "ArrowRight" || e.key === "ArrowDown"){
-        goTo(current + 1);
+        if(
+            event.key === "ArrowRight" ||
+            event.key === "ArrowDown"
+        ){
+
+            goTo(current + 1);
+
+        }
+
+        if(
+            event.key === "ArrowLeft" ||
+            event.key === "ArrowUp"
+        ){
+
+            goTo(current - 1);
+
+        }
+
     }
-
-    if(e.key === "ArrowLeft" || e.key === "ArrowUp"){
-        goTo(current - 1);
-    }
-
-});
+);
 
 
 /* =========================================================
-   DRAG / SWIPE
+   DRAG
 ========================================================= */
 
-let pointerStart = 0;
+let pointerStartX = 0;
 let dragging = false;
 
-window.addEventListener("pointerdown", e => {
+window.addEventListener(
+    "pointerdown",
+    event => {
 
-    if(isMobile()) return;
+        if(isMobile()) return;
 
-    pointerStart = e.clientX;
-    dragging = true;
+        pointerStartX =
+            event.clientX;
 
-});
+        dragging = true;
 
-window.addEventListener("pointerup", e => {
-
-    if(!dragging || isMobile()) return;
-
-    dragging = false;
-
-    const distance = e.clientX - pointerStart;
-
-    if(Math.abs(distance) > 70){
-        goTo(current + (distance < 0 ? 1 : -1));
     }
+);
 
-});
+window.addEventListener(
+    "pointerup",
+    event => {
+
+        if(!dragging || isMobile())
+            return;
+
+        dragging = false;
+
+        const distance =
+            event.clientX -
+            pointerStartX;
+
+        if(Math.abs(distance) > 70){
+
+            goTo(
+                current +
+                (distance < 0 ? 1 : -1)
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   HERO PARALLAX
+========================================================= */
+
+window.addEventListener(
+    "pointermove",
+    event => {
+
+        if(isMobile()) return;
+
+        const heroTitle =
+            document.getElementById(
+                "heroTitle"
+            );
+
+        const x =
+            (event.clientX /
+            window.innerWidth - .5) * 12;
+
+        const y =
+            (event.clientY /
+            window.innerHeight - .5) * 8;
+
+        heroTitle.style.transform =
+            `translate3d(${x}px,${y}px,0)`;
+
+    },
+    {
+        passive:true
+    }
+);
+
+
+/* =========================================================
+   TOUCH
+========================================================= */
+
+let touchStartX = 0;
+
+window.addEventListener(
+    "touchstart",
+    event => {
+
+        touchStartX =
+            event.touches[0].clientX;
+
+    },
+    {
+        passive:true
+    }
+);
+
+window.addEventListener(
+    "touchend",
+    event => {
+
+        if(isMobile()) return;
+
+        const distance =
+            event.changedTouches[0].clientX -
+            touchStartX;
+
+        if(Math.abs(distance) < 60)
+            return;
+
+        goTo(
+            current +
+            (distance < 0 ? 1 : -1)
+        );
+
+    },
+    {
+        passive:true
+    }
+);
 
 
 /* =========================================================
    RESIZE
 ========================================================= */
 
-window.addEventListener("resize", () => {
+window.addEventListener(
+    "resize",
+    () => {
 
-    if(isMobile()){
+        if(isMobile()){
 
-        track.style.transform = "none";
+            track.style.transform =
+                "none";
 
-    }else{
+        }else{
 
-        targetX = -(current * innerWidth);
-        currentX = targetX;
+            targetX =
+                -(current *
+                window.innerWidth);
 
-        track.style.transform =
-            `translate3d(${currentX}px,0,0)`;
+            currentX =
+                targetX;
+
+            track.style.transform =
+                `translate3d(${currentX}px,0,0)`;
+
+        }
+
     }
-
-});
-
-
-/* =========================================================
-   LOADER
-========================================================= */
-
-window.addEventListener("load", () => {
-
-    setTimeout(() => {
-
-        document.getElementById("loader")
-            .classList.add("exit");
-
-        setTimeout(() => {
-
-            document.getElementById("loader").remove();
-
-        }, 1300);
-
-    }, 3000);
-
-});
+);
 
 
 /* =========================================================
-   HERO MOUSE PARALLAX
+   INTRO EXIT
 ========================================================= */
 
-const heroTitle = document.getElementById("heroTitle");
+window.addEventListener(
+    "load",
+    () => {
 
-window.addEventListener("pointermove", e => {
+        setTimeout(
+            () => {
 
-    if(isMobile()) return;
+                loader.classList.add(
+                    "exit"
+                );
 
-    const x =
-        (e.clientX / innerWidth - .5) * 12;
+                setTimeout(
+                    () => {
 
-    const y =
-        (e.clientY / innerHeight - .5) * 8;
+                        if(loader)
+                            loader.remove();
 
-    heroTitle.style.transform =
-        `translate3d(${x}px,${y}px,0)`;
+                    },
+                    1300
+                );
 
-}, {passive:true});
+            },
+            3000
+        );
 
-
-/* =========================================================
-   TOUCH SWIPE
-========================================================= */
-
-let touchStart = 0;
-
-window.addEventListener("touchstart", e => {
-
-    touchStart = e.touches[0].clientX;
-
-}, {passive:true});
-
-
-window.addEventListener("touchend", e => {
-
-    const distance =
-        e.changedTouches[0].clientX - touchStart;
-
-    if(Math.abs(distance) < 60) return;
-
-    if(isMobile()) return;
-
-    goTo(current + (distance < 0 ? 1 : -1));
-
-}, {passive:true});
+    }
+);
 
 
 /* =========================================================
