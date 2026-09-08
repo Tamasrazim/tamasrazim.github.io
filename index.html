@@ -1,0 +1,3624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="TAMASRAZIM — Robiul Rumman Razim. Digital identity, work, experiments and archive.">
+<title>TAMASRAZIM — Robiul Rumman Razim</title>
+
+<!-- =========================================================
+     FONT
+     ========================================================= -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+/* =========================================================
+   TAMASRAZIM — FINAL BOSS
+   =========================================================
+   Animation-first.
+   Desktop: cinematic horizontal world.
+   Mobile: native vertical experience.
+   Motion: mostly transform / opacity.
+   ========================================================= */
+
+:root{
+    --bg:#050505;
+    --bg-2:#0a0a0a;
+    --fg:#f2f0e8;
+    --muted:#85847f;
+    --dim:#4f4e4a;
+    --line:rgba(242,240,232,.13);
+    --line-soft:rgba(242,240,232,.065);
+    --panel-soft:rgba(242,240,232,.035);
+
+    --ease:cubic-bezier(.16,1,.3,1);
+    --ease-soft:cubic-bezier(.22,1,.36,1);
+
+    --scroll:0;
+    --velocity:0;
+    --mouse-x:50vw;
+    --mouse-y:50vh;
+    --progress:0;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+html{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    background:var(--bg);
+    color:var(--fg);
+    font-family:Inter,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+}
+
+body{
+    margin:0;
+    width:100%;
+    min-height:100%;
+    overflow:hidden;
+    background:var(--bg);
+    color:var(--fg);
+    overscroll-behavior:none;
+}
+
+a,
+button{
+    color:inherit;
+    font:inherit;
+}
+
+a{
+    text-decoration:none;
+}
+
+button{
+    border:0;
+    background:none;
+}
+
+::selection{
+    background:var(--fg);
+    color:var(--bg);
+}
+
+/* =========================================================
+   GLOBAL FX LAYERS
+   ========================================================= */
+
+.fx-noise{
+    position:fixed;
+    inset:0;
+    z-index:9998;
+    pointer-events:none;
+    opacity:.028;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+    transform:translateZ(0);
+}
+
+.fx-vignette{
+    position:fixed;
+    inset:0;
+    z-index:9997;
+    pointer-events:none;
+    background:radial-gradient(circle at 50% 50%,transparent 34%,rgba(0,0,0,.34) 100%);
+}
+
+#particleCanvas{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    opacity:.55;
+}
+
+/* =========================================================
+   LOADER
+   ========================================================= */
+
+.loader{
+    position:fixed;
+    inset:0;
+    z-index:10000;
+    display:grid;
+    place-items:center;
+    overflow:hidden;
+    background:#050505;
+    isolation:isolate;
+    transition:opacity 900ms var(--ease),visibility 900ms;
+}
+
+.loader.is-done{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+}
+
+.loader-core{
+    position:relative;
+    width:100%;
+    height:100%;
+    display:grid;
+    place-items:center;
+}
+
+.loader-orbit{
+    position:absolute;
+    width:min(44vw,540px);
+    aspect-ratio:1;
+    border:1px solid rgba(242,240,232,.15);
+    border-radius:50%;
+    animation:loaderOrbit 8s linear infinite;
+    will-change:transform;
+}
+
+.loader-orbit::before,
+.loader-orbit::after{
+    content:"";
+    position:absolute;
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:var(--fg);
+}
+
+.loader-orbit::before{
+    top:0;
+    left:50%;
+    transform:translate(-50%,-50%);
+}
+
+.loader-orbit::after{
+    bottom:0;
+    right:50%;
+    transform:translate(50%,50%);
+}
+
+@keyframes loaderOrbit{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+.loader-word{
+    position:relative;
+    z-index:2;
+    width:max-content;
+    max-width:100%;
+    display:flex;
+    flex-wrap:nowrap;
+    align-items:baseline;
+    justify-content:center;
+    white-space:nowrap;
+    font-size:clamp(2.3rem,10.5vw,11rem);
+    font-weight:800;
+    line-height:.78;
+    letter-spacing:-.04em;
+}
+
+.loader-word span{
+    display:block;
+    flex:0 0 auto;
+    opacity:0;
+    transform:translate3d(0,90px,0) scale(.82) rotateX(70deg);
+    animation:loaderLetter 900ms var(--ease) forwards;
+    will-change:transform,opacity;
+}
+
+.loader-word span:nth-child(1){animation-delay:40ms}
+.loader-word span:nth-child(2){animation-delay:75ms}
+.loader-word span:nth-child(3){animation-delay:110ms}
+.loader-word span:nth-child(4){animation-delay:145ms}
+.loader-word span:nth-child(5){animation-delay:180ms}
+.loader-word span:nth-child(6){animation-delay:215ms}
+.loader-word span:nth-child(7){animation-delay:250ms}
+.loader-word span:nth-child(8){animation-delay:285ms}
+.loader-word span:nth-child(9){animation-delay:320ms}
+.loader-word span:nth-child(10){animation-delay:355ms}
+
+@keyframes loaderLetter{
+    to{
+        opacity:1;
+        transform:translate3d(0,0,0) scale(1) rotateX(0deg);
+    }
+}
+
+.loader-line{
+    position:absolute;
+    left:0;
+    right:0;
+    top:50%;
+    height:1px;
+    background:rgba(242,240,232,.09);
+    transform:scaleX(0);
+    animation:loaderLine 1200ms 450ms var(--ease) forwards;
+}
+
+@keyframes loaderLine{
+    to{transform:scaleX(1)}
+}
+
+.loader-info{
+    position:absolute;
+    left:28px;
+    right:28px;
+    bottom:24px;
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    color:var(--muted);
+    font-size:8px;
+    line-height:1.4;
+    text-transform:uppercase;
+    letter-spacing:.18em;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.site-header{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:700;
+    height:76px;
+    padding:0 32px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    mix-blend-mode:difference;
+    pointer-events:none;
+}
+
+.brand{
+    pointer-events:auto;
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.13em;
+}
+
+.brand-mark{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:currentColor;
+    animation:brandPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes brandPulse{
+    0%,100%{transform:scale(1);opacity:.7}
+    50%{transform:scale(1.7);opacity:1}
+}
+
+.site-nav{
+    pointer-events:auto;
+    display:flex;
+    gap:24px;
+}
+
+.site-nav a{
+    position:relative;
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:.17em;
+    opacity:.56;
+    transition:opacity 300ms var(--ease),transform 300ms var(--ease);
+}
+
+.site-nav a::after{
+    content:"";
+    position:absolute;
+    left:0;
+    bottom:-7px;
+    width:100%;
+    height:1px;
+    background:currentColor;
+    transform:scaleX(0);
+    transform-origin:right;
+    transition:transform 450ms var(--ease);
+}
+
+.site-nav a:hover{
+    opacity:1;
+    transform:translate3d(0,-2px,0);
+}
+
+.site-nav a:hover::after{
+    transform:scaleX(1);
+    transform-origin:left;
+}
+
+/* =========================================================
+   DESKTOP VIEWPORT / TRACK
+   ========================================================= */
+
+.viewport{
+    position:relative;
+    z-index:2;
+    width:100vw;
+    height:100vh;
+    overflow:hidden;
+    perspective:1500px;
+}
+
+@media(min-width:761px){
+    .viewport{
+        touch-action:none;
+        cursor:grab;
+    }
+
+    .viewport:active{
+        cursor:grabbing;
+    }
+}
+
+.track{
+    position:relative;
+    width:max-content;
+    height:100vh;
+    display:flex;
+    transform:translate3d(0,0,0);
+    transform-style:preserve-3d;
+    will-change:transform;
+}
+
+.panel{
+    position:relative;
+    flex:0 0 100vw;
+    width:100vw;
+    height:100vh;
+    overflow:hidden;
+    transform-style:preserve-3d;
+    will-change:transform;
+}
+
+.panel-shell{
+    position:relative;
+    width:100%;
+    height:100%;
+    transform-style:preserve-3d;
+    will-change:transform;
+}
+
+.panel::before{
+    content:"";
+    position:absolute;
+    inset:18px;
+    border:1px solid var(--line-soft);
+    pointer-events:none;
+    border-radius:22px;
+}
+
+.panel::after{
+    content:"";
+    position:absolute;
+    left:7vw;
+    right:7vw;
+    bottom:31px;
+    height:1px;
+    background:var(--line);
+    pointer-events:none;
+}
+
+.panel-index{
+    position:absolute;
+    top:105px;
+    left:7vw;
+    z-index:4;
+    color:var(--dim);
+    font-size:9px;
+    letter-spacing:.19em;
+}
+
+.panel-caption{
+    position:absolute;
+    right:7vw;
+    bottom:48px;
+    z-index:4;
+    color:var(--dim);
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:.18em;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero{
+    display:flex;
+    align-items:center;
+    padding:105px 7vw 72px;
+    background:
+        radial-gradient(circle at 78% 50%,rgba(242,240,232,.075),transparent 24%),
+        radial-gradient(circle at 25% 75%,rgba(242,240,232,.035),transparent 28%);
+}
+
+.hero-grid{
+    position:absolute;
+    inset:-15%;
+    opacity:.12;
+    background-image:
+        linear-gradient(rgba(242,240,232,.13) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(242,240,232,.13) 1px,transparent 1px);
+    background-size:90px 90px;
+    transform:
+        perspective(700px)
+        rotateX(62deg)
+        translateY(28%);
+    animation:heroGrid 14s linear infinite;
+    will-change:background-position;
+    pointer-events:none;
+}
+
+@keyframes heroGrid{
+    from{background-position:0 0,0 0}
+    to{background-position:0 90px,90px 0}
+}
+
+.hero-orb{
+    position:absolute;
+    right:7vw;
+    top:50%;
+    width:min(34vw,500px);
+    aspect-ratio:1;
+    border:1px solid rgba(242,240,232,.12);
+    border-radius:50%;
+    transform:translate3d(0,-50%,0);
+    animation:heroOrbFloat 7s ease-in-out infinite;
+    will-change:transform;
+}
+
+.hero-orb::before,
+.hero-orb::after{
+    content:"";
+    position:absolute;
+    inset:13%;
+    border:1px solid rgba(242,240,232,.07);
+    border-radius:50%;
+}
+
+.hero-orb::after{
+    inset:29%;
+}
+
+@keyframes heroOrbFloat{
+    0%,100%{transform:translate3d(0,-50%,0) rotate(0deg)}
+    50%{transform:translate3d(0,calc(-50% - 13px),0) rotate(6deg)}
+}
+
+.hero-orb-dot{
+    position:absolute;
+    left:50%;
+    top:0;
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:var(--fg);
+    transform:translate(-50%,-50%);
+    animation:dotBlink 2.2s ease-in-out infinite;
+}
+
+@keyframes dotBlink{
+    0%,100%{opacity:.45;transform:translate(-50%,-50%) scale(1)}
+    50%{opacity:1;transform:translate(-50%,-50%) scale(1.5)}
+}
+
+.hero-copy{
+    position:relative;
+    z-index:5;
+    min-width:0;
+}
+
+.hero-kicker{
+    color:var(--muted);
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:.28em;
+    opacity:0;
+    transform:translate3d(0,20px,0);
+    transition:opacity 800ms var(--ease),transform 800ms var(--ease);
+}
+
+.hero.active .hero-kicker{
+    opacity:1;
+    transform:translate3d(0,0,0);
+}
+
+/* IMPORTANT: one continuous word */
+.hero-title{
+    display:flex;
+    flex-wrap:nowrap;
+    align-items:baseline;
+    width:max-content;
+    max-width:none;
+    white-space:nowrap;
+    margin:28px 0 0;
+    padding:0;
+    font-size:clamp(4rem,11vw,12rem);
+    font-weight:800;
+    line-height:.76;
+    letter-spacing:-.028em;
+    transform-origin:left center;
+    perspective:1000px;
+    user-select:none;
+}
+
+.hero-title span{
+    display:block;
+    flex:0 0 auto;
+    width:auto;
+    margin:0;
+    padding:0;
+    opacity:0;
+    transform:translate3d(0,90px,0) rotateX(65deg) skewX(5deg);
+    transition:opacity 700ms var(--ease),transform 950ms var(--ease);
+    will-change:transform,opacity;
+}
+
+.hero.active .hero-title span{
+    opacity:1;
+    transform:translate3d(0,0,0) rotateX(0deg) skewX(0deg);
+}
+
+.hero.active .hero-title span:nth-child(1){transition-delay:30ms}
+.hero.active .hero-title span:nth-child(2){transition-delay:65ms}
+.hero.active .hero-title span:nth-child(3){transition-delay:100ms}
+.hero.active .hero-title span:nth-child(4){transition-delay:135ms}
+.hero.active .hero-title span:nth-child(5){transition-delay:170ms}
+.hero.active .hero-title span:nth-child(6){transition-delay:205ms}
+.hero.active .hero-title span:nth-child(7){transition-delay:240ms}
+.hero.active .hero-title span:nth-child(8){transition-delay:275ms}
+.hero.active .hero-title span:nth-child(9){transition-delay:310ms}
+.hero.active .hero-title span:nth-child(10){transition-delay:345ms}
+
+.hero-subline{
+    display:flex;
+    align-items:center;
+    gap:13px;
+    margin-top:40px;
+    color:var(--muted);
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.15em;
+    opacity:0;
+    transform:translate3d(0,20px,0);
+    transition:opacity 800ms 650ms var(--ease),transform 900ms 650ms var(--ease);
+}
+
+.hero.active .hero-subline{
+    opacity:1;
+    transform:translate3d(0,0,0);
+}
+
+.hero-subline i{
+    display:block;
+    width:55px;
+    height:1px;
+    background:var(--line);
+    transform-origin:left;
+}
+
+.hero-statline{
+    position:absolute;
+    left:7vw;
+    bottom:45px;
+    z-index:5;
+    display:flex;
+    gap:40px;
+}
+
+.hero-stat{
+    min-width:100px;
+}
+
+.hero-stat small{
+    display:block;
+    color:var(--dim);
+    font-size:8px;
+    text-transform:uppercase;
+    letter-spacing:.16em;
+    margin-bottom:7px;
+}
+
+.hero-stat span{
+    display:block;
+    font-size:10px;
+}
+
+.hero-scroll-indicator{
+    position:absolute;
+    right:7vw;
+    bottom:43px;
+    z-index:5;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    color:var(--dim);
+    font-size:8px;
+    text-transform:uppercase;
+    letter-spacing:.2em;
+}
+
+.scroll-arrow{
+    position:relative;
+    width:55px;
+    height:1px;
+    background:var(--line);
+    overflow:hidden;
+}
+
+.scroll-arrow::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    width:35%;
+    background:var(--fg);
+    transform:translateX(-120%);
+    animation:arrowTravel 2.4s ease-in-out infinite;
+}
+
+@keyframes arrowTravel{
+    0%,35%{transform:translateX(-120%)}
+    70%,100%{transform:translateX(330%)}
+}
+
+/* =========================================================
+   IDENTITY
+   ========================================================= */
+
+.identity{
+    display:flex;
+    align-items:center;
+    padding:10vh 7vw;
+    background:#0a0a0a;
+}
+
+.identity-main{
+    width:100%;
+    max-width:1250px;
+}
+
+.identity-kicker{
+    margin-bottom:26px;
+}
+
+.identity-statement{
+    max-width:1100px;
+    font-size:clamp(3rem,7vw,9rem);
+    line-height:.9;
+    letter-spacing:-.06em;
+    font-weight:600;
+}
+
+.identity-statement .word{
+    display:inline-block;
+    margin-right:.18em;
+    opacity:0;
+    transform:translate3d(0,75px,0) rotate(2deg);
+    transition:opacity 800ms var(--ease),transform 950ms var(--ease);
+}
+
+.identity.active .identity-statement .word{
+    opacity:1;
+    transform:translate3d(0,0,0) rotate(0);
+}
+
+.identity.active .identity-statement .word:nth-child(2){transition-delay:90ms}
+.identity.active .identity-statement .word:nth-child(3){transition-delay:180ms}
+.identity.active .identity-statement .word:nth-child(4){transition-delay:270ms}
+
+.identity-footer{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    max-width:1100px;
+    margin-top:90px;
+    border-top:1px solid var(--line);
+}
+
+.identity-fact{
+    padding-top:20px;
+    border-right:1px solid var(--line);
+}
+
+.identity-fact:last-child{
+    border-right:0;
+}
+
+.identity-fact small{
+    display:block;
+    color:var(--dim);
+    font-size:8px;
+    text-transform:uppercase;
+    letter-spacing:.17em;
+    margin-bottom:10px;
+}
+
+.identity-fact strong{
+    font-size:12px;
+    font-weight:500;
+}
+
+/* =========================================================
+   ABOUT
+   ========================================================= */
+
+.about{
+    display:flex;
+    align-items:center;
+    padding:11vh 7vw;
+    background:
+        radial-gradient(circle at 18% 20%,rgba(242,240,232,.035),transparent 25%),
+        #070707;
+}
+
+.about-grid{
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+    gap:8vw;
+    width:100%;
+    align-items:end;
+}
+
+.about-title{
+    margin:22px 0 0;
+    font-size:clamp(3.2rem,7vw,8.5rem);
+    line-height:.84;
+    letter-spacing:-.075em;
+    font-weight:700;
+}
+
+.about-title-line{
+    display:block;
+    overflow:hidden;
+}
+
+.about-title-line span{
+    display:inline-block;
+    transform:translateY(110%);
+    opacity:0;
+    transition:transform 900ms var(--ease),opacity 700ms var(--ease);
+}
+
+.about.active .about-title-line span{
+    transform:translateY(0);
+    opacity:1;
+}
+
+.about.active .about-title-line:nth-child(2) span{transition-delay:100ms}
+.about.active .about-title-line:nth-child(3) span{transition-delay:200ms}
+
+.about-copy{
+    max-width:500px;
+    color:var(--muted);
+    font-size:14px;
+    line-height:1.8;
+}
+
+.about-copy p + p{
+    margin-top:24px;
+}
+
+.about-details{
+    margin-top:45px;
+    border-top:1px solid var(--line);
+}
+
+.about-row{
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    padding:16px 0;
+    border-bottom:1px solid var(--line);
+    font-size:10px;
+}
+
+.about-row span:first-child{
+    color:var(--dim);
+    text-transform:uppercase;
+    letter-spacing:.14em;
+}
+
+.about-row span:last-child{
+    color:var(--fg);
+}
+
+/* =========================================================
+   TIMELINE
+   ========================================================= */
+
+.timeline{
+    display:flex;
+    align-items:center;
+    padding:10vh 7vw;
+    background:#0a0a0a;
+}
+
+.timeline-inner{
+    width:100%;
+}
+
+.timeline-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:end;
+}
+
+.timeline-head h2{
+    margin:20px 0 0;
+    font-size:clamp(3.5rem,8vw,9rem);
+    line-height:.76;
+    letter-spacing:-.075em;
+}
+
+.timeline-head p{
+    max-width:240px;
+    color:var(--muted);
+    font-size:11px;
+    line-height:1.6;
+}
+
+.timeline-list{
+    margin-top:8vh;
+    border-top:1px solid var(--line);
+}
+
+.timeline-item{
+    display:grid;
+    grid-template-columns:100px 1fr 200px;
+    align-items:center;
+    min-height:90px;
+    gap:30px;
+    border-bottom:1px solid var(--line);
+    transition:padding 500ms var(--ease),background 500ms var(--ease);
+}
+
+.timeline-item:hover{
+    padding-left:24px;
+    background:var(--soft);
+}
+
+.timeline-no{
+    color:var(--dim);
+    font-size:9px;
+}
+
+.timeline-name{
+    font-size:clamp(1.25rem,2.2vw,2.2rem);
+    letter-spacing:-.04em;
+}
+
+.timeline-type{
+    color:var(--muted);
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:.15em;
+}
+
+/* =========================================================
+   WORK
+   ========================================================= */
+
+.work{
+    display:block;
+    padding:9vh 5vw;
+    background:#0a0a0a;
+}
+
+.work-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:end;
+    padding:0 2vw;
+}
+
+.work-head h2{
+    margin:18px 0 0;
+    font-size:clamp(4rem,9vw,10rem);
+    line-height:.76;
+    letter-spacing:-.08em;
+}
+
+.work-head p{
+    max-width:220px;
+    color:var(--muted);
+    font-size:10px;
+    line-height:1.6;
+}
+
+.work-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-top:6vh;
+}
+
+.work-card{
+    position:relative;
+    min-height:55vh;
+    overflow:hidden;
+    border:1px solid var(--line);
+    background:#090909;
+    transition:transform 700ms var(--ease),border-color 400ms var(--ease);
+    will-change:transform;
+}
+
+.work-card:hover{
+    border-color:rgba(242,240,232,.35);
+}
+
+.work-card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(135deg,rgba(242,240,232,.075),transparent 43%);
+    pointer-events:none;
+}
+
+.work-index{
+    position:absolute;
+    left:19px;
+    top:18px;
+    z-index:4;
+    color:var(--muted);
+    font-size:9px;
+}
+
+.work-visual{
+    position:absolute;
+    inset:11% 9% 20%;
+    display:grid;
+    place-items:center;
+}
+
+/* generative object 1 */
+.shape-a{
+    position:relative;
+    width:50%;
+    aspect-ratio:1;
+    border:1px solid rgba(242,240,232,.36);
+    border-radius:50%;
+    animation:shapeA 11s linear infinite;
+}
+
+.shape-a::before,
+.shape-a::after{
+    content:"";
+    position:absolute;
+    inset:17%;
+    border:1px solid rgba(242,240,232,.2);
+    border-radius:50%;
+}
+
+.shape-a::after{
+    inset:34%;
+}
+
+@keyframes shapeA{
+    to{transform:rotate(360deg)}
+}
+
+/* generative object 2 */
+.shape-b{
+    position:relative;
+    width:49%;
+    aspect-ratio:1;
+    transform:rotate(45deg);
+    animation:shapeB 8s ease-in-out infinite;
+}
+
+.shape-b::before,
+.shape-b::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border:1px solid rgba(242,240,232,.34);
+}
+
+.shape-b::after{
+    transform:rotate(45deg);
+}
+
+@keyframes shapeB{
+    0%,100%{transform:rotate(45deg) scale(1)}
+    50%{transform:rotate(135deg) scale(.82)}
+}
+
+/* generative object 3 */
+.shape-c{
+    position:relative;
+    width:56%;
+    aspect-ratio:1;
+    border:1px solid rgba(242,240,232,.36);
+    border-radius:43% 57% 51% 49% / 48% 42% 58% 52%;
+    animation:shapeC 9s ease-in-out infinite;
+}
+
+.shape-c::before{
+    content:"";
+    position:absolute;
+    inset:17%;
+    border:1px solid rgba(242,240,232,.18);
+    border-radius:50%;
+}
+
+@keyframes shapeC{
+    0%,100%{transform:rotate(0) scale(1);border-radius:43% 57% 51% 49% / 48% 42% 58% 52%}
+    50%{transform:rotate(180deg) scale(1.08);border-radius:61% 39% 45% 55% / 54% 49% 51% 46%}
+}
+
+.work-info{
+    position:absolute;
+    left:20px;
+    right:20px;
+    bottom:20px;
+    z-index:5;
+}
+
+.work-name{
+    font-size:clamp(1.35rem,2vw,2rem);
+    letter-spacing:-.04em;
+}
+
+.work-desc{
+    margin-top:6px;
+    color:var(--muted);
+    font-size:9px;
+}
+
+/* =========================================================
+   PRESENCE
+   ========================================================= */
+
+.presence{
+    display:flex;
+    align-items:center;
+    padding:11vh 7vw;
+    background:#070707;
+}
+
+.presence-inner{
+    width:100%;
+}
+
+.presence-title{
+    margin:22px 0 0;
+    font-size:clamp(4rem,9vw,10rem);
+    font-weight:700;
+    line-height:.78;
+    letter-spacing:-.08em;
+}
+
+.presence-title span{
+    display:inline-block;
+    color:var(--muted);
+    animation:presenceDrift 5s ease-in-out infinite;
+}
+
+@keyframes presenceDrift{
+    0%,100%{transform:translate3d(0,0,0)}
+    50%{transform:translate3d(15px,-7px,0)}
+}
+
+.social-wall{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    margin-top:7vh;
+    border-top:1px solid var(--line);
+    border-left:1px solid var(--line);
+}
+
+.social{
+    position:relative;
+    min-height:175px;
+    padding:20px;
+    border-right:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    overflow:hidden;
+    transition:background 450ms var(--ease),transform 450ms var(--ease);
+    will-change:transform;
+}
+
+.social::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:var(--fg);
+    transform:translate3d(-101%,0,0);
+    transition:transform 650ms var(--ease);
+}
+
+.social:hover::before{
+    transform:translate3d(0,0,0);
+}
+
+.social-top,
+.social-name,
+.social-handle,
+.social-arrow{
+    position:relative;
+    z-index:2;
+    transition:color 450ms var(--ease),transform 450ms var(--ease);
+}
+
+.social-top{
+    display:flex;
+    justify-content:space-between;
+    color:var(--muted);
+    font-size:8px;
+    text-transform:uppercase;
+    letter-spacing:.15em;
+}
+
+.social-name{
+    font-size:18px;
+    letter-spacing:-.025em;
+}
+
+.social-handle{
+    color:var(--muted);
+    font-size:10px;
+}
+
+.social-arrow{
+    color:var(--muted);
+    text-align:right;
+    font-size:16px;
+}
+
+.social:hover .social-top,
+.social:hover .social-name,
+.social:hover .social-handle,
+.social:hover .social-arrow{
+    color:#050505;
+}
+
+/* =========================================================
+   ARCHIVE
+   ========================================================= */
+
+.archive{
+    display:flex;
+    align-items:center;
+    padding:11vh 7vw;
+    background:#0a0a0a;
+}
+
+.archive-inner{
+    width:100%;
+}
+
+.archive-head{
+    display:flex;
+    justify-content:space-between;
+    gap:50px;
+}
+
+.archive-head h2{
+    margin:20px 0 0;
+    max-width:1000px;
+    font-size:clamp(3.3rem,7vw,8.4rem);
+    line-height:.82;
+    letter-spacing:-.075em;
+}
+
+.archive-note{
+    max-width:240px;
+    align-self:end;
+}
+
+.archive-list{
+    margin-top:7vh;
+    border-top:1px solid var(--line);
+}
+
+.archive-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    min-height:76px;
+    border-bottom:1px solid var(--line);
+    transition:padding 450ms var(--ease),background 450ms var(--ease);
+}
+
+.archive-item:hover{
+    padding:0 25px;
+    background:var(--soft);
+}
+
+.archive-item strong{
+    font-size:16px;
+    font-weight:500;
+    letter-spacing:-.03em;
+}
+
+.archive-item span{
+    color:var(--muted);
+    font-size:8px;
+    text-transform:uppercase;
+    letter-spacing:.16em;
+}
+
+/* =========================================================
+   CONTACT
+   ========================================================= */
+
+.contact{
+    display:flex;
+    align-items:center;
+    padding:10vh 7vw 50px;
+    background:#eeeae1;
+    color:#111;
+}
+
+.contact-inner{
+    width:100%;
+}
+
+.contact-title{
+    margin:20px 0 0;
+    max-width:1150px;
+    font-size:clamp(4rem,10vw,12rem);
+    line-height:.72;
+    letter-spacing:-.095em;
+    font-weight:800;
+}
+
+.contact-title .contact-line{
+    display:block;
+    overflow:hidden;
+}
+
+.contact-title .contact-line span{
+    display:inline-block;
+    transform:translateY(110%);
+    opacity:0;
+    transition:transform 950ms var(--ease),opacity 700ms var(--ease);
+}
+
+.contact.active .contact-line span{
+    transform:translateY(0);
+    opacity:1;
+}
+
+.contact.active .contact-line:nth-child(2) span{transition-delay:110ms}
+
+.contact-link{
+    display:inline-flex;
+    align-items:center;
+    gap:13px;
+    margin-top:55px;
+    padding-bottom:7px;
+    border-bottom:1px solid #111;
+    font-size:13px;
+    transition:transform 450ms var(--ease);
+}
+
+.contact-link:hover{
+    transform:translate3d(12px,0,0);
+}
+
+.contact-bottom{
+    position:absolute;
+    left:7vw;
+    right:7vw;
+    bottom:47px;
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    color:#666;
+    font-size:8px;
+    text-transform:uppercase;
+    letter-spacing:.15em;
+}
+
+/* =========================================================
+   DESKTOP PROGRESS
+   ========================================================= */
+
+.progress-dock{
+    position:fixed;
+    z-index:700;
+    right:28px;
+    bottom:27px;
+    display:flex;
+    gap:7px;
+}
+
+.progress-dot{
+    width:4px;
+    height:4px;
+    padding:0;
+    border-radius:50%;
+    background:rgba(242,240,232,.27);
+    cursor:none;
+    transition:transform 350ms var(--ease),background 300ms;
+}
+
+.progress-dot.active{
+    background:var(--fg);
+    transform:scale(1.9);
+}
+
+/* =========================================================
+   MOBILE — REAL LAYOUT
+   ========================================================= */
+
+@media(max-width:760px){
+
+    html{
+        overflow:auto;
+        scroll-behavior:auto;
+    }
+
+    body{
+        overflow-x:hidden;
+        overflow-y:auto;
+        overscroll-behavior-y:auto;
+        cursor:auto;
+    }
+
+    #particleCanvas{
+        opacity:.25;
+    }
+
+    .fx-noise{
+        opacity:.015;
+    }
+
+    .fx-vignette{
+        background:radial-gradient(circle at 50% 50%,transparent 38%,rgba(0,0,0,.26) 100%);
+    }
+
+    .site-header{
+        height:62px;
+        padding:0 17px;
+    }
+
+    .brand{
+        font-size:9px;
+    }
+
+    .site-nav{
+        display:none;
+    }
+
+    .viewport{
+        position:relative;
+        width:100%;
+        height:auto;
+        overflow:visible;
+        perspective:none;
+    }
+
+    .track{
+        display:block;
+        width:100%;
+        height:auto;
+        transform:none !important;
+        transform-style:flat;
+    }
+
+    .panel{
+        width:100%;
+        height:auto;
+        min-height:100svh;
+        overflow:hidden;
+        transform:none !important;
+        transform-style:flat;
+    }
+
+    .panel-shell{
+        width:100%;
+        min-height:100svh;
+        height:auto;
+        transform:none !important;
+        transform-style:flat;
+    }
+
+    .panel::before{
+        inset:9px;
+        border-radius:16px;
+    }
+
+    .panel::after{
+        left:20px;
+        right:20px;
+        bottom:25px;
+    }
+
+    .panel-index{
+        top:82px;
+        left:20px;
+        font-size:8px;
+    }
+
+    .panel-caption{
+        right:20px;
+        bottom:39px;
+        font-size:7px;
+    }
+
+    /* -----------------------------------------------------
+       LOADER
+       ----------------------------------------------------- */
+
+    .loader{
+        width:100%;
+        height:100dvh;
+        min-height:100svh;
+    }
+
+    .loader-core{
+        width:100%;
+        height:100%;
+        overflow:hidden;
+    }
+
+    .loader-word{
+        width:max-content;
+        max-width:none;
+        font-size:8.2vw;
+        letter-spacing:-.045em;
+        transform-origin:center center;
+    }
+
+    .loader-orbit{
+        width:66vw;
+        max-width:285px;
+    }
+
+    .loader-line{
+        opacity:.8;
+    }
+
+    .loader-info{
+        left:17px;
+        right:17px;
+        bottom:18px;
+        font-size:6px;
+        letter-spacing:.13em;
+    }
+
+    /* -----------------------------------------------------
+       HERO
+       ----------------------------------------------------- */
+
+    .hero{
+        min-height:100svh;
+        padding:95px 18px 42px;
+        align-items:center;
+    }
+
+    .hero-grid{
+        opacity:.07;
+        background-size:65px 65px;
+        transform:
+            perspective(600px)
+            rotateX(63deg)
+            translateY(34%);
+    }
+
+    .hero-orb{
+        width:72vw;
+        right:-24vw;
+        top:69%;
+        opacity:.62;
+    }
+
+    .hero-kicker{
+        font-size:7px;
+        letter-spacing:.2em;
+    }
+
+    /* CRITICAL: one continuous row + fit function */
+    .hero-title{
+        width:max-content;
+        max-width:none;
+        white-space:nowrap;
+        font-size:8.2vw;
+        letter-spacing:-.02em;
+        line-height:.8;
+        overflow:visible;
+        transform-origin:left center;
+    }
+
+    .hero-title span{
+        width:auto;
+        min-width:0;
+        flex:0 0 auto;
+        overflow:visible;
+        padding:0;
+        margin:0;
+    }
+
+    .hero-subline{
+        max-width:94%;
+        font-size:8.5px;
+        line-height:1.65;
+        letter-spacing:.10em;
+    }
+
+    .hero-statline{
+        left:18px;
+        bottom:19px;
+        gap:19px;
+    }
+
+    .hero-stat{
+        min-width:72px;
+    }
+
+    .hero-stat small{
+        font-size:6px;
+        margin-bottom:5px;
+    }
+
+    .hero-stat span{
+        font-size:7px;
+    }
+
+    .hero-scroll-indicator{
+        display:none;
+    }
+
+    /* -----------------------------------------------------
+       IDENTITY
+       ----------------------------------------------------- */
+
+    .identity{
+        padding:90px 20px 50px;
+    }
+
+    .identity-grid{
+        display:flex;
+        flex-direction:column;
+        justify-content:space-between;
+        min-height:calc(100svh - 140px);
+        gap:50px;
+    }
+
+    .identity-main{
+        margin-top:auto;
+        margin-bottom:auto;
+    }
+
+    .identity-statement{
+        font-size:clamp(2.65rem,11vw,5rem);
+        line-height:.93;
+        letter-spacing:-.055em;
+    }
+
+    .identity-footer{
+        grid-template-columns:1fr 1fr;
+        margin-top:60px;
+    }
+
+    .identity-fact{
+        padding-bottom:18px;
+        border-right:0;
+        border-bottom:1px solid var(--line);
+    }
+
+    .identity-fact strong{
+        font-size:10px;
+    }
+
+    /* -----------------------------------------------------
+       ABOUT
+       ----------------------------------------------------- */
+
+    .about{
+        padding:90px 20px 52px;
+    }
+
+    .about-grid{
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        gap:55px;
+        min-height:calc(100svh - 142px);
+    }
+
+    .about-title{
+        font-size:clamp(2.7rem,12vw,5.2rem);
+    }
+
+    .about-copy{
+        font-size:12px;
+        line-height:1.75;
+    }
+
+    .about-row{
+        font-size:8px;
+    }
+
+    /* -----------------------------------------------------
+       TIMELINE
+       ----------------------------------------------------- */
+
+    .timeline{
+        padding:90px 20px 52px;
+    }
+
+    .timeline-head{
+        display:block;
+    }
+
+    .timeline-head h2{
+        font-size:clamp(3rem,13vw,5rem);
+    }
+
+    .timeline-head p{
+        margin-top:22px;
+        max-width:100%;
+        font-size:10px;
+    }
+
+    .timeline-list{
+        margin-top:55px;
+    }
+
+    .timeline-item{
+        grid-template-columns:45px 1fr;
+        min-height:85px;
+        gap:13px;
+    }
+
+    .timeline-type{
+        grid-column:2;
+        margin-top:-6px;
+        font-size:7px;
+    }
+
+    .timeline-name{
+        font-size:15px;
+    }
+
+    /* -----------------------------------------------------
+       WORK
+       ----------------------------------------------------- */
+
+    .work{
+        padding:80px 18px 52px;
+    }
+
+    .work-head{
+        display:block;
+        padding:0 2px;
+    }
+
+    .work-head h2{
+        font-size:clamp(3rem,13vw,5rem);
+    }
+
+    .work-head p{
+        margin-top:20px;
+        max-width:100%;
+        font-size:9px;
+    }
+
+    .work-grid{
+        grid-template-columns:1fr;
+        gap:12px;
+        margin-top:42px;
+    }
+
+    .work-card{
+        min-height:59svh;
+    }
+
+    .work-card:hover{
+        transform:none;
+    }
+
+    /* -----------------------------------------------------
+       PRESENCE
+       ----------------------------------------------------- */
+
+    .presence{
+        padding:90px 20px 52px;
+    }
+
+    .presence-title{
+        font-size:clamp(3rem,13vw,5rem);
+    }
+
+    .social-wall{
+        grid-template-columns:1fr 1fr;
+        margin-top:50px;
+    }
+
+    .social{
+        min-height:145px;
+        padding:16px;
+    }
+
+    .social:hover{
+        transform:none;
+    }
+
+    .social-name{
+        font-size:14px;
+    }
+
+    .social-handle{
+        font-size:9px;
+        word-break:break-word;
+    }
+
+    /* -----------------------------------------------------
+       ARCHIVE
+       ----------------------------------------------------- */
+
+    .archive{
+        padding:90px 20px 52px;
+    }
+
+    .archive-head{
+        display:block;
+    }
+
+    .archive-head h2{
+        font-size:clamp(3rem,12vw,5rem);
+    }
+
+    .archive-note{
+        margin-top:28px;
+        max-width:100%;
+    }
+
+    .archive-list{
+        margin-top:48px;
+    }
+
+    .archive-item{
+        min-height:70px;
+        gap:15px;
+    }
+
+    .archive-item strong{
+        font-size:13px;
+    }
+
+    .archive-item span{
+        font-size:7px;
+    }
+
+    .archive-item:hover{
+        padding:0;
+    }
+
+    /* -----------------------------------------------------
+       CONTACT
+       ----------------------------------------------------- */
+
+    .contact{
+        padding:90px 20px 32px;
+        min-height:100svh;
+    }
+
+    .contact-title{
+        font-size:clamp(3.7rem,16vw,7rem);
+        line-height:.76;
+    }
+
+    .contact-link{
+        margin-top:36px;
+        font-size:11px;
+    }
+
+    .contact-bottom{
+        left:20px;
+        right:20px;
+        bottom:36px;
+        font-size:6px;
+        letter-spacing:.11em;
+    }
+
+    /* -----------------------------------------------------
+       PROGRESS
+       ----------------------------------------------------- */
+
+    .progress-dock{
+        right:14px;
+        bottom:16px;
+    }
+
+}
+
+/* =========================================================
+   VERY SMALL PHONES
+   ========================================================= */
+
+@media(max-width:380px){
+
+    .hero{
+        padding-left:14px;
+        padding-right:14px;
+    }
+
+    .hero-title{
+        font-size:7.8vw;
+        letter-spacing:-.025em;
+    }
+
+    .identity,
+    .about,
+    .timeline,
+    .presence,
+    .archive,
+    .contact{
+        padding-left:15px;
+        padding-right:15px;
+    }
+
+    .work{
+        padding-left:14px;
+        padding-right:14px;
+    }
+
+    .social-wall{
+        grid-template-columns:1fr;
+    }
+
+    .social{
+        min-height:122px;
+    }
+}
+
+/* =========================================================
+   LANDSCAPE PHONES
+   ========================================================= */
+
+@media(max-width:900px) and (orientation:landscape){
+
+    .hero{
+        min-height:100svh;
+        padding-top:75px;
+        padding-bottom:24px;
+    }
+
+    .hero-title{
+        font-size:6.6vw;
+    }
+
+    .hero-subline{
+        margin-top:19px;
+    }
+
+    .hero-statline{
+        bottom:11px;
+    }
+
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media(prefers-reduced-motion:reduce){
+
+    *,
+    *::before,
+    *::after{
+        animation-duration:.001ms !important;
+        animation-iteration-count:1 !important;
+        transition-duration:.001ms !important;
+        scroll-behavior:auto !important;
+    }
+
+}
+
+/* =========================================================
+   FINAL BOSS — INFINITE WHIRLPOOL TRACK
+   ========================================================= */
+.track{
+    transform-origin:50% 50%;
+    perspective:1400px;
+    will-change:transform;
+}
+.panel{
+    transform-style:preserve-3d;
+    backface-visibility:hidden;
+    will-change:transform;
+}
+.viewport{
+    overflow:hidden;
+    touch-action:pan-y;
+}
+body.is-dragging .viewport{
+    cursor:grabbing;
+}
+@media (pointer:fine){
+    .viewport{cursor:grab;}
+}
+
+
+/* =========================================================
+   FINAL BOSS EYES — ORIGINAL SHARINGAN / RINNEGAN-INSPIRED
+   Only the tomoe marks carry the accent colour.
+   The eye body, iris rings and pupil stay dark/neutral.
+   ========================================================= */
+:root{
+    --sharing-tomoe:#d71938;
+    --rinne-tomoe:#a06cff;
+}
+
+.loader-orbit,
+.hero-orb{
+    display:none !important;
+}
+
+.dojo-eyes{
+    position:absolute;
+    z-index:3;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:clamp(18px,3vw,44px);
+    pointer-events:none;
+    transform-style:preserve-3d;
+}
+
+.dojo-eye{
+    position:relative;
+    width:clamp(120px,13vw,235px);
+    aspect-ratio:1;
+    border-radius:50%;
+    background:#070707;
+    border:1px solid rgba(242,240,232,.20);
+    box-shadow:inset 0 0 0 1px rgba(242,240,232,.025);
+    transform:translate3d(0,0,0);
+    will-change:transform;
+}
+
+.dojo-eye::before{
+    content:"";
+    position:absolute;
+    inset:8%;
+    border-radius:50%;
+    border:1px solid rgba(242,240,232,.12);
+    transform:rotate(0deg);
+    animation:eyeRingSpin 4.2s linear infinite;
+}
+
+.dojo-eye::after{
+    content:"";
+    position:absolute;
+    inset:22%;
+    border-radius:50%;
+    border:1px solid rgba(242,240,232,.09);
+    animation:eyeRingSpinReverse 2.7s linear infinite;
+}
+
+.sharingan-eye{
+    --accent:var(--sharing-tomoe);
+}
+
+.rinnegan-eye{
+    --accent:var(--rinne-tomoe);
+}
+
+.eye-ring{
+    position:absolute;
+    border-radius:50%;
+    pointer-events:none;
+}
+
+.ring-outer{
+    inset:5%;
+    border:1px solid rgba(242,240,232,.10);
+    animation:eyeFastSpin 2.2s linear infinite;
+}
+
+.ring-middle{
+    inset:15%;
+    border:1px solid rgba(242,240,232,.17);
+    animation:eyeFastSpinReverse 2.8s linear infinite;
+}
+
+.ring-inner{
+    inset:30%;
+    border:1px solid rgba(242,240,232,.11);
+    animation:eyeFastSpin 1.9s linear infinite;
+}
+
+.eye-pupil{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:16%;
+    aspect-ratio:1;
+    border-radius:50%;
+    background:#020202;
+    border:1px solid rgba(242,240,232,.15);
+    transform:translate(-50%,-50%);
+}
+
+.tomoe{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:11%;
+    height:17%;
+    border-radius:65% 65% 45% 45%;
+    background:transparent;
+    border:2px solid var(--accent);
+    border-bottom-color:transparent;
+    transform-origin:50% 170%;
+    filter:none;
+    opacity:.98;
+}
+
+.tomoe::after{
+    content:"";
+    position:absolute;
+    width:34%;
+    aspect-ratio:1;
+    border-radius:50%;
+    background:var(--accent);
+    left:50%;
+    top:-5%;
+    transform:translate(-50%,-50%);
+}
+
+.tomoe-1{
+    transform:translate(-50%,-170%) rotate(0deg);
+    animation:tomoeSpin 2.15s linear infinite;
+}
+
+.tomoe-2{
+    transform:translate(-50%,-170%) rotate(120deg);
+    animation:tomoeSpin 2.15s linear infinite;
+}
+
+.tomoe-3{
+    transform:translate(-50%,-170%) rotate(240deg);
+    animation:tomoeSpin 2.15s linear infinite;
+}
+
+@keyframes eyeRingSpin{
+    to{transform:rotate(360deg)}
+}
+
+@keyframes eyeRingSpinReverse{
+    to{transform:rotate(-360deg)}
+}
+
+@keyframes eyeFastSpin{
+    to{transform:rotate(360deg)}
+}
+
+@keyframes eyeFastSpinReverse{
+    to{transform:rotate(-360deg)}
+}
+
+@keyframes tomoeSpin{
+    to{transform:translate(-50%,-170%) rotate(360deg)}
+}
+
+.loader-eyes{
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%) scale(.92);
+    animation:loaderEyeBreath 2.1s ease-in-out infinite;
+}
+
+@keyframes loaderEyeBreath{
+    0%,100%{scale:.92}
+    50%{scale:1.03}
+}
+
+.hero-eyes{
+    right:7vw;
+    top:50%;
+    transform:translateY(-50%);
+    animation:heroEyesFloat 4.5s ease-in-out infinite;
+}
+
+@keyframes heroEyesFloat{
+    0%,100%{transform:translateY(-50%) translateX(0) rotate(0deg)}
+    50%{transform:translateY(calc(-50% - 10px)) translateX(-5px) rotate(-1deg)}
+}
+
+.hero-eyes .dojo-eye:first-child{
+    animation:eyeLift 3.4s ease-in-out infinite;
+}
+
+.hero-eyes .dojo-eye:last-child{
+    animation:eyeLift 3.4s 1.7s ease-in-out infinite;
+}
+
+@keyframes eyeLift{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-8px)}
+}
+
+/* Disable the obsolete hero grid only on tiny phones; the eyes stay animated. */
+@media(max-width:760px){
+    .hero-eyes{
+        right:-3vw;
+        top:68%;
+        gap:14px;
+        transform:translateY(-50%) scale(.74);
+        transform-origin:right center;
+    }
+
+    .loader-eyes{
+        transform:translate(-50%,-50%) scale(.62);
+        gap:10px;
+    }
+
+    .dojo-eye{
+        width:39vw;
+        max-width:165px;
+        min-width:105px;
+    }
+
+    .tomoe{
+        border-width:1.5px;
+    }
+}
+
+@media(max-width:380px){
+    .hero-eyes{
+        right:-12vw;
+        top:70%;
+        transform:translateY(-50%) scale(.66);
+    }
+
+    .loader-eyes{
+        transform:translate(-50%,-50%) scale(.52);
+    }
+}
+
+@media(max-width:900px) and (orientation:landscape){
+    .hero-eyes{
+        top:57%;
+        right:-4vw;
+        transform:translateY(-50%) scale(.58);
+    }
+
+    .loader-eyes{
+        transform:translate(-50%,-50%) scale(.55);
+    }
+}
+
+/* Remove visual page counters entirely. */
+.panel-index,
+.progress-dock,
+.progress-dot,
+.panel-page-number,
+.page-number{
+    display:none !important;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =======================================================
+     GLOBAL FX
+     ======================================================= -->
+
+<canvas id="particleCanvas" aria-hidden="true"></canvas>
+<div class="fx-noise" aria-hidden="true"></div>
+<div class="fx-vignette" aria-hidden="true"></div>
+
+<!-- =======================================================
+     KAMUI-STYLE INTRO
+     ======================================================= -->
+
+<div class="loader" id="loader">
+
+    <div class="loader-core" id="loaderCore">
+
+        <div class="dojo-eyes loader-eyes" aria-hidden="true">
+            <div class="dojo-eye sharingan-eye">
+                <div class="eye-ring ring-outer"></div>
+                <div class="eye-ring ring-inner"></div>
+                <div class="eye-pupil"></div>
+                <div class="tomoe tomoe-1"></div>
+                <div class="tomoe tomoe-2"></div>
+                <div class="tomoe tomoe-3"></div>
+            </div>
+            <div class="dojo-eye rinnegan-eye">
+                <div class="eye-ring ring-outer"></div>
+                <div class="eye-ring ring-inner"></div>
+                <div class="eye-pupil"></div>
+                <div class="tomoe tomoe-1"></div>
+                <div class="tomoe tomoe-2"></div>
+                <div class="tomoe tomoe-3"></div>
+            </div>
+        </div>
+
+        <div class="loader-word" id="loaderWord">
+            <span>T</span><span>A</span><span>M</span><span>A</span><span>S</span><span>R</span><span>A</span><span>Z</span><span>I</span><span>M</span>
+        </div>
+
+        <div class="loader-line" aria-hidden="true"></div>
+
+        <div class="loader-info">
+            <span>ROBIUL RUMMAN RAZIM</span>
+            <span>DIGITAL IDENTITY / 2026</span>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =======================================================
+     HEADER
+     ======================================================= -->
+
+<header class="site-header">
+
+    <a class="brand magnetic" href="#home" aria-label="Tamasrazim home">
+        <span class="brand-mark"></span>
+        TAMASRAZIM
+    </a>
+
+    <nav class="site-nav" aria-label="Primary navigation">
+        <a href="#home" data-index="0">Home</a>
+        <a href="#identity" data-index="1">Identity</a>
+        <a href="#about" data-index="2">About</a>
+        <a href="#timeline" data-index="3">Timeline</a>
+        <a href="#work" data-index="4">Work</a>
+        <a href="#presence" data-index="5">Presence</a>
+        <a href="#archive" data-index="6">Archive</a>
+        <a href="#contact" data-index="7">Contact</a>
+    </nav>
+
+</header>
+
+<!-- =======================================================
+     PROGRESS
+     ======================================================= -->
+
+
+
+<!-- =======================================================
+     MAIN HORIZONTAL WORLD
+     ======================================================= -->
+
+<main class="viewport" id="viewport">
+
+<div class="track" id="track">
+
+<!-- ======================================================
+     00 — HOME
+     ====================================================== -->
+
+<section class="panel hero active" id="home" data-index="0">
+
+<div class="panel-shell">
+
+    <div class="hero-grid" aria-hidden="true"></div>
+
+    <div class="dojo-eyes hero-eyes" aria-hidden="true">
+        <div class="dojo-eye sharingan-eye">
+            <div class="eye-ring ring-outer"></div>
+            <div class="eye-ring ring-middle"></div>
+            <div class="eye-ring ring-inner"></div>
+            <div class="eye-pupil"></div>
+            <div class="tomoe tomoe-1"></div>
+            <div class="tomoe tomoe-2"></div>
+            <div class="tomoe tomoe-3"></div>
+        </div>
+        <div class="dojo-eye rinnegan-eye">
+            <div class="eye-ring ring-outer"></div>
+            <div class="eye-ring ring-middle"></div>
+            <div class="eye-ring ring-inner"></div>
+            <div class="eye-pupil"></div>
+            <div class="tomoe tomoe-1"></div>
+            <div class="tomoe tomoe-2"></div>
+            <div class="tomoe tomoe-3"></div>
+        </div>
+    </div>
+
+    <div class="hero-copy">
+
+        <div class="hero-kicker">
+            ROBIUL RUMMAN RAZIM / DIGITAL IDENTITY
+        </div>
+
+        <!-- NO WHITESPACE BETWEEN SPANS -->
+        <h1 class="hero-title" id="heroTitle">
+            <span>T</span><span>A</span><span>M</span><span>A</span><span>S</span><span>R</span><span>A</span><span>Z</span><span>I</span><span>M</span>
+        </h1>
+
+        <div class="hero-subline">
+            <i></i>
+            <span>TECHNOLOGY / DIGITAL / CREATIVE</span>
+        </div>
+
+    </div>
+
+    <div class="hero-statline">
+
+        <div class="hero-stat">
+            <small>MODE</small>
+            <span>ALWAYS MOVING</span>
+        </div>
+
+        <div class="hero-stat">
+            <small>IDENTITY</small>
+            <span>TAMASRAZIM</span>
+        </div>
+
+        <div class="hero-stat">
+            <small>STATUS</small>
+            <span>ONLINE</span>
+        </div>
+
+    </div>
+
+    <div class="hero-scroll-indicator">
+        <span>DRAG / WHEEL</span>
+        <span class="scroll-arrow"></span>
+    </div>
+
+    <div class="panel-caption">START HERE</div>
+
+</div>
+</section>
+
+
+<!-- ======================================================
+     01 — IDENTITY
+     ====================================================== -->
+
+<section class="panel identity" id="identity" data-index="1">
+
+<div class="panel-shell">
+
+    <div class="identity-grid">
+
+        <div class="identity-side">
+            <div class="eyebrow">01 / IDENTITY</div>
+            <p class="small">
+                A digital signature built over time.
+            </p>
+        </div>
+
+        <div class="identity-main">
+
+            <h2 class="identity-statement">
+                <span class="word">BUILD.</span>
+                <span class="word">BREAK.</span>
+                <span class="word">REPEAT.</span>
+                <span class="word">EVOLVE.</span>
+            </h2>
+
+            <div class="identity-footer">
+
+                <div class="identity-fact">
+                    <small>NAME</small>
+                    <strong>Robiul Rumman Razim</strong>
+                </div>
+
+                <div class="identity-fact">
+                    <small>KNOWN AS</small>
+                    <strong>Tamasrazim</strong>
+                </div>
+
+                <div class="identity-fact">
+                    <small>FOCUS</small>
+                    <strong>Technology / Digital</strong>
+                </div>
+
+                <div class="identity-fact">
+                    <small>BASE</small>
+                    <strong>Bangladesh</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="panel-caption">WHO I AM</div>
+
+</div>
+</section>
+
+
+<!-- ======================================================
+     02 — ABOUT
+     ====================================================== -->
+
+<section class="panel about" id="about" data-index="2">
+
+<div class="panel-shell">
+
+    <div class="about-grid">
+
+        <div class="about-left">
+
+            <div class="eyebrow">02 / ABOUT</div>
+
+            <h2 class="about-title">
+                <span class="about-title-line"><span>CURIOUS</span></span>
+                <span class="about-title-line"><span>ABOUT</span></span>
+                <span class="about-title-line"><span>HOW THINGS MOVE.</span></span>
+            </h2>
+
+        </div>
+
+        <div class="about-right">
+
+            <div class="about-copy">
+
+                <p>
+                    Tamasrazim is the digital identity of Robiul Rumman Razim —
+                    a space built around technology, systems, gaming, visual work
+                    and experimentation.
+                </p>
+
+                <p>
+                    The idea is simple: keep exploring, keep building,
+                    and keep the interesting pieces somewhere worth returning to.
+                </p>
+
+            </div>
+
+            <div class="about-details">
+
+                <div class="about-row">
+                    <span>FIELD</span>
+                    <span>Technology</span>
+                </div>
+
+                <div class="about-row">
+                    <span>MEDIUM</span>
+                    <span>Digital</span>
+                </div>
+
+                <div class="about-row">
+                    <span>APPROACH</span>
+                    <span>Experimental</span>
+                </div>
+
+                <div class="about-row">
+                    <span>DIRECTION</span>
+                    <span>Forward</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="panel-caption">PROFILE</div>
+
+</div>
+</section>
+
+
+<!-- ======================================================
+     03 — TIMELINE
+     ====================================================== -->
+
+<section class="panel timeline" id="timeline" data-index="3">
+
+<div class="panel-shell">
+
+    <div class="timeline-inner">
+
+        <div class="timeline-head">
+
+            <div>
+                <div class="eyebrow">03 / TIMELINE</div>
+                <h2>EVOLUTION</h2>
+            </div>
+
+            <p>
+                Not a fixed destination.<br>
+                A moving system.
+            </p>
+
+        </div>
+
+        <div class="timeline-list">
+
+            <div class="timeline-item">
+                <span class="timeline-no">01</span>
+                <span class="timeline-name">Explore</span>
+                <span class="timeline-type">Curiosity</span>
+            </div>
+
+            <div class="timeline-item">
+                <span class="timeline-no">02</span>
+                <span class="timeline-name">Experiment</span>
+                <span class="timeline-type">Process</span>
+            </div>
+
+            <div class="timeline-item">
+                <span class="timeline-no">03</span>
+                <span class="timeline-name">Build</span>
+                <span class="timeline-type">Execution</span>
+            </div>
+
+            <div class="timeline-item">
+                <span class="timeline-no">04</span>
+                <span class="timeline-name">Refine</span>
+                <span class="timeline-type">Iteration</span>
+            </div>
+
+            <div class="timeline-item">
+                <span class="timeline-no">05</span>
+                <span class="timeline-name">Archive</span>
+                <span class="timeline-type">Memory</span>
+            </div>
+
+        </div>
+
+    </div>
+    <div class="panel-caption">PROCESS</div>
+
+</div>
+</section>
+
+
+<!-- ======================================================
+     04 — WORK
+     ====================================================== -->
+
+<section class="panel work" id="work" data-index="4">
+
+<div class="panel-shell">
+
+    <div class="work-head">
+
+        <div>
+            <div class="eyebrow">04 / WORK</div>
+            <h2>PROJECTS</h2>
+        </div>
+
+        <p>
+            Selected ideas, systems<br>
+            and visual experiments.
+        </p>
+
+    </div>
+
+    <div class="work-grid">
+
+        <article class="work-card magnetic-card">
+            <span class="work-index">001</span>
+
+            <div class="work-visual">
+                <div class="shape-a"></div>
+            </div>
+
+            <div class="work-info">
+                <div class="work-name">Digital Systems</div>
+                <div class="work-desc">Interfaces / logic / experiments</div>
+            </div>
+        </article>
+
+        <article class="work-card magnetic-card">
+            <span class="work-index">002</span>
+
+            <div class="work-visual">
+                <div class="shape-b"></div>
+            </div>
+
+            <div class="work-info">
+                <div class="work-name">Game Space</div>
+                <div class="work-desc">Worlds / machines / simulations</div>
+            </div>
+        </article>
+
+        <article class="work-card magnetic-card">
+            <span class="work-index">003</span>
+
+            <div class="work-visual">
+                <div class="shape-c"></div>
+            </div>
+
+            <div class="work-info">
+                <div class="work-name">Visual Lab</div>
+                <div class="work-desc">Motion / graphics / media</div>
+            </div>
+        </article>
+
+    </div>
+    <div class="panel-caption">SELECTED WORK</div>
+
+</div>
+</section>
+
+
+<!-- ======================================================
+     05 — PRESENCE
+     ====================================================== -->
+
+<section class="panel presence" id="presence" data-index="5">
+
+<div class="panel-shell">
+
+    <div class="presence-inner">
+
+        <div class="eyebrow">05 / DIGITAL PRESENCE</div>
+
+        <h2 class="presence-title">
+            FIND THE<br>
+            <span>SAME NAME.</span>
+        </h2>
+
+        <div class="social-wall">
+
+            <a
+                class="social magnetic"
+                href="https://linkedin.com/in/Tamasrazim"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <div class="social-top">
+                    <span>01</span>
+                    <span>↗</span>
+                </div>
+                <div class="social-name">LinkedIn</div>
+                <div class="social-handle">Tamasrazim</div>
+            </a>
+
+            <a
+                class="social magnetic"
+                href="https://facebook.com/Tamasrazim"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <div class="social-top">
+                    <span>02</span>
+                    <span>↗</span>
+                </div>
+                <div class="social-name">Facebook</div>
+                <div class="social-handle">Tamasrazim</div>
+            </a>
+
+            <a
+                class="social magnetic"
+                href="https://tiktok.com/@Tamasrazim"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <div class="social-top">
+                    <span>03</span>
+                    <span>↗</span>
+                </div>
+                <div class="social-name">TikTok</div>
+                <div class="social-handle">@Tamasrazim</div>
+            </a>
+
+            <a
+                class="social magnetic"
+                href="https://instagram.com/Tamasrazim"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <div class="social-top">
+                    <span>04</span>
+                    <span>↗</span>
+                </div>
+                <div class="social-name">Instagram</div>
+                <div class="social-handle">@Tamasrazim</div>
+            </a>
+
+        </div>
+
+    </div>
+    <div class="panel-caption">ONLINE</div>
+
+</div>
+</section>
+
+
+<!-- ======================================================
+     06 — ARCHIVE
+     ====================================================== -->
+
+<section class="panel archive" id="archive" data-index="6">
+
+<div class="panel-shell">
+
+    <div class="archive-inner">
+
+        <div class="archive-head">
+
+            <div>
+                <div class="eyebrow">06 / ARCHIVE</div>
+                <h2>BUILT.<br>BROKEN.<br>TESTED.</h2>
+            </div>
+
+            <p class="archive-note small">
+                Some experiments become projects.<br>
+                Some disappear.<br>
+                Both are part of the process.
+            </p>
+
+        </div>
+
+        <div class="archive-list">
+
+            <div class="archive-item">
+                <strong>PC experiments</strong>
+                <span>Hardware</span>
+            </div>
+
+            <div class="archive-item">
+                <strong>Game worlds</strong>
+                <span>Gaming</span>
+            </div>
+
+            <div class="archive-item">
+                <strong>Video experiments</strong>
+                <span>Media</span>
+            </div>
+
+            <div class="archive-item">
+                <strong>Web experiments</strong>
+                <span>Code</span>
+            </div>
+
+            <div class="archive-item">
+                <strong>Random ideas</strong>
+                <span>Unknown</span>
+            </div>
+
+        </div>
+
+    </div>
+    <div class="panel-caption">MEMORY</div>
+
+</div>
+</section>
+
+
+<!-- ======================================================
+     07 — CONTACT
+     ====================================================== -->
+
+<section class="panel contact" id="contact" data-index="7">
+
+<div class="panel-shell">
+
+    <div class="contact-inner">
+
+        <div class="eyebrow">07 / CONTACT</div>
+
+        <h2 class="contact-title">
+            <span class="contact-line"><span>LET'S MAKE</span></span>
+            <span class="contact-line"><span>SOMETHING MOVE.</span></span>
+        </h2>
+
+        <a
+            class="contact-link magnetic"
+            href="mailto:hello@tamasrazim.com"
+        >
+            hello@tamasrazim.com ↗
+        </a>
+
+    </div>
+
+    <div class="contact-bottom">
+        <span>ROBIUL RUMMAN RAZIM</span>
+        <span>TAMASRAZIM / 2026</span>
+        <span>ALWAYS MOVING</span>
+    </div>
+
+</div>
+</section>
+
+</div>
+</main>
+
+<script>
+(() => {
+    "use strict";
+
+    const loader = document.getElementById("loader");
+    const loaderWord = document.getElementById("loaderWord");
+    const track = document.getElementById("track");
+    const viewport = document.getElementById("viewport");
+    const basePanels = [...document.querySelectorAll(".panel")];
+    const navLinks = [...document.querySelectorAll(".site-nav a")];
+    const particleCanvas = document.getElementById("particleCanvas");
+
+    const mobileQuery = matchMedia("(max-width:760px)");
+    const coarseQuery = matchMedia("(pointer:coarse)");
+
+    let isMobile = mobileQuery.matches;
+    let isCoarse = coarseQuery.matches;
+
+    /* ---------------------------------------------------------
+       REMOVE ANY OLD PAGE NUMBER NODES
+       --------------------------------------------------------- */
+    document.querySelectorAll(
+        ".panel-index,.progress-dock,.progress-dot,.panel-page-number,.page-number"
+    ).forEach(el => el.remove());
+
+    /* ---------------------------------------------------------
+       INFINITE WORLD
+       --------------------------------------------------------- */
+    const originalCount = basePanels.length;
+    let worldPanels = [...basePanels];
+    let clonesBuilt = false;
+
+    function clonePanel(panel){
+        const clone = panel.cloneNode(true);
+        clone.removeAttribute("id");
+        clone.querySelectorAll("[id]").forEach(el => el.removeAttribute("id"));
+        clone.dataset.clone = "true";
+        return clone;
+    }
+
+    function clearClones(){
+        track.querySelectorAll('.panel[data-clone="true"]').forEach(el => el.remove());
+        worldPanels = [...basePanels];
+        clonesBuilt = false;
+    }
+
+    function buildClones(){
+        if(isMobile || clonesBuilt) return;
+
+        const left = basePanels.map(clonePanel).reverse();
+        const right = basePanels.map(clonePanel);
+
+        left.forEach(panel => track.insertBefore(panel, track.firstChild));
+        right.forEach(panel => track.appendChild(panel));
+
+        worldPanels = [...track.querySelectorAll(".panel")];
+        clonesBuilt = true;
+    }
+
+    buildClones();
+
+    /* ---------------------------------------------------------
+       STATE
+       --------------------------------------------------------- */
+    let logicalIndex = 0;
+    let currentX = 0;
+    let targetX = 0;
+    let viewportWidth = innerWidth;
+
+    let dragging = false;
+    let pointerId = null;
+    let dragStartX = 0;
+    let dragStartTarget = 0;
+    let lastDragX = 0;
+    let lastDragTime = performance.now();
+    let dragVelocity = 0;
+
+    let wheelLock = false;
+    let whirl = 0;
+    let pointerHold = 0;
+
+    let pointerX = innerWidth * .5;
+    let pointerY = innerHeight * .5;
+    let cursorX = pointerX;
+    let cursorY = pointerY;
+    let ringX = pointerX;
+    let ringY = pointerY;
+
+    let raf = 0;
+    let lastFrame = performance.now();
+
+    /* ---------------------------------------------------------
+       HELPERS
+       --------------------------------------------------------- */
+    const clamp = (v,min,max) => Math.max(min,Math.min(max,v));
+
+    function wrapIndex(value){
+        return ((value % originalCount) + originalCount) % originalCount;
+    }
+
+    function middleBase(){
+        return -originalCount * viewportWidth;
+    }
+
+    function desiredXForIndex(index){
+        return middleBase() - wrapIndex(index) * viewportWidth;
+    }
+
+    function normalizeInfinite(){
+        if(isMobile) return;
+
+        const block = originalCount * viewportWidth;
+        const safeMin = -2.5 * block;
+        const safeMax = -.5 * block;
+
+        while(currentX < safeMin){
+            currentX += block;
+            targetX += block;
+        }
+
+        while(currentX > safeMax){
+            currentX -= block;
+            targetX -= block;
+        }
+    }
+
+    function nearestLogicalIndex(x){
+        const visual = Math.round((Math.abs(x) - originalCount * viewportWidth) / viewportWidth);
+        return wrapIndex(visual);
+    }
+
+    function setActive(index){
+        logicalIndex = wrapIndex(index);
+        basePanels.forEach((panel,i) => {
+            panel.classList.toggle("active", i === logicalIndex);
+        });
+    }
+
+    /* ---------------------------------------------------------
+       NAVIGATION
+       --------------------------------------------------------- */
+    function goTo(index, options = {}){
+        if(isMobile){
+            const target = basePanels[wrapIndex(index)];
+            if(target){
+                target.scrollIntoView({
+                    behavior: options.instant ? "auto" : "smooth",
+                    block: "start"
+                });
+            }
+            logicalIndex = wrapIndex(index);
+            return;
+        }
+
+        logicalIndex = wrapIndex(index);
+        targetX = desiredXForIndex(logicalIndex);
+        startMotion();
+    }
+
+    function settleToNearest(projectedX){
+        const block = originalCount * viewportWidth;
+        const normalized = projectedX + block;
+        const snapped = Math.round(normalized / viewportWidth);
+        const index = wrapIndex(snapped);
+        logicalIndex = index;
+        targetX = desiredXForIndex(index);
+        startMotion();
+    }
+
+    /* ---------------------------------------------------------
+       WHIRLPOOL
+       --------------------------------------------------------- */
+    function updateWhirlpool(dt){
+        const centerOffset =
+            Math.abs(pointerX - innerWidth * .5) /
+            Math.max(1, innerWidth * .5);
+
+        const pointerInfluence = clamp(centerOffset,0,1);
+        const desired = dragging
+            ? 1.65
+            : pointerHold
+                ? 1.25
+                : .35 + pointerInfluence * .35;
+
+        whirl += (desired - whirl) * Math.min(.16, dt * .0007);
+    }
+
+    function updatePanels(){
+        if(isMobile) return;
+
+        const position = -currentX / Math.max(1,viewportWidth);
+        const strength = clamp(whirl,0,1.8);
+
+        worldPanels.forEach((panel,i) => {
+            let d = i - position;
+
+            if(d > worldPanels.length * .5) d -= worldPanels.length;
+            if(d < -worldPanels.length * .5) d += worldPanels.length;
+
+            const a = Math.abs(d);
+            const side = Math.sign(d) || 1;
+
+            /* Stronger inward bend while sliding/holding. */
+            const yCurve = clamp(
+                d * d * (3.5 + strength * 8.5),
+                0,
+                125
+            );
+
+            const xInward = side * clamp(
+                a * a * (1.15 + strength * 2.9),
+                0,
+                46
+            );
+
+            const rotateY = clamp(
+                d * (3.1 + strength * 4.5),
+                -15,
+                15
+            );
+
+            const rotateZ = side * clamp(
+                a * (.55 + strength * 1.4),
+                0,
+                11
+            );
+
+            const scale = Math.max(
+                .86,
+                1 - a * (.021 + strength * .008)
+            );
+
+            const z = -a * (36 + strength * 28);
+            const lift = -Math.min(
+                55,
+                a * a * (1.2 + strength * 3.2)
+            );
+
+            panel.style.transform =
+                `translate3d(${xInward}px,${lift + yCurve}px,${z}px)` +
+                ` rotateY(${rotateY}deg)` +
+                ` rotateZ(${rotateZ}deg)` +
+                ` scale3d(${scale},${scale},${scale})`;
+        });
+    }
+
+    /* ---------------------------------------------------------
+       CURSOR
+       --------------------------------------------------------- */
+    let cursorCore = null;
+    let cursorRing = null;
+
+    if(!isCoarse){
+        cursorCore = document.createElement("div");
+        cursorCore.className = "final-cursor-core";
+
+        cursorRing = document.createElement("div");
+        cursorRing.className = "final-cursor-ring";
+
+        const cursorStyle = document.createElement("style");
+        cursorStyle.textContent = `
+            .final-cursor-core,
+            .final-cursor-ring{
+                position:fixed;
+                left:0;
+                top:0;
+                pointer-events:none;
+                z-index:10050;
+                border-radius:50%;
+                transform:translate3d(-50%,-50%,0);
+                will-change:transform;
+                mix-blend-mode:difference;
+            }
+            .final-cursor-core{
+                width:5px;
+                height:5px;
+                background:#fff;
+            }
+            .final-cursor-ring{
+                width:35px;
+                height:35px;
+                border:1px solid rgba(255,255,255,.7);
+                transition:
+                    width 280ms cubic-bezier(.16,1,.3,1),
+                    height 280ms cubic-bezier(.16,1,.3,1);
+            }
+            body.cursor-hover .final-cursor-ring{
+                width:62px;
+                height:62px;
+            }
+            body.is-dragging .final-cursor-ring{
+                width:82px;
+                height:82px;
+            }
+        `;
+        document.head.appendChild(cursorStyle);
+        document.body.append(cursorCore,cursorRing);
+
+        window.addEventListener("pointermove", e => {
+            pointerX = e.clientX;
+            pointerY = e.clientY;
+            startMotion();
+        }, {passive:true});
+
+        document.querySelectorAll("a,button,.work-card,.social,.magnetic").forEach(el => {
+            el.addEventListener("pointerenter", () => document.body.classList.add("cursor-hover"));
+            el.addEventListener("pointerleave", () => {
+                document.body.classList.remove("cursor-hover");
+                if(!dragging) el.style.transform = "";
+            });
+        });
+    }
+
+    /* ---------------------------------------------------------
+       MAGNETIC INTERACTION
+       --------------------------------------------------------- */
+    if(!isCoarse){
+        document.querySelectorAll(".magnetic").forEach(el => {
+            el.addEventListener("pointermove", e => {
+                if(dragging) return;
+                const rect = el.getBoundingClientRect();
+                const x = e.clientX - (rect.left + rect.width/2);
+                const y = e.clientY - (rect.top + rect.height/2);
+                el.style.transform = `translate3d(${x*.08}px,${y*.08}px,0)`;
+            }, {passive:true});
+        });
+    }
+
+    /* ---------------------------------------------------------
+       MAIN MOTION LOOP
+       --------------------------------------------------------- */
+    function startMotion(){
+        if(!raf) raf = requestAnimationFrame(motionLoop);
+    }
+
+    function motionLoop(now){
+        raf = 0;
+
+        const dt = Math.min(32, Math.max(8, now - lastFrame));
+        lastFrame = now;
+
+        if(!isMobile){
+            const dx = targetX - currentX;
+            const smoothing = Math.min(.22, .115 * (dt / 16.67));
+
+            currentX += dx * smoothing;
+            normalizeInfinite();
+
+            updateWhirlpool(dt);
+            updatePanels();
+
+            track.style.transform =
+                `translate3d(${currentX.toFixed(2)}px,0,0)`;
+
+            if(Math.abs(dx) < .06 && !dragging){
+                currentX = targetX;
+                track.style.transform =
+                    `translate3d(${targetX.toFixed(2)}px,0,0)`;
+                setActive(nearestLogicalIndex(currentX));
+            }else{
+                setActive(nearestLogicalIndex(currentX));
+            }
+        }
+
+        if(!isCoarse && cursorCore && cursorRing){
+            cursorX += (pointerX - cursorX) * .32;
+            cursorY += (pointerY - cursorY) * .32;
+            ringX += (pointerX - ringX) * .12;
+            ringY += (pointerY - ringY) * .12;
+
+            cursorCore.style.transform =
+                `translate3d(${cursorX}px,${cursorY}px,0) translate(-50%,-50%)`;
+
+            cursorRing.style.transform =
+                `translate3d(${ringX}px,${ringY}px,0) translate(-50%,-50%)`;
+        }
+
+        /* Keep holding/dragging and cursor motion fluid. */
+        const moving =
+            !isMobile && Math.abs(targetX - currentX) > .06;
+
+        const cursorMoving =
+            !isCoarse &&
+            (Math.abs(pointerX-cursorX) > .12 ||
+             Math.abs(pointerY-cursorY) > .12);
+
+        if(moving || cursorMoving || dragging){
+            raf = requestAnimationFrame(motionLoop);
+        }
+    }
+
+    /* ---------------------------------------------------------
+       DESKTOP DRAG
+       --------------------------------------------------------- */
+    viewport.addEventListener("pointerdown", e => {
+        if(isMobile || e.button !== 0) return;
+        if(e.target.closest("a,button,input,textarea,select")) return;
+
+        dragging = true;
+        pointerHold = 1;
+        pointerId = e.pointerId;
+        dragStartX = e.clientX;
+        dragStartTarget = targetX;
+        lastDragX = e.clientX;
+        lastDragTime = performance.now();
+        dragVelocity = 0;
+
+        document.body.classList.add("is-dragging");
+
+        try{
+            viewport.setPointerCapture(pointerId);
+        }catch{}
+
+        startMotion();
+    });
+
+    viewport.addEventListener("pointermove", e => {
+        if(!dragging || e.pointerId !== pointerId) return;
+
+        const now = performance.now();
+        const dx = e.clientX - dragStartX;
+        const dt = Math.max(8, now - lastDragTime);
+
+        const instant =
+            (e.clientX - lastDragX) / dt;
+
+        dragVelocity +=
+            (instant - dragVelocity) * .4;
+
+        lastDragX = e.clientX;
+        lastDragTime = now;
+
+        /* Direct grab: content follows cursor in the same direction. */
+        targetX = dragStartTarget + dx;
+
+        startMotion();
+    }, {passive:true});
+
+    function stopDrag(){
+        if(!dragging) return;
+
+        dragging = false;
+        pointerHold = 0;
+        document.body.classList.remove("is-dragging");
+
+        const projected =
+            targetX + dragVelocity * 260;
+
+        dragVelocity = 0;
+
+        settleToNearest(projected);
+
+        if(pointerId !== null && viewport.hasPointerCapture?.(pointerId)){
+            try{viewport.releasePointerCapture(pointerId)}catch{}
+        }
+
+        pointerId = null;
+        startMotion();
+    }
+
+    viewport.addEventListener("pointerup", stopDrag);
+    viewport.addEventListener("pointercancel", stopDrag);
+    viewport.addEventListener("lostpointercapture", () => {
+        if(dragging) stopDrag();
+    });
+
+    /* ---------------------------------------------------------
+       WHEEL
+       --------------------------------------------------------- */
+    window.addEventListener("wheel", e => {
+        if(isMobile || wheelLock) return;
+
+        const magnitude =
+            Math.abs(e.deltaY) + Math.abs(e.deltaX);
+
+        if(magnitude < 4) return;
+
+        wheelLock = true;
+
+        goTo(
+            logicalIndex +
+            ((e.deltaY + e.deltaX) > 0 ? 1 : -1)
+        );
+
+        window.setTimeout(() => {
+            wheelLock = false;
+        },280);
+    }, {passive:true});
+
+    /* ---------------------------------------------------------
+       KEYBOARD
+       --------------------------------------------------------- */
+    window.addEventListener("keydown", e => {
+        if(isMobile) return;
+
+        if(e.key === "ArrowRight" || e.key === "ArrowDown"){
+            e.preventDefault();
+            goTo(logicalIndex + 1);
+        }
+
+        if(e.key === "ArrowLeft" || e.key === "ArrowUp"){
+            e.preventDefault();
+            goTo(logicalIndex - 1);
+        }
+    });
+
+    /* ---------------------------------------------------------
+       NAV
+       --------------------------------------------------------- */
+    navLinks.forEach(link => {
+        link.addEventListener("click", e => {
+            if(isMobile) return;
+            e.preventDefault();
+            goTo(Number(link.dataset.index));
+        });
+    });
+
+    /* ---------------------------------------------------------
+       MOBILE OBSERVER
+       --------------------------------------------------------- */
+    const mobileObserver =
+        new IntersectionObserver(entries => {
+            if(!isMobile) return;
+
+            entries.forEach(entry => {
+                if(!entry.isIntersecting || entry.intersectionRatio < .55) return;
+
+                const index = Number(entry.target.dataset.index);
+                if(Number.isFinite(index)){
+                    logicalIndex = wrapIndex(index);
+                    entry.target.classList.add("active");
+                }
+            });
+        }, {threshold:[.55]});
+
+    basePanels.forEach(panel => mobileObserver.observe(panel));
+
+    /* ---------------------------------------------------------
+       PARTICLES — ONE LIGHTWEIGHT LOOP
+       --------------------------------------------------------- */
+    const particleContext = particleCanvas
+        ? particleCanvas.getContext("2d", {alpha:true})
+        : null;
+
+    const particles = [];
+    let canvasWidth = 0;
+    let canvasHeight = 0;
+    let pixelRatio = 1;
+
+    function particleCount(){
+        return isMobile ? 22 : 46;
+    }
+
+    function resizeCanvas(){
+        if(!particleCanvas || !particleContext) return;
+
+        pixelRatio = Math.min(1.5, window.devicePixelRatio || 1);
+
+        canvasWidth = innerWidth;
+        canvasHeight = innerHeight;
+
+        particleCanvas.width =
+            Math.round(canvasWidth * pixelRatio);
+
+        particleCanvas.height =
+            Math.round(canvasHeight * pixelRatio);
+
+        particleCanvas.style.width = canvasWidth + "px";
+        particleCanvas.style.height = canvasHeight + "px";
+
+        particleContext.setTransform(
+            pixelRatio,0,0,pixelRatio,0,0
+        );
+
+        particles.length = 0;
+
+        const count = particleCount();
+
+        for(let i=0;i<count;i++){
+            particles.push({
+                x:Math.random()*canvasWidth,
+                y:Math.random()*canvasHeight,
+                vx:(Math.random()-.5)*(isMobile?.045:.065),
+                vy:(Math.random()-.5)*(isMobile?.045:.065),
+                r:.4+Math.random()*.7,
+                a:.12+Math.random()*.30
+            });
+        }
+    }
+
+    function updateParticles(){
+        if(!particleContext) return;
+
+        particleContext.clearRect(
+            0,0,canvasWidth,canvasHeight
+        );
+
+        particleContext.fillStyle =
+            "rgba(242,240,232,1)";
+
+        for(const p of particles){
+            p.x += p.vx;
+            p.y += p.vy;
+
+            if(p.x < -10) p.x = canvasWidth + 10;
+            if(p.x > canvasWidth + 10) p.x = -10;
+            if(p.y < -10) p.y = canvasHeight + 10;
+            if(p.y > canvasHeight + 10) p.y = -10;
+
+            particleContext.globalAlpha = p.a;
+            particleContext.beginPath();
+            particleContext.arc(
+                p.x,p.y,p.r,0,Math.PI*2
+            );
+            particleContext.fill();
+        }
+
+        particleContext.globalAlpha = 1;
+    }
+
+    function particleLoop(){
+        updateParticles();
+        requestAnimationFrame(particleLoop);
+    }
+
+    resizeCanvas();
+    particleLoop();
+
+    /* ---------------------------------------------------------
+       RESIZE / BREAKPOINT SWITCH
+       --------------------------------------------------------- */
+    let resizeTimer = 0;
+
+    function resizeAll(){
+        resizeTimer = 0;
+
+        const wasMobile = isMobile;
+
+        isMobile = mobileQuery.matches;
+        isCoarse = coarseQuery.matches;
+        viewportWidth = innerWidth;
+
+        if(wasMobile !== isMobile){
+            clearClones();
+
+            if(!isMobile){
+                buildClones();
+                targetX = desiredXForIndex(logicalIndex);
+                currentX = targetX;
+                track.style.transform =
+                    `translate3d(${currentX}px,0,0)`;
+                updatePanels();
+            }else{
+                track.style.transform = "none";
+            }
+        }else if(!isMobile){
+            targetX = desiredXForIndex(logicalIndex);
+            currentX = targetX;
+            track.style.transform =
+                `translate3d(${currentX}px,0,0)`;
+            updatePanels();
+        }
+
+        resizeCanvas();
+        fitMobileLoader();
+        fitMobileHero();
+        startMotion();
+    }
+
+    window.addEventListener("resize", () => {
+        if(resizeTimer) return;
+        resizeTimer = requestAnimationFrame(resizeAll);
+    }, {passive:true});
+
+    window.addEventListener("orientationchange", () => {
+        setTimeout(resizeAll,120);
+    }, {passive:true});
+
+    mobileQuery.addEventListener("change", resizeAll);
+    coarseQuery.addEventListener("change", resizeAll);
+
+    /* ---------------------------------------------------------
+       MOBILE WORD FITTING
+       --------------------------------------------------------- */
+    function fitWord(el, minPadding){
+        if(!el) return;
+
+        el.style.transform = "scaleX(1)";
+
+        const available =
+            Math.max(120, innerWidth - minPadding);
+
+        const width = el.scrollWidth;
+
+        if(width > available){
+            el.style.transform =
+                `scaleX(${available/width})`;
+        }
+    }
+
+    function fitMobileHero(){
+        if(!mobileQuery.matches){
+            heroTitle.style.transform = "";
+            return;
+        }
+        fitWord(heroTitle,36);
+    }
+
+    function fitMobileLoader(){
+        if(!loaderWord) return;
+
+        if(innerWidth <= 760){
+            fitWord(loaderWord,34);
+        }else{
+            loaderWord.style.transform = "";
+        }
+    }
+
+    /* ---------------------------------------------------------
+       HERO WORD PARALLAX
+       --------------------------------------------------------- */
+    if(!isCoarse){
+        window.addEventListener("pointermove", e => {
+            if(isMobile) return;
+
+            const x =
+                (e.clientX / innerWidth - .5) * 18;
+
+            const y =
+                (e.clientY / innerHeight - .5) * 10;
+
+            heroTitle.style.marginLeft =
+                `${x*.18}px`;
+
+            heroTitle.style.marginTop =
+                `${28 + y*.03}px`;
+        }, {passive:true});
+    }
+
+    /* ---------------------------------------------------------
+       RESTART MOTION WHEN TAB RETURNS
+       --------------------------------------------------------- */
+    document.addEventListener("visibilitychange", () => {
+        if(!document.hidden){
+            fitMobileLoader();
+            fitMobileHero();
+            startMotion();
+        }
+    });
+
+    /* ---------------------------------------------------------
+       INTRO — GUARANTEED ONE-SHOT EXIT
+       --------------------------------------------------------- */
+    function finishLoader(){
+        if(!loader || loader.dataset.closed === "1") return;
+
+        loader.dataset.closed = "1";
+        loader.classList.add("is-done");
+
+        window.setTimeout(() => {
+            loader.remove();
+        },950);
+    }
+
+    fitMobileLoader();
+    fitMobileHero();
+
+    window.setTimeout(finishLoader,2800);
+
+    /* ---------------------------------------------------------
+       INITIAL POSITION
+       --------------------------------------------------------- */
+    setActive(0);
+
+    if(!isMobile){
+        currentX = desiredXForIndex(0);
+        targetX = currentX;
+        track.style.transform =
+            `translate3d(${currentX}px,0,0)`;
+        updatePanels();
+    }
+
+    startMotion();
+})();
+</script>
+</body>
+</html>
