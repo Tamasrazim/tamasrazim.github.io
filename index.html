@@ -3,2195 +3,1351 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#050505">
 
-<title>TAMASRAZIM — Robiul Rumman Razim</title>
+<title>Robiul Rumman Razim — Tamasrazim</title>
+
+<meta name="description"
+content="Robiul Rumman Razim — known online as Tamasrazim. Technology, projects, systems and digital work.">
 
 <style>
-/* =========================================================
-   TAMASRAZIM — CINEMATIC IDENTITY SITE
-   V5 — MOBILE TYPOGRAPHY FIX
-========================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
-:root{
-    --bg:#050505;
-    --fg:#f3f1eb;
-    --muted:#8a8a86;
-    --line:rgba(243,241,235,.15);
-    --soft:rgba(243,241,235,.06);
-
-    --ease:cubic-bezier(.16,1,.3,1);
-    --fast:cubic-bezier(.22,1,.36,1);
+:root {
+    --black: #030305;
+    --black2: #08070c;
+    --red: #b40025;
+    --red2: #ff174d;
+    --purple: #761cff;
+    --purple2: #b06cff;
+    --white: #f7f7fa;
+    --muted: #8e8d98;
+    --border: rgba(255,255,255,.09);
 }
 
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-html,
-body{
-    width:100%;
-    height:100%;
+html {
+    scroll-behavior: smooth;
 }
 
-html{
-    background:var(--bg);
-    scroll-behavior:auto;
-}
-
-body{
-    background:var(--bg);
-    color:var(--fg);
-    font-family:Inter,Arial,sans-serif;
-    overflow:hidden;
-    cursor:none;
+body {
+    background: var(--black);
+    color: var(--white);
+    font-family: Inter, sans-serif;
+    overflow-x: hidden;
 }
 
 /* =========================================================
-   CURSOR
+   360° INTERACTIVE BACKGROUND
 ========================================================= */
 
-.cursor{
-    position:fixed;
-    left:0;
-    top:0;
-    width:8px;
-    height:8px;
-    border-radius:50%;
-    background:var(--fg);
-    pointer-events:none;
-    z-index:99999;
-    transform:translate3d(-50%,-50%,0);
-    mix-blend-mode:difference;
+#space {
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+    overflow: hidden;
+    background:
+        radial-gradient(
+            circle at var(--mx,50%) var(--my,50%),
+            rgba(118,28,255,.16),
+            transparent 25%
+        ),
+        radial-gradient(
+            circle at 20% 20%,
+            rgba(180,0,37,.13),
+            transparent 35%
+        ),
+        #030305;
 }
 
-.cursor-ring{
-    position:fixed;
-    left:0;
-    top:0;
-    width:38px;
-    height:38px;
-    border:1px solid rgba(243,241,235,.6);
-    border-radius:50%;
-    pointer-events:none;
-    z-index:99998;
-    transform:translate3d(-50%,-50%,0);
-    transition:
-        width .35s var(--ease),
-        height .35s var(--ease),
-        border-color .35s var(--ease);
+.orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    transition: transform .25s cubic-bezier(.2,.8,.2,1);
 }
 
-.cursor-ring.active{
-    width:70px;
-    height:70px;
-    border-color:rgba(243,241,235,.9);
+.orb.one {
+    width: 420px;
+    height: 420px;
+    background: rgba(180,0,37,.18);
+    left: -100px;
+    top: 20%;
+}
+
+.orb.two {
+    width: 500px;
+    height: 500px;
+    background: rgba(118,28,255,.16);
+    right: -150px;
+    top: 10%;
+}
+
+.orb.three {
+    width: 300px;
+    height: 300px;
+    background: rgba(255,23,77,.12);
+    left: 45%;
+    bottom: -150px;
 }
 
 /* =========================================================
-   INTRO / KAMUI STYLE OPENING
+   KAMUI-INSPIRED OPENING
 ========================================================= */
 
-.intro{
-    position:fixed;
-    inset:0;
-    background:#000;
-    z-index:5000;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
+#intro {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #000;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    animation: introExit 1s 2.9s forwards;
 }
 
-.intro-core{
-    position:relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
+.portal {
+    position: absolute;
+    width: 520px;
+    height: 520px;
+    border-radius: 50%;
 
-.intro-title{
-    display:flex;
-    flex-wrap:nowrap;
-    white-space:nowrap;
-    font-size:clamp(3rem,11vw,12rem);
-    font-weight:800;
-    line-height:.8;
-    letter-spacing:-.08em;
-}
+    background:
+        conic-gradient(
+            from 0deg,
+            transparent,
+            var(--red2),
+            var(--purple),
+            transparent,
+            var(--red)
+        );
 
-.intro-title span{
-    display:block;
-    opacity:0;
-    transform:
-        translate3d(0,120px,0)
-        scale(.7)
-        rotateX(80deg);
-    animation:introLetter 1.1s var(--ease) forwards;
-}
+    filter: blur(2px);
 
-.intro-title span:nth-child(1){animation-delay:.05s}
-.intro-title span:nth-child(2){animation-delay:.09s}
-.intro-title span:nth-child(3){animation-delay:.13s}
-.intro-title span:nth-child(4){animation-delay:.17s}
-.intro-title span:nth-child(5){animation-delay:.21s}
-.intro-title span:nth-child(6){animation-delay:.25s}
-.intro-title span:nth-child(7){animation-delay:.29s}
-.intro-title span:nth-child(8){animation-delay:.33s}
-.intro-title span:nth-child(9){animation-delay:.37s}
-.intro-title span:nth-child(10){animation-delay:.41s}
-
-@keyframes introLetter{
-    0%{
-        opacity:0;
-        transform:
-            translate3d(0,120px,0)
-            scale(.7)
-            rotateX(80deg);
-    }
-
-    60%{
-        opacity:1;
-    }
-
-    100%{
-        opacity:1;
-        transform:
-            translate3d(0,0,0)
-            scale(1)
-            rotateX(0deg);
-    }
-}
-
-.intro-circle{
-    position:absolute;
-    width:min(50vw,600px);
-    aspect-ratio:1;
-    border:1px solid rgba(243,241,235,.12);
-    border-radius:50%;
     animation:
-        introCircle 3s linear infinite,
-        introPulse 1.8s ease-in-out infinite;
+        portalSpin 2.3s cubic-bezier(.1,.8,.1,1) forwards,
+        portalPulse .7s infinite alternate;
 }
 
-@keyframes introCircle{
-    from{
-        transform:rotate(0deg) scale(.85);
+.portal::before {
+    content: "";
+    position: absolute;
+    inset: 45px;
+    border-radius: 50%;
+    background: #000;
+}
+
+.portal::after {
+    content: "";
+    position: absolute;
+    inset: -100px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,0,60,.4);
+    filter: blur(5px);
+}
+
+.intro-name {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    font-family: "Space Grotesk";
+    font-size: clamp(2rem,5vw,5rem);
+    letter-spacing: -.06em;
+    opacity: 0;
+    transform: scale(.4);
+    animation: nameReveal 1s 1.6s cubic-bezier(.16,1,.3,1) forwards;
+}
+
+.intro-name span {
+    display: block;
+    font-size: .28em;
+    letter-spacing: .4em;
+    margin-top: 14px;
+    color: #9b8aff;
+}
+
+@keyframes portalSpin {
+    0% {
+        transform: scale(.05) rotate(-720deg);
     }
-
-    to{
-        transform:rotate(360deg) scale(.85);
+    65% {
+        transform: scale(1.25) rotate(80deg);
+    }
+    100% {
+        transform: scale(1) rotate(360deg);
     }
 }
 
-@keyframes introPulse{
-    0%,100%{opacity:.2}
-    50%{opacity:.65}
+@keyframes portalPulse {
+    from { filter: blur(2px); }
+    to { filter: blur(8px); }
 }
 
-.intro.exit{
-    animation:introExit 1.2s var(--ease) forwards;
-}
-
-@keyframes introExit{
-    0%{
-        opacity:1;
-        transform:scale(1);
+@keyframes nameReveal {
+    to {
+        opacity: 1;
+        transform: scale(1);
     }
+}
 
-    100%{
-        opacity:0;
-        transform:scale(1.5);
-        visibility:hidden;
+@keyframes introExit {
+    to {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
     }
 }
 
 /* =========================================================
-   HEADER
+   NAVIGATION
 ========================================================= */
 
-.header{
-    position:fixed;
-    left:0;
-    top:0;
-    width:100%;
-    height:90px;
-    padding:0 4vw;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    z-index:1000;
-    pointer-events:none;
+.nav {
+    position: fixed;
+    z-index: 100;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(1150px, calc(100% - 50px));
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 13px 18px 13px 24px;
+
+    border: 1px solid var(--border);
+    border-radius: 100px;
+
+    background: rgba(5,5,8,.65);
+    backdrop-filter: blur(20px);
 }
 
-.logo{
-    font-size:13px;
-    font-weight:700;
-    letter-spacing:.08em;
-    pointer-events:auto;
+.logo {
+    font-family: "Space Grotesk";
+    font-weight: 700;
+    letter-spacing: -.03em;
 }
 
-.nav{
-    display:flex;
-    gap:30px;
-    pointer-events:auto;
+.logo span {
+    color: var(--red2);
 }
 
-.nav button{
-    border:0;
-    background:none;
-    color:var(--muted);
-    font:inherit;
-    font-size:11px;
-    letter-spacing:.08em;
-    text-transform:uppercase;
-    cursor:none;
-    transition:
-        color .4s var(--ease),
-        transform .4s var(--ease);
+.nav-links {
+    display: flex;
+    gap: 28px;
+    color: var(--muted);
+    font-size: .86rem;
 }
 
-.nav button:hover{
-    color:var(--fg);
-    transform:translateY(-2px);
+.nav-links a {
+    transition: .2s;
+}
+
+.nav-links a:hover {
+    color: white;
+}
+
+.nav-button {
+    padding: 9px 16px;
+    border-radius: 100px;
+    background: linear-gradient(135deg,var(--red),var(--purple));
+    font-size: .82rem;
+    font-weight: 700;
 }
 
 /* =========================================================
-   HORIZONTAL TRACK
+   GENERAL
 ========================================================= */
 
-.viewport{
-    position:fixed;
-    inset:0;
-    overflow:hidden;
+.container {
+    width: min(1150px,calc(100% - 50px));
+    margin: auto;
 }
 
-.track{
-    height:100%;
-    width:max-content;
-    display:flex;
-    align-items:stretch;
-    will-change:transform;
-    transform:translate3d(0,0,0);
-}
-
-/* =========================================================
-   PANELS
-========================================================= */
-
-.panel{
-    position:relative;
-    width:100vw;
-    height:100vh;
-    flex:0 0 100vw;
-    overflow:hidden;
-    display:flex;
-    align-items:center;
-    padding:7vw;
-}
-
-.panel::after{
-    content:"";
-    position:absolute;
-    left:7vw;
-    right:7vw;
-    bottom:38px;
-    height:1px;
-    background:var(--line);
-}
-
-.panel-number{
-    position:absolute;
-    top:110px;
-    left:7vw;
-    color:var(--muted);
-    font-size:10px;
-    letter-spacing:.16em;
-}
-
-.panel-label{
-    position:absolute;
-    bottom:55px;
-    right:7vw;
-    color:var(--muted);
-    font-size:10px;
-    letter-spacing:.12em;
-    text-transform:uppercase;
+section {
+    min-height: 100vh;
+    padding: 150px 0;
+    display: flex;
+    align-items: center;
 }
 
 /* =========================================================
    HERO
 ========================================================= */
 
-.hero{
-    padding-left:7vw;
+.hero {
+    min-height: 100vh;
+    position: relative;
 }
 
-.hero-inner{
-    position:relative;
-    width:100%;
-    max-width:100%;
+.hero-content {
+    max-width: 900px;
 }
 
-/*
-IMPORTANT:
-The title itself is FLEX + NOWRAP.
-There is no whitespace between the letter spans.
-This prevents:
-TAMA AR AZ IM
-and mobile M clipping.
-*/
-
-.hero-title{
-    display:flex;
-    flex-wrap:nowrap;
-    align-items:baseline;
-
-    width:max-content;
-    max-width:none;
-
-    white-space:nowrap;
-
-    font-size:clamp(4rem,13vw,15rem);
-    font-weight:800;
-    line-height:.78;
-    letter-spacing:0;
-
-    overflow:visible;
-    transform-origin:left center;
+.kicker {
+    color: #9e91ff;
+    text-transform: uppercase;
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .2em;
+    margin-bottom: 25px;
 }
 
-.hero-title span{
-    display:block;
-    flex:0 0 auto;
-
-    width:auto;
-    min-width:0;
-
-    margin:0;
-    padding:0;
-
-    white-space:nowrap;
-    overflow:visible;
-
-    opacity:0;
-    transform:
-        translate3d(0,90px,0)
-        rotateX(70deg);
-
-    animation:heroLetter 1.3s var(--ease) forwards;
+h1 {
+    font-family: "Space Grotesk";
+    font-size: clamp(5rem,10vw,10rem);
+    line-height: .82;
+    letter-spacing: -.085em;
 }
 
-.hero-title span:nth-child(1){animation-delay:.55s}
-.hero-title span:nth-child(2){animation-delay:.60s}
-.hero-title span:nth-child(3){animation-delay:.65s}
-.hero-title span:nth-child(4){animation-delay:.70s}
-.hero-title span:nth-child(5){animation-delay:.75s}
-.hero-title span:nth-child(6){animation-delay:.80s}
-.hero-title span:nth-child(7){animation-delay:.85s}
-.hero-title span:nth-child(8){animation-delay:.90s}
-.hero-title span:nth-child(9){animation-delay:.95s}
-.hero-title span:nth-child(10){animation-delay:1s}
-
-@keyframes heroLetter{
-    0%{
-        opacity:0;
-        transform:
-            translate3d(0,90px,0)
-            rotateX(70deg);
-    }
-
-    100%{
-        opacity:1;
-        transform:
-            translate3d(0,0,0)
-            rotateX(0deg);
-    }
+h1 .red {
+    color: var(--red2);
 }
 
-.hero-sub{
-    margin-top:40px;
-    margin-left:4px;
-
-    display:flex;
-    align-items:center;
-    gap:18px;
-
-    color:var(--muted);
-    font-size:11px;
-    letter-spacing:.12em;
-    text-transform:uppercase;
-
-    animation:subReveal 1.2s 1.2s var(--ease) both;
+.hero-subtitle {
+    margin-top: 35px;
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 650px;
 }
 
-.hero-sub-line{
-    width:70px;
-    height:1px;
-    background:var(--muted);
-    transform-origin:left;
-    animation:lineReveal 1s 1.4s var(--ease) both;
+.hero-subtitle strong {
+    color: white;
 }
 
-@keyframes subReveal{
-    from{
-        opacity:0;
-        transform:translateY(20px);
-    }
-
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
+.buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 35px;
 }
 
-@keyframes lineReveal{
-    from{
-        transform:scaleX(0);
-    }
+.btn {
+    padding: 14px 21px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    font-weight: 700;
+    transition: transform .2s,box-shadow .2s;
+}
 
-    to{
-        transform:scaleX(1);
-    }
+.btn:hover {
+    transform: translateY(-3px);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg,var(--red),var(--purple));
+    box-shadow: 0 15px 45px rgba(118,28,255,.2);
 }
 
 /* =========================================================
-   AMBIENT RING
+   CURVED DECORATION
 ========================================================= */
 
-.ambient{
-    position:absolute;
-    width:min(45vw,600px);
-    aspect-ratio:1;
-    border:1px solid rgba(243,241,235,.1);
-    border-radius:50%;
-
-    right:8vw;
-    top:50%;
-    transform:translateY(-50%);
-
-    pointer-events:none;
-
-    animation:
-        ambientRotate 18s linear infinite,
-        ambientFloat 5s ease-in-out infinite;
+.curve {
+    position: absolute;
+    pointer-events: none;
+    border: 1px solid rgba(180,0,37,.25);
+    border-radius: 50%;
 }
 
-.ambient::before,
-.ambient::after{
-    content:"";
-    position:absolute;
-    border-radius:50%;
-    border:1px solid rgba(243,241,235,.07);
+.curve.one {
+    width: 800px;
+    height: 350px;
+    right: -250px;
+    top: 25%;
+    transform: rotate(-25deg);
 }
 
-.ambient::before{
-    inset:12%;
-    animation:ambientRotateReverse 11s linear infinite;
-}
-
-.ambient::after{
-    inset:25%;
-    animation:ambientRotate 8s linear infinite;
-}
-
-@keyframes ambientRotate{
-    from{
-        transform:translateY(-50%) rotate(0deg);
-    }
-
-    to{
-        transform:translateY(-50%) rotate(360deg);
-    }
-}
-
-@keyframes ambientRotateReverse{
-    from{
-        transform:rotate(360deg);
-    }
-
-    to{
-        transform:rotate(0deg);
-    }
-}
-
-@keyframes ambientFloat{
-    0%,100%{
-        margin-top:-10px;
-    }
-
-    50%{
-        margin-top:10px;
-    }
+.curve.two {
+    width: 650px;
+    height: 250px;
+    right: -170px;
+    top: 38%;
+    transform: rotate(-25deg);
+    border-color: rgba(118,28,255,.25);
 }
 
 /* =========================================================
-   IDENTITY
+   SECTION HEADERS
 ========================================================= */
 
-.identity-content{
-    width:min(100%,1100px);
+.section-label {
+    color: var(--red2);
+    font-size: .7rem;
+    font-weight: 800;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    margin-bottom: 13px;
 }
 
-.eyebrow{
-    color:var(--muted);
-    font-size:10px;
-    text-transform:uppercase;
-    letter-spacing:.18em;
-    margin-bottom:30px;
+h2 {
+    font-family: "Space Grotesk";
+    font-size: clamp(3rem,6vw,6rem);
+    letter-spacing: -.07em;
+    line-height: .95;
+    max-width: 850px;
 }
 
-.big-copy{
-    max-width:1050px;
-
-    font-size:clamp(2.2rem,5vw,6rem);
-    font-weight:500;
-    line-height:1.02;
-    letter-spacing:-.055em;
-}
-
-.big-copy span{
-    display:inline-block;
-    opacity:0;
-    transform:translate3d(0,60px,0);
-}
-
-.panel.visible .big-copy span{
-    animation:copyReveal 1s var(--ease) forwards;
-}
-
-.panel.visible .big-copy span:nth-child(2){animation-delay:.06s}
-.panel.visible .big-copy span:nth-child(3){animation-delay:.12s}
-.panel.visible .big-copy span:nth-child(4){animation-delay:.18s}
-.panel.visible .big-copy span:nth-child(5){animation-delay:.24s}
-.panel.visible .big-copy span:nth-child(6){animation-delay:.30s}
-
-@keyframes copyReveal{
-    to{
-        opacity:1;
-        transform:translate3d(0,0,0);
-    }
+.description {
+    color: var(--muted);
+    max-width: 650px;
+    margin-top: 22px;
 }
 
 /* =========================================================
    ABOUT
 ========================================================= */
 
-.about-grid{
-    width:100%;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10vw;
+.about-layout {
+    display: grid;
+    grid-template-columns: 1.4fr .6fr;
+    gap: 25px;
+    width: 100%;
 }
 
-.about-heading{
-    font-size:clamp(3rem,7vw,9rem);
-    font-weight:700;
-    line-height:.85;
-    letter-spacing:-.07em;
+.card {
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,.035);
+    backdrop-filter: blur(18px);
+    border-radius: 35px;
+    padding: 38px;
 }
 
-.about-text{
-    max-width:550px;
-    color:#b0afaa;
-    font-size:clamp(1rem,1.5vw,1.3rem);
-    line-height:1.7;
+.about-main {
+    min-height: 360px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    transform: rotate(-1deg);
 }
 
-.about-text p + p{
-    margin-top:25px;
+.about-main:hover {
+    transform: rotate(0) translateY(-5px);
 }
 
-/* =========================================================
-   TIMELINE
-========================================================= */
-
-.timeline{
-    width:100%;
-    max-width:1100px;
+.about-main p {
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 700px;
 }
 
-.timeline-item{
-    display:grid;
-    grid-template-columns:100px 1fr auto;
-    gap:40px;
-
-    padding:28px 0;
-
-    border-top:1px solid var(--line);
-
-    opacity:0;
-    transform:translate3d(0,35px,0);
+.alias {
+    font-family: "Space Grotesk";
+    font-size: 3rem;
+    margin-bottom: 20px;
 }
 
-.timeline-item:last-child{
-    border-bottom:1px solid var(--line);
-}
-
-.panel.visible .timeline-item{
-    animation:timelineIn .9s var(--ease) forwards;
-}
-
-.panel.visible .timeline-item:nth-child(2){animation-delay:.1s}
-.panel.visible .timeline-item:nth-child(3){animation-delay:.2s}
-.panel.visible .timeline-item:nth-child(4){animation-delay:.3s}
-
-@keyframes timelineIn{
-    to{
-        opacity:1;
-        transform:translate3d(0,0,0);
-    }
-}
-
-.timeline-year{
-    color:var(--muted);
-    font-size:12px;
-}
-
-.timeline-title{
-    font-size:clamp(1.2rem,2vw,2rem);
-    font-weight:500;
-}
-
-.timeline-desc{
-    color:var(--muted);
-    font-size:11px;
+.alias span {
+    color: var(--purple2);
 }
 
 /* =========================================================
-   WORK
+   EXPERTISE
 ========================================================= */
 
-.work-grid{
-    width:100%;
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:20px;
+.expertise-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 18px;
 }
 
-.work-card{
-    position:relative;
-    min-height:280px;
-
-    padding:35px;
-
-    border:1px solid var(--line);
-
-    overflow:hidden;
-
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-
-    transition:
-        transform .7s var(--ease),
-        border-color .5s var(--ease);
+.expertise {
+    min-height: 280px;
+    transition: transform .25s,border-color .25s;
 }
 
-.work-card::before{
-    content:"";
-    position:absolute;
-    inset:0;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(255,255,255,.08),
-            transparent 45%
-        );
-
-    transform:translate3d(-100%,0,0);
-    transition:transform .8s var(--ease);
+.expertise:nth-child(2) {
+    transform: translateY(35px);
 }
 
-.work-card:hover{
-    transform:translateY(-10px);
-    border-color:rgba(243,241,235,.45);
+.expertise:nth-child(3) {
+    transform: translateY(-20px);
 }
 
-.work-card:hover::before{
-    transform:translate3d(0,0,0);
+.expertise:hover {
+    transform: translateY(-8px) scale(1.015);
+    border-color: rgba(180,0,37,.35);
 }
 
-.work-number{
-    position:relative;
-    color:var(--muted);
-    font-size:10px;
-}
-
-.work-name{
-    position:relative;
-    font-size:clamp(2rem,4vw,5rem);
-    font-weight:700;
-    letter-spacing:-.06em;
-}
-
-.work-type{
-    position:relative;
-    color:var(--muted);
-    font-size:10px;
-    letter-spacing:.1em;
-    text-transform:uppercase;
+.icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(
+        135deg,
+        rgba(180,0,37,.25),
+        rgba(118,28,255,.18)
+    );
+    margin-bottom: 25px;
+    font-weight: 800;
 }
 
 /* =========================================================
-   DIGITAL PRESENCE
+   PROJECTS
 ========================================================= */
 
-.presence{
-    width:100%;
-    max-width:1100px;
+.project-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 20px;
 }
 
-.presence-title{
-    font-size:clamp(3rem,8vw,10rem);
-    font-weight:800;
-    line-height:.8;
-    letter-spacing:-.08em;
-    margin-bottom:70px;
+.project {
+    min-height: 330px;
+    position: relative;
+    overflow: hidden;
+    transition: .3s;
 }
 
-.social-list{
-    border-top:1px solid var(--line);
+.project::before {
+    content: "";
+    position: absolute;
+    width: 280px;
+    height: 280px;
+    right: -130px;
+    bottom: -130px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(118,28,255,.2),
+        transparent 65%
+    );
 }
 
-.social{
-    position:relative;
-
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
-    padding:22px 0;
-
-    border-bottom:1px solid var(--line);
-
-    color:var(--fg);
-    text-decoration:none;
-
-    overflow:hidden;
+.project:hover {
+    transform: translateY(-7px);
 }
 
-.social::before{
-    content:"";
-    position:absolute;
-    inset:0;
-
-    background:var(--fg);
-
-    transform:translate3d(-101%,0,0);
-    transition:transform .65s var(--ease);
+.project-number {
+    color: var(--red2);
+    font-size: .7rem;
+    letter-spacing: .2em;
+    font-weight: 800;
+    margin-bottom: 15px;
 }
 
-.social:hover::before{
-    transform:translate3d(0,0,0);
+.tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 22px;
 }
 
-.social-name,
-.social-arrow{
-    position:relative;
-    z-index:1;
-    transition:
-        color .5s var(--ease),
-        transform .5s var(--ease);
+.tag {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: .7rem;
+    color: #aaa9b5;
 }
 
-.social:hover .social-name,
-.social:hover .social-arrow{
-    color:#000;
+/* =========================================================
+   SOCIALS
+========================================================= */
+
+.socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 35px;
 }
 
-.social:hover .social-arrow{
-    transform:translateX(10px);
+.social {
+    padding: 12px 17px;
+    border-radius: 13px;
+    border: 1px solid var(--border);
+    color: #bbb9c5;
+    background: rgba(255,255,255,.03);
+    transition: .2s;
 }
 
-.social-name{
-    font-size:clamp(1.2rem,2vw,2rem);
-}
-
-.social-handle{
-    position:relative;
-    z-index:1;
-    color:var(--muted);
-    font-size:11px;
-}
-
-.social:hover .social-handle{
-    color:#333;
+.social:hover {
+    color: white;
+    border-color: var(--red);
+    transform: translateY(-3px);
 }
 
 /* =========================================================
    CONTACT
 ========================================================= */
 
-.contact{
-    width:100%;
-    position:relative;
+.contact {
+    width: 100%;
+    text-align: center;
+    padding: 90px 30px;
+    border-radius: 50px;
+    border: 1px solid var(--border);
+
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(118,28,255,.18),
+            transparent 55%
+        ),
+        rgba(255,255,255,.03);
 }
 
-.contact-title{
-    font-size:clamp(4rem,10vw,13rem);
-    font-weight:800;
-    line-height:.78;
-    letter-spacing:-.08em;
+.contact h2 {
+    margin: auto;
 }
 
-.contact-sub{
-    margin-top:45px;
-    color:var(--muted);
-    font-size:12px;
-    letter-spacing:.08em;
-}
-
-.contact-link{
-    display:inline-block;
-    margin-top:25px;
-
-    color:var(--fg);
-    text-decoration:none;
-
-    font-size:clamp(1rem,2vw,1.6rem);
-
-    border-bottom:1px solid var(--fg);
-    padding-bottom:7px;
-
-    transition:
-        transform .5s var(--ease),
-        opacity .5s var(--ease);
-}
-
-.contact-link:hover{
-    transform:translateX(12px);
-    opacity:.6;
-}
-
-.float-orb{
-    position:absolute;
-    width:220px;
-    aspect-ratio:1;
-    border:1px solid rgba(243,241,235,.15);
-    border-radius:50%;
-
-    right:8vw;
-    top:50%;
-
-    animation:
-        contactFloat 4s ease-in-out infinite,
-        contactRotate 12s linear infinite;
-}
-
-@keyframes contactFloat{
-    0%,100%{
-        transform:translateY(-50%);
-    }
-
-    50%{
-        transform:translateY(calc(-50% - 25px));
-    }
-}
-
-@keyframes contactRotate{
-    from{
-        border-radius:50%;
-    }
-
-    50%{
-        border-radius:45%;
-    }
-
-    to{
-        border-radius:50%;
-    }
+.contact p {
+    color: var(--muted);
+    max-width: 600px;
+    margin: 25px auto 0;
 }
 
 /* =========================================================
-   MOBILE
+   FOOTER
 ========================================================= */
 
-@media(max-width:760px){
+footer {
+    border-top: 1px solid var(--border);
+    padding: 30px 0;
+    color: #666672;
+    font-size: .8rem;
+}
 
-    body{
-        overflow:auto;
-        cursor:auto;
-    }
-
-    .cursor,
-    .cursor-ring{
-        display:none;
-    }
-
-    .header{
-        height:70px;
-        padding:0 20px;
-    }
-
-    .nav{
-        display:none;
-    }
-
-    .viewport{
-        position:relative;
-        overflow:visible;
-    }
-
-    .track{
-        width:100%;
-        height:auto;
-        display:block;
-        transform:none !important;
-    }
-
-    .panel{
-        width:100%;
-        height:auto;
-        min-height:100svh;
-
-        display:flex;
-        align-items:center;
-
-        padding:100px 20px 80px;
-
-        overflow:hidden;
-    }
-
-    .panel::after{
-        left:20px;
-        right:20px;
-        bottom:30px;
-    }
-
-    .panel-number{
-        top:85px;
-        left:20px;
-    }
-
-    .panel-label{
-        bottom:42px;
-        right:20px;
-    }
-
-    /* =====================================================
-       CRITICAL MOBILE HERO FIX
-    ===================================================== */
-
-    .hero{
-        padding-left:20px;
-        padding-right:20px;
-
-        overflow:hidden;
-    }
-
-    .hero-inner{
-        width:100%;
-        max-width:100%;
-        min-width:0;
-        overflow:visible;
-    }
-
-    .hero-title{
-        /*
-        Keep all ten letters on ONE line.
-        Width is calculated by the browser.
-        Font size is calculated from viewport width.
-        */
-
-        display:flex;
-        flex-wrap:nowrap;
-
-        width:max-content;
-        max-width:none;
-
-        white-space:nowrap;
-
-        /*
-        8.6vw gives enough room for all characters
-        even on narrow phones.
-        */
-        font-size:8.6vw;
-
-        line-height:.82;
-        letter-spacing:0;
-
-        transform-origin:left center;
-
-        overflow:visible;
-    }
-
-    .hero-title span{
-        display:block;
-
-        flex:0 0 auto;
-
-        width:auto;
-        min-width:0;
-
-        margin:0;
-        padding:0;
-
-        white-space:nowrap;
-        overflow:visible;
-
-        /*
-        No negative width tricks.
-        No inline whitespace.
-        */
-    }
-
-    .hero-sub{
-        margin-top:30px;
-        font-size:9px;
-        gap:12px;
-    }
-
-    .hero-sub-line{
-        width:40px;
-    }
-
-    .ambient{
-        width:100vw;
-        max-width:none;
-
-        right:-55vw;
-        top:58%;
-
-        opacity:.65;
-    }
-
-    /* =====================================================
-       MOBILE IDENTITY
-    ===================================================== */
-
-    .identity-content{
-        width:100%;
-    }
-
-    .big-copy{
-        font-size:clamp(2rem,9vw,4rem);
-        line-height:1.02;
-        letter-spacing:-.045em;
-    }
-
-    /* =====================================================
-       MOBILE ABOUT
-    ===================================================== */
-
-    .about-grid{
-        grid-template-columns:1fr;
-        gap:50px;
-    }
-
-    .about-heading{
-        font-size:clamp(3.5rem,16vw,7rem);
-    }
-
-    .about-text{
-        font-size:1rem;
-        line-height:1.65;
-    }
-
-    /* =====================================================
-       MOBILE TIMELINE
-    ===================================================== */
-
-    .timeline-item{
-        grid-template-columns:65px 1fr;
-        gap:15px;
-    }
-
-    .timeline-desc{
-        grid-column:2;
-        margin-top:-5px;
-    }
-
-    /* =====================================================
-       MOBILE WORK
-    ===================================================== */
-
-    .work-grid{
-        grid-template-columns:1fr;
-        gap:12px;
-    }
-
-    .work-card{
-        min-height:230px;
-        padding:25px;
-    }
-
-    .work-name{
-        font-size:2.4rem;
-    }
-
-    /* =====================================================
-       MOBILE SOCIAL
-    ===================================================== */
-
-    .presence-title{
-        font-size:17vw;
-        margin-bottom:45px;
-    }
-
-    .social{
-        padding:18px 0;
-    }
-
-    .social-name{
-        font-size:1.1rem;
-    }
-
-    .social-handle{
-        display:none;
-    }
-
-    /* =====================================================
-       MOBILE CONTACT
-    ===================================================== */
-
-    .contact-title{
-        font-size:17vw;
-    }
-
-    .float-orb{
-        width:150px;
-        right:-45px;
-        top:65%;
-    }
+.footer-inner {
+    display: flex;
+    justify-content: space-between;
 }
 
 /* =========================================================
-   VERY SMALL PHONES
+   RESPONSIVE
 ========================================================= */
 
-@media(max-width:380px){
+@media(max-width:850px) {
 
-    .hero-title{
-        /*
-        Extra safety for very narrow phones.
-        Still one continuous word.
-        */
-        font-size:8.05vw;
+    .nav-links {
+        display: none;
     }
 
-    .hero{
-        padding-left:15px;
-        padding-right:15px;
+    .nav {
+        width: calc(100% - 24px);
     }
 
-    .panel{
-        padding-left:15px;
-        padding-right:15px;
+    .container {
+        width: calc(100% - 24px);
+    }
+
+    h1 {
+        font-size: clamp(4rem,18vw,7rem);
+    }
+
+    .about-layout,
+    .expertise-grid,
+    .project-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .expertise:nth-child(2),
+    .expertise:nth-child(3) {
+        transform: none;
+    }
+
+    section {
+        padding: 100px 0;
     }
 }
 
-/* =========================================================
-   REDUCED MOTION
-========================================================= */
+@media(max-width:500px) {
 
-@media(prefers-reduced-motion:reduce){
+    .buttons {
+        flex-direction: column;
+    }
 
-    *,
-    *::before,
-    *::after{
-        animation-duration:.001ms !important;
-        animation-iteration-count:1 !important;
-        transition-duration:.001ms !important;
-        scroll-behavior:auto !important;
+    .btn {
+        text-align: center;
+    }
+
+    .footer-inner {
+        flex-direction: column;
+        gap: 10px;
     }
 }
 </style>
 </head>
 
+
 <body>
 
-<!-- =======================================================
-     INTRO
+<!-- ======================================================
+     ANIMATED BACKGROUND
 ======================================================= -->
 
-<div class="intro" id="intro">
+<div id="space">
 
-    <div class="intro-core">
+    <div class="orb one"></div>
+    <div class="orb two"></div>
+    <div class="orb three"></div>
 
-        <div class="intro-circle"></div>
+</div>
 
-        <div class="intro-title">
-            <span>T</span><span>A</span><span>M</span><span>A</span><span>S</span>
-            <span>R</span><span>A</span><span>Z</span><span>I</span><span>M</span>
-        </div>
 
+<!-- ======================================================
+     OPENING
+======================================================= -->
+
+<div id="intro">
+
+    <div class="portal"></div>
+
+    <div class="intro-name">
+        ROBIUL RUMMAN RAZIM
+        <span>TAMASRAZIM</span>
     </div>
 
 </div>
 
-<!-- =======================================================
-     CURSOR
+
+<!-- ======================================================
+     NAV
 ======================================================= -->
 
-<div class="cursor" id="cursor"></div>
-<div class="cursor-ring" id="cursorRing"></div>
+<nav class="nav">
 
-<!-- =======================================================
-     HEADER
-======================================================= -->
+    <a href="#" class="logo">
+        ROBIUL <span>RAZIM</span>
+    </a>
 
-<header class="header">
-
-    <div class="logo">
-        TAMASRAZIM
+    <div class="nav-links">
+        <a href="#about">About</a>
+        <a href="#expertise">Expertise</a>
+        <a href="#projects">Projects</a>
+        <a href="#socials">Socials</a>
     </div>
 
-    <nav class="nav">
+    <a href="#contact" class="nav-button">
+        Contact
+    </a>
 
-        <button data-target="0">Home</button>
-        <button data-target="1">Identity</button>
-        <button data-target="2">About</button>
-        <button data-target="3">Timeline</button>
-        <button data-target="4">Work</button>
-        <button data-target="5">Presence</button>
-        <button data-target="6">Contact</button>
+</nav>
 
-    </nav>
 
-</header>
-
-<!-- =======================================================
-     MAIN
-======================================================= -->
-
-<main class="viewport">
-
-<div class="track" id="track">
-
-<!-- =====================================================
+<!-- ======================================================
      HERO
-===================================================== -->
+======================================================= -->
 
-<section class="panel hero visible" data-index="0">
+<section class="hero">
 
-    <div class="panel-number">00 / 07</div>
+    <div class="curve one"></div>
+    <div class="curve two"></div>
 
-    <div class="hero-inner">
+    <div class="container">
 
-        <!-- NO WHITESPACE BETWEEN THESE SPANS -->
-        <h1 class="hero-title" id="heroTitle"><span>T</span><span>A</span><span>M</span><span>A</span><span>S</span><span>R</span><span>A</span><span>Z</span><span>I</span><span>M</span></h1>
+        <div class="hero-content">
 
-        <div class="hero-sub">
-
-            <span class="hero-sub-line"></span>
-
-            <span>
-                ROBIUL RUMMAN RAZIM
-            </span>
-
-        </div>
-
-    </div>
-
-    <div class="ambient"></div>
-
-    <div class="panel-label">
-        Digital Identity
-    </div>
-
-</section>
-
-<!-- =====================================================
-     IDENTITY
-===================================================== -->
-
-<section class="panel" data-index="1">
-
-    <div class="panel-number">01 / 07</div>
-
-    <div class="identity-content">
-
-        <div class="eyebrow">
-            Identity
-        </div>
-
-        <div class="big-copy">
-
-            <span>ROB</span>
-            <span>IUL</span>
-            <span>RUM</span>
-            <span>MAN</span>
-            <span>RAZ</span>
-            <span>IM.</span>
-
-        </div>
-
-    </div>
-
-    <div class="panel-label">
-        Who I Am
-    </div>
-
-</section>
-
-<!-- =====================================================
-     ABOUT
-===================================================== -->
-
-<section class="panel" data-index="2">
-
-    <div class="panel-number">02 / 07</div>
-
-    <div class="about-grid">
-
-        <div>
-
-            <div class="eyebrow">
-                About
+            <div class="kicker">
+                Digital Identity / Technology / Creator
             </div>
 
-            <h2 class="about-heading">
-                MAKING<br>
-                THINGS<br>
-                MOVE.
+            <h1>
+                ROBIUL<br>
+                <span class="red">RUMMAN</span><br>
+                RAZIM
+            </h1>
+
+            <p class="hero-subtitle">
+
+                I'm <strong>Robiul Rumman Razim</strong>.
+                Online, I'm known as <strong>Tamasrazim</strong>.
+
+                I explore technology, software, computing,
+                digital media and the things that make the
+                internet interesting.
+
+            </p>
+
+            <div class="buttons">
+
+                <a href="#projects" class="btn btn-primary">
+                    Explore my work →
+                </a>
+
+                <a href="#about" class="btn">
+                    About me
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     ABOUT
+======================================================= -->
+
+<section id="about">
+
+    <div class="container">
+
+        <div class="section-label">
+            01 / About
+        </div>
+
+        <h2>
+            More than a username.
+        </h2>
+
+        <p class="description">
+            Tamasrazim is the online identity.
+            Robiul Rumman Razim is the person behind it.
+        </p>
+
+        <div class="about-layout">
+
+            <div class="card about-main">
+
+                <div class="alias">
+                    TAMAS<span>RAZIM</span>
+                </div>
+
+                <p>
+                    I'm interested in understanding technology
+                    from both sides — the software people interact
+                    with and the systems underneath it.
+
+                    This website is my personal space for projects,
+                    experiments, interests and digital work.
+                </p>
+
+            </div>
+
+            <div class="card">
+
+                <div class="section-label">
+                    Identity
+                </div>
+
+                <h3>
+                    Robiul Rumman Razim
+                </h3>
+
+                <br>
+
+                <p>
+                    Also known online as
+                    <strong>Tamasrazim</strong>.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     EXPERTISE
+======================================================= -->
+
+<section id="expertise">
+
+    <div class="container">
+
+        <div class="section-label">
+            02 / Expertise
+        </div>
+
+        <h2>
+            Things I like
+            <span style="color:#b06cff">building.</span>
+        </h2>
+
+        <p class="description">
+            Technology, systems and digital creativity.
+        </p>
+
+        <div class="expertise-grid">
+
+            <div class="card expertise">
+
+                <div class="icon">
+                    &lt;/&gt;
+                </div>
+
+                <h3>
+                    Web Technology
+                </h3>
+
+                <p>
+                    Websites, interfaces, HTML, CSS,
+                    JavaScript, hosting and web experiments.
+                </p>
+
+            </div>
+
+
+            <div class="card expertise">
+
+                <div class="icon">
+                    SYS
+                </div>
+
+                <h3>
+                    Computing
+                </h3>
+
+                <p>
+                    PC hardware, operating systems,
+                    performance, troubleshooting and systems.
+                </p>
+
+            </div>
+
+
+            <div class="card expertise">
+
+                <div class="icon">
+                    FX
+                </div>
+
+                <h3>
+                    Digital Media
+                </h3>
+
+                <p>
+                    Gaming, recording, editing, visual
+                    presentation and digital content.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     PROJECTS
+======================================================= -->
+
+<section id="projects">
+
+    <div class="container">
+
+        <div class="section-label">
+            03 / Projects
+        </div>
+
+        <h2>
+            Stuff I've built
+            <span style="color:#ff174d">and explored.</span>
+        </h2>
+
+        <p class="description">
+            Replace these cards with your actual projects,
+            repositories and experiments.
+        </p>
+
+        <div class="project-grid">
+
+            <div class="card project">
+
+                <div>
+
+                    <div class="project-number">
+                        PROJECT 01
+                    </div>
+
+                    <h3>
+                        Personal Web
+                    </h3>
+
+                    <p>
+                        The official digital home of
+                        Robiul Rumman Razim.
+                    </p>
+
+                    <div class="tags">
+                        <span class="tag">HTML</span>
+                        <span class="tag">CSS</span>
+                        <span class="tag">GitHub Pages</span>
+                    </div>
+
+                </div>
+
+                <a
+                    href="https://tamasrazim.github.io/"
+                    target="_blank"
+                    class="project-link"
+                >
+                    Visit website →
+                </a>
+
+            </div>
+
+
+            <div class="card project">
+
+                <div>
+
+                    <div class="project-number">
+                        PROJECT 02
+                    </div>
+
+                    <h3>
+                        Technical Experiments
+                    </h3>
+
+                    <p>
+                        Software, systems, scripts and
+                        technology experiments.
+                    </p>
+
+                    <div class="tags">
+                        <span class="tag">Code</span>
+                        <span class="tag">Systems</span>
+                        <span class="tag">Research</span>
+                    </div>
+
+                </div>
+
+                <a
+                    href="https://github.com/"
+                    target="_blank"
+                    class="project-link"
+                >
+                    GitHub →
+                </a>
+
+            </div>
+
+
+            <div class="card project">
+
+                <div>
+
+                    <div class="project-number">
+                        PROJECT 03
+                    </div>
+
+                    <h3>
+                        Gaming & Media
+                    </h3>
+
+                    <p>
+                        Gameplay capture, editing and
+                        technical content creation.
+                    </p>
+
+                    <div class="tags">
+                        <span class="tag">Gaming</span>
+                        <span class="tag">OBS</span>
+                        <span class="tag">Video</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="card project">
+
+                <div>
+
+                    <div class="project-number">
+                        PROJECT 04
+                    </div>
+
+                    <h3>
+                        Coming Soon
+                    </h3>
+
+                    <p>
+                        More projects and experiments
+                        will appear here.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     SOCIALS
+======================================================= -->
+
+<section id="socials">
+
+    <div class="container">
+
+        <div class="section-label">
+            04 / Connect
+        </div>
+
+        <h2>
+            Find me
+            <span style="color:#761cff">online.</span>
+        </h2>
+
+        <p class="description">
+            My online presence across social and gaming platforms.
+        </p>
+
+        <div class="socials">
+
+            <a
+                class="social"
+                href="https://www.linkedin.com/in/Tamasrazim"
+                target="_blank"
+            >
+                LinkedIn
+            </a>
+
+            <a
+                class="social"
+                href="https://www.facebook.com/Tamasrazim"
+                target="_blank"
+            >
+                Facebook
+            </a>
+
+            <a
+                class="social"
+                href="https://www.facebook.com/Tamasrazim2"
+                target="_blank"
+            >
+                Facebook 2
+            </a>
+
+            <a
+                class="social"
+                href="https://www.tiktok.com/@Tamasrazim"
+                target="_blank"
+            >
+                TikTok
+            </a>
+
+            <a
+                class="social"
+                href="https://www.instagram.com/Tamasrazim"
+                target="_blank"
+            >
+                Instagram
+            </a>
+
+            <a
+                class="social"
+                href="https://steamcommunity.com/"
+                target="_blank"
+            >
+                Steam
+            </a>
+
+            <a
+                class="social"
+                href="https://discord.com/"
+                target="_blank"
+            >
+                Discord
+            </a>
+
+            <a
+                class="social"
+                href="https://store.epicgames.com/"
+                target="_blank"
+            >
+                Epic Games
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     CONTACT
+======================================================= -->
+
+<section id="contact">
+
+    <div class="container">
+
+        <div class="contact">
+
+            <div class="section-label">
+                Contact
+            </div>
+
+            <h2>
+                Let's connect.
             </h2>
 
-        </div>
-
-        <div class="about-text">
-
             <p>
-                I’m Robiul Rumman Razim,
-                also known online as Tamasrazim.
+                For professional inquiries, projects,
+                collaboration or anything worth discussing.
             </p>
 
-            <p>
-                I work around technology,
-                digital projects, gaming,
-                visual experiments and
-                the constantly changing
-                world of the internet.
-            </p>
+            <div class="buttons" style="justify-content:center">
 
-            <p>
-                This website is not a traditional
-                portfolio. It is my digital identity.
-            </p>
+                <a
+                    class="btn btn-primary"
+                    href="mailto:tasnimaktertamanna2@gmail.com"
+                >
+                    Email me →
+                </a>
+
+            </div>
 
         </div>
 
-    </div>
-
-    <div class="panel-label">
-        Profile
     </div>
 
 </section>
 
-<!-- =====================================================
-     TIMELINE
-===================================================== -->
 
-<section class="panel" data-index="3">
+<!-- ======================================================
+     FOOTER
+======================================================= -->
 
-    <div class="panel-number">03 / 07</div>
+<footer>
 
-    <div class="timeline">
+    <div class="container footer-inner">
 
-        <div class="eyebrow">
-            Timeline
-        </div>
+        <span>
+            © 2026 Robiul Rumman Razim
+        </span>
 
-        <div class="timeline-item">
-
-            <div class="timeline-year">
-                01
-            </div>
-
-            <div class="timeline-title">
-                Technology
-            </div>
-
-            <div class="timeline-desc">
-                Digital / IT
-            </div>
-
-        </div>
-
-        <div class="timeline-item">
-
-            <div class="timeline-year">
-                02
-            </div>
-
-            <div class="timeline-title">
-                Gaming
-            </div>
-
-            <div class="timeline-desc">
-                Games / Systems
-            </div>
-
-        </div>
-
-        <div class="timeline-item">
-
-            <div class="timeline-year">
-                03
-            </div>
-
-            <div class="timeline-title">
-                Creative
-            </div>
-
-            <div class="timeline-desc">
-                Visual / Motion
-            </div>
-
-        </div>
-
-        <div class="timeline-item">
-
-            <div class="timeline-year">
-                04
-            </div>
-
-            <div class="timeline-title">
-                Digital Presence
-            </div>
-
-            <div class="timeline-desc">
-                Web / Social
-            </div>
-
-        </div>
+        <span>
+            TAMASRAZIM
+        </span>
 
     </div>
 
-    <div class="panel-label">
-        Evolution
-    </div>
+</footer>
 
-</section>
 
-<!-- =====================================================
-     WORK
-===================================================== -->
-
-<section class="panel" data-index="4">
-
-    <div class="panel-number">04 / 07</div>
-
-    <div class="work-grid">
-
-        <article class="work-card">
-
-            <div class="work-number">
-                001
-            </div>
-
-            <div class="work-name">
-                DIGITAL
-            </div>
-
-            <div class="work-type">
-                Web / Identity
-            </div>
-
-        </article>
-
-        <article class="work-card">
-
-            <div class="work-number">
-                002
-            </div>
-
-            <div class="work-name">
-                SYSTEMS
-            </div>
-
-            <div class="work-type">
-                Technology
-            </div>
-
-        </article>
-
-        <article class="work-card">
-
-            <div class="work-number">
-                003
-            </div>
-
-            <div class="work-name">
-                VISUAL
-            </div>
-
-            <div class="work-type">
-                Motion / Media
-            </div>
-
-        </article>
-
-        <article class="work-card">
-
-            <div class="work-number">
-                004
-            </div>
-
-            <div class="work-name">
-                FUTURE
-            </div>
-
-            <div class="work-type">
-                Experiments
-            </div>
-
-        </article>
-
-    </div>
-
-    <div class="panel-label">
-        Selected Work
-    </div>
-
-</section>
-
-<!-- =====================================================
-     DIGITAL PRESENCE
-===================================================== -->
-
-<section class="panel" data-index="5">
-
-    <div class="panel-number">05 / 07</div>
-
-    <div class="presence">
-
-        <div class="eyebrow">
-            Digital Presence
-        </div>
-
-        <h2 class="presence-title">
-            FIND<br>
-            ME.
-        </h2>
-
-        <div class="social-list">
-
-            <a
-                class="social"
-                href="https://linkedin.com/in/Tamasrazim"
-                target="_blank"
-                rel="noopener"
-            >
-
-                <span class="social-name">
-                    LinkedIn
-                </span>
-
-                <span class="social-handle">
-                    /Tamasrazim
-                </span>
-
-                <span class="social-arrow">
-                    ↗
-                </span>
-
-            </a>
-
-            <a
-                class="social"
-                href="https://facebook.com/Tamasrazim"
-                target="_blank"
-                rel="noopener"
-            >
-
-                <span class="social-name">
-                    Facebook
-                </span>
-
-                <span class="social-handle">
-                    /Tamasrazim
-                </span>
-
-                <span class="social-arrow">
-                    ↗
-                </span>
-
-            </a>
-
-            <a
-                class="social"
-                href="https://tiktok.com/@Tamasrazim"
-                target="_blank"
-                rel="noopener"
-            >
-
-                <span class="social-name">
-                    TikTok
-                </span>
-
-                <span class="social-handle">
-                    @Tamasrazim
-                </span>
-
-                <span class="social-arrow">
-                    ↗
-                </span>
-
-            </a>
-
-            <a
-                class="social"
-                href="https://instagram.com/Tamasrazim"
-                target="_blank"
-                rel="noopener"
-            >
-
-                <span class="social-name">
-                    Instagram
-                </span>
-
-                <span class="social-handle">
-                    @Tamasrazim
-                </span>
-
-                <span class="social-arrow">
-                    ↗
-                </span>
-
-            </a>
-
-        </div>
-
-    </div>
-
-    <div class="panel-label">
-        Online
-    </div>
-
-</section>
-
-<!-- =====================================================
-     CONTACT
-===================================================== -->
-
-<section class="panel" data-index="6">
-
-    <div class="panel-number">06 / 07</div>
-
-    <div class="contact">
-
-        <h2 class="contact-title">
-            LET'S<br>
-            TALK.
-        </h2>
-
-        <div class="contact-sub">
-            HAVE SOMETHING INTERESTING?
-        </div>
-
-        <a
-            class="contact-link"
-            href="mailto:hello@tamasrazim.com"
-        >
-            hello@tamasrazim.com ↗
-        </a>
-
-        <div class="float-orb"></div>
-
-    </div>
-
-    <div class="panel-label">
-        Contact
-    </div>
-
-</section>
-
-</div>
-</main>
+<!-- ======================================================
+     360° CURSOR ENGINE
+======================================================= -->
 
 <script>
-/* =========================================================
-   TAMASRAZIM — MOTION ENGINE
-========================================================= */
 
-const intro = document.getElementById("intro");
-const track = document.getElementById("track");
-const panels = [...document.querySelectorAll(".panel")];
+const space = document.getElementById("space");
 
-const cursor = document.getElementById("cursor");
-const cursorRing = document.getElementById("cursorRing");
+const orbs = document.querySelectorAll(".orb");
 
-let current = 0;
-let target = 0;
+let mouseX = 0;
+let mouseY = 0;
 
-let currentX = 0;
 let targetX = 0;
+let targetY = 0;
 
-let dragging = false;
-let dragStartX = 0;
-let dragStartTarget = 0;
+document.addEventListener("mousemove", e => {
 
-let wheelLocked = false;
+    mouseX =
+        (e.clientX / window.innerWidth - .5);
 
-/* =========================================================
-   INTRO EXIT
-========================================================= */
+    mouseY =
+        (e.clientY / window.innerHeight - .5);
 
-setTimeout(() => {
-
-    intro.classList.add("exit");
-
-    setTimeout(() => {
-        intro.style.pointerEvents = "none";
-    }, 1300);
-
-}, 2300);
-
-/* =========================================================
-   DESKTOP HORIZONTAL POSITION
-========================================================= */
-
-function isMobile(){
-
-    return window.innerWidth <= 760;
-
-}
-
-function maxX(){
-
-    return Math.max(
-        0,
-        (panels.length - 1) * window.innerWidth
+    space.style.setProperty(
+        "--mx",
+        `${e.clientX}px`
     );
 
-}
-
-function clamp(value,min,max){
-
-    return Math.max(min,Math.min(max,value));
-
-}
-
-function goTo(index){
-
-    if(isMobile()){
-
-        panels[index]?.scrollIntoView({
-            behavior:"smooth",
-            block:"start"
-        });
-
-        current = index;
-        return;
-
-    }
-
-    current = clamp(index,0,panels.length - 1);
-
-    targetX = -current * window.innerWidth;
-
-}
-
-function updateTrack(){
-
-    if(isMobile()) return;
-
-    currentX += (targetX - currentX) * .075;
-
-    track.style.transform =
-        `translate3d(${currentX}px,0,0)`;
-
-    requestAnimationFrame(updateTrack);
-
-}
-
-updateTrack();
-
-/* =========================================================
-   WHEEL
-========================================================= */
-
-window.addEventListener("wheel",(event)=>{
-
-    if(isMobile()) return;
-
-    event.preventDefault();
-
-    if(wheelLocked) return;
-
-    wheelLocked = true;
-
-    const direction =
-        event.deltaY > 0 || event.deltaX > 0
-        ? 1
-        : -1;
-
-    goTo(current + direction);
-
-    setTimeout(()=>{
-        wheelLocked = false;
-    },420);
-
-},{passive:false});
-
-/* =========================================================
-   KEYBOARD
-========================================================= */
-
-window.addEventListener("keydown",(event)=>{
-
-    if(isMobile()) return;
-
-    if(
-        event.key === "ArrowRight" ||
-        event.key === "ArrowDown"
-    ){
-
-        goTo(current + 1);
-
-    }
-
-    if(
-        event.key === "ArrowLeft" ||
-        event.key === "ArrowUp"
-    ){
-
-        goTo(current - 1);
-
-    }
+    space.style.setProperty(
+        "--my",
+        `${e.clientY}px`
+    );
 
 });
 
-/* =========================================================
-   NAV
-========================================================= */
 
-document.querySelectorAll(".nav button").forEach(button => {
+function animate() {
 
-    button.addEventListener("click",()=>{
+    targetX +=
+        (mouseX - targetX) * .045;
 
-        goTo(
-            Number(button.dataset.target)
-        );
+    targetY +=
+        (mouseY - targetY) * .045;
 
-    });
+    orbs.forEach((orb,index) => {
 
-});
-
-/* =========================================================
-   DRAG
-========================================================= */
-
-window.addEventListener("pointerdown",(event)=>{
-
-    if(isMobile()) return;
-
-    if(
-        event.target.closest("button") ||
-        event.target.closest("a")
-    ) return;
-
-    dragging = true;
-
-    dragStartX = event.clientX;
-    dragStartTarget = targetX;
-
-});
-
-window.addEventListener("pointermove",(event)=>{
-
-    if(!dragging || isMobile()) return;
-
-    const distance =
-        event.clientX - dragStartX;
-
-    targetX =
-        clamp(
-            dragStartTarget + distance,
-            -maxX(),
-            0
-        );
-
-});
-
-window.addEventListener("pointerup",()=>{
-
-    if(!dragging) return;
-
-    dragging = false;
-
-    const nearest =
-        Math.round(
-            Math.abs(targetX) / window.innerWidth
-        );
-
-    goTo(nearest);
-
-});
-
-/* =========================================================
-   TOUCH SWIPE
-========================================================= */
-
-let touchStart = 0;
-
-window.addEventListener("touchstart",(event)=>{
-
-    if(!isMobile()) return;
-
-    touchStart =
-        event.touches[0].clientX;
-
-},{passive:true});
-
-window.addEventListener("touchend",(event)=>{
-
-    if(!isMobile()) return;
-
-    const end =
-        event.changedTouches[0].clientX;
-
-    const diff =
-        end - touchStart;
-
-    if(Math.abs(diff) > 60){
-
-        const direction =
-            diff < 0 ? 1 : -1;
-
-        const next =
-            clamp(current + direction,0,panels.length - 1);
-
-        current = next;
-
-        panels[next].scrollIntoView({
-            behavior:"smooth"
-        });
-
-    }
-
-},{passive:true});
-
-/* =========================================================
-   CURSOR ENGINE
-========================================================= */
-
-let mouseX = window.innerWidth / 2;
-let mouseY = window.innerHeight / 2;
-
-let cursorX = mouseX;
-let cursorY = mouseY;
-
-window.addEventListener("mousemove",(event)=>{
-
-    mouseX = event.clientX;
-    mouseY = event.clientY;
-
-});
-
-function cursorLoop(){
-
-    cursorX += (mouseX - cursorX) * .2;
-    cursorY += (mouseY - cursorY) * .2;
-
-    cursor.style.transform =
-        `translate3d(${mouseX}px,${mouseY}px,0) translate(-50%,-50%)`;
-
-    cursorRing.style.transform =
-        `translate3d(${cursorX}px,${cursorY}px,0) translate(-50%,-50%)`;
-
-    requestAnimationFrame(cursorLoop);
-
-}
-
-cursorLoop();
-
-/* =========================================================
-   CURSOR INTERACTION
-========================================================= */
-
-document.querySelectorAll("a,button,.work-card").forEach(el=>{
-
-    el.addEventListener("mouseenter",()=>{
-
-        cursorRing.classList.add("active");
-
-    });
-
-    el.addEventListener("mouseleave",()=>{
-
-        cursorRing.classList.remove("active");
-
-    });
-
-});
-
-/* =========================================================
-   MAGNETIC ELEMENTS
-========================================================= */
-
-document.querySelectorAll(".social,.contact-link,.nav button").forEach(el=>{
-
-    el.addEventListener("mousemove",(event)=>{
-
-        if(isMobile()) return;
-
-        const rect =
-            el.getBoundingClientRect();
+        const strength =
+            (index + 1) * 35;
 
         const x =
-            event.clientX -
-            (rect.left + rect.width / 2);
+            targetX * strength;
 
         const y =
-            event.clientY -
-            (rect.top + rect.height / 2);
+            targetY * strength;
 
-        el.style.transform =
-            `translate3d(${x * .08}px,${y * .08}px,0)`;
+        orb.style.transform =
+            `translate3d(${x}px,${y}px,0)`;
 
     });
 
-    el.addEventListener("mouseleave",()=>{
+    requestAnimationFrame(animate);
 
-        el.style.transform = "";
+}
+
+animate();
+
+
+/* 3D CARD MOVEMENT */
+
+document.querySelectorAll(".card").forEach(card => {
+
+    card.addEventListener("mousemove", e => {
+
+        const rect =
+            card.getBoundingClientRect();
+
+        const x =
+            e.clientX - rect.left;
+
+        const y =
+            e.clientY - rect.top;
+
+        const rotateX =
+            ((y / rect.height) - .5) * -4;
+
+        const rotateY =
+            ((x / rect.width) - .5) * 4;
+
+        card.style.transform =
+            `perspective(900px)
+             rotateX(${rotateX}deg)
+             rotateY(${rotateY}deg)
+             translateY(-3px)`;
+
+    });
+
+    card.addEventListener("mouseleave", () => {
+
+        card.style.transform = "";
 
     });
 
 });
-
-/* =========================================================
-   PANEL VISIBILITY
-========================================================= */
-
-function updateVisiblePanel(){
-
-    if(isMobile()){
-
-        const center =
-            window.scrollY +
-            window.innerHeight / 2;
-
-        panels.forEach(panel => {
-
-            const top = panel.offsetTop;
-            const bottom = top + panel.offsetHeight;
-
-            if(center >= top && center <= bottom){
-
-                panel.classList.add("visible");
-
-                current =
-                    Number(panel.dataset.index);
-
-            }
-
-        });
-
-        return;
-
-    }
-
-    panels.forEach((panel,index)=>{
-
-        const distance =
-            Math.abs(
-                currentX +
-                index * window.innerWidth
-            );
-
-        if(distance < window.innerWidth * .55){
-
-            panel.classList.add("visible");
-
-        }
-
-    });
-
-}
-
-window.addEventListener(
-    "scroll",
-    updateVisiblePanel,
-    {passive:true}
-);
-
-setInterval(updateVisiblePanel,100);
-
-/* =========================================================
-   RESIZE
-========================================================= */
-
-window.addEventListener("resize",()=>{
-
-    if(isMobile()){
-
-        track.style.transform = "none";
-
-    }else{
-
-        targetX =
-            -current * window.innerWidth;
-
-    }
-
-});
-
-/* =========================================================
-   MOBILE HERO FINAL SAFETY
-========================================================= */
-
-/*
-This makes absolutely sure the mobile title
-fits inside the available width.
-
-The title remains a single flex row.
-Nothing is removed.
-Nothing is split.
-*/
-
-function fitMobileHero(){
-
-    if(!isMobile()) return;
-
-    const title =
-        document.getElementById("heroTitle");
-
-    if(!title) return;
-
-    const available =
-        window.innerWidth - 40;
-
-    const natural =
-        title.scrollWidth;
-
-    if(natural > available){
-
-        const scale =
-            available / natural;
-
-        title.style.transform =
-            `scaleX(${scale})`;
-
-    }else{
-
-        title.style.transform = "";
-
-    }
-
-}
-
-window.addEventListener(
-    "resize",
-    fitMobileHero
-);
-
-window.addEventListener(
-    "load",
-    fitMobileHero
-);
-
-setTimeout(
-    fitMobileHero,
-    100
-);
 
 </script>
 
