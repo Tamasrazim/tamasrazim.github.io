@@ -1,0 +1,4583 @@
+<!-- =========================================  
+     TAMASRAZIM — DRONE VIEW INTRO  
+     ========================================= -->  <div id="drone-intro" aria-hidden="true">  
+  <div class="drone-vignette"></div>    <div class="drone-camera">  
+    <div class="drone-world">  <!-- giant floor/grid -->  
+  <div class="drone-grid"></div>  
+
+  <!-- central word -->  
+  <div class="drone-word-wrap">  
+    <div class="drone-word-shadow">TAMASRAZIM</div>  
+
+    <div class="drone-word" data-text="TAMASRAZIM">  
+      TAMASRAZIM  
+    </div>  
+
+    <div class="drone-word-line"></div>  
+  </div>  
+
+  <!-- tiny technical markings -->  
+  <div class="drone-mark mark-1">25°10'05"N</div>  
+  <div class="drone-mark mark-2">90°24'00"E</div>  
+  <div class="drone-mark mark-3">TAMASRAZIM / 001</div>  
+  <div class="drone-mark mark-4">SYSTEM ONLINE</div>  
+
+  <div class="drone-crosshair">  
+    <span></span>  
+    <span></span>  
+    <span></span>  
+    <span></span>  
+  </div>  
+
+</div>
+
+  </div>    <div class="drone-status">  
+    <span>INITIALIZING</span>  
+    <b></b>  
+  </div>    <div class="drone-scroll">  
+    <span>ENTER</span>  
+  </div>  
+</div>  <style>  
+/* =========================================  
+   DRONE INTRO  
+   ========================================= */  
+  
+#drone-intro {  
+  position: fixed;  
+  inset: 0;  
+  z-index: 99999;  
+  overflow: hidden;  
+  background: #000;  
+  color: #fff;  
+  perspective: 1600px;  
+  pointer-events: none;  
+  isolation: isolate;  
+}  
+  
+/* subtle film texture */  
+#drone-intro::before {  
+  content: "";  
+  position: absolute;  
+  inset: -50%;  
+  z-index: 20;  
+  pointer-events: none;  
+  
+  background-image:  
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.32'/%3E%3C/svg%3E");  
+  
+  opacity: .055;  
+  animation: droneNoise .18s steps(2) infinite;  
+}  
+  
+.drone-vignette {  
+  position: absolute;  
+  inset: 0;  
+  z-index: 15;  
+  pointer-events: none;  
+  
+  background:  
+    radial-gradient(  
+      ellipse at center,  
+      transparent 30%,  
+      rgba(0,0,0,.25) 60%,  
+      rgba(0,0,0,.95) 100%  
+    );  
+}  
+  
+/* =========================================  
+   CAMERA  
+   ========================================= */  
+  
+.drone-camera {  
+  position: absolute;  
+  inset: -20%;  
+  display: grid;  
+  place-items: center;  
+  
+  transform:  
+    translate3d(0, 8vh, 0)  
+    rotateX(58deg)  
+    scale(1.25);  
+  
+  transform-origin: center center;  
+  
+  animation:  
+    droneApproach 6.8s cubic-bezier(.16,.84,.18,1) forwards;  
+}  
+  
+/* =========================================  
+   WORLD  
+   ========================================= */  
+  
+.drone-world {  
+  position: relative;  
+  width: 100vw;  
+  height: 100vh;  
+  
+  display: grid;  
+  place-items: center;  
+  
+  transform-style: preserve-3d;  
+}  
+  
+/* =========================================  
+   FLOOR GRID  
+   ========================================= */  
+  
+.drone-grid {  
+  position: absolute;  
+  width: 180vw;  
+  height: 180vh;  
+  
+  transform:  
+    translateZ(-180px)  
+    scale(1.5);  
+  
+  opacity: .32;  
+  
+  background-image:  
+    linear-gradient(  
+      rgba(255,255,255,.12) 1px,  
+      transparent 1px  
+    ),  
+    linear-gradient(  
+      90deg,  
+      rgba(255,255,255,.12) 1px,  
+      transparent 1px  
+    );  
+  
+  background-size:  
+    80px 80px,  
+    80px 80px;  
+  
+  mask-image:  
+    radial-gradient(  
+      ellipse at center,  
+      #000 0%,  
+      transparent 68%  
+    );  
+  
+  animation:  
+    droneGridMove 8s linear infinite;  
+}  
+  
+/* secondary fine grid */  
+.drone-grid::after {  
+  content: "";  
+  position: absolute;  
+  inset: 0;  
+  
+  background-image:  
+    linear-gradient(  
+      rgba(255,255,255,.035) 1px,  
+      transparent 1px  
+    ),  
+    linear-gradient(  
+      90deg,  
+      rgba(255,255,255,.035) 1px,  
+      transparent 1px  
+    );  
+  
+  background-size:  
+    20px 20px,  
+    20px 20px;  
+}  
+  
+/* =========================================  
+   WORD  
+   ========================================= */  
+  
+.drone-word-wrap {  
+  position: relative;  
+  
+  transform:  
+    translateZ(120px)  
+    rotateX(-2deg);  
+  
+  transform-style: preserve-3d;  
+  
+  animation:  
+    droneWordFloat 3.5s ease-in-out infinite;  
+}  
+  
+/* shadow / physical depth */  
+.drone-word-shadow {  
+  position: absolute;  
+  left: 0;  
+  top: 24px;  
+  
+  font-family:  
+    Arial Black,  
+    Helvetica Neue,  
+    Arial,  
+    sans-serif;  
+  
+  font-size: clamp(4rem, 13vw, 15rem);  
+  font-weight: 900;  
+  letter-spacing: -.075em;  
+  line-height: .8;  
+  
+  color: transparent;  
+  
+  -webkit-text-stroke: 1px rgba(255,255,255,.12);  
+  
+  transform:  
+    translateZ(-45px)  
+    scaleY(.96);  
+  
+  filter: blur(1px);  
+}  
+  
+/* actual word */  
+.drone-word {  
+  position: relative;  
+  
+  font-family:  
+    Arial Black,  
+    Helvetica Neue,  
+    Arial,  
+    sans-serif;  
+  
+  font-size: clamp(4rem, 13vw, 15rem);  
+  font-weight: 900;  
+  letter-spacing: -.075em;  
+  line-height: .8;  
+  
+  color: #fff;  
+  
+  white-space: nowrap;  
+  
+  transform-style: preserve-3d;  
+  
+  text-shadow:  
+    0 1px 0 #ddd,  
+    0 2px 0 #bbb,  
+    0 3px 0 #999,  
+    0 4px 0 #777,  
+    0 5px 0 #555,  
+    0 18px 40px rgba(0,0,0,.8);  
+  
+  animation:  
+    droneWordReveal 2.5s cubic-bezier(.16,1,.3,1) forwards;  
+}  
+  
+/* outline ghost */  
+.drone-word::after {  
+  content: attr(data-text);  
+  
+  position: absolute;  
+  inset: 0;  
+  
+  color: transparent;  
+  
+  -webkit-text-stroke: 1px rgba(255,255,255,.5);  
+  
+  transform:  
+    translateZ(18px)  
+    translateX(5px)  
+    translateY(-4px);  
+  
+  opacity: .25;  
+  
+  animation: droneGhost 2s ease forwards;  
+}  
+  
+/* line beneath word */  
+.drone-word-line {  
+  position: absolute;  
+  
+  width: 100%;  
+  height: 1px;  
+  
+  left: 0;  
+  bottom: -34px;  
+  
+  background: #fff;  
+  
+  transform-origin: left;  
+  
+  animation:  
+    droneLine 2.5s cubic-bezier(.16,1,.3,1) forwards;  
+}  
+  
+/* =========================================  
+   TECHNICAL MARKINGS  
+   ========================================= */  
+  
+.drone-mark {  
+  position: absolute;  
+  
+  font-family:  
+    "Courier New",  
+    monospace;  
+  
+  font-size: 9px;  
+  letter-spacing: .18em;  
+  
+  color: rgba(255,255,255,.5);  
+  
+  white-space: nowrap;  
+  
+  opacity: 0;  
+  
+  animation:  
+    droneMarks 1s ease forwards;  
+}  
+  
+.mark-1 {  
+  top: 31%;  
+  left: 8%;  
+  animation-delay: 1.2s;  
+}  
+  
+.mark-2 {  
+  bottom: 29%;  
+  right: 8%;  
+  animation-delay: 1.5s;  
+}  
+  
+.mark-3 {  
+  top: 14%;  
+  right: 10%;  
+  animation-delay: 1.8s;  
+}  
+  
+.mark-4 {  
+  bottom: 13%;  
+  left: 10%;  
+  animation-delay: 2s;  
+}  
+  
+/* =========================================  
+   CROSSHAIR  
+   ========================================= */  
+  
+.drone-crosshair {  
+  position: absolute;  
+  
+  width: 70px;  
+  height: 70px;  
+  
+  left: 50%;  
+  top: 50%;  
+  
+  transform:  
+    translate(-50%, -50%)  
+    translateZ(160px);  
+  
+  opacity: 0;  
+  
+  animation:  
+    droneCrosshair 1.5s ease forwards;  
+  
+  animation-delay: .8s;  
+}  
+  
+.drone-crosshair span {  
+  position: absolute;  
+  display: block;  
+  
+  background: rgba(255,255,255,.55);  
+}  
+  
+.drone-crosshair span:nth-child(1) {  
+  width: 1px;  
+  height: 18px;  
+  left: 50%;  
+  top: 0;  
+}  
+  
+.drone-crosshair span:nth-child(2) {  
+  width: 1px;  
+  height: 18px;  
+  left: 50%;  
+  bottom: 0;  
+}  
+  
+.drone-crosshair span:nth-child(3) {  
+  width: 18px;  
+  height: 1px;  
+  left: 0;  
+  top: 50%;  
+}  
+  
+.drone-crosshair span:nth-child(4) {  
+  width: 18px;  
+  height: 1px;  
+  right: 0;  
+  top: 50%;  
+}  
+  
+/* =========================================  
+   STATUS  
+   ========================================= */  
+  
+.drone-status {  
+  position: absolute;  
+  
+  left: 30px;  
+  bottom: 30px;  
+  
+  z-index: 30;  
+  
+  display: flex;  
+  align-items: center;  
+  gap: 12px;  
+  
+  font-family:  
+    "Courier New",  
+    monospace;  
+  
+  font-size: 9px;  
+  letter-spacing: .2em;  
+  
+  color: rgba(255,255,255,.55);  
+}  
+  
+.drone-status b {  
+  width: 35px;  
+  height: 1px;  
+  
+  background: #fff;  
+  
+  transform-origin: left;  
+  
+  animation:  
+    droneStatus 1.8s ease infinite;  
+}  
+  
+/* =========================================  
+   ENTER  
+   ========================================= */  
+  
+.drone-scroll {  
+  position: absolute;  
+  
+  right: 30px;  
+  bottom: 30px;  
+  
+  z-index: 30;  
+  
+  font-family:  
+    "Courier New",  
+    monospace;  
+  
+  font-size: 9px;  
+  letter-spacing: .25em;  
+  
+  color: rgba(255,255,255,.5);  
+  
+  opacity: 0;  
+  
+  animation:  
+    droneEnter 1s ease forwards;  
+  
+  animation-delay: 3s;  
+}  
+  
+.drone-scroll::before {  
+  content: "";  
+  
+  display: inline-block;  
+  
+  width: 28px;  
+  height: 1px;  
+  
+  margin-right: 10px;  
+  
+  vertical-align: middle;  
+  
+  background: rgba(255,255,255,.5);  
+}  
+  
+/* =========================================  
+   ANIMATIONS  
+   ========================================= */  
+  
+@keyframes droneApproach {  
+  
+  0% {  
+    transform:  
+      translate3d(0, 16vh, -700px)  
+      rotateX(72deg)  
+      scale(2.2);  
+  }  
+  
+  30% {  
+    transform:  
+      translate3d(0, 10vh, -400px)  
+      rotateX(66deg)  
+      scale(1.8);  
+  }  
+  
+  65% {  
+    transform:  
+      translate3d(0, 5vh, -100px)  
+      rotateX(60deg)  
+      scale(1.4);  
+  }  
+  
+  100% {  
+    transform:  
+      translate3d(0, 0, 0)  
+      rotateX(58deg)  
+      scale(1.25);  
+  }  
+}  
+  
+@keyframes droneWordReveal {  
+  
+  0% {  
+    opacity: 0;  
+    transform:  
+      translateZ(500px)  
+      scale(1.8)  
+      translateY(80px);  
+    filter: blur(25px);  
+  }  
+  
+  45% {  
+    opacity: .2;  
+  }  
+  
+  100% {  
+    opacity: 1;  
+    transform:  
+      translateZ(120px)  
+      scale(1)  
+      translateY(0);  
+    filter: blur(0);  
+  }  
+}  
+  
+@keyframes droneWordFloat {  
+  
+  0%, 100% {  
+    transform:  
+      translateZ(120px)  
+      translateY(0);  
+  }  
+  
+  50% {  
+    transform:  
+      translateZ(145px)  
+      translateY(-7px);  
+  }  
+}  
+  
+@keyframes droneGhost {  
+  
+  0% {  
+    opacity: 0;  
+    transform:  
+      translateZ(80px)  
+      translateX(30px);  
+  }  
+  
+  100% {  
+    opacity: .25;  
+    transform:  
+      translateZ(18px)  
+      translateX(5px)  
+      translateY(-4px);  
+  }  
+}  
+  
+@keyframes droneLine {  
+  
+  0% {  
+    transform: scaleX(0);  
+    opacity: 0;  
+  }  
+  
+  100% {  
+    transform: scaleX(1);  
+    opacity: .7;  
+  }  
+}  
+  
+@keyframes droneGridMove {  
+  
+  from {  
+    background-position:  
+      0 0,  
+      0 0;  
+  }  
+  
+  to {  
+    background-position:  
+      0 80px,  
+      80px 0;  
+  }  
+}  
+  
+@keyframes droneMarks {  
+  
+  from {  
+    opacity: 0;  
+    transform: translateY(10px);  
+  }  
+  
+  to {  
+    opacity: 1;  
+    transform: translateY(0);  
+  }  
+}  
+  
+@keyframes droneCrosshair {  
+  
+  from {  
+    opacity: 0;  
+    transform:  
+      translate(-50%, -50%)  
+      translateZ(160px)  
+      scale(1.8);  
+  }  
+  
+  to {  
+    opacity: 1;  
+    transform:  
+      translate(-50%, -50%)  
+      translateZ(160px)  
+      scale(1);  
+  }  
+}  
+  
+@keyframes droneStatus {  
+  
+  0%,100% {  
+    transform: scaleX(.35);  
+  }  
+  
+  50% {  
+    transform: scaleX(1);  
+  }  
+}  
+  
+@keyframes droneEnter {  
+  
+  from {  
+    opacity: 0;  
+    transform: translateX(15px);  
+  }  
+  
+  to {  
+    opacity: 1;  
+    transform: translateX(0);  
+  }  
+}  
+  
+@keyframes droneNoise {  
+  
+  0% {  
+    transform: translate(0,0);  
+  }  
+  
+  25% {  
+    transform: translate(2%,-1%);  
+  }  
+  
+  50% {  
+    transform: translate(-1%,2%);  
+  }  
+  
+  75% {  
+    transform: translate(1%,1%);  
+  }  
+  
+  100% {  
+    transform: translate(0,0);  
+  }  
+}  
+  
+/* =========================================  
+   EXIT TRANSITION  
+   ========================================= */  
+  
+#drone-intro.drone-exit {  
+  animation:  
+    droneExit 1.4s cubic-bezier(.76,0,.24,1) forwards;  
+}  
+  
+#drone-intro.drone-exit .drone-camera {  
+  animation:  
+    droneDive 1.4s cubic-bezier(.76,0,.24,1) forwards;  
+}  
+  
+#drone-intro.drone-exit .drone-word {  
+  animation:  
+    droneWordDive 1.4s cubic-bezier(.76,0,.24,1) forwards;  
+}  
+  
+@keyframes droneExit {  
+  
+  0% {  
+    opacity: 1;  
+  }  
+  
+  70% {  
+    opacity: 1;  
+  }  
+  
+  100% {  
+    opacity: 0;  
+    visibility: hidden;  
+  }  
+}  
+  
+@keyframes droneDive {  
+  
+  to {  
+    transform:  
+      translate3d(0,0,700px)  
+      rotateX(30deg)  
+      scale(3.5);  
+  }  
+}  
+  
+@keyframes droneWordDive {  
+  
+  to {  
+    transform:  
+      translateZ(900px)  
+      scale(2.5);  
+    filter: blur(18px);  
+  }  
+}  
+  
+/* =========================================  
+   MOBILE  
+   ========================================= */  
+  
+@media (max-width: 700px) {  
+  
+  .drone-camera {  
+    transform:  
+      translate3d(0,8vh,0)  
+      rotateX(58deg)  
+      scale(.95);  
+  }  
+  
+  .drone-word {  
+    font-size: 18vw;  
+    letter-spacing: -.08em;  
+  }  
+  
+  .drone-word-shadow {  
+    font-size: 18vw;  
+  }  
+  
+  .drone-grid {  
+    background-size:  
+      45px 45px,  
+      45px 45px;  
+  }  
+  
+  .drone-mark {  
+    font-size: 7px;  
+  }  
+  
+  .drone-status {  
+    left: 18px;  
+    bottom: 18px;  
+  }  
+  
+  .drone-scroll {  
+    right: 18px;  
+    bottom: 18px;  
+  }  
+}  
+  
+/* =========================================  
+   REDUCED MOTION  
+   ========================================= */  
+  
+@media (prefers-reduced-motion: reduce) {  
+  
+  #drone-intro *,  
+  #drone-intro::before {  
+    animation-duration: .01ms !important;  
+    animation-iteration-count: 1 !important;  
+  }  
+  
+}  
+</style>  <script>  
+/* =========================================  
+   DRONE INTRO CONTROLLER  
+   ========================================= */  
+  
+(() => {  
+  
+  const intro = document.getElementById("drone-intro");  
+  
+  if (!intro) return;  
+  
+  const reduceMotion =  
+    window.matchMedia(  
+      "(prefers-reduced-motion: reduce)"  
+    ).matches;  
+  
+  let exited = false;  
+  
+  function exitIntro() {  
+  
+    if (exited) return;  
+  
+    exited = true;  
+  
+    intro.classList.add("drone-exit");  
+  
+    setTimeout(() => {  
+      intro.remove();  
+    }, 1500);  
+  }  
+  
+  /*  
+   * Automatic cinematic sequence.  
+   *  
+   * The word appears first,  
+   * camera settles,  
+   * then the website is revealed.  
+   */  
+  
+  if (!reduceMotion) {  
+  
+    setTimeout(() => {  
+      exitIntro();  
+    }, 6500);  
+  
+  } else {  
+  
+    setTimeout(() => {  
+      exitIntro();  
+    }, 800);  
+  
+  }  
+  
+  /*  
+   * Allow the visitor to skip/enter.  
+   */  
+  
+  window.addEventListener(  
+    "wheel",  
+    exitIntro,  
+    { passive: true, once: true }  
+  );  
+  
+  window.addEventListener(  
+    "touchstart",  
+    exitIntro,  
+    { passive: true, once: true }  
+  );  
+  
+  window.addEventListener(  
+    "keydown",  
+    event => {  
+  
+      if (  
+        event.key === "Enter" ||  
+        event.key === " " ||  
+        event.key === "Escape"  
+      ) {  
+        exitIntro();  
+      }  
+  
+    },  
+    { once: false }  
+  );  
+  
+})();  
+</script>  #↑ this Is the intro
+#↓ and this Is the code
+
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">  
+<meta name="theme-color" content="#000000">  
+<meta name="color-scheme" content="dark">  
+<meta name="description" content="TAMASRAZIM — creative technologist, developer and digital experimenter.">  
+<meta property="og:title" content="TAMASRAZIM — Digital Universe">  
+<meta property="og:description" content="Creative technology, experiments and digital work by Tamasrazim.">  
+<meta property="og:type" content="website">  
+<title>TAMASRAZIM — Digital Universe</title>  <style>  
+/* =========================================================  
+   TAMASRAZIM / 01 — RESET  
+   ========================================================= */  
+  
+:root{  
+  --black:#000;  
+  --white:#fff;  
+  --gray:#8b8b8b;  
+  --dark:#111;  
+  --line:rgba(255,255,255,.14);  
+  --soft:rgba(255,255,255,.06);  
+  --ease:cubic-bezier(.16,1,.3,1);  
+  --ease2:cubic-bezier(.77,0,.18,1);  
+  --vh:1vh;  
+  --pointer-x:50vw;  
+  --pointer-y:50vh;  
+}  
+  
+*{  
+  box-sizing:border-box;  
+  margin:0;  
+  padding:0;  
+}  
+  
+html{  
+  width:100%;  
+  height:100%;  
+  background:#000;  
+  color:#fff;  
+  overflow:hidden;  
+  scroll-behavior:auto;  
+}  
+  
+body{  
+  width:100%;  
+  height:100%;  
+  background:#000;  
+  color:#fff;  
+  overflow:hidden;  
+  font-family:Arial,Helvetica,sans-serif;  
+  -webkit-font-smoothing:antialiased;  
+  text-rendering:geometricPrecision;  
+  cursor:none;  
+}  
+  
+body.native-cursor{  
+  cursor:auto;  
+}  
+  
+button,  
+a{  
+  color:inherit;  
+  font:inherit;  
+}  
+  
+button{  
+  border:0;  
+  background:none;  
+}  
+  
+a{  
+  text-decoration:none;  
+}  
+  
+/* =========================================================  
+   02 — GLOBAL  
+   ========================================================= */  
+  
+::selection{  
+  background:#fff;  
+  color:#000;  
+}  
+  
+::-webkit-scrollbar{  
+  width:0;  
+  height:0;  
+}  
+  
+#app{  
+  position:fixed;  
+  inset:0;  
+  width:100%;  
+  height:100%;  
+  overflow:hidden;  
+  background:#000;  
+}  
+  
+#world{  
+  position:absolute;  
+  inset:0;  
+  overflow:hidden;  
+  will-change:transform;  
+}  
+  
+canvas#visuals{  
+  position:absolute;  
+  inset:0;  
+  width:100%;  
+  height:100%;  
+  z-index:0;  
+  pointer-events:none;  
+}  
+  
+.noise{  
+  position:absolute;  
+  inset:-100%;  
+  z-index:30;  
+  pointer-events:none;  
+  opacity:.055;  
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");  
+  animation:noiseMove .18s steps(2) infinite;  
+}  
+  
+@keyframes noiseMove{  
+  0%{transform:translate(0,0)}  
+  25%{transform:translate(4%,-3%)}  
+  50%{transform:translate(-3%,4%)}  
+  75%{transform:translate(3%,3%)}  
+  100%{transform:translate(-4%,-2%)}  
+}  
+  
+.vignette{  
+  position:absolute;  
+  inset:0;  
+  z-index:20;  
+  pointer-events:none;  
+  background:  
+    radial-gradient(  
+      ellipse at center,  
+      transparent 30%,  
+      rgba(0,0,0,.18) 65%,  
+      rgba(0,0,0,.7) 100%  
+    );  
+}  
+  
+.scanlines{  
+  position:absolute;  
+  inset:0;  
+  z-index:19;  
+  pointer-events:none;  
+  opacity:.08;  
+  background:repeating-linear-gradient(  
+    to bottom,  
+    transparent 0,  
+    transparent 2px,  
+    rgba(255,255,255,.025) 3px  
+  );  
+}  
+  
+.hidden{  
+  display:none!important;  
+}  
+  
+/* =========================================================  
+   03 — LOADER  
+   ========================================================= */  
+  
+.loader{  
+  position:fixed;  
+  inset:0;  
+  z-index:1000;  
+  display:flex;  
+  align-items:flex-end;  
+  justify-content:space-between;  
+  padding:clamp(24px,4vw,60px);  
+  background:#000;  
+  transition:  
+    opacity 1s var(--ease),  
+    visibility 1s;  
+}  
+  
+.loader.done{  
+  opacity:0;  
+  visibility:hidden;  
+  pointer-events:none;  
+}  
+  
+.loader-brand{  
+  font-size:12px;  
+  font-weight:700;  
+  letter-spacing:.18em;  
+}  
+  
+.loader-counter{  
+  display:flex;  
+  align-items:flex-end;  
+  gap:8px;  
+  font-family:monospace;  
+}  
+  
+.loader-number{  
+  font-size:clamp(60px,11vw,160px);  
+  line-height:.75;  
+  letter-spacing:-.08em;  
+  font-weight:700;  
+}  
+  
+.loader-percent{  
+  font-size:12px;  
+  margin-bottom:4px;  
+}  
+  
+.loader-bar{  
+  position:absolute;  
+  left:clamp(24px,4vw,60px);  
+  right:clamp(24px,4vw,60px);  
+  bottom:20px;  
+  height:1px;  
+  background:rgba(255,255,255,.2);  
+  overflow:hidden;  
+}  
+  
+.loader-bar span{  
+  display:block;  
+  width:0;  
+  height:100%;  
+  background:#fff;  
+}  
+  
+/* =========================================================  
+   04 — HEADER  
+   ========================================================= */  
+  
+.header{  
+  position:fixed;  
+  z-index:100;  
+  top:0;  
+  left:0;  
+  width:100%;  
+  display:grid;  
+  grid-template-columns:1fr auto 1fr;  
+  align-items:center;  
+  padding:  
+    max(24px,env(safe-area-inset-top))  
+    clamp(24px,4vw,60px)  
+    20px;  
+  pointer-events:none;  
+  mix-blend-mode:difference;  
+}  
+  
+.header>*{  
+  pointer-events:auto;  
+}  
+  
+.logo{  
+  justify-self:start;  
+  font-size:12px;  
+  font-weight:800;  
+  letter-spacing:.18em;  
+}  
+  
+.logo span{  
+  opacity:.45;  
+}  
+  
+.status{  
+  justify-self:center;  
+  display:flex;  
+  align-items:center;  
+  gap:8px;  
+  font-size:9px;  
+  letter-spacing:.16em;  
+  text-transform:uppercase;  
+  opacity:.7;  
+}  
+  
+.status-dot{  
+  width:5px;  
+  height:5px;  
+  border-radius:50%;  
+  background:#fff;  
+  animation:pulse 1.8s ease-in-out infinite;  
+}  
+  
+@keyframes pulse{  
+  0%,100%{opacity:.3;transform:scale(.8)}  
+  50%{opacity:1;transform:scale(1)}  
+}  
+  
+.menu{  
+  justify-self:end;  
+  display:flex;  
+  gap:8px;  
+  align-items:center;  
+  font-size:10px;  
+  letter-spacing:.15em;  
+  text-transform:uppercase;  
+}  
+  
+.menu button{  
+  cursor:none;  
+  opacity:.55;  
+  transition:opacity .3s ease;  
+}  
+  
+.menu button:hover{  
+  opacity:1;  
+}  
+  
+/* =========================================================  
+   05 — HORIZONTAL WORLD  
+   ========================================================= */  
+  
+.track{  
+  position:absolute;  
+  left:0;  
+  top:0;  
+  height:100%;  
+  display:flex;  
+  align-items:center;  
+  will-change:transform;  
+}  
+  
+.section{  
+  position:relative;  
+  flex:0 0 100vw;  
+  width:100vw;  
+  height:100vh;  
+  overflow:hidden;  
+}  
+  
+.section-inner{  
+  position:relative;  
+  width:100%;  
+  height:100%;  
+  z-index:2;  
+}  
+  
+/* =========================================================  
+   06 — HERO  
+   ========================================================= */  
+  
+.hero{  
+  display:flex;  
+  align-items:center;  
+}  
+  
+.hero-content{  
+  position:absolute;  
+  left:clamp(24px,7vw,120px);  
+  top:50%;  
+  transform:translateY(-50%);  
+  width:min(90vw,1100px);  
+}  
+  
+.kicker{  
+  display:flex;  
+  align-items:center;  
+  gap:14px;  
+  margin-bottom:30px;  
+  font-family:monospace;  
+  font-size:10px;  
+  letter-spacing:.2em;  
+  text-transform:uppercase;  
+  opacity:.55;  
+}  
+  
+.kicker-line{  
+  width:42px;  
+  height:1px;  
+  background:#fff;  
+}  
+  
+.hero-title{  
+  font-size:clamp(68px,14vw,220px);  
+  line-height:.76;  
+  letter-spacing:-.085em;  
+  font-weight:800;  
+  text-transform:uppercase;  
+  user-select:none;  
+}  
+  
+.hero-title .solid{  
+  display:block;  
+}  
+  
+.hero-title .outline{  
+  display:block;  
+  color:transparent;  
+  -webkit-text-stroke:  
+    clamp(1px,.11vw,2px)  
+    rgba(255,255,255,.85);  
+  transform:translateX(.04em);  
+}  
+  
+.hero-meta{  
+  display:flex;  
+  justify-content:space-between;  
+  align-items:flex-end;  
+  gap:40px;  
+  width:min(90vw,900px);  
+  margin-top:55px;  
+  font-size:10px;  
+  line-height:1.7;  
+  letter-spacing:.08em;  
+  text-transform:uppercase;  
+}  
+  
+.hero-copy{  
+  max-width:310px;  
+  opacity:.55;  
+}  
+  
+.hero-scroll{  
+  display:flex;  
+  align-items:center;  
+  gap:10px;  
+  opacity:.65;  
+  white-space:nowrap;  
+}  
+  
+.scroll-wheel{  
+  width:26px;  
+  height:40px;  
+  border:1px solid rgba(255,255,255,.5);  
+  border-radius:20px;  
+  position:relative;  
+}  
+  
+.scroll-wheel:after{  
+  content:"";  
+  position:absolute;  
+  width:2px;  
+  height:7px;  
+  background:#fff;  
+  left:50%;  
+  top:7px;  
+  transform:translateX(-50%);  
+  animation:wheel 1.5s ease-in-out infinite;  
+}  
+  
+@keyframes wheel{  
+  0%{opacity:0;transform:translate(-50%,0)}  
+  30%{opacity:1}  
+  100%{opacity:0;transform:translate(-50%,13px)}  
+}  
+  
+.hero-index{  
+  position:absolute;  
+  right:clamp(24px,4vw,60px);  
+  bottom:clamp(24px,4vw,50px);  
+  font-family:monospace;  
+  font-size:10px;  
+  opacity:.4;  
+}  
+  
+/* =========================================================  
+   07 — ORBITAL DECOR  
+   ========================================================= */  
+  
+.orbit{  
+  position:absolute;  
+  width:min(52vw,760px);  
+  aspect-ratio:1;  
+  right:-12vw;  
+  top:50%;  
+  transform:translateY(-50%) rotate(0deg);  
+  border:1px solid rgba(255,255,255,.1);  
+  border-radius:50%;  
+  animation:orbitSpin 30s linear infinite;  
+  pointer-events:none;  
+}  
+  
+.orbit:before,  
+.orbit:after{  
+  content:"";  
+  position:absolute;  
+  inset:10%;  
+  border:1px solid rgba(255,255,255,.08);  
+  border-radius:50%;  
+}  
+  
+.orbit:after{  
+  inset:28%;  
+  border-color:rgba(255,255,255,.13);  
+}  
+  
+.orbit-dot{  
+  position:absolute;  
+  width:8px;  
+  height:8px;  
+  border-radius:50%;  
+  background:#fff;  
+  left:14%;  
+  top:13%;  
+  box-shadow:0 0 25px rgba(255,255,255,.4);  
+}  
+  
+@keyframes orbitSpin{  
+  to{transform:translateY(-50%) rotate(360deg)}  
+}  
+  
+/* =========================================================  
+   08 — MARQUEE  
+   ========================================================= */  
+  
+.marquee-section{  
+  display:flex;  
+  align-items:center;  
+}  
+  
+.marquee{  
+  width:100%;  
+  overflow:hidden;  
+  transform:rotate(-4deg) scale(1.08);  
+  border-top:1px solid var(--line);  
+  border-bottom:1px solid var(--line);  
+  padding:24px 0;  
+}  
+  
+.marquee-track{  
+  display:flex;  
+  width:max-content;  
+  animation:marquee 25s linear infinite;  
+}  
+  
+.marquee-item{  
+  display:flex;  
+  align-items:center;  
+  gap:60px;  
+  padding-right:60px;  
+  font-size:clamp(70px,12vw,180px);  
+  font-weight:800;  
+  letter-spacing:-.08em;  
+  white-space:nowrap;  
+  text-transform:uppercase;  
+}  
+  
+.marquee-item i{  
+  display:block;  
+  width:10px;  
+  height:10px;  
+  background:#fff;  
+  border-radius:50%;  
+}  
+  
+@keyframes marquee{  
+  to{transform:translateX(-50%)}  
+}  
+  
+/* =========================================================  
+   09 — ABOUT  
+   ========================================================= */  
+  
+.about{  
+  display:flex;  
+  align-items:center;  
+}  
+  
+.about-grid{  
+  width:100%;  
+  padding:0 clamp(24px,7vw,120px);  
+  display:grid;  
+  grid-template-columns:minmax(150px,.6fr) minmax(300px,1.4fr);  
+  gap:clamp(50px,9vw,160px);  
+  align-items:end;  
+}  
+  
+.section-number{  
+  font-family:monospace;  
+  font-size:10px;  
+  letter-spacing:.18em;  
+  opacity:.4;  
+  margin-bottom:22px;  
+}  
+  
+.about-title{  
+  font-size:clamp(48px,8vw,120px);  
+  line-height:.85;  
+  letter-spacing:-.07em;  
+  font-weight:700;  
+}  
+  
+.about-copy{  
+  max-width:700px;  
+}  
+  
+.about-copy p{  
+  font-size:clamp(22px,3vw,48px);  
+  line-height:1.05;  
+  letter-spacing:-.04em;  
+}  
+  
+.about-copy p span{  
+  opacity:.3;  
+}  
+  
+.about-details{  
+  display:grid;  
+  grid-template-columns:repeat(3,1fr);  
+  border-top:1px solid var(--line);  
+  margin-top:60px;  
+}  
+  
+.detail{  
+  padding:18px 18px 0 0;  
+  border-right:1px solid var(--line);  
+}  
+  
+.detail:last-child{  
+  border-right:0;  
+}  
+  
+.detail-label{  
+  display:block;  
+  font-family:monospace;  
+  font-size:9px;  
+  text-transform:uppercase;  
+  letter-spacing:.15em;  
+  opacity:.4;  
+  margin-bottom:10px;  
+}  
+  
+.detail-value{  
+  font-size:12px;  
+  line-height:1.5;  
+}  
+  
+/* =========================================================  
+   10 — WORK  
+   ========================================================= */  
+  
+.work{  
+  display:flex;  
+  align-items:center;  
+}  
+  
+.work-wrap{  
+  width:100%;  
+  padding-left:clamp(24px,7vw,120px);  
+}  
+  
+.work-heading{  
+  display:flex;  
+  align-items:flex-end;  
+  justify-content:space-between;  
+  padding-right:clamp(24px,7vw,120px);  
+  margin-bottom:38px;  
+}  
+  
+.work-heading h2{  
+  font-size:clamp(55px,10vw,150px);  
+  line-height:.8;  
+  letter-spacing:-.08em;  
+}  
+  
+.work-heading span{  
+  font-family:monospace;  
+  font-size:9px;  
+  opacity:.4;  
+}  
+  
+.project-row{  
+  display:flex;  
+  gap:18px;  
+  width:max-content;  
+}  
+  
+.project{  
+  position:relative;  
+  width:clamp(280px,34vw,510px);  
+  height:clamp(360px,58vh,650px);  
+  flex:0 0 auto;  
+  border:1px solid var(--line);  
+  overflow:hidden;  
+  background:#050505;  
+  transition:border-color .5s ease;  
+}  
+  
+.project:hover{  
+  border-color:rgba(255,255,255,.55);  
+}  
+  
+.project-visual{  
+  position:absolute;  
+  inset:0;  
+  overflow:hidden;  
+}  
+  
+.project-visual:before{  
+  content:"";  
+  position:absolute;  
+  inset:-20%;  
+  background:  
+    radial-gradient(  
+      circle at 30% 30%,  
+      rgba(255,255,255,.16),  
+      transparent 22%  
+    ),  
+    radial-gradient(  
+      circle at 70% 70%,  
+      rgba(255,255,255,.08),  
+      transparent 28%  
+    );  
+  filter:blur(15px);  
+  transform:rotate(15deg);  
+  transition:transform 1.2s var(--ease);  
+}  
+  
+.project:hover .project-visual:before{  
+  transform:rotate(-18deg) scale(1.2);  
+}  
+  
+.project-art{  
+  position:absolute;  
+  inset:10%;  
+  border:1px solid rgba(255,255,255,.22);  
+  transform:rotate(-7deg);  
+  transition:transform 1s var(--ease);  
+}  
+  
+.project:hover .project-art{  
+  transform:rotate(7deg) scale(.92);  
+}  
+  
+.project-art:before,  
+.project-art:after{  
+  content:"";  
+  position:absolute;  
+  border:1px solid rgba(255,255,255,.2);  
+}  
+  
+.project-art:before{  
+  inset:15%;  
+  transform:rotate(20deg);  
+}  
+  
+.project-art:after{  
+  inset:30%;  
+  border-radius:50%;  
+}  
+  
+.project:nth-child(2) .project-art{  
+  border-radius:50%;  
+  transform:rotate(20deg);  
+}  
+  
+.project:nth-child(2) .project-art:after{  
+  border-radius:0;  
+  transform:rotate(45deg);  
+}  
+  
+.project:nth-child(3) .project-art{  
+  clip-path:polygon(50% 0,100% 100%,0 100%);  
+  border:0;  
+  background:  
+    repeating-linear-gradient(  
+      90deg,  
+      rgba(255,255,255,.15) 0 1px,  
+      transparent 1px 15px  
+    );  
+}  
+  
+.project:nth-child(4) .project-art{  
+  border-radius:0;  
+  transform:rotate(0);  
+}  
+  
+.project:nth-child(4) .project-art:after{  
+  inset:20%;  
+  border-radius:0;  
+  transform:rotate(45deg);  
+}  
+  
+.project-info{  
+  position:absolute;  
+  left:20px;  
+  right:20px;  
+  bottom:20px;  
+  display:flex;  
+  justify-content:space-between;  
+  align-items:flex-end;  
+  z-index:2;  
+}  
+  
+.project-name{  
+  font-size:clamp(25px,3vw,45px);  
+  font-weight:700;  
+  letter-spacing:-.06em;  
+}  
+  
+.project-type{  
+  margin-top:7px;  
+  font-family:monospace;  
+  font-size:8px;  
+  letter-spacing:.12em;  
+  opacity:.5;  
+}  
+  
+.project-index{  
+  font-family:monospace;  
+  font-size:10px;  
+  opacity:.5;  
+}  
+  
+.project-open{  
+  position:absolute;  
+  top:20px;  
+  right:20px;  
+  width:35px;  
+  height:35px;  
+  border:1px solid rgba(255,255,255,.25);  
+  display:grid;  
+  place-items:center;  
+  border-radius:50%;  
+  transition:  
+    background .4s ease,  
+    color .4s ease,  
+    transform .6s var(--ease);  
+}  
+  
+.project:hover .project-open{  
+  background:#fff;  
+  color:#000;  
+  transform:rotate(45deg);  
+}  
+  
+/* =========================================================  
+   11 — LAB  
+   ========================================================= */  
+  
+.lab{  
+  display:flex;  
+  align-items:center;  
+}  
+  
+.lab-layout{  
+  width:100%;  
+  padding:0 clamp(24px,7vw,120px);  
+}  
+  
+.lab-top{  
+  display:flex;  
+  justify-content:space-between;  
+  align-items:flex-end;  
+  margin-bottom:40px;  
+}  
+  
+.lab-title{  
+  font-size:clamp(60px,11vw,170px);  
+  line-height:.78;  
+  letter-spacing:-.09em;  
+}  
+  
+.lab-counter{  
+  font-family:monospace;  
+  font-size:10px;  
+  opacity:.45;  
+}  
+  
+.lab-grid{  
+  display:grid;  
+  grid-template-columns:repeat(5,1fr);  
+  gap:1px;  
+  border:1px solid var(--line);  
+  background:var(--line);  
+}  
+  
+.lab-cell{  
+  min-height:140px;  
+  padding:15px;  
+  background:#000;  
+  position:relative;  
+  overflow:hidden;  
+  transition:background .5s ease;  
+}  
+  
+.lab-cell:hover{  
+  background:#0d0d0d;  
+}  
+  
+.lab-cell-number{  
+  font-family:monospace;  
+  font-size:8px;  
+  opacity:.35;  
+}  
+  
+.lab-cell-name{  
+  position:absolute;  
+  left:15px;  
+  bottom:15px;  
+  font-size:12px;  
+  letter-spacing:-.02em;  
+}  
+  
+.lab-cell-symbol{  
+  position:absolute;  
+  top:50%;  
+  left:50%;  
+  transform:translate(-50%,-50%);  
+  font-size:50px;  
+  font-weight:200;  
+  opacity:.2;  
+  transition:  
+    transform .8s var(--ease),  
+    opacity .8s ease;  
+}  
+  
+.lab-cell:hover .lab-cell-symbol{  
+  transform:translate(-50%,-50%) rotate(90deg) scale(1.5);  
+  opacity:.8;  
+}  
+  
+/* =========================================================  
+   12 — CONTACT  
+   ========================================================= */  
+  
+.contact{  
+  display:flex;  
+  align-items:center;  
+}  
+  
+.contact-layout{  
+  width:100%;  
+  padding:0 clamp(24px,7vw,120px);  
+}  
+  
+.contact-small{  
+  font-family:monospace;  
+  font-size:10px;  
+  letter-spacing:.15em;  
+  opacity:.4;  
+  margin-bottom:35px;  
+}  
+  
+.contact-title{  
+  font-size:clamp(60px,13vw,200px);  
+  line-height:.78;  
+  letter-spacing:-.09em;  
+  font-weight:800;  
+}  
+  
+.contact-title .outline{  
+  color:transparent;  
+  -webkit-text-stroke:1px #fff;  
+}  
+  
+.contact-links{  
+  display:flex;  
+  gap:10px;  
+  flex-wrap:wrap;  
+  margin-top:55px;  
+}  
+  
+.contact-link{  
+  border:1px solid var(--line);  
+  padding:14px 18px;  
+  font-family:monospace;  
+  font-size:9px;  
+  letter-spacing:.12em;  
+  text-transform:uppercase;  
+  position:relative;  
+  overflow:hidden;  
+}  
+  
+.contact-link span{  
+  position:relative;  
+  z-index:2;  
+}  
+  
+.contact-link:before{  
+  content:"";  
+  position:absolute;  
+  left:0;  
+  bottom:0;  
+  width:100%;  
+  height:0;  
+  background:#fff;  
+  transition:height .5s var(--ease);  
+}  
+  
+.contact-link:hover{  
+  color:#000;  
+}  
+  
+.contact-link:hover:before{  
+  height:100%;  
+}  
+  
+.contact-footer{  
+  position:absolute;  
+  left:clamp(24px,7vw,120px);  
+  right:clamp(24px,7vw,120px);  
+  bottom:35px;  
+  border-top:1px solid var(--line);  
+  padding-top:14px;  
+  display:flex;  
+  justify-content:space-between;  
+  font-family:monospace;  
+  font-size:8px;  
+  letter-spacing:.12em;  
+  opacity:.4;  
+}  
+  
+/* =========================================================  
+   13 — POINTER  
+   ========================================================= */  
+  
+.pointer{  
+  position:fixed;  
+  left:0;  
+  top:0;  
+  z-index:10000;  
+  width:8px;  
+  height:8px;  
+  border-radius:50%;  
+  background:#fff;  
+  pointer-events:none;  
+  mix-blend-mode:difference;  
+  transform:translate3d(  
+    calc(var(--pointer-x) - 50%),  
+    calc(var(--pointer-y) - 50%),  
+    0  
+  );  
+  transition:  
+    width .35s var(--ease),  
+    height .35s var(--ease),  
+    border-radius .35s var(--ease),  
+    background .35s ease;  
+}  
+  
+.pointer-ring{  
+  position:fixed;  
+  left:0;  
+  top:0;  
+  z-index:9999;  
+  width:38px;  
+  height:38px;  
+  border:1px solid rgba(255,255,255,.65);  
+  border-radius:50%;  
+  pointer-events:none;  
+  mix-blend-mode:difference;  
+  transform:translate3d(  
+    calc(var(--pointer-x) - 50%),  
+    calc(var(--pointer-y) - 50%),  
+    0  
+  );  
+  transition:  
+    width .45s var(--ease),  
+    height .45s var(--ease),  
+    border-color .3s ease,  
+    background .3s ease;  
+}  
+  
+.pointer-label{  
+  position:fixed;  
+  left:0;  
+  top:0;  
+  z-index:10001;  
+  pointer-events:none;  
+  font-family:monospace;  
+  font-size:8px;  
+  letter-spacing:.1em;  
+  opacity:0;  
+  transform:  
+    translate3d(  
+      calc(var(--pointer-x) + 24px),  
+      calc(var(--pointer-y) + 18px),  
+      0  
+    );  
+  transition:opacity .3s ease;  
+  mix-blend-mode:difference;  
+}  
+  
+.pointer.active .pointer-ring{  
+  width:70px;  
+  height:70px;  
+  background:#fff;  
+  border-color:#fff;  
+}  
+  
+.pointer.active .pointer-label{  
+  opacity:1;  
+}  
+  
+.pointer.drag .pointer-ring{  
+  width:80px;  
+  height:80px;  
+}  
+  
+.pointer.drag .pointer-dot{  
+  width:3px;  
+  height:3px;  
+}  
+  
+/* =========================================================  
+   14 — PROGRESS  
+   ========================================================= */  
+  
+.progress{  
+  position:fixed;  
+  left:0;  
+  bottom:0;  
+  width:100%;  
+  height:2px;  
+  z-index:110;  
+  background:rgba(255,255,255,.08);  
+  pointer-events:none;  
+}  
+  
+.progress-bar{  
+  width:0;  
+  height:100%;  
+  background:#fff;  
+  transform-origin:left;  
+}  
+  
+/* =========================================================  
+   15 — SIDE INDEX  
+   ========================================================= */  
+  
+.side-index{  
+  position:fixed;  
+  z-index:90;  
+  right:clamp(20px,3vw,45px);  
+  top:50%;  
+  transform:translateY(-50%);  
+  display:flex;  
+  flex-direction:column;  
+  gap:8px;  
+  mix-blend-mode:difference;  
+}  
+  
+.side-dot{  
+  width:4px;  
+  height:4px;  
+  border-radius:50%;  
+  background:#fff;  
+  opacity:.3;  
+  transition:  
+    transform .4s var(--ease),  
+    opacity .4s ease;  
+}  
+  
+.side-dot.active{  
+  opacity:1;  
+  transform:scale(2);  
+}  
+  
+/* =========================================================  
+   16 — PROJECT MODAL  
+   ========================================================= */  
+  
+.modal{  
+  position:fixed;  
+  inset:0;  
+  z-index:500;  
+  background:#000;  
+  opacity:0;  
+  visibility:hidden;  
+  pointer-events:none;  
+  transition:  
+    opacity .7s var(--ease),  
+    visibility .7s;  
+}  
+  
+.modal.open{  
+  opacity:1;  
+  visibility:visible;  
+  pointer-events:auto;  
+}  
+  
+.modal-inner{  
+  width:100%;  
+  height:100%;  
+  padding:clamp(24px,5vw,80px);  
+  display:flex;  
+  flex-direction:column;  
+  justify-content:space-between;  
+  overflow:auto;  
+}  
+  
+.modal-close{  
+  position:absolute;  
+  top:clamp(24px,4vw,50px);  
+  right:clamp(24px,4vw,50px);  
+  width:45px;  
+  height:45px;  
+  border:1px solid var(--line);  
+  border-radius:50%;  
+  display:grid;  
+  place-items:center;  
+  cursor:none;  
+  transition:  
+    background .4s ease,  
+    color .4s ease,  
+    transform .5s var(--ease);  
+}  
+  
+.modal-close:hover{  
+  background:#fff;  
+  color:#000;  
+  transform:rotate(90deg);  
+}  
+  
+.modal-number{  
+  font-family:monospace;  
+  font-size:10px;  
+  opacity:.4;  
+}  
+  
+.modal-title{  
+  font-size:clamp(65px,13vw,210px);  
+  line-height:.75;  
+  letter-spacing:-.09em;  
+  font-weight:800;  
+  max-width:1000px;  
+}  
+  
+.modal-description{  
+  max-width:650px;  
+  font-size:clamp(17px,2vw,27px);  
+  line-height:1.15;  
+  letter-spacing:-.025em;  
+  opacity:.65;  
+}  
+  
+.modal-tags{  
+  display:flex;  
+  gap:8px;  
+  flex-wrap:wrap;  
+  margin-top:25px;  
+}  
+  
+.modal-tag{  
+  border:1px solid var(--line);  
+  padding:8px 12px;  
+  font-family:monospace;  
+  font-size:8px;  
+  letter-spacing:.1em;  
+  text-transform:uppercase;  
+}  
+  
+/* =========================================================  
+   17 — TRANSITION  
+   ========================================================= */  
+  
+.transition{  
+  position:fixed;  
+  inset:0;  
+  z-index:900;  
+  pointer-events:none;  
+  display:flex;  
+  flex-direction:column;  
+}  
+  
+.transition span{  
+  flex:1;  
+  background:#fff;  
+  transform:scaleX(0);  
+  transform-origin:left;  
+}  
+  
+.transition.active span{  
+  animation:transitionIn .65s var(--ease) forwards;  
+}  
+  
+.transition.active span:nth-child(2){animation-delay:.04s}  
+.transition.active span:nth-child(3){animation-delay:.08s}  
+.transition.active span:nth-child(4){animation-delay:.12s}  
+.transition.active span:nth-child(5){animation-delay:.16s}  
+  
+@keyframes transitionIn{  
+  0%{transform:scaleX(0)}  
+  45%{transform:scaleX(1)}  
+  55%{transform:scaleX(1);transform-origin:right}  
+  100%{transform:scaleX(0);transform-origin:right}  
+}  
+  
+/* =========================================================  
+   18 — RESPONSIVE  
+   ========================================================= */  
+  
+@media(max-width:900px){  
+  
+  body{  
+    cursor:auto;  
+  }  
+  
+  .pointer,  
+  .pointer-ring,  
+  .pointer-label{  
+    display:none;  
+  }  
+  
+  .header{  
+    grid-template-columns:1fr auto;  
+  }  
+  
+  .status{  
+    display:none;  
+  }  
+  
+  .hero-content{  
+    left:24px;  
+    width:calc(100vw - 48px);  
+  }  
+  
+  .hero-title{  
+    font-size:clamp(62px,18vw,150px);  
+  }  
+  
+  .hero-meta{  
+    margin-top:40px;  
+    flex-direction:column;  
+    align-items:flex-start;  
+    gap:25px;  
+  }  
+  
+  .orbit{  
+    width:90vw;  
+    right:-35vw;  
+    opacity:.6;  
+  }  
+  
+  .about-grid{  
+    grid-template-columns:1fr;  
+    gap:35px;  
+    padding:0 24px;  
+  }  
+  
+  .about-copy p{  
+    font-size:clamp(23px,6vw,40px);  
+  }  
+  
+  .about-details{  
+    margin-top:35px;  
+  }  
+  
+  .work-wrap{  
+    padding-left:24px;  
+  }  
+  
+  .work-heading{  
+    padding-right:24px;  
+  }  
+  
+  .project{  
+    width:78vw;  
+    height:62vh;  
+  }  
+  
+  .lab-layout{  
+    padding:0 24px;  
+  }  
+  
+  .lab-grid{  
+    grid-template-columns:repeat(2,1fr);  
+  }  
+  
+  .lab-cell{  
+    min-height:110px;  
+  }  
+  
+  .contact-layout{  
+    padding:0 24px;  
+  }  
+  
+  .contact-footer{  
+    left:24px;  
+    right:24px;  
+    bottom:25px;  
+  }  
+  
+  .contact-footer span:last-child{  
+    display:none;  
+  }  
+}  
+  
+@media(max-width:560px){  
+  
+  .header{  
+    padding-left:18px;  
+    padding-right:18px;  
+  }  
+  
+  .menu{  
+    gap:5px;  
+  }  
+  
+  .hero-content{  
+    left:18px;  
+    width:calc(100vw - 36px);  
+  }  
+  
+  .hero-title{  
+    font-size:20vw;  
+  }  
+  
+  .hero-meta{  
+    font-size:8px;  
+  }  
+  
+  .about-grid,  
+  .lab-layout,  
+  .contact-layout{  
+    padding-left:18px;  
+    padding-right:18px;  
+  }  
+  
+  .about-title{  
+    font-size:18vw;  
+  }  
+  
+  .about-details{  
+    grid-template-columns:1fr;  
+  }  
+  
+  .detail{  
+    border-right:0;  
+    border-bottom:1px solid var(--line);  
+    padding:13px 0;  
+  }  
+  
+  .detail:last-child{  
+    border-bottom:0;  
+  }  
+  
+  .work-wrap{  
+    padding-left:18px;  
+  }  
+  
+  .work-heading{  
+    padding-right:18px;  
+  }  
+  
+  .project{  
+    width:82vw;  
+    height:60vh;  
+  }  
+  
+  .lab-grid{  
+    grid-template-columns:1fr 1fr;  
+  }  
+  
+  .lab-cell{  
+    min-height:100px;  
+  }  
+  
+  .contact-title{  
+    font-size:20vw;  
+  }  
+  
+  .contact-links{  
+    margin-top:35px;  
+  }  
+}  
+  
+/* =========================================================  
+   19 — REDUCED MOTION  
+   ========================================================= */  
+  
+@media(prefers-reduced-motion:reduce){  
+  
+  *,  
+  *:before,  
+  *:after{  
+    animation-duration:.001ms!important;  
+    animation-iteration-count:1!important;  
+    scroll-behavior:auto!important;  
+    transition-duration:.001ms!important;  
+  }  
+  
+  .noise{  
+    display:none;  
+  }  
+}  
+</style>  </head>  <body>  <div id="app">    <!-- =====================================================  
+       LOADER  
+       ===================================================== -->    <div class="loader" id="loader">  
+    <div class="loader-brand">TAMASRAZIM® / 2026</div>  <div class="loader-counter">  
+  <div class="loader-number" id="loaderNumber">0</div>  
+  <div class="loader-percent">%</div>  
+</div>  
+
+<div class="loader-bar">  
+  <span id="loaderBar"></span>  
+</div>
+
+  </div>    <!-- =====================================================  
+       BACKGROUND ENGINE  
+       ===================================================== -->  <canvas id="visuals"></canvas>
+
+  <div class="noise"></div>  
+  <div class="scanlines"></div>  
+  <div class="vignette"></div>    <!-- =====================================================  
+       HEADER  
+       ===================================================== -->    <header class="header">  
+    <a class="logo magnetic" href="#home" data-cursor="HOME">  
+      TAMAS<span>RAZIM</span>  
+    </a>  <div class="status">  
+  <i class="status-dot"></i>  
+  <span>Digital system online</span>  
+</div>  
+
+<nav class="menu">  
+  <button class="nav-btn magnetic" data-target="home">HOME</button>  
+  <button class="nav-btn magnetic" data-target="work">WORK</button>  
+  <button class="nav-btn magnetic" data-target="about">ABOUT</button>  
+</nav>
+
+  </header>    <!-- =====================================================  
+       HORIZONTAL TRACK  
+       ===================================================== -->    <main id="world">  
+    <div class="track" id="track">  <!-- =================================================  
+       HERO  
+       ================================================= -->  
+
+  <section  
+    class="section hero"  
+    id="home"  
+    data-name="HOME"  
+  >  
+    <div class="section-inner">  
+
+      <div class="hero-content">  
+
+        <div class="kicker">  
+          <span class="kicker-line"></span>  
+          <span>Creative technologist / Bangladesh</span>  
+        </div>  
+
+        <h1 class="hero-title">  
+          <span class="solid">TAMAS</span>  
+          <span class="outline">RAZIM</span>  
+        </h1>  
+
+        <div class="hero-meta">  
+
+          <p class="hero-copy">  
+            Building digital experiences, experiments,  
+            systems and strange things for the web.  
+          </p>  
+
+          <div class="hero-scroll">  
+            <div class="scroll-wheel"></div>  
+            <span>Scroll horizontally</span>  
+          </div>  
+
+        </div>  
+
+      </div>  
+
+      <div class="orbit">  
+        <div class="orbit-dot"></div>  
+      </div>  
+
+      <div class="hero-index">  
+        01 / 07  
+      </div>  
+
+    </div>  
+  </section>  
+
+  <!-- =================================================  
+       MARQUEE  
+       ================================================= -->  
+
+  <section  
+    class="section marquee-section"  
+    id="signal"  
+    data-name="SIGNAL"  
+  >  
+    <div class="section-inner">  
+
+      <div class="marquee">  
+        <div class="marquee-track">  
+
+          <div class="marquee-item">  
+            <span>MAKE DIGITAL NOISE</span>  
+            <i></i>  
+          </div>  
+
+          <div class="marquee-item">  
+            <span>MAKE DIGITAL NOISE</span>  
+            <i></i>  
+          </div>  
+
+          <div class="marquee-item">  
+            <span>MAKE DIGITAL NOISE</span>  
+            <i></i>  
+          </div>  
+
+          <div class="marquee-item">  
+            <span>MAKE DIGITAL NOISE</span>  
+            <i></i>  
+          </div>  
+
+        </div>  
+      </div>  
+
+    </div>  
+  </section>  
+
+  <!-- =================================================  
+       ABOUT  
+       ================================================= -->  
+
+  <section  
+    class="section about"  
+    id="about"  
+    data-name="ABOUT"  
+  >  
+    <div class="section-inner">  
+
+      <div class="about-grid">  
+
+        <div>  
+          <div class="section-number">  
+            03 / ABOUT  
+          </div>  
+
+          <h2 class="about-title">  
+            WHO<br>AM I?  
+          </h2>  
+        </div>  
+
+        <div class="about-copy">  
+
+          <p>  
+            I like taking technology apart,  
+            understanding how it works,  
+            and rebuilding it into something  
+            <span>unexpected.</span>  
+          </p>  
+
+          <div class="about-details">  
+
+            <div class="detail">  
+              <span class="detail-label">Focus</span>  
+              <span class="detail-value">  
+                Web / Creative Code / Systems  
+              </span>  
+            </div>  
+
+            <div class="detail">  
+              <span class="detail-label">Based</span>  
+              <span class="detail-value">  
+                Bangladesh  
+              </span>  
+            </div>  
+
+            <div class="detail">  
+              <span class="detail-label">Status</span>  
+              <span class="detail-value">  
+                Building something  
+              </span>  
+            </div>  
+
+          </div>  
+
+        </div>  
+
+      </div>  
+
+    </div>  
+  </section>  
+
+  <!-- =================================================  
+       WORK  
+       ================================================= -->  
+
+  <section  
+    class="section work"  
+    id="work"  
+    data-name="WORK"  
+  >  
+    <div class="section-inner">  
+
+      <div class="work-wrap">  
+
+        <div class="work-heading">  
+
+          <h2>SELECTED<br>WORK</h2>  
+
+          <span>  
+            04 / PROJECTS  
+          </span>  
+
+        </div>  
+
+        <div class="project-row">  
+
+          <!-- PROJECT 01 -->  
+
+          <article  
+            class="project project-openable"  
+            data-project="VOID"  
+            data-description="A monochrome experimental interface exploring motion, typography and spatial navigation."  
+            data-tags="Web Design,Creative Code,Motion"  
+          >  
+
+            <div class="project-visual">  
+              <div class="project-art"></div>  
+            </div>  
+
+            <div class="project-open">↗</div>  
+
+            <div class="project-info">  
+
+              <div>  
+                <div class="project-name">VOID</div>  
+                <div class="project-type">  
+                  INTERACTIVE EXPERIENCE  
+                </div>  
+              </div>  
+
+              <div class="project-index">01</div>  
+
+            </div>  
+
+          </article>  
+
+          <!-- PROJECT 02 -->  
+
+          <article  
+            class="project project-openable"  
+            data-project="SIGNAL"  
+            data-description="A visual playground for experimental interfaces, generative motion and responsive interaction."  
+            data-tags="Experiment,Canvas,Interaction"  
+          >  
+
+            <div class="project-visual">  
+              <div class="project-art"></div>  
+            </div>  
+
+            <div class="project-open">↗</div>  
+
+            <div class="project-info">  
+
+              <div>  
+                <div class="project-name">SIGNAL</div>  
+                <div class="project-type">  
+                  DIGITAL EXPERIMENT  
+                </div>  
+              </div>  
+
+              <div class="project-index">02</div>  
+
+            </div>  
+
+          </article>  
+
+          <!-- PROJECT 03 -->  
+
+          <article  
+            class="project project-openable"  
+            data-project="FRAME"  
+            data-description="An editorial digital space built around kinetic type, geometry and controlled chaos."  
+            data-tags="Editorial,Typography,Art Direction"  
+          >  
+
+            <div class="project-visual">  
+              <div class="project-art"></div>  
+            </div>  
+
+            <div class="project-open">↗</div>  
+
+            <div class="project-info">  
+
+              <div>  
+                <div class="project-name">FRAME</div>  
+                <div class="project-type">  
+                  DIGITAL ART DIRECTION  
+                </div>  
+              </div>  
+
+              <div class="project-index">03</div>  
+
+            </div>  
+
+          </article>  
+
+          <!-- PROJECT 04 -->  
+
+          <article  
+            class="project project-openable"  
+            data-project="CORE"  
+            data-description="A system-first interface concept where structure, movement and visual identity become one."  
+            data-tags="Systems,UI,Motion"  
+          >  
+
+            <div class="project-visual">  
+              <div class="project-art"></div>  
+            </div>  
+
+            <div class="project-open">↗</div>  
+
+            <div class="project-info">  
+
+              <div>  
+                <div class="project-name">CORE</div>  
+                <div class="project-type">  
+                  SYSTEM DESIGN  
+                </div>  
+              </div>  
+
+              <div class="project-index">04</div>  
+
+            </div>  
+
+          </article>  
+
+        </div>  
+
+      </div>  
+
+    </div>  
+  </section>  
+
+  <!-- =================================================  
+       LAB  
+       ================================================= -->  
+
+  <section  
+    class="section lab"  
+    id="lab"  
+    data-name="LAB"  
+  >  
+    <div class="section-inner">  
+
+      <div class="lab-layout">  
+
+        <div class="lab-top">  
+
+          <h2 class="lab-title">  
+            LAB  
+          </h2>  
+
+          <div class="lab-counter">  
+            05 / EXPERIMENTS  
+          </div>  
+
+        </div>  
+
+        <div class="lab-grid">  
+
+          <div class="lab-cell magnetic">  
+            <span class="lab-cell-number">01</span>  
+            <span class="lab-cell-symbol">◯</span>  
+            <span class="lab-cell-name">GENERATIVE</span>  
+          </div>  
+
+          <div class="lab-cell magnetic">  
+            <span class="lab-cell-number">02</span>  
+            <span class="lab-cell-symbol">×</span>  
+            <span class="lab-cell-name">MOTION</span>  
+          </div>  
+
+          <div class="lab-cell magnetic">  
+            <span class="lab-cell-number">03</span>  
+            <span class="lab-cell-symbol">+</span>  
+            <span class="lab-cell-name">SYSTEMS</span>  
+          </div>  
+
+          <div class="lab-cell magnetic">  
+            <span class="lab-cell-number">04</span>  
+            <span class="lab-cell-symbol">△</span>  
+            <span class="lab-cell-name">WEBGL</span>  
+          </div>  
+
+          <div class="lab-cell magnetic">  
+            <span class="lab-cell-number">05</span>  
+            <span class="lab-cell-symbol">∞</span>  
+            <span class="lab-cell-name">EXPERIMENTS</span>  
+          </div>  
+
+          <div class="lab-cell magnetic">  
+            <span class="lab-cell-number">06</span>  
+            <span class="lab-cell-symbol">□</span>  
+            <span class="lab-cell-name">INTERACTION</span>  
+          </div>  
+
+          <div class="lab-cell magnetic">  
+            <span class="lab-cell-number">07</span>  
+            <span class="lab-cell-symbol">/</span>  
+            <span class="lab-cell-name">CODE</span>  
+          </div>  
+
+          <div class="lab-cell magnetic">  
+            <span class="lab-cell-number">08</span>  
+            <span class="lab-cell-symbol">*</span>  
+            <span class="lab-cell-name">VISUALS</span>  
+          </div>  
+
+          <div class="lab-cell magnetic">  
+            <span class="lab-cell-number">09</span>  
+            <span class="lab-cell-symbol">#</span>  
+            <span class="lab-cell-name">IDEAS</span>  
+          </div>  
+
+          <div class="lab-cell magnetic">  
+            <span class="lab-cell-number">10</span>  
+            <span class="lab-cell-symbol">?</span>  
+            <span class="lab-cell-name">UNKNOWN</span>  
+          </div>  
+
+        </div>  
+
+      </div>  
+
+    </div>  
+  </section>  
+
+  <!-- =================================================  
+       SIGNAL / SECOND MARQUEE  
+       ================================================= -->  
+
+  <section  
+    class="section marquee-section"  
+    id="signal2"  
+    data-name="NOISE"  
+  >  
+    <div class="section-inner">  
+
+      <div  
+        class="marquee"  
+        style="transform:rotate(4deg) scale(1.08)"  
+      >  
+
+        <div  
+          class="marquee-track"  
+          style="animation-direction:reverse;animation-duration:32s"  
+        >  
+
+          <div class="marquee-item">  
+            <span>THERE IS NO FINAL VERSION</span>  
+            <i></i>  
+          </div>  
+
+          <div class="marquee-item">  
+            <span>THERE IS NO FINAL VERSION</span>  
+            <i></i>  
+          </div>  
+
+          <div class="marquee-item">  
+            <span>THERE IS NO FINAL VERSION</span>  
+            <i></i>  
+          </div>  
+
+          <div class="marquee-item">  
+            <span>THERE IS NO FINAL VERSION</span>  
+            <i></i>  
+          </div>  
+
+        </div>  
+
+      </div>  
+
+    </div>  
+  </section>  
+
+  <!-- =================================================  
+       CONTACT  
+       ================================================= -->  
+
+  <section  
+    class="section contact"  
+    id="contact"  
+    data-name="CONTACT"  
+  >  
+    <div class="section-inner">  
+
+      <div class="contact-layout">  
+
+        <div class="contact-small">  
+          07 / LET'S BUILD SOMETHING  
+        </div>  
+
+        <h2 class="contact-title">  
+          SAY<br>  
+          <span class="outline">HELLO.</span>  
+        </h2>  
+
+        <div class="contact-links">  
+
+          <a  
+            class="contact-link magnetic"  
+            href="mailto:hello@tamasrazim.com"  
+            data-cursor="MAIL"  
+          >  
+            <span>Email ↗</span>  
+          </a>  
+
+          <a  
+            class="contact-link magnetic"  
+            href="https://github.com/Tamasrazim"  
+            target="_blank"  
+            rel="noopener"  
+            data-cursor="GITHUB"  
+          >  
+            <span>GitHub ↗</span>  
+          </a>  
+
+          <a  
+            class="contact-link magnetic"  
+            href="https://tamasrazim.github.io/"  
+            target="_blank"  
+            rel="noopener"  
+            data-cursor="SITE"  
+          >  
+            <span>Current site ↗</span>  
+          </a>  
+
+        </div>  
+
+      </div>  
+
+      <div class="contact-footer">  
+        <span>© 2026 TAMASRAZIM</span>  
+        <span>KEEP MOVING →</span>  
+      </div>  
+
+    </div>  
+  </section>  
+
+</div>
+
+  </main>    <!-- =====================================================  
+       SIDE NAV  
+       ===================================================== -->    <div class="side-index" id="sideIndex">  
+    <i class="side-dot active"></i>  
+    <i class="side-dot"></i>  
+    <i class="side-dot"></i>  
+    <i class="side-dot"></i>  
+    <i class="side-dot"></i>  
+    <i class="side-dot"></i>  
+    <i class="side-dot"></i>  
+  </div>    <!-- =====================================================  
+       PROGRESS  
+       ===================================================== -->    <div class="progress">  
+    <div class="progress-bar" id="progressBar"></div>  
+  </div>    <!-- =====================================================  
+       CUSTOM POINTER  
+       ===================================================== -->    <div class="pointer" id="pointer"></div>  
+  <div class="pointer-ring" id="pointerRing"></div>  
+  <div class="pointer-label" id="pointerLabel">VIEW</div>    <!-- =====================================================  
+       PROJECT MODAL  
+       ===================================================== -->    <div class="modal" id="projectModal">  <button  
+  class="modal-close magnetic"  
+  id="modalClose"  
+  aria-label="Close project"  
+>  
+  ×  
+</button>  
+
+<div class="modal-inner">  
+
+  <div class="modal-number" id="modalNumber">  
+    PROJECT / 01  
+  </div>  
+
+  <div>  
+    <h2 class="modal-title" id="modalTitle">  
+      VOID  
+    </h2>  
+
+    <p  
+      class="modal-description"  
+      id="modalDescription"  
+    >  
+      Experimental digital experience.  
+    </p>  
+
+    <div  
+      class="modal-tags"  
+      id="modalTags"  
+    ></div>  
+  </div>  
+
+  <div  
+    style="  
+      display:flex;  
+      justify-content:space-between;  
+      font-family:monospace;  
+      font-size:9px;  
+      opacity:.4;  
+    "  
+  >  
+    <span>CASE STUDY / PREVIEW</span>  
+    <span>ESC TO CLOSE</span>  
+  </div>  
+
+</div>
+
+  </div>    <!-- =====================================================  
+       PAGE TRANSITION  
+       ===================================================== -->    <div class="transition" id="transition">  
+    <span></span>  
+    <span></span>  
+    <span></span>  
+    <span></span>  
+    <span></span>  
+  </div>  </div>  <script>  
+/* =========================================================  
+   TAMASRAZIM / 20 — CORE ENGINE  
+   ========================================================= */  
+  
+(() => {  
+  "use strict";  
+  
+  const $ = (selector, root = document) =>  
+    root.querySelector(selector);  
+  
+  const $$ = (selector, root = document) =>  
+    [...root.querySelectorAll(selector)];  
+  
+  const clamp = (value, min, max) =>  
+    Math.max(min, Math.min(max, value));  
+  
+  const lerp = (a, b, t) =>  
+    a + (b - a) * t;  
+  
+  const ease = t =>  
+    1 - Math.pow(1 - t, 4);  
+  
+  const reducedMotion =  
+    window.matchMedia(  
+      "(prefers-reduced-motion: reduce)"  
+    ).matches;  
+  
+  /* =======================================================  
+     STATE  
+     ======================================================= */  
+  
+  const state = {  
+  
+    ready:false,  
+  
+    pointer:{  
+      x:window.innerWidth / 2,  
+      y:window.innerHeight / 2,  
+      targetX:window.innerWidth / 2,  
+      targetY:window.innerHeight / 2,  
+      vx:0,  
+      vy:0  
+    },  
+  
+    scroll:{  
+      current:0,  
+      target:0,  
+      velocity:0,  
+      lastInput:0,  
+      max:1  
+    },  
+  
+    world:{  
+      x:0,  
+      targetX:0,  
+      width:0,  
+      sectionWidth:window.innerWidth,  
+      index:0  
+    },  
+  
+    mouseDown:false,  
+  
+    drag:{  
+      active:false,  
+      startX:0,  
+      startWorld:0,  
+      moved:false  
+    },  
+  
+    modal:{  
+      open:false  
+    },  
+  
+    time:0,  
+  
+    dpr:Math.min(  
+      window.devicePixelRatio || 1,  
+      2  
+    )  
+  };  
+  
+  /* =======================================================  
+     ELEMENTS  
+     ======================================================= */  
+  
+  const app = $("#app");  
+  const loader = $("#loader");  
+  const loaderNumber = $("#loaderNumber");  
+  const loaderBar = $("#loaderBar");  
+  
+  const canvas = $("#visuals");  
+  const ctx = canvas.getContext("2d", {  
+    alpha:true,  
+    desynchronized:true  
+  });  
+  
+  const track = $("#track");  
+  const sections = $$(".section");  
+  const progressBar = $("#progressBar");  
+  
+  const pointer = $("#pointer");  
+  const pointerRing = $("#pointerRing");  
+  const pointerLabel = $("#pointerLabel");  
+  
+  const sideDots = $$(".side-dot");  
+  
+  const projectModal = $("#projectModal");  
+  const modalClose = $("#modalClose");  
+  const modalTitle = $("#modalTitle");  
+  const modalDescription = $("#modalDescription");  
+  const modalTags = $("#modalTags");  
+  const modalNumber = $("#modalNumber");  
+  
+  /* =======================================================  
+     LOADER  
+     ======================================================= */  
+  
+  function runLoader(){  
+  
+    let progress = 0;  
+  
+    const tick = () => {  
+  
+      progress +=  
+        progress < 70 ? 3.7 :  
+        progress < 90 ? 1.6 :  
+        .8;  
+  
+      progress = Math.min(100, progress);  
+  
+      loaderNumber.textContent =  
+        Math.floor(progress);  
+  
+      loaderBar.style.width =  
+        progress + "%";  
+  
+      if(progress < 100){  
+        requestAnimationFrame(tick);  
+      }else{  
+        setTimeout(() => {  
+  
+          loader.classList.add("done");  
+  
+          state.ready = true;  
+  
+          updateDimensions();  
+          startLoop();  
+  
+        }, reducedMotion ? 0 : 550);  
+      }  
+    };  
+  
+    requestAnimationFrame(tick);  
+  }  
+  
+  /* =======================================================  
+     CANVAS  
+     ======================================================= */  
+  
+  let canvasWidth = 1;  
+  let canvasHeight = 1;  
+  
+  function resizeCanvas(){  
+  
+    state.dpr =  
+      Math.min(  
+        window.devicePixelRatio || 1,  
+        2  
+      );  
+  
+    canvasWidth =  
+      window.innerWidth;  
+  
+    canvasHeight =  
+      window.innerHeight;  
+  
+    canvas.width =  
+      Math.floor(  
+        canvasWidth * state.dpr  
+      );  
+  
+    canvas.height =  
+      Math.floor(  
+        canvasHeight * state.dpr  
+      );  
+  
+    canvas.style.width =  
+      canvasWidth + "px";  
+  
+    canvas.style.height =  
+      canvasHeight + "px";  
+  
+    ctx.setTransform(  
+      state.dpr,  
+      0,  
+      0,  
+      state.dpr,  
+      0,  
+      0  
+    );  
+  }  
+  
+  /* =======================================================  
+     DIMENSIONS  
+     ======================================================= */  
+  
+  function updateDimensions(){  
+  
+    state.world.sectionWidth =  
+      window.innerWidth;  
+  
+    state.world.width =  
+      sections.length *  
+      state.world.sectionWidth;  
+  
+    state.scroll.max =  
+      Math.max(  
+        1,  
+        state.world.width -  
+        state.world.sectionWidth  
+      );  
+  
+    state.world.targetX =  
+      clamp(  
+        state.world.targetX,  
+        0,  
+        state.scroll.max  
+      );  
+  }  
+  
+  /* =======================================================  
+     POINTER  
+     ======================================================= */  
+  
+  function updatePointerTarget(x, y){  
+  
+    state.pointer.targetX = x;  
+    state.pointer.targetY = y;  
+  
+    document.documentElement.style  
+      .setProperty("--pointer-x", x + "px");  
+  
+    document.documentElement.style  
+      .setProperty("--pointer-y", y + "px");  
+  }  
+  
+  function pointerLoop(){  
+  
+    const p = state.pointer;  
+  
+    p.vx = p.targetX - p.x;  
+    p.vy = p.targetY - p.y;  
+  
+    p.x = lerp(  
+      p.x,  
+      p.targetX,  
+      reducedMotion ? 1 : .18  
+    );  
+  
+    p.y = lerp(  
+      p.y,  
+      p.targetY,  
+      reducedMotion ? 1 : .18  
+    );  
+  
+    pointer.style.transform =  
+      `translate3d(${p.x}px,${p.y}px,0) translate(-50%,-50%)`;  
+  
+    pointerRing.style.transform =  
+      `translate3d(${p.x}px,${p.y}px,0) translate(-50%,-50%)`;  
+  
+    pointerLabel.style.transform =  
+      `translate3d(${p.x + 24}px,${p.y + 18}px,0)`;  
+  
+  }  
+  
+  window.addEventListener(  
+    "pointermove",  
+    e => {  
+  
+      updatePointerTarget(  
+        e.clientX,  
+        e.clientY  
+      );  
+  
+    },  
+    {passive:true}  
+  );  
+  
+  /* =======================================================  
+     POINTER CONTEXT  
+     ======================================================= */  
+  
+  function setCursorContext(  
+    active,  
+    label = "VIEW",  
+    drag = false  
+  ){  
+  
+    pointer.classList.toggle(  
+      "active",  
+      active  
+    );  
+  
+    pointer.classList.toggle(  
+      "drag",  
+      drag  
+    );  
+  
+    pointerLabel.textContent =  
+      label;  
+  }  
+  
+  document.addEventListener(  
+    "pointerover",  
+    e => {  
+  
+      const magnetic =  
+        e.target.closest(  
+          ".magnetic"  
+        );  
+  
+      const project =  
+        e.target.closest(  
+          ".project"  
+        );  
+  
+      if(project){  
+        setCursorContext(  
+          true,  
+          "OPEN"  
+        );  
+        return;  
+      }  
+  
+      if(magnetic){  
+        setCursorContext(  
+          true,  
+          magnetic.dataset.cursor ||  
+          "SELECT"  
+        );  
+        return;  
+      }  
+  
+      setCursorContext(false);  
+  
+    }  
+  );  
+  
+  /* =======================================================  
+     MAGNETIC ELEMENTS  
+     ======================================================= */  
+  
+  function setupMagnetic(){  
+  
+    $$(".magnetic").forEach(el => {  
+  
+      el.addEventListener(  
+        "pointermove",  
+        e => {  
+  
+          if(  
+            window.matchMedia(  
+              "(max-width:900px)"  
+            ).matches  
+          ){  
+            return;  
+          }  
+  
+          const rect =  
+            el.getBoundingClientRect();  
+  
+          const x =  
+            e.clientX -  
+            (rect.left + rect.width / 2);  
+  
+          const y =  
+            e.clientY -  
+            (rect.top + rect.height / 2);  
+  
+          const strength =  
+            el.classList.contains("lab-cell")  
+              ? .10  
+              : .18;  
+  
+          el.style.transform =  
+            `translate3d(  
+              ${x * strength}px,  
+              ${y * strength}px,  
+              0  
+            )`;  
+  
+        }  
+      );  
+  
+      el.addEventListener(  
+        "pointerleave",  
+        () => {  
+          el.style.transform = "";  
+        }  
+      );  
+  
+    });  
+  }  
+  
+  /* =======================================================  
+     HORIZONTAL INPUT  
+     ======================================================= */  
+  
+  function addScrollImpulse(amount){  
+  
+    state.scroll.target += amount;  
+  
+    state.scroll.target =  
+      clamp(  
+        state.scroll.target,  
+        0,  
+        state.scroll.max  
+      );  
+  
+    state.scroll.lastInput =  
+      performance.now();  
+  }  
+  
+  window.addEventListener(  
+    "wheel",  
+    e => {  
+  
+      if(state.modal.open){  
+        return;  
+      }  
+  
+      /*  
+       * Convert vertical wheel movement  
+       * into horizontal world movement.  
+       */  
+  
+      const amount =  
+        Math.abs(e.deltaX) >  
+        Math.abs(e.deltaY)  
+          ? e.deltaX  
+          : e.deltaY;  
+  
+      addScrollImpulse(  
+        amount * 1.15  
+      );  
+  
+      e.preventDefault();  
+  
+    },  
+    {  
+      passive:false  
+    }  
+  );  
+  
+  /* =======================================================  
+     TOUCH  
+     ======================================================= */  
+  
+  let touchX = 0;  
+  let touchY = 0;  
+  
+  window.addEventListener(  
+    "touchstart",  
+    e => {  
+  
+      if(!e.touches[0]) return;  
+  
+      touchX =  
+        e.touches[0].clientX;  
+  
+      touchY =  
+        e.touches[0].clientY;  
+  
+    },  
+    {passive:true}  
+  );  
+  
+  window.addEventListener(  
+    "touchmove",  
+    e => {  
+  
+      if(  
+        state.modal.open ||  
+        !e.touches[0]  
+      ){  
+        return;  
+      }  
+  
+      const x =  
+        e.touches[0].clientX;  
+  
+      const y =  
+        e.touches[0].clientY;  
+  
+      const dx =  
+        touchX - x;  
+  
+      const dy =  
+        touchY - y;  
+  
+      /*  
+       * Horizontal gesture wins.  
+       * Vertical swipe also becomes horizontal  
+       * because this is a horizontal world.  
+       */  
+  
+      const amount =  
+        Math.abs(dx) > Math.abs(dy)  
+          ? dx  
+          : dy;  
+  
+      addScrollImpulse(  
+        amount * .85  
+      );  
+  
+      touchX = x;  
+      touchY = y;  
+  
+    },  
+    {passive:true}  
+  );  
+  
+  /* =======================================================  
+     DRAG  
+     ======================================================= */  
+  
+  app.addEventListener(  
+    "pointerdown",  
+    e => {  
+  
+      if(  
+        state.modal.open ||  
+        e.pointerType === "touch"  
+      ){  
+        return;  
+      }  
+  
+      if(  
+        e.target.closest(  
+          "a,button,.project"  
+        )  
+      ){  
+        return;  
+      }  
+  
+      state.mouseDown = true;  
+  
+      state.drag.active = true;  
+  
+      state.drag.startX =  
+        e.clientX;  
+  
+      state.drag.startWorld =  
+        state.scroll.target;  
+  
+      state.drag.moved = false;  
+  
+      setCursorContext(  
+        true,  
+        "DRAG",  
+        true  
+      );  
+  
+      app.setPointerCapture?.(  
+        e.pointerId  
+      );  
+  
+    }  
+  );  
+  
+  app.addEventListener(  
+    "pointermove",  
+    e => {  
+  
+      if(!state.drag.active){  
+        return;  
+      }  
+  
+      const dx =  
+        e.clientX -  
+        state.drag.startX;  
+  
+      if(Math.abs(dx) > 4){  
+        state.drag.moved = true;  
+      }  
+  
+      state.scroll.target =  
+        clamp(  
+          state.drag.startWorld - dx,  
+          0,  
+          state.scroll.max  
+        );  
+  
+    }  
+  );  
+  
+  app.addEventListener(  
+    "pointerup",  
+    e => {  
+  
+      state.mouseDown = false;  
+  
+      if(state.drag.active){  
+  
+        state.drag.active = false;  
+  
+        setCursorContext(  
+          false  
+        );  
+  
+        app.releasePointerCapture?.(  
+          e.pointerId  
+        );  
+  
+      }  
+    }  
+  );  
+  
+  /* =======================================================  
+     NAVIGATION  
+     ======================================================= */  
+  
+  function goToSection(  
+    index,  
+    immediate = false  
+  ){  
+  
+    index =  
+      clamp(  
+        index,  
+        0,  
+        sections.length - 1  
+      );  
+  
+    const target =  
+      index *  
+      state.world.sectionWidth;  
+  
+    state.world.index =  
+      index;  
+  
+    if(immediate){  
+      state.scroll.target = target;  
+      state.scroll.current = target;  
+    }else{  
+      state.scroll.target = target;  
+    }  
+  
+    updateURL(index);  
+  }  
+  
+  function updateURL(index){  
+  
+    const id =  
+      sections[index]?.id;  
+  
+    if(!id) return;  
+  
+    history.replaceState(  
+      null,  
+      "",  
+      "#" + id  
+    );  
+  }  
+  
+  $$(".nav-btn").forEach(btn => {  
+  
+    btn.addEventListener(  
+      "click",  
+      () => {  
+  
+        const id =  
+          btn.dataset.target;  
+  
+        const index =  
+          sections.findIndex(  
+            section =>  
+              section.id === id  
+          );  
+  
+        if(index >= 0){  
+          goToSection(index);  
+        }  
+  
+      }  
+    );  
+  
+  });  
+  
+  /* =======================================================  
+     KEYBOARD  
+     ======================================================= */  
+  
+  window.addEventListener(  
+    "keydown",  
+    e => {  
+  
+      if(e.key === "Escape"){  
+  
+        if(state.modal.open){  
+          closeModal();  
+        }  
+  
+        return;  
+      }  
+  
+      if(state.modal.open){  
+        return;  
+      }  
+  
+      if(  
+        e.key === "ArrowRight" ||  
+        e.key === "ArrowDown"  
+      ){  
+  
+        e.preventDefault();  
+  
+        goToSection(  
+          state.world.index + 1  
+        );  
+  
+      }  
+  
+      if(  
+        e.key === "ArrowLeft" ||  
+        e.key === "ArrowUp"  
+      ){  
+  
+        e.preventDefault();  
+  
+        goToSection(  
+          state.world.index - 1  
+        );  
+  
+      }  
+  
+      if(e.key === "Home"){  
+        e.preventDefault();  
+        goToSection(0);  
+      }  
+  
+      if(e.key === "End"){  
+        e.preventDefault();  
+        goToSection(  
+          sections.length - 1  
+        );  
+      }  
+  
+    }  
+  );  
+  
+  /* =======================================================  
+     SECTION INDEX  
+     ======================================================= */  
+  
+  function updateSectionIndex(){  
+  
+    const width =  
+      state.world.sectionWidth;  
+  
+    const raw =  
+      state.scroll.current / width;  
+  
+    const index =  
+      clamp(  
+        Math.round(raw),  
+        0,  
+        sections.length - 1  
+      );  
+  
+    state.world.index =  
+      index;  
+  
+    sideDots.forEach(  
+      (dot, i) => {  
+  
+        dot.classList.toggle(  
+          "active",  
+          i === index  
+        );  
+  
+      }  
+    );  
+  
+    progressBar.style.width =  
+      (  
+        state.scroll.current /  
+        state.scroll.max *  
+        100  
+      ) + "%";  
+  }  
+  
+  sideDots.forEach(  
+    (dot, index) => {  
+  
+      dot.addEventListener(  
+        "click",  
+        () => goToSection(index)  
+      );  
+  
+    }  
+  );  
+  
+  /* =======================================================  
+     INFINITE FEEL  
+     ======================================================= */  
+  
+  /*  
+   * The visual world is finite in DOM space, but the  
+   * navigation wraps at the boundaries. This avoids  
+   * cloning an ever-growing DOM.  
+   *  
+   * When the user reaches an edge and continues moving,  
+   * we jump to the corresponding opposite location while  
+   * keeping the visual state continuous.  
+   */  
+  
+  function applyInfiniteWrap(){  
+  
+    const threshold = 2;  
+  
+    if(  
+      state.scroll.target >=  
+      state.scroll.max - threshold  
+    ){  
+  
+      /*  
+       * Do not immediately wrap while the user is merely  
+       * parked on the final section. Wrap only if velocity  
+       * indicates continued movement.  
+       */  
+  
+      if(  
+        state.scroll.velocity > 12  
+      ){  
+  
+        state.scroll.target =  
+          state.world.sectionWidth;  
+  
+        state.scroll.current =  
+          state.world.sectionWidth;  
+  
+      }  
+  
+    }  
+  
+    if(  
+      state.scroll.target <= threshold  
+    ){  
+  
+      if(  
+        state.scroll.velocity < -12  
+      ){  
+  
+        state.scroll.target =  
+          state.scroll.max -  
+          state.world.sectionWidth;  
+  
+        state.scroll.current =  
+          state.scroll.target;  
+  
+      }  
+  
+    }  
+  }  
+  
+  /* =======================================================  
+     WORLD RENDER  
+     ======================================================= */  
+  
+  function updateWorld(){  
+  
+    const delta =  
+      state.scroll.target -  
+      state.scroll.current;  
+  
+    state.scroll.velocity =  
+      lerp(  
+        state.scroll.velocity,  
+        delta,  
+        .35  
+      );  
+  
+    state.scroll.current =  
+      lerp(  
+        state.scroll.current,  
+        state.scroll.target,  
+        reducedMotion ? 1 : .075  
+      );  
+  
+    /*  
+     * Kill microscopic movement.  
+     */  
+  
+    if(  
+      Math.abs(delta) < .01  
+    ){  
+      state.scroll.current =  
+        state.scroll.target;  
+    }  
+  
+    track.style.transform =  
+      `translate3d(  
+        ${-state.scroll.current}px,  
+        0,  
+        0  
+      )`;  
+  
+    updateSectionIndex();  
+    applyInfiniteWrap();  
+  
+  }  
+  
+  /* =======================================================  
+     SECTION PARALLAX  
+     ======================================================= */  
+  
+  function renderSectionMotion(){  
+  
+    const viewport =  
+      state.world.sectionWidth;  
+  
+    sections.forEach(  
+      (section, index) => {  
+  
+        const sectionCenter =  
+          index * viewport;  
+  
+        const distance =  
+          state.scroll.current -  
+          sectionCenter;  
+  
+        const normalized =  
+          distance / viewport;  
+  
+        const inner =  
+          $(".section-inner", section);  
+  
+        if(!inner) return;  
+  
+        const amount =  
+          clamp(  
+            normalized,  
+            -1.5,  
+            1.5  
+          );  
+  
+        /*  
+         * This is deliberately subtle.  
+         * The world itself moves, while its contents  
+         * have their own counter-motion.  
+         */  
+  
+        inner.style.transform =  
+          reducedMotion  
+            ? ""  
+            :  
+            `translate3d(  
+              ${amount * -28}px,  
+              ${Math.abs(amount) * 3}px,  
+              0  
+            )`;  
+  
+        inner.style.opacity =  
+          reducedMotion  
+            ? "1"  
+            :  
+            String(  
+              clamp(  
+                1 -  
+                Math.max(  
+                  0,  
+                  Math.abs(amount) - .75  
+                ) * .7,  
+                .3,  
+                1  
+              )  
+            );  
+  
+      }  
+    );  
+  
+  }  
+  
+  /* =======================================================  
+     CANVAS PARTICLES  
+     ======================================================= */  
+  
+  const particles = [];  
+  
+  function random(min,max){  
+    return Math.random() *  
+      (max-min) +  
+      min;  
+  }  
+  
+  function createParticles(){  
+  
+    particles.length = 0;  
+  
+    const count =  
+      window.innerWidth < 700  
+        ? 55  
+        : 110;  
+  
+    for(  
+      let i=0;  
+      i<count;  
+      i++  
+    ){  
+  
+      particles.push({  
+  
+        x:random(  
+          0,  
+          window.innerWidth  
+        ),  
+  
+        y:random(  
+          0,  
+          window.innerHeight  
+        ),  
+  
+        z:random(.15,1),  
+  
+        size:random(.3,1.7),  
+  
+        speed:random(.08,.45),  
+  
+        phase:random(  
+          0,  
+          Math.PI * 2  
+        ),  
+  
+        drift:random(  
+          .2,  
+          1.4  
+        )  
+  
+      });  
+  
+    }  
+  }  
+  
+  function drawParticles(){  
+  
+    ctx.clearRect(  
+      0,  
+      0,  
+      canvasWidth,  
+      canvasHeight  
+    );  
+  
+    const t =  
+      state.time * .001;  
+  
+    /*  
+     * Subtle radial glow behind pointer.  
+     */  
+  
+    const px =  
+      state.pointer.x;  
+  
+    const py =  
+      state.pointer.y;  
+  
+    const glow =  
+      ctx.createRadialGradient(  
+        px,  
+        py,  
+        0,  
+        px,  
+        py,  
+        Math.min(  
+          canvasWidth,  
+          canvasHeight  
+        ) * .38  
+      );  
+  
+    glow.addColorStop(  
+      0,  
+      "rgba(255,255,255,.035)"  
+    );  
+  
+    glow.addColorStop(  
+      1,  
+      "rgba(255,255,255,0)"  
+    );  
+  
+    ctx.fillStyle = glow;  
+  
+    ctx.fillRect(  
+      0,  
+      0,  
+      canvasWidth,  
+      canvasHeight  
+    );  
+  
+    /*  
+     * Grid.  
+     */  
+  
+    const grid =  
+      110;  
+  
+    ctx.lineWidth = .5;  
+  
+    ctx.strokeStyle =  
+      "rgba(255,255,255,.035)";  
+  
+    const offset =  
+      (  
+        state.scroll.current *  
+        .04  
+      ) % grid;  
+  
+    for(  
+      let x=-grid;  
+      x<canvasWidth+grid;  
+      x+=grid  
+    ){  
+  
+      ctx.beginPath();  
+  
+      ctx.moveTo(  
+        x-offset,  
+        0  
+      );  
+  
+      ctx.lineTo(  
+        x-offset,  
+        canvasHeight  
+      );  
+  
+      ctx.stroke();  
+  
+    }  
+  
+    for(  
+      let y=0;  
+      y<canvasHeight;  
+      y+=grid  
+    ){  
+  
+      ctx.beginPath();  
+  
+      ctx.moveTo(  
+        0,  
+        y  
+      );  
+  
+      ctx.lineTo(  
+        canvasWidth,  
+        y  
+      );  
+  
+      ctx.stroke();  
+  
+    }  
+  
+    /*  
+     * Particles.  
+     */  
+  
+    particles.forEach(  
+      p => {  
+  
+        p.x -=  
+          p.speed *  
+          (  
+            1 +  
+            Math.abs(  
+              state.scroll.velocity  
+            ) * .015  
+          );  
+  
+        p.y +=  
+          Math.sin(  
+            t * p.drift +  
+            p.phase  
+          ) * .08;  
+  
+        if(p.x < -10){  
+          p.x =  
+            canvasWidth + 10;  
+        }  
+  
+        const alpha =  
+          .12 +  
+          p.z * .28;  
+  
+        ctx.fillStyle =  
+          `rgba(255,255,255,${alpha})`;  
+  
+        ctx.beginPath();  
+  
+        ctx.arc(  
+          p.x,  
+          p.y,  
+          p.size * p.z,  
+          0,  
+          Math.PI * 2  
+        );  
+  
+        ctx.fill();  
+  
+      }  
+    );  
+  
+    /*  
+     * Long directional lines generated from scroll.  
+     */  
+  
+    const speed =  
+      state.scroll.velocity;  
+  
+    if(Math.abs(speed) > .1){  
+  
+      const lineCount =  
+        Math.min(  
+          12,  
+          Math.ceil(  
+            Math.abs(speed) / 2  
+          )  
+        );  
+  
+      for(  
+        let i=0;  
+        i<lineCount;  
+        i++  
+      ){  
+  
+        const y =  
+          (  
+            i * 91 +  
+            state.time * .03  
+          ) %  
+          canvasHeight;  
+  
+        const length =  
+          40 +  
+          Math.abs(speed) * 3;  
+  
+        ctx.strokeStyle =  
+          `rgba(255,255,255,${  
+            Math.min(  
+              .2,  
+              Math.abs(speed) / 200  
+            )  
+          })`;  
+  
+        ctx.beginPath();  
+  
+        if(speed > 0){  
+  
+          ctx.moveTo(  
+            canvasWidth -  
+            20 -  
+            length,  
+            y  
+          );  
+  
+          ctx.lineTo(  
+            canvasWidth - 20,  
+            y  
+          );  
+  
+        }else{  
+  
+          ctx.moveTo(  
+            20,  
+            y  
+          );  
+  
+          ctx.lineTo(  
+            20 + length,  
+            y  
+          );  
+  
+        }  
+  
+        ctx.stroke();  
+  
+      }  
+  
+    }  
+  }  
+  
+  /* =======================================================  
+     PROJECT MODAL  
+     ======================================================= */  
+  
+  const projects =  
+    $$(".project-openable");  
+  
+  function openModal(project){  
+  
+    const name =  
+      project.dataset.project ||  
+      "PROJECT";  
+  
+    const description =  
+      project.dataset.description ||  
+      "Experimental project.";  
+  
+    const tags =  
+      project.dataset.tags  
+        ? project.dataset.tags  
+            .split(",")  
+            .map(x => x.trim())  
+        : [];  
+  
+    const number =  
+      $(".project-index",project)  
+        ?.textContent ||  
+      "01";  
+  
+    modalTitle.textContent =  
+      name;  
+  
+    modalDescription.textContent =  
+      description;  
+  
+    modalNumber.textContent =  
+      `PROJECT / ${number}`;  
+  
+    modalTags.innerHTML = "";  
+  
+    tags.forEach(  
+      tag => {  
+  
+        const el =  
+          document.createElement("span");  
+  
+        el.className =  
+          "modal-tag";  
+  
+        el.textContent =  
+          tag;  
+  
+        modalTags.appendChild(el);  
+  
+      }  
+    );  
+  
+    projectModal.classList.add("open");  
+  
+    state.modal.open = true;  
+  
+    document.body.classList.add(  
+      "native-cursor"  
+    );  
+  
+  }  
+  
+  function closeModal(){  
+  
+    projectModal.classList.remove(  
+      "open"  
+    );  
+  
+    state.modal.open = false;  
+  
+    document.body.classList.remove(  
+      "native-cursor"  
+    );  
+  
+  }  
+  
+  projects.forEach(  
+    project => {  
+  
+      project.addEventListener(  
+        "click",  
+        () => {  
+  
+          if(state.drag.moved){  
+            return;  
+          }  
+  
+          openModal(project);  
+  
+        }  
+      );  
+  
+    }  
+  );  
+  
+  modalClose.addEventListener(  
+    "click",  
+    closeModal  
+  );  
+  
+  projectModal.addEventListener(  
+    "click",  
+    e => {  
+  
+      if(  
+        e.target === projectModal  
+      ){  
+        closeModal();  
+      }  
+  
+    }  
+  );  
+  
+  /* =======================================================  
+     HASH NAVIGATION  
+     ======================================================= */  
+  
+  function loadHash(){  
+  
+    const hash =  
+      location.hash  
+        .replace("#","")  
+        .trim();  
+  
+    if(!hash){  
+      return;  
+    }  
+  
+    const index =  
+      sections.findIndex(  
+        section =>  
+          section.id === hash  
+      );  
+  
+    if(index >= 0){  
+      goToSection(  
+        index,  
+        true  
+      );  
+    }  
+  }  
+  
+  window.addEventListener(  
+    "hashchange",  
+    loadHash  
+  );  
+  
+  /* =======================================================  
+     RESIZE  
+     ======================================================= */  
+  
+  let resizeTimer;  
+  
+  window.addEventListener(  
+    "resize",  
+    () => {  
+  
+      clearTimeout(  
+        resizeTimer  
+      );  
+  
+      resizeTimer =  
+        setTimeout(  
+          () => {  
+  
+            const previous =  
+              state.world.index;  
+  
+            resizeCanvas();  
+            updateDimensions();  
+            createParticles();  
+  
+            goToSection(  
+              previous,  
+              true  
+            );  
+  
+          },  
+          100  
+        );  
+  
+    }  
+  );  
+  
+  /* =======================================================  
+     VISIBILITY  
+     ======================================================= */  
+  
+  document.addEventListener(  
+    "visibilitychange",  
+    () => {  
+  
+      if(  
+        document.hidden  
+      ){  
+        /*  
+         * No special action needed.  
+         * Browser will throttle animation.  
+         */  
+      }  
+  
+    }  
+  );  
+  
+  /* =======================================================  
+     FRAME LOOP  
+     ======================================================= */  
+  
+  let loopStarted = false;  
+  
+  function frame(now){  
+  
+    state.time = now;  
+  
+    pointerLoop();  
+  
+    if(!state.modal.open){  
+  
+      updateWorld();  
+  
+      renderSectionMotion();  
+  
+    }  
+  
+    drawParticles();  
+  
+    requestAnimationFrame(  
+      frame  
+    );  
+  }  
+  
+  function startLoop(){  
+  
+    if(loopStarted){  
+      return;  
+    }  
+  
+    loopStarted = true;  
+  
+    requestAnimationFrame(  
+      frame  
+    );  
+  }  
+  
+  /* =======================================================  
+     INITIALIZATION  
+     ======================================================= */  
+  
+  resizeCanvas();  
+  updateDimensions();  
+  createParticles();  
+  setupMagnetic();  
+  loadHash();  
+  runLoader();  
+  
+  /* =======================================================  
+     ACCESSIBILITY: TAB FOCUS  
+     ======================================================= */  
+  
+  document.addEventListener(  
+    "focusin",  
+    e => {  
+  
+      const target =  
+        e.target;  
+  
+      if(  
+        target.matches(  
+          "a,button"  
+        )  
+      ){  
+  
+        setCursorContext(  
+          true,  
+          "SELECT"  
+        );  
+  
+      }  
+  
+    }  
+  );  
+  
+  document.addEventListener(  
+    "focusout",  
+    () => {  
+      setCursorContext(false);  
+    }  
+  );  
+  
+})();  
+</script>  </body>  
+</html>  
