@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="UTF-8">
+<script>document.documentElement.classList.replace('no-js','js');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Robiul Rumman Razim — Tamasrazim</title>
+<meta name="description" content="Robiul Rumman Razim — known online as Tamasrazim. Technology, projects, systems and digital work.">
+<meta name="theme-color" content="#050505">
+<meta property="og:title" content="Robiul Rumman Razim — Tamasrazim">
+<meta property="og:description" content="Technology, projects, systems and digital work.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tamasrazim.github.io/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23050505'/%3E%3Ctext x='32' y='44' font-family='monospace' font-size='34' fill='%23f2f2ee' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Robiul Rumman Razim",
+  "alternateName": "Tamasrazim",
+  "url": "https://tamasrazim.github.io/",
+  "email": "tasnimaktertamanna2@gmail.com",
+  "sameAs": [
+    "https://www.linkedin.com/in/Tamasrazim",
+    "https://www.facebook.com/Tamasrazim",
+    "https://www.facebook.com/Tamasrazim2",
+    "https://www.instagram.com/Tamasrazim",
+    "https://www.tiktok.com/@Tamasrazim",
+    "https://x.com/Tamasrazim",
+    "https://www.youtube.com/@Tamasrazim",
+    "https://www.threads.net/@Tamasrazim",
+    "https://www.pinterest.com/Tamasrazim",
+    "https://www.twitch.tv/Tamasrazim",
+    "https://github.com/Tamasrazim",
+    "https://steamcommunity.com/id/Tamasrazim",
+    "https://discord.com/users/Tamasrazim"
+  ]
+}
+</script>
+
+<style>
+  /* ============ Custom properties ============ */
+  :root{
+    --black:#050505;
+    --white:#f2f2ee;
+    --ease:cubic-bezier(.16,1,.3,1);
+    --font-display:'Unbounded', Arial, sans-serif;
+    --font-body:'Unbounded', Arial, sans-serif;
+    --font-mono:'JetBrains Mono', 'Courier New', monospace;
+  }
+
+  /* ============ Reset & Base ============ */
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{ 
+    margin:0; 
+    font-family:var(--font-body); 
+    font-size:16px; 
+    line-height:1.5; 
+    -webkit-font-smoothing:antialiased; 
+    background-color: var(--black); 
+    color: var(--white); 
+    overflow-x: hidden; 
+  }
+  h1,h2,h3{ margin:0; font-family:var(--font-display); line-height:1.05; }
+  p{ margin:0 0 1rem; }
+  a{ color:inherit; text-decoration:none; }
+  svg{ display:block; }
+  button{ font:inherit; color:inherit; background:none; border:none; }
+  ::selection{ background:var(--white); color:var(--black); }
+
+  .container{ max-width:1240px; margin-inline:auto; padding-inline:clamp(20px,5vw,64px); position: relative; z-index: 2; }
+
+  /* ============ Transparent Glass Box System ============ */
+  .panel--dark, .panel--light {
+    position: relative;
+    background: transparent;
+    color: var(--white);
+  }
+
+  .glass-box {
+    background: rgba(242, 242, 238, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(242, 242, 238, 0.12);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.45);
+    border-radius: 8px;
+    transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease), border-color 0.4s var(--ease), background 0.4s var(--ease);
+  }
+
+  .glass-box:hover {
+    background: rgba(242, 242, 238, 0.06);
+    border-color: rgba(242, 242, 238, 0.3);
+    box-shadow: 0 20px 50px 0 rgba(0, 0, 0, 0.6), 0 0 20px rgba(242, 242, 238, 0.1);
+  }
+
+  /* Gentle Floating Motion */
+  .animated-float {
+    animation: continuousFloat 7s ease-in-out infinite alternate;
+  }
+  @keyframes continuousFloat {
+    0% { transform: translateY(0px); }
+    100% { transform: translateY(-8px); }
+  }
+
+  /* ============ Reveal-on-scroll utility ============ */
+  .js [data-reveal]{ opacity:0; transform:translateY(30px); transition:opacity 0.8s var(--ease), transform 0.8s var(--ease); transition-delay:calc(var(--i,0) * 90ms); }
+  .js [data-reveal].is-visible{ opacity:1; transform:translateY(0); }
+
+  /* ============ Focus ============ */
+  a:focus-visible, button:focus-visible{ outline:2px solid var(--white); outline-offset:4px; }
+
+  /* ============ Fixed chrome: progress bar, cursor ============ */
+  .progress-bar{ position:fixed; top:0; left:0; height:3px; width:0%; background:var(--white); mix-blend-mode:difference; z-index:600; pointer-events:none; }
+  .cursor-dot,.cursor-ring{ position:fixed; top:0; left:0; border-radius:50%; pointer-events:none; z-index:9999; mix-blend-mode:difference; opacity:0; transform:translate(-50%,-50%); }
+  .cursor-dot{ width:8px; height:8px; background:var(--white); }
+  .cursor-ring{ width:34px; height:34px; border:1px solid var(--white); transition:width .25s var(--ease), height .25s var(--ease); }
+  html.has-cursor .cursor-dot, html.has-cursor .cursor-ring{ opacity:1; }
+  html.has-cursor, html.has-cursor a, html.has-cursor button{ cursor:none; }
+  .cursor-ring.is-hover{ width:58px; height:58px; }
+
+  /* ============ Header / Nav ============ */
+  .site-header{ position:fixed; top:0; left:0; right:0; z-index:500; color:var(--white); padding-block:1.1rem; background: rgba(5,5,5,0.45); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(242,242,238,0.1); }
+  .header-inner{ display:flex; align-items:center; justify-content:space-between; gap:1.5rem; }
+  
+  .logo-glass {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.9rem;
+    background: rgba(242, 242, 238, 0.05);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(242, 242, 238, 0.18);
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: .02em;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.4s var(--ease);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    user-select: none;
+  }
+  .logo-glass:hover {
+    background: rgba(242, 242, 238, 0.12);
+    border-color: rgba(242, 242, 238, 0.45);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 0 15px rgba(242, 242, 238, 0.2);
+    transform: translateY(-1px);
+  }
+  .logo-glass.expanded {
+    background: rgba(242, 242, 238, 0.14);
+    border-color: rgba(242, 242, 238, 0.55);
+    padding-inline: 1.15rem;
+    box-shadow: 0 0 20px rgba(242, 242, 238, 0.25);
+  }
+
+  .nav-links{ display:flex; gap:2rem; font-size:.92rem; font-weight:500; }
+  .nav-links a{ position:relative; padding-bottom:3px; }
+  .nav-links a::after{ content:''; position:absolute; left:0; bottom:0; width:0; height:1px; background:currentColor; transition:width .3s var(--ease); }
+  .nav-links a:hover::after{ width:100%; }
+  .header-right{ display:flex; align-items:center; gap:1.5rem; }
+  .clock{ font-family:var(--font-mono); font-size:.82rem; opacity:.85; }
+  .nav-contact{ display:inline-flex; align-items:center; padding:.55em 1.3em; font-family:var(--font-body); font-weight:500; font-size:.85rem; border:1.5px solid var(--white); background: rgba(242,242,238,0.05); backdrop-filter: blur(8px); transition:all .3s var(--ease); border-radius: 4px; }
+  .nav-contact:hover{ background:var(--white); color:var(--black); }
+  .nav-toggle{ display:none; position:relative; width:26px; height:18px; cursor:pointer; padding:0; }
+  .nav-toggle span{ position:absolute; left:0; width:100%; height:2px; background:currentColor; transition:transform .3s var(--ease); }
+  .nav-toggle span:first-child{ top:0; }
+  .nav-toggle span:last-child{ bottom:0; }
+  .nav-toggle[aria-expanded="true"] span:first-child{ transform:translateY(8px) rotate(45deg); }
+  .nav-toggle[aria-expanded="true"] span:last-child{ transform:translateY(-8px) rotate(-45deg); }
+
+  .mobile-menu{ position:fixed; inset:0; background:rgba(5,5,5,0.95); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); color:var(--white); z-index:450; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:1.4rem; padding:2rem clamp(20px,8vw,64px); transform:translateY(-100%); transition:transform .5s var(--ease); }
+  .mobile-menu.is-open{ transform:translateY(0); }
+  .mobile-menu a{ font-family:var(--font-display); font-weight:600; font-size:clamp(1.7rem,7vw,2.6rem); }
+  body.menu-open{ overflow:hidden; }
+
+  /* ============ Buttons ============ */
+  .btn{ display:inline-flex; align-items:center; gap:.5rem; padding:.9em 1.7em; font-family:var(--font-body); font-weight:500; font-size:.95rem; border:1.5px solid var(--white); backdrop-filter: blur(12px); border-radius: 4px; transition:all .3s var(--ease); }
+  .btn-solid{ background:var(--white); color:var(--black); }
+  .btn-solid:hover{ background:transparent; color:var(--white); }
+  .btn-outline{ background:rgba(242,242,238,0.05); color:var(--white); }
+  .btn-outline:hover{ background:var(--white); color:var(--black); }
+  .arrow{ display:inline-block; transition:transform .3s var(--ease); }
+  .btn:hover .arrow{ transform:translateX(5px); }
+
+  /* ============ Hero ============ */
+  .hero{ min-height:100vh; min-height:100svh; display:flex; align-items:center; padding-top:clamp(120px,14vw,180px); padding-bottom:clamp(72px,10vw,120px); position:relative; overflow:hidden; }
+  
+  .hero-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.85;
+  }
+
+  .hero-inner{ position:relative; z-index:1; width:100%; }
+  .hero-title{ font-weight:900; text-transform:uppercase; font-size:clamp(3rem,8.5vw,7.3rem); line-height:.96; letter-spacing:-.01em; }
+  .line-mask{ display:block; overflow:hidden; }
+  .line-inner{ display:block; transform:none; }
+
+  .hero-alias{ margin-top:1.6rem; display:flex; align-items:baseline; gap:.6rem; font-family:var(--font-mono); }
+  .alias-label{ font-size:.85rem; color:rgba(242,242,238,0.65); }
+  .alias-text{ font-weight:700; letter-spacing:.04em; font-size:clamp(1.1rem,2.2vw,1.5rem); }
+
+  .hero-desc{ margin-top:2rem; max-width:52ch; color:rgba(242,242,238,0.7); font-size:clamp(1rem,1.3vw,1.15rem); line-height:1.7; }
+  .hero-actions{ margin-top:2.5rem; display:flex; gap:1rem; flex-wrap:wrap; }
+
+  .scroll-cue{ position:absolute; left:clamp(20px,5vw,64px); bottom:2.5rem; display:flex; align-items:center; gap:.75rem; font-family:var(--font-mono); font-size:.78rem; color:rgba(242,242,238,0.6); z-index:1; }
+  .scroll-line{ width:1px; height:34px; background:rgba(242,242,238,0.2); position:relative; overflow:hidden; }
+  .scroll-line::after{ content:''; position:absolute; top:0; left:0; width:100%; height:50%; background:var(--white); animation:scrollLine 1.8s ease-in-out infinite; }
+  @keyframes scrollLine{ from{ transform:translateY(-100%);} to{ transform:translateY(300%);} }
+
+  /* ============ Marquee ============ */
+  .marquee{ overflow:hidden; border-top:1px solid rgba(242,242,238,0.12); border-bottom:1px solid rgba(242,242,238,0.12); padding-block:1rem; background: rgba(5,5,5,0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .marquee-track{ display:flex; width:max-content; animation:marquee 24s linear infinite; }
+  .marquee:hover .marquee-track{ animation-play-state:paused; }
+  .marquee-item{ font-family:var(--font-display); font-weight:700; text-transform:uppercase; font-size:clamp(1.05rem,2.4vw,1.5rem); padding-inline:1.4rem; white-space:nowrap; }
+  .marquee-item::after{ content:'/'; margin-left:1.4rem; opacity:.4; }
+  @keyframes marquee{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+
+  /* ============ Shared section bits ============ */
+  section{ padding-block:clamp(80px,11vw,150px); scroll-margin-top:90px; position:relative; }
+  .eyebrow{ font-family:var(--font-mono); font-size:.85rem; color:rgba(242,242,238,0.65); margin-bottom:1.25rem; }
+  .section-sub{ margin-top:1rem; max-width:56ch; color:rgba(242,242,238,0.7); font-size:clamp(1rem,1.2vw,1.1rem); line-height:1.7; }
+  section h2{ font-weight:700; font-size:clamp(2rem,4.5vw,3.4rem); max-width:15ch; letter-spacing:-.01em; }
+
+  /* ============ About & ID Card ============ */
+  .about-grid{ display:grid; grid-template-columns:1.1fr .9fr; gap:clamp(2.5rem,6vw,5rem); align-items:center; }
+  .about-copy p{ color:rgba(242,242,238,0.7); font-size:clamp(1rem,1.2vw,1.1rem); line-height:1.75; max-width:52ch; }
+  
+  .id-card{ 
+    position:relative; 
+    overflow:hidden; 
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 1.586 / 1;
+    border-radius: 14px;
+    padding: 1.4rem 1.6rem; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between;
+    margin-inline: auto;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(242,242,238,0.15);
+  }
+  .id-card::after{ content:''; position:absolute; left:0; right:0; height:35%; background:linear-gradient(to bottom, transparent, rgba(242,242,238,.25), transparent); animation:scan 3.2s linear infinite; pointer-events:none; }
+  @keyframes scan{ from{ transform:translateY(-120%);} to{ transform:translateY(320%);} }
+
+  /* Obito Mask Animated Graphic Container inside ID Card */
+  .obito-mask-container {
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 140px;
+    height: 140px;
+    pointer-events: none;
+    opacity: 0.35;
+    transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+    z-index: 0;
+  }
+  .id-card:hover .obito-mask-container {
+    opacity: 0.6;
+    transform: translateY(-50%) scale(1.06);
+  }
+  .id-card > *:not(.obito-mask-container) {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .corner{ position:absolute; width:16px; height:16px; border:1.5px solid var(--white); opacity:.7; transition: all 0.3s var(--ease); z-index: 2; }
+  .id-card:hover .corner { border-color: rgba(242, 242, 238, 1); filter: drop-shadow(0 0 6px rgba(242,242,238,0.8)); }
+  .corner-tl{ top:10px; left:10px; border-right:none; border-bottom:none; }
+  .corner-tr{ top:10px; right:10px; border-left:none; border-bottom:none; }
+  .corner-bl{ bottom:10px; left:10px; border-right:none; border-top:none; }
+  .corner-br{ bottom:10px; right:10px; border-left:none; border-top:none; }
+
+  .id-header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+  .id-kicker{ font-family:var(--font-mono); font-size:.68rem; color:rgba(242,242,238,0.65); margin:0; letter-spacing: 0.08em; }
+  .card-chip { width: 32px; height: 24px; background: linear-gradient(135deg, #d4af37, #f7e08b, #aa7c11); border-radius: 4px; border: 1px solid rgba(0,0,0,0.4); opacity: 0.85; }
+
+  .id-middle { margin-block: auto; display: flex; flex-direction: column; gap: 0.2rem; }
+  .id-name{ font-family:var(--font-display); font-weight:600; font-size:clamp(1.1rem, 2vw, 1.35rem); line-height:1.15; margin: 0; }
+  .id-rule{ height:1px; background:linear-gradient(90deg, rgba(242,242,238,0.25), rgba(242,242,238,0.05)); margin-block:0.35rem; }
+  .id-online{ font-family:var(--font-mono); font-size:.68rem; color:rgba(242,242,238,0.6); margin:0; }
+  .id-alias{ font-family:var(--font-mono); font-weight:700; font-size:clamp(1rem, 1.8vw, 1.25rem); letter-spacing:.04em; margin:0; cursor: pointer; transition: color 0.3s var(--ease); }
+  .id-alias:hover { color: rgba(242,242,238,0.85); }
+
+  /* Glass Box inside ID Card for Status */
+  .id-footer { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+  .id-status-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    background: rgba(242, 242, 238, 0.04);
+    border: 1px solid rgba(242, 242, 238, 0.16);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .active-line {
+    width: 18px;
+    height: 3px;
+    background: #00ff88;
+    border-radius: 2px;
+    box-shadow: 0 0 10px #00ff88;
+    animation: pulseActiveLine 1.8s ease-in-out infinite alternate;
+  }
+  @keyframes pulseActiveLine {
+    0% { opacity: 0.4; width: 12px; box-shadow: 0 0 4px #00ff88; }
+    100% { opacity: 1; width: 22px; box-shadow: 0 0 12px #00ff88, 0 0 20px #00ff88; }
+  }
+  .active-text {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #00ff88;
+    text-transform: uppercase;
+  }
+
+  /* ============ Projects ============ */
+  .projects-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1.75rem; margin-top:3rem; }
+  .project-card{ border:1.5px solid rgba(242,242,238,0.15); }
+  .project-card:hover{ transform:translateY(-6px); border-color: rgba(242,242,238,0.35); }
+  .project-card--soon{ border-style:dashed; opacity:.7; }
+  .project-card--soon:hover{ transform:none; }
+  .window-bar{ display:flex; align-items:center; gap:.4rem; padding:.85rem 1rem; border-bottom:1px solid rgba(242,242,238,0.12); background: rgba(5,5,5,0.3); }
+  .dot{ width:7px; height:7px; border-radius:50%; border:1px solid var(--white); opacity:.6; }
+  .filename{ margin-left:.6rem; font-family:var(--font-mono); font-size:.76rem; color:rgba(242,242,238,0.6); }
+  .project-body{ padding:1.75rem; }
+  .project-body h3{ font-weight:600; font-size:1.3rem; margin-bottom:.5rem; }
+  .project-body p{ color:rgba(242,242,238,0.7); font-size:.98rem; line-height:1.6; }
+  .tags{ font-family:var(--font-mono); font-size:.8rem; color:rgba(242,242,238,0.6); margin:.75rem 0 1.25rem; }
+  .project-link{ display:inline-flex; align-items:center; gap:.4rem; font-family:var(--font-mono); font-size:.88rem; font-weight:500; border-bottom:1.5px solid transparent; padding-bottom:2px; transition:border-color .3s var(--ease), transform 0.3s var(--ease); }
+  .project-link:hover{ border-color:var(--white); transform: translateX(4px); }
+  .dots-loading{ display:flex; gap:.35rem; margin-top:.5rem; }
+  .dots-loading span{ width:5px; height:5px; border-radius:50%; background:var(--white); opacity:.25; display:inline-block; animation:pulseDot 1.4s ease-in-out infinite; }
+  .dots-loading span:nth-child(2){ animation-delay:.2s; }
+  .dots-loading span:nth-child(3){ animation-delay:.4s; }
+  @keyframes pulseDot{ 0%,100%{opacity:.2;} 50%{opacity:.9;} }
+
+  /* ============ Socials / Connect list ============ */
+  .connect-list{ margin-top:2.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
+  .connect-row{ position:relative; display:flex; justify-content:space-between; align-items:center; padding:1.35rem 1.5rem; overflow:hidden; }
+  .connect-row::before{ content:''; position:absolute; inset:0; background:var(--white); transform:scaleX(0); transform-origin:left; transition:transform .4s var(--ease); z-index:0; }
+  .connect-row:hover::before{ transform:scaleX(1); }
+  .connect-name{ position:relative; z-index:1; font-family:var(--font-display); font-weight:700; font-size:clamp(1.25rem,3vw,1.8rem); transition:color .35s var(--ease); transition-delay:.05s; }
+  .connect-meta{ position:relative; z-index:1; display:flex; align-items:center; gap:.5rem; font-family:var(--font-mono); font-size:.8rem; color:rgba(242,242,238,0.65); transition:color .35s var(--ease); transition-delay:.05s; }
+  .connect-row:hover .connect-name, .connect-row:hover .connect-meta{ color:var(--black); }
+
+  /* ============ Contact ============ */
+  .contact-inner{ max-width:760px; padding: 3.5rem clamp(20px,5vw,48px); }
+  .email-link{ display:inline-block; margin-top:2rem; font-family:var(--font-mono); font-weight:700; font-size:clamp(1.2rem,4vw,2.2rem); border-bottom:2px solid var(--white); padding-bottom:.35rem; word-break:break-all; transition: transform 0.3s var(--ease), opacity 0.3s var(--ease); }
+  .email-link:hover { transform: scale(1.02); opacity: 0.9; }
+
+  /* ============ Footer ============ */
+  .site-footer{ padding-block:2.5rem; border-top: 1px solid rgba(242,242,238,0.1); }
+  .footer-inner{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; font-family:var(--font-mono); font-size:.85rem; color:rgba(242,242,238,0.65); }
+  .back-to-top{ transition:transform .3s var(--ease); }
+  .back-to-top:hover{ transform:translateY(-4px); }
+
+  /* ============ Responsive ============ */
+  @media (max-width:880px){
+    .nav-links,.header-right .nav-contact,.header-right .clock{ display:none; }
+    .nav-toggle{ display:block; }
+    .about-grid{ grid-template-columns:1fr; }
+    .projects-grid{ grid-template-columns:1fr; }
+  }
+  @media (max-width:560px){
+    .hero-actions{ flex-direction:column; align-items:flex-start; }
+    .connect-name{ font-size:1.15rem; }
+    .connect-meta{ font-size:.72rem; }
+    .obito-mask-container{ width:120px; height:120px; right: -15px; }
+  }
+
+  /* ============ Reduced motion ============ */
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+    html{ scroll-behavior:auto; }
+    .line-inner{ transform:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" aria-hidden="true"></div>
+<div class="cursor-dot" aria-hidden="true"></div>
+<div class="cursor-ring" aria-hidden="true"></div>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="#top" class="logo-glass magnetic" id="logoBtn" aria-label="Toggle logo view"><span id="logoText">T/R</span></a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#about">About</a>
+      <a href="#projects">Projects</a>
+      <a href="#socials">Socials</a>
+    </nav>
+    <div class="header-right">
+      <span class="clock" id="clock" aria-hidden="true"></span>
+      <a href="#contact" class="nav-contact magnetic">Contact</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav class="mobile-menu" id="mobileMenu" aria-label="Mobile">
+  <a href="#about">About</a>
+  <a href="#projects">Projects</a>
+  <a href="#socials">Socials</a>
+  <a href="#contact">Contact</a>
+</nav>
+
+<main id="top">
+
+  <section id="hero" class="hero panel--dark">
+    <canvas id="heroCanvas" class="hero-canvas" aria-hidden="true"></canvas>
+
+    <div class="container hero-inner">
+      <h1 class="hero-title">
+        <span class="line-mask"><span class="line-inner">Robiul Rumman</span></span>
+        <span class="line-mask"><span class="line-inner" style="animation-delay:.28s">Razim</span></span>
+      </h1>
+      <p class="hero-alias">
+        <span class="alias-label">online as</span>
+        <span class="alias-text" id="aliasText">TAMASRAZIM</span>
+      </p>
+      <p class="hero-desc" data-reveal style="--i:2">Exploring technology, computing, digital systems, and space-time architecture under the mask.</p>
+      <div class="hero-actions" data-reveal style="--i:3">
+        <a href="#projects" class="btn btn-solid magnetic">Explore my work <span class="arrow">→</span></a>
+        <a href="#about" class="btn btn-outline magnetic">About me</a>
+      </div>
+    </div>
+    <div class="scroll-cue" aria-hidden="true"><span class="scroll-line"></span>Kamui Scroll</div>
+  </section>
+
+  <div class="marquee panel--dark" aria-hidden="true">
+    <div class="marquee-track">
+      <span class="marquee-item">Technology</span><span class="marquee-item">Systems</span><span class="marquee-item">Digital Media</span><span class="marquee-item">Gaming</span><span class="marquee-item">Web Development</span>
+      <span class="marquee-item">Technology</span><span class="marquee-item">Systems</span><span class="marquee-item">Digital Media</span><span class="marquee-item">Gaming</span><span class="marquee-item">Web Development</span>
+    </div>
+  </div>
+
+  <section id="about" class="about panel--light">
+    <div class="container about-grid">
+      <div class="about-copy">
+        <p class="eyebrow" data-reveal>01 / About</p>
+        <h2 data-reveal style="--i:1">More than a username.</h2>
+        <p data-reveal style="--i:2">Tamasrazim is the online identity. Robiul Rumman Razim is the person behind it.</p>
+        <p data-reveal style="--i:3">I'm interested in understanding technology from both sides — the software people interact with, and the systems underneath it.</p>
+        <p data-reveal style="--i:4">This site is a personal space for projects, experiments and the things I'm building.</p>
+      </div>
+      <div class="id-card glass-box animated-float" data-reveal style="--i:2">
+        <span class="corner corner-tl"></span><span class="corner corner-tr"></span><span class="corner corner-bl"></span><span class="corner corner-br"></span>
+        
+        <!-- Obito's Mask Animated Canvas -->
+        <div class="obito-mask-container">
+          <canvas id="obitoMaskCanvas" width="160" height="160" aria-hidden="true"></canvas>
+        </div>
+
+        <div class="id-header">
+          <p class="id-kicker">REGISTERED IDENTITY</p>
+          <div class="card-chip" title="EMV Chip"></div>
+        </div>
+
+        <div class="id-middle">
+          <p class="id-name">Robiul Rumman Razim</p>
+          <div class="id-rule"></div>
+          <p class="id-online">ONLINE HANDLE</p>
+          <p class="id-alias" id="idCardAlias">TAMASRAZIM</p>
+        </div>
+
+        <div class="id-footer">
+          <div class="id-status-box glass-box">
+            <span class="active-line"></span>
+            <span class="active-text">Active</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects" class="projects panel--light">
+    <div class="container">
+      <p class="eyebrow" data-reveal>02 / Projects</p>
+      <h2 data-reveal style="--i:1">Stuff I've built and explored.</h2>
+      <p class="section-sub" data-reveal style="--i:2">A running log of projects, repositories and experiments.</p>
+      <div class="projects-grid">
+        <article class="project-card glass-box animated-float" data-reveal style="--i:3">
+          <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="filename">personal-web.html</span></div>
+          <div class="project-body">
+            <h3>Personal Web</h3>
+            <p>The official digital home of Robiul Rumman Razim.</p>
+            <p class="tags">HTML · CSS · GitHub Pages</p>
+            <a href="https://tamasrazim.github.io/" class="project-link magnetic" target="_blank" rel="noopener">Visit site <span class="arrow">→</span></a>
+          </div>
+        </article>
+        <article class="project-card glass-box animated-float" data-reveal style="--i:4">
+          <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="filename">experiments.sh</span></div>
+          <div class="project-body">
+            <h3>Technical Experiments</h3>
+            <p>Software, systems, scripts and technology experiments.</p>
+            <p class="tags">Code · Systems · Research</p>
+            <a href="https://github.com/Tamasrazim" class="project-link magnetic" target="_blank" rel="noopener">View GitHub <span class="arrow">→</span></a>
+          </div>
+        </article>
+        <article class="project-card glass-box animated-float" data-reveal style="--i:5">
+          <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="filename">gaming-media.mp4</span></div>
+          <div class="project-body">
+            <h3>Gaming &amp; Media</h3>
+            <p>Gameplay capture, editing and technical content creation.</p>
+            <p class="tags">Gaming · OBS · Video</p>
+          </div>
+        </article>
+        <article class="project-card project-card--soon glass-box animated-float" data-reveal style="--i:6">
+          <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="filename">coming-soon</span></div>
+          <div class="project-body">
+            <h3>Coming soon</h3>
+            <p>More projects and experiments will appear here.</p>
+            <p class="dots-loading"><span></span><span></span><span></span></p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="socials" class="socials panel--dark">
+    <div class="container">
+      <p class="eyebrow" data-reveal>03 / Socials</p>
+      <h2 data-reveal style="--i:1">Find me online.</h2>
+      <p class="section-sub" data-reveal style="--i:2">My presence across social and gaming platforms.</p>
+      <div class="connect-list">
+        <a class="connect-row glass-box" href="https://www.linkedin.com/in/Tamasrazim" target="_blank" rel="noopener" data-reveal style="--i:3"><span class="connect-name">LinkedIn</span><span class="connect-meta">Professional <span class="arrow">→</span></span></a>
+        <a class="connect-row glass-box" href="https://www.facebook.com/Tamasrazim" target="_blank" rel="noopener" data-reveal style="--i:3"><span class="connect-name">Facebook</span><span class="connect-meta">Social <span class="arrow">→</span></span></a>
+        <a class="connect-row glass-box" href="https://www.facebook.com/Tamasrazim2" target="_blank" rel="noopener" data-reveal style="--i:3"><span class="connect-name">Facebook (2)</span><span class="connect-meta">Social <span class="arrow">→</span></span></a>
+        <a class="connect-row glass-box" href="https://www.tiktok.com/@Tamasrazim" target="_blank" rel="noopener" data-reveal style="--i:4"><span class="connect-name">TikTok</span><span class="connect-meta">Social <span class="arrow">→</span></span></a>
+        <a class="connect-row glass-box" href="https://www.instagram.com/Tamasrazim" target="_blank" rel="noopener" data-reveal style="--i:4"><span class="connect-name">Instagram</span><span class="connect-meta">Social <span class="arrow">→</span></span></a>
+        <a class="connect-row glass-box" href="https://steamcommunity.com/id/Tamasrazim" target="_blank" rel="noopener" data-reveal style="--i:5"><span class="connect-name">Steam</span><span class="connect-meta">Gaming <span class="arrow">→</span></span></a>
+        <a class="connect-row glass-box" href="https://discord.com/users/Tamasrazim" target="_blank" rel="noopener" data-reveal style="--i:5"><span class="connect-name">Discord</span><span class="connect-meta">Gaming <span class="arrow">→</span></span></a>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee panel--dark" aria-hidden="true">
+    <div class="marquee-track">
+      <span class="marquee-item">Technology</span><span class="marquee-item">Systems</span><span class="marquee-item">Digital Media</span><span class="marquee-item">Gaming</span><span class="marquee-item">Web Development</span>
+      <span class="marquee-item">Technology</span><span class="marquee-item">Systems</span><span class="marquee-item">Digital Media</span><span class="marquee-item">Gaming</span><span class="marquee-item">Web Development</span>
+    </div>
+  </div>
+
+  <section id="contact" class="contact panel--light">
+    <div class="container contact-inner glass-box animated-float">
+      <p class="eyebrow" data-reveal>Contact</p>
+      <h2 data-reveal style="--i:1">Let's connect.</h2>
+      <p data-reveal style="--i:2">For professional inquiries, projects, collaboration, or anything worth discussing.</p>
+      <a href="mailto:tasnimaktertamanna2@gmail.com" class="email-link magnetic" id="emailLink" data-reveal style="--i:3">tasnimaktertamanna2@gmail.com</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer panel--dark">
+  <div class="container footer-inner">
+    <p>© 2026 Robiul Rumman Razim</p>
+    <a href="#top" class="back-to-top">Tamasrazim ↑</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Obito Kamui Space-Time Void Hero Canvas ---------- */
+  (function initHeroCanvas(){
+    var canvas = document.getElementById('heroCanvas');
+    if(!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var particles = [];
+    var dimensionBlocks = [];
+    var tomoeList = [];
+    var mouse = { x: null, y: null, radius: 240, isHovered: false };
+    var width = 0, height = 0;
+    var vortexAngle = 0;
+
+    function resize(){
+      var parent = canvas.parentElement;
+      width = canvas.width = parent.clientWidth;
+      height = canvas.height = parent.clientHeight;
+      initElements();
+    }
+
+    function initElements(){
+      particles = [];
+      dimensionBlocks = [];
+      tomoeList = [];
+
+      // Particle Chakra Dust
+      var pCount = Math.min(Math.floor((width * height) / 10000), 85);
+      for(var i = 0; i < pCount; i++){
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          angle: Math.random() * Math.PI * 2,
+          dist: Math.random() * Math.max(width, height) * 0.5 + 40,
+          speed: (Math.random() * 0.4 + 0.2),
+          size: Math.random() * 2 + 0.8,
+          color: Math.random() > 0.45 ? 'rgba(255, 60, 0, ' : (Math.random() > 0.5 ? 'rgba(255, 140, 0, ' : 'rgba(242, 242, 238, '),
+          alpha: Math.random() * 0.6 + 0.2
+        });
+      }
+
+      // Kamui Dimension Pillars / Floating Blocks (The Kamui Pocket Dimension geometry)
+      var blockCount = Math.min(Math.floor(width / 160), 12);
+      for(var b = 0; b < blockCount; b++){
+        dimensionBlocks.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          w: Math.random() * 45 + 25,
+          h: Math.random() * 65 + 35,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          rot: Math.random() * Math.PI,
+          vRot: (Math.random() - 0.5) * 0.005,
+          alpha: Math.random() * 0.15 + 0.05
+        });
+      }
+
+      // Floating Mangekyou Sharingan Tomoe
+      for(var t = 0; t < 6; t++){
+        tomoeList.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          size: Math.random() * 12 + 10,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: (Math.random() - 0.5) * 0.4,
+          rot: Math.random() * Math.PI * 2,
+          vRot: (Math.random() - 0.5) * 0.02,
+          alpha: Math.random() * 0.3 + 0.15
+        });
+      }
+    }
+
+    window.addEventListener('resize', resize, { passive: true });
+    window.addEventListener('mousemove', function(e){
+      var rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+      mouse.isHovered = true;
+    }, { passive: true });
+
+    window.addEventListener('mouseleave', function(){
+      mouse.isHovered = false;
+    });
+
+    // Helper to draw Kamui Tomoe shape (Sharingan Blade)
+    function drawTomoe(ctx, x, y, size, angle, alpha) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.beginPath();
+      ctx.arc(0, 0, size * 0.45, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 40, 0, ' + alpha + ')';
+      ctx.fill();
+
+      // Curved tail of tomoe
+      ctx.beginPath();
+      ctx.moveTo(0, -size * 0.45);
+      ctx.quadraticCurveTo(size * 0.7, -size * 0.2, size * 0.4, size * 0.6);
+      ctx.quadraticCurveTo(size * 0.1, size * 0.3, 0, size * 0.45);
+      ctx.fillStyle = 'rgba(255, 60, 0, ' + (alpha * 0.85) + ')';
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawHeroCanvas(){
+      ctx.clearRect(0, 0, width, height);
+
+      var vortexX = mouse.isHovered && mouse.x !== null ? mouse.x : width * 0.75;
+      var vortexY = mouse.isHovered && mouse.y !== null ? mouse.y : height * 0.45;
+      vortexAngle += 0.012;
+
+      // 1. Kamui Vortex Distortion Lines
+      ctx.save();
+      ctx.translate(vortexX, vortexY);
+      var numRays = 16;
+      for(var r = 0; r < numRays; r++){
+        var rAngle = (r * Math.PI * 2 / numRays) + vortexAngle;
+        ctx.beginPath();
+        var maxLen = Math.max(width, height) * 0.6;
+        for(var step = 10; step < maxLen; step += 15){
+          var twist = rAngle + (step * 0.0035);
+          var px = Math.cos(twist) * step;
+          var py = Math.sin(twist) * step;
+          if(step === 10) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        var rayAlpha = 0.08 + Math.sin(vortexAngle + r) * 0.03;
+        ctx.strokeStyle = (r % 2 === 0) ? 'rgba(255, 68, 0, ' + rayAlpha + ')' : 'rgba(242, 242, 238, ' + (rayAlpha * 0.5) + ')';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // 2. Kamui Dimensional Blocks (Pillars floating in space)
+      for(var b = 0; b < dimensionBlocks.length; b++){
+        var blk = dimensionBlocks[b];
+        blk.x += blk.vx;
+        blk.y += blk.vy;
+        blk.rot += blk.vRot;
+
+        if(blk.x < -100) blk.x = width + 50;
+        if(blk.x > width + 100) blk.x = -50;
+        if(blk.y < -100) blk.y = height + 50;
+        if(blk.y > height + 100) blk.y = -50;
+
+        ctx.save();
+        ctx.translate(blk.x, blk.y);
+        ctx.rotate(blk.rot);
+        ctx.fillStyle = 'rgba(242, 242, 238, ' + blk.alpha + ')';
+        ctx.strokeStyle = 'rgba(255, 80, 0, ' + (blk.alpha * 1.5) + ')';
+        ctx.lineWidth = 1;
+        ctx.fillRect(-blk.w/2, -blk.h/2, blk.w, blk.h);
+        ctx.strokeRect(-blk.w/2, -blk.h/2, blk.w, blk.h);
+        ctx.restore();
+      }
+
+      // 3. Floating Mangekyou Tomoe
+      for(var t = 0; t < tomoeList.length; t++){
+        var tm = tomoeList[t];
+        tm.x += tm.vx;
+        tm.y += tm.vy;
+        tm.rot += tm.vRot;
+
+        if(tm.x < -30) tm.x = width + 20;
+        if(tm.x > width + 30) tm.x = -20;
+        if(tm.y < -30) tm.y = height + 20;
+        if(tm.y > height + 30) tm.y = -20;
+
+        drawTomoe(ctx, tm.x, tm.y, tm.size, tm.rot, tm.alpha);
+      }
+
+      // 4. Kamui Chakra Particles swirling toward vortex
+      for(var i = 0; i < particles.length; i++){
+        var p = particles[i];
+        p.angle += p.speed * 0.03;
+        p.dist -= p.speed * 0.7;
+
+        if(p.dist <= 15){
+          p.dist = Math.random() * Math.max(width, height) * 0.45 + 100;
+          p.angle = Math.random() * Math.PI * 2;
+        }
+
+        var px = vortexX + Math.cos(p.angle + (p.dist * 0.005)) * p.dist;
+        var py = vortexY + Math.sin(p.angle + (p.dist * 0.005)) * p.dist;
+
+        ctx.beginPath();
+        ctx.arc(px, py, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = p.color + p.alpha + ')';
+        ctx.fill();
+
+        // Connect particles near vortex with glowing Kamui chakra lines
+        if(p.dist < 120){
+          ctx.beginPath();
+          ctx.moveTo(px, py);
+          ctx.lineTo(vortexX, vortexY);
+          ctx.strokeStyle = 'rgba(255, 60, 0, ' + ((1 - p.dist/120) * 0.25) + ')';
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+
+      requestAnimationFrame(drawHeroCanvas);
+    }
+
+    resize();
+    if(!prefersReduced){
+      drawHeroCanvas();
+    }
+  })();
+
+  /* ---------- Dynamic Obito Mask & Kamui Mangekyou Sharingan Canvas ---------- */
+  (function initObitoMask(){
+    var canvas = document.getElementById('obitoMaskCanvas');
+    if(!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var angle = 0;
+    var eyeSpin = 0;
+    var isCardHovered = false;
+
+    var parentCard = canvas.closest('.id-card');
+    if(parentCard){
+      parentCard.addEventListener('mouseenter', function(){ isCardHovered = true; });
+      parentCard.addEventListener('mouseleave', function(){ isCardHovered = false; });
+    }
+
+    function drawMask(){
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      var cx = 110;
+      var cy = 110;
+      
+      // Eye hole center position (upper right like Obito's spiral mask)
+      var eyeX = cx + 24;
+      var eyeY = cy - 22;
+      
+      ctx.save();
+      
+      // Outer mask contour outline
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, 78, 94, -0.08, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(242, 242, 238, 0.45)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Swirling Spiral ridges emanating from Obito's eye hole
+      var numSpirals = 6;
+      var maxRadius = 115;
+      
+      for(var i = 0; i < numSpirals; i++){
+        ctx.beginPath();
+        var startAngle = (i * Math.PI * 2 / numSpirals) + angle;
+        
+        for(var r = 8; r < maxRadius; r += 2){
+          var currentAngle = startAngle + (r * 0.042);
+          var px = eyeX + Math.cos(currentAngle) * r * 0.88;
+          var py = eyeY + Math.sin(currentAngle) * r * 1.08;
+          
+          if(r === 8){
+            ctx.moveTo(px, py);
+          } else {
+            ctx.lineTo(px, py);
+          }
+        }
+        
+        // Dynamic Glowing Orange & Crimson Spirals
+        ctx.strokeStyle = (i % 2 === 0) ? 'rgba(255, 90, 0, 0.85)' : 'rgba(242, 242, 238, 0.5)';
+        ctx.lineWidth = (i % 2 === 0) ? 2.2 : 1.4;
+        ctx.stroke();
+      }
+
+      // Eye hole background (Void core)
+      ctx.beginPath();
+      ctx.arc(eyeX, eyeY, 13, 0, Math.PI * 2);
+      ctx.fillStyle = '#050505';
+      ctx.fill();
+      ctx.strokeStyle = '#ff3300';
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = '#ff3300';
+      ctx.shadowBlur = isCardHovered ? 20 : 12;
+      ctx.stroke();
+
+      // Obito's Mangekyou Sharingan Pattern inside eye hole (3 connected triangular blades)
+      ctx.save();
+      ctx.translate(eyeX, eyeY);
+      ctx.rotate(eyeSpin);
+
+      // Red Iris
+      ctx.beginPath();
+      ctx.arc(0, 0, 10, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(230, 0, 0, 0.9)';
+      ctx.fill();
+
+      // Mangekyou 3-blade Pinwheel (Obito's Kamui pattern)
+      var blades = 3;
+      for(var b = 0; b < blades; b++){
+        ctx.rotate((Math.PI * 2) / blades);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(7, -3, 9, -9);
+        ctx.quadraticCurveTo(3, -7, 0, 0);
+        ctx.fillStyle = '#050505';
+        ctx.fill();
+      }
+
+      // Pupil center
+      ctx.beginPath();
+      ctx.arc(0, 0, 3, 0, Math.PI * 2);
+      ctx.fillStyle = '#050505';
+      ctx.fill();
+
+      ctx.restore();
+      ctx.restore();
+
+      angle += 0.006;
+      eyeSpin += isCardHovered ? 0.08 : 0.02; // Spins rapidly when card is hovered!
+      requestAnimationFrame(drawMask);
+    }
+
+    if(!prefersReduced){
+      drawMask();
+    }
+  })();
+
+  /* ---------- Clock ---------- */
+  function updateClock(){
+    var el = document.getElementById('clock');
+    if(!el) return;
+    el.textContent = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  /* ---------- Logo Expand Text Glitch Animation ---------- */
+  var logoBtn = document.getElementById('logoBtn');
+  var logoText = document.getElementById('logoText');
+  var isLogoExpanded = false;
+
+  function glitchScramble(el, targetText, duration) {
+    duration = duration || 320;
+    var chars = '!<>-_/[]{}=+*#01';
+    var start = Date.now();
+    var timer = setInterval(function() {
+      var timePassed = Date.now() - start;
+      var progress = timePassed / duration;
+      if (progress >= 1) {
+        clearInterval(timer);
+        el.textContent = targetText;
+      } else {
+        var out = '';
+        for (var i = 0; i < targetText.length; i++) {
+          if (targetText[i] === ' ') out += ' ';
+          else out += chars[Math.floor(Math.random() * chars.length)];
+        }
+        el.textContent = out;
+      }
+    }, 30);
+  }
+
+  if (logoBtn && logoText) {
+    logoBtn.addEventListener('click', function(e) {
+      if (!isLogoExpanded) {
+        e.preventDefault();
+        isLogoExpanded = true;
+        logoBtn.classList.add('expanded');
+        // Expand animation shows ONLY "Tamasrazim"
+        glitchScramble(logoText, 'Tamasrazim', 350);
+      }
+    });
+
+    window.addEventListener('scroll', function() {
+      if (isLogoExpanded && window.scrollY > 60) {
+        isLogoExpanded = false;
+        logoBtn.classList.remove('expanded');
+        glitchScramble(logoText, 'T/R', 280);
+      }
+    }, { passive: true });
+  }
+
+  /* ---------- Obito's Mask Canvas Animation ---------- */
+  (function initObitoMask(){
+    var canvas = document.getElementById('obitoMaskCanvas');
+    if(!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var angle = 0;
+
+    function drawMask(){
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      var cx = 110;
+      var cy = 110;
+      
+      // Eye hole center position (upper right like Obito's spiral mask)
+      var eyeX = cx + 24;
+      var eyeY = cy - 22;
+      
+      ctx.save();
+      
+      // Outer mask contour outline
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, 78, 94, -0.08, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(242, 242, 238, 0.35)';
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+
+      // Swirling Spiral ridges emanating from Obito's eye hole
+      var numSpirals = 5;
+      var maxRadius = 115;
+      
+      for(var i = 0; i < numSpirals; i++){
+        ctx.beginPath();
+        var startAngle = (i * Math.PI * 2 / numSpirals) + angle;
+        
+        for(var r = 6; r < maxRadius; r += 2){
+          var currentAngle = startAngle + (r * 0.042);
+          var px = eyeX + Math.cos(currentAngle) * r * 0.88;
+          var py = eyeY + Math.sin(currentAngle) * r * 1.08;
+          
+          if(r === 6){
+            ctx.moveTo(px, py);
+          } else {
+            ctx.lineTo(px, py);
+          }
+        }
+        
+        // Alternating glowing orange & monochrome spirals
+        ctx.strokeStyle = (i % 2 === 0) ? 'rgba(255, 120, 30, 0.7)' : 'rgba(242, 242, 238, 0.45)';
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+      }
+
+      // Eye hole background (dark core)
+      ctx.beginPath();
+      ctx.arc(eyeX, eyeY, 10, 0, Math.PI * 2);
+      ctx.fillStyle = '#050505';
+      ctx.fill();
+      ctx.strokeStyle = '#ff7700';
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = '#ff7700';
+      ctx.shadowBlur = 12;
+      ctx.stroke();
+
+      // Sharingan subtle red center glow inside eye hole
+      ctx.beginPath();
+      ctx.arc(eyeX, eyeY, 3, 0, Math.PI * 2);
+      ctx.fillStyle = '#ff3300';
+      ctx.fill();
+
+      ctx.restore();
+
+      angle += 0.007; // smooth swirling rotation rate
+      requestAnimationFrame(drawMask);
+    }
+
+    if(!prefersReduced){
+      drawMask();
+    }
+  })();
+
+  /* ---------- Scroll progress ---------- */
+  var progressBar = document.querySelector('.progress-bar');
+  var ticking = false;
+  function updateProgress(){
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docHeight > 0 ? (window.scrollY/docHeight)*100 : 0;
+    if(progressBar) progressBar.style.width = pct + '%';
+    ticking = false;
+  }
+  window.addEventListener('scroll', function(){
+    if(!ticking){ requestAnimationFrame(updateProgress); ticking = true; }
+  }, {passive:true});
+  updateProgress();
+
+  /* ---------- Nav toggle ---------- */
+  var navToggle = document.getElementById('navToggle');
+  var mobileMenu = document.getElementById('mobileMenu');
+  if(navToggle && mobileMenu){
+    navToggle.addEventListener('click', function(){
+      var willOpen = !mobileMenu.classList.contains('is-open');
+      mobileMenu.classList.toggle('is-open', willOpen);
+      navToggle.setAttribute('aria-expanded', String(willOpen));
+      document.body.classList.toggle('menu-open', willOpen);
+    });
+    Array.prototype.forEach.call(mobileMenu.querySelectorAll('a'), function(a){
+      a.addEventListener('click', function(){
+        mobileMenu.classList.remove('is-open');
+        navToggle.setAttribute('aria-expanded','false');
+        document.body.classList.remove('menu-open');
+      });
+    });
+  }
+
+  /* ---------- Scramble text ---------- */
+  var scrambleChars = '!<>-_/[]{}=+*#01';
+  function scrambleReveal(el, text, stepMs){
+    stepMs = stepMs || 40;
+    var iteration = 0;
+    clearInterval(el.__scrambleTimer);
+    el.__scrambleTimer = setInterval(function(){
+      var out = '';
+      for(var i=0;i<text.length;i++){
+        if(text[i] === ' '){ out += ' '; continue; }
+        out += (i < iteration) ? text[i] : scrambleChars[Math.floor(Math.random()*scrambleChars.length)];
+      }
+      el.textContent = out;
+      if(iteration >= text.length){
+        clearInterval(el.__scrambleTimer);
+        el.textContent = text;
+      }
+      iteration += 0.6;
+    }, stepMs);
+  }
+
+  var aliasEl = document.getElementById('aliasText');
+  if(aliasEl && !prefersReduced){
+    var aliasText = aliasEl.textContent;
+    setTimeout(function(){ scrambleReveal(aliasEl, aliasText); }, 1100);
+    aliasEl.parentElement.addEventListener('mouseenter', function(){ scrambleReveal(aliasEl, aliasText); });
+  }
+
+  var idAlias = document.getElementById('idCardAlias');
+  if(idAlias && !prefersReduced){
+    idAlias.addEventListener('mouseenter', function(){ scrambleReveal(idAlias, 'TAMASRAZIM', 30); });
+  }
+
+  var emailLink = document.getElementById('emailLink');
+  if(emailLink && !prefersReduced){
+    var emailText = emailLink.textContent.trim();
+    emailLink.addEventListener('mouseenter', function(){ scrambleReveal(emailLink, emailText, 28); });
+  }
+
+  /* ---------- Reveal on scroll ---------- */
+  var revealEls = document.querySelectorAll('[data-reveal]');
+  if('IntersectionObserver' in window && !prefersReduced){
+    var revealObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('is-visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, {threshold:0.15, rootMargin:'0px 0px -8% 0px'});
+    revealEls.forEach(function(el){ revealObserver.observe(el); });
+  } else {
+    revealEls.forEach(function(el){ el.classList.add('is-visible'); });
+  }
+
+  /* ---------- 3D Tilt Effect for Glass Boxes ---------- */
+  if(!prefersReduced){
+    var glassBoxes = document.querySelectorAll('.glass-box');
+    glassBoxes.forEach(function(box){
+      box.addEventListener('mousemove', function(e){
+        var rect = box.getBoundingClientRect();
+        var x = e.clientX - rect.left - rect.width/2;
+        var y = e.clientY - rect.top - rect.height/2;
+        box.style.transform = 'perspective(1000px) rotateX(' + (-y/30) + 'deg) rotateY(' + (x/30) + 'deg) translateY(-6px)';
+      });
+      box.addEventListener('mouseleave', function(){
+        box.style.transform = '';
+      });
+    });
+  }
+
+  /* ---------- Magnetic elements ---------- */
+  if(!prefersReduced){
+    document.querySelectorAll('.magnetic').forEach(function(el){
+      el.addEventListener('mousemove', function(e){
+        var r = el.getBoundingClientRect();
+        var relX = e.clientX - r.left - r.width/2;
+        var relY = e.clientY - r.top - r.height/2;
+        el.style.transform = 'translate(' + (relX*0.25) + 'px, ' + (relY*0.25) + 'px)';
+      });
+      el.addEventListener('mouseleave', function(){ el.style.transform = ''; });
+    });
+  }
+
+  /* ---------- Custom cursor ---------- */
+  var dot = document.querySelector('.cursor-dot');
+  var ring = document.querySelector('.cursor-ring');
+  if(dot && ring && window.matchMedia('(pointer: fine)').matches && !prefersReduced){
+    var mouseX=0, mouseY=0, ringX=0, ringY=0, started=false;
+    window.addEventListener('mousemove', function(e){
+      mouseX = e.clientX; mouseY = e.clientY;
+      dot.style.transform = 'translate(' + mouseX + 'px, ' + mouseY + 'px) translate(-50%, -50%)';
+      if(!started){
+        ringX = mouseX; ringY = mouseY;
+        document.documentElement.classList.add('has-cursor');
+        started = true;
+      }
+    });
+    document.querySelectorAll('a, button, .magnetic, .glass-box').forEach(function(el){
+      el.addEventListener('mouseenter', function(){ ring.classList.add('is-hover'); });
+      el.addEventListener('mouseleave', function(){ ring.classList.remove('is-hover'); });
+    });
+    (function loopRing(){
+      ringX += (mouseX-ringX)*0.16;
+      ringY += (mouseY-ringY)*0.16;
+      ring.style.transform = 'translate(' + ringX + 'px, ' + ringY + 'px) translate(-50%, -50%)';
+      requestAnimationFrame(loopRing);
+    })();
+  }
+
+})();
+</script>
+</body>
+</html>
