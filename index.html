@@ -196,31 +196,34 @@
     }
     .tap-ripple::before,
     .tap-ripple::after{
-      content:'';position:absolute;left:0;top:0;border:1px solid currentColor;
-      transform:translate(-50%,-50%);border-radius:50%;
-    }
-    .tap-ripple::before{
-      width:10px;height:10px;
-      animation:rippleCore .6s var(--ease) forwards;
+      content:'';position:absolute;left:0;top:0;transform:translate(-50%,-50%);
+      width:5px;height:5px;background:currentColor;border-radius:50%;
+      animation:signalCore .48s var(--ease) forwards;
     }
     .tap-ripple::after{
-      width:10px;height:10px;
-      border-radius:2px;
-      animation:rippleSquare .64s var(--ease) forwards;
+      background:transparent;border:1px solid currentColor;
+      animation:signalRing .58s var(--ease) forwards;
     }
-    @keyframes rippleCore{
-      0%{opacity:.9;width:8px;height:8px;box-shadow:0 0 0 0 currentColor}
-      35%{opacity:.62}
-      100%{opacity:0;width:76px;height:76px;box-shadow:0 0 0 10px transparent}
+    @keyframes signalCore{
+      0%{opacity:1;transform:translate(-50%,-50%) scale(.45)}
+      35%{opacity:.9;transform:translate(-50%,-50%) scale(1)}
+      100%{opacity:0;transform:translate(-50%,-50%) scale(.15)}
     }
-    @keyframes rippleCross{
-      0%{opacity:.72;transform:translate(-50%,-50%) scale(.3) rotate(45deg)}
-      100%{opacity:0;transform:translate(-50%,-50%) scale(1.45) rotate(45deg)}
+    @keyframes signalRing{
+      0%{opacity:.75;width:8px;height:8px}
+      100%{opacity:0;width:54px;height:54px}
     }
-    @keyframes rippleSquare{
-      0%{opacity:.72;transform:translate(-50%,-50%) rotate(0deg) scale(.2)}
-      45%{opacity:.42}
-      100%{opacity:0;transform:translate(-50%,-50%) rotate(45deg) scale(3.1)}
+    .tap-ripple i{
+      position:absolute;left:0;top:0;width:18px;height:1px;background:currentColor;
+      transform-origin:0 50%;animation:signalBeam .46s var(--ease) forwards;
+    }
+    .tap-ripple i:nth-child(1){transform:translate(4px,-50%) rotate(0deg)}
+    .tap-ripple i:nth-child(2){transform:translate(4px,-50%) rotate(90deg)}
+    .tap-ripple i:nth-child(3){transform:translate(4px,-50%) rotate(180deg)}
+    .tap-ripple i:nth-child(4){transform:translate(4px,-50%) rotate(270deg)}
+    @keyframes signalBeam{
+      0%{opacity:.9;transform-origin:0 50%;scale:.4}
+      100%{opacity:0;scale:1.5}
     }
 
     .site-header{
@@ -983,27 +986,17 @@
     /* ---------- Tap ripple ---------- */
     window.addEventListener('pointerdown', function(e){
       if(reduced) return;
-      var ripple = document.createElement('span');
+      var ripple=document.createElement('span');
       ripple.className='tap-ripple';
       ripple.style.left=e.clientX+'px';
       ripple.style.top=e.clientY+'px';
 
-      var cross = document.createElement('i');
-      cross.style.position='absolute';
-      cross.style.left='50%';
-      cross.style.top='50%';
-      cross.style.width='18px';
-      cross.style.height='18px';
-      cross.style.border='1px solid currentColor';
-      cross.style.transform='translate(-50%,-50%) rotate(45deg)';
-      cross.style.opacity='.8';
-      cross.style.pointerEvents='none';
-      cross.style.borderRadius='3px';
-      cross.style.animation='rippleCross .42s var(--ease) forwards';
-      ripple.appendChild(cross);
+      for(var n=0;n<4;n++){
+        ripple.appendChild(document.createElement('i'));
+      }
 
       document.body.appendChild(ripple);
-      window.setTimeout(function(){ ripple.remove(); }, 680);
+      window.setTimeout(function(){ ripple.remove(); }, 620);
     }, {passive:true});
 
     /* ---------- Tilt ---------- */
