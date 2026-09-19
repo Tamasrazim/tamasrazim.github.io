@@ -200,27 +200,27 @@
       transform:translate(-50%,-50%);border-radius:50%;
     }
     .tap-ripple::before{
-      width:14px;height:14px;
-      animation:rippleCore .72s var(--ease) forwards;
+      width:10px;height:10px;
+      animation:rippleCore .6s var(--ease) forwards;
     }
     .tap-ripple::after{
-      width:14px;height:14px;
+      width:10px;height:10px;
       border-radius:2px;
-      animation:rippleSquare .78s var(--ease) forwards;
+      animation:rippleSquare .64s var(--ease) forwards;
     }
     @keyframes rippleCore{
-      0%{opacity:.95;width:10px;height:10px;box-shadow:0 0 0 0 currentColor}
-      35%{opacity:.72}
-      100%{opacity:0;width:150px;height:150px;box-shadow:0 0 0 22px transparent}
+      0%{opacity:.9;width:8px;height:8px;box-shadow:0 0 0 0 currentColor}
+      35%{opacity:.62}
+      100%{opacity:0;width:76px;height:76px;box-shadow:0 0 0 10px transparent}
     }
     @keyframes rippleCross{
-      0%{opacity:.85;transform:translate(-50%,-50%) scale(.35) rotate(45deg)}
-      100%{opacity:0;transform:translate(-50%,-50%) scale(1.8) rotate(45deg)}
+      0%{opacity:.72;transform:translate(-50%,-50%) scale(.3) rotate(45deg)}
+      100%{opacity:0;transform:translate(-50%,-50%) scale(1.45) rotate(45deg)}
     }
     @keyframes rippleSquare{
-      0%{opacity:.8;transform:translate(-50%,-50%) rotate(0deg) scale(.2)}
-      45%{opacity:.5}
-      100%{opacity:0;transform:translate(-50%,-50%) rotate(45deg) scale(5.2)}
+      0%{opacity:.72;transform:translate(-50%,-50%) rotate(0deg) scale(.2)}
+      45%{opacity:.42}
+      100%{opacity:0;transform:translate(-50%,-50%) rotate(45deg) scale(3.1)}
     }
 
     .site-header{
@@ -992,18 +992,18 @@
       cross.style.position='absolute';
       cross.style.left='50%';
       cross.style.top='50%';
-      cross.style.width='26px';
-      cross.style.height='26px';
+      cross.style.width='18px';
+      cross.style.height='18px';
       cross.style.border='1px solid currentColor';
       cross.style.transform='translate(-50%,-50%) rotate(45deg)';
       cross.style.opacity='.8';
       cross.style.pointerEvents='none';
       cross.style.borderRadius='3px';
-      cross.style.animation='rippleCross .5s var(--ease) forwards';
+      cross.style.animation='rippleCross .42s var(--ease) forwards';
       ripple.appendChild(cross);
 
       document.body.appendChild(ripple);
-      window.setTimeout(function(){ ripple.remove(); }, 820);
+      window.setTimeout(function(){ ripple.remove(); }, 680);
     }, {passive:true});
 
     /* ---------- Tilt ---------- */
