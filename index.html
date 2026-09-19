@@ -314,7 +314,12 @@
       font:600 .68rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)
     }
     .eyebrow::before{content:'';width:22px;height:1px;background:currentColor}
-    .section-title{font-size:clamp(2.15rem,5.6vw,5.4rem);max-width:11ch;letter-spacing:-.045em}
+    .section-title{font-size:clamp(2.15rem,5.6vw,5.4rem);max-width:11ch;letter-spacing:-.045em;overflow:visible}
+    .section-title .type-char{display:inline-block;will-change:transform;transition:transform .45s var(--ease),letter-spacing .45s var(--ease)}
+    .section-title:hover .type-char:nth-child(4n){transform:translateY(-.07em) rotate(-1.2deg)}
+    .section-title:hover .type-char:nth-child(4n+1){transform:translateY(.035em)}
+    .section-title:hover .type-char:nth-child(4n+2){transform:translateY(-.025em)}
+    .section-title:hover .type-char:nth-child(4n+3){transform:translateY(.06em) rotate(1deg)}
     .section-intro{margin-top:22px;max-width:62ch;font:400 clamp(.9rem,1.35vw,1.05rem)/1.8 var(--mono);color:var(--muted)}
 
     .hero{
@@ -330,12 +335,32 @@
     @keyframes signalDot{0%,100%{transform:scale(.55);opacity:.35}45%{transform:scale(1.45);opacity:1}70%{transform:scale(.85);opacity:.72}}
     .hero-title{
       max-width:1050px;font-size:clamp(3.2rem,9.25vw,9.4rem);font-weight:900;letter-spacing:-.065em;
-      text-transform:uppercase
+      text-transform:uppercase;perspective:900px
     }
-    .hero-line{display:block;overflow:hidden}
+    .hero-line{display:block;overflow:hidden;white-space:nowrap}
     .hero-line > span{
-      display:block;transform:translateY(115%);opacity:0
+      display:block;transform:translateY(115%);opacity:0;will-change:transform,opacity,letter-spacing
     }
+    .hero-line.is-ready > span{transform:none;opacity:1}
+    .hero-line .type-char{
+      display:inline-block;will-change:transform;transition:transform .45s var(--ease),letter-spacing .45s var(--ease)
+    }
+    .hero-line:hover .type-char{letter-spacing:.012em}
+    .hero-line:hover .type-char:nth-child(3n){transform:translateY(-.045em) rotateX(18deg)}
+    .hero-line:hover .type-char:nth-child(3n+1){transform:translateY(.035em) rotateX(-12deg)}
+    .hero-line:hover .type-char:nth-child(3n+2){transform:translateY(-.02em) rotateX(8deg)}
+
+    .kinetic-type{
+      display:inline-block;will-change:transform,letter-spacing;
+      transition:transform .5s var(--ease),letter-spacing .5s var(--ease)
+    }
+    .kinetic-type:hover{letter-spacing:.01em}
+    .kinetic-type .type-char{
+      display:inline-block;will-change:transform;
+      transition:transform .4s var(--ease)
+    }
+    .kinetic-type:hover .type-char:nth-child(odd){transform:translateY(-.09em)}
+    .kinetic-type:hover .type-char:nth-child(even){transform:translateY(.06em)}
     .loaded .hero-line > span{animation:heroIn 1.15s var(--ease) forwards}
     .loaded .hero-line:nth-child(2) > span{animation-delay:.11s}
     .loaded .hero-line:nth-child(3) > span{animation-delay:.2s}
@@ -529,6 +554,9 @@
     .social-top,.social-bottom{position:relative;z-index:1}
     .social-top{display:flex;flex-direction:column;align-items:flex-start;gap:15px}
     .social-name{display:block;font:700 .88rem var(--display);letter-spacing:-.03em;line-height:1.05}
+    .social-name .type-char{display:inline-block;transition:transform .35s var(--ease)}
+    .social-link:hover .social-name .type-char:nth-child(odd){transform:translateY(-.1em)}
+    .social-link:hover .social-name .type-char:nth-child(even){transform:translateY(.06em)}
     .social-meta{display:block;margin:0;font:500 .58rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:rgba(5,5,5,.5);transition:color .35s var(--ease)}
     .social-arrow{align-self:flex-end;font:600 .65rem var(--mono);transition:color .35s var(--ease),transform .35s var(--ease)}
     .social-link:hover .social-meta,.social-link:hover .social-arrow{color:rgba(243,243,239,.62)}
@@ -686,7 +714,7 @@
       <div class="container hero-inner">
         <div class="hero-kicker reveal" data-reveal><i aria-hidden="true"></i><span>Identity / Digital Work</span></div>
 
-        <h1 class="hero-title" aria-label="Robiul Rumman Razim">
+        <h1 class="hero-title type-motion" aria-label="Robiul Rumman Razim">
           <span class="hero-line"><span>Robiul Rumman</span></span>
           <span class="hero-line"><span>Razim</span></span>
         </h1>
@@ -725,7 +753,7 @@
         <div class="about-grid">
           <div class="about-copy">
             <p class="eyebrow reveal" data-reveal>01 / About</p>
-            <h2 class="reveal" data-reveal style="--delay:1">More than a username.</h2>
+            <h2 class="reveal kinetic-type" data-reveal style="--delay:1">More than a username.</h2>
             <p class="reveal" data-reveal style="--delay:2">Tamasrazim is the online identity. Robiul Rumman Razim is the person behind it.</p>
             <p class="reveal" data-reveal style="--delay:3">The focus is on understanding technology from both sides — the software people interact with and the systems underneath it.</p>
             <p class="reveal" data-reveal style="--delay:4">This site is a personal space for projects, experiments and the things being built and explored.</p>
@@ -765,7 +793,7 @@
     <section class="projects" id="projects">
       <div class="container section-inner">
         <p class="eyebrow reveal" data-reveal>02 / Projects</p>
-        <h2 class="section-title reveal" data-reveal style="--delay:1">Stuff built and explored.</h2>
+        <h2 class="section-title kinetic-type reveal" data-reveal style="--delay:1">Stuff built and explored.</h2>
         <p class="section-intro reveal" data-reveal style="--delay:2">A running log of projects, repositories and technical experiments.</p>
 
         <div class="projects-grid">
@@ -817,7 +845,7 @@
     <section class="socials" id="socials">
       <div class="container section-inner">
         <p class="eyebrow reveal" data-reveal>03 / Socials</p>
-        <h2 class="section-title reveal" data-reveal style="--delay:1">Find me online.</h2>
+        <h2 class="section-title kinetic-type reveal" data-reveal style="--delay:1">Find me online.</h2>
         <p class="section-intro reveal" data-reveal style="--delay:2">Social, professional, developer and gaming platforms connected to the Tamasrazim identity.</p>
 
         <div class="social-grid">
@@ -849,7 +877,7 @@
       <div class="container section-inner">
         <div class="contact-panel reveal" data-reveal>
           <p class="eyebrow" data-reveal>04 / Contact</p>
-          <h2 data-reveal style="--delay:1">Let's connect.</h2>
+          <h2 class="kinetic-type" data-reveal style="--delay:1">Let's connect.</h2>
           <p class="contact-copy" data-reveal style="--delay:2">For professional inquiries, projects, collaboration, or anything worth discussing.</p>
 
           <div class="email-row reveal" data-reveal style="--delay:3">
@@ -972,6 +1000,77 @@
       alias.addEventListener('mouseenter', function(){ scrambleTo(alias,'TAMASRAZIM',280); });
     }
     if(idAlias) idAlias.addEventListener('mouseenter', function(){ scrambleTo(idAlias,'TAMASRAZIM',260); });
+
+    /* ---------- Typography motion ---------- */
+    function buildTypeChars(el){
+      if(!el || el.dataset.typeBuilt) return;
+      el.dataset.typeBuilt='true';
+      var source=el.textContent;
+      el.textContent='';
+      for(var i=0;i<source.length;i++){
+        var ch=source[i];
+        if(ch===' '){
+          el.appendChild(document.createTextNode(' '));
+        }else{
+          var span=document.createElement('span');
+          span.className='type-char';
+          span.textContent=ch;
+          span.style.setProperty('--char-i',i);
+          el.appendChild(span);
+        }
+      }
+    }
+
+    qa('.hero-title .hero-line > span,.kinetic-type,.social-name').forEach(buildTypeChars);
+
+    var heroLines=qa('.hero-line');
+    if(reduced){
+      heroLines.forEach(function(line){line.classList.add('is-ready');});
+    }else{
+      heroLines.forEach(function(line,index){
+        var inner=line.querySelector(':scope > span');
+        if(!inner) return;
+        var delay=index*.11;
+        inner.style.animationDelay=delay+'s';
+      });
+    }
+
+    if(finePointer && !reduced){
+      qa('.hero-title,.section-title,.kinetic-type').forEach(function(el){
+        el.addEventListener('pointermove',function(e){
+          var r=el.getBoundingClientRect();
+          var px=(e.clientX-r.left)/r.width-.5;
+          var py=(e.clientY-r.top)/r.height-.5;
+          var shiftX=px*10;
+          var shiftY=py*5;
+          el.style.transform='translate3d('+shiftX.toFixed(2)+'px,'+shiftY.toFixed(2)+'px,0)';
+          el.style.letterSpacing=(px*.008)+'em';
+        });
+        el.addEventListener('pointerleave',function(){
+          el.style.transform='';
+          el.style.letterSpacing='';
+        });
+      });
+    }
+
+    /* Subtle scroll typography drift */
+    if(!reduced){
+      var typeTick=false;
+      window.addEventListener('scroll',function(){
+        if(typeTick)return;
+        typeTick=true;
+        requestAnimationFrame(function(){
+          var y=window.scrollY;
+          qa('.hero-title .hero-line:nth-child(1) > span').forEach(function(el){
+            el.style.transform='translate3d('+Math.min(0,y*.035).toFixed(2)+'px,'+Math.min(0,y*.02).toFixed(2)+'px,0)';
+          });
+          qa('.hero-title .hero-line:nth-child(2) > span').forEach(function(el){
+            el.style.transform='translate3d('+Math.max(0,y*.025).toFixed(2)+'px,'+Math.min(0,y*.014).toFixed(2)+'px,0)';
+          });
+          typeTick=false;
+        });
+      },{passive:true});
+    }
 
     /* ---------- Magnetic interaction ---------- */
     if(!reduced && finePointer){
