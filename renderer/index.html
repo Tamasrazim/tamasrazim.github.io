@@ -179,8 +179,18 @@ function toast(msg){toastEl.textContent=msg;toastEl.classList.add('show');clearT
 function setState(s){engineState.textContent=s}
 function updateMeta(){lineCount.textContent=codeEl.value.split(/\r?\n/).length+' lines'}
 function parseSettings(){
-  var p=preset.value.split('x');W=+p[0];H=+p[1];FPS=+fpsEl.value;DURATION=+durationEl.value;
-  canvas.width=W;canvas.height=H;resolutionLabel.textContent=W+' × '+H;timeline.max=DURATION;
+  var p=preset.value.split('x');
+  W=+p[0];H=+p[1];FPS=+fpsEl.value;DURATION=+durationEl.value;
+  playing=false;cancelAnimationFrame(raf);playBtn.textContent='Preview';
+  var pixels=W*H;
+  if(!Number.isFinite(pixels)||pixels<1||pixels>268435456){
+    setState('ERROR');videoBtn.disabled=true;stillBtn.disabled=true;
+    toast('Canvas size is outside the safe browser limit');
+    return;
+  }
+  canvas.width=W;canvas.height=H;
+  resolutionLabel.textContent=W+' × '+H;
+  timeline.max=DURATION;
   frame=Math.min(frame,Math.max(0,Math.floor(DURATION*FPS)-1));
   checker.classList.toggle('show',transparent.checked);
   buildEngine(true);
@@ -245,6 +255,18 @@ function exportStill(){
     return;
   }
   var type=fmt==='jpg'?'image/jpeg':fmt==='webp'?'image/webp':'image/png',quality=fmt==='png'?undefined:.96;
+  if(fmt==='jpg' && transparent.checked){
+    var flat=document.createElement('canvas');
+    flat.width=W;flat.height=H;
+    var fctx=flat.getContext('2d');
+    fctx.fillStyle='#050505';fctx.fillRect(0,0,W,H);
+    fctx.drawImage(canvas,0,0);
+    flat.toBlob(function(blob){
+      if(!blob){toast('JPG export failed in this browser');return}
+      downloadBlob(blob,safeName()+'.jpg');toast('JPG exported with opaque background');
+    },'image/jpeg',quality);
+    return;
+  }
   canvas.toBlob(function(blob){
     if(!blob){toast('Raster export failed in this browser');return}
     downloadBlob(blob,safeName()+'.'+fmt);toast(fmt.toUpperCase()+' exported');
@@ -254,9 +276,10 @@ function exportVideo(){
   if(renderingVideo)return;
   if(!userFn&& !buildEngine())return;
   if(!canvas.captureStream||!window.MediaRecorder){toast('WebM rendering is unavailable in this browser');return}
-  var mime='video/webm;codecs=vp9';
-  if(!MediaRecorder.isTypeSupported(mime))mime='video/webm';
-  if(!MediaRecorder.isTypeSupported(mime)){toast('No WebM encoder is available');return}
+  var mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp9')?'video/webm;codecs=vp9':
+  (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')?'video/webm;codecs=vp8':
+  (MediaRecorder.isTypeSupported('video/webm')?'video/webm':null));
+  if(!mime){toast('No supported WebM encoder is available in this browser');return}
   renderingVideo=true;playing=false;setState('RENDERING');videoBtn.disabled=true;rendering.classList.add('open');
   var stream=canvas.captureStream(FPS),rec,chunks=[];
   try{rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:16000000})}
@@ -285,8 +308,18 @@ function exportMetadata(){
     description:$('#metaDescription').value.trim(),
     keywords:$('#metaKeywords').value.split(',').map(function(x){return x.trim()}).filter(Boolean),
     creator:$('#metaCreator').value.trim()||'Tamasrazim',
+    category:'Graphics / Animation',
     source:'Animation Renderer — Tamasrazim',
-    delivery:{width:W,height:H,fps:FPS,durationSeconds:DURATION,loop:loopMode.value==='loop',transparent:transparent.checked,stillFormat:stillFormat.value,animationFormat:'WebM'},
+    delivery:{
+      width:W,
+      height:H,
+      fps:FPS,
+      durationSeconds:DURATION,
+      loop:loopMode.value==='loop',
+      transparent:transparent.checked,
+      stillFormat:stillFormat.value,
+      animationFormat:'WebM'
+    },
     generatedAt:new Date().toISOString()
   };
   downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),safeName()+'.json');toast('Metadata JSON exported');
@@ -307,9 +340,17 @@ var gameScore=0,gameTarget=$('#gameTarget'),gameBox=$('#gameBox');
 function moveTarget(){gameTarget.style.left=(8+Math.random()*84)+'%';gameTarget.style.top=(12+Math.random()*76)+'%';gameTarget.style.display='block'}
 gameTarget.addEventListener('pointerdown',function(){gameScore++;$('#gameScore').textContent='Score '+gameScore;moveTarget()});moveTarget();
 
-formatSupport.textContent=window.MediaRecorder&&canvas.captureStream?'WebM encoder detected':'WebM encoder unavailable';
+(function(){
+  var vp9=window.MediaRecorder&&MediaRecorder.isTypeSupported('video/webm;codecs=vp9');
+  var vp8=window.MediaRecorder&&MediaRecorder.isTypeSupported('video/webm;codecs=vp8');
+  var webm=window.MediaRecorder&&MediaRecorder.isTypeSupported('video/webm');
+  formatSupport.textContent=window.MediaRecorder&&canvas.captureStream&&(vp9||vp8||webm)?'WebM encoder detected':'WebM encoder unavailable';
+})();
 
 var deferredPrompt=null,installBtn=$('#installBtn');
+if(location.protocol!=='https:' && location.hostname!=='localhost'){
+  installBtn.hidden=true;
+}
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;installBtn.hidden=false});
 installBtn.addEventListener('click',async function(){if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;installBtn.hidden=true});
 window.addEventListener('appinstalled',function(){installBtn.hidden=true;toast('Renderer installed')});
