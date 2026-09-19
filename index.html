@@ -389,8 +389,8 @@
     .band-item::after{content:' / ';opacity:.25;padding-inline:28px}
     @keyframes marquee{to{transform:translateX(-50%)}}
 
-    .about{background:var(--white);color:var(--black)}
-    .about .eyebrow,.about .section-intro,.about-copy p{color:rgba(5,5,5,.6)}
+    .about{background:transparent;color:var(--white)}
+    .about .eyebrow,.about .section-intro,.about-copy p{color:var(--muted)}
     .about .eyebrow::before{background:currentColor}
     .about-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:clamp(48px,8vw,120px);align-items:center}
     .about-copy h2{font-size:clamp(2.25rem,5.1vw,5.4rem);max-width:10ch;letter-spacing:-.05em}
@@ -403,7 +403,7 @@
       padding:clamp(22px,3vw,30px);border:1px solid rgba(5,5,5,.28);border-radius:14px;
       background:
         radial-gradient(circle at 85% 22%,rgba(5,5,5,.11),transparent 34%),
-        linear-gradient(135deg,rgba(5,5,5,.03),rgba(255,255,255,.68));
+        linear-gradient(135deg,rgba(5,5,5,.03),rgba(255,255,255,.82));
       box-shadow:0 30px 80px rgba(5,5,5,.2),inset 0 0 0 1px rgba(255,255,255,.5);
       isolation:isolate;transition:transform .45s var(--ease),box-shadow .45s var(--ease)
     }
