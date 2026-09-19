@@ -199,6 +199,8 @@ function buildEngine(silent){
   updateMeta();
   try{
     userFn=null;userSvg=null;
+    delete window.renderFrame;
+    delete window.renderSVG;
     var runner=new Function('window','document','canvas','ctx','Math','Date','performance',codeEl.value+'\\n;return {frame:typeof window.renderFrame==="function"?window.renderFrame:null,svg:typeof window.renderSVG==="function"?window.renderSVG:null};');
     var out=runner(window,document,canvas,ctx,Math,Date,performance);
     if(typeof out.frame!=='function')throw new Error('Render contract missing: window.renderFrame(time, frame, fps)');
