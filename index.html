@@ -452,8 +452,9 @@
     }
     .social-link:hover::before,.social-link:focus-visible::before{transform:translateY(0)}
     .social-top,.social-bottom{position:relative;z-index:1}
-    .social-name{display:block;font:700 .88rem var(--display);letter-spacing:-.03em}
-    .social-meta{display:block;margin-top:10px;font:500 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:rgba(5,5,5,.5);transition:color .35s var(--ease)}
+    .social-top{display:flex;flex-direction:column;align-items:flex-start;gap:15px}
+    .social-name{display:block;font:700 .88rem var(--display);letter-spacing:-.03em;line-height:1.05}
+    .social-meta{display:block;margin:0;font:500 .58rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:rgba(5,5,5,.5);transition:color .35s var(--ease)}
     .social-arrow{align-self:flex-end;font:600 .65rem var(--mono);transition:color .35s var(--ease),transform .35s var(--ease)}
     .social-link:hover .social-meta,.social-link:hover .social-arrow{color:rgba(243,243,239,.62)}
     .social-link:hover .social-name{color:var(--white)}
