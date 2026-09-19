@@ -446,42 +446,133 @@
       72%{opacity:.5}
     }
     .project-featured .project-body h3{margin-top:18px}
+    .projects-grid{perspective:1800px;perspective-origin:50% 42%}
     .project-card{
-      position:relative;min-height:290px;border:1px solid var(--line);border-radius:9px;
-      background:linear-gradient(140deg,rgba(243,243,239,.045),rgba(243,243,239,.012));
-      overflow:hidden;transition:transform .5s var(--ease),border-color .4s var(--ease),background .4s var(--ease);
-      animation:projectFloat 6.8s ease-in-out infinite
+      --mx:0;
+      --my:0;
+      --lift:0px;
+      --sx:1;
+      --sy:1;
+      --photo-x:0px;
+      --photo-y:0px;
+      --photo-scale:1.06;
+      --photo-rotate:0deg;
+      position:relative;
+      min-height:290px;
+      border:1px solid var(--line);
+      border-radius:9px;
+      background:#090909;
+      overflow:hidden;
+      transform-style:preserve-3d;
+      backface-visibility:hidden;
+      will-change:transform;
+      transition:border-color .55s var(--ease),background .55s var(--ease);
     }
-    .project-card:nth-child(2){animation-delay:-1.7s}
-    .project-card:nth-child(3){animation-delay:-3.4s}
-    .project-card:nth-child(4){animation-delay:-5.1s}
-    @keyframes projectFloat{0%,100%{translate:0 0}50%{translate:0 -3px}}
-    .project-card:hover{transform:translateY(-7px);border-color:var(--line-strong);background:linear-gradient(140deg,rgba(243,243,239,.08),rgba(243,243,239,.02))}
+    .project-card:hover{
+      border-color:var(--line-strong);
+      background:#0b0b0b
+    }
     .project-card::before{
-      content:'';position:absolute;left:-25%;top:0;width:18%;height:100%;
-      background:linear-gradient(90deg,transparent,rgba(243,243,239,.09),transparent);
-      transform:skewX(-18deg) translateX(-180%);
-      pointer-events:none
+      content:'';
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      z-index:2;
+      opacity:.18;
+      background:
+        linear-gradient(105deg,transparent 0 42%,rgba(255,255,255,.16) 50%,transparent 58%);
+      transform:translateX(calc(var(--mx) * .12)) skewX(calc(var(--mx) * .08));
+      transition:opacity .45s var(--ease)
     }
-    .project-card:not(.soon)::after{
-      content:'';position:absolute;left:0;right:0;top:0;height:1px;
-      background:linear-gradient(90deg,transparent,rgba(243,243,239,.55),transparent);
-      opacity:.28;transform:translateX(-100%);
-      animation:projectScan 5.5s ease-in-out infinite
+    .project-card::after{
+      content:'';
+      position:absolute;
+      inset:1px;
+      pointer-events:none;
+      z-index:4;
+      border:1px solid rgba(243,243,239,.04);
+      border-radius:8px;
+      box-shadow:inset 0 0 0 1px rgba(243,243,239,.018);
     }
-    @keyframes projectScan{
-      0%,58%{transform:translateX(-100%);opacity:0}
-      68%{opacity:.55}
-      82%,100%{transform:translateX(100%);opacity:0}
+    .project-photo{
+      position:absolute;
+      inset:-9% -8% 28%;
+      z-index:1;
+      overflow:hidden;
+      opacity:.62;
+      transform:
+        translate3d(var(--photo-x),var(--photo-y),18px)
+        scale(var(--photo-scale))
+        rotateZ(var(--photo-rotate));
+      transform-origin:50% 48%;
+      pointer-events:none;
+      filter:saturate(.88) contrast(1.08);
+      transition:opacity .55s var(--ease),filter .55s var(--ease);
+      will-change:transform;
     }
-    .project-card:hover::before{animation:cardSweep .85s var(--ease) forwards}
-    .project-card .project-body::after{
-      content:'';position:absolute;left:28px;right:28px;bottom:18px;height:1px;
-      background:currentColor;opacity:.12;transform:scaleX(.18);transform-origin:left;
-      transition:transform .5s var(--ease)
+    .project-photo::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at 30% 28%,rgba(255,255,255,.22),transparent 17%),
+        radial-gradient(circle at 72% 66%,rgba(255,255,255,.11),transparent 24%),
+        linear-gradient(135deg,rgba(255,255,255,.12),transparent 42%,rgba(255,255,255,.06));
+      mix-blend-mode:screen;
+      opacity:.8;
     }
-    .project-card:hover .project-body::after{transform:scaleX(1)}
-    @keyframes cardSweep{to{transform:skewX(-18deg) translateX(820%)}}
+    .project-photo::after{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:linear-gradient(to bottom,rgba(5,5,5,.03),rgba(5,5,5,.64) 66%,rgba(5,5,5,.96));
+    }
+    .project-card:nth-child(2) .project-photo{
+      background:
+        radial-gradient(circle at 23% 35%,#f3f3ef 0 5%,transparent 5.5%),
+        radial-gradient(circle at 67% 28%,rgba(243,243,239,.42) 0 13%,transparent 13.8%),
+        linear-gradient(132deg,#151515 0 42%,#30302d 42% 56%,#080808 56%);
+    }
+    .project-card:nth-child(3) .project-photo{
+      background:
+        radial-gradient(circle at 72% 32%,rgba(243,243,239,.5) 0 10%,transparent 10.8%),
+        linear-gradient(155deg,#080808 0 33%,#22221f 33% 64%,#111 64%);
+    }
+    .project-card:nth-child(4) .project-photo{
+      background:
+        linear-gradient(115deg,transparent 0 37%,rgba(243,243,239,.22) 37% 39%,transparent 39%),
+        radial-gradient(circle at 31% 62%,rgba(243,243,239,.26),transparent 20%),
+        linear-gradient(145deg,#1b1b19,#070707 62%);
+    }
+    .project-card:nth-child(5) .project-photo{
+      background:
+        repeating-linear-gradient(0deg,rgba(243,243,239,.06) 0 1px,transparent 1px 9px),
+        repeating-linear-gradient(90deg,rgba(243,243,239,.04) 0 1px,transparent 1px 11px),
+        radial-gradient(circle at 50% 42%,rgba(243,243,239,.18),transparent 26%),
+        #090909;
+    }
+    .project-card:hover .project-photo{
+      --photo-scale:1.13;
+      opacity:.78;
+      filter:saturate(1) contrast(1.14);
+    }
+    .project-card .project-body{
+      position:relative;
+      z-index:5;
+      transform:translate3d(calc(var(--mx) * -.035),calc(var(--my) * -.035),36px);
+      transition:transform .35s var(--ease);
+    }
+    .project-card .window-bar{
+      position:relative;
+      z-index:6;
+      transform:translateZ(46px);
+    }
+    .project-card .project-link{
+      transform:translateZ(52px);
+    }
+    .project-card:hover .project-body::after{
+      transform:scaleX(1)
+    }
     .window-bar{
       display:flex;align-items:center;gap:6px;padding:12px 14px;border-bottom:1px solid var(--line);
       font:500 .62rem var(--mono);color:var(--muted)
