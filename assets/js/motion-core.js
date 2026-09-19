@@ -73,6 +73,11 @@ var pointer={
 var scroll={y:window.scrollY||0,target:window.scrollY||0,velocity:0,last:window.scrollY||0};
 var nodes=[],texts=[],email=null;
 var boundsDirty=true,last=performance.now(),raf=0;
+var pageVisible=!document.hidden;
+document.addEventListener('visibilitychange',function(){
+  pageVisible=!document.hidden;
+  if(pageVisible) last=performance.now();
+},{passive:true});
 
 function qa(s){return Array.prototype.slice.call(document.querySelectorAll(s))}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
@@ -131,6 +136,7 @@ window.addEventListener('blur',function(){pointer.tx=innerWidth*.5;pointer.ty=in
 window.addEventListener('scroll',function(){scroll.target=window.scrollY||0;invalidate()},{passive:true});
 
 function frame(now){
+  if(!pageVisible){raf=requestAnimationFrame(frame);return;}
   var dt=Math.min(.05,Math.max(.008,(now-last)/1000));last=now;
   if(boundsDirty)refreshBounds();
 
@@ -262,6 +268,7 @@ raf=requestAnimationFrame(frame);
   window.addEventListener('scroll',function(){target.scroll=window.scrollY||0},{passive:true});
   window.addEventListener('blur',function(){target.x=innerWidth*.5;target.y=innerHeight*.5},{passive:true});
   function tick(now){
+    if(!pageVisible){requestAnimationFrame(tick);return;}
     var dt=Math.min(.033,Math.max(.008,(now-last)/1000));last=now;
     var k=1-Math.exp(-dt*8.5);
     state.x=smooth(state.x,target.x,k);state.y=smooth(state.y,target.y,k);
@@ -334,6 +341,7 @@ raf=requestAnimationFrame(frame);
     return {index:best,blend:clamp(score,0,1)};
   }
   function tick(now){
+    if(!pageVisible){requestAnimationFrame(tick);return;}
     var dt=now-last;last=now;
     if(dt>0&&dt<100){
       samples.push(dt);
