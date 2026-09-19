@@ -158,109 +158,85 @@
       window.setTimeout(function(){ ripple.remove(); }, 620);
     }, {passive:true});
 
-    /* ---------- Project photo-plane motion ---------- */
+    /* ---------- Photo-plane mouse interaction ---------- */
     if(!reduced && finePointer){
       var projectCards=qa('.project-card');
       projectCards.forEach(function(card,index){
-        var photo=document.createElement('div');
-        photo.className='project-photo';
-        photo.setAttribute('aria-hidden','true');
+        var photo=card.querySelector('.project-photo');
+        if(!photo){
+          photo=document.createElement('div');
+          photo.className='project-photo';
+          photo.setAttribute('aria-hidden','true');
+          card.insertBefore(photo,card.firstElementChild);
+        }
+
         if(index===0){
           photo.style.background=
             'radial-gradient(circle at 50% 40%,rgba(243,243,239,.24),transparent 18%),'+
             'repeating-radial-gradient(circle at 50% 45%,rgba(243,243,239,.12) 0 1px,transparent 1px 18px),'+
             'linear-gradient(145deg,#181816,#050505 72%)';
         }
-        card.insertBefore(photo,card.firstElementChild);
-        card.dataset.motionReady='1';
 
-        var targetX=0,targetY=0,targetRX=0,targetRY=0;
-        var currentX=0,currentY=0,currentRX=0,currentRY=0;
-        var active=false,rafId=0,lastStamp=performance.now();
+        var tx=0,ty=0,trx=0,try_=0;
+        var x=0,y=0,rx=0,ry=0;
+        var inside=false,raf=0,last=performance.now();
 
         function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
 
-        function render(now){
-          var dt=Math.min(.05,Math.max(.008,(now-lastStamp)/1000));
-          lastStamp=now;
-          var ease=1-Math.exp(-dt*(active?18:12));
-          currentX+=(targetX-currentX)*ease;
-          currentY+=(targetY-currentY)*ease;
-          currentRX+=(targetRX-currentRX)*ease;
-          currentRY+=(targetRY-currentRY)*ease;
+        function tick(now){
+          var dt=Math.min(.05,Math.max(.008,(now-last)/1000));
+          last=now;
+          var k=1-Math.exp(-dt*(inside?15:11));
 
-          var tx=currentX;
-          var ty=currentY;
-          var rx=currentRX;
-          var ry=currentRY;
-          var rz=(currentX*.0055)-(currentY*.0028);
-          var sx=1+Math.abs(ry)*.00015;
-          var sy=1+Math.abs(rx)*.0001;
+          x+=(tx-x)*k;
+          y+=(ty-y)*k;
+          rx+=(trx-rx)*k;
+          ry+=(try_-ry)*k;
 
-          var rxr=rx*Math.PI/180, ryr=ry*Math.PI/180, rzr=rz*Math.PI/180;
-          var sxr=Math.sin(rxr),cxr=Math.cos(rxr);
-          var syr=Math.sin(ryr),cyr=Math.cos(ryr);
-          var szr=Math.sin(rzr),czr=Math.cos(rzr);
+          photo.style.setProperty('--photo-x',x.toFixed(2)+'px');
+          photo.style.setProperty('--photo-y',y.toFixed(2)+'px');
+          photo.style.setProperty('--photo-rx',rx.toFixed(3)+'deg');
+          photo.style.setProperty('--photo-ry',ry.toFixed(3)+'deg');
 
-          var m11=cyr*czr;
-          var m12=sxr*syr*czr+cxr*szr;
-          var m13=-cxr*syr*czr+sxr*szr;
-          var m21=-cyr*szr;
-          var m22=-sxr*syr*szr+cxr*czr;
-          var m23=cxr*syr*szr+sxr*czr;
-          var m31=syr;
-          var m32=-sxr*cyr;
-          var m33=cxr*cyr;
-
-          card.style.transform=
-            'matrix3d('+
-            (m11*sx).toFixed(5)+','+(m12*sx).toFixed(5)+','+(m13*sx).toFixed(5)+',0,'+
-            (m21*sy).toFixed(5)+','+(m22*sy).toFixed(5)+','+(m23*sy).toFixed(5)+',0,'+
-            m31.toFixed(5)+','+m32.toFixed(5)+','+m33.toFixed(5)+',0,'+
-            tx.toFixed(2)+','+ty.toFixed(2)+','+
-            (active?8:0).toFixed(2)+',1)';
-
-          card.style.setProperty('--mx',currentX.toFixed(2)+'px');
-          card.style.setProperty('--my',currentY.toFixed(2)+'px');
-          card.style.setProperty('--photo-x',(-currentX*.24).toFixed(2)+'px');
-          card.style.setProperty('--photo-y',(-currentY*.20).toFixed(2)+'px');
-          card.style.setProperty('--photo-rotate',(currentX*.018).toFixed(3)+'deg');
-          card.style.setProperty('--rx',currentRX.toFixed(3)+'deg');
-          card.style.setProperty('--ry',currentRY.toFixed(3)+'deg');
-
-          if(active || Math.abs(targetX-currentX)>.05 || Math.abs(targetY-currentY)>.05 ||
-             Math.abs(targetRX-currentRX)>.05 || Math.abs(targetRY-currentRY)>.05){
-            rafId=requestAnimationFrame(render);
+          if(inside || Math.abs(tx-x)>.05 || Math.abs(ty-y)>.05 || Math.abs(trx-rx)>.05 || Math.abs(try_-ry)>.05){
+            raf=requestAnimationFrame(tick);
           }else{
-            rafId=0;
+            raf=0;
           }
         }
 
         function wake(){
-          if(!rafId) rafId=requestAnimationFrame(render);
+          if(!raf) raf=requestAnimationFrame(tick);
         }
 
         card.addEventListener('pointerenter',function(){
-          active=true;
+          inside=true;
           wake();
         },{passive:true});
 
-        card.addEventListener('pointermove',function(e){
+        card.addEventListener('pointermove',function(event){
           var rect=card.getBoundingClientRect();
-          var nx=(e.clientX-(rect.left+rect.width*.5))/(rect.width*.5);
-          var ny=(e.clientY-(rect.top+rect.height*.5))/(rect.height*.5);
-          nx=clamp(nx,-1,1);
-          ny=clamp(ny,-1,1);
-          targetRX=ny*-6.2;
-          targetRY=nx*7.2;
-          targetX=nx*5.5;
-          targetY=ny*4.5;
+          var px=clamp((event.clientX-rect.left)/rect.width,0,1);
+          var py=clamp((event.clientY-rect.top)/rect.height,0,1);
+
+          var nx=px-.5;
+          var ny=py-.5;
+
+          tx=nx*-22;
+          ty=ny*-16;
+          trx=ny*-5.2;
+          try_=nx*6.4;
+
+          card.style.setProperty('--mx',(px*100).toFixed(2)+'%');
+          card.style.setProperty('--my',(py*100).toFixed(2)+'%');
           wake();
         },{passive:true});
 
         card.addEventListener('pointerleave',function(){
-          active=false;
-          targetX=0;targetY=0;targetRX=0;targetRY=0;
+          inside=false;
+          tx=0;ty=0;trx=0;try_=0;
+          card.style.setProperty('--mx','50%');
+          card.style.setProperty('--my','50%');
           wake();
         },{passive:true});
       });
