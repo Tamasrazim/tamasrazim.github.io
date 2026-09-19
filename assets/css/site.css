@@ -463,9 +463,9 @@
       border-radius:9px;
       background:#090909;
       overflow:hidden;
-      transform-style:preserve-3d;
+      transform-style:flat;
       backface-visibility:hidden;
-      will-change:transform;
+      will-change:auto;
       transition:border-color .55s var(--ease),background .55s var(--ease);
     }
     .project-card:hover{
@@ -473,17 +473,11 @@
       background:#0b0b0b
     }
     .project-card::before{
-      content:'';
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      z-index:2;
-      opacity:.18;
-      background:
-        linear-gradient(105deg,transparent 0 42%,rgba(255,255,255,.16) 50%,transparent 58%);
-      transform:translateX(calc(var(--mx) * .12)) skewX(calc(var(--mx) * .08));
-      transition:opacity .45s var(--ease)
+      content:'';position:absolute;inset:0;pointer-events:none;z-index:2;
+      opacity:.0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.12),transparent 26%);
+      transition:opacity .5s var(--ease)
     }
+    .project-card:hover::before{opacity:.55}
     .project-card::after{
       content:'';
       position:absolute;
@@ -496,19 +490,18 @@
     }
     .project-photo{
       position:absolute;
-      inset:-9% -8% 28%;
+      inset:-10% -10% 24%;
       z-index:1;
       overflow:hidden;
       opacity:.62;
-      transform:
-        translate3d(var(--photo-x),var(--photo-y),18px)
-        scale(var(--photo-scale))
-        rotateZ(var(--photo-rotate));
-      transform-origin:50% 48%;
+      transform:translate3d(var(--photo-x,0px),var(--photo-y,0px),0) rotateX(var(--photo-rx,0deg)) rotateY(var(--photo-ry,0deg)) scale(var(--photo-scale,1.06));
+      transform-style:preserve-3d;
+      transform-origin:50% 50%;
       pointer-events:none;
       filter:saturate(.88) contrast(1.08);
       transition:opacity .55s var(--ease),filter .55s var(--ease);
       will-change:transform;
+      backface-visibility:hidden;
     }
     .project-photo::before{
       content:'';
@@ -552,23 +545,23 @@
         #090909;
     }
     .project-card:hover .project-photo{
-      --photo-scale:1.13;
-      opacity:.78;
+      --photo-scale:1.11;
+      opacity:.82;
       filter:saturate(1) contrast(1.14);
     }
-    .project-card .project-body{
+    .project-card:hover .project-body{
       position:relative;
       z-index:5;
-      transform:translate3d(calc(var(--mx) * -.035),calc(var(--my) * -.035),36px);
-      transition:transform .35s var(--ease);
+      transform:none;
+      transition:none;
     }
     .project-card .window-bar{
       position:relative;
       z-index:6;
-      transform:translateZ(46px);
+      transform:none;
     }
     .project-card .project-link{
-      transform:translateZ(52px);
+      transform:none;
     }
     .project-card:hover .project-body::after{
       transform:scaleX(1)
