@@ -7,10 +7,19 @@
 <title>Robiul Rumman Razim — Tamasrazim</title>
 <meta name="description" content="Robiul Rumman Razim — known online as Tamasrazim. Technology, projects, systems and digital work.">
 <meta name="theme-color" content="#050505">
+
+<!-- Enhanced Social Media Previews -->
 <meta property="og:title" content="Robiul Rumman Razim — Tamasrazim">
 <meta property="og:description" content="Technology, projects, systems and digital work.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tamasrazim.github.io/">
+<meta property="og:image" content="https://tamasrazim.github.io/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@Tamasrazim">
+<meta name="twitter:creator" content="@Tamasrazim">
+
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23050505'/%3E%3Ctext x='32' y='44' font-family='monospace' font-size='34' fill='%23f2f2ee' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,14 +27,9 @@
 
 <!-- Firebase Integration -->
 <script type="module">
-  // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
     apiKey: "AIzaSyArbY6StyRhYFlkTCZgvAzeUh8gSfSG0Nk",
     authDomain: "tamasrazim-aquarium.firebaseapp.com",
@@ -36,7 +40,6 @@
     measurementId: "G-0MLYNQKJQ0"
   };
 
-  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
 </script>
@@ -50,7 +53,14 @@
   "alternateName": "Tamasrazim",
   "url": "https://tamasrazim.github.io/",
   "email": "tasnimaktertamanna2@gmail.com",
+  "knowsAbout": [
+    "Web Development",
+    "Software Engineering",
+    "Systems Architecture",
+    "Digital Media"
+  ],
   "sameAs": [
+    "https://www.wikidata.org/wiki/Q141343253",
     "https://www.linkedin.com/in/Tamasrazim",
     "https://www.facebook.com/Tamasrazim",
     "https://www.facebook.com/Tamasrazim2",
@@ -69,7 +79,7 @@
 </script>
 
 <style>
-  /* ============ Custom properties ============ */
+  /* Custom properties */
   :root{
     --black:#050505;
     --white:#f2f2ee;
@@ -79,7 +89,7 @@
     --font-mono:'JetBrains Mono', 'Courier New', monospace;
   }
 
-  /* ============ Reset & Base ============ */
+  /* Reset & Base */
   *,*::before,*::after{ box-sizing:border-box; }
   html{ scroll-behavior:smooth; }
   body{ 
@@ -101,7 +111,7 @@
 
   .container{ max-width:1240px; margin-inline:auto; padding-inline:clamp(20px,5vw,64px); position: relative; z-index: 2; }
 
-  /* ============ Transparent Glass Box System ============ */
+  /* Transparent Glass Box System */
   .panel--dark, .panel--light {
     position: relative;
     background: transparent;
@@ -124,7 +134,7 @@
     box-shadow: 0 20px 50px 0 rgba(0, 0, 0, 0.6), 0 0 20px rgba(242, 242, 238, 0.1);
   }
 
-  /* Gentle Floating Motion */
+  /* Floating Motion */
   .animated-float {
     animation: continuousFloat 7s ease-in-out infinite alternate;
   }
@@ -133,14 +143,14 @@
     100% { transform: translateY(-8px); }
   }
 
-  /* ============ Reveal-on-scroll utility ============ */
+  /* Reveal-on-scroll utility */
   .js [data-reveal]{ opacity:0; transform:translateY(30px); transition:opacity 0.8s var(--ease), transform 0.8s var(--ease); transition-delay:calc(var(--i,0) * 90ms); }
   .js [data-reveal].is-visible{ opacity:1; transform:translateY(0); }
 
-  /* ============ Focus ============ */
+  /* Focus */
   a:focus-visible, button:focus-visible{ outline:2px solid var(--white); outline-offset:4px; }
 
-  /* ============ Fixed chrome: progress bar, cursor ============ */
+  /* Fixed progress bar & cursor */
   .progress-bar{ position:fixed; top:0; left:0; height:3px; width:0%; background:var(--white); mix-blend-mode:difference; z-index:600; pointer-events:none; }
   .cursor-dot,.cursor-ring{ position:fixed; top:0; left:0; border-radius:50%; pointer-events:none; z-index:9999; mix-blend-mode:difference; opacity:0; transform:translate(-50%,-50%); }
   .cursor-dot{ width:8px; height:8px; background:var(--white); }
@@ -149,7 +159,7 @@
   html.has-cursor, html.has-cursor a, html.has-cursor button{ cursor:none; }
   .cursor-ring.is-hover{ width:58px; height:58px; }
 
-  /* ============ Header / Nav ============ */
+  /* Header / Nav */
   .site-header{ position:fixed; top:0; left:0; right:0; z-index:500; color:var(--white); padding-block:1.1rem; background: rgba(5,5,5,0.45); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(242,242,238,0.1); }
   .header-inner{ display:flex; align-items:center; justify-content:space-between; gap:1.5rem; }
   
@@ -206,7 +216,7 @@
   .mobile-menu a{ font-family:var(--font-display); font-weight:600; font-size:clamp(1.7rem,7vw,2.6rem); }
   body.menu-open{ overflow:hidden; }
 
-  /* ============ Buttons ============ */
+  /* Buttons */
   .btn{ display:inline-flex; align-items:center; gap:.5rem; padding:.9em 1.7em; font-family:var(--font-body); font-weight:500; font-size:.95rem; border:1.5px solid var(--white); backdrop-filter: blur(12px); border-radius: 4px; transition:all .3s var(--ease); }
   .btn-solid{ background:var(--white); color:var(--black); }
   .btn-solid:hover{ background:transparent; color:var(--white); }
@@ -215,7 +225,7 @@
   .arrow{ display:inline-block; transition:transform .3s var(--ease); }
   .btn:hover .arrow{ transform:translateX(5px); }
 
-  /* ============ Hero ============ */
+  /* Hero */
   .hero{ min-height:100vh; min-height:100svh; display:flex; align-items:center; padding-top:clamp(120px,14vw,180px); padding-bottom:clamp(72px,10vw,120px); position:relative; overflow:hidden; }
   
   .hero-canvas {
@@ -245,7 +255,7 @@
   .scroll-line::after{ content:''; position:absolute; top:0; left:0; width:100%; height:50%; background:var(--white); animation:scrollLine 1.8s ease-in-out infinite; }
   @keyframes scrollLine{ from{ transform:translateY(-100%);} to{ transform:translateY(300%);} }
 
-  /* ============ Marquee ============ */
+  /* Marquee */
   .marquee{ overflow:hidden; border-top:1px solid rgba(242,242,238,0.12); border-bottom:1px solid rgba(242,242,238,0.12); padding-block:1rem; background: rgba(5,5,5,0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
   .marquee-track{ display:flex; width:max-content; animation:marquee 24s linear infinite; }
   .marquee:hover .marquee-track{ animation-play-state:paused; }
@@ -253,13 +263,13 @@
   .marquee-item::after{ content:'/'; margin-left:1.4rem; opacity:.4; }
   @keyframes marquee{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
 
-  /* ============ Shared section bits ============ */
+  /* Shared section bits */
   section{ padding-block:clamp(80px,11vw,150px); scroll-margin-top:90px; position:relative; }
   .eyebrow{ font-family:var(--font-mono); font-size:.85rem; color:rgba(242,242,238,0.65); margin-bottom:1.25rem; }
   .section-sub{ margin-top:1rem; max-width:56ch; color:rgba(242,242,238,0.7); font-size:clamp(1rem,1.2vw,1.1rem); line-height:1.7; }
   section h2{ font-weight:700; font-size:clamp(2rem,4.5vw,3.4rem); max-width:15ch; letter-spacing:-.01em; }
 
-  /* ============ About & ID Card ============ */
+  /* About & ID Card */
   .about-grid{ display:grid; grid-template-columns:1.1fr .9fr; gap:clamp(2.5rem,6vw,5rem); align-items:center; }
   .about-copy p{ color:rgba(242,242,238,0.7); font-size:clamp(1rem,1.2vw,1.1rem); line-height:1.75; max-width:52ch; }
   
@@ -280,7 +290,6 @@
   .id-card::after{ content:''; position:absolute; left:0; right:0; height:35%; background:linear-gradient(to bottom, transparent, rgba(242,242,238,.25), transparent); animation:scan 3.2s linear infinite; pointer-events:none; }
   @keyframes scan{ from{ transform:translateY(-120%);} to{ transform:translateY(320%);} }
 
-  /* Obito Mask Animated Graphic Container inside ID Card */
   .obito-mask-container {
     position: absolute;
     right: -10px;
@@ -320,7 +329,6 @@
   .id-alias{ font-family:var(--font-mono); font-weight:700; font-size:clamp(1rem, 1.8vw, 1.25rem); letter-spacing:.04em; margin:0; cursor: pointer; transition: color 0.3s var(--ease); }
   .id-alias:hover { color: rgba(242,242,238,0.85); }
 
-  /* Glass Box inside ID Card for Status */
   .id-footer { display: flex; justify-content: space-between; align-items: center; width: 100%; }
   .id-status-box {
     display: inline-flex;
@@ -353,7 +361,7 @@
     text-transform: uppercase;
   }
 
-  /* ============ Projects ============ */
+  /* Projects */
   .projects-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1.75rem; margin-top:3rem; }
   .project-card{ border:1.5px solid rgba(242,242,238,0.15); }
   .project-card:hover{ transform:translateY(-6px); border-color: rgba(242,242,238,0.35); }
@@ -374,7 +382,7 @@
   .dots-loading span:nth-child(3){ animation-delay:.4s; }
   @keyframes pulseDot{ 0%,100%{opacity:.2;} 50%{opacity:.9;} }
 
-  /* ============ Socials / Connect list ============ */
+  /* Socials / Connect list */
   .connect-list{ margin-top:2.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
   .connect-row{ position:relative; display:flex; justify-content:space-between; align-items:center; padding:1.35rem 1.5rem; overflow:hidden; }
   .connect-row::before{ content:''; position:absolute; inset:0; background:var(--white); transform:scaleX(0); transform-origin:left; transition:transform .4s var(--ease); z-index:0; }
@@ -383,18 +391,34 @@
   .connect-meta{ position:relative; z-index:1; display:flex; align-items:center; gap:.5rem; font-family:var(--font-mono); font-size:.8rem; color:rgba(242,242,238,0.65); transition:color .35s var(--ease); transition-delay:.05s; }
   .connect-row:hover .connect-name, .connect-row:hover .connect-meta{ color:var(--black); }
 
-  /* ============ Contact ============ */
+  /* Contact */
   .contact-inner{ max-width:760px; padding: 3.5rem clamp(20px,5vw,48px); }
-  .email-link{ display:inline-block; margin-top:2rem; font-family:var(--font-mono); font-weight:700; font-size:clamp(1.2rem,4vw,2.2rem); border-bottom:2px solid var(--white); padding-bottom:.35rem; word-break:break-all; transition: transform 0.3s var(--ease), opacity 0.3s var(--ease); }
+  .email-container { margin-top: 2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+  .email-link{ font-family:var(--font-mono); font-weight:700; font-size:clamp(1.1rem,3.5vw,2.1rem); border-bottom:2px solid var(--white); padding-bottom:.35rem; word-break:break-all; transition: transform 0.3s var(--ease), opacity 0.3s var(--ease); }
   .email-link:hover { transform: scale(1.02); opacity: 0.9; }
+  .copy-btn {
+    padding: 0.6rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(242, 242, 238, 0.3);
+    border-radius: 4px;
+    background: rgba(242, 242, 238, 0.05);
+    cursor: pointer;
+    transition: all 0.3s var(--ease);
+  }
+  .copy-btn:hover {
+    background: var(--white);
+    color: var(--black);
+  }
 
-  /* ============ Footer ============ */
+  /* Footer */
   .site-footer{ padding-block:2.5rem; border-top: 1px solid rgba(242,242,238,0.1); }
   .footer-inner{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; font-family:var(--font-mono); font-size:.85rem; color:rgba(242,242,238,0.65); }
   .back-to-top{ transition:transform .3s var(--ease); }
   .back-to-top:hover{ transform:translateY(-4px); }
 
-  /* ============ Responsive ============ */
+  /* Responsive */
   @media (max-width:880px){
     .nav-links,.header-right .nav-contact,.header-right .clock{ display:none; }
     .nav-toggle{ display:block; }
@@ -408,7 +432,7 @@
     .obito-mask-container{ width:120px; height:120px; right: -15px; }
   }
 
-  /* ============ Reduced motion ============ */
+  /* Reduced motion */
   @media (prefers-reduced-motion:reduce){
     *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
     html{ scroll-behavior:auto; }
@@ -489,7 +513,6 @@
       <div class="id-card glass-box animated-float" data-reveal style="--i:2">
         <span class="corner corner-tl"></span><span class="corner corner-tr"></span><span class="corner corner-bl"></span><span class="corner corner-br"></span>
         
-        <!-- Obito's Mask Animated Canvas -->
         <div class="obito-mask-container">
           <canvas id="obitoMaskCanvas" width="160" height="160" aria-hidden="true"></canvas>
         </div>
@@ -589,7 +612,10 @@
       <p class="eyebrow" data-reveal>Contact</p>
       <h2 data-reveal style="--i:1">Let's connect.</h2>
       <p data-reveal style="--i:2">For professional inquiries, projects, collaboration, or anything worth discussing.</p>
-      <a href="mailto:tasnimaktertamanna2@gmail.com" class="email-link magnetic" id="emailLink" data-reveal style="--i:3">tasnimaktertamanna2@gmail.com</a>
+      <div class="email-container" data-reveal style="--i:3">
+        <a href="mailto:tasnimaktertamanna2@gmail.com" class="email-link magnetic" id="emailLink">tasnimaktertamanna2@gmail.com</a>
+        <button class="copy-btn magnetic" id="copyBtn" aria-label="Copy email address">Copy Email</button>
+      </div>
     </div>
   </section>
 
@@ -630,7 +656,6 @@
       dimensionBlocks = [];
       tomoeList = [];
 
-      // Particle Chakra Dust
       var pCount = Math.min(Math.floor((width * height) / 10000), 85);
       for(var i = 0; i < pCount; i++){
         particles.push({
@@ -645,7 +670,6 @@
         });
       }
 
-      // Kamui Dimension Pillars / Floating Blocks (The Kamui Pocket Dimension geometry)
       var blockCount = Math.min(Math.floor(width / 160), 12);
       for(var b = 0; b < blockCount; b++){
         dimensionBlocks.push({
@@ -661,7 +685,6 @@
         });
       }
 
-      // Floating Mangekyou Sharingan Tomoe
       for(var t = 0; t < 6; t++){
         tomoeList.push({
           x: Math.random() * width,
@@ -688,7 +711,6 @@
       mouse.isHovered = false;
     });
 
-    // Helper to draw Kamui Tomoe shape (Sharingan Blade)
     function drawTomoe(ctx, x, y, size, angle, alpha) {
       ctx.save();
       ctx.translate(x, y);
@@ -698,7 +720,6 @@
       ctx.fillStyle = 'rgba(255, 40, 0, ' + alpha + ')';
       ctx.fill();
 
-      // Curved tail of tomoe
       ctx.beginPath();
       ctx.moveTo(0, -size * 0.45);
       ctx.quadraticCurveTo(size * 0.7, -size * 0.2, size * 0.4, size * 0.6);
@@ -715,7 +736,6 @@
       var vortexY = mouse.isHovered && mouse.y !== null ? mouse.y : height * 0.45;
       vortexAngle += 0.012;
 
-      // 1. Kamui Vortex Distortion Lines
       ctx.save();
       ctx.translate(vortexX, vortexY);
       var numRays = 16;
@@ -737,7 +757,6 @@
       }
       ctx.restore();
 
-      // 2. Kamui Dimensional Blocks (Pillars floating in space)
       for(var b = 0; b < dimensionBlocks.length; b++){
         var blk = dimensionBlocks[b];
         blk.x += blk.vx;
@@ -760,7 +779,6 @@
         ctx.restore();
       }
 
-      // 3. Floating Mangekyou Tomoe
       for(var t = 0; t < tomoeList.length; t++){
         var tm = tomoeList[t];
         tm.x += tm.vx;
@@ -775,7 +793,6 @@
         drawTomoe(ctx, tm.x, tm.y, tm.size, tm.rot, tm.alpha);
       }
 
-      // 4. Kamui Chakra Particles swirling toward vortex
       for(var i = 0; i < particles.length; i++){
         var p = particles[i];
         p.angle += p.speed * 0.03;
@@ -794,7 +811,6 @@
         ctx.fillStyle = p.color + p.alpha + ')';
         ctx.fill();
 
-        // Connect particles near vortex with glowing Kamui chakra lines
         if(p.dist < 120){
           ctx.beginPath();
           ctx.moveTo(px, py);
@@ -814,7 +830,7 @@
     }
   })();
 
-  /* ---------- Dynamic Obito Mask & Kamui Mangekyou Sharingan Canvas ---------- */
+  /* ---------- Obito Mask & Kamui Canvas ---------- */
   (function initObitoMask(){
     var canvas = document.getElementById('obitoMaskCanvas');
     if(!canvas) return;
@@ -833,21 +849,17 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       var cx = 110;
       var cy = 110;
-      
-      // Eye hole center position (upper right like Obito's spiral mask)
       var eyeX = cx + 24;
       var eyeY = cy - 22;
       
       ctx.save();
       
-      // Outer mask contour outline
       ctx.beginPath();
       ctx.ellipse(cx, cy, 78, 94, -0.08, 0, Math.PI * 2);
       ctx.strokeStyle = 'rgba(242, 242, 238, 0.45)';
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // Swirling Spiral ridges emanating from Obito's eye hole
       var numSpirals = 6;
       var maxRadius = 115;
       
@@ -867,13 +879,11 @@
           }
         }
         
-        // Dynamic Glowing Orange & Crimson Spirals
         ctx.strokeStyle = (i % 2 === 0) ? 'rgba(255, 90, 0, 0.85)' : 'rgba(242, 242, 238, 0.5)';
         ctx.lineWidth = (i % 2 === 0) ? 2.2 : 1.4;
         ctx.stroke();
       }
 
-      // Eye hole background (Void core)
       ctx.beginPath();
       ctx.arc(eyeX, eyeY, 13, 0, Math.PI * 2);
       ctx.fillStyle = '#050505';
@@ -884,18 +894,15 @@
       ctx.shadowBlur = isCardHovered ? 20 : 12;
       ctx.stroke();
 
-      // Obito's Mangekyou Sharingan Pattern inside eye hole (3 connected triangular blades)
       ctx.save();
       ctx.translate(eyeX, eyeY);
       ctx.rotate(eyeSpin);
 
-      // Red Iris
       ctx.beginPath();
       ctx.arc(0, 0, 10, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(230, 0, 0, 0.9)';
       ctx.fill();
 
-      // Mangekyou 3-blade Pinwheel (Obito's Kamui pattern)
       var blades = 3;
       for(var b = 0; b < blades; b++){
         ctx.rotate((Math.PI * 2) / blades);
@@ -907,7 +914,6 @@
         ctx.fill();
       }
 
-      // Pupil center
       ctx.beginPath();
       ctx.arc(0, 0, 3, 0, Math.PI * 2);
       ctx.fillStyle = '#050505';
@@ -917,7 +923,7 @@
       ctx.restore();
 
       angle += 0.006;
-      eyeSpin += isCardHovered ? 0.08 : 0.02; // Spins rapidly when card is hovered!
+      eyeSpin += isCardHovered ? 0.08 : 0.02;
       requestAnimationFrame(drawMask);
     }
 
@@ -935,7 +941,7 @@
   updateClock();
   setInterval(updateClock, 1000);
 
-  /* ---------- Logo Expand Text Glitch Animation ---------- */
+  /* ---------- Logo Glitch Animation ---------- */
   var logoBtn = document.getElementById('logoBtn');
   var logoText = document.getElementById('logoText');
   var isLogoExpanded = false;
@@ -967,7 +973,6 @@
         e.preventDefault();
         isLogoExpanded = true;
         logoBtn.classList.add('expanded');
-        // Expand animation shows ONLY "Tamasrazim"
         glitchScramble(logoText, 'Tamasrazim', 350);
       }
     });
@@ -981,84 +986,19 @@
     }, { passive: true });
   }
 
-  /* ---------- Obito's Mask Canvas Animation ---------- */
-  (function initObitoMask(){
-    var canvas = document.getElementById('obitoMaskCanvas');
-    if(!canvas) return;
-    var ctx = canvas.getContext('2d');
-    var angle = 0;
-
-    function drawMask(){
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      var cx = 110;
-      var cy = 110;
-      
-      // Eye hole center position (upper right like Obito's spiral mask)
-      var eyeX = cx + 24;
-      var eyeY = cy - 22;
-      
-      ctx.save();
-      
-      // Outer mask contour outline
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, 78, 94, -0.08, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(242, 242, 238, 0.35)';
-      ctx.lineWidth = 1.8;
-      ctx.stroke();
-
-      // Swirling Spiral ridges emanating from Obito's eye hole
-      var numSpirals = 5;
-      var maxRadius = 115;
-      
-      for(var i = 0; i < numSpirals; i++){
-        ctx.beginPath();
-        var startAngle = (i * Math.PI * 2 / numSpirals) + angle;
-        
-        for(var r = 6; r < maxRadius; r += 2){
-          var currentAngle = startAngle + (r * 0.042);
-          var px = eyeX + Math.cos(currentAngle) * r * 0.88;
-          var py = eyeY + Math.sin(currentAngle) * r * 1.08;
-          
-          if(r === 6){
-            ctx.moveTo(px, py);
-          } else {
-            ctx.lineTo(px, py);
-          }
-        }
-        
-        // Alternating glowing orange & monochrome spirals
-        ctx.strokeStyle = (i % 2 === 0) ? 'rgba(255, 120, 30, 0.7)' : 'rgba(242, 242, 238, 0.45)';
-        ctx.lineWidth = 1.8;
-        ctx.stroke();
-      }
-
-      // Eye hole background (dark core)
-      ctx.beginPath();
-      ctx.arc(eyeX, eyeY, 10, 0, Math.PI * 2);
-      ctx.fillStyle = '#050505';
-      ctx.fill();
-      ctx.strokeStyle = '#ff7700';
-      ctx.lineWidth = 2.5;
-      ctx.shadowColor = '#ff7700';
-      ctx.shadowBlur = 12;
-      ctx.stroke();
-
-      // Sharingan subtle red center glow inside eye hole
-      ctx.beginPath();
-      ctx.arc(eyeX, eyeY, 3, 0, Math.PI * 2);
-      ctx.fillStyle = '#ff3300';
-      ctx.fill();
-
-      ctx.restore();
-
-      angle += 0.007; // smooth swirling rotation rate
-      requestAnimationFrame(drawMask);
-    }
-
-    if(!prefersReduced){
-      drawMask();
-    }
-  })();
+  /* ---------- Copy Email Action ---------- */
+  var copyBtn = document.getElementById('copyBtn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', function() {
+      navigator.clipboard.writeText('tasnimaktertamanna2@gmail.com').then(function() {
+        var originalText = copyBtn.textContent;
+        copyBtn.textContent = 'Copied!';
+        setTimeout(function() {
+          copyBtn.textContent = originalText;
+        }, 2000);
+      });
+    });
+  }
 
   /* ---------- Scroll progress ---------- */
   var progressBar = document.querySelector('.progress-bar');
@@ -1148,7 +1088,7 @@
     revealEls.forEach(function(el){ el.classList.add('is-visible'); });
   }
 
-  /* ---------- 3D Tilt Effect for Glass Boxes ---------- */
+  /* ---------- 3D Tilt Effect ---------- */
   if(!prefersReduced){
     var glassBoxes = document.querySelectorAll('.glass-box');
     glassBoxes.forEach(function(box){
