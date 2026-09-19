@@ -494,6 +494,51 @@
     .projects-grid{
       display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:48px
     }
+    .project-featured{
+      grid-column:1 / -1;
+      min-height:340px;
+    }
+    .renderer-mini{
+      position:relative;
+      width:100%;
+      height:150px;
+      margin-top:18px;
+      border:1px solid rgba(243,243,239,.1);
+      border-radius:5px;
+      overflow:hidden;
+      background:#050505;
+    }
+    .renderer-mini canvas{
+      width:100%;
+      height:100%;
+      opacity:.86;
+    }
+    .renderer-mini::after{
+      content:'LIVE RENDER / LOCAL';
+      position:absolute;
+      right:10px;
+      top:9px;
+      font:600 .52rem var(--mono);
+      letter-spacing:.1em;
+      color:var(--dim);
+    }
+    .renderer-mini-scan{
+      position:absolute;
+      left:0;
+      top:0;
+      width:100%;
+      height:1px;
+      background:linear-gradient(90deg,transparent,rgba(243,243,239,.42),transparent);
+      animation:rendererScan 2.8s ease-in-out infinite;
+      pointer-events:none;
+    }
+    @keyframes rendererScan{
+      0%,100%{transform:translateY(0);opacity:0}
+      18%{opacity:.65}
+      55%{transform:translateY(148px);opacity:.16}
+      72%{opacity:.5}
+    }
+    .project-featured .project-body h3{margin-top:18px}
     .project-card{
       position:relative;min-height:290px;border:1px solid var(--line);border-radius:9px;
       background:linear-gradient(140deg,rgba(243,243,239,.045),rgba(243,243,239,.012));
@@ -817,6 +862,21 @@
         <p class="section-intro reveal" data-reveal style="--delay:2">A running log of projects, repositories and technical experiments.</p>
 
         <div class="projects-grid">
+          <article class="project-card project-featured tilt reveal" data-reveal style="--delay:3">
+            <div class="window-bar"><span class="window-dot"></span><span class="window-dot"></span><span class="window-dot"></span><span class="filename">Animation-Renderer-Tamasrazim</span></div>
+            <div class="project-body">
+              <span class="project-index">FLAGSHIP TOOL</span>
+              <div class="renderer-mini">
+                <canvas id="rendererPreviewCanvas" width="640" height="360" aria-hidden="true"></canvas>
+                <span class="renderer-mini-scan" aria-hidden="true"></span>
+              </div>
+              <h3>Animation Renderer — Tamasrazim</h3>
+              <p>Browser-based animation preview and export workspace with native raster, vector-contract and WebM workflows, plus an installable offline PWA.</p>
+              <p class="project-tags">Canvas · SVG · PNG · JPG · WebP · WebM · PWA</p>
+              <a class="project-link magnetic" href="renderer/">Open renderer <span>→</span></a>
+            </div>
+          </article>
+
           <article class="project-card tilt reveal" data-reveal style="--delay:3">
             <div class="window-bar"><span class="window-dot"></span><span class="window-dot"></span><span class="window-dot"></span><span class="filename">personal-web.html</span></div>
             <div class="project-body">
@@ -1146,6 +1206,56 @@
         });
       }
     }
+
+    /* ---------- Renderer live project preview ---------- */
+    (function initRendererPreview(){
+      var canvas=q('#rendererPreviewCanvas');
+      if(!canvas || reduced) return;
+      var ctx=canvas.getContext('2d');
+      var w=canvas.width,h=canvas.height,started=performance.now();
+      function frame(now){
+        var t=(now-started)/1000, cx=w*.5, cy=h*.52, s=Math.min(w,h);
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='#050505';
+        ctx.fillRect(0,0,w,h);
+
+        var g=ctx.createRadialGradient(cx,cy,0,cx,cy,s*.46);
+        g.addColorStop(0,'rgba(243,243,239,.07)');
+        g.addColorStop(1,'rgba(243,243,239,0)');
+        ctx.fillStyle=g;
+        ctx.beginPath();ctx.arc(cx,cy,s*.46,0,Math.PI*2);ctx.fill();
+
+        for(var r=0;r<7;r++){
+          var rr=s*(.15+r*.06)+Math.sin(t*1.2+r)*4;
+          ctx.beginPath();
+          ctx.arc(cx,cy,rr,0,Math.PI*2);
+          ctx.setLineDash([10+r*3,18+r*4]);
+          ctx.lineDashOffset=-t*(28+r*7);
+          ctx.strokeStyle='rgba(243,243,239,'+(.035+r*.006)+')';
+          ctx.lineWidth=1;
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+
+        for(var i=0;i<32;i++){
+          var a=t*(i%2?0.45:-0.38)+i*Math.PI*2/32;
+          var rr=s*(.13+i*.007)+Math.sin(t*1.6+i)*4;
+          var x=cx+Math.cos(a)*rr;
+          var y=cy+Math.sin(a)*rr*.6;
+          ctx.beginPath();
+          ctx.arc(x,y,1.1+(Math.sin(t*3+i)*.4+.4),0,Math.PI*2);
+          ctx.fillStyle='rgba(243,243,239,'+(.12+Math.pow(Math.sin(t*1.6+i),2)*.18).toFixed(3)+')';
+          ctx.fill();
+        }
+
+        var beam=((t*58)%(h+80))-40;
+        ctx.fillStyle='rgba(243,243,239,.045)';
+        ctx.fillRect(0,beam,w,1);
+
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    })();
 
     /* ---------- Global motion field ---------- */
     var canvas=q('#field');
