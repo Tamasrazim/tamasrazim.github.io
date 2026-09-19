@@ -158,14 +158,37 @@
 
     .cursor-dot,.cursor-ring{
       position:fixed;left:0;top:0;z-index:1800;pointer-events:none;
-      transform:translate(-50%,-50%);opacity:0
+      transform:translate(-50%,-50%);opacity:0;mix-blend-mode:difference
     }
-    .cursor-dot{width:7px;height:7px;border-radius:50%;background:var(--white);mix-blend-mode:difference}
+    .cursor-dot{
+      width:4px;height:4px;border:1px solid var(--white);border-radius:50%;
+      background:var(--white);box-shadow:0 0 14px rgba(243,243,239,.55)
+    }
     .cursor-ring{
-      width:32px;height:32px;border:1px solid var(--white);border-radius:50%;
-      mix-blend-mode:difference;transition:width .3s var(--ease),height .3s var(--ease),opacity .3s var(--ease)
+      width:42px;height:42px;border:0;
+      transition:width .4s var(--ease),height .4s var(--ease),opacity .3s var(--ease),transform .08s linear
     }
-    .cursor-ring.is-active{width:58px;height:58px}
+    .cursor-ring::before,
+    .cursor-ring::after{
+      content:'';position:absolute;left:50%;top:50%;background:var(--white);
+      transform:translate(-50%,-50%);opacity:.72
+    }
+    .cursor-ring::before{width:42px;height:1px}
+    .cursor-ring::after{width:1px;height:42px}
+    .cursor-ring.is-active{width:68px;height:68px}
+    .cursor-ring.is-active::before{width:68px}
+    .cursor-ring.is-active::after{height:68px}
+    .cursor-ring{
+      background:
+        linear-gradient(var(--white),var(--white)) 0 0/10px 1px no-repeat,
+        linear-gradient(var(--white),var(--white)) 0 0/1px 10px no-repeat,
+        linear-gradient(var(--white),var(--white)) 100% 0/10px 1px no-repeat,
+        linear-gradient(var(--white),var(--white)) 100% 0/1px 10px no-repeat,
+        linear-gradient(var(--white),var(--white)) 0 100%/10px 1px no-repeat,
+        linear-gradient(var(--white),var(--white)) 0 100%/1px 10px no-repeat,
+        linear-gradient(var(--white),var(--white)) 100% 100%/10px 1px no-repeat,
+        linear-gradient(var(--white),var(--white)) 100% 100%/1px 10px no-repeat
+    }
 
     .tap-ripple{
       position:fixed;z-index:1750;pointer-events:none;width:10px;height:10px;border-radius:50%;
@@ -570,7 +593,9 @@
   <div class="grain" aria-hidden="true"></div>
   <div class="site-progress" aria-hidden="true"><span id="progressFill"></span></div>
   <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
-  <div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
+  <div class="cursor-ring" id="cursorRing" aria-hidden="true">
+    <span aria-hidden="true"></span>
+  </div>
 
   <header class="site-header">
     <div class="header-inner">
@@ -921,7 +946,7 @@
           rx=mx;ry=my;hasMoved=true;ring.style.opacity='1';
         }
       }, {passive:true});
-      qa('a,button,.project-card,.id-card').forEach(function(el){
+      qa('a,button,.project-card,.id-card,.email-link').forEach(function(el){
         el.addEventListener('mouseenter', function(){ ring.classList.add('is-active'); });
         el.addEventListener('mouseleave', function(){ ring.classList.remove('is-active'); });
       });
