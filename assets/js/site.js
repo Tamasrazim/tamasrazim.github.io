@@ -158,20 +158,111 @@
       window.setTimeout(function(){ ripple.remove(); }, 620);
     }, {passive:true});
 
-    /* ---------- Tilt ---------- */
+    /* ---------- Project photo-plane motion ---------- */
     if(!reduced && finePointer){
-      qa('.tilt').forEach(function(el){
-        el.addEventListener('pointermove', function(e){
-          var r=el.getBoundingClientRect();
-          var x=(e.clientX-r.left)/r.width-.5;
-          var y=(e.clientY-r.top)/r.height-.5;
-          el.style.setProperty('--rx',(-y*4.5).toFixed(2)+'deg');
-          el.style.setProperty('--ry',(x*5.2).toFixed(2)+'deg');
-        });
-        el.addEventListener('pointerleave', function(){
-          el.style.setProperty('--rx','0deg');
-          el.style.setProperty('--ry','0deg');
-        });
+      var projectCards=qa('.project-card');
+      projectCards.forEach(function(card,index){
+        var photo=document.createElement('div');
+        photo.className='project-photo';
+        photo.setAttribute('aria-hidden','true');
+        if(index===0){
+          photo.style.background=
+            'radial-gradient(circle at 50% 40%,rgba(243,243,239,.24),transparent 18%),'+
+            'repeating-radial-gradient(circle at 50% 45%,rgba(243,243,239,.12) 0 1px,transparent 1px 18px),'+
+            'linear-gradient(145deg,#181816,#050505 72%)';
+        }
+        card.insertBefore(photo,card.firstElementChild);
+        card.dataset.motionReady='1';
+
+        var targetX=0,targetY=0,targetRX=0,targetRY=0;
+        var currentX=0,currentY=0,currentRX=0,currentRY=0;
+        var active=false,rafId=0,lastStamp=performance.now();
+
+        function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+
+        function render(now){
+          var dt=Math.min(.05,Math.max(.008,(now-lastStamp)/1000));
+          lastStamp=now;
+          var ease=1-Math.exp(-dt*(active?18:12));
+          currentX+=(targetX-currentX)*ease;
+          currentY+=(targetY-currentY)*ease;
+          currentRX+=(targetRX-currentRX)*ease;
+          currentRY+=(targetRY-currentRY)*ease;
+
+          var tx=currentX;
+          var ty=currentY;
+          var rx=currentRX;
+          var ry=currentRY;
+          var rz=(currentX*.0055)-(currentY*.0028);
+          var sx=1+Math.abs(ry)*.00015;
+          var sy=1+Math.abs(rx)*.0001;
+
+          var rxr=rx*Math.PI/180, ryr=ry*Math.PI/180, rzr=rz*Math.PI/180;
+          var sxr=Math.sin(rxr),cxr=Math.cos(rxr);
+          var syr=Math.sin(ryr),cyr=Math.cos(ryr);
+          var szr=Math.sin(rzr),czr=Math.cos(rzr);
+
+          var m11=cyr*czr;
+          var m12=sxr*syr*czr+cxr*szr;
+          var m13=-cxr*syr*czr+sxr*szr;
+          var m21=-cyr*szr;
+          var m22=-sxr*syr*szr+cxr*czr;
+          var m23=cxr*syr*szr+sxr*czr;
+          var m31=syr;
+          var m32=-sxr*cyr;
+          var m33=cxr*cyr;
+
+          card.style.transform=
+            'matrix3d('+
+            (m11*sx).toFixed(5)+','+(m12*sx).toFixed(5)+','+(m13*sx).toFixed(5)+',0,'+
+            (m21*sy).toFixed(5)+','+(m22*sy).toFixed(5)+','+(m23*sy).toFixed(5)+',0,'+
+            m31.toFixed(5)+','+m32.toFixed(5)+','+m33.toFixed(5)+',0,'+
+            tx.toFixed(2)+','+ty.toFixed(2)+','+
+            (active?8:0).toFixed(2)+',1)';
+
+          card.style.setProperty('--mx',currentX.toFixed(2)+'px');
+          card.style.setProperty('--my',currentY.toFixed(2)+'px');
+          card.style.setProperty('--photo-x',(-currentX*.24).toFixed(2)+'px');
+          card.style.setProperty('--photo-y',(-currentY*.20).toFixed(2)+'px');
+          card.style.setProperty('--photo-rotate',(currentX*.018).toFixed(3)+'deg');
+          card.style.setProperty('--rx',currentRX.toFixed(3)+'deg');
+          card.style.setProperty('--ry',currentRY.toFixed(3)+'deg');
+
+          if(active || Math.abs(targetX-currentX)>.05 || Math.abs(targetY-currentY)>.05 ||
+             Math.abs(targetRX-currentRX)>.05 || Math.abs(targetRY-currentRY)>.05){
+            rafId=requestAnimationFrame(render);
+          }else{
+            rafId=0;
+          }
+        }
+
+        function wake(){
+          if(!rafId) rafId=requestAnimationFrame(render);
+        }
+
+        card.addEventListener('pointerenter',function(){
+          active=true;
+          wake();
+        },{passive:true});
+
+        card.addEventListener('pointermove',function(e){
+          var rect=card.getBoundingClientRect();
+          var nx=(e.clientX-(rect.left+rect.width*.5))/(rect.width*.5);
+          var ny=(e.clientY-(rect.top+rect.height*.5))/(rect.height*.5);
+          nx=clamp(nx,-1,1);
+          ny=clamp(ny,-1,1);
+          targetRX=ny*-6.2;
+          targetRY=nx*7.2;
+          targetX=nx*5.5;
+          targetY=ny*4.5;
+          wake();
+        },{passive:true});
+
+        card.addEventListener('pointerleave',function(){
+          active=false;
+          targetX=0;targetY=0;targetRX=0;targetRY=0;
+          wake();
+        },{passive:true});
       });
     }
 
