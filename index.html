@@ -167,7 +167,7 @@
     }
     .cursor-ring{
       width:42px;height:42px;border:0;
-      transition:width .4s var(--ease),height .4s var(--ease),opacity .3s var(--ease),transform .08s linear
+      transition:width .4s var(--ease),height .4s var(--ease),opacity .3s var(--ease)
     }
     .cursor-ring::before,
     .cursor-ring::after{
@@ -991,12 +991,13 @@
         el.addEventListener('mouseenter', function(){ ring.classList.add('is-active'); });
         el.addEventListener('mouseleave', function(){ ring.classList.remove('is-active'); });
       });
-      (function follow(){
-        rx += (mx-rx)*.15;
-        ry += (my-ry)*.15;
-        ring.style.transform='translate3d(' + rx + 'px,' + ry + 'px,0) translate(-50%,-50%)';
-        requestAnimationFrame(follow);
-      })();
+      function syncCursor(){
+        rx=mx;
+        ry=my;
+        ring.style.transform='translate3d(' + mx + 'px,' + my + 'px,0) translate(-50%,-50%)';
+      }
+      window.addEventListener('mousemove', syncCursor, {passive:true});
+      syncCursor();
     }
 
     /* ---------- Tap ripple ---------- */
