@@ -319,7 +319,20 @@
 
     .hero{
       min-height:100svh;display:flex;align-items:flex-end;overflow:hidden;
-      padding-top:150px
+      padding-top:150px;isolation:isolate
+    }
+    .hero::after{
+      content:'';position:absolute;inset:-20%;z-index:-1;pointer-events:none;
+      background:
+        radial-gradient(circle at 18% 22%,rgba(243,243,239,.055),transparent 22%),
+        radial-gradient(circle at 78% 62%,rgba(243,243,239,.045),transparent 25%);
+      background-size:120% 120%;
+      animation:heroAtmosphere 12s ease-in-out infinite alternate
+    }
+    @keyframes heroAtmosphere{
+      0%{background-position:0% 0%,100% 100%;transform:scale(1)}
+      50%{background-position:32% 68%,65% 35%;transform:scale(1.035)}
+      100%{background-position:68% 28%,18% 72%;transform:scale(1.015)}
     }
     .hero-inner{padding:150px 0 74px}
     .hero-kicker{
@@ -392,6 +405,13 @@
       position:relative;overflow:hidden;border-block:1px solid var(--line);
       background:rgba(243,243,239,.018)
     }
+    .band::after{
+      content:'';position:absolute;top:0;bottom:0;width:18vw;min-width:120px;
+      background:linear-gradient(90deg,transparent,rgba(243,243,239,.045),transparent);
+      transform:translateX(-140%) skewX(-16deg);pointer-events:none;
+      animation:bandSweep 6.2s ease-in-out infinite
+    }
+    @keyframes bandSweep{0%,58%{transform:translateX(-140%) skewX(-16deg)}82%,100%{transform:translateX(720%) skewX(-16deg)}}
     .band-track{display:flex;width:max-content;animation:marquee 26s linear infinite}
     .band:hover .band-track{animation-play-state:paused}
     .band-item{
@@ -401,7 +421,14 @@
     .band-item::after{content:' / ';opacity:.25;padding-inline:28px}
     @keyframes marquee{to{transform:translateX(-50%)}}
 
-    .about{background:transparent;color:var(--white)}
+    .about{background:transparent;color:var(--white);overflow:hidden}
+    .about::before{
+      content:'';position:absolute;right:-12vw;top:12%;width:min(45vw,560px);aspect-ratio:1;
+      border:1px solid rgba(243,243,239,.055);border-radius:50%;
+      box-shadow:0 0 0 34px rgba(243,243,239,.018),0 0 0 68px rgba(243,243,239,.012);
+      animation:aboutOrbit 18s linear infinite;pointer-events:none
+    }
+    @keyframes aboutOrbit{to{transform:rotate(360deg) scale(1.04)}}
     .about .eyebrow,.about .section-intro,.about-copy p{color:var(--muted)}
     .about .eyebrow::before{background:currentColor}
     .about-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:clamp(48px,8vw,120px);align-items:center}
@@ -470,8 +497,13 @@
     .project-card{
       position:relative;min-height:290px;border:1px solid var(--line);border-radius:9px;
       background:linear-gradient(140deg,rgba(243,243,239,.045),rgba(243,243,239,.012));
-      overflow:hidden;transition:transform .5s var(--ease),border-color .4s var(--ease),background .4s var(--ease)
+      overflow:hidden;transition:transform .5s var(--ease),border-color .4s var(--ease),background .4s var(--ease);
+      animation:projectFloat 6.8s ease-in-out infinite
     }
+    .project-card:nth-child(2){animation-delay:-1.7s}
+    .project-card:nth-child(3){animation-delay:-3.4s}
+    .project-card:nth-child(4){animation-delay:-5.1s}
+    @keyframes projectFloat{0%,100%{translate:0 0}50%{translate:0 -3px}}
     .project-card:hover{transform:translateY(-7px);border-color:var(--line-strong);background:linear-gradient(140deg,rgba(243,243,239,.08),rgba(243,243,239,.02))}
     .project-card::before{
       content:'';position:absolute;left:-25%;top:0;width:18%;height:100%;
@@ -479,12 +511,24 @@
       transform:skewX(-18deg) translateX(-180%);
       pointer-events:none
     }
-    .project-card:hover::before{animation:cardSweep .85s var(--ease) forwards}
-    .project-card::after{
-      content:'';position:absolute;inset:auto 0 0;height:1px;background:currentColor;opacity:.4;
-      transform:scaleX(.1);transform-origin:left;transition:transform .5s var(--ease)
+    .project-card:not(.soon)::after{
+      content:'';position:absolute;left:0;right:0;top:0;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(243,243,239,.55),transparent);
+      opacity:.28;transform:translateX(-100%);
+      animation:projectScan 5.5s ease-in-out infinite
     }
-    .project-card:hover::after{transform:scaleX(1)}
+    @keyframes projectScan{
+      0%,58%{transform:translateX(-100%);opacity:0}
+      68%{opacity:.55}
+      82%,100%{transform:translateX(100%);opacity:0}
+    }
+    .project-card:hover::before{animation:cardSweep .85s var(--ease) forwards}
+    .project-card .project-body::after{
+      content:'';position:absolute;left:28px;right:28px;bottom:18px;height:1px;
+      background:currentColor;opacity:.12;transform:scaleX(.18);transform-origin:left;
+      transition:transform .5s var(--ease)
+    }
+    .project-card:hover .project-body::after{transform:scaleX(1)}
     @keyframes cardSweep{to{transform:skewX(-18deg) translateX(820%)}}
     .window-bar{
       display:flex;align-items:center;gap:6px;padding:12px 14px;border-bottom:1px solid var(--line);
@@ -534,6 +578,10 @@
     .social-link:hover .social-meta,.social-link:hover .social-arrow{color:rgba(243,243,239,.62)}
     .social-link:hover .social-name{color:var(--white)}
     .social-link:hover .social-arrow{transform:translate(4px,-3px)}
+    .social-link:nth-child(3n+1){animation:socialFloat 6.5s ease-in-out infinite}
+    .social-link:nth-child(3n+2){animation:socialFloat 7.2s ease-in-out -.9s infinite}
+    .social-link:nth-child(3n){animation:socialFloat 5.9s ease-in-out -1.8s infinite}
+    @keyframes socialFloat{0%,100%{translate:0 0}50%{translate:0 -2px}}
 
     .contact{background:var(--black)}
     .contact-panel{
@@ -1074,6 +1122,29 @@
       document.body.appendChild(input);input.select();
       try{ document.execCommand('copy'); done(); }catch(err){}
       input.remove();
+    }
+
+    /* ---------- Page-level pointer motion ---------- */
+    if(!reduced && finePointer){
+      var hero=q('.hero');
+      if(hero){
+        var heroTitle=q('.hero-title',hero);
+        var heroKicker=q('.hero-kicker',hero);
+        var heroCopy=q('.hero-copy',hero);
+        hero.addEventListener('pointermove',function(e){
+          var r=hero.getBoundingClientRect();
+          var x=(e.clientX-r.left)/r.width-.5;
+          var y=(e.clientY-r.top)/r.height-.5;
+          if(heroTitle) heroTitle.style.transform='translate3d('+(x*7).toFixed(2)+'px,'+(y*4).toFixed(2)+'px,0)';
+          if(heroKicker) heroKicker.style.transform='translate3d('+(x*3).toFixed(2)+'px,'+(y*2).toFixed(2)+'px,0)';
+          if(heroCopy) heroCopy.style.transform='translate3d('+(x*2.5).toFixed(2)+'px,'+(y*1.5).toFixed(2)+'px,0)';
+        });
+        hero.addEventListener('pointerleave',function(){
+          if(heroTitle) heroTitle.style.transform='';
+          if(heroKicker) heroKicker.style.transform='';
+          if(heroCopy) heroCopy.style.transform='';
+        });
+      }
     }
 
     /* ---------- Global motion field ---------- */
