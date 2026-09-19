@@ -9,7 +9,7 @@ if(reduce)return;
 var style=document.createElement('style');
 style.textContent=String.raw\`
 :root{--motion-px:0;--motion-py:0;--motion-vx:0;--motion-vy:0;--motion-scroll-v:0}
-.motion-layer{--ml-x:0px;--ml-y:0px;--ml-rx:0deg;--ml-ry:0deg;--ml-s:1;translate:var(--ml-x) var(--ml-y);rotate:var(--ml-rx) var(--ml-ry);scale:var(--ml-s);transform-style:preserve-3d;will-change:translate,rotate,scale}
+.motion-layer{--ml-x:0px;--ml-y:0px;--ml-rx:0deg;--ml-ry:0deg;--ml-s:1;translate:var(--ml-x) var(--ml-y);scale:var(--ml-s);transform-style:preserve-3d;will-change:translate,rotate,scale}
 .motion-text{--mt-s:1;--mt-y:0px;--mt-x:0px;scale:var(--mt-s);translate:var(--mt-x) var(--mt-y);transform-origin:50% 50%;will-change:scale,translate}
 .infinity-field{position:relative;isolation:isolate;--if-strength:0;--if-x:0px;--if-y:0px;--if-scale:1;translate:var(--if-x) var(--if-y);scale:var(--if-scale);will-change:translate,scale}
 .infinity-field:before,.infinity-field:after{content:"";position:absolute;left:50%;top:50%;border:1px solid currentColor;border-radius:50%;pointer-events:none;z-index:-1;opacity:calc(var(--if-strength)*.8);transform:translate(-50%,-50%) scale(calc(1 + var(--if-strength)*5))}
