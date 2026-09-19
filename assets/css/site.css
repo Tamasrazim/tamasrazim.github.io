@@ -731,6 +731,60 @@
       will-change:transform;
       transform:translate3d(var(--pd-x),var(--pd-y),0);
     }
+
+    /* Local cursor zoom: independent from the existing transform stack. */
+    .text-reactive{
+      --text-scale:1;
+      --text-y:0px;
+      --text-glow:0;
+      scale:var(--text-scale);
+      translate:0 var(--text-y);
+      transform-origin:50% 50%;
+      will-change:scale,translate;
+      transition:scale .18s var(--ease),translate .18s var(--ease),filter .18s var(--ease);
+    }
+    .text-reactive:hover{
+      z-index:20;
+    }
+
+    /* Recreated Infinity-style contact field: cursor resistance + near-field rings. */
+    .infinity-email{
+      --inf-x:0px;
+      --inf-y:0px;
+      --inf-scale:1;
+      --inf-rot:0deg;
+      --inf-alpha:0;
+      position:relative;
+      isolation:isolate;
+      transform:translate3d(calc(var(--pd-x) + var(--inf-x)),calc(var(--pd-y) + var(--inf-y)),0) scale(var(--inf-scale)) rotate(var(--inf-rot));
+      will-change:transform;
+    }
+    .infinity-email::before,
+    .infinity-email::after{
+      content:'';
+      position:absolute;
+      inset:50%;
+      width:18px;
+      height:18px;
+      border:1px solid currentColor;
+      border-radius:50%;
+      pointer-events:none;
+      z-index:-1;
+      opacity:var(--inf-alpha);
+      transform:translate(-50%,-50%) scale(calc(1 + var(--inf-alpha) * 7));
+    }
+    .infinity-email::after{
+      width:46px;
+      height:46px;
+      opacity:calc(var(--inf-alpha) * .34);
+      transform:translate(-50%,-50%) scale(calc(1 + var(--inf-alpha) * 2.5));
+      filter:blur(.35px);
+    }
+    .infinity-email.infinity-active{
+      border-color:rgba(243,243,239,.62);
+      box-shadow:0 0 0 1px rgba(243,243,239,.05),0 0 46px rgba(243,243,239,.045);
+    }
+
     .hero-title.pointer-drift,
     .hero-kicker.pointer-soft,
     .hero-alias.pointer-soft,
@@ -745,6 +799,13 @@
     .brand.pointer-soft,
     .header-contact.pointer-soft{
       transform-style:preserve-3d;
+    }
+
+    @media (pointer:coarse){
+      .pointer-drift,.pointer-soft{transform:none!important}
+      .text-reactive{scale:1!important;translate:none!important}
+      .infinity-email{transform:none!important}
+      .infinity-email::before,.infinity-email::after{display:none}
     }
 
     @media (pointer:coarse){
