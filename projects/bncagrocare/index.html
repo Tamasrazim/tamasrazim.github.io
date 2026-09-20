@@ -2,41 +2,66 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b3d2e">
-<meta name="description" content="BNC AgroCare — quality agricultural products and practical solutions for better farming.">
-<title>BNC AgroCare</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark light">
+<meta name="author" content="Robiul Rumman Razim">
+<meta name="description" content="BNC AgroCare — a web and invoice PWA project by Robiul Rumman Razim — Tamasrazim.">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/bncagrocare/">
+<title>BNC AgroCare — Tamasrazim</title>
 <style>
-:root{--green:#0b3d2e;--green2:#146b4f;--cream:#f5f3e9;--ink:#10231b;--muted:#63736c}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);background:var(--cream)}
-nav{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:20px 6%;background:rgba(245,243,233,.86);backdrop-filter:blur(14px);border-bottom:1px solid rgba(16,35,27,.08)}
-.brand{font-weight:900;letter-spacing:-.04em;font-size:1.25rem}.brand span{color:var(--green2)}nav a{color:var(--ink);text-decoration:none;margin-left:25px;font-size:.9rem;font-weight:650}
-.hero{min-height:92vh;padding:150px 6% 70px;display:grid;grid-template-columns:1.1fr .9fr;gap:50px;align-items:center;background:radial-gradient(circle at 80% 20%,#d9ead7 0,transparent 34%),var(--cream)}
-.eyebrow{text-transform:uppercase;letter-spacing:.18em;font-size:.72rem;font-weight:800;color:var(--green2)}
-h1{font-size:clamp(3.3rem,8vw,7rem);line-height:.88;letter-spacing:-.075em;margin:18px 0 28px;max-width:850px}
-.lead{font-size:clamp(1rem,1.6vw,1.25rem);line-height:1.7;color:var(--muted);max-width:650px}
-.btn{display:inline-block;margin-top:22px;padding:14px 21px;border-radius:999px;background:var(--green);color:white;text-decoration:none;font-weight:750}
-.visual{position:relative;min-height:430px;border-radius:30px;overflow:hidden;background:#173d2e;box-shadow:0 30px 80px rgba(11,61,46,.2)}
-.visual img{width:100%;height:100%;min-height:430px;object-fit:cover;display:block;opacity:.92}
-.badge{position:absolute;bottom:22px;left:22px;padding:13px 16px;background:rgba(255,255,255,.9);border-radius:15px;font-size:.78rem;font-weight:800}
-section{padding:100px 6%}.wrap{max-width:1200px;margin:auto}.section-head{max-width:700px;margin-bottom:45px}.section-head h2{font-size:clamp(2.2rem,5vw,4.2rem);letter-spacing:-.06em;margin:10px 0}.section-head p{color:var(--muted);line-height:1.7}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{padding:30px;border:1px solid rgba(16,35,27,.1);border-radius:24px;background:rgba(255,255,255,.42)}.num{font-size:.72rem;color:var(--green2);font-weight:900}.card h3{font-size:1.35rem;margin:30px 0 10px}.card p{color:var(--muted);line-height:1.65}
-.about{background:var(--green);color:white}.about p{color:#c9ddd5}.about .eyebrow{color:#9ad4bc}
-footer{padding:35px 6%;background:#08291f;color:#b8ccc4;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:.82rem}
-@media(max-width:800px){nav{padding:17px 5%}nav .links{display:none}.hero{grid-template-columns:1fr;padding-top:125px}.visual{min-height:330px}.visual img{min-height:330px}.grid{grid-template-columns:1fr}section{padding:75px 5%}h1{font-size:clamp(3.3rem,17vw,5.5rem)}}
+:root{--bg:#050505;--panel:#0c0c0c;--ink:#f3f3ee;--muted:#96968f;--line:#232323;--accent:#9ce2bd;--green:#0b3d2e}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,sans-serif}a{color:inherit}.wrap{width:min(980px,calc(100% - 32px));margin:auto}.top{display:flex;justify-content:space-between;align-items:center;padding:22px 0;border-bottom:1px solid var(--line)}.back{color:var(--muted);font:700 10px monospace;letter-spacing:.12em;text-decoration:none;text-transform:uppercase}.tag{font:800 9px monospace;letter-spacing:.14em;color:var(--accent);text-transform:uppercase}.hero{padding:92px 0 76px}.eyebrow{font:800 9px monospace;letter-spacing:.16em;color:var(--accent);text-transform:uppercase}.hero h1{margin:15px 0 20px;font-size:clamp(52px,9vw,100px);line-height:.88;letter-spacing:-.07em}.hero h1 span{display:block;color:var(--muted)}.lead{max-width:700px;margin:0;color:#c7c7c0;font-size:18px;line-height:1.7}.byline{margin-top:22px;color:var(--muted);font:700 10px monospace;letter-spacing:.08em}.byline strong{color:var(--ink)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:30px}.btn{display:inline-flex;align-items:center;padding:11px 14px;border:1px solid #3a3a3a;background:#101010;text-decoration:none;font:800 9px monospace;letter-spacing:.09em;text-transform:uppercase;transition:.18s ease}.btn:hover{border-color:var(--accent);transform:translateY(-1px)}.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}.feature{display:grid;grid-template-columns:1.3fr .7fr;gap:12px;margin-top:12px}.panel{border:1px solid var(--line);background:linear-gradient(145deg,#101010,#090909);padding:24px}.panel h2{margin:0 0 10px;font-size:21px;letter-spacing:-.03em}.panel p{margin:0;color:var(--muted);font-size:13px;line-height:1.7}.list{margin:18px 0 0;padding:0;list-style:none}.list li{padding:9px 0;border-top:1px solid var(--line);font:700 10px monospace;color:#c7c7c0}.list li:first-child{border-top:0}.links{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.linkbox{border:1px solid var(--line);padding:16px;background:var(--panel);text-decoration:none}.linkbox span{display:block;color:var(--muted);font:700 8px monospace;letter-spacing:.1em;text-transform:uppercase}.linkbox strong{display:block;margin-top:9px;font-size:14px}.footer{padding:70px 0 34px;color:var(--muted);text-align:center;font:700 9px monospace;letter-spacing:.08em}@media(max-width:720px){.top{align-items:flex-start;gap:18px}.tag{text-align:right}.hero{padding:62px 0 52px}.lead{font-size:16px}.feature,.links{grid-template-columns:1fr}.panel{padding:20px}}
 </style>
 </head>
 <body>
-<nav><div class="brand">BNC <span>AgroCare</span></div><div class="links"><a href="#about">About</a><a href="#focus">Focus</a><a href="#contact">Contact</a><a href="invoice/">Invoice PWA</a></div></nav>
+<div class="wrap">
+<header class="top"><a class="back" href="../../">← Tamasrazim</a><div class="tag">PROJECT / BNC AGROCARE</div></header>
+
 <main>
 <section class="hero">
-<div><div class="eyebrow">Agriculture • Products • Solutions</div><h1>Better farming starts here.</h1><p class="lead">BNC AgroCare is an agriculture-focused company providing quality agricultural products and practical solutions for farmers, growers, and the wider agricultural community.</p><a class="btn" href="invoice/">Create an invoice</a></div>
-<div class="visual"><img src="FB_IMG_1789811599210.jpg" alt="BNC AgroCare agricultural visual"><div class="badge">Quality • Practical • Reliable</div></div>
+<div class="eyebrow">A Tamasrazim project</div>
+<h1>BNC AgroCare <span>web + business tooling.</span></h1>
+<p class="lead">BNC AgroCare is an agriculture-focused project. I built its public web presence and its invoice workflow as a small, practical system instead of keeping invoice work inside the original spreadsheet.</p>
+<p class="byline">Built by <strong>Robiul Rumman Razim — Tamasrazim</strong></p>
+<div class="actions">
+<a class="btn primary" href="invoice/">Open Invoice PWA →</a>
+<a class="btn" href="https://github.com/Tamasrazim/bncagrocare" target="_blank" rel="noopener noreferrer">Backup repository →</a>
+</div>
 </section>
-<section id="about"><div class="wrap section-head"><div class="eyebrow">About BNC AgroCare</div><h2>Supporting agriculture with practical solutions.</h2><p>We focus on reliable agricultural products, practical support, efficient service, and solutions designed around the needs of modern farming.</p></div></section>
-<section id="focus"><div class="wrap"><div class="section-head"><div class="eyebrow">Our focus</div><h2>Built around the farm.</h2></div><div class="grid"><article class="card"><div class="num">01</div><h3>Quality Products</h3><p>Reliable agricultural products selected to support everyday farming needs.</p></article><article class="card"><div class="num">02</div><h3>Practical Solutions</h3><p>Useful agricultural solutions with a focus on productivity and real-world application.</p></article><article class="card"><div class="num">03</div><h3>Better Service</h3><p>Efficient service and support for farmers, growers, and the agricultural community.</p></article></div></div></section>
-<section class="about" id="contact"><div class="wrap section-head"><div class="eyebrow">BNC AgroCare</div><h2>Quality agricultural products and practical solutions for better farming.</h2><p>More company information, product data, and contact details can be added as the official BNC AgroCare information becomes available.</p></div></section>
+
+<section class="feature">
+<article class="panel">
+<h2>BNC AgroCare</h2>
+<p>The customer-facing site presents the project around agriculture, products, practical solutions and service.</p>
+<ul class="list">
+<li>Public company website</li>
+<li>Agriculture-focused presentation</li>
+<li>Responsive layout</li>
+<li>Original BNC visual asset</li>
+</ul>
+</article>
+<article class="panel">
+<h2>Invoice PWA</h2>
+<p>Fill the boxes, watch the A4 paper update live, save the invoice locally, then print or save as PDF.</p>
+<ul class="list">
+<li>IndexedDB local drafts + history</li>
+<li>Copy / load / delete invoices</li>
+<li>JSON export + import</li>
+<li>Installable offline-oriented PWA</li>
+<li>A4 multi-page print layout</li>
+</ul>
+</article>
+</section>
+
+<section class="links" aria-label="Project links">
+<a class="linkbox" href="invoice/"><span>Tool</span><strong>Invoice PWA →</strong></a>
+<a class="linkbox" href="../../"><span>Owner</span><strong>Tamasrazim site →</strong></a>
+<a class="linkbox" href="https://github.com/Tamasrazim/bncagrocare" target="_blank" rel="noopener noreferrer"><span>Backup</span><strong>GitHub repository →</strong></a>
+</section>
 </main>
-<footer><strong>BNC AgroCare</strong><span>Agriculture-focused products & solutions</span><span>Built by Robiul Rumman Razim — Tamasrazim</span></footer>
+
+<footer class="footer">BNC AGROCARE · PROJECT BY ROBIUL RUMMAN RAZIM — TAMASRAZIM</footer>
+</div>
 </body>
 </html>
