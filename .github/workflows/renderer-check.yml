@@ -24,6 +24,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Python syntax check
+        run: python3 -m py_compile tools/validate_renderer.py
+
       - name: Validate renderer contracts
         run: python3 tools/validate_renderer.py --root .
 
