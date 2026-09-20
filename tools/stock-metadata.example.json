@@ -1,0 +1,31 @@
+{
+  "title": "Abstract monochrome orbital animation",
+  "description": "Minimal monochrome abstract motion graphic with orbital rings and flowing points.",
+  "keywords": [
+    "abstract",
+    "animation",
+    "motion",
+    "orbital",
+    "monochrome",
+    "technology",
+    "background"
+  ],
+  "creator": "Tamasrazim",
+  "category": "Graphics / Animation",
+  "source": "Animation Renderer — Tamasrazim",
+  "delivery": {
+    "width": 3840,
+    "height": 2160,
+    "fps": 60,
+    "durationSeconds": 30,
+    "loop": true,
+    "loopDurationSeconds": 5,
+    "transparent": false,
+    "stillFormat": "png",
+    "videoEngine": "webcodecs",
+    "videoContainer": "webm",
+    "bitrate": 24000000,
+    "keyframeSeconds": 2
+  },
+  "generatedAt": "2026-09-20T00:00:00.000Z"
+}
