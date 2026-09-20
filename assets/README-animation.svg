@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+<defs>
+ <radialGradient id="g"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#111" stop-opacity="0"/></radialGradient>
+ <filter id="b"><feGaussianBlur stdDeviation="18"/></filter>
+</defs>
+<rect width="800" height="450" fill="#080808"/>
+<g fill="none" stroke="#ddd" stroke-width="2" opacity=".7">
+ <circle cx="400" cy="225" r="55"><animate attributeName="r" values="35;150;35" dur="3s" repeatCount="indefinite"/></circle>
+ <circle cx="400" cy="225" r="95"><animate attributeName="r" values="150;35;150" dur="3s" repeatCount="indefinite"/></circle>
+</g>
+<g filter="url(#b)" fill="url(#g)" opacity=".55">
+ <circle cx="400" cy="225" r="65"><animate attributeName="cx" values="180;620;180" dur="4s" repeatCount="indefinite"/><animate attributeName="cy" values="140;310;140" dur="4s" repeatCount="indefinite"/></circle>
+</g>
+<g fill="none" stroke="#aaa" stroke-width="1">
+ <path d="M80 225 Q240 80 400 225 T720 225"><animate attributeName="d" values="M80 225 Q240 80 400 225 T720 225;M80 225 Q240 370 400 225 T720 225;M80 225 Q240 80 400 225 T720 225" dur="5s" repeatCount="indefinite"/></path>
+</g>
+</svg>
