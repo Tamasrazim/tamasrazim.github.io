@@ -28,7 +28,7 @@ The PWA provides:
 - Invoice history with load, copy and delete actions
 - Installable PWA shell
 
-The original Excel files remain reference/demo material; the working invoice interface no longer uses HTML as the paper preview and does not edit the original workbook.
+The original Excel files remain reference/demo material; the working invoice interface no longer uses HTML as the paper preview and does not edit the original workbook. Product slots are ordered left SL 1–4, right SL 5–8, then new products alternate left SL 9, right SL 10, left SL 11, right SL 12, and so on.
 
 ## Company website
 
