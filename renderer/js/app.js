@@ -8,6 +8,7 @@ var progress=$('#progress'),timeLabel=$('#timeLabel'),frameLabel=$('#frameLabel'
 var rendering=$('#rendering'),rFrame=$('#rFrame'),rPct=$('#rPct'),rProgress=$('#rProgress'),rFormat=$('#rFormat'),rRate=$('#rRate'),rQueue=$('#rQueue'),rDropped=$('#rDropped'),rElapsed=$('#rElapsed');
 var toastEl=$('#toast'),stillFormat=$('#stillFormat'),transparent=$('#transparent'),stillBtn=$('#stillBtn'),videoBtn=$('#videoBtn'),playBtn=$('#playBtn'),formatSupport=$('#formatSupport');
 var videoEngine=$('#videoEngine'),videoCodec=$('#videoCodec'),bitrateEl=$('#bitrate'),hardwareEl=$('#hardwareAcceleration'),keyframeEl=$('#keyframeSeconds'),preflight=$('#preflight');
+var projectInput=$('#projectFileInput');
 var W=3840,H=2160,FPS=60,DURATION=30,frame=0,userFn=null,userSvg=null,playing=false,renderingVideo=false,raf=0,toastTimer=0;
 var studioState={active:0,scenes:[{name:'MAIN',code:null,sources:[
   {id:'animation',name:'Animation Code',kind:'CODE',visible:true,locked:true},
@@ -235,18 +236,112 @@ async function exportVideo(){
   }catch(e){setState('ERROR');engineState.title=e.message;toast('Render failed: '+e.message)}
   finally{renderingVideo=false;videoBtn.disabled=false;playBtn.disabled=false;rendering.classList.remove('open');runPreflight()}
 }
-function exportMetadata(){
-  var selected=videoCodec.options[videoCodec.selectedIndex],data={
-    title:$('#metaTitle').value.trim()||'Untitled animation',description:$('#metaDescription').value.trim(),
-    keywords:$('#metaKeywords').value.split(',').map(function(x){return x.trim()}).filter(Boolean),creator:$('#metaCreator').value.trim()||'Tamasrazim',
-    category:'Graphics / Animation',source:'Animation Renderer — Tamasrazim',
-    delivery:{width:W,height:H,fps:FPS,durationSeconds:DURATION,loop:loopMode.value==='loop',loopDurationSeconds:loopMode.value==='loop'?(Number(loopDurationEl.value)||DURATION):null,
-      transparent:transparent.checked,stillFormat:stillFormat.value,animationEncoder:selected?selected.textContent:'Unavailable',engine:videoEngine.value,deterministic:videoEngine.value==='webcodecs',bitrate:Number(bitrateEl.value)||16000000},
+function currentRenderSpec(){
+  return {
+    width:W,height:H,fps:FPS,durationSeconds:DURATION,
+    loop:loopMode.value==='loop',
+    loopDurationSeconds:loopMode.value==='loop'?(Number(loopDurationEl.value)||DURATION):null,
+    transparent:transparent.checked,
+    stillFormat:stillFormat.value,
+    videoEngine:videoEngine.value,
+    videoCodec:videoCodec.value||null,
+    bitrate:Number(bitrateEl.value)||16000000,
+    keyframeSeconds:Number(keyframeEl.value)||2
+  };
+}
+function collectStockMetadata(){
+  var selected=videoCodec.options[videoCodec.selectedIndex];
+  return {
+    title:$('#metaTitle').value.trim()||'Untitled animation',
+    description:$('#metaDescription').value.trim(),
+    keywords:$('#metaKeywords').value.split(',').map(function(x){return x.trim()}).filter(Boolean),
+    creator:$('#metaCreator').value.trim()||'Tamasrazim',
+    category:'Graphics / Animation',
+    source:'Animation Renderer — Tamasrazim',
+    delivery:Object.assign({},currentRenderSpec(),{animationEncoder:selected?selected.textContent:'Unavailable',deterministic:videoEngine.value==='webcodecs'}),
     generatedAt:new Date().toISOString()
   };
-  downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),safeName()+'.json');toast('Metadata JSON exported')
+}
+function projectPayload(){
+  saveStudio();
+  return {
+    schemaVersion:1,
+    app:'Animation Renderer — Tamasrazim',
+    fileType:'tamasrazim-render-project',
+    exportedAt:new Date().toISOString(),
+    activeScene:studioState.active,
+    scenes:JSON.parse(JSON.stringify(studioState.scenes)),
+    render:currentRenderSpec(),
+    stock:collectStockMetadata()
+  };
+}
+function exportProject(){
+  var payload=projectPayload();
+  var stamp=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+  var name=safeName()+'-'+stamp+'.trproj';
+  downloadBlob(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),name);
+  toast('Project saved · '+studioState.scenes.length+' scene'+(studioState.scenes.length===1?'':'s'));
+}
+function validProject(data){
+  return !!(data&&data.schemaVersion===1&&data.fileType==='tamasrazim-render-project'&&Array.isArray(data.scenes)&&data.scenes.length&&data.scenes.every(function(scene){
+    return scene&&typeof scene.name==='string'&&typeof scene.code==='string'&&Array.isArray(scene.sources);
+  }));
+}
+function applyProject(data){
+  studioState={
+    active:Math.max(0,Math.min(Number(data.activeScene)||0,data.scenes.length-1)),
+    scenes:data.scenes
+  };
+  if(data.render){
+    var r=data.render;
+    var p=String(Number(r.width)||W)+'x'+String(Number(r.height)||H);
+    if(Array.prototype.some.call(preset.options,function(o){return o.value===p}))preset.value=p;
+    if([24,25,30,50,60,120].indexOf(Number(r.fps))>=0)fpsEl.value=String(r.fps);
+    if([10,15,20,30,60].indexOf(Number(r.durationSeconds))>=0)durationEl.value=String(r.durationSeconds);
+    loopMode.value=r.loop?'loop':'record';
+    loopDurationEl.value=Number(r.loopDurationSeconds)>0?Number(r.loopDurationSeconds):5;
+    transparent.checked=!!r.transparent;
+    if(Array.prototype.some.call(stillFormat.options,function(o){return o.value===r.stillFormat}))stillFormat.value=r.stillFormat;
+    if(r.videoEngine==='mediarecorder'||r.videoEngine==='webcodecs')videoEngine.value=r.videoEngine;
+    bitrateEl.value=String(Math.max(100000,Number(r.bitrate)||24000000));
+    keyframeEl.value=String(Math.max(.5,Number(r.keyframeSeconds)||2));
+  }
+  if(data.stock){
+    $('#metaTitle').value=data.stock.title||'';
+    $('#metaDescription').value=data.stock.description||'';
+    $('#metaKeywords').value=Array.isArray(data.stock.keywords)?data.stock.keywords.join(', '):'';
+    $('#metaCreator').value=data.stock.creator||'Tamasrazim';
+  }
+  loadStudio();renderStudioUI();parseSettings();buildEngine(true);
+  var wantedCodec=data.render&&data.render.videoCodec;
+  if(wantedCodec)videoCodec.dataset.pendingValue=wantedCodec;
+  setTimeout(function(){
+    if(wantedCodec&&Array.prototype.some.call(videoCodec.options,function(o){return o.value===wantedCodec}))videoCodec.value=wantedCodec;
+    runPreflight();
+  },220);
+  toast('Project opened · '+activeScene().name);
+}
+function importProjectFile(file){
+  var reader=new FileReader();
+  reader.onload=function(){
+    try{
+      var data=JSON.parse(String(reader.result));
+      if(!validProject(data))throw new Error('Invalid .trproj project file');
+      applyProject(data);
+    }catch(e){toast('Project open failed · '+e.message)}
+  };
+  reader.onerror=function(){toast('Project open failed · file could not be read')};
+  reader.readAsText(file);
+}
+function exportMetadata(){
+  var data=collectStockMetadata();
+  downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),safeName()+'.json');
+  toast('Metadata JSON exported')
 }
 $('.tab').forEach(function(tab){tab.addEventListener('click',function(){$('.tab').forEach(function(x){x.classList.remove('active')});tab.classList.add('active');['scenesPanel','sourcesPanel','codePanel','settingsPanel','stockPanel'].forEach(function(id){$('#'+id).hidden=id!==tab.dataset.tab})})});
+$('#exportProjectBtn').addEventListener('click',exportProject);
+$('#importProjectBtn').addEventListener('click',function(){projectInput&&projectInput.click()});
+if(projectInput)projectInput.addEventListener('change',function(){if(projectInput.files&&projectInput.files[0])importProjectFile(projectInput.files[0]);projectInput.value=''});
 $('#renderBtn').addEventListener('click',function(){buildEngine(false)});
 $('#loadBtn').addEventListener('click',function(){codeEl.value=DEFAULT_CODE;buildEngine(false)});
 codeEl.addEventListener('input',updateMeta);preset.addEventListener('change',parseSettings);fpsEl.addEventListener('change',parseSettings);durationEl.addEventListener('change',parseSettings);
