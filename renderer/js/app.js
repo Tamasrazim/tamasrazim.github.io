@@ -100,7 +100,9 @@ function nextImageSourceId(scene){
 function createImageSource(scene){
   var id=nextImageSourceId(scene);
   var src={id:id,name:id==='image'?'Image File':'Image '+id.replace('image-',''),kind:'IMAGE',visible:true,locked:false,dataUrl:'',opacity:1,fit:'contain'};
-  scene.sources.push(src);
+  var lastImage=-1;
+  scene.sources.forEach(function(item,index){if(item.kind==='IMAGE')lastImage=index});
+  scene.sources.splice(lastImage+1,0,src);
   return src;
 }
 function removeImageSource(src){
