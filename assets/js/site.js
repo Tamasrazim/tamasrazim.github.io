@@ -684,5 +684,102 @@
     /* ---------- Keep the page quiet when offscreen ---------- */
     var bands=qa('.band-track');
     if(bands.length && reduced){bands.forEach(function(el){el.style.animation='none';})}
-  })();
+  
+
+    /* ---------- Hidden name story ---------- */
+    (function initSecretNameStory(){
+      var node=q('#secretNode'),wrap=q('.secret-node-wrap'),bubble=q('#secretBubble'),reveal=q('#secretReveal'),close=q('#secretClose');
+      if(!node||!wrap||!bubble||!reveal||!close)return;
+
+      var messages=[
+        'something is hiding here',
+        'too far',
+        'closer',
+        'you almost had it',
+        'the quiet things move',
+        'nearly',
+        'one more try',
+        'you found the seam'
+      ];
+      var messageIndex=0,escapeCount=0,bubbleTimer=0,open=false;
+      var reducedMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var finePointer=window.matchMedia&&window.matchMedia('(pointer: fine)').matches;
+
+      function say(message,duration){
+        bubble.textContent=message;
+        bubble.classList.add('show');
+        clearTimeout(bubbleTimer);
+        bubbleTimer=setTimeout(function(){bubble.classList.remove('show')},duration||1100);
+      }
+      function resetNode(){
+        node.style.setProperty('--sn-x','0px');
+        node.style.setProperty('--sn-y','0px');
+        node.style.setProperty('--sn-scale','1');
+      }
+      function dodge(e){
+        if(open||reducedMotion||!finePointer)return;
+        var rect=wrap.getBoundingClientRect();
+        var nx=(e.clientX-(rect.left+rect.width/2))/Math.max(1,rect.width);
+        var ny=(e.clientY-(rect.top+rect.height/2))/Math.max(1,rect.height);
+        if(Math.hypot(nx,ny)>.32){
+          var angle=Math.atan2(ny,nx);
+          var distance=9+Math.min(23,escapeCount*2.4);
+          node.style.setProperty('--sn-x',(-Math.cos(angle)*distance).toFixed(1)+'px');
+          node.style.setProperty('--sn-y',(-Math.sin(angle)*distance*.7).toFixed(1)+'px');
+          node.style.setProperty('--sn-scale',(1+Math.min(.12,escapeCount*.012)).toFixed(3));
+          say(messages[messageIndex%messages.length],900);
+          messageIndex++;
+          escapeCount++;
+          if(escapeCount>=7){
+            escapeCount=0;
+            window.setTimeout(function(){
+              resetNode();
+              say('it is still here. click when it stops.',1500);
+            },260);
+          }
+        }
+      }
+      function openReveal(){
+        if(open)return;
+        open=true;
+        var r=node.getBoundingClientRect();
+        reveal.style.setProperty('--reveal-x',(((r.left+r.width*.5)/Math.max(1,innerWidth))*100).toFixed(3)+'%');
+        reveal.style.setProperty('--reveal-y',(((r.top+r.height*.5)/Math.max(1,innerHeight))*100).toFixed(3)+'%');
+        reveal.hidden=false;
+        reveal.classList.remove('is-closing');
+        document.body.classList.add('is-locked');
+        node.setAttribute('aria-expanded','true');
+        requestAnimationFrame(function(){
+          reveal.classList.add('is-open');
+          try{close.focus({preventScroll:true})}catch(err){close.focus()}
+        });
+      }
+      function closeReveal(){
+        if(!open)return;
+        open=false;
+        reveal.classList.remove('is-open');
+        reveal.classList.add('is-closing');
+        node.setAttribute('aria-expanded','false');
+        document.body.classList.remove('is-locked');
+        window.setTimeout(function(){
+          reveal.hidden=true;
+          reveal.classList.remove('is-closing');
+          resetNode();
+          try{node.focus({preventScroll:true})}catch(err){node.focus()}
+        },500);
+      }
+
+      node.addEventListener('pointermove',dodge,{passive:true});
+      node.addEventListener('pointerenter',function(){
+        if(!open){say(messages[messageIndex%messages.length],900);messageIndex++}
+      });
+      node.addEventListener('focus',function(){resetNode();say('the secret is easier to find from here.',1400)});
+      node.addEventListener('click',openReveal);
+      close.addEventListener('click',closeReveal);
+      reveal.addEventListener('click',function(e){if(e.target===reveal)closeReveal()});
+      window.addEventListener('keydown',function(e){if(e.key==='Escape'&&open){e.preventDefault();closeReveal()}});
+      resetNode();
+    })();
+
+})();
   
