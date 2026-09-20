@@ -230,40 +230,44 @@ function frame(now){
 
   if(email){
     var er=email.getBoundingClientRect();
-    var ex=pointer.x-(er.left+er.width*.5),ey=pointer.y-(er.top+er.height*.5);
+    var ecx=er.left+er.width*.5, ecy=er.top+er.height*.5;
+    var ex=pointer.x-ecx, ey=pointer.y-ecy;
     var dist=Math.hypot(ex,ey);
-    var radius=Math.max(190,Math.min(430,er.width*1.65));
-    var f=ease(1-dist/radius),res=f*f;
-    var mag=Math.max(1,dist);
-    email.style.setProperty('--if-strength',f.toFixed(3));
-    email.style.setProperty('--if-x',(-ex/mag*res*(10+energy*7)).toFixed(2)+'px');
-    email.style.setProperty('--if-y',(-ey/mag*res*(7+energy*5)).toFixed(2)+'px');
-    email.style.setProperty('--if-scale',(1+res*(.018+energy*.012)).toFixed(4));
-    emailLetters.forEach(function(ch,i){
-      var cr=ch.el.getBoundingClientRect();
-      ch.w=cr.width||1; ch.h=cr.height||1;
-      ch.cx=cr.left+ch.w*.5; ch.cy=cr.top+ch.h*.5;
-      var dx=pointer.x-ch.cx,dy=pointer.y-ch.cy;
-      var d=Math.hypot(dx,dy);
-      var rr=Math.max(72,Math.min(180,ch.w*7+ch.h*8));
-      var local=ease(1-d/rr);
-      var side=(pointer.x-ch.cx)/Math.max(1,rr);
-      var along=(pointer.y-ch.cy)/Math.max(1,rr);
-      var bend=local*local;
-      var push=12+energy*9;
-      var tx=-dx/Math.max(1,d)*bend*push;
-      var ty=-dy/Math.max(1,d)*bend*(8+energy*6);
-      var twist=clamp(side*local*18,-18,18);
-      var scale=1+local*(.045+energy*.025);
-      ch.x=smooth(ch.x,tx,1-Math.exp(-dt*(14+local*12)));
-      ch.y=smooth(ch.y,ty,1-Math.exp(-dt*(14+local*12)));
-      ch.r=smooth(ch.r,twist,1-Math.exp(-dt*13));
-      ch.s=smooth(ch.s,scale,1-Math.exp(-dt*14));
-      ch.el.style.setProperty('--il-x',ch.x.toFixed(2)+'px');
-      ch.el.style.setProperty('--il-y',ch.y.toFixed(2)+'px');
-      ch.el.style.setProperty('--il-r',ch.r.toFixed(2)+'deg');
-      ch.el.style.setProperty('--il-s',ch.s.toFixed(4));
-    });
+    var radius=Math.max(180,Math.min(520,Math.max(er.width*2.8,er.height*9)));
+    var f=ease(1-dist/radius);
+    var edge=clamp(f,0,1);
+    var force=edge*edge*(3-2*edge);
+    var nx=ex/Math.max(1,er.width*.5), ny=ey/Math.max(1,er.height*.5);
+    var angle=Math.atan2(ey,ex);
+    var repel=force*(18+energy*10);
+
+    email.style.setProperty('--if-strength',edge.toFixed(3));
+    email.style.setProperty('--if-x',(-Math.cos(angle)*repel).toFixed(2)+'px');
+    email.style.setProperty('--if-y',(-Math.sin(angle)*repel*.72).toFixed(2)+'px');
+    email.style.setProperty('--if-scale',(1+force*(.018+energy*.012)).toFixed(4));
+
+    /* Letter-level field: the pointer pushes the word away non-linearly,
+       with the center resisting more strongly than the edges. */
+    var letters=email.querySelectorAll('.infinity-letter');
+    if(letters.length){
+      for(var li=0;li<letters.length;li++){
+        var letter=letters[li],lr=letter.getBoundingClientRect();
+        var lcx=lr.left+lr.width*.5,lcy=lr.top+lr.height*.5;
+        var ldx=pointer.x-lcx,ldy=pointer.y-lcy;
+        var ld=Math.hypot(ldx,ldy);
+        var lf=ease(1-ld/Math.max(70,Math.min(210,er.width*.72)));
+        var lforce=lf*lf*(3-2*lf);
+        var inv=Math.max(1,ld);
+        var px=-ldx/inv*lforce*(8+energy*5);
+        var py=-ldy/inv*lforce*(5+energy*4);
+        var twist=clamp((ldx/Math.max(1,er.width))*.9*lforce,-1.8,1.8);
+        var ls=1+lforce*.028;
+        letter.style.setProperty('--il-x',px.toFixed(2)+'px');
+        letter.style.setProperty('--il-y',py.toFixed(2)+'px');
+        letter.style.setProperty('--il-r',twist.toFixed(3)+'deg');
+        letter.style.setProperty('--il-s',ls.toFixed(4));
+      }
+    }
   }
 
   raf=requestAnimationFrame(frame);
