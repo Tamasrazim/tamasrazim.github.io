@@ -36,6 +36,11 @@ def main() -> int:
         if not required.is_file():
             fail(errors, f"Missing required renderer file: {required.relative_to(root)}")
 
+    if '"Save project" not in html and 'id="exportProjectBtn"' in html:
+        fail(errors, "Project save control is malformed")
+    if '"Open project" not in html and 'id="importProjectBtn"' in html:
+        fail(errors, "Project open control is malformed")
+
     if errors:
         for error in errors:
             print(f"ERROR: {error}")
@@ -60,6 +65,9 @@ def main() -> int:
         'id="renderCanvas"',
         'id="videoEngine"',
         'id="videoCodec"',
+        'id="exportProjectBtn"',
+        'id="importProjectBtn"',
+        'id="projectFileInput"',
     )
     for token in required_html:
         if token not in html:
@@ -71,6 +79,9 @@ def main() -> int:
         "function renderPreviewGuides",
         "tamasrazim-renderer-studio",
         "function exportVideo",
+        "function exportProject",
+        "function importProjectFile",
+        "tamasrazim-render-project",
     )
     for token in required_app:
         if token not in app_js:
