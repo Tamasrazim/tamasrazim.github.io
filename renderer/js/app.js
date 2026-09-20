@@ -11,6 +11,7 @@ var videoEngine=$('#videoEngine'),videoCodec=$('#videoCodec'),bitrateEl=$('#bitr
 var projectInput=$('#projectFileInput');
 var W=3840,H=2160,FPS=60,DURATION=30,frame=0,userFn=null,userSvg=null,playing=false,renderingVideo=false,raf=0,toastTimer=0;
 var studioState={active:0,scenes:[{name:'MAIN',code:null,sources:[
+  {id:'matte',name:'Solid Matte',kind:'MATTE',visible:false,locked:false,color:'#050505',opacity:1},
   {id:'animation',name:'Animation Code',kind:'CODE',visible:true,locked:true},
   {id:'grid',name:'Grid Guide',kind:'GRID',visible:false,locked:false,previewOnly:true},
   {id:'safe',name:'Safe Area',kind:'SAFE',visible:false,locked:false,previewOnly:true}
@@ -41,7 +42,8 @@ function loadStudio(){
   studioState.active=Math.max(0,Math.min(Number(studioState.active)||0,studioState.scenes.length-1));
   var scene=activeScene();
   if(!scene.sources)scene.sources=[];
-  if(!scene.sources.some(function(s){return s.id==='animation'}))scene.sources.unshift({id:'animation',name:'Animation Code',kind:'CODE',visible:true,locked:true});
+  if(!scene.sources.some(function(s){return s.id==='matte'}))scene.sources.unshift({id:'matte',name:'Solid Matte',kind:'MATTE',visible:false,locked:false,color:'#050505',opacity:1});
+  if(!scene.sources.some(function(s){return s.id==='animation'}))scene.sources.push({id:'animation',name:'Animation Code',kind:'CODE',visible:true,locked:true});
   if(!scene.code)scene.code=DEFAULT_CODE;
   codeEl.value=scene.code;
 }
@@ -125,7 +127,18 @@ function renderStudioUI(){
     info.innerHTML='<strong>'+escapeHTML(src.name)+'</strong><span>'+escapeHTML(src.kind)+(src.previewOnly?' · PREVIEW ONLY':' · EXPORT')+'</span>';
     var lock=document.createElement('button');lock.type='button';lock.className='source-lock';lock.textContent=src.locked?'LOCK':'FREE';lock.title=src.locked?'Unlock source controls':'Lock source controls';
     lock.addEventListener('click',function(){src.locked=!src.locked;saveStudio();renderStudioUI()});
-    row.append(toggle,info,lock);sourceList.appendChild(row);
+    row.append(toggle,info,lock);
+    if(src.id==='matte'){
+      var controls=document.createElement('div');controls.className='source-controls';
+      var colorLabel=document.createElement('label');colorLabel.textContent='Color';
+      var color=document.createElement('input');color.type='color';color.value=/^#[0-9a-f]{6}$/i.test(src.color||'')?src.color:'#050505';color.disabled=!!src.locked;
+      var opacityLabel=document.createElement('label');opacityLabel.textContent='Opacity';
+      var opacity=document.createElement('input');opacity.type='range';opacity.min='0';opacity.max='1';opacity.step='.01';opacity.value=String(Number.isFinite(Number(src.opacity))?src.opacity:1);opacity.disabled=!!src.locked;
+      color.addEventListener('input',function(){if(src.locked)return;src.color=color.value;saveStudio();renderAt(Number(timeline.value)||0)});
+      opacity.addEventListener('input',function(){if(src.locked)return;src.opacity=Number(opacity.value);saveStudio();renderAt(Number(timeline.value)||0)});
+      colorLabel.appendChild(color);opacityLabel.appendChild(opacity);controls.append(colorLabel,opacityLabel);row.appendChild(controls);
+    }
+    sourceList.appendChild(row);
   });
   $('#activeSceneLabel').textContent=scene.name;
   $('#sourceCount').textContent=String(scene.sources.length);
@@ -149,9 +162,32 @@ function buildEngine(silent){
     stillBtn.disabled=stillFormat.value==='svg'&&!userSvg;if(!silent)toast('Render code compiled locally');return true;
   }catch(e){setState('ERROR');engineState.title=e.message;toast(e.message);return false}
 }
+function hexToRGB(hex){
+  var h=String(hex||'#050505').replace('#','');
+  if(h.length!==6)h='050505';
+  return {r:parseInt(h.slice(0,2),16)||0,g:parseInt(h.slice(2,4),16)||0,b:parseInt(h.slice(4,6),16)||0};
+}
+function renderSolidMatte(){
+  var matte=sourceById('matte');if(!matte||!matte.visible)return;
+  var alpha=Math.max(0,Math.min(1,Number(matte.opacity)));
+  if(alpha<=0)return;
+  var rgb=hexToRGB(matte.color);
+  ctx.save();ctx.globalAlpha=alpha;ctx.fillStyle='rgb('+rgb.r+','+rgb.g+','+rgb.b+')';ctx.fillRect(0,0,W,H);ctx.restore();
+}
+function injectMatteIntoSVG(svg){
+  var matte=sourceById('matte');if(!matte||!matte.visible)return svg;
+  var alpha=Math.max(0,Math.min(1,Number(matte.opacity)));if(alpha<=0)return svg;
+  var color=/^#[0-9a-f]{6}$/i.test(matte.color||'')?matte.color:'#050505';
+  var rect='<rect width="'+W+'" height="'+H+'" fill="'+color+'" fill-opacity="'+alpha.toFixed(3)+'"/>';
+  var close=svg.indexOf('>');
+  return close<0?svg:svg.slice(0,close+1)+rect+svg.slice(close+1);
+}
 function renderOutputFrame(t){
   if(!userFn)return false;
   window.__rendererTransparent=transparent.checked;
+  if(transparent.checked)ctx.clearRect(0,0,W,H);
+  else{ctx.clearRect(0,0,W,H);ctx.fillStyle='#050505';ctx.fillRect(0,0,W,H)}
+  renderSolidMatte();
   var anim=sourceById('animation');
   if(anim&&anim.visible){
     userFn(effectiveTime(t),effectiveFrame(t),FPS);
@@ -196,7 +232,7 @@ function togglePreview(){
 function downloadBlob(blob,name){var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},30000)}
 function exportStill(){
   if(!userFn&&!buildEngine())return;var t=Number(timeline.value)||0;renderAt(t);var fmt=stillFormat.value;
-  if(fmt==='svg'){if(typeof userSvg!=='function'){toast('SVG export requires window.renderSVG(time, frame, fps)');return}try{var svg=userSvg(effectiveTime(t),effectiveFrame(t),FPS);if(typeof svg!=='string'||svg.toLowerCase().indexOf('<svg')<0)throw new Error('renderSVG must return SVG markup');downloadBlob(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}),safeName()+'.svg');toast('SVG exported')}catch(e){toast('SVG error: '+e.message)}return}
+  if(fmt==='svg'){if(typeof userSvg!=='function'){toast('SVG export requires window.renderSVG(time, frame, fps)');return}try{var svg=injectMatteIntoSVG(userSvg(effectiveTime(t),effectiveFrame(t),FPS));if(typeof svg!=='string'||svg.toLowerCase().indexOf('<svg')<0)throw new Error('renderSVG must return SVG markup');downloadBlob(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}),safeName()+'.svg');toast('SVG exported')}catch(e){toast('SVG error: '+e.message)}return}
   renderOutputFrame(t);
   var type=fmt==='jpg'?'image/jpeg':fmt==='webp'?'image/webp':'image/png',quality=fmt==='png'?undefined:.96;
   if(fmt==='jpg'&&transparent.checked){var flat=document.createElement('canvas');flat.width=W;flat.height=H;var fctx=flat.getContext('2d');fctx.fillStyle='#050505';fctx.fillRect(0,0,W,H);fctx.drawImage(canvas,0,0);flat.toBlob(function(blob){if(!blob){toast('JPG export failed');return}downloadBlob(blob,safeName()+'.jpg');toast('JPG exported with opaque background')},'image/jpeg',quality);return}
@@ -391,6 +427,36 @@ function exportMetadata(){
   downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),safeName()+'.json');
   toast('Metadata JSON exported')
 }
+$('#newSceneBtn').addEventListener('click',function(){
+  saveStudio();
+  var name=uniqueSceneName('SCENE');
+  studioState.scenes.push({name:name,code:DEFAULT_CODE,sources:[
+    {id:'matte',name:'Solid Matte',kind:'MATTE',visible:false,locked:false,color:'#050505',opacity:1},
+    {id:'animation',name:'Animation Code',kind:'CODE',visible:true,locked:true},
+    {id:'grid',name:'Grid Guide',kind:'GRID',visible:false,locked:false,previewOnly:true},
+    {id:'safe',name:'Safe Area',kind:'SAFE',visible:false,locked:false,previewOnly:true}
+  ]});
+  studioState.active=studioState.scenes.length-1;loadStudio();renderStudioUI();buildEngine(true);toast('New scene · '+name);
+});
+$('#duplicateSceneBtn').addEventListener('click',function(){
+  saveStudio();var src=activeScene(),copy=JSON.parse(JSON.stringify(src)),name=uniqueSceneName(src.name+' COPY');
+  copy.name=name;studioState.scenes.push(copy);studioState.active=studioState.scenes.length-1;loadStudio();renderStudioUI();buildEngine(true);toast('Scene duplicated · '+name);
+});
+$('#addMatteBtn').addEventListener('click',function(){
+  var matte=sourceById('matte');
+  if(!matte){
+    activeScene().sources.unshift({id:'matte',name:'Solid Matte',kind:'MATTE',visible:true,locked:false,color:'#050505',opacity:1});
+  }else{matte.visible=true;matte.locked=false}
+  saveStudio();renderStudioUI();renderAt(Number(timeline.value)||0);toast('Solid matte added');
+});
+$('#addGuideBtn').addEventListener('click',function(){
+  var s=sourceById('grid');if(!s)activeScene().sources.push({id:'grid',name:'Grid Guide',kind:'GRID',visible:true,locked:false,previewOnly:true});else s.visible=true;
+  saveStudio();renderStudioUI();renderAt(Number(timeline.value)||0);toast('Grid guide enabled');
+});
+$('#addSafeBtn').addEventListener('click',function(){
+  var s=sourceById('safe');if(!s)activeScene().sources.push({id:'safe',name:'Safe Area',kind:'SAFE',visible:true,locked:false,previewOnly:true});else s.visible=true;
+  saveStudio();renderStudioUI();renderAt(Number(timeline.value)||0);toast('Safe area enabled');
+});
 $('.tab').forEach(function(tab){tab.addEventListener('click',function(){$('.tab').forEach(function(x){x.classList.remove('active')});tab.classList.add('active');['scenesPanel','sourcesPanel','codePanel','settingsPanel','stockPanel'].forEach(function(id){$('#'+id).hidden=id!==tab.dataset.tab})})});
 $('#exportProjectBtn').addEventListener('click',exportProject);
 $('#importProjectBtn').addEventListener('click',function(){projectInput&&projectInput.click()});
