@@ -1107,11 +1107,11 @@
     .secret-title{
       font-family:var(--display);
       font-size:clamp(3.8rem,14vw,12rem);
-      line-height:.78;
+      line-height:.84;
       letter-spacing:-.085em;
       text-transform:uppercase;
       display:grid;
-      gap:0;
+      row-gap:clamp(.08rem,.7vw,.7rem);
       overflow:hidden;
     }
     .secret-title span{
