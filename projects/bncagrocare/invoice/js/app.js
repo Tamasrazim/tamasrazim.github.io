@@ -163,58 +163,82 @@ function fillTemplateForm(form){
   safeTextField(form,"cell_L18",String(state.commission),fieldMap);safeTextField(form,"cell_L19",money(t.finalTotal),fieldMap);safeTextField(form,"cell_D20_K20",state.amountWords,fieldMap);
 }
 function fitText(text,max){text=String(text||"");return text.length<=max?text:text.slice(0,Math.max(0,max-1))+"…"}
-function drawCell(page,x,y,w,h,value,size=8,bold=false,align="left",font){
-  page.drawRectangle({x,y,width:w,height:h,borderColor:PDFLib.rgb(0,0,0),borderWidth:.7,color:PDFLib.rgb(1,1,1)});
-  const v=String(value||"");if(!v)return;
-  const tw=font.widthOfTextAtSize(v,size),tx=align==="center"?x+(w-tw)/2:align==="right"?x+w-tw-3:x+3;
-  page.drawText(v,{x:Math.max(x+2,tx),y:y+(h-size)/2+2,size,font,color:PDFLib.rgb(0,0,0),maxWidth:Math.max(8,w-5)});
+const X=[22.883,35.553,152.482,172.693,211.939,259.504,272.572,334.409,393.852,412.476,462.422,521.496];
+const ROW_TOP=649.45, ROW_H=10.12;
+const SUMMARY_TOP=639.33, SUMMARY_BOTTOM=593.0, MIN_SUMMARY_BOTTOM=548.0;
+const SUMMARY_ROWS=[
+  {h:7.0,label:"ST",labelX1:X[1],labelX2:X[3],v1X:X[3],v1W:X[5]-X[3],rightLabel:"ST",rightLabelX1:X[7],rightLabelX2:X[9],rightV1X:X[11]},
+  {h:9.74,label:"Total Carton",labelX1:X[1],labelX2:X[3],v1X:X[3],v1W:X[5]-X[3],rightLabel:"Total Taka",rightLabelX1:X[8],rightLabelX2:X[11],rightV1X:X[11]},
+  {h:9.74,label:"Commission %",labelX1:X[1],labelX2:X[11],v1X:X[11],v1W:X[12]-X[11]},
+  {h:9.74,label:"Total Amount",labelX1:X[1],labelX2:X[11],v1X:X[11],v1W:X[12]-X[11]},
+  {h:8.12,label:"Total Taka (In words):",labelX1:X[1],labelX2:X[3],v1X:X[3],v1W:X[11]-X[3]}
+];
+
+function drawBox(page,x,y,w,h,border=.7){
+  page.drawRectangle({x,y,width:w,height:h,borderColor:PDFLib.rgb(0,0,0),borderWidth:border,color:PDFLib.rgb(1,1,1)});
 }
-function drawOverflowPage(doc,itemsLeft,itemsRight,pageIndex,startLeft,startRight){
-  const page=doc.addPage([595.30396,841.88977]),helvetica=awaitFont(doc,false),bold=awaitFont(doc,true);
+function drawTextFit(page,text,x,y,w,h,font,size,align="left"){
+  const v=String(text??"");if(!v)return;
+  let fs=size;
+  while(fs>3.5 && font.widthOfTextAtSize(v,fs)>w-4)fs-=.25;
+  const tw=font.widthOfTextAtSize(v,fs);
+  const tx=align==="center"?x+(w-tw)/2:align==="right"?x+w-tw-2:x+2;
+  page.drawText(v,{x:Math.max(x+1,tx),y:y+Math.max(1,(h-fs)/2+1.5),size:fs,font,color:PDFLib.rgb(0,0,0)});
 }
-function awaitFont(doc,bold){return bold?doc.embedFont(PDFLib.StandardFonts.HelveticaBold):doc.embedFont(PDFLib.StandardFonts.Helvetica)}
-function drawContinuation(doc,left,right){
-  const helvetica=doc.__bncHelvetica||null;return {left,right,helvetica}
+function dynamicRowHeight(extraRows){
+  if(extraRows<=0)return ROW_H;
+  return Math.min(ROW_H,Math.max(4.5,(SUMMARY_BOTTOM-MIN_SUMMARY_BOTTOM)/extraRows));
 }
-async function addContinuationPages(doc){
-  const left=state.left.slice(4),right=state.right.slice(4),max=Math.max(left.length,right.length);
-  if(max===0)return;
-  const regular=await doc.embedFont(PDFLib.StandardFonts.Helvetica),bold=await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
-  const tableX=22.9,tableW=498.6;
-  const ratios=[5.285,22.140625,20,7.285156,14.140625,17.140625,4.7109375,22.285156,21.425781,6.7109375,18,21.285156];
-  const ratioTotal=ratios.reduce((a,b)=>a+b,0),widths=ratios.map(r=>tableW*r/ratioTotal);
-  const xs=[tableX];for(let i=0;i<widths.length;i++)xs.push(xs[i]+widths[i]);
-  const rowH=20, tableTop=742, headerH=28;
-  for(let offset=0;offset<max;offset+=8){
-    const page=doc.addPage([595.30396,841.88977]);
-    page.drawText("BNC AGRO CARE",{x:24,y:803,size:22,font:bold,color:PDFLib.rgb(0,0,0)});
-    page.drawText("Invoice No: "+String(state.invoiceNo).padStart(4,"0")+"    Ref: "+state.ref,{x:24,y:781,size:9,font:regular});
-    page.drawText("Continuation",{x:470,y:803,size:9,font:bold,color:PDFLib.rgb(0,0,0)});
-    const heads=["SL","Products Name","Pack Size","Ctn","Rate / Ctn","Amount Tk.","SL","Products Name","Pack Size","Ctn","Rate / Ctn","Amount Tk."];
-    let y=tableTop-headerH;
-    for(let c=0;c<12;c++)drawCell(page,xs[c],y,widths[c],headerH,heads[c],7,bold,"center",bold);
-    const count=Math.min(8,max-offset);
-    for(let r=0;r<count;r++){
-      const li=offset+r,ri=offset+r,items=[left[li]||blank(),right[ri]||blank()];
-      const rowY=y-(r+1)*rowH;
-      const leftSl=slFor("left",li+4),rightSl=slFor("right",ri+4);
-      const vals=[
-        hasData(items[0])?leftSl:"",items[0].name,items[0].pack,items[0].ctn,items[0].rate,hasData(items[0])?money(num(items[0].ctn)*num(items[0].rate)):"",
-        hasData(items[1])?rightSl:"",items[1].name,items[1].pack,items[1].ctn,items[1].rate,hasData(items[1])?money(num(items[1].ctn)*num(items[1].rate)):""
-      ];
-      for(let c=0;c<12;c++){
-        const center=(c===0||c===3||c===4||c===5||c===6||c===9||c===10||c===11);
-        const maxChars=[5,28,10,8,10,13,5,28,10,8,10,13][c];
-        drawCell(page,xs[c],rowY,widths[c],rowH,fitText(vals[c],maxChars),c===1||c===7?7.2:7,false,center?"center":"left",regular);
-      }
+function drawExtraProductRows(page,left,right,maxRows,regular,bold){
+  const extraRows=Math.max(0,maxRows-4);
+  if(!extraRows)return 0;
+  const rh=dynamicRowHeight(extraRows);
+  const totalExtraH=extraRows*rh;
+  const maskBottom=SUMMARY_BOTTOM-totalExtraH;
+  // Remove only the lower existing summary/empty area. SL 1–4 and the original header stay untouched.
+  page.drawRectangle({x:X[0],y:maskBottom,width:X[12]-X[0],height:ROW_TOP-maskBottom,
+    color:PDFLib.rgb(1,1,1),borderWidth:0});
+  for(let r=0;r<extraRows;r++){
+    const y=ROW_TOP-(r+1)*rh;
+    const li=r+4,ri=r+4,l=left[li]||blank(),rr=right[ri]||blank();
+    const vals=[
+      hasData(l)?slFor("left",li):"",hasData(l)?l.name:"",hasData(l)?l.pack:"",hasData(l)?l.ctn:"",hasData(l)?l.rate:"",hasData(l)?money(num(l.ctn)*num(l.rate)):"",
+      hasData(rr)?slFor("right",ri):"",hasData(rr)?rr.name:"",hasData(rr)?rr.pack:"",hasData(rr)?rr.ctn:"",hasData(rr)?rr.rate:"",hasData(rr)?money(num(rr.ctn)*num(rr.rate)):""
+    ];
+    for(let c=0;c<12;c++){
+      drawBox(page,X[c],y,X[c+1]-X[c],rh,.75);
+      const center=[0,3,4,5,6,9,10,11].includes(c);
+      drawTextFit(page,fitText(vals[c],[4,28,10,8,10,13,4,28,10,8,10,13][c]),X[c],y,X[c+1]-X[c],rh,regular,Math.min(8,Math.max(4,rh*.72)),center?"center":"left");
     }
   }
+  return totalExtraH;
 }
-async function getTemplateBytes(){
-  if(!templateBytesPromise){
-    templateBytesPromise=fetch(TEMPLATE_URL,{cache:"force-cache"}).then(res=>{if(!res.ok)throw Error("Template PDF unavailable");return res.arrayBuffer()});
-  }
-  return templateBytesPromise
+function drawDynamicSummary(page,t,shift,regular,bold){
+  if(shift<=0)return;
+  const rows=[
+    {top:SUMMARY_TOP-0*0-shift,label:"ST",leftValue:money(t.leftAmount),rightLabel:"ST",rightValue:money(t.rightAmount)},
+    {top:632.33-shift,label:"Total Carton",leftValue:String(t.totalCartons),rightLabel:"Total Taka",rightValue:money(t.totalTaka)},
+    {top:622.59-shift,label:"Commission %",leftValue:String(state.commission)},
+    {top:612.85-shift,label:"Total Amount",leftValue:money(t.finalTotal)},
+    {top:603.11-shift,label:"Total Taka (In words):",leftValue:state.amountWords}
+  ];
+  const heights=[7.0,9.74,9.74,9.74,8.12];
+  const b1=X[1],b3=X[3],d=X[3],f=X[5],h=X[7],i=X[8],l=X[11],right=X[12];
+  rows.forEach((row,idx)=>{
+    const hgt=heights[idx],y=row.top-hgt;
+    if(idx===0){
+      drawBox(page,b1,y,b3-b1,hgt,.7);drawBox(page,d,y,f-d,hgt,.7);drawBox(page,h,y,i-h,hgt,.7);drawBox(page,l,y,right-l,hgt,.7);
+      drawTextFit(page,row.label,b1,y,b3-b1,hgt,bold,8,"center");drawTextFit(page,row.leftValue,d,y,f-d,hgt,regular,8,"right");
+      drawTextFit(page,row.rightLabel,h,y,i-h,hgt,bold,8,"center");drawTextFit(page,row.rightValue,l,y,right-l,hgt,regular,8,"right");
+    }else if(idx===1){
+      drawBox(page,b1,y,b3-b1,hgt,.7);drawBox(page,d,y,f-d,hgt,.7);drawBox(page,h,y,l-h,hgt,.7);drawBox(page,l,y,right-l,hgt,.7);
+      drawTextFit(page,row.label,b1,y,b3-b1,hgt,bold,7.8,"center");drawTextFit(page,row.leftValue,d,y,f-d,hgt,regular,8,"right");
+      drawTextFit(page,row.rightLabel,h,y,l-h,hgt,bold,7.8,"center");drawTextFit(page,row.rightValue,l,y,right-l,hgt,regular,8,"right");
+    }else{
+      drawBox(page,b1,y,l-b1,hgt,.7);drawBox(page,l,y,right-l,hgt,.7);
+      drawTextFit(page,row.label,b1,y,l-b1,hgt,bold,8,"right");drawTextFit(page,row.leftValue,l,y,right-l,hgt,regular,8,idx===4?"left":"right");
+    }
+  });
 }
 async function generatePdf(){
   readSimple();syncTotalsPanel();
@@ -226,7 +250,7 @@ async function generatePdf(){
   await addContinuationPages(doc);
   return await doc.save({useObjectStreams:true,addDefaultPage:false});
 }
-function queuePdfRender(){clearTimeout(pdfTimer);pdfTimer=setTimeout(updatePdfPreview,60)}
+function queuePdfRender(){clearTimeout(pdfTimer);pdfTimer=setTimeout(updatePdfPreview,70)}
 
 async function updatePdfPreview(){
   const seq=++renderSeq;
