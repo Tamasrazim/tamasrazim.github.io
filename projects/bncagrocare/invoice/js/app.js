@@ -15,7 +15,7 @@ const state={
  repName:"Md Rezaul Karim",repRole:"Officer BNC AGRO CARE Area Manager",repMob:"01718-306103",
  commission:0,left:firstRows(),right:firstRows(),amountWords:""
 };
-let db=null,timer=null,pdfTimer=null,deferredInstall=null,pdfUrl="",renderSeq=0,pdfBytes=null,pdfjsPromise=null,pdfDocument=null,pdfCanvasSeq=0;
+let db=null,timer=null,pdfTimer=null,deferredInstall=null,pdfUrl="",renderSeq=0,pdfBytes=null,pdfjsPromise=null,pdfDocument=null,templateBytesPromise=null,renderingPdf=null;
 
 function localDate(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function displayDate(v){const m=String(v||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?m[3]+"/"+m[2]+"/"+m[1]:String(v||"")}
@@ -28,11 +28,23 @@ function normalize(){
   ["left","right"].forEach(side=>{
     state[side]=Array.isArray(state[side])?state[side].map(x=>({name:String(x?.name||""),pack:String(x?.pack||""),ctn:String(x?.ctn||""),rate:String(x?.rate||"")})):firstRows();
     trimTrailing(side);
-    if(hasData(state[side][state[side].length-1]))state[side].push(blank());
   });
   state.commission=Math.max(0,num(state.commission));
-  state.freeCells=undefined;
+  state.nextAddSide=state.nextAddSide==="right"?"right":"left";
+  const leftExtra=Math.max(0,state.left.length-4),rightExtra=Math.max(0,state.right.length-4);
+  if(!state.hasOwnProperty("_nextSideSaved"))state.nextAddSide=leftExtra===rightExtra?"left":leftExtra>rightExtra?"right":"left";
+  state._nextSideSaved=true;
+  delete state.freeCells;
 }
+function slFor(side,index){
+  return side==="left"?(index<4?index+1:9+(index-4)*2):(index<4?index+5:10+(index-4)*2);
+}
+function nextProductLabel(){
+  const side=state.nextAddSide==="right"?"Right":"Left";
+  const extra=state[side.toLowerCase()].length-4;
+  return "Next slot: "+side+" · SL "+slFor(side.toLowerCase(),extra+4);
+}
+
 function totals(){
   const left=state.left.filter(hasData),right=state.right.filter(hasData);
   const leftCartons=left.reduce((s,i)=>s+num(i.ctn),0),rightCartons=right.reduce((s,i)=>s+num(i.ctn),0);
@@ -61,28 +73,40 @@ function createInput(side,i,key,placeholder,type){
   const input=document.createElement("input");input.className="field "+key;input.value=state[side][i][key]||"";if(placeholder)input.placeholder=placeholder;if(type){input.type=type;input.min="0";input.step="0.01"}
   input.addEventListener("input",()=>{
     state[side][i][key]=input.value;
-    if(i===state[side].length-1&&hasData(state[side][i])){state[side].push(blank());appendEditorRow(side,state[side].length-1)}
-    trimTrailing(side);syncTotalsPanel();scheduleSave();queuePdfRender()
+    syncTotalsPanel();scheduleSave();queuePdfRender()
   });return input
 }
 function editorRow(side,i){
   const row=document.createElement("div");row.className="prod-row";row.dataset.i=i;
-  const no=document.createElement("span");no.className="prod-num";no.textContent=i+1;row.append(no);
+  const no=document.createElement("span");no.className="prod-num";no.textContent=slFor(side,i);row.append(no);
   row.append(createInput(side,i,"name","Product"));
   row.append(createInput(side,i,"pack","Pack"));
   row.append(createInput(side,i,"ctn","", "number"));
   row.append(createInput(side,i,"rate","", "number"));
   return row
 }
-function appendEditorRow(side,i){const host=$("#"+side+"Editor");const row=editorRow(side,i);const add=host.querySelector(".add-product");host.insertBefore(row,add)}
-function addProduct(side){trimTrailing(side);if(hasData(state[side][state[side].length-1])){state[side].push(blank());appendEditorRow(side,state[side].length-1)}else{const last=hostRows(side).at(-1);last?.querySelector(".name")?.focus()}queuePdfRender();scheduleSave()}
+function appendEditorRow(side,i){const host=$("#"+side+"Editor");const row=editorRow(side,i);host.appendChild(row)}
 function hostRows(side){return [...document.querySelectorAll("#"+side+"Editor .prod-row")]}
+function addProduct(){
+  const side=state.nextAddSide==="right"?"right":"left";
+  const index=state[side].length;
+  state[side].push(blank());
+  state.nextAddSide=side==="left"?"right":"left";
+  renderEditor(side);
+  $("#nextProductHint").textContent=nextProductLabel();
+  const row=hostRows(side).find(x=>Number(x.dataset.i)===index);
+  row?.querySelector(".name")?.focus();
+  syncTotalsPanel();scheduleSave();queuePdfRender()
+}
 function renderEditor(side){
   const host=$("#"+side+"Editor");host.innerHTML='<div class="prod-head"><span>SL</span><span>Products</span><span>Pack</span><span>Ctn</span><span>Rate / Ctn</span></div>';
   state[side].forEach((_,i)=>host.appendChild(editorRow(side,i)));
-  const add=document.createElement("button");add.type="button";add.className="add-product outline-btn";add.textContent="+ Add product";add.onclick=()=>addProduct(side);host.appendChild(add)
 }
-function renderEditors(){ensureFour("left");ensureFour("right");renderEditor("left");renderEditor("right");syncEditors();syncTotalsPanel()}
+function renderEditors(){
+  ensureFour("left");ensureFour("right");
+  renderEditor("left");renderEditor("right");syncEditors();syncTotalsPanel();
+  $("#nextProductHint").textContent=nextProductLabel();
+}
 
 function syncEditors(){
   ensureNumber();
@@ -106,34 +130,37 @@ function bindSimpleInputs(){
   })
 }
 
-function safeTextField(form,name,value){
-  try{const f=form.getTextField(name);f.setText(value==null?"":String(value));return true}catch(e){return false}
+function safeTextField(form,name,value,fieldMap){
+  try{
+    const f=fieldMap?.get(name)||form.getTextField(name);
+    f.setText(value==null?"":String(value));return true
+  }catch(e){return false}
 }
-function fillProductFields(form,side,items){
+function buildFieldMap(form){const map=new Map();for(const f of form.getFields()){try{map.set(f.getName(),f)}catch(e){}}return map}
+function fillProductFields(form,side,items,fieldMap){
   const cols=side==="left"?["A","B","C","D","E","F"]:["G","H","I","J","K","L"];
   for(let i=0;i<4;i++){
     const item=items[i]||blank(),active=hasData(item),amount=active?money(num(item.ctn)*num(item.rate)):"";
-    const row=10+i;
-    [item.sl||"",active?i+1:"",item.name||"",item.pack||"",item.ctn||"",item.rate||"",amount].forEach(()=>{});
-    safeTextField(form,"cell_"+cols[0]+row,active?String(i+1):"");
-    safeTextField(form,"cell_"+cols[1]+row,active?item.name:"");
-    safeTextField(form,"cell_"+cols[2]+row,active?item.pack:"");
-    safeTextField(form,"cell_"+cols[3]+row,active?item.ctn:"");
-    safeTextField(form,"cell_"+cols[4]+row,active?item.rate:"");
-    safeTextField(form,"cell_"+cols[5]+row,amount)
+    const row=10+i,sl=slFor(side,i);
+    safeTextField(form,"cell_"+cols[0]+row,active?String(sl):"",fieldMap);
+    safeTextField(form,"cell_"+cols[1]+row,active?item.name:"",fieldMap);
+    safeTextField(form,"cell_"+cols[2]+row,active?item.pack:"",fieldMap);
+    safeTextField(form,"cell_"+cols[3]+row,active?item.ctn:"",fieldMap);
+    safeTextField(form,"cell_"+cols[4]+row,active?item.rate:"",fieldMap);
+    safeTextField(form,"cell_"+cols[5]+row,amount,fieldMap)
   }
 }
 function fillTemplateForm(form){
-  const t=totals();ensureNumber();state.amountWords=numberWords(t.finalTotal);
-  safeTextField(form,PDF_FIELDS.ref,state.ref);
-  safeTextField(form,PDF_FIELDS.invoiceNo,state.invoiceNo);
-  safeTextField(form,PDF_FIELDS.date,displayDate(state.date));
-  safeTextField(form,PDF_FIELDS.repName,state.repName);safeTextField(form,PDF_FIELDS.repRole,state.repRole);safeTextField(form,PDF_FIELDS.repMob,state.repMob);
-  safeTextField(form,PDF_FIELDS.trader,state.traderName);safeTextField(form,PDF_FIELDS.buyer,state.buyerName);safeTextField(form,PDF_FIELDS.address,state.address);safeTextField(form,PDF_FIELDS.dealerMob,state.dealerMobile);
-  fillProductFields(form,"left",state.left.filter(hasData));fillProductFields(form,"right",state.right.filter(hasData));
-  safeTextField(form,"cell_D16",String(t.leftCartons));safeTextField(form,"cell_F16",money(t.leftAmount));safeTextField(form,"cell_L16",money(t.rightAmount));
-  safeTextField(form,"cell_D17",String(t.totalCartons));safeTextField(form,"cell_L17",money(t.totalTaka));
-  safeTextField(form,"cell_L18",String(state.commission));safeTextField(form,"cell_L19",money(t.finalTotal));safeTextField(form,"cell_D20_K20",state.amountWords);
+  const t=totals();ensureNumber();state.amountWords=numberWords(t.finalTotal);const fieldMap=buildFieldMap(form);
+  safeTextField(form,PDF_FIELDS.ref,state.ref,fieldMap);
+  safeTextField(form,PDF_FIELDS.invoiceNo,state.invoiceNo,fieldMap);
+  safeTextField(form,PDF_FIELDS.date,displayDate(state.date),fieldMap);
+  safeTextField(form,PDF_FIELDS.repName,state.repName,fieldMap);safeTextField(form,PDF_FIELDS.repRole,state.repRole,fieldMap);safeTextField(form,PDF_FIELDS.repMob,state.repMob,fieldMap);
+  safeTextField(form,PDF_FIELDS.trader,state.traderName,fieldMap);safeTextField(form,PDF_FIELDS.buyer,state.buyerName,fieldMap);safeTextField(form,PDF_FIELDS.address,state.address,fieldMap);safeTextField(form,PDF_FIELDS.dealerMob,state.dealerMobile,fieldMap);
+  fillProductFields(form,"left",state.left.slice(0,4),fieldMap);fillProductFields(form,"right",state.right.slice(0,4),fieldMap);
+  safeTextField(form,"cell_D16",String(t.leftCartons),fieldMap);safeTextField(form,"cell_F16",money(t.leftAmount),fieldMap);safeTextField(form,"cell_L16",money(t.rightAmount),fieldMap);
+  safeTextField(form,"cell_D17",String(t.totalCartons),fieldMap);safeTextField(form,"cell_L17",money(t.totalTaka),fieldMap);
+  safeTextField(form,"cell_L18",String(state.commission),fieldMap);safeTextField(form,"cell_L19",money(t.finalTotal),fieldMap);safeTextField(form,"cell_D20_K20",state.amountWords,fieldMap);
 }
 function fitText(text,max){text=String(text||"");return text.length<=max?text:text.slice(0,Math.max(0,max-1))+"…"}
 function drawCell(page,x,y,w,h,value,size=8,bold=false,align="left",font){
@@ -150,8 +177,8 @@ function drawContinuation(doc,left,right){
   const helvetica=doc.__bncHelvetica||null;return {left,right,helvetica}
 }
 async function addContinuationPages(doc){
-  const left=state.left.filter(hasData),right=state.right.filter(hasData),max=Math.max(left.length,right.length);
-  if(max<=4)return;
+  const left=state.left.slice(4),right=state.right.slice(4),max=Math.max(left.length,right.length);
+  if(max===0)return;
   const regular=await doc.embedFont(PDFLib.StandardFonts.Helvetica),bold=await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
   const tableX=22.9,tableW=498.6;
   const ratios=[5.285,22.140625,20,7.285156,14.140625,17.140625,4.7109375,22.285156,21.425781,6.7109375,18,21.285156];
@@ -170,9 +197,10 @@ async function addContinuationPages(doc){
     for(let r=0;r<count;r++){
       const li=offset+r,ri=offset+r,items=[left[li]||blank(),right[ri]||blank()];
       const rowY=y-(r+1)*rowH;
+      const leftSl=slFor("left",li+4),rightSl=slFor("right",ri+4);
       const vals=[
-        items[0].name?li+1:"",items[0].name,items[0].pack,items[0].ctn,items[0].rate,items[0].name?money(num(items[0].ctn)*num(items[0].rate)):"",
-        items[1].name?ri+1:"",items[1].name,items[1].pack,items[1].ctn,items[1].rate,items[1].name?money(num(items[1].ctn)*num(items[1].rate)):""
+        hasData(items[0])?leftSl:"",items[0].name,items[0].pack,items[0].ctn,items[0].rate,hasData(items[0])?money(num(items[0].ctn)*num(items[0].rate)):"",
+        hasData(items[1])?rightSl:"",items[1].name,items[1].pack,items[1].ctn,items[1].rate,hasData(items[1])?money(num(items[1].ctn)*num(items[1].rate)):""
       ];
       for(let c=0;c<12;c++){
         const center=(c===0||c===3||c===4||c===5||c===6||c===9||c===10||c===11);
@@ -182,18 +210,24 @@ async function addContinuationPages(doc){
     }
   }
 }
+async function getTemplateBytes(){
+  if(!templateBytesPromise){
+    templateBytesPromise=fetch(TEMPLATE_URL,{cache:"force-cache"}).then(res=>{if(!res.ok)throw Error("Template PDF unavailable");return res.arrayBuffer()});
+  }
+  return templateBytesPromise
+}
 async function generatePdf(){
   readSimple();syncTotalsPanel();
   if(!window.PDFLib)throw Error("PDF engine unavailable");
-  const res=await fetch(TEMPLATE_URL,{cache:"no-store"});if(!res.ok)throw Error("Template PDF unavailable");
-  const bytes=await res.arrayBuffer();
-  const doc=await PDFLib.PDFDocument.load(bytes,{updateMetadata:false});
+  const bytes=await getTemplateBytes();
+  const doc=await PDFLib.PDFDocument.load(bytes,{updateMetadata:false,ignoreEncryption:true});
   const form=doc.getForm();fillTemplateForm(form);
   try{form.updateFieldAppearances()}catch(e){}
   await addContinuationPages(doc);
-  return await doc.save({useObjectStreams:false});
+  return await doc.save({useObjectStreams:true,addDefaultPage:false});
 }
-function queuePdfRender(){clearTimeout(pdfTimer);pdfTimer=setTimeout(updatePdfPreview,120)}
+function queuePdfRender(){clearTimeout(pdfTimer);pdfTimer=setTimeout(updatePdfPreview,60)}
+
 async function updatePdfPreview(){
   const seq=++renderSeq;
   $("#pdfStatus").textContent="Generating PDF…";
@@ -220,27 +254,26 @@ async function getPdfJs(){
 }
 async function renderCleanPdf(bytes,seq){
   const pdfjs=await getPdfJs();
+  try{await pdfDocument?.destroy()}catch(e){} pdfDocument=null;
   const loading=pdfjs.getDocument({data:bytes});
   const pdf=await loading.promise;
-  if(seq!==renderSeq)return;
+  if(seq!==renderSeq){try{await pdf.destroy()}catch(e){};return}
   pdfDocument=pdf;
-  const stage=$("#pdfStage");stage.innerHTML="";
-  const width=Math.max(320,stage.clientWidth-28);
+  const stage=$("#pdfStage"),width=Math.max(320,stage.clientWidth-28);
+  stage.replaceChildren();
+  const dpr=Math.min(1.5,window.devicePixelRatio||1);
   for(let n=1;n<=pdf.numPages;n++){
-    if(seq!==renderSeq)break;
+    if(seq!==renderSeq){try{await pdf.destroy()}catch(e){};return}
     const page=await pdf.getPage(n);
-    const base=page.getViewport({scale:1});
-    const scale=width/base.width;
-    const dpr=Math.min(2,window.devicePixelRatio||1);
-    const viewport=page.getViewport({scale:scale*dpr});
-    const cssViewport=page.getViewport({scale});
+    const base=page.getViewport({scale:1}),scale=width/base.width;
+    const viewport=page.getViewport({scale:scale*dpr}),cssViewport=page.getViewport({scale});
     const wrap=document.createElement("div");wrap.className="pdf-page-wrap";wrap.dataset.page=String(n);
     const canvas=document.createElement("canvas");canvas.className="pdf-page";
     canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
     canvas.style.width=Math.ceil(cssViewport.width)+"px";canvas.style.height=Math.ceil(cssViewport.height)+"px";
     wrap.appendChild(canvas);stage.appendChild(wrap);
-    const ctx=canvas.getContext("2d",{alpha:false});
-    await page.render({canvasContext:ctx,viewport}).promise;
+    const task=page.render({canvasContext:canvas.getContext("2d",{alpha:false,desynchronized:true}),viewport});
+    renderingPdf=task;await task.promise;renderingPdf=null;page.cleanup();
   }
   $("#pdfStatus").textContent="Live PDF · "+pdf.numPages+" page"+(pdf.numPages===1?"":"s")+" · "+(state.left.filter(hasData).length+state.right.filter(hasData).length)+" products";
 }
@@ -279,7 +312,7 @@ function setupInstall(){
   addEventListener("appinstalled",()=>{b.hidden=true})
 }
 function bindActions(){
-  $("#saveInvoice").onclick=saveRecord;$("#newInvoice").onclick=newInvoice;$("#printBtn").onclick=openPdf;$("#downloadPdfBtn").onclick=savePdf;
+  $("#saveInvoice").onclick=saveRecord;$("#newInvoice").onclick=newInvoice;$("#addProductBtn").onclick=addProduct;$("#printBtn").onclick=openPdf;$("#downloadPdfBtn").onclick=savePdf;
   $("#openPdf").onclick=e=>{e.preventDefault();openPdf()};
   $("#openTemplateBtn").onclick=()=>window.open(TEMPLATE_URL,"_blank","noopener");
   $("#jsonBtn").onclick=exportJSON;$("#importBtn").onclick=()=>$("#importFile").click();$("#importFile").onchange=e=>{const f=e.target.files?.[0];if(f)importJSON(f);e.target.value=""}
