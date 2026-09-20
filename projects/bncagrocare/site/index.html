@@ -15,7 +15,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;justify-content:s
 .eyebrow{text-transform:uppercase;letter-spacing:.18em;font-size:.72rem;font-weight:800;color:var(--green2)}
 h1{font-size:clamp(3.3rem,8vw,7rem);line-height:.88;letter-spacing:-.075em;margin:18px 0 28px;max-width:850px}
 .lead{font-size:clamp(1rem,1.6vw,1.25rem);line-height:1.7;color:var(--muted);max-width:650px}
-.btn{display:inline-block;margin-top:22px;padding:14px 21px;border-radius:999px;background:var(--green);color:white;text-decoration:none;font-weight:750}.project-tools{margin-top:28px;padding:22px;border:1px solid rgba(16,35,27,.12);background:rgba(255,255,255,.55);border-radius:20px}.project-tools .btn{margin:0 8px 8px 0}.project-tools .secondary{background:transparent;color:var(--green);border:1px solid rgba(11,61,46,.25)}.project-tools p{margin:8px 0 0;color:var(--muted);line-height:1.65;font-size:.88rem}
+.btn{display:inline-block;margin-top:22px;padding:14px 21px;border-radius:999px;background:var(--green);color:white;text-decoration:none;font-weight:750}
 .visual{position:relative;min-height:430px;border-radius:30px;overflow:hidden;background:#173d2e;box-shadow:0 30px 80px rgba(11,61,46,.2)}
 .visual img{width:100%;height:100%;min-height:430px;object-fit:cover;display:block;opacity:.92}
 .badge{position:absolute;bottom:22px;left:22px;padding:13px 16px;background:rgba(255,255,255,.9);border-radius:15px;font-size:.78rem;font-weight:800}
@@ -27,15 +27,14 @@ footer{padding:35px 6%;background:#08291f;color:#b8ccc4;display:flex;justify-con
 </style>
 </head>
 <body>
-<nav><div class="brand">BNC <span>AgroCare</span></div><div class="links"><a href="#about">About</a><a href="#focus">Focus</a><a href="#invoice">Invoice PWA</a><a href="#contact">Contact</a></div></nav>
+<nav><div class="brand">BNC <span>AgroCare</span></div><div class="links"><a href="#about">About</a><a href="#focus">Focus</a><a href="#contact">Contact</a><a href="invoice/">Invoice PWA</a></div></nav>
 <main>
 <section class="hero">
-<div><div class="eyebrow">Agriculture • Products • Solutions</div><h1>Better farming starts here.</h1><p class="lead">BNC AgroCare is an agriculture-focused company providing quality agricultural products and practical solutions for farmers, growers, and the wider agricultural community.</p><a class="btn" href="#about">Discover BNC AgroCare</a></div>
+<div><div class="eyebrow">Agriculture • Products • Solutions</div><h1>Better farming starts here.</h1><p class="lead">BNC AgroCare is an agriculture-focused company providing quality agricultural products and practical solutions for farmers, growers, and the wider agricultural community.</p><a class="btn" href="invoice/">Create an invoice</a></div>
 <div class="visual"><img src="FB_IMG_1789811599210.jpg" alt="BNC AgroCare agricultural visual"><div class="badge">Quality • Practical • Reliable</div></div>
 </section>
 <section id="about"><div class="wrap section-head"><div class="eyebrow">About BNC AgroCare</div><h2>Supporting agriculture with practical solutions.</h2><p>We focus on reliable agricultural products, practical support, efficient service, and solutions designed around the needs of modern farming.</p></div></section>
 <section id="focus"><div class="wrap"><div class="section-head"><div class="eyebrow">Our focus</div><h2>Built around the farm.</h2></div><div class="grid"><article class="card"><div class="num">01</div><h3>Quality Products</h3><p>Reliable agricultural products selected to support everyday farming needs.</p></article><article class="card"><div class="num">02</div><h3>Practical Solutions</h3><p>Useful agricultural solutions with a focus on productivity and real-world application.</p></article><article class="card"><div class="num">03</div><h3>Better Service</h3><p>Efficient service and support for farmers, growers, and the agricultural community.</p></article></div></div></section>
-<section id="invoice" style="background:#edf2ea"><div class="wrap section-head"><div class="eyebrow">BNC Invoice PWA</div><h2>Turn the paper workflow into a proper app.</h2><p>Form-based invoice entry replaces manual spreadsheet editing. Drafts and saved invoices stay on the device, invoice history can be reopened, JSON backups are available, and the finished document prints as an A4 invoice.</p><div class="project-tools"><a class="btn" href="invoice/">Open Invoice PWA →</a><a class="btn secondary" href="https://github.com/Tamasrazim/bncagrocare" target="_blank" rel="noopener noreferrer">View GitHub repo →</a><p><strong>Invoice workflow:</strong> Fill the boxes → live A4 preview → save locally → print / PDF. The original spreadsheet remains untouched as a reference.</p></div></div></section>
 <section class="about" id="contact"><div class="wrap section-head"><div class="eyebrow">BNC AgroCare</div><h2>Quality agricultural products and practical solutions for better farming.</h2><p>More company information, product data, and contact details can be added as the official BNC AgroCare information becomes available.</p></div></section>
 </main>
 <footer><strong>BNC AgroCare</strong><span>Agriculture-focused products & solutions</span><span>Built by Robiul Rumman Razim — Tamasrazim</span></footer>
