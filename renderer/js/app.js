@@ -168,7 +168,7 @@ async function exportRealtime(){
       rec.onerror=function(){failed=new Error('MediaRecorder encoder error');try{rec.stop()}catch(e){}};
       rec.onstop=function(){failed?reject(failed):resolve()};
       rec.start(250);
-      function tick(){if(i>=total){rec.stop();return}if(!renderAt(i/FPS)){failed=new Error('Render failed during capture');try{rec.stop()}catch(e){}return}
+      function tick(){if(i>=total){rec.stop();return}if(!renderOutputFrame(i/FPS)){failed=new Error('Render failed during capture');try{rec.stop()}catch(e){}return}
         var pct=i/Math.max(1,total-1);rFrame.textContent=i+' / '+total;rPct.textContent=Math.round(pct*100)+'%';rProgress.style.transform='scaleX('+pct+')';
         rRate.textContent='realtime';rQueue.textContent='—';rDropped.textContent='unknown';rElapsed.textContent=((performance.now()-start)/1000).toFixed(1)+'s';i++;setTimeout(tick,Math.max(0,1000/FPS))}
       tick();
