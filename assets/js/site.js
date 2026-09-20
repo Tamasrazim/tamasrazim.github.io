@@ -699,9 +699,15 @@
         'the quiet things move',
         'nearly',
         'one more try',
-        'you found the seam'
+        'you found the seam',
+        'stop chasing me',
+        'not that easy',
+        'you are making this worse',
+        'still trying?',
+        'i warned you'
       ];
-      var messageIndex=0,escapeCount=0,bubbleTimer=0,open=false;
+      var messageIndex=0,escapeCount=0,bubbleTimer=0,open=false,lastDodge=0,pausedUntil=0;
+      var targetX=0,targetY=0;
       var reducedMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       var finePointer=window.matchMedia&&window.matchMedia('(pointer: fine)').matches;
 
@@ -709,34 +715,65 @@
         bubble.textContent=message;
         bubble.classList.add('show');
         clearTimeout(bubbleTimer);
-        bubbleTimer=setTimeout(function(){bubble.classList.remove('show')},duration||1100);
+        bubbleTimer=setTimeout(function(){bubble.classList.remove('show')},duration||1050);
       }
       function resetNode(){
+        targetX=0;
+        targetY=0;
         node.style.setProperty('--sn-x','0px');
         node.style.setProperty('--sn-y','0px');
         node.style.setProperty('--sn-scale','1');
       }
       function dodge(e){
         if(open||reducedMotion||!finePointer)return;
-        var rect=wrap.getBoundingClientRect();
-        var nx=(e.clientX-(rect.left+rect.width/2))/Math.max(1,rect.width);
-        var ny=(e.clientY-(rect.top+rect.height/2))/Math.max(1,rect.height);
-        if(Math.hypot(nx,ny)>.32){
-          var angle=Math.atan2(ny,nx);
-          var distance=9+Math.min(23,escapeCount*2.4);
-          node.style.setProperty('--sn-x',(-Math.cos(angle)*distance).toFixed(1)+'px');
-          node.style.setProperty('--sn-y',(-Math.sin(angle)*distance*.7).toFixed(1)+'px');
-          node.style.setProperty('--sn-scale',(1+Math.min(.12,escapeCount*.012)).toFixed(3));
-          say(messages[messageIndex%messages.length],900);
-          messageIndex++;
-          escapeCount++;
-          if(escapeCount>=7){
-            escapeCount=0;
-            window.setTimeout(function(){
-              resetNode();
-              say('it is still here. click when it stops.',1500);
-            },260);
-          }
+        var now=performance.now();
+        if(now<pausedUntil||now-lastDodge<170)return;
+
+        var rect=node.getBoundingClientRect();
+        var cx=rect.left+rect.width*.5;
+        var cy=rect.top+rect.height*.5;
+        var dx=e.clientX-cx,dy=e.clientY-cy;
+        var distance=Math.hypot(dx,dy);
+
+        /* Start running before the pointer reaches the node. */
+        if(distance>92)return;
+
+        lastDodge=now;
+
+        var away=Math.atan2(cy-e.clientY,cx-e.clientX);
+        var chaos=(Math.random()-.5)*.9;
+        var angle=away+chaos;
+
+        /* Escalate the jump distance so repeated attempts feel increasingly annoying. */
+        var jump=38+Math.min(58,escapeCount*5.5);
+        var maxX=Math.min(155,Math.max(72,innerWidth*.24));
+        var maxY=22;
+
+        targetX=Math.max(-maxX,Math.min(maxX,targetX+Math.cos(angle)*jump));
+        targetY=Math.max(-maxY,Math.min(maxY,targetY+Math.sin(angle)*Math.min(jump*.4,maxY)));
+
+        /* If a jump would go back toward the pointer, force a lateral escape. */
+        if(Math.abs(targetX-(e.clientX-(wrap.getBoundingClientRect().left+wrap.getBoundingClientRect().width*.5)))<28){
+          targetX+=(targetX>=0?42:-42);
+          targetX=Math.max(-maxX,Math.min(maxX,targetX));
+        }
+
+        node.style.setProperty('--sn-x',targetX.toFixed(1)+'px');
+        node.style.setProperty('--sn-y',targetY.toFixed(1)+'px');
+        node.style.setProperty('--sn-scale',(1+Math.min(.16,escapeCount*.014)).toFixed(3));
+
+        say(messages[messageIndex%messages.length],escapeCount>7?750:900);
+        messageIndex++;
+        escapeCount++;
+
+        /* After a long chase it deliberately stops for a fair click window. */
+        if(escapeCount>=12){
+          escapeCount=0;
+          pausedUntil=now+1550;
+          window.setTimeout(function(){
+            resetNode();
+            say('fine. you earned the click.',1450);
+          },120);
         }
       }
       function openReveal(){
@@ -765,15 +802,24 @@
           reveal.hidden=true;
           reveal.classList.remove('is-closing');
           resetNode();
+          pausedUntil=0;
+          lastDodge=performance.now();
           try{node.focus({preventScroll:true})}catch(err){node.focus()}
         },500);
       }
 
-      node.addEventListener('pointermove',dodge,{passive:true});
+      window.addEventListener('pointermove',dodge,{passive:true});
       node.addEventListener('pointerenter',function(){
-        if(!open){say(messages[messageIndex%messages.length],900);messageIndex++}
+        if(!open&&!reducedMotion&&!finePointer&&performance.now()>=pausedUntil){
+          say(messages[messageIndex%messages.length],900);
+          messageIndex++;
+        }
       });
-      node.addEventListener('focus',function(){resetNode();say('the secret is easier to find from here.',1400)});
+      node.addEventListener('focus',function(){
+        resetNode();
+        pausedUntil=performance.now()+1800;
+        say('the secret is easier to find from here.',1400);
+      });
       node.addEventListener('click',openReveal);
       close.addEventListener('click',closeReveal);
       reveal.addEventListener('click',function(e){if(e.target===reveal)closeReveal()});
