@@ -46,3 +46,8 @@ textarea#code{width:100%;height:390px;resize:vertical;padding:13px;background:#0
 .scene-action:hover{color:var(--fg);border-color:var(--line2);background:#111}
 .scene-action:disabled{opacity:.25;cursor:not-allowed}
 .scene-name{min-width:0;overflow:hidden;text-overflow:ellipsis}
+
+.source-controls{grid-column:2/-1;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:3px}
+.source-controls label{display:grid;gap:3px;color:var(--muted);font-size:8px;text-transform:uppercase;letter-spacing:.08em}
+.source-controls input[type="color"]{width:100%;height:30px;padding:2px;border:1px solid var(--line2);background:#080808}
+.source-controls input[type="range"]{width:100%;accent-color:#fff}
