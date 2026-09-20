@@ -14,7 +14,7 @@ The BNC business website keeps its own agriculture-focused design, separate from
 - `index.html` — BNC AgroCare business website
 - `FB_IMG_1789811599210.jpg` — BNC source image
 - `invoice/` — BNC Invoice PWA
-- `reference/demo.xlsx` — original Excel demo/reference, untouched
+- `reference/demo.xlsx` — current `18-09-26 0002.xlsx` invoice reference, preserved exactly
 
 ## Workflow
 
