@@ -231,43 +231,66 @@ function frame(now){
   if(email){
     var er=email.getBoundingClientRect();
     var ecx=er.left+er.width*.5, ecy=er.top+er.height*.5;
-    var ex=pointer.x-ecx, ey=pointer.y-ecy;
-    var dist=Math.hypot(ex,ey);
-    var radius=Math.max(180,Math.min(520,Math.max(er.width*2.8,er.height*9)));
-    var f=ease(1-dist/radius);
-    var edge=clamp(f,0,1);
-    var force=edge*edge*(3-2*edge);
-    var nx=ex/Math.max(1,er.width*.5), ny=ey/Math.max(1,er.height*.5);
-    var angle=Math.atan2(ey,ex);
-    var repel=force*(18+energy*10);
+    var radius=Math.max(220,Math.min(620,er.width*3.2));
+    var dist=Math.hypot(pointer.x-ecx,pointer.y-ecy);
+    var proximity=clamp(1-dist/radius,0,1);
+    var field=proximity*proximity*(3-2*proximity);
 
-    email.style.setProperty('--if-strength',edge.toFixed(3));
-    email.style.setProperty('--if-x',(-Math.cos(angle)*repel).toFixed(2)+'px');
-    email.style.setProperty('--if-y',(-Math.sin(angle)*repel*.72).toFixed(2)+'px');
-    email.style.setProperty('--if-scale',(1+force*(.018+energy*.012)).toFixed(4));
+    email.classList.add('infinity-email');
+    email.style.setProperty('--if-strength',field.toFixed(3));
 
-    /* Letter-level field: the pointer pushes the word away non-linearly,
-       with the center resisting more strongly than the edges. */
-    var letters=email.querySelectorAll('.infinity-letter');
-    if(letters.length){
+    /* Cursor-driven fluid field:
+       near the word, letters flow around the pointer instead of simply
+       translating away from it. The tangential component creates the
+       characteristic wrap/warp motion while the radial component preserves
+       readable resistance. */
+    var letters=emailLetters;
+    if(letters&&letters.length){
       for(var li=0;li<letters.length;li++){
-        var letter=letters[li],lr=letter.getBoundingClientRect();
-        var lcx=lr.left+lr.width*.5,lcy=lr.top+lr.height*.5;
-        var ldx=pointer.x-lcx,ldy=pointer.y-lcy;
-        var ld=Math.hypot(ldx,ldy);
-        var lf=ease(1-ld/Math.max(70,Math.min(210,er.width*.72)));
-        var lforce=lf*lf*(3-2*lf);
-        var inv=Math.max(1,ld);
-        var px=-ldx/inv*lforce*(8+energy*5);
-        var py=-ldy/inv*lforce*(5+energy*4);
-        var twist=clamp((ldx/Math.max(1,er.width))*.9*lforce,-1.8,1.8);
-        var ls=1+lforce*.028;
-        letter.style.setProperty('--il-x',px.toFixed(2)+'px');
-        letter.style.setProperty('--il-y',py.toFixed(2)+'px');
-        letter.style.setProperty('--il-r',twist.toFixed(3)+'deg');
-        letter.style.setProperty('--il-s',ls.toFixed(4));
+        var item=letters[li];
+        var lr=item.el.getBoundingClientRect();
+        var lcx=lr.left+lr.width*.5, lcy=lr.top+lr.height*.5;
+        var dx=pointer.x-lcx, dy=pointer.y-lcy;
+        var d=Math.max(1,Math.hypot(dx,dy));
+        var local=clamp(1-d/Math.max(85,Math.min(245,er.width*.82)),0,1);
+        local=local*local*(3-2*local);
+
+        var ux=dx/d, uy=dy/d;
+        var tx=-uy, ty=ux;
+        var side=(pointer.x-ecx)/Math.max(1,er.width*.5);
+        var bend=local*(9+energy*8);
+        var repel=local*(5+energy*4);
+        var edge=(lcx-ecx)/Math.max(1,er.width*.5);
+        var edgeBias=clamp(Math.abs(edge),0,1);
+
+        /* Strongest bend around the cursor, tapering toward the word edges. */
+        var px=tx*bend-ux*repel;
+        var py=ty*bend-uy*repel*.72;
+        var curve=(side*.85-edge*.55)*local;
+        var rotate=clamp(curve*4.2,-7,7);
+        var scale=1+local*(.045+energy*.018);
+
+        item.x=smooth(item.x,px,1-Math.exp(-dt*(14+local*18)));
+        item.y=smooth(item.y,py,1-Math.exp(-dt*(14+local*18)));
+        item.r=smooth(item.r,rotate,1-Math.exp(-dt*(13+local*16)));
+        item.s=smooth(item.s,scale,1-Math.exp(-dt*14));
+
+        item.el.style.setProperty('--il-x',item.x.toFixed(2)+'px');
+        item.el.style.setProperty('--il-y',item.y.toFixed(2)+'px');
+        item.el.style.setProperty('--il-r',item.r.toFixed(3)+'deg');
+        item.el.style.setProperty('--il-s',item.s.toFixed(4));
+        item.el.style.setProperty('--il-edge',edgeBias.toFixed(3));
       }
     }
+
+    /* The whole word follows the field very slightly; the letters do the
+       actual deformation, so the interaction reads as elastic typography. */
+    var wordX=-(pointer.x-ecx)*field*.018;
+    var wordY=-(pointer.y-ecy)*field*.010;
+    var wordScale=1+field*(.006+energy*.006);
+    email.style.setProperty('--if-x',wordX.toFixed(2)+'px');
+    email.style.setProperty('--if-y',wordY.toFixed(2)+'px');
+    email.style.setProperty('--if-scale',wordScale.toFixed(4));
   }
 
   raf=requestAnimationFrame(frame);
