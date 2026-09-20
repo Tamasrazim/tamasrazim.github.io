@@ -46,6 +46,43 @@ function loadStudio(){
   codeEl.value=scene.code;
 }
 function escapeHTML(v){return String(v).replace(/[&<>]/g,function(x){return x==='&'?'&amp;':x==='<'?'&lt;':'&gt;'})}
+function uniqueSceneName(base,ignoreIndex){
+  var name=String(base||'SCENE').trim()||'SCENE',candidate=name,n=2;
+  while(studioState.scenes.some(function(scene,index){return index!==ignoreIndex&&scene.name.toLowerCase()===candidate.toLowerCase()})){
+    candidate=name+' '+n++;
+  }
+  return candidate.slice(0,48);
+}
+function renameScene(index){
+  var scene=studioState.scenes[index];if(!scene)return;
+  if(index===0){toast('MAIN is the protected base scene');return}
+  var next=window.prompt('Rename scene',scene.name);
+  if(next===null)return;
+  next=next.trim();
+  if(!next){toast('Scene name cannot be empty');return}
+  saveStudio();scene.name=uniqueSceneName(next,index);saveStudio();renderStudioUI();toast('Scene renamed · '+scene.name);
+}
+function moveScene(index,direction){
+  var target=index+direction;
+  if(index<=0||target<=0||target>=studioState.scenes.length)return;
+  saveStudio();
+  var scenes=studioState.scenes,tmp=scenes[index];scenes[index]=scenes[target];scenes[target]=tmp;
+  if(studioState.active===index)studioState.active=target;
+  else if(studioState.active===target)studioState.active=index;
+  saveStudio();renderStudioUI();loadStudio();buildEngine(true);renderAt(Number(timeline.value)||0);
+  toast('Scene moved');
+}
+function deleteScene(index){
+  if(index===0){toast('MAIN is the protected base scene');return}
+  if(studioState.scenes.length===1)return;
+  var scene=studioState.scenes[index];if(!window.confirm('Delete "'+scene.name+'"?'))return;
+  saveStudio();
+  studioState.scenes.splice(index,1);
+  if(studioState.active===index)studioState.active=Math.min(index,studioState.scenes.length-1);
+  else if(studioState.active>index)studioState.active--;
+  loadStudio();renderStudioUI();buildEngine(true);renderAt(Number(timeline.value)||0);saveStudio();
+  toast('Scene deleted');
+}
 function renderStudioUI(){
   var scene=activeScene(),sceneList=$('#sceneList'),sourceList=$('#sourceList');
   if(!scene||!sceneList||!sourceList)return;
@@ -53,12 +90,28 @@ function renderStudioUI(){
   studioState.scenes.forEach(function(item,index){
     var row=document.createElement('div');row.className='scene-row'+(index===studioState.active?' active':'');
     var button=document.createElement('button');button.type='button';button.className='scene-select';
-    button.innerHTML='<span class="scene-led"></span><span>'+escapeHTML(item.name)+'</span>';
+    button.innerHTML='<span class="scene-led"></span><span class="scene-name">'+escapeHTML(item.name)+'</span>';
+    button.title='Activate '+item.name+' · double-click to rename';
     button.addEventListener('click',function(){
       if(index===studioState.active)return;
       saveStudio();studioState.active=index;loadStudio();renderStudioUI();buildEngine(true);renderAt(Number(timeline.value)||0);toast('Scene switched · '+activeScene().name);
     });
-    row.appendChild(button);sceneList.appendChild(row);
+    button.addEventListener('dblclick',function(){
+      renameScene(index);
+    });
+    var actions=document.createElement('div');actions.className='scene-row-actions';
+    var rename=document.createElement('button');rename.type='button';rename.className='scene-action';rename.textContent='Rename';rename.addEventListener('click',function(){renameScene(index)});
+    var up=document.createElement('button');up.type='button';up.className='scene-action';up.textContent='↑';up.title='Move scene up';
+    var down=document.createElement('button');down.type='button';down.className='scene-action';down.textContent='↓';down.title='Move scene down';
+    var remove=document.createElement('button');remove.type='button';remove.className='scene-action';remove.textContent='Delete';
+    up.disabled=index<=1;
+    down.disabled=index<1||index>=studioState.scenes.length-1;
+    remove.disabled=index===0||studioState.scenes.length===1;
+    up.addEventListener('click',function(){moveScene(index,-1)});
+    down.addEventListener('click',function(){moveScene(index,1)});
+    remove.addEventListener('click',function(){deleteScene(index)});
+    actions.append(rename,up,down,remove);
+    row.append(button,actions);sceneList.appendChild(row);
   });
   sourceList.innerHTML='';
   scene.sources.forEach(function(src){
