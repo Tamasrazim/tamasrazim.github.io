@@ -28,9 +28,32 @@ The renderer exists for a practical reason: create animation assets from code, p
 
 The idea is simple:
 
-**Write animation code → Paste it → Preview it → Choose your render settings → Render → Prepare metadata → Download → Ready-to-upload stock animation → Submit → If approved, earn from the work.**
+**Write animation code → Paste it → Preview it → Choose render settings → Run preflight → Render frame-by-frame → Prepare metadata → Download → Ready-to-upload stock animation → Submit → If approved, earn from the work.**
 
 The renderer is designed to keep the exported visual itself clean. Tamasrazim branding, interface controls, or watermarks are not intended to be burned into the animation output.
+
+### Render engine
+
+The production video path is built around deterministic frame generation when the browser exposes WebCodecs:
+
+**Frame N → render at N / FPS → encode → timestamp → next frame**
+
+That means output generation does not depend on the preview playing in real time. A slow machine may take longer to render, but the requested frame sequence remains explicit rather than being driven by realtime capture.
+
+The renderer probes the current browser/device for supported encoder configurations before offering deterministic codecs. The current deterministic path targets browser-exposed VP8, VP9 and AV1 encoders packaged into WebM. MediaRecorder remains available as an explicitly labeled realtime fallback where the browser exposes formats such as H.264/MP4.
+
+WebCodecs availability is browser-dependent, so the renderer reports what the current environment can actually configure rather than presenting a fixed list of imaginary codecs.
+
+### Exact loop
+
+The output duration and animation loop duration are independent.
+
+Example:
+
+**Output: 30 seconds**  
+**Loop: 5.000 seconds**
+
+The renderer evaluates the animation clock modulo the exact loop duration while still producing the full requested output frame count.
 
 ### Workflow
 
@@ -38,23 +61,26 @@ The renderer is designed to keep the exported visual itself clean. Tamasrazim br
 → **PREVIEW**
 → **RENDER**
 → **SETTINGS**
+→ **PREFLIGHT**
 → **CONFIRM**
 → **RENDERING**
 → **MINI-GAME**
 → **COMPLETE**
 → **DOWNLOAD**
 
-During the workflow, the contributor controls the important production choices such as duration, frame rate, resolution, output format, and looping/recording behavior.
-
-The browser renderer reports the formats it can actually produce rather than pretending that unsupported browser exports are available.
+The contributor controls resolution, frame rate, duration, loop behavior, bitrate, keyframe interval, hardware-acceleration hint, output codec where supported, transparency for stills, and stock metadata.
 
 ### Animation example
 
-The renderer itself is the live example: open it, load or write an animation, preview it, configure the render, and produce the asset.
+The renderer itself is the live example: open it, load or write an animation, preview it, configure the render, run preflight, and produce the asset.
 
 **[Open Animation Renderer — Tamasrazim](https://tamasrazim.github.io/renderer/)**
 
 The goal is not simply to demonstrate an animation. The goal is to demonstrate the complete path from **animation code to a downloadable stock-content asset**.
+
+### PWA
+
+The renderer includes an installable offline-oriented PWA shell with a versioned service-worker cache and update detection.
 
 ---
 
@@ -83,8 +109,11 @@ The interaction system is implemented independently for Tamasrazim rather than c
 - `assets/css/site.css` — website styling
 - `assets/js/boot.js` — boot and progressive enhancement
 - `assets/js/site.js` — site interactions and effects
-- `assets/js/motion-core.js` — centralized motion and scene architecture
 - `renderer/` — Animation Renderer — Tamasrazim
+- `renderer/js/app.js` — renderer UI, timeline, settings, preview and workflow
+- `renderer/js/video-engine.js` — deterministic WebCodecs frame encoder and WebM muxer
+- `renderer/manifest.webmanifest` — PWA manifest
+- `renderer/sw.js` — offline cache and update handling
 - `og-image.png` — social preview image
 - `robots.txt` / `sitemap.xml` — search discovery
 - `404.html` — GitHub Pages fallback
