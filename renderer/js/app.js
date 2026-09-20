@@ -237,13 +237,18 @@ function renderSolidMatte(){
   ctx.save();ctx.globalAlpha=alpha;ctx.fillStyle='rgb('+rgb.r+','+rgb.g+','+rgb.b+')';ctx.fillRect(0,0,W,H);ctx.restore();
 }
 function injectMatteIntoSVG(svg){
-  var matte=sourceById('matte');if(!matte||!matte.visible)return svg;
-  var alpha=Math.max(0,Math.min(1,Number(matte.opacity)));if(alpha<=0)return svg;
-  var color=/^#[0-9a-f]{6}$/i.test(matte.color||'')?matte.color:'#050505';
-  var rect='<rect width="'+W+'" height="'+H+'" fill="'+color+'" fill-opacity="'+alpha.toFixed(3)+'"/>';
+  var matte=sourceById('matte'),image=imageAsSvg(sourceById('image'));
+  var prefix='';
+  if(matte&&matte.visible){
+    var alpha=Math.max(0,Math.min(1,Number(matte.opacity)));
+    if(alpha>0){
+      var color=/^#[0-9a-f]{6}$/i.test(matte.color||'')?matte.color:'#050505';
+      prefix+='<rect width="'+W+'" height="'+H+'" fill="'+color+'" fill-opacity="'+alpha.toFixed(3)+'"/>';
+    }
+  }
+  if(!prefix&&!image)return svg;
   var close=svg.indexOf('>');
-  var image=imageAsSvg(sourceById('image'));
-  return close<0?svg:svg.slice(0,close+1)+rect+image+svg.slice(close+1);
+  return close<0?svg:svg.slice(0,close+1)+prefix+image+svg.slice(close+1);
 }
 function renderOutputFrame(t){
   if(!userFn)return false;
@@ -255,9 +260,6 @@ function renderOutputFrame(t){
   var anim=sourceById('animation');
   if(anim&&anim.visible){
     userFn(effectiveTime(t),effectiveFrame(t),FPS);
-  }else{
-    ctx.clearRect(0,0,W,H);
-    if(!transparent.checked){ctx.fillStyle='#050505';ctx.fillRect(0,0,W,H)}
   }
   return true;
 }
