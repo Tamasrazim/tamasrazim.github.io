@@ -36,9 +36,9 @@ def main() -> int:
         if not required.is_file():
             fail(errors, f"Missing required renderer file: {required.relative_to(root)}")
 
-    if '"Save project" not in html and 'id="exportProjectBtn"' in html:
+    if 'id="exportProjectBtn"' in html and "Save project" not in html:
         fail(errors, "Project save control is malformed")
-    if '"Open project" not in html and 'id="importProjectBtn"' in html:
+    if 'id="importProjectBtn"' in html and "Open project" not in html:
         fail(errors, "Project open control is malformed")
 
     if errors:
