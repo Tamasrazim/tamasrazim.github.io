@@ -72,3 +72,16 @@ export function createDefaultRenderSpec(): RenderSpec {
     keyframeSeconds: 2
   };
 }
+
+export interface RendererProject {
+  schemaVersion: 1;
+  app: "Animation Renderer — Tamasrazim";
+  fileType: "tamasrazim-render-project";
+  exportedAt: string;
+  activeScene: number;
+  scenes: Scene[];
+  render: RenderSpec & {
+    videoCodec: string | null;
+  };
+  stock: StockMetadata;
+}
