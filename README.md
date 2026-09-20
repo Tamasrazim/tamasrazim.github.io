@@ -140,6 +140,7 @@ The interaction system is implemented independently for Tamasrazim rather than c
 - `assets/js/boot.js` — boot and progressive enhancement
 - `assets/js/site.js` — site interactions and effects
 - `renderer/` — Animation Renderer — Tamasrazim
+- `projects/bncagrocare/` — BNC AgroCare project page
 - `asset-vault/` — Stock Asset Vault — Tamasrazim
 - `renderer/js/app.js` — renderer UI, timeline, settings, preview and workflow
 - `renderer/js/video-engine.js` — deterministic WebCodecs frame encoder and WebM muxer
