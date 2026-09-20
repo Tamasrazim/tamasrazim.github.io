@@ -68,6 +68,8 @@ def main() -> int:
         'id="exportProjectBtn"',
         'id="importProjectBtn"',
         'id="projectFileInput"',
+        'id="addImageBtn"',
+        'id="imageFileInput"',
     )
     for token in required_html:
         if token not in html:
@@ -82,6 +84,8 @@ def main() -> int:
         "function exportProject",
         "function importProjectFile",
         "tamasrazim-render-project",
+        "function drawImageSource",
+        "function imageAsSvg",
     )
     for token in required_app:
         if token not in app_js:
