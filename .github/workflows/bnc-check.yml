@@ -1,0 +1,27 @@
+name: BNC AgroCare Check
+
+on:
+  push:
+    paths:
+      - 'projects/bncagrocare/**'
+      - '.github/workflows/bnc-check.yml'
+      - 'tools/validate_bnc.mjs'
+  pull_request:
+    paths:
+      - 'projects/bncagrocare/**'
+      - '.github/workflows/bnc-check.yml'
+      - 'tools/validate_bnc.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Validate BNC project
+        run: node tools/validate_bnc.mjs
