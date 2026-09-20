@@ -11,6 +11,7 @@ var videoEngine=$('#videoEngine'),videoCodec=$('#videoCodec'),bitrateEl=$('#bitr
 var projectInput=$('#projectFileInput'),imageInput=$('#imageFileInput');
 var imageRuntime={};
 var W=3840,H=2160,FPS=60,DURATION=30,frame=0,userFn=null,userSvg=null,playing=false,renderingVideo=false,raf=0,toastTimer=0;
+var renderQueue=[];
 var studioState={active:0,scenes:[{name:'MAIN',code:null,sources:[
   {id:'matte',name:'Solid Matte',kind:'MATTE',visible:false,locked:false,color:'#050505',opacity:1},
   {id:'image',name:'Image File',kind:'IMAGE',visible:false,locked:false,dataUrl:'',opacity:1,fit:'contain'},
@@ -156,13 +157,16 @@ function renderStudioUI(){
     var up=document.createElement('button');up.type='button';up.className='scene-action';up.textContent='↑';up.title='Move scene up';
     var down=document.createElement('button');down.type='button';down.className='scene-action';down.textContent='↓';down.title='Move scene down';
     var remove=document.createElement('button');remove.type='button';remove.className='scene-action';remove.textContent='Delete';
+    var queued=renderQueue.indexOf(item.name)>=0;
+    var queue=document.createElement('button');queue.type='button';queue.className='scene-action';queue.textContent=queued?'Queued':'Queue';queue.title=queued?'Remove from render queue':'Add to render queue';
     up.disabled=index<=1;
     down.disabled=index<1||index>=studioState.scenes.length-1;
     remove.disabled=index===0||studioState.scenes.length===1;
     up.addEventListener('click',function(){moveScene(index,-1)});
     down.addEventListener('click',function(){moveScene(index,1)});
     remove.addEventListener('click',function(){deleteScene(index)});
-    actions.append(rename,up,down,remove);
+    queue.addEventListener('click',function(){toggleQueueScene(index)});
+    actions.append(rename,up,down,remove,queue);
     row.append(button,actions);sceneList.appendChild(row);
   });
   sourceList.innerHTML='';
@@ -204,6 +208,7 @@ function renderStudioUI(){
   });
   $('#activeSceneLabel').textContent=scene.name;
   $('#sourceCount').textContent=String(scene.sources.length);
+  var queueCount=$('#queueCount');if(queueCount)queueCount.textContent=String(renderQueue.length);
   $('#studioOutput').textContent=(W>=3840?'4K':W>=1920?'2K':'HD')+' · '+FPS+' FPS';
   $('#studioStatus').textContent=engineState.textContent||'READY';
 }
@@ -372,9 +377,9 @@ function parseSettings(){
   loopDurationEl.disabled=loopMode.value!=='loop';checker.classList.toggle('show',transparent.checked);playing=false;cancelAnimationFrame(raf);playBtn.textContent='Preview';renderAt(Number(timeline.value)||0);probeCapabilities();
 }
 function startRenderUI(label){renderingVideo=true;playing=false;videoBtn.disabled=true;playBtn.disabled=true;setState('RENDERING');rendering.classList.add('open');rFormat.textContent=label;rFrame.textContent='0';rPct.textContent='0%';rProgress.style.transform='scaleX(0)';rRate.textContent='—';rQueue.textContent='0';rDropped.textContent='0';rElapsed.textContent='0.0s'}
-async function exportVideo(){
-  if(renderingVideo)return;if(!userFn&&!buildEngine())return;if(!(await runPreflight()))return;
-  var selected=videoCodec.options[videoCodec.selectedIndex];if(!selected)return;
+async function renderVideoBlob(){
+  if(renderingVideo)return null;if(!userFn&&!buildEngine())return null;if(!(await runPreflight()))return null;
+  var selected=videoCodec.options[videoCodec.selectedIndex];if(!selected)return null;
   startRenderUI(selected.textContent);var started=performance.now();
   try{
     var result;
@@ -387,9 +392,48 @@ async function exportVideo(){
         onProgress:function(info){rFrame.textContent=info.frame.toLocaleString()+' / '+info.total.toLocaleString();rPct.textContent=Math.round(info.percent)+'%';rProgress.style.transform='scaleX('+(info.percent/100)+')';rRate.textContent=info.renderRate.toFixed(1)+' fps';rQueue.textContent=String(info.encodeQueue);rDropped.textContent=String(info.droppedFrames);rElapsed.textContent=info.renderSeconds.toFixed(1)+'s'}
       });
     }else result=await exportRealtime();
-    downloadBlob(result.blob,safeName()+'.'+result.extension);setState('READY');toast((result.deterministic?'Deterministic ':'Realtime fallback ')+result.extension.toUpperCase()+' render complete · '+((performance.now()-started)/1000).toFixed(1)+'s');
-  }catch(e){setState('ERROR');engineState.title=e.message;toast('Render failed: '+e.message)}
+    setState('READY');toast((result.deterministic?'Deterministic ':'Realtime fallback ')+result.extension.toUpperCase()+' render complete · '+((performance.now()-started)/1000).toFixed(1)+'s');
+    return result;
+  }catch(e){setState('ERROR');engineState.title=e.message;toast('Render failed: '+e.message);return null}
   finally{renderingVideo=false;videoBtn.disabled=false;playBtn.disabled=false;rendering.classList.remove('open');runPreflight()}
+}
+async function exportVideo(){
+  var result=await renderVideoBlob();
+  if(!result)return;
+  downloadBlob(result.blob,safeName()+'.'+result.extension);
+}
+function toggleQueueScene(index){
+  var scene=studioState.scenes[index];if(!scene)return;
+  var pos=renderQueue.indexOf(scene.name);
+  if(pos>=0){renderQueue.splice(pos,1);toast('Removed from render queue · '+scene.name)}
+  else{renderQueue.push(scene.name);toast('Queued · '+scene.name)}
+  var count=$('#queueCount');if(count)count.textContent=String(renderQueue.length);
+  renderStudioUI();
+}
+async function exportQueue(){
+  if(renderingVideo)return;
+  if(!renderQueue.length){toast('Render queue is empty');return}
+  var names=renderQueue.slice(),restore=studioState.active,completed=0;
+  renderQueue=[];
+  var count=$('#queueCount');if(count)count.textContent='0';
+  for(var q=0;q<names.length;q++){
+    var index=studioState.scenes.findIndex(function(scene){return scene.name===names[q]});
+    if(index<0)continue;
+    saveStudio();
+    studioState.active=index;
+    loadStudio();
+    renderStudioUI();
+    buildEngine(true);
+    renderAt(0);
+    var result=await renderVideoBlob();
+    if(!result){toast('Queue stopped · render failed for '+names[q]);break}
+    downloadBlob(result.blob,safeName()+'.'+result.extension);
+    completed++;
+    toast('Queue item '+completed+'/'+names.length+' downloaded · '+names[q]);
+  }
+  studioState.active=Math.max(0,Math.min(restore,studioState.scenes.length-1));
+  loadStudio();renderStudioUI();buildEngine(true);renderAt(Number(timeline.value)||0);
+  toast(completed+' queued scene'+(completed===1?'':'s')+' rendered');
 }
 function currentRenderSpec(){
   return {
@@ -509,6 +553,7 @@ $('#duplicateSceneBtn').addEventListener('click',function(){
   saveStudio();var src=activeScene(),copy=JSON.parse(JSON.stringify(src)),name=uniqueSceneName(src.name+' COPY');
   copy.name=name;studioState.scenes.push(copy);studioState.active=studioState.scenes.length-1;loadStudio();renderStudioUI();buildEngine(true);toast('Scene duplicated · '+name);
 });
+$('#renderQueueBtn').addEventListener('click',exportQueue);
 $('#addImageBtn').addEventListener('click',function(){
   var src=sourceById('image');
   if(!src){activeScene().sources.push({id:'image',name:'Image File',kind:'IMAGE',visible:true,locked:false,dataUrl:'',opacity:1,fit:'contain'});src=sourceById('image')}
