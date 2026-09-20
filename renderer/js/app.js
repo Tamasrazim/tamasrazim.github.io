@@ -110,6 +110,22 @@ function removeImageSource(src){
   scene.sources.splice(index,1);
   saveStudio();renderStudioUI();renderAt(Number(timeline.value)||0);toast('Image source removed');
 }
+function moveImageSource(src,direction){
+  var scene=activeScene(),index=scene.sources.indexOf(src),target=index+direction;
+  if(index<0||target<0||target>=scene.sources.length)return;
+  if(!scene.sources[target]||scene.sources[target].kind!=='IMAGE')return;
+  var item=scene.sources.splice(index,1)[0];
+  scene.sources.splice(target,0,item);
+  saveStudio();renderStudioUI();renderAt(Number(timeline.value)||0);toast(src.name+' moved');
+}
+function duplicateImageSource(src){
+  var scene=activeScene(),index=scene.sources.indexOf(src);
+  if(index<0)return;
+  var copy=JSON.parse(JSON.stringify(src)),id=nextImageSourceId(scene);
+  copy.id=id;copy.name=(src.name||'Image')+' Copy';copy.visible=true;copy.locked=false;
+  scene.sources.splice(index+1,0,copy);
+  saveStudio();renderStudioUI();renderAt(Number(timeline.value)||0);toast('Image duplicated · '+copy.name);
+}
 function getImageRuntime(src){
   if(!src||!src.dataUrl)return null;
   var cached=imageRuntime[src.id];
@@ -199,7 +215,7 @@ function renderStudioUI(){
     row.append(button,actions);sceneList.appendChild(row);
   });
   sourceList.innerHTML='';
-  scene.sources.forEach(function(src){
+  scene.sources.forEach(function(src,index){
     var row=document.createElement('div');row.className='source-row'+(src.visible?' visible':'');
     var toggle=document.createElement('button');toggle.type='button';toggle.className='source-toggle';toggle.setAttribute('aria-pressed',String(!!src.visible));toggle.textContent=src.visible?'ON':'OFF';
     toggle.addEventListener('click',function(){
@@ -231,9 +247,15 @@ function renderStudioUI(){
       var fitLabel=document.createElement('label');fitLabel.textContent='Fit';
       var fit=document.createElement('select');fit.innerHTML='<option value="contain">Contain</option><option value="cover">Cover</option><option value="stretch">Stretch</option>';fit.value=src.fit||'contain';fit.disabled=!!src.locked;
       fit.addEventListener('change',function(){if(src.locked)return;src.fit=fit.value;saveStudio();renderAt(Number(timeline.value)||0)});
+      var duplicate=document.createElement('button');duplicate.type='button';duplicate.className='source-lock';duplicate.textContent='DUP';duplicate.disabled=!!src.locked;
+      var upImage=document.createElement('button');upImage.type='button';upImage.className='source-lock';upImage.textContent='↑';upImage.title='Move image layer up';upImage.disabled=!!src.locked||!scene.sources[index-1]||scene.sources[index-1].kind!=='IMAGE';
+      var downImage=document.createElement('button');downImage.type='button';downImage.className='source-lock';downImage.textContent='↓';downImage.title='Move image layer down';downImage.disabled=!!src.locked||!scene.sources[index+1]||scene.sources[index+1].kind!=='IMAGE';
       var remove=document.createElement('button');remove.type='button';remove.className='source-lock';remove.textContent='REMOVE';remove.disabled=!!src.locked;
+      duplicate.addEventListener('click',function(){if(!src.locked)duplicateImageSource(src)});
+      upImage.addEventListener('click',function(){if(!src.locked)moveImageSource(src,-1)});
+      downImage.addEventListener('click',function(){if(!src.locked)moveImageSource(src,1)});
       remove.addEventListener('click',function(){if(!src.locked)removeImageSource(src)});
-      opacityLabel.appendChild(opacity);fitLabel.appendChild(fit);controls.append(file,opacityLabel,fitLabel,remove);row.appendChild(controls);
+      opacityLabel.appendChild(opacity);fitLabel.appendChild(fit);controls.append(file,opacityLabel,fitLabel,duplicate,upImage,downImage,remove);row.appendChild(controls);
     }
     sourceList.appendChild(row);
   });
