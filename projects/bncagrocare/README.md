@@ -32,4 +32,4 @@ The original Excel files remain reference/demo material; the working invoice int
 
 ## Company website
 
-https://tamasrazim.github.io/bncagrocare/
+https://tamasrazim.github.io/projects/bncagrocare/
