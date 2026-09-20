@@ -1,6 +1,25 @@
 
   (function(){
     'use strict';
+    /* Site animation governor: keep continuous JS motion at a maximum of 60 updates/sec.
+       The renderer/export engine is independent and may still render at 120 FPS. */
+    var __raf60Last = new WeakMap();
+    var __raf60Interval = 1000 / 60;
+    function requestAnimationFrame60(callback){
+      function schedule(){
+        window.requestAnimationFrame(function(now){
+          var last = __raf60Last.get(callback);
+          if(last === undefined || now - last >= (__raf60Interval - 0.25)){
+            __raf60Last.set(callback, now);
+            callback(now);
+          }else{
+            window.setTimeout(schedule, Math.max(0, __raf60Interval - (now - last)));
+          }
+        });
+      }
+      schedule();
+    }
+
 
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var finePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
@@ -89,10 +108,10 @@
           else output += i < reveal ? target[i] : scramble[Math.floor(Math.random()*scramble.length)];
         }
         el.textContent = output;
-        if(progress < 1) requestAnimationFrame(frame);
+        if(progress < 1) requestAnimationFrame60(frame);
         else el.textContent = target;
       }
-      requestAnimationFrame(frame);
+      requestAnimationFrame60(frame);
     }
 
     var alias = q('#aliasText');
@@ -190,7 +209,7 @@
           item.el.style.setProperty('--pd-ry',ry.toFixed(3)+'deg');
         });
 
-        pointerRAF=requestAnimationFrame(pointerTick);
+        pointerRAF=requestAnimationFrame60(pointerTick);
       }
 
       window.addEventListener('pointermove',function(e){
@@ -198,7 +217,7 @@
         var y=(e.clientY/window.innerHeight-.5)*2;
         pointerTX=Math.max(-1,Math.min(1,x));
         pointerTY=Math.max(-1,Math.min(1,y));
-        if(!pointerRAF) pointerRAF=requestAnimationFrame(pointerTick);
+        if(!pointerRAF) pointerRAF=requestAnimationFrame60(pointerTick);
       },{passive:true});
 
       document.addEventListener('mouseleave',function(){
@@ -291,12 +310,12 @@
       window.addEventListener('pointermove',function(e){
         textPoint.x=e.clientX;
         textPoint.y=e.clientY;
-        if(!zoomRAF) zoomRAF=requestAnimationFrame(textZoomTick);
+        if(!zoomRAF) zoomRAF=requestAnimationFrame60(textZoomTick);
       },{passive:true});
 
       window.addEventListener('blur',function(){
         textPoint.x=-9999;textPoint.y=-9999;
-        if(!zoomRAF) zoomRAF=requestAnimationFrame(textZoomTick);
+        if(!zoomRAF) zoomRAF=requestAnimationFrame60(textZoomTick);
       });
     }
 
@@ -357,14 +376,14 @@
           photo.style.setProperty('--photo-ry',ry.toFixed(3)+'deg');
 
           if(inside || Math.abs(tx-x)>.05 || Math.abs(ty-y)>.05 || Math.abs(trx-rx)>.05 || Math.abs(try_-ry)>.05){
-            raf=requestAnimationFrame(tick);
+            raf=requestAnimationFrame60(tick);
           }else{
             raf=0;
           }
         }
 
         function wake(){
-          if(!raf) raf=requestAnimationFrame(tick);
+          if(!raf) raf=requestAnimationFrame60(tick);
         }
 
         card.addEventListener('pointerenter',function(){
@@ -476,9 +495,9 @@
         ctx.fillStyle='rgba(243,243,239,.045)';
         ctx.fillRect(0,beam,w,1);
 
-        requestAnimationFrame(frame);
+        requestAnimationFrame60(frame);
       }
-      requestAnimationFrame(frame);
+      requestAnimationFrame60(frame);
     })();
 
     /* ---------- Global motion field ---------- */
@@ -541,7 +560,7 @@
       }
 
       function stepField(now){
-        if(!running){last=now;requestAnimationFrame(stepField);return;}
+        if(!running){last=now;requestAnimationFrame60(stepField);return;}
         var dt=Math.min(32,now-last);last=now;
         sectionPulse += dt*.0007;
 
@@ -643,7 +662,7 @@
           ctx.fill();
         }
 
-        requestAnimationFrame(stepField);
+        requestAnimationFrame60(stepField);
       }
 
       window.addEventListener('resize',resizeField,{passive:true});
@@ -660,7 +679,7 @@
       pointer.y=height*.42;
       pointer.tx=pointer.x;
       pointer.ty=pointer.y;
-      requestAnimationFrame(stepField);
+      requestAnimationFrame60(stepField);
     }
     /* ---------- Keep the page quiet when offscreen ---------- */
     var bands=qa('.band-track');
