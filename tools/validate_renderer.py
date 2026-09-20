@@ -36,11 +36,6 @@ def main() -> int:
         if not required.is_file():
             fail(errors, f"Missing required renderer file: {required.relative_to(root)}")
 
-    if 'id="exportProjectBtn"' in html and "Save project" not in html:
-        fail(errors, "Project save control is malformed")
-    if 'id="importProjectBtn"' in html and "Open project" not in html:
-        fail(errors, "Project open control is malformed")
-
     if errors:
         for error in errors:
             print(f"ERROR: {error}")
@@ -51,6 +46,11 @@ def main() -> int:
     engine_js = read(engine)
     sw_js = read(sw)
     manifest_text = read(manifest)
+
+    if 'id="exportProjectBtn"' in html and "Save project" not in html:
+        fail(errors, "Project save control is malformed")
+    if 'id="importProjectBtn"' in html and "Open project" not in html:
+        fail(errors, "Project open control is malformed")
 
     scripts = re.findall(r'<script\s+src="([^"]*app\.js[^"]*)"></script>', html)
     if len(scripts) != 1:
@@ -118,7 +118,7 @@ def main() -> int:
         return 1
 
     print("Renderer validation passed.")
-    print(f"WebCodecs engine: OK")
+    print("WebCodecs engine: OK")
     print(f"PWA cache: {cache_match.group(1)}")
     print("FPS options include: 60, 120")
     print("Preview-only sources are excluded from realtime export.")
