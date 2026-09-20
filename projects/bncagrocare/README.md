@@ -20,7 +20,7 @@ The PWA provides:
 - Four starting product rows per side
 - Automatic SL 5, SL 6, and onward when more products are entered
 - Empty product rows omitted from the generated PDF
-- Overflow products rendered on continuation PDF pages without changing the original page-1 template
+- Additional products are added as real PDF cells on the same A4 page; the original page design remains the base
 - Live PDF preview in the browser
 - Open / print and Save PDF actions
 - Local draft persistence with IndexedDB
