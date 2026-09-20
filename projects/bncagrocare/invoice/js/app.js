@@ -185,7 +185,7 @@ async function addContinuationPages(doc){
   const ratioTotal=ratios.reduce((a,b)=>a+b,0),widths=ratios.map(r=>tableW*r/ratioTotal);
   const xs=[tableX];for(let i=0;i<widths.length;i++)xs.push(xs[i]+widths[i]);
   const rowH=20, tableTop=742, headerH=28;
-  for(let offset=4;offset<max;offset+=8){
+  for(let offset=0;offset<max;offset+=8){
     const page=doc.addPage([595.30396,841.88977]);
     page.drawText("BNC AGRO CARE",{x:24,y:803,size:22,font:bold,color:PDFLib.rgb(0,0,0)});
     page.drawText("Invoice No: "+String(state.invoiceNo).padStart(4,"0")+"    Ref: "+state.ref,{x:24,y:781,size:9,font:regular});
