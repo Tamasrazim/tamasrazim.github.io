@@ -52,5 +52,5 @@ textarea#code{width:100%;height:390px;resize:vertical;padding:13px;background:#0
 .source-controls input[type="color"]{width:100%;height:30px;padding:2px;border:1px solid var(--line2);background:#080808}
 .source-controls input[type="range"]{width:100%;accent-color:#fff}
 
-.source-controls.image-controls{grid-template-columns:1fr 1fr}
+.source-controls.image-controls{grid-template-columns:repeat(4,minmax(0,1fr))}.source-controls.image-controls .source-lock{min-height:30px}
 .source-controls select{width:100%;padding:7px 8px;border:1px solid var(--line2);background:#080808;outline:0;font-size:9px}
