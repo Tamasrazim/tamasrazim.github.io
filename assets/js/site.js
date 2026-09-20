@@ -302,82 +302,6 @@
       });
     }
 
-    /* ---------- Recreated infinity-field email interaction ---------- */
-    if(!reduced && finePointer){
-      var infinityEmail=q('.email-link');
-      if(infinityEmail){
-        infinityEmail.classList.add('infinity-email');
-
-        var ix=0,iy=0,itx=0,ity=0,iScale=1,iTargetScale=1,iRot=0,iTargetRot=0,iAlpha=0,iTargetAlpha=0;
-        var infinityRAF=0,infinityInside=false,lastInfinity=performance.now();
-
-        function infinityTick(now){
-          var dt=Math.min(.05,Math.max(.008,(now-lastInfinity)/1000));
-          lastInfinity=now;
-          var k=1-Math.exp(-dt*(infinityInside?17:10));
-
-          ix+=(itx-ix)*k;
-          iy+=(ity-iy)*k;
-          iScale+=(iTargetScale-iScale)*k;
-          iRot+=(iTargetRot-iRot)*k;
-          iAlpha+=(iTargetAlpha-iAlpha)*k;
-
-          infinityEmail.style.setProperty('--inf-x',ix.toFixed(2)+'px');
-          infinityEmail.style.setProperty('--inf-y',iy.toFixed(2)+'px');
-          infinityEmail.style.setProperty('--inf-scale',iScale.toFixed(4));
-          infinityEmail.style.setProperty('--inf-rot',iRot.toFixed(3)+'deg');
-          infinityEmail.style.setProperty('--inf-alpha',iAlpha.toFixed(3));
-
-          if(infinityInside ||
-             Math.abs(itx-ix)>.05 || Math.abs(ity-iy)>.05 ||
-             Math.abs(iTargetScale-iScale)>.001 ||
-             Math.abs(iTargetRot-iRot)>.02 ||
-             Math.abs(iTargetAlpha-iAlpha)>.005){
-            infinityRAF=requestAnimationFrame(infinityTick);
-          }else{
-            infinityRAF=0;
-          }
-        }
-
-        function wakeInfinity(){
-          if(!infinityRAF) infinityRAF=requestAnimationFrame(infinityTick);
-        }
-
-        infinityEmail.addEventListener('pointerenter',function(){
-          infinityInside=true;
-          iTargetAlpha=1;
-          wakeInfinity();
-        },{passive:true});
-
-        infinityEmail.addEventListener('pointermove',function(e){
-          var r=infinityEmail.getBoundingClientRect();
-          var nx=(e.clientX-(r.left+r.width*.5))/(r.width*.5);
-          var ny=(e.clientY-(r.top+r.height*.5))/(r.height*.5);
-          nx=Math.max(-2,Math.min(2,nx));
-          ny=Math.max(-2,Math.min(2,ny));
-
-          var dist=Math.sqrt(nx*nx+ny*ny);
-          var proximity=Math.max(0,1-Math.min(1,dist*.72));
-          var force=proximity*proximity*(3-2*proximity);
-
-          /* Non-linear resistance: the closer the pointer gets, the stronger the displacement. */
-          itx=nx*(8+force*42);
-          ity=ny*(6+force*30);
-          iTargetScale=1+force*.07;
-          iTargetRot=nx*force*2.2;
-          iTargetAlpha=.25+.75*force;
-          wakeInfinity();
-        },{passive:true});
-
-        infinityEmail.addEventListener('pointerleave',function(){
-          infinityInside=false;
-          itx=0;ity=0;
-          iTargetScale=1;iTargetRot=0;iTargetAlpha=0;
-          wakeInfinity();
-        },{passive:true});
-      }
-    }
-
     /* ---------- Tap ripple ---------- */
     window.addEventListener('pointerdown', function(e){
       if(reduced) return;
@@ -507,29 +431,6 @@
       document.body.appendChild(input);input.select();
       try{ document.execCommand('copy'); done(); }catch(err){}
       input.remove();
-    }
-
-    /* ---------- Page-level pointer motion ---------- */
-    if(!reduced && finePointer){
-      var hero=q('.hero');
-      if(hero){
-        var heroTitle=q('.hero-title',hero);
-        var heroKicker=q('.hero-kicker',hero);
-        var heroCopy=q('.hero-copy',hero);
-        hero.addEventListener('pointermove',function(e){
-          var r=hero.getBoundingClientRect();
-          var x=(e.clientX-r.left)/r.width-.5;
-          var y=(e.clientY-r.top)/r.height-.5;
-          if(heroTitle) heroTitle.style.transform='translate3d('+(x*7).toFixed(2)+'px,'+(y*4).toFixed(2)+'px,0)';
-          if(heroKicker) heroKicker.style.transform='translate3d('+(x*3).toFixed(2)+'px,'+(y*2).toFixed(2)+'px,0)';
-          if(heroCopy) heroCopy.style.transform='translate3d('+(x*2.5).toFixed(2)+'px,'+(y*1.5).toFixed(2)+'px,0)';
-        });
-        hero.addEventListener('pointerleave',function(){
-          if(heroTitle) heroTitle.style.transform='';
-          if(heroKicker) heroKicker.style.transform='';
-          if(heroCopy) heroCopy.style.transform='';
-        });
-      }
     }
 
     /* ---------- Renderer live project preview ---------- */
