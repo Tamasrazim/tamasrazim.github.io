@@ -749,13 +749,13 @@
 
     /* Recreated Infinity-style contact field: cursor resistance + near-field rings. */
     .infinity-email{
-      --inf-x:0px;
-      --inf-y:0px;
-      --inf-scale:1;
+      --if-x:0px;
+      --if-y:0px;
+      --if-scale:1;
       position:relative;
       isolation:isolate;
-      translate:var(--inf-x) var(--inf-y);
-      scale:var(--inf-scale);
+      translate:var(--if-x) var(--if-y);
+      scale:var(--if-scale);
       will-change:translate,scale;
     }
     .infinity-email .infinity-letter{
@@ -765,7 +765,7 @@
       --il-r:0deg;
       --il-s:1;
       transform:translate3d(var(--il-x),var(--il-y),0) rotate(var(--il-r)) scale(var(--il-s));
-      transform-origin:50% 70%;
+      transform-origin:50% 62%;
       will-change:transform;
     }
     .infinity-email::before,.infinity-email::after{
@@ -780,13 +780,13 @@
       pointer-events:none;
       z-index:-1;
       opacity:var(--if-strength);
-      transform:translate(-50%,-50%) scale(calc(1 + var(--if-strength) * 5.5));
+      transform:translate(-50%,-50%) scale(calc(1 + var(--if-strength) * 4.2));
     }
     .infinity-email::after{
       width:62px;
       height:62px;
       opacity:calc(var(--if-strength) * .22);
-      transform:translate(-50%,-50%) scale(calc(1 + var(--if-strength) * 2.2));
+      transform:translate(-50%,-50%) scale(calc(1 + var(--if-strength) * 1.7));
       filter:blur(.4px);
     }
 
