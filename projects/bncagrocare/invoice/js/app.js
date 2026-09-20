@@ -301,7 +301,7 @@ function renderHistory(){
 }
 function esc(v){return String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function newInvoice(){
-  Object.assign(state,{ref:"X2",invoiceNo:nextNo(),date:localDate(),traderName:"",buyerName:"",address:"",dealerMobile:"",commission:0,amountWords:"",left:firstRows(),right:firstRows()});
+  Object.assign(state,{ref:"X2",invoiceNo:nextNo(),date:localDate(),traderName:"",buyerName:"",address:"",dealerMobile:"",commission:0,amountWords:"",left:firstRows(),right:firstRows(),nextAddSide:"left",_nextSideSaved:true});
   renderEditors();saveDraft();queuePdfRender();toast("New invoice · "+state.invoiceNo)
 }
 function exportJSON(){const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="BNC-Invoice-"+(state.invoiceNo||"draft")+".json";a.click();URL.revokeObjectURL(u)}
