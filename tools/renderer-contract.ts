@@ -1,7 +1,7 @@
 export type StillFormat = "png" | "jpg" | "webp" | "svg";
 export type VideoContainer = "webm" | "mp4";
 export type VideoEngine = "webcodecs" | "mediarecorder";
-export type SourceKind = "CODE" | "GRID" | "SAFE";
+export type SourceKind = "CODE" | "MATTE" | "GRID" | "SAFE";
 
 export interface SceneSource {
   id: string;
