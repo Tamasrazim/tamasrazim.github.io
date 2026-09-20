@@ -1,38 +1,257 @@
 (()=>{"use strict";
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const DB_NAME="bnc-invoice-exact-sheet",DB_VERSION=1;
-const state={ref:"X2",invoiceNo:"0002",date:"",repName:"Md Rezaul Karim",repRole:"Officer BNC AGRO CARE Area Manager",repMob:"01718-306103",commission:0,amountWords:"",freeCells:{},left:Array.from({length:5},()=>({name:"",pack:"",ctn:"",rate:""})),right:Array.from({length:5},()=>({name:"",pack:"",ctn:"",rate:""}))};
-let db=null,timer=null,deferredInstall=null;
+const $=s=>document.querySelector(s);
+const DB_NAME="bnc-invoice-exact-sheet",DB_VERSION=2;
+const TEMPLATE_URL="../invoice.pdf";
+const PDF_FIELDS={
+ ref:"header_B4_L4",invoiceNo:"invoice_number",date:"invoice_date",
+ repName:"header_I6_L6",repRole:"header_I7_L7",repMob:"header_I8_L8",
+ trader:"dealer_trader_name",buyer:"dealer_buyer_name",address:"dealer_address",dealerMob:"dealer_mobile",
+ rowsLeft:10,rowsRight:10
+};
+const blank=()=>({name:"",pack:"",ctn:"",rate:""});
+const firstRows=()=>Array.from({length:4},blank);
+const state={
+ ref:"X2",invoiceNo:"0002",date:"",traderName:"",buyerName:"",address:"",dealerMobile:"",
+ repName:"Md Rezaul Karim",repRole:"Officer BNC AGRO CARE Area Manager",repMob:"01718-306103",
+ commission:0,left:firstRows(),right:firstRows(),amountWords:""
+};
+let db=null,timer=null,pdfTimer=null,deferredInstall=null,pdfUrl="",renderSeq=0,pdfBytes=null;
 
-function localDate(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}function displayDate(v){const m=String(v||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:String(v||"")}function parseDisplayDate(v){const m=String(v||"").trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);return m?`${m[3]}-${m[2]}-${m[1]}`:String(v||"").trim()}
+function localDate(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function displayDate(v){const m=String(v||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?m[3]+"/"+m[2]+"/"+m[1]:String(v||"")}
 function num(v){const n=Number(v);return Number.isFinite(n)?n:0}
 function money(v){return num(v).toFixed(2)}
+function hasData(x){return !!(String(x.name||"").trim()||String(x.pack||"").trim()||String(x.ctn||"").trim()||String(x.rate||"").trim())}
+function ensureFour(side){while(state[side].length<4)state[side].push(blank())}
+function trimTrailing(side){ensureFour(side);while(state[side].length>4&&!hasData(state[side][state[side].length-1])&&!hasData(state[side][state[side].length-2]))state[side].pop();ensureFour(side)}
+function normalize(){
+  ["left","right"].forEach(side=>{
+    state[side]=Array.isArray(state[side])?state[side].map(x=>({name:String(x?.name||""),pack:String(x?.pack||""),ctn:String(x?.ctn||""),rate:String(x?.rate||"")})):firstRows();
+    trimTrailing(side);
+    if(hasData(state[side][state[side].length-1]))state[side].push(blank());
+  });
+  state.commission=Math.max(0,num(state.commission));
+  state.freeCells=undefined;
+}
+function totals(){
+  const left=state.left.filter(hasData),right=state.right.filter(hasData);
+  const leftCartons=left.reduce((s,i)=>s+num(i.ctn),0),rightCartons=right.reduce((s,i)=>s+num(i.ctn),0);
+  const leftAmount=left.reduce((s,i)=>s+num(i.ctn)*num(i.rate),0),rightAmount=right.reduce((s,i)=>s+num(i.ctn)*num(i.rate),0);
+  const totalTaka=leftAmount+rightAmount,commissionAmount=totalTaka*num(state.commission)/100,finalTotal=Math.max(0,totalTaka-commissionAmount);
+  return{left,right,leftCartons,rightCartons,totalCartons:leftCartons+rightCartons,leftAmount,rightAmount,totalTaka,commissionAmount,finalTotal}
+}
+function numberWords(n){
+  n=Math.max(0,Math.round(num(n)*100))/100;
+  const whole=Math.floor(n),paisa=Math.round((n-whole)*100);
+  const ones=["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+  const tens=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+  function w(x){if(x<20)return ones[x];if(x<100)return tens[Math.floor(x/10)]+(x%10?" "+ones[x%10]:"");if(x<1000)return ones[Math.floor(x/100)]+" Hundred"+(x%100?" "+w(x%100):"");if(x<100000)return w(Math.floor(x/1000))+" Thousand"+(x%1000?" "+w(x%1000):"");if(x<10000000)return w(Math.floor(x/100000))+" Lakh"+(x%100000?" "+w(x%100000):"");return w(Math.floor(x/10000000))+" Crore"+(x%10000000?" "+w(x%10000000):"")}
+  return w(whole)+" Taka"+(paisa?" and "+String(paisa).padStart(2,"0")+" Paisa":"")+" Only"
+}
 function toast(msg){const e=$("#toast");e.textContent=msg;e.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>e.classList.remove("show"),1800)}
 function nextNo(){const key="bnc-invoice-next",n=Math.max(3,Math.floor(num(localStorage.getItem(key)||3)));localStorage.setItem(key,String(n+1));return String(n).padStart(4,"0")}
 function syncCounter(v){const m=String(v||"").match(/^\d{1,4}$/);if(!m)return;const n=Number(m[0])+1,cur=Math.max(1,Math.floor(num(localStorage.getItem("bnc-invoice-next")||1)));if(n>cur)localStorage.setItem("bnc-invoice-next",String(n))}
 function ensureNumber(){if(!state.invoiceNo)state.invoiceNo=nextNo();syncCounter(state.invoiceNo)}
-function totals(){const all=[...state.left,...state.right],ctn=all.reduce((s,i)=>s+num(i.ctn),0),leftCtn=state.left.reduce((s,i)=>s+num(i.ctn),0),leftAmount=state.left.reduce((s,i)=>s+num(i.ctn)*num(i.rate),0),rightAmount=state.right.reduce((s,i)=>s+num(i.ctn)*num(i.rate),0),totalTaka=leftAmount+rightAmount,grand=Math.max(0,totalTaka-num(state.commission));return{ctn,leftCtn,leftAmount,rightAmount,totalTaka,grand}}
-function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB_NAME,DB_VERSION);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains("invoices")){const s=d.createObjectStore("invoices",{keyPath:"id"});s.createIndex("updatedAt","updatedAt")};if(!d.objectStoreNames.contains("drafts"))d.createObjectStore("drafts",{keyPath:"id"})};r.onsuccess=()=>{db=r.result;resolve()};r.onerror=()=>reject(r.error)})}
-function saveDraft(){if(!db)return;const req=db.transaction("drafts","readwrite").objectStore("drafts").put({id:"current",updatedAt:Date.now(),data:state});req.onsuccess=()=>$("#saveState").textContent="Saved locally";req.onerror=()=>$("#saveState").textContent="Save error"}
+
+function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB_NAME,DB_VERSION);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains("invoices")){const s=d.createObjectStore("invoices",{keyPath:"id"});s.createIndex("updatedAt","updatedAt")}if(!d.objectStoreNames.contains("drafts"))d.createObjectStore("drafts",{keyPath:"id"})};r.onsuccess=()=>{db=r.result;resolve()};r.onerror=()=>reject(r.error)})}
+function saveDraft(){if(!db)return;const data=JSON.parse(JSON.stringify(state));const req=db.transaction("drafts","readwrite").objectStore("drafts").put({id:"current",updatedAt:Date.now(),data});req.onsuccess=()=>$("#saveState").textContent="Saved locally";req.onerror=()=>$("#saveState").textContent="Save error"}
 function scheduleSave(){clearTimeout(timer);$("#saveState").textContent="Saving…";timer=setTimeout(saveDraft,220)}
-function readStateFromEditor(){state.ref=$("#ref").value.trim();state.invoiceNo=$("#invoiceNo").value.trim();state.date=$("#invoiceDate").value;state.repName=$("#repName").value.trim();state.repRole=$("#repRole").value.trim();state.repMob=$("#repMob").value.trim();state.commission=Math.max(0,num($("#commission").value));state.amountWords=$("#amountWords").value;["left","right"].forEach(side=>state[side]=state[side].map((item,i)=>{const q=$(`#${side}Editor .prod-row[data-i="${i}"]`);return{name:q.querySelector(".name").value.trim(),pack:q.querySelector(".pack").value.trim(),ctn:q.querySelector(".ctn").value,rate:q.querySelector(".rate").value}}));ensureNumber()}
-function makeProductEditor(side){const host=side==="left"?$("#leftEditor"):$("#rightEditor");host.innerHTML='<div class="prod-head"><span>SL</span><span>Products</span><span>Pack</span><span>Ctn</span><span>Rate / Ctn</span></div>'+state[side].map((it,i)=>'<div class="prod-row" data-i="'+i+'"><span class="prod-num">'+(i+1)+'</span><input class="field name" value="'+esc(it.name)+'" placeholder="Product"><input class="field pack" value="'+esc(it.pack)+'" placeholder="Pack"><input class="field ctn" type="number" min="0" step="0.01" value="'+esc(it.ctn)+'"><input class="field rate" type="number" min="0" step="0.01" value="'+esc(it.rate)+'"></div>').join("");$$('#'+side+'Editor .field').forEach(e=>e.addEventListener("input",()=>{syncAll(true)}))}
+
+function createInput(side,i,key,placeholder,type){
+  const input=document.createElement("input");input.className="field "+key;input.value=state[side][i][key]||"";if(placeholder)input.placeholder=placeholder;if(type){input.type=type;input.min="0";input.step="0.01"}
+  input.addEventListener("input",()=>{
+    state[side][i][key]=input.value;
+    if(i===state[side].length-1&&hasData(state[side][i])){state[side].push(blank());appendEditorRow(side,state[side].length-1)}
+    trimTrailing(side);syncTotalsPanel();scheduleSave();queuePdfRender()
+  });return input
+}
+function editorRow(side,i){
+  const row=document.createElement("div");row.className="prod-row";row.dataset.i=i;
+  const no=document.createElement("span");no.className="prod-num";no.textContent=i+1;row.append(no);
+  row.append(createInput(side,i,"name","Product"));
+  row.append(createInput(side,i,"pack","Pack"));
+  row.append(createInput(side,i,"ctn","", "number"));
+  row.append(createInput(side,i,"rate","", "number"));
+  return row
+}
+function appendEditorRow(side,i){const host=$("#"+side+"Editor");const row=editorRow(side,i);const add=host.querySelector(".add-product");host.insertBefore(row,add)}
+function addProduct(side){trimTrailing(side);if(hasData(state[side][state[side].length-1])){state[side].push(blank());appendEditorRow(side,state[side].length-1)}else{const last=hostRows(side).at(-1);last?.querySelector(".name")?.focus()}queuePdfRender();scheduleSave()}
+function hostRows(side){return [...document.querySelectorAll("#"+side+"Editor .prod-row")]}
+function renderEditor(side){
+  const host=$("#"+side+"Editor");host.innerHTML='<div class="prod-head"><span>SL</span><span>Products</span><span>Pack</span><span>Ctn</span><span>Rate / Ctn</span></div>';
+  state[side].forEach((_,i)=>host.appendChild(editorRow(side,i)));
+  const add=document.createElement("button");add.type="button";add.className="add-product outline-btn";add.textContent="+ Add product";add.onclick=()=>addProduct(side);host.appendChild(add)
+}
+function renderEditors(){ensureFour("left");ensureFour("right");renderEditor("left");renderEditor("right");syncEditors();syncTotalsPanel()}
+
+function syncEditors(){
+  ensureNumber();
+  $("#ref").value=state.ref;$("#invoiceNo").value=String(state.invoiceNo).padStart(4,"0");$("#invoiceDate").value=state.date;
+  $("#dealerTraderName").value=state.traderName;$("#dealerBuyerName").value=state.buyerName;$("#dealerAddress").value=state.address;$("#dealerMobile").value=state.dealerMobile;
+  $("#repName").value=state.repName;$("#repRole").value=state.repRole;$("#repMob").value=state.repMob;$("#commission").value=state.commission
+}
+function readSimple(){
+  state.ref=$("#ref").value.trim();state.invoiceNo=$("#invoiceNo").value.trim();state.date=$("#invoiceDate").value;
+  state.traderName=$("#dealerTraderName").value.trim();state.buyerName=$("#dealerBuyerName").value.trim();state.address=$("#dealerAddress").value.trim();state.dealerMobile=$("#dealerMobile").value.trim();
+  state.repName=$("#repName").value.trim();state.repRole=$("#repRole").value.trim();state.repMob=$("#repMob").value.trim();state.commission=Math.max(0,num($("#commission").value));
+  ensureNumber()
+}
+function syncTotalsPanel(){
+  const t=totals();state.amountWords=numberWords(t.finalTotal);
+  $("#commissionAmount").value=money(t.commissionAmount);$("#finalTotal").value=money(t.finalTotal);$("#amountWords").value=state.amountWords
+}
+function bindSimpleInputs(){
+  ["ref","invoiceNo","invoiceDate","dealerTraderName","dealerBuyerName","dealerAddress","dealerMobile","repName","repRole","repMob","commission"].forEach(id=>{
+    $("#"+id).addEventListener("input",()=>{readSimple();syncTotalsPanel();scheduleSave();queuePdfRender()})
+  })
+}
+
+function safeTextField(form,name,value){
+  try{const f=form.getTextField(name);f.setText(value==null?"":String(value));return true}catch(e){return false}
+}
+function fillProductFields(form,side,items){
+  const cols=side==="left"?["A","B","C","D","E","F"]:["G","H","I","J","K","L"];
+  for(let i=0;i<4;i++){
+    const item=items[i]||blank(),active=hasData(item),amount=active?money(num(item.ctn)*num(item.rate)):"";
+    const row=10+i;
+    [item.sl||"",active?i+1:"",item.name||"",item.pack||"",item.ctn||"",item.rate||"",amount].forEach(()=>{});
+    safeTextField(form,"cell_"+cols[0]+row,active?String(i+1):"");
+    safeTextField(form,"cell_"+cols[1]+row,active?item.name:"");
+    safeTextField(form,"cell_"+cols[2]+row,active?item.pack:"");
+    safeTextField(form,"cell_"+cols[3]+row,active?item.ctn:"");
+    safeTextField(form,"cell_"+cols[4]+row,active?item.rate:"");
+    safeTextField(form,"cell_"+cols[5]+row,amount)
+  }
+}
+function fillTemplateForm(form){
+  const t=totals();ensureNumber();state.amountWords=numberWords(t.finalTotal);
+  safeTextField(form,PDF_FIELDS.ref,state.ref);
+  safeTextField(form,PDF_FIELDS.invoiceNo,state.invoiceNo);
+  safeTextField(form,PDF_FIELDS.date,displayDate(state.date));
+  safeTextField(form,PDF_FIELDS.repName,state.repName);safeTextField(form,PDF_FIELDS.repRole,state.repRole);safeTextField(form,PDF_FIELDS.repMob,state.repMob);
+  safeTextField(form,PDF_FIELDS.trader,state.traderName);safeTextField(form,PDF_FIELDS.buyer,state.buyerName);safeTextField(form,PDF_FIELDS.address,state.address);safeTextField(form,PDF_FIELDS.dealerMob,state.dealerMobile);
+  fillProductFields(form,"left",state.left.filter(hasData));fillProductFields(form,"right",state.right.filter(hasData));
+  safeTextField(form,"cell_D16",String(t.leftCartons));safeTextField(form,"cell_F16",money(t.leftAmount));safeTextField(form,"cell_L16",money(t.rightAmount));
+  safeTextField(form,"cell_D17",String(t.totalCartons));safeTextField(form,"cell_L17",money(t.totalTaka));
+  safeTextField(form,"cell_L18",String(state.commission));safeTextField(form,"cell_L19",money(t.finalTotal));safeTextField(form,"cell_D20_K20",state.amountWords);
+}
+function fitText(text,max){text=String(text||"");return text.length<=max?text:text.slice(0,Math.max(0,max-1))+"…"}
+function drawCell(page,x,y,w,h,value,size=8,bold=false,align="left",font){
+  page.drawRectangle({x,y,width:w,height:h,borderColor:PDFLib.rgb(0,0,0),borderWidth:.7,color:PDFLib.rgb(1,1,1)});
+  const v=String(value||"");if(!v)return;
+  const tw=font.widthOfTextAtSize(v,size),tx=align==="center"?x+(w-tw)/2:align==="right"?x+w-tw-3:x+3;
+  page.drawText(v,{x:Math.max(x+2,tx),y:y+(h-size)/2+2,size,font,color:PDFLib.rgb(0,0,0),maxWidth:Math.max(8,w-5)});
+}
+function drawOverflowPage(doc,itemsLeft,itemsRight,pageIndex,startLeft,startRight){
+  const page=doc.addPage([595.30396,841.88977]),helvetica=awaitFont(doc,false),bold=awaitFont(doc,true);
+}
+function awaitFont(doc,bold){return bold?doc.embedFont(PDFLib.StandardFonts.HelveticaBold):doc.embedFont(PDFLib.StandardFonts.Helvetica)}
+function drawContinuation(doc,left,right){
+  const helvetica=doc.__bncHelvetica||null;return {left,right,helvetica}
+}
+async function addContinuationPages(doc){
+  const left=state.left.filter(hasData),right=state.right.filter(hasData),max=Math.max(left.length,right.length);
+  if(max<=4)return;
+  const regular=await doc.embedFont(PDFLib.StandardFonts.Helvetica),bold=await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+  const tableX=22.9,tableW=498.6;
+  const ratios=[5.285,22.140625,20,7.285156,14.140625,17.140625,4.7109375,22.285156,21.425781,6.7109375,18,21.285156];
+  const ratioTotal=ratios.reduce((a,b)=>a+b,0),widths=ratios.map(r=>tableW*r/ratioTotal);
+  const xs=[tableX];for(let i=0;i<widths.length;i++)xs.push(xs[i]+widths[i]);
+  const rowH=20, tableTop=742, headerH=28;
+  for(let offset=4;offset<max;offset+=8){
+    const page=doc.addPage([595.30396,841.88977]);
+    page.drawText("BNC AGRO CARE",{x:24,y:803,size:22,font:bold,color:PDFLib.rgb(0,0,0)});
+    page.drawText("Invoice No: "+String(state.invoiceNo).padStart(4,"0")+"    Ref: "+state.ref,{x:24,y:781,size:9,font:regular});
+    page.drawText("Continuation",{x:470,y:803,size:9,font:bold,color:PDFLib.rgb(0,0,0)});
+    const heads=["SL","Products Name","Pack Size","Ctn","Rate / Ctn","Amount Tk.","SL","Products Name","Pack Size","Ctn","Rate / Ctn","Amount Tk."];
+    let y=tableTop-headerH;
+    for(let c=0;c<12;c++)drawCell(page,xs[c],y,widths[c],headerH,heads[c],7,bold,"center",bold);
+    const count=Math.min(8,max-offset);
+    for(let r=0;r<count;r++){
+      const li=offset+r,ri=offset+r,items=[left[li]||blank(),right[ri]||blank()];
+      const rowY=y-(r+1)*rowH;
+      const vals=[
+        items[0].name?li+1:"",items[0].name,items[0].pack,items[0].ctn,items[0].rate,items[0].name?money(num(items[0].ctn)*num(items[0].rate)):"",
+        items[1].name?ri+1:"",items[1].name,items[1].pack,items[1].ctn,items[1].rate,items[1].name?money(num(items[1].ctn)*num(items[1].rate)):""
+      ];
+      for(let c=0;c<12;c++){
+        const center=(c===0||c===3||c===4||c===5||c===6||c===9||c===10||c===11);
+        const maxChars=[5,28,10,8,10,13,5,28,10,8,10,13][c];
+        drawCell(page,xs[c],rowY,widths[c],rowH,fitText(vals[c],maxChars),c===1||c===7?7.2:7,false,center?"center":"left",regular);
+      }
+    }
+  }
+}
+async function generatePdf(){
+  readSimple();syncTotalsPanel();
+  if(!window.PDFLib)throw Error("PDF engine unavailable");
+  const res=await fetch(TEMPLATE_URL,{cache:"no-store"});if(!res.ok)throw Error("Template PDF unavailable");
+  const bytes=await res.arrayBuffer();
+  const doc=await PDFLib.PDFDocument.load(bytes,{updateMetadata:false});
+  const form=doc.getForm();fillTemplateForm(form);
+  try{form.updateFieldAppearances()}catch(e){}
+  await addContinuationPages(doc);
+  return await doc.save({useObjectStreams:false});
+}
+function queuePdfRender(){clearTimeout(pdfTimer);pdfTimer=setTimeout(updatePdfPreview,120)}
+async function updatePdfPreview(){
+  const seq=++renderSeq;
+  $("#pdfStatus").textContent="Generating PDF…";
+  try{
+    const out=await generatePdf();if(seq!==renderSeq)return;
+    pdfBytes=out;
+    const blob=new Blob([out],{type:"application/pdf"});
+    const nextUrl=URL.createObjectURL(blob);
+    if(pdfUrl)URL.revokeObjectURL(pdfUrl);pdfUrl=nextUrl;
+    $("#pdfFrame").src=pdfUrl+"#view=FitH";
+    $("#openPdf").href=pdfUrl;
+    $("#pdfStatus").textContent="Live PDF · "+(state.left.filter(hasData).length+state.right.filter(hasData).length)+" products";
+    $("#saveState").textContent="PDF ready"
+  }catch(e){console.error(e);$("#pdfStatus").textContent="PDF error";toast(e.message||"Could not generate PDF")}
+}
+function savePdf(){
+  if(!pdfBytes)return updatePdfPreview().then(savePdf);
+  const a=document.createElement("a");a.href=pdfUrl;a.download="BNC-Invoice-"+(state.invoiceNo||"draft")+".pdf";a.click()
+}
+function openPdf(){if(!pdfUrl){updatePdfPreview().then(openPdf);return}window.open(pdfUrl,"_blank","noopener")}
+function saveRecord(){
+  readSimple();syncTotalsPanel();syncCounter(state.invoiceNo);
+  if(!db)return;
+  const data=JSON.parse(JSON.stringify(state)),t=totals();
+  const req=db.transaction("invoices","readwrite").objectStore("invoices").put({id:data.invoiceNo,invoiceNumber:data.invoiceNo,updatedAt:Date.now(),data,total:t.finalTotal});
+  req.onsuccess=()=>{renderHistory();$("#saveState").textContent="Saved locally";toast("Invoice saved · "+data.invoiceNo);queuePdfRender()}
+}
+function renderHistory(){
+  if(!db)return;const host=$("#historyList"),req=db.transaction("invoices").objectStore("invoices").index("updatedAt").openCursor(null,"prev");host.innerHTML="";
+  req.onsuccess=()=>{const c=req.result;if(!c)return;const a=c.value,row=document.createElement("div");row.className="history-row";
+    row.innerHTML='<div class="history-main"><strong>'+esc(a.invoiceNumber)+'</strong><span>'+money(a.total)+'</span></div><div class="history-actions"><button type="button" class="load">Load</button><button type="button" class="copy">Copy</button><button type="button" class="delete">×</button></div>';
+    row.querySelector(".load").onclick=()=>{Object.assign(state,JSON.parse(JSON.stringify(a.data)));normalize();renderEditors();renderHistory();scheduleSave();queuePdfRender();toast("Invoice loaded · "+a.invoiceNumber)};
+    row.querySelector(".copy").onclick=()=>{Object.assign(state,JSON.parse(JSON.stringify(a.data)));state.invoiceNo=nextNo();state.date=localDate();normalize();renderEditors();scheduleSave();queuePdfRender();toast("Copied as "+state.invoiceNo)};
+    row.querySelector(".delete").onclick=()=>{if(confirm("Delete this saved invoice?"))db.transaction("invoices","readwrite").objectStore("invoices").delete(a.id).onsuccess=renderHistory};
+    host.appendChild(row);c.continue()
+  }
+}
 function esc(v){return String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
-function buildRows(side){const host=side==="left"?$("#leftRows"):$("#rightRows");host.innerHTML="";for(let i=0;i<5;i++){const row=i+11;const item=state[side][i];const cols=side==="left"?["1","2","3","4","5","6"]:["7","8","9","10","11","12"];for(let j=0;j<6;j++){if(side==="left"&&i===4&&j<2)continue;const el=document.createElement("div");el.className="product-cell"+(j===0?" left-edge":"")+(j===5?" right-edge":"")+(i===4?" last-left":"");el.style.gridColumn=cols[j];el.style.gridRow=(side==="left"&&i===3&&j<2)?"14 / 16":String(row);if(side==="left"&&i===3&&j<2)el.classList.add("merge-two");if(j===0){el.classList.add("sl-cell");el.textContent=String(i+1)}else if(j===5){el.classList.add("amt-cell");el.id=side+"Amt"+i;el.textContent=money(num(item.ctn)*num(item.rate))}else{const input=document.createElement("input");input.className="sheet-input";input.value=j===1?item.name:j===2?item.pack:j===3?item.ctn:j===4?item.rate:"";if(j===3||j===4){input.type="number";input.min="0";input.step="0.01"}input.dataset.side=side;input.dataset.i=i;input.dataset.field=j===1?"name":j===2?"pack":j===3?"ctn":"rate";input.addEventListener("input",()=>{state[side][i][input.dataset.field]=input.value;syncEditors();renderSheet();scheduleSave()});el.appendChild(input)}host.appendChild(el)}}}function numberWords(n){n=Math.max(0,Math.round(num(n)));const ones=["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"],tens=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];function w(x){if(x<20)return ones[x];if(x<100)return tens[Math.floor(x/10)]+(x%10?" "+ones[x%10]:"");if(x<1000)return ones[Math.floor(x/100)]+" Hundred"+(x%100?" "+w(x%100):"");if(x<100000)return w(Math.floor(x/1000))+" Thousand"+(x%1000?" "+w(x%1000):"");if(x<10000000)return w(Math.floor(x/100000))+" Lakh"+(x%100000?" "+w(x%100000):"");return w(Math.floor(x/10000000))+" Crore"+(x%10000000?" "+w(x%10000000):"")}return w(n)+" Taka Only"}
-function syncPreviewFields(){ensureNumber();$("#pRef").value=state.ref;$("#pNo").value=String(state.invoiceNo).padStart(4,"0");$("#pDate").value=displayDate(state.date);$("#pRepName").value=state.repName;$("#pRepRole").value=state.repRole;$("#pRepMob").value=state.repMob;$("#pCommission").value=state.commission;$("#pWords").value=state.amountWords;const t=totals();if(!String(state.amountWords||"").trim())state.amountWords=numberWords(t.grand);$("#pLeftCartons").textContent=String(t.leftCtn);$("#pLeftAmount").textContent=money(t.leftAmount);$("#pRightAmount").textContent=money(t.rightAmount);$("#pTotalCartons").textContent=String(t.ctn);$("#pTotalTaka").textContent=money(t.totalTaka);$("#pTotalAmount").textContent=money(t.grand)}
-function syncEditors(){ensureNumber();$("#ref").value=state.ref;$("#invoiceNo").value=String(state.invoiceNo).padStart(4,"0");$("#invoiceDate").value=state.date;$("#repName").value=state.repName;$("#repRole").value=state.repRole;$("#repMob").value=state.repMob;$("#commission").value=state.commission;$("#amountWords").value=state.amountWords}
-function renderEditors(){syncEditors();makeProductEditor("left");makeProductEditor("right")}
-function renderSheet(){buildRows("left");buildRows("right");syncPreviewFields();bindDirectCells()}
-function bindDirectCells(){const skip=".hdr,.calc";$(".sheet .s:not(.hdr):not(.calc)").forEach(e=>{if(e.querySelector("input"))return;const key=Array.from(e.classList).filter(c=>c!=="s").join(".");if(!key)return;e.contentEditable="true";e.spellcheck=false;if(Object.prototype.hasOwnProperty.call(state.freeCells||{},key))e.textContent=state.freeCells[key];if(e.dataset.bound==="1")return;e.dataset.bound="1";e.addEventListener("input",()=>{state.freeCells=state.freeCells||{};state.freeCells[key]=e.textContent;scheduleSave()})})}function syncAll(save=true){readStateFromEditor();renderSheet();if(save)scheduleSave();else $("#saveState").textContent="Saved locally"}
-function bindSimple(id,pid){const a=$("#"+id),b=$("#"+pid);a.addEventListener("input",()=>{state[id==="invoiceNo"?"invoiceNo":id]=a.value; if(id==="commission")state.commission=Math.max(0,num(a.value)); renderSheet();scheduleSave()});b.addEventListener("input",()=>{state[id==="invoiceNo"?"invoiceNo":id]=b.value;if(id==="pCommission")state.commission=Math.max(0,num(b.value));renderEditors();renderSheet();scheduleSave()})}
-function fillFromSheet(){state.ref=$("#pRef").value;state.invoiceNo=$("#pNo").value;state.date=parseDisplayDate($("#pDate").value);state.repName=$("#pRepName").value;state.repRole=$("#pRepRole").value;state.repMob=$("#pRepMob").value;state.commission=Math.max(0,num($("#pCommission").value));state.amountWords=$("#pWords").value}
-function bindPreviewInputs(){["ref","invoiceNo","invoiceDate","repName","repRole","repMob","commission","amountWords"].forEach((id)=>{const map={ref:"pRef",invoiceNo:"pNo",invoiceDate:"pDate",repName:"pRepName",repRole:"pRepRole",repMob:"pRepMob",commission:"pCommission",amountWords:"pWords"};const a=$("#"+id),b=$("#"+map[id]);const f=()=>{state.ref=$("#ref").value.trim();state.invoiceNo=$("#invoiceNo").value.trim();state.date=$("#invoiceDate").value;state.repName=$("#repName").value;state.repRole=$("#repRole").value;state.repMob=$("#repMob").value;state.commission=Math.max(0,num($("#commission").value));state.amountWords=$("#amountWords").value;ensureNumber();$("#"+map[id]).value=id==="invoiceNo"?String(state.invoiceNo).padStart(4,"0"):a.value;scheduleSave()};a.addEventListener("input",f);b.addEventListener("input",()=>{fillFromSheet();renderEditors();renderSheet();scheduleSave()})})}
-function saveRecord(){fillFromSheet();syncCounter(state.invoiceNo);const data=JSON.parse(JSON.stringify(state));if(!data.invoiceNo)data.invoiceNo=nextNo();const req=db.transaction("invoices","readwrite").objectStore("invoices").put({id:data.invoiceNo,invoiceNumber:data.invoiceNo,updatedAt:Date.now(),data,total:totals().grand});req.onsuccess=()=>{renderHistory();$("#saveState").textContent="Saved locally";toast("Invoice saved · "+data.invoiceNo)}}
-function renderHistory(){if(!db)return;const host=$("#historyList"),req=db.transaction("invoices").objectStore("invoices").index("updatedAt").openCursor(null,"prev");host.innerHTML="";req.onsuccess=()=>{const c=req.result;if(!c)return;const a=c.value,row=document.createElement("div");row.className="history-row";row.innerHTML='<div class="history-main"><strong>'+esc(a.invoiceNumber)+'</strong><span>'+money(a.total)+'</span></div><div class="history-actions"><button type="button" class="load">Load</button><button type="button" class="copy">Copy</button><button type="button" class="delete">×</button></div>';row.querySelector(".load").onclick=()=>{Object.assign(state,JSON.parse(JSON.stringify(a.data)));renderEditors();renderSheet();toast("Invoice loaded · "+a.invoiceNumber)};row.querySelector(".copy").onclick=()=>{Object.assign(state,JSON.parse(JSON.stringify(a.data)));state.invoiceNo=nextNo();state.date=localDate();renderEditors();renderSheet();scheduleSave();toast("Copied as "+state.invoiceNo)};row.querySelector(".delete").onclick=()=>{if(confirm("Delete this saved invoice?")){db.transaction("invoices","readwrite").objectStore("invoices").delete(a.id).onsuccess=renderHistory}};host.appendChild(row);c.continue()}}
-function newInvoice(){const oldCompany={repName:state.repName,repRole:state.repRole,repMob:state.repMob};Object.assign(state,{ref:"X2",invoiceNo:nextNo(),date:"",...oldCompany,commission:0,amountWords:"",freeCells:{},left:Array.from({length:5},()=>({name:"",pack:"",ctn:"",rate:""})),right:Array.from({length:5},()=>({name:"",pack:"",ctn:"",rate:""}))});renderEditors();renderSheet();saveDraft();toast("New invoice · "+state.invoiceNo)}
+function newInvoice(){
+  Object.assign(state,{ref:"X2",invoiceNo:nextNo(),date:localDate(),traderName:"",buyerName:"",address:"",dealerMobile:"",commission:0,amountWords:"",left:firstRows(),right:firstRows()});
+  renderEditors();saveDraft();queuePdfRender();toast("New invoice · "+state.invoiceNo)
+}
 function exportJSON(){const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="BNC-Invoice-"+(state.invoiceNo||"draft")+".json";a.click();URL.revokeObjectURL(u)}
-function importJSON(file){file.text().then(t=>{const d=JSON.parse(t);if(!d||!Array.isArray(d.left)||!Array.isArray(d.right))throw Error("Invalid BNC invoice JSON");Object.assign(state,d);state.freeCells=state.freeCells||{};ensureNumber();renderEditors();renderSheet();scheduleSave();toast("Invoice imported")}).catch(()=>toast("Invalid invoice JSON"))}
-function setupInstall(){const b=$("#installBtn");if(!b)return;addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e;b.hidden=false});b.onclick=async()=>{if(!deferredInstall)return;deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;b.hidden=true};addEventListener("appinstalled",()=>{b.hidden=true})}
-function loadDraft(){return new Promise(resolve=>{if(!db)return resolve(false);const q=db.transaction("drafts").objectStore("drafts").get("current");q.onsuccess=()=>{if(q.result?.data){Object.assign(state,q.result.data);resolve(true)}else resolve(false)};q.onerror=()=>resolve(false)})}
-(async()=>{try{await openDB();const loaded=await loadDraft();if(!loaded){ensureNumber()}state.freeCells=state.freeCells||{};renderEditors();renderSheet();bindPreviewInputs();$("#saveInvoice").onclick=saveRecord;$("#newInvoice").onclick=newInvoice;$("#printBtn").onclick=()=>{syncAll(false);saveRecord();window.print()};$("#jsonBtn").onclick=exportJSON;$("#importBtn").onclick=()=>$("#importFile").click();$("#importFile").onchange=e=>{const f=e.target.files?.[0];if(f)importJSON(f);e.target.value=""};setupInstall();renderHistory();}catch(e){toast("Local storage unavailable");renderEditors();renderSheet()}})();
+function importJSON(file){file.text().then(t=>{const d=JSON.parse(t);Object.assign(state,d);normalize();renderEditors();scheduleSave();queuePdfRender();toast("Invoice imported")}).catch(()=>toast("Invalid invoice JSON"))}
+function setupInstall(){
+  const b=$("#installBtn");addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e;b.hidden=false});
+  b.onclick=async()=>{if(!deferredInstall)return;deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;b.hidden=true};
+  addEventListener("appinstalled",()=>{b.hidden=true})
+}
+function bindActions(){
+  $("#saveInvoice").onclick=saveRecord;$("#newInvoice").onclick=newInvoice;$("#printBtn").onclick=openPdf;$("#downloadPdfBtn").onclick=savePdf;
+  $("#openPdf").onclick=e=>{e.preventDefault();openPdf()};
+  $("#openTemplateBtn").onclick=()=>window.open(TEMPLATE_URL,"_blank","noopener");
+  $("#jsonBtn").onclick=exportJSON;$("#importBtn").onclick=()=>$("#importFile").click();$("#importFile").onchange=e=>{const f=e.target.files?.[0];if(f)importJSON(f);e.target.value=""}
+}
+function loadDraft(){return new Promise(resolve=>{if(!db)return resolve(false);const q=db.transaction("drafts").objectStore("drafts").get("current");q.onsuccess=()=>{if(q.result?.data){Object.assign(state,q.result.data);normalize();resolve(true)}else resolve(false)};q.onerror=()=>resolve(false)})}
+(async()=>{
+  try{await openDB();const loaded=await loadDraft();if(!loaded){ensureNumber()}normalize();renderEditors();bindSimpleInputs();bindActions();setupInstall();renderHistory();syncTotalsPanel();await updatePdfPreview()}
+  catch(e){console.error(e);normalize();renderEditors();bindSimpleInputs();bindActions();setupInstall();syncTotalsPanel();queuePdfRender();toast("Invoice storage unavailable")}
+})();
 })();
