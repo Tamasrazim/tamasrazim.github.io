@@ -101,6 +101,8 @@ The project is designed as a companion to Animation Renderer — Tamasrazim: the
 
 ## BNC AgroCare
 
+BNC validation runs automatically with `tools/validate_bnc.mjs` through GitHub Actions.
+
 **BNC canonical source:** `projects/bncagrocare/` in this repository. `Tamasrazim/bncagrocare` is the backup mirror.
 
 An agriculture-focused project with a public company website and a local-first invoice PWA.
