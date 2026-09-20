@@ -1,23 +1,35 @@
-# BNC AgroCare — Canonical Project
+# BNC AgroCare
 
-This is the canonical BNC AgroCare project page inside the Tamasrazim main repository.
+> Backup mirror: Canonical BNC source is maintained in Tamasrazim/tamasrazim.github.io under projects/bncagrocare/. Keep this repository as the deployment/backup copy.
 
-The BNC business website keeps its own agriculture-focused design, separate from the personal Tamasrazim site.
+BNC AgroCare website and invoice PWA.
 
-## Live
+## Invoice PWA
 
-- **BNC project page:** https://tamasrazim.github.io/projects/bncagrocare/
-- **BNC source repository:** https://github.com/Tamasrazim/bncagrocare
+The working interface is PDF-first.
 
-## Structure
+Workflow:
 
-- `index.html` — BNC AgroCare business website
-- `FB_IMG_1789811599210.jpg` — BNC source image
-- `invoice/` — BNC Invoice PWA
-- `reference/demo.xlsx` — current `18-09-26 0002.xlsx` invoice reference, preserved exactly
+**Fill the boxes → calculate automatically → generate the real PDF → preview the PDF → open/print or save PDF**
 
-## Workflow
+The PWA provides:
 
-**Open BNC → use the Invoice PWA when needed → keep the original Excel sheet as the demo/reference.**
+- Original BNC invoice PDF used as the page-1 template
+- Named AcroForm fields filled directly where the template exposes them
+- Automatic amount calculations: Ctn × Rate / Ctn, left/right subtotals, total cartons, total taka, commission %, final total and amount in words
+- Four starting product rows per side
+- Automatic SL 5, SL 6, and onward when more products are entered
+- Empty product rows omitted from the generated PDF
+- Overflow products rendered on continuation PDF pages without changing the original page-1 template
+- Live PDF preview in the browser
+- Open / print and Save PDF actions
+- Local draft persistence with IndexedDB
+- JSON backup for the current invoice
+- Invoice history with load, copy and delete actions
+- Installable PWA shell
 
-Built by Robiul Rumman Razim — Tamasrazim.
+The original Excel files remain reference/demo material; the working invoice interface no longer uses HTML as the paper preview and does not edit the original workbook.
+
+## Company website
+
+https://tamasrazim.github.io/bncagrocare/
