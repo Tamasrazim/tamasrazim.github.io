@@ -1,0 +1,31 @@
+name: Renderer Check
+
+on:
+  push:
+    paths:
+      - "renderer/**"
+      - "tools/**"
+      - "scripts/**"
+      - ".github/workflows/renderer-check.yml"
+  pull_request:
+    paths:
+      - "renderer/**"
+      - "tools/**"
+      - "scripts/**"
+      - ".github/workflows/renderer-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate renderer contracts
+        run: python3 tools/validate_renderer.py --root .
+
+      - name: Run shell validation
+        run: bash scripts/check-renderer.sh
