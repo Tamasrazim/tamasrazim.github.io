@@ -84,6 +84,21 @@ The renderer includes an installable offline-oriented PWA shell with a versioned
 
 ---
 
+## Stock Asset Vault — Tamasrazim
+
+A local-first stock asset organizer for the renderer workflow.
+
+**Workflow:**
+**Render → Import → Inspect → Add metadata → Track status → Download**
+
+The vault stores imported image/video assets in the browser's IndexedDB rather than uploading them to a server. It supports asset previews, search, type/status filters, title, description, keywords, notes, per-asset download, metadata JSON export, deletion, and an installable PWA shell.
+
+**Open Stock Asset Vault:** https://tamasrazim.github.io/asset-vault/
+
+The project is designed as a companion to Animation Renderer — Tamasrazim: the renderer produces the asset; the vault keeps the finished asset and its submission metadata organized locally.
+
+---
+
 ## Website Motion System
 
 The website uses a custom motion architecture for continuous interaction and scene behavior, including:
@@ -110,6 +125,7 @@ The interaction system is implemented independently for Tamasrazim rather than c
 - `assets/js/boot.js` — boot and progressive enhancement
 - `assets/js/site.js` — site interactions and effects
 - `renderer/` — Animation Renderer — Tamasrazim
+- `asset-vault/` — Stock Asset Vault — Tamasrazim
 - `renderer/js/app.js` — renderer UI, timeline, settings, preview and workflow
 - `renderer/js/video-engine.js` — deterministic WebCodecs frame encoder and WebM muxer
 - `renderer/manifest.webmanifest` — PWA manifest
@@ -134,6 +150,7 @@ For renderer development, see the files inside `renderer/`.
 
 - **Website:** https://tamasrazim.github.io/
 - **Animation Renderer:** https://tamasrazim.github.io/renderer/
+- **Stock Asset Vault:** https://tamasrazim.github.io/asset-vault/
 - **GitHub:** https://github.com/Tamasrazim
 - **LinkedIn:** https://www.linkedin.com/in/Tamasrazim/
 
