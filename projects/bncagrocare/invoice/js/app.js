@@ -187,7 +187,7 @@ function drawTextFit(page,text,x,y,w,h,font,size,align="left"){
 }
 function dynamicRowHeight(extraRows){
   if(extraRows<=0)return ROW_H;
-  return Math.min(ROW_H,Math.max(4.5,(SUMMARY_BOTTOM-MIN_SUMMARY_BOTTOM)/extraRows));
+  return Math.min(ROW_H,(SUMMARY_BOTTOM-MIN_SUMMARY_BOTTOM)/extraRows);
 }
 function drawExtraProductRows(page,left,right,maxRows,regular,bold){
   const extraRows=Math.max(0,maxRows-4);
@@ -246,8 +246,17 @@ async function generatePdf(){
   const bytes=await getTemplateBytes();
   const doc=await PDFLib.PDFDocument.load(bytes,{updateMetadata:false,ignoreEncryption:true});
   const form=doc.getForm();fillTemplateForm(form);
-  try{form.updateFieldAppearances()}catch(e){}
-  await addContinuationPages(doc);
+  try{form.updateFieldAppearances();form.flatten()}catch(e){}
+  const left=state.left,right=state.right;
+  const activeCount=side=>{let n=4;for(let i=0;i<state[side].length;i++)if(hasData(state[side][i]))n=Math.max(n,i+1);return n};
+  const maxRows=Math.max(activeCount("left"),activeCount("right"),4);
+  if(maxRows>4){
+    const page=doc.getPages()[0];
+    const regular=await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+    const bold=await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+    const shift=drawExtraProductRows(page,left,right,maxRows,regular,bold);
+    const t=totals();state.amountWords=numberWords(t.finalTotal);drawDynamicSummary(page,t,shift,regular,bold);
+  }
   return await doc.save({useObjectStreams:true,addDefaultPage:false});
 }
 function queuePdfRender(){clearTimeout(pdfTimer);pdfTimer=setTimeout(updatePdfPreview,70)}
