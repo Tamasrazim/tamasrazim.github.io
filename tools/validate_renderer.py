@@ -88,6 +88,8 @@ def main() -> int:
         "tamasrazim-render-project",
         "function drawImageSource",
         "function imageAsSvg",
+        "function drawImageSources",
+        "function imagesAsSvg",
         "function renderVideoBlob",
         "function toggleQueueScene",
         "function exportQueue",
