@@ -108,8 +108,8 @@ BNC validation runs automatically with `tools/validate_bnc.mjs` through GitHub A
 An agriculture-focused project with a public company website and a local-first invoice PWA.
 
 **Project page:** https://tamasrazim.github.io/projects/bncagrocare/  
-**BNC site:** https://tamasrazim.github.io/bncagrocare/  
-**Invoice PWA:** https://tamasrazim.github.io/bncagrocare/invoice/  
+**BNC site:** https://tamasrazim.github.io/projects/bncagrocare/  
+**Invoice PWA:** https://tamasrazim.github.io/projects/bncagrocare/invoice/  
 **Repository:** https://github.com/Tamasrazim/bncagrocare
 
 The invoice workflow is:
