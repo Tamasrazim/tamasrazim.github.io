@@ -1118,6 +1118,10 @@
       display:block;
       transform:translateY(105%);
     }
+    .secret-title span + span{
+      margin-top:clamp(.04rem,.35vw,.35rem);
+      padding-left:clamp(.18rem,.8vw,.8rem);
+    }
     .secret-story{
       width:min(650px,100%);
       margin-left:auto;
