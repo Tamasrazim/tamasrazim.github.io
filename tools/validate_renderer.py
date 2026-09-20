@@ -70,6 +70,8 @@ def main() -> int:
         'id="projectFileInput"',
         'id="addImageBtn"',
         'id="imageFileInput"',
+        'id="renderQueueBtn"',
+        'id="queueCount"',
     )
     for token in required_html:
         if token not in html:
@@ -86,6 +88,9 @@ def main() -> int:
         "tamasrazim-render-project",
         "function drawImageSource",
         "function imageAsSvg",
+        "function renderVideoBlob",
+        "function toggleQueueScene",
+        "function exportQueue",
     )
     for token in required_app:
         if token not in app_js:
