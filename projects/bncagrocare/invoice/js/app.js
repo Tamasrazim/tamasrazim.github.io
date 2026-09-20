@@ -15,7 +15,7 @@ const state={
  repName:"Md Rezaul Karim",repRole:"Officer BNC AGRO CARE Area Manager",repMob:"01718-306103",
  commission:0,left:firstRows(),right:firstRows(),amountWords:""
 };
-let db=null,timer=null,pdfTimer=null,deferredInstall=null,pdfUrl="",renderSeq=0,pdfBytes=null;
+let db=null,timer=null,pdfTimer=null,deferredInstall=null,pdfUrl="",renderSeq=0,pdfBytes=null,pdfjsPromise=null,pdfDocument=null,pdfCanvasSeq=0;
 
 function localDate(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function displayDate(v){const m=String(v||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?m[3]+"/"+m[2]+"/"+m[1]:String(v||"")}
@@ -203,11 +203,46 @@ async function updatePdfPreview(){
     const blob=new Blob([out],{type:"application/pdf"});
     const nextUrl=URL.createObjectURL(blob);
     if(pdfUrl)URL.revokeObjectURL(pdfUrl);pdfUrl=nextUrl;
-    $("#pdfFrame").src=pdfUrl+"#view=FitH";
     $("#openPdf").href=pdfUrl;
-    $("#pdfStatus").textContent="Live PDF · "+(state.left.filter(hasData).length+state.right.filter(hasData).length)+" products";
+    await renderCleanPdf(out,seq);
+    if(seq!==renderSeq)return;
     $("#saveState").textContent="PDF ready"
   }catch(e){console.error(e);$("#pdfStatus").textContent="PDF error";toast(e.message||"Could not generate PDF")}
+}
+async function getPdfJs(){
+  if(!pdfjsPromise){
+    pdfjsPromise=import("https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs").then(m=>{
+      m.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs";
+      return m;
+    });
+  }
+  return pdfjsPromise;
+}
+async function renderCleanPdf(bytes,seq){
+  const pdfjs=await getPdfJs();
+  const loading=pdfjs.getDocument({data:bytes});
+  const pdf=await loading.promise;
+  if(seq!==renderSeq)return;
+  pdfDocument=pdf;
+  const stage=$("#pdfStage");stage.innerHTML="";
+  const width=Math.max(320,stage.clientWidth-28);
+  for(let n=1;n<=pdf.numPages;n++){
+    if(seq!==renderSeq)break;
+    const page=await pdf.getPage(n);
+    const base=page.getViewport({scale:1});
+    const scale=width/base.width;
+    const dpr=Math.min(2,window.devicePixelRatio||1);
+    const viewport=page.getViewport({scale:scale*dpr});
+    const cssViewport=page.getViewport({scale});
+    const wrap=document.createElement("div");wrap.className="pdf-page-wrap";wrap.dataset.page=String(n);
+    const canvas=document.createElement("canvas");canvas.className="pdf-page";
+    canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
+    canvas.style.width=Math.ceil(cssViewport.width)+"px";canvas.style.height=Math.ceil(cssViewport.height)+"px";
+    wrap.appendChild(canvas);stage.appendChild(wrap);
+    const ctx=canvas.getContext("2d",{alpha:false});
+    await page.render({canvasContext:ctx,viewport}).promise;
+  }
+  $("#pdfStatus").textContent="Live PDF · "+pdf.numPages+" page"+(pdf.numPages===1?"":"s")+" · "+(state.left.filter(hasData).length+state.right.filter(hasData).length)+" products";
 }
 function savePdf(){
   if(!pdfBytes)return updatePdfPreview().then(savePdf);
@@ -251,7 +286,12 @@ function bindActions(){
 }
 function loadDraft(){return new Promise(resolve=>{if(!db)return resolve(false);const q=db.transaction("drafts").objectStore("drafts").get("current");q.onsuccess=()=>{if(q.result?.data){Object.assign(state,q.result.data);normalize();resolve(true)}else resolve(false)};q.onerror=()=>resolve(false)})}
 (async()=>{
-  try{await openDB();const loaded=await loadDraft();if(!loaded){ensureNumber()}normalize();renderEditors();bindSimpleInputs();bindActions();setupInstall();renderHistory();syncTotalsPanel();await updatePdfPreview()}
+  try{
+    await openDB();const loaded=await loadDraft();if(!loaded){ensureNumber()}
+    normalize();renderEditors();bindSimpleInputs();bindActions();setupInstall();renderHistory();syncTotalsPanel();
+    new ResizeObserver(()=>{if(pdfBytes)queuePdfRender()}).observe($("#pdfStage"));
+    await updatePdfPreview();
+  }
   catch(e){console.error(e);normalize();renderEditors();bindSimpleInputs();bindActions();setupInstall();syncTotalsPanel();queuePdfRender();toast("Invoice storage unavailable")}
 })();
 })();
