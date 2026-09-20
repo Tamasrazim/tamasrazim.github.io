@@ -347,9 +347,43 @@
   <footer class="site-footer">
     <div class="container footer-inner">
       <p class="footer-copy">© 2026 Robiul Rumman Razim</p>
+
+      <div class="secret-node-wrap">
+        <button class="secret-node" id="secretNode" type="button" aria-label="Discover a hidden story" aria-haspopup="dialog" aria-controls="secretReveal">
+          <span class="secret-node-core" aria-hidden="true"></span>
+          <span class="secret-node-ring ring-a" aria-hidden="true"></span>
+          <span class="secret-node-ring ring-b" aria-hidden="true"></span>
+          <span class="secret-node-spark" aria-hidden="true"></span>
+        </button>
+        <span class="secret-bubble" id="secretBubble" role="status" aria-live="polite"></span>
+      </div>
+
       <a class="footer-link" href="#top">Tamasrazim <span>↑</span></a>
     </div>
   </footer>
+
+  <aside class="secret-reveal" id="secretReveal" role="dialog" aria-modal="true" aria-labelledby="secretTitle" aria-describedby="secretBody" hidden>
+    <div class="secret-noise" aria-hidden="true"></div>
+    <div class="secret-signal" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="secret-stage">
+      <div class="secret-meta"><span>HIDDEN / ORIGIN</span><span>01—01</span></div>
+      <div class="secret-title-wrap">
+        <p class="secret-kicker">A name can be a place you return to.</p>
+        <h2 class="secret-title" id="secretTitle"><span>TAMA</span><span>SRAZIM</span></h2>
+      </div>
+      <div class="secret-story" id="secretBody">
+        <p class="secret-lead">It was never drawn on a board. It was found between two pieces of meaning.</p>
+        <p>From <strong>“Tamanna’s Tama”</strong> came <em>Tama</em>.</p>
+        <p>From <strong>“Tama’s Razim”</strong> came <em>Razim</em>.</p>
+        <p>Then the two stayed together long enough to become one word:</p>
+        <p class="secret-quote">“Tama + s + Razim — a little piece of one story, carried forward as a name.”</p>
+        <p class="secret-close-line">That is Tamasrazim.<br>Not a title. Not a mask. Just a name that kept its memory.</p>
+      </div>
+      <button class="secret-close" id="secretClose" type="button" aria-label="Close hidden story">Close <span>×</span></button>
+    </div>
+  </aside>
+
+  <script src="./assets/js/site.js?v=20260920-7"></script>
 
   <script src="./assets/js/site.js?v=20260920-6"></script>
 </body>
