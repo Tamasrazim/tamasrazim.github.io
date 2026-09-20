@@ -64,11 +64,12 @@ function renderStudioUI(){
     var row=document.createElement('div');row.className='source-row'+(src.visible?' visible':'');
     var toggle=document.createElement('button');toggle.type='button';toggle.className='source-toggle';toggle.setAttribute('aria-pressed',String(!!src.visible));toggle.textContent=src.visible?'ON':'OFF';
     toggle.addEventListener('click',function(){
+      if(src.locked){toast(src.name+' is locked');return}
       src.visible=!src.visible;saveStudio();renderStudioUI();renderAt(Number(timeline.value)||0);
     });
     var info=document.createElement('div');info.className='source-info';
     info.innerHTML='<strong>'+escapeHTML(src.name)+'</strong><span>'+escapeHTML(src.kind)+(src.previewOnly?' · PREVIEW ONLY':' · EXPORT')+'</span>';
-    var lock=document.createElement('button');lock.type='button';lock.className='source-lock';lock.textContent=src.locked?'LOCK':'FREE';
+    var lock=document.createElement('button');lock.type='button';lock.className='source-lock';lock.textContent=src.locked?'LOCK':'FREE';lock.title=src.locked?'Unlock source controls':'Lock source controls';
     lock.addEventListener('click',function(){src.locked=!src.locked;saveStudio();renderStudioUI()});
     row.append(toggle,info,lock);sourceList.appendChild(row);
   });
@@ -257,7 +258,15 @@ var score=0,target=$('#gameTarget');function moveTarget(){target.style.left=(8+M
 var deferredPrompt=null,installBtn=$('#installBtn');if(location.protocol!=='https:'&&location.hostname!=='localhost')installBtn.hidden=true;
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;installBtn.hidden=false});installBtn.addEventListener('click',async function(){if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;installBtn.hidden=true});window.addEventListener('appinstalled',function(){installBtn.hidden=true;toast('Renderer installed')});
 if('serviceWorker'in navigator){navigator.serviceWorker.register('./sw.js').then(function(reg){if(reg&&reg.waiting)toast('Renderer update ready — reload to apply');reg&&reg.addEventListener('updatefound',function(){var w=reg.installing;if(!w)return;w.addEventListener('statechange',function(){if(w.state==='installed'&&navigator.serviceWorker.controller)toast('Renderer update ready — reload to apply')})})}).catch(function(){})}
-window.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();exportVideo()}});
+window.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();exportVideo();return}
+  if(e.altKey&&!e.ctrlKey&&!e.metaKey){
+    var n=Number(e.key);
+    if(Number.isInteger(n)&&n>=1&&n<=9&&studioState.scenes[n-1]){
+      e.preventDefault();saveStudio();studioState.active=n-1;loadStudio();renderStudioUI();buildEngine(true);renderAt(Number(timeline.value)||0);toast('Scene '+n+' · '+activeScene().name);
+    }
+  }
+});
 loadStudio();renderStudioUI();
 window.addEventListener('beforeunload',function(){saveStudio()});
 parseSettings();buildEngine(true);probeCapabilities();
