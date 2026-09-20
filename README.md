@@ -99,6 +99,21 @@ The project is designed as a companion to Animation Renderer — Tamasrazim: the
 
 ---
 
+## BNC AgroCare
+
+An agriculture-focused project with a public company website and a local-first invoice PWA.
+
+**Project page:** https://tamasrazim.github.io/projects/bncagrocare/  
+**BNC site:** https://tamasrazim.github.io/bncagrocare/  
+**Invoice PWA:** https://tamasrazim.github.io/bncagrocare/invoice/  
+**Repository:** https://github.com/Tamasrazim/bncagrocare
+
+The invoice workflow is:
+
+**Fill the boxes → Live A4 preview → Save invoice → Print / PDF**
+
+The PWA keeps invoice drafts and saved invoice history in the browser with IndexedDB. JSON backup is available, and the original spreadsheet remains a reference rather than the editing interface.
+
 ## Website Motion System
 
 The website uses a custom motion architecture for continuous interaction and scene behavior, including:
