@@ -1,7 +1,7 @@
 export type StillFormat = "png" | "jpg" | "webp" | "svg";
 export type VideoContainer = "webm" | "mp4";
 export type VideoEngine = "webcodecs" | "mediarecorder";
-export type SourceKind = "CODE" | "MATTE" | "GRID" | "SAFE";
+export type SourceKind = "CODE" | "MATTE" | "IMAGE" | "GRID" | "SAFE";
 
 export interface SceneSource {
   id: string;
@@ -10,6 +10,9 @@ export interface SceneSource {
   visible: boolean;
   locked: boolean;
   previewOnly?: boolean;
+  dataUrl?: string;
+  opacity?: number;
+  fit?: "contain" | "cover" | "stretch";
 }
 
 export interface RenderSpec {
