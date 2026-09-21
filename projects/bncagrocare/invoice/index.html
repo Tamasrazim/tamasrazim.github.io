@@ -10,8 +10,8 @@
 <div class="siteTop"><div><span>BNC AGROCARE</span><span>AGRICULTURE · PRODUCTS · SOLUTIONS</span></div></div>
 <header class="bar">
   <a href="../" class="brand">BNC <b>AgroCare</b></a>
-  <div class="barMeta"><span class="liveDot"></span><span id="status">Ready</span></div>
-  <div class="barActions"><button id="newBtn">New</button><button id="saveBtn">Save</button><button id="installBtn" hidden>Install</button></div>
+  <div class="barMeta"><span class="liveDot"></span><span id="status" role="status" aria-live="polite">Ready</span></div>
+  <div class="barActions"><button id="newBtn" type="button" aria-label="Create new invoice">New</button><button id="saveBtn" type="button" aria-label="Save invoice">Save</button><button id="installBtn" type="button" aria-label="Install invoice app" hidden>Install</button></div>
 </header>
 
 <main class="app">
@@ -24,7 +24,7 @@
     <div class="heroAction">
       <span class="heroLabel">WORKFLOW</span>
       <div class="steps"><span class="active">01 Fill</span><i></i><span>02 Calculate</span><i></i><span>03 Preview</span></div>
-      <button class="heroBtn" id="previewBtn">Generate PDF <b>→</b></button>
+      <button class="heroBtn" id="previewBtn" type="button" aria-label="Generate invoice PDF">Generate PDF <b>→</b></button>
     </div>
   </section>
 
@@ -41,7 +41,7 @@
         <label class="wide">Trader / Shop name<input id="trader" data-k="trader" placeholder="M/S ______ Traders"></label>
         <label class="wide">Buyer name<input id="buyer" data-k="buyer"></label>
         <label class="wide">Address<input id="address" data-k="address"></label>
-        <label>Mobile<input id="mobile" data-k="mobile"></label>
+        <label>Mobile<input id="mobile" type="tel" inputmode="tel" autocomplete="tel" data-k="mobile"></label>
         <label>Commission %<input id="commission" type="number" min="0" step=".01" data-k="commission"></label>
       </div>
 
@@ -52,7 +52,7 @@
 
       <div class="sectionIntro productsIntro">
         <div><div class="ey">02 · Products</div><h2>Line items</h2></div>
-        <button id="addBtn" class="addBtn">+ Add product</button>
+        <button id="addBtn" class="addBtn" type="button" aria-label="Add product line">+ Add product</button>
       </div>
       <div class="productLegend"><span>SL</span><span>PRODUCT</span><span>PACK</span><span>CTN</span><span>RATE</span><span>AMOUNT</span><span></span></div>
       <div id="products"></div>
@@ -62,7 +62,7 @@
     <section class="preview">
       <div class="previewTop">
         <div><div class="ey">03 · Live PDF</div><h2>Invoice preview</h2></div>
-        <span id="pdfState">No PDF generated</span>
+        <span id="pdfState" aria-live="polite">No PDF generated</span>
       </div>
       <div class="pdfFrame"><iframe id="pdf" title="BNC invoice PDF preview"></iframe><div id="emptyPdf"><strong>PDF preview</strong><span>Generate your invoice to see the final document here.</span></div></div>
       <div class="previewActions">
