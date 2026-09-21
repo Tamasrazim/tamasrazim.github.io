@@ -9,7 +9,7 @@ const renderer = fs.readFileSync('code-motion-tamasrazim.html', 'utf8');
 const project = fs.readFileSync('projects/code-motion/index.html', 'utf8');
 const media = fs.readFileSync('projects/code-motion/media-stack.js', 'utf8');
 
-must(renderer.includes('<title>Animation Renderer — Tamasrazim</title>'), 'V2 title exists');
+must(renderer.includes('<title>Code → Motion — Tamasrazim</title>'), 'current Code Motion title exists');
 must(renderer.includes('function encodeRange'), 'deterministic export function exists');
 must(renderer.includes('VideoEncoder'), 'WebCodecs encoder path exists');
 must(renderer.includes('VideoFrame'), 'VideoFrame path exists');
