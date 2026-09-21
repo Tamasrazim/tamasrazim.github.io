@@ -835,9 +835,19 @@
       :root{--page-pad:clamp(17px,5vw,28px);--section:clamp(78px,15vw,120px)}
       .site-header{padding:10px 0}
       .clock{display:none}
+      .brand-name{line-height:1}
       .hero{min-height:100svh}
       .hero-inner{padding:145px 0 70px}
-      .hero-title{font-size:clamp(2.9rem,13vw,5.6rem)}
+      .hero-title{
+        width:100%;
+        max-width:none;
+        font-size:clamp(2rem,9.1vw,5.6rem);
+        line-height:.92;
+        letter-spacing:-.075em;
+        text-align:left
+      }
+      .hero-line{width:100%}
+      .hero-line > span{width:100%}
       .hero-meta{display:none}
       .hero-scan{width:62vw;bottom:62px}
       .scroll-cue{bottom:20px}
