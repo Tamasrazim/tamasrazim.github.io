@@ -19,7 +19,7 @@ must(fs.existsSync(root+'/invoice/manifest.webmanifest'),'Invoice manifest exist
 
 const site=read(root+'/index.html');
 must(site.includes('BNC AgroCare'),'business page identifies BNC AgroCare');
-must(site.includes('href="invoice/"'),'business page links to Invoice PWA');
+must(/href=["'](?:\./)?invoice\//.test(site),'business page links to Invoice PWA');
 must(site.includes('href="reference/demo.xlsx"'),'business page links to demo sheet');
 must(!site.includes('tamasrazim.github.io/renderer'),'BNC page does not leak personal renderer navigation');
 
