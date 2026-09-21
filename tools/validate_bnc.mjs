@@ -30,6 +30,8 @@ must(invoice.includes('id="importBtn"'),'invoice JSON import exists');
 must(invoice.includes('href="../reference/demo.xlsx"'),'invoice points to canonical demo sheet');
 must(!invoice.includes('../site/'),'invoice has no stale staging path');
 must(invoiceJs.includes('const PRODUCT_CELLS=[[22.883,35.553]'),'dynamic product cells use locked-template coordinates');
+must(invoiceJs.includes('async function getTemplateBytes()'),'invoice PDF template loader exists');
+must(invoiceJs.includes('fetch(TEMPLATE_URL)'),'invoice loads the locked template from the local app path');
 must(!/X\[12\]/.test(invoiceJs),'invoice PDF drawing has no out-of-range X[12] coordinate');
 must(invoiceJs.includes('l=X[10],right=X[11]'),'dynamic summary uses final template columns');
 
