@@ -425,6 +425,495 @@ select.mini:focus{outline:none;border-color:#fff}
 }
 body.noui-motion *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
 body.noui-motion #grain{display:none}
+
+/* ============================================================
+   TAMASRAZIM UI POLISH — LESS GRID / MORE WORKSTATION
+   Visual layer only. Renderer logic and DOM behavior unchanged.
+   ============================================================ */
+:root{
+  --void:#050506;
+  --panel:#0a0a0c;
+  --raise:#101012;
+  --raise2:#151518;
+  --rule:rgba(255,255,255,.07);
+  --rule-hi:rgba(255,255,255,.18);
+  --ink:#f4f4f6;
+  --ink-2:#bcbcc3;
+  --mut:#777780;
+  --mut-2:#505058;
+  --grid:rgba(255,255,255,.018);
+  --t-fast:140ms cubic-bezier(.2,.7,.3,1);
+  --t-mid:280ms cubic-bezier(.2,.7,.3,1);
+  --t-slow:620ms cubic-bezier(.16,.84,.28,1);
+}
+
+body{
+  background:
+    radial-gradient(circle at 70% -10%,rgba(255,255,255,.045),transparent 34%),
+    radial-gradient(circle at 12% 110%,rgba(255,255,255,.02),transparent 28%),
+    var(--void);
+}
+
+#grain{opacity:.018}
+
+#hdr{
+  height:52px;
+  border-bottom:0;
+  background:linear-gradient(180deg,rgba(15,15,18,.94),rgba(9,9,11,.92));
+  box-shadow:0 10px 35px rgba(0,0,0,.24);
+}
+.brand{
+  gap:10px;
+  padding:0 18px;
+  border-right:0;
+}
+.brand b{font-size:11px;letter-spacing:.18em}
+.brand em{margin-top:13px;letter-spacing:.18em}
+.proj{
+  gap:8px;
+  padding:0 14px;
+  border-right:0;
+}
+#projName{
+  width:170px;
+  border-bottom:0;
+  background:rgba(255,255,255,.035);
+  border-radius:9px;
+  padding:7px 9px;
+}
+#projName:hover,#projName:focus{border-bottom-color:transparent}
+.vtag{
+  border:0;
+  border-radius:999px;
+  padding:3px 7px;
+  background:rgba(255,255,255,.055);
+  color:var(--mut);
+}
+.hdr-acts{gap:4px;padding:0 8px}
+.hdr-acts button{
+  border-left:0;
+  border-radius:9px;
+  margin:8px 0;
+  padding:0 11px;
+  font-size:10px;
+  background:transparent;
+}
+.hdr-acts button:hover{background:rgba(255,255,255,.065)}
+.hdr-acts button.key::before{inset:4px;border:0}
+.hdr-acts button::after{height:2px;bottom:3px;left:10px;right:10px;border-radius:2px}
+
+#strip{
+  height:30px;
+  border-bottom:0;
+  padding:0 14px;
+  gap:3px;
+  background:rgba(7,7,9,.82);
+}
+.st{
+  padding:4px 9px;
+  border-radius:999px;
+  font-size:8.5px;
+  letter-spacing:.14em;
+}
+.st i{
+  width:4px;height:4px;
+  border-radius:50%;
+  transform:none;
+}
+.st.on{background:rgba(255,255,255,.075)}
+.st.done{background:rgba(255,255,255,.025)}
+.st-sep{display:none}
+
+#work{
+  grid-template-columns:minmax(220px,1fr) 1px minmax(320px,1.25fr) 1px 344px;
+  background:rgba(0,0,0,.16);
+}
+.pane{
+  background:rgba(10,10,12,.92);
+}
+.vrule{
+  background:transparent;
+}
+.vrule:hover,.vrule.drag{background:rgba(255,255,255,.08)}
+
+.phead{
+  height:34px;
+  padding:0 13px;
+  border-bottom:0;
+  background:transparent;
+  letter-spacing:.14em;
+  color:#85858d;
+}
+.phead::before{
+  content:"";
+  width:5px;height:5px;
+  border-radius:50%;
+  background:#4f4f56;
+  margin-right:1px;
+}
+.phead button{
+  padding:4px 7px;
+  border-radius:999px;
+  background:rgba(255,255,255,.035);
+}
+.phead button:hover{background:rgba(255,255,255,.075)}
+
+#edwrap{
+  background:linear-gradient(180deg,#09090b,#08080a);
+  border-radius:0;
+}
+#gutter{
+  width:56px;
+  padding-top:14px;
+  border-right:0;
+  background:rgba(0,0,0,.08);
+  color:#45454d;
+}
+#gutter div.cur{
+  color:#fff;
+  background:rgba(255,255,255,.035);
+}
+#gutter div.err{
+  border-radius:4px;
+}
+#hl,#ta{
+  padding-top:14px;
+}
+.tk-api{border-bottom:0}
+
+#find{
+  padding:6px 9px;
+  border-bottom:0;
+  background:rgba(255,255,255,.025);
+  gap:7px;
+}
+#find input{
+  border:0;
+  border-radius:8px;
+  background:rgba(255,255,255,.045);
+  padding:6px 8px;
+}
+#find button{
+  border:0;
+  border-radius:7px;
+  background:rgba(255,255,255,.035);
+}
+#find button:hover{background:rgba(255,255,255,.075)}
+
+#stage{
+  padding:22px;
+  background:
+    radial-gradient(circle at 50% 45%,rgba(255,255,255,.028),transparent 43%),
+    linear-gradient(var(--grid) 1px,transparent 1px) 0 0/36px 36px,
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/36px 36px,
+    #060607;
+}
+#canvasFrame{
+  box-shadow:0 20px 70px -28px rgba(0,0,0,.95),0 0 0 1px rgba(255,255,255,.08);
+}
+#hud{padding:12px 14px;gap:8px}
+#hud .pill{
+  border:0;
+  border-radius:999px;
+  padding:4px 8px;
+  background:rgba(5,5,7,.72);
+}
+#stageMsg{
+  left:18px;right:18px;bottom:18px;
+  border:0;
+  border-radius:12px;
+  box-shadow:0 18px 50px rgba(0,0,0,.38);
+  background:rgba(9,9,11,.94);
+  padding:13px 15px;
+  backdrop-filter:blur(12px);
+}
+#stageMsg .fix{border-top:0;padding-top:4px}
+#pvctl{
+  height:40px;
+  border-top:0;
+  padding:0 12px;
+  background:rgba(9,9,11,.9);
+}
+.ib{
+  width:30px;height:26px;
+  border-radius:8px;
+}
+.ib:hover{background:rgba(255,255,255,.07)}
+.ib.on{border-radius:8px}
+select.mini{
+  border:0;
+  border-radius:7px;
+  background:rgba(255,255,255,.045);
+  padding:4px 7px;
+}
+
+#tabs{
+  gap:5px;
+  padding:7px;
+  border-bottom:0;
+  background:rgba(7,7,9,.72);
+}
+#tabs button{
+  padding:7px 7px;
+  border:0;
+  border-right:0;
+  border-radius:8px;
+  background:transparent;
+}
+#tabs button:hover{background:rgba(255,255,255,.055)}
+#tabs button.on{
+  background:rgba(255,255,255,.085);
+  border-bottom:0;
+  box-shadow:inset 0 -2px 0 #fff;
+}
+#railBody{
+  padding:3px 0 18px;
+}
+.panel{
+  padding:10px 12px 34px;
+}
+.panel.on{
+  animation:railIn 220ms cubic-bezier(.2,.7,.3,1);
+}
+@keyframes railIn{
+  from{opacity:0;transform:translateY(4px)}
+  to{opacity:1;transform:none}
+}
+.sec{
+  margin:0 0 10px;
+  padding:11px 12px 12px;
+  border-radius:12px;
+  background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.012));
+}
+.sec>h4{
+  border-bottom:0;
+  padding-bottom:8px;
+  margin-bottom:8px;
+  color:#92929a;
+  letter-spacing:.16em;
+}
+.sec>h4::before{
+  content:"";
+  width:4px;height:4px;
+  border-radius:50%;
+  background:#55555d;
+}
+.sec>h4 button{
+  padding:3px 6px;
+  border-radius:999px;
+  background:rgba(255,255,255,.035);
+}
+.row{
+  min-height:30px;
+  padding:3px 0;
+}
+.row>label,.row>.lb{flex-basis:104px}
+.row input[type=text],.row input[type=number],.row select,.row textarea{
+  border:0;
+  border-radius:8px;
+  background:rgba(255,255,255,.04);
+  padding:6px 7px;
+}
+.row input:focus,.row select:focus,.row textarea:focus{
+  border-color:transparent;
+  background:rgba(255,255,255,.075);
+  box-shadow:0 0 0 1px rgba(255,255,255,.2);
+}
+.row input[type=checkbox]{
+  margin-left:auto;
+}
+.seg{
+  gap:3px;
+  border:0;
+  border-radius:9px;
+  padding:3px;
+  margin:3px 0 7px;
+  background:rgba(255,255,255,.03);
+}
+.seg button{
+  border-right:0;
+  border-radius:7px;
+  padding:6px 5px;
+}
+.seg button:hover{background:rgba(255,255,255,.06)}
+.seg button.on{background:#fff;color:#000}
+.note{color:#707078}
+.warnbox{
+  border:0;
+  border-radius:9px;
+  border-left:0;
+  background:rgba(255,255,255,.045);
+  padding:9px 10px;
+}
+.btn{
+  border:0;
+  border-radius:9px;
+  background:rgba(255,255,255,.045);
+  padding:10px;
+  margin-top:7px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);
+}
+.btn::before{display:none}
+.btn:hover{
+  border-color:transparent;
+  background:rgba(255,255,255,.09);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);
+}
+.btn.solid{
+  background:#f2f2f4;
+  color:#070709;
+  box-shadow:none;
+}
+.btn.solid:hover{background:#fff}
+.btn-row{gap:7px}
+
+.kv{
+  gap:5px 10px;
+}
+.tag{
+  border:0;
+  border-radius:999px;
+  background:rgba(255,255,255,.04);
+  padding:3px 6px;
+}
+
+#time{
+  height:140px;
+  border-top:0;
+  background:linear-gradient(180deg,#0a0a0c,#08080a);
+  box-shadow:0 -18px 40px rgba(0,0,0,.18);
+}
+#tlhead{
+  height:32px;
+  border-bottom:0;
+  padding:0 14px;
+  gap:16px;
+  background:transparent;
+}
+#tlhead b{font-weight:600}
+#track{
+  margin:0 14px;
+  border:0;
+  border-radius:10px;
+  background:
+    linear-gradient(to right,rgba(255,255,255,.055) 1px,transparent 1px) 0 0/12.5% 100%,
+    rgba(255,255,255,.035);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.055);
+}
+#loopband{
+  border-left:0;
+  border-right:0;
+  background:rgba(255,255,255,.055);
+}
+#loopband::before{
+  top:5px;left:7px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  padding:2px 5px;
+}
+#ph{
+  width:2px;
+  background:#fff;
+  box-shadow:0 0 16px rgba(255,255,255,.26);
+}
+#ph::before{
+  top:1px;left:-3px;
+  width:8px;height:8px;
+  border-radius:50%;
+  clip-path:none;
+}
+#tfoot{
+  height:42px;
+  background:transparent;
+  padding:0 10px;
+}
+#tfoot .rd{
+  padding:4px 7px;
+  border-radius:7px;
+  background:rgba(255,255,255,.03);
+}
+
+#status{
+  height:26px;
+  min-height:26px;
+  border-top:0;
+  background:#070709;
+  color:#63636c;
+  padding:0 12px;
+}
+#status b{color:#bdbdc4}
+#status .dot{
+  width:5px;height:5px;
+  border-radius:50%;
+  box-shadow:none;
+}
+#status #stMsg{color:#55555d}
+
+.media{
+  margin:6px 0 4px;
+  border:0;
+  border-radius:10px;
+  overflow:hidden;
+  background:rgba(255,255,255,.03);
+}
+.media .mrow{
+  border-bottom:0;
+  padding:8px 10px;
+}
+.media small{padding:0 10px 8px}
+
+.verified{
+  border:0;
+  border-radius:10px;
+  background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.035));
+}
+.verified b{
+  border-right:0;
+  padding-right:0;
+  margin-right:4px;
+}
+
+#modal{
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(14px);
+}
+#modalBox{
+  border:0 !important;
+  border-radius:16px !important;
+  background:#0c0c0f !important;
+  box-shadow:0 30px 100px rgba(0,0,0,.62) !important;
+}
+#modalHead{
+  border-bottom:0 !important;
+  padding:0 14px !important;
+}
+#modalBody{border-top:0 !important}
+#modalFoot{border-top:0 !important}
+
+/* Keep the layout airy on narrower screens. */
+@media(max-width:1100px){
+  #work{grid-template-columns:minmax(220px,1fr) 1px minmax(320px,1.25fr) 1px 300px}
+  .sec{padding:10px}
+}
+@media(max-width:760px){
+  #hdr{height:48px}
+  .brand{padding:0 12px}
+  .brand em{display:none}
+  #projName{width:130px}
+  .hdr-acts button{padding:0 8px}
+  #strip{padding:0 8px}
+  #stage{padding:12px}
+  #time{height:128px}
+  #track{margin:0 9px}
+  .panel{padding-left:8px;padding-right:8px}
+}
+@media(max-width:560px){
+  .hdr-acts button:not(.key){display:none}
+  #projName{width:110px}
+  #tabs button{font-size:8px;letter-spacing:.11em}
+  .sec{border-radius:10px}
+}
+
 </style>
 </head>
 <body>
