@@ -158,7 +158,7 @@ async function generate(){
   const remaining=state.products.slice(shown).filter(hasData);
   for(let i=0;i<remaining.length;i+=18)await continuationPage(doc,remaining.slice(i,i+18),shown+i,font,bold);
   lastPdf=await doc.save({useObjectStreams:false});
-  if(pdfUrl)URL.revokeObjectURL(pdfUrl);pdfUrl=URL.createObjectURL(new Blob([lastPdf],{type:"application/pdf"}));$("#pdf").src=pdfUrl;$("#emptyPdf").style.display="none";
+  if(pdfUrl)URL.revokeObjectURL(pdfUrl);pdfUrl=URL.createObjectURL(new Blob([lastPdf],{type:"application/pdf"}));
   $("#pdfState").textContent=pageCount>1?`PDF generated · ${pageCount} A4 pages`:"PDF generated · A4";$("#status").textContent="Ready";return lastPdf
 }
 async function download(){const b=lastPdf||await generate();const url=URL.createObjectURL(new Blob([b],{type:"application/pdf"})),a=document.createElement("a");a.href=url;a.download="BNC-Invoice-"+state.invoiceNo+".pdf";a.click();setTimeout(()=>URL.revokeObjectURL(url),1200)}
