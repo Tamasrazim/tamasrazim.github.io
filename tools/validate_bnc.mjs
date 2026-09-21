@@ -37,7 +37,7 @@ must(!invoiceJs.includes('$("#pdf")'),'invoice has no stale browser PDF viewer r
 must(/const side=i<4\?0:i<8\?1:\(i-8\)%2/.test(invoiceJs),'dynamic extra rows map to left/right columns');
 must(invoiceJs.includes('function renderProducts(){lastPdf=null;'),'editing invalidates the old generated PDF');
 must(invoiceJs.includes('function syncFields(){'),'invoice synchronizes saved state back into form fields');
-must(invoiceJs.includes('install();\\n(async()=>'),'PWA install prompt is registered before async initialization');
+const installPos=invoiceJs.indexOf('install();');\nconst initPos=invoiceJs.indexOf('(async()=>');\nmust(installPos>=0 && initPos>installPos,'PWA install prompt is registered before async initialization');
 must(invoiceJs.includes('let dl=$("#catalog")'),'product catalog is not duplicated on every render');
 must(invoiceJs.includes('items.sort((x,y)=>Number(y.updatedAt||0)-Number(x.updatedAt||0))'),'invoice history sorts by save time');
 must(invoiceJs.includes('const remaining=state.products.slice(shown).filter(hasData)'),'invoice supports continuation pages');
