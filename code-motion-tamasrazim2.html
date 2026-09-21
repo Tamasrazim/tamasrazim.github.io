@@ -4452,7 +4452,7 @@ function buildJob(over) {
     code: S.code,
     composition: comp,
     metadata: meta,
-    format: fmt === 'webm' ? 'webm' : 'png',
+    format: fmt === 'mp4' ? 'mp4' : fmt === 'webm' ? 'webm' : 'png',
     target: fmt === 'dir' ? 'dir' : 'zip',
     exportFormat: fmt,
     quality: S.quality, timebase: S.timebase, checksums: S.checksums,
@@ -4639,7 +4639,7 @@ function startRender(job, opts) {
   prog.querySelector('i').style.width = '0%';
   var c = job.composition;
   logLine('job ' + job.id + (job.test ? ' (test: ' + job.test + ')' : ''), true);
-  logLine(c.width + '×' + c.height + ' · ' + c.fps + ' fps · ' + c.frameCount + ' frames · ' + (c.frameCount / c.fps).toFixed(3) + ' s · ' + (job.format === 'webm' ? 'WebM' : 'PNG ' + job.target));
+  logLine(c.width + '×' + c.height + ' · ' + c.fps + ' fps · ' + c.frameCount + ' frames · ' + (c.frameCount / c.fps).toFixed(3) + ' s · ' + job.format === 'mp4' ? 'MP4' : job.format === 'webm' ? 'WebM' : 'PNG ' + job.target);
   logLine('frame 0 renders at t = 0.000 s, frame ' + (c.frameCount - 1) + ' at t = ' + ((c.frameCount - 1) / c.fps).toFixed(3) + ' s');
   renderStat({ frame: 0, done: 0, total: c.frameCount, elapsedMs: 0, renderFps: 0, msPerFrame: 0, bytes: 0 }, job);
   toyShow(true);
@@ -4914,7 +4914,7 @@ function renderQueue() {
     d.appendChild(el('h5', null, job.label + '  ·  ' + job.id));
     var c = job.composition;
     d.appendChild(el('p', null, c.width + '×' + c.height + ' · ' + c.fps + ' fps · ' + (c.frameCount / c.fps).toFixed(2) + ' s · ' +
-      c.frameCount + ' frames · ' + (job.format === 'webm' ? 'WebM' : 'PNG ' + job.target) + ' · ' + job.status));
+      c.frameCount + ' frames · ' + job.format === 'mp4' ? 'MP4' : job.format === 'webm' ? 'WebM' : 'PNG ' + job.target + ' · ' + job.status));
     if (job.status === 'READY' || job.status === 'DONE' || job.status === 'FAILED') {
       var x = el('button', 'x', '✕');
       x.title = 'Remove from queue';
