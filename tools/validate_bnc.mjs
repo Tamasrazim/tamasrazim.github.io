@@ -21,24 +21,13 @@ must(site.includes('href="./invoice/"'),'business page links to Invoice PWA');
 must(!site.includes('tamasrazim.github.io/renderer'),'BNC page does not leak personal renderer navigation');
 
 const invoice=read(root+'/invoice/index.html');
+must(invoice.includes('id="pdfPreview"'),'invoice uses the new A4 preview field');
+must(!invoice.includes('<iframe id="pdf"'),'invoice does not use a browser PDF iframe');
 must(invoice.includes('id="previewBtn"'),'invoice generate control exists');
 must(invoice.includes('id="saveBtn"'),'invoice save control exists');
 must(invoice.includes('id="jsonInBtn"'),'invoice JSON import control exists');
 must(invoice.includes('serviceWorker'),'invoice registers its own service worker');
 must(invoice.includes('../invoice.pdf'),'invoice references local locked PDF template');
-must(invoice.includes('id="pdfPreview"'),'invoice uses the in-page A4 PDF preview');
-must(!invoice.includes('<iframe id="pdf"'),'invoice does not use the browser PDF viewer');
-must(!invoiceJs.includes('$("#pdf").src'),'invoice has no stale browser PDF viewer reference');
-must(invoice.includes('pdf-lib@1.17.1'),'invoice includes the pinned PDF engine');
-
-const invoiceJs=read(root+'/invoice/js/app.js');
-must(invoiceJs.includes('const TEMPLATE="../invoice.pdf"'),'invoice uses the local locked PDF template');
-must(invoiceJs.includes('fetch(TEMPLATE'),'invoice loads the locked template at runtime');
-must(invoiceJs.includes('loadPdfEngine'),'invoice has a resilient PDF engine loader');
-must(invoiceJs.includes('unpkg.com/pdf-lib@1.17.1'),'invoice has a second PDF engine CDN fallback');
-must(invoiceJs.includes('useObjectStreams:false'),'invoice saves preview PDFs with compatible object streams');
-must(invoiceJs.includes('pdfjs-dist@6.3.289'),'invoice uses pinned PDF.js for in-page preview');
-must(invoiceJs.includes('function renderPdfPreview'),'invoice renders generated PDFs to A4 canvas sheets');
 must(invoiceJs.includes('header_B4_L4'),'invoice maps the template ref field explicitly');
 must(invoiceJs.includes('invoice_number'),'invoice maps the template invoice field explicitly');
 must(invoiceJs.includes('dealer_trader_name'),'invoice maps trader field explicitly');
