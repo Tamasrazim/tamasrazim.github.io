@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#050505">
+  <meta name="description" content="Code → Motion — Tamasrazim's deterministic animation renderer and media stack.">
+  <title>Code → Motion — Tamasrazim</title>
+  <style>
+    :root{color-scheme:dark;--bg:#050505;--panel:#0b0b0b;--ink:#f4f4f4;--mut:#858585;--rule:#282828;--soft:#111;--mono:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;--sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);min-height:100vh}
+    a{color:inherit}
+    .shell{width:min(1180px,calc(100% - 32px));margin:auto}
+    header{border-bottom:1px solid var(--rule);padding:18px 0;position:sticky;top:0;background:rgba(5,5,5,.92);backdrop-filter:blur(12px);z-index:5}
+    .head{display:flex;align-items:center;justify-content:space-between;gap:20px;font-family:var(--mono);font-size:11px;letter-spacing:.14em}
+    .head a{text-decoration:none;color:var(--mut)}
+    .head a:hover{color:#fff}
+    main{padding:72px 0 100px}
+    .kicker{font:10px var(--mono);letter-spacing:.24em;color:var(--mut);margin-bottom:18px}
+    h1{font-size:clamp(42px,8vw,88px);line-height:.94;letter-spacing:-.055em;margin:0;max-width:900px}
+    .arrow{color:var(--mut)}
+    .lead{max-width:720px;margin:28px 0 0;color:#bcbcbc;font-size:18px;line-height:1.6}
+    .rule{height:1px;background:var(--rule);margin:64px 0}
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+    .panel{border:1px solid var(--rule);background:var(--panel);padding:24px;min-height:230px;transition:transform .3s ease,border-color .3s ease}
+    .panel:hover{transform:translateY(-4px);border-color:#555}
+    .label{font:10px var(--mono);letter-spacing:.2em;color:var(--mut);margin-bottom:16px}
+    h2{font-size:27px;font-weight:500;letter-spacing:-.02em;margin:0 0 14px}
+    p{color:#aaa;line-height:1.7}
+    ul{margin:0;padding-left:19px;color:#aaa;line-height:1.9}
+    code{font:12px var(--mono);color:#eee}
+    .matrix{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:22px}
+    .cell{background:#090909;padding:16px;font:12px var(--mono)}
+    .cell span{display:block;color:var(--mut);font-size:9px;letter-spacing:.14em;margin-bottom:7px}
+    .status{display:inline-flex;padding:5px 8px;border:1px solid #454545;font:10px var(--mono);letter-spacing:.12em}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:28px}
+    .btn{display:inline-block;border:1px solid #454545;padding:12px 15px;text-decoration:none;font:10px var(--mono);letter-spacing:.12em;transition:all .2s}
+    .btn:hover{background:#fff;color:#000;border-color:#fff}
+    footer{border-top:1px solid var(--rule);padding:22px 0;color:#666;font:10px var(--mono);display:flex;justify-content:space-between;gap:20px}
+    @media(max-width:760px){.grid{grid-template-columns:1fr}.matrix{grid-template-columns:1fr}.lead{font-size:16px}main{padding-top:48px}footer{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell head">
+      <span>PROJECT / CODE → MOTION</span>
+      <a href="../../">TAMASRAZIM ↗</a>
+    </div>
+  </header>
+
+  <main class="shell">
+    <div class="kicker">TAMASRAZIM / PROJECT 01 / MEDIA ENGINE</div>
+    <h1>Code → Motion <span class="arrow">—</span><br>Tamasrazim</h1>
+    <p class="lead">Write the motion. See the motion. Render every frame. A deterministic animation workspace whose preview, analysis, export and verification all share the same composition model.</p>
+
+    <div class="actions">
+      <a class="btn" href="../../code-motion-tamasrazim.html">OPEN RENDERER →</a>
+      <a class="btn" href="https://github.com/Tamasrazim/tamasrazim.github.io/blob/main/code-motion-tamasrazim.html" target="_blank" rel="noopener noreferrer">SOURCE ↗</a>
+      <span class="status">MEDIA STACK / MEDIABUNNY 1.58.1</span>
+    </div>
+
+    <div class="rule"></div>
+
+    <div class="grid">
+      <section class="panel">
+        <div class="label">01 / RENDER MODEL</div>
+        <h2>Every requested frame is explicit.</h2>
+        <p>The export clock is derived from the frame index rather than realtime playback:</p>
+        <p><code>time = frame / fps</code></p>
+        <p>Preview playback and export are separate systems. Rendering can take longer on heavy compositions without silently dropping requested frames.</p>
+      </section>
+
+      <section class="panel">
+        <div class="label">02 / MEDIA STACK</div>
+        <h2>Encoder + container are separate layers.</h2>
+        <p><strong>WebCodecs</strong> provides browser/device encoder access. <strong>Mediabunny 1.58.1</strong> provides the media output and muxing layer.</p>
+        <div class="matrix">
+          <div class="cell"><span>VIDEO</span>H.264 / AVC</div>
+          <div class="cell"><span>VIDEO</span>H.265 / HEVC</div>
+          <div class="cell"><span>VIDEO</span>AV1</div>
+          <div class="cell"><span>VIDEO</span>VP9 / VP8</div>
+          <div class="cell"><span>CONTAINER</span>MP4</div>
+          <div class="cell"><span>CONTAINER</span>MKV / WebM</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="label">03 / CAPABILITY DETECTION</div>
+        <h2>No imaginary codecs.</h2>
+        <p>The app should probe the selected resolution, frame rate and codec against the current browser before enabling a render path. Unsupported combinations remain visibly unavailable instead of producing fake files.</p>
+      </section>
+
+      <section class="panel">
+        <div class="label">04 / THIRD PARTY</div>
+        <h2>Mediabunny is vendored, not hidden.</h2>
+        <p>The pinned browser bundle is placed under the project directory by GitHub Actions, with its MPL-2.0 license and SHA-256 checksum kept beside it.</p>
+        <div class="actions">
+          <a class="btn" href="README.md">README</a>
+          <a class="btn" href="THIRD-PARTY-NOTICES.md">LICENSE / NOTICE</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="shell">
+    <span>CODE → MOTION — TAMASRAZIM</span>
+    <a href="../../">BACK TO MAIN SITE ↑</a>
+  </footer>
+</body>
+</html>
