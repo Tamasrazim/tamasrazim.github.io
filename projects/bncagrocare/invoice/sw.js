@@ -1,8 +1,6 @@
-const CACHE="bnc-invoice-v35";
+const CACHE="bnc-invoice-v40";
 const PDF_LIB="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js";
-const PDF_RENDERER="https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.mjs";
-const PDF_WORKER="https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.worker.min.mjs";
-const CORE=["./","./index.html","./css/app.css","./js/app.js","./manifest.webmanifest","./icons/icon.svg","../invoice.pdf"];
+const CORE=["./","./index.html","./css/app.css","./js/app.js","./manifest.webmanifest","./icons/icon.svg","../invoice.pdf",PDF_LIB];
 const FALLBACK=new URL("./index.html",self.registration.scope).href;
 
 async function cachePut(request,response){if(response&&(response.ok||response.type==="opaque")){try{const c=await caches.open(CACHE);await c.put(request,response.clone())}catch{}}return response}
