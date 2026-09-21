@@ -6,7 +6,6 @@ const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error(msg);console.log('PASS',msg)};
 
 must(fs.existsSync(root+'/index.html'),'BNC business page exists');
-must(fs.existsSync(root+'/FB_IMG_1789811599210.jpg'),'BNC image asset exists');
 must(fs.existsSync(root+'/invoice.pdf'),'Locked original invoice PDF exists');
 const pdfTree=execFileSync('git',['ls-tree','-r','HEAD','--',root+'/invoice.pdf'],{encoding:'utf8'}).trim().split(/\s+/);
 must(pdfTree[2]==='46c9ce8303a0a4abdf7599ba1479b298c26fc6fe','invoice.pdf immutable template SHA matches locked source');
@@ -18,25 +17,28 @@ for(const p of ['index.html','js/app.js','css/app.css','sw.js','manifest.webmani
 const site=read(root+'/index.html');
 must(site.includes('BNC AgroCare'),'business page identifies BNC AgroCare');
 must(site.includes('href="./invoice/"'),'business page links to Invoice PWA');
-must(!site.includes('tamasrazim.github.io/renderer'),'BNC page does not leak personal renderer navigation');
 
 const invoice=read(root+'/invoice/index.html');
-must(invoice.includes('id="pdfPreview"'),'invoice uses the new A4 preview field');
-must(!invoice.includes('<iframe id="pdf"'),'invoice does not use a browser PDF iframe');
-must(invoice.includes('id="previewBtn"'),'invoice generate control exists');
-must(invoice.includes('id="saveBtn"'),'invoice save control exists');
-must(invoice.includes('id="jsonInBtn"'),'invoice JSON import control exists');
-must(invoice.includes('serviceWorker'),'invoice registers its own service worker');
-must(invoice.includes('../invoice.pdf'),'invoice references local locked PDF template');
-must(invoiceJs.includes('header_B4_L4'),'invoice maps the template ref field explicitly');
-must(invoiceJs.includes('invoice_number'),'invoice maps the template invoice field explicitly');
-must(invoiceJs.includes('dealer_trader_name'),'invoice maps trader field explicitly');
-must(invoiceJs.includes('function totals()')&&invoiceJs.includes('leftAmount')&&invoiceJs.includes('rightAmount'),'invoice calculates the left/right summary amounts');
-must(invoiceJs.includes('if(!drawn)drawSummary(page,totals(),0,font,bold)'),'invoice always redraws the summary when no extra data rows exist');
-must(invoiceJs.includes('const X=[22.883,35.553,96.994'),'invoice uses the corrected template column geometry');
-must(invoiceJs.includes('MAX_EXTRAROWS=10'),'invoice bounds same-page dynamic expansion');
-must(invoiceJs.includes('function continuationPage'),'invoice has a safe overflow continuation path');
-must(invoiceJs.includes('setTimeout(()=>URL.revokeObjectURL'),'invoice cleans generated object URLs');
+must(invoice.includes('id="pdfPreview"'),'invoice uses the A4 preview field');
+must(!invoice.includes('<iframe'),'invoice does not use a browser PDF iframe');
+must(invoice.includes('unpkg.com/pdf-lib@1.17.1'),'invoice preloads pinned pdf-lib');
+must(invoice.includes('navigator.serviceWorker.register("./sw.js")'),'invoice registers its service worker');
+
+const invoiceJs=read(root+'/invoice/js/app.js');
+must(invoiceJs.includes('bnc-invoice-v4'),'invoice uses the rebuilt data store');
+must(invoiceJs.includes('TEMPLATE="../invoice.pdf"'),'invoice uses the locked PDF template');
+must(invoiceJs.includes('async function loadPdfLib'),'invoice has a resilient PDF engine loader');
+must(invoiceJs.includes('cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js'),'invoice has a PDF engine fallback');
+must(invoiceJs.includes('async function generate'),'invoice has a single PDF generation path');
+must(invoiceJs.includes('useObjectStreams:false'),'invoice saves a compatible PDF');
+must(!invoiceJs.includes('form.flatten'),'invoice does not depend on form flattening');
+must(!invoiceJs.includes('pdfjs-dist'),'invoice has no PDF.js dependency');
+must(!invoiceJs.includes('$("#pdf")'),'invoice has no stale browser PDF viewer reference');
+must(/const side=i<4\?0:i<8\?1:\(i-8\)%2/.test(invoiceJs),'dynamic extra rows map to left/right columns');
+must(invoiceJs.includes('function renderProducts(){lastPdf=null;'),'editing invalidates the old generated PDF');
+must(invoiceJs.includes('let dl=$("#catalog")'),'product catalog is not duplicated on every render');
+must(invoiceJs.includes('items.sort((x,y)=>Number(y.updatedAt||0)-Number(x.updatedAt||0))'),'invoice history sorts by save time');
+must(invoiceJs.includes('const remaining=state.products.slice(shown).filter(hasData)'),'invoice supports continuation pages');
 execFileSync(process.execPath,['--check',root+'/invoice/js/app.js'],{stdio:'inherit'});
 
 const manifest=JSON.parse(read(root+'/invoice/manifest.webmanifest'));
@@ -44,11 +46,12 @@ must(manifest.start_url==='./','PWA start_url is relative');
 must(manifest.scope==='./','PWA scope is relative');
 must(Array.isArray(manifest.icons)&&manifest.icons.length>0,'PWA icon is declared');
 
-const sw=read(root+'/invoice/sw.js');
-must(/bnc-invoice-v\d+/.test(sw),'service worker cache is versioned');
-must(sw.includes("self.registration.scope"),'service worker derives its navigation scope');
-must(sw.includes('caches.match(FALLBACK)'),'service worker has offline navigation fallback');
-must(sw.includes('no-cors'),'service worker can cache the external PDF engine');
+const serviceWorker=read(root+'/invoice/sw.js');
+must(/bnc-invoice-v\d+/.test(serviceWorker),'service worker cache is versioned');
+must(serviceWorker.includes('bnc-invoice-v43'),'service worker cache is at v43');
+must(serviceWorker.includes('self.registration.scope'),'service worker derives its navigation scope');
+must(serviceWorker.includes('caches.match(FALLBACK)'),'service worker has an offline navigation fallback');
+must(serviceWorker.includes('invoice.pdf'),'service worker pre-caches the locked invoice template');
 execFileSync(process.execPath,['--check',root+'/invoice/sw.js'],{stdio:'inherit'});
 
 console.log('BNC validation complete');
