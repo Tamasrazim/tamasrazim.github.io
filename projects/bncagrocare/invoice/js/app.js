@@ -166,7 +166,7 @@ function fitText(text,max){text=String(text||"");return text.length<=max?text:te
 const X=[22.883,35.553,152.482,172.693,211.939,259.504,272.572,334.409,393.852,412.476,462.422,521.496];
 const PRODUCT_CELLS=[[22.883,35.553],[37.553,96.994],[98.994,152.482],[154.482,172.693],[174.693,211.939],[213.939,259.504],[261.504,272.572],[274.572,334.409],[336.409,393.852],[395.852,412.476],[414.476,462.422],[464.422,521.496]];
 const ROW_TOP=649.45, ROW_H=10.12;
-const SUMMARY_TOP=639.33, SUMMARY_BOTTOM=593.0, MIN_SUMMARY_BOTTOM=548.0;
+const SUMMARY_TOP=ROW_TOP-(ROW_H*4), SUMMARY_BOTTOM=SUMMARY_TOP-44.34, MIN_SUMMARY_BOTTOM=548.0;
 const SUMMARY_ROWS=[
   {h:7.0,label:"ST",labelX1:X[1],labelX2:X[3],v1X:X[3],v1W:X[5]-X[3],rightLabel:"ST",rightLabelX1:X[7],rightLabelX2:X[9],rightV1X:X[11]},
   {h:9.74,label:"Total Carton",labelX1:X[1],labelX2:X[3],v1X:X[3],v1W:X[5]-X[3],rightLabel:"Total Taka",rightLabelX1:X[8],rightLabelX2:X[11],rightV1X:X[11]},
@@ -188,19 +188,25 @@ function drawTextFit(page,text,x,y,w,h,font,size,align="left"){
 }
 function dynamicRowHeight(extraRows){
   if(extraRows<=0)return ROW_H;
-  return Math.min(ROW_H,(SUMMARY_BOTTOM-MIN_SUMMARY_BOTTOM)/extraRows);
+  return Math.min(ROW_H,(SUMMARY_TOP-MIN_SUMMARY_BOTTOM)/extraRows);
 }
 function drawExtraProductRows(page,left,right,maxRows,regular,bold){
   const extraRows=Math.max(0,maxRows-4);
   if(!extraRows)return 0;
   const rh=dynamicRowHeight(extraRows);
   const totalExtraH=extraRows*rh;
-  const maskBottom=SUMMARY_BOTTOM-totalExtraH;
-  // Remove only the lower existing summary/empty area. SL 1–4 and the original header stay untouched.
-  page.drawRectangle({x:PRODUCT_CELLS[0][0],y:maskBottom,width:PRODUCT_CELLS[PRODUCT_CELLS.length-1][1]-PRODUCT_CELLS[0][0],height:ROW_TOP-maskBottom,
-    color:PDFLib.rgb(1,1,1),borderWidth:0});
+  const clearBottom=SUMMARY_BOTTOM-totalExtraH;
+  // Preserve SL 1–4. Clear only the summary area plus the space occupied by the inserted rows.
+  page.drawRectangle({
+    x:PRODUCT_CELLS[0][0],
+    y:clearBottom,
+    width:PRODUCT_CELLS[PRODUCT_CELLS.length-1][1]-PRODUCT_CELLS[0][0],
+    height:SUMMARY_TOP-clearBottom,
+    color:PDFLib.rgb(1,1,1),
+    borderWidth:0
+  });
   for(let r=0;r<extraRows;r++){
-    const y=ROW_TOP-(r+1)*rh;
+    const y=SUMMARY_TOP-(r+1)*rh;
     const li=r+4,ri=r+4,l=left[li]||blank(),rr=right[ri]||blank();
     const vals=[
       hasData(l)?slFor("left",li):"",hasData(l)?l.name:"",hasData(l)?l.pack:"",hasData(l)?l.ctn:"",hasData(l)?l.rate:"",hasData(l)?money(num(l.ctn)*num(l.rate)):"",
@@ -217,14 +223,15 @@ function drawExtraProductRows(page,left,right,maxRows,regular,bold){
 }
 function drawDynamicSummary(page,t,shift,regular,bold){
   if(shift<=0)return;
-  const rows=[
-    {top:SUMMARY_TOP-0*0-shift,label:"ST",leftValue:money(t.leftAmount),rightLabel:"ST",rightValue:money(t.rightAmount)},
-    {top:632.33-shift,label:"Total Carton",leftValue:String(t.totalCartons),rightLabel:"Total Taka",rightValue:money(t.totalTaka)},
-    {top:622.59-shift,label:"Commission %",leftValue:String(state.commission)},
-    {top:612.85-shift,label:"Total Amount",leftValue:money(t.finalTotal)},
-    {top:603.11-shift,label:"Total Taka (In words):",leftValue:state.amountWords}
-  ];
+  let top=SUMMARY_TOP-shift;
   const heights=[7.0,9.74,9.74,9.74,8.12];
+  const rows=[
+    {top,label:"ST",leftValue:money(t.leftAmount),rightLabel:"ST",rightValue:money(t.rightAmount)},
+    {top:top-=9.74,label:"Total Carton",leftValue:String(t.totalCartons),rightLabel:"Total Taka",rightValue:money(t.totalTaka)},
+    {top:top-=9.74,label:"Commission %",leftValue:String(state.commission)},
+    {top:top-=9.74,label:"Total Amount",leftValue:money(t.finalTotal)},
+    {top:top-=8.12,label:"Total Taka (In words):",leftValue:state.amountWords}
+  ];
   const b1=X[1],b3=X[3],d=X[3],f=X[5],h=X[7],i=X[8],l=X[10],right=X[11];
   rows.forEach((row,idx)=>{
     const hgt=heights[idx],y=row.top-hgt;
@@ -250,7 +257,8 @@ async function generatePdf(){
   const form=doc.getForm();fillTemplateForm(form);
   try{form.updateFieldAppearances();form.flatten()}catch(e){}
   const left=state.left,right=state.right;
-  const activeCount=side=>{let n=4;for(let i=0;i<state[side].length;i++)if(hasData(state[side][i]))n=Math.max(n,i+1);return n};
+  // Product rows are structural: pressing Add Product must create a visible PDF row even before data is entered.
+  const activeCount=side=>Math.max(4,state[side].length);
   const maxRows=Math.max(activeCount("left"),activeCount("right"),4);
   if(maxRows>4){
     const page=doc.getPages()[0];
