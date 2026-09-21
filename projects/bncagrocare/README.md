@@ -4,6 +4,8 @@
 
 BNC AgroCare website and invoice PWA.
 
+> **Immutable template:** `invoice.pdf` is the locked original BNC invoice template. The project may fill or extend from it, but the template file itself must not be modified.
+
 ## Invoice PWA
 
 The working interface is PDF-first.
