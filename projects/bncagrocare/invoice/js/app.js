@@ -112,8 +112,8 @@ async function generate(){
   let engine;
   try{engine=await loadPdfEngine()}catch(e){$("#status").textContent="PDF engine error";$("#pdfState").textContent="PDF engine unavailable";throw e}
   const {PDFDocument,StandardFonts}=engine;if(!PDFDocument)throw Error("PDF engine unavailable");
-  $("#status").textContent="Generating PDF…";
-  const res=await fetch(TEMPLATE,{cache:"no-store"});if(!res.ok)throw Error("Locked invoice template unavailable");
+  $("#status").textContent="Loading PDF engine…";
+  $("#status").textContent="Generating PDF…";const res=await fetch(TEMPLATE,{cache:"no-store"});if(!res.ok)throw Error("Locked invoice template unavailable");
   const doc=await PDFDocument.load(await res.arrayBuffer(),{updateMetadata:false,ignoreEncryption:true});
   const form=doc.getForm();
   putField(form,"header_B4_L4",state.ref);
