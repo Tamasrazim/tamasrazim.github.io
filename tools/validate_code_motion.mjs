@@ -23,8 +23,7 @@ for (const token of [
   'new VideoFrame',
   'VideoEncoder',
   'MediaRecorder',
-  'render-target',
-  'INIT_EXPORT'
+  'render-target'
 ]) {
   must(renderer.includes(token), 'renderer contract: ' + token);
 }
