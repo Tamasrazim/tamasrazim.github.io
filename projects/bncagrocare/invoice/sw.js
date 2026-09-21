@@ -13,13 +13,15 @@ async function cacheResponse(request,response){
 }
 async function networkFirst(request){
   try{return await cacheResponse(request,await fetch(request))}
-  catch(e){return caches.match(request).then(r=>r||caches.match('./index.html').then(r=>r||caches.match(FALLBACK_URL)))}
+  catch(e){
+    return caches.match(request).then(r=>r||caches.match(FALLBACK_URL))
+  }
 }
 async function staleWhileRevalidate(request){
   const cached=await caches.match(request);
   const network=fetch(request).then(r=>cacheResponse(request,r)).catch(()=>null);
-  if(cached){self.registration.active&&self.registration.active.postMessage({type:'asset-refresh'});return cached}
-  return (await network)||caches.match(request)||caches.match(FALLBACK_URL);
+  if(cached){network.catch(()=>{});return cached}
+  return (await network)||caches.match(request)||Response.error();
 }
 
 self.addEventListener('install',event=>{
