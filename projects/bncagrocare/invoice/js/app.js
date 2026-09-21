@@ -15,7 +15,7 @@ const hasData=p=>!!(String(p?.name||"").trim()||String(p?.pack||"").trim()||Stri
 
 function words(n){n=Math.max(0,Math.round(num(n)*100))/100;const o=["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"],t=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];const w=x=>x<20?o[x]:x<100?t[Math.floor(x/10)]+(x%10?" "+o[x%10]:""):x<1000?o[Math.floor(x/100)]+" Hundred"+(x%100?" "+w(x%100):""):x<1e5?w(Math.floor(x/1e3))+" Thousand"+(x%1e3?" "+w(x%1e3):""):x<1e7?w(Math.floor(x/1e5))+" Lakh"+(x%1e5?" "+w(x%1e5):""):w(Math.floor(x/1e7))+" Crore"+(x%1e7?" "+w(x%1e7):"");const whole=Math.floor(n),p=Math.round((n-whole)*100);return w(whole)+" Taka"+(p?" and "+String(p).padStart(2,"0")+" Paisa":"")+" Only"}
 
-function totals(){let cartons=0,total=0;state.products.forEach(p=>{const c=num(p.ctn),a=c*num(p.rate);cartons+=c;total+=a});const commission=total*num(state.commission)/100;return{cartons,total,commission,final:Math.max(0,total-commission)}}
+function totals(){let cartons=0,total=0,leftAmount=0,rightAmount=0;state.products.forEach((p,i)=>{const c=Math.max(0,num(p.ctn)),a=c*Math.max(0,num(p.rate));cartons+=c;total+=a;const side=i<4?0:i<8?1:(i-8)%2;if(side===0)leftAmount+=a;else rightAmount+=a});const commission=total*Math.max(0,num(state.commission))/100;return{cartons,total,commission,final:Math.max(0,total-commission),leftAmount,rightAmount}}
 function normalize(){state.products=Array.isArray(state.products)?state.products.map(p=>({...blank(),...p})):[];if(!state.products.length)state.products=Array.from({length:TEMPLATE_ROWS},blank);while(state.products.length<TEMPLATE_ROWS)state.products.push(blank());state.commission=Math.max(0,num(state.commission));if(!state.date)state.date=localDate()}
 function cloneState(){return JSON.parse(JSON.stringify(state))}
 function saveDraft(){if(!db)return;db.transaction("drafts","readwrite").objectStore("drafts").put({id:"current",data:cloneState(),updatedAt:Date.now()})}
@@ -24,13 +24,13 @@ function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB,1);r.
 function render(){normalize();for(const el of document.querySelectorAll("[data-k]")){const k=el.dataset.k;if(document.activeElement!==el)el.value=state[k]??""}
 const host=$("#products");host.replaceChildren();
 state.products.forEach((p,i)=>{const row=document.createElement("div");row.className="prod";const n=document.createElement("div");n.className="n";n.textContent=String(i+1).padStart(2,"0");row.append(n);
-["name","pack","ctn","rate"].forEach(k=>{const lab=document.createElement("label");lab.textContent=k==="ctn"?"Ctn":k==="rate"?"Rate / Ctn":k[0].toUpperCase()+k.slice(1);const inp=document.createElement("input");inp.value=p[k]||"";inp.placeholder=k==="name"?"Product":"";inp.autocomplete="off";if(k==="name"){inp.setAttribute("list","productCatalog");inp.setAttribute("aria-label","Product "+(i+1))}
-inp.addEventListener("input",e=>{state.products[i][k]=e.target.value;updateSummary();saveDraft()});lab.append(inp);row.append(lab)});
-const amount=document.createElement("label");amount.textContent="Amount";const ai=document.createElement("input");ai.readOnly=true;ai.value=p.ctn&&p.rate?money(num(p.ctn)*num(p.rate)):"";amount.append(ai);row.append(amount);
+["name","pack","ctn","rate"].forEach(k=>{const lab=document.createElement("label");lab.textContent=k==="ctn"?"Ctn":k==="rate"?"Rate / Ctn":k[0].toUpperCase()+k.slice(1);const inp=document.createElement("input");inp.value=p[k]||"";inp.placeholder=k==="name"?"Product":"";inp.autocomplete="off";inp.setAttribute("aria-label",(k==="ctn"?"Cartons":k==="rate"?"Rate per carton":k[0].toUpperCase()+k.slice(1))+" "+(i+1));if(k==="ctn"){inp.type="number";inp.min="0";inp.step="1";inp.inputMode="numeric"}if(k==="rate"){inp.type="number";inp.min="0";inp.step="0.01";inp.inputMode="decimal"}if(k==="name"){inp.setAttribute("list","productCatalog")}
+inp.addEventListener("input",e=>{const v=(k==="ctn"||k==="rate")?Math.max(0,num(e.target.value)):e.target.value;state.products[i][k]=v;updateSummary();saveDraft()});lab.append(inp);row.append(lab)});
+const amount=document.createElement("label");amount.textContent="Amount";const ai=document.createElement("input");ai.readOnly=true;ai.setAttribute("aria-label","Amount "+(i+1));ai.value=p.ctn&&p.rate?money(num(p.ctn)*num(p.rate)):"";amount.append(ai);row.append(amount);
 const del=document.createElement("button");del.textContent="×";del.title="Remove product";del.setAttribute("aria-label","Remove product "+(i+1));del.onclick=()=>{if(state.products.length>TEMPLATE_ROWS){state.products.splice(i,1);render();saveDraft()}else{$("#status").textContent="Keep at least 8 template rows"}};row.append(del);host.append(row)});
 const dl=document.createElement("datalist");dl.id="productCatalog";PRODUCTS.forEach(v=>{const o=document.createElement("option");o.value=v;dl.append(o)});document.body.append(dl);updateSummary()}
 function updateSummary(){const t=totals();$("#summary").innerHTML='<div class="sum"><span>Cartons</span><strong>'+t.cartons+'</strong></div><div class="sum"><span>Gross taka</span><strong>'+money(t.total)+'</strong></div><div class="sum"><span>Commission</span><strong>'+money(t.commission)+'</strong></div><div class="sum final"><span>Final total</span><strong>'+money(t.final)+'</strong></div>'}
-function bindFields(){document.querySelectorAll("[data-k]").forEach(el=>el.addEventListener("input",()=>{state[el.dataset.k]=el.value;saveDraft();updateSummary()}))}
+function bindFields(){document.querySelectorAll("[data-k]").forEach(el=>el.addEventListener("input",()=>{const k=el.dataset.k;const v=k==="commission"?Math.max(0,num(el.value)):el.value;state[k]=v;if(k==="commission")el.value=String(v);saveDraft();updateSummary()}))}
 function addProduct(){state.products.push(blank());render();saveDraft();const inputs=document.querySelectorAll("#products input");requestAnimationFrame(()=>inputs[Math.max(0,inputs.length-5)]?.focus());$("#status").textContent="Product added"}
 function reset(){Object.assign(state,{ref:"X2",invoiceNo:String((Number(state.invoiceNo)||1)+1).padStart(4,"0"),date:localDate(),trader:"",buyer:"",address:"",mobile:"",commission:0,products:Array.from({length:TEMPLATE_ROWS},blank)});lastPdf=null;render();saveDraft();if(pdfUrl){URL.revokeObjectURL(pdfUrl);pdfUrl=""}$("#pdf").removeAttribute("src");$("#emptyPdf").style.display="grid";$("#pdfState").textContent="No PDF generated";$("#status").textContent="New invoice"}
 
@@ -109,10 +109,9 @@ async function generate(){
   try{form.updateFieldAppearances()}catch{}
   const font=await doc.embedFont(StandardFonts.Helvetica),bold=await doc.embedFont(StandardFonts.HelveticaBold),page=doc.getPage(0);
   drawExistingRows(page,font);
-  const extraRows=Math.min(MAX_EXTRAROWS,Math.ceil(Math.max(0,state.products.length-8)/2));
   const drawn=drawExtraRows(page,font,bold);
   const shown=8+drawn;
-  if(extraRows===0){drawSummary(page,totals(),0,font,bold)}
+  if(!drawn)drawSummary(page,totals(),0,font,bold);
   const remaining=state.products.slice(shown).filter(hasData);
   for(let i=0;i<remaining.length;i+=18)await continuationPage(doc,remaining.slice(i,i+18),shown+i,font,bold);
   lastPdf=await doc.save();
