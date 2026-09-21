@@ -24,13 +24,14 @@ must(site.includes('href="reference/demo.xlsx"'),'business page links to demo sh
 must(!site.includes('tamasrazim.github.io/renderer'),'BNC page does not leak personal renderer navigation');
 
 const invoice=read(root+'/invoice/index.html');
+const invoiceJs=read(root+'/invoice/js/app.js');
 must(invoice.includes('id="saveInvoice"'),'invoice save control exists');
 must(invoice.includes('id="importBtn"'),'invoice JSON import exists');
 must(invoice.includes('href="../reference/demo.xlsx"'),'invoice points to canonical demo sheet');
 must(!invoice.includes('../site/'),'invoice has no stale staging path');
-must(invoice.includes('const PRODUCT_CELLS=[[22.883,35.553]'),'dynamic product cells use locked-template coordinates');
-must(!/X\\[12\\]/.test(invoice),'invoice PDF drawing has no out-of-range X[12] coordinate');
-must(invoice.includes('l=X[10],right=X[11]'),'dynamic summary uses final template columns');
+must(invoiceJs.includes('const PRODUCT_CELLS=[[22.883,35.553]'),'dynamic product cells use locked-template coordinates');
+must(!/X\[12\]/.test(invoiceJs),'invoice PDF drawing has no out-of-range X[12] coordinate');
+must(invoiceJs.includes('l=X[10],right=X[11]'),'dynamic summary uses final template columns');
 
 const manifest=JSON.parse(read(root+'/invoice/manifest.webmanifest'));
 must(manifest.start_url==='./','PWA start_url is relative to invoice app');
