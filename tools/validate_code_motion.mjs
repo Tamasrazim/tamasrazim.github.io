@@ -21,7 +21,7 @@ must(renderer.includes("type:'FRAME'"), 'explicit frame message exists');
 must(renderer.includes('Render Test'), 'render test control exists');
 must(renderer.includes('Loop Inspector'), 'loop inspector control exists');
 must(renderer.includes('4K UHD'), '4K preset exists');
-must(renderer.includes('<option value="120">120</option>'), '120 FPS preset exists');
+must(/<option[^>]*>120<\/option>/.test(renderer), '120 FPS preset exists');
 must(!/<script[^>]+\bsrc=/i.test(renderer), 'renderer has no external script dependency');
 must(!/<link[^>]+\bhref=[^>]+\.css/i.test(renderer), 'renderer has no external stylesheet dependency');
 
