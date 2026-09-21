@@ -621,8 +621,13 @@
     .project-body h3{margin-top:42px;font-size:clamp(1.15rem,2vw,1.65rem);letter-spacing:-.035em}
     .project-body p{margin-top:12px;max-width:44ch;font:400 .79rem/1.75 var(--mono);color:var(--muted)}
     .project-tags{margin-top:auto;padding-top:24px;font:600 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+    .project-links{
+      position:absolute;right:26px;bottom:24px;
+      display:flex;align-items:center;gap:18px;
+      z-index:7;
+    }
     .project-link{
-      position:absolute;right:26px;bottom:24px;display:inline-flex;align-items:center;gap:8px;
+      position:relative;display:inline-flex;align-items:center;gap:8px;
       font:600 .62rem var(--mono);letter-spacing:.06em;text-transform:uppercase
     }
     .project-link span{transition:transform .3s var(--ease)}
