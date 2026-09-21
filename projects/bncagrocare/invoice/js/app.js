@@ -1,6 +1,24 @@
 (()=>{"use strict";
 const $=s=>document.querySelector(s);
-const PDF=()=>window.PDFLib||{};
+const PDF=()=>window.PDFLib||globalThis.PDFLib||{};
+let pdfEnginePromise=null;
+function loadPdfEngine(){
+  if(PDF().PDFDocument)return Promise.resolve(PDF());
+  if(pdfEnginePromise)return pdfEnginePromise;
+  pdfEnginePromise=new Promise((resolve,reject)=>{
+    const urls=["https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js","https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"];
+    let n=0;
+    const next=()=>{
+      if(PDF().PDFDocument)return resolve(PDF());
+      if(n>=urls.length)return reject(Error("PDF engine could not be loaded"));
+      const s=document.createElement("script");s.src=urls[n++];s.async=false;
+      s.onload=()=>PDF().PDFDocument?resolve(PDF()):next();
+      s.onerror=next;document.head.append(s)
+    };
+    next()
+  }).catch(e=>{pdfEnginePromise=null;throw e});
+  return pdfEnginePromise
+}
 const TEMPLATE="../invoice.pdf",DB="bnc-invoice-pdf-v3",MAX_EXTRAROWS=10,TEMPLATE_ROWS=8;
 const PRODUCTS=["NC Gold - 4cpa","NC Zinc - Mono 36%","NC Solu - Boron 20%","NC Solu+ - Boron 17%","NC Chilli - Chilted Zinc 10%","Pa- Cola - Paclobutazol 25 SC","NC Vit - (NHA 98%)","NC Leaf - GA-3","NC Gyp - Calcium 20% & sulfur 16%","Pachtara - 5 SG","NC Darma","Darma+++","NC Vit+++","NC Leaf+++"];
 const blank=()=>({name:"",pack:"",ctn:"",rate:""});
@@ -91,10 +109,12 @@ async function continuationPage(doc,items,start,font,bold){
 }
 
 async function generate(){
-  const {PDFDocument,StandardFonts}=PDF();if(!PDFDocument)throw Error("PDF engine unavailable");
+  let engine;
+  try{engine=await loadPdfEngine()}catch(e){$("#status").textContent="PDF engine error";$("#pdfState").textContent="PDF engine unavailable";throw e}
+  const {PDFDocument,StandardFonts}=engine;if(!PDFDocument)throw Error("PDF engine unavailable");
   $("#status").textContent="Generating PDF…";
   const res=await fetch(TEMPLATE,{cache:"no-store"});if(!res.ok)throw Error("Locked invoice template unavailable");
-  const doc=await PDFDocument.load(await res.arrayBuffer(),{updateMetadata:false});
+  const doc=await PDFDocument.load(await res.arrayBuffer(),{updateMetadata:false,ignoreEncryption:true});
   const form=doc.getForm();
   putField(form,"header_B4_L4",state.ref);
   putField(form,"invoice_number",state.invoiceNo);
@@ -106,15 +126,16 @@ async function generate(){
   putField(form,"header_I6_L6","Md Rezaul Karim");
   putField(form,"header_I7_L7","Officer BNC AGRO CARE Area Manager");
   putField(form,"header_I8_L8","01718-306103");
-  try{form.updateFieldAppearances()}catch{}
-  const font=await doc.embedFont(StandardFonts.Helvetica),bold=await doc.embedFont(StandardFonts.HelveticaBold),page=doc.getPage(0);
+  const font=await doc.embedFont(StandardFonts.Helvetica),bold=await doc.embedFont(StandardFonts.HelveticaBold);
+  try{form.updateFieldAppearances(font)}catch{}
+  const page=doc.getPage(0);
   drawExistingRows(page,font);
   const drawn=drawExtraRows(page,font,bold);
   const shown=8+drawn;
   if(!drawn)drawSummary(page,totals(),0,font,bold);
   const remaining=state.products.slice(shown).filter(hasData);
   for(let i=0;i<remaining.length;i+=18)await continuationPage(doc,remaining.slice(i,i+18),shown+i,font,bold);
-  lastPdf=await doc.save();
+  lastPdf=await doc.save({useObjectStreams:false});
   if(pdfUrl)URL.revokeObjectURL(pdfUrl);pdfUrl=URL.createObjectURL(new Blob([lastPdf],{type:"application/pdf"}));$("#pdf").src=pdfUrl;$("#emptyPdf").style.display="none";
   $("#pdfState").textContent=remaining.length?"PDF generated · continuation page":"PDF generated";$("#status").textContent="Ready";return lastPdf
 }
@@ -122,5 +143,5 @@ async function download(){const b=lastPdf||await generate();const url=URL.create
 function exportJSON(){const url=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:"application/json"})),a=document.createElement("a");a.href=url;a.download="BNC-Invoice-"+state.invoiceNo+".json";a.click();setTimeout(()=>URL.revokeObjectURL(url),800)}
 function importJSON(file){file.text().then(t=>{const d=JSON.parse(t);if(!Array.isArray(d.products))throw Error();Object.assign(state,d);normalize();render();saveDraft();$("#status").textContent="Imported"}).catch(()=>alert("Invalid invoice JSON"))}
 function install(){addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;$("#installBtn").hidden=false});$("#installBtn").onclick=async()=>{if(!deferred)return;await deferred.prompt();deferred=null;$("#installBtn").hidden=true};addEventListener("appinstalled",()=>$("#installBtn").hidden=true)}
-(async()=>{try{await openDB();const q=db.transaction("drafts").objectStore("drafts").get("current");q.onsuccess=()=>{if(q.result?.data)Object.assign(state,q.result.data);normalize();render();bindFields();history();install()}}catch{normalize();render();bindFields();install()}$("#addBtn").onclick=addProduct;$("#newBtn").onclick=reset;$("#saveBtn").onclick=saveInvoice;$("#previewBtn").onclick=()=>generate().catch(e=>{$("#status").textContent="PDF error";alert(e.message)});$("#downloadBtn").onclick=()=>download().catch(e=>alert(e.message));$("#jsonOutBtn").onclick=exportJSON;$("#jsonInBtn").onclick=()=>$("#jsonFile").click();$("#jsonFile").onchange=e=>{const f=e.target.files?.[0];if(f)importJSON(f);e.target.value=""}})();
+(async()=>{try{await openDB();const q=db.transaction("drafts").objectStore("drafts").get("current");q.onsuccess=()=>{if(q.result?.data)Object.assign(state,q.result.data);normalize();render();bindFields();history();install()}}catch{normalize();render();bindFields();install()}$("#addBtn").onclick=addProduct;$("#newBtn").onclick=reset;$("#saveBtn").onclick=saveInvoice;$("#previewBtn").onclick=()=>generate().catch(e=>{const msg=String(e?.message||e||"Unknown PDF error");$("#status").textContent="PDF error";$("#pdfState").textContent="Generation failed";alert(msg)});$("#downloadBtn").onclick=()=>download().catch(e=>alert(e.message));$("#jsonOutBtn").onclick=exportJSON;$("#jsonInBtn").onclick=()=>$("#jsonFile").click();$("#jsonFile").onchange=e=>{const f=e.target.files?.[0];if(f)importJSON(f);e.target.value=""}})();
 })();
