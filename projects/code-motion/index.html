@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#050505">
-  <meta name="description" content="Code → Motion — Tamasrazim's deterministic animation renderer and media stack.">
+  <meta name="description" content="Code → Motion — Tamasrazim's browser-first deterministic animation renderer.">
   <title>Code → Motion — Tamasrazim</title>
   <style>
     :root{color-scheme:dark;--bg:#050505;--panel:#0b0b0b;--ink:#f4f4f4;--mut:#858585;--rule:#282828;--soft:#111;--mono:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;--sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
@@ -51,14 +51,14 @@
   </header>
 
   <main class="shell">
-    <div class="kicker">TAMASRAZIM / PROJECT 01 / MEDIA ENGINE</div>
+    <div class="kicker">TAMASRAZIM / PROJECT 01 / MOTION RENDERER V2</div>
     <h1>Code → Motion <span class="arrow">—</span><br>Tamasrazim</h1>
-    <p class="lead">Write the motion. See the motion. Render every frame. A deterministic animation workspace whose preview, analysis, export and verification all share the same composition model.</p>
+    <p class="lead">Write the motion. See the motion. Render explicit frames locally. V2 isolates the animation runtime, probes the browser's actual encoder capability, and writes the supported output container from those frames.</p>
 
     <div class="actions">
       <a class="btn" href="../../code-motion-tamasrazim.html">OPEN RENDERER →</a>
       <a class="btn" href="https://github.com/Tamasrazim/tamasrazim.github.io/blob/main/code-motion-tamasrazim.html" target="_blank" rel="noopener noreferrer">SOURCE ↗</a>
-      <span class="status">MEDIA STACK / MEDIABUNNY 1.58.1</span>
+      <span class="status">V2 / WEBCodecs + LOCAL MUXERS</span>
     </div>
 
     <div class="rule"></div>
@@ -75,14 +75,14 @@
       <section class="panel">
         <div class="label">02 / MEDIA STACK</div>
         <h2>Encoder + container are separate layers.</h2>
-        <p><strong>WebCodecs</strong> provides browser/device encoder access. <strong>Mediabunny 1.58.1</strong> provides the media output and muxing layer.</p>
+        <p><strong>WebCodecs</strong> provides browser/device encoder access. V2 uses local MP4/WebM muxers for the output paths implemented by the renderer.</p>
         <div class="matrix">
           <div class="cell"><span>VIDEO</span>H.264 / AVC</div>
-          <div class="cell"><span>VIDEO</span>H.265 / HEVC</div>
-          <div class="cell"><span>VIDEO</span>AV1</div>
+          
+          
           <div class="cell"><span>VIDEO</span>VP9 / VP8</div>
           <div class="cell"><span>CONTAINER</span>MP4</div>
-          <div class="cell"><span>CONTAINER</span>MKV / WebM</div>
+          <div class="cell"><span>CONTAINER</span>WebM / Matroska</div>
         </div>
       </section>
 
@@ -94,11 +94,11 @@
 
       <section class="panel">
         <div class="label">04 / THIRD PARTY</div>
-        <h2>Mediabunny is vendored, not hidden.</h2>
-        <p>The pinned browser bundle is placed under the project directory by GitHub Actions, with its MPL-2.0 license and SHA-256 checksum kept beside it.</p>
+        <h2>Output is local and explicit.</h2>
+        <p>V2 does not require a vendored media runtime. Encoder availability comes from the current browser/device, and the supported containers are written locally by the renderer.</p>
         <div class="actions">
           <a class="btn" href="README.md">README</a>
-          <a class="btn" href="THIRD-PARTY-NOTICES.md">LICENSE / NOTICE</a>
+          <a class="btn" href="THIRD-PARTY-NOTICES.md">TECHNICAL NOTE</a>
         </div>
       </section>
     </div>
