@@ -20,6 +20,15 @@ The repository is the source of truth for the website.
 
 ---
 
+## Code → Motion V2
+
+A separate single-file motion renderer for deterministic code-driven video output.
+
+**Canonical renderer:** `code-motion-tamasrazim.html`  
+**Project page:** `projects/code-motion/`
+
+V2 isolates the animation source, requests frames from the deterministic clock, probes actual browser encoder support, and writes the supported MP4/WebM output locally. The renderer UI is not used as the exported capture surface.
+
 ## Animation Renderer — Tamasrazim
 
 ### Built from a stock contributor's workflow, for stock contributors.
