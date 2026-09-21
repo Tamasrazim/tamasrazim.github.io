@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0a0a0a">
+<title>Repo Token Meter — Tamasrazim</title>
+<style>
+:root{color-scheme:dark;--bg:#070707;--panel:#101010;--panel2:#0b0b0b;--line:#252525;--text:#f4f4f4;--muted:#858585;--accent:#c7ff6a;--danger:#ff7777;--warn:#ffd166}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 15% 0,#191919 0,#070707 38%),#070707;color:var(--text);font:14px/1.5 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:1160px;margin:auto;padding:28px 18px 72px}
+header{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;margin-bottom:24px}
+h1{margin:0;font-size:clamp(32px,5vw,62px);letter-spacing:-.055em;line-height:.95}
+.kicker{margin:0 0 8px;color:var(--accent);font:700 11px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.14em}
+.sub{margin-top:12px;color:var(--muted);max-width:700px}
+.badge{border:1px solid var(--line);border-radius:999px;padding:8px 11px;color:#d4d4d4;font:11px ui-monospace,monospace;white-space:nowrap}
+.panel{border:1px solid var(--line);background:linear-gradient(180deg,rgba(20,20,20,.96),rgba(10,10,10,.96));border-radius:20px;padding:18px;margin:14px 0;box-shadow:0 20px 65px rgba(0,0,0,.18)}
+.controls{display:grid;grid-template-columns:1fr 130px 150px auto;gap:10px}
+input,button,select{height:46px;border:1px solid var(--line);border-radius:12px;background:#0a0a0a;color:var(--text);padding:0 13px;font:13px ui-monospace,SFMono-Regular,Consolas,monospace}
+button{cursor:pointer;border-color:transparent;background:#ededed;color:#050505;font-weight:800}
+button.secondary{background:#161616;color:#fff;border-color:var(--line)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.help{margin-top:10px;color:var(--muted);font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.stat{min-height:108px;padding:14px 15px;border:1px solid var(--line);border-radius:15px;background:var(--panel2)}
+.stat .label{color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font:11px ui-monospace,monospace}
+.stat .value{margin-top:6px;font-size:27px;font-weight:850;letter-spacing:-.025em}
+.stat .note{margin-top:5px;color:#6f6f6f;font-size:11px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.section-title{font-weight:800;margin-bottom:8px}
+.rows{display:grid}
+.row{display:flex;justify-content:space-between;gap:18px;padding:10px 0;border-bottom:1px solid #1b1b1b;font:12px ui-monospace,SFMono-Regular,Consolas,monospace}
+.row:last-child{border-bottom:0}
+.row strong{text-align:right}
+.green{color:var(--accent)}.warn{color:var(--warn)}.red{color:var(--danger)}
+.file{display:flex;justify-content:space-between;gap:15px;padding:9px 0;border-bottom:1px solid #191919;font:12px ui-monospace,SFMono-Regular,Consolas,monospace}
+.file:last-child{border-bottom:0}
+.file span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.history{max-height:340px;overflow:auto}
+.history-item{padding:11px 0;border-bottom:1px solid #1b1b1b}
+.history-item:last-child{border-bottom:0}
+.history-top{display:flex;justify-content:space-between;gap:12px;font:12px ui-monospace,monospace}
+.history-meta{margin-top:3px;color:var(--muted);font-size:11px}
+footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
+@media(max-width:930px){.stats{grid-template-columns:repeat(2,1fr)}.controls{grid-template-columns:1fr 1fr}.controls button{grid-column:1/-1}.two{grid-template-columns:1fr}}
+@media(max-width:520px){main{padding:20px 12px 50px}.stats{grid-template-columns:1fr}.controls{grid-template-columns:1fr}.controls button{grid-column:auto}header{align-items:flex-start;flex-direction:column}.badge{align-self:flex-start}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div>
+    <p class="kicker">TAMASRAZIM // MEASUREMENT</p>
+    <h1>Repo Token Meter</h1>
+    <div class="sub">Live GitHub repository measurement for source size, estimated tokens, binary footprint, commit history, and local scan history.</div>
+  </div>
+  <div class="badge">NO BACKEND · LOCAL HISTORY</div>
+</header>
+
+<section class="panel">
+  <div class="controls">
+    <input id="repo" value="https://github.com/Tamasrazim/tamasrazim.github.io" aria-label="GitHub repository URL">
+    <input id="branch" value="main" aria-label="Branch" placeholder="branch">
+    <input id="ratio" value="3.1" inputmode="decimal" aria-label="Characters per token">
+    <button id="measure">MEASURE NOW</button>
+  </div>
+  <div class="help">Fast mode uses repository byte sizes. The displayed token number is an estimate, not an official OpenAI billing/tokenizer count. A lower chars/token ratio produces a higher estimate.</div>
+</section>
+
+<section class="panel">
+  <div class="stats">
+    <div class="stat"><div class="label">Files</div><div class="value" id="files">—</div><div class="note">all blobs in tree</div></div>
+    <div class="stat"><div class="label">Source files</div><div class="value" id="sourceFiles">—</div><div class="note">text/code only</div></div>
+    <div class="stat"><div class="label">Source tokens</div><div class="value green" id="tokens">—</div><div class="note">estimated</div></div>
+    <div class="stat"><div class="label">Repo size</div><div class="value" id="repoSize">—</div><div class="note">all tracked blobs</div></div>
+    <div class="stat"><div class="label">API left</div><div class="value" id="rate">—</div><div class="note">GitHub REST requests</div></div>
+  </div>
+</section>
+
+<div class="two">
+<section class="panel">
+  <div class="section-title">Current snapshot</div>
+  <div class="rows">
+    <div class="row"><span>Source bytes</span><strong id="sourceBytes">—</strong></div>
+    <div class="row"><span>Binary bytes</span><strong id="binaryBytes">—</strong></div>
+    <div class="row"><span>Binary share</span><strong id="binaryShare">—</strong></div>
+    <div class="row"><span>Estimated token range</span><strong id="tokenRange">—</strong></div>
+    <div class="row"><span>HEAD</span><strong id="head">—</strong></div>
+    <div class="row"><span>Measured</span><strong id="measuredAt">—</strong></div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="section-title">Historical growth</div>
+  <div class="rows">
+    <div class="row"><span>First commit</span><strong id="firstCommit">—</strong></div>
+    <div class="row"><span>Latest commit</span><strong id="lastCommit">—</strong></div>
+    <div class="row"><span>Commits scanned</span><strong id="commitCount">—</strong></div>
+    <div class="row"><span>Lines added</span><strong id="lineAdds">—</strong></div>
+    <div class="row"><span>Lines deleted</span><strong id="lineDels">—</strong></div>
+    <div class="row"><span>Current source token footprint</span><strong id="growthTokens">—</strong></div>
+  </div>
+</section>
+</div>
+
+<section class="panel">
+  <div class="section-title">Largest source files</div>
+  <div id="largest"><div class="help">Run a measurement.</div></div>
+</section>
+
+<section class="panel">
+  <div class="section-title">Browser measurement history</div>
+  <div class="help">Saved locally on this device. Nothing is uploaded by this tool.</div>
+  <div id="history" class="history"><div class="help">No measurements saved yet.</div></div>
+  <div style="margin-top:12px"><button id="clearHistory" class="secondary">CLEAR LOCAL HISTORY</button></div>
+</section>
+
+<section class="panel">
+  <div class="section-title">What this tool measures</div>
+  <div class="help">
+    It measures the repository snapshot visible through GitHub's public REST API. “Tokens” means an estimate of how much text/code the current snapshot represents.
+    GitHub does not expose an “AI token usage” number for repository storage, so this tool cannot report an official OpenAI/Claude billing count.
+    API rate-limit information is shown separately so you can see how much GitHub REST access remains.
+  </div>
+</section>
+
+<footer>Repo Token Meter — Tamasrazim · standalone GitHub Pages project</footer>
+</main>
+
+<script>
+"use strict";
+(() => {
+  const $ = id => document.getElementById(id);
+  const BIN = /\.(png|jpe?g|gif|webp|avif|ico|pdf|xlsx?|xlsm|zip|7z|rar|tar|gz|woff2?|ttf|otf|eot|mp3|wav|ogg|mp4|webm|mov|mkv|exe|dll|so|dylib|bin|psd|ai|sketch)$/i;
+  const HISTORY_KEY = "tamasrazim-repo-token-meter:v1";
+  const API = "https://api.github.com";
+  const REQUESTS = 1500;
+  const state = { running:false };
+
+  function fmt(n){ return Number(n||0).toLocaleString("en-US"); }
+  function bytes(n){
+    if(n < 1024) return fmt(n) + " B";
+    if(n < 1048576) return (n/1024).toFixed(1) + " KiB";
+    if(n < 1073741824) return (n/1048576).toFixed(2) + " MiB";
+    return (n/1073741824).toFixed(2) + " GiB";
+  }
+  function esc(s){
+    return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+  }
+  function repoParts(raw){
+    let u;
+    try { u = new URL(raw); } catch { throw new Error("Invalid GitHub repository URL."); }
+    if(u.hostname !== "github.com") throw new Error("Use a github.com repository URL.");
+    const p = u.pathname.split("/").filter(Boolean);
+    if(p.length < 2) throw new Error("Repository URL must look like https://github.com/owner/repo");
+    return {owner:p[0], repo:p[1].replace(/\.git$/i,"")};
+  }
+  async function getJSON(url){
+    const r = await fetch(url,{headers:{"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"}});
+    if(!r.ok){
+      let message = "GitHub API " + r.status;
+      try { const j = await r.json(); if(j.message) message += ": " + j.message; } catch {}
+      throw new Error(message);
+    }
+    return r.json();
+  }
+  function set(id,value){ $(id).textContent = value; }
+  function tokenEstimate(sourceBytes, ratio){
+    const estimate = Math.max(0, Math.round(sourceBytes / ratio));
+    return {estimate, low:Math.round(estimate*.88), high:Math.round(estimate*1.12)};
+  }
+  async function allCommits(owner,repo,branch){
+    const first = await getJSON(API + "/repos/" + encodeURIComponent(owner) + "/" + encodeURIComponent(repo) + "/commits?sha=" + encodeURIComponent(branch) + "&per_page=100&page=1");
+    const all = [...first];
+    let page = 2;
+    while(first.length === 100 && page <= 10){
+      const more = await getJSON(API + "/repos/" + encodeURIComponent(owner) + "/" + encodeURIComponent(repo) + "/commits?sha=" + encodeURIComponent(branch) + "&per_page=100&page=" + page);
+      all.push(...more);
+      if(more.length < 100) break;
+      page++;
+    }
+    return {commits:all, capped:page>10};
+  }
+  async function compareHistory(owner,repo,firstSha,headSha){
+    if(!firstSha || !headSha || firstSha === headSha) return {additions:0,deletions:0,commits:1};
+    const j = await getJSON(API + "/repos/" + encodeURIComponent(owner) + "/" + encodeURIComponent(repo) + "/compare/" + encodeURIComponent(firstSha) + "..." + encodeURIComponent(headSha));
+    return {
+      additions:(j.files||[]).reduce((n,f)=>n+(f.additions||0),0),
+      deletions:(j.files||[]).reduce((n,f)=>n+(f.deletions||0),0),
+      commits:Number(j.total_commits||0),
+      limited:Boolean(j.status === "ahead" && Number(j.total_commits||0)>250)
+    };
+  }
+  function saveHistory(item){
+    const old = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+    const next = [item,...old.filter(x => !(x.repo===item.repo && x.branch===item.branch && x.head===item.head))].slice(0,40);
+    localStorage.setItem(HISTORY_KEY,JSON.stringify(next));
+    renderHistory();
+  }
+  function renderHistory(){
+    const arr = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+    if(!arr.length){ $("history").innerHTML='<div class="help">No measurements saved yet.</div>'; return; }
+    $("history").innerHTML = arr.map(x =>
+      '<div class="history-item">'+
+      '<div class="history-top"><span>'+esc(x.repo)+':'+esc(x.branch)+'</span><strong>'+fmt(x.tokens)+' tokens</strong></div>'+
+      '<div class="history-meta">'+esc(new Date(x.time).toLocaleString())+' · '+fmt(x.files)+' files · '+esc(x.head.slice(0,12))+'</div>'+
+      '</div>'
+    ).join("");
+  }
+  async function measure(){
+    if(state.running) return;
+    state.running = true;
+    $("measure").disabled = true;
+    $("measure").textContent = "MEASURING…";
+    try{
+      const {owner,repo} = repoParts($("repo").value.trim());
+      const branch = $("branch").value.trim() || "main";
+      const ratioRaw = Number($("ratio").value);
+      const ratio = Number.isFinite(ratioRaw) && ratioRaw >= 1.5 && ratioRaw <= 8 ? ratioRaw : 3.1;
+
+      const tree = await getJSON(API + "/repos/" + encodeURIComponent(owner) + "/" + encodeURIComponent(repo) + "/git/trees/" + encodeURIComponent(branch) + "?recursive=1");
+      if(tree.truncated) throw new Error("GitHub returned a truncated repository tree. This scanner cannot safely measure a truncated tree.");
+
+      const blobs = (tree.tree||[]).filter(x=>x.type==="blob");
+      const source = blobs.filter(x=>!BIN.test(x.path));
+      const binary = blobs.filter(x=>BIN.test(x.path));
+      const sourceBytes = source.reduce((n,x)=>n+(x.size||0),0);
+      const binaryBytes = binary.reduce((n,x)=>n+(x.size||0),0);
+      const totalBytes = sourceBytes + binaryBytes;
+      const tok = tokenEstimate(sourceBytes,ratio);
+
+      set("files",fmt(blobs.length));
+      set("sourceFiles",fmt(source.length));
+      set("tokens",fmt(tok.estimate));
+      set("repoSize",bytes(totalBytes));
+      set("sourceBytes",bytes(sourceBytes));
+      set("binaryBytes",bytes(binaryBytes));
+      set("binaryShare",totalBytes ? ((binaryBytes/totalBytes)*100).toFixed(1)+"%" : "0%");
+      set("tokenRange",fmt(tok.low)+"–"+fmt(tok.high));
+      set("head",String(tree.sha||"").slice(0,12));
+      set("measuredAt",new Date().toLocaleString());
+
+      const top = source.slice().sort((a,b)=>(b.size||0)-(a.size||0)).slice(0,20);
+      $("largest").innerHTML = top.length ? top.map((f,i)=>
+        '<div class="file"><span title="'+esc(f.path)+'">'+(i+1)+'. '+esc(f.path)+'</span><strong>'+bytes(f.size||0)+'</strong></div>'
+      ).join("") : '<div class="help">No source files detected.</div>';
+
+      let historyInfo = {commits:[],capped:false};
+      try { historyInfo = await allCommits(owner,repo,branch); } catch {}
+      const commits = historyInfo.commits;
+      const first = commits[commits.length-1];
+      const last = commits[0];
+
+      set("firstCommit", first?.commit?.author?.date ? new Date(first.commit.author.date).toLocaleString() : "—");
+      set("lastCommit", last?.commit?.author?.date ? new Date(last.commit.author.date).toLocaleString() : "—");
+
+      let additions = 0, deletions = 0, counted = false;
+      try{
+        if(first && last){
+          const cmp = await compareHistory(owner,repo,first.sha,last.sha);
+          additions = cmp.additions; deletions = cmp.deletions; counted = true;
+          set("commitCount",fmt(cmp.commits));
+        }
+      }catch{}
+      if(!counted){
+        set("commitCount",historyInfo.capped ? "1000+ (list scan)" : fmt(commits.length));
+        set("lineAdds","—");
+        set("lineDels","—");
+      }else{
+        set("lineAdds",fmt(additions));
+        set("lineDels",fmt(deletions));
+      }
+      set("growthTokens",fmt(tok.estimate));
+
+      try{
+        const rate = await getJSON(API+"/rate_limit");
+        set("rate",fmt(rate.resources?.core?.remaining ?? 0));
+      }catch{ set("rate","—"); }
+
+      const item = {repo:owner+"/"+repo,branch,head:String(tree.sha||""),tokens:tok.estimate,files:blobs.length,time:new Date().toISOString()};
+      saveHistory(item);
+
+      document.title = fmt(tok.estimate) + " tokens · " + owner + "/" + repo;
+    }catch(e){
+      $("measure").textContent = "MEASURE NOW";
+      const box = $("history");
+      const old = box.innerHTML;
+      box.innerHTML = '<div class="history-item"><div class="history-top"><span class="red">Measurement error</span></div><div class="history-meta">'+esc(e.message||String(e))+'</div></div>'+old;
+    }finally{
+      state.running=false;
+      $("measure").disabled=false;
+      $("measure").textContent="MEASURE NOW";
+    }
+  }
+
+  $("measure").addEventListener("click",measure);
+  $("clearHistory").addEventListener("click",() => {
+    localStorage.removeItem(HISTORY_KEY);
+    renderHistory();
+  });
+  renderHistory();
+  measure();
+})();
+</script>
+</body>
+</html>
