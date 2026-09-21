@@ -1,0 +1,60 @@
+name: Vendor Code → Motion media stack
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'projects/code-motion/**'
+      - '.github/workflows/code-motion-media-stack.yml'
+      - 'code-motion-tamasrazim.html'
+
+permissions:
+  contents: write
+
+jobs:
+  vendor-mediabunny:
+    # The generated vendor commit carries this marker so it does not retrigger itself forever.
+    if: ${{ !contains(github.event.head_commit.message, '[media-stack]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Vendor Mediabunny 1.58.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="1.58.1"
+          mkdir -p ".cache/mediabunny" "projects/code-motion/vendor/mediabunny/${VERSION}"
+          npm pack "mediabunny@${VERSION}" --pack-destination ".cache/mediabunny"
+          tar -xzf ".cache/mediabunny/mediabunny-${VERSION}.tgz" -C ".cache/mediabunny"
+
+          cp ".cache/mediabunny/package/dist/bundles/mediabunny.min.cjs" \
+             "projects/code-motion/vendor/mediabunny/${VERSION}/mediabunny.min.cjs"
+          cp ".cache/mediabunny/package/LICENSE" \
+             "projects/code-motion/vendor/mediabunny/${VERSION}/LICENSE-MPL-2.0.txt"
+
+          printf '%s  %s\n' "${VERSION}" "mediabunny.min.cjs" > \
+            "projects/code-motion/vendor/mediabunny/${VERSION}/VERSION.txt"
+          sha256sum \
+            "projects/code-motion/vendor/mediabunny/${VERSION}/mediabunny.min.cjs" \
+            > "projects/code-motion/vendor/mediabunny/${VERSION}/SHA256SUMS.txt"
+
+      - name: Commit vendored media stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "projects/code-motion/vendor/mediabunny/1.58.1"
+          if git diff --cached --quiet; then
+            echo "Vendored Mediabunny is already current."
+            exit 0
+          fi
+          git commit -m "Vendor Mediabunny 1.58.1 [media-stack]"
+          git push
