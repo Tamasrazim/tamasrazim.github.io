@@ -20,14 +20,14 @@ must(fs.existsSync(root+'/invoice/manifest.webmanifest'),'Invoice manifest exist
 const site=read(root+'/index.html');
 must(site.includes('BNC AgroCare'),'business page identifies BNC AgroCare');
 must(/href=["'](?:\./)?invoice\//.test(site),'business page links to Invoice PWA');
-must(site.includes('href="reference/demo.xlsx"'),'business page links to demo sheet');
+must(site.includes('exactsheet.xlsx'),'business page links to exactsheet');
 must(!site.includes('tamasrazim.github.io/renderer'),'BNC page does not leak personal renderer navigation');
 
 const invoice=read(root+'/invoice/index.html');
 const invoiceJs=read(root+'/invoice/js/app.js');
 must(invoice.includes('id="saveInvoice"'),'invoice save control exists');
 must(invoice.includes('id="importBtn"'),'invoice JSON import exists');
-must(invoice.includes('href="../reference/demo.xlsx"'),'invoice points to canonical demo sheet');
+must(invoice.includes('exactsheet.xlsx'),'invoice references exactsheet');
 must(!invoice.includes('../site/'),'invoice has no stale staging path');
 must(invoiceJs.includes('const PRODUCT_CELLS=[[22.883,35.553]'),'dynamic product cells use locked-template coordinates');
 must(invoiceJs.includes('async function getTemplateBytes()'),'invoice PDF template loader exists');
