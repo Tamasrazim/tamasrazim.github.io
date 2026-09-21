@@ -914,6 +914,139 @@ select.mini{
   .sec{border-radius:10px}
 }
 
+
+/* ============================================================
+   TAMASRAZIM UI POLISH 02 — SECONDARY SURFACES
+   ============================================================ */
+#edstat{
+  border-top:0;
+  background:rgba(255,255,255,.018);
+  padding:0 12px;
+}
+#edstat b{color:#8e8e96}
+
+#log{
+  border:0;
+  border-radius:9px;
+  background:rgba(255,255,255,.025);
+  padding:9px 10px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.045);
+}
+#log div{
+  padding:2px 0;
+}
+#log time{color:#47474f}
+
+#queue .job{
+  border:0;
+  border-radius:10px;
+  padding:10px 11px;
+  margin-bottom:6px;
+  background:rgba(255,255,255,.032);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.045);
+  transition:background var(--t-fast),transform var(--t-fast);
+}
+#queue .job:hover{
+  background:rgba(255,255,255,.055);
+  transform:translateY(-1px);
+}
+#queue .job.run{
+  border:0;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.24),0 8px 24px rgba(0,0,0,.18);
+}
+#queue .job .x{
+  top:8px;right:8px;
+  width:22px;height:22px;
+  display:grid;place-items:center;
+  border-radius:7px;
+  background:rgba(255,255,255,.035);
+}
+.empty{
+  border:0;
+  border-radius:9px;
+  background:rgba(255,255,255,.025);
+  padding:16px 10px;
+}
+
+.list{
+  border:0;
+  border-radius:10px;
+  overflow:hidden;
+  background:rgba(255,255,255,.025);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.045);
+}
+.list .it{
+  padding:10px 11px;
+  border-bottom:0;
+  transition:background var(--t-fast),transform var(--t-fast);
+}
+.list .it + .it{margin-top:2px}
+.list .it:hover{
+  background:rgba(255,255,255,.06);
+  transform:translateX(2px);
+}
+.list .it .x{
+  border-radius:6px;
+  background:rgba(255,255,255,.035);
+}
+
+.doc pre{
+  border:0;
+  border-radius:9px;
+  background:rgba(255,255,255,.03);
+  padding:10px 11px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.045);
+}
+.doc table{
+  border-collapse:separate;
+  border-spacing:0 3px;
+}
+.doc td,.doc th{
+  border:0;
+  padding:6px 7px;
+  background:rgba(255,255,255,.025);
+}
+.doc th{
+  background:transparent;
+  padding-bottom:3px;
+}
+.doc td:first-child{
+  border-radius:7px 0 0 7px;
+}
+.doc td:last-child{
+  border-radius:0 7px 7px 0;
+}
+
+#toy{
+  border:0;
+  border-radius:10px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+}
+
+#cmpLine::after{
+  border:0;
+  border-radius:50%;
+  box-shadow:0 0 0 1px rgba(255,255,255,.75),0 8px 20px rgba(0,0,0,.45);
+}
+
+#loopband{
+  box-shadow:inset 1px 0 rgba(255,255,255,.16),inset -1px 0 rgba(255,255,255,.16);
+}
+
+@media(max-width:860px){
+  .hdr-acts{border-top:0}
+  #mtabs{
+    border-top:0;
+    padding:5px;
+    gap:4px;
+  }
+  #mtabs button{
+    border-right:0;
+    border-radius:8px;
+  }
+  #mtabs button.on{border-radius:8px}
+}
+
 </style>
 </head>
 <body>
