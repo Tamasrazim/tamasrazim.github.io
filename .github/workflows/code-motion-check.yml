@@ -1,0 +1,29 @@
+name: Code → Motion V2 Check
+
+on:
+  push:
+    paths:
+      - 'code-motion-tamasrazim.html'
+      - 'projects/code-motion/**'
+      - 'tools/validate_code_motion.mjs'
+      - '.github/workflows/code-motion-check.yml'
+  pull_request:
+    paths:
+      - 'code-motion-tamasrazim.html'
+      - 'projects/code-motion/**'
+      - 'tools/validate_code_motion.mjs'
+      - '.github/workflows/code-motion-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate Code → Motion V2
+        run: node tools/validate_code_motion.mjs
