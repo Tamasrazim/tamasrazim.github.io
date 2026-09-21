@@ -1,7 +1,7 @@
 (()=>{"use strict";
 const $=s=>document.querySelector(s);
 const PDF=()=>window.PDFLib||globalThis.PDFLib||{};
-let pdfEnginePromise=null;
+let pdfEnginePromise=null,pdfRendererPromise=null;
 function loadPdfEngine(){
   if(PDF().PDFDocument)return Promise.resolve(PDF());
   if(pdfEnginePromise)return pdfEnginePromise;
@@ -20,6 +20,7 @@ function loadPdfEngine(){
   return pdfEnginePromise
 }
 const TEMPLATE="../invoice.pdf",DB="bnc-invoice-pdf-v3",MAX_EXTRAROWS=10,TEMPLATE_ROWS=8;
+const PDF_RENDERER="https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.mjs",PDF_WORKER="https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.worker.min.mjs";
 const PRODUCTS=["NC Gold - 4cpa","NC Zinc - Mono 36%","NC Solu - Boron 20%","NC Solu+ - Boron 17%","NC Chilli - Chilted Zinc 10%","Pa- Cola - Paclobutazol 25 SC","NC Vit - (NHA 98%)","NC Leaf - GA-3","NC Gyp - Calcium 20% & sulfur 16%","Pachtara - 5 SG","NC Darma","Darma+++","NC Vit+++","NC Leaf+++"];
 const blank=()=>({name:"",pack:"",ctn:"",rate:""});
 const state={ref:"X2",invoiceNo:"0002",date:"",trader:"",buyer:"",address:"",mobile:"",commission:0,products:Array.from({length:TEMPLATE_ROWS},blank)};
@@ -30,6 +31,27 @@ const money=v=>num(v).toFixed(2);
 const localDate=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const displayDate=v=>String(v||"").match(/^(\d{4})-(\d{2})-(\d{2})$/)?.slice(1).reverse().join(".")||String(v||"");
 const hasData=p=>!!(String(p?.name||"").trim()||String(p?.pack||"").trim()||String(p?.ctn||"").trim()||String(p?.rate||"").trim());
+
+async function loadPdfRenderer(){
+  if(pdfRendererPromise)return pdfRendererPromise;
+  pdfRendererPromise=import(PDF_RENDERER).then(lib=>{lib.GlobalWorkerOptions.workerSrc=PDF_WORKER;return lib}).catch(e=>{pdfRendererPromise=null;throw e});
+  return pdfRendererPromise
+}
+async function renderPdfPreview(bytes){
+  const lib=await loadPdfRenderer(),host=$("#pdfPreview");
+  host.className="pdfPreview";host.replaceChildren();
+  const task=lib.getDocument({data:bytes}),pdf=await task.promise;
+  const width=Math.min(Math.max(host.clientWidth-8,280),420);
+  for(let n=1;n<=pdf.numPages;n++){
+    const page=await pdf.getPage(n),base=page.getViewport({scale:1}),scale=width/base.width,viewport=page.getViewport({scale});
+    const sheet=document.createElement("div");sheet.className="pdfSheet";sheet.setAttribute("role","img");sheet.setAttribute("aria-label","A4 invoice page "+n);
+    const canvas=document.createElement("canvas"),outputScale=Math.min(window.devicePixelRatio||1,2),ctx=canvas.getContext("2d",{alpha:false});
+    canvas.width=Math.floor(viewport.width*outputScale);canvas.height=Math.floor(viewport.height*outputScale);canvas.style.width=Math.floor(viewport.width)+"px";canvas.style.height=Math.floor(viewport.height)+"px";
+    sheet.append(canvas);host.append(sheet);
+    await page.render({canvasContext:ctx,viewport,transform:outputScale!==1?[outputScale,0,0,outputScale,0,0]:null,background:"rgb(255,255,255)"}).promise
+  }
+  return pdf.numPages
+}
 
 function words(n){n=Math.max(0,Math.round(num(n)*100))/100;const o=["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"],t=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];const w=x=>x<20?o[x]:x<100?t[Math.floor(x/10)]+(x%10?" "+o[x%10]:""):x<1000?o[Math.floor(x/100)]+" Hundred"+(x%100?" "+w(x%100):""):x<1e5?w(Math.floor(x/1e3))+" Thousand"+(x%1e3?" "+w(x%1e3):""):x<1e7?w(Math.floor(x/1e5))+" Lakh"+(x%1e5?" "+w(x%1e5):""):w(Math.floor(x/1e7))+" Crore"+(x%1e7?" "+w(x%1e7):"");const whole=Math.floor(n),p=Math.round((n-whole)*100);return w(whole)+" Taka"+(p?" and "+String(p).padStart(2,"0")+" Paisa":"")+" Only"}
 
@@ -50,7 +72,7 @@ const dl=document.createElement("datalist");dl.id="productCatalog";PRODUCTS.forE
 function updateSummary(){const t=totals();$("#summary").innerHTML='<div class="sum"><span>Cartons</span><strong>'+t.cartons+'</strong></div><div class="sum"><span>Gross taka</span><strong>'+money(t.total)+'</strong></div><div class="sum"><span>Commission</span><strong>'+money(t.commission)+'</strong></div><div class="sum final"><span>Final total</span><strong>'+money(t.final)+'</strong></div>'}
 function bindFields(){document.querySelectorAll("[data-k]").forEach(el=>el.addEventListener("input",()=>{const k=el.dataset.k;const v=k==="commission"?Math.max(0,num(el.value)):el.value;state[k]=v;if(k==="commission")el.value=String(v);saveDraft();updateSummary()}))}
 function addProduct(){state.products.push(blank());render();saveDraft();const inputs=document.querySelectorAll("#products input");requestAnimationFrame(()=>inputs[Math.max(0,inputs.length-5)]?.focus());$("#status").textContent="Product added"}
-function reset(){Object.assign(state,{ref:"X2",invoiceNo:String((Number(state.invoiceNo)||1)+1).padStart(4,"0"),date:localDate(),trader:"",buyer:"",address:"",mobile:"",commission:0,products:Array.from({length:TEMPLATE_ROWS},blank)});lastPdf=null;render();saveDraft();if(pdfUrl){URL.revokeObjectURL(pdfUrl);pdfUrl=""}$("#pdf").removeAttribute("src");$("#emptyPdf").style.display="grid";$("#pdfState").textContent="No PDF generated";$("#status").textContent="New invoice"}
+function reset(){Object.assign(state,{ref:"X2",invoiceNo:String((Number(state.invoiceNo)||1)+1).padStart(4,"0"),date:localDate(),trader:"",buyer:"",address:"",mobile:"",commission:0,products:Array.from({length:TEMPLATE_ROWS},blank)});lastPdf=null;render();saveDraft();if(pdfUrl){URL.revokeObjectURL(pdfUrl);pdfUrl=""}$("#pdfPreview").replaceChildren();$("#emptyPdf").style.display="grid";$("#pdfState").textContent="No PDF generated";$("#status").textContent="New invoice"}
 
 function saveInvoice(){if(!db)return;const t=totals(),id=(state.invoiceNo||Date.now())+"-"+Date.now();db.transaction("invoices","readwrite").objectStore("invoices").put({id,invoiceNumber:state.invoiceNo,updatedAt:Date.now(),data:cloneState(),total:t.final});history();saveDraft();$("#status").textContent="Saved"}
 function history(){if(!db)return;const host=$("#history");host.replaceChildren();const req=db.transaction("invoices").objectStore("invoices").openCursor(null,"prev");req.onsuccess=()=>{const c=req.result;if(!c)return;const x=c.value,row=document.createElement("div");row.className="historyRow";const meta=document.createElement("div");meta.innerHTML="<strong>"+String(x.invoiceNumber).replace(/[<>&"]/g,"")+"</strong><small>"+money(x.total)+" · "+new Date(x.updatedAt).toLocaleString()+"</small>";const actions=document.createElement("div");const load=document.createElement("button");load.textContent="Load";load.onclick=()=>{Object.assign(state,x.data);render();saveDraft();$("#status").textContent="Loaded"};const copy=document.createElement("button");copy.textContent="Copy";copy.onclick=()=>{Object.assign(state,x.data);state.invoiceNo=String((Number(state.invoiceNo)||0)+1).padStart(4,"0");state.date=localDate();render();saveDraft();$("#status").textContent="Copied"};const del=document.createElement("button");del.className="del";del.textContent="Delete";del.onclick=()=>{db.transaction("invoices","readwrite").objectStore("invoices").delete(x.id).onsuccess=history};actions.append(load,copy,del);row.append(meta,actions);host.append(row);c.continue()}}
@@ -137,7 +159,7 @@ async function generate(){
   for(let i=0;i<remaining.length;i+=18)await continuationPage(doc,remaining.slice(i,i+18),shown+i,font,bold);
   lastPdf=await doc.save({useObjectStreams:false});
   if(pdfUrl)URL.revokeObjectURL(pdfUrl);pdfUrl=URL.createObjectURL(new Blob([lastPdf],{type:"application/pdf"}));$("#pdf").src=pdfUrl;$("#emptyPdf").style.display="none";
-  $("#pdfState").textContent=remaining.length?"PDF generated · continuation page":"PDF generated";$("#status").textContent="Ready";return lastPdf
+  $("#pdfState").textContent=pageCount>1?`PDF generated · ${pageCount} A4 pages`:"PDF generated · A4";$("#status").textContent="Ready";return lastPdf
 }
 async function download(){const b=lastPdf||await generate();const url=URL.createObjectURL(new Blob([b],{type:"application/pdf"})),a=document.createElement("a");a.href=url;a.download="BNC-Invoice-"+state.invoiceNo+".pdf";a.click();setTimeout(()=>URL.revokeObjectURL(url),1200)}
 function exportJSON(){const url=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:"application/json"})),a=document.createElement("a");a.href=url;a.download="BNC-Invoice-"+state.invoiceNo+".json";a.click();setTimeout(()=>URL.revokeObjectURL(url),800)}
