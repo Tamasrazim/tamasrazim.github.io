@@ -4617,7 +4617,7 @@ function renderStat(p, job) {
   html += '<dt>Elapsed</dt><dd>' + fmtClock((p.elapsedMs || 0) / 1000) + '</dd>';
   html += '<dt>ETA estimate</dt><dd>' + (etaMs === null ? '—' : fmtClock(etaMs / 1000) + ' (ESTIMATE)') + '</dd>';
   html += '<dt>Written so far</dt><dd>' + fmtBytes(p.bytes || 0) + '</dd>';
-  html += '<dt>Output</dt><dd>' + c.width + '×' + c.height + ' ' + (job.format === 'webm' ? 'WebM' : 'PNG') + '</dd>';
+  html += '<dt>Output</dt><dd>' + c.width + '×' + c.height + ' ' + job.format === 'mp4' ? 'MP4' : job.format === 'webm' ? 'WebM' : 'PNG' + '</dd>';
   html += '</dl>';
   $('#rstat').innerHTML = html;
 }
