@@ -2,36 +2,35 @@
 
 > Backup mirror: Canonical BNC source is maintained in Tamasrazim/tamasrazim.github.io under projects/bncagrocare/. Keep this repository as the deployment/backup copy.
 
-BNC AgroCare website and invoice PWA.
+BNC AgroCare website and PDF-first invoice PWA.
 
-> **Immutable template:** `invoice.pdf` is the locked original BNC invoice template. The project may fill or extend from it, but the template file itself must not be modified.
+> **Immutable template:** invoice.pdf is the locked original BNC invoice template. The app reads it as the master PDF and never rewrites the source template.
 
 ## Invoice PWA
 
-The working interface is PDF-first.
+The working interface is form-based and PDF-first:
 
-Workflow:
+**Fill the fields → calculate automatically → generate the actual invoice PDF → preview → save/download**
 
-**Fill the boxes → calculate automatically → generate the real PDF → preview the PDF → open/print or save PDF**
+The app provides:
 
-The PWA provides:
-
-- Original BNC invoice PDF used as the page-1 template
-- Named AcroForm fields filled directly where the template exposes them
-- Automatic amount calculations: Ctn × Rate / Ctn, left/right subtotals, total cartons, total taka, commission %, final total and amount in words
-- Four starting product rows per side
-- Automatic SL 5, SL 6, and onward when more products are entered
-- Empty product rows omitted from the generated PDF
-- Additional products are added as real PDF cells on the same A4 page; the original page design remains the base
-- Live PDF preview in the browser
-- Open / print and Save PDF actions
+- BNC website-matched UI with a focused invoice workspace
+- Original BNC invoice PDF used as the locked first-page template
+- Automatic Ctn × Rate / Ctn calculations
+- Carton, gross, commission and final-total calculations
+- Amount in words
+- Product catalog autocomplete
+- Dynamic product rows with alternating left/right SL continuation
+- Same-page table extension while there is usable room
+- Safe continuation pages when the first page is full
+- Live PDF preview and PDF download
 - Local draft persistence with IndexedDB
-- JSON backup for the current invoice
-- Invoice history with load, copy and delete actions
-- Installable PWA shell
+- Local invoice history with load, copy and delete
+- JSON export/import
+- Installable PWA shell with offline caching
 
-The original Excel files remain reference/demo material; the working invoice interface no longer uses HTML as the paper preview and does not edit the original workbook. Product slots are ordered left SL 1–4, right SL 5–8, then new products alternate left SL 9, right SL 10, left SL 11, right SL 12, and so on.
+The original workbook remains reference material; the active invoice workflow does not edit the locked PDF or overwrite source reference files.
 
 ## Company website
 
-https://tamasrazim.github.io/projects/bncagrocare/
+The project site and invoice tool are kept under the same BNC AgroCare visual system.
