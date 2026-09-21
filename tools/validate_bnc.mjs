@@ -31,6 +31,9 @@ must(invoice.includes('pdf-lib@1.17.1'),'invoice includes the pinned PDF engine'
 const invoiceJs=read(root+'/invoice/js/app.js');
 must(invoiceJs.includes('const TEMPLATE="../invoice.pdf"'),'invoice uses the local locked PDF template');
 must(invoiceJs.includes('fetch(TEMPLATE'),'invoice loads the locked template at runtime');
+must(invoiceJs.includes('loadPdfEngine'),'invoice has a resilient PDF engine loader');
+must(invoiceJs.includes('unpkg.com/pdf-lib@1.17.1'),'invoice has a second PDF engine CDN fallback');
+must(invoiceJs.includes('useObjectStreams:false'),'invoice saves preview PDFs with compatible object streams');
 must(invoiceJs.includes('header_B4_L4'),'invoice maps the template ref field explicitly');
 must(invoiceJs.includes('invoice_number'),'invoice maps the template invoice field explicitly');
 must(invoiceJs.includes('dealer_trader_name'),'invoice maps trader field explicitly');
@@ -51,6 +54,7 @@ const sw=read(root+'/invoice/sw.js');
 must(/bnc-invoice-v\d+/.test(sw),'service worker cache is versioned');
 must(sw.includes("self.registration.scope"),'service worker derives its navigation scope');
 must(sw.includes('caches.match(FALLBACK)'),'service worker has offline navigation fallback');
+must(sw.includes('no-cors'),'service worker can cache the external PDF engine');
 execFileSync(process.execPath,['--check',root+'/invoice/sw.js'],{stdio:'inherit'});
 
 console.log('BNC validation complete');
