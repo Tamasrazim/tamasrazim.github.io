@@ -2,9 +2,9 @@
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b3d2e"><meta name="color-scheme" content="light">
-<meta name="description" content="BNC AgroCare invoice tool with live, form-backed PDF preview and automatic calculations.">
+<meta name="description" content="BNC AgroCare invoice editor based on the exactsheet master workbook.">
 <link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icons/icon.svg">
-<title>BNC AgroCare — Invoice</title><link rel="stylesheet" href="./css/app.css">
+<title>BNC AgroCare — Invoice Sheet</title><link rel="stylesheet" href="./css/app.css">
 </head><body>
 <header class="bnc-top"><div class="bnc-top-inner">
 <a href="../" class="brand">BNC <span>AgroCare</span></a>
@@ -12,63 +12,39 @@
 <span class="save-state" id="saveState">Local draft</span>
 <button type="button" class="top-btn" id="newInvoice">New</button>
 <button type="button" class="top-btn" id="saveInvoice">Save</button>
-<button type="button" class="top-btn" id="printBtn">Open / Print PDF</button>
-<button type="button" class="top-btn" id="downloadPdfBtn">Save PDF</button>
+<button type="button" class="top-btn" id="downloadXlsxBtn">Download XLSX</button>
+<button type="button" class="top-btn" id="printBtn">Print Sheet</button>
 <button type="button" class="top-btn" id="installBtn" hidden>Install</button>
 </div></div></header>
 
 <main class="workspace">
-<aside class="editor">
-<section class="editor-head"><div class="eyebrow">BNC AgroCare</div><h1>Invoice</h1>
-<p>Fill the invoice fields. The preview below is the actual generated PDF from the original BNC invoice template.</p></section>
-
-<section class="panel"><div class="panel-title">Invoice details</div>
-<div class="field-grid"><label>No<input id="invoiceNo" class="field" value="0002" inputmode="numeric" maxlength="4"></label>
-<label>Ref<input id="ref" class="field" value="X2"></label>
-<label>Date<input id="invoiceDate" class="field" type="date"></label></div></section>
-
-<section class="panel"><div class="panel-title">Trader / buyer</div>
-<label>Trader / Shop Name<input id="dealerTraderName" class="field" placeholder="M/S ___ Traders"></label>
-<label>Buyer Name<input id="dealerBuyerName" class="field" placeholder="Buyer name"></label>
-<label>Address<input id="dealerAddress" class="field" placeholder="Address"></label>
-<label>Mobile<input id="dealerMobile" class="field" inputmode="tel" placeholder="Mobile number"></label></section>
-
-<section class="panel"><div class="panel-title">Representative</div>
-<label>Name<input id="repName" class="field" value="Md Rezaul Karim"></label>
-<label>Role<input id="repRole" class="field" value="Officer BNC AGRO CARE Area Manager"></label>
-<label>Mobile<input id="repMob" class="field" value="01718-306103"></label></section>
-
-<section class="panel products-panel"><div class="products-toolbar"><div><div class="panel-title">Products</div><div class="hint" id="nextProductHint">Next slot: Left · SL 9</div></div><button type="button" class="outline-btn add-global" id="addProductBtn">+ Add product</button></div>
-<div class="product-sides"><div><div class="side-title">Left · SL 1–4, 9, 11…</div><div class="product-editor" id="leftEditor"></div></div>
-<div><div class="side-title">Right · SL 5–8, 10, 12…</div><div class="product-editor" id="rightEditor"></div></div></div></section>
-
-<section class="panel"><div class="panel-title">Totals</div>
-<label>Commission %<input id="commission" class="field" type="number" min="0" step="0.01" value="0"></label>
-<label>Commission Amount<input id="commissionAmount" class="field" readonly></label>
-<label>Final Total<input id="finalTotal" class="field" readonly></label>
-<label>Amount in Words<input id="amountWords" class="field" readonly></label>
-</section>
-
-<section class="panel"><div class="panel-title">Saved invoices</div><div class="hint">Stored locally on this device.</div><div id="historyList"></div></section>
-
-<section class="panel compact-actions">
-<button type="button" class="outline-btn" id="openTemplateBtn">Open original PDF template</button>
-<button type="button" class="outline-btn" id="jsonBtn">Export JSON</button>
-<button type="button" class="outline-btn" id="importBtn">Import JSON</button>
+<div class="workspace-head">
+<div><div class="eyebrow">BNC AgroCare · Exact Sheet</div><h1>Invoice</h1><p>The invoice is edited directly in the exactsheet layout. Product rows expand before the totals section and the finished workbook keeps the master sheet formatting.</p></div>
+<div class="head-actions">
+<button type="button" class="sheet-btn primary" id="addProductBtn">+ Add product</button>
+<a class="sheet-btn" href="https://github.com/Tamasrazim/bncagrocare/blob/main/exactsheet.xlsx" target="_blank" rel="noopener">Open exactsheet ↗</a>
+<button type="button" class="sheet-btn" id="jsonBtn">Export JSON</button>
+<button type="button" class="sheet-btn" id="importBtn">Import JSON</button>
 <input id="importFile" type="file" accept=".json,application/json" hidden>
-</section>
-</aside>
+</div>
+</div>
 
-<section class="preview">
-<div class="preview-head"><div><div class="eyebrow">Actual PDF</div><h2>Live invoice preview</h2></div>
-<div class="preview-meta"><span id="pdfStatus">Generating…</span><a id="openPdf" href="#" target="_blank" rel="noopener">Open in PDF viewer</a></div></div>
-<div class="pdf-stage" id="pdfStage" aria-label="Rendered BNC AgroCare invoice PDF pages"></div>
+<section class="sheet-shell">
+<div class="sheet-scroll">
+<table class="invoice-sheet" id="invoiceSheet">
+<colgroup><col><col><col><col><col><col><col><col><col><col><col><col><col></colgroup>
+<tbody id="sheetBody"></tbody>
+</table>
+</div>
+</section>
+
+<section class="history-panel">
+<div><div class="eyebrow">Local history</div><h2>Saved invoices</h2><p>Drafts stay on this device.</p></div>
+<div id="historyList"></div>
 </section>
 </main>
-
-<footer class="bnc-footer">BNC AgroCare · Invoice tool · Built by Robiul Rumman Razim — Tamasrazim</footer>
+<footer class="bnc-footer">BNC AgroCare · Invoice Sheet · Built by Robiul Rumman Razim — Tamasrazim</footer>
 <div id="toast"></div>
-
-<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js" crossorigin="anonymous"></script>
 <script src="./js/app.js"></script>
 </body></html>
