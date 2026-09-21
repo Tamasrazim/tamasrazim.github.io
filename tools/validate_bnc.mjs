@@ -28,6 +28,7 @@ must(invoice.includes('serviceWorker'),'invoice registers its own service worker
 must(invoice.includes('../invoice.pdf'),'invoice references local locked PDF template');
 must(invoice.includes('id="pdfPreview"'),'invoice uses the in-page A4 PDF preview');
 must(!invoice.includes('<iframe id="pdf"'),'invoice does not use the browser PDF viewer');
+must(!invoiceJs.includes('$("#pdf").src'),'invoice has no stale browser PDF viewer reference');
 must(invoice.includes('pdf-lib@1.17.1'),'invoice includes the pinned PDF engine');
 
 const invoiceJs=read(root+'/invoice/js/app.js');
