@@ -164,6 +164,7 @@ function fillTemplateForm(form){
 }
 function fitText(text,max){text=String(text||"");return text.length<=max?text:text.slice(0,Math.max(0,max-1))+"…"}
 const X=[22.883,35.553,152.482,172.693,211.939,259.504,272.572,334.409,393.852,412.476,462.422,521.496];
+const PRODUCT_CELLS=[[22.883,35.553],[37.553,96.994],[98.994,152.482],[154.482,172.693],[174.693,211.939],[213.939,259.504],[261.504,272.572],[274.572,334.409],[336.409,393.852],[395.852,412.476],[414.476,462.422],[464.422,521.496]];
 const ROW_TOP=649.45, ROW_H=10.12;
 const SUMMARY_TOP=639.33, SUMMARY_BOTTOM=593.0, MIN_SUMMARY_BOTTOM=548.0;
 const SUMMARY_ROWS=[
@@ -196,7 +197,7 @@ function drawExtraProductRows(page,left,right,maxRows,regular,bold){
   const totalExtraH=extraRows*rh;
   const maskBottom=SUMMARY_BOTTOM-totalExtraH;
   // Remove only the lower existing summary/empty area. SL 1–4 and the original header stay untouched.
-  page.drawRectangle({x:X[0],y:maskBottom,width:X[12]-X[0],height:ROW_TOP-maskBottom,
+  page.drawRectangle({x:PRODUCT_CELLS[0][0],y:maskBottom,width:PRODUCT_CELLS[PRODUCT_CELLS.length-1][1]-PRODUCT_CELLS[0][0],height:ROW_TOP-maskBottom,
     color:PDFLib.rgb(1,1,1),borderWidth:0});
   for(let r=0;r<extraRows;r++){
     const y=ROW_TOP-(r+1)*rh;
@@ -205,10 +206,11 @@ function drawExtraProductRows(page,left,right,maxRows,regular,bold){
       hasData(l)?slFor("left",li):"",hasData(l)?l.name:"",hasData(l)?l.pack:"",hasData(l)?l.ctn:"",hasData(l)?l.rate:"",hasData(l)?money(num(l.ctn)*num(l.rate)):"",
       hasData(rr)?slFor("right",ri):"",hasData(rr)?rr.name:"",hasData(rr)?rr.pack:"",hasData(rr)?rr.ctn:"",hasData(rr)?rr.rate:"",hasData(rr)?money(num(rr.ctn)*num(rr.rate)):""
     ];
-    for(let c=0;c<12;c++){
-      drawBox(page,X[c],y,X[c+1]-X[c],rh,.75);
+    for(let c=0;c<PRODUCT_CELLS.length;c++){
+      const x1=PRODUCT_CELLS[c][0],x2=PRODUCT_CELLS[c][1],w=x2-x1;
+      drawBox(page,x1,y,w,rh,.75);
       const center=[0,3,4,5,6,9,10,11].includes(c);
-      drawTextFit(page,fitText(vals[c],[4,28,10,8,10,13,4,28,10,8,10,13][c]),X[c],y,X[c+1]-X[c],rh,regular,Math.min(8,Math.max(4,rh*.72)),center?"center":"left");
+      drawTextFit(page,fitText(vals[c],[4,28,10,8,10,13,4,28,10,8,10,13][c]),x1,y,w,rh,regular,Math.min(8,Math.max(4,rh*.72)),center?"center":"left");
     }
   }
   return totalExtraH;
@@ -223,7 +225,7 @@ function drawDynamicSummary(page,t,shift,regular,bold){
     {top:603.11-shift,label:"Total Taka (In words):",leftValue:state.amountWords}
   ];
   const heights=[7.0,9.74,9.74,9.74,8.12];
-  const b1=X[1],b3=X[3],d=X[3],f=X[5],h=X[7],i=X[8],l=X[11],right=X[12];
+  const b1=X[1],b3=X[3],d=X[3],f=X[5],h=X[7],i=X[8],l=X[10],right=X[11];
   rows.forEach((row,idx)=>{
     const hgt=heights[idx],y=row.top-hgt;
     if(idx===0){
