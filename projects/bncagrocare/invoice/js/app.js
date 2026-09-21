@@ -261,6 +261,15 @@ async function generatePdf(){
   }
   return await doc.save({useObjectStreams:true,addDefaultPage:false});
 }
+async function getTemplateBytes(){
+  if(!templateBytesPromise){
+    templateBytesPromise=fetch(TEMPLATE_URL).then(response=>{
+      if(!response.ok)throw Error("Invoice template unavailable ("+response.status+")");
+      return response.arrayBuffer();
+    });
+  }
+  return templateBytesPromise;
+}
 function queuePdfRender(){clearTimeout(pdfTimer);pdfTimer=setTimeout(updatePdfPreview,70)}
 
 async function updatePdfPreview(){
