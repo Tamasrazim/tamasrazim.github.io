@@ -1,0 +1,27 @@
+name: Asset Vault Check
+
+on:
+  push:
+    paths:
+      - 'asset-vault/**'
+      - 'tools/validate_asset_vault.mjs'
+      - '.github/workflows/asset-vault-check.yml'
+  pull_request:
+    paths:
+      - 'asset-vault/**'
+      - 'tools/validate_asset_vault.mjs'
+      - '.github/workflows/asset-vault-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate Asset Vault
+        run: node tools/validate_asset_vault.mjs
