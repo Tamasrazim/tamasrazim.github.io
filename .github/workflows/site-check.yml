@@ -1,0 +1,35 @@
+name: Site Check
+
+on:
+  push:
+    paths:
+      - 'index.html'
+      - 'projects/**'
+      - 'renderer/**'
+      - 'asset-vault/**'
+      - 'assets/**'
+      - 'tools/validate_site.mjs'
+      - '.github/workflows/site-check.yml'
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'projects/**'
+      - 'renderer/**'
+      - 'asset-vault/**'
+      - 'assets/**'
+      - 'tools/validate_site.mjs'
+      - '.github/workflows/site-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate site routes, DOM ids and runtime scripts
+        run: node tools/validate_site.mjs
