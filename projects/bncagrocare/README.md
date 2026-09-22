@@ -1,36 +1,34 @@
 # BNC AgroCare
 
-> Backup mirror: Canonical BNC source is maintained in Tamasrazim/tamasrazim.github.io under projects/bncagrocare/. Keep this repository as the deployment/backup copy.
+BNC AgroCare is the canonical agriculture-focused project in this repository.
 
-BNC AgroCare website and PDF-first invoice PWA.
+> **Immutable invoice template:** `invoice.pdf` is the locked original BNC invoice template. The Invoice Studio reads it as the master document and never rewrites the source PDF.
 
-> **Immutable template:** invoice.pdf is the locked original BNC invoice template. The app reads it as the master PDF and never rewrites the source template.
+## Website
 
-## Invoice PWA
+The public BNC site is a product-first business interface with:
+- the current BNC product names
+- exact pack-size options from the project reference
+- product/pack search
+- BNC reference imagery
+- direct access to Invoice Studio
 
-The working interface is form-based and PDF-first:
+## Invoice Studio
 
-**Fill the fields → calculate automatically → generate the actual invoice PDF → preview → save/download**
+The PWA workflow is:
 
-The app provides:
+**Customer details → product lines → live totals → A4 preview → generate/download**
 
-- BNC website-matched UI with a focused invoice workspace
-- Original BNC invoice PDF used as the locked first-page template
-- Automatic Ctn × Rate / Ctn calculations
-- Carton, gross, commission and final-total calculations
-- Amount in words
-- Product catalog autocomplete
-- Dynamic product rows with alternating left/right SL continuation
-- Same-page table extension while there is usable room
-- Safe continuation pages when the first page is full
-- Live PDF preview and PDF download
-- Local draft persistence with IndexedDB
-- Local invoice history with load, copy and delete
+It includes:
+- the BNC product catalogue with pack-size suggestions
+- automatic CTN × RATE calculations
+- commission and final-total calculations
+- amount in words
+- dynamic product rows and continuation pages
+- local draft persistence with IndexedDB
+- saved invoice history
 - JSON export/import
-- Installable PWA shell with offline caching
+- installable/offline PWA shell
+- the locked original invoice PDF as the document master
 
-The original workbook remains reference material; the active invoice workflow does not edit the locked PDF or overwrite source reference files.
-
-## Company website
-
-The project site and invoice tool are kept under the same BNC AgroCare visual system.
+The public website and Invoice Studio share one BNC visual system, while the invoice template remains unchanged.
