@@ -4,13 +4,17 @@
     /* Site animation governor: keep continuous JS motion at a maximum of 60 updates/sec.
        The renderer/export engine is independent and may still render at 120 FPS. */
     var __raf60Last = new WeakMap();
+    var __raf60Pending = new WeakSet();
     var __raf60Interval = 1000 / 60;
     function requestAnimationFrame60(callback){
+      if(__raf60Pending.has(callback)) return true;
+      __raf60Pending.add(callback);
       function schedule(){
         window.requestAnimationFrame(function(now){
           var last = __raf60Last.get(callback);
           if(last === undefined || now - last >= (__raf60Interval - 0.25)){
             __raf60Last.set(callback, now);
+            __raf60Pending.delete(callback);
             callback(now);
           }else{
             window.setTimeout(schedule, Math.max(0, __raf60Interval - (now - last)));
@@ -18,6 +22,7 @@
         });
       }
       schedule();
+      return true;
     }
 
 
