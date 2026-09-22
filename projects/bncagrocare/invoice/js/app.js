@@ -1,7 +1,22 @@
 (()=>{"use strict";
 const $=s=>document.querySelector(s);
 const TEMPLATE="../invoice.pdf",DB="bnc-invoice-v4",TEMPLATE_ROWS=8,MAX_EXTRA=20;
-const PRODUCTS=["NC Gold - 4cpa","NC Zinc - Mono 36%","NC Solu - Boron 20%","NC Solu+ - Boron 17%","NC Chilli - Chilted Zinc 10%","Pa- Cola - Paclobutazol 25 SC","NC Vit - (NHA 98%)","NC Leaf - GA-3","NC Gyp - Calcium 20% & sulfur 16%","Pachtara - 5 SG","NC Darma","Darma+++","NC Vit+++","NC Leaf+++"];
+const PRODUCTS=[
+{name:"NC Gold- 4CPA",packs:["1 Ltr x 12 Bottle","500 ml x 12 Bottle","100 ml x 30 Bottle"]},
+{name:"NC Zinc- Mono 36%",packs:["1kg. x 10 Pack"]},
+{name:"NC Solu- Boron 20%",packs:["500 gm x 10 Pack","100 gm x 24 Pack"]},
+{name:"NC Solu+ Boron 17%",packs:["1kg. x 10 Pack","500 gm x 20 Pack"]},
+{name:"NC Chilli- Chilted Zinc 10%",packs:["500 gm x 10 Pack","100 gm x 30 Pack","17 gm x 100 Pack"]},
+{name:"Pa-Cola- Paclobutazol 25 SC",packs:["20 Ltr","5 Ltr","1 Ltr x 12 Bottle","100 ml x 30 Bottle"]},
+{name:"NC Vit- (NNA 98%)",packs:["1kg. x 10 Pack"]},
+{name:"NC Leaf- GA-3",packs:["10 gm x 100 Pack","1 gm x 100 Pack"]},
+{name:"NC Gyp- Calcium 20% & Sulfur 16%",packs:["10 kg. x 5 Pack","5 kg. x 10 Pack"]},
+{name:"Pachtara- 5 SG",packs:["100 ml x 30 Pack","15 ml x 100 Pack","10 ml x 100 Pack"]},
+{name:"NC-Darma",packs:["500 ml x 12 Bottle","100 ml x 30 Bottle"]},
+{name:"Darma+++",packs:["500 gm x 10 Box","100 gm x 30 Box"]},
+{name:"NC Vit +++",packs:["1 Ltr x 12 Bottle","500 ml x 12 Bottle","100 ml x 30 Bottle"]},
+{name:"NC-Leaf +++",packs:["1 Ltr x 12 Bottle","500 ml x 12 Bottle","100 ml x 30 Bottle"]}
+];
 const blank=()=>({name:"",pack:"",ctn:"",rate:""});
 const state={ref:"X2",invoiceNo:"0002",date:"",trader:"",buyer:"",address:"",mobile:"",commission:0,products:Array.from({length:TEMPLATE_ROWS},blank)};
 let db=null,lastPdf=null,deferred=null,pdfLibPromise=null;
@@ -23,7 +38,7 @@ function normalize(){state.products=Array.isArray(state.products)?state.products
 function saveDraft(){if(!db)return;db.transaction("drafts","readwrite").objectStore("drafts").put({id:"current",data:clone(),updatedAt:Date.now()})}
 function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains("drafts"))d.createObjectStore("drafts",{keyPath:"id"});if(!d.objectStoreNames.contains("invoices"))d.createObjectStore("invoices",{keyPath:"id"})};r.onsuccess=()=>{db=r.result;res()};r.onerror=()=>rej(r.error)})}
 
-function renderProducts(){lastPdf=null;normalize();const host=$("#products");host.replaceChildren();let dl=$("#catalog");if(!dl){dl=document.createElement("datalist");dl.id="catalog";document.body.append(dl)}dl.replaceChildren();PRODUCTS.forEach(v=>{const o=document.createElement("option");o.value=v;dl.append(o)});
+function renderProducts(){lastPdf=null;normalize();const host=$("#products");host.replaceChildren();let dl=$("#catalog");if(!dl){dl=document.createElement("datalist");dl.id="catalog";document.body.append(dl)}dl.replaceChildren();PRODUCTS.forEach(v=>{const o=document.createElement("option");o.value=v.name;dl.append(o)});
 state.products.forEach((p,i)=>{const row=document.createElement("div");row.className="prod";const n=document.createElement("div");n.className="n";n.textContent=String(i+1).padStart(2,"0");row.append(n);
 ["name","pack","ctn","rate"].forEach(k=>{const lab=document.createElement("label");lab.textContent=k==="ctn"?"Ctn":k==="rate"?"Rate / Ctn":k[0].toUpperCase()+k.slice(1);const inp=document.createElement("input");inp.value=p[k]??"";inp.autocomplete="off";inp.setAttribute("aria-label",(k==="ctn"?"Cartons":k==="rate"?"Rate per carton":k)+" "+(i+1));if(k==="name"){inp.setAttribute("list","catalog");inp.placeholder="Product"}if(k==="ctn"){inp.type="number";inp.min="0";inp.step="1";inp.inputMode="numeric"}if(k==="rate"){inp.type="number";inp.min="0";inp.step=".01";inp.inputMode="decimal"}inp.addEventListener("input",e=>{p[k]=(k==="ctn"||k==="rate")?Math.max(0,num(e.target.value)):e.target.value;updateSummary();renderPreview();saveDraft()});lab.append(inp);row.append(lab)});
 const amount=document.createElement("label");amount.textContent="Amount";const ai=document.createElement("input");ai.readOnly=true;ai.value=p.ctn&&p.rate?money(num(p.ctn)*num(p.rate)):"";ai.setAttribute("aria-label","Amount "+(i+1));amount.append(ai);row.append(amount);
