@@ -607,6 +607,12 @@
     .project-card .project-link{
       transform:none;
     }
+    .project-index-link{
+      margin-top:28px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+      font:500 .62rem var(--mono);letter-spacing:.04em;color:var(--dim)
+    }
+    .project-index-link .button{width:auto}
+    .project-index-link code{font:600 .62rem var(--mono);color:var(--muted)}
     .project-card:hover .project-body::after{
       transform:scaleX(1)
     }
@@ -853,6 +859,12 @@
       .scroll-cue{bottom:20px}
       .projects-grid{grid-template-columns:1fr}
       .project-card{min-height:265px}
+      .project-body{height:auto;min-height:220px}
+      .project-tags{margin-top:20px}
+      .project-links{position:static;display:flex;align-items:flex-start;justify-content:flex-start;gap:12px;flex-wrap:wrap;margin-top:18px}
+      .project-index-link{display:block;margin-top:22px}
+      .project-index-link .button{width:100%}
+      .project-index-link span{display:block;margin-top:10px;line-height:1.6}
       .social-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
       .contact-panel::before{right:-140px;top:-110px}
     }
