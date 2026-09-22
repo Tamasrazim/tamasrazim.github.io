@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200">
+<defs>
+  <radialGradient id="bg"><stop offset="0" stop-color="#111"/><stop offset="1" stop-color="#000"/></radialGradient>
+  <filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect width="1200" height="1200" fill="url(#bg)"/>
+<g fill="#fff" opacity=".75">
+  <circle cx="92" cy="150" r="2"/><circle cx="180" cy="310" r="3"/><circle cx="1080" cy="170" r="2"/><circle cx="1010" cy="350" r="3"/>
+  <circle cx="150" cy="900" r="2"/><circle cx="1060" cy="920" r="2"/><circle cx="260" cy="1040" r="3"/><circle cx="930" cy="1050" r="2"/>
+  <circle cx="330" cy="120" r="2"/><circle cx="850" cy="110" r="2"/><circle cx="1120" cy="620" r="3"/><circle cx="80" cy="610" r="2"/>
+</g>
+<g fill="none" stroke="#fff" stroke-opacity=".42" stroke-width="3">
+  <path d="M420 270 L510 210 L610 245 L700 205 L790 280 L760 390 L820 490 L750 590 L785 720 L690 790 L620 900 L535 805 L445 845 L470 720 L395 620 L455 510 L390 410 Z"/>
+  <path d="M510 210 L455 510 L535 805"/><path d="M610 245 L620 900"/><path d="M790 280 L750 590 L690 790"/>
+</g>
+<g fill="#fff" filter="url(#glow)">
+  <circle cx="420" cy="270" r="10"/><circle cx="510" cy="210" r="14"/><circle cx="610" cy="245" r="9"/>
+  <circle cx="700" cy="205" r="12"/><circle cx="790" cy="280" r="10"/><circle cx="760" cy="390" r="7"/>
+  <circle cx="820" cy="490" r="13"/><circle cx="750" cy="590" r="9"/><circle cx="785" cy="720" r="12"/>
+  <circle cx="690" cy="790" r="8"/><circle cx="620" cy="900" r="14"/><circle cx="535" cy="805" r="10"/>
+  <circle cx="445" cy="845" r="8"/><circle cx="470" cy="720" r="11"/><circle cx="395" cy="620" r="8"/>
+  <circle cx="455" cy="510" r="12"/><circle cx="390" cy="410" r="8"/>
+</g>
+<g fill="#fff" opacity=".9" font-family="sans-serif" text-anchor="middle">
+  <text x="600" y="1030" font-size="28" letter-spacing="9">CONSTELLATION</text>
+  <text x="600" y="1070" font-size="14" letter-spacing="5" opacity=".55">A SKY WRITTEN IN STARS</text>
+</g>
+</svg>
