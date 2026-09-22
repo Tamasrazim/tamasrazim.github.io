@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="description" content="Tamasrazim project index — canonical browser projects, production tools and business applications.">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/">
+<title>Projects — Tamasrazim</title>
+<style>
+:root{color-scheme:dark;--bg:#050505;--panel:#0b0b0b;--ink:#f3f3ef;--muted:#858585;--line:#252525;--soft:#111;--ease:cubic-bezier(.2,.7,.2,1)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(circle at 50% -10%,#171715 0,#050505 42%);color:var(--ink);font:14px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:inherit}
+.shell{width:min(1180px,calc(100% - 32px));margin:auto}
+.top{position:sticky;top:0;z-index:10;border-bottom:1px solid var(--line);background:rgba(5,5,5,.84);backdrop-filter:blur(14px)}
+.topin{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:18px;font:10px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.14em}
+.brand{text-decoration:none;font-weight:800}
+.brand span{color:var(--muted)}
+.nav{display:flex;gap:18px}
+.nav a{text-decoration:none;color:var(--muted);transition:color .2s}
+.nav a:hover{color:var(--ink)}
+main{padding:84px 0 100px}
+.kicker{font:10px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.22em;color:#7f7f79;text-transform:uppercase}
+h1{margin:18px 0 0;font-size:clamp(48px,9vw,110px);line-height:.9;letter-spacing:-.065em;max-width:900px}
+.lead{max-width:720px;color:#aaa;margin:28px 0 0;font:15px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace}
+.rule{height:1px;background:var(--line);margin:56px 0 26px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{position:relative;min-height:300px;padding:26px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(145deg,#0d0d0d,#080808);overflow:hidden;transition:transform .45s var(--ease),border-color .45s var(--ease),background .45s var(--ease)}
+.card::before{content:"";position:absolute;inset:-60% -20%;background:conic-gradient(from 40deg,transparent 0 24%,rgba(255,255,255,.06) 30%,transparent 38% 100%);transform:translateX(-20%) rotate(8deg);opacity:0;transition:opacity .5s,transform .8s var(--ease)}
+.card:hover{transform:translateY(-6px);border-color:#404040;background:#0b0b0b}
+.card:hover::before{opacity:1;transform:translateX(18%) rotate(8deg)}
+.meta,.copy,.actions{position:relative;z-index:1}
+.meta{display:flex;justify-content:space-between;gap:14px;font:9px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.14em;color:#6f6f6f;text-transform:uppercase}
+.copy h2{margin:52px 0 12px;font-size:clamp(24px,3.1vw,38px);line-height:.98;letter-spacing:-.045em}
+.copy p{margin:0;color:#999;max-width:48ch;font:12px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace}
+.tags{margin-top:22px;color:#6f6f6f;font:9px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 14px;border:1px solid #333;border-radius:5px;text-decoration:none;font:700 9px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase;transition:all .25s}
+.btn:hover{background:var(--ink);color:#050505;border-color:var(--ink)}
+footer{border-top:1px solid var(--line);padding:24px 0 36px;color:#666;font:10px ui-monospace,SFMono-Regular,Consolas,monospace;display:flex;justify-content:space-between;gap:18px}
+@media(max-width:760px){.nav{display:none}.shell{width:min(100% - 24px,1180px)}main{padding-top:58px}.grid{grid-template-columns:1fr}.card{min-height:260px}.copy h2{margin-top:38px}footer{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.card{transition:none}.card::before{display:none}}
+</style>
+</head>
+<body>
+<header class="top"><div class="shell topin"><a class="brand" href="../">TAMASRAZIM <span>/ PROJECTS</span></a><nav class="nav" aria-label="Project navigation"><a href="../#projects">Site</a><a href="https://github.com/Tamasrazim/tamasrazim.github.io" target="_blank" rel="noopener noreferrer">Source ↗</a></nav></div></header>
+<main class="shell">
+<div class="kicker">TAMASRAZIM / CANONICAL PROJECT INDEX</div>
+<h1>Built things.<br>Real routes.</h1>
+<p class="lead">The projects shown here are actual maintained applications and project surfaces in the repository. Compatibility URLs are kept separately so older links continue to resolve without becoming duplicate sources.</p>
+<div class="rule"></div>
+<section class="grid" aria-label="Project list">
+<article class="card"><div class="meta"><span>01 · Motion</span><span>Renderer</span></div><div class="copy"><h2>Code → Motion</h2><p>Deterministic single-file code-driven animation renderer with explicit frame timing and capability-checked export.</p><div class="tags">HTML · Canvas · WebCodecs · MP4 · WebM</div></div><div class="actions"><a class="btn" href="./code-motion/">Project page →</a><a class="btn" href="./code-motion/renderer.html">Renderer →</a></div></article>
+<article class="card"><div class="meta"><span>02 · Production</span><span>PWA</span></div><div class="copy"><h2>Animation Renderer</h2><p>Production-oriented rendering workspace with scenes, source layers, still export, deterministic WebCodecs video, queues and stock metadata.</p><div class="tags">PWA · Indexed State · WebCodecs · WebM · Stock</div></div><div class="actions"><a class="btn" href="../renderer/">Open renderer →</a></div></article>
+<article class="card"><div class="meta"><span>03 · Stock</span><span>Local-first</span></div><div class="copy"><h2>Stock Asset Vault</h2><p>Browser-local asset organization for rendered images and videos, searchable metadata, review status and direct downloads.</p><div class="tags">IndexedDB · PWA · Metadata · PNG · JPG · WebP · MP4 · WebM</div></div><div class="actions"><a class="btn" href="../asset-vault/">Open vault →</a></div></article>
+<article class="card"><div class="meta"><span>04 · Business</span><span>BNC AgroCare</span></div><div class="copy"><h2>BNC AgroCare</h2><p>A professional agriculture business catalogue paired with a separate Invoice Studio for local-first A4 PDF generation.</p><div class="tags">Agriculture · Product Catalogue · Invoice PWA · A4 PDF</div></div><div class="actions"><a class="btn" href="./bncagrocare/">Business site →</a><a class="btn" href="./bncagrocare/invoice/">Invoice Studio →</a></div></article>
+<article class="card"><div class="meta"><span>05 · Measurement</span><span>GitHub API</span></div><div class="copy"><h2>Repo Token Meter</h2><p>Repository footprint measurement for file count, source bytes, estimated tokens, binary share, commit history and local scan history.</p><div class="tags">GitHub REST API · Repository Metrics · Local History</div></div><div class="actions"><a class="btn" href="./repo-token-meter/">Open meter →</a></div></article>
+</section>
+</main>
+<footer class="shell"><span>Source of truth: Tamasrazim/tamasrazim.github.io</span><a href="../">Back to main site ↑</a></footer>
+</body>
+</html>
