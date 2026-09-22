@@ -3,57 +3,82 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b3d2e">
-<meta name="description" content="BNC AgroCare invoice generator.">
+<meta name="theme-color" content="#08271e">
+<meta name="description" content="BNC AgroCare Invoice Studio — prepare, calculate and generate BNC invoices.">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icons/icon.svg">
-<title>BNC AgroCare - Invoice</title>
+<title>BNC AgroCare · Invoice Studio</title>
 <link rel="stylesheet" href="./css/app.css">
 </head>
 <body>
+<div class="topline"></div>
 <header class="topbar">
-  <a class="brand" href="../">BNC <b>AgroCare</b></a>
+  <div class="brandWrap">
+    <a class="brand" href="../">BNC <b>AgroCare</b></a>
+    <span class="workspaceName">INVOICE STUDIO</span>
+  </div>
   <div class="topstatus"><span class="dot"></span><span id="status" role="status" aria-live="polite">Ready</span></div>
-  <div class="actions"><button id="newBtn" type="button">New</button><button id="saveBtn" type="button">Save</button><button id="installBtn" type="button" hidden>Install</button></div>
+  <div class="actions">
+    <button id="newBtn" type="button">New</button>
+    <button id="saveBtn" type="button">Save draft</button>
+    <button id="installBtn" type="button" hidden>Install</button>
+  </div>
 </header>
 
 <main class="shell">
-  <section class="hero">
+  <section class="introHero">
     <div>
-      <div class="ey">INVOICE STUDIO</div>
-      <h1>Create. Calculate. <em>Generate.</em></h1>
-      <p>One form. Automatic totals. A locked BNC invoice template underneath every generated PDF.</p>
+      <div class="ey">BNC BUSINESS WORKSPACE · LOCAL-FIRST</div>
+      <h1>Prepare the invoice.<br><em>Keep the document exact.</em></h1>
+      <p>Enter the customer and product details, verify the live totals, then generate the finished BNC PDF. The original invoice template stays protected.</p>
     </div>
-    <button id="previewBtn" class="primary" type="button">Generate PDF <span>→</span></button>
+    <div class="heroActions">
+      <div class="heroStat"><strong>A4</strong><span>PDF output</span></div>
+      <div class="heroStat"><strong>14</strong><span>catalogued products</span></div>
+      <button id="previewBtn" class="primary" type="button">Generate PDF <span>→</span></button>
+    </div>
   </section>
 
   <div class="workspace">
     <section class="panel formPanel">
-      <div class="panelHead"><div><div class="ey">01 / DATA</div><h2>Invoice details</h2></div><span class="pill">LOCAL</span></div>
+      <div class="panelHead">
+        <div><div class="ey">01 / CUSTOMER</div><h2>Invoice details</h2></div>
+        <span class="pill">LOCAL</span>
+      </div>
       <div class="formGrid">
-        <label>Ref<input id="ref" data-k="ref"></label>
-        <label>Invoice No.<input id="invoiceNo" data-k="invoiceNo" inputmode="numeric"></label>
+        <label>Reference<input id="ref" data-k="ref" placeholder="X2"></label>
+        <label>Invoice No.<input id="invoiceNo" data-k="invoiceNo" inputmode="numeric" placeholder="0002"></label>
         <label>Date<input id="date" data-k="date" type="date"></label>
-        <label>Commission %<input id="commission" data-k="commission" type="number" min="0" step=".01"></label>
+        <label>Commission %<input id="commission" data-k="commission" type="number" min="0" step=".01" placeholder="0"></label>
         <label class="full">Trader / Shop name<input id="trader" data-k="trader" placeholder="M/S ______ Traders"></label>
-        <label class="full">Buyer name<input id="buyer" data-k="buyer"></label>
-        <label class="full">Address<input id="address" data-k="address"></label>
-        <label class="full">Mobile<input id="mobile" data-k="mobile" type="tel" inputmode="tel" autocomplete="tel"></label>
+        <label class="full">Buyer name<input id="buyer" data-k="buyer" placeholder="Customer / buyer"></label>
+        <label class="full">Address<input id="address" data-k="address" placeholder="Full address"></label>
+        <label class="full">Mobile<input id="mobile" data-k="mobile" type="tel" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX"></label>
       </div>
 
-      <div class="repCard"><div class="repTag">BNC</div><div><small>Representative</small><strong>Md Rezaul Karim</strong><span>Officer BNC AGRO CARE Area Manager · 01718-306103</span></div></div>
+      <div class="repCard">
+        <div class="repTag">BNC</div>
+        <div><small>Sales representative</small><strong>Md Rezaul Karim</strong><span>Officer BNC AGRO CARE · Area Manager · 01718-306103</span></div>
+      </div>
 
-      <div class="panelHead productHead"><div><div class="ey">02 / ITEMS</div><h2>Products</h2></div><button id="addBtn" class="secondary" type="button">+ Add product</button></div>
+      <div class="panelHead productHead">
+        <div><div class="ey">02 / PRODUCT LINES</div><h2>Products</h2></div>
+        <button id="addBtn" class="secondary" type="button">+ Add product</button>
+      </div>
+      <div class="catalogHint"><span>Use the product and pack suggestions from the BNC catalogue.</span><span>CTN × RATE = AMOUNT</span></div>
       <div class="legend"><span>SL</span><span>PRODUCT</span><span>PACK</span><span>CTN</span><span>RATE</span><span>AMOUNT</span><i></i></div>
       <div id="products"></div>
       <div id="summary" class="summary"></div>
     </section>
 
     <section class="panel previewPanel">
-      <div class="panelHead"><div><div class="ey">03 / PDF</div><h2>A4 preview</h2></div><span id="pdfState" class="pill">Ready</span></div>
+      <div class="panelHead">
+        <div><div class="ey">03 / A4 DOCUMENT</div><h2>Live preview</h2></div>
+        <span id="pdfState" class="pill">Ready</span>
+      </div>
       <div class="previewViewport">
         <div id="pdfPreview" class="a4Stage" aria-label="A4 invoice preview">
-          <div class="a4Sheet empty"><strong>Generate PDF</strong><span>The finished invoice will appear here as an A4 page.</span></div>
+          <div class="a4Sheet empty"><strong>Generate PDF</strong><span>The finished BNC invoice will appear here.</span></div>
         </div>
       </div>
       <div class="previewActions">
@@ -62,13 +87,22 @@
         <button id="jsonInBtn" class="secondary" type="button">Import JSON</button>
         <input id="jsonFile" type="file" accept=".json" hidden>
       </div>
+      <div class="previewNote"><strong>PDF master protected</strong><span>The source invoice template remains the visual master for generated documents.</span></div>
     </section>
   </div>
 
-  <section class="history panel"><div class="panelHead"><div><div class="ey">04 / HISTORY</div><h2>Saved invoices</h2></div><span class="pill">THIS DEVICE</span></div><div id="history"></div></section>
+  <section class="history panel">
+    <div class="panelHead">
+      <div><div class="ey">04 / LOCAL HISTORY</div><h2>Saved invoices</h2></div>
+      <span class="pill">THIS DEVICE</span>
+    </div>
+    <div id="history"></div>
+  </section>
 </main>
-<footer>BNC AgroCare · Invoice PWA <span>·</span> Built by Tamasrazim</footer>
+
+<footer>BNC AgroCare · Invoice Studio <span>·</span> Built by Tamasrazim</footer>
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script src="./js/app.js"></script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});</script>
-</body></html>
+</body>
+</html>
