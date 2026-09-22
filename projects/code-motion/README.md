@@ -1,36 +1,40 @@
 # Code → Motion — Tamasrazim
 
-Browser-first deterministic animation renderer and local media-production project.
+Browser-first deterministic animation rendering project.
 
-## Renderer V2
+## Canonical files
 
-The canonical renderer is `../../code-motion-tamasrazim.html`.
+- `renderer.html` — current V2 single-file renderer.
+- `media-stack.js` — media capability and container/codec descriptors.
+- `legacy-renderer.html` — archived previous renderer build.
 
-V2 runs animation source inside an isolated runtime, requests output frames explicitly from the animation clock, and sends those frames through the browser's available WebCodecs encoder.
+The old root URLs are kept as compatibility launchers so existing links do not break.
 
-Core timing rule:
+## Render model
+
+The renderer evaluates animation time from the requested frame:
 
 `time = frame / fps`
 
-Preview playback is not used as the export clock.
+Preview playback is separate from export timing. The renderer requests frames explicitly, then uses the browser's available encoding path.
 
-## Video output
+## Output
 
-V2 currently targets:
+The application probes the active browser/device for compatible encoding configurations rather than claiming universal codec support.
 
-- MP4 / ISO-BMFF with H.264 / AVC when the browser reports a compatible WebCodecs configuration.
-- WebM / Matroska with the supported VP8/VP9 browser encoders.
+Current project documentation describes:
 
-The renderer probes the selected resolution, FPS, bitrate and codec before rendering. Unsupported combinations are reported rather than represented as guaranteed support.
+- MP4 / ISO-BMFF with H.264 / AVC where the active browser exposes a compatible WebCodecs configuration.
+- WebM with browser-supported VP8/VP9 paths.
+- Local output generation without a backend, subscription, Electron runtime, or required FFmpeg installation.
 
-## Architecture
+## Development
 
-`source → isolated runtime → explicit frame → VideoFrame → WebCodecs encoder → local muxer → output verification → download`
+The project entry page is `index.html`.
 
-The renderer UI is kept outside the render surface.
+The actual renderer source of truth is:
 
-The browser-first V2 page does not require a backend service, account, subscription, Electron runtime, proprietary encoder binary, or FFmpeg installation.
+`projects/code-motion/renderer.html`
 
-## Repository note
+The root `code-motion-tamasrazim.html` URL is retained only as a compatibility entry point.
 
-`code-motion-tamasrazim2.html` is retained as the previous advanced renderer build. Its recent output-label precedence regressions are fixed, but the project entry point is now the uploaded V2 renderer.
