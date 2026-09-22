@@ -10,179 +10,125 @@
 
 ---
 
-## Digital Identity
+## What this repository is
 
-**Robiul Rumman Razim — Tamasrazim**
+This is the source-of-truth repository for **Robiul Rumman Razim — Tamasrazim**.
 
-This repository contains the source for the Tamasrazim personal web experience: an animation-focused, interactive digital identity built around motion, experimentation, and a continuously evolving interface.
+It contains the main digital identity site plus standalone browser projects and production tools. The repository is intentionally organized so the root stays focused on the personal site while project implementations live under `projects/`, and shared website code stays under `assets/`.
 
-The repository is the source of truth for the website.
+## Live projects
 
----
+| Project | What it is | Live |
+| --- | --- | --- |
+| **Code → Motion** | Deterministic browser-first animation renderer | https://tamasrazim.github.io/projects/code-motion/ |
+| **Animation Renderer** | Full rendering workflow / production renderer PWA | https://tamasrazim.github.io/renderer/ |
+| **Stock Asset Vault** | Local-first asset organization and metadata workspace | https://tamasrazim.github.io/asset-vault/ |
+| **BNC AgroCare** | Agricultural product catalogue + invoice PWA | https://tamasrazim.github.io/projects/bncagrocare/ |
+| **Repo Token Meter** | Repository source-footprint measurement tool | https://tamasrazim.github.io/projects/repo-token-meter/ |
 
-## Code → Motion V2
+## Repository map
 
-A separate single-file motion renderer for deterministic code-driven video output.
+```text
+/
+├── index.html                         # Tamasrazim personal site
+├── assets/
+│   ├── css/                           # shared site styling
+│   └── js/                            # boot, motion and site runtime
+├── projects/
+│   ├── code-motion/                   # Code → Motion project
+│   │   ├── index.html                 # project landing page
+│   │   ├── renderer.html              # canonical renderer
+│   │   ├── legacy-renderer.html       # archived renderer build
+│   │   └── media-stack.js              # media descriptors
+│   ├── bncagrocare/                   # BNC business project
+│   │   ├── index.html                 # company website
+│   │   ├── invoice/                   # Invoice Studio PWA
+│   │   └── reference/                 # reference material
+│   └── repo-token-meter/              # standalone utility
+├── renderer/                          # Animation Renderer PWA
+├── asset-vault/                       # Stock Asset Vault PWA
+├── tools/                             # project validators and contracts
+├── scripts/                           # repository helper/check scripts
+├── .github/workflows/                 # automated project validation
+├── 404.html                           # GitHub Pages fallback
+├── robots.txt                          # crawler rules
+└── sitemap.xml                         # public route discovery
+```
 
-**Canonical renderer:** `code-motion-tamasrazim.html`  
-**Project page:** `projects/code-motion/`
+## Project notes
 
-V2 isolates the animation source, requests frames from the deterministic clock, probes actual browser encoder support, and writes the supported MP4/WebM output locally. The renderer UI is not used as the exported capture surface.
+### Code → Motion
 
-## Animation Renderer — Tamasrazim
+Canonical renderer source:
 
-### Built from a stock contributor's workflow, for stock contributors.
+`projects/code-motion/renderer.html`
 
-The renderer exists for a practical reason: create animation assets from code, prepare them cleanly, and turn them into files that can be used in a stock-content workflow.
+The repository also keeps root compatibility URLs for older inbound links:
 
-The idea is simple:
+- `/code-motion-tamasrazim.html`
+- `/code-motion-tamasrazim2.html`
 
-**Write animation code → Paste it → Preview it → Choose render settings → Run preflight → Render frame-by-frame → Prepare metadata → Download → Ready-to-upload stock animation → Submit → If approved, earn from the work.**
+Those are entry-point compatibility files; the project source lives under `projects/code-motion/`.
 
-The renderer is designed to keep the exported visual itself clean. Tamasrazim branding, interface controls, or watermarks are not intended to be burned into the animation output.
+### Animation Renderer
 
-### Render engine
+The production-oriented renderer lives under `renderer/`. Its main UI, deterministic video engine, PWA manifest, service worker and validation tooling stay together.
 
-The production video path is built around deterministic frame generation when the browser exposes WebCodecs:
+### Stock Asset Vault
 
-**Frame N → render at N / FPS → encode → timestamp → next frame**
+`asset-vault/` is the companion local-first workspace for organizing rendered stock assets, previews, metadata and submission status.
 
-That means output generation does not depend on the preview playing in real time. A slow machine may take longer to render, but the requested frame sequence remains explicit rather than being driven by realtime capture.
+### BNC AgroCare
 
-The renderer probes the current browser/device for supported encoder configurations before offering deterministic codecs. The current deterministic path targets browser-exposed VP8, VP9 and AV1 encoders packaged into WebM. MediaRecorder remains available as an explicitly labeled realtime fallback where the browser exposes formats such as H.264/MP4.
+BNC is maintained canonically under `projects/bncagrocare/`.
 
-WebCodecs availability is browser-dependent, so the renderer reports what the current environment can actually configure rather than presenting a fixed list of imaginary codecs.
+The public site is product-first and includes the current BNC product names and pack formats. The Invoice Studio is a separate local-first PWA under:
 
-### Exact loop
+`projects/bncagrocare/invoice/`
 
-The output duration and animation loop duration are independent.
+The original `invoice.pdf` is an immutable project asset and remains the document master.
 
-Example:
+### Repo Token Meter
 
-**Output: 30 seconds**  
-**Loop: 5.000 seconds**
+A standalone browser utility under `projects/repo-token-meter/` for measuring repository source footprint and estimating token volume. The measurement is an estimate of source text, not AI billing usage.
 
-The renderer evaluates the animation clock modulo the exact loop duration while still producing the full requested output frame count.
+## Validation
 
-### Workflow
+Projects have their own automated checks:
 
-**CODE**
-→ **PREVIEW**
-→ **RENDER**
-→ **SETTINGS**
-→ **PREFLIGHT**
-→ **CONFIRM**
-→ **RENDERING**
-→ **MINI-GAME**
-→ **COMPLETE**
-→ **DOWNLOAD**
+- `tools/validate_code_motion.mjs`
+- `tools/validate_bnc.mjs`
+- `tools/validate_renderer.py`
+- `tools/validate_asset_vault.mjs`
+- `tools/renderer-contract.ts`
 
-The contributor controls resolution, frame rate, duration, loop behavior, bitrate, keyframe interval, hardware-acceleration hint, output codec where supported, transparency for stills, and stock metadata.
-
-### Animation example
-
-The renderer itself is the live example: open it, load or write an animation, preview it, configure the render, run preflight, and produce the asset.
-
-**[Open Animation Renderer — Tamasrazim](https://tamasrazim.github.io/renderer/)**
-
-The goal is not simply to demonstrate an animation. The goal is to demonstrate the complete path from **animation code to a downloadable stock-content asset**.
-
-### PWA
-
-The renderer includes an installable offline-oriented PWA shell with a versioned service-worker cache and update detection.
-
----
-
-## Stock Asset Vault — Tamasrazim
-
-A local-first stock asset organizer for the renderer workflow.
-
-**Workflow:**
-**Render → Import → Inspect → Add metadata → Track status → Download**
-
-The vault stores imported image/video assets in the browser's IndexedDB rather than uploading them to a server. It supports asset previews, search, type/status filters, title, description, keywords, notes, per-asset download, metadata JSON export, deletion, and an installable PWA shell.
-
-**Open Stock Asset Vault:** https://tamasrazim.github.io/asset-vault/
-
-The project is designed as a companion to Animation Renderer — Tamasrazim: the renderer produces the asset; the vault keeps the finished asset and its submission metadata organized locally.
-
----
-
-## BNC AgroCare
-
-BNC validation runs automatically with `tools/validate_bnc.mjs` through GitHub Actions.
-
-**BNC canonical source:** `projects/bncagrocare/` in this repository. `Tamasrazim/bncagrocare` is the backup mirror.
-
-An agriculture-focused project with a public company website and a local-first invoice PWA.
-
-**Project page:** https://tamasrazim.github.io/projects/bncagrocare/  
-**BNC site:** https://tamasrazim.github.io/projects/bncagrocare/  
-**Invoice PWA:** https://tamasrazim.github.io/projects/bncagrocare/invoice/  
-**Repository:** https://github.com/Tamasrazim/bncagrocare
-
-The invoice workflow is:
-
-**Fill the boxes → Live A4 preview → Save invoice → Print / PDF**
-
-The PWA keeps invoice drafts and saved invoice history in the browser with IndexedDB. JSON backup is available, and the original spreadsheet remains a reference rather than the editing interface.
-
-## Website Motion System
-
-The website uses a custom motion architecture for continuous interaction and scene behavior, including:
-
-- Cursor-responsive motion
-- Kinetic typography
-- Text deformation and zoom
-- Magnetic interactions
-- Fluid contact/email field interaction
-- Scroll choreography
-- Canvas-based ambient effects
-- Motion layers and depth
-- Responsive and reduced-motion handling
-- Renderer preview integration
-
-The interaction system is implemented independently for Tamasrazim rather than copying another site's source code or assets.
-
----
-
-## Repository Structure
-
-- `index.html` — main identity site
-- `assets/css/site.css` — website styling
-- `assets/js/boot.js` — boot and progressive enhancement
-- `assets/js/site.js` — site interactions and effects
-- `renderer/` — Animation Renderer — Tamasrazim
-- `projects/bncagrocare/` — BNC AgroCare project page
-- `asset-vault/` — Stock Asset Vault — Tamasrazim
-- `renderer/js/app.js` — renderer UI, timeline, settings, preview and workflow
-- `renderer/js/video-engine.js` — deterministic WebCodecs frame encoder and WebM muxer
-- `renderer/manifest.webmanifest` — PWA manifest
-- `renderer/sw.js` — offline cache and update handling
-- `og-image.png` — social preview image
-- `robots.txt` / `sitemap.xml` — search discovery
-- `404.html` — GitHub Pages fallback
-
----
+GitHub Actions runs the relevant validation workflow when a project changes.
 
 ## Development
 
-The website is designed as a static GitHub Pages project. There is no required application build pipeline for the main site.
+The main website is a static GitHub Pages site. There is no required root build pipeline.
 
-Open `index.html` through a local static server when testing browser behavior, or visit the live site.
+For local browser testing, serve the repository through a static HTTP server rather than opening pages directly from `file://`.
 
-For renderer development, see the files inside `renderer/`.
+Each standalone project keeps its own HTML/CSS/JS/PWA assets close to its implementation.
 
----
+## Source-of-truth rule
+
+When a project exists in both this repository and a separate deployment/backup repository, this repository is the canonical source unless the project documentation explicitly says otherwise.
+
+For BNC AgroCare, `Tamasrazim/tamasrazim.github.io` is canonical and `Tamasrazim/bncagrocare` is the backup mirror.
 
 ## Links
 
 - **Website:** https://tamasrazim.github.io/
+- **Code → Motion:** https://tamasrazim.github.io/projects/code-motion/
 - **Animation Renderer:** https://tamasrazim.github.io/renderer/
 - **Stock Asset Vault:** https://tamasrazim.github.io/asset-vault/
+- **BNC AgroCare:** https://tamasrazim.github.io/projects/bncagrocare/
+- **Repo Token Meter:** https://tamasrazim.github.io/projects/repo-token-meter/
 - **GitHub:** https://github.com/Tamasrazim
 - **LinkedIn:** https://www.linkedin.com/in/Tamasrazim/
 
 ---
 
-<sub>Built as an evolving digital identity and animation-production experiment.</sub>
+<sub>Source of truth for the Tamasrazim web ecosystem.</sub>
