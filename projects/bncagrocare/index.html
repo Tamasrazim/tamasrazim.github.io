@@ -134,11 +134,7 @@ const PRODUCTS=[
 ["07","NC Vit- (NNA 98%)",["1kg. x 10 Pack"]],
 ["08","NC Leaf- GA-3",["10 gm x 100 Pack","1 gm x 100 Pack"]],
 ["09","NC Gyp- Calcium 20% & Sulfur 16%",["10 kg. x 5 Pack","5 kg. x 10 Pack"]],
-["12","Pachtara- 5 SG",["100 ml x 30 Pack","15 ml x 100 Pack","10 ml x 100 Pack"]],
 ["14","NC-Darma",["500 ml x 12 Bottle","100 ml x 30 Bottle"]],
-["15","Darma+++",["500 gm x 10 Box","100 gm x 30 Box"]],
-["16","NC Vit +++",["1 Ltr x 12 Bottle","500 ml x 12 Bottle","100 ml x 30 Bottle"]],
-["17","NC-Leaf +++",["1 Ltr x 12 Bottle","500 ml x 12 Bottle","100 ml x 30 Bottle"]]
 ];
 const grid=document.getElementById("grid"),search=document.getElementById("search"),count=document.getElementById("count"),empty=document.getElementById("noResults");
 function render(q=""){const x=q.trim().toLowerCase();const list=PRODUCTS.filter(p=>(p[1]+" "+p[2].join(" ")).toLowerCase().includes(x));grid.innerHTML=list.map(p=>'<article class="product"><div class="code">'+p[0]+' · BNC PRODUCT</div><h3>'+p[1]+'</h3><div class="kind">Product reference</div><div class="packlabel">Available pack formats</div><div class="packs">'+p[2].map(v=>'<span class="pack">'+v+'</span>').join("")+'</div></article>').join("");empty.style.display=list.length?"none":"block";count.textContent=list.length+" PRODUCT"+(list.length===1?"":"S")+" · "+list.reduce((n,p)=>n+p[2].length,0)+" PACK OPTIONS"}
