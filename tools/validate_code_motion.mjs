@@ -5,7 +5,7 @@ const must = (ok, msg) => {
   console.log('PASS', msg);
 };
 
-const renderer = fs.readFileSync('code-motion-tamasrazim.html', 'utf8');
+const renderer = fs.readFileSync('projects/code-motion/renderer.html', 'utf8');
 const project = fs.readFileSync('projects/code-motion/index.html', 'utf8');
 const media = fs.readFileSync('projects/code-motion/media-stack.js', 'utf8');
 
@@ -59,7 +59,7 @@ try {
   throw new Error('renderer application JavaScript syntax: ' + error.message);
 }
 
-must(project.includes('../../code-motion-tamasrazim.html'), 'project page points to canonical renderer');
+must(project.includes('./renderer.html'), 'project page points to canonical renderer');
 must(!project.includes('Mediabunny'), 'project page has no stale Mediabunny claim');
 must(!media.includes('Mediabunny'), 'media descriptor has no stale Mediabunny dependency');
 must(media.includes("containers: ['mp4', 'webm']"), 'media descriptor exposes current containers');
