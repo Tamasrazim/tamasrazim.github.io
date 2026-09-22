@@ -16,7 +16,7 @@ function all(){return new Promise((resolve,reject)=>{const r=tx('readonly').getA
 async function refresh(){assets=await all();applyFilters()}
 function revokeUrl(id){const u=objectUrls.get(id);if(u){URL.revokeObjectURL(u);objectUrls.delete(id)}}
 function urlFor(asset){if(!asset||!asset.blob)return null;if(!objectUrls.has(asset.id))objectUrls.set(asset.id,URL.createObjectURL(asset.blob));return objectUrls.get(asset.id)}
-function kindOf(file){if(file.type.startsWith('video/'))return 'VIDEO';if(file.type.startsWith('image/'))return 'IMAGE';return 'FILE'}
+function kindOf(file){const type=String(file.type||'').toLowerCase(),name=String(file.name||'').toLowerCase();if(type.startsWith('video/')||/\.(mp4|webm|mov|mkv)$/.test(name))return 'VIDEO';if(type.startsWith('image/')||/\.(png|jpe?g|webp|gif|avif|svg)$/.test(name))return 'IMAGE';return 'FILE'}
 function bytes(n){if(n<1024)return n+' B';let u=['KB','MB','GB'];let i=-1;do{n/=1024;i++}while(n>=1024&&i<u.length-1);return n.toFixed(n>100?0:1)+' '+u[i]}
 function escape(v){return String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function applyFilters(){
@@ -45,7 +45,7 @@ function render(){
   $$('[data-download]').forEach(b=>b.addEventListener('click',()=>downloadAsset(b.dataset.download)));
 }
 async function importFiles(list){
-  const files=Array.from(list||[]).filter(f=>/^(image|video)\//.test(f.type));
+  const files=Array.from(list||[]).filter(f=>{const type=String(f.type||'').toLowerCase(),name=String(f.name||'').toLowerCase();return /^(image|video)\//.test(type)||/\.(png|jpe?g|webp|gif|avif|svg|mp4|webm|mov|mkv)$/.test(name)});
   if(!files.length){toast('Use image or video files.');return}
   for(const file of files){
     const asset={id:uid(),name:file.name,title:file.name.replace(/\.[^.]+$/,''),description:'',keywords:[],notes:'',status:'ready',kind:kindOf(file),mime:file.type,size:file.size,blob:file,createdAt:Date.now(),updatedAt:Date.now()};
