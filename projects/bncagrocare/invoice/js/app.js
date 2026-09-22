@@ -160,7 +160,7 @@ function saveInvoice(){
 }
 function history(){
  if(!db)return;const host=$("#history");host.replaceChildren();const req=db.transaction("invoices").objectStore("invoices").openCursor(),items=[];
- req.onsuccess=()=>{const c=req.result;if(c){items.push(c.value);c.continue();return}items.sort((x,y)=>Number(y.updatedAt||0)-Number(x.updatedAt||0););
+ req.onsuccess=()=>{const c=req.result;if(c){items.push(c.value);c.continue();return}items.sort((x,y)=>Number(y.updatedAt||0)-Number(x.updatedAt||0));
  if(!items.length){host.innerHTML='<div class="historyRow"><div><strong>No saved invoices</strong><small>Saved documents from this device will appear here.</small></div></div>';return}
  items.forEach(x=>{const row=document.createElement("div");row.className="historyRow";row.innerHTML='<div><strong>'+safe(x.invoiceNumber)+'</strong><small>'+money(x.total)+' · '+new Date(x.updatedAt).toLocaleString()+'</small></div>';const actions=document.createElement("div");actions.className="rowActions";
  [["Load",()=>{Object.assign(state,x.data);normalize();syncFields();renderProducts();saveDraft();setStatus("Loaded "+x.invoiceNumber)}],["Copy",()=>{Object.assign(state,x.data);state.invoiceNo=String((Number(state.invoiceNo)||0)+1).padStart(4,"0");state.date=today();normalize();syncFields();renderProducts();saveDraft();setStatus("Copied "+x.invoiceNumber)}],["Delete",()=>{db.transaction("invoices","readwrite").objectStore("invoices").delete(x.id).onsuccess=history},"del"]].forEach(([label,fn,cl])=>{const b=document.createElement("button");b.textContent=label;b.type="button";if(cl)b.className=cl;b.onclick=fn;actions.append(b)});row.append(actions);host.append(row)})
