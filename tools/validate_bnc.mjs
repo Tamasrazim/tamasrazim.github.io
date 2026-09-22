@@ -50,7 +50,7 @@ must(Array.isArray(manifest.icons)&&manifest.icons.length>0,'PWA icon is declare
 
 const serviceWorker=read(root+'/invoice/sw.js');
 must(/bnc-invoice-v\d+/.test(serviceWorker),'service worker cache is versioned');
-must(serviceWorker.includes('bnc-invoice-v45'),'service worker cache is at v43');
+must(serviceWorker.includes('bnc-invoice-v45'),'service worker cache is at v45');
 must(serviceWorker.includes('self.registration.scope'),'service worker derives its navigation scope');
 must(serviceWorker.includes('caches.match(FALLBACK)'),'service worker has an offline navigation fallback');
 must(serviceWorker.includes('invoice.pdf'),'service worker pre-caches the locked invoice template');
