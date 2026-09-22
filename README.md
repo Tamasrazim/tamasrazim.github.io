@@ -35,6 +35,7 @@ It contains the main digital identity site plus standalone browser projects and 
 │   ├── css/                           # shared site styling
 │   └── js/                            # boot, motion and site runtime
 ├── projects/
+│   ├── index.html                     # canonical public project index
 │   ├── code-motion/                   # Code → Motion project
 │   │   ├── index.html                 # project landing page
 │   │   ├── renderer.html              # canonical renderer
@@ -96,6 +97,7 @@ A standalone browser utility under `projects/repo-token-meter/` for measuring re
 
 Projects have their own automated checks:
 
+- `tools/validate_site.mjs`
 - `tools/validate_code_motion.mjs`
 - `tools/validate_bnc.mjs`
 - `tools/validate_renderer.py`
@@ -107,6 +109,8 @@ GitHub Actions runs the relevant validation workflow when a project changes.
 ## Development
 
 The main website is a static GitHub Pages site. There is no required root build pipeline.
+
+The public project directory is `projects/`. Its index is `projects/index.html`; standalone applications that retain short top-level URLs, such as `/renderer/` and `/asset-vault/`, remain compatibility-friendly deployment surfaces.
 
 For local browser testing, serve the repository through a static HTTP server rather than opening pages directly from `file://`.
 
