@@ -11,11 +11,7 @@ const PRODUCTS=[
 {name:"NC Vit- (NNA 98%)",packs:["1kg. x 10 Pack"]},
 {name:"NC Leaf- GA-3",packs:["10 gm x 100 Pack","1 gm x 100 Pack"]},
 {name:"NC Gyp- Calcium 20% & Sulfur 16%",packs:["10 kg. x 5 Pack","5 kg. x 10 Pack"]},
-{name:"Pachtara- 5 SG",packs:["100 ml x 30 Pack","15 ml x 100 Pack","10 ml x 100 Pack"]},
 {name:"NC-Darma",packs:["500 ml x 12 Bottle","100 ml x 30 Bottle"]},
-{name:"Darma+++",packs:["500 gm x 10 Box","100 gm x 30 Box"]},
-{name:"NC Vit +++",packs:["1 Ltr x 12 Bottle","500 ml x 12 Bottle","100 ml x 30 Bottle"]},
-{name:"NC-Leaf +++",packs:["1 Ltr x 12 Bottle","500 ml x 12 Bottle","100 ml x 30 Bottle"]}
 ];
 const blank=()=>({name:"",pack:"",ctn:"",rate:""});
 const state={ref:"X2",invoiceNo:"0002",date:"",commission:0,trader:"",buyer:"",address:"",mobile:"",products:Array.from({length:TEMPLATE_ROWS},blank)};
