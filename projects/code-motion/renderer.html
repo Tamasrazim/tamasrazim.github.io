@@ -497,8 +497,7 @@ body{
   color:var(--mut);
 }
 .hdr-acts{gap:4px;padding:0 8px}
-.hdr-acts button{
-  border-left:0;
+.hdr-acts button{  border-left:0;
   border-radius:9px;
   margin:8px 0;
   padding:0 11px;
@@ -997,8 +996,7 @@ select.mini{
   background:rgba(255,255,255,.035);
 }
 
-.doc pre{
-  border:0;
+.doc pre{  border:0;
   border-radius:9px;
   background:rgba(255,255,255,.03);
   padding:10px 11px;
@@ -1497,8 +1495,7 @@ select.mini{
             <div class="row"><label for="cW">Width</label><input type="number" id="cW" min="2" max="8192" step="2"></div>
             <div class="row"><label for="cH">Height</label><input type="number" id="cH" min="2" max="8192" step="2"></div>
             <div class="row"><span class="lb">Aspect</span><span class="val dim" id="cAspect">16:9 · 1.7778</span></div>
-            <div class="row"><span class="lb">Megapixels</span><span class="val dim" id="cMp">2.07 MP</span></div>
-          </div>
+            <div class="row"><span class="lb">Megapixels</span><span class="val dim" id="cMp">2.07 MP</span></div>          </div>
           <div class="sec">
             <h4>FRAME RATE</h4>
             <div class="seg" id="segFps"></div>
@@ -1997,8 +1994,7 @@ function createRuntime() {
     var body = '"use strict";\n' + code +
       '\n;return {r:(typeof renderFrame==="function")?renderFrame:null,s:(typeof setup==="function")?setup:null};';
     var factory;
-    try {
-      factory = Function.apply(null, SCOPE.concat([body]));
+    try {      factory = Function.apply(null, SCOPE.concat([body]));
     } catch (e) {
       var d = describeError(e, 'compile');
       if (d.line === null) {
@@ -2497,8 +2493,7 @@ function parseZip(blob) {
    ============================================================ */
 /* ============================================================
    ISO-BMFF / MP4 — real muxer for H.264 (AVC) elementary samples
-   ------------------------------------------------------------
-   Samples arrive from WebCodecs already in AVCC form (length-prefixed
+   ------------------------------------------------------------   Samples arrive from WebCodecs already in AVCC form (length-prefixed
    NAL units) because the encoder is configured with avc.format = 'avc'.
    The AVCDecoderConfigurationRecord handed back in the first chunk's
    metadata is written verbatim as the avcC payload, so the sample
@@ -2525,6 +2520,29 @@ var MP4_MATRIX = concat([
   u32b(0), u32b(0), u32b(0x40000000)
 ]);
 
+function deriveAvcCFromSample(bytes) {
+  if (!bytes || bytes.length < 8) return null;
+  var p = 0, sps = null, pps = null;
+  while (p + 4 <= bytes.length) {
+    var len = (((bytes[p] << 24) >>> 0) | (bytes[p + 1] << 16) | (bytes[p + 2] << 8) | bytes[p + 3]) >>> 0;
+    p += 4;
+    if (!len || p + len > bytes.length) break;
+    var nalType = bytes[p] & 0x1F;
+    if (nalType === 7 && !sps) sps = bytes.slice(p, p + len);
+    else if (nalType === 8 && !pps) pps = bytes.slice(p, p + len);
+    p += len;
+    if (sps && pps) break;
+  }
+  if (!sps || !pps || sps.length < 4 || pps.length < 1 || sps.length > 65535 || pps.length > 65535) return null;
+  return concat([
+    u8b(1),
+    u8b(sps[1]), u8b(sps[2]), u8b(sps[3]),
+    u8b(0xFF),
+    u8b(0xE1), u16b(sps.length), sps,
+    u8b(1), u16b(pps.length), pps
+  ]);
+}
+
 function MP4Muxer(o) {
   this.width = Math.max(2, o.width | 0);
   this.height = Math.max(2, o.height | 0);
@@ -2549,9 +2567,16 @@ function MP4Muxer(o) {
 MP4Muxer.prototype.setDescription = function (desc) {
   if (this.description || !desc) return;
   var v = (desc instanceof ArrayBuffer) ? new Uint8Array(desc) : new Uint8Array(desc.buffer, desc.byteOffset, desc.byteLength);
+  if (v.length < 7 || v[0] !== 1) return;
   this.description = new Uint8Array(v);
 };
 MP4Muxer.prototype.addSample = function (bytes, isKey, timestampUs) {
+  if (!(bytes && bytes.length)) throw new Error('Encoded H.264 sample is empty.');
+  if (!isFinite(timestampUs)) throw new Error('Encoded H.264 sample has an invalid timestamp.');
+  if (!this.description) {
+    var derived = deriveAvcCFromSample(bytes);
+    if (derived) this.description = derived;
+  }
   if (timestampUs <= this.lastTs) this.monotonic = false;
   this.lastTs = timestampUs;
   this.samples.push({ size: bytes.length, sync: !!isKey, offset: this.mdatBytes, ts: timestampUs });
@@ -2666,7 +2691,20 @@ MP4Muxer.prototype.buildMoov = function (base) {
   var udta = mbox('udta', [meta]);
   return mbox('moov', [mvhd, trak, udta]);
 };
-MP4Muxer.prototype.finish = function () {
+MP4Muxer.prototype.finish = function (expectedSamples) {
+  var expected = Math.max(0, Number(expectedSamples) || this.expectedSamples);
+  if (expected && this.samples.length !== expected) {
+    return {
+      ok: false,
+      reason: 'The muxer received ' + this.samples.length + ' encoded samples for ' + expected + ' requested frames.'
+    };
+  }
+  if (!this.monotonic) {
+    return {
+      ok: false,
+      reason: 'The H.264 encoder returned samples with non-monotonic presentation timestamps. No MP4 was produced.'
+    };
+  }
   if (!this.description) {
     return {
       ok: false,
@@ -2997,8 +3035,7 @@ function runFrames(cfg) {
     res.durations = durations;
     res.elapsedMs = now() - started;
     return res;
-  });
-}
+  });}
 
 function analyseDurations(d) {
   if (!d.length) return { avg: 0, min: 0, max: 0, total: 0 };
@@ -3124,7 +3161,7 @@ function exportMP4(cfg) {
     var sel = probe.selected;
     var mux = new enc.MP4Muxer({
       width: comp.width, height: comp.height, fps: comp.fps,
-      codecString: sel.id, metadata: job.metadata, tags: job.tags
+      codecString: sel.id, metadata: job.metadata, tags: job.tags, expectedSamples: comp.frameCount
     });
     var out = (env.makeExportCanvas || env.makeCanvas)(comp.width, comp.height);
     function release() { if (env.releaseExportCanvas) { try { env.releaseExportCanvas(out); } catch (e) { } } }
@@ -3215,7 +3252,7 @@ function exportMP4(cfg) {
             }
           };
         }
-        var fin = mux.finish();
+        var fin = mux.finish(comp.frameCount);
         if (!fin.ok) {
           return { ok: false, stage: 'mux', error: { name: 'MP4 MUXER ERROR', layer: 'mux', message: fin.reason, detail: 'The H.264 stream was produced but could not be described in an MP4 sample table, so no file was written.' } };
         }
@@ -3497,8 +3534,7 @@ function loopSeam(env, job) {
   });
 }
 
-return { run: run, sampleTiming: sampleTiming, loopSeam: loopSeam, pad6: pad6 };
-})();
+return { run: run, sampleTiming: sampleTiming, loopSeam: loopSeam, pad6: pad6 };})();
 </script>
 
 <script type="text/js-source" id="src-worker">
@@ -3997,8 +4033,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 
   for (let j = 0; j <= CY; j++) {
     ctx.beginPath();
-    for (let i = 0; i <= CX; i++) {
-      const p = point(i, j);
+    for (let i = 0; i <= CX; i++) {      const p = point(i, j);
       i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
     }
     const d = Math.abs(j / CY - 0.5) * 2;
@@ -4497,8 +4532,7 @@ function initEditor() {
   Ed.curMark = document.createElement('div');
   Ed.curMark.style.cssText = 'position:absolute;left:0;right:0;height:19px;background:rgba(255,255,255,.06);pointer-events:none';
   Ed.errMark = document.createElement('div');
-  Ed.errMark.style.cssText = 'position:absolute;left:0;right:0;height:19px;background:#fff;opacity:.18;display:none;pointer-events:none';
-  Ed.gutter.appendChild(Ed.curMark); Ed.gutter.appendChild(Ed.errMark); Ed.gutter.appendChild(Ed.nums);
+  Ed.errMark.style.cssText = 'position:absolute;left:0;right:0;height:19px;background:#fff;opacity:.18;display:none;pointer-events:none';  Ed.gutter.appendChild(Ed.curMark); Ed.gutter.appendChild(Ed.errMark); Ed.gutter.appendChild(Ed.nums);
 
   var probe = document.createElement('span');
   probe.style.cssText = 'position:absolute;visibility:hidden;font-family:var(--mono);font-size:12px;white-space:pre';
@@ -4997,8 +5031,7 @@ function applyComp(patch) {
   drawRuler();
   syncFrameUI();
   markDirty();
-  if (!Engine.api) return;
-  Engine.api.setComposition(S.comp);
+  if (!Engine.api) return;  Engine.api.setComposition(S.comp);
   S.lastPainted = -1;
   requestPreview(true);
   if (S.compareMode) refreshCompare();
@@ -5497,8 +5530,7 @@ function analyseJob() {
         box.innerHTML = html;
         S.analysis = { at: Date.now(), blocking: blocking, probe: probe, timing: t };
       });
-    });
-  }).catch(function (e) {
+    });  }).catch(function (e) {
     setStage('IDLE', true);
     box.innerHTML = '<div class="warnbox"><b>Analysis failed</b>' + esc(String(e.message || e)) + '</div>';
   });
@@ -5997,8 +6029,7 @@ function refreshDiag() {
   yesNo(dl, 'IndexedDB', c.idb);
   yesNo(dl, 'Web Crypto (SHA-256)', c.subtle, 'SUPPORTED', 'NOT AVAILABLE — source hashing is off');
   yesNo(dl, 'Secure context', c.secure);
-  yesNo(dl, 'WebGL2', c.webgl2, 'SUPPORTED — usable from your code via a second canvas', 'NOT AVAILABLE');
-  yesNo(dl, 'WebGPU', c.webgpu);
+  yesNo(dl, 'WebGL2', c.webgl2, 'SUPPORTED — usable from your code via a second canvas', 'NOT AVAILABLE');  yesNo(dl, 'WebGPU', c.webgpu);
   kvRow(dl, 'Logical cores', c.cores ? String(c.cores) : 'not reported');
   kvRow(dl, 'Device memory', c.memoryGB ? c.memoryGB + ' GB (browser estimate)' : 'not reported');
   kvRow(dl, 'Device pixel ratio', c.dpr.toFixed(2));
@@ -6497,8 +6528,7 @@ function toyTick(ts) {
   if (!Toy.on) return;
   Toy.raf = requestAnimationFrame(toyTick);
   var budget = Engine.mode === 'worker' ? 33 : 120;
-  if (ts - Toy.last < budget) return;
-  var dt = Math.min(0.2, (ts - Toy.last) / 1000);
+  if (ts - Toy.last < budget) return;  var dt = Math.min(0.2, (ts - Toy.last) / 1000);
   Toy.last = ts;
   Toy.t += dt;
   var cv = $('#toy'), g = cv.getContext('2d');
