@@ -32,31 +32,21 @@ function checkScript(file){
 }
 
 const htmlFiles=[
-  'index.html',
-  'projects/index.html',
-  'renderer/index.html',
-  'asset-vault/index.html',
-  'projects/code-motion/index.html',
-  'projects/bncagrocare/index.html',
-  'projects/bncagrocare/invoice/index.html',
-  'projects/repo-token-meter/index.html'
+  'index.html','projects/index.html','renderer/index.html','asset-vault/index.html',
+  'projects/code-motion/index.html','projects/bncagrocare/index.html',
+  'projects/bncagrocare/invoice/index.html','projects/repo-token-meter/index.html'
 ];
 for(const file of htmlFiles) must(exists(file),file+' exists');
 for(const file of htmlFiles) checkLocalRefs(file);
 
 for(const file of [
-  'assets/js/boot.js',
-  'assets/js/site.js',
-  'assets/js/motion-core.js',
-  'renderer/js/app.js',
-  'renderer/js/video-engine.js',
-  'asset-vault/js/app.js',
+  'assets/js/boot.js','assets/js/site.js','assets/js/motion-core.js',
+  'renderer/js/app.js','renderer/js/video-engine.js','asset-vault/js/app.js',
   'projects/bncagrocare/invoice/js/app.js'
 ]) checkScript(file);
 
 for(const file of [
-  'renderer/manifest.webmanifest',
-  'asset-vault/manifest.webmanifest',
+  'renderer/manifest.webmanifest','asset-vault/manifest.webmanifest',
   'projects/bncagrocare/invoice/manifest.webmanifest'
 ]){
   JSON.parse(read(file));
@@ -64,28 +54,21 @@ for(const file of [
 }
 
 const site=read('index.html');
-for(const ref of [
-  'href="renderer/"',
-  'href="projects/code-motion/"',
-  'href="projects/code-motion/renderer.html"',
-  'href="asset-vault/"',
-  'href="projects/bncagrocare/"',
-  'href="projects/bncagrocare/invoice/"',
-  'href="projects/repo-token-meter/"',
-  'href="projects/"'
-]) must(site.includes(ref),'homepage exposes '+ref);
+const projects=JSON.parse(read('data/projects.json'));
+must(site.includes('Robiul Rumman Razim'),'homepage preserves canonical identity');
+must(site.includes('id="projectList"'),'homepage contains data-driven project mount');
+must(projects.length>0,'project data is non-empty');
+for(const p of projects) must(typeof p.url==='string'&&p.url,'project has canonical route: '+p.name);
+must(projects.some(p=>p.url==='renderer/'),'project data exposes renderer/');
+must(projects.some(p=>p.url==='projects/code-motion/'),'project data exposes Code Motion/');
+must(projects.some(p=>p.url==='asset-vault/'),'project data exposes Asset Vault/');
+must(projects.some(p=>p.url==='projects/bncagrocare/'),'project data exposes BNC AgroCare/');
+must(projects.some(p=>p.url==='projects/repo-token-meter/'),'project data exposes Repo Token Meter/');
 for(const stale of ['Personal Web','Technical Experiments','Gaming & Media']) must(!site.includes('<h3>'+stale+'</h3>'),'homepage has no placeholder project card: '+stale);
 
 const hub=read('projects/index.html');
-for(const ref of [
-  'href="./code-motion/"',
-  'href="./code-motion/renderer.html"',
-  'href="../renderer/"',
-  'href="../asset-vault/"',
-  'href="./bncagrocare/"',
-  'href="./bncagrocare/invoice/"',
-  'href="./repo-token-meter/"'
-]) must(hub.includes(ref),'project index exposes '+ref);
+must(hub.includes('id="projectList"'),'project index uses the shared data-driven project mount');
+must(hub.includes('../assets/js/site.js'),'project index uses the shared site runtime');
 
 const bncPdfSha=execFileSync('git',['ls-tree','-r','HEAD','--','projects/bncagrocare/invoice.pdf'],{encoding:'utf8'}).trim().split(/\s+/)[2];
 must(bncPdfSha==='46c9ce8303a0a4abdf7599ba1479b298c26fc6fe','locked BNC invoice template SHA is unchanged');
