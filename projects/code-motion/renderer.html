@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <meta name="description" content="Code to Motion — a browser-first deterministic animation renderer. Write JavaScript, preview it live, render every frame exactly.">
+<meta name="application-name" content="Code → Motion — Tamasrazim">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Code → Motion">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
 <title>Code → Motion — Tamasrazim</title>
 <style>
 /* ============================================================
@@ -4112,7 +4119,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 'use strict';
 
 var SELF_SOURCE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-var APP_VERSION = '1.0.0';
+var APP_VERSION = '1.1.0';
 var SOFTWARE = 'Code → Motion — Tamasrazim';
 
 var $ = function (s, r) { return (r || document).querySelector(s); };
@@ -6706,7 +6713,7 @@ var DOCS = [
   '<li>H.264 is not universal. Where the browser has no H.264 encoder, the MP4 path reports that and the PNG sequence remains the way out.</li>',
   '<li>No GIF, no ProRes, no alpha in MP4 or WebM. See the export table above.</li>',
   '<li>No fonts are loaded. Generic families only, so a render never waits on a network fetch.</li>',
-  '<li>Service workers cannot be registered from this hosted page. Download the app and serve it yourself for offline install.</li>',
+  '<li>The app registers a local service worker on the GitHub Pages origin. After the first successful load, the application shell can open offline from the installed PWA.</li>',
   '<li>A background tab may be throttled by the browser. Long renders want a visible tab.</li>',
   '<li>Verification proves the container is consistent with the request. It cannot prove that your animation is what you intended.</li>',
   '</ul>',
@@ -6891,6 +6898,14 @@ function boot() {
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
 else boot();
+})();
+</script>
+<script>
+(function(){
+  if (!("serviceWorker" in navigator)) return;
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("./sw.js", {scope:"./"}).catch(function(){ /* optional PWA enhancement */ });
+  });
 })();
 </script>
 </body>
