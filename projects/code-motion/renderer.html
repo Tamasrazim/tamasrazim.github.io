@@ -1398,6 +1398,7 @@ select.mini{
         <span class="sp"></span>
         <button data-act="find">Find</button>
         <button data-act="fmtIndent">Reindent</button>
+        <button data-act="paste" title="Paste code from clipboard">Paste</button>
         <button data-act="undo">Undo</button>
         <button data-act="redo">Redo</button>
       </div>
@@ -4505,6 +4506,27 @@ function edInsert(text, selStart, selEnd) {
   ta.setRangeText(text, s, e, 'end');
   edChanged(true);
 }
+
+function pasteCode() {
+  var ta = Ed.ta;
+  ta.focus();
+  if (!navigator.clipboard || !navigator.clipboard.readText) {
+    $('#edState').textContent = 'clipboard access unavailable — use Ctrl+V';
+    return;
+  }
+  navigator.clipboard.readText().then(function (text) {
+    if (!text) {
+      $('#edState').textContent = 'clipboard is empty';
+      return;
+    }
+    edInsert(text);
+    S.compiled = false;
+    $('#edState').textContent = 'pasted — run to apply';
+    edMarks();
+  }).catch(function () {
+    $('#edState').textContent = 'clipboard permission denied — use Ctrl+V';
+  });
+}
 function edSetValue(v) {
   Ed.ta.value = v; Ed.undo = [{ v: v, s: 0 }]; Ed.redo = [];
   Ed.ta.selectionStart = Ed.ta.selectionEnd = 0;
@@ -6824,6 +6846,7 @@ var ACTS = {
   findClose: closeFind,
   findNext: function () { stepMatch(1); },
   findPrev: function () { stepMatch(-1); },
+  paste: pasteCode,
   replaceOne: replaceOne,
   replaceAll: replaceAll,
   fmtIndent: reindent,
