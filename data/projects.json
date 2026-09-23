@@ -1,4 +1,5 @@
 [
+{"name":"Tamasrazim World","url":"projects/world/","type":"experience","label":"WORLD","description":"First-person procedural portfolio world with planetary exploration, discoveries and project landmarks.","tags":["FPP","WEBGL2","PROCEDURAL","EXPLORATION"]},
 {"name":"Animation Renderer — Tamasrazim","url":"renderer/","type":"tool","label":"FLAGSHIP","description":"Browser rendering workspace for scenes, deterministic frame generation, export and offline PWA use.","tags":["CANVAS","WEBCODECS","PWA"]},
 {"name":"Code → Motion","url":"projects/code-motion/","type":"tool","label":"TOOL","description":"Deterministic code-driven animation and rendering project with canonical renderer routes.","tags":["MOTION","FRAMES","WEB"]},
 {"name":"Stock Asset Vault","url":"asset-vault/","type":"tool","label":"TOOL","description":"Local-first workspace for rendered assets, previews, metadata, keywords and submission state.","tags":["INDEXEDDB","PWA","METADATA"]},
