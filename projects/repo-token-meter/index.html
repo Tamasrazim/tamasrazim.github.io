@@ -1,99 +1,9 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0a0a0a">
-<title>Repo Token Meter — Tamasrazim</title>
-<style>:root{--bg:#070a0d;--panel:#0d1318;--panel2:#111a20;--line:#202a32;--line2:#33404a;--text:#e9eef1;--muted:#78858e;--accent:#cfff39;--danger:#ff6f81;--warn:#ffd66b;--mono:ui-monospace,SFMono-Regular,Consolas,monospace;--sans:Inter,ui-sans-serif,system-ui,sans-serif}
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#070a0d"><title>Repo Token Meter — Tamasrazim</title><style>:root{--bg:#070a0d;--panel:#0d1318;--panel2:#111a20;--line:#202a32;--line2:#33404a;--text:#e9eef1;--muted:#78858e;--accent:#cfff39;--danger:#ff6f81;--warn:#ffd66b;--mono:ui-monospace,SFMono-Regular,Consolas,monospace;--sans:Inter,ui-sans-serif,system-ui,sans-serif}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:500 12px/1.5 var(--sans)}main{max-width:1280px;margin:auto;padding:0 20px 70px}header{min-height:190px;display:flex;justify-content:space-between;align-items:end;gap:20px;padding:45px 0 28px;border-bottom:1px solid var(--line)}h1{margin:0;font:950 clamp(40px,7vw,82px)/.85 var(--sans);letter-spacing:-.08em}.kicker{margin:0 0 8px;color:var(--accent);font:900 8px var(--mono);letter-spacing:.17em}.sub{margin-top:12px;max-width:760px;color:var(--muted);font-size:13px}.badge{border:1px solid var(--line2);padding:8px 10px;font:800 8px var(--mono);letter-spacing:.1em;white-space:nowrap}
 .panel{border:1px solid var(--line);background:linear-gradient(135deg,#0d1318,#0b1014);padding:15px;margin-top:8px}.controls{display:grid;grid-template-columns:1fr 130px 130px auto;gap:6px}.controls input,.controls button{height:43px;border:1px solid var(--line2);background:#090e12;color:var(--text);padding:0 11px;font:800 9px var(--mono);outline:0}.controls input:focus{border-color:var(--accent)}.controls button{background:var(--accent);color:#0a0d0f;border-color:var(--accent);cursor:pointer}.controls button:disabled{opacity:.45}.help{margin-top:9px;color:#65737c;font:700 8px/1.65 var(--mono)}
 .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.stat{min-height:112px;border:1px solid var(--line);background:#0a0f13;padding:12px}.stat .label{font:800 7px var(--mono);color:#64717a;letter-spacing:.12em;text-transform:uppercase}.stat .value{margin-top:7px;font:900 clamp(18px,3vw,29px) var(--mono);letter-spacing:-.03em}.stat .note{margin-top:5px;color:#526069;font:700 7px var(--mono)}.green{color:var(--accent)}.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.section-title{font:900 8px var(--mono);letter-spacing:.13em;color:#9aa6ad;text-transform:uppercase;margin-bottom:6px}.rows{display:grid}.row{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid var(--line);font:700 9px var(--mono);color:#78858e}.row:last-child{border-bottom:0}.row strong{color:var(--text);text-align:right}.file,.history-item{padding:9px 0;border-bottom:1px solid var(--line);font:700 9px var(--mono)}.file{display:flex;justify-content:space-between;gap:12px}.file span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.history{max-height:340px;overflow:auto}.history-top{display:flex;justify-content:space-between;gap:10px;color:var(--text)}.history-meta{margin-top:3px;color:#5f6d76;font-size:8px}button.secondary{border:1px solid var(--line2);background:#0d1318;color:#dbe2e6;padding:8px 10px;font:800 8px var(--mono);cursor:pointer}footer{padding-top:18px;color:#53616a;font:700 8px var(--mono)}
 @media(max-width:900px){header{align-items:flex-start;flex-direction:column}.stats{grid-template-columns:repeat(2,1fr)}.controls{grid-template-columns:1fr 1fr}.controls button{grid-column:1/-1}.two{grid-template-columns:1fr}}@media(max-width:520px){main{padding-inline:12px}h1{font-size:50px}.stats{grid-template-columns:1fr}.controls{grid-template-columns:1fr}.controls button{grid-column:auto}.badge{align-self:flex-start}}
-</style>
-</head>
-<body>
-<main>
-<header>
-  <div>
-    <p class="kicker">TAMASRAZIM // MEASUREMENT</p>
-    <h1>Repo Token Meter</h1>
-    <div class="sub">Live GitHub repository measurement for source size, estimated tokens, binary footprint, commit history, and local scan history.</div>
-  </div>
-  <div class="badge">NO BACKEND · LOCAL HISTORY</div>
-</header>
-
-<section class="panel">
-  <div class="controls">
-    <input id="repo" value="https://github.com/Tamasrazim/tamasrazim.github.io" aria-label="GitHub repository URL">
-    <input id="branch" value="main" aria-label="Branch" placeholder="branch">
-    <input id="ratio" value="3.1" inputmode="decimal" aria-label="Characters per token">
-    <button id="measure">MEASURE NOW</button>
-  </div>
-  <div class="help">Fast mode uses repository byte sizes. The displayed token number is an estimate, not an official OpenAI billing/tokenizer count. A lower chars/token ratio produces a higher estimate.</div>
-</section>
-
-<section class="panel">
-  <div class="stats">
-    <div class="stat"><div class="label">Files</div><div class="value" id="files">—</div><div class="note">all blobs in tree</div></div>
-    <div class="stat"><div class="label">Source files</div><div class="value" id="sourceFiles">—</div><div class="note">text/code only</div></div>
-    <div class="stat"><div class="label">Source tokens</div><div class="value green" id="tokens">—</div><div class="note">estimated</div></div>
-    <div class="stat"><div class="label">Repo size</div><div class="value" id="repoSize">—</div><div class="note">all tracked blobs</div></div>
-    <div class="stat"><div class="label">API left</div><div class="value" id="rate">—</div><div class="note">GitHub REST requests</div></div>
-  </div>
-</section>
-
-<div class="two">
-<section class="panel">
-  <div class="section-title">Current snapshot</div>
-  <div class="rows">
-    <div class="row"><span>Source bytes</span><strong id="sourceBytes">—</strong></div>
-    <div class="row"><span>Binary bytes</span><strong id="binaryBytes">—</strong></div>
-    <div class="row"><span>Binary share</span><strong id="binaryShare">—</strong></div>
-    <div class="row"><span>Estimated token range</span><strong id="tokenRange">—</strong></div>
-    <div class="row"><span>HEAD</span><strong id="head">—</strong></div>
-    <div class="row"><span>Measured</span><strong id="measuredAt">—</strong></div>
-  </div>
-</section>
-
-<section class="panel">
-  <div class="section-title">Historical growth</div>
-  <div class="rows">
-    <div class="row"><span>First commit</span><strong id="firstCommit">—</strong></div>
-    <div class="row"><span>Latest commit</span><strong id="lastCommit">—</strong></div>
-    <div class="row"><span>Commits scanned</span><strong id="commitCount">—</strong></div>
-    <div class="row"><span>Lines added</span><strong id="lineAdds">—</strong></div>
-    <div class="row"><span>Lines deleted</span><strong id="lineDels">—</strong></div>
-    <div class="row"><span>Current source token footprint</span><strong id="growthTokens">—</strong></div>
-  </div>
-</section>
-</div>
-
-<section class="panel">
-  <div class="section-title">Largest source files</div>
-  <div id="largest"><div class="help">Run a measurement.</div></div>
-</section>
-
-<section class="panel">
-  <div class="section-title">Browser measurement history</div>
-  <div class="help">Saved locally on this device. Nothing is uploaded by this tool.</div>
-  <div id="history" class="history"><div class="help">No measurements saved yet.</div></div>
-  <div style="margin-top:12px"><button id="clearHistory" class="secondary">CLEAR LOCAL HISTORY</button></div>
-</section>
-
-<section class="panel">
-  <div class="section-title">What this tool measures</div>
-  <div class="help">
-    It measures the repository snapshot visible through GitHub's public REST API. “Tokens” means an estimate of how much text/code the current snapshot represents.
-    GitHub does not expose an “AI token usage” number for repository storage, so this tool cannot report an official OpenAI/Claude billing count.
-    API rate-limit information is shown separately so you can see how much GitHub REST access remains.
-  </div>
-</section>
-
-<footer>Repo Token Meter — Tamasrazim · standalone GitHub Pages project</footer>
-</main>
-
-<script>
+</style></head><body><main><header><div><p class="kicker">GITHUB / SNAPSHOT ANALYSIS</p><h1>Token<br>Meter.</h1><div class="sub">Measure repository bytes, source footprint, estimated tokens and historical growth directly from GitHub's public API.</div></div><div class="badge">CLIENT-SIDE / LOCAL HISTORY</div></header><section class="panel"><div class="controls"><input id="repo" value="https://github.com/Tamasrazim/tamasrazim.github.io" aria-label="GitHub repository URL"><input id="branch" value="main" aria-label="Branch" placeholder="branch"><input id="ratio" value="3.1" inputmode="decimal" aria-label="Characters per token"><button id="measure">MEASURE NOW</button></div><div class="help">Token counts are estimates based on source bytes and the selected characters-per-token ratio. They are not official model billing counts.</div></section><section class="panel"><div class="stats"><div class="stat"><div class="label">Files</div><div class="value" id="files">—</div><div class="note">tracked blobs</div></div><div class="stat"><div class="label">Source</div><div class="value" id="sourceFiles">—</div><div class="note">text/code</div></div><div class="stat"><div class="label">Tokens</div><div class="value green" id="tokens">—</div><div class="note">estimated</div></div><div class="stat"><div class="label">Repo</div><div class="value" id="repoSize">—</div><div class="note">all blobs</div></div><div class="stat"><div class="label">API</div><div class="value" id="rate">—</div><div class="note">requests left</div></div></div></section><div class="two"><section class="panel"><div class="section-title">CURRENT SNAPSHOT</div><div class="rows"><div class="row"><span>Source bytes</span><strong id="sourceBytes">—</strong></div><div class="row"><span>Binary bytes</span><strong id="binaryBytes">—</strong></div><div class="row"><span>Binary share</span><strong id="binaryShare">—</strong></div><div class="row"><span>Estimated token range</span><strong id="tokenRange">—</strong></div><div class="row"><span>HEAD</span><strong id="head">—</strong></div><div class="row"><span>Measured</span><strong id="measuredAt">—</strong></div></div></section><section class="panel"><div class="section-title">HISTORY</div><div class="rows"><div class="row"><span>First commit</span><strong id="firstCommit">—</strong></div><div class="row"><span>Latest commit</span><strong id="lastCommit">—</strong></div><div class="row"><span>Commits scanned</span><strong id="commitCount">—</strong></div><div class="row"><span>Lines added</span><strong id="lineAdds">—</strong></div><div class="row"><span>Lines deleted</span><strong id="lineDels">—</strong></div><div class="row"><span>Current token footprint</span><strong id="growthTokens">—</strong></div></div></section></div><section class="panel"><div class="section-title">LARGEST SOURCE FILES</div><div id="largest"><div class="help">Run a measurement.</div></div></section><section class="panel"><div class="section-title">LOCAL MEASUREMENTS</div><div class="help">Saved only in this browser.</div><div id="history" class="history"><div class="help">No measurements saved yet.</div></div><div style="margin-top:10px"><button id="clearHistory" class="secondary">CLEAR LOCAL HISTORY</button></div></section><section class="panel"><div class="section-title">BOUNDARY</div><div class="help">GitHub exposes repository data, not a universal AI-token count. This tool reports a reproducible estimate and keeps API-rate data separate.</div></section><footer>Repo Token Meter — Tamasrazim · GitHub Pages</footer></main><script>
 "use strict";
 (() => {
   const $ = id => document.getElementById(id);
@@ -267,6 +177,4 @@
   renderHistory();
   measure();
 })();
-</script>
-</body>
-</html>
+</script></body></html>
