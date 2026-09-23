@@ -1,0 +1,1 @@
+import{Game}from"./game.js";try{new Game(document.querySelector("#world"))}catch(error){console.error(error);document.querySelector("#prompt").textContent=error.message}
