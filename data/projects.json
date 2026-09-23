@@ -1,0 +1,7 @@
+[
+{"name":"Animation Renderer — Tamasrazim","url":"renderer/","type":"tool","label":"FLAGSHIP","description":"Browser rendering workspace for scenes, deterministic frame generation, export and offline PWA use.","tags":["CANVAS","WEBCODECS","PWA"]},
+{"name":"Code → Motion","url":"projects/code-motion/","type":"tool","label":"TOOL","description":"Deterministic code-driven animation and rendering project with canonical renderer routes.","tags":["MOTION","FRAMES","WEB"]},
+{"name":"Stock Asset Vault","url":"asset-vault/","type":"tool","label":"TOOL","description":"Local-first workspace for rendered assets, previews, metadata, keywords and submission state.","tags":["INDEXEDDB","PWA","METADATA"]},
+{"name":"BNC AgroCare","url":"projects/bncagrocare/","type":"business","label":"BUSINESS","description":"Agriculture catalogue and related document workflow built around the maintained BNC reference data.","tags":["CATALOGUE","INVOICE","A4"]},
+{"name":"Repo Token Meter","url":"projects/repo-token-meter/","type":"experiment","label":"EXPERIMENT","description":"Browser utility for repository footprint, source size, estimated tokens and local measurement history.","tags":["GITHUB API","METRICS","UTILITY"]}
+]
