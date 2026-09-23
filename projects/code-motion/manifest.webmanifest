@@ -1,0 +1,24 @@
+{
+  "id": "./renderer.html",
+  "name": "Animation Renderer — Tamasrazim",
+  "short_name": "Tamasrazim Renderer",
+  "description": "Deterministic frame-by-frame animation renderer with local, offline-first workflows.",
+  "start_url": "./renderer.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "orientation": "any",
+  "lang": "en",
+  "categories": ["graphics", "design", "productivity"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
