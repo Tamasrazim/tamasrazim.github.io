@@ -1,12 +1,4 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#073125">
-<meta name="description" content="BNC AgroCare — agricultural products, pack formats and invoice workflow.">
-<title>BNC AgroCare</title>
-<style>:root{--ink:#102126;--muted:#66777d;--paper:#f8fbfc;--soft:#edf3f5;--line:#d8e2e6;--deep:#08252d;--accent:#c8ff28;--accent2:#8fb300;--warm:#eff5e8}
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#08252d"><meta name="description" content="BNC AgroCare — agricultural products, pack formats and invoice workflow."><title>BNC AgroCare</title><style>:root{--ink:#102126;--muted:#66777d;--paper:#f8fbfc;--soft:#edf3f5;--line:#d8e2e6;--deep:#08252d;--accent:#c8ff28;--accent2:#8fb300;--warm:#eff5e8}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f1f5f6;color:var(--ink);font:500 14px/1.6 Inter,ui-sans-serif,system-ui,sans-serif}a{color:inherit}button,input{font:inherit}::selection{background:var(--deep);color:#fff}
 .wrap{width:min(1320px,92vw);margin:auto}.top{height:30px;background:var(--deep);color:#b9c9ce;font:800 8px/1 var(--mono,ui-monospace);letter-spacing:.16em}.top .wrap{height:100%;display:flex;align-items:center;justify-content:space-between}.top span:last-child{opacity:.55}
 .nav{position:sticky;top:0;z-index:100;background:rgba(241,245,246,.9);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}.navin{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{font:950 21px/1 Inter,ui-sans-serif,sans-serif;letter-spacing:-.075em;text-decoration:none}.brand b{font-weight:500;color:#44616a}.links{display:flex;align-items:center;gap:20px}.links a{font:900 8px/1 ui-monospace,monospace;letter-spacing:.12em;text-decoration:none}.links a:not(.main){color:#6b7a80}.main{padding:11px 14px;background:var(--deep);color:#fff!important}.menu{display:none}.mobile{display:none}.progress{position:fixed;left:0;top:0;width:0;height:2px;background:var(--accent);z-index:999}
@@ -14,104 +6,7 @@
 .heroVisual{position:relative;overflow:hidden;background:linear-gradient(135deg,#113740,#06171c)}.heroVisual:before{content:"";position:absolute;inset:7% 9%;border:1px solid #ffffff20;transform:skewX(-12deg);box-shadow:0 0 0 1px #c8ff2814,0 0 90px #c8ff2810}.heroVisual:after{content:"AGROCARE // REFERENCE";position:absolute;left:7%;bottom:6%;font:800 8px ui-monospace,monospace;letter-spacing:.15em;color:#a9bdc4}.heroVisual>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.62;mix-blend-mode:screen;filter:saturate(.25) contrast(1.15)}.photo{position:absolute;z-index:2;width:220px;height:150px;overflow:hidden;border:1px solid #ffffff38;background:#0b242b;box-shadow:18px 18px 0 #041116;transition:transform .5s cubic-bezier(.2,.8,.2,1)}.photo img{width:100%;height:100%;object-fit:cover}.photo label{position:absolute;left:9px;bottom:8px;background:var(--accent);color:#0a171b;padding:5px 7px;font:900 7px ui-monospace,monospace;letter-spacing:.1em}.photo.one{left:8%;bottom:10%}.photo.two{right:8%;top:9%}.heroBox:hover .photo.one{transform:translate(-9px,-9px)}.heroBox:hover .photo.two{transform:translate(9px,9px)}
 .section{padding:92px 0}.head{display:grid;grid-template-columns:.75fr 1.25fr;gap:40px;align-items:end;margin-bottom:28px}.head h2{margin:10px 0 0;font:950 clamp(38px,5vw,66px)/.88 Inter,sans-serif;letter-spacing:-.075em}.head p{margin:0;color:var(--muted);font-size:13px}.catalogTools{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}.count{font:900 8px ui-monospace,monospace;letter-spacing:.12em;color:#65767d}.search{width:min(380px,100%);border:1px solid var(--line);background:#fff;padding:11px 12px;outline:0;font:800 9px ui-monospace,monospace}.search:focus{border-color:#59737c}.catalog{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.product{min-height:230px;background:var(--paper);border:1px solid var(--line);padding:18px;transition:transform .24s,border-color .24s}.product:hover{transform:translateY(-4px);border-color:#9aacb3}.code{font:900 8px ui-monospace,monospace;color:#78909a;letter-spacing:.12em}.product h3{font:900 20px/1.05 Inter,sans-serif;letter-spacing:-.05em;margin:16px 0 10px}.kind,.packlabel{font:800 7px ui-monospace,monospace;text-transform:uppercase;letter-spacing:.1em;color:#718188}.packlabel{margin-top:18px}.packs{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.pack{padding:6px 7px;border:1px solid var(--line);background:#f0f5f6;font:800 8px ui-monospace,monospace;color:#455960}.noResults{padding:50px 20px;text-align:center;border:1px dashed var(--line);font:800 8px ui-monospace,monospace;color:#73838a}.reveal{opacity:0;transform:translateY(18px);transition:opacity .55s ease,transform .55s ease}.reveal.visible{opacity:1;transform:none}.footer{padding:24px 0 40px;border-top:1px solid var(--line);color:#6e7c82;font:800 8px ui-monospace,monospace}.foot{display:flex;justify-content:space-between;gap:12px}
 @media(max-width:900px){.heroBox{grid-template-columns:1fr}.heroVisual{min-height:420px}.head{grid-template-columns:1fr}.catalog{grid-template-columns:1fr 1fr}.heroCopy{padding:48px}.links{display:none}.menu{display:block;border:1px solid var(--line);background:transparent;padding:8px 10px;font:900 8px ui-monospace,monospace}.mobile{display:grid;max-height:0;overflow:hidden;transition:max-height .3s;border-top:1px solid transparent}.mobile.open{max-height:220px;border-color:var(--line)}.mobile a{padding:12px 4vw;border-bottom:1px solid var(--line);text-decoration:none;font:900 9px ui-monospace,monospace}}@media(max-width:600px){.heroCopy{padding:34px 24px}.hero h1{font-size:46px}.heroVisual{min-height:330px}.heroStats{gap:9px}.catalog{grid-template-columns:1fr}.section{padding:70px 0}.catalogTools{align-items:stretch;flex-direction:column}.search{width:100%}.foot{flex-direction:column}}
-</style>
-</head>
-<body>
-<div class="progress" id="progress"></div>
-<div class="top"><div class="wrap"><span>BNC AGROCARE</span><span>PRODUCTS · PACK FORMATS · BUSINESS WORKFLOW</span></div></div>
-<header class="nav" id="nav">
-  <div class="wrap navin">
-    <a class="brand" href="./">BNC <b>AgroCare</b></a>
-    <nav class="links">
-      <a href="#products">Products</a><a href="#about">About</a><a href="#visuals">Visuals</a><a href="#invoice">Invoice</a><a class="main" href="./invoice/">Invoice Studio →</a>
-    </nav>
-    <button class="menu" id="menu" type="button" aria-expanded="false">Menu</button>
-  </div>
-  <nav class="wrap mobile" id="mobile">
-    <a href="#products">Products</a><a href="#about">About</a><a href="#visuals">Visuals</a><a href="#invoice">Invoice</a><a class="main" href="./invoice/">Invoice Studio →</a>
-  </nav>
-</header>
-
-<main>
-<section class="hero">
-  <div class="wrap">
-    <div class="heroBox reveal">
-      <div class="heroCopy">
-        <div class="ey">BNC AGROCARE · PRODUCT INFORMATION</div>
-        <h1>A clearer way to see the <span>BNC range.</span></h1>
-        <p>Explore the current BNC Agro Care product reference, see the available pack formats, and move into the dedicated invoice workspace when it is time to prepare a document.</p>
-        <div class="heroActions"><a class="btn light" href="#products">Browse products ↓</a><a class="btn outline" href="./invoice/">Open Invoice Studio →</a></div>
-        <div class="heroStats"><div class="stat"><strong>10</strong><small>listed products</small></div><div class="stat"><strong>22</strong><small>pack options</small></div><div class="stat"><strong>A4 PDF</strong><small>invoice workflow</small></div></div>
-      </div>
-      <div class="heroVisual">
-        <img src="./FB_IMG_1789811599210.jpg" alt="BNC AgroCare" fetchpriority="high">
-        <figure class="photo one"><img src="./IMG-20260713-WA0000.jpg" alt="BNC AgroCare reference image" loading="lazy"><label>FIELD · 01</label></figure>
-        <figure class="photo two"><img src="./IMG-20260713-WA0002.jpg" alt="BNC AgroCare reference image" loading="lazy"><label>FIELD · 02</label></figure>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="products">
-  <div class="wrap">
-    <div class="head reveal"><div><div class="ey">01 · Product catalogue</div><h2>Names first.<br>Pack formats visible.</h2></div><p>The catalogue uses the current BNC product reference. Search across product names and pack sizes without prices or extra product claims.</p></div>
-    <div class="catalogTools reveal"><div class="count" id="count">10 PRODUCTS · 22 PACK OPTIONS</div><label class="search"><input id="search" type="search" placeholder="Search product or pack…" autocomplete="off"></label></div>
-    <div class="grid" id="grid"></div><div class="noResults" id="noResults">No matching product or pack size.</div>
-  </div>
-</section>
-
-<section class="section" id="about">
-  <div class="wrap">
-    <div class="split">
-      <article class="darkCard reveal">
-        <div class="ey">02 · BNC AgroCare</div><h3>A business interface built around the information people actually use.</h3>
-        <p>The public site puts product names and pack formats at the center. The operational work stays inside a dedicated Invoice Studio instead of competing with the catalogue.</p>
-        <div class="miniList"><div class="miniItem"><b>01</b><span>Product reference that is easy to scan.</span></div><div class="miniItem"><b>02</b><span>Pack formats shown with every product.</span></div><div class="miniItem"><b>03</b><span>A direct handoff into the business document.</span></div></div>
-      </article>
-      <article class="lightCard reveal">
-        <div class="ey">Product reference</div><h3>Search, compare pack formats, then move on.</h3>
-        <p>No sales-price layer is added to the catalogue. The site stays useful as a reference screen and leaves calculations to the invoice workspace.</p>
-        <div class="miniList"><div class="miniItem"><b>01</b><span>Type a product name to filter the range.</span></div><div class="miniItem"><b>02</b><span>Search also matches pack sizes.</span></div><div class="miniItem"><b>03</b><span>Open Invoice Studio for customer and line-item entry.</span></div></div>
-      </article>
-    </div>
-  </div>
-</section>
-
-<section class="section gallery" id="visuals">
-  <div class="wrap">
-    <div class="head reveal"><div><div class="ey">03 · Visual reference</div><h2>The business, presented with room to breathe.</h2></div><p>Existing BNC imagery becomes a supporting visual system instead of taking over the product information.</p></div>
-    <div class="galleryGrid reveal">
-      <figure class="shot big"><img src="./IMG-20260713-WA0001.jpg" alt="BNC AgroCare reference image" loading="lazy"><span>BNC · VISUAL 01</span></figure>
-      <figure class="shot"><img src="./IMG-20260713-WA0003.jpg" alt="BNC AgroCare reference image" loading="lazy"><span>BNC · VISUAL 02</span></figure>
-      <figure class="shot"><img src="./IMG-20260713-WA0000.jpg" alt="BNC AgroCare reference image" loading="lazy"><span>BNC · VISUAL 03</span></figure>
-      <figure class="shot"><img src="./IMG-20260713-WA0002.jpg" alt="BNC AgroCare reference image" loading="lazy"><span>BNC · VISUAL 04</span></figure>
-      <figure class="shot"><img src="./FB_IMG_1789811611633.jpg" alt="BNC AgroCare reference image" loading="lazy"><span>BNC · VISUAL 05</span></figure>
-    </div>
-  </div>
-</section>
-
-<section class="workspace" id="invoice">
-  <div class="wrap">
-    <div class="workGrid">
-      <article class="workCopy reveal">
-        <div><div class="ey">04 · Invoice Studio</div><h2>The business side gets its own workspace.</h2><p>Enter customer details, add BNC products, calculate totals, preview the A4 document, save locally and download the generated invoice.</p></div>
-        <div><a class="btn light" href="./invoice/">Open Invoice Studio →</a></div>
-      </article>
-      <article class="workMock reveal">
-        <div class="mockHead"><strong>BNC Invoice Studio</strong><span>LOCAL · A4 PDF</span></div>
-        <div class="mockBody">
-          <div class="mcard"><div class="mlabel">01 / CUSTOMER</div><div class="mfields"><div class="mf"><small>Reference</small><b>X2</b></div><div class="mf"><small>Invoice no.</small><b>0002</b></div><div class="mf full"><small>Trader / shop</small><b>M/S ______ Traders</b></div><div class="mf full"><small>Buyer</small><b>Customer details</b></div></div><div class="mlabel" style="margin-top:12px">02 / PRODUCT LINES</div><div class="mrows"><div class="mrow"><i></i><i></i><i></i><i></i></div><div class="mrow"><i></i><i></i><i></i><i></i></div><div class="mrow"><i></i><i></i><i></i><i></i></div></div></div>
-          <div class="sheet"><div class="sheetTop"><strong>A4 invoice</strong><small>PREVIEW</small></div><div class="sheetLines"><i></i><i></i><i></i><i></i></div><div class="sheetTotal"><div><small>FINAL TOTAL</small><br><b>৳ —</b></div><span>→</span></div></div>
-        </div>
-      </article>
-    </div>
-  </div>
-</section>
-</main>
-
-<footer class="footer"><div class="wrap foot"><span>BNC AgroCare · Agricultural products &amp; pack reference</span><span>Built by Robiul Rumman Razim — Tamasrazim</span></div></footer>
-
-<script>
+</style></head><body><div class="progress" id="progress"></div><div class="top"><div class="wrap"><span>BNC AGROCARE / PRODUCT REFERENCE</span><span>LOCAL CATALOGUE</span></div></div><nav class="nav" id="nav"><div class="wrap navin"><a class="brand" href="./">BNC <b>AgroCare</b></a><div class="links"><a href="#catalog">CATALOG</a><a href="#workflow">WORKFLOW</a><a class="main" href="./invoice/">OPEN INVOICE →</a></div><button class="menu" id="menu" aria-expanded="false">Menu</button></div><div class="wrap mobile" id="mobile"><a href="#catalog">Catalog</a><a href="#workflow">Workflow</a><a href="./invoice/">Invoice Studio</a></div></nav><main><section class="hero"><div class="wrap"><div class="heroBox"><div class="heroCopy"><div class="ey">BUSINESS REFERENCE / AGRICULTURAL PRODUCTS</div><h1>Find the<br><span>right pack.</span></h1><p>The BNC product reference keeps product names and available pack formats searchable in one place, with a direct handoff into the invoice workflow.</p><div class="heroActions"><a class="btn light" href="#catalog">BROWSE PRODUCTS</a><a class="btn outline" href="./invoice/">OPEN INVOICE STUDIO</a></div><div class="heroStats"><div class="stat"><strong id="count">0</strong><small>product / pack view</small></div><div class="stat"><strong>01</strong><small>reference system</small></div><div class="stat"><strong>A4</strong><small>invoice output</small></div></div></div><div class="heroVisual"></div></div></div></section><section class="section" id="catalog"><div class="wrap"><div class="head"><div><div class="ey">REFERENCE CATALOG</div><h2>Products.</h2></div><p>Search the embedded BNC reference dataset by product or pack format.</p></div><div class="catalogTools"><div class="count" id="catalogMeta">LIVE REFERENCE</div><input id="search" class="search" placeholder="Search product or pack format…" aria-label="Search products"></div><div class="catalog" id="grid"></div><div class="noResults" id="noResults">No matching products.</div></div></section><section class="section" id="workflow"><div class="wrap"><div class="head"><div><div class="ey">HANDOFF</div><h2>Reference → invoice.</h2></div><p>Use the product list to identify the pack, then continue into the local Invoice Studio for customer details, totals and PDF generation.</p></div><div class="product reveal" style="display:flex;align-items:center;justify-content:space-between;gap:20px"><div><div class="code">BNC INVOICE STUDIO</div><h3>Keep the document workflow separate from the catalog.</h3></div><a class="btn light" href="./invoice/">OPEN INVOICE →</a></div></div></section></main><footer class="footer"><div class="wrap foot"><span>BNC AgroCare · Agricultural products &amp; pack reference</span><span>Built by Robiul Rumman Razim — Tamasrazim</span></div></footer><script>
 const PRODUCTS=[
 ["01","NC Gold- 4CPA",["1 Ltr x 12 Bottle","500 ml x 12 Bottle","100 ml x 30 Bottle"]],
 ["02","NC Zinc- Mono 36%",["1kg. x 10 Pack"]],
@@ -131,6 +26,4 @@ const nav=document.getElementById("nav"),progress=document.getElementById("progr
 function scrollUi(){const max=document.documentElement.scrollHeight-innerHeight;progress.style.width=(max>0?scrollY/max*100:0)+"%";nav.classList.toggle("scrolled",scrollY>6)}scrollUi();addEventListener("scroll",scrollUi,{passive:true});
 const menu=document.getElementById("menu"),mobile=document.getElementById("mobile");menu.addEventListener("click",()=>{const open=mobile.classList.toggle("open");menu.setAttribute("aria-expanded",String(open));menu.textContent=open?"Close":"Menu"});mobile.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>{mobile.classList.remove("open");menu.setAttribute("aria-expanded","false");menu.textContent="Menu"}));
 const reveals=document.querySelectorAll(".reveal");if("IntersectionObserver"in window){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");io.unobserve(e.target)}}),{rootMargin:"0px 0px -50px",threshold:.08});reveals.forEach(e=>io.observe(e))}else reveals.forEach(e=>e.classList.add("visible"));
-</script>
-</body>
-</html>
+</script></body></html>
