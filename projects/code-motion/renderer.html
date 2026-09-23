@@ -497,8 +497,7 @@ body{
   color:var(--mut);
 }
 .hdr-acts{gap:4px;padding:0 8px}
-.hdr-acts button{  border-left:0;
-  border-radius:9px;
+.hdr-acts button{  border-left:0;  border-radius:9px;
   margin:8px 0;
   padding:0 11px;
   font-size:10px;
@@ -997,8 +996,7 @@ select.mini{
 }
 
 .doc pre{  border:0;
-  border-radius:9px;
-  background:rgba(255,255,255,.03);
+  border-radius:9px;  background:rgba(255,255,255,.03);
   padding:10px 11px;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.045);
 }
@@ -1497,8 +1495,7 @@ select.mini{
             <div class="row"><span class="lb">Aspect</span><span class="val dim" id="cAspect">16:9 · 1.7778</span></div>
             <div class="row"><span class="lb">Megapixels</span><span class="val dim" id="cMp">2.07 MP</span></div>          </div>
           <div class="sec">
-            <h4>FRAME RATE</h4>
-            <div class="seg" id="segFps"></div>
+            <h4>FRAME RATE</h4>            <div class="seg" id="segFps"></div>
             <div class="row"><label for="cFps">Custom fps</label><input type="number" id="cFps" min="1" max="240" step="1"></div>
           </div>
           <div class="sec">
@@ -1997,8 +1994,7 @@ function createRuntime() {
     try {      factory = Function.apply(null, SCOPE.concat([body]));
     } catch (e) {
       var d = describeError(e, 'compile');
-      if (d.line === null) {
-        var b = scanBalance(code);
+      if (d.line === null) {        var b = scanBalance(code);
         if (b) { d.line = b.line; d.hint = 'The engine does not report a position for this error. First structural problem found: ' + b.why + '.'; }
       }
       rt.lastError = d; return { ok: false, error: d };
@@ -2497,8 +2493,7 @@ function parseZip(blob) {
    NAL units) because the encoder is configured with avc.format = 'avc'.
    The AVCDecoderConfigurationRecord handed back in the first chunk's
    metadata is written verbatim as the avcC payload, so the sample
-   description and the sample data cannot disagree.
-   ============================================================ */
+   description and the sample data cannot disagree.   ============================================================ */
 function u8b(n) { return new Uint8Array([n & 255]); }
 function u16b(n) { return new Uint8Array([(n >>> 8) & 255, n & 255]); }
 function u32b(n) { return new Uint8Array([(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255]); }
@@ -2555,6 +2550,7 @@ function MP4Muxer(o) {
   this.codecString = o.codecString || '';
   this.meta = o.metadata || {};
   this.tags = o.tags || [];
+  this.expectedSamples = Math.max(0, Number(o.expectedSamples) || 0);
   this.description = null;
   this.samples = [];
   this.parts = [];
@@ -2997,8 +2993,7 @@ function checksumOf(env, src, comp, thumb) {
   return env.enc.fnv1a(d);
 }
 
-/* Renders every frame in [from, to) and hands each one to sink(frameIndex).
-   Nothing in here can skip a frame: the loop index is the only clock. */
+/* Renders every frame in [from, to) and hands each one to sink(frameIndex).   Nothing in here can skip a frame: the loop index is the only clock. */
 function runFrames(cfg) {
   var env = cfg.env, rt = cfg.rt, comp = cfg.comp, out = cfg.canvas;
   var thumbHolder = { canvas: null, ctx: null, set: function (o) { this.canvas = o.canvas; this.ctx = o.ctx; } };
@@ -3497,8 +3492,7 @@ function sampleTiming(env, job, frames) {
     var s = analyseDurations(times);
     res.avgMs = s.avg; res.minMs = s.min; res.maxMs = s.max;
     return res;
-  });
-}
+  });}
 
 /* Compare the first frame with the frame one loop-length later. */
 function loopSeam(env, job) {
@@ -3997,8 +3991,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
     ctx.fillText(WORD[i], 0, 0);
     ctx.restore();
 
-    ctx.globalAlpha = 0.5;
-    ctx.fillStyle = '#fff';
+    ctx.globalAlpha = 0.5;    ctx.fillStyle = '#fff';
     ctx.fillRect(cx - widths[i] * 0.3, height / 2 + size * 0.62, widths[i] * 0.6 * rise, 2 * s);
     x += widths[i];
   }
@@ -4497,8 +4490,7 @@ function edUndo() {
   Ed.ta.value = prev.v; Ed.ta.selectionStart = Ed.ta.selectionEnd = prev.s;
   edChanged(true);
 }
-function edRedo() {
-  if (!Ed.redo.length) return;
+function edRedo() {  if (!Ed.redo.length) return;
   var n = Ed.redo.pop();
   Ed.undo.push(n);
   Ed.ta.value = n.v; Ed.ta.selectionStart = Ed.ta.selectionEnd = n.s;
@@ -4998,7 +4990,6 @@ function initComp() {
   $$('#segLoop button').forEach(function (b) {
     b.addEventListener('click', function () { applyComp({ loop: b.dataset.loop === '1' }); });
   });
-
   function numField(sel, key, opts) {
     var inp = $(sel);
     inp.addEventListener('change', function () {
@@ -5497,8 +5488,7 @@ function analyseJob() {
         } else if (job.format === 'webm') {
           rows.push(['Video encoder', probe.available ? probe.supported.map(function (s) { return s.label; }).join(', ') : 'NOT AVAILABLE']);
           if (!probe.available) warn.push('This browser cannot encode WebM at ' + c.width + '×' + c.height + ': ' + probe.reason + ' Render a PNG sequence instead.');
-        } else {
-          rows.push(['PNG encoder', 'canvas toBlob — always available']);
+        } else {          rows.push(['PNG encoder', 'canvas toBlob — always available']);
           if (job.target === 'zip') {
             var est = Math.round(c.frameCount * c.width * c.height * (c.transparent ? 1.3 : 0.9) * 0.28);
             rows.push(['Archive estimate', '≈ ' + fmtBytes(est) + ' (rough, PNG compresses by content)']);
@@ -5997,8 +5987,7 @@ function detectCaps() {
   S.caps = c;
   return c;
 }
-function kvRow(dl, k, v, cls) {
-  dl.appendChild(el('dt', null, k));
+function kvRow(dl, k, v, cls) {  dl.appendChild(el('dt', null, k));
   dl.appendChild(el('dd', cls || null, v));
 }
 function yesNo(dl, k, ok, yes, no) {
@@ -6497,8 +6486,7 @@ function toyShow(on) {
   if (on) {
     if (S.toyEnabled === false) return;
     if (!S.activeJob || S.activeJob.composition.frameCount < 90) return;
-    wrap.style.display = '';
-    $('#toyNote').textContent = Engine.mode === 'worker'
+    wrap.style.display = '';    $('#toyNote').textContent = Engine.mode === 'worker'
       ? 'The renderer owns a separate thread. This runs on the idle main thread and cannot slow it down.'
       : 'This browser has no worker path, so the renderer is sharing this thread — the toy is capped to a few frames a second and yields to every rendered frame.';
     toyStart();
