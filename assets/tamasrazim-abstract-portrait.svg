@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1600" width="1600" height="1600" role="img" aria-labelledby="title desc">
+  <title id="title">Tamasrazim Abstract Portrait</title>
+  <desc id="desc">An original abstract human portrait constructed from ink-like planes, torn edges, graphite marks, and a restrained cobalt accent.</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#050505"/>
+      <stop offset="55%" stop-color="#0a0a0b"/>
+      <stop offset="100%" stop-color="#020203"/>
+    </linearGradient>
+
+    <linearGradient id="ivory" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f2eee5"/>
+      <stop offset="48%" stop-color="#d7d1c5"/>
+      <stop offset="100%" stop-color="#a8a095"/>
+    </linearGradient>
+
+    <linearGradient id="ivory2" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#b8b0a4"/>
+      <stop offset="55%" stop-color="#e3ddd2"/>
+      <stop offset="100%" stop-color="#faf7ef"/>
+    </linearGradient>
+
+    <linearGradient id="ink" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#111113"/>
+      <stop offset="100%" stop-color="#2c2b30"/>
+    </linearGradient>
+
+    <linearGradient id="cobalt" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0a2f69"/>
+      <stop offset="50%" stop-color="#173f86"/>
+      <stop offset="100%" stop-color="#0d2550"/>
+    </linearGradient>
+
+    <filter id="paper" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="2" seed="17" result="noise"/>
+      <feColorMatrix in="noise" type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 0.14"/>
+      </feComponentTransfer>
+      <feBlend in="SourceGraphic" mode="multiply"/>
+    </filter>
+
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+
+    <mask id="portraitMask">
+      <rect width="1600" height="1600" fill="black"/>
+      <path d="M793 240 C677 250 578 323 520 439 C470 539 452 653 472 760 C488 843 479 934 430 1045 C398 1118 378 1200 393 1290 C427 1410 573 1487 758 1509 C954 1533 1154 1496 1258 1382 C1319 1315 1334 1214 1308 1121 C1278 1019 1220 939 1213 846 C1207 775 1240 693 1231 614 C1217 490 1157 391 1067 323 C988 263 893 231 793 240 Z" fill="white"/>
+    </mask>
+  </defs>
+
+  <!-- Deep field -->
+  <rect width="1600" height="1600" fill="url(#bg)"/>
+
+  <!-- Faint hand-drawn arcs -->
+  <g fill="none" stroke="#6a6764" stroke-linecap="round" opacity=".28">
+    <path d="M260 1040 C180 780 256 502 475 306" stroke-width="5"/>
+    <path d="M1290 352 C1428 567 1430 876 1316 1119" stroke-width="3"/>
+    <path d="M316 1206 C530 1370 820 1435 1120 1330" stroke-width="4"/>
+  </g>
+
+  <!-- Portrait shadow -->
+  <ellipse cx="825" cy="1420" rx="470" ry="74" fill="#000" opacity=".72" filter="url(#softShadow)"/>
+
+  <!-- Main portrait silhouette -->
+  <g mask="url(#portraitMask)" filter="url(#paper)">
+    <rect x="350" y="220" width="1000" height="1320" fill="#141416"/>
+
+    <!-- Ivory mass -->
+    <path d="M575 1303 C555 1174 621 1084 654 997 C682 925 669 855 640 794 C612 732 612 650 641 564 C679 454 760 363 863 338 C956 315 1044 350 1100 425 C1153 495 1154 567 1140 641 C1124 726 1167 781 1174 874 C1184 1005 1109 1145 1019 1248 C945 1332 850 1393 731 1403 Z" fill="url(#ivory)"/>
+
+    <!-- Dark dissolving side -->
+    <path d="M793 240 C657 301 575 418 538 575 C502 727 553 836 519 967 C489 1082 419 1179 454 1316 C486 1436 626 1490 751 1505 C691 1412 668 1329 684 1228 C697 1145 753 1068 761 979 C768 890 727 826 705 748 C674 636 705 495 793 240 Z" fill="url(#ink)"/>
+
+    <!-- Neck planes -->
+    <path d="M658 972 C619 1090 559 1197 572 1311 L715 1482 L785 1322 L766 1150 Z" fill="#2b292d"/>
+    <path d="M945 1160 C1015 1207 1070 1295 1067 1416 L913 1492 L841 1337 Z" fill="url(#ivory2)"/>
+
+    <!-- Cobalt accent -->
+    <path d="M872 278 C902 374 910 460 891 563 C872 664 855 774 875 896 C896 1017 929 1088 918 1197 C910 1270 886 1347 864 1450 L946 1495 C986 1342 1007 1220 994 1108 C982 1000 951 910 948 808 C945 711 977 619 977 516 C978 416 943 324 872 278 Z" fill="url(#cobalt)" opacity=".93"/>
+
+    <!-- Facial plane -->
+    <path d="M916 454 C1014 440 1087 493 1102 584 C1115 663 1084 723 1045 759 C1009 793 990 852 1001 917 C1014 997 1019 1048 983 1082 C947 1116 885 1110 839 1083 C801 1061 781 1022 785 968 C789 902 824 852 821 781 C817 698 811 619 844 549 C861 513 886 478 916 454 Z" fill="url(#ivory2)"/>
+
+    <!-- Eye shadow -->
+    <path d="M886 655 C922 629 973 631 1011 657 C982 679 943 689 900 681 Z" fill="#19191b"/>
+    <path d="M887 655 C912 644 946 644 973 657 C946 666 919 667 887 655 Z" fill="#ded7ca"/>
+
+    <!-- Nose plane -->
+    <path d="M960 670 C941 727 939 785 949 832 C958 874 941 904 901 919 C949 932 1005 916 1012 875 C1018 838 992 790 1000 742 C1006 705 995 684 960 670 Z" fill="#b8b0a5" opacity=".88"/>
+
+    <!-- Mouth plane -->
+    <path d="M877 991 C914 975 964 978 1003 1004 C979 1028 925 1037 881 1020 Z" fill="#3a3537"/>
+    <path d="M882 1017 C924 1027 969 1021 998 1008 C973 1050 916 1058 882 1017 Z" fill="#a49b90"/>
+
+    <!-- Ear / side plane -->
+    <path d="M1110 671 C1171 669 1208 723 1187 795 C1171 847 1122 869 1089 832 C1104 778 1113 721 1110 671 Z" fill="#938a80"/>
+
+    <!-- Negative-space cut -->
+    <path d="M741 547 C696 602 675 670 688 739 C699 800 733 846 761 866 C728 786 724 710 748 643 C767 590 785 560 809 532 Z" fill="#030304"/>
+
+    <!-- Torn ivory strips -->
+    <path d="M566 466 L681 374 L724 394 L624 534 L566 552 Z" fill="#ece7dc"/>
+    <path d="M516 560 L618 500 L648 523 L554 653 Z" fill="#bdb5aa"/>
+    <path d="M1075 364 L1140 412 L1109 464 L1050 404 Z" fill="#f0ebe2"/>
+
+    <!-- Graphite marks -->
+    <g fill="none" stroke="#3e3b39" stroke-linecap="round" opacity=".58">
+      <path d="M571 764 C635 730 672 711 730 704" stroke-width="6"/>
+      <path d="M568 787 C624 759 666 746 726 744" stroke-width="3"/>
+      <path d="M1049 1106 C1092 1079 1128 1047 1155 1013" stroke-width="5"/>
+      <path d="M1007 1136 C1052 1111 1089 1079 1117 1048" stroke-width="2.5"/>
+    </g>
+
+    <!-- Small hand-drawn contour marks -->
+    <g fill="none" stroke="#514d49" opacity=".34">
+      <path d="M609 925 C646 893 664 866 675 824" stroke-width="2"/>
+      <path d="M1048 943 C1090 906 1104 872 1108 830" stroke-width="2"/>
+      <path d="M835 1210 C869 1234 909 1245 948 1240" stroke-width="3"/>
+    </g>
+  </g>
+
+  <!-- Layer seams -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M474 1002 C528 959 578 931 633 911" stroke="#d9d3ca" stroke-width="2" opacity=".38"/>
+    <path d="M1038 530 C1090 508 1141 502 1184 516" stroke="#f4efe6" stroke-width="2" opacity=".3"/>
+    <path d="M760 1379 C828 1402 901 1406 970 1384" stroke="#0d2f67" stroke-width="3" opacity=".58"/>
+  </g>
+
+  <!-- Signature-like abstract marker, not text -->
+  <path d="M1235 1268 C1283 1234 1311 1187 1321 1128" fill="none" stroke="#174487" stroke-width="4" opacity=".8"/>
+  <circle cx="1230" cy="1272" r="6" fill="#174487"/>
+
+  <!-- Frame -->
+  <rect x="34" y="34" width="1532" height="1532" rx="18" fill="none" stroke="#252529" stroke-width="2"/>
+</svg>
