@@ -1,34 +1,28 @@
-# BNC AgroCare
+# BNC Agro Care
 
-BNC AgroCare is the canonical agriculture-focused project in this repository.
+BNC Agro Care is maintained as a standalone corporate website project under `projects/bncagrocare/`.
 
-> **Immutable invoice template:** `invoice.pdf` is the locked original BNC invoice template. The Invoice Studio reads it as the master document and never rewrites the source PDF.
+## Public website
 
-## Website
+The public-facing page is the BNC Agro Care company/product website:
 
-The public BNC site is a product-first business interface with:
-- the current BNC product names
-- exact pack-size options from the project reference
-- product/pack search
-- BNC reference imagery
-- direct access to Invoice Studio
+`projects/bncagrocare/index.html`
 
-## Invoice Studio
+It is designed to be portable to a future BNC-owned TLD without depending on the personal Tamasrazim site.
 
-The PWA workflow is:
+The public site focuses on:
+- BNC product names
+- exact pack-size reference from the current product reference file
+- company/about presentation
+- existing BNC photography
+- a clean contact/official-web structure
 
-**Customer details → product lines → live totals → A4 preview → generate/download**
+## Business invoice tool
 
-It includes:
-- the BNC product catalogue with pack-size suggestions
-- automatic CTN × RATE calculations
-- commission and final-total calculations
-- amount in words
-- dynamic product rows and continuation pages
-- local draft persistence with IndexedDB
-- saved invoice history
-- JSON export/import
-- installable/offline PWA shell
-- the locked original invoice PDF as the document master
+The invoice application remains a separate internal/business route:
 
-The public website and Invoice Studio share one BNC visual system, while the invoice template remains unchanged.
+`projects/bncagrocare/invoice/`
+
+It is not the identity of the public website.
+
+The locked `invoice.pdf` remains the immutable invoice template.
