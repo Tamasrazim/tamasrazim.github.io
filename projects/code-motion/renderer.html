@@ -1931,14 +1931,23 @@ select.mini{
         <!-- METADATA -->
         <div class="panel" id="p-meta" role="tabpanel">
           <div class="sec">
-            <h4>PROJECT</h4>
+            <h4>SOURCE METADATA <span class="sp"></span><button data-act="extractMeta">extract</button></h4>
+            <div class="verified" id="metaSourceState">
+              <b id="metaSourceBadge">SOURCE</b>
+              <span id="metaSourceMsg">No metadata block detected.</span>
+            </div>
             <div class="row"><label for="mTitle">Name</label><input type="text" id="mTitle" spellcheck="false"></div>
             <div class="row"><label for="mCreator">Creator</label><input type="text" id="mCreator" spellcheck="false"></div>
             <div class="row"><label for="mComp">Composition</label><input type="text" id="mComp" spellcheck="false"></div>
             <div class="row"><label for="mDesc">Description</label><input type="text" id="mDesc" spellcheck="false"></div>
+            <div class="row"><label for="mCategory">Category</label><input type="text" id="mCategory" spellcheck="false"></div>
+            <div class="row"><label for="mSecondCategory">Second category</label><input type="text" id="mSecondCategory" spellcheck="false"></div>
+            <div class="row"><label for="mKeywords">Keywords</label><textarea id="mKeywords" rows="3" spellcheck="false"></textarea></div>
+            <div class="row"><label for="mAI">AI-generated</label><select id="mAI"><option value="no">No</option><option value="yes">Yes</option></select></div>
             <div class="row"><label for="mLang">Language</label><input type="text" id="mLang" spellcheck="false"></div>
             <div class="row"><span class="lb">Software</span><span class="val dim" id="mSoft">Code → Motion — Tamasrazim</span></div>
             <div class="row"><span class="lb">Version</span><span class="val dim" id="mVer">1.0.0</span></div>
+            <p class="note">Put metadata directly in the animation source with a <code>/* @meta ... */</code> block. The renderer extracts it on Run and before export.</p>
           </div>
           <div class="sec">
             <h4>SOURCE</h4>
@@ -4805,6 +4814,7 @@ function markDirty(v) {
 function defaultMeta() {
   return {
     title: 'Untitled', creator: 'Tamasrazim', composition: 'Comp 1', description: '',
+    category: '', secondCategory: '', keywords: [], aiGenerated: 'no',
     language: 'en', software: SOFTWARE, softwareVersion: APP_VERSION,
     created: new Date().toISOString(), modified: new Date().toISOString(), sourceHash: ''
   };
@@ -5545,26 +5555,108 @@ function analyseLoop() {
 /* ============================================================
    Metadata panel
    ============================================================ */
+function parseSourceMetadata(code) {
+  var out = { found: false };
+  var m = /\/\*\\s*@meta\\b([\\s\\S]*?)\\*\//i.exec(code);
+  var raw = m ? m[1] : '';
+  if (!raw) {
+    var lines = code.split(/\\r?\\n/);
+    var picked = [];
+    for (var i = 0; i < lines.length && picked.length < 80; i++) {
+      var line = lines[i].replace(/^\\s*\\/\\/\\s?/, '').trim();
+      if (/^@(title|creator|composition|description|category|secondCategory|second-category|keywords|ai-generated|language)\\b/i.test(line) ||
+          /^(title|creator|composition|description|category|secondCategory|second-category|keywords|ai-generated|language)\\s*:/i.test(line)) picked.push(line);
+      else if (picked.length && line === '') break;
+    }
+    if (picked.length) raw = picked.join('\\n');
+  }
+  if (!raw) return out;
+  out.found = true;
+  raw.split(/\\r?\\n/).forEach(function (line) {
+    line = line.trim().replace(/^\\*+\\s?/, '').trim();
+    var mm = /^@?([A-Za-z][A-Za-z0-9 _-]*)\\s*:\\s*(.*?)\\s*$/.exec(line);
+    if (!mm) return;
+    var key = mm[1].toLowerCase().replace(/[ _-]+/g, '');
+    var value = mm[2].trim();
+    if (!value) return;
+    if (key === 'title' || key === 'name') out.title = value;
+    else if (key === 'creator' || key === 'author') out.creator = value;
+    else if (key === 'composition' || key === 'comp') out.composition = value;
+    else if (key === 'description' || key === 'desc') out.description = value;
+    else if (key === 'category') out.category = value;
+    else if (key === 'secondcategory' || key === 'subcategory') out.secondCategory = value;
+    else if (key === 'keywords' || key === 'keyword') out.keywords = value.split(/[,;]+/).map(function (x) { return x.trim(); }).filter(Boolean);
+    else if (key === 'aigenerated' || key === 'ai') out.aiGenerated = /^(yes|true|1)$/i.test(value) ? 'yes' : 'no';
+    else if (key === 'language' || key === 'lang') out.language = value;
+  });
+  return out;
+}
+function extractMetaFromSource() {
+  var parsed = parseSourceMetadata(Ed.ta ? Ed.ta.value : S.code);
+  var fields = ['title','creator','composition','description','category','secondCategory','language'];
+  var changed = false;
+  fields.forEach(function (k) {
+    if (parsed[k] !== undefined && parsed[k] !== S.meta[k]) {
+      S.meta[k] = parsed[k];
+      changed = true;
+    }
+  });
+  if (parsed.keywords !== undefined) {
+    var joined = parsed.keywords.join(', ');
+    if (joined !== (S.meta.keywords || []).join(', ')) changed = true;
+    S.meta.keywords = parsed.keywords;
+  }
+  if (parsed.aiGenerated !== undefined && parsed.aiGenerated !== S.meta.aiGenerated) {
+    S.meta.aiGenerated = parsed.aiGenerated;
+    changed = true;
+  }
+  $('#metaSourceBadge').textContent = parsed.found ? 'SOURCE' : 'AUTO';
+  $('#metaSourceMsg').textContent = parsed.found
+    ? 'Metadata extracted from animation source.'
+    : 'No metadata block detected; current project values remain.';
+  $('#metaSourceState').classList.toggle('verified', parsed.found);
+  syncMetaUI();
+  if (changed) {
+    S.meta.modified = new Date().toISOString();
+    markDirty();
+    syncFileName();
+  }
+  return parsed;
+}
 function initMeta() {
   [['#mTitle', 'title'], ['#mCreator', 'creator'], ['#mComp', 'composition'],
-  ['#mDesc', 'description'], ['#mLang', 'language']].forEach(function (p) {
+  ['#mDesc', 'description'], ['#mCategory', 'category'], ['#mSecondCategory', 'secondCategory'],
+  ['#mKeywords', 'keywords'], ['#mAI', 'aiGenerated'], ['#mLang', 'language']].forEach(function (p) {
     $(p[0]).addEventListener('input', function () {
-      S.meta[p[1]] = $(p[0]).value;
+      var v = $(p[0]).value;
+      if (p[1] === 'keywords') v = v.split(/[,;]+/).map(function (x) { return x.trim(); }).filter(Boolean);
+      S.meta[p[1]] = v;
       S.meta.modified = new Date().toISOString();
       markDirty();
       if (p[1] === 'title') syncFileName();
     });
+    $(p[0]).addEventListener('change', function () {
+      if (p[1] === 'aiGenerated') {
+        S.meta.aiGenerated = $(p[0]).value === 'yes' ? 'yes' : 'no';
+        S.meta.modified = new Date().toISOString();
+        markDirty();
+      }
+    });
   });
 }
 function syncMetaUI() {
-  $('#mTitle').value = S.meta.title;
-  $('#mCreator').value = S.meta.creator;
-  $('#mComp').value = S.meta.composition;
-  $('#mDesc').value = S.meta.description;
-  $('#mLang').value = S.meta.language;
+  $('#mTitle').value = S.meta.title || '';
+  $('#mCreator').value = S.meta.creator || '';
+  $('#mComp').value = S.meta.composition || '';
+  $('#mDesc').value = S.meta.description || '';
+  $('#mCategory').value = S.meta.category || '';
+  $('#mSecondCategory').value = S.meta.secondCategory || '';
+  $('#mKeywords').value = (S.meta.keywords || []).join(', ');
+  $('#mAI').value = S.meta.aiGenerated === 'yes' ? 'yes' : 'no';
+  $('#mLang').value = S.meta.language || 'en';
   $('#mSoft').textContent = S.meta.software;
   $('#mVer').textContent = S.meta.softwareVersion;
-  $('#mLines').textContent = S.code.split('\n').length;
+  $('#mLines').textContent = S.code.split('\\n').length;
   $('#mHash').textContent = S.hash || '— run the code to hash it —';
   syncMetaSupport();
 }
@@ -5642,7 +5734,8 @@ function metadataReceipt() {
     software: S.meta.software, softwareVersion: S.meta.softwareVersion,
     project: { name: S.name, version: S.version, id: S.id },
     title: S.meta.title, creator: S.meta.creator, compositionName: S.meta.composition,
-    description: S.meta.description, language: S.meta.language,
+    description: S.meta.description, category: S.meta.category, secondCategory: S.meta.secondCategory,
+    keywords: S.meta.keywords || [], aiGenerated: S.meta.aiGenerated || 'no', language: S.meta.language,
     composition: {
       width: c.width, height: c.height, aspect: +c.aspect.toFixed(6),
       fps: c.fps, frameCount: c.frameCount, duration: +(c.frameCount / c.fps).toFixed(6),
@@ -5670,7 +5763,11 @@ function buildTags(comp, meta) {
     { name: 'LOOP', value: comp.loop ? 'yes' : 'no' },
     { name: 'LOOP_DURATION', value: comp.loop ? comp.loopDuration + ' s' : 'n/a' },
     { name: 'TIME_RATE', value: comp.speed },
-    { name: 'TIME_REVERSE', value: comp.reverse ? 'yes' : 'no' }
+    { name: 'TIME_REVERSE', value: comp.reverse ? 'yes' : 'no' },
+    { name: 'CATEGORY', value: meta.category || '' },
+    { name: 'SECOND_CATEGORY', value: meta.secondCategory || '' },
+    { name: 'KEYWORDS', value: (meta.keywords || []).join(', ') },
+    { name: 'AI_GENERATED', value: meta.aiGenerated || 'no' }
   ].filter(function (t) { return String(t.value).length > 0; });
 }
 
@@ -5679,6 +5776,7 @@ function buildTags(comp, meta) {
    ============================================================ */
 function run() {
   S.code = Ed.ta.value;
+  extractMetaFromSource();
   $('#edState').textContent = 'compiling…';
   setStage('VALIDATING');
   $('#stDot').className = 'dot busy';
@@ -5712,6 +5810,7 @@ function run() {
   });
 }
 function withCompiled() {
+  extractMetaFromSource();
   if (S.compiled && S.code === Ed.ta.value) return Promise.resolve(true);
   return run().then(function (r) { return !!(r && r.ok); });
 }
@@ -7145,7 +7244,21 @@ var DOCS = [
   '<tr><td><code>TAU</code> · <code>PI</code></td><td>Constants.</td></tr>',
   '</table>',
 
-  '<h5>DETERMINISM</h5>',
+  '<h5>SOURCE METADATA</h5>
+  <p>The first metadata source is the animation itself. Add a block like:</p>
+  <pre>/* @meta
+title: Kinetic Isometric Tile Surface
+description: Seamless abstract kinetic tile motion background
+category: Abstract
+secondCategory: Backgrounds/Textures
+keywords: abstract, kinetic, geometric, seamless, motion background
+ai-generated: no
+creator: Tamasrazim
+language: en
+*/</pre>
+  <p>The Metadata panel extracts these fields on Run and before export. Technical fields such as resolution, frame rate, duration, loop state and source hash come from the composition and source automatically.</p>
+
+  <h5>DETERMINISM</h5>',
   '<p>Any frame must be renderable on its own. The generator is reseeded at the start of every frame from <code>seed + frame</code>, so <code>random()</code> returns the same sequence for frame 900 whether you scrubbed to it, played into it, or exported straight to it. Reading <code>Date.now()</code>, <code>Math.random()</code> or your own accumulating variables breaks that, and the render will not match the preview.</p>',
   '<p><code>motion.simulation()</code> exists for real physics: it steps a fixed <code>1/fps</code> and rebuilds from frame 0 whenever you move backwards. It is slower to scrub and exactly reproducible.</p>',
 
@@ -7233,6 +7346,7 @@ var DOCS = [
 var ACTS = {
   panels: function () { toggleRail(true); },
   panelsClose: function () { toggleRail(false); },
+  extractMeta: function () { extractMetaFromSource(); },
   'new': function () {
     askDiscard('Start a new project?', function () { newProject('sample-starter'); });
   },
