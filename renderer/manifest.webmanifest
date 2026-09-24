@@ -1,5 +1,0 @@
-{
-  "id":"/renderer/","name":"Animation Renderer — Tamasrazim","short_name":"Tamasrazim Renderer",
-  "description":"Deterministic frame-by-frame animation rendering and stock-content preparation.","start_url":"/renderer/","scope":"/renderer/","display":"standalone","display_override":["window-controls-overlay","standalone"],"background_color":"#050505","theme_color":"#050505","orientation":"any","lang":"en","categories":["graphics","design","productivity"],"prefer_related_applications":false,
-  "icons":[{"src":"./icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},{"src":"./icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},{"src":"./icons/icon-192-maskable.png","sizes":"192x192","type":"image/png","purpose":"maskable"},{"src":"./icons/icon-512-maskable.png","sizes":"512x512","type":"image/png","purpose":"maskable"},{"src":"./icons/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]
-}
