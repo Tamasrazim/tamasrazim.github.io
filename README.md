@@ -64,9 +64,7 @@ These are the routes that should be used for navigation, documentation and the s
 │   └── repo-token-meter/
 │       └── index.html                      # Standalone utility
 ├── renderer/
-│   ├── index.html                          # Animation Renderer PWA
-│   ├── manifest.webmanifest
-│   └── ...                                 # Renderer app assets
+│   └── index.html                          # Compatibility redirect to Code → Motion
 ├── asset-vault/
 │   ├── index.html                          # Stock Asset Vault PWA
 │   ├── manifest.webmanifest
@@ -102,11 +100,11 @@ are compatibility entry points for older inbound links. They redirect to the cur
 
 ### Animation Renderer
 
-The Animation Renderer is a separate standalone application:
+The former standalone Animation Renderer has been archived. Its public compatibility route remains:
 
 `https://tamasrazim.github.io/renderer/`
 
-It is not the same application as the Code → Motion renderer. The main site and project hub must link to this route when referring to the standalone Animation Renderer.
+That route now redirects to the canonical Code → Motion project. The former renderer implementation is preserved on the `archive-animation-renderer-2026-09-24` branch and is not part of normal navigation, the sitemap, or the current product surface.
 
 ### Stock Asset Vault
 
