@@ -1,5 +1,18 @@
-const CACHE='tamasrazim-renderer-v10';
-const CORE=['./','./index.html','./css/app.css','./js/video-engine.js','./js/app.js','./manifest.webmanifest','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/icon-192-maskable.png','./icons/icon-512-maskable.png'];
-self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()))});
-self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
-self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;var url=new URL(event.request.url);if(url.origin!==self.location.origin||!url.pathname.startsWith('/renderer/'))return;var nav=event.request.mode==='navigate'||url.pathname.endsWith('/renderer/')||url.pathname.endsWith('/renderer/index.html');if(nav){event.respondWith(fetch(event.request,{cache:'no-store'}).then(function(r){caches.open(CACHE).then(c=>c.put('./index.html',r.clone()));return r}).catch(()=>caches.match('./index.html')));return}event.respondWith(caches.match(event.request).then(c=>c||fetch(event.request).then(r=>{caches.open(CACHE).then(x=>x.put(event.request,r.clone()));return r})))});
+const CACHE='tamasrazim-renderer-retired-v1';
+
+self.addEventListener('install',event=>{
+  event.waitUntil(self.skipWaiting());
+});
+
+self.addEventListener('activate',event=>{
+  event.waitUntil((async()=>{
+    const keys=await caches.keys();
+    await Promise.all(keys.map(key=>caches.delete(key)));
+    await self.registration.unregister();
+    await self.clients.claim();
+  })());
+});
+
+self.addEventListener('fetch',event=>{
+  // Retired renderer service worker: let normal network navigation handle the redirect page.
+});
