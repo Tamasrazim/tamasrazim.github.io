@@ -1361,6 +1361,375 @@ select.mini{
   }
 }
 
+
+/* ============================================================
+   TAMASRAZIM UI REDESIGN 05 — MOTION STUDIO
+   ============================================================ */
+#work{
+  grid-template-columns:minmax(320px,.78fr) 1px minmax(420px,1.55fr);
+  position:relative;
+  overflow:hidden;
+}
+#rule2{display:none}
+#paneCode{min-width:0}
+#panePreview{min-width:0}
+
+#rail{
+  position:absolute;
+  top:0;
+  right:0;
+  bottom:0;
+  width:min(410px,92vw);
+  z-index:70;
+  transform:translateX(105%);
+  transition:transform 300ms cubic-bezier(.2,.8,.2,1);
+  border-left:1px solid rgba(255,255,255,.12);
+  box-shadow:-32px 0 80px rgba(0,0,0,.48);
+  background:rgba(10,10,12,.97);
+  backdrop-filter:blur(18px);
+}
+#app.rail-open #rail{transform:translateX(0)}
+#work::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:60;
+  background:rgba(0,0,0,.38);
+  backdrop-filter:blur(2px);
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 240ms ease;
+}
+#app.rail-open #work::after{opacity:1}
+
+#railClose{
+  display:grid;
+  place-items:center;
+  width:30px;
+  height:30px;
+  border:1px solid var(--rule);
+  color:var(--mut);
+  font:12px var(--mono);
+  transition:all 140ms ease;
+}
+#railClose:hover{
+  color:#fff;
+  border-color:#fff;
+  background:rgba(255,255,255,.06);
+}
+#railHeader{
+  position:sticky;
+  top:0;
+  z-index:8;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:48px;
+  padding:8px 12px;
+  border-bottom:1px solid var(--rule);
+  background:rgba(9,9,11,.94);
+  backdrop-filter:blur(12px);
+}
+#railHeader .eyebrow{
+  font:600 9px/1 var(--mono);
+  letter-spacing:.2em;
+  color:#777780;
+}
+#railHeader .title{
+  font:500 12px/1 var(--mono);
+  letter-spacing:.08em;
+  color:#f0f0f2;
+}
+#railHeader .sp{flex:1}
+
+#tabs{
+  position:sticky;
+  top:48px;
+  z-index:7;
+  padding:7px;
+  gap:4px;
+  background:rgba(9,9,11,.90);
+  border-bottom:1px solid var(--rule);
+  backdrop-filter:blur(12px);
+}
+#tabs button{
+  min-height:30px;
+  border:1px solid transparent;
+  border-radius:6px;
+  color:#67676f;
+}
+#tabs button:hover{color:#fff;background:rgba(255,255,255,.045)}
+#tabs button.on{
+  color:#fff;
+  background:rgba(255,255,255,.08);
+  border-color:rgba(255,255,255,.1);
+  box-shadow:none;
+}
+
+#railBody{
+  padding:0 3px 30px;
+  overflow-y:auto;
+}
+.panel{padding:12px 13px 40px}
+
+#hdr{
+  box-shadow:0 10px 30px rgba(0,0,0,.16);
+}
+.hdr-acts button{
+  min-width:70px;
+}
+.hdr-acts button[data-act="panels"]{
+  color:#e1e1e5;
+  border-left:1px solid var(--rule);
+}
+.hdr-acts button[data-act="panels"]::before{
+  content:"";
+  position:absolute;
+  inset:6px 8px;
+  border:1px solid rgba(255,255,255,.09);
+}
+#app.rail-open .hdr-acts button[data-act="panels"]{
+  color:#000;
+  background:#fff;
+}
+#app.rail-open .hdr-acts button[data-act="panels"]::before{border-color:rgba(0,0,0,.16)}
+
+#strip{
+  min-height:26px;
+  background:linear-gradient(90deg,#070709,#0b0b0d 50%,#070709);
+}
+
+#panePreview{
+  position:relative;
+  box-shadow:-18px 0 40px rgba(0,0,0,.10);
+}
+#panePreview .phead{
+  height:34px;
+  background:rgba(9,9,11,.94);
+  backdrop-filter:blur(10px);
+}
+#panePreview .phead span:first-child{
+  font-weight:600;
+  letter-spacing:.2em;
+  color:#d0d0d6;
+}
+#stage{
+  padding:34px;
+  background:
+    radial-gradient(circle at 50% 48%,rgba(255,255,255,.025),transparent 30%),
+    linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px) 0 0/32px 32px,
+    linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px) 0 0/32px 32px,
+    #060607;
+}
+#canvasFrame{
+  box-shadow:
+    0 45px 100px -40px rgba(0,0,0,.98),
+    0 16px 38px rgba(0,0,0,.25),
+    0 0 0 1px rgba(255,255,255,.07);
+}
+#hud{
+  top:14px;
+  left:16px;
+  right:16px;
+  gap:5px;
+}
+#hud .pill{
+  padding:4px 7px;
+  border-radius:4px;
+  background:rgba(5,5,7,.72);
+  border-color:rgba(255,255,255,.10);
+  backdrop-filter:blur(10px);
+}
+#pvctl{
+  height:42px;
+  padding:0 14px;
+  background:#08080a;
+}
+#pvctl .ib{
+  width:30px;
+  height:26px;
+  border-radius:5px;
+}
+#pvctl .ib:hover{background:rgba(255,255,255,.07)}
+#pvctl .ib.on{background:#fff}
+
+#paneCode .phead{
+  height:34px;
+  padding-left:15px;
+  background:#09090b;
+}
+#paneCode .phead span:first-child{
+  color:#c7c7cd;
+  font-weight:600;
+}
+#edstat{
+  height:25px;
+  background:#070709;
+}
+
+#time{
+  height:142px;
+  background:#09090b;
+}
+#tlhead{
+  height:28px;
+  padding:0 14px;
+}
+#track{
+  height:40px;
+  min-height:40px;
+  margin:0 14px;
+  border-color:rgba(255,255,255,.10);
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.018),rgba(255,255,255,.005)),
+    #070709;
+}
+#tfoot{
+  height:34px;
+  padding:0 13px;
+}
+
+#status{
+  height:24px;
+  border-top:1px solid rgba(255,255,255,.08);
+  background:#050507;
+  font-size:9px;
+}
+
+#renderOverlay{
+  position:absolute;
+  inset:0;
+  z-index:85;
+  display:grid;
+  place-items:center;
+  padding:28px;
+  background:rgba(2,2,3,.72);
+  backdrop-filter:blur(18px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 180ms ease;
+}
+#app.render-active #renderOverlay{
+  opacity:1;
+  pointer-events:auto;
+}
+#renderCard{
+  width:min(620px,92vw);
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(10,10,12,.95);
+  box-shadow:0 35px 100px rgba(0,0,0,.6);
+  padding:24px;
+}
+#renderCardTop{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:18px;
+}
+#renderCardTop .live-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 0 5px rgba(255,255,255,.08);
+  animation:mpulse 1.1s ease-in-out infinite;
+}
+#renderCardTop .eyebrow{
+  font:600 9px/1 var(--mono);
+  letter-spacing:.22em;
+  color:#777780;
+}
+#renderCardTop h2{
+  margin-top:5px;
+  font:500 17px/1.1 var(--mono);
+  letter-spacing:.04em;
+}
+#renderBig{
+  font:500 34px/1 var(--mono);
+  letter-spacing:-.04em;
+  color:#fff;
+}
+#renderBig small{
+  font-size:12px;
+  color:#74747c;
+  letter-spacing:0;
+}
+#renderBar{
+  height:5px;
+  margin:16px 0 20px;
+  border-radius:999px;
+  overflow:hidden;
+  background:rgba(255,255,255,.08);
+}
+#renderBar i{
+  display:block;
+  width:0;
+  height:100%;
+  border-radius:inherit;
+  background:#fff;
+  transition:width 120ms linear;
+}
+#renderGrid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  border-top:1px solid var(--rule);
+  border-left:1px solid var(--rule);
+}
+.renderMetric{
+  min-height:66px;
+  padding:11px 13px;
+  border-right:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
+}
+.renderMetric span{
+  display:block;
+  font:9px/1 var(--mono);
+  letter-spacing:.14em;
+  color:#66666e;
+  text-transform:uppercase;
+}
+.renderMetric b{
+  display:block;
+  margin-top:8px;
+  font:500 12px/1 var(--mono);
+  color:#e6e6ea;
+}
+#renderActions{
+  display:flex;
+  justify-content:flex-end;
+  gap:7px;
+  margin-top:18px;
+}
+#renderActions .btn{
+  width:auto;
+  min-width:120px;
+  margin:0;
+}
+#renderActions .btn.cancel{
+  border-color:#3a3a40;
+  color:#c9c9ce;
+}
+#renderActions .btn.cancel:hover{
+  border-color:#fff;
+  color:#fff;
+}
+
+@media(max-width:1100px){
+  #work{grid-template-columns:minmax(280px,.72fr) 1px minmax(360px,1.28fr)}
+  #stage{padding:22px}
+}
+@media(max-width:860px){
+  #work{display:block}
+  #paneCode,#panePreview,#time{display:none}
+  #paneCode.mon,#panePreview.mon,#time.mon{display:flex}
+  #rail{
+    width:min(100%,430px);
+  }
+  #renderCard{padding:18px}
+  #renderGrid{grid-template-columns:1fr}
+  #stage{padding:14px}
+}
+
 </style>
 </head>
 <body>
@@ -1382,6 +1751,7 @@ select.mini{
       <button data-act="open">Open</button>
       <button data-act="save">Save<kbd>⌘S</kbd></button>
       <button data-act="samples">Examples</button>
+      <button data-act="panels">Panels</button>
       <button data-act="run" class="key">Run<kbd>⌘⏎</kbd></button>
       <button data-act="render" class="key">Render</button>
     </nav>
@@ -1483,6 +1853,14 @@ select.mini{
 
     <!-- ================= RAIL ================= -->
     <aside class="pane" id="rail" data-m="rail">
+      <div id="railHeader">
+        <div>
+          <div class="eyebrow">INSPECTOR</div>
+          <div class="title">MOTION STUDIO</div>
+        </div>
+        <span class="sp"></span>
+        <button id="railClose" data-act="panelsClose" aria-label="Close inspector">✕</button>
+      </div>
       <nav id="tabs" role="tablist"></nav>
       <div id="railBody">
 
@@ -1699,6 +2077,34 @@ select.mini{
       <span class="rd" id="tComp">1920×1080 · 60 fps · 30 s</span>
     </div>
   </footer>
+
+
+  <div id="renderOverlay" aria-live="polite">
+    <div id="renderCard">
+      <div id="renderCardTop">
+        <div class="live-dot"></div>
+        <div>
+          <div class="eyebrow">EXPORT ENGINE</div>
+          <h2>RENDERING</h2>
+        </div>
+      </div>
+      <div id="renderBig"><span id="ovDone">0</span> <small>/ <span id="ovTotal">0</span> frames</small></div>
+      <div id="renderBar"><i id="ovBar"></i></div>
+      <div id="renderGrid">
+        <div class="renderMetric"><span>Progress</span><b id="ovPct">0.00 %</b></div>
+        <div class="renderMetric"><span>Frame</span><b id="ovFrame">0 · t = 0.000 s</b></div>
+        <div class="renderMetric"><span>Render rate</span><b id="ovRate">—</b></div>
+        <div class="renderMetric"><span>Elapsed</span><b id="ovElapsed">00:00</b></div>
+        <div class="renderMetric"><span>ETA estimate</span><b id="ovEta">—</b></div>
+        <div class="renderMetric"><span>Written so far</span><b id="ovBytes">0 B</b></div>
+        <div class="renderMetric"><span>Output</span><b id="ovOutput">—</b></div>
+        <div class="renderMetric"><span>Composition</span><b id="ovComp">—</b></div>
+      </div>
+      <div id="renderActions">
+        <button class="btn cancel" data-act="cancelRender" id="ovCancel">Cancel render</button>
+      </div>
+    </div>
+  </div>
 
   <div id="status">
     <span><i class="dot" id="stDot"></i><b id="stEngine">starting</b></span>
@@ -4938,6 +5344,7 @@ function initTabs() {
     host.appendChild(b);
   });
   showTab('p-comp');
+  toggleRail(false);
 
   var mt = $('#mtabs');
   mt.innerHTML = '';
@@ -4949,8 +5356,11 @@ function initTabs() {
   });
   showMobile('preview');
 }
+function toggleRail(open) {
+  $('#app').classList.toggle('rail-open', open !== false);
+}
 function showTab(id) {
-  $$('#tabs button').forEach(function (b) {
+  $('#tabs button').forEach(function (b) {
     var on = b.dataset.tab === id;
     b.classList.toggle('on', on);
     b.setAttribute('aria-selected', on ? 'true' : 'false');
@@ -5623,29 +6033,47 @@ function renderStat(p, job) {
   var pct = p.total ? (p.done / p.total) : 0;
   $('#rprog').querySelector('i').style.width = (pct * 100).toFixed(2) + '%';
   var etaMs = (p.msPerFrame && p.done) ? p.msPerFrame * (p.total - p.done) : null;
+  var rate = (p.renderFps || 0).toFixed(2) + ' fps · ' + (p.msPerFrame || 0).toFixed(1) + ' ms/frame';
+  var frameText = p.frame + ' · t = ' + (p.frame / c.fps).toFixed(3) + ' s';
+  var outputText = c.width + '×' + c.height + ' ' + (job.format === 'mp4' ? 'MP4' : job.format === 'webm' ? 'WebM' : 'PNG');
+  var etaText = etaMs === null ? '—' : fmtClock(etaMs / 1000) + ' (ESTIMATE)';
+  var elapsedText = fmtClock((p.elapsedMs || 0) / 1000);
+  var bytesText = fmtBytes(p.bytes || 0);
   var html = '<div class="bignum">' + p.done + ' <small>/ ' + p.total + ' frames</small></div>';
   html += '<dl class="kv">';
   html += '<dt>Progress</dt><dd>' + (pct * 100).toFixed(2) + ' %</dd>';
-  html += '<dt>Frame</dt><dd>' + p.frame + ' · t = ' + (p.frame / c.fps).toFixed(3) + ' s</dd>';
-  html += '<dt>Render rate</dt><dd>' + (p.renderFps || 0).toFixed(2) + ' fps · ' + (p.msPerFrame || 0).toFixed(1) + ' ms/frame</dd>';
-  html += '<dt>Elapsed</dt><dd>' + fmtClock((p.elapsedMs || 0) / 1000) + '</dd>';
-  html += '<dt>ETA estimate</dt><dd>' + (etaMs === null ? '—' : fmtClock(etaMs / 1000) + ' (ESTIMATE)') + '</dd>';
-  html += '<dt>Written so far</dt><dd>' + fmtBytes(p.bytes || 0) + '</dd>';
-  html += '<dt>Output</dt><dd>' + c.width + '×' + c.height + ' ' + (job.format === 'mp4' ? 'MP4' : job.format === 'webm' ? 'WebM' : 'PNG') + '</dd>';
+  html += '<dt>Frame</dt><dd>' + frameText + '</dd>';
+  html += '<dt>Render rate</dt><dd>' + rate + '</dd>';
+  html += '<dt>Elapsed</dt><dd>' + elapsedText + '</dd>';
+  html += '<dt>ETA estimate</dt><dd>' + etaText + '</dd>';
+  html += '<dt>Written so far</dt><dd>' + bytesText + '</dd>';
+  html += '<dt>Output</dt><dd>' + outputText + '</dd>';
   html += '</dl>';
   $('#rstat').innerHTML = html;
-}
 
+  $('#ovDone').textContent = p.done;
+  $('#ovTotal').textContent = p.total;
+  $('#ovPct').textContent = (pct * 100).toFixed(2) + ' %';
+  $('#ovFrame').textContent = frameText;
+  $('#ovRate').textContent = rate;
+  $('#ovElapsed').textContent = elapsedText;
+  $('#ovEta').textContent = etaText;
+  $('#ovBytes').textContent = bytesText;
+  $('#ovOutput').textContent = outputText;
+  $('#ovComp').textContent = c.fps + ' FPS · ' + (c.frameCount / c.fps).toFixed(3) + ' s';
+  $('#ovBar').style.width = (pct * 100).toFixed(2) + '%';
+}
 function startRender(job, opts) {
   opts = opts || {};
   if (S.rendering) return Promise.resolve(null);
   S.rendering = true;
   S.renderStart = Date.now();
+  $('#app').classList.add('render-active');
+  toggleRail(false);
   S.activeJob = job;
   $('#cancelBtn').disabled = false;
   $$('[data-act=startRender], [data-act=queueRun]').forEach(function (b) { b.disabled = true; });
   $('#stDot').className = 'dot busy';
-  showTab('p-render');
   clearLog();
   setStage('VALIDATING');
   var prog = $('#rprog');
@@ -5707,6 +6135,7 @@ function finishRender(job, result, opts) {
     setStage('IDLE');
     logLine('cancelled by user at frame ' + (S.lastProgress ? S.lastProgress.frame : 0) + ' — no file was produced', true);
     $('#stMsg').textContent = 'render cancelled — project and diagnostics kept';
+    $('#app').classList.remove('render-active');
     $('#rstat').innerHTML = '<div class="warnbox"><b>Cancelled</b>Stopped after ' +
       (S.lastProgress ? S.lastProgress.done : 0) + ' of ' + job.composition.frameCount +
       ' frames. A partial file would have been misleading, so none was written.</div>';
@@ -5726,6 +6155,7 @@ function finishRender(job, result, opts) {
       'WHY · ' + esc(err.name + ': ' + err.message) + '\n' +
       'HOW TO FIX · ' + esc(err.detail || (err.line ? 'Open line ' + err.line + ' in the editor.' : 'Check the render log above.')) +
       '</div>';
+    $('#app').classList.remove('render-active');
     $('#rstat').innerHTML = h;
     if (err.line || err.stage) showRuntimeError(merge(err, { stage: 'render' }));
     $('#stMsg').textContent = err.name + ': ' + err.message;
@@ -5745,6 +6175,7 @@ function finishRender(job, result, opts) {
   html += '<dt>Codec</dt><dd>' + esc(st.codec) + '</dd>';
   html += '</dl>';
   v.problems.forEach(function (p) { html += '<div class="warnbox"><b>Verification problem</b>' + esc(p) + '</div>'; });
+  $('#app').classList.remove('render-active');
   $('#rstat').innerHTML = html;
   logLine('verification: ' + v.status + (v.problems.length ? ' — ' + v.problems.length + ' problem(s)' : ''), true);
 
@@ -6799,6 +7230,8 @@ var DOCS = [
    Actions
    ============================================================ */
 var ACTS = {
+  panels: function () { toggleRail(true); },
+  panelsClose: function () { toggleRail(false); },
   'new': function () {
     askDiscard('Start a new project?', function () { newProject('sample-starter'); });
   },
