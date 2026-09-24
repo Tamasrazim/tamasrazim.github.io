@@ -5557,24 +5557,24 @@ function analyseLoop() {
    ============================================================ */
 function parseSourceMetadata(code) {
   var out = { found: false };
-  var m = /\/\*\\s*@meta\\b([\\s\\S]*?)\\*\//i.exec(code);
+  var m = /\/\*\s*@meta\b([\s\S]*?)\*\//i.exec(code);
   var raw = m ? m[1] : '';
   if (!raw) {
-    var lines = code.split(/\\r?\\n/);
+    var lines = code.split(/\r?\n/);
     var picked = [];
     for (var i = 0; i < lines.length && picked.length < 80; i++) {
-      var line = lines[i].replace(/^\\s*\\/\\/\\s?/, '').trim();
-      if (/^@(title|creator|composition|description|category|secondCategory|second-category|keywords|ai-generated|language)\\b/i.test(line) ||
-          /^(title|creator|composition|description|category|secondCategory|second-category|keywords|ai-generated|language)\\s*:/i.test(line)) picked.push(line);
+      var line = lines[i].replace(/^\s*\/\/\s?/, '').trim();
+      if (/^@?(title|creator|composition|description|category|secondCategory|second-category|keywords|ai-generated|language)\b/i.test(line) ||
+          /^(title|creator|composition|description|category|secondCategory|second-category|keywords|ai-generated|language)\s*:/i.test(line)) picked.push(line);
       else if (picked.length && line === '') break;
     }
-    if (picked.length) raw = picked.join('\\n');
+    if (picked.length) raw = picked.join('\n');
   }
   if (!raw) return out;
   out.found = true;
-  raw.split(/\\r?\\n/).forEach(function (line) {
-    line = line.trim().replace(/^\\*+\\s?/, '').trim();
-    var mm = /^@?([A-Za-z][A-Za-z0-9 _-]*)\\s*:\\s*(.*?)\\s*$/.exec(line);
+  raw.split(/\r?\n/).forEach(function (line) {
+    line = line.trim().replace(/^\*+\s?/, '').trim();
+    var mm = /^@?([A-Za-z][A-Za-z0-9 _-]*)\s*:\s*(.*?)\s*$/.exec(line);
     if (!mm) return;
     var key = mm[1].toLowerCase().replace(/[ _-]+/g, '');
     var value = mm[2].trim();
@@ -5590,38 +5590,6 @@ function parseSourceMetadata(code) {
     else if (key === 'language' || key === 'lang') out.language = value;
   });
   return out;
-}
-function extractMetaFromSource() {
-  var parsed = parseSourceMetadata(Ed.ta ? Ed.ta.value : S.code);
-  var fields = ['title','creator','composition','description','category','secondCategory','language'];
-  var changed = false;
-  fields.forEach(function (k) {
-    if (parsed[k] !== undefined && parsed[k] !== S.meta[k]) {
-      S.meta[k] = parsed[k];
-      changed = true;
-    }
-  });
-  if (parsed.keywords !== undefined) {
-    var joined = parsed.keywords.join(', ');
-    if (joined !== (S.meta.keywords || []).join(', ')) changed = true;
-    S.meta.keywords = parsed.keywords;
-  }
-  if (parsed.aiGenerated !== undefined && parsed.aiGenerated !== S.meta.aiGenerated) {
-    S.meta.aiGenerated = parsed.aiGenerated;
-    changed = true;
-  }
-  $('#metaSourceBadge').textContent = parsed.found ? 'SOURCE' : 'AUTO';
-  $('#metaSourceMsg').textContent = parsed.found
-    ? 'Metadata extracted from animation source.'
-    : 'No metadata block detected; current project values remain.';
-  $('#metaSourceState').classList.toggle('verified', parsed.found);
-  syncMetaUI();
-  if (changed) {
-    S.meta.modified = new Date().toISOString();
-    markDirty();
-    syncFileName();
-  }
-  return parsed;
 }
 function initMeta() {
   [['#mTitle', 'title'], ['#mCreator', 'creator'], ['#mComp', 'composition'],
@@ -5656,7 +5624,7 @@ function syncMetaUI() {
   $('#mLang').value = S.meta.language || 'en';
   $('#mSoft').textContent = S.meta.software;
   $('#mVer').textContent = S.meta.softwareVersion;
-  $('#mLines').textContent = S.code.split('\\n').length;
+  $('#mLines').textContent = S.code.split('\n').length;
   $('#mHash').textContent = S.hash || '— run the code to hash it —';
   syncMetaSupport();
 }
