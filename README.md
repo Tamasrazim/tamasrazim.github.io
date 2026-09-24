@@ -3,6 +3,8 @@
 <p align="center">
   <a href="https://tamasrazim.github.io/">Website</a>
   ·
+  <a href="https://tamasrazim.github.io/projects/">Projects</a>
+  ·
   <a href="https://github.com/Tamasrazim">GitHub</a>
   ·
   <a href="https://www.linkedin.com/in/Tamasrazim/">LinkedIn</a>
@@ -10,92 +12,149 @@
 
 ---
 
-## What this repository is
+## Source of truth
 
-This is the source-of-truth repository for **Robiul Rumman Razim — Tamasrazim**.
+This repository is the canonical source for **Robiul Rumman Razim — Tamasrazim** and the public projects maintained under the Tamasrazim web ecosystem.
 
-It contains the main digital identity site plus standalone browser projects and production tools. The repository is intentionally organized so the root stays focused on the personal site while project implementations live under `projects/`, and shared website code stays under `assets/`.
+The public structure is intentionally split into:
 
-## Live projects
+- the personal website at the root;
+- the public project hub under `/projects/`;
+- standalone applications that keep their own top-level canonical route;
+- project implementations and business tools grouped under `projects/`.
 
-| Project | What it is | Live |
-| --- | --- | --- |
-| **Code → Motion** | Deterministic browser-first animation renderer | https://tamasrazim.github.io/projects/code-motion/ |
-| **Animation Renderer** | Full rendering workflow / production renderer PWA | https://tamasrazim.github.io/renderer/ |
-| **Stock Asset Vault** | Local-first asset organization and metadata workspace | https://tamasrazim.github.io/asset-vault/ |
-| **BNC AgroCare** | Agricultural product catalogue + invoice PWA | https://tamasrazim.github.io/projects/bncagrocare/ |
-| **Repo Token Meter** | Repository source-footprint measurement tool | https://tamasrazim.github.io/projects/repo-token-meter/ |
+There is no separate production repository that should silently replace the files in this repository.
+
+## Canonical public routes
+
+| Route | Purpose |
+| --- | --- |
+| `/` | Main Tamasrazim personal website |
+| `/projects/` | Canonical public project index |
+| `/projects/code-motion/` | Code → Motion project page |
+| `/projects/code-motion/renderer.html` | Canonical Code → Motion renderer |
+| `/renderer/` | Standalone Animation Renderer PWA |
+| `/asset-vault/` | Standalone Stock Asset Vault PWA |
+| `/projects/bncagrocare/` | BNC AgroCare public website |
+| `/projects/bncagrocare/invoice/` | BNC AgroCare Invoice Studio |
+| `/projects/repo-token-meter/` | Repo Token Meter |
+
+These are the routes that should be used for navigation, documentation and the sitemap.
 
 ## Repository map
 
 ```text
 /
-├── index.html                         # Tamasrazim personal site
-├── assets/
-│   ├── css/                           # shared site styling
-│   └── js/                            # boot, motion and site runtime
+├── index.html                              # Main Tamasrazim website
+├── assets/                                 # Shared main-site CSS/JS
+│   ├── css/
+│   └── js/
 ├── projects/
-│   ├── index.html                     # canonical public project index
-│   ├── code-motion/                   # Code → Motion project
-│   │   ├── index.html                 # project landing page
-│   │   ├── renderer.html              # canonical renderer
-│   │   ├── legacy-renderer.html       # archived renderer build
-│   │   └── media-stack.js              # media descriptors
-│   ├── bncagrocare/                   # BNC business project
-│   │   ├── index.html                 # company website
-│   │   ├── invoice/                   # Invoice Studio PWA
-│   │   └── reference/                 # reference material
-│   └── repo-token-meter/              # standalone utility
-├── renderer/                          # Animation Renderer PWA
-├── asset-vault/                       # Stock Asset Vault PWA
-├── tools/                             # project validators and contracts
-├── scripts/                           # repository helper/check scripts
-├── .github/workflows/                 # automated project validation
-├── 404.html                           # GitHub Pages fallback
-├── robots.txt                          # crawler rules
-└── sitemap.xml                         # public route discovery
+│   ├── index.html                          # Public project hub
+│   ├── code-motion/
+│   │   ├── index.html                      # Project landing page
+│   │   ├── renderer.html                   # Canonical renderer
+│   │   ├── legacy-renderer.html            # Archived renderer build
+│   │   ├── media-stack.js                  # Media descriptors
+│   │   └── README.md                       # Project documentation
+│   ├── bncagrocare/
+│   │   ├── index.html                      # Public BNC site
+│   │   ├── invoice/                        # Invoice Studio PWA
+│   │   └── reference/                      # Reference material
+│   └── repo-token-meter/
+│       └── index.html                      # Standalone utility
+├── renderer/
+│   ├── index.html                          # Animation Renderer PWA
+│   ├── manifest.webmanifest
+│   └── ...                                 # Renderer app assets
+├── asset-vault/
+│   ├── index.html                          # Stock Asset Vault PWA
+│   ├── manifest.webmanifest
+│   └── ...                                 # Vault app assets
+├── tools/                                  # Validation scripts
+├── scripts/                                # Repository helpers
+├── .github/workflows/                      # Automated checks
+├── 404.html
+├── robots.txt
+└── sitemap.xml
 ```
 
-## Project notes
+## Project routing
 
 ### Code → Motion
 
-Canonical renderer source:
+Code → Motion owns its canonical renderer at:
 
-`projects/code-motion/renderer.html`
+`https://tamasrazim.github.io/projects/code-motion/renderer.html`
 
-The repository also keeps root compatibility URLs for older inbound links:
+The project landing page is:
+
+`https://tamasrazim.github.io/projects/code-motion/`
+
+The root files:
 
 - `/code-motion-tamasrazim.html`
 - `/code-motion-tamasrazim2.html`
 
-Those are entry-point compatibility files; the project source lives under `projects/code-motion/`.
+are compatibility entry points for older inbound links. They redirect to the current Code → Motion renderer and are not canonical project routes.
+
+`projects/code-motion/legacy-renderer.html` is archived and should not be used by normal site navigation.
 
 ### Animation Renderer
 
-The production-oriented renderer lives under `renderer/`. Its main UI, deterministic video engine, PWA manifest, service worker and validation tooling stay together.
+The Animation Renderer is a separate standalone application:
+
+`https://tamasrazim.github.io/renderer/`
+
+It is not the same application as the Code → Motion renderer. The main site and project hub must link to this route when referring to the standalone Animation Renderer.
 
 ### Stock Asset Vault
 
-`asset-vault/` is the companion local-first workspace for organizing rendered stock assets, previews, metadata and submission status.
+The Stock Asset Vault is a separate local-first application:
+
+`https://tamasrazim.github.io/asset-vault/`
+
+It is used for organizing rendered stock assets, previews, metadata and submission status.
 
 ### BNC AgroCare
 
-BNC is maintained canonically under `projects/bncagrocare/`.
+BNC AgroCare is maintained canonically in:
 
-The public site is product-first and includes the current BNC product names and pack formats. The Invoice Studio is a separate local-first PWA under:
+`projects/bncagrocare/`
 
-`projects/bncagrocare/invoice/`
+Public site:
 
-The original `invoice.pdf` is an immutable project asset and remains the document master.
+`https://tamasrazim.github.io/projects/bncagrocare/`
+
+Invoice Studio:
+
+`https://tamasrazim.github.io/projects/bncagrocare/invoice/`
+
+The original invoice PDF remains the document master for the Invoice Studio workflow.
+
+The separate repository `Tamasrazim/bncagrocare` is treated as a backup/mirror, while this repository remains the canonical source.
 
 ### Repo Token Meter
 
-A standalone browser utility under `projects/repo-token-meter/` for measuring repository source footprint and estimating token volume. The measurement is an estimate of source text, not AI billing usage.
+The Repo Token Meter lives at:
+
+`https://tamasrazim.github.io/projects/repo-token-meter/`
+
+It measures repository source footprint and estimates token volume from source text. The measurement is not a statement of AI billing.
+
+## Navigation rules
+
+The main website should link to canonical routes only.
+
+The project hub should link to canonical project/application routes only.
+
+Compatibility launchers may remain for older inbound links, but they should not appear in the sitemap or normal navigation.
+
+Archived project builds may remain in the repository for recovery/reference, but they are not public canonical destinations.
 
 ## Validation
 
-Projects have their own automated checks:
+Relevant repository checks include:
 
 - `tools/validate_site.mjs`
 - `tools/validate_code_motion.mjs`
@@ -104,35 +163,22 @@ Projects have their own automated checks:
 - `tools/validate_asset_vault.mjs`
 - `tools/renderer-contract.ts`
 
-GitHub Actions runs the relevant validation workflow when a project changes.
+GitHub Actions runs the relevant validation workflow when the corresponding project files change.
 
 ## Development
 
-The main website is a static GitHub Pages site. There is no required root build pipeline.
+The site is deployed as a static GitHub Pages repository.
 
-The public project directory is `projects/`. Its index is `projects/index.html`; standalone applications that retain short top-level URLs, such as `/renderer/` and `/asset-vault/`, remain compatibility-friendly deployment surfaces.
+For browser testing, serve the repository through a local HTTP server rather than opening files directly with `file://`.
 
-For local browser testing, serve the repository through a static HTTP server rather than opening pages directly from `file://`.
+Each standalone project keeps its own HTML/CSS/JS/PWA files close to its implementation.
 
-Each standalone project keeps its own HTML/CSS/JS/PWA assets close to its implementation.
+## Social / profile
 
-## Source-of-truth rule
-
-When a project exists in both this repository and a separate deployment/backup repository, this repository is the canonical source unless the project documentation explicitly says otherwise.
-
-For BNC AgroCare, `Tamasrazim/tamasrazim.github.io` is canonical and `Tamasrazim/bncagrocare` is the backup mirror.
-
-## Links
-
-- **Website:** https://tamasrazim.github.io/
-- **Code → Motion:** https://tamasrazim.github.io/projects/code-motion/
-- **Animation Renderer:** https://tamasrazim.github.io/renderer/
-- **Stock Asset Vault:** https://tamasrazim.github.io/asset-vault/
-- **BNC AgroCare:** https://tamasrazim.github.io/projects/bncagrocare/
-- **Repo Token Meter:** https://tamasrazim.github.io/projects/repo-token-meter/
-- **GitHub:** https://github.com/Tamasrazim
-- **LinkedIn:** https://www.linkedin.com/in/Tamasrazim/
+- Website: https://tamasrazim.github.io/
+- GitHub: https://github.com/Tamasrazim
+- LinkedIn: https://www.linkedin.com/in/Tamasrazim/
 
 ---
 
-<sub>Source of truth for the Tamasrazim web ecosystem.</sub>
+<sub>Canonical source for the Tamasrazim web ecosystem.</sub>
