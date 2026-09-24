@@ -2265,22 +2265,23 @@ body{
 .account-btn{
   display:flex;
   align-items:center;
-  gap:7px;
+  justify-content:center;
+  gap:8px;
+  min-width:92px;
   padding:0 12px;
-  min-width:104px;
-  border-left:1px solid rgba(255,255,255,.045);
-  color:#aaaab1;
-  font:600 9px/1 var(--mono);
-  letter-spacing:.08em;
-  transition:all 160ms ease;
+  border-left:1px solid rgba(255,255,255,.055);
+  color:#9a9aa2;
+  font:600 8.5px/1 var(--mono);
+  letter-spacing:.12em;
+  transition:background 160ms ease,color 160ms ease;
 }
 .account-btn:hover{
-  background:rgba(255,255,255,.055);
+  background:rgba(255,255,255,.05);
   color:#fff;
 }
 .account-avatar{
-  width:18px;
-  height:18px;
+  width:19px;
+  height:19px;
   border-radius:50%;
   display:grid;
   place-items:center;
@@ -2289,71 +2290,73 @@ body{
   border:1px solid rgba(255,255,255,.16);
   background:#151518;
   color:#fff;
-  font:600 9px/1 var(--mono);
-}
-.account-avatar img{
-  width:100%;
-  height:100%;
-  display:block;
-  object-fit:cover;
-}
-.account-btn.signed-in{
-  color:#ececf0;
+  font:600 8px/1 var(--mono);
 }
 .account-btn.signed-in .account-avatar{
-  border-color:rgba(255,255,255,.34);
+  border-color:rgba(255,255,255,.35);
+  box-shadow:0 0 0 3px rgba(255,255,255,.035);
 }
 .account-pop{
   position:fixed;
   top:62px;
   right:14px;
-  width:320px;
+  width:332px;
   z-index:120;
-  border:1px solid rgba(255,255,255,.13);
-  background:rgba(11,11,13,.97);
-  box-shadow:0 32px 80px rgba(0,0,0,.56);
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(10,10,12,.975);
+  box-shadow:0 34px 90px rgba(0,0,0,.62);
   backdrop-filter:blur(18px);
-  animation:accountPopIn 180ms cubic-bezier(.16,.84,.28,1);
+  animation:accountPopIn 190ms cubic-bezier(.16,.84,.28,1);
 }
 .account-pop[hidden]{display:none}
 @keyframes accountPopIn{
-  from{opacity:0;transform:translateY(-5px) scale(.985)}
+  from{opacity:0;transform:translateY(-6px) scale(.985)}
   to{opacity:1;transform:none}
 }
 .account-pop-head{
-  min-height:42px;
+  min-height:44px;
   display:flex;
   align-items:center;
-  padding:0 12px;
-  border-bottom:1px solid var(--studio-line);
+  padding:0 13px;
+  border-bottom:1px solid rgba(255,255,255,.075);
 }
 .account-pop-eyebrow{
   font:600 8px/1 var(--mono);
-  letter-spacing:.2em;
-  color:#68686f;
+  letter-spacing:.22em;
+  color:#67676f;
 }
 .account-pop-close{
   margin-left:auto;
-  width:26px;
-  height:26px;
-  color:#6b6b73;
+  width:27px;
+  height:27px;
   border:1px solid transparent;
+  color:#64646c;
+  transition:all 140ms ease;
 }
 .account-pop-close:hover{
+  border-color:rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);
   color:#fff;
-  border-color:var(--studio-line-strong);
 }
-.account-pop-body{padding:14px}
+.account-pop-body{padding:16px}
 .account-user{
   display:flex;
   align-items:center;
   gap:11px;
-  padding-bottom:14px;
+  min-height:54px;
 }
 .account-avatar.large{
-  width:40px;
-  height:40px;
+  width:44px;
+  height:44px;
+  border-color:rgba(255,255,255,.18);
   font-size:13px;
+}
+#accountPhoto{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  object-fit:cover;
+  border:1px solid rgba(255,255,255,.17);
 }
 .account-user-copy{
   min-width:0;
@@ -2362,15 +2365,15 @@ body{
   gap:5px;
 }
 .account-user-copy strong{
-  font:600 11px/1.2 var(--sans);
   color:#efeff2;
+  font:600 12px/1.2 var(--sans);
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
 }
 .account-user-copy span{
+  color:#65656d;
   font:9px/1.3 var(--mono);
-  color:#696970;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
@@ -2378,29 +2381,42 @@ body{
 .account-action{
   width:100%;
   min-height:38px;
+  margin-top:12px;
   display:flex;
   align-items:center;
   justify-content:center;
   gap:8px;
-  border:1px solid var(--studio-line-strong);
-  background:rgba(255,255,255,.025);
-  color:#d5d5da;
-  font:600 9px/1 var(--mono);
-  letter-spacing:.1em;
+  border:1px solid rgba(255,255,255,.13);
+  background:rgba(255,255,255,.026);
+  color:#d8d8dd;
+  font:600 8.5px/1 var(--mono);
+  letter-spacing:.13em;
   transition:all 160ms ease;
 }
-.account-action:hover{
-  border-color:#fff;
-  background:rgba(255,255,255,.07);
+.account-action:hover:not(:disabled){
+  border-color:rgba(255,255,255,.65);
+  background:rgba(255,255,255,.065);
   color:#fff;
+  transform:translateY(-1px);
 }
 .account-action.primary{
-  background:#f2f2f4;
+  background:#f0f0f2;
   color:#050506;
-  border-color:#f2f2f4;
+  border-color:#f0f0f2;
 }
-.account-action.primary:hover{
-  background:#d7d7db;
+.account-action.primary:hover:not(:disabled){background:#d8d8dc}
+.account-action.ghost{
+  background:transparent;
+  border-color:transparent;
+  color:#777780;
+}
+.account-action.ghost:hover:not(:disabled){
+  border-color:rgba(255,255,255,.1);
+  background:rgba(255,255,255,.03);
+}
+.account-action:disabled{
+  opacity:.48;
+  cursor:not-allowed;
 }
 .google-mark{
   width:17px;
@@ -2412,17 +2428,69 @@ body{
   color:#4285f4;
   font:bold 10px/1 Arial,sans-serif;
 }
-.account-note{
-  margin:10px 0 0;
-  color:#62626a;
-  font:9px/1.55 var(--mono);
+.account-divider{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:15px 0 9px;
 }
-#accountPhoto{
-  width:40px;
-  height:40px;
+.account-divider::after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:rgba(255,255,255,.055);
+}
+.account-divider span{
+  font:600 7.5px/1 var(--mono);
+  letter-spacing:.2em;
+  color:#44444b;
+}
+.account-status-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 0;
+  border-bottom:1px solid rgba(255,255,255,.045);
+}
+.account-status-row>div{
+  min-width:0;
+  flex:1;
+}
+.account-section-label{
+  display:block;
+  margin-bottom:5px;
+  color:#4f4f57;
+  font:600 7px/1 var(--mono);
+  letter-spacing:.18em;
+}
+.account-status-row strong{
+  display:block;
+  color:#bfc0c5;
+  font:500 9.5px/1 var(--mono);
+}
+.connection-dot{
+  width:6px;
+  height:6px;
+  flex:0 0 auto;
   border-radius:50%;
-  object-fit:cover;
-  border:1px solid rgba(255,255,255,.14);
+  background:#fff;
+  box-shadow:0 0 0 4px rgba(255,255,255,.06);
+}
+.connection-dot.muted{
+  background:#3c3c43;
+  box-shadow:none;
+}
+.account-coming{
+  padding:3px 5px;
+  border:1px solid rgba(255,255,255,.08);
+  color:#56565e;
+  font-size:7px;
+  letter-spacing:.14em;
+}
+.account-note{
+  margin:11px 1px 0;
+  color:#55555d;
+  font:8.5px/1.55 var(--mono);
 }
 @media(max-width:860px){
   .account-btn{
@@ -2433,11 +2501,9 @@ body{
   .account-pop{
     top:58px;
     right:8px;
-    width:min(320px,calc(100vw - 16px));
+    width:min(332px,calc(100vw - 16px));
   }
-}
-
-</style>
+}</style>
 </head>
 <body>
 <div id="grain" aria-hidden="true"></div>
@@ -2487,14 +2553,40 @@ body{
         <div class="account-avatar large" id="accountAvatarLarge">G</div>
         <div class="account-user-copy">
           <strong id="accountName">Not signed in</strong>
-          <span id="accountEmail">Sign in to sync your identity</span>
+          <span id="accountEmail">Sign in to your Google account</span>
         </div>
       </div>
+
       <button id="googleLoginBtn" class="account-action primary" type="button">
         <span class="google-mark">G</span>
         <span id="googleLoginText">Continue with Google</span>
       </button>
-      <button id="googleLogoutBtn" class="account-action" type="button" hidden>Sign out</button>
+
+      <div class="account-divider"><span>ACCOUNT</span></div>
+
+      <div class="account-status-row">
+        <div>
+          <span class="account-section-label">GOOGLE</span>
+          <strong id="googleConnection">Not connected</strong>
+        </div>
+        <span class="connection-dot" id="googleConnectionDot"></span>
+      </div>
+
+      <div class="account-status-row drive-row">
+        <div>
+          <span class="account-section-label">GOOGLE DRIVE</span>
+          <strong id="driveConnection">Not connected</strong>
+        </div>
+        <span class="connection-dot muted" id="driveConnectionDot"></span>
+      </div>
+
+      <button id="driveBtn" class="account-action" type="button" disabled>
+        <span>CONNECT DRIVE</span>
+        <span class="account-coming">NEXT</span>
+      </button>
+
+      <button id="googleLogoutBtn" class="account-action ghost" type="button" hidden>Sign out</button>
+
       <p class="account-note" id="accountStatus">Authentication is optional. Local projects continue to work without an account.</p>
     </div>
   </div>
@@ -8297,6 +8389,10 @@ else boot();
   const accountName = document.getElementById("accountName");
   const accountEmail = document.getElementById("accountEmail");
   const accountStatus = document.getElementById("accountStatus");
+  const googleConnection = document.getElementById("googleConnection");
+  const googleConnectionDot = document.getElementById("googleConnectionDot");
+  const driveConnection = document.getElementById("driveConnection");
+  const driveConnectionDot = document.getElementById("driveConnectionDot");
 
   function initials(user) {
     const value = (user.displayName || user.email || "G").trim();
@@ -8358,6 +8454,10 @@ else boot();
       accountEmail.textContent = "Sign in to sync your identity";
       googleLoginBtn.hidden = false;
       googleLogoutBtn.hidden = true;
+      googleConnection.textContent = "Not connected";
+      googleConnectionDot.classList.add("muted");
+      driveConnection.textContent = "Sign in first";
+      driveConnectionDot.classList.add("muted");
       accountStatus.textContent = "Authentication is optional. Local projects continue to work without an account.";
       return;
     }
@@ -8381,7 +8481,11 @@ else boot();
 
     googleLoginBtn.hidden = true;
     googleLogoutBtn.hidden = false;
-    accountStatus.textContent = "Signed in with Google. Drive sync can be connected separately.";
+    googleConnection.textContent = "Connected";
+    googleConnectionDot.classList.remove("muted");
+    driveConnection.textContent = "Not connected";
+    driveConnectionDot.classList.add("muted");
+    accountStatus.textContent = "Google identity connected. Drive storage will use a separate permission.";
   });
 </script>
 
