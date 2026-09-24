@@ -20,7 +20,7 @@ The public structure is intentionally split into:
 
 - the personal website at the root;
 - the public project hub under `/projects/`;
-- standalone applications that keep their own top-level canonical route;
+- the dedicated Stock Asset Vault application at `/asset-vault/`;
 - project implementations and business tools grouped under `projects/`.
 
 There is no separate production repository that should silently replace the files in this repository.
@@ -33,7 +33,6 @@ There is no separate production repository that should silently replace the file
 | `/projects/` | Canonical public project index |
 | `/projects/code-motion/` | Code → Motion project page |
 | `/projects/code-motion/renderer.html` | Canonical Code → Motion renderer |
-| `/renderer/` | Standalone Animation Renderer PWA |
 | `/asset-vault/` | Standalone Stock Asset Vault PWA |
 | `/projects/bncagrocare/` | BNC AgroCare public website |
 | `/projects/bncagrocare/invoice/` | BNC AgroCare Invoice Studio |
