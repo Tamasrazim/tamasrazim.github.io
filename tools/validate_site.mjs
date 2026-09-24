@@ -76,7 +76,6 @@ for(const stale of ['Personal Web','Technical Experiments','Gaming & Media']) mu
 const hub=read('projects/index.html');
 for(const ref of [
   'href="./code-motion/"',
-  'href="../renderer/"',
   'href="../asset-vault/"',
   'href="./bncagrocare/"',
   'href="./bncagrocare/invoice/"',
