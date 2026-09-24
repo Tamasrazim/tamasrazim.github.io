@@ -1768,6 +1768,8 @@ select.mini{
         <span class="sp"></span>
         <button data-act="find">Find</button>
         <button data-act="fmtIndent">Reindent</button>
+        <button data-act="copy" title="Copy selected code, or all code when nothing is selected">Copy</button>
+        <button data-act="clear" title="Clear the code editor (undoable)">Clear</button>
         <button data-act="paste" title="Paste code from clipboard">Paste</button>
         <button data-act="undo">Undo</button>
         <button data-act="redo">Redo</button>
@@ -4923,6 +4925,30 @@ function edInsert(text, selStart, selEnd) {
   edChanged(true);
 }
 
+function copyCode() {
+  var ta = Ed.ta;
+  if (!ta) return;
+  var start = ta.selectionStart, end = ta.selectionEnd;
+  var text = start !== end ? ta.value.slice(start, end) : ta.value;
+  if (!text) {
+    $('#edState').textContent = 'nothing to copy';
+    return;
+  }
+  copyText(text, start !== end ? 'selected code copied' : 'code copied');
+}
+function clearCode() {
+  var ta = Ed.ta;
+  if (!ta || !ta.value) {
+    $('#edState').textContent = 'editor already empty';
+    return;
+  }
+  edSnapshot(true);
+  ta.value = '';
+  ta.selectionStart = ta.selectionEnd = 0;
+  S.compiled = false;
+  edChanged(true);
+  $('#edState').textContent = 'code cleared — undo to restore';
+}
 function pasteCode() {
   var ta = Ed.ta;
   ta.focus();
@@ -7315,6 +7341,8 @@ var ACTS = {
   panels: function () { toggleRail(true); },
   panelsClose: function () { toggleRail(false); },
   extractMeta: function () { extractMetaFromSource(); },
+  copy: copyCode,
+  clear: clearCode,
   'new': function () {
     askDiscard('Start a new project?', function () { newProject('sample-starter'); });
   },
