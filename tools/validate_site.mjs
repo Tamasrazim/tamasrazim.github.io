@@ -34,7 +34,6 @@ function checkScript(file){
 const htmlFiles=[
   'index.html',
   'projects/index.html',
-  'renderer/index.html',
   'asset-vault/index.html',
   'projects/code-motion/index.html',
   'projects/bncagrocare/index.html',
@@ -48,14 +47,11 @@ for(const file of [
   'assets/js/boot.js',
   'assets/js/site.js',
   'assets/js/motion-core.js',
-  'renderer/js/app.js',
-  'renderer/js/video-engine.js',
   'asset-vault/js/app.js',
   'projects/bncagrocare/invoice/js/app.js'
 ]) checkScript(file);
 
 for(const file of [
-  'renderer/manifest.webmanifest',
   'asset-vault/manifest.webmanifest',
   'projects/bncagrocare/invoice/manifest.webmanifest'
 ]){
@@ -65,7 +61,6 @@ for(const file of [
 
 const site=read('index.html');
 for(const ref of [
-  'href="renderer/"',
   'href="projects/code-motion/"',
   'href="projects/code-motion/renderer.html"',
   'href="asset-vault/"',
@@ -89,5 +84,10 @@ for(const ref of [
 
 const bncPdfSha=execFileSync('git',['ls-tree','-r','HEAD','--','projects/bncagrocare/invoice.pdf'],{encoding:'utf8'}).trim().split(/\s+/)[2];
 must(bncPdfSha==='46c9ce8303a0a4abdf7599ba1479b298c26fc6fe','locked BNC invoice template SHA is unchanged');
+
+const renderer=read('renderer/index.html');
+must(renderer.includes('projects/code-motion/'),'retired renderer route redirects to Code → Motion');
+must(!site.includes('href="renderer/"'),'homepage has no retired renderer link');
+must(!hub.includes('href="../renderer/"'),'project hub has no retired renderer link');
 
 console.log('Global site validation complete.');
