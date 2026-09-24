@@ -7094,6 +7094,7 @@ function initShortcuts() {
     if (k === 'Escape') {
       if (S.modalOpen) { closeModal(); return; }
       if (!$('#find').classList.contains('hide')) { closeFind(); return; }
+      if ($('#app').classList.contains('rail-open')) { toggleRail(false); return; }
     }
     if (meta && k === 'Enter') { ev.preventDefault(); run(); return; }
     if (meta && k.toLowerCase() === 's') { ev.preventDefault(); saveProject(ev.shiftKey ? 'as' : null); return; }
