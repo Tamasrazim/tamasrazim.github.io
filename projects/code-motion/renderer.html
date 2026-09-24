@@ -1362,1148 +1362,33 @@ select.mini{
 }
 
 
-/* ============================================================
-   TAMASRAZIM UI REDESIGN 05 — MOTION STUDIO
-   ============================================================ */
-#work{
-  grid-template-columns:minmax(320px,.78fr) 1px minmax(420px,1.55fr);
-  position:relative;
-  overflow:hidden;
+/* Minimal Google account UI */
+.auth-mini{
+  display:flex;align-items:center;gap:6px;padding:0 11px;border-left:1px solid var(--rule);
+  color:var(--mut);font:600 9px/1 var(--mono);letter-spacing:.08em;transition:all 140ms ease
 }
-#rule2{display:none}
-#paneCode{min-width:0}
-#panePreview{min-width:0}
+.auth-mini:hover{color:#fff;background:var(--raise)}
+.auth-dot{width:18px;height:18px;border:1px solid var(--rule-hi);border-radius:50%;display:grid;place-items:center;font:600 8px var(--mono);color:#fff;background:#111}
+.auth-pop{position:fixed;top:54px;right:10px;width:300px;z-index:120;background:#0b0b0d;border:1px solid var(--rule-hi);box-shadow:0 24px 70px rgba(0,0,0,.55)}
+.auth-pop[hidden]{display:none}
+.auth-pop-head{height:40px;display:flex;align-items:center;padding:0 11px;border-bottom:1px solid var(--rule)}
+.auth-pop-head b{font:600 8px var(--mono);letter-spacing:.18em;color:var(--mut)}
+.auth-pop-head button{margin-left:auto;color:var(--mut);padding:4px 7px;border:1px solid transparent}
+.auth-pop-head button:hover{color:#fff;border-color:var(--rule-hi)}
+.auth-user{display:flex;align-items:center;gap:10px;padding:14px 12px}
+.auth-user>div{min-width:0;display:flex;flex-direction:column;gap:4px}
+.auth-user strong{font:600 11px var(--sans);color:var(--ink)}
+.auth-user div span{font:9px var(--mono);color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.auth-avatar-large,#accountPhoto{width:38px;height:38px;border-radius:50%;object-fit:cover;border:1px solid var(--rule-hi);background:#151517}
+.auth-avatar-large{display:grid;place-items:center;color:#fff;font:600 12px var(--mono)}
+.auth-action{display:flex;align-items:center;justify-content:center;gap:7px;width:calc(100% - 24px);margin:0 12px 8px;height:36px;border:1px solid var(--rule-hi);color:var(--ink);font:600 9px var(--mono);letter-spacing:.1em}
+.auth-action:hover{border-color:#fff;background:var(--raise)}
+.auth-action.primary{background:#fff;color:#000;border-color:#fff}
+.google-mark{width:16px;height:16px;border-radius:50%;background:#fff;color:#4285f4;display:grid;place-items:center;font:bold 10px Arial}
+.auth-note{padding:2px 12px 13px;margin:0;font:9px/1.5 var(--mono);color:var(--mut)}
+@media(max-width:860px){.auth-mini{min-width:40px;padding:0 7px}.auth-mini #accountLabel{display:none}.auth-pop{right:8px;width:min(300px,calc(100vw - 16px))}}
 
-#rail{
-  position:absolute;
-  top:0;
-  right:0;
-  bottom:0;
-  width:min(410px,92vw);
-  z-index:70;
-  transform:translateX(105%);
-  transition:transform 300ms cubic-bezier(.2,.8,.2,1);
-  border-left:1px solid rgba(255,255,255,.12);
-  box-shadow:-32px 0 80px rgba(0,0,0,.48);
-  background:rgba(10,10,12,.97);
-  backdrop-filter:blur(18px);
-}
-#app.rail-open #rail{transform:translateX(0)}
-#work::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:60;
-  background:rgba(0,0,0,.38);
-  backdrop-filter:blur(2px);
-  pointer-events:none;
-  opacity:0;
-  transition:opacity 240ms ease;
-}
-#app.rail-open #work::after{opacity:1}
-
-#railClose{
-  display:grid;
-  place-items:center;
-  width:30px;
-  height:30px;
-  border:1px solid var(--rule);
-  color:var(--mut);
-  font:12px var(--mono);
-  transition:all 140ms ease;
-}
-#railClose:hover{
-  color:#fff;
-  border-color:#fff;
-  background:rgba(255,255,255,.06);
-}
-#railHeader{
-  position:sticky;
-  top:0;
-  z-index:8;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-height:48px;
-  padding:8px 12px;
-  border-bottom:1px solid var(--rule);
-  background:rgba(9,9,11,.94);
-  backdrop-filter:blur(12px);
-}
-#railHeader .eyebrow{
-  font:600 9px/1 var(--mono);
-  letter-spacing:.2em;
-  color:#777780;
-}
-#railHeader .title{
-  font:500 12px/1 var(--mono);
-  letter-spacing:.08em;
-  color:#f0f0f2;
-}
-#railHeader .sp{flex:1}
-
-#tabs{
-  position:sticky;
-  top:48px;
-  z-index:7;
-  padding:7px;
-  gap:4px;
-  background:rgba(9,9,11,.90);
-  border-bottom:1px solid var(--rule);
-  backdrop-filter:blur(12px);
-}
-#tabs button{
-  min-height:30px;
-  border:1px solid transparent;
-  border-radius:6px;
-  color:#67676f;
-}
-#tabs button:hover{color:#fff;background:rgba(255,255,255,.045)}
-#tabs button.on{
-  color:#fff;
-  background:rgba(255,255,255,.08);
-  border-color:rgba(255,255,255,.1);
-  box-shadow:none;
-}
-
-#railBody{
-  padding:0 3px 30px;
-  overflow-y:auto;
-}
-.panel{padding:12px 13px 40px}
-
-#hdr{
-  box-shadow:0 10px 30px rgba(0,0,0,.16);
-}
-.hdr-acts button{
-  min-width:70px;
-}
-.hdr-acts button[data-act="panels"]{
-  color:#e1e1e5;
-  border-left:1px solid var(--rule);
-}
-.hdr-acts button[data-act="panels"]::before{
-  content:"";
-  position:absolute;
-  inset:6px 8px;
-  border:1px solid rgba(255,255,255,.09);
-}
-#app.rail-open .hdr-acts button[data-act="panels"]{
-  color:#000;
-  background:#fff;
-}
-#app.rail-open .hdr-acts button[data-act="panels"]::before{border-color:rgba(0,0,0,.16)}
-
-#strip{
-  min-height:26px;
-  background:linear-gradient(90deg,#070709,#0b0b0d 50%,#070709);
-}
-
-#panePreview{
-  position:relative;
-  box-shadow:-18px 0 40px rgba(0,0,0,.10);
-}
-#panePreview .phead{
-  height:34px;
-  background:rgba(9,9,11,.94);
-  backdrop-filter:blur(10px);
-}
-#panePreview .phead span:first-child{
-  font-weight:600;
-  letter-spacing:.2em;
-  color:#d0d0d6;
-}
-#stage{
-  padding:34px;
-  background:
-    radial-gradient(circle at 50% 48%,rgba(255,255,255,.025),transparent 30%),
-    linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px) 0 0/32px 32px,
-    linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px) 0 0/32px 32px,
-    #060607;
-}
-#canvasFrame{
-  box-shadow:
-    0 45px 100px -40px rgba(0,0,0,.98),
-    0 16px 38px rgba(0,0,0,.25),
-    0 0 0 1px rgba(255,255,255,.07);
-}
-#hud{
-  top:14px;
-  left:16px;
-  right:16px;
-  gap:5px;
-}
-#hud .pill{
-  padding:4px 7px;
-  border-radius:4px;
-  background:rgba(5,5,7,.72);
-  border-color:rgba(255,255,255,.10);
-  backdrop-filter:blur(10px);
-}
-#pvctl{
-  height:42px;
-  padding:0 14px;
-  background:#08080a;
-}
-#pvctl .ib{
-  width:30px;
-  height:26px;
-  border-radius:5px;
-}
-#pvctl .ib:hover{background:rgba(255,255,255,.07)}
-#pvctl .ib.on{background:#fff}
-
-#paneCode .phead{
-  height:34px;
-  padding-left:15px;
-  background:#09090b;
-}
-#paneCode .phead span:first-child{
-  color:#c7c7cd;
-  font-weight:600;
-}
-#edstat{
-  height:25px;
-  background:#070709;
-}
-
-#time{
-  height:142px;
-  background:#09090b;
-}
-#tlhead{
-  height:28px;
-  padding:0 14px;
-}
-#track{
-  height:40px;
-  min-height:40px;
-  margin:0 14px;
-  border-color:rgba(255,255,255,.10);
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.018),rgba(255,255,255,.005)),
-    #070709;
-}
-#tfoot{
-  height:34px;
-  padding:0 13px;
-}
-
-#status{
-  height:24px;
-  border-top:1px solid rgba(255,255,255,.08);
-  background:#050507;
-  font-size:9px;
-}
-
-#renderOverlay{
-  position:absolute;
-  inset:0;
-  z-index:85;
-  display:grid;
-  place-items:center;
-  padding:28px;
-  background:rgba(2,2,3,.72);
-  backdrop-filter:blur(18px);
-  opacity:0;
-  pointer-events:none;
-  transition:opacity 180ms ease;
-}
-#app.render-active #renderOverlay{
-  opacity:1;
-  pointer-events:auto;
-}
-#renderCard{
-  width:min(620px,92vw);
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(10,10,12,.95);
-  box-shadow:0 35px 100px rgba(0,0,0,.6);
-  padding:24px;
-}
-#renderCardTop{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:18px;
-}
-#renderCardTop .live-dot{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:#fff;
-  box-shadow:0 0 0 5px rgba(255,255,255,.08);
-  animation:mpulse 1.1s ease-in-out infinite;
-}
-#renderCardTop .eyebrow{
-  font:600 9px/1 var(--mono);
-  letter-spacing:.22em;
-  color:#777780;
-}
-#renderCardTop h2{
-  margin-top:5px;
-  font:500 17px/1.1 var(--mono);
-  letter-spacing:.04em;
-}
-#renderBig{
-  font:500 34px/1 var(--mono);
-  letter-spacing:-.04em;
-  color:#fff;
-}
-#renderBig small{
-  font-size:12px;
-  color:#74747c;
-  letter-spacing:0;
-}
-#renderBar{
-  height:5px;
-  margin:16px 0 20px;
-  border-radius:999px;
-  overflow:hidden;
-  background:rgba(255,255,255,.08);
-}
-#renderBar i{
-  display:block;
-  width:0;
-  height:100%;
-  border-radius:inherit;
-  background:#fff;
-  transition:width 120ms linear;
-}
-#renderGrid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  border-top:1px solid var(--rule);
-  border-left:1px solid var(--rule);
-}
-.renderMetric{
-  min-height:66px;
-  padding:11px 13px;
-  border-right:1px solid var(--rule);
-  border-bottom:1px solid var(--rule);
-}
-.renderMetric span{
-  display:block;
-  font:9px/1 var(--mono);
-  letter-spacing:.14em;
-  color:#66666e;
-  text-transform:uppercase;
-}
-.renderMetric b{
-  display:block;
-  margin-top:8px;
-  font:500 12px/1 var(--mono);
-  color:#e6e6ea;
-}
-#renderActions{
-  display:flex;
-  justify-content:flex-end;
-  gap:7px;
-  margin-top:18px;
-}
-#renderActions .btn{
-  width:auto;
-  min-width:120px;
-  margin:0;
-}
-#renderActions .btn.cancel{
-  border-color:#3a3a40;
-  color:#c9c9ce;
-}
-#renderActions .btn.cancel:hover{
-  border-color:#fff;
-  color:#fff;
-}
-
-@media(max-width:1100px){
-  #work{grid-template-columns:minmax(280px,.72fr) 1px minmax(360px,1.28fr)}
-  #stage{padding:22px}
-}
-@media(max-width:860px){
-  #work{display:block}
-  #paneCode,#panePreview,#time{display:none}
-  #paneCode.mon,#panePreview.mon,#time.mon{display:flex}
-  #rail{
-    width:min(100%,430px);
-  }
-  #renderCard{padding:18px}
-  #renderGrid{grid-template-columns:1fr}
-  #stage{padding:14px}
-}
-
-
-/* ============================================================
-   TAMASRAZIM UI REDESIGN 06 — CINEMATIC MOTION SUITE
-   ============================================================ */
-:root{
-  --studio-black:#050506;
-  --studio-panel:#0a0a0c;
-  --studio-panel-2:#0d0d10;
-  --studio-line:rgba(255,255,255,.085);
-  --studio-line-strong:rgba(255,255,255,.15);
-  --studio-text:#e8e8ec;
-  --studio-muted:#6d6d76;
-}
-
-body{
-  background:
-    radial-gradient(circle at 72% -20%,rgba(255,255,255,.035),transparent 28%),
-    #050506;
-}
-
-#hdr{
-  height:56px;
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.022),transparent 70%),
-    #08080a;
-  border-bottom-color:var(--studio-line-strong);
-  box-shadow:0 12px 30px rgba(0,0,0,.26);
-}
-
-.brand{
-  min-width:182px;
-  padding:0 17px;
-  border-right-color:var(--studio-line);
-  position:relative;
-}
-.brand::after{
-  content:"";
-  position:absolute;
-  right:-1px;
-  top:12px;
-  bottom:12px;
-  width:1px;
-  background:linear-gradient(180deg,transparent,#fff,transparent);
-  opacity:.24;
-}
-.brand b{
-  font-size:12px;
-  letter-spacing:.18em;
-}
-.brand em{
-  margin-top:11px;
-  letter-spacing:.18em;
-}
-
-.proj{
-  min-width:196px;
-  padding:0 16px;
-  border-right:1px solid var(--studio-line);
-}
-#projName{
-  width:170px;
-  font-size:11px;
-  color:#ededf0;
-}
-.vtag{
-  border-color:var(--studio-line-strong);
-  color:#777780;
-}
-
-.studio-mode{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-left:16px;
-  white-space:nowrap;
-  font:600 9px/1 var(--mono);
-  letter-spacing:.16em;
-  color:#5e5e66;
-}
-.studio-mode-k{
-  color:#38383e;
-  margin-right:3px;
-}
-.studio-mode b{
-  color:#fff;
-  position:relative;
-}
-.studio-mode b::after{
-  content:"";
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:-7px;
-  height:1px;
-  background:#fff;
-  transform-origin:left;
-  animation:studioLine 2.8s ease-in-out infinite;
-}
-.studio-mode i{
-  color:#2d2d31;
-  font-style:normal;
-}
-@keyframes studioLine{
-  0%,100%{transform:scaleX(.45);opacity:.35}
-  50%{transform:scaleX(1);opacity:.9}
-}
-
-.hdr-acts{
-  gap:1px;
-}
-.hdr-acts button{
-  min-width:66px;
-  padding:0 12px;
-  color:#7f7f88;
-  border-left:1px solid rgba(255,255,255,.045);
-}
-.hdr-acts button:hover{
-  background:rgba(255,255,255,.055);
-}
-.hdr-acts button.key{
-  color:#f4f4f5;
-}
-.hdr-acts button[data-act="render"]{
-  min-width:82px;
-  background:#f4f4f5;
-  color:#050506;
-  font-weight:650;
-  letter-spacing:.13em;
-}
-.hdr-acts button[data-act="render"]::before{
-  display:none;
-}
-.hdr-acts button[data-act="render"]:hover{
-  background:#d9d9dd;
-}
-.hdr-acts button[data-act="run"]{
-  border-left-color:var(--studio-line-strong);
-}
-
-#strip{
-  height:24px;
-  padding:0 14px;
-  border-bottom-color:var(--studio-line);
-  background:
-    linear-gradient(90deg,#060607,#0a0a0d 35%,#09090b 65%,#060607);
-  box-shadow:inset 0 -1px rgba(255,255,255,.015);
-}
-.st{
-  font-size:8.5px;
-  letter-spacing:.18em;
-}
-.st-sep{
-  width:10px;
-  background:#18181c;
-}
-
-#work{
-  grid-template-columns:minmax(300px,.66fr) 1px minmax(500px,1.62fr);
-  background:#060607;
-}
-
-.pane{
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.008),transparent 28%),
-    var(--studio-panel);
-}
-
-#paneCode{
-  border-right:0;
-}
-
-#paneCode .phead,
-#panePreview .phead{
-  height:36px;
-  min-height:36px;
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.018),transparent),
-    #09090b;
-  border-bottom-color:var(--studio-line);
-  position:relative;
-}
-#paneCode .phead::after,
-#panePreview .phead::after{
-  content:"";
-  position:absolute;
-  left:0;
-  bottom:-1px;
-  width:72px;
-  height:1px;
-  background:linear-gradient(90deg,#fff,transparent);
-  opacity:.35;
-}
-#paneCode .phead span:first-child,
-#panePreview .phead span:first-child{
-  font:650 9px/1 var(--mono);
-  letter-spacing:.19em;
-  color:#d4d4d9;
-}
-#paneCode .phead::before{
-  content:"01  SOURCE / JAVASCRIPT";
-  position:absolute;
-  left:15px;
-  top:3px;
-  transform:translateY(-100%);
-  font:600 7.5px/1 var(--mono);
-  letter-spacing:.17em;
-  color:#35353b;
-  pointer-events:none;
-}
-#panePreview .phead::before{
-  content:"02  PROGRAM MONITOR";
-  position:absolute;
-  left:15px;
-  top:3px;
-  transform:translateY(-100%);
-  font:600 7.5px/1 var(--mono);
-  letter-spacing:.17em;
-  color:#35353b;
-  pointer-events:none;
-}
-
-#edwrap{
-  background:
-    linear-gradient(90deg,rgba(255,255,255,.008),transparent 28%),
-    #08080a;
-}
-#gutter{
-  width:58px;
-  border-right-color:rgba(255,255,255,.055);
-  background:#08080a;
-}
-#hl,#ta{
-  padding-top:14px;
-  padding-bottom:35vh;
-  font-size:12px;
-  line-height:19px;
-}
-#edstat{
-  height:26px;
-  background:#070709;
-  border-top-color:var(--studio-line);
-  color:#55555e;
-}
-#edState{
-  color:#c5c5cb;
-}
-
-#panePreview{
-  position:relative;
-  min-width:0;
-  background:
-    radial-gradient(circle at 50% 42%,rgba(255,255,255,.025),transparent 35%),
-    #08080a;
-}
-#stage{
-  padding:40px;
-  background:
-    radial-gradient(circle at 50% 48%,rgba(255,255,255,.035),transparent 26%),
-    linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px) 0 0/40px 40px,
-    linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px) 0 0/40px 40px,
-    #060607;
-  isolation:isolate;
-}
-#stage::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  background:
-    linear-gradient(90deg,transparent 49.94%,rgba(255,255,255,.035) 50%,transparent 50.06%),
-    linear-gradient(0deg,transparent 49.94%,rgba(255,255,255,.035) 50%,transparent 50.06%);
-  opacity:.3;
-  animation:stageBreath 7s ease-in-out infinite;
-}
-@keyframes stageBreath{
-  0%,100%{opacity:.2}
-  50%{opacity:.42}
-}
-#canvasFrame{
-  border-radius:2px;
-  box-shadow:
-    0 55px 120px -42px rgba(0,0,0,.98),
-    0 18px 44px rgba(0,0,0,.24),
-    0 0 0 1px rgba(255,255,255,.09);
-  animation:monitorIn 700ms cubic-bezier(.16,.84,.28,1);
-}
-@keyframes monitorIn{
-  from{opacity:.82;transform:translateY(6px) scale(.992)}
-  to{opacity:1;transform:translateY(0) scale(1)}
-}
-#hud{
-  top:16px;
-  left:16px;
-  right:16px;
-  gap:5px;
-}
-#hud .pill{
-  border-radius:3px;
-  padding:4px 7px;
-  color:#7b7b84;
-  background:rgba(4,4,6,.68);
-  border-color:rgba(255,255,255,.08);
-  box-shadow:0 8px 18px rgba(0,0,0,.14);
-}
-#hud .pill b{
-  color:#f0f0f3;
-}
-#pvctl{
-  height:44px;
-  background:#070709;
-  border-top-color:var(--studio-line);
-  position:relative;
-}
-#pvctl::before{
-  content:"PROGRAM";
-  position:absolute;
-  left:14px;
-  top:-7px;
-  font:600 7px/1 var(--mono);
-  letter-spacing:.18em;
-  color:#323239;
-  background:#070709;
-  padding-right:8px;
-}
-#pvctl .ib{
-  border-radius:4px;
-}
-
-#time{
-  height:168px;
-  border-top-color:var(--studio-line-strong);
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.01),transparent 30%),
-    #08080a;
-}
-#tlhead{
-  height:30px;
-  background:#09090b;
-  border-bottom-color:var(--studio-line);
-  padding:0 15px;
-}
-#tlhead span:first-child{
-  color:#d4d4d9;
-}
-#track{
-  height:48px;
-  min-height:48px;
-  margin:0 15px;
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.02),transparent),
-    #060607;
-  border-color:rgba(255,255,255,.09);
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.015),
-    0 12px 28px rgba(0,0,0,.15);
-}
-#ph{
-  width:1px;
-  background:#fff;
-  box-shadow:0 0 12px rgba(255,255,255,.5);
-}
-#ph::before{
-  content:"";
-  position:absolute;
-  top:0;
-  left:-4px;
-  width:9px;
-  height:9px;
-  background:#fff;
-  clip-path:polygon(50% 100%,0 0,100% 0);
-}
-#loopband{
-  background:rgba(255,255,255,.055);
-  border-left-color:rgba(255,255,255,.45);
-  border-right-color:rgba(255,255,255,.45);
-}
-#tfoot{
-  height:42px;
-  padding:0 14px;
-  border-top:1px solid var(--studio-line);
-  background:#070709;
-}
-#tfoot .ib{
-  border-radius:4px;
-}
-#tComp{
-  padding:5px 8px;
-  border:1px solid rgba(255,255,255,.06);
-  background:rgba(255,255,255,.018);
-  border-radius:4px;
-}
-
-#status{
-  height:26px;
-  padding:0 14px;
-  background:#050507;
-  border-top-color:rgba(255,255,255,.055);
-  color:#55555e;
-}
-#status b{
-  color:#bfc0c5;
-}
-
-#rail{
-  width:min(430px,94vw);
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.012),transparent 22%),
-    #09090b;
-  box-shadow:-38px 0 100px rgba(0,0,0,.55);
-}
-#railHeader{
-  min-height:52px;
-  background:#09090b;
-}
-#tabs{
-  background:
-    linear-gradient(180deg,#0b0b0d,#09090b);
-}
-#tabs button{
-  font-size:8.5px;
-  letter-spacing:.16em;
-}
-.panel{
-  animation:inspectorIn 220ms cubic-bezier(.2,.8,.2,1);
-}
-@keyframes inspectorIn{
-  from{opacity:0;transform:translateX(8px)}
-  to{opacity:1;transform:translateX(0)}
-}
-
-#renderOverlay{
-  background:
-    radial-gradient(circle at 50% 45%,rgba(255,255,255,.04),transparent 25%),
-    rgba(2,2,3,.82);
-}
-#renderCard{
-  border-color:rgba(255,255,255,.16);
-  box-shadow:
-    0 55px 120px rgba(0,0,0,.7),
-    0 0 80px rgba(255,255,255,.025);
-  animation:renderCardIn 360ms cubic-bezier(.16,.84,.28,1);
-}
-@keyframes renderCardIn{
-  from{opacity:0;transform:translateY(10px) scale(.985)}
-  to{opacity:1;transform:none}
-}
-#renderCardTop h2{
-  letter-spacing:.12em;
-}
-#renderBig{
-  font-size:38px;
-}
-#renderBar{
-  height:6px;
-  background:rgba(255,255,255,.07);
-}
-#renderBar i{
-  box-shadow:0 0 16px rgba(255,255,255,.22);
-}
-.renderMetric{
-  background:rgba(255,255,255,.008);
-}
-.renderMetric b{
-  font-size:12px;
-  color:#f0f0f3;
-}
-
-#modalBox{
-  border-color:rgba(255,255,255,.13);
-  box-shadow:0 45px 120px rgba(0,0,0,.7);
-}
-
-/* Pro-suite motion language */
-#paneCode,
-#panePreview,
-#time,
-#rail{
-  will-change:transform;
-}
-#paneCode .phead button,
-#panePreview .phead button,
-#railHeader button,
-#tabs button,
-#hdr-acts button{
-  transition:
-    color 140ms ease,
-    background 180ms ease,
-    border-color 180ms ease,
-    transform 180ms ease;
-}
-#paneCode .phead button:hover,
-#panePreview .phead button:hover{
-  transform:translateY(-1px);
-}
-
-@media(max-width:1100px){
-  #work{grid-template-columns:minmax(280px,.58fr) 1px minmax(430px,1.42fr)}
-  #stage{padding:28px}
-  .studio-mode{display:none}
-}
-@media(max-width:860px){
-  #hdr{height:52px}
-  .brand{min-width:146px}
-  .brand em{display:none}
-  .proj{min-width:0}
-  .proj #projName{width:120px}
-  .hdr-acts button{
-    min-width:44px;
-    padding:0 7px;
-    font-size:9px;
-  }
-  .hdr-acts button[data-act="new"],
-  .hdr-acts button[data-act="open"],
-  .hdr-acts button[data-act="samples"]{
-    display:none;
-  }
-  #strip{height:22px}
-  #stage{padding:12px}
-  #time{height:150px}
-  #track{height:40px;min-height:40px}
-}
-@media(prefers-reduced-motion:reduce){
-  #canvasFrame,
-  #studio-mode b::after,
-  #stage::before,
-  #renderCard{
-    animation:none !important;
-  }
-}
-
-
-/* Google account UI */
-.account-btn{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  min-width:92px;
-  padding:0 12px;
-  border-left:1px solid rgba(255,255,255,.055);
-  color:#9a9aa2;
-  font:600 8.5px/1 var(--mono);
-  letter-spacing:.12em;
-  transition:background 160ms ease,color 160ms ease;
-}
-.account-btn:hover{
-  background:rgba(255,255,255,.05);
-  color:#fff;
-}
-.account-avatar{
-  width:19px;
-  height:19px;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  overflow:hidden;
-  flex:0 0 auto;
-  border:1px solid rgba(255,255,255,.16);
-  background:#151518;
-  color:#fff;
-  font:600 8px/1 var(--mono);
-}
-.account-btn.signed-in .account-avatar{
-  border-color:rgba(255,255,255,.35);
-  box-shadow:0 0 0 3px rgba(255,255,255,.035);
-}
-.account-pop{
-  position:fixed;
-  top:62px;
-  right:14px;
-  width:332px;
-  z-index:120;
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(10,10,12,.975);
-  box-shadow:0 34px 90px rgba(0,0,0,.62);
-  backdrop-filter:blur(18px);
-  animation:accountPopIn 190ms cubic-bezier(.16,.84,.28,1);
-}
-.account-pop[hidden]{display:none}
-@keyframes accountPopIn{
-  from{opacity:0;transform:translateY(-6px) scale(.985)}
-  to{opacity:1;transform:none}
-}
-.account-pop-head{
-  min-height:44px;
-  display:flex;
-  align-items:center;
-  padding:0 13px;
-  border-bottom:1px solid rgba(255,255,255,.075);
-}
-.account-pop-eyebrow{
-  font:600 8px/1 var(--mono);
-  letter-spacing:.22em;
-  color:#67676f;
-}
-.account-pop-close{
-  margin-left:auto;
-  width:27px;
-  height:27px;
-  border:1px solid transparent;
-  color:#64646c;
-  transition:all 140ms ease;
-}
-.account-pop-close:hover{
-  border-color:rgba(255,255,255,.12);
-  background:rgba(255,255,255,.04);
-  color:#fff;
-}
-.account-pop-body{padding:16px}
-.account-user{
-  display:flex;
-  align-items:center;
-  gap:11px;
-  min-height:54px;
-}
-.account-avatar.large{
-  width:44px;
-  height:44px;
-  border-color:rgba(255,255,255,.18);
-  font-size:13px;
-}
-#accountPhoto{
-  width:44px;
-  height:44px;
-  border-radius:50%;
-  object-fit:cover;
-  border:1px solid rgba(255,255,255,.17);
-}
-.account-user-copy{
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-  gap:5px;
-}
-.account-user-copy strong{
-  color:#efeff2;
-  font:600 12px/1.2 var(--sans);
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-.account-user-copy span{
-  color:#65656d;
-  font:9px/1.3 var(--mono);
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-.account-action{
-  width:100%;
-  min-height:38px;
-  margin-top:12px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  border:1px solid rgba(255,255,255,.13);
-  background:rgba(255,255,255,.026);
-  color:#d8d8dd;
-  font:600 8.5px/1 var(--mono);
-  letter-spacing:.13em;
-  transition:all 160ms ease;
-}
-.account-action:hover:not(:disabled){
-  border-color:rgba(255,255,255,.65);
-  background:rgba(255,255,255,.065);
-  color:#fff;
-  transform:translateY(-1px);
-}
-.account-action.primary{
-  background:#f0f0f2;
-  color:#050506;
-  border-color:#f0f0f2;
-}
-.account-action.primary:hover:not(:disabled){background:#d8d8dc}
-.account-action.ghost{
-  background:transparent;
-  border-color:transparent;
-  color:#777780;
-}
-.account-action.ghost:hover:not(:disabled){
-  border-color:rgba(255,255,255,.1);
-  background:rgba(255,255,255,.03);
-}
-.account-action:disabled{
-  opacity:.48;
-  cursor:not-allowed;
-}
-.google-mark{
-  width:17px;
-  height:17px;
-  display:grid;
-  place-items:center;
-  border-radius:50%;
-  background:#fff;
-  color:#4285f4;
-  font:bold 10px/1 Arial,sans-serif;
-}
-.account-divider{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin:15px 0 9px;
-}
-.account-divider::after{
-  content:"";
-  flex:1;
-  height:1px;
-  background:rgba(255,255,255,.055);
-}
-.account-divider span{
-  font:600 7.5px/1 var(--mono);
-  letter-spacing:.2em;
-  color:#44444b;
-}
-.account-status-row{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:10px 0;
-  border-bottom:1px solid rgba(255,255,255,.045);
-}
-.account-status-row>div{
-  min-width:0;
-  flex:1;
-}
-.account-section-label{
-  display:block;
-  margin-bottom:5px;
-  color:#4f4f57;
-  font:600 7px/1 var(--mono);
-  letter-spacing:.18em;
-}
-.account-status-row strong{
-  display:block;
-  color:#bfc0c5;
-  font:500 9.5px/1 var(--mono);
-}
-.connection-dot{
-  width:6px;
-  height:6px;
-  flex:0 0 auto;
-  border-radius:50%;
-  background:#fff;
-  box-shadow:0 0 0 4px rgba(255,255,255,.06);
-}
-.connection-dot.muted{
-  background:#3c3c43;
-  box-shadow:none;
-}
-.account-coming{
-  padding:3px 5px;
-  border:1px solid rgba(255,255,255,.08);
-  color:#56565e;
-  font-size:7px;
-  letter-spacing:.14em;
-}
-.account-note{
-  margin:11px 1px 0;
-  color:#55555d;
-  font:8.5px/1.55 var(--mono);
-}
-@media(max-width:860px){
-  .account-btn{
-    min-width:42px;
-    padding:0 8px;
-  }
-  .account-btn #accountLabel{display:none}
-  .account-pop{
-    top:58px;
-    right:8px;
-    width:min(332px,calc(100vw - 16px));
-  }
-}</style>
+</style>
 </head>
 <body>
 <div id="grain" aria-hidden="true"></div>
@@ -2518,77 +1403,30 @@ body{
       <input id="projName" value="Untitled" aria-label="Project name" spellcheck="false">
       <span class="vtag num" id="projVer">v1</span>
     </div>
-    <div class="studio-mode" aria-label="Workspace">
-      <span class="studio-mode-k">WORKSPACE</span>
-      <b>EDIT</b>
-      <i>·</i>
-      <span>PROGRAM</span>
-      <i>·</i>
-      <span>TIMELINE</span>
-    </div>
     <div class="hdr-sp"></div>
     <nav class="hdr-acts" aria-label="Project actions">
       <button data-act="new">New</button>
       <button data-act="open">Open</button>
       <button data-act="save">Save<kbd>⌘S</kbd></button>
       <button data-act="samples">Examples</button>
-      <button data-act="panels">Panels</button>
-      <button id="accountBtn" class="account-btn" type="button" aria-haspopup="true" aria-expanded="false">
-        <span class="account-avatar" id="accountAvatar">G</span>
-        <span id="accountLabel">Sign in</span>
-      </button>
       <button data-act="run" class="key">Run<kbd>⌘⏎</kbd></button>
+      <button id="accountBtn" class="auth-mini" type="button" aria-haspopup="true" aria-expanded="false">
+        <span class="auth-dot" id="accountAvatar">G</span><span id="accountLabel">Sign in</span>
+      </button>
       <button data-act="render" class="key">Render</button>
     </nav>
   </header>
 
-  <div id="accountPop" class="account-pop" hidden>
-    <div class="account-pop-head">
-      <span class="account-pop-eyebrow">GOOGLE ACCOUNT</span>
-      <button id="accountClose" class="account-pop-close" type="button" aria-label="Close">✕</button>
+  <div id="accountPop" class="auth-pop" hidden>
+    <div class="auth-pop-head"><b>GOOGLE ACCOUNT</b><button id="accountClose" type="button">✕</button></div>
+    <div class="auth-user">
+      <img id="accountPhoto" alt="" hidden>
+      <span class="auth-avatar-large" id="accountAvatarLarge">G</span>
+      <div><strong id="accountName">Not signed in</strong><span id="accountEmail">Sign in to continue</span></div>
     </div>
-    <div class="account-pop-body">
-      <div class="account-user">
-        <img id="accountPhoto" alt="" hidden>
-        <div class="account-avatar large" id="accountAvatarLarge">G</div>
-        <div class="account-user-copy">
-          <strong id="accountName">Not signed in</strong>
-          <span id="accountEmail">Sign in to your Google account</span>
-        </div>
-      </div>
-
-      <button id="googleLoginBtn" class="account-action primary" type="button">
-        <span class="google-mark">G</span>
-        <span id="googleLoginText">Continue with Google</span>
-      </button>
-
-      <div class="account-divider"><span>ACCOUNT</span></div>
-
-      <div class="account-status-row">
-        <div>
-          <span class="account-section-label">GOOGLE</span>
-          <strong id="googleConnection">Not connected</strong>
-        </div>
-        <span class="connection-dot" id="googleConnectionDot"></span>
-      </div>
-
-      <div class="account-status-row drive-row">
-        <div>
-          <span class="account-section-label">GOOGLE DRIVE</span>
-          <strong id="driveConnection">Not connected</strong>
-        </div>
-        <span class="connection-dot muted" id="driveConnectionDot"></span>
-      </div>
-
-      <button id="driveBtn" class="account-action" type="button" disabled>
-        <span>CONNECT DRIVE</span>
-        <span class="account-coming">NEXT</span>
-      </button>
-
-      <button id="googleLogoutBtn" class="account-action ghost" type="button" hidden>Sign out</button>
-
-      <p class="account-note" id="accountStatus">Authentication is optional. Local projects continue to work without an account.</p>
-    </div>
+    <button id="googleLoginBtn" class="auth-action primary" type="button"><span class="google-mark">G</span><span id="googleLoginText">Continue with Google</span></button>
+    <button id="googleLogoutBtn" class="auth-action" type="button" hidden>Sign out</button>
+    <p id="accountStatus" class="auth-note">Authentication is optional. Local projects continue to work without an account.</p>
   </div>
 
   <div id="strip" role="status" aria-label="Render lifecycle"></div>
@@ -2689,14 +1527,6 @@ body{
 
     <!-- ================= RAIL ================= -->
     <aside class="pane" id="rail" data-m="rail">
-      <div id="railHeader">
-        <div>
-          <div class="eyebrow">INSPECTOR</div>
-          <div class="title">MOTION STUDIO</div>
-        </div>
-        <span class="sp"></span>
-        <button id="railClose" data-act="panelsClose" aria-label="Close inspector">✕</button>
-      </div>
       <nav id="tabs" role="tablist"></nav>
       <div id="railBody">
 
@@ -2922,34 +1752,6 @@ body{
       <span class="rd" id="tComp">1920×1080 · 60 fps · 30 s</span>
     </div>
   </footer>
-
-
-  <div id="renderOverlay" aria-live="polite">
-    <div id="renderCard">
-      <div id="renderCardTop">
-        <div class="live-dot"></div>
-        <div>
-          <div class="eyebrow">EXPORT ENGINE</div>
-          <h2>RENDERING</h2>
-        </div>
-      </div>
-      <div id="renderBig"><span id="ovDone">0</span> <small>/ <span id="ovTotal">0</span> frames</small></div>
-      <div id="renderBar"><i id="ovBar"></i></div>
-      <div id="renderGrid">
-        <div class="renderMetric"><span>Progress</span><b id="ovPct">0.00 %</b></div>
-        <div class="renderMetric"><span>Frame</span><b id="ovFrame">0 · t = 0.000 s</b></div>
-        <div class="renderMetric"><span>Render rate</span><b id="ovRate">—</b></div>
-        <div class="renderMetric"><span>Elapsed</span><b id="ovElapsed">00:00</b></div>
-        <div class="renderMetric"><span>ETA estimate</span><b id="ovEta">—</b></div>
-        <div class="renderMetric"><span>Written so far</span><b id="ovBytes">0 B</b></div>
-        <div class="renderMetric"><span>Output</span><b id="ovOutput">—</b></div>
-        <div class="renderMetric"><span>Composition</span><b id="ovComp">—</b></div>
-      </div>
-      <div id="renderActions">
-        <button class="btn cancel" data-act="cancelRender" id="ovCancel">Cancel render</button>
-      </div>
-    </div>
-  </div>
 
   <div id="status">
     <span><i class="dot" id="stDot"></i><b id="stEngine">starting</b></span>
@@ -6214,7 +5016,6 @@ function initTabs() {
     host.appendChild(b);
   });
   showTab('p-comp');
-  toggleRail(false);
 
   var mt = $('#mtabs');
   mt.innerHTML = '';
@@ -6226,11 +5027,8 @@ function initTabs() {
   });
   showMobile('preview');
 }
-function toggleRail(open) {
-  $('#app').classList.toggle('rail-open', open !== false);
-}
 function showTab(id) {
-  $('#tabs button').forEach(function (b) {
+  $$('#tabs button').forEach(function (b) {
     var on = b.dataset.tab === id;
     b.classList.toggle('on', on);
     b.setAttribute('aria-selected', on ? 'true' : 'false');
@@ -6960,47 +5758,29 @@ function renderStat(p, job) {
   var pct = p.total ? (p.done / p.total) : 0;
   $('#rprog').querySelector('i').style.width = (pct * 100).toFixed(2) + '%';
   var etaMs = (p.msPerFrame && p.done) ? p.msPerFrame * (p.total - p.done) : null;
-  var rate = (p.renderFps || 0).toFixed(2) + ' fps · ' + (p.msPerFrame || 0).toFixed(1) + ' ms/frame';
-  var frameText = p.frame + ' · t = ' + (p.frame / c.fps).toFixed(3) + ' s';
-  var outputText = c.width + '×' + c.height + ' ' + (job.format === 'mp4' ? 'MP4' : job.format === 'webm' ? 'WebM' : 'PNG');
-  var etaText = etaMs === null ? '—' : fmtClock(etaMs / 1000) + ' (ESTIMATE)';
-  var elapsedText = fmtClock((p.elapsedMs || 0) / 1000);
-  var bytesText = fmtBytes(p.bytes || 0);
   var html = '<div class="bignum">' + p.done + ' <small>/ ' + p.total + ' frames</small></div>';
   html += '<dl class="kv">';
   html += '<dt>Progress</dt><dd>' + (pct * 100).toFixed(2) + ' %</dd>';
-  html += '<dt>Frame</dt><dd>' + frameText + '</dd>';
-  html += '<dt>Render rate</dt><dd>' + rate + '</dd>';
-  html += '<dt>Elapsed</dt><dd>' + elapsedText + '</dd>';
-  html += '<dt>ETA estimate</dt><dd>' + etaText + '</dd>';
-  html += '<dt>Written so far</dt><dd>' + bytesText + '</dd>';
-  html += '<dt>Output</dt><dd>' + outputText + '</dd>';
+  html += '<dt>Frame</dt><dd>' + p.frame + ' · t = ' + (p.frame / c.fps).toFixed(3) + ' s</dd>';
+  html += '<dt>Render rate</dt><dd>' + (p.renderFps || 0).toFixed(2) + ' fps · ' + (p.msPerFrame || 0).toFixed(1) + ' ms/frame</dd>';
+  html += '<dt>Elapsed</dt><dd>' + fmtClock((p.elapsedMs || 0) / 1000) + '</dd>';
+  html += '<dt>ETA estimate</dt><dd>' + (etaMs === null ? '—' : fmtClock(etaMs / 1000) + ' (ESTIMATE)') + '</dd>';
+  html += '<dt>Written so far</dt><dd>' + fmtBytes(p.bytes || 0) + '</dd>';
+  html += '<dt>Output</dt><dd>' + c.width + '×' + c.height + ' ' + (job.format === 'mp4' ? 'MP4' : job.format === 'webm' ? 'WebM' : 'PNG') + '</dd>';
   html += '</dl>';
   $('#rstat').innerHTML = html;
-
-  $('#ovDone').textContent = p.done;
-  $('#ovTotal').textContent = p.total;
-  $('#ovPct').textContent = (pct * 100).toFixed(2) + ' %';
-  $('#ovFrame').textContent = frameText;
-  $('#ovRate').textContent = rate;
-  $('#ovElapsed').textContent = elapsedText;
-  $('#ovEta').textContent = etaText;
-  $('#ovBytes').textContent = bytesText;
-  $('#ovOutput').textContent = outputText;
-  $('#ovComp').textContent = c.fps + ' FPS · ' + (c.frameCount / c.fps).toFixed(3) + ' s';
-  $('#ovBar').style.width = (pct * 100).toFixed(2) + '%';
 }
+
 function startRender(job, opts) {
   opts = opts || {};
   if (S.rendering) return Promise.resolve(null);
   S.rendering = true;
   S.renderStart = Date.now();
-  $('#app').classList.add('render-active');
-  toggleRail(false);
   S.activeJob = job;
   $('#cancelBtn').disabled = false;
   $$('[data-act=startRender], [data-act=queueRun]').forEach(function (b) { b.disabled = true; });
   $('#stDot').className = 'dot busy';
+  showTab('p-render');
   clearLog();
   setStage('VALIDATING');
   var prog = $('#rprog');
@@ -7062,7 +5842,6 @@ function finishRender(job, result, opts) {
     setStage('IDLE');
     logLine('cancelled by user at frame ' + (S.lastProgress ? S.lastProgress.frame : 0) + ' — no file was produced', true);
     $('#stMsg').textContent = 'render cancelled — project and diagnostics kept';
-    $('#app').classList.remove('render-active');
     $('#rstat').innerHTML = '<div class="warnbox"><b>Cancelled</b>Stopped after ' +
       (S.lastProgress ? S.lastProgress.done : 0) + ' of ' + job.composition.frameCount +
       ' frames. A partial file would have been misleading, so none was written.</div>';
@@ -7082,7 +5861,6 @@ function finishRender(job, result, opts) {
       'WHY · ' + esc(err.name + ': ' + err.message) + '\n' +
       'HOW TO FIX · ' + esc(err.detail || (err.line ? 'Open line ' + err.line + ' in the editor.' : 'Check the render log above.')) +
       '</div>';
-    $('#app').classList.remove('render-active');
     $('#rstat').innerHTML = h;
     if (err.line || err.stage) showRuntimeError(merge(err, { stage: 'render' }));
     $('#stMsg').textContent = err.name + ': ' + err.message;
@@ -7102,7 +5880,6 @@ function finishRender(job, result, opts) {
   html += '<dt>Codec</dt><dd>' + esc(st.codec) + '</dd>';
   html += '</dl>';
   v.problems.forEach(function (p) { html += '<div class="warnbox"><b>Verification problem</b>' + esc(p) + '</div>'; });
-  $('#app').classList.remove('render-active');
   $('#rstat').innerHTML = html;
   logLine('verification: ' + v.status + (v.problems.length ? ' — ' + v.problems.length + ' problem(s)' : ''), true);
 
@@ -8021,7 +6798,6 @@ function initShortcuts() {
     if (k === 'Escape') {
       if (S.modalOpen) { closeModal(); return; }
       if (!$('#find').classList.contains('hide')) { closeFind(); return; }
-      if ($('#app').classList.contains('rail-open')) { toggleRail(false); return; }
     }
     if (meta && k === 'Enter') { ev.preventDefault(); run(); return; }
     if (meta && k.toLowerCase() === 's') { ev.preventDefault(); saveProject(ev.shiftKey ? 'as' : null); return; }
@@ -8073,7 +6849,7 @@ var DOCS = [
   '</table>',
 
   '<h5>SOURCE METADATA</h5>
-  <p>The first metadata source is the animation itself. Add a block like:</p>
+  <p>The animation source can carry project metadata:</p>
   <pre>/* @meta
 title: Kinetic Isometric Tile Surface
 description: Seamless abstract kinetic tile motion background
@@ -8084,7 +6860,7 @@ ai-generated: no
 creator: Tamasrazim
 language: en
 */</pre>
-  <p>The Metadata panel extracts these fields on Run and before export. Technical fields such as resolution, frame rate, duration, loop state and source hash come from the composition and source automatically.</p>
+  <p>The Metadata panel extracts these fields on Run and before export.</p>
 
   <h5>DETERMINISM</h5>',
   '<p>Any frame must be renderable on its own. The generator is reseeded at the start of every frame from <code>seed + frame</code>, so <code>random()</code> returns the same sequence for frame 900 whether you scrubbed to it, played into it, or exported straight to it. Reading <code>Date.now()</code>, <code>Math.random()</code> or your own accumulating variables breaks that, and the render will not match the preview.</p>',
@@ -8172,11 +6948,9 @@ language: en
    Actions
    ============================================================ */
 var ACTS = {
-  panels: function () { toggleRail(true); },
-  panelsClose: function () { toggleRail(false); },
-  extractMeta: function () { extractMetaFromSource(); },
   copy: copyCode,
   clear: clearCode,
+  extractMeta: function () { extractMetaFromSource(); },
   'new': function () {
     askDiscard('Start a new project?', function () { newProject('sample-starter'); });
   },
@@ -8488,6 +7262,7 @@ else boot();
     accountStatus.textContent = "Google identity connected. Drive storage will use a separate permission.";
   });
 </script>
+
 
 <script>
 (function(){
