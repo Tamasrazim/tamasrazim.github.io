@@ -1,14 +1,38 @@
 # Code → Motion — Tamasrazim
 
-Browser-first deterministic animation rendering project.
+Browser-first deterministic code-driven animation renderer.
 
-## Canonical files
+## Canonical routes
 
-- `renderer.html` — current V2 single-file renderer.
+Project page:
+
+`https://tamasrazim.github.io/projects/code-motion/`
+
+Renderer:
+
+`https://tamasrazim.github.io/projects/code-motion/renderer.html`
+
+The renderer source of truth is:
+
+`projects/code-motion/renderer.html`
+
+## Project files
+
+- `renderer.html` — current single-file renderer.
 - `media-stack.js` — media capability and container/codec descriptors.
 - `legacy-renderer.html` — archived previous renderer build.
+- `manifest.webmanifest` / `sw.js` / `icons/` — PWA support.
 
-The old root URLs are kept as compatibility launchers so existing links do not break.
+## Compatibility URLs
+
+Older inbound links are preserved through:
+
+- `/code-motion-tamasrazim.html`
+- `/code-motion-tamasrazim2.html`
+
+Both compatibility entry points redirect to the current Code → Motion renderer.
+
+The archived `legacy-renderer.html` is not used by normal navigation.
 
 ## Render model
 
@@ -16,25 +40,25 @@ The renderer evaluates animation time from the requested frame:
 
 `time = frame / fps`
 
-Preview playback is separate from export timing. The renderer requests frames explicitly, then uses the browser's available encoding path.
+Preview playback is separate from export timing. Export requests output frames explicitly and uses the browser/device's available encoding capabilities.
 
 ## Output
 
-The application probes the active browser/device for compatible encoding configurations rather than claiming universal codec support.
+The application checks the active browser/device for supported encoding paths instead of claiming universal codec availability.
 
-Current project documentation describes:
+Supported browser-side paths include:
 
-- MP4 / ISO-BMFF with H.264 / AVC where the active browser exposes a compatible WebCodecs configuration.
+- MP4 / ISO-BMFF with H.264 / AVC where a compatible WebCodecs configuration is available.
 - WebM with browser-supported VP8/VP9 paths.
-- Local output generation without a backend, subscription, Electron runtime, or required FFmpeg installation.
+- PNG frame export, including preferred-frame ZIP export.
+- Local generation without a backend, subscription, Electron runtime, or required FFmpeg installation.
 
 ## Development
 
 The project entry page is `index.html`.
 
-The actual renderer source of truth is:
+The separate standalone Animation Renderer application lives at:
 
-`projects/code-motion/renderer.html`
+`/renderer/`
 
-The root `code-motion-tamasrazim.html` URL is retained only as a compatibility entry point.
-
+Do not treat `/renderer/` as an alias for Code → Motion; they are separate applications.
