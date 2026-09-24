@@ -1388,6 +1388,36 @@ select.mini{
 .auth-note{padding:2px 12px 13px;margin:0;font:9px/1.5 var(--mono);color:var(--mut)}
 @media(max-width:860px){.auth-mini{min-width:40px;padding:0 7px}.auth-mini #accountLabel{display:none}.auth-pop{right:8px;width:min(300px,calc(100vw - 16px))}}
 
+/* ---------- preferred PNG frames ---------- */
+#preferredPngFrames{
+  width:100%;
+  min-height:72px;
+  resize:vertical;
+  background:rgba(255,255,255,.032);
+  border:0;
+  border-radius:8px;
+  padding:8px 9px;
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:10.5px;
+  line-height:1.5;
+}
+#preferredPngFrames:focus{
+  outline:none;
+  background:rgba(255,255,255,.075);
+  box-shadow:0 0 0 1px rgba(255,255,255,.2);
+}
+#preferredPngStatus{
+  min-height:17px;
+  margin-top:6px;
+  font-family:var(--mono);
+  font-size:9.5px;
+  color:var(--mut);
+  white-space:pre-wrap;
+}
+#preferredPngStatus.ok{color:#fff}
+#preferredPngStatus.err{color:#fff}
+
 </style>
 </head>
 <body>
@@ -1651,6 +1681,19 @@ select.mini{
               <input id="oFileName" type="text" maxlength="120" autocomplete="off" spellcheck="false" placeholder="Auto from project">
             </div>
             <div class="row"><span class="lb">Output preview</span><span class="val dim num" id="oName" style="font-size:9.5px;word-break:break-all">—</span></div>
+          </div>
+          <div class="sec">
+            <h4>PREFERRED PNG FRAMES</h4>
+            <textarea id="preferredPngFrames" rows="3" spellcheck="false" placeholder="0, 36, 72, 108, 144 or 0-864:36"></textarea>
+            <div class="btn-row">
+              <button class="btn" data-act="pngUseCurrent">Use current frame</button>
+              <button class="btn" data-act="pngUse25">Fill 25 frames</button>
+            </div>
+            <button class="btn solid" data-act="pngDownloadPreferred">Download preferred PNGs</button>
+            <button class="btn" data-act="pngDownloadCurrent">Download current PNG</button>
+            <div id="preferredPngStatus"></div>
+            <p class="note">Enter frame numbers separated by commas. Ranges are supported as <code>0-864:36</code>. Multiple PNGs are downloaded as one ZIP containing individual PNG files.</p>
+          </div>
           </div>
           <div class="sec">
             <h4>PRE-FLIGHT</h4>
@@ -5450,6 +5493,541 @@ var FMT = [
   { label: 'PNG\u00B7ZIP', value: 'zip', title: 'Every frame as a PNG inside one archive' },
   { label: 'PNG\u00B7DIR', value: 'dir', title: 'Every frame written straight to a folder you choose' }
 ];
+
+function parsePreferredPngFrames() {
+  var raw = String($('#preferredPngFrames').value || '').trim();
+  var max = S.comp ? S.comp.frameCount - 1 : 0;
+  if (!raw) return { frames: [Math.max(0, Math.min(max, S.frame || 0))], errors: [] };
+
+  var parts = raw.split(/[\\s,;]+/).filter(Boolean);
+  var set = {};
+  var frames = [];
+  var errors = [];
+
+  function addFrame(v, token) {
+    if (!Number.isFinite(v) || Math.floor(v) !== v) {
+      errors.push('Invalid frame "' + token + '".');
+      return;
+    }
+    if (v < 0 || v > max) {
+      errors.push('Frame ' + v + ' is outside 0…' + max + '.');
+      return;
+    }
+    if (!set[v]) {
+      set[v] = true;
+      frames.push(v);
+    }
+  }
+
+  parts.forEach(function (token) {
+    var m = /^(\\d+)\\-(\\d+)(?::(\\d+))?$/.exec(token);
+
+    if (m) {
+      var a = Number(m[1]);
+      var b = Number(m[2]);
+      var step = Math.max(1, Number(m[3] || 1));
+
+      if (a > b) {
+        var tmp = a;
+        a = b;
+        b = tmp;
+      }
+
+      for (var v = a; v <= b; v += step) {
+        addFrame(v, token);
+        if (frames.length > 500) break;
+      }
+
+      return;
+    }
+
+    if (/^\\d+$/.test(token)) {
+      addFrame(Number(token), token);
+      return;
+    }
+
+    errors.push(
+      'Invalid frame token "' +
+      token +
+      '". Use numbers or ranges like 0-864:36.'
+    );
+  });
+
+  frames.sort(function (a, b) {
+    return a - b;
+  });
+
+  if (frames.length > 500) {
+    errors.push('Maximum 500 preferred frames.');
+    frames = frames.slice(0, 500);
+  }
+
+  return {
+    frames: frames,
+    errors: errors
+  };
+}
+
+function setPreferredPngStatus(msg, kind) {
+  var box = $('#preferredPngStatus');
+  if (!box) return;
+  box.className = kind || '';
+  box.textContent = msg || '';
+}
+
+function useCurrentPreferredFrame() {
+  $('#preferredPngFrames').value = String(S.frame || 0);
+  setPreferredPngStatus(
+    'Frame ' + (S.frame || 0) + ' selected.',
+    'ok'
+  );
+}
+
+function fillPreferred25() {
+  if (!S.comp || !S.comp.frameCount) return;
+
+  var count =
+    Math.min(
+      25,
+      S.comp.frameCount
+    );
+
+  var frames = [];
+  var last = -1;
+
+  for (var i = 0; i < count; i++) {
+    var frame =
+      count === 1
+        ? 0
+        : Math.round(
+            i *
+            (S.comp.frameCount - 1) /
+            (count - 1)
+          );
+
+    if (frame !== last) {
+      frames.push(frame);
+      last = frame;
+    }
+  }
+
+  $('#preferredPngFrames').value =
+    frames.join(', ');
+
+  setPreferredPngStatus(
+    frames.length +
+    ' preferred frames selected.',
+    'ok'
+  );
+}
+
+function preferredPngBlobFromRender(
+  rendered,
+  width,
+  height,
+  bridge
+) {
+  if (!rendered || !rendered.ok) {
+    return Promise.reject(
+      new Error(
+        rendered &&
+        rendered.error
+          ? (
+              (rendered.error.name || 'RenderError') +
+              ': ' +
+              (rendered.error.message || 'Frame render failed.')
+            )
+          : 'Frame render failed.'
+      )
+    );
+  }
+
+  if (rendered.canvas) {
+    return new Promise(function (resolve, reject) {
+      rendered.canvas.toBlob(
+        function (blob) {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(
+              new Error(
+                'The browser could not encode this frame as PNG.'
+              )
+            );
+          }
+        },
+        'image/png'
+      );
+    });
+  }
+
+  if (rendered.bitmap) {
+    if (
+      !bridge.canvas ||
+      bridge.canvas.width !== width ||
+      bridge.canvas.height !== height
+    ) {
+      bridge.canvas =
+        document.createElement('canvas');
+
+      bridge.canvas.width = width;
+      bridge.canvas.height = height;
+
+      bridge.ctx =
+        bridge.canvas.getContext(
+          '2d',
+          { alpha: true }
+        );
+    }
+
+    bridge.ctx.setTransform(
+      1, 0, 0, 1, 0, 0
+    );
+
+    bridge.ctx.clearRect(
+      0, 0,
+      width,
+      height
+    );
+
+    bridge.ctx.drawImage(
+      rendered.bitmap,
+      0,
+      0,
+      width,
+      height
+    );
+
+    if (
+      typeof rendered.bitmap.close ===
+      'function'
+    ) {
+      rendered.bitmap.close();
+    }
+
+    return new Promise(function (resolve, reject) {
+      bridge.canvas.toBlob(
+        function (blob) {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(
+              new Error(
+                'The browser could not encode this frame as PNG.'
+              )
+            );
+          }
+        },
+        'image/png'
+      );
+    });
+  }
+
+  return Promise.reject(
+    new Error(
+      'The render engine returned no canvas or bitmap.'
+    )
+  );
+}
+
+function preferredPngBaseName() {
+  var title =
+    S.meta &&
+    S.meta.title
+      ? S.meta.title
+      : (S.name || 'animation');
+
+  return slugify(title) ||
+    'animation';
+}
+
+function downloadCurrentPng() {
+  return withCompiled().then(function (ok) {
+    if (!ok) return null;
+
+    var c = S.comp;
+
+    var frame =
+      Math.max(
+        0,
+        Math.min(
+          c.frameCount - 1,
+          S.frame || 0
+        )
+      );
+
+    setPreferredPngStatus(
+      'Rendering frame ' +
+      frame +
+      ' at ' +
+      c.width +
+      '×' +
+      c.height +
+      '…'
+    );
+
+    return Engine.api
+      .renderOne(
+        frame,
+        c.width,
+        c.height
+      )
+      .then(function (rendered) {
+        return preferredPngBlobFromRender(
+          rendered,
+          c.width,
+          c.height,
+          { canvas: null, ctx: null }
+        );
+      })
+      .then(function (blob) {
+        var name =
+          preferredPngBaseName() +
+          '_frame_' +
+          pad(frame, 6) +
+          '.png';
+
+        download(
+          blob,
+          name
+        );
+
+        setPreferredPngStatus(
+          'Downloaded frame ' +
+          frame +
+          ' as ' +
+          name,
+          'ok'
+        );
+
+        return blob;
+      })
+      .catch(function (e) {
+        setPreferredPngStatus(
+          'PNG download failed: ' +
+          String(e.message || e),
+          'err'
+        );
+
+        return null;
+      });
+  });
+}
+
+function downloadPreferredPngs() {
+  return withCompiled().then(function (ok) {
+    if (!ok) return null;
+
+    var parsed =
+      parsePreferredPngFrames();
+
+    if (parsed.errors.length) {
+      setPreferredPngStatus(
+        parsed.errors.join('\n'),
+        'err'
+      );
+      return null;
+    }
+
+    var frames =
+      parsed.frames;
+
+    if (!frames.length) {
+      setPreferredPngStatus(
+        'No frames selected.',
+        'err'
+      );
+      return null;
+    }
+
+    if (typeof ENC.ZipWriter !== 'function') {
+      setPreferredPngStatus(
+        'ZIP support is unavailable in this build.',
+        'err'
+      );
+      return null;
+    }
+
+    var c = S.comp;
+
+    var zip =
+      new ENC.ZipWriter();
+
+    var bridge = {
+      canvas: null,
+      ctx: null
+    };
+
+    var prefix =
+      preferredPngBaseName() +
+      '_preferred_';
+
+    var manifestFrames = [];
+
+    var started =
+      Date.now();
+
+    setPreferredPngStatus(
+      'Rendering 0 / ' +
+      frames.length +
+      ' preferred PNGs…'
+    );
+
+    function step(index) {
+      if (index >= frames.length) {
+        var manifest =
+          JSON.stringify(
+            {
+              software:
+                S.meta
+                  ? S.meta.software
+                  : 'Code → Motion — Tamasrazim',
+
+              creator:
+                S.meta
+                  ? S.meta.creator
+                  : '',
+
+              title:
+                S.meta
+                  ? S.meta.title
+                  : S.name,
+
+              sourceSha256:
+                S.hash || null,
+
+              resolution:
+                c.width + 'x' + c.height,
+
+              frameRate:
+                c.fps,
+
+              duration:
+                c.frameCount / c.fps,
+
+              transparent:
+                !!c.transparent,
+
+              preferredFrames:
+                manifestFrames
+            },
+            null,
+            2
+          );
+
+        zip.addBytes(
+          'preferred-frames-manifest.json',
+          ENC.utf8(manifest)
+        );
+
+        var blob =
+          zip.finish();
+
+        download(
+          blob,
+          prefix +
+          'PNG.zip'
+        );
+
+        setPreferredPngStatus(
+          'Downloaded ' +
+          frames.length +
+          ' PNG frames as ' +
+          prefix +
+          'PNG.zip · ' +
+          (
+            (Date.now() - started) /
+            1000
+          ).toFixed(1) +
+          's',
+          'ok'
+        );
+
+        return Promise.resolve(blob);
+      }
+
+      var frame =
+        frames[index];
+
+      return Engine.api
+        .renderOne(
+          frame,
+          c.width,
+          c.height
+        )
+        .then(function (rendered) {
+          return preferredPngBlobFromRender(
+            rendered,
+            c.width,
+            c.height,
+            bridge
+          );
+        })
+        .then(function (blob) {
+          return blob.arrayBuffer().then(function (ab) {
+            var u8 =
+              new Uint8Array(ab);
+
+            var crc =
+              ENC.crc32Final(
+                ENC.crc32(u8)
+              );
+
+            var fileName =
+              prefix +
+              pad(frame, 6) +
+              '.png';
+
+            zip.add(
+              fileName,
+              blob,
+              crc,
+              u8.length
+            );
+
+            manifestFrames.push({
+              frame: frame,
+              time: frame / c.fps,
+              file: fileName,
+              bytes: blob.size
+            });
+
+            setPreferredPngStatus(
+              'Rendering ' +
+              (index + 1) +
+              ' / ' +
+              frames.length +
+              ' · frame ' +
+              frame
+            );
+          });
+        })
+        .then(function () {
+          return new Promise(function (resolve) {
+            setTimeout(
+              function () {
+                resolve(
+                  step(index + 1)
+                );
+              },
+              0
+            );
+          });
+        });
+    }
+
+    return step(0).catch(function (e) {
+      setPreferredPngStatus(
+        'Preferred PNG export failed: ' +
+        String(e.message || e),
+        'err'
+      );
+
+      return null;
+    });
+  });
+}
+
 function initRenderPanel() {
   var dirOk = typeof window.showDirectoryPicker === 'function';
   buildSeg($('#segFmt'), FMT.map(function (f) {
@@ -6980,6 +7558,10 @@ var ACTS = {
     download(new Blob([SELF_SOURCE], { type: 'text/html' }), 'code-motion-tamasrazim.html');
     $('#stMsg').textContent = 'downloaded the application as a single HTML file';
   },
+  pngUseCurrent: useCurrentPreferredFrame,
+  pngUse25: fillPreferred25,
+  pngDownloadCurrent: downloadCurrentPng,
+  pngDownloadPreferred: downloadPreferredPngs,
   recheck: function () { refreshDiag(); $('#stMsg').textContent = 're-checked capabilities'; },
   play: togglePlay,
   stepBack: function () { pause(); setFrame(S.frame - 1); },
