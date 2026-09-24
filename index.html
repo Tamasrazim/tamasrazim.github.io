@@ -358,24 +358,78 @@
     </div>
   </footer>
 
-  <aside class="secret-reveal" id="secretReveal" role="dialog" aria-modal="true" aria-labelledby="secretTitle" aria-describedby="secretBody" hidden>
-    <div class="secret-noise" aria-hidden="true"></div>
-    <div class="secret-signal" aria-hidden="true"><span></span><span></span><span></span></div>
-    <div class="secret-stage">
-      <div class="secret-meta"><span>HIDDEN / ORIGIN</span><span>01—01</span></div>
-      <div class="secret-title-wrap">
-        <p class="secret-kicker">A name can be a place you return to.</p>
-        <h2 class="secret-title" id="secretTitle"><span>TAMASRAZIM</span></h2>
+  <aside class="secret-reveal origin-reveal" id="secretReveal" role="dialog" aria-modal="true" aria-labelledby="secretTitle" aria-describedby="secretBody" hidden>
+    <div class="origin-void" aria-hidden="true">
+      <span class="origin-orbit orbit-one"></span>
+      <span class="origin-orbit orbit-two"></span>
+      <span class="origin-orbit orbit-three"></span>
+      <span class="origin-cross cross-x"></span>
+      <span class="origin-cross cross-y"></span>
+      <span class="origin-scan"></span>
+    </div>
+    <div class="origin-frame">
+      <header class="origin-header">
+        <div>
+          <p class="origin-eyebrow">RESTRICTED / IDENTITY ARCHIVE</p>
+          <p class="origin-path">/ HIDDEN / ORIGIN / 01</p>
+        </div>
+        <button class="origin-close" id="secretClose" type="button" aria-label="Close hidden story"><span>ESC</span><b>×</b></button>
+      </header>
+
+      <div class="origin-main">
+        <section class="origin-intro">
+          <p class="origin-kicker">A name can be a place you return to.</p>
+          <h2 class="origin-title" id="secretTitle"><span>TAMAS</span><i>+</i><span>RAZIM</span></h2>
+          <div class="origin-title-line"><span></span><b>THE HIDDEN ORIGIN</b><span></span></div>
+          <p class="origin-lead">Some names are chosen. Some names are discovered. This one was gathered from pieces of a real story.</p>
+        </section>
+
+        <section class="origin-map" aria-label="How the name was formed">
+          <div class="origin-axis" aria-hidden="true"><span></span><i></i><span></span><i></i><span></span></div>
+
+          <article class="origin-step step-tamanna">
+            <div class="origin-index">01</div>
+            <div class="origin-step-body">
+              <span class="origin-tag">SOURCE NAME</span>
+              <h3>TAMANNA</h3>
+              <p>From Tamanna came <strong>Tama</strong> — the first piece carried forward.</p>
+            </div>
+            <div class="origin-glyph">TA<br>MA</div>
+          </article>
+
+          <article class="origin-step step-razim">
+            <div class="origin-index">02</div>
+            <div class="origin-step-body">
+              <span class="origin-tag">REAL NAME</span>
+              <h3>RAZIM</h3>
+              <p><strong>Razim</strong> came from the real-life name behind the online identity.</p>
+            </div>
+            <div class="origin-glyph">RA<br>ZIM</div>
+          </article>
+
+          <article class="origin-step step-fusion">
+            <div class="origin-index">03</div>
+            <div class="origin-step-body">
+              <span class="origin-tag">MERGE</span>
+              <h3>TAMA + RAZIM</h3>
+              <p>One part came from Tamanna. One part came from Razim. The space between them disappeared.</p>
+            </div>
+            <div class="origin-glyph">T/R</div>
+          </article>
+        </section>
+
+        <section class="origin-final" id="secretBody">
+          <div class="origin-final-label">FINAL IDENTITY</div>
+          <div class="origin-final-name"><span>TAMAS</span><em>RAZIM</em></div>
+          <p class="origin-quote">“Tama, carried from Tamanna.<br>Razim, carried from my real name.<br>Two fragments, one identity — until the space between them disappeared.”</p>
+          <p class="origin-ending">The final name is <strong>Tamasrazim</strong>.<br>Not a replacement for who I am, but a name that remembers where it came from.</p>
+        </section>
       </div>
-      <div class="secret-story" id="secretBody">
-        <p class="secret-lead">Some names are chosen. Some names are discovered. This one was gathered from pieces of a real story.</p>
-        <p><strong>“Tamanna’s Tama.”</strong><br>Tamanna is the person whose name lives inside the first half of it — the source of <em>Tama</em>, the first word carried forward.</p>
-        <p>And <strong>Razim</strong> was never borrowed from somewhere else. It came from my own real-life name: <em>Razim</em>.</p>
-        <p>So one part came from Tamanna, one part came from me, and somewhere between them the pieces stopped feeling separate.</p>
-        <p class="secret-quote">“Tama, carried from Tamanna.<br>Razim, carried from my real name.<br>Two fragments, one identity — until the space between them disappeared.”</p>
-        <p class="secret-close-line">The final name is <strong>Tamasrazim</strong>.<br>Not a replacement for who I am, but a name that remembers where it came from.</p>
-      </div>
-      <button class="secret-close" id="secretClose" type="button" aria-label="Close hidden story">Close <span>×</span></button>
+
+      <footer class="origin-footer">
+        <span>ORIGIN FILE / CLOSED RECORD</span>
+        <span>TAMASRAZIM</span>
+      </footer>
     </div>
   </aside>
 
