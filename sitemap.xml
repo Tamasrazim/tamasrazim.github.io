@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://tamasrazim.github.io/</loc><lastmod>2026-09-22</lastmod></url>
-  <url><loc>https://tamasrazim.github.io/projects/</loc><lastmod>2026-09-22</lastmod></url>
-  <url><loc>https://tamasrazim.github.io/renderer/</loc><lastmod>2026-09-22</lastmod></url>
-  <url><loc>https://tamasrazim.github.io/asset-vault/</loc><lastmod>2026-09-22</lastmod></url>
-  <url><loc>https://tamasrazim.github.io/projects/code-motion/</loc><lastmod>2026-09-22</lastmod></url>
-  <url><loc>https://tamasrazim.github.io/projects/code-motion/renderer.html</loc><lastmod>2026-09-22</lastmod></url>
-  <url><loc>https://tamasrazim.github.io/projects/bncagrocare/</loc><lastmod>2026-09-22</lastmod></url>
-  <url><loc>https://tamasrazim.github.io/projects/bncagrocare/invoice/</loc><lastmod>2026-09-22</lastmod></url>
-  <url><loc>https://tamasrazim.github.io/projects/repo-token-meter/</loc><lastmod>2026-09-22</lastmod></url>
-  <url><loc>https://tamasrazim.github.io/code-motion-tamasrazim.html</loc><lastmod>2026-09-22</lastmod></url>
+  <url><loc>https://tamasrazim.github.io/</loc><lastmod>2026-09-24</lastmod></url>
+  <url><loc>https://tamasrazim.github.io/projects/</loc><lastmod>2026-09-24</lastmod></url>
+
+  <url><loc>https://tamasrazim.github.io/projects/code-motion/</loc><lastmod>2026-09-24</lastmod></url>
+  <url><loc>https://tamasrazim.github.io/projects/code-motion/renderer.html</loc><lastmod>2026-09-24</lastmod></url>
+
+  <url><loc>https://tamasrazim.github.io/renderer/</loc><lastmod>2026-09-24</lastmod></url>
+  <url><loc>https://tamasrazim.github.io/asset-vault/</loc><lastmod>2026-09-24</lastmod></url>
+
+  <url><loc>https://tamasrazim.github.io/projects/bncagrocare/</loc><lastmod>2026-09-24</lastmod></url>
+  <url><loc>https://tamasrazim.github.io/projects/bncagrocare/invoice/</loc><lastmod>2026-09-24</lastmod></url>
+
+  <url><loc>https://tamasrazim.github.io/projects/repo-token-meter/</loc><lastmod>2026-09-24</lastmod></url>
 </urlset>
