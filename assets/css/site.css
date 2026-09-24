@@ -1593,3 +1593,42 @@
   .origin-scan{animation:none}
   .origin-step,.origin-close{transition:none}
 }
+
+/* Hidden Origin: neutralize legacy story selectors on the redesigned archive */
+.origin-reveal .origin-title{
+  display:flex;
+  opacity:1;
+  transform:none;
+}
+.origin-reveal .origin-title span{
+  display:inline;
+  transform:none;
+}
+.origin-reveal .origin-intro,
+.origin-reveal .origin-map,
+.origin-reveal .origin-final,
+.origin-reveal .origin-footer{
+  opacity:1;
+  transform:none;
+}
+.origin-reveal.is-open .origin-title span,
+.origin-reveal.is-closing .origin-title span{
+  animation:none;
+  transform:none;
+}
+.origin-reveal.is-open .origin-title,
+.origin-reveal.is-closing .origin-title,
+.origin-reveal.is-open .origin-intro,
+.origin-reveal.is-closing .origin-intro,
+.origin-reveal.is-open .origin-map,
+.origin-reveal.is-closing .origin-map,
+.origin-reveal.is-open .origin-final,
+.origin-reveal.is-closing .origin-final,
+.origin-reveal.is-open .origin-footer,
+.origin-reveal.is-closing .origin-footer{
+  animation:none;
+}
+.origin-reveal .origin-close{
+  opacity:1;
+  transform:none;
+}
