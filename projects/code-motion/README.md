@@ -1,6 +1,6 @@
 # Code → Motion — Tamasrazim
 
-Browser-first deterministic code-driven animation renderer.
+Browser-first deterministic code-driven animation workspace.
 
 ## Canonical routes
 
@@ -8,20 +8,23 @@ Project page:
 
 `https://tamasrazim.github.io/projects/code-motion/`
 
-Renderer:
+Workspace:
 
-`https://tamasrazim.github.io/projects/code-motion/renderer.html`
+`https://tamasrazim.github.io/projects/code-motion/renderer/`
 
-The renderer source of truth is:
+The workspace entry is:
 
-`projects/code-motion/renderer.html`
+`projects/code-motion/renderer/index.html`
 
 ## Project files
 
-- `renderer.html` — current single-file renderer.
-- `media-stack.js` — media capability and container/codec descriptors.
+- `index.html` — project landing page.
+- `renderer/index.html` — canonical Code → Motion workspace.
+- `renderer/media-stack.js` — media capability and container/codec descriptors.
+- `renderer/manifest.webmanifest` — workspace PWA manifest.
+- `renderer/sw.js` — workspace service worker.
+- `renderer/icons/` — workspace icon assets.
 - `legacy-renderer.html` — archived previous renderer build.
-- `manifest.webmanifest` / `sw.js` / `icons/` — PWA support.
 
 ## Compatibility URLs
 
@@ -30,21 +33,19 @@ Older inbound links are preserved through:
 - `/code-motion-tamasrazim.html`
 - `/code-motion-tamasrazim2.html`
 
-Both compatibility entry points redirect to the current Code → Motion renderer.
+Both redirect to the current Code → Motion workspace.
 
 The archived `legacy-renderer.html` is not used by normal navigation.
 
 ## Render model
 
-The renderer evaluates animation time from the requested frame:
+The workspace evaluates animation time from the requested frame:
 
 `time = frame / fps`
 
 Preview playback is separate from export timing. Export requests output frames explicitly and uses the browser/device's available encoding capabilities.
 
 ## Output
-
-The application checks the active browser/device for supported encoding paths instead of claiming universal codec availability.
 
 Supported browser-side paths include:
 
@@ -55,10 +56,10 @@ Supported browser-side paths include:
 
 ## Development
 
-The project entry page is `index.html`.
+The project page is the entry point for the project.
 
-The separate standalone Animation Renderer application lives at:
+Open the workspace through:
 
-`/renderer/`
+`/projects/code-motion/renderer/`
 
-Do not treat `/renderer/` as an alias for Code → Motion; they are separate applications.
+The workspace is intentionally an `index.html` application directory rather than a standalone `.html` route.
