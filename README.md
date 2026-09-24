@@ -32,7 +32,7 @@ There is no separate production repository that should silently replace the file
 | `/` | Main Tamasrazim personal website |
 | `/projects/` | Canonical public project index |
 | `/projects/code-motion/` | Code → Motion project page |
-| `/projects/code-motion/renderer.html` | Canonical Code → Motion renderer |
+| `/projects/code-motion/renderer/` | Canonical Code → Motion workspace |
 | `/asset-vault/` | Standalone Stock Asset Vault PWA |
 | `/projects/bncagrocare/` | BNC AgroCare public website |
 | `/projects/bncagrocare/invoice/` | BNC AgroCare Invoice Studio |
@@ -52,9 +52,13 @@ These are the routes that should be used for navigation, documentation and the s
 │   ├── index.html                          # Public project hub
 │   ├── code-motion/
 │   │   ├── index.html                      # Project landing page
-│   │   ├── renderer.html                   # Canonical renderer
-│   │   ├── legacy-renderer.html            # Archived renderer build
-│   │   ├── media-stack.js                  # Media descriptors
+│   │   ├── renderer/                       # Canonical Code → Motion workspace
+│   │   │   ├── index.html                    # Workspace entry
+│   │   │   ├── media-stack.js                # Media descriptors
+│   │   │   ├── manifest.webmanifest           # PWA manifest
+│   │   │   ├── sw.js                          # Workspace service worker
+│   │   │   └── icons/                         # Workspace icon
+│   │   └── legacy-renderer.html              # Archived legacy renderer build
 │   │   └── README.md                       # Project documentation
 │   ├── bncagrocare/
 │   │   ├── index.html                      # Public BNC site
@@ -82,18 +86,22 @@ These are the routes that should be used for navigation, documentation and the s
 
 Code → Motion owns its canonical renderer at:
 
-`https://tamasrazim.github.io/projects/code-motion/renderer.html`
+`https://tamasrazim.github.io/projects/code-motion/renderer/`
 
 The project landing page is:
 
 `https://tamasrazim.github.io/projects/code-motion/`
+
+The workspace lives at:
+
+`https://tamasrazim.github.io/projects/code-motion/renderer/`
 
 The root files:
 
 - `/code-motion-tamasrazim.html`
 - `/code-motion-tamasrazim2.html`
 
-are compatibility entry points for older inbound links. They redirect to the current Code → Motion renderer and are not canonical project routes.
+are compatibility entry points for older inbound links. They redirect to the current Code → Motion workspace and are not canonical project routes.
 
 `projects/code-motion/legacy-renderer.html` is archived and should not be used by normal site navigation.
 
