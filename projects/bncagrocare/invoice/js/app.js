@@ -23,6 +23,7 @@ let previewTimer=null;
 let liveWorkbook=null;
 let liveSheet=null;
 let dirty=true;
+let headerTargets={};
 
 const num=v=>{const n=Number(v);return Number.isFinite(n)?n:0};
 const money=v=>num(v).toFixed(2);
@@ -302,9 +303,26 @@ function writeNextToLabel(ws,anchor,value){
 }
 function putHeaderField(ws,labels,value,required=false){
   if(value==null||value==="")return true;
-  const ok=writeNextToLabel(ws,findCell(ws,labels),value);
-  if(!ok&&required)throw Error("Could not place workbook field: "+labels[0]);
-  return ok;
+  const key=labels.join("|");
+  if(headerTargets[key]){
+    const target=cellAt(ws,headerTargets[key].row,headerTargets[key].col);
+    if(target){target.value=value;return true}
+  }
+  const anchor=findCell(ws,labels);
+  if(!anchor){if(required)throw Error("Could not find workbook field: "+labels[0]);return false}
+  const candidates=[
+    cellAt(ws,anchor.row,anchor.col+1),cellAt(ws,anchor.row,anchor.col+2),cellAt(ws,anchor.row,anchor.col+3),
+    cellAt(ws,anchor.row+1,anchor.col),cellAt(ws,anchor.row+1,anchor.col+1),cellAt(ws,anchor.row+1,anchor.col+2),cellAt(ws,anchor.row,anchor.col-1)
+  ];
+  for(const raw of candidates){
+    const target=raw?.master||raw;
+    if(!target||target.address===anchor.address)continue;
+    if(!textOfCell(target)){
+      target.value=value;headerTargets[key]={row:target.row,col:target.col};return true;
+    }
+  }
+  if(required)throw Error("Could not place workbook field: "+labels[0]);
+  return false;
 }
 
 function findStRow(ws){
@@ -363,6 +381,7 @@ async function ensureLiveWorkbook(){
     setStatus("Loading BNCFINAL.xlsx…");
     const response=await fetch(TEMPLATE,{cache:"no-store"});
     if(!response.ok)throw Error("BNCFINAL.xlsx unavailable ("+response.status+")");
+    headerTargets={};
     liveWorkbook=new ExcelJS.Workbook();
     await liveWorkbook.xlsx.load(await response.arrayBuffer());
     liveSheet=findInvoiceSheet(liveWorkbook);
@@ -572,7 +591,7 @@ function reset(){
   renderProducts();
   saveDraft();
   $("#xlsxState").textContent="Ready";
-  liveWorkbook=null;liveSheet=null;buildPromise=null;lastBuffer=null;dirty=true;
+  liveWorkbook=null;liveSheet=null;buildPromise=null;lastBuffer=null;headerTargets={};dirty=true;
   setStatus("New invoice");
 }
 function saveInvoice(){
@@ -672,9 +691,10 @@ install();
   $("#saveBtn").onclick=saveInvoice;
   $("#previewBtn").onclick=()=>renderPreview();
   $("#downloadBtn").onclick=()=>downloadXlsx();
-  $("#jsonOutBtn").onclick=exportJson;
-  $("#jsonInBtn").onclick=()=>$("#jsonFile").click();
-  $("#jsonFile").onchange=e=>{
+  const jsonOut=$("#jsonOutBtn"),jsonIn=$("#jsonInBtn"),jsonFile=$("#jsonFile");
+  if(jsonOut)jsonOut.onclick=exportJson;
+  if(jsonIn&&jsonFile)jsonIn.onclick=()=>jsonFile.click();
+  if(jsonFile)jsonFile.onchange=e=>{
     const file=e.target.files?.[0];
     if(file)importJson(file);
     e.target.value="";
