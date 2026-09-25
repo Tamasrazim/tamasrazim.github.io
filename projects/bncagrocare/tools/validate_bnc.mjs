@@ -23,14 +23,16 @@ const js=read("invoice/js/app.js");
 must(js.includes("BNCFINAL.xlsx"),"Invoice Studio uses BNCFINAL.xlsx");
 must(js.includes("addProductRow.js")===false,"row rule remains external in reference/addProductRow.js");
 must(js.includes("ROWS_PER_SIDE=4"),"base invoice geometry is 4 rows per side");
-must(js.includes("insertProductRow"),"Invoice Studio applies the row insertion rule");
+must(js.includes("BNCInsertProductRow"),"Invoice Studio uses canonical row engine");
 must(js.includes("downloadXlsx"),"XLSX download path exists");
+must(js.includes("getRow(r).getCell"),"workbook cells are accessed through explicit rows");
 must(!js.includes("PDFDocument")&&!js.includes("pdf-lib"),"no PDF generation code");
 execFileSync(process.execPath,["--check",root+"/invoice/js/app.js"],{stdio:"inherit"});
 
 const sw=read("invoice/sw.js");
 must(sw.includes("EXCEL_JS"),"service worker caches ExcelJS");
 must(sw.includes("BNCFINAL.xlsx"),"service worker caches BNCFINAL.xlsx");
+must(sw.includes("addProductRow.js?v=52"),"service worker caches the row engine");
 must(!sw.includes("pdf-lib")&&!sw.includes("invoice.pdf"),"service worker has no PDF dependency");
 execFileSync(process.execPath,["--check",root+"/invoice/sw.js"],{stdio:"inherit"});
 
