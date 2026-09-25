@@ -104,17 +104,136 @@ function updateSummary(){
  $("#summary").innerHTML='<div class="sum"><span>Cartons</span><strong>'+t.cartons+'</strong></div><div class="sum"><span>Gross taka</span><strong>'+money(t.total)+'</strong></div><div class="sum"><span>Commission</span><strong>'+money(t.commission)+'</strong></div><div class="sum final"><span>Final total</span><strong>'+money(t.final)+'</strong></div>';
 }
 
-function paperRow(p,sl){
- return '<div class="tr"><span>'+(hasData(p)?String(sl).padStart(2,"0"):"")+'</span><span title="'+safe(p.name)+'">'+safe(p.name)+'</span><span>'+safe(p.pack)+'</span><span>'+safe(p.ctn)+'</span><span>'+safe(p.rate?money(p.rate):"")+'</span><span>'+(p.ctn&&p.rate?money(num(p.ctn)*num(p.rate)):"")+'</span></div>';
+function colLetter(n){
+ let out="";
+ while(n>0){const m=(n-1)%26;out=String.fromCharCode(65+m)+out;n=Math.floor((n-1)/26)}
+ return out;
 }
-function paperCol(rows,side,totalRows){
- return '<div class="paperTable"><div class="th"><span>SL</span><span>PRODUCT</span><span>PACK</span><span>CTN</span><span>RATE</span><span>AMOUNT</span></div>'+rows.map((p,i)=>paperRow(p,slFor(i,side,totalRows))).join("")+'</div>';
+function excelColorToCss(v,fallback="#111"){
+ if(!v)return fallback;
+ if(typeof v==="string")return v.startsWith("#")?v:"#"+v.slice(-6);
+ if(v.argb){
+  const a=String(v.argb);
+  return a.length>=8?"#"+a.slice(-6):"#"+a;
+ }
+ if(v.rgb)return String(v.rgb).startsWith("#")?v.rgb:"#"+String(v.rgb).slice(-6);
+ return fallback;
 }
-function renderPreview(){
- const totalRows=state.rows.length,t=totals();
- $("#sheetPreview").innerHTML='<div class="a4Sheet"><div class="paperHeader"><div><div class="paperBrand">BNC AGROCARE</div><div class="paperTitle">INVOICE · WORKBOOK 01</div></div><div class="paperMeta">REF '+safe(state.ref)+'<br>NO. '+safe(state.invoiceNo)+'<br>'+safe(displayDate(state.date))+'</div></div><div class="metaGrid"><div class="metaBox"><small>TRADER / DEALER</small><strong>'+safe(state.trader)+'</strong></div><div class="metaBox"><small>BUYER</small><strong>'+safe(state.buyer)+'</strong></div><div class="metaBox"><small>ADDRESS</small><strong>'+safe(state.address)+'</strong></div><div class="metaBox"><small>MOBILE</small><strong>'+safe(state.mobile)+'</strong></div></div><div class="paperTables">'+paperCol(state.rows.map(r=>r.left),"left",totalRows)+paperCol(state.rows.map(r=>r.right),"right",totalRows)+'</div><div class="paperSummary"><div class="paperTotal"><span>TOTAL CARTON</span><strong>'+t.cartons+'</strong></div><div class="paperTotal"><span>GROSS TAKA</span><strong>'+money(t.total)+'</strong></div><div class="paperTotal"><span>COMMISSION</span><strong>'+money(t.commission)+'</strong></div><div class="paperTotal"><span>TOTAL AMOUNT</span><strong>'+money(t.final)+'</strong></div></div><div class="paperFoot"><span>Source: BNCFINAL.xlsx · Sheet 01</span><span>Export: XLSX only</span></div></div>';
+function borderCss(side,defaultColor="#222"){
+ if(!side)return"";
+ const style=String(side.style||"");
+ if(!style)return"";
+ const map={thin:"1px",medium:"2px",thick:"3px",double:"3px",hair:"1px",dotted:"1px",dashed:"1px"};
+ return (map[style]||"1px")+" "+(style==="double"?"double":"solid")+" "+excelColorToCss(side.color,defaultColor);
 }
-
+function cellDisplayValue(cell){
+ const v=cell?.value;
+ if(v==null)return"";
+ if(typeof v==="string"||typeof v==="number")return String(v);
+ if(v instanceof Date)return displayDate(v.toISOString().slice(0,10));
+ if(v.richText)return v.richText.map(x=>x.text||"").join("");
+ if(v.result!=null)return String(v.result);
+ if(v.text)return String(v.text);
+ if(v.formula)return"="+v.formula;
+ return"";
+}
+function buildWorkbookPreviewSheet(ws){
+ const host=$("#sheetPreview");
+ if(!host)return;
+ const maxCol=Math.max(12,ws.columnCount||12);
+ const maxRow=Math.max(1,ws.rowCount||1);
+ const stage=document.createElement("div");
+ stage.className="workbookSheet";
+ const inner=document.createElement("div");
+ inner.className="workbookGrid";
+ const widths=[];
+ for(let c=1;c<=maxCol;c++){
+  const w=Number(ws.getColumn(c).width)||10;
+  widths.push(Math.max(28,Math.min(260,Math.round(w*7.2)));
+ }
+ const heights=[];
+ for(let r=1;r<=maxRow;r++){
+  const h=Number(ws.getRow(r).height)||15;
+  heights.push(Math.max(12,Math.min(120,Math.round(h*1.333)));
+ }
+ const gridX=widths.reduce((a,b)=>a+b,0);
+ const gridY=heights.reduce((a,b)=>a+b,0);
+ inner.style.width=gridX+"px";
+ inner.style.height=gridY+"px";
+ const mergeMap=new Map();
+ const merges=ws.model?.merges||[];
+ merges.forEach(ref=>{
+  const m=String(ref).match(/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/);
+  if(!m)return;
+  const parseCol=x=>{let n=0;for(const ch of x)n=n*26+ch.charCodeAt(0)-64;return n};
+  const c1=parseCol(m[1]),r1=Number(m[2]),c2=parseCol(m[3]),r2=Number(m[4]);
+  mergeMap.set(r1+"-"+c1,{r1,c1,r2,c2});
+ });
+ for(let r=1;r<=maxRow;r++){
+  let x=0;
+  for(let c=1;c<=maxCol;c++){
+   const cell=ws.getRow(r).getCell(c);
+   const merge=mergeMap.get(r+"-"+c);
+   if(cell.isMerged&&!merge) { x+=widths[c-1]; continue; }
+   const el=document.createElement("div");
+   el.className="xlsxCell";
+   el.dataset.address=colLetter(c)+r;
+   el.textContent=cellDisplayValue(cell);
+   el.style.left=x+"px";
+   el.style.top=heights.slice(0,r-1).reduce((a,b)=>a+b,0)+"px";
+   let cw=widths[c-1],ch=heights[r-1],spanC=1,spanR=1;
+   if(merge){
+    spanC=merge.c2-merge.c1+1;spanR=merge.r2-merge.r1+1;
+    cw=widths.slice(merge.c1-1,merge.c2).reduce((a,b)=>a+b,0);
+    ch=heights.slice(merge.r1-1,merge.r2).reduce((a,b)=>a+b,0);
+   }
+   el.style.width=cw+"px";el.style.height=ch+"px";
+   const st=cell.style||{};
+   if(st.font){
+    if(st.font.name)el.style.fontFamily=st.font.name+",Arial,sans-serif";
+    if(st.font.sz)el.style.fontSize=Number(st.font.sz)+"px";
+    if(st.font.bold)el.style.fontWeight="700";
+    if(st.font.italic)el.style.fontStyle="italic";
+    if(st.font.underline)el.style.textDecoration="underline";
+    if(st.font.color)el.style.color=excelColorToCss(st.font.color,"#111");
+   }
+   if(st.fill&&st.fill.fgColor)el.style.background=excelColorToCss(st.fill.fgColor,"transparent");
+   const align=st.alignment||{};
+   el.style.textAlign=align.horizontal||"left";
+   el.style.verticalAlign=align.vertical||"middle";
+   el.style.whiteSpace=align.wrapText?"pre-wrap":"nowrap";
+   el.style.overflow="hidden";
+   if(align.indent)el.style.paddingLeft=(Number(align.indent)*8+3)+"px";
+   else el.style.paddingLeft="3px";
+   el.style.paddingRight="3px";
+   const bd=st.border||{};
+   el.style.borderTop=borderCss(bd.top);
+   el.style.borderRight=borderCss(bd.right);
+   el.style.borderBottom=borderCss(bd.bottom);
+   el.style.borderLeft=borderCss(bd.left);
+   inner.append(el);
+   x+=widths[c-1];
+  }
+ }
+ stage.append(inner);
+ host.replaceChildren(stage);
+ host.closest(".previewPanel")?.querySelector(".panelHead b")?.replaceChildren(document.createTextNode("LIVE XLSX"));
+}
+async function renderPreview(){
+ const host=$("#sheetPreview");
+ if(!host)return;
+ host.innerHTML='<div class="emptyPage"><strong>Rendering workbook…</strong><span>Using the same edited XLSX that will be downloaded.</span></div>';
+ try{
+  const buffer=await buildWorkbook();
+  const wb=new ExcelJS.Workbook();
+  await wb.xlsx.load(buffer);
+  const ws=findInvoiceSheet(wb);
+  if(!ws)throw Error("Preview sheet 01 unavailable");
+  buildWorkbookPreviewSheet(ws);
+ }catch(e){
+  host.innerHTML='<div class="emptyPage"><strong>Preview unavailable</strong><span>'+safe(e?.message||"Unable to render workbook")+'</span></div>';
+ }
+}
 function findInvoiceSheet(workbook){
  return workbook.getWorksheet("01")||workbook.worksheets[0]
 }
