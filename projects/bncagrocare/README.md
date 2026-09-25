@@ -1,29 +1,24 @@
-# BNC AgroCare
+# BNC Agro Care
 
-A clean rebuild of the BNC AgroCare project using the business data preserved in the `bncagrocare` repository.
+Canonical BNC project inside the Tamasrazim main repository.
 
-## Data preserved from the BNC repository
+## Project rules
 
-- `reference/BNCFINAL.xlsx` — invoice workbook master.
-- `reference/products.js` — current product and pack-size catalogue.
-- `reference/product name.txt` — raw product-name reference.
-- `reference/product name and pack size.txt` — raw pack-size reference.
-- `reference/addProductRow.js` — invoice row-expansion engine.
-- `invoice.pdf` — immutable document archive.
-- Sample invoice workbooks and BNC product photographs.
-
-## Rebuilt workflow
-
-**BNC site → Invoice Studio → edited BNCFINAL.xlsx → live workbook preview → XLSX download**
-
-The Studio never modifies the repository master workbook and does not generate PDF.
+1. reference/BNCFINAL.xlsx is the invoice workbook source of truth.
+2. reference/addProductRow.js owns the product-row insertion rule.
+3. reference/products.js owns the shared product and pack-size catalogue used by both the public site and Invoice Studio.
+4. reference/product name.txt and reference/product name and pack size.txt are preserved raw references.
+5. FB_IMG_1789811599210.jpg is the BNC logo image.
+6. FB_IMG_1789811611633.jpg is the BNC cover image.
+7. Invoice Studio edits a live in-memory XLSX workbook, shows that current workbook in the preview, and downloads the latest edited XLSX.
+8. Adding a product inserts a physical worksheet row immediately above the ST subtotal row, copies formatting from the row above, clears A:L, and rebalances SL numbering.
+9. The repository master workbook is never overwritten by the Studio.
+10. PDF generation is not part of the Studio workflow. invoice.pdf, where present, is an archive/reference file only.
+11. This main repository is the canonical source. The Tamasrazim/bncagrocare repository is the backup/mirror.
 
 ## Structure
 
-`index.html` is the public BNC AgroCare page.
-
-`invoice/` is the local-first Invoice Studio.
-
-`reference/` contains canonical business data.
-
-`tools/` contains project validation.
+- index.html — public BNC Agro Care website.
+- invoice/ — live XLSX Invoice Studio.
+- reference/ — canonical workbook, row rule, product catalogue and raw references.
+- tools/ — project validation.
