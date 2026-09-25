@@ -69,9 +69,13 @@ function bindFields(){
     el.addEventListener("input",()=>{
       const k=el.dataset.k;
       state[k]=k==="commission"?Math.max(0,num(el.value)):el.value;
-      invalidate();
+      ensureLiveWorkbook().then(()=>{
+        applyHeaderEditsToLive();
+        recalcLiveFormulas();
+        dirty=true;lastBuffer=null;
+        schedulePreview();
+      }).catch(console.error);
       updateSummary();
-      schedulePreview();
       saveDraft();
     });
   });
@@ -135,9 +139,14 @@ function buildSide(row,rowIndex,side,totalRows){
     input.addEventListener("input",e=>{
       row[key]=(key==="ctn"||key==="rate")?Math.max(0,num(e.target.value)):e.target.value;
       if(key==="name")refreshPackList(rowIndex,side);
-      invalidate();
+      ensureLiveWorkbook().then(()=>{
+        writeLine(liveSheet,rowIndex,state.rows.length,side,row);
+        rebalanceSL(liveSheet,state.rows.length);
+        recalcLiveFormulas();
+        dirty=true;lastBuffer=null;
+        schedulePreview();
+      }).catch(console.error);
       updateSummary();
-      schedulePreview();
       saveDraft();
     });
     lab.append(input);
@@ -201,20 +210,24 @@ function renderProducts(){
   schedulePreview();
 }
 
-function addProductRow(){
-  if(state.rows.length>=MAX_ROWS_PER_SIDE){
-    setStatus("Maximum 50 rows per side");
-    return;
-  }
-  state.rows.push(blankRow());
-  renderProducts();
-  saveDraft();
-  setStatus("Product row added");
-  const input=$("#products .pairRow:last-child input");
-  if(input)input.focus();
+
+async function addProductRow(){
+  if(state.rows.length>=MAX_ROWS_PER_SIDE){setStatus("Maximum 50 rows per side");return}
+  try{
+    await ensureLiveWorkbook();
+    window.BNCInsertProductRow(liveSheet);
+    state.rows.push(blankRow());
+    rebalanceSL(liveSheet,state.rows.length);
+    recalcLiveFormulas();
+    dirty=true;lastBuffer=null;
+    renderProducts();
+    saveDraft();
+    buildWorkbookPreviewSheet(liveSheet);
+    setStatus("Live XLSX row added");
+  }catch(error){console.error(error);setStatus("Could not add row");alert(error.message||"Could not add product row")}
 }
 
-function updateSummary(){
+function updateSummary()function updateSummary(){
   const t=totals();
   $("#summary").innerHTML=
     '<div class="sum"><span>Cartons</span><strong>'+t.cartons+"</strong></div>"+
@@ -327,67 +340,79 @@ function findInvoiceSheet(wb){
   return wb.getWorksheet("01")||wb.worksheets[0];
 }
 
-async function buildWorkbook(){
+
+async function ensureLiveWorkbook(){
+  if(liveWorkbook&&liveSheet)return liveWorkbook;
   if(buildPromise)return buildPromise;
-
   buildPromise=(async()=>{
-    $("#previewBtn").disabled=true;
-    $("#downloadBtn").disabled=true;
-    $("#xlsxState").textContent="Preparing...";
-    setStatus("Building edited XLSX...");
-    try{
-      if(!window.ExcelJS?.Workbook)throw Error("ExcelJS unavailable");
-      if(typeof window.BNCInsertProductRow!=="function")throw Error("Invoice row engine unavailable");
-
-      normalize();
-      const wb=new ExcelJS.Workbook();
-      const response=await fetch(TEMPLATE,{cache:"no-store"});
-      if(!response.ok)throw Error("BNCFINAL.xlsx unavailable ("+response.status+")");
-      const source=await response.arrayBuffer();
-      await wb.xlsx.load(source);
-
-      const ws=findInvoiceSheet(wb);
-      if(!ws)throw Error("Invoice sheet 01 is unavailable");
-
-      putHeaderField(ws,["reference","ref"],state.ref);
-      putHeaderField(ws,["invoice no","invoice number","invoice"],state.invoiceNo,true);
-      putHeaderField(ws,["date"],displayDate(state.date),true);
-      putHeaderField(ws,["trader / dealer","trader/dealer","trader","dealer"],state.trader);
-      putHeaderField(ws,["buyer"],state.buyer);
-      putHeaderField(ws,["address"],state.address);
-      putHeaderField(ws,["mobile","phone"],state.mobile);
-      putHeaderField(ws,["commission %","commission"],state.commission);
-
-      fillRows(ws);
-
-      if(wb.calcProperties){
-        wb.calcProperties.fullCalcOnLoad=true;
-        wb.calcProperties.forceFullCalc=true;
-      }
-
-      const out=await wb.xlsx.writeBuffer();
-      if(!out||!out.byteLength)throw Error("ExcelJS produced an empty workbook");
-      lastBuffer=out;
-      $("#xlsxState").textContent="XLSX ready";
-      setStatus("Edited workbook ready");
-      return out;
-    }catch(error){
-      lastBuffer=null;
-      $("#xlsxState").textContent="Failed";
-      setStatus("XLSX error");
-      console.error("Invoice Studio:",error);
-      throw error;
-    }finally{
-      $("#previewBtn").disabled=false;
-      $("#downloadBtn").disabled=false;
+    if(!window.ExcelJS?.Workbook)throw Error("ExcelJS unavailable");
+    setStatus("Loading BNCFINAL.xlsx…");
+    const response=await fetch(TEMPLATE,{cache:"no-store"});
+    if(!response.ok)throw Error("BNCFINAL.xlsx unavailable ("+response.status+")");
+    liveWorkbook=new ExcelJS.Workbook();
+    await liveWorkbook.xlsx.load(await response.arrayBuffer());
+    liveSheet=findInvoiceSheet(liveWorkbook);
+    if(!liveSheet)throw Error("Invoice sheet 01 is unavailable");
+    putHeaderField(liveSheet,["reference","ref"],state.ref);
+    putHeaderField(liveSheet,["invoice no","invoice number","invoice"],state.invoiceNo,true);
+    putHeaderField(liveSheet,["date"],displayDate(state.date),true);
+    putHeaderField(liveSheet,["trader / dealer","trader/dealer","trader","dealer"],state.trader);
+    putHeaderField(liveSheet,["buyer"],state.buyer);
+    putHeaderField(liveSheet,["address"],state.address);
+    putHeaderField(liveSheet,["mobile","phone"],state.mobile);
+    putHeaderField(liveSheet,["commission %","commission"],state.commission);
+    while(countInvoiceRows(liveSheet)<state.rows.length)window.BNCInsertProductRow(liveSheet);
+    const totalRows=state.rows.length;
+    for(let i=0;i<totalRows;i++){
+      writeLine(liveSheet,i,totalRows,"left",state.rows[i].left);
+      writeLine(liveSheet,i,totalRows,"right",state.rows[i].right);
     }
+    rebalanceSL(liveSheet,totalRows);
+    recalcLiveFormulas();
+    setStatus("Live XLSX loaded");
+    return liveWorkbook;
   })();
-
-  try{return await buildPromise}
-  finally{buildPromise=null}
+  try{return await buildPromise}finally{buildPromise=null}
 }
 
-function excelColor(v,fallback){
+function recalcLiveFormulas(){
+  if(!liveSheet)return;
+  liveSheet.eachRow(row=>row.eachCell({includeEmpty:false},cell=>{
+    if(!cell.formula)return;
+    const m=String(cell.formula).match(/^SUM\(([A-Z]+)(\d+):([A-Z]+)(\d+)\)$/i);
+    if(!m||m[1].toUpperCase()!==m[3].toUpperCase())return;
+    let total=0;
+    for(let r=Number(m[2]);r<=Number(m[4]);r++)total+=num(liveSheet.getRow(r).getCell(cell.column).value);
+    cell.value={formula:cell.formula,result:total};
+  }));
+}
+
+async function buildWorkbook(){
+  await ensureLiveWorkbook();
+  applyHeaderEditsToLive();
+  recalcLiveFormulas();
+  if(liveWorkbook.calcProperties){
+    liveWorkbook.calcProperties.fullCalcOnLoad=true;
+    liveWorkbook.calcProperties.forceFullCalc=true;
+  }
+  const out=await liveWorkbook.xlsx.writeBuffer();
+  lastBuffer=out;
+  return out;
+}
+
+function applyHeaderEditsToLive(){
+  if(!liveSheet)return;
+  putHeaderField(liveSheet,["reference","ref"],state.ref);
+  putHeaderField(liveSheet,["invoice no","invoice number","invoice"],state.invoiceNo);
+  putHeaderField(liveSheet,["date"],displayDate(state.date));
+  putHeaderField(liveSheet,["trader / dealer","trader/dealer","trader","dealer"],state.trader);
+  putHeaderField(liveSheet,["buyer"],state.buyer);
+  putHeaderField(liveSheet,["address"],state.address);
+  putHeaderField(liveSheet,["mobile","phone"],state.mobile);
+  putHeaderField(liveSheet,["commission %","commission"],state.commission);
+}
+
+function excelColor(function excelColor(v,fallback){
   if(!v)return fallback;
   if(v.argb)return"#"+String(v.argb).slice(-6);
   if(v.rgb)return"#"+String(v.rgb).slice(-6);
@@ -414,153 +439,108 @@ function columnNumberFromLetters(value){
   for(const ch of value)n=n*26+ch.charCodeAt(0)-64;
   return n;
 }
+
 function buildWorkbookPreviewSheet(ws){
   const host=$("#sheetPreview");
   if(!host)return;
-
-  const maxCol=Math.max(12,ws.columnCount||12);
-  const maxRow=Math.max(1,ws.rowCount||1);
-  const widths=[];
-  const heights=[];
-  const tops=[0];
-
-  for(let c=1;c<=maxCol;c++){
-    const width=Number(ws.getColumn(c).width)||10;
-    widths.push(Math.max(28,Math.min(280,Math.round(width*7.2))));
-  }
-  for(let r=1;r<=maxRow;r++){
-    const height=Number(ws.getRow(r).height)||15;
-    heights.push(Math.max(12,Math.min(120,Math.round(height*1.333))));
-    tops.push(tops[tops.length-1]+heights[r-1]);
-  }
-
-  const stage=document.createElement("div");
-  stage.className="workbookSheet";
-  const grid=document.createElement("div");
-  grid.className="workbookGrid";
-  grid.style.width=widths.reduce((a,b)=>a+b,0)+"px";
-  grid.style.height=heights.reduce((a,b)=>a+b,0)+"px";
-
-  const merges=Array.isArray(ws.model?.merges)?ws.model.merges:[];
-  const mergeMap=new Map();
-  for(const ref of merges){
-    const m=String(ref).match(/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/);
-    if(!m)continue;
-    const c1=columnNumberFromLetters(m[1]),r1=Number(m[2]);
-    const c2=columnNumberFromLetters(m[3]),r2=Number(m[4]);
-    mergeMap.set(r1+":"+c1,{r1,c1,r2,c2});
-  }
-
-  const left=[];
-  for(let c=1;c<=maxCol;c++){
-    left[c]=(left[c-1]||0)+widths[c-1];
-  }
-
-  for(let r=1;r<=maxRow;r++){
-    for(let c=1;c<=maxCol;c++){
-      const cell=ws.getRow(r).getCell(c);
-      const merge=mergeMap.get(r+":"+c);
-      if(cell.isMerged&&!merge)continue;
-
-      const el=document.createElement("div");
-      el.className="xlsxCell";
-      el.dataset.address=(function(n){let out="";while(n){const m=(n-1)%26;out=String.fromCharCode(65+m)+out;n=Math.floor((n-1)/26)}return out})(c)+r;
-      el.textContent=displayWorkbookValue(cell);
-
-      let width=widths[c-1],height=heights[r-1];
-      if(merge){
-        width=widths.slice(merge.c1-1,merge.c2).reduce((a,b)=>a+b,0);
-        height=heights.slice(merge.r1-1,merge.r2).reduce((a,b)=>a+b,0);
+  const maxCol=Math.max(12,ws.columnCount||12),maxRow=Math.max(1,ws.rowCount||1);
+  const widths=[],heights=[],x=[0],y=[0];
+  for(let c=1;c<=maxCol;c++){widths[c-1]=Math.max(28,Math.min(280,Math.round((Number(ws.getColumn(c).width)||10)*7.2)));x.push(x[x.length-1]+widths[c-1])}
+  for(let r=1;r<=maxRow;r++){heights[r-1]=Math.max(12,Math.min(120,Math.round((Number(ws.getRow(r).height)||15)*1.333)));y.push(y[y.length-1]+heights[r-1])}
+  const stage=document.createElement("div");stage.className="workbookSheet";
+  const grid=document.createElement("div");grid.className="workbookGrid";
+  grid.style.width=x[x.length-1]+"px";grid.style.height=y[y.length-1]+"px";
+  const merges=(Array.isArray(ws.model?.merges)?ws.model.merges:[]).map(ref=>{
+    const m=String(ref).match(/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/);if(!m)return null;
+    return{r1:Number(m[2]),c1:columnNumberFromLetters(m[1]),r2:Number(m[4]),c2:columnNumberFromLetters(m[3])};
+  }).filter(Boolean);
+  const covered=new Set();
+  merges.forEach(m=>{for(let r=m.r1;r<=m.r2;r++)for(let c=m.c1;c<=m.c2;c++)if(r!==m.r1||c!==m.c1)covered.add(r+":"+c)});
+  for(let r=1;r<=maxRow;r++)for(let c=1;c<=maxCol;c++){
+    if(covered.has(r+":"+c))continue;
+    const cell=ws.getRow(r).getCell(c);
+    const merge=merges.find(m=>r>=m.r1&&r<=m.r2&&c>=m.c1&&c<=m.c2);
+    const r2=merge?merge.r2:r,c2=merge?merge.c2:c;
+    const el=document.createElement("div");
+    el.className="xlsxCell";
+    el.contentEditable="true";
+    el.spellcheck=false;
+    el.dataset.row=String(r);el.dataset.col=String(c);el.dataset.address=colLetters(c)+r;
+    el.textContent=displayWorkbookValue(cell);
+    el.style.left=x[c-1]+"px";el.style.top=y[r-1]+"px";el.style.width=(x[c2]-x[c-1])+"px";el.style.height=(y[r2]-y[r-1])+"px";
+    const a=cell.alignment||{};
+    el.style.justifyContent=a.horizontal==="right"?"flex-end":a.horizontal==="center"?"center":"flex-start";
+    el.style.alignItems=a.vertical==="bottom"?"flex-end":a.vertical==="middle"?"center":"flex-start";
+    el.style.textAlign=a.horizontal||"left";el.style.whiteSpace=a.wrapText?"pre-wrap":"nowrap";
+    el.style.padding=(a.indent?2+a.indent*2:2)+"px";
+    const f=cell.font||{};
+    el.style.fontFamily=f.name||"Arial";el.style.fontSize=((Number(f.size)||9))+"px";el.style.fontWeight=f.bold?"700":"400";el.style.fontStyle=f.italic?"italic":"normal";el.style.color=excelColor(f.color,"#111");
+    if(cell.fill?.type==="pattern")el.style.background=excelColor(cell.fill.fgColor,"#fff");
+    const b=cell.border||{};
+    el.style.borderTop=borderCss(b.top);el.style.borderRight=borderCss(b.right);el.style.borderBottom=borderCss(b.bottom);el.style.borderLeft=borderCss(b.left);
+    if(cell.formula)el.dataset.formula="1";
+    el.addEventListener("focus",()=>{el.classList.add("editing");setStatus("Editing "+el.dataset.address)});
+    el.addEventListener("input",()=>{
+      if(!liveSheet)return;
+      const live=liveSheet.getRow(r).getCell(c);
+      const value=el.textContent.trim();
+      if(live.formula&&!value.startsWith("=")){live.value=value===""?null:value}
+      else if(!live.formula){
+        live.value=value===""?null:(/^-?\d+(?:\.\d+)?$/.test(value)?Number(value):value);
       }
-
-      el.style.left=((left[c-1]||0))+"px";
-      el.style.top=tops[r-1]+"px";
-      el.style.width=width+"px";
-      el.style.height=height+"px";
-
-      const style=cell.style||{};
-      const font=style.font||{};
-      const fill=style.fill||{};
-      const align=style.alignment||{};
-      const border=style.border||{};
-
-      if(font.name)el.style.fontFamily=font.name+",Arial,sans-serif";
-      if(font.sz)el.style.fontSize=Number(font.sz)+"px";
-      if(font.bold)el.style.fontWeight="700";
-      if(font.italic)el.style.fontStyle="italic";
-      if(font.underline)el.style.textDecoration="underline";
-      if(font.color)el.style.color=excelColor(font.color,"#111");
-      if(fill.fgColor)el.style.background=excelColor(fill.fgColor,"transparent");
-
-      el.style.textAlign=align.horizontal||"left";
-      el.style.alignItems=align.vertical==="top"?"flex-start":align.vertical==="bottom"?"flex-end":"center";
-      el.style.whiteSpace=align.wrapText?"pre-wrap":"nowrap";
-      el.style.overflow="hidden";
-      el.style.paddingLeft=align.indent?(Number(align.indent)*8+3)+"px":"3px";
-      el.style.paddingRight="3px";
-      el.style.borderTop=borderCss(border.top);
-      el.style.borderRight=borderCss(border.right);
-      el.style.borderBottom=borderCss(border.bottom);
-      el.style.borderLeft=borderCss(border.left);
-
-      grid.append(el);
-    }
+      dirty=true;lastBuffer=null;$("#xlsxState").textContent="EDITED";
+    });
+    el.addEventListener("blur",async()=>{
+      if(!liveSheet)return;
+      recalcLiveFormulas();
+      el.classList.remove("editing");
+      setStatus("Live XLSX edited");
+      await renderPreview();
+    });
+    grid.append(el);
   }
-
-  stage.append(grid);
-  host.replaceChildren(stage);
-  const badge=$("#xlsxState");
-  if(badge)badge.textContent="LIVE XLSX";
+  stage.append(grid);host.replaceChildren(stage);
+  $("#xlsxState").textContent=dirty?"LIVE XLSX":"LIVE XLSX";
 }
+
 
 async function renderPreview(){
   const host=$("#sheetPreview");
   if(!host)return;
-
-  host.innerHTML='<div class="emptyPage"><strong>Rendering workbook…</strong><span>Showing the same edited XLSX that will be downloaded.</span></div>';
+  host.innerHTML='<div class="emptyPage"><strong>Syncing live XLSX…</strong><span>The preview is the current workbook state.</span></div>';
   try{
-    const buffer=await buildWorkbook();
-    const wb=new ExcelJS.Workbook();
-    await wb.xlsx.load(buffer);
-    const ws=findInvoiceSheet(wb);
-    if(!ws)throw Error("Preview sheet 01 unavailable");
-    buildWorkbookPreviewSheet(ws);
+    await ensureLiveWorkbook();
+    recalcLiveFormulas();
+    buildWorkbookPreviewSheet(liveSheet);
+    dirty=false;
+    setStatus("Live preview synced");
   }catch(error){
-    host.innerHTML="";
-    const empty=document.createElement("div");
-    empty.className="emptyPage";
-    const strong=document.createElement("strong");
-    strong.textContent="Preview unavailable";
-    const span=document.createElement("span");
-    span.textContent=error?.message||"Unable to render workbook";
-    empty.append(strong,span);
-    host.append(empty);
+    console.error("Invoice Studio:",error);
+    host.innerHTML='<div class="emptyPage"><strong>Preview unavailable</strong><span>'+safe(error?.message||"Unable to render workbook")+'</span></div>';
+    setStatus("XLSX error");
   }
 }
-function schedulePreview(){
+
+function schedulePreview()function schedulePreview(){
   clearTimeout(previewTimer);
   previewTimer=setTimeout(()=>{renderPreview()},180);
 }
+
 
 async function downloadXlsx(){
   try{
     const buffer=await buildWorkbook();
     const blob=new Blob([buffer],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
+    const url=URL.createObjectURL(blob),a=document.createElement("a");
     a.href=url;
     a.download="BNC-Invoice-"+String(state.invoiceNo||"0002").replace(/[^0-9A-Za-z_-]/g,"_")+".xlsx";
-    document.body.append(a);
-    a.click();
-    a.remove();
+    document.body.append(a);a.click();a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),1500);
-    setStatus("XLSX downloaded");
-  }catch(error){
-    alert(error?.message||"Unable to download XLSX");
-  }
+    setStatus("Latest XLSX downloaded");
+  }catch(error){console.error(error);alert(error?.message||"Unable to download XLSX")}
 }
 
-function reset(){
+function reset()function reset(){
   Object.assign(state,{
     ref:"X2",
     invoiceNo:String((Number(state.invoiceNo)||1)+1).padStart(4,"0"),
@@ -577,6 +557,7 @@ function reset(){
   renderProducts();
   saveDraft();
   $("#xlsxState").textContent="Ready";
+  liveWorkbook=null;liveSheet=null;buildPromise=null;lastBuffer=null;dirty=true;
   setStatus("New invoice");
 }
 function saveInvoice(){
