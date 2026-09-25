@@ -20,6 +20,9 @@ let deferred=null;
 let buildPromise=null;
 let lastBuffer=null;
 let previewTimer=null;
+let liveWorkbook=null;
+let liveSheet=null;
+let dirty=true;
 
 const num=v=>{const n=Number(v);return Number.isFinite(n)?n:0};
 const money=v=>num(v).toFixed(2);
@@ -227,7 +230,7 @@ async function addProductRow(){
   }catch(error){console.error(error);setStatus("Could not add row");alert(error.message||"Could not add product row")}
 }
 
-function updateSummary()function updateSummary(){
+function updateSummary(){
   const t=totals();
   $("#summary").innerHTML=
     '<div class="sum"><span>Cartons</span><strong>'+t.cartons+"</strong></div>"+
@@ -412,7 +415,7 @@ function applyHeaderEditsToLive(){
   putHeaderField(liveSheet,["commission %","commission"],state.commission);
 }
 
-function excelColor(function excelColor(v,fallback){
+function excelColor(v,fallback){
   if(!v)return fallback;
   if(v.argb)return"#"+String(v.argb).slice(-6);
   if(v.rgb)return"#"+String(v.rgb).slice(-6);
@@ -440,6 +443,7 @@ function columnNumberFromLetters(value){
   return n;
 }
 
+function colLetters(n){let s="";while(n){const r=(n-1)%26;s=String.fromCharCode(65+r)+s;n=Math.floor((n-1)/26)}return s}
 function buildWorkbookPreviewSheet(ws){
   const host=$("#sheetPreview");
   if(!host)return;
@@ -521,7 +525,7 @@ async function renderPreview(){
   }
 }
 
-function schedulePreview()function schedulePreview(){
+function schedulePreview(){
   clearTimeout(previewTimer);
   previewTimer=setTimeout(()=>{renderPreview()},180);
 }
@@ -540,7 +544,7 @@ async function downloadXlsx(){
   }catch(error){console.error(error);alert(error?.message||"Unable to download XLSX")}
 }
 
-function reset()function reset(){
+function reset(){
   Object.assign(state,{
     ref:"X2",
     invoiceNo:String((Number(state.invoiceNo)||1)+1).padStart(4,"0"),
