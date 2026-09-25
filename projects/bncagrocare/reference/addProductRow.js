@@ -22,7 +22,7 @@ function findStRow(ws){
   for(let r=PRODUCT_START_ROW;r<=ws.rowCount;r++){
     if(textOfCell(cellAt(ws,r,2)).toUpperCase()==="ST")return r;
   }
-  throw new Error('Could not find the "ST" row in BNCFINAL.xlsx');
+  throw new Error('Could not find the invoice subtotal row.');
 }
 function bumpFormula(formula,startRow){
   return String(formula).replace(/(\$?[A-Z]{1,3}\$?)(\d+)/g,(whole,col,rowText)=>{
