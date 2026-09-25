@@ -120,6 +120,7 @@ function adjustRowModel(model,newNumber,startRow){
 
 function shiftRowsDownWithoutSplice(ws,startRow){
   const last=ws.rowCount;
+  const sourceModelForInsert=clone(ws.findRow(startRow-1)?.model||null);
   const merges=mergeRanges(ws);
 
   // ExcelJS's normal splice path can break templates with merged cells.
@@ -155,7 +156,7 @@ function shiftRowsDownWithoutSplice(ws,startRow){
   }
 
   // Blank row with the same style/height as the row above ST.
-  const sourceModel=models[startRow-1]||ws.getRow(startRow-1).model;
+  const sourceModel=sourceModelForInsert;
   const inserted=ws.getRow(startRow);
   if(sourceModel){
     const blankModel=clone(sourceModel);
