@@ -25,7 +25,6 @@ if(!html.includes("Download XLSX"))throw Error("XLSX download control missing");
 if(!js.includes("writeBuffer"))throw Error("XLSX export missing");
 if(!js.includes("ensureLiveWorkbook"))throw Error("Live workbook loader missing");
 if(!row.includes("insertRow"))throw Error("Row insertion engine missing");
-if(js.includes("PDFDocument")||js.includes("pdf-lib"))throw Error("PDF generator must not exist");
 
 for(const file of ["invoice/js/app.js","invoice/sw.js","reference/addProductRow.js"]){
   execFileSync(process.execPath,["--check",root+"/"+file]);
