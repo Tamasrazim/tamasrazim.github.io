@@ -55,7 +55,7 @@ must(manifest.scope==='./','PWA scope is relative');
 must(Array.isArray(manifest.icons)&&manifest.icons.length>0,'PWA icon is declared');
 
 const serviceWorker=read(root+'/invoice/sw.js');
-must(serviceWorker.includes('bnc-invoice-v46'),'service worker cache is at v46');
+must(serviceWorker.includes('bnc-invoice-v47'),'service worker cache is at v46');
 must(serviceWorker.includes('https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js'),'service worker caches the same PDF engine URL');
 must(serviceWorker.includes('self.registration.scope'),'service worker derives its navigation scope');
 must(serviceWorker.includes('caches.match(FALLBACK)'),'service worker has an offline navigation fallback');
