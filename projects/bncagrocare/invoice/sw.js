@@ -1,4 +1,4 @@
-const CACHE="bnc-rebuild-v1";
+const CACHE="bnc-studio-v3";
 const CORE=["./","./index.html","./css/app.css","./js/app.js","./manifest.webmanifest","./icons/icon.svg","../reference/products.js","../reference/addProductRow.js","../reference/BNCFINAL.xlsx"];
 const EXCEL="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js";
 self.addEventListener("install",e=>e.waitUntil((async()=>{const c=await caches.open(CACHE);await c.addAll(CORE);try{await c.add(EXCEL,await fetch(EXCEL,{mode:"no-cors"}))}catch{}await self.skipWaiting()})()));
