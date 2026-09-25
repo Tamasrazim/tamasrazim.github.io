@@ -1,28 +1,27 @@
 # BNC Agro Care
 
-BNC Agro Care is maintained as a standalone corporate website project under `projects/bncagrocare/`.
+BNC Agro Care is the canonical agriculture project inside the Tamasrazim main repository.
 
-## Public website
+## Source hierarchy
 
-The public-facing page is the BNC Agro Care company/product website:
+1. BNCFINAL.xlsx — principal invoice-sheet reference.
+2. addProductRow.js — authoritative rule for inserting an invoice product row.
+3. products.js — shared product and pack-size data used by the public catalogue and Invoice Studio.
+4. invoice.pdf — immutable PDF master used for final document generation.
+5. invoice/ — local-first business UI.
 
-`projects/bncagrocare/index.html`
+## Public site
 
-It is designed to be portable to a future BNC-owned TLD without depending on the personal Tamasrazim site.
+projects/bncagrocare/index.html
 
-The public site focuses on:
-- BNC product names
-- exact pack-size reference from the current product reference file
-- company/about presentation
-- existing BNC photography
-- a clean contact/official-web structure
+## Invoice Studio
 
-## Business invoice tool
+projects/bncagrocare/invoice/
 
-The invoice application remains a separate internal/business route:
+Base sheet: 4 rows per side / 8 product slots. Adding a row follows the spreadsheet rule: insert before the ST subtotal region, extend ST formulas, copy the row structure, and renumber left/right SL values.
 
-`projects/bncagrocare/invoice/`
+## Canonical / backup model
 
-It is not the identity of the public website.
+This personal repository is canonical. github.com/Tamasrazim/bncagrocare is the backup/deployment mirror.
 
-The locked `invoice.pdf` remains the immutable invoice template.
+Edit here first -> verify -> mirror to backup.
