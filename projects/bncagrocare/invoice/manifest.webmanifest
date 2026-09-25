@@ -1,1 +1,9 @@
-{"name":"BNC AgroCare — Invoice Studio","short_name":"BNC Invoice","start_url":"./","scope":"./","display":"standalone","background_color":"#edf0eb","theme_color":"#06271e","description":"BNC AgroCare local-first invoice preparation and A4 PDF workflow.","icons":[{"src":"./icons/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]}
+{
+  "name":"BNC AgroCare Invoice Studio",
+  "short_name":"BNC Invoice",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#071811",
+  "theme_color":"#071811",
+  "icons":[{"src":"./icons/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}

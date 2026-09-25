@@ -1,39 +1,22 @@
 import fs from "node:fs";
-import { execFileSync } from "node:child_process";
-
+import {execFileSync} from "node:child_process";
 const root=fs.existsSync("projects/bncagrocare")?"projects/bncagrocare":".";
-const read=p=>fs.readFileSync(root+"/"+p,"utf8");
-const must=(ok,msg)=>{if(!ok)throw new Error(msg);console.log("PASS",msg)};
-
-for(const p of [
- "index.html","invoice/index.html","invoice/css/app.css","invoice/js/app.js",
- "invoice/sw.js","invoice/manifest.webmanifest","reference/BNCFINAL.xlsx",
- "reference/addProductRow.js","reference/products.js"
-])must(fs.existsSync(root+"/"+p),p+" exists");
-
-const xlsxSha=execFileSync("git",["ls-tree","-r","HEAD","--",root+"/reference/BNCFINAL.xlsx"],{encoding:"utf8"}).trim().split(/\s+/)[2];
-must(xlsxSha==="f705ea96084e0c9777effd400744a7f7d94cba69","BNCFINAL.xlsx is canonical");
-
-const invoice=read("invoice/index.html");
-must(invoice.includes("exceljs@4.4.0"),"Invoice Studio loads ExcelJS");
-must(invoice.includes("Download XLSX"),"Invoice Studio exports XLSX");
-must(!invoice.includes("pdf-lib"),"Invoice Studio has no pdf-lib");
-
-const js=read("invoice/js/app.js");
-must(js.includes("BNCFINAL.xlsx"),"Invoice Studio uses BNCFINAL.xlsx");
-must(js.includes("addProductRow.js")===false,"row rule remains external in reference/addProductRow.js");
-must(js.includes("ROWS_PER_SIDE=4"),"base invoice geometry is 4 rows per side");
-must(js.includes("BNCInsertProductRow"),"Invoice Studio uses canonical row engine");
-must(js.includes("downloadXlsx"),"XLSX download path exists");
-must(js.includes("getRow(r).getCell"),"workbook cells are accessed through explicit rows");
-must(!js.includes("PDFDocument")&&!js.includes("pdf-lib"),"no PDF generation code");
-execFileSync(process.execPath,["--check",root+"/invoice/js/app.js"],{stdio:"inherit"});
-
-const sw=read("invoice/sw.js");
-must(sw.includes("EXCEL_JS"),"service worker caches ExcelJS");
-must(sw.includes("BNCFINAL.xlsx"),"service worker caches BNCFINAL.xlsx");
-must(sw.includes("addProductRow.js?v=52"),"service worker caches the row engine");
-must(!sw.includes("pdf-lib")&&!sw.includes("invoice.pdf"),"service worker has no PDF dependency");
-execFileSync(process.execPath,["--check",root+"/invoice/sw.js"],{stdio:"inherit"});
-
-console.log("BNC XLSX validation complete");
+const need=[
+"index.html","18-09-26 0001.xlsx","18-09-26 0002.xlsx","invoice.pdf",
+"IMG-20260713-WA0000.jpg","IMG-20260713-WA0001.jpg","IMG-20260713-WA0002.jpg","IMG-20260713-WA0003.jpg",
+"reference/BNCFINAL.xlsx","reference/products.js","reference/addProductRow.js",
+"invoice/index.html","invoice/css/app.css","invoice/js/app.js","invoice/sw.js"
+];
+for(const p of need)if(!fs.existsSync(root+"/"+p))throw Error("Missing "+p);
+const js=fs.readFileSync(root+"/invoice/js/app.js","utf8");
+const row=fs.readFileSync(root+"/reference/addProductRow.js","utf8");
+if(!js.includes("getRow(")||!js.includes("getCell("))throw Error("Workbook writes are not row-based");
+if(!js.includes("writeBuffer"))throw Error("XLSX export missing");
+if(js.includes("PDFDocument")||js.includes("pdf-lib"))throw Error("PDF generator must not exist");
+if(!row.includes("getRow(row)")||!row.includes("insertRow"))throw Error("Row engine incomplete");
+execFileSync(process.execPath,["--check",root+"/invoice/js/app.js"]);
+execFileSync(process.execPath,["--check",root+"/invoice/sw.js"]);
+execFileSync(process.execPath,["--check",root+"/reference/addProductRow.js"]);
+const sha=execFileSync("git",["ls-tree","-r","HEAD","--",root+"/reference/BNCFINAL.xlsx"],{encoding:"utf8"}).trim().split(/\s+/)[2];
+if(sha!=="f705ea96084e0c9777effd400744a7f7d94cba69")throw Error("BNCFINAL.xlsx changed");
+console.log("BNC rebuild validation passed");

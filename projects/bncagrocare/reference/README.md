@@ -1,9 +1,9 @@
-# BNC invoice references
+# BNC AgroCare reference data
 
-- BNCFINAL.xlsx — main invoice sheet reference.
-- addProductRow.js — row insertion, formula and SL rule.
-- products.js — shared product and pack-size data.
-- product name.txt — raw product-name reference.
-- product name and pack size.txt — raw pack-size reference.
+`BNCFINAL.xlsx` is the invoice workbook master.
 
-The Invoice Studio must not alter BNCFINAL.xlsx or invoice.pdf.
+`addProductRow.js` is the row engine used when product rows are added. Workbook edits are performed through explicit worksheet Row → Cell access.
+
+`products.js` contains the shared product and pack-size catalogue.
+
+The Studio never overwrites `BNCFINAL.xlsx` or `invoice.pdf`.
