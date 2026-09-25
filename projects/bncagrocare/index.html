@@ -3,130 +3,120 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#102c1d">
+<meta name="theme-color" content="#0e291b">
 <meta name="description" content="BNC Agro Care — agricultural products, pack sizes and contact information.">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./FB_IMG_1789811599210.jpg">
 <title>BNC Agro Care</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <style>
-:root{
-  --forest:#102c1d;--forest2:#173c28;--lime:#c8e879;--sand:#f3efe4;--paper:#fbfaf6;
-  --ink:#17221b;--muted:#707a72;--line:#d8ded4;--white:#fff;--shadow:0 28px 90px rgba(9,35,21,.14);
-  --ease:cubic-bezier(.16,.72,.2,1);--mx:0px;--my:0px
-}
+:root{--forest:#0e291b;--forest2:#173b27;--lime:#d7f28f;--cream:#f3efe2;--paper:#fbfaf6;--ink:#18231c;--muted:#69756d;--line:#d8ddd4;--white:#fff;--ease:cubic-bezier(.2,.8,.2,1)}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--sand);color:var(--ink);font:14px/1.55 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;background-image:linear-gradient(rgba(16,44,29,.11) 1px,transparent 1px),linear-gradient(90deg,rgba(16,44,29,.11) 1px,transparent 1px);background-size:36px 36px;mask-image:linear-gradient(#000,transparent 70%)}
-a{text-decoration:none;color:inherit}button,input{font:inherit}img{display:block;max-width:100%}
-.wrap{width:min(1320px,92vw);margin:auto}
-.nav{position:fixed;inset:0 0 auto;z-index:50;padding:14px 0;pointer-events:none}
-.navInner{display:flex;justify-content:space-between;align-items:center;gap:18px;pointer-events:auto;padding:10px 12px 10px 14px;background:rgba(250,248,241,.78);border:1px solid rgba(255,255,255,.54);border-radius:18px;box-shadow:0 10px 40px rgba(10,30,18,.08);backdrop-filter:blur(20px)}
-.logo{width:154px;height:44px;display:block}.logo img{width:100%;height:100%;object-fit:contain;object-position:left center}
-.navLinks{display:flex;align-items:center;gap:22px}.navLinks a{font:900 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.13em;text-transform:uppercase;color:#526058}.navLinks a:hover{color:var(--forest)}
-.navCta{padding:10px 13px;border-radius:999px;background:var(--forest);color:#fff!important}
-.menu{display:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 12px;font:900 8px ui-monospace,SFMono-Regular,Consolas,monospace}
-.mobileLinks{display:none}
-
-.hero{padding:14px 0 0}
-.heroFrame{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:30px;background:var(--forest);box-shadow:var(--shadow);isolation:isolate}
-.heroImage{position:absolute;inset:0;overflow:hidden}
-.heroImage img{width:100%;height:100%;object-fit:cover;transform:scale(1.04) translate3d(calc(var(--mx)*.035),calc(var(--my)*.025),0);transition:transform .25s ease-out}
-.heroImage:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,25,16,.92),rgba(8,25,16,.53) 38%,rgba(8,25,16,.08) 70%,rgba(8,25,16,.1)),linear-gradient(0deg,rgba(8,25,16,.55),transparent 55%)}
-.heroGlow{position:absolute;width:38vw;height:38vw;max-width:520px;max-height:520px;border-radius:50%;right:-12vw;top:-18vw;background:radial-gradient(circle,rgba(200,232,121,.25),transparent 68%);filter:blur(5px);transform:translate3d(calc(var(--mx)*-.06),calc(var(--my)*-.05),0)}
-.heroGrid{position:relative;z-index:2;height:100%;display:grid;grid-template-columns:1.15fr .85fr;align-items:end;padding:clamp(42px,6vw,84px)}
-.heroCopy{max-width:780px;color:#fff}
-.eyebrow{font:900 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.18em;text-transform:uppercase;color:#7f9888}
-.eyebrow.light{color:var(--lime)}
-.hero h1{font-size:clamp(58px,8vw,126px);line-height:.79;letter-spacing:-.095em;margin:17px 0 21px;max-width:850px}
-.hero h1 em{font-style:normal;color:#d8e2da}
-.heroLead{max-width:600px;color:#d2ddd5;font-size:15px}
-.heroActions{display:flex;gap:9px;flex-wrap:wrap;margin-top:28px}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:999px;font:900 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.09em;text-transform:uppercase;transition:transform .35s var(--ease),background .25s}
-.btn:hover{transform:translateY(-2px)}
-.btnPrimary{background:#fff;color:var(--forest)}.btnDark{background:var(--forest);color:#fff}.btnGhost{border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.04);color:#fff}
-.heroMeta{align-self:end;justify-self:end;width:min(320px,100%);color:#fff}
-.metaBox{padding:15px;border-top:1px solid rgba(255,255,255,.2);display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.metaBox strong{font-size:22px;letter-spacing:-.05em}.metaBox span{display:block;margin-top:3px;color:#9db0a3;font:800 7px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase}
-.metaLine{display:flex;align-items:center;gap:9px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.12);font:800 7px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase;color:#aab9b0}.metaDot{width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 5px rgba(200,232,121,.1)}
-
-.rail{background:var(--lime);overflow:hidden}.railTrack{display:flex;width:max-content;animation:rail 25s linear infinite}.rail span{padding:11px 22px;font:900 8px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase;letter-spacing:.15em;color:#17331f}@keyframes rail{to{transform:translateX(-50%)}}
-
-.section{padding:112px 0}.sectionHead{display:grid;grid-template-columns:.85fr 1.15fr;gap:50px;align-items:end;margin-bottom:30px}.sectionTitle{font-size:clamp(45px,6vw,86px);line-height:.84;letter-spacing:-.09em;margin:9px 0 0}.sectionText{color:var(--muted);max-width:650px;font-size:13px;margin:0}
-
-.catalogTools{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:13px}.search{height:48px;width:min(480px,100%);border:1px solid var(--line);border-radius:13px;padding:0 14px;background:rgba(255,255,255,.62);outline:none;color:var(--ink);box-shadow:0 8px 30px rgba(10,30,18,.04);transition:border-color .25s,box-shadow .25s}.search:focus{border-color:#89a36f;box-shadow:0 0 0 4px rgba(137,163,111,.12)}.count{font:900 8px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase;letter-spacing:.1em;color:#7a847d}
-.products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.product{position:relative;min-height:245px;padding:22px;border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.74);overflow:hidden;transition:transform .45s var(--ease),box-shadow .45s var(--ease),border-color .3s}.product:before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(200,232,121,.13),transparent 40%);opacity:0;transition:opacity .45s}.product:after{content:"";position:absolute;width:160px;height:160px;border-radius:50%;right:-70px;top:-65px;background:radial-gradient(circle,rgba(200,232,121,.25),transparent 67%);transform:scale(.7);transition:transform .55s var(--ease)}.product:hover{transform:translateY(-5px);box-shadow:var(--shadow);border-color:#c4d0c2}.product:hover:before{opacity:1}.product:hover:after{transform:scale(1.15)}
-.productTop{display:flex;justify-content:space-between;gap:12px;align-items:center;position:relative;z-index:1}.productCode{font:900 8px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.15em;color:#587260}.productArrow{font:900 18px/1 ui-monospace,SFMono-Regular,Consolas,monospace;color:#a0aba2;transition:transform .3s}.product:hover .productArrow{transform:translate(3px,-3px);color:var(--forest)}.product h3{position:relative;z-index:1;margin:38px 0 14px;max-width:15ch;font-size:28px;line-height:.92;letter-spacing:-.065em}.packLabel{position:relative;z-index:1;padding-top:14px;border-top:1px solid var(--line);font:900 7px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase;letter-spacing:.12em;color:#7c867e}.packs{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.pack{padding:6px 8px;border:1px solid #d9e1d7;border-radius:999px;background:#f6f8f2;color:#365640;font:800 7px ui-monospace,SFMono-Regular,Consolas,monospace}
-
-.story{background:var(--forest);color:#fff;position:relative;overflow:hidden}.story:before{content:"";position:absolute;width:48vw;height:48vw;border-radius:50%;right:-22vw;top:-18vw;background:radial-gradient(circle,rgba(200,232,121,.16),transparent 68%);pointer-events:none}.storyGrid{position:relative;z-index:1;display:grid;grid-template-columns:1.08fr .92fr;gap:10px}.storyMedia,.storyCard{min-height:520px;border-radius:28px;overflow:hidden}.storyMedia{position:relative}.storyMedia img{width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)}.storyMedia:hover img{transform:scale(1.035)}.storyMedia:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(7,25,15,.72),transparent 60%)}.storyCaption{position:absolute;z-index:2;left:24px;right:24px;bottom:22px}.storyCaption strong{display:block;font-size:16px}.storyCaption span{display:block;margin-top:4px;color:#b8c9bf;font:800 7px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase;letter-spacing:.11em}
-.storyCard{background:#f8f4e8;color:var(--ink);padding:34px;display:flex;flex-direction:column;justify-content:space-between}.storyCard h3{margin:11px 0;font-size:57px;line-height:.86;letter-spacing:-.085em}.storyCard p{max-width:470px;color:var(--muted)}.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:30px}.stat{padding:12px;border-top:1px solid var(--line)}.stat strong{display:block;font-size:19px}.stat span{display:block;margin-top:3px;color:#7e8980;font:800 7px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase}
-
-.gallery{display:grid;grid-template-columns:1.1fr .7fr .7fr;grid-template-rows:250px 250px;gap:10px}.tile{position:relative;border-radius:21px;overflow:hidden;background:#d5dbd3}.tile:first-child{grid-row:span 2}.tile img{width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)}.tile:hover img{transform:scale(1.045)}.tileTag{position:absolute;left:12px;bottom:12px;padding:7px 9px;background:rgba(255,255,255,.9);border-radius:999px;color:var(--forest);font:900 7px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase}
-
-.contact{padding:10px 0 120px}.contactCard{display:grid;grid-template-columns:1.08fr .92fr;gap:10px}.contactMain,.contactSide{border-radius:28px;padding:35px}.contactMain{background:#e6eadf}.contactMain h2{margin:10px 0;font-size:clamp(46px,6vw,82px);line-height:.83;letter-spacing:-.09em}.contactMain p{color:var(--muted);max-width:650px}.contactSide{background:var(--forest);color:#fff;display:flex;flex-direction:column;justify-content:flex-end}.contactSide small{font:900 7px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase;color:#9eb0a4}.contactSide a{margin-top:4px;font:900 16px ui-monospace,SFMono-Regular,Consolas,monospace}.contactSide a+a{margin-top:18px;color:#cce59d}
-
-.footer{padding:25px 0 40px;border-top:1px solid var(--line);text-align:center;color:#758078;font:800 8px ui-monospace,SFMono-Regular,Consolas,monospace}.footer a:hover{color:var(--forest)}
-.reveal{opacity:0;transform:translateY(24px);transition:opacity .75s var(--ease),transform .75s var(--ease);transition-delay:calc(var(--delay,0) * 70ms)}.reveal.in{opacity:1;transform:none}
-@media(max-width:960px){.navLinks{display:none}.menu{display:block}.sectionHead,.storyGrid,.contactCard{grid-template-columns:1fr}.nav.open .mobileLinks{display:flex}.mobileLinks{padding:9px 14px 13px;gap:11px;flex-direction:column;background:rgba(250,248,241,.9);border:1px solid var(--line);border-radius:16px;margin-top:5px}.mobileLinks a{font:900 8px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase;color:#536159}}
-@media(max-width:720px){.wrap{width:92vw}.hero{padding-top:78px}.heroFrame{min-height:auto;border-radius:24px}.heroGrid{display:flex;min-height:0;padding:30px 24px;align-items:flex-end}.hero h1{font-size:clamp(52px,14vw,78px)}.heroLead{font-size:13px}.heroMeta{display:none}.catalogTools{display:block}.search{width:100%;margin-bottom:8px}.products{grid-template-columns:1fr}.section{padding:78px 0}.storyMedia,.storyCard{min-height:360px}.storyCard{padding:27px}.storyCard h3{font-size:47px}.gallery{grid-template-columns:1fr;grid-template-rows:260px}.tile:first-child{grid-row:auto}.contact{padding-bottom:80px}.contactMain,.contactSide{padding:27px}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.railTrack{animation:none}.heroImage img,.heroGlow{transform:none!important;transition:none}.reveal{opacity:1;transform:none;transition:none}.product,.btn,.tile img,.storyMedia img{transition:none}}
+body{margin:0;background:var(--cream);color:var(--ink);font:14px/1.55 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.11;background-image:linear-gradient(90deg,rgba(14,41,27,.13) 1px,transparent 1px),linear-gradient(rgba(14,41,27,.13) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(#000,transparent 65%)}
+a{color:inherit;text-decoration:none}img{display:block;max-width:100%}button,input{font:inherit}
+.shell{width:min(1380px,92vw);margin:auto}
+.top{position:fixed;inset:0 0 auto;z-index:50;padding:13px 0;pointer-events:none}
+.topBar{pointer-events:auto;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 12px 10px 15px;border:1px solid rgba(255,255,255,.45);border-radius:18px;background:rgba(249,247,239,.82);box-shadow:0 14px 44px rgba(11,35,21,.08);backdrop-filter:blur(22px)}
+.logo{width:162px;height:43px}.logo img{width:100%;height:100%;object-fit:contain;object-position:left center}
+.nav{display:flex;align-items:center;gap:19px}.nav a{font:900 8px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.15em;text-transform:uppercase;color:#5e6d63}.nav a:hover{color:var(--forest)}.nav .cta{padding:10px 13px;border-radius:999px;background:var(--forest);color:var(--white)}
+.menu{display:none;border:1px solid var(--line);background:var(--white);border-radius:999px;padding:9px 12px;font:900 8px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase}
+.mobileNav{display:none}
+.hero{padding-top:85px}.heroGrid{display:grid;grid-template-columns:.9fr 1.1fr;min-height:calc(100vh - 100px);gap:10px}
+.heroCopy{display:flex;flex-direction:column;justify-content:space-between;padding:52px 18px 45px 0}.eyebrow{font:900 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.18em;text-transform:uppercase;color:#607267}.heroCopy h1{font-size:clamp(66px,9.3vw,146px);line-height:.78;letter-spacing:-.1em;margin:12px 0 20px;max-width:700px}.heroCopy h1 em{font-style:normal;color:#4e7659}.heroCopy p{max-width:560px;color:var(--muted);font-size:14px}.heroLinks{display:flex;gap:8px;flex-wrap:wrap;margin-top:25px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:45px;padding:0 15px;border-radius:999px;font:900 8px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;transition:transform .35s var(--ease),background .25s}.btn:hover{transform:translateY(-2px)}.btnDark{background:var(--forest);color:#fff}.btnLight{border:1px solid #cad2c8;background:rgba(255,255,255,.48)}
+.heroStats{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:480px}.heroStat{padding-top:11px;border-top:1px solid #cfd6cd}.heroStat strong{display:block;font-size:28px;letter-spacing:-.07em}.heroStat span{display:block;margin-top:2px;color:#78847d;font:900 7px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em;text-transform:uppercase}
+.heroImage{position:relative;min-height:690px;overflow:hidden;border-radius:32px;background:var(--forest);box-shadow:0 30px 100px rgba(11,37,21,.16)}.heroImage img{width:100%;height:100%;object-fit:cover;transform:scale(1.04);transition:transform 1.2s var(--ease)}.heroImage:hover img{transform:scale(1.075)}.heroImage:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,23,14,.72),transparent 58%),linear-gradient(0deg,rgba(8,23,14,.58),transparent 45%)}.heroTag{position:absolute;z-index:2;left:24px;right:24px;bottom:22px;display:flex;justify-content:space-between;gap:15px;align-items:end;color:#fff}.heroTag strong{font-size:17px}.heroTag span{display:block;margin-top:3px;color:#b9c8bf;font:900 7px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em;text-transform:uppercase}.scrollMark{padding:9px 11px;border:1px solid rgba(255,255,255,.2);border-radius:999px;font:900 7px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase}
+.ticker{margin-top:10px;background:var(--lime);overflow:hidden}.tickerTrack{width:max-content;display:flex;animation:marquee 27s linear infinite}.ticker span{padding:12px 23px;color:#183720;font:900 8px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.15em;text-transform:uppercase}@keyframes marquee{to{transform:translateX(-50%)}}
+.section{padding:115px 0}.sectionHead{display:grid;grid-template-columns:.8fr 1.2fr;gap:55px;align-items:end;margin-bottom:25px}.title{font-size:clamp(48px,6.6vw,92px);line-height:.82;letter-spacing:-.095em;margin:9px 0}.lead{max-width:640px;color:var(--muted);font-size:13px;margin:0}
+.catalogTop{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:10px}.search{height:50px;width:min(540px,100%);border:1px solid #ccd4ca;border-radius:14px;background:rgba(255,255,255,.62);padding:0 15px;outline:none;color:var(--ink);box-shadow:0 8px 25px rgba(10,30,18,.04)}.search:focus{border-color:#83a269;box-shadow:0 0 0 4px rgba(131,162,105,.12)}.count{font:900 8px ui-monospace,SFMono-Regular,Consolas,monospace;color:#748078;text-transform:uppercase;letter-spacing:.1em}
+.products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.product{position:relative;min-height:230px;padding:23px;border:1px solid var(--line);border-radius:23px;background:rgba(255,255,255,.68);overflow:hidden;transition:transform .45s var(--ease),box-shadow .45s var(--ease),border-color .3s}.product:before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(215,242,143,.16),transparent 46%);opacity:0;transition:opacity .4s}.product:hover{transform:translateY(-5px);box-shadow:0 28px 70px rgba(11,35,21,.1);border-color:#c4cdc1}.product:hover:before{opacity:1}.productTop,.product h3,.packLabel,.packs{position:relative;z-index:1}.productTop{display:flex;justify-content:space-between;gap:10px}.productCode{font:900 8px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.14em;color:#59705f}.productMark{font-size:20px;color:#a6afa8;transition:transform .35s}.product:hover .productMark{transform:translate(4px,-4px);color:var(--forest)}.product h3{font-size:29px;line-height:.9;letter-spacing:-.07em;max-width:15ch;margin:44px 0 17px}.packLabel{padding-top:12px;border-top:1px solid var(--line);font:900 7px ui-monospace,SFMono-Regular,Consolas,monospace;color:#7a857d;letter-spacing:.12em;text-transform:uppercase}.packs{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.pack{padding:6px 8px;border:1px solid #d6ddd3;background:#f6f8f1;border-radius:999px;color:#42604b;font:800 7px ui-monospace,SFMono-Regular,Consolas,monospace}
+.story{background:var(--forest);color:#fff;overflow:hidden}.storyGrid{display:grid;grid-template-columns:1.1fr .9fr;gap:10px}.storyImage,.storyCard{min-height:560px;border-radius:27px;overflow:hidden}.storyImage{position:relative}.storyImage img{width:100%;height:100%;object-fit:cover;transition:transform 1s var(--ease)}.storyImage:hover img{transform:scale(1.04)}.storyImage:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(8,24,14,.72),transparent 58%)}.storyImage figcaption{position:absolute;z-index:1;left:22px;bottom:20px}.storyImage strong{display:block;font-size:17px}.storyImage span{display:block;margin-top:3px;color:#b9c8bf;font:900 7px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase;letter-spacing:.12em}.storyCard{background:#f7f3e8;color:var(--ink);padding:34px;display:flex;flex-direction:column;justify-content:space-between}.storyCard h3{font-size:58px;line-height:.84;letter-spacing:-.09em;margin:11px 0}.storyCard p{max-width:470px;color:var(--muted)}.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.fact{border-top:1px solid #ccd3ca;padding-top:10px}.fact strong{display:block;font-size:19px}.fact span{display:block;margin-top:2px;color:#7a857d;font:900 7px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase}
+.gallery{display:grid;grid-template-columns:1.05fr .65fr .65fr;grid-template-rows:250px 250px;gap:9px}.tile{position:relative;overflow:hidden;border-radius:22px;background:#d5dbd3}.tile:first-child{grid-row:span 2}.tile img{width:100%;height:100%;object-fit:cover;transition:transform .9s var(--ease)}.tile:hover img{transform:scale(1.045)}.tile span{position:absolute;left:11px;bottom:11px;padding:7px 9px;border-radius:999px;background:rgba(255,255,255,.9);font:900 7px ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--forest);text-transform:uppercase}
+.contactCard{display:grid;grid-template-columns:1.1fr .9fr;gap:9px}.contactMain,.contactSide{border-radius:27px;padding:35px}.contactMain{background:#e6eadf}.contactMain h2{font-size:clamp(52px,6.5vw,92px);line-height:.8;letter-spacing:-.095em;margin:11px 0 19px}.contactMain p{max-width:620px;color:var(--muted)}.contactSide{background:var(--forest);color:#fff;display:flex;flex-direction:column;justify-content:flex-end}.contactSide small{font:900 7px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.15em;text-transform:uppercase;color:#9eb1a6}.contactSide a{font:900 17px ui-monospace,SFMono-Regular,Consolas,monospace;margin-top:5px}.contactSide a+a{margin-top:18px;color:#d8f09f}
+.footer{padding:28px 0 40px;border-top:1px solid var(--line);text-align:center;color:#748078;font:900 8px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .8s var(--ease),transform .8s var(--ease);transition-delay:calc(var(--delay,0)*70ms)}.reveal.in{opacity:1;transform:none}
+@media(max-width:920px){.nav{display:none}.menu{display:block}.topBar{position:relative}.top{padding:10px}.mobileNav{display:none;pointer-events:auto;margin-top:5px;padding:12px;border-radius:16px;background:rgba(249,247,239,.94);border:1px solid var(--line);gap:11px;flex-direction:column}.mobileNav.open{display:flex}.mobileNav a{font:900 8px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase;color:#526259}.heroGrid,.storyGrid,.contactCard,.sectionHead{grid-template-columns:1fr}.hero{padding-top:74px}.heroCopy{padding-right:0}.heroImage{min-height:520px}.heroStats{max-width:none}.section{padding:82px 0}}
+@media(max-width:680px){.shell{width:92vw}.logo{width:138px;height:38px}.heroCopy h1{font-size:clamp(58px,16vw,88px)}.heroImage{min-height:420px;border-radius:24px}.heroStats{grid-template-columns:1fr 1fr}.products{grid-template-columns:1fr}.product h3{font-size:27px}.storyImage,.storyCard{min-height:370px}.storyCard{padding:27px}.storyCard h3{font-size:48px}.gallery{grid-template-columns:1fr;grid-template-rows:260px}.tile:first-child{grid-row:auto}.contactMain,.contactSide{padding:27px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.tickerTrack{animation:none}.heroImage img,.product,.tile img,.storyImage img,.btn{transition:none}.reveal{opacity:1;transform:none;transition:none}}
 </style>
 </head>
 <body>
-<header class="nav" id="nav">
-  <div class="wrap navInner">
+<header class="top">
+  <div class="shell topBar">
     <a class="logo" href="./" aria-label="BNC Agro Care"><img src="./FB_IMG_1789811599210.jpg" alt="BNC Agro Care"></a>
-    <nav class="navLinks"><a href="#products">Products</a><a href="#about">About</a><a href="#gallery">Gallery</a><a href="#contact" class="navCta">Contact</a></nav>
+    <nav class="nav"><a href="#products">Products</a><a href="#about">About</a><a href="#gallery">Gallery</a><a class="cta" href="#contact">Contact</a></nav>
     <button class="menu" id="menu" type="button" aria-expanded="false">Menu</button>
   </div>
-  <nav class="wrap mobileLinks" id="mobileLinks"><a href="#products">Products</a><a href="#about">About</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a></nav>
+  <nav class="shell mobileNav" id="mobileNav"><a href="#products">Products</a><a href="#about">About</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a></nav>
 </header>
+
 <main>
-<section class="hero"><div class="wrap"><div class="heroFrame reveal">
-  <div class="heroImage"><img src="./FB_IMG_1789811611633.jpg" alt="BNC Agro Care cover"></div>
-  <div class="heroGlow"></div>
-  <div class="heroGrid">
-    <div class="heroCopy">
-      <div class="eyebrow light">BNC Agro Care</div>
-      <h1>Built around<br><em>the crop.</em></h1>
-      <p class="heroLead">A clear product catalogue for growers, dealers and customers — with the BNC range, available pack sizes and a direct contact point.</p>
-      <div class="heroActions"><a class="btn btnPrimary" href="#products">Explore products</a><a class="btn btnGhost" href="#contact">Talk to BNC</a></div>
+<section class="hero">
+  <div class="shell heroGrid">
+    <div class="heroCopy reveal">
+      <div>
+        <div class="eyebrow">BNC Agro Care / Product Catalogue</div>
+        <h1>Made for<br><em>the field.</em></h1>
+        <p>A focused catalogue of BNC Agro Care products and available pack formats, presented for growers, dealers and customers.</p>
+        <div class="heroLinks"><a class="btn btnDark" href="#products">View range</a><a class="btn btnLight" href="#contact">Talk to BNC</a></div>
+      </div>
+      <div class="heroStats">
+        <div class="heroStat"><strong id="heroProducts">—</strong><span>Products</span></div>
+        <div class="heroStat"><strong id="heroPacks">—</strong><span>Pack formats</span></div>
+      </div>
     </div>
-    <div class="heroMeta">
-      <div class="metaLine"><i class="metaDot"></i><span>Current catalogue</span></div>
-      <div class="metaBox"><div><strong id="heroProducts">—</strong><span>Products</span></div><div><strong id="heroPacks">—</strong><span>Pack formats</span></div></div>
+    <figure class="heroImage reveal" style="--delay:1">
+      <img src="./FB_IMG_1789811611633.jpg" alt="BNC Agro Care">
+      <figcaption class="heroTag"><div><strong>BNC Agro Care</strong><span>Agricultural product range</span></div><span class="scrollMark">Explore ↓</span></figcaption>
+    </figure>
+  </div>
+</section>
+
+<div class="ticker" aria-hidden="true"><div class="tickerTrack"><span>Product range</span><span>Pack sizes</span><span>BNC Agro Care</span><span>Customer information</span><span>Product range</span><span>Pack sizes</span><span>BNC Agro Care</span><span>Customer information</span></div></div>
+
+<section class="section" id="products">
+  <div class="shell">
+    <div class="sectionHead reveal"><div><div class="eyebrow">01 / Product range</div><h2 class="title">Know what<br>you need.</h2></div><p class="lead">Search by product name or pack size. The catalogue stays deliberately simple so the information is easy to scan at a counter, on a phone or in front of a customer.</p></div>
+    <div class="catalogTop reveal" style="--delay:1"><input class="search" id="search" type="search" autocomplete="off" placeholder="Search product or pack size…"><span class="count" id="catalogCount">Loading…</span></div>
+    <div class="products" id="products" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="section story" id="about">
+  <div class="shell">
+    <div class="sectionHead reveal"><div><div class="eyebrow" style="color:#9db1a6">02 / About</div><h2 class="title">Product first.<br>Noise last.</h2></div><p class="lead" style="color:#b7c6bd">The public experience is built around the catalogue itself: names, pack formats, visuals and a direct route to the representative.</p></div>
+    <div class="storyGrid">
+      <figure class="storyImage reveal"><img src="./IMG-20260713-WA0000.jpg" alt="BNC Agro Care" loading="lazy"><figcaption><strong>Built around the product</strong><span>BNC Agro Care</span></figcaption></figure>
+      <article class="storyCard reveal" style="--delay:1"><div><div class="eyebrow">At a glance</div><h3>Clear.<br>Useful.<br>Direct.</h3><p>Customers should not have to decode the website. The range, the formats and the contact point stay visible throughout.</p></div><div class="facts"><div class="fact"><strong id="infoProducts">— products</strong><span>Current range</span></div><div class="fact"><strong id="infoPacks">— pack formats</strong><span>Available formats</span></div></div></article>
     </div>
   </div>
-</div></div></section>
+</section>
 
-<div class="rail" aria-hidden="true"><div class="railTrack"><span>Product range</span><span>Pack sizes</span><span>BNC Agro Care</span><span>Customer information</span><span>Product range</span><span>Pack sizes</span><span>BNC Agro Care</span><span>Customer information</span></div></div>
-
-<section class="section" id="products"><div class="wrap">
-  <div class="sectionHead reveal"><div><div class="eyebrow">01 / Product range</div><h2 class="sectionTitle">Know the range.</h2></div><p class="sectionText">Browse the current product names and available pack formats. The catalogue stays intentionally focused on the information customers need.</p></div>
-  <div class="catalogTools reveal" style="--delay:1"><input class="search" id="search" type="search" autocomplete="off" placeholder="Search a product or pack size…"><span class="count" id="catalogCount">Loading…</span></div>
-  <div class="products" id="products" aria-live="polite"></div>
-</div></section>
-
-<section class="section story" id="about"><div class="wrap">
-  <div class="sectionHead reveal"><div><div class="eyebrow light">02 / About</div><h2 class="sectionTitle">A clearer<br>way to browse.</h2></div><p class="sectionText" style="color:#b8c9bf">The experience keeps the brand visible and the product information easy to scan — with motion used as a layer, not as a distraction.</p></div>
-  <div class="storyGrid">
-    <figure class="storyMedia reveal"><img src="./FB_IMG_1789811611633.jpg" alt="BNC Agro Care cover image" loading="lazy"><figcaption class="storyCaption"><strong>BNC Agro Care</strong><span>Brand image</span></figcaption></figure>
-    <article class="storyCard reveal" style="--delay:1"><div><div class="eyebrow">Customer view</div><h3>Less noise.<br>More product.</h3><p>Everything here is designed around the catalogue: clear names, readable pack formats and a simple path to the representative.</p></div><div class="stats"><div class="stat"><strong id="infoProducts">— products</strong><span>Current range</span></div><div class="stat"><strong id="infoPacks">— pack formats</strong><span>Available formats</span></div></div></article>
+<section class="section" id="gallery">
+  <div class="shell">
+    <div class="sectionHead reveal"><div><div class="eyebrow">03 / Gallery</div><h2 class="title">See the<br>brand.</h2></div><p class="lead">The original BNC imagery stays prominent while the interface remains restrained around it.</p></div>
+    <div class="gallery reveal">
+      <figure class="tile"><img src="./FB_IMG_1789811611633.jpg" alt="BNC Agro Care cover" loading="lazy"><span>Cover</span></figure>
+      <figure class="tile"><img src="./IMG-20260713-WA0001.jpg" alt="BNC Agro Care product" loading="lazy"><span>Product</span></figure>
+      <figure class="tile"><img src="./IMG-20260713-WA0002.jpg" alt="BNC Agro Care product" loading="lazy"><span>Product</span></figure>
+      <figure class="tile"><img src="./IMG-20260713-WA0003.jpg" alt="BNC Agro Care product" loading="lazy"><span>Product</span></figure>
+      <figure class="tile"><img src="./IMG-20260713-WA0000.jpg" alt="BNC Agro Care product" loading="lazy"><span>Product</span></figure>
+    </div>
   </div>
-</div></section>
+</section>
 
-<section class="section" id="gallery"><div class="wrap">
-  <div class="sectionHead reveal"><div><div class="eyebrow">03 / Gallery</div><h2 class="sectionTitle">See the brand.</h2></div><p class="sectionText">The original BNC imagery stays prominent without becoming the interface itself.</p></div>
-  <div class="gallery reveal"><figure class="tile"><img src="./FB_IMG_1789811611633.jpg" alt="BNC Agro Care cover" loading="lazy"><span class="tileTag">Cover</span></figure><figure class="tile"><img src="./IMG-20260713-WA0000.jpg" alt="BNC Agro Care product" loading="lazy"><span class="tileTag">Product</span></figure><figure class="tile"><img src="./IMG-20260713-WA0001.jpg" alt="BNC Agro Care product" loading="lazy"><span class="tileTag">Product</span></figure><figure class="tile"><img src="./IMG-20260713-WA0002.jpg" alt="BNC Agro Care product" loading="lazy"><span class="tileTag">Product</span></figure><figure class="tile"><img src="./IMG-20260713-WA0003.jpg" alt="BNC Agro Care product" loading="lazy"><span class="tileTag">Product</span></figure></div>
-</div></section>
-
-<section class="contact" id="contact"><div class="wrap"><div class="contactCard reveal">
-  <div class="contactMain"><div class="eyebrow">04 / Contact</div><h2>Need a product?<br>Talk to BNC.</h2><p>For product information, pack-size questions and business enquiries, contact the representative directly.</p><div class="heroActions"><a class="btn btnDark" href="tel:+8801718306103">Call representative</a></div></div>
-  <div class="contactSide"><small>Representative</small><a href="tel:+8801718306103">Md Rezaul Karim</a><small style="margin-top:20px">Role</small><a href="#contact">Officer BNC Agro Care · Area Manager</a><small style="margin-top:20px">Mobile</small><a href="tel:+8801718306103">01718-306103</a></div>
-</div></div></section>
+<section class="section" id="contact" style="padding-top:0">
+  <div class="shell">
+    <div class="contactCard reveal">
+      <div class="contactMain"><div class="eyebrow">04 / Contact</div><h2>Need a product?<br>Talk to BNC.</h2><p>For product information, pack-size questions and business enquiries, contact the representative directly.</p><div class="heroLinks"><a class="btn btnDark" href="tel:+8801718306103">Call representative</a></div></div>
+      <div class="contactSide"><small>Representative</small><a href="tel:+8801718306103">Md Rezaul Karim</a><small style="margin-top:20px">Role</small><a href="#contact">Officer BNC Agro Care · Area Manager</a><small style="margin-top:20px">Mobile</small><a href="tel:+8801718306103">01718-306103</a></div>
+    </div>
+  </div>
+</section>
 </main>
-<footer class="footer"><a href="https://tamasrazim.github.io/" target="_blank" rel="noopener noreferrer">© Robiul Rumman Razim</a></footer>
+
+<footer class="footer"><div class="shell"><a href="https://tamasrazim.github.io/" target="_blank" rel="noopener noreferrer">© Robiul Rumman Razim</a></div></footer>
+
 <script src="./reference/products.js"></script>
 <script>
 (()=>{
@@ -142,19 +132,20 @@ a{text-decoration:none;color:inherit}button,input{font:inherit}img{display:block
     const list=data.filter(p=>(String(p.name||"")+" "+(p.packs||[]).join(" ")).toLowerCase().includes(q));
     const packs=list.reduce((n,p)=>n+(p.packs||[]).length,0);
     count.textContent=list.length+" product"+(list.length===1?"":"s")+" · "+packs+" pack format"+(packs===1?"":"s");
-    if(!list.length){grid.innerHTML='<div style="grid-column:1/-1;padding:38px;border:1px dashed #c8d1c7;border-radius:22px;text-align:center;color:#748078">No matching product found.</div>';return}
-    grid.innerHTML=list.map((p,i)=>'<article class="product reveal" style="--delay:'+Math.min(i,7)+'"><div class="productTop"><span class="productCode">'+esc(p.code||String(i+1).padStart(2,"0"))+'</span><span class="productArrow">↗</span></div><h3>'+esc(p.name)+'</h3><div class="packLabel">Pack formats</div><div class="packs">'+(p.packs||[]).map(x=>'<span class="pack">'+esc(x)+'</span>').join("")+'</div></article>').join("");
-    requestAnimationFrame(()=>grid.querySelectorAll(".reveal").forEach(observe));
+    if(!list.length){
+      grid.innerHTML='<div style="grid-column:1/-1;padding:42px;border:1px dashed #c5cec4;border-radius:22px;text-align:center;color:#738078">No matching product found.</div>';
+      return;
+    }
+    grid.innerHTML=list.map((p,i)=>'<article class="product reveal" style="--delay:'+Math.min(i,6)+'"><div class="productTop"><span class="productCode">'+esc(p.code||String(i+1).padStart(2,"0"))+'</span><span class="productMark">↗</span></div><h3>'+esc(p.name)+'</h3><div class="packLabel">'+(p.packs?.length||0)+' pack formats</div><div class="packs">'+(p.packs||[]).map(v=>'<span class="pack">'+esc(v)+'</span>').join("")+'</div></article>').join("");
+    requestAnimationFrame(()=>document.querySelectorAll(".product.reveal").forEach((el,i)=>setTimeout(()=>el.classList.add("in"),i*35)));
   }
-  search.addEventListener("input",()=>render(search.value));render();
-  const nav=$("#nav"),menu=$("#menu"),mobile=$("#mobileLinks");
-  menu?.addEventListener("click",()=>{const open=nav.classList.toggle("open");menu.setAttribute("aria-expanded",String(open))});
-  mobile?.addEventListener("click",e=>{if(e.target.matches("a")){nav.classList.remove("open");menu.setAttribute("aria-expanded","false")}});
-  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const observer=!reduce&&"IntersectionObserver"in window?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");observer.unobserve(e.target)}}),{threshold:.11,rootMargin:"0px 0px -30px"}):null;
-  function observe(el){if(observer)observer.observe(el);else el.classList.add("in")}
-  document.querySelectorAll(".reveal").forEach(observe);
-  if(!reduce){let tx=0,ty=0,ax=0,ay=0;window.addEventListener("pointermove",e=>{tx=(e.clientX/innerWidth-.5)*34;ty=(e.clientY/innerHeight-.5)*24},{passive:true});function tick(){ax+=(tx-ax)*.06;ay+=(ty-ay)*.06;document.documentElement.style.setProperty("--mx",ax.toFixed(2)+"px");document.documentElement.style.setProperty("--my",ay.toFixed(2)+"px");requestAnimationFrame(tick)}tick()}
+  search.addEventListener("input",e=>render(e.target.value));
+  render();
+  const menu=$("#menu"),mobile=$("#mobileNav");
+  menu.addEventListener("click",()=>{const open=mobile.classList.toggle("open");menu.setAttribute("aria-expanded",String(open))});
+  mobile.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>{mobile.classList.remove("open");menu.setAttribute("aria-expanded","false")}));
+  const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add("in")}),{threshold:.1});
+  document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
 })();
 </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});</script>
