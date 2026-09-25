@@ -24,6 +24,7 @@ let liveWorkbook=null;
 let liveSheet=null;
 let dirty=true;
 let headerTargets={};
+let formulaResults={};
 
 const num=v=>{const n=Number(v);return Number.isFinite(n)?n:0};
 const money=v=>num(v).toFixed(2);
@@ -201,8 +202,13 @@ function renderProducts(){
       if(state.rows.length<=ROWS_PER_SIDE)return;
       try{
         await ensureLiveWorkbook();
-        liveSheet.spliceRows(PRODUCT_START_ROW+i,1);
         state.rows.splice(i,1);
+        liveWorkbook=null;
+        liveSheet=null;
+        buildPromise=null;
+        headerTargets={};
+        formulaResults={};
+        await ensureLiveWorkbook();
         rebalanceSL(liveSheet,state.rows.length);
         recalcLiveFormulas();
         dirty=true;lastBuffer=null;
@@ -411,14 +417,18 @@ async function ensureLiveWorkbook(){
 }
 
 function recalcLiveFormulas(){
+  formulaResults={};
   if(!liveSheet)return;
   liveSheet.eachRow(row=>row.eachCell({includeEmpty:false},cell=>{
     if(!cell.formula)return;
     const m=String(cell.formula).match(/^SUM\(([A-Z]+)(\d+):([A-Z]+)(\d+)\)$/i);
     if(!m||m[1].toUpperCase()!==m[3].toUpperCase())return;
     let total=0;
-    for(let r=Number(m[2]);r<=Number(m[4]);r++)total+=num(liveSheet.getRow(r).getCell(cell.column).value);
-    cell.value={formula:cell.formula,result:total};
+    for(let r=Number(m[2]);r<=Number(m[4]);r++){
+      const value=liveSheet.getRow(r).getCell(cell.column).value;
+      total+=num(value);
+    }
+    formulaResults[cell.address]=total;
   }));
 }
 
@@ -464,9 +474,13 @@ function displayWorkbookValue(cell){
   if(typeof v==="string"||typeof v==="number")return String(v);
   if(v instanceof Date)return displayDate(v.toISOString().slice(0,10));
   if(v.richText)return v.richText.map(x=>x.text||"").join("");
+  if(v.formula){
+    if(formulaResults[cell.address]!==undefined)return String(formulaResults[cell.address]);
+    if(v.result!=null)return String(v.result);
+    return"="+v.formula;
+  }
   if(v.result!=null)return String(v.result);
   if(v.text!=null)return String(v.text);
-  if(v.formula)return"="+v.formula;
   return"";
 }
 function columnNumberFromLetters(value){
