@@ -526,7 +526,7 @@
         canvas.style.height=height+'px';
         ctx.setTransform(dpr,0,0,dpr,0,0);
 
-        var count=width<700?72:Math.min(155,Math.max(72,Math.floor((width*height)/14500)));
+        var count=width<700?48:Math.min(96,Math.max(48,Math.floor((width*height)/22000)));
         particles=[];
         for(var i=0;i<count;i++){
           var radius=Math.random()*Math.min(width,height)*.62+18;
@@ -540,7 +540,7 @@
           });
         }
         streaks=[];
-        for(var s=0;s<18;s++){
+        for(var s=0;s<10;s++){
           streaks.push({
             angle:Math.random()*Math.PI*2,
             radius:Math.random()*Math.min(width,height)*.56+80,
@@ -564,8 +564,11 @@
         ctx.restore();
       }
 
+      var fieldNextFrame=0;
       function stepField(now){
         if(!running){last=now;requestAnimationFrame60(stepField);return;}
+        if(now<fieldNextFrame){requestAnimationFrame60(stepField);return;}
+        fieldNextFrame=now+33.333;
         var dt=Math.min(32,now-last);last=now;
         sectionPulse += dt*.0007;
 
