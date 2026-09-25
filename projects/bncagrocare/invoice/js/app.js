@@ -1,6 +1,6 @@
 (()=>{"use strict";
 const $=s=>document.querySelector(s);
-const TEMPLATE="../invoice.pdf",DB="bnc-invoice-v4",ROWS_PER_SIDE=6,MAX_ROWS_PER_SIDE=50,FIRST_PAGE_EXTRA_ROWS=2;
+const TEMPLATE="../invoice.pdf",DB="bnc-invoice-v4",ROWS_PER_SIDE=4,MAX_ROWS_PER_SIDE=50,FIRST_PAGE_EXTRA_ROWS=2;
 const PRODUCTS=[
 {name:"NC Gold- 4CPA",packs:["1 Ltr x 12 Bottle","500 ml x 12 Bottle","100 ml x 30 Bottle"]},
 {name:"NC Zinc- Mono 36%",packs:["1kg. x 10 Pack"]},
@@ -145,7 +145,7 @@ function paperCol(rows,side,totalRows){
  return "<div class=\"paperTable\"><div class=\"th\"><span>SL</span><span>PRODUCT</span><span>PACK</span><span>CTN</span><span>RATE</span></div>"+rows.map((p,i)=>paperRow(p,slFor(i,side,totalRows))).join("")+"</div>";
 }
 function renderPreview(){
- const t=totals(),totalRows=state.rows.length,left=state.rows.map(r=>r.left),right=state.rows.map(r=>r.right),shown=state.rows.slice(0,8);
+ const t=totals(),totalRows=state.rows.length,left=state.rows.map(r=>r.left),right=state.rows.map(r=>r.right),shown=state.rows.slice(0,ROWS_PER_SIDE+FIRST_PAGE_EXTRA_ROWS);
  const previewRows=shown,extra=Math.max(0,state.rows.length-8);
  const leftPreview=previewRows.map(r=>r.left),rightPreview=previewRows.map(r=>r.right);
  $("#pdfPreview").innerHTML="<div class=\"a4Sheet\"><div class=\"paperHeader\"><div><div class=\"paperBrand\">BNC AGROCARE</div><div class=\"paperTitle\">INVOICE</div></div><div class=\"paperMeta\">REF "+safe(state.ref)+"<br>NO. "+safe(state.invoiceNo)+"<br>"+safe(displayDate(state.date))+"</div></div><div class=\"metaGrid\"><div class=\"metaBox\"><small>TRADER / SHOP</small><strong>"+safe(state.trader)+"</strong></div><div class=\"metaBox\"><small>BUYER</small><strong>"+safe(state.buyer)+"</strong></div><div class=\"metaBox\"><small>ADDRESS</small><strong>"+safe(state.address)+"</strong></div><div class=\"metaBox\"><small>MOBILE</small><strong>"+safe(state.mobile)+"</strong></div></div><div class=\"paperTables\">"+paperCol(leftPreview,"left",totalRows)+paperCol(rightPreview,"right",totalRows)+"</div>"+(extra?"<div class=\"paperContinuation\">+"+extra+" additional row"+(extra===1?"":"s")+" continue on the PDF.</div>":"")+"<div class=\"paperSummary\"><div class=\"paperTotal\"><span>TOTAL CARTON</span><strong>"+t.cartons+"</strong></div><div class=\"paperTotal\"><span>GROSS TAKA</span><strong>"+money(t.total)+"</strong></div><div class=\"paperTotal\"><span>COMMISSION</span><strong>"+money(t.commission)+"</strong></div><div class=\"paperTotal\"><span>TOTAL AMOUNT</span><strong>"+money(t.final)+"</strong></div><div class=\"paperWords\">Total Taka (In words): "+safe(words(t.final))+"</div></div><div class=\"paperFoot\"><span>Representative: Md Rezaul Karim</span><span>BNC AgroCare</span></div></div>";
