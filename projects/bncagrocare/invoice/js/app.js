@@ -208,7 +208,7 @@ function countInvoiceRows(ws){
  return stRow?Math.max(ROWS_PER_SIDE,stRow-11):ROWS_PER_SIDE
 }
 
-async async function buildWorkbook(){
+async function buildWorkbook(){
  if(buildWorkbook.busy)return lastBuffer;
  buildWorkbook.busy=true;$("#previewBtn").disabled=true;$("#xlsxState").textContent="Preparing...";setStatus("Loading BNCFINAL.xlsx...");
  try{
