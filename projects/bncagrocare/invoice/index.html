@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#06271e">
+<meta name="theme-color" content="#071a12">
 <meta name="description" content="BNC AgroCare Invoice Studio — local-first invoice preparation and A4 PDF generation.">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icons/icon.svg">
@@ -11,78 +11,22 @@
 <link rel="stylesheet" href="./css/app.css">
 </head>
 <body>
-<header class="topbar">
-  <div class="brandArea"><a class="brand" href="../">BNC <b>AgroCare</b></a><span class="divider"></span><span class="appName">INVOICE STUDIO</span></div>
-  <div class="status"><span class="statusDot"></span><span id="status">Ready</span></div>
-  <div class="topActions"><button id="newBtn" type="button">New</button><button id="saveBtn" type="button">Save</button><button id="installBtn" type="button" hidden>Install</button></div>
-</header>
-
-<main class="shell">
-  <section class="hero">
-    <div class="heroCopy">
-      <div class="ey">BNC BUSINESS TOOL · A4 PDF WORKFLOW</div>
-      <h1>Build the invoice<br><span>without losing the document.</span></h1>
-      <p>Enter the customer and product lines, verify the live totals, then generate the finished BNC invoice. The original PDF remains the master template.</p>
-    </div>
-    <div class="heroMeta">
-      <div class="metric"><strong id="rowMetric">6</strong><span>rows / side</span></div>
-      <div class="metric"><strong id="slotMetric">12</strong><span>product slots</span></div>
-      <div class="metric"><strong>A4</strong><span>PDF output</span></div>
-      <button id="previewBtn" class="primary">Generate PDF <span>→</span></button>
-    </div>
-  </section>
-
-  <section class="workspace">
-    <div class="editor">
-      <article class="panel">
-        <div class="panelHeader"><div><span class="ey">01 · CUSTOMER</span><h2>Document details</h2></div><span class="badge">LOCAL</span></div>
-        <div class="formGrid">
-          <label>Reference<input id="ref" data-k="ref" placeholder="X2"></label>
-          <label>Invoice No.<input id="invoiceNo" data-k="invoiceNo" inputmode="numeric" placeholder="0002"></label>
-          <label>Date<input id="date" data-k="date" type="date"></label>
-          <label>Commission %<input id="commission" data-k="commission" type="number" min="0" step=".01" placeholder="0"></label>
-          <label class="full">Trader / Shop name<input id="trader" data-k="trader" placeholder="M/S ______ Traders"></label>
-          <label class="full">Buyer name<input id="buyer" data-k="buyer" placeholder="Buyer / customer"></label>
-          <label class="full">Address<input id="address" data-k="address" placeholder="Full address"></label>
-          <label class="full">Mobile<input id="mobile" data-k="mobile" type="tel" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX"></label>
-        </div>
-        <div class="rep"><div class="repMark">BNC</div><div><small>Sales representative</small><strong>Md Rezaul Karim</strong><span>Officer BNC AGRO CARE · Area Manager · 01718-306103</span></div></div>
-      </article>
-
-      <article class="panel">
-        <div class="panelHeader productHeader"><div><span class="ey">02 · PRODUCT LINES</span><h2>Invoice products</h2></div><button id="addBtn" class="secondary" type="button">+ Add product row</button></div>
-        <div class="catalogNote"><span>Each click inserts one physical invoice row. Left and right SL numbers rebalance automatically.</span><b>CTN × RATE → AMOUNT</b></div>
-        <div class="productViewport">
-          <div class="pairLegend"><span>LEFT · SL 01 → N</span><span>RIGHT · SL N+1 → 2N</span><span></span></div>
-          <div id="products"></div>
-        </div>
-        <div id="summary" class="summary"></div>
-      </article>
-
-      <article class="panel historyPanel">
-        <div class="panelHeader"><div><span class="ey">04 · SAVED DOCUMENTS</span><h2>Invoice history</h2></div><span class="badge">THIS DEVICE</span></div>
-        <div id="history"></div>
-      </article>
-    </div>
-
-    <aside class="preview">
-      <article class="panel previewPanel">
-        <div class="panelHeader"><div><span class="ey">03 · A4 DOCUMENT</span><h2>Preview</h2></div><span id="pdfState" class="badge">Ready</span></div>
-        <div class="previewViewport">
-          <div id="pdfPreview" class="a4Stage" aria-label="A4 invoice preview">
-            <div class="emptyPage"><strong>Generate PDF</strong><span>Your finished BNC invoice will appear here.</span></div>
-          </div>
-        </div>
-        <div class="previewActions"><button id="downloadBtn" class="primary">Download PDF</button><button id="jsonOutBtn" class="secondary">Export JSON</button><button id="jsonInBtn" class="secondary">Import JSON</button><input id="jsonFile" type="file" accept=".json" hidden></div>
-        <div class="protect"><strong>Template protected</strong><span>invoice.pdf stays unchanged and is used as the document master.</span></div>
-      </article>
-    </aside>
-  </section>
+<header class="topbar"><div class="brand"><a href="../">BNC <b>AgroCare</b></a><span class="slash">/</span><span>Invoice Studio</span></div><div class="status"><i></i><span id="status">Ready</span></div><div class="actions"><a class="back" href="../">BNC site</a><button id="newBtn" type="button">New</button><button id="saveBtn" type="button">Save</button><button id="installBtn" type="button" hidden>Install</button></div></header>
+<main class="studio">
+<section class="studioHead"><div><div class="ey">BNC BUSINESS TOOL · CANONICAL INVOICE WORKFLOW</div><h1>Invoice <span>Studio.</span></h1><p>BNCFINAL.xlsx defines the sheet structure. The row-expansion rule stays in addProductRow.js. Final PDF generation uses the locked invoice.pdf master.</p></div><div class="headStats"><div><strong id="rowMetric">4</strong><span>rows / side</span></div><div><strong id="slotMetric">8</strong><span>base slots</span></div><div><strong>A4</strong><span>locked master</span></div></div></section>
+<div class="workspace">
+<div class="editor">
+<article class="panel"><div class="panelHead"><div><span class="ey">01 · DOCUMENT</span><h2>Customer &amp; invoice</h2></div><b>LOCAL</b></div><div class="formGrid">
+<label>Reference<input id="ref" data-k="ref" placeholder="X2"></label><label>Invoice No.<input id="invoiceNo" data-k="invoiceNo" inputmode="numeric" placeholder="0002"></label><label>Date<input id="date" data-k="date" type="date"></label><label>Commission %<input id="commission" data-k="commission" type="number" min="0" step=".01" placeholder="0"></label>
+<label class="wide">Trader / Dealer name<input id="trader" data-k="trader" placeholder="M/S ______ Traders"></label><label class="wide">Buyer name<input id="buyer" data-k="buyer" placeholder="Name:"></label><label class="wide">Address<input id="address" data-k="address" placeholder="Address"></label><label class="wide">Mobile<input id="mobile" data-k="mobile" type="tel" inputmode="tel" placeholder="01XXXXXXXXX"></label>
+</div><div class="repLine"><span>BNC</span><div><small>Sales representative</small><strong>Md Rezaul Karim</strong><em>Officer BNC AGRO CARE · Area Manager · 01718-306103</em></div></div></article>
+<article class="panel productPanel"><div class="panelHead"><div><span class="ey">02 · LINE ITEMS</span><h2>Products</h2></div><button id="addBtn" class="add" type="button">+ Add product row</button></div><div class="ruleBar"><span>Base sheet: 4 + 4</span><span>Add row → insert before ST</span><span>SL always rebalances</span></div><div class="columnHeads"><span>LEFT · SL 01 → N</span><span>RIGHT · SL N+1 → 2N</span><span></span></div><div id="products"></div><div id="summary" class="summary"></div></article>
+<article class="panel"><div class="panelHead"><div><span class="ey">04 · SAVED DOCUMENTS</span><h2>History</h2></div><b>THIS DEVICE</b></div><div id="history"></div></article>
+</div>
+<aside class="preview"><article class="panel previewPanel"><div class="panelHead"><div><span class="ey">03 · A4 OUTPUT</span><h2>Live preview</h2></div><b id="pdfState">Ready</b></div><div class="previewViewport"><div id="pdfPreview" class="a4Stage"><div class="emptyPage"><strong>A4 invoice preview</strong><span>Generate the PDF to create the finished document.</span></div></div></div><div class="previewActions"><button id="previewBtn" class="primary">Generate PDF →</button><button id="downloadBtn" class="secondary">Download PDF</button><div class="miniActions"><button id="jsonOutBtn" class="secondary">Export JSON</button><button id="jsonInBtn" class="secondary">Import JSON</button><input id="jsonFile" type="file" accept=".json" hidden></div></div><div class="lockNote"><strong>Template protected</strong><span><code>invoice.pdf</code> is read-only master input. The generator writes a new PDF; it never modifies the source.</span></div></article></aside>
+</div>
 </main>
-
-<footer>BNC AgroCare · Invoice Studio <span>·</span> Built by Tamasrazim</footer>
-<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-<script src="./js/app.js"></script>
-<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});</script>
+<footer>BNC AgroCare · Invoice Studio · Canonical project under <span>tamasrazim.github.io/projects/bncagrocare</span></footer>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script><script src="../reference/products.js"></script><script src="./js/app.js"></script><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});</script>
 </body>
 </html>
