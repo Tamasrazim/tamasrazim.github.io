@@ -1,6 +1,6 @@
 (()=>{"use strict";
 const $=s=>document.querySelector(s);
-const TEMPLATE="../invoice.pdf",DB="bnc-invoice-v4",ROWS_PER_SIDE=4,MAX_ROWS_PER_SIDE=50,FIRST_PAGE_EXTRA_ROWS=4;
+const TEMPLATE="../invoice.pdf",DB="bnc-invoice-v4",ROWS_PER_SIDE=6,MAX_ROWS_PER_SIDE=50,FIRST_PAGE_EXTRA_ROWS=2;
 const PRODUCTS=[
 {name:"NC Gold- 4CPA",packs:["1 Ltr x 12 Bottle","500 ml x 12 Bottle","100 ml x 30 Bottle"]},
 {name:"NC Zinc- Mono 36%",packs:["1kg. x 10 Pack"]},
