@@ -65,11 +65,8 @@ function rebalanceSL(ws,totalRows){
 function insertProductRowIntoWorksheet(ws){
   const stRow=findStRow(ws);
   bumpFormulaRefsAtOrBelow(ws,stRow);
-  ws.spliceRows(stRow,0,[]);
-  const sourceRow=ws.getRow(stRow-1);
-  const inserted=ws.getRow(stRow);
-  inserted.height=sourceRow.height;
-  for(let c=1;c<=12;c++)copyFormats(sourceRow.getCell(c),inserted.getCell(c));
+  const inserted=ws.insertRow(stRow,[], "i+");
+  inserted.height=ws.getRow(stRow-1).height;
   clearCellsAtoL(ws,stRow);
   const totalRows=Math.max(4,stRow-PRODUCT_START_ROW+1);
   rebalanceSL(ws,totalRows);
