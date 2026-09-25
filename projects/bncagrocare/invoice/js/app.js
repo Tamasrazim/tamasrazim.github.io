@@ -247,7 +247,7 @@ async function addProductRow(){
     saveDraft();
     buildWorkbookPreviewSheet(liveSheet);
     setStatus("Live XLSX row added");
-  }catch(error){console.error(error);setStatus("Could not add row");alert(error.message||"Could not add product row")}
+  }catch(error){console.error(error);setStatus("Row insert failed");alert(error.message||"Could not add product row")}
 }
 
 function updateSummary(){
@@ -339,7 +339,7 @@ function findStRow(ws){
     if(stRow!==null)return;
     if(textOfCell(row.getCell(2)).toUpperCase()==="ST")stRow=rowNumber;
   });
-  if(!stRow)throw Error('Could not find the "ST" row in BNCFINAL.xlsx');
+  if(!stRow)throw Error('Could not find the invoice subtotal row.');
   return stRow;
 }
 function countInvoiceRows(ws){
@@ -385,33 +385,50 @@ async function ensureLiveWorkbook(){
   if(liveWorkbook&&liveSheet)return liveWorkbook;
   if(buildPromise)return buildPromise;
   buildPromise=(async()=>{
-    if(!window.ExcelJS?.Workbook)throw Error("ExcelJS unavailable");
-    setStatus("Loading BNCFINAL.xlsx…");
-    const response=await fetch(TEMPLATE,{cache:"no-store"});
-    if(!response.ok)throw Error("BNCFINAL.xlsx unavailable ("+response.status+")");
-    headerTargets={};
-    liveWorkbook=new ExcelJS.Workbook();
-    await liveWorkbook.xlsx.load(await response.arrayBuffer());
-    liveSheet=findInvoiceSheet(liveWorkbook);
-    if(!liveSheet)throw Error("Invoice sheet 01 is unavailable");
-    putHeaderField(liveSheet,["reference","ref"],state.ref);
-    putHeaderField(liveSheet,["invoice no","invoice number","invoice"],state.invoiceNo,true);
-    putHeaderField(liveSheet,["date"],displayDate(state.date),true);
-    putHeaderField(liveSheet,["trader / dealer","trader/dealer","trader","dealer"],state.trader);
-    putHeaderField(liveSheet,["buyer"],state.buyer);
-    putHeaderField(liveSheet,["address"],state.address);
-    putHeaderField(liveSheet,["mobile","phone"],state.mobile);
-    putHeaderField(liveSheet,["commission %","commission"],state.commission);
-    while(countInvoiceRows(liveSheet)<state.rows.length)window.BNCInsertProductRow(liveSheet);
-    const totalRows=state.rows.length;
-    for(let i=0;i<totalRows;i++){
-      writeLine(liveSheet,i,totalRows,"left",state.rows[i].left);
-      writeLine(liveSheet,i,totalRows,"right",state.rows[i].right);
+    let stage="startup";
+    try{
+      if(!window.ExcelJS?.Workbook)throw Error("ExcelJS unavailable");
+      stage="template fetch";
+      setStatus("Loading invoice template…");
+      const response=await fetch(TEMPLATE,{cache:"no-store"});
+      if(!response.ok)throw Error("Template unavailable ("+response.status+")");
+      stage="workbook parse";
+      headerTargets={};
+      liveWorkbook=new ExcelJS.Workbook();
+      await liveWorkbook.xlsx.load(await response.arrayBuffer());
+      stage="sheet lookup";
+      liveSheet=findInvoiceSheet(liveWorkbook);
+      if(!liveSheet)throw Error("Invoice sheet is unavailable");
+      stage="header fields";
+      putHeaderField(liveSheet,["reference","ref"],state.ref);
+      putHeaderField(liveSheet,["invoice no","invoice number","invoice"],state.invoiceNo,true);
+      putHeaderField(liveSheet,["date"],displayDate(state.date),true);
+      putHeaderField(liveSheet,["trader / dealer","trader/dealer","trader","dealer"],state.trader);
+      putHeaderField(liveSheet,["buyer"],state.buyer);
+      putHeaderField(liveSheet,["address"],state.address);
+      putHeaderField(liveSheet,["mobile","phone"],state.mobile);
+      putHeaderField(liveSheet,["commission %","commission"],state.commission);
+      stage="product rows";
+      while(countInvoiceRows(liveSheet)<state.rows.length)window.BNCInsertProductRow(liveSheet);
+      const totalRows=state.rows.length;
+      for(let i=0;i<totalRows;i++){
+        writeLine(liveSheet,i,totalRows,"left",state.rows[i].left);
+        writeLine(liveSheet,i,totalRows,"right",state.rows[i].right);
+      }
+      rebalanceSL(liveSheet,totalRows);
+      stage="formula calculation";
+      recalcLiveFormulas();
+      setStatus("Live XLSX loaded");
+      return liveWorkbook;
+    }catch(error){
+      liveWorkbook=null;
+      liveSheet=null;
+      formulaResults={};
+      const message=error?.message||String(error);
+      const wrapped=new Error("XLSX "+stage+" failed: "+message);
+      wrapped.cause=error;
+      throw wrapped;
     }
-    rebalanceSL(liveSheet,totalRows);
-    recalcLiveFormulas();
-    setStatus("Live XLSX loaded");
-    return liveWorkbook;
   })();
   try{return await buildPromise}finally{buildPromise=null}
 }
@@ -434,15 +451,24 @@ function recalcLiveFormulas(){
 
 async function buildWorkbook(){
   await ensureLiveWorkbook();
-  applyHeaderEditsToLive();
-  recalcLiveFormulas();
-  if(liveWorkbook.calcProperties){
-    liveWorkbook.calcProperties.fullCalcOnLoad=true;
-    liveWorkbook.calcProperties.forceFullCalc=true;
+  try{
+    applyHeaderEditsToLive();
+    recalcLiveFormulas();
+    if(liveWorkbook.calcProperties){
+      liveWorkbook.calcProperties.fullCalcOnLoad=true;
+      liveWorkbook.calcProperties.forceFullCalc=true;
+    }
+    setStatus("Building XLSX…");
+    const out=await liveWorkbook.xlsx.writeBuffer();
+    lastBuffer=out;
+    setStatus("XLSX ready");
+    return out;
+  }catch(error){
+    const wrapped=new Error("XLSX serialization failed: "+(error?.message||String(error)));
+    wrapped.cause=error;
+    setStatus("XLSX serialization error");
+    throw wrapped;
   }
-  const out=await liveWorkbook.xlsx.writeBuffer();
-  lastBuffer=out;
-  return out;
 }
 
 function applyHeaderEditsToLive(){
@@ -567,7 +593,7 @@ async function renderPreview(){
   }catch(error){
     console.error("BNC Invoice:",error);
     host.innerHTML='<div class="emptyPage"><strong>Preview unavailable</strong><span>'+safe(error?.message||"Unable to render workbook")+'</span></div>';
-    setStatus("XLSX error");
+    setStatus(error?.message||"XLSX error");
   }
 }
 
