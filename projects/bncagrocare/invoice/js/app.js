@@ -549,7 +549,7 @@ async function renderPreview(){
     dirty=false;
     setStatus("Live preview synced");
   }catch(error){
-    console.error("Invoice Studio:",error);
+    console.error("BNC Invoice:",error);
     host.innerHTML='<div class="emptyPage"><strong>Preview unavailable</strong><span>'+safe(error?.message||"Unable to render workbook")+'</span></div>';
     setStatus("XLSX error");
   }
