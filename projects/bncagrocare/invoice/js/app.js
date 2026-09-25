@@ -5,7 +5,7 @@ const PRODUCTS=window.BNC_PRODUCTS||[];
 const blank=()=>({name:"",pack:"",ctn:"",rate:""});
 const blankRow=()=>({left:blank(),right:blank()});
 const state={ref:"X2",invoiceNo:"0002",date:"",commission:0,trader:"",buyer:"",address:"",mobile:"",rows:Array.from({length:ROWS_PER_SIDE},blankRow)};
-let db=null,lastBuffer=null,deferred=null;
+let db=null,lastBuffer=null,deferred=null,buildBusy=false;
 
 const num=v=>{const n=Number(v);return Number.isFinite(n)?n:0};
 const money=v=>num(v).toFixed(2);
