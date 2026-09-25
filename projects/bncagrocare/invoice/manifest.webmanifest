@@ -1,9 +1,12 @@
 {
-  "name":"BNC AgroCare Invoice Studio",
-  "short_name":"BNC Invoice",
+  "name":"BNC Agro Care",
+  "short_name":"BNC Agro Care",
   "start_url":"./",
   "display":"standalone",
-  "background_color":"#071811",
-  "theme_color":"#071811",
-  "icons":[{"src":"./icons/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+  "background_color":"#f3f1e8",
+  "theme_color":"#153c25",
+  "icons":[
+    {"src":"./FB_IMG_1789811599210.jpg","sizes":"any","type":"image/jpeg","purpose":"any"},
+    {"src":"./invoice/icons/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
 }
