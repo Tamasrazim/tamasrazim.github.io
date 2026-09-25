@@ -1,4 +1,4 @@
-const CACHE="bnc-public-v2";
+const CACHE="bnc-public-v3";
 const CORE=[
  "./","./index.html","./manifest.webmanifest","./FB_IMG_1789811599210.jpg","./FB_IMG_1789811611633.jpg",
  "./IMG-20260713-WA0000.jpg","./IMG-20260713-WA0001.jpg","./IMG-20260713-WA0002.jpg","./IMG-20260713-WA0003.jpg" ,"./reference/products.js"
