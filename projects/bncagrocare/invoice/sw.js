@@ -1,6 +1,6 @@
-const CACHE="bnc-invoice-v50";
+const CACHE="bnc-invoice-v51";
 const EXCEL_JS="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js";
-const CORE=["./","./index.html","./css/app.css","./js/app.js","./manifest.webmanifest","./icons/icon.svg","../reference/BNCFINAL.xlsx"];
+const CORE=["./","./index.html","./css/app.css","./js/app.js?v=51","./manifest.webmanifest","./icons/icon.svg","../reference/BNCFINAL.xlsx?v=51"];
 const FALLBACK=new URL("./index.html",self.registration.scope).href;
 
 const put=async(req,res)=>{
