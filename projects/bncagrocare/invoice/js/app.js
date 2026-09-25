@@ -219,8 +219,10 @@ function renderProducts(){
     host.append(pair);
   });
 
-  $("#rowMetric").textContent=String(totalRows);
-  $("#slotMetric").textContent=String(totalRows*2);
+  const rowMetric=$("#rowMetric");
+  const slotMetric=$("#slotMetric");
+  if(rowMetric)rowMetric.textContent=String(totalRows);
+  if(slotMetric)slotMetric.textContent=String(totalRows*2);
   updateSummary();
   schedulePreview();
 }
