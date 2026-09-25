@@ -5,14 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <meta name="description" content="Code to Motion — a browser-first deterministic animation renderer. Write JavaScript, preview it live, render every frame exactly.">
-<meta name="application-name" content="Code → Motion — Tamasrazim">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Code → Motion">
+<title>Code → Motion — Tamasrazim</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
-<link rel="apple-touch-icon" href="./icons/icon.svg">
-<title>Code → Motion — Tamasrazim</title>
 <style>
 /* ============================================================
    CODE -> MOTION — TAMASRAZIM
@@ -497,7 +492,9 @@ body{
   color:var(--mut);
 }
 .hdr-acts{gap:4px;padding:0 8px}
-.hdr-acts button{  border-left:0;  border-radius:9px;
+.hdr-acts button{
+  border-left:0;
+  border-radius:9px;
   margin:8px 0;
   padding:0 11px;
   font-size:10px;
@@ -995,8 +992,10 @@ select.mini{
   background:rgba(255,255,255,.035);
 }
 
-.doc pre{  border:0;
-  border-radius:9px;  background:rgba(255,255,255,.03);
+.doc pre{
+  border:0;
+  border-radius:9px;
+  background:rgba(255,255,255,.03);
   padding:10px 11px;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.045);
 }
@@ -1361,63 +1360,6 @@ select.mini{
   }
 }
 
-
-/* Minimal Google account UI */
-.auth-mini{
-  display:flex;align-items:center;gap:6px;padding:0 11px;border-left:1px solid var(--rule);
-  color:var(--mut);font:600 9px/1 var(--mono);letter-spacing:.08em;transition:all 140ms ease
-}
-.auth-mini:hover{color:#fff;background:var(--raise)}
-.auth-dot{width:18px;height:18px;border:1px solid var(--rule-hi);border-radius:50%;display:grid;place-items:center;font:600 8px var(--mono);color:#fff;background:#111}
-.auth-pop{position:fixed;top:54px;right:10px;width:300px;z-index:120;background:#0b0b0d;border:1px solid var(--rule-hi);box-shadow:0 24px 70px rgba(0,0,0,.55)}
-.auth-pop[hidden]{display:none}
-.auth-pop-head{height:40px;display:flex;align-items:center;padding:0 11px;border-bottom:1px solid var(--rule)}
-.auth-pop-head b{font:600 8px var(--mono);letter-spacing:.18em;color:var(--mut)}
-.auth-pop-head button{margin-left:auto;color:var(--mut);padding:4px 7px;border:1px solid transparent}
-.auth-pop-head button:hover{color:#fff;border-color:var(--rule-hi)}
-.auth-user{display:flex;align-items:center;gap:10px;padding:14px 12px}
-.auth-user>div{min-width:0;display:flex;flex-direction:column;gap:4px}
-.auth-user strong{font:600 11px var(--sans);color:var(--ink)}
-.auth-user div span{font:9px var(--mono);color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.auth-avatar-large,#accountPhoto{width:38px;height:38px;border-radius:50%;object-fit:cover;border:1px solid var(--rule-hi);background:#151517}
-.auth-avatar-large{display:grid;place-items:center;color:#fff;font:600 12px var(--mono)}
-.auth-action{display:flex;align-items:center;justify-content:center;gap:7px;width:calc(100% - 24px);margin:0 12px 8px;height:36px;border:1px solid var(--rule-hi);color:var(--ink);font:600 9px var(--mono);letter-spacing:.1em}
-.auth-action:hover{border-color:#fff;background:var(--raise)}
-.auth-action.primary{background:#fff;color:#000;border-color:#fff}
-.google-mark{width:16px;height:16px;border-radius:50%;background:#fff;color:#4285f4;display:grid;place-items:center;font:bold 10px Arial}
-.auth-note{padding:2px 12px 13px;margin:0;font:9px/1.5 var(--mono);color:var(--mut)}
-@media(max-width:860px){.auth-mini{min-width:40px;padding:0 7px}.auth-mini #accountLabel{display:none}.auth-pop{right:8px;width:min(300px,calc(100vw - 16px))}}
-
-/* ---------- preferred PNG frames ---------- */
-#preferredPngFrames{
-  width:100%;
-  min-height:72px;
-  resize:vertical;
-  background:rgba(255,255,255,.032);
-  border:0;
-  border-radius:8px;
-  padding:8px 9px;
-  color:var(--ink);
-  font-family:var(--mono);
-  font-size:10.5px;
-  line-height:1.5;
-}
-#preferredPngFrames:focus{
-  outline:none;
-  background:rgba(255,255,255,.075);
-  box-shadow:0 0 0 1px rgba(255,255,255,.2);
-}
-#preferredPngStatus{
-  min-height:17px;
-  margin-top:6px;
-  font-family:var(--mono);
-  font-size:9.5px;
-  color:var(--mut);
-  white-space:pre-wrap;
-}
-#preferredPngStatus.ok{color:#fff}
-#preferredPngStatus.err{color:#fff}
-
 </style>
 </head>
 <body>
@@ -1455,9 +1397,6 @@ select.mini{
         <span class="sp"></span>
         <button data-act="find">Find</button>
         <button data-act="fmtIndent">Reindent</button>
-        <button data-act="copy" title="Copy selected code, or all code when nothing is selected">Copy</button>
-        <button data-act="clear" title="Clear the code editor (undoable)">Clear</button>
-        <button data-act="paste" title="Paste code from clipboard">Paste</button>
         <button data-act="undo">Undo</button>
         <button data-act="redo">Redo</button>
       </div>
@@ -1553,9 +1492,11 @@ select.mini{
             <div class="row"><label for="cW">Width</label><input type="number" id="cW" min="2" max="8192" step="2"></div>
             <div class="row"><label for="cH">Height</label><input type="number" id="cH" min="2" max="8192" step="2"></div>
             <div class="row"><span class="lb">Aspect</span><span class="val dim" id="cAspect">16:9 · 1.7778</span></div>
-            <div class="row"><span class="lb">Megapixels</span><span class="val dim" id="cMp">2.07 MP</span></div>          </div>
+            <div class="row"><span class="lb">Megapixels</span><span class="val dim" id="cMp">2.07 MP</span></div>
+          </div>
           <div class="sec">
-            <h4>FRAME RATE</h4>            <div class="seg" id="segFps"></div>
+            <h4>FRAME RATE</h4>
+            <div class="seg" id="segFps"></div>
             <div class="row"><label for="cFps">Custom fps</label><input type="number" id="cFps" min="1" max="240" step="1"></div>
           </div>
           <div class="sec">
@@ -1612,23 +1553,14 @@ select.mini{
         <!-- METADATA -->
         <div class="panel" id="p-meta" role="tabpanel">
           <div class="sec">
-            <h4>SOURCE METADATA <span class="sp"></span><button data-act="extractMeta">extract</button></h4>
-            <div class="verified" id="metaSourceState">
-              <b id="metaSourceBadge">SOURCE</b>
-              <span id="metaSourceMsg">No metadata block detected.</span>
-            </div>
+            <h4>PROJECT</h4>
             <div class="row"><label for="mTitle">Name</label><input type="text" id="mTitle" spellcheck="false"></div>
             <div class="row"><label for="mCreator">Creator</label><input type="text" id="mCreator" spellcheck="false"></div>
             <div class="row"><label for="mComp">Composition</label><input type="text" id="mComp" spellcheck="false"></div>
             <div class="row"><label for="mDesc">Description</label><input type="text" id="mDesc" spellcheck="false"></div>
-            <div class="row"><label for="mCategory">Category</label><input type="text" id="mCategory" spellcheck="false"></div>
-            <div class="row"><label for="mSecondCategory">Second category</label><input type="text" id="mSecondCategory" spellcheck="false"></div>
-            <div class="row"><label for="mKeywords">Keywords</label><textarea id="mKeywords" rows="3" spellcheck="false"></textarea></div>
-            <div class="row"><label for="mAI">AI-generated</label><select id="mAI"><option value="no">No</option><option value="yes">Yes</option></select></div>
             <div class="row"><label for="mLang">Language</label><input type="text" id="mLang" spellcheck="false"></div>
             <div class="row"><span class="lb">Software</span><span class="val dim" id="mSoft">Code → Motion — Tamasrazim</span></div>
             <div class="row"><span class="lb">Version</span><span class="val dim" id="mVer">1.0.0</span></div>
-            <p class="note">Put metadata directly in the animation source with a <code>/* @meta ... */</code> block. The renderer extracts it on Run and before export.</p>
           </div>
           <div class="sec">
             <h4>SOURCE</h4>
@@ -1662,23 +1594,7 @@ select.mini{
               <select id="oTimebase"><option value="ms">1 ms (compatible)</option><option value="exact">Exact 1/fps tick</option></select></div>
             <div class="row"><label for="oChecksum">Frame checksums</label>
               <select id="oChecksum"><option value="on">On (64px fingerprint)</option><option value="off">Off</option></select></div>
-            <div class="row"><label for="oFileName">File name</label>
-              <input id="oFileName" type="text" maxlength="120" autocomplete="off" spellcheck="false" placeholder="Auto from project">
-            </div>
-            <div class="row"><span class="lb">Output preview</span><span class="val dim num" id="oName" style="font-size:9.5px;word-break:break-all">—</span></div>
-          </div>
-          <div class="sec">
-            <h4>PREFERRED PNG FRAMES</h4>
-            <textarea id="preferredPngFrames" rows="3" spellcheck="false" placeholder="0, 36, 72, 108, 144 or 0-864:36"></textarea>
-            <div class="btn-row">
-              <button class="btn" data-act="pngUseCurrent">Use current frame</button>
-              <button class="btn" data-act="pngUse25">Fill 25 frames</button>
-            </div>
-            <button class="btn solid" data-act="pngDownloadPreferred">Download preferred PNGs</button>
-            <button class="btn" data-act="pngDownloadCurrent">Download current PNG</button>
-            <div id="preferredPngStatus"></div>
-            <p class="note">Enter frame numbers separated by commas. Ranges are supported as <code>0-864:36</code>. Multiple PNGs are downloaded as one ZIP containing individual PNG files.</p>
-          </div>
+            <div class="row"><span class="lb">File name</span><span class="val dim num" id="oName" style="font-size:9.5px;word-break:break-all">—</span></div>
           </div>
           <div class="sec">
             <h4>PRE-FLIGHT</h4>
@@ -2076,10 +1992,12 @@ function createRuntime() {
     var body = '"use strict";\n' + code +
       '\n;return {r:(typeof renderFrame==="function")?renderFrame:null,s:(typeof setup==="function")?setup:null};';
     var factory;
-    try {      factory = Function.apply(null, SCOPE.concat([body]));
+    try {
+      factory = Function.apply(null, SCOPE.concat([body]));
     } catch (e) {
       var d = describeError(e, 'compile');
-      if (d.line === null) {        var b = scanBalance(code);
+      if (d.line === null) {
+        var b = scanBalance(code);
         if (b) { d.line = b.line; d.hint = 'The engine does not report a position for this error. First structural problem found: ' + b.why + '.'; }
       }
       rt.lastError = d; return { ok: false, error: d };
@@ -2574,11 +2492,13 @@ function parseZip(blob) {
    ============================================================ */
 /* ============================================================
    ISO-BMFF / MP4 — real muxer for H.264 (AVC) elementary samples
-   ------------------------------------------------------------   Samples arrive from WebCodecs already in AVCC form (length-prefixed
+   ------------------------------------------------------------
+   Samples arrive from WebCodecs already in AVCC form (length-prefixed
    NAL units) because the encoder is configured with avc.format = 'avc'.
    The AVCDecoderConfigurationRecord handed back in the first chunk's
    metadata is written verbatim as the avcC payload, so the sample
-   description and the sample data cannot disagree.   ============================================================ */
+   description and the sample data cannot disagree.
+   ============================================================ */
 function u8b(n) { return new Uint8Array([n & 255]); }
 function u16b(n) { return new Uint8Array([(n >>> 8) & 255, n & 255]); }
 function u32b(n) { return new Uint8Array([(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255]); }
@@ -2600,29 +2520,6 @@ var MP4_MATRIX = concat([
   u32b(0), u32b(0), u32b(0x40000000)
 ]);
 
-function deriveAvcCFromSample(bytes) {
-  if (!bytes || bytes.length < 8) return null;
-  var p = 0, sps = null, pps = null;
-  while (p + 4 <= bytes.length) {
-    var len = (((bytes[p] << 24) >>> 0) | (bytes[p + 1] << 16) | (bytes[p + 2] << 8) | bytes[p + 3]) >>> 0;
-    p += 4;
-    if (!len || p + len > bytes.length) break;
-    var nalType = bytes[p] & 0x1F;
-    if (nalType === 7 && !sps) sps = bytes.slice(p, p + len);
-    else if (nalType === 8 && !pps) pps = bytes.slice(p, p + len);
-    p += len;
-    if (sps && pps) break;
-  }
-  if (!sps || !pps || sps.length < 4 || pps.length < 1 || sps.length > 65535 || pps.length > 65535) return null;
-  return concat([
-    u8b(1),
-    u8b(sps[1]), u8b(sps[2]), u8b(sps[3]),
-    u8b(0xFF),
-    u8b(0xE1), u16b(sps.length), sps,
-    u8b(1), u16b(pps.length), pps
-  ]);
-}
-
 function MP4Muxer(o) {
   this.width = Math.max(2, o.width | 0);
   this.height = Math.max(2, o.height | 0);
@@ -2635,7 +2532,6 @@ function MP4Muxer(o) {
   this.codecString = o.codecString || '';
   this.meta = o.metadata || {};
   this.tags = o.tags || [];
-  this.expectedSamples = Math.max(0, Number(o.expectedSamples) || 0);
   this.description = null;
   this.samples = [];
   this.parts = [];
@@ -2648,16 +2544,9 @@ function MP4Muxer(o) {
 MP4Muxer.prototype.setDescription = function (desc) {
   if (this.description || !desc) return;
   var v = (desc instanceof ArrayBuffer) ? new Uint8Array(desc) : new Uint8Array(desc.buffer, desc.byteOffset, desc.byteLength);
-  if (v.length < 7 || v[0] !== 1) return;
   this.description = new Uint8Array(v);
 };
 MP4Muxer.prototype.addSample = function (bytes, isKey, timestampUs) {
-  if (!(bytes && bytes.length)) throw new Error('Encoded H.264 sample is empty.');
-  if (!isFinite(timestampUs)) throw new Error('Encoded H.264 sample has an invalid timestamp.');
-  if (!this.description) {
-    var derived = deriveAvcCFromSample(bytes);
-    if (derived) this.description = derived;
-  }
   if (timestampUs <= this.lastTs) this.monotonic = false;
   this.lastTs = timestampUs;
   this.samples.push({ size: bytes.length, sync: !!isKey, offset: this.mdatBytes, ts: timestampUs });
@@ -2772,20 +2661,7 @@ MP4Muxer.prototype.buildMoov = function (base) {
   var udta = mbox('udta', [meta]);
   return mbox('moov', [mvhd, trak, udta]);
 };
-MP4Muxer.prototype.finish = function (expectedSamples) {
-  var expected = Math.max(0, Number(expectedSamples) || this.expectedSamples);
-  if (expected && this.samples.length !== expected) {
-    return {
-      ok: false,
-      reason: 'The muxer received ' + this.samples.length + ' encoded samples for ' + expected + ' requested frames.'
-    };
-  }
-  if (!this.monotonic) {
-    return {
-      ok: false,
-      reason: 'The H.264 encoder returned samples with non-monotonic presentation timestamps. No MP4 was produced.'
-    };
-  }
+MP4Muxer.prototype.finish = function () {
   if (!this.description) {
     return {
       ok: false,
@@ -3078,7 +2954,8 @@ function checksumOf(env, src, comp, thumb) {
   return env.enc.fnv1a(d);
 }
 
-/* Renders every frame in [from, to) and hands each one to sink(frameIndex).   Nothing in here can skip a frame: the loop index is the only clock. */
+/* Renders every frame in [from, to) and hands each one to sink(frameIndex).
+   Nothing in here can skip a frame: the loop index is the only clock. */
 function runFrames(cfg) {
   var env = cfg.env, rt = cfg.rt, comp = cfg.comp, out = cfg.canvas;
   var thumbHolder = { canvas: null, ctx: null, set: function (o) { this.canvas = o.canvas; this.ctx = o.ctx; } };
@@ -3115,7 +2992,8 @@ function runFrames(cfg) {
     res.durations = durations;
     res.elapsedMs = now() - started;
     return res;
-  });}
+  });
+}
 
 function analyseDurations(d) {
   if (!d.length) return { avg: 0, min: 0, max: 0, total: 0 };
@@ -3241,7 +3119,7 @@ function exportMP4(cfg) {
     var sel = probe.selected;
     var mux = new enc.MP4Muxer({
       width: comp.width, height: comp.height, fps: comp.fps,
-      codecString: sel.id, metadata: job.metadata, tags: job.tags, expectedSamples: comp.frameCount
+      codecString: sel.id, metadata: job.metadata, tags: job.tags
     });
     var out = (env.makeExportCanvas || env.makeCanvas)(comp.width, comp.height);
     function release() { if (env.releaseExportCanvas) { try { env.releaseExportCanvas(out); } catch (e) { } } }
@@ -3332,7 +3210,7 @@ function exportMP4(cfg) {
             }
           };
         }
-        var fin = mux.finish(comp.frameCount);
+        var fin = mux.finish();
         if (!fin.ok) {
           return { ok: false, stage: 'mux', error: { name: 'MP4 MUXER ERROR', layer: 'mux', message: fin.reason, detail: 'The H.264 stream was produced but could not be described in an MP4 sample table, so no file was written.' } };
         }
@@ -3577,7 +3455,8 @@ function sampleTiming(env, job, frames) {
     var s = analyseDurations(times);
     res.avgMs = s.avg; res.minMs = s.min; res.maxMs = s.max;
     return res;
-  });}
+  });
+}
 
 /* Compare the first frame with the frame one loop-length later. */
 function loopSeam(env, job) {
@@ -3613,7 +3492,8 @@ function loopSeam(env, job) {
   });
 }
 
-return { run: run, sampleTiming: sampleTiming, loopSeam: loopSeam, pad6: pad6 };})();
+return { run: run, sampleTiming: sampleTiming, loopSeam: loopSeam, pad6: pad6 };
+})();
 </script>
 
 <script type="text/js-source" id="src-worker">
@@ -4076,7 +3956,8 @@ function renderFrame(time, frame, fps, ctx, width, height) {
     ctx.fillText(WORD[i], 0, 0);
     ctx.restore();
 
-    ctx.globalAlpha = 0.5;    ctx.fillStyle = '#fff';
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = '#fff';
     ctx.fillRect(cx - widths[i] * 0.3, height / 2 + size * 0.62, widths[i] * 0.6 * rise, 2 * s);
     x += widths[i];
   }
@@ -4111,7 +3992,8 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 
   for (let j = 0; j <= CY; j++) {
     ctx.beginPath();
-    for (let i = 0; i <= CX; i++) {      const p = point(i, j);
+    for (let i = 0; i <= CX; i++) {
+      const p = point(i, j);
       i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
     }
     const d = Math.abs(j / CY - 0.5) * 2;
@@ -4232,7 +4114,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 'use strict';
 
 var SELF_SOURCE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-var APP_VERSION = '1.1.0';
+var APP_VERSION = '1.0.0';
 var SOFTWARE = 'Code → Motion — Tamasrazim';
 
 var $ = function (s, r) { return (r || document).querySelector(s); };
@@ -4447,7 +4329,7 @@ var S = {
   previewBusy: false, previewFps: 0, previewRaster: { w: 0, h: 0, s: 1 },
   compareMode: false, compareSplit: 0.5, compareBitmap: null,
   rendering: false, queue: [], results: [], caps: {}, stage: 'IDLE',
-  exportFormat: 'mp4', fileName: '', quality: 'standard', timebase: 'ms', checksums: true, pngTarget: 'zip'
+  exportFormat: 'mp4', quality: 'standard', timebase: 'ms', checksums: true, pngTarget: 'zip'
 };
 
 var STAGES = ['IDLE', 'VALIDATING', 'PREPARING', 'ANALYSING', 'RENDERING', 'ENCODING', 'FINALISING', 'VERIFYING', 'COMPLETE'];
@@ -4480,7 +4362,6 @@ function markDirty(v) {
 function defaultMeta() {
   return {
     title: 'Untitled', creator: 'Tamasrazim', composition: 'Comp 1', description: '',
-    category: '', secondCategory: '', keywords: [], aiGenerated: 'no',
     language: 'en', software: SOFTWARE, softwareVersion: APP_VERSION,
     created: new Date().toISOString(), modified: new Date().toISOString(), sourceHash: ''
   };
@@ -4576,7 +4457,8 @@ function edUndo() {
   Ed.ta.value = prev.v; Ed.ta.selectionStart = Ed.ta.selectionEnd = prev.s;
   edChanged(true);
 }
-function edRedo() {  if (!Ed.redo.length) return;
+function edRedo() {
+  if (!Ed.redo.length) return;
   var n = Ed.redo.pop();
   Ed.undo.push(n);
   Ed.ta.value = n.v; Ed.ta.selectionStart = Ed.ta.selectionEnd = n.s;
@@ -4587,51 +4469,6 @@ function edInsert(text, selStart, selEnd) {
   edSnapshot(true);
   ta.setRangeText(text, s, e, 'end');
   edChanged(true);
-}
-
-function copyCode() {
-  var ta = Ed.ta;
-  if (!ta) return;
-  var start = ta.selectionStart, end = ta.selectionEnd;
-  var text = start !== end ? ta.value.slice(start, end) : ta.value;
-  if (!text) {
-    $('#edState').textContent = 'nothing to copy';
-    return;
-  }
-  copyText(text, start !== end ? 'selected code copied' : 'code copied');
-}
-function clearCode() {
-  var ta = Ed.ta;
-  if (!ta || !ta.value) {
-    $('#edState').textContent = 'editor already empty';
-    return;
-  }
-  edSnapshot(true);
-  ta.value = '';
-  ta.selectionStart = ta.selectionEnd = 0;
-  S.compiled = false;
-  edChanged(true);
-  $('#edState').textContent = 'code cleared — undo to restore';
-}
-function pasteCode() {
-  var ta = Ed.ta;
-  ta.focus();
-  if (!navigator.clipboard || !navigator.clipboard.readText) {
-    $('#edState').textContent = 'clipboard access unavailable — use Ctrl+V';
-    return;
-  }
-  navigator.clipboard.readText().then(function (text) {
-    if (!text) {
-      $('#edState').textContent = 'clipboard is empty';
-      return;
-    }
-    edInsert(text);
-    S.compiled = false;
-    $('#edState').textContent = 'pasted — run to apply';
-    edMarks();
-  }).catch(function () {
-    $('#edState').textContent = 'clipboard permission denied — use Ctrl+V';
-  });
 }
 function edSetValue(v) {
   Ed.ta.value = v; Ed.undo = [{ v: v, s: 0 }]; Ed.redo = [];
@@ -4655,7 +4492,8 @@ function initEditor() {
   Ed.curMark = document.createElement('div');
   Ed.curMark.style.cssText = 'position:absolute;left:0;right:0;height:19px;background:rgba(255,255,255,.06);pointer-events:none';
   Ed.errMark = document.createElement('div');
-  Ed.errMark.style.cssText = 'position:absolute;left:0;right:0;height:19px;background:#fff;opacity:.18;display:none;pointer-events:none';  Ed.gutter.appendChild(Ed.curMark); Ed.gutter.appendChild(Ed.errMark); Ed.gutter.appendChild(Ed.nums);
+  Ed.errMark.style.cssText = 'position:absolute;left:0;right:0;height:19px;background:#fff;opacity:.18;display:none;pointer-events:none';
+  Ed.gutter.appendChild(Ed.curMark); Ed.gutter.appendChild(Ed.errMark); Ed.gutter.appendChild(Ed.nums);
 
   var probe = document.createElement('span');
   probe.style.cssText = 'position:absolute;visibility:hidden;font-family:var(--mono);font-size:12px;white-space:pre';
@@ -5121,6 +4959,7 @@ function initComp() {
   $$('#segLoop button').forEach(function (b) {
     b.addEventListener('click', function () { applyComp({ loop: b.dataset.loop === '1' }); });
   });
+
   function numField(sel, key, opts) {
     var inp = $(sel);
     inp.addEventListener('change', function () {
@@ -5153,7 +4992,8 @@ function applyComp(patch) {
   drawRuler();
   syncFrameUI();
   markDirty();
-  if (!Engine.api) return;  Engine.api.setComposition(S.comp);
+  if (!Engine.api) return;
+  Engine.api.setComposition(S.comp);
   S.lastPainted = -1;
   requestPreview(true);
   if (S.compareMode) refreshCompare();
@@ -5241,73 +5081,23 @@ function analyseLoop() {
 /* ============================================================
    Metadata panel
    ============================================================ */
-function parseSourceMetadata(code) {
-  var out = { found: false };
-  var m = /\/\*\s*@meta\b([\s\S]*?)\*\//i.exec(code);
-  var raw = m ? m[1] : '';
-  if (!raw) {
-    var lines = code.split(/\r?\n/);
-    var picked = [];
-    for (var i = 0; i < lines.length && picked.length < 80; i++) {
-      var line = lines[i].replace(/^\s*\/\/\s?/, '').trim();
-      if (/^@?(title|creator|composition|description|category|secondCategory|second-category|keywords|ai-generated|language)\b/i.test(line) ||
-          /^(title|creator|composition|description|category|secondCategory|second-category|keywords|ai-generated|language)\s*:/i.test(line)) picked.push(line);
-      else if (picked.length && line === '') break;
-    }
-    if (picked.length) raw = picked.join('\n');
-  }
-  if (!raw) return out;
-  out.found = true;
-  raw.split(/\r?\n/).forEach(function (line) {
-    line = line.trim().replace(/^\*+\s?/, '').trim();
-    var mm = /^@?([A-Za-z][A-Za-z0-9 _-]*)\s*:\s*(.*?)\s*$/.exec(line);
-    if (!mm) return;
-    var key = mm[1].toLowerCase().replace(/[ _-]+/g, '');
-    var value = mm[2].trim();
-    if (!value) return;
-    if (key === 'title' || key === 'name') out.title = value;
-    else if (key === 'creator' || key === 'author') out.creator = value;
-    else if (key === 'composition' || key === 'comp') out.composition = value;
-    else if (key === 'description' || key === 'desc') out.description = value;
-    else if (key === 'category') out.category = value;
-    else if (key === 'secondcategory' || key === 'subcategory') out.secondCategory = value;
-    else if (key === 'keywords' || key === 'keyword') out.keywords = value.split(/[,;]+/).map(function (x) { return x.trim(); }).filter(Boolean);
-    else if (key === 'aigenerated' || key === 'ai') out.aiGenerated = /^(yes|true|1)$/i.test(value) ? 'yes' : 'no';
-    else if (key === 'language' || key === 'lang') out.language = value;
-  });
-  return out;
-}
 function initMeta() {
   [['#mTitle', 'title'], ['#mCreator', 'creator'], ['#mComp', 'composition'],
-  ['#mDesc', 'description'], ['#mCategory', 'category'], ['#mSecondCategory', 'secondCategory'],
-  ['#mKeywords', 'keywords'], ['#mAI', 'aiGenerated'], ['#mLang', 'language']].forEach(function (p) {
+  ['#mDesc', 'description'], ['#mLang', 'language']].forEach(function (p) {
     $(p[0]).addEventListener('input', function () {
-      var v = $(p[0]).value;
-      if (p[1] === 'keywords') v = v.split(/[,;]+/).map(function (x) { return x.trim(); }).filter(Boolean);
-      S.meta[p[1]] = v;
+      S.meta[p[1]] = $(p[0]).value;
       S.meta.modified = new Date().toISOString();
       markDirty();
       if (p[1] === 'title') syncFileName();
     });
-    $(p[0]).addEventListener('change', function () {
-      if (p[1] === 'aiGenerated') {
-        S.meta.aiGenerated = $(p[0]).value === 'yes' ? 'yes' : 'no';
-        S.meta.modified = new Date().toISOString();
-        markDirty();
-      }
-    });
   });
 }
 function syncMetaUI() {
-  $('#mTitle').value = S.meta.title || '';
-  $('#mCreator').value = S.meta.creator || '';
-  $('#mComp').value = S.meta.composition || '';
-  $('#mDesc').value = S.meta.description || '';
-  $('#mCategory').value = S.meta.category || '';
-  $('#mSecondCategory').value = S.meta.secondCategory || '';
-  $('#mKeywords').value = (S.meta.keywords || []).join(', ');
-  $('#mAI').value = S.meta.aiGenerated === 'yes' ? 'yes' : 'no';
-  $('#mLang').value = S.meta.language || 'en';
+  $('#mTitle').value = S.meta.title;
+  $('#mCreator').value = S.meta.creator;
+  $('#mComp').value = S.meta.composition;
+  $('#mDesc').value = S.meta.description;
+  $('#mLang').value = S.meta.language;
   $('#mSoft').textContent = S.meta.software;
   $('#mVer').textContent = S.meta.softwareVersion;
   $('#mLines').textContent = S.code.split('\n').length;
@@ -5388,8 +5178,7 @@ function metadataReceipt() {
     software: S.meta.software, softwareVersion: S.meta.softwareVersion,
     project: { name: S.name, version: S.version, id: S.id },
     title: S.meta.title, creator: S.meta.creator, compositionName: S.meta.composition,
-    description: S.meta.description, category: S.meta.category, secondCategory: S.meta.secondCategory,
-    keywords: S.meta.keywords || [], aiGenerated: S.meta.aiGenerated || 'no', language: S.meta.language,
+    description: S.meta.description, language: S.meta.language,
     composition: {
       width: c.width, height: c.height, aspect: +c.aspect.toFixed(6),
       fps: c.fps, frameCount: c.frameCount, duration: +(c.frameCount / c.fps).toFixed(6),
@@ -5399,7 +5188,7 @@ function metadataReceipt() {
     loop: { enabled: !!c.loop, duration: c.loopDuration, frames: Math.round(c.loopDuration * c.fps / c.speed) },
     timeModel: { frameTime: 'frame / fps', rate: c.speed, reverse: !!c.reverse },
     source: { language: 'JavaScript', lines: S.code.split('\n').length, sha256: S.hash || null },
-    exportFormat: S.exportFormat, fileName: S.fileName || null,
+    exportFormat: S.exportFormat,
     created: S.meta.created, modified: S.meta.modified
   };
 }
@@ -5417,11 +5206,7 @@ function buildTags(comp, meta) {
     { name: 'LOOP', value: comp.loop ? 'yes' : 'no' },
     { name: 'LOOP_DURATION', value: comp.loop ? comp.loopDuration + ' s' : 'n/a' },
     { name: 'TIME_RATE', value: comp.speed },
-    { name: 'TIME_REVERSE', value: comp.reverse ? 'yes' : 'no' },
-    { name: 'CATEGORY', value: meta.category || '' },
-    { name: 'SECOND_CATEGORY', value: meta.secondCategory || '' },
-    { name: 'KEYWORDS', value: (meta.keywords || []).join(', ') },
-    { name: 'AI_GENERATED', value: meta.aiGenerated || 'no' }
+    { name: 'TIME_REVERSE', value: comp.reverse ? 'yes' : 'no' }
   ].filter(function (t) { return String(t.value).length > 0; });
 }
 
@@ -5430,7 +5215,6 @@ function buildTags(comp, meta) {
    ============================================================ */
 function run() {
   S.code = Ed.ta.value;
-  extractMetaFromSource();
   $('#edState').textContent = 'compiling…';
   setStage('VALIDATING');
   $('#stDot').className = 'dot busy';
@@ -5464,7 +5248,6 @@ function run() {
   });
 }
 function withCompiled() {
-  extractMetaFromSource();
   if (S.compiled && S.code === Ed.ta.value) return Promise.resolve(true);
   return run().then(function (r) { return !!(r && r.ok); });
 }
@@ -5478,541 +5261,6 @@ var FMT = [
   { label: 'PNG\u00B7ZIP', value: 'zip', title: 'Every frame as a PNG inside one archive' },
   { label: 'PNG\u00B7DIR', value: 'dir', title: 'Every frame written straight to a folder you choose' }
 ];
-
-function parsePreferredPngFrames() {
-  var raw = String($('#preferredPngFrames').value || '').trim();
-  var max = S.comp ? S.comp.frameCount - 1 : 0;
-  if (!raw) return { frames: [Math.max(0, Math.min(max, S.frame || 0))], errors: [] };
-
-  var parts = raw.split(/[\\s,;]+/).filter(Boolean);
-  var set = {};
-  var frames = [];
-  var errors = [];
-
-  function addFrame(v, token) {
-    if (!Number.isFinite(v) || Math.floor(v) !== v) {
-      errors.push('Invalid frame "' + token + '".');
-      return;
-    }
-    if (v < 0 || v > max) {
-      errors.push('Frame ' + v + ' is outside 0…' + max + '.');
-      return;
-    }
-    if (!set[v]) {
-      set[v] = true;
-      frames.push(v);
-    }
-  }
-
-  parts.forEach(function (token) {
-    var m = /^(\\d+)\\-(\\d+)(?::(\\d+))?$/.exec(token);
-
-    if (m) {
-      var a = Number(m[1]);
-      var b = Number(m[2]);
-      var step = Math.max(1, Number(m[3] || 1));
-
-      if (a > b) {
-        var tmp = a;
-        a = b;
-        b = tmp;
-      }
-
-      for (var v = a; v <= b; v += step) {
-        addFrame(v, token);
-        if (frames.length > 500) break;
-      }
-
-      return;
-    }
-
-    if (/^\\d+$/.test(token)) {
-      addFrame(Number(token), token);
-      return;
-    }
-
-    errors.push(
-      'Invalid frame token "' +
-      token +
-      '". Use numbers or ranges like 0-864:36.'
-    );
-  });
-
-  frames.sort(function (a, b) {
-    return a - b;
-  });
-
-  if (frames.length > 500) {
-    errors.push('Maximum 500 preferred frames.');
-    frames = frames.slice(0, 500);
-  }
-
-  return {
-    frames: frames,
-    errors: errors
-  };
-}
-
-function setPreferredPngStatus(msg, kind) {
-  var box = $('#preferredPngStatus');
-  if (!box) return;
-  box.className = kind || '';
-  box.textContent = msg || '';
-}
-
-function useCurrentPreferredFrame() {
-  $('#preferredPngFrames').value = String(S.frame || 0);
-  setPreferredPngStatus(
-    'Frame ' + (S.frame || 0) + ' selected.',
-    'ok'
-  );
-}
-
-function fillPreferred25() {
-  if (!S.comp || !S.comp.frameCount) return;
-
-  var count =
-    Math.min(
-      25,
-      S.comp.frameCount
-    );
-
-  var frames = [];
-  var last = -1;
-
-  for (var i = 0; i < count; i++) {
-    var frame =
-      count === 1
-        ? 0
-        : Math.round(
-            i *
-            (S.comp.frameCount - 1) /
-            (count - 1)
-          );
-
-    if (frame !== last) {
-      frames.push(frame);
-      last = frame;
-    }
-  }
-
-  $('#preferredPngFrames').value =
-    frames.join(', ');
-
-  setPreferredPngStatus(
-    frames.length +
-    ' preferred frames selected.',
-    'ok'
-  );
-}
-
-function preferredPngBlobFromRender(
-  rendered,
-  width,
-  height,
-  bridge
-) {
-  if (!rendered || !rendered.ok) {
-    return Promise.reject(
-      new Error(
-        rendered &&
-        rendered.error
-          ? (
-              (rendered.error.name || 'RenderError') +
-              ': ' +
-              (rendered.error.message || 'Frame render failed.')
-            )
-          : 'Frame render failed.'
-      )
-    );
-  }
-
-  if (rendered.canvas) {
-    return new Promise(function (resolve, reject) {
-      rendered.canvas.toBlob(
-        function (blob) {
-          if (blob) {
-            resolve(blob);
-          } else {
-            reject(
-              new Error(
-                'The browser could not encode this frame as PNG.'
-              )
-            );
-          }
-        },
-        'image/png'
-      );
-    });
-  }
-
-  if (rendered.bitmap) {
-    if (
-      !bridge.canvas ||
-      bridge.canvas.width !== width ||
-      bridge.canvas.height !== height
-    ) {
-      bridge.canvas =
-        document.createElement('canvas');
-
-      bridge.canvas.width = width;
-      bridge.canvas.height = height;
-
-      bridge.ctx =
-        bridge.canvas.getContext(
-          '2d',
-          { alpha: true }
-        );
-    }
-
-    bridge.ctx.setTransform(
-      1, 0, 0, 1, 0, 0
-    );
-
-    bridge.ctx.clearRect(
-      0, 0,
-      width,
-      height
-    );
-
-    bridge.ctx.drawImage(
-      rendered.bitmap,
-      0,
-      0,
-      width,
-      height
-    );
-
-    if (
-      typeof rendered.bitmap.close ===
-      'function'
-    ) {
-      rendered.bitmap.close();
-    }
-
-    return new Promise(function (resolve, reject) {
-      bridge.canvas.toBlob(
-        function (blob) {
-          if (blob) {
-            resolve(blob);
-          } else {
-            reject(
-              new Error(
-                'The browser could not encode this frame as PNG.'
-              )
-            );
-          }
-        },
-        'image/png'
-      );
-    });
-  }
-
-  return Promise.reject(
-    new Error(
-      'The render engine returned no canvas or bitmap.'
-    )
-  );
-}
-
-function preferredPngBaseName() {
-  var title =
-    S.meta &&
-    S.meta.title
-      ? S.meta.title
-      : (S.name || 'animation');
-
-  return slugify(title) ||
-    'animation';
-}
-
-function downloadCurrentPng() {
-  return withCompiled().then(function (ok) {
-    if (!ok) return null;
-
-    var c = S.comp;
-
-    var frame =
-      Math.max(
-        0,
-        Math.min(
-          c.frameCount - 1,
-          S.frame || 0
-        )
-      );
-
-    setPreferredPngStatus(
-      'Rendering frame ' +
-      frame +
-      ' at ' +
-      c.width +
-      '×' +
-      c.height +
-      '…'
-    );
-
-    return Engine.api
-      .renderOne(
-        frame,
-        c.width,
-        c.height
-      )
-      .then(function (rendered) {
-        return preferredPngBlobFromRender(
-          rendered,
-          c.width,
-          c.height,
-          { canvas: null, ctx: null }
-        );
-      })
-      .then(function (blob) {
-        var name =
-          preferredPngBaseName() +
-          '_frame_' +
-          pad(frame, 6) +
-          '.png';
-
-        download(
-          blob,
-          name
-        );
-
-        setPreferredPngStatus(
-          'Downloaded frame ' +
-          frame +
-          ' as ' +
-          name,
-          'ok'
-        );
-
-        return blob;
-      })
-      .catch(function (e) {
-        setPreferredPngStatus(
-          'PNG download failed: ' +
-          String(e.message || e),
-          'err'
-        );
-
-        return null;
-      });
-  });
-}
-
-function downloadPreferredPngs() {
-  return withCompiled().then(function (ok) {
-    if (!ok) return null;
-
-    var parsed =
-      parsePreferredPngFrames();
-
-    if (parsed.errors.length) {
-      setPreferredPngStatus(
-        parsed.errors.join('\n'),
-        'err'
-      );
-      return null;
-    }
-
-    var frames =
-      parsed.frames;
-
-    if (!frames.length) {
-      setPreferredPngStatus(
-        'No frames selected.',
-        'err'
-      );
-      return null;
-    }
-
-    if (typeof ENC.ZipWriter !== 'function') {
-      setPreferredPngStatus(
-        'ZIP support is unavailable in this build.',
-        'err'
-      );
-      return null;
-    }
-
-    var c = S.comp;
-
-    var zip =
-      new ENC.ZipWriter();
-
-    var bridge = {
-      canvas: null,
-      ctx: null
-    };
-
-    var prefix =
-      preferredPngBaseName() +
-      '_preferred_';
-
-    var manifestFrames = [];
-
-    var started =
-      Date.now();
-
-    setPreferredPngStatus(
-      'Rendering 0 / ' +
-      frames.length +
-      ' preferred PNGs…'
-    );
-
-    function step(index) {
-      if (index >= frames.length) {
-        var manifest =
-          JSON.stringify(
-            {
-              software:
-                S.meta
-                  ? S.meta.software
-                  : 'Code → Motion — Tamasrazim',
-
-              creator:
-                S.meta
-                  ? S.meta.creator
-                  : '',
-
-              title:
-                S.meta
-                  ? S.meta.title
-                  : S.name,
-
-              sourceSha256:
-                S.hash || null,
-
-              resolution:
-                c.width + 'x' + c.height,
-
-              frameRate:
-                c.fps,
-
-              duration:
-                c.frameCount / c.fps,
-
-              transparent:
-                !!c.transparent,
-
-              preferredFrames:
-                manifestFrames
-            },
-            null,
-            2
-          );
-
-        zip.addBytes(
-          'preferred-frames-manifest.json',
-          ENC.utf8(manifest)
-        );
-
-        var blob =
-          zip.finish();
-
-        download(
-          blob,
-          prefix +
-          'PNG.zip'
-        );
-
-        setPreferredPngStatus(
-          'Downloaded ' +
-          frames.length +
-          ' PNG frames as ' +
-          prefix +
-          'PNG.zip · ' +
-          (
-            (Date.now() - started) /
-            1000
-          ).toFixed(1) +
-          's',
-          'ok'
-        );
-
-        return Promise.resolve(blob);
-      }
-
-      var frame =
-        frames[index];
-
-      return Engine.api
-        .renderOne(
-          frame,
-          c.width,
-          c.height
-        )
-        .then(function (rendered) {
-          return preferredPngBlobFromRender(
-            rendered,
-            c.width,
-            c.height,
-            bridge
-          );
-        })
-        .then(function (blob) {
-          return blob.arrayBuffer().then(function (ab) {
-            var u8 =
-              new Uint8Array(ab);
-
-            var crc =
-              ENC.crc32Final(
-                ENC.crc32(u8)
-              );
-
-            var fileName =
-              prefix +
-              pad(frame, 6) +
-              '.png';
-
-            zip.add(
-              fileName,
-              blob,
-              crc,
-              u8.length
-            );
-
-            manifestFrames.push({
-              frame: frame,
-              time: frame / c.fps,
-              file: fileName,
-              bytes: blob.size
-            });
-
-            setPreferredPngStatus(
-              'Rendering ' +
-              (index + 1) +
-              ' / ' +
-              frames.length +
-              ' · frame ' +
-              frame
-            );
-          });
-        })
-        .then(function () {
-          return new Promise(function (resolve) {
-            setTimeout(
-              function () {
-                resolve(
-                  step(index + 1)
-                );
-              },
-              0
-            );
-          });
-        });
-    }
-
-    return step(0).catch(function (e) {
-      setPreferredPngStatus(
-        'Preferred PNG export failed: ' +
-        String(e.message || e),
-        'err'
-      );
-
-      return null;
-    });
-  });
-}
-
 function initRenderPanel() {
   var dirOk = typeof window.showDirectoryPicker === 'function';
   buildSeg($('#segFmt'), FMT.map(function (f) {
@@ -6025,13 +5273,6 @@ function initRenderPanel() {
     syncMetaSupport(); syncFileName(); refreshMedia(); markDirty();
   });
   segMark($('#segFmt'), S.exportFormat);
-  $('#oFileName').value = S.fileName || '';
-  $('#oFileName').addEventListener('input', function () {
-    S.fileName = $('#oFileName').value.trim();
-    if (S.meta) S.meta.modified = new Date().toISOString();
-    syncFileName();
-    markDirty();
-  });
   $('#oQuality').value = S.quality;
   $('#oTimebase').value = S.timebase;
   $('#oChecksum').value = S.checksums ? 'on' : 'off';
@@ -6046,35 +5287,15 @@ function stampNow() {
   return '' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' +
     pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
 }
-function customFileBase(name) {
-  var raw = String(name || '').trim()
-    .replace(/[\\/:*?"<>|]+/g, '-')
-    .replace(/\.(mp4|webm|zip|png)$/i, '');
-  return slugify(raw);
-}
-function fileNameFor(comp, name, fmt, stamp, custom) {
-  var ext = extFor(fmt);
-  var base = customFileBase(custom);
-  if (!base) {
-    if (fmt === 'mp4') {
-      base = 'tamasrazim-animation-' + (stamp || stampNow());
-    } else {
-      var secs = comp.frameCount / comp.fps;
-      var dur = (Math.abs(secs - Math.round(secs)) < 1e-6) ? Math.round(secs) + 's' : secs.toFixed(2) + 's';
-      base = slugify(name || 'untitled') + '_' + comp.width + 'x' + comp.height + '_' + comp.fps + 'fps_' + dur;
-    }
-  }
-  return base + ext;
+function fileNameFor(comp, name, fmt, stamp) {
+  if (fmt === 'mp4') return 'tamasrazim-animation-' + (stamp || stampNow()) + '.mp4';
+  var secs = comp.frameCount / comp.fps;
+  var dur = (Math.abs(secs - Math.round(secs)) < 1e-6) ? Math.round(secs) + 's' : secs.toFixed(2) + 's';
+  return slugify(name || 'untitled') + '_' + comp.width + 'x' + comp.height + '_' + comp.fps + 'fps_' + dur + extFor(fmt);
 }
 function syncFileName() {
   if (!S.comp) return;
-  $('#oName').textContent = fileNameFor(
-    S.comp,
-    S.meta ? (S.meta.title || S.name) : S.name,
-    S.exportFormat,
-    '<timestamp>',
-    S.fileName
-  );
+  $('#oName').textContent = fileNameFor(S.comp, S.meta ? (S.meta.title || S.name) : S.name, S.exportFormat, '<timestamp>');
 }
 
 /* ---------------- media status — driven by an actual encoder probe ---------------- */
@@ -6175,7 +5396,7 @@ function buildJob(over) {
     createdAt: new Date().toISOString(),
     test: over.test || null
   };
-  job.fileName = fileNameFor(comp, meta.title || S.name, fmt, stampNow(), S.fileName);
+  job.fileName = fileNameFor(comp, meta.title || S.name, fmt, stampNow());
   return job;
 }
 
@@ -6238,7 +5459,8 @@ function analyseJob() {
         } else if (job.format === 'webm') {
           rows.push(['Video encoder', probe.available ? probe.supported.map(function (s) { return s.label; }).join(', ') : 'NOT AVAILABLE']);
           if (!probe.available) warn.push('This browser cannot encode WebM at ' + c.width + '×' + c.height + ': ' + probe.reason + ' Render a PNG sequence instead.');
-        } else {          rows.push(['PNG encoder', 'canvas toBlob — always available']);
+        } else {
+          rows.push(['PNG encoder', 'canvas toBlob — always available']);
           if (job.target === 'zip') {
             var est = Math.round(c.frameCount * c.width * c.height * (c.transparent ? 1.3 : 0.9) * 0.28);
             rows.push(['Archive estimate', '≈ ' + fmtBytes(est) + ' (rough, PNG compresses by content)']);
@@ -6270,7 +5492,8 @@ function analyseJob() {
         box.innerHTML = html;
         S.analysis = { at: Date.now(), blocking: blocking, probe: probe, timing: t };
       });
-    });  }).catch(function (e) {
+    });
+  }).catch(function (e) {
     setStage('IDLE', true);
     box.innerHTML = '<div class="warnbox"><b>Analysis failed</b>' + esc(String(e.message || e)) + '</div>';
   });
@@ -6737,7 +5960,8 @@ function detectCaps() {
   S.caps = c;
   return c;
 }
-function kvRow(dl, k, v, cls) {  dl.appendChild(el('dt', null, k));
+function kvRow(dl, k, v, cls) {
+  dl.appendChild(el('dt', null, k));
   dl.appendChild(el('dd', cls || null, v));
 }
 function yesNo(dl, k, ok, yes, no) {
@@ -6768,7 +5992,8 @@ function refreshDiag() {
   yesNo(dl, 'IndexedDB', c.idb);
   yesNo(dl, 'Web Crypto (SHA-256)', c.subtle, 'SUPPORTED', 'NOT AVAILABLE — source hashing is off');
   yesNo(dl, 'Secure context', c.secure);
-  yesNo(dl, 'WebGL2', c.webgl2, 'SUPPORTED — usable from your code via a second canvas', 'NOT AVAILABLE');  yesNo(dl, 'WebGPU', c.webgpu);
+  yesNo(dl, 'WebGL2', c.webgl2, 'SUPPORTED — usable from your code via a second canvas', 'NOT AVAILABLE');
+  yesNo(dl, 'WebGPU', c.webgpu);
   kvRow(dl, 'Logical cores', c.cores ? String(c.cores) : 'not reported');
   kvRow(dl, 'Device memory', c.memoryGB ? c.memoryGB + ' GB (browser estimate)' : 'not reported');
   kvRow(dl, 'Device pixel ratio', c.dpr.toFixed(2));
@@ -6861,7 +6086,7 @@ function projectRecord() {
   return {
     id: S.id, name: S.name, version: S.version,
     code: Ed.ta.value, comp: S.comp, meta: S.meta,
-    exportPrefs: { format: S.exportFormat, fileName: S.fileName, quality: S.quality, timebase: S.timebase, checksums: S.checksums },
+    exportPrefs: { format: S.exportFormat, quality: S.quality, timebase: S.timebase, checksums: S.checksums },
     created: S.created, modified: new Date().toISOString()
   };
 }
@@ -6916,7 +6141,6 @@ function loadProjectRecord(rec) {
   S.comp = CORE.composition(rec.comp || {});
   var p = rec.exportPrefs || {};
   S.exportFormat = p.format || 'webm';
-  S.fileName = p.fileName || '';
   S.quality = p.quality || 'standard';
   S.timebase = p.timebase || 'ms';
   S.checksums = p.checksums !== false;
@@ -6925,7 +6149,6 @@ function loadProjectRecord(rec) {
   $('#projName').value = S.name;
   $('#projVer').textContent = 'v' + S.version;
   segMark($('#segFmt'), S.exportFormat);
-  $('#oFileName').value = S.fileName || '';
   $('#oQuality').value = S.quality; $('#oTimebase').value = S.timebase;
   $('#oChecksum').value = S.checksums ? 'on' : 'off';
   S.frame = 0;
@@ -6991,7 +6214,6 @@ function versionDialog(rec) {
 function newProject(sampleId) {
   S.id = null; S.version = 1; S.created = new Date().toISOString();
   S.name = 'Untitled';
-  S.fileName = '';
   S.meta = defaultMeta();
   S.results = S.results || [];
   var src = srcOf(sampleId || 'sample-starter');
@@ -7033,7 +6255,7 @@ function toTmotion() {
     loop: { enabled: !!c.loop, duration: c.loopDuration },
     timeRemap: { rate: c.speed, reverse: !!c.reverse },
     metadata: S.meta,
-    exportPrefs: { format: S.exportFormat, fileName: S.fileName, quality: S.quality, timebase: S.timebase, checksums: S.checksums },
+    exportPrefs: { format: S.exportFormat, quality: S.quality, timebase: S.timebase, checksums: S.checksums },
     frameModel: 'frameCount = round(duration * fps); frames 0..frameCount-1; time = frame / fps * rate'
   };
 }
@@ -7239,7 +6461,8 @@ function toyShow(on) {
   if (on) {
     if (S.toyEnabled === false) return;
     if (!S.activeJob || S.activeJob.composition.frameCount < 90) return;
-    wrap.style.display = '';    $('#toyNote').textContent = Engine.mode === 'worker'
+    wrap.style.display = '';
+    $('#toyNote').textContent = Engine.mode === 'worker'
       ? 'The renderer owns a separate thread. This runs on the idle main thread and cannot slow it down.'
       : 'This browser has no worker path, so the renderer is sharing this thread — the toy is capped to a few frames a second and yields to every rendered frame.';
     toyStart();
@@ -7269,7 +6492,8 @@ function toyTick(ts) {
   if (!Toy.on) return;
   Toy.raf = requestAnimationFrame(toyTick);
   var budget = Engine.mode === 'worker' ? 33 : 120;
-  if (ts - Toy.last < budget) return;  var dt = Math.min(0.2, (ts - Toy.last) / 1000);
+  if (ts - Toy.last < budget) return;
+  var dt = Math.min(0.2, (ts - Toy.last) / 1000);
   Toy.last = ts;
   Toy.t += dt;
   var cv = $('#toy'), g = cv.getContext('2d');
@@ -7411,21 +6635,7 @@ var DOCS = [
   '<tr><td><code>TAU</code> · <code>PI</code></td><td>Constants.</td></tr>',
   '</table>',
 
-  '<h5>SOURCE METADATA</h5>
-  <p>The animation source can carry project metadata:</p>
-  <pre>/* @meta
-title: Kinetic Isometric Tile Surface
-description: Seamless abstract kinetic tile motion background
-category: Abstract
-secondCategory: Backgrounds/Textures
-keywords: abstract, kinetic, geometric, seamless, motion background
-ai-generated: no
-creator: Tamasrazim
-language: en
-*/</pre>
-  <p>The Metadata panel extracts these fields on Run and before export.</p>
-
-  <h5>DETERMINISM</h5>',
+  '<h5>DETERMINISM</h5>',
   '<p>Any frame must be renderable on its own. The generator is reseeded at the start of every frame from <code>seed + frame</code>, so <code>random()</code> returns the same sequence for frame 900 whether you scrubbed to it, played into it, or exported straight to it. Reading <code>Date.now()</code>, <code>Math.random()</code> or your own accumulating variables breaks that, and the render will not match the preview.</p>',
   '<p><code>motion.simulation()</code> exists for real physics: it steps a fixed <code>1/fps</code> and rebuilds from frame 0 whenever you move backwards. It is slower to scrub and exactly reproducible.</p>',
 
@@ -7498,7 +6708,7 @@ language: en
   '<li>H.264 is not universal. Where the browser has no H.264 encoder, the MP4 path reports that and the PNG sequence remains the way out.</li>',
   '<li>No GIF, no ProRes, no alpha in MP4 or WebM. See the export table above.</li>',
   '<li>No fonts are loaded. Generic families only, so a render never waits on a network fetch.</li>',
-  '<li>The app registers a local service worker on the GitHub Pages origin. After the first successful load, the application shell can open offline from the installed PWA.</li>',
+  '<li>Service workers cannot be registered from this hosted page. Download the app and serve it yourself for offline install.</li>',
   '<li>A background tab may be throttled by the browser. Long renders want a visible tab.</li>',
   '<li>Verification proves the container is consistent with the request. It cannot prove that your animation is what you intended.</li>',
   '</ul>',
@@ -7511,9 +6721,6 @@ language: en
    Actions
    ============================================================ */
 var ACTS = {
-  copy: copyCode,
-  clear: clearCode,
-  extractMeta: function () { extractMetaFromSource(); },
   'new': function () {
     askDiscard('Start a new project?', function () { newProject('sample-starter'); });
   },
@@ -7543,10 +6750,6 @@ var ACTS = {
     download(new Blob([SELF_SOURCE], { type: 'text/html' }), 'code-motion-tamasrazim.html');
     $('#stMsg').textContent = 'downloaded the application as a single HTML file';
   },
-  pngUseCurrent: useCurrentPreferredFrame,
-  pngUse25: fillPreferred25,
-  pngDownloadCurrent: downloadCurrentPng,
-  pngDownloadPreferred: downloadPreferredPngs,
   recheck: function () { refreshDiag(); $('#stMsg').textContent = 're-checked capabilities'; },
   play: togglePlay,
   stepBack: function () { pause(); setFrame(S.frame - 1); },
@@ -7565,7 +6768,6 @@ var ACTS = {
   findClose: closeFind,
   findNext: function () { stepMatch(1); },
   findPrev: function () { stepMatch(-1); },
-  paste: pasteCode,
   replaceOne: replaceOne,
   replaceAll: replaceAll,
   fmtIndent: reindent,
@@ -7693,14 +6895,11 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 else boot();
 })();
 </script>
-
-
-
 <script>
 (function(){
   if (!("serviceWorker" in navigator)) return;
-  window.addEventListener("load", function(){
-    navigator.serviceWorker.register("./sw.js", {scope:"./"}).catch(function(){ /* optional PWA enhancement */ });
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(function(){});
   });
 })();
 </script>
