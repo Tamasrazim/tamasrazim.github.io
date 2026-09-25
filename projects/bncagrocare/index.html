@@ -3,339 +3,121 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#153c25">
+<meta name="theme-color" content="#173c28">
+<meta name="description" content="BNC Agro Care — agricultural products, pack sizes and company information.">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./FB_IMG_1789811599210.jpg">
-<meta name="description" content="BNC Agro Care — agricultural products, pack sizes and Invoice Studio.">
 <title>BNC Agro Care</title>
 <style>
-:root{
-  --green:#1c4a2f;--green-dark:#10351f;--green-soft:#eaf2ea;--lime:#a9dc68;
-  --cream:#f7f5ef;--paper:#fff;--ink:#18241c;--muted:#6e7972;--line:#dde2da;
-  --gold:#d9bb6a;--shadow:0 20px 50px rgba(16,53,31,.08)
-}
+:root{--bg:#f3f1e7;--paper:#fbfaf5;--ink:#17221b;--muted:#6d786f;--line:#d9dfd6;--green:#173c28;--green2:#245238;--lime:#b8df68;--cream:#ece8dc;--white:#fff;--shadow:0 30px 90px rgba(18,54,34,.12);--ease:cubic-bezier(.2,.75,.2,1);--mx:0px;--my:0px}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--cream);color:var(--ink);font:14px/1.55 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-img{max-width:100%}
-a{text-decoration:none;color:inherit}
-button,input{font:inherit}
-.container{width:min(1240px,92vw);margin:auto}
-.topline{background:var(--green-dark);color:#d3e1d6;font:800 8px/1 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase}
-.topline .container{min-height:32px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(18px);border-bottom:1px solid rgba(16,53,31,.08)}
-.nav-inner{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:25px}
-.logo-wrap{display:flex;align-items:center;width:164px;height:48px}
-.logo-wrap img{display:block;width:100%;height:100%;object-fit:contain;object-position:left center}
-.nav-links{display:flex;align-items:center;gap:25px}
-.nav-links a{font-size:11px;font-weight:800;color:#49554e}
-.nav-links a:hover{color:var(--green)}
-.nav-btn{padding:11px 15px;background:var(--green);color:#fff!important;border-radius:999px}
-.menu{display:none;border:1px solid var(--line);background:#fff;padding:9px 12px;border-radius:999px;font:800 9px ui-monospace,monospace}
-.mobile-links{display:none}
-
-.hero{padding:14px 0 70px}
-.hero-grid{display:grid;grid-template-columns:1fr 1.08fr;min-height:650px;border-radius:30px;overflow:hidden;box-shadow:var(--shadow);background:var(--green-dark)}
-.hero-copy{padding:64px 62px;display:flex;flex-direction:column;justify-content:center;color:#fff}
-.kicker{font:900 8px ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--lime)}
-.hero h1{margin:17px 0 22px;font-size:clamp(56px,7.2vw,92px);line-height:.84;letter-spacing:-.09em}
-.hero h1 span{color:#dce7da}
-.hero p{max-width:560px;color:#c4d4ca;font-size:15px}
-.hero-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:27px}
-.btn{min-height:44px;padding:0 16px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:9px}
-.btn-primary{background:#fff;color:var(--green-dark)}
-.btn-secondary{border:1px solid rgba(255,255,255,.18);color:#fff}
-.hero-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px;max-width:600px}
-.hero-fact{border-top:1px solid rgba(255,255,255,.18);padding-top:10px}
-.hero-fact strong{display:block;font-size:20px}
-.hero-fact span{display:block;color:#9ab0a0;font:800 7px ui-monospace,monospace;text-transform:uppercase;margin-top:2px}
-.hero-photo{position:relative;min-height:650px}
-.hero-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
-.hero-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(16,53,31,.38),transparent 35%,rgba(16,53,31,.08))}
-.photo-chip{position:absolute;z-index:2;left:22px;bottom:22px;padding:11px 13px;border-radius:13px;background:rgba(255,255,255,.9);color:var(--green-dark);font:900 8px ui-monospace,monospace;text-transform:uppercase}
-.photo-chip b{display:block;font-size:13px;font-family:inherit;letter-spacing:-.03em}
-.photo-chip span{display:block;color:#708078;margin-top:2px;font-size:7px}
-
-.quick{background:var(--lime)}
-.quick .container{min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:20px;font:900 8px ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#17351f}
-
-.section{padding:92px 0}
-.section-head{display:grid;grid-template-columns:.85fr 1.15fr;align-items:end;gap:40px;margin-bottom:28px}
-.eyebrow{color:#4c7656;font:900 8px ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase}
-.section-head h2{margin:7px 0 0;font-size:clamp(42px,5.6vw,72px);line-height:.86;letter-spacing:-.08em}
-.section-head p{margin:0;color:var(--muted);max-width:620px;font-size:13px}
-
-.catalog-tools{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:15px}
-.search{width:min(420px,100%);height:44px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:0 13px;outline:0;color:var(--ink)}
-.search:focus{border-color:#80aa68;box-shadow:0 0 0 3px #80aa6814}
-.catalog-count{font:900 8px ui-monospace,monospace;color:#7b857e;text-transform:uppercase}
-
-.products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.product{
-  position:relative;background:#fff;border:1px solid var(--line);border-radius:20px;padding:21px 20px 19px;
-  min-height:230px;display:flex;flex-direction:column;overflow:hidden;transition:transform .2s,box-shadow .2s,border-color .2s
-}
-.product:before{content:"";position:absolute;left:0;top:0;width:100%;height:4px;background:var(--lime);transform:scaleX(.16);transform-origin:left;transition:transform .25s}
-.product:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:#cbd6ca}
-.product:hover:before{transform:scaleX(1)}
-.product-code{color:#4a7355;font:900 8px ui-monospace,monospace;letter-spacing:.11em}
-.product h3{margin:27px 0 6px;font-size:25px;line-height:.96;letter-spacing:-.06em}
-.product-note{color:#869087;font-size:10px}
-.pack-title{margin-top:auto;padding-top:15px;border-top:1px solid var(--line);color:#7a857e;font:900 7px ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}
-.packs{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
-.pack{padding:5px 7px;border-radius:999px;border:1px solid #dce4dc;background:#f5f8f4;color:#33543f;font:800 7px ui-monospace,monospace}
-
-.feature{background:var(--green-dark);color:#fff}
-.feature-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}
-.feature-main,.feature-side{border-radius:24px;padding:36px}
-.feature-main{background:#173c29;border:1px solid rgba(255,255,255,.07)}
-.feature-side{background:#fff;color:var(--ink)}
-.feature h2{font-size:clamp(40px,5vw,64px);line-height:.88;letter-spacing:-.075em;margin:11px 0}
-.feature p{max-width:650px;color:#c6d6cc}
-.feature-side p{color:var(--muted)}
-.feature-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:26px}
-.feature-stat{padding-top:9px;border-top:1px solid rgba(255,255,255,.12)}
-.feature-stat strong{display:block;font-size:18px}.feature-stat span{display:block;color:#8fab9e;font:800 7px ui-monospace,monospace;text-transform:uppercase;margin-top:2px}
-
-.gallery{display:grid;grid-template-columns:1.15fr .85fr .85fr;grid-template-rows:220px 220px;gap:9px}
-.tile{position:relative;border-radius:18px;overflow:hidden;background:#ccd5cc}
-.tile:first-child{grid-row:span 2}
-.tile img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .5s}
-.tile:hover img{transform:scale(1.035)}
-.tile-label{position:absolute;z-index:2;left:11px;bottom:11px;padding:7px 9px;border-radius:999px;background:rgba(255,255,255,.9);color:var(--green-dark);font:900 7px ui-monospace,monospace;text-transform:uppercase}
-
-.studio{padding:92px 0}
-.studio-card{display:grid;grid-template-columns:1.08fr .92fr;border:1px solid #d1d8cf;border-radius:28px;overflow:hidden;background:#edeae1}
-.studio-main{padding:58px}
-.studio-main h2{margin:12px 0 16px;font-size:clamp(50px,7vw,92px);line-height:.82;letter-spacing:-.095em}
-.studio-main p{max-width:620px;color:#68756d;font-size:13px}
-.studio-items{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:28px}
-.studio-item{padding:12px;border:1px solid #d7ded5;border-radius:12px;background:#f7f4ec}
-.studio-item strong{display:block;font-size:16px}.studio-item span{display:block;margin-top:2px;color:#7d8881;font:800 7px ui-monospace,monospace;text-transform:uppercase}
-.studio-side{background:var(--green);color:#fff;padding:58px;display:flex;align-items:end}
-.studio-side h3{margin:9px 0;font-size:43px;line-height:.9;letter-spacing:-.08em}
-.studio-side p{color:#b7c9be;font-size:11px;max-width:340px}
-
-.contact{padding:0 0 90px}
-.contact-card{border:1px solid var(--line);background:#fff;border-radius:24px;padding:32px;display:grid;grid-template-columns:1.1fr .9fr;gap:30px}
-.contact-card h2{margin:10px 0;font-size:clamp(38px,5vw,58px);line-height:.9;letter-spacing:-.075em}
-.contact-card p{max-width:680px;color:var(--muted)}
-.contact-info{border-left:1px solid var(--line);padding-left:25px;display:flex;flex-direction:column;justify-content:end;gap:7px}
-.contact-info small{font:900 7px ui-monospace,monospace;color:#8b938d;text-transform:uppercase;letter-spacing:.12em}
-.contact-info a{font:900 13px ui-monospace,monospace;color:var(--green)}
-
-.footer{background:#0b2416;color:#98ad9f;padding:23px 0;font:800 8px ui-monospace,monospace;text-transform:uppercase}
-.footer-inner{display:flex;justify-content:space-between;gap:15px}
-
-.reveal{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
-.reveal.in{opacity:1;transform:none}
-
-@media(max-width:980px){
-  .nav-links{display:none}.menu{display:block}
-  .mobile-links.open{display:flex;flex-direction:column;align-items:flex-start;padding-bottom:14px;gap:12px}
-  .hero-grid,.feature-grid,.studio-card,.contact-card,.section-head{grid-template-columns:1fr}
-  .hero-photo{min-height:430px}.products{grid-template-columns:1fr}.gallery{grid-template-columns:1fr 1fr;grid-template-rows:240px 190px 190px}.tile:first-child{grid-column:span 2;grid-row:auto}
-  .contact-info{border-left:0;border-top:1px solid var(--line);padding:20px 0 0}
-}
-@media(max-width:600px){
-  .container{width:92vw}.topline .container{min-height:28px}
-  .hero{padding-top:8px}.hero-copy{padding:48px 28px}.hero h1{font-size:clamp(48px,14vw,72px)}.hero-facts{grid-template-columns:1fr}
-  .hero-photo{min-height:360px}.quick .container{display:block;padding:11px 0}.quick span+span{display:block;margin-top:4px}
-  .section,.studio{padding:72px 0}.catalog-tools{display:block}.search{width:100%;margin-bottom:8px}
-  .gallery{grid-template-columns:1fr;grid-template-rows:230px}.tile:first-child{grid-column:auto}
-  .studio-main,.studio-side,.feature-main,.feature-side{padding:30px}.studio-items,.feature-stats{grid-template-columns:1fr 1fr}
-  .contact-card{padding:26px}
-  .footer-inner{display:block}.footer-inner div+div{margin-top:7px}
-}
+body{margin:0;background:radial-gradient(circle at 20% 0,#fbfaf7 0 18%,transparent 43%),var(--bg);color:var(--ink);font:14px/1.6 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.24;background-image:linear-gradient(rgba(23,60,40,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(23,60,40,.035) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.5),transparent 75%)}
+a{color:inherit;text-decoration:none}button,input{font:inherit}img{max-width:100%;display:block}
+.wrap{width:min(1240px,92vw);margin:auto}
+.nav{position:sticky;top:0;z-index:30;background:rgba(243,241,231,.76);backdrop-filter:blur(18px);border-bottom:1px solid rgba(23,60,40,.08)}
+.navInner{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:25px}
+.logo{display:flex;align-items:center;width:170px;height:50px}.logo img{width:100%;height:100%;object-fit:contain;object-position:left center}
+.navLinks{display:flex;align-items:center;gap:28px}.navLinks a{font:900 9px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em;text-transform:uppercase;color:#55635a;position:relative;padding:8px 0}.navLinks a:after{content:"";position:absolute;left:0;right:100%;bottom:2px;height:1px;background:var(--green);transition:right .35s var(--ease)}.navLinks a:hover{color:var(--green)}.navLinks a:hover:after{right:0}
+.menu{display:none;border:1px solid var(--line);background:rgba(255,255,255,.65);border-radius:999px;padding:10px 13px;font:900 9px ui-monospace,SFMono-Regular,Consolas,monospace}
+.hero{padding:18px 0 0}.heroShell{position:relative;min-height:min(790px,78vh);border-radius:34px;overflow:hidden;background:var(--green);box-shadow:var(--shadow);isolation:isolate}
+.heroMedia{position:absolute;inset:0;aspect-ratio:16/9}.heroMedia img{width:100%;height:100%;object-fit:cover;object-position:center;transform:scale(1.035) translate3d(calc(var(--mx)*.035),calc(var(--my)*.025),0);transition:transform .25s ease-out;filter:saturate(.98) contrast(1.02)}
+.heroMedia:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,27,17,.85) 0%,rgba(8,27,17,.58) 32%,rgba(8,27,17,.1) 65%,rgba(8,27,17,.15) 100%),linear-gradient(180deg,rgba(8,27,17,.08),rgba(8,27,17,.5))}
+.heroGlow{position:absolute;width:38vw;height:38vw;max-width:520px;max-height:520px;border-radius:50%;background:radial-gradient(circle,rgba(184,223,104,.24),transparent 68%);filter:blur(10px);right:-12vw;top:-16vw;transform:translate3d(calc(var(--mx)*-.06),calc(var(--my)*-.04),0);pointer-events:none}
+.heroContent{position:relative;z-index:2;min-height:100%;display:flex;align-items:flex-end;padding:clamp(40px,6vw,80px);color:#fff}.heroCopy{max-width:760px}
+.kicker{font:900 9px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--lime)}
+.hero h1{margin:18px 0 18px;font-size:clamp(58px,8.5vw,118px);line-height:.82;letter-spacing:-.09em;max-width:820px}.hero h1 em{font-style:normal;color:#dce9dc}.heroText{max-width:600px;color:#d0ddd3;font-size:15px}
+.heroActions{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 17px;border-radius:999px;font:900 9px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase;transition:transform .35s var(--ease),background .25s,border-color .25s}.btnPrimary{background:#fff;color:var(--green)}.btnGhost{border:1px solid rgba(255,255,255,.26);color:#fff;background:rgba(255,255,255,.03)}.btn:hover{transform:translateY(-2px)}
+.heroFacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:34px;max-width:650px}.fact{padding:11px 12px 0;border-top:1px solid rgba(255,255,255,.2)}.fact strong{display:block;font-size:22px;letter-spacing:-.05em}.fact span{display:block;margin-top:3px;color:#9fb1a5;font:800 7px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase;letter-spacing:.1em}
+.ticker{overflow:hidden;border-bottom:1px solid var(--line);background:var(--lime)}.tickerTrack{display:flex;width:max-content;animation:ticker 26s linear infinite}.tickerItem{padding:12px 24px;color:#193720;font:900 8px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase;letter-spacing:.16em}@keyframes ticker{to{transform:translateX(-50%)}}
+.section{padding:110px 0}.sectionHead{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:50px;align-items:end;margin-bottom:34px}.eyebrow{font:900 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.18em;text-transform:uppercase;color:#54725d}.section h2{margin:9px 0 0;font-size:clamp(44px,6vw,82px);line-height:.84;letter-spacing:-.085em}.sectionLead{margin:0;color:var(--muted);max-width:650px;font-size:13px}
+.tools{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:15px}.search{width:min(460px,100%);height:46px;border:1px solid var(--line);border-radius:13px;padding:0 14px;background:rgba(255,255,255,.66);outline:none;color:var(--ink);box-shadow:0 8px 30px rgba(18,54,34,.03);transition:border-color .25s,box-shadow .25s}.search:focus{border-color:#8da96f;box-shadow:0 0 0 4px rgba(141,169,111,.12)}.count{font:900 8px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase;letter-spacing:.1em;color:#7b857d}
+.products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.product{position:relative;min-height:245px;border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.72);padding:22px;overflow:hidden;transition:transform .45s var(--ease),box-shadow .45s var(--ease),border-color .35s}.product:before{content:"";position:absolute;inset:auto auto 0 0;height:4px;width:100%;background:linear-gradient(90deg,var(--lime),#dbe9b0);transform:scaleX(.15);transform-origin:left;transition:transform .5s var(--ease)}.product:after{content:"";position:absolute;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(184,223,104,.18),transparent 68%);right:-60px;top:-60px;opacity:.45;transition:transform .6s var(--ease)}.product:hover{transform:translateY(-6px);box-shadow:var(--shadow);border-color:#c9d4c8}.product:hover:before{transform:scaleX(1)}.product:hover:after{transform:scale(1.35)}.code{font:900 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em;color:#5d7664}.product h3{margin:28px 0 7px;font-size:27px;line-height:.94;letter-spacing:-.065em;max-width:14ch}.packTitle{margin-top:auto;padding-top:16px;border-top:1px solid var(--line);font:900 7px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em;text-transform:uppercase;color:#7d887f}.packs{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.pack{padding:6px 8px;border:1px solid #d9e1d7;border-radius:999px;background:#f6f8f3;color:#365640;font:800 7px/1 ui-monospace,SFMono-Regular,Consolas,monospace}
+.showcase{background:var(--green);color:#fff}.showcaseGrid{display:grid;grid-template-columns:1.1fr .9fr;gap:10px}.showcaseCard{border:1px solid rgba(255,255,255,.1);border-radius:26px;overflow:hidden;min-height:470px;position:relative}.showcaseCard img{width:100%;height:100%;object-fit:cover;transition:transform .9s var(--ease)}.showcaseCard:hover img{transform:scale(1.035)}.showcaseCard:first-child{background:#244932}.showcaseCard:first-child:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,44,28,.05),rgba(15,44,28,.78))}.showcaseLabel{position:absolute;left:24px;right:24px;bottom:23px;z-index:2}.showcaseLabel strong{display:block;font-size:14px}.showcaseLabel span{display:block;color:#b9cbbf;font:800 7px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;margin-top:4px}.infoPanel{padding:30px;background:#f8f5eb;color:var(--ink);display:flex;flex-direction:column;justify-content:space-between}.infoPanel h3{margin:11px 0;font-size:50px;line-height:.86;letter-spacing:-.08em}.infoPanel p{color:var(--muted);max-width:420px}.infoList{display:grid;gap:8px;margin-top:30px}.infoRow{display:flex;justify-content:space-between;gap:15px;padding:11px 0;border-bottom:1px solid var(--line);font-size:12px}.infoRow span:last-child{font-weight:800;text-align:right}
+.gallery{display:grid;grid-template-columns:1.15fr .85fr .85fr;grid-template-rows:240px 240px;gap:10px}.tile{position:relative;border-radius:20px;overflow:hidden;background:#d8ded5}.tile:first-child{grid-row:span 2}.tile img{width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)}.tile:hover img{transform:scale(1.045)}.tile span{position:absolute;left:12px;bottom:12px;padding:7px 9px;border-radius:999px;background:rgba(255,255,255,.9);color:var(--green);font:900 7px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase}
+.contact{padding:20px 0 120px}.contactCard{border:1px solid var(--line);border-radius:26px;background:rgba(255,255,255,.68);padding:34px;display:grid;grid-template-columns:1fr .72fr;gap:30px;box-shadow:0 12px 50px rgba(18,54,34,.05)}.contactCard h2{margin:11px 0;font-size:clamp(44px,5.4vw,72px);line-height:.85;letter-spacing:-.08em}.contactCard p{color:var(--muted);max-width:620px}.contactSide{border-left:1px solid var(--line);padding-left:28px;display:flex;flex-direction:column;justify-content:flex-end}.contactSide small{font:900 7px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase;color:#8a938c;letter-spacing:.13em}.contactSide a{margin-top:5px;font:900 16px ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--green)}.contactSide a+a{margin-top:14px}
+.footer{padding:26px 0 44px;text-align:center;border-top:1px solid var(--line);font:800 8px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase;letter-spacing:.09em;color:#6f7b72}.footer a{transition:color .25s}.footer a:hover{color:var(--green)}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .75s var(--ease),transform .75s var(--ease);transition-delay:calc(var(--delay,0) * 70ms)}.reveal.in{opacity:1;transform:none}
+@media(max-width:980px){.navLinks{display:none}.menu{display:block}.nav.open .mobileLinks{display:flex}.mobileLinks{display:none;flex-direction:column;gap:10px;padding:10px 0 15px}.mobileLinks a{font:900 8px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase;color:#52615a}.sectionHead,.showcaseGrid,.contactCard{grid-template-columns:1fr}.contactSide{border-left:0;border-top:1px solid var(--line);padding:20px 0 0}}
+@media(max-width:720px){.wrap{width:92vw}.navInner{min-height:66px}.logo{width:140px}.heroShell{border-radius:24px;min-height:650px}.heroMedia{aspect-ratio:16/9;min-height:100%}.heroContent{padding:30px 24px 34px}.hero h1{font-size:clamp(48px,14vw,76px)}.heroText{font-size:13px}.heroFacts{grid-template-columns:1fr}.section{padding:78px 0}.tools{display:block}.search{width:100%;margin-bottom:8px}.products{grid-template-columns:1fr}.showcaseCard{min-height:340px}.gallery{grid-template-columns:1fr;grid-template-rows:250px}.tile:first-child{grid-row:auto}.contact{padding-bottom:85px}.contactCard{padding:25px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.tickerTrack{animation:none}.heroMedia img,.heroGlow{transform:none!important;transition:none}.reveal{opacity:1;transform:none;transition:none}.product,.btn,.tile img,.showcaseCard img{transition:none}}
 </style>
 </head>
 <body>
-<div class="topline"><div class="container"><span>BNC AGRO CARE</span><span>AGRICULTURAL PRODUCTS · BUSINESS OPERATIONS</span></div></div>
-
-<header class="nav">
-  <div class="container nav-inner">
-    <a class="logo-wrap" href="./" aria-label="BNC Agro Care"><img src="./FB_IMG_1789811599210.jpg" alt="BNC Agro Care"></a>
-    <nav class="nav-links">
-      <a href="#products">Products</a>
-      <a href="#about">About</a>
-      <a href="#gallery">Gallery</a>
-      <a href="#contact">Contact</a>
-      <a class="nav-btn" href="./invoice/">Invoice Studio</a>
-    </nav>
+<header class="nav" id="nav">
+  <div class="wrap navInner">
+    <a class="logo" href="./" aria-label="BNC Agro Care"><img src="./FB_IMG_1789811599210.jpg" alt="BNC Agro Care"></a>
+    <nav class="navLinks" aria-label="Main navigation"><a href="#products">Products</a><a href="#about">About</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a></nav>
     <button class="menu" id="menu" type="button" aria-expanded="false">Menu</button>
   </div>
-  <nav class="container mobile-links" id="mobileLinks">
-    <a href="#products">Products</a><a href="#about">About</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a><a href="./invoice/">Invoice Studio</a>
-  </nav>
+  <nav class="wrap mobileLinks" id="mobileLinks" aria-label="Mobile navigation"><a href="#products">Products</a><a href="#about">About</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a></nav>
 </header>
-
 <main>
-<section class="hero">
-  <div class="container">
-    <div class="hero-grid reveal">
-      <div class="hero-copy">
-        <div class="kicker">BNC Agro Care · Product catalogue</div>
-        <h1>Better agriculture.<br><span>Better organized.</span></h1>
-        <p>BNC Agro Care brings its product range, pack-size references and business workflow into one clear digital home.</p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="#products">Browse products</a>
-          <a class="btn btn-secondary" href="./invoice/">Open Invoice Studio</a>
-        </div>
-        <div class="hero-facts">
-          <div class="hero-fact"><strong id="heroProducts">10</strong><span>Product references</span></div>
-          <div class="hero-fact"><strong id="heroPacks">22</strong><span>Pack formats</span></div>
-          <div class="hero-fact"><strong>01</strong><span>Invoice workspace</span></div>
-        </div>
-      </div>
-      <div class="hero-photo">
-        <img src="./FB_IMG_1789811611633.jpg" alt="BNC Agro Care cover" fetchpriority="high">
-        <div class="photo-chip"><b>BNC Agro Care</b><span>Official project cover</span></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="quick"><div class="container"><span>Product catalogue · Current reference</span><span>BNCFINAL.xlsx · Invoice Studio · XLSX workflow</span></div></div>
-
-<section class="section" id="products">
-  <div class="container">
-    <div class="section-head reveal">
-      <div><div class="eyebrow">01 · Product catalogue</div><h2>Know the range.</h2></div>
-      <p>Product names and pack formats are loaded directly from the shared BNC reference data. The site does not invent prices, claims or unsupported product information.</p>
-    </div>
-    <div class="catalog-tools reveal">
-      <input id="search" class="search" type="search" placeholder="Search product or pack size…" autocomplete="off">
-      <span id="catalogCount" class="catalog-count">10 products · 22 pack formats</span>
-    </div>
-    <div class="products" id="products"></div>
-  </div>
-</section>
-
-<section class="section feature" id="about">
-  <div class="container">
-    <div class="feature-grid">
-      <article class="feature-main reveal">
-        <div class="eyebrow" style="color:var(--lime)">02 · About the project</div>
-        <h2>Public catalogue outside.<br>Operational tools inside.</h2>
-        <p>The BNC public page is designed for clear product browsing. The Invoice Studio is separated into its own workspace so business operations can stay focused without cluttering the catalogue.</p>
-        <div class="feature-stats">
-          <div class="feature-stat"><strong>10</strong><span>Current products</span></div>
-          <div class="feature-stat"><strong>22</strong><span>Pack references</span></div>
-          <div class="feature-stat"><strong>4 + 4</strong><span>Base invoice slots</span></div>
-          <div class="feature-stat"><strong>50 + 50</strong><span>Maximum slots</span></div>
-        </div>
-      </article>
-      <article class="feature-side reveal">
-        <div class="eyebrow">Source of truth</div>
-        <h2>BNCFINAL.xlsx</h2>
-        <p>The invoice Studio works from the canonical workbook and its row-expansion JavaScript. The repository master remains protected while edited invoice work is downloaded as XLSX.</p>
-        <a class="btn" style="margin-top:12px;background:var(--green);color:#fff" href="./invoice/">Open Invoice Studio →</a>
-      </article>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="gallery">
-  <div class="container">
-    <div class="section-head reveal">
-      <div><div class="eyebrow">03 · Visual reference</div><h2>Product presence.</h2></div>
-      <p>Existing BNC project imagery is kept as a visual support layer so the actual product catalogue remains the focus.</p>
-    </div>
-    <div class="gallery reveal">
-      <figure class="tile"><img src="./FB_IMG_1789811611633.jpg" alt="BNC Agro Care cover"><figcaption class="tile-label">Cover</figcaption></figure>
-      <figure class="tile"><img src="./IMG-20260713-WA0000.jpg" alt="BNC Agro Care product"><figcaption class="tile-label">Product 01</figcaption></figure>
-      <figure class="tile"><img src="./IMG-20260713-WA0001.jpg" alt="BNC Agro Care product"><figcaption class="tile-label">Product 02</figcaption></figure>
-      <figure class="tile"><img src="./IMG-20260713-WA0002.jpg" alt="BNC Agro Care product"><figcaption class="tile-label">Product 03</figcaption></figure>
-      <figure class="tile"><img src="./IMG-20260713-WA0003.jpg" alt="BNC Agro Care product"><figcaption class="tile-label">Product 04</figcaption></figure>
-    </div>
-  </div>
-</section>
-
-<section class="studio">
-  <div class="container">
-    <div class="studio-card reveal">
-      <div class="studio-main">
-        <div class="eyebrow">04 · Invoice Studio</div>
-        <h2>Run the paperwork<br>without changing the master.</h2>
-        <p>Edit the real workbook, add physical product rows, work in the live Sheet 01 preview and download the latest edited XLSX.</p>
-        <div class="studio-items">
-          <div class="studio-item"><strong>LIVE</strong><span>Workbook preview</span></div>
-          <div class="studio-item"><strong>+ ROW</strong><span>Insert before ST</span></div>
-          <div class="studio-item"><strong>XLSX</strong><span>Latest download</span></div>
-          <div class="studio-item"><strong>LOCAL</strong><span>Draft history</span></div>
-        </div>
-      </div>
-      <div class="studio-side">
-        <div>
-          <div class="kicker">BNC business tool</div>
-          <h3>Invoice Studio.</h3>
-          <p>Built around the BNC workbook rather than a fake document editor.</p>
-          <a class="btn btn-primary" href="./invoice/">Launch Studio →</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="contact" id="contact">
-  <div class="container">
-    <div class="contact-card reveal">
-      <div>
-        <div class="eyebrow">05 · Business contact</div>
-        <h2>One project.<br>Two focused surfaces.</h2>
-        <p>Use the public catalogue for product information and the Invoice Studio for day-to-day document work.</p>
-        <div class="hero-actions">
-          <a class="btn" style="background:var(--green);color:#fff" href="./invoice/">Open Invoice Studio</a>
-          <a class="btn" style="background:var(--green-soft);color:var(--green)" href="#products">View products</a>
-        </div>
-      </div>
-      <div class="contact-info">
-        <small>Representative</small>
-        <a href="tel:+8801718306103">Md Rezaul Karim</a>
-        <small>Officer BNC Agro Care · Area Manager</small>
-        <a href="tel:+8801718306103">01718-306103</a>
-      </div>
-    </div>
-  </div>
-</section>
+<section class="hero"><div class="wrap"><div class="heroShell reveal">
+  <div class="heroMedia" aria-hidden="true"><img src="./FB_IMG_1789811611633.jpg" alt=""></div>
+  <div class="heroGlow" aria-hidden="true"></div>
+  <div class="heroContent"><div class="heroCopy">
+    <div class="kicker">BNC Agro Care</div>
+    <h1>Care for the crop.<br><em>Clarity for the choice.</em></h1>
+    <p class="heroText">Explore the current BNC Agro Care product range, pack sizes and contact details in one clear customer-facing catalogue.</p>
+    <div class="heroActions"><a class="btn btnPrimary" href="#products">Explore products</a><a class="btn btnGhost" href="#contact">Contact</a></div>
+    <div class="heroFacts"><div class="fact"><strong id="heroProducts">—</strong><span>Products</span></div><div class="fact"><strong id="heroPacks">—</strong><span>Pack formats</span></div><div class="fact"><strong>01</strong><span>Digital catalogue</span></div></div>
+  </div></div>
+</div></div></section>
+<div class="ticker" aria-hidden="true"><div class="tickerTrack"><span class="tickerItem">Product catalogue</span><span class="tickerItem">Pack sizes</span><span class="tickerItem">BNC Agro Care</span><span class="tickerItem">Customer information</span><span class="tickerItem">Product catalogue</span><span class="tickerItem">Pack sizes</span><span class="tickerItem">BNC Agro Care</span><span class="tickerItem">Customer information</span></div></div>
+<section class="section" id="products"><div class="wrap">
+  <div class="sectionHead reveal"><div><div class="eyebrow">01 / Product range</div><h2>See the range.</h2></div><p class="sectionLead">Browse the current product names and available pack formats. The catalogue stays focused on reference information rather than unsupported claims.</p></div>
+  <div class="tools reveal" style="--delay:1"><input class="search" id="search" type="search" autocomplete="off" placeholder="Search a product or pack size…"><span class="count" id="catalogCount">Loading…</span></div>
+  <div class="products" id="products" aria-live="polite"></div>
+</div></section>
+<section class="section showcase" id="about"><div class="wrap">
+  <div class="sectionHead reveal"><div><div class="eyebrow" style="color:var(--lime)">02 / About</div><h2>Clear enough to show.</h2></div><p class="sectionLead" style="color:#b7c9bd">A customer-facing surface should make the product range easy to understand, keep the brand visible and leave the rest out of the way.</p></div>
+  <div class="showcaseGrid"><figure class="showcaseCard reveal" style="--delay:1"><img src="./FB_IMG_1789811611633.jpg" alt="BNC Agro Care cover image" loading="lazy"><figcaption class="showcaseLabel"><strong>BNC Agro Care</strong><span>Brand imagery</span></figcaption></figure>
+  <article class="showcaseCard infoPanel reveal" style="--delay:2"><div><div class="eyebrow">BNC / CUSTOMER VIEW</div><h3>Less noise.<br>More product.</h3><p>Product names and pack sizes stay front and center while the interface adds just enough motion to feel alive.</p></div><div class="infoList"><div class="infoRow"><span>Range</span><span id="infoProducts">— products</span></div><div class="infoRow"><span>Formats</span><span id="infoPacks">— pack formats</span></div><div class="infoRow"><span>Contact</span><span>Representative available</span></div></div></article></div>
+</div></section>
+<section class="section" id="gallery"><div class="wrap">
+  <div class="sectionHead reveal"><div><div class="eyebrow">03 / Gallery</div><h2>Keep the visual language familiar.</h2></div><p class="sectionLead">Existing BNC imagery is used as a visual layer, with the cover preserved in its wide 16:9 presentation.</p></div>
+  <div class="gallery reveal"><figure class="tile"><img src="./FB_IMG_1789811611633.jpg" alt="BNC Agro Care cover" loading="lazy"><span>Cover</span></figure><figure class="tile"><img src="./IMG-20260713-WA0000.jpg" alt="BNC Agro Care product image" loading="lazy"><span>Product</span></figure><figure class="tile"><img src="./IMG-20260713-WA0001.jpg" alt="BNC Agro Care product image" loading="lazy"><span>Product</span></figure><figure class="tile"><img src="./IMG-20260713-WA0002.jpg" alt="BNC Agro Care product image" loading="lazy"><span>Product</span></figure><figure class="tile"><img src="./IMG-20260713-WA0003.jpg" alt="BNC Agro Care product image" loading="lazy"><span>Product</span></figure></div>
+</div></section>
+<section class="contact" id="contact"><div class="wrap"><div class="contactCard reveal">
+  <div><div class="eyebrow">04 / Contact</div><h2>Talk to the representative.</h2><p>For current product information, pack-size questions and business enquiries, use the contact details below.</p><div class="heroActions"><a class="btn" style="background:var(--green);color:#fff" href="tel:+8801718306103">Call representative</a></div></div>
+  <div class="contactSide"><small>Name</small><a href="tel:+8801718306103">Md Rezaul Karim</a><small style="margin-top:18px">Role</small><a href="#contact" aria-label="Representative role">Officer BNC Agro Care · Area Manager</a><small style="margin-top:18px">Mobile</small><a href="tel:+8801718306103">01718-306103</a></div>
+</div></div></section>
 </main>
-
-<footer class="footer"><div class="container footer-inner"><div>BNC Agro Care · Product catalogue & business operations</div><div>Canonical project · Tamasrazim main repository</div></div></footer>
-
+<footer class="footer"><a href="https://tamasrazim.github.io/" target="_blank" rel="noopener noreferrer">© Robiul Rumman Razim</a></footer>
 <script src="./reference/products.js"></script>
 <script>
-const data=window.BNC_PRODUCTS||[];
-const grid=document.getElementById("products");
-const search=document.getElementById("search");
-const catalogCount=document.getElementById("catalogCount");
-const heroProducts=document.getElementById("heroProducts");
-const heroPacks=document.getElementById("heroPacks");
-const totalPacks=data.reduce((n,p)=>n+(p.packs||[]).length,0);
-heroProducts.textContent=data.length;
-heroPacks.textContent=totalPacks;
-function esc(v){return String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
-function render(term=""){
-  const q=term.trim().toLowerCase();
-  const list=data.filter(p=>(p.name+" "+(p.packs||[]).join(" ")).toLowerCase().includes(q));
-  catalogCount.textContent=list.length+" product"+(list.length===1?"":"s")+" · "+list.reduce((n,p)=>n+(p.packs||[]).length,0)+" pack formats";
-  if(!list.length){
-    grid.innerHTML='<div style="grid-column:1/-1;padding:34px;border:1px dashed #cad3ca;border-radius:18px;text-align:center;color:#77837c">No matching BNC product found.</div>';
-    return;
+(() => {
+  const data = Array.isArray(window.BNC_PRODUCTS) ? window.BNC_PRODUCTS : [];
+  const $ = s => document.querySelector(s);
+  const grid = $("#products"), search = $("#search"), count = $("#catalogCount");
+  const totalPacks = data.reduce((n,p) => n + (Array.isArray(p.packs) ? p.packs.length : 0), 0);
+  const hp=$("#heroProducts"), hpk=$("#heroPacks"), ip=$("#infoProducts"), ik=$("#infoPacks");
+  if(hp)hp.textContent=data.length;if(hpk)hpk.textContent=totalPacks;if(ip)ip.textContent=data.length+" products";if(ik)ik.textContent=totalPacks+" pack formats";
+  const esc = v => String(v ?? "").replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+  function render(term=""){
+    const q = term.trim().toLowerCase();
+    const list = data.filter(p => (String(p.name||"")+" "+(Array.isArray(p.packs)?p.packs.join(" "):"")).toLowerCase().includes(q));
+    const packs = list.reduce((n,p)=>n+(Array.isArray(p.packs)?p.packs.length:0),0);
+    count.textContent=list.length+" product"+(list.length===1?"":"s")+" · "+packs+" pack format"+(packs===1?"":"s");
+    if(!list.length){grid.innerHTML='<div style="grid-column:1/-1;padding:34px;border:1px dashed #c9d3ca;border-radius:20px;text-align:center;color:#748078">No matching product found.</div>';return}
+    grid.innerHTML=list.map((p,i)=>{
+      const chips=(p.packs||[]).map(x=>'<span class="pack">'+esc(x)+'</span>').join("");
+      return '<article class="product reveal" style="--delay:'+Math.min(i,7)+'"><span class="code">'+esc(p.code||String(i+1).padStart(2,"0"))+'</span><h3>'+esc(p.name)+'</h3><div class="packTitle">Pack formats</div><div class="packs">'+chips+'</div></article>';
+    }).join("");
+    requestAnimationFrame(()=>grid.querySelectorAll(".reveal").forEach(observe));
   }
-  grid.innerHTML=list.map(p=>'<article class="product"><div class="product-code">'+esc(p.code)+' · BNC PRODUCT</div><h3>'+esc(p.name)+'</h3><div class="product-note">Shared catalogue reference</div><div class="pack-title">Available pack formats</div><div class="packs">'+(p.packs||[]).map(x=>'<span class="pack">'+esc(x)+'</span>').join("")+'</div></article>').join("");
-}
-search.addEventListener("input",()=>render(search.value));
-render();
-
-const menu=document.getElementById("menu");
-const mobile=document.getElementById("mobileLinks");
-menu.addEventListener("click",()=>{const open=mobile.classList.toggle("open");menu.setAttribute("aria-expanded",String(open));menu.textContent=open?"Close":"Menu"});
-mobile.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>{mobile.classList.remove("open");menu.setAttribute("aria-expanded","false");menu.textContent="Menu"}));
-
-if("IntersectionObserver"in window){
-  const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");observer.unobserve(e.target)}}),{threshold:.08});
-  document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));
-}else document.querySelectorAll(".reveal").forEach(el=>el.classList.add("in"));
+  search.addEventListener("input",()=>render(search.value));render();
+  const nav=$("#nav"),menu=$("#menu"),mobile=$("#mobileLinks");
+  menu?.addEventListener("click",()=>{const open=nav.classList.toggle("open");menu.setAttribute("aria-expanded",String(open));});
+  mobile?.addEventListener("click",e=>{if(e.target.matches("a")){nav.classList.remove("open");menu.setAttribute("aria-expanded","false");}});
+  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const observer=!reduce&&"IntersectionObserver"in window?new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add("in");observer.unobserve(entry.target);}})},{threshold:.12,rootMargin:"0px 0px -30px"}):null;
+  function observe(el){if(!el)return;if(observer)observer.observe(el);else el.classList.add("in")}
+  document.querySelectorAll(".reveal").forEach(observe);
+  if(!reduce){let tx=0,ty=0,ax=0,ay=0;window.addEventListener("pointermove",e=>{tx=(e.clientX/window.innerWidth-.5)*34;ty=(e.clientY/window.innerHeight-.5)*24},{passive:true});function frame(){ax+=(tx-ax)*.06;ay+=(ty-ay)*.06;document.documentElement.style.setProperty("--mx",ax.toFixed(2)+"px");document.documentElement.style.setProperty("--my",ay.toFixed(2)+"px");requestAnimationFrame(frame)}frame()}
+})();
 </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});</script>
 </body>
