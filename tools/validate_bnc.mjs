@@ -21,11 +21,13 @@ must(invoice.includes('cdn.jsdelivr.net/npm/pdf-lib@1.17.1'),'invoice preloads p
 must(invoice.includes('navigator.serviceWorker.register("./sw.js")'),'invoice registers its service worker');
 must(invoice.includes('id="rowMetric"'),'invoice exposes physical row count');
 must(invoice.includes('id="slotMetric"'),'invoice exposes total product slots');
+must(invoice.includes('id="rowMetric">6'),'invoice master UI starts at 6 rows per side');
+must(invoice.includes('id="slotMetric">12'),'invoice master UI starts at 12 product slots');
 must(invoice.includes('+ Add product row'),'invoice uses physical row insertion wording');
 must(invoice.includes('pairLegend'),'invoice presents balanced left/right product columns');
 
 const invoiceJs=read(root+'/invoice/js/app.js');
-must(invoiceJs.includes('ROWS_PER_SIDE=4'),'invoice starts with 4 physical rows per side');
+must(invoiceJs.includes('ROWS_PER_SIDE=6'),'invoice starts with 6 physical rows per side from the master workbook');
 must(invoiceJs.includes('MAX_ROWS_PER_SIDE=50'),'invoice has an explicit safe row ceiling');
 must(invoiceJs.includes('function addProductRow()'),'invoice adds a physical row, not a single flat product');
 must(invoiceJs.includes('state.rows.push(blankRow())'),'adding a product creates one row on both sides');
