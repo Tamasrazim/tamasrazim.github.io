@@ -1,6 +1,6 @@
 (()=>{"use strict";
 const $=s=>document.querySelector(s);
-const TEMPLATE="../reference/BNCFINAL.xlsx?v=51",DB="bnc-invoice-xlsx-v1",ROWS_PER_SIDE=4,MAX_ROWS_PER_SIDE=50,FIRST_PAGE_EXTRA_ROWS=2;
+const SOURCE_VERSION=52,TEMPLATE="../reference/BNCFINAL.xlsx?v="+SOURCE_VERSION,DB="bnc-invoice-xlsx-v1",ROWS_PER_SIDE=4,MAX_ROWS_PER_SIDE=50,PRODUCT_START_ROW=11;
 const PRODUCTS=window.BNC_PRODUCTS||[];
 const blank=()=>({name:"",pack:"",ctn:"",rate:""});
 const blankRow=()=>({left:blank(),right:blank()});
@@ -111,8 +111,8 @@ function paperCol(rows,side,totalRows){
  return '<div class="paperTable"><div class="th"><span>SL</span><span>PRODUCT</span><span>PACK</span><span>CTN</span><span>RATE</span><span>AMOUNT</span></div>'+rows.map((p,i)=>paperRow(p,slFor(i,side,totalRows))).join("")+'</div>';
 }
 function renderPreview(){
- const totalRows=state.rows.length,shown=state.rows.slice(0,ROWS_PER_SIDE+FIRST_PAGE_EXTRA_ROWS),t=totals();
- $("#sheetPreview").innerHTML='<div class="a4Sheet"><div class="paperHeader"><div><div class="paperBrand">BNC AGROCARE</div><div class="paperTitle">INVOICE · XLSX</div></div><div class="paperMeta">REF '+safe(state.ref)+'<br>NO. '+safe(state.invoiceNo)+'<br>'+safe(displayDate(state.date))+'</div></div><div class="metaGrid"><div class="metaBox"><small>TRADER / DEALER</small><strong>'+safe(state.trader)+'</strong></div><div class="metaBox"><small>BUYER</small><strong>'+safe(state.buyer)+'</strong></div><div class="metaBox"><small>ADDRESS</small><strong>'+safe(state.address)+'</strong></div><div class="metaBox"><small>MOBILE</small><strong>'+safe(state.mobile)+'</strong></div></div><div class="paperTables">'+paperCol(shown.map(r=>r.left),"left",totalRows)+paperCol(shown.map(r=>r.right),"right",totalRows)+'</div>'+(state.rows.length>shown.length?'<div class="paperContinuation">+ '+(state.rows.length-shown.length)+' extra row(s) will be inserted into the workbook before ST.</div>':"")+'<div class="paperSummary"><div class="paperTotal"><span>TOTAL CARTON</span><strong>'+t.cartons+'</strong></div><div class="paperTotal"><span>GROSS TAKA</span><strong>'+money(t.total)+'</strong></div><div class="paperTotal"><span>COMMISSION</span><strong>'+money(t.commission)+'</strong></div><div class="paperTotal"><span>TOTAL AMOUNT</span><strong>'+money(t.final)+'</strong></div></div><div class="paperFoot"><span>Workbook source: BNCFINAL.xlsx</span><span>Output: .xlsx</span></div></div>';
+ const totalRows=state.rows.length,t=totals();
+ $("#sheetPreview").innerHTML='<div class="a4Sheet"><div class="paperHeader"><div><div class="paperBrand">BNC AGROCARE</div><div class="paperTitle">INVOICE · WORKBOOK 01</div></div><div class="paperMeta">REF '+safe(state.ref)+'<br>NO. '+safe(state.invoiceNo)+'<br>'+safe(displayDate(state.date))+'</div></div><div class="metaGrid"><div class="metaBox"><small>TRADER / DEALER</small><strong>'+safe(state.trader)+'</strong></div><div class="metaBox"><small>BUYER</small><strong>'+safe(state.buyer)+'</strong></div><div class="metaBox"><small>ADDRESS</small><strong>'+safe(state.address)+'</strong></div><div class="metaBox"><small>MOBILE</small><strong>'+safe(state.mobile)+'</strong></div></div><div class="paperTables">'+paperCol(state.rows.map(r=>r.left),"left",totalRows)+paperCol(state.rows.map(r=>r.right),"right",totalRows)+'</div><div class="paperSummary"><div class="paperTotal"><span>TOTAL CARTON</span><strong>'+t.cartons+'</strong></div><div class="paperTotal"><span>GROSS TAKA</span><strong>'+money(t.total)+'</strong></div><div class="paperTotal"><span>COMMISSION</span><strong>'+money(t.commission)+'</strong></div><div class="paperTotal"><span>TOTAL AMOUNT</span><strong>'+money(t.final)+'</strong></div></div><div class="paperFoot"><span>Source: BNCFINAL.xlsx · Sheet 01</span><span>Export: XLSX only</span></div></div>';
 }
 
 function findInvoiceSheet(workbook){
@@ -126,32 +126,50 @@ function textOfCell(cell){
  if(v.text)return String(v.text).trim();
  return ""
 }
+function cellAt(ws,rowNumber,colNumber){
+ const r=Number(rowNumber),c=Number(colNumber);
+ if(!Number.isInteger(r)||r<1||!Number.isInteger(c)||c<1)return null;
+ return ws.getRow(r).getCell(c);
+}
 function findCell(ws,labels){
- let found=null;
- ws.eachRow({includeEmpty:true},row=>row.eachCell({includeEmpty:true},cell=>{
-  if(found)return;
+ const wanted=labels.map(x=>String(x).toLowerCase());
+ let exact=null,fuzzy=null;
+ ws.eachRow(row=>row.eachCell({includeEmpty:false},cell=>{
+  if(exact)return;
   const s=textOfCell(cell).toLowerCase();
-  if(labels.some(x=>s===x||s.includes(x))){found=cell}
+  if(!s)return;
+  if(wanted.includes(s)){if(!exact)exact=cell;return}
+  if(!fuzzy&&wanted.some(x=>s.includes(x)))fuzzy=cell;
  }));
- return found
+ return exact||fuzzy;
 }
+function mergedMaster(cell){return cell&&cell.master?cell.master:cell}
+function sameCell(a,b){return !!(a&&b&&a.address===b.address)}
 function tryWrite(cell,value){
- try{cell.value=value;return true}catch{return false}
+ try{if(!cell)return false;cell.value=value;return true}catch{return false}
 }
-function writeNextToLabel(ws,cell,value){
- if(!cell||value==null)return false;
+function writeNextToLabel(ws,anchor,value){
+ if(!anchor||value==null)return false;
  const candidates=[
-  ws.getCell(cell.row,cell.col+1),ws.getCell(cell.row,cell.col+2),
-  ws.getCell(cell.row+1,cell.col),ws.getCell(cell.row+1,cell.col+1),
-  ws.getCell(cell.row,cell.col-1)
- ].filter(x=>x&&x.col>0&&x.row>0);
- for(const c of candidates){if(!textOfCell(c)&&tryWrite(c,value))return true}
- return tryWrite(ws.getCell(cell.row,cell.col+1),value)
+  cellAt(ws,anchor.row,anchor.col+1),cellAt(ws,anchor.row,anchor.col+2),cellAt(ws,anchor.row,anchor.col+3),
+  cellAt(ws,anchor.row+1,anchor.col),cellAt(ws,anchor.row+1,anchor.col+1),cellAt(ws,anchor.row+1,anchor.col+2),
+  cellAt(ws,anchor.row,anchor.col-1)
+ ];
+ for(const raw of candidates){
+  const c=mergedMaster(raw);
+  if(!c||sameCell(c,anchor))continue;
+  if(!textOfCell(c)&&tryWrite(c,value))return true;
+ }
+ return false;
 }
-function putHeaderField(ws,labels,value){
- const cell=findCell(ws,labels);
- return writeNextToLabel(ws,cell,value)
+function putHeaderField(ws,labels,value,{required=false}={}){
+ if(value==null||value==="")return true;
+ const anchor=findCell(ws,labels);
+ const ok=writeNextToLabel(ws,anchor,value);
+ if(!ok&&required)throw Error("Could not place workbook field: "+labels[0]);
+ return ok;
 }
+
 function copyStyleAndRelativeFormula(source,target){
  try{target.style={...source.style}}catch{}
  if(source.formula){
@@ -171,27 +189,30 @@ function bumpFormulaRefsAtOrBelow(ws,startRow){
   })
  }
 }
-function insertProductRow(ws){
+function findStRow(ws){
  let stRow=null;
- ws.eachRow((row,rowNumber)=>{if(stRow===null&&textOfCell(row.getCell("B")).toUpperCase()==="ST")stRow=rowNumber});
+ ws.eachRow((row,rowNumber)=>{
+  if(stRow!==null)return;
+  if(textOfCell(row.getCell(2)).toUpperCase()==="ST")stRow=rowNumber;
+ });
  if(!stRow)throw Error('Could not find the "ST" row in BNCFINAL.xlsx');
- bumpFormulaRefsAtOrBelow(ws,stRow);
- ws.spliceRows(stRow,0,[]);
- const above=ws.getRow(stRow-1),neo=ws.getRow(stRow);
- for(let c=1;c<=12;c++)copyStyleAndRelativeFormula(above.getCell(c),neo.getCell(c));
- neo.height=above.height;
- const newSt=stRow+1;
- ["D","F","L"].forEach(col=>ws.getCell(col+newSt).value={formula:"SUM("+col+"11:"+col+stRow+")"});
- return stRow
+ return stRow;
 }
+function insertProductRow(ws){
+ if(typeof window.BNCInsertProductRow!=="function")throw Error("Invoice row engine is unavailable");
+ const inserted=window.BNCInsertProductRow(ws);
+ if(!Number.isInteger(inserted)||inserted<PRODUCT_START_ROW)throw Error("Invoice row engine returned an invalid row");
+ return inserted;
+}
+
 function clearValue(cell){try{cell.value=null}catch{}}
 function writeLine(ws,rowIndex,totalRows,side,p){
- const r=11+rowIndex;
- const base=side==="left"?0:6;
+ const r=PRODUCT_START_ROW+rowIndex,base=side==="left"?0:6;
  const vals=[hasData(p)?slFor(rowIndex,side,totalRows):"",p.name||"",p.pack||"",p.ctn===""?"":num(p.ctn),p.rate===""?"":num(p.rate)];
- clearValue(ws.getCell(r,1+base));tryWrite(ws.getCell(r,1+base),vals[0]);
- [1,2,3,4].forEach((i,k)=>{const cell=ws.getCell(r,2+base+k);tryWrite(cell,vals[i]??null)});
+ const row=ws.getRow(r);
+ for(let i=0;i<5;i++)row.getCell(base+1+i).value=vals[i]??"";
 }
+
 function fillRows(ws){
  normalize();
  while(countInvoiceRows(ws)<state.rows.length)insertProductRow(ws);
@@ -202,17 +223,16 @@ function fillRows(ws){
  }
  return totalRows
 }
-function countInvoiceRows(ws){
- let stRow=null;
- ws.eachRow((row,rowNumber)=>{if(stRow===null&&textOfCell(row.getCell("B")).toUpperCase()==="ST")stRow=rowNumber});
- return stRow?Math.max(ROWS_PER_SIDE,stRow-11):ROWS_PER_SIDE
-}
+function countInvoiceRows(ws){return Math.max(ROWS_PER_SIDE,findStRow(ws)-PRODUCT_START_ROW)}
+
+
 
 async function buildWorkbook(){
- if(buildWorkbook.busy)return lastBuffer;
- buildWorkbook.busy=true;lastBuffer=null;$("#previewBtn").disabled=true;$("#xlsxState").textContent="Preparing...";setStatus("Loading BNCFINAL.xlsx...");
+ if(buildBusy)return lastBuffer;
+ buildBusy=true;lastBuffer=null;$("#previewBtn").disabled=true;$("#downloadBtn").disabled=true;$("#xlsxState").textContent="Preparing...";setStatus("Loading BNCFINAL.xlsx...");
  try{
   if(!window.ExcelJS?.Workbook)throw Error("ExcelJS unavailable");
+  if(typeof window.BNCInsertProductRow!=="function")throw Error("Row engine unavailable");
   const wb=new ExcelJS.Workbook();
   const response=await fetch(TEMPLATE,{cache:"no-store"});
   if(!response.ok)throw Error("BNCFINAL.xlsx unavailable");
@@ -237,7 +257,7 @@ async function buildWorkbook(){
   lastBuffer=await wb.xlsx.writeBuffer();
   $("#xlsxState").textContent="XLSX ready";setStatus("Workbook ready");
   return lastBuffer
- }finally{buildWorkbook.busy=false;$("#previewBtn").disabled=false}
+ }finally{buildBusy=false;$("#previewBtn").disabled=false;$("#downloadBtn").disabled=false}
 }
 async function downloadXlsx(){
  const buffer=await buildWorkbook();
