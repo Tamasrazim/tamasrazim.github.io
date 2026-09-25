@@ -1,4 +1,4 @@
-const CACHE="bnc-invoice-v47";
+const CACHE="bnc-invoice-v48";
 const PDF_LIB="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js";
 const CORE=["./","./index.html","./css/app.css","./js/app.js","./manifest.webmanifest","./icons/icon.svg","../invoice.pdf"];
 const FALLBACK=new URL("./index.html",self.registration.scope).href;
