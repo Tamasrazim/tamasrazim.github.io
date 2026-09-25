@@ -127,15 +127,6 @@ function shiftRowsDownWithoutSplice(ws,startRow){
   // Detach the merge layer first, rebuild rows from models, then restore shifted merges.
   unmergeAll(ws,merges);
 
-  // Update defined-name row references just like Worksheet.spliceRows(start,0,...)
-  try{
-    if(ws.workbook?.definedNames?.spliceRows){
-      ws.workbook.definedNames.spliceRows(ws.name,startRow,0,1);
-    }
-  }catch(error){
-    console.warn("BNC defined-name row shift skipped:",error);
-  }
-
   bumpFormulaRefsAtOrBelow(ws,startRow);
 
   const models=[];
