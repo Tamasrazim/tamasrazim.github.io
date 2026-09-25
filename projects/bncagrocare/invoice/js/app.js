@@ -43,7 +43,7 @@ function normalize(){
   const old=Array.isArray(state.products)?state.products.map(p=>({...blank(),...p})):[];
   const rows=Array.from({length:Math.max(ROWS_PER_SIDE,Math.ceil(Math.max(ROWS_PER_SIDE*2,old.length)/2))},blankRow);
   for(let i=0;i<ROWS_PER_SIDE;i++){rows[i].left={...rows[i].left,...(old[i]||{})};rows[i].right={...rows[i].right,...(old[ROWS_PER_SIDE+i]||{})}}
-  for(let i=ROWS_PER_SIDE*2,j=ROWS_PER_SIDE;j<old.length;j++,j+=0){
+  for(let j=ROWS_PER_SIDE*2;j<old.length;j++){
    const extraIndex=j-ROWS_PER_SIDE*2,rowIndex=ROWS_PER_SIDE+Math.floor(extraIndex/2);
    if(rowIndex>=rows.length)break;
    if(extraIndex%2===0)rows[rowIndex].left={...rows[rowIndex].left,...old[j]};
@@ -204,7 +204,7 @@ function drawExtraRows(page,font,bold){
  const rh=9.8,white=window.PDFLib.rgb(1,1,1);
  page.drawRectangle({x:X[0]-1,y:548,width:X[12]-X[0]+2,height:94,color:white});
  extra.forEach((row,j)=>{
-  const y=SY[0]-(j+1)*rh;
+  const y=SY[0]-j*rh;
   drawPair(page,row,ROWS_PER_SIDE+j,state.rows.length,y,rh,font);
   cellBorders(page,0,y,rh);cellBorders(page,6,y,rh);
  });
