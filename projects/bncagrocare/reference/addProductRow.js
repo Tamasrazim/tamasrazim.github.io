@@ -1,5 +1,4 @@
-// BNC Agro Care · canonical workbook row rule
-// Source of truth: reference/BNCFINAL.xlsx
+// BNC Agro Care invoice row helper
 (function(global){
 "use strict";
 const PRODUCT_START_ROW=11;
