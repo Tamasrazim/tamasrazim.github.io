@@ -3,48 +3,36 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#153c25">
+<meta name="theme-color" content="#173c28">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icons/icon.svg">
-<title>BNC Agro Care · Invoice Studio</title>
+<title>BNC Agro Care · Invoice</title>
 <link rel="stylesheet" href="./css/app.css">
 </head>
 <body>
-<header class="studioNav">
-  <div class="navInner">
-    <a class="logoLink" href="../" aria-label="Back to BNC Agro Care">
-      <img src="../FB_IMG_1789811599210.jpg" alt="BNC Agro Care">
-      <span>/ Invoice Studio</span>
-    </a>
-    <div class="liveState"><i></i><span id="status">Ready</span></div>
-    <div class="navActions">
-      <a href="../" class="navLink">Website</a>
-      <button id="newBtn" type="button">New invoice</button>
-      <button id="saveBtn" type="button">Save draft</button>
-      <button id="installBtn" type="button" hidden>Install</button>
+<header class="topbar">
+  <div class="topbarInner">
+    <a class="brand" href="../" aria-label="Back to BNC Agro Care"><img src="../FB_IMG_1789811599210.jpg" alt="BNC Agro Care"><span>Invoice</span></a>
+    <div class="status"><i></i><span id="status">Ready</span></div>
+    <div class="topActions">
+      <a class="ghostBtn" href="../">Website</a><button id="newBtn" type="button">New</button><button id="saveBtn" type="button">Save</button><button id="installBtn" type="button" hidden>Install</button>
     </div>
   </div>
 </header>
-
 <main>
-<section class="studioIntro">
-  <div>
-    <div class="eyebrow">BNC / OPERATIONS / WORKBOOK</div>
-    <h1>Invoice<br><span>Studio.</span></h1>
-    <p>Work directly against the canonical BNCFINAL.xlsx workbook. The preview is the current workbook state: edit cells, add physical rows, then download the latest XLSX.</p>
+<section class="intro">
+  <div class="introCopy reveal">
+    <div class="eyebrow">BNC / REPRESENTATIVE APP</div>
+    <h1>Make the invoice.<br><span>Leave Excel alone.</span></h1>
+    <p>Create invoices through a clean business interface while the real workbook stays behind the scenes. Edit customer details, enter products, review the live sheet and download the latest XLSX.</p>
+    <div class="introPills"><span>Live workbook</span><span>Fast entry</span><span>XLSX</span><span>Local drafts</span></div>
   </div>
-  <div class="ruleCard">
-    <div><span>MASTER</span><strong>BNCFINAL.xlsx</strong></div>
-    <div><span>ROW RULE</span><strong>Insert before ST</strong></div>
-    <div><span>PREVIEW</span><strong>Live Sheet 01</strong></div>
-    <div><span>OUTPUT</span><strong>XLSX only</strong></div>
-  </div>
+  <div class="introVisual reveal" style="--delay:2" aria-hidden="true"><div class="orb"></div><div class="ring"></div><div class="miniSheet"><span></span><span></span><span></span><span></span><span></span></div></div>
 </section>
-
-<section class="studioLayout">
+<section class="workspace">
   <aside class="controls">
-    <article class="panel identity">
-      <div class="panelHead"><div><small>01 / DOCUMENT</small><h2>Invoice identity</h2></div><b>LOCAL</b></div>
+    <article class="panel reveal">
+      <div class="panelHead"><div><small>01 / CUSTOMER</small><h2>Invoice details</h2></div><b>LOCAL</b></div>
       <div class="formGrid">
         <label>Reference<input data-k="ref" placeholder="X2"></label>
         <label>Invoice No.<input data-k="invoiceNo" inputmode="numeric" placeholder="0002"></label>
@@ -55,46 +43,28 @@
         <label class="wide">Address<input data-k="address" placeholder="Address"></label>
         <label class="wide">Mobile<input data-k="mobile" inputmode="tel" placeholder="01XXXXXXXXX"></label>
       </div>
-      <div class="repCard"><img src="../FB_IMG_1789811599210.jpg" alt="BNC"><div><small>Sales representative</small><strong>Md Rezaul Karim</strong><em>Officer BNC Agro Care · Area Manager · 01718-306103</em></div></div>
+      <div class="repCard"><img src="../FB_IMG_1789811599210.jpg" alt="BNC Agro Care"><div><small>Representative</small><strong>Md Rezaul Karim</strong><em>Officer BNC Agro Care · Area Manager · 01718-306103</em></div></div>
     </article>
-
-    <article class="panel productPanel">
-      <div class="panelHead"><div><small>02 / LINE ITEMS</small><h2>Products</h2></div><button id="addBtn" class="addBtn" type="button">+ Add physical row</button></div>
-      <div class="ruleBar"><span>Real workbook row</span><span>Before ST</span><span>SL rebalanced</span></div>
-      <div id="products"></div>
-      <div id="summary" class="summary"></div>
+    <article class="panel reveal" style="--delay:1">
+      <div class="panelHead"><div><small>02 / PRODUCTS</small><h2>Line items</h2></div><button id="addBtn" class="addBtn" type="button">+ Add row</button></div>
+      <div id="products"></div><div id="summary" class="summary"></div>
     </article>
-
-    <article class="panel historyPanel">
-      <div class="panelHead"><div><small>05 / LOCAL HISTORY</small><h2>Saved drafts</h2></div><b>DEVICE</b></div>
+    <article class="panel reveal" style="--delay:2">
+      <div class="panelHead"><div><small>03 / SAVED</small><h2>Drafts</h2></div><b>DEVICE</b></div>
       <div id="history"></div>
     </article>
   </aside>
-
-  <section class="previewColumn">
-    <article class="previewCard">
-      <div class="previewHeader">
-        <div><small>03 / LIVE WORKBOOK</small><h2>Sheet 01</h2></div>
-        <span id="xlsxState" class="stateBadge">READY</span>
-      </div>
-      <div class="previewMeta"><span>Editable workbook preview</span><strong>BNCFINAL.xlsx</strong></div>
-      <div class="workbookViewport"><div id="sheetPreview" class="stage"><div class="empty"><strong>Workbook preview</strong><span>Building the current Sheet 01…</span></div></div></div>
-      <div class="previewActions">
-        <button id="previewBtn" class="syncBtn" type="button">Sync live preview</button>
-        <button id="downloadBtn" class="downloadBtn" type="button">Download latest XLSX</button>
-      </div>
-      <div class="masterNote"><strong>Master protected</strong><span>The repository copy of <code>BNCFINAL.xlsx</code> is never modified by the Studio.</span></div>
+  <section class="previewCol">
+    <article class="previewCard reveal" style="--delay:1">
+      <div class="previewTop"><div><small>LIVE PREVIEW</small><h2>Invoice sheet</h2></div><span id="xlsxState" class="state">READY</span></div>
+      <div class="previewBar"><span>Current workbook view</span><strong>Ready to download</strong></div>
+      <div class="workbookViewport"><div id="sheetPreview" class="stage"><div class="emptyPage"><strong>Loading invoice…</strong><span>The live sheet will appear here.</span></div></div></div>
+      <div class="previewActions"><button id="previewBtn" class="syncBtn" type="button">Refresh preview</button><button id="downloadBtn" class="downloadBtn" type="button">Download XLSX</button></div>
     </article>
   </section>
 </section>
 </main>
-
-<footer class="footer">
-  <span>BNC Agro Care · Invoice Studio</span>
-  <span>Canonical workbook → live preview → latest XLSX</span>
-  <span>No PDF generation</span>
-</footer>
-
+<footer class="footer"><a href="https://tamasrazim.github.io/" target="_blank" rel="noopener noreferrer">© Robiul Rumman Razim</a></footer>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script src="../reference/products.js"></script>
 <script src="../reference/addProductRow.js"></script>
