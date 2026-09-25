@@ -249,7 +249,7 @@ function reset(){Object.assign(state,{ref:"X2",invoiceNo:String((Number(state.in
 function saveInvoice(){if(!db)return;const t=totals(),id=state.invoiceNo+"-"+Date.now();db.transaction("invoices","readwrite").objectStore("invoices").put({id,invoiceNumber:state.invoiceNo,total:t.final,updatedAt:Date.now(),data:copy()});saveDraft();history();setStatus("Invoice saved")}
 function history(){
  if(!db)return;const host=$("#history");host.replaceChildren();const req=db.transaction("invoices").objectStore("invoices").openCursor(),items=[];
- req.onsuccess=()=>{const c=req.result;if(c){items.push(c.value);c.continue();return}items.sort((a,b)=>Number(b.updatedAt||0)-Number(a.updatedAt||0);
+ req.onsuccess=()=>{const c=req.result;if(c){items.push(c.value);c.continue();return}items.sort((a,b)=>Number(b.updatedAt||0)-Number(a.updatedAt||0));
  if(!items.length){host.innerHTML="<div class=\"historyRow\"><div><strong>No saved invoices</strong><small>Saved workbook drafts from this device appear here.</small></div></div>";return}
  items.forEach(x=>{
   const row=document.createElement("div");row.className="historyRow";row.innerHTML="<div><strong>"+safe(x.invoiceNumber)+"</strong><small>"+money(x.total)+" · "+new Date(x.updatedAt).toLocaleString()+"</small></div>";
