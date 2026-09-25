@@ -1,6 +1,6 @@
 (()=>{"use strict";
 const $=s=>document.querySelector(s);
-const TEMPLATE="../reference/BNCFINAL.xlsx",DB="bnc-invoice-xlsx-v1",ROWS_PER_SIDE=4,MAX_ROWS_PER_SIDE=50,FIRST_PAGE_EXTRA_ROWS=2;
+const TEMPLATE="../reference/BNCFINAL.xlsx?v=51",DB="bnc-invoice-xlsx-v1",ROWS_PER_SIDE=4,MAX_ROWS_PER_SIDE=50,FIRST_PAGE_EXTRA_ROWS=2;
 const PRODUCTS=window.BNC_PRODUCTS||[];
 const blank=()=>({name:"",pack:"",ctn:"",rate:""});
 const blankRow=()=>({left:blank(),right:blank()});
@@ -210,7 +210,7 @@ function countInvoiceRows(ws){
 
 async function buildWorkbook(){
  if(buildWorkbook.busy)return lastBuffer;
- buildWorkbook.busy=true;$("#previewBtn").disabled=true;$("#xlsxState").textContent="Preparing...";setStatus("Loading BNCFINAL.xlsx...");
+ buildWorkbook.busy=true;lastBuffer=null;$("#previewBtn").disabled=true;$("#xlsxState").textContent="Preparing...";setStatus("Loading BNCFINAL.xlsx...");
  try{
   if(!window.ExcelJS?.Workbook)throw Error("ExcelJS unavailable");
   const wb=new ExcelJS.Workbook();
@@ -240,7 +240,7 @@ async function buildWorkbook(){
  }finally{buildWorkbook.busy=false;$("#previewBtn").disabled=false}
 }
 async function downloadXlsx(){
- const buffer=lastBuffer||await buildWorkbook();
+ const buffer=await buildWorkbook();
  const url=URL.createObjectURL(new Blob([buffer],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}));
  const a=document.createElement("a");a.href=url;a.download="BNC-Invoice-"+String(state.invoiceNo||"0002")+".xlsx";a.click();
  setTimeout(()=>URL.revokeObjectURL(url),1200);setStatus("XLSX downloaded")
