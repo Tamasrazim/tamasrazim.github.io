@@ -1,9 +1,24 @@
-# BNC AgroCare reference data
+# BNC Agro Care reference set
 
-`BNCFINAL.xlsx` is the invoice workbook master.
+## Canonical files
 
-`addProductRow.js` is the row engine used when product rows are added. Workbook edits are performed through explicit worksheet Row → Cell access.
+- BNCFINAL.xlsx — master invoice workbook.
+- addProductRow.js — JavaScript implementation of the product-row insertion rule.
+- products.js — shared product and pack-size catalogue.
+- product name.txt — preserved raw product-name reference.
+- product name and pack size.txt — preserved raw product/pack reference.
 
-`products.js` contains the shared product and pack-size catalogue.
+## Branding references
 
-The Studio never overwrites `BNCFINAL.xlsx` or `invoice.pdf`.
+- ../FB_IMG_1789811599210.jpg — BNC logo image.
+- ../FB_IMG_1789811611633.jpg — BNC cover image.
+
+## Workbook rule
+
+For Add Product, the Studio finds the first ST subtotal row in column B starting at row 11, inserts a worksheet row above it, copies formatting from the preceding row, clears A:L on the new row, rebalances SL values in columns A and G, and rebuilds the affected subtotal formulas.
+
+## Workflow rule
+
+BNCFINAL.xlsx → live edit → live Sheet 01 preview → latest XLSX download
+
+The Studio never overwrites BNCFINAL.xlsx and does not generate PDFs.
