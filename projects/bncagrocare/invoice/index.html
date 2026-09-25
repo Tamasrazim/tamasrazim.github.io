@@ -3,43 +3,72 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#071811">
+<meta name="theme-color" content="#07130e">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icons/icon.svg">
 <title>BNC AgroCare · Invoice Studio</title>
 <link rel="stylesheet" href="./css/app.css">
 </head>
 <body>
-<header class="topbar"><a class="brand" href="../">BNC <span>AgroCare</span> / Invoice Studio</a><div class="status"><i></i><span id="status">Ready</span></div><div class="tools"><button id="newBtn">New</button><button id="saveBtn">Save</button><button id="installBtn" hidden>Install</button></div></header>
+<header class="topbar">
+<a class="brand" href="../"><span class="brandDot">B</span><span>BNC <b>AgroCare</b></span><em>/ Invoice Studio</em></a>
+<div class="status"><i></i><span id="status">Ready</span></div>
+<div class="tools"><button id="newBtn">New invoice</button><button id="saveBtn">Save</button><button id="installBtn" hidden>Install</button></div>
+</header>
 
 <main>
-<section class="intro"><div><div class="ey">BNC WORKBOOK EDITOR</div><h1>Invoice<br><span>Studio.</span></h1><p>Built from the BNC repository data. The workbook master stays untouched. Every export is a new XLSX, and the preview renders that same edited workbook.</p></div><div class="stats"><div><b id="rowMetric">4</b><span>rows / side</span></div><div><b id="slotMetric">8</b><span>base slots</span></div><div><b>XLSX</b><span>output</span></div></div></section>
-
-<div class="layout">
-<section class="editor">
-<article class="card"><header><div><small>01 · DOCUMENT</small><h2>Invoice details</h2></div><b>LOCAL</b></header><div class="form">
-<label>Reference<input data-k="ref"></label>
-<label>Invoice No.<input data-k="invoiceNo" inputmode="numeric"></label>
-<label>Date<input data-k="date" type="date"></label>
-<label>Commission %<input data-k="commission" type="number" min="0" step=".01"></label>
-<label class="wide">Trader / Dealer<input data-k="trader" placeholder="M/S ______ Traders"></label>
-<label class="wide">Buyer<input data-k="buyer" placeholder="Name:"></label>
-<label class="wide">Address<input data-k="address"></label>
-<label class="wide">Mobile<input data-k="mobile" inputmode="tel"></label>
-</div></article>
-
-<article class="card"><header><div><small>02 · PRODUCTS</small><h2>Line items</h2></div><button id="addBtn" class="add">+ Product row</button></header><div class="rule"><span>Base 4 + 4</span><span>Insert before ST</span><span>SL rebalances</span></div><div id="products"></div><div id="summary" class="summary"></div></article>
-
-<article class="card"><header><div><small>04 · HISTORY</small><h2>Saved invoices</h2></div><b>DEVICE</b></header><div id="history"></div></article>
+<section class="studioHead">
+<div><div class="eyebrow">BNC / OPERATIONS</div><h1>Invoice<br><span>Studio.</span></h1><p>Edit the business data, work directly against the BNCFINAL.xlsx master, preview the resulting Sheet 01, and export a new XLSX.</p></div>
+<div class="readout"><div><strong id="rowMetric">4</strong><span>rows / side</span></div><div><strong id="slotMetric">8</strong><span>active slots</span></div><div><strong>XLSX</strong><span>output</span></div></div>
 </section>
 
-<aside class="preview"><article class="card previewCard"><header><div><small>03 · LIVE WORKBOOK</small><h2>Sheet 01 preview</h2></div><b id="xlsxState">Ready</b></header><div class="viewport"><div id="sheetPreview" class="stage"><div class="empty"><strong>BNCFINAL.xlsx</strong><span>Prepare the workbook to render its real cells and styling.</span></div></div></div><div class="previewButtons"><button id="previewBtn" class="primary">Prepare workbook</button><button id="downloadBtn">Download XLSX</button></div><div class="note">Master: <code>reference/BNCFINAL.xlsx</code><br>Output is XLSX only. The master file in the repository is never modified.</div></article></aside>
+<div class="work">
+<section class="left">
+<article class="panel document">
+<div class="panelHead"><div><small>01 / DOCUMENT</small><h2>Invoice identity</h2></div><b>LOCAL</b></div>
+<div class="form">
+<label>Reference<input data-k="ref" placeholder="X2"></label>
+<label>Invoice No.<input data-k="invoiceNo" inputmode="numeric" placeholder="0002"></label>
+<label>Date<input data-k="date" type="date"></label>
+<label>Commission %<input data-k="commission" type="number" min="0" step=".01" placeholder="0"></label>
+<label class="wide">Trader / Dealer<input data-k="trader" placeholder="M/S ______ Traders"></label>
+<label class="wide">Buyer<input data-k="buyer" placeholder="Name:"></label>
+<label class="wide">Address<input data-k="address" placeholder="Address"></label>
+<label class="wide">Mobile<input data-k="mobile" inputmode="tel" placeholder="01XXXXXXXXX"></label>
+</div>
+<div class="rep"><span>BNC</span><div><small>Sales representative</small><strong>Md Rezaul Karim</strong><em>Officer BNC AGRO CARE · Area Manager · 01718-306103</em></div></div>
+</article>
+
+<article class="panel items">
+<div class="panelHead"><div><small>02 / LINE ITEMS</small><h2>Products</h2></div><button id="addBtn" class="add">+ Add physical row</button></div>
+<div class="rule"><span>Rows are real workbook rows</span><span>Insert before ST</span><span>SL rebalances</span></div>
+<div id="products"></div>
+<div id="summary" class="summary"></div>
+</article>
+
+<article class="panel historyPanel">
+<div class="panelHead"><div><small>04 / LOCAL HISTORY</small><h2>Saved invoices</h2></div><b>DEVICE</b></div>
+<div id="history"></div>
+</article>
+</section>
+
+<aside class="previewCol">
+<article class="panel previewPanel">
+<div class="panelHead"><div><small>03 / LIVE WORKBOOK</small><h2>Sheet 01</h2></div><b id="xlsxState">READY</b></div>
+<div class="previewTop"><span>Same workbook buffer as download</span><span>BNCFINAL.xlsx</span></div>
+<div class="viewport"><div id="sheetPreview" class="stage"><div class="empty"><strong>Workbook preview</strong><span>Building the edited Sheet 01…</span></div></div></div>
+<div class="previewBottom"><button id="previewBtn" class="primary">Refresh preview</button><button id="downloadBtn">Download XLSX</button></div>
+<div class="masterNote"><strong>Master protected</strong><span>The repository copy of <code>BNCFINAL.xlsx</code> is never modified.</span></div>
+</article>
+</aside>
 </div>
 </main>
-<footer>BNC AgroCare · Invoice Studio · XLSX workflow</footer>
+<footer><span>BNC AgroCare / Invoice Studio</span><span>XLSX workflow · No PDF generation</span></footer>
+
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script src="../reference/products.js"></script>
 <script src="../reference/addProductRow.js"></script>
 <script src="./js/app.js"></script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});</script>
-</body></html>
+</body>
+</html>
