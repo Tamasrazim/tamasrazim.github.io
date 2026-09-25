@@ -196,12 +196,23 @@ function renderProducts(){
     del.textContent="×";
     del.title="Remove this physical invoice row";
     del.disabled=totalRows<=ROWS_PER_SIDE;
-    del.onclick=()=>{
+    del.onclick=async()=>{
       if(state.rows.length<=ROWS_PER_SIDE)return;
-      state.rows.splice(i,1);
-      renderProducts();
-      saveDraft();
-      setStatus("Invoice row removed");
+      try{
+        await ensureLiveWorkbook();
+        liveSheet.spliceRows(PRODUCT_START_ROW+i,1);
+        state.rows.splice(i,1);
+        rebalanceSL(liveSheet,state.rows.length);
+        recalcLiveFormulas();
+        dirty=true;lastBuffer=null;
+        renderProducts();
+        saveDraft();
+        buildWorkbookPreviewSheet(liveSheet);
+        setStatus("Live XLSX row removed");
+      }catch(error){
+        console.error(error);
+        setStatus("Could not remove row");
+      }
     };
     pair.append(del);
     host.append(pair);
