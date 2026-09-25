@@ -1,6 +1,6 @@
 (()=>{"use strict";
 const $=s=>document.querySelector(s);
-const SOURCE_VERSION=53;
+const SOURCE_VERSION=54;
 const TEMPLATE="../reference/BNCFINAL.xlsx?v="+SOURCE_VERSION;
 const DB="bnc-invoice-xlsx-v1";
 const ROWS_PER_SIDE=4;
