@@ -3,249 +3,337 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#183b2a">
-<meta name="description" content="BNC AgroCare — agriculture products, pack sizes and Invoice Studio.">
-<title>BNC AgroCare — Agriculture, Products & Invoice Studio</title>
+<meta name="theme-color" content="#1c4a2f">
+<meta name="description" content="BNC Agro Care — agricultural products, pack sizes and Invoice Studio.">
+<title>BNC Agro Care</title>
 <style>
 :root{
-  --green:#183b2a;--green2:#234d37;--lime:#b8ed73;--cream:#f3efe4;--paper:#fbfaf5;
-  --ink:#15231b;--muted:#68776e;--line:#d9ded5;--white:#fff;--black:#0d1511;
+  --green:#1c4a2f;--green-dark:#10351f;--green-soft:#eaf2ea;--lime:#a9dc68;
+  --cream:#f7f5ef;--paper:#fff;--ink:#18241c;--muted:#6e7972;--line:#dde2da;
+  --gold:#d9bb6a;--shadow:0 20px 50px rgba(16,53,31,.08)
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.5 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-a{color:inherit}
+body{margin:0;background:var(--cream);color:var(--ink);font:14px/1.55 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+img{max-width:100%}
+a{text-decoration:none;color:inherit}
 button,input{font:inherit}
-.page{overflow:hidden}
-.nav{
-  position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:20px;
-  padding:14px 4.5vw;border-bottom:1px solid #fff2;background:#183b2af2;color:#fff;backdrop-filter:blur(18px)
-}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:900;letter-spacing:-.05em;font-size:17px}
-.brandMark{width:30px;height:30px;border-radius:10px;background:var(--lime);color:#17301f;display:grid;place-items:center;font:900 12px ui-monospace,monospace}
-.brand span:last-child{color:var(--lime)}
-.navlinks{display:flex;gap:27px;color:#b9c8bf;font-size:11px;font-weight:650}
-.navlinks a{text-decoration:none}
-.navlinks a:hover{color:#fff}
-.navCta{padding:9px 13px;border:1px solid #fff3;border-radius:999px;color:#fff;text-decoration:none;font:900 8px ui-monospace,monospace;letter-spacing:.08em}
-.hero{
-  position:relative;min-height:88vh;padding:7vw 4.5vw 5vw;background:var(--green);color:#fff;display:grid;
-  grid-template-columns:minmax(0,1.06fr) minmax(330px,.94fr);gap:5vw;align-items:end;isolation:isolate
-}
-.hero:before{content:"";position:absolute;inset:0;z-index:-2;background:
-  radial-gradient(circle at 78% 22%,#b8ed7330,transparent 24%),
-  radial-gradient(circle at 38% 70%,#7fae8a18,transparent 28%),
-  linear-gradient(120deg,#183b2a,#102b1f 75%,#0e2319)}
-.hero:after{content:"";position:absolute;z-index:-1;right:-10vw;top:12vh;width:54vw;height:54vw;border:1px solid #b8ed7325;border-radius:50%;box-shadow:0 0 0 90px #b8ed7308,0 0 0 180px #b8ed7304}
-.eyebrow{color:var(--lime);font:900 8px ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase}
-.hero h1{margin:16px 0 22px;font-size:clamp(68px,10.5vw,164px);line-height:.79;letter-spacing:-.11em;max-width:900px}
-.hero h1 span{color:var(--lime)}
-.heroText{max-width:590px;color:#bdcdc3;font-size:16px}
-.heroActions{display:flex;flex-wrap:wrap;gap:9px;margin-top:27px}
-.btn{min-height:45px;padding:0 17px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-size:10px;font-weight:900;letter-spacing:.02em}
-.btn.fill{background:var(--lime);color:#17311f}
-.btn.line{border:1px solid #fff3;color:#fff}
-.heroCard{
-  justify-self:end;width:min(430px,100%);padding:17px;border:1px solid #fff1;background:#ffffff08;border-radius:24px;
-  backdrop-filter:blur(14px);box-shadow:0 30px 80px #06150d44
-}
-.heroCardTop{display:flex;justify-content:space-between;color:#a9bcb1;font:800 8px ui-monospace,monospace;text-transform:uppercase}
-.heroCardImage{height:225px;margin-top:12px;border-radius:16px;overflow:hidden;background:#284f38}
-.heroCardImage img{width:100%;height:100%;display:block;object-fit:cover}
-.heroCard h3{margin:17px 0 5px;font-size:28px;line-height:.95;letter-spacing:-.06em}
-.heroCard p{margin:0;color:#a9bbb0;font-size:10px}
-.heroStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:18px}
-.heroStats div{padding:10px;border:1px solid #fff1;border-radius:12px;background:#fff1}
-.heroStats strong{display:block;font-size:16px}.heroStats span{display:block;margin-top:3px;color:#8fa59a;font:800 6px ui-monospace,monospace;text-transform:uppercase}
+.container{width:min(1240px,92vw);margin:auto}
+.topline{background:var(--green-dark);color:#d3e1d6;font:800 8px/1 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase}
+.topline .container{min-height:32px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(18px);border-bottom:1px solid rgba(16,53,31,.08)}
+.nav-inner{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:25px}
+.logo-wrap{display:flex;align-items:center;width:164px;height:48px}
+.logo-wrap img{display:block;width:100%;height:100%;object-fit:contain;object-position:left center}
+.nav-links{display:flex;align-items:center;gap:25px}
+.nav-links a{font-size:11px;font-weight:800;color:#49554e}
+.nav-links a:hover{color:var(--green)}
+.nav-btn{padding:11px 15px;background:var(--green);color:#fff!important;border-radius:999px}
+.menu{display:none;border:1px solid var(--line);background:#fff;padding:9px 12px;border-radius:999px;font:800 9px ui-monospace,monospace}
+.mobile-links{display:none}
 
-.band{background:var(--lime);color:#183723;padding:12px 4.5vw;display:flex;justify-content:space-between;gap:20px;font:900 8px ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase}
-.band span:last-child{opacity:.65}
+.hero{padding:14px 0 70px}
+.hero-grid{display:grid;grid-template-columns:1fr 1.08fr;min-height:650px;border-radius:30px;overflow:hidden;box-shadow:var(--shadow);background:var(--green-dark)}
+.hero-copy{padding:64px 62px;display:flex;flex-direction:column;justify-content:center;color:#fff}
+.kicker{font:900 8px ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--lime)}
+.hero h1{margin:17px 0 22px;font-size:clamp(56px,7.2vw,92px);line-height:.84;letter-spacing:-.09em}
+.hero h1 span{color:#dce7da}
+.hero p{max-width:560px;color:#c4d4ca;font-size:15px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:27px}
+.btn{min-height:44px;padding:0 16px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:9px}
+.btn-primary{background:#fff;color:var(--green-dark)}
+.btn-secondary{border:1px solid rgba(255,255,255,.18);color:#fff}
+.hero-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px;max-width:600px}
+.hero-fact{border-top:1px solid rgba(255,255,255,.18);padding-top:10px}
+.hero-fact strong{display:block;font-size:20px}
+.hero-fact span{display:block;color:#9ab0a0;font:800 7px ui-monospace,monospace;text-transform:uppercase;margin-top:2px}
+.hero-photo{position:relative;min-height:650px}
+.hero-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+.hero-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(16,53,31,.38),transparent 35%,rgba(16,53,31,.08))}
+.photo-chip{position:absolute;z-index:2;left:22px;bottom:22px;padding:11px 13px;border-radius:13px;background:rgba(255,255,255,.9);color:var(--green-dark);font:900 8px ui-monospace,monospace;text-transform:uppercase}
+.photo-chip b{display:block;font-size:13px;font-family:inherit;letter-spacing:-.03em}
+.photo-chip span{display:block;color:#708078;margin-top:2px;font-size:7px}
 
-.section{padding:7vw 4.5vw}
-.sectionHead{display:flex;align-items:end;justify-content:space-between;gap:35px;margin-bottom:26px}
-.sectionNo{color:#6f8176;font:900 8px ui-monospace,monospace;letter-spacing:.15em}
-.sectionHead h2{margin:4px 0 0;font-size:clamp(46px,7vw,94px);line-height:.8;letter-spacing:-.095em}
-.sectionHead p{max-width:460px;color:var(--muted);font-size:12px;margin:0}
+.quick{background:var(--lime)}
+.quick .container{min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:20px;font:900 8px ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#17351f}
 
-.catalogBar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
-.search{width:min(440px,100%);height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:0 13px;color:var(--ink);outline:none}
-.search:focus{border-color:#83ad68;box-shadow:0 0 0 3px #83ad6815}
-.count{color:#7a877f;font:800 8px ui-monospace,monospace;text-transform:uppercase}
+.section{padding:92px 0}
+.section-head{display:grid;grid-template-columns:.85fr 1.15fr;align-items:end;gap:40px;margin-bottom:28px}
+.eyebrow{color:#4c7656;font:900 8px ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase}
+.section-head h2{margin:7px 0 0;font-size:clamp(42px,5.6vw,72px);line-height:.86;letter-spacing:-.08em}
+.section-head p{margin:0;color:var(--muted);max-width:620px;font-size:13px}
 
-.products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.catalog-tools{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:15px}
+.search{width:min(420px,100%);height:44px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:0 13px;outline:0;color:var(--ink)}
+.search:focus{border-color:#80aa68;box-shadow:0 0 0 3px #80aa6814}
+.catalog-count{font:900 8px ui-monospace,monospace;color:#7b857e;text-transform:uppercase}
+
+.products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .product{
-  position:relative;min-height:225px;padding:21px;background:#fff;border:1px solid var(--line);border-radius:20px;
-  transition:transform .24s ease,box-shadow .24s ease,border-color .24s ease;overflow:hidden
+  position:relative;background:#fff;border:1px solid var(--line);border-radius:20px;padding:21px 20px 19px;
+  min-height:230px;display:flex;flex-direction:column;overflow:hidden;transition:transform .2s,box-shadow .2s,border-color .2s
 }
-.product:before{content:"";position:absolute;right:-35px;top:-35px;width:120px;height:120px;border-radius:50%;background:#b8ed7314}
-.product:hover{transform:translateY(-4px);border-color:#b8c9b9;box-shadow:0 18px 35px #17382110}
-.productNum{color:#4e7357;font:900 8px ui-monospace,monospace}
-.productArrow{position:absolute;right:17px;top:17px;width:28px;height:28px;border:1px solid #d6ddd5;border-radius:50%;display:grid;place-items:center;color:#4d7657}
-.product h3{position:relative;margin:45px 0 19px;font-size:clamp(22px,3vw,34px);line-height:.94;letter-spacing:-.07em;max-width:600px}
-.packs{position:relative;display:flex;flex-wrap:wrap;gap:5px}
-.pack{padding:5px 8px;border:1px solid #e0e5df;border-radius:999px;color:#67766d;background:#fafbf8;font:700 7px ui-monospace,monospace}
+.product:before{content:"";position:absolute;left:0;top:0;width:100%;height:4px;background:var(--lime);transform:scaleX(.16);transform-origin:left;transition:transform .25s}
+.product:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:#cbd6ca}
+.product:hover:before{transform:scaleX(1)}
+.product-code{color:#4a7355;font:900 8px ui-monospace,monospace;letter-spacing:.11em}
+.product h3{margin:27px 0 6px;font-size:25px;line-height:.96;letter-spacing:-.06em}
+.product-note{color:#869087;font-size:10px}
+.pack-title{margin-top:auto;padding-top:15px;border-top:1px solid var(--line);color:#7a857e;font:900 7px ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}
+.packs{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.pack{padding:5px 7px;border-radius:999px;border:1px solid #dce4dc;background:#f5f8f4;color:#33543f;font:800 7px ui-monospace,monospace}
 
-.product-empty{grid-column:1/-1;padding:35px;text-align:center;border:1px dashed #cbd4cb;border-radius:16px;color:#78867e}
+.feature{background:var(--green-dark);color:#fff}
+.feature-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}
+.feature-main,.feature-side{border-radius:24px;padding:36px}
+.feature-main{background:#173c29;border:1px solid rgba(255,255,255,.07)}
+.feature-side{background:#fff;color:var(--ink)}
+.feature h2{font-size:clamp(40px,5vw,64px);line-height:.88;letter-spacing:-.075em;margin:11px 0}
+.feature p{max-width:650px;color:#c6d6cc}
+.feature-side p{color:var(--muted)}
+.feature-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:26px}
+.feature-stat{padding-top:9px;border-top:1px solid rgba(255,255,255,.12)}
+.feature-stat strong{display:block;font-size:18px}.feature-stat span{display:block;color:#8fab9e;font:800 7px ui-monospace,monospace;text-transform:uppercase;margin-top:2px}
 
-.visual{background:var(--green);color:#fff}
-.visual .sectionNo{color:#9bb0a4}.visual .sectionHead p{color:#adbeb3}
-.gallery{display:grid;grid-template-columns:1.15fr .85fr .85fr;grid-template-rows:230px 230px;gap:8px}
-.shot{position:relative;overflow:hidden;border-radius:18px;background:#264e38}
-.shot:first-child{grid-row:span 2}
-.shot img{width:100%;height:100%;display:block;object-fit:cover;filter:saturate(.8) contrast(1.02);transition:transform .55s ease,filter .55s ease}
-.shot:hover img{transform:scale(1.04);filter:saturate(.95) contrast(1.05)}
-.shot:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 48%,#06150caa 100%)}
-.shotOverlay{position:absolute;z-index:2;left:12px;right:12px;bottom:12px;padding:9px 10px;border:1px solid #fff2;border-radius:11px;background:#08140dbd;color:#fff;font:800 7px ui-monospace,monospace;text-transform:uppercase}
+.gallery{display:grid;grid-template-columns:1.15fr .85fr .85fr;grid-template-rows:220px 220px;gap:9px}
+.tile{position:relative;border-radius:18px;overflow:hidden;background:#ccd5cc}
+.tile:first-child{grid-row:span 2}
+.tile img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .5s}
+.tile:hover img{transform:scale(1.035)}
+.tile-label{position:absolute;z-index:2;left:11px;bottom:11px;padding:7px 9px;border-radius:999px;background:rgba(255,255,255,.9);color:var(--green-dark);font:900 7px ui-monospace,monospace;text-transform:uppercase}
 
-.studioWrap{padding:7vw 4.5vw}
-.studioPanel{display:grid;grid-template-columns:1.08fr .92fr;border-radius:28px;overflow:hidden;border:1px solid #d0d8ce;background:#ece8dd}
-.studioMain{padding:5.5vw;color:var(--ink)}
-.studioMain .eyebrow{color:#547c5a}
-.studioMain h2{margin:17px 0;font-size:clamp(54px,8vw,105px);line-height:.82;letter-spacing:-.1em}
-.studioMain p{max-width:560px;color:#65736b}
-.studioGrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:27px}
-.studioItem{padding:12px;border:1px solid #d5ddd4;background:#f7f4ec;border-radius:12px}
-.studioItem strong{display:block;font-size:16px}.studioItem span{display:block;margin-top:3px;color:#7b8780;font:800 7px ui-monospace,monospace;text-transform:uppercase}
-.studioAside{position:relative;min-height:420px;padding:5.5vw;background:#173a29;color:#fff;display:flex;align-items:end}
-.studioAside:before{content:"";position:absolute;right:-20%;top:-15%;width:360px;height:360px;border:1px solid #b8ed7327;border-radius:50%;box-shadow:0 0 0 55px #b8ed7310,0 0 0 110px #b8ed7305}
-.studioAsideInner{position:relative;z-index:1}
-.studioAside h3{margin:10px 0;font-size:45px;line-height:.89;letter-spacing:-.08em}
-.studioAside p{max-width:350px;color:#a8bbb0;font-size:11px}
-.studioAside .btn{margin-top:14px}
+.studio{padding:92px 0}
+.studio-card{display:grid;grid-template-columns:1.08fr .92fr;border:1px solid #d1d8cf;border-radius:28px;overflow:hidden;background:#edeae1}
+.studio-main{padding:58px}
+.studio-main h2{margin:12px 0 16px;font-size:clamp(50px,7vw,92px);line-height:.82;letter-spacing:-.095em}
+.studio-main p{max-width:620px;color:#68756d;font-size:13px}
+.studio-items{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:28px}
+.studio-item{padding:12px;border:1px solid #d7ded5;border-radius:12px;background:#f7f4ec}
+.studio-item strong{display:block;font-size:16px}.studio-item span{display:block;margin-top:2px;color:#7d8881;font:800 7px ui-monospace,monospace;text-transform:uppercase}
+.studio-side{background:var(--green);color:#fff;padding:58px;display:flex;align-items:end}
+.studio-side h3{margin:9px 0;font-size:43px;line-height:.9;letter-spacing:-.08em}
+.studio-side p{color:#b7c9be;font-size:11px;max-width:340px}
 
-.footer{padding:24px 4.5vw 42px;background:#0f261b;color:#8ca196;display:flex;justify-content:space-between;gap:18px;font:800 8px ui-monospace,monospace;text-transform:uppercase}
-.footer strong{color:#fff}
+.contact{padding:0 0 90px}
+.contact-card{border:1px solid var(--line);background:#fff;border-radius:24px;padding:32px;display:grid;grid-template-columns:1.1fr .9fr;gap:30px}
+.contact-card h2{margin:10px 0;font-size:clamp(38px,5vw,58px);line-height:.9;letter-spacing:-.075em}
+.contact-card p{max-width:680px;color:var(--muted)}
+.contact-info{border-left:1px solid var(--line);padding-left:25px;display:flex;flex-direction:column;justify-content:end;gap:7px}
+.contact-info small{font:900 7px ui-monospace,monospace;color:#8b938d;text-transform:uppercase;letter-spacing:.12em}
+.contact-info a{font:900 13px ui-monospace,monospace;color:var(--green)}
 
-@media(max-width:900px){
-  .hero{grid-template-columns:1fr;min-height:auto;padding-top:13vw}.heroCard{justify-self:start}
-  .products{grid-template-columns:1fr}.gallery{grid-template-columns:1fr 1fr;grid-template-rows:220px 220px 220px}.shot:first-child{grid-row:span 2}
-  .studioPanel{grid-template-columns:1fr}.studioAside{min-height:340px}
-  .navlinks{display:none}
+.footer{background:#0b2416;color:#98ad9f;padding:23px 0;font:800 8px ui-monospace,monospace;text-transform:uppercase}
+.footer-inner{display:flex;justify-content:space-between;gap:15px}
+
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
+.reveal.in{opacity:1;transform:none}
+
+@media(max-width:980px){
+  .nav-links{display:none}.menu{display:block}
+  .mobile-links.open{display:flex;flex-direction:column;align-items:flex-start;padding-bottom:14px;gap:12px}
+  .hero-grid,.feature-grid,.studio-card,.contact-card,.section-head{grid-template-columns:1fr}
+  .hero-photo{min-height:430px}.products{grid-template-columns:1fr}.gallery{grid-template-columns:1fr 1fr;grid-template-rows:240px 190px 190px}.tile:first-child{grid-column:span 2;grid-row:auto}
+  .contact-info{border-left:0;border-top:1px solid var(--line);padding:20px 0 0}
 }
-@media(max-width:560px){
-  .nav{padding:12px 4vw}.navCta{display:none}
-  .hero{padding:18vw 4.5vw 12vw}.hero h1{font-size:23vw}.heroText{font-size:14px}
-  .band{display:block;padding:11px 4.5vw}.band span{display:block}.band span+span{margin-top:5px}
-  .section{padding:18vw 4.5vw}.sectionHead{display:block}.sectionHead p{margin-top:13px}
-  .catalogBar{display:block}.search{width:100%}.count{display:block;margin-top:8px}
-  .gallery{grid-template-columns:1fr;grid-template-rows:230px}.shot:first-child{grid-row:span 1}
-  .studioWrap{padding:18vw 4.5vw}.studioMain{padding:13vw 8vw}.studioAside{padding:10vw 8vw}.studioGrid{grid-template-columns:1fr 1fr}
-  .footer{display:block}.footer span{display:block;margin-top:8px}
+@media(max-width:600px){
+  .container{width:92vw}.topline .container{min-height:28px}
+  .hero{padding-top:8px}.hero-copy{padding:48px 28px}.hero h1{font-size:clamp(48px,14vw,72px)}.hero-facts{grid-template-columns:1fr}
+  .hero-photo{min-height:360px}.quick .container{display:block;padding:11px 0}.quick span+span{display:block;margin-top:4px}
+  .section,.studio{padding:72px 0}.catalog-tools{display:block}.search{width:100%;margin-bottom:8px}
+  .gallery{grid-template-columns:1fr;grid-template-rows:230px}.tile:first-child{grid-column:auto}
+  .studio-main,.studio-side,.feature-main,.feature-side{padding:30px}.studio-items,.feature-stats{grid-template-columns:1fr 1fr}
+  .contact-card{padding:26px}
+  .footer-inner{display:block}.footer-inner div+div{margin-top:7px}
 }
 </style>
 </head>
 <body>
-<div class="page">
-<nav class="nav">
-  <a class="brand" href="./"><span class="brandMark">B</span>BNC <span>AgroCare</span></a>
-  <div class="navlinks"><a href="#products">Products</a><a href="#visuals">Field visuals</a><a href="#studio">Invoice Studio</a></div>
-  <a class="navCta" href="./invoice/">OPEN STUDIO ↗</a>
-</nav>
+<div class="topline"><div class="container"><span>BNC AGRO CARE</span><span>AGRICULTURAL PRODUCTS · BUSINESS OPERATIONS</span></div></div>
 
-<header class="hero">
-  <div class="heroCopy">
-    <div class="eyebrow">BNC AgroCare · Product & operations</div>
-    <h1>Built for<br><span>the field.</span></h1>
-    <p class="heroText">A focused home for the BNC product catalogue and the working invoice system. Product data stays centralized while day-to-day invoice work stays fast and practical.</p>
-    <div class="heroActions">
-      <a class="btn fill" href="#products">VIEW PRODUCTS</a>
-      <a class="btn line" href="./invoice/">OPEN INVOICE STUDIO</a>
-    </div>
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="logo-wrap" href="./" aria-label="BNC Agro Care"><img src="./FB_IMG_1789811599210.jpg" alt="BNC Agro Care"></a>
+    <nav class="nav-links">
+      <a href="#products">Products</a>
+      <a href="#about">About</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#contact">Contact</a>
+      <a class="nav-btn" href="./invoice/">Invoice Studio</a>
+    </nav>
+    <button class="menu" id="menu" type="button" aria-expanded="false">Menu</button>
   </div>
-  <div class="heroCard">
-    <div class="heroCardTop"><span>BNC / CURRENT CATALOGUE</span><span>LIVE DATA</span></div>
-    <div class="heroCardImage"><img src="./IMG-20260713-WA0000.jpg" alt="BNC AgroCare product"></div>
-    <h3>Products.<br>Pack sizes.</h3>
-    <p>The public catalogue is driven by the same shared BNC reference data used by the Studio.</p>
-    <div class="heroStats">
-      <div><strong id="heroCount">10</strong><span>Catalogue entries</span></div>
-      <div><strong>01</strong><span>Master workbook</span></div>
-      <div><strong>XLSX</strong><span>Output</span></div>
-    </div>
-  </div>
+  <nav class="container mobile-links" id="mobileLinks">
+    <a href="#products">Products</a><a href="#about">About</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a><a href="./invoice/">Invoice Studio</a>
+  </nav>
 </header>
 
-<div class="band"><span>BNC AgroCare / Agriculture & distribution</span><span>Master workbook → live studio → latest XLSX</span></div>
-
-<section id="products" class="section">
-  <div class="sectionHead">
-    <div><div class="sectionNo">01 / CATALOGUE</div><h2>Products.</h2></div>
-    <p>Search the current product and pack-size reference. This section reads directly from the shared catalogue file rather than duplicating the data in the page.</p>
-  </div>
-  <div class="catalogBar">
-    <input id="search" class="search" placeholder="Search product or pack size…" autocomplete="off">
-    <span id="count" class="count">10 products</span>
-  </div>
-  <div id="productGrid" class="products"></div>
-</section>
-
-<section id="visuals" class="section visual">
-  <div class="sectionHead">
-    <div><div class="sectionNo">02 / FIELD VISUALS</div><h2>In the mix.</h2></div>
-    <p>A simple visual layer for the BNC product range—kept secondary to the catalogue and operational tools.</p>
-  </div>
-  <div class="gallery">
-    <div class="shot"><img src="./IMG-20260713-WA0000.jpg" alt="BNC AgroCare product"><div class="shotOverlay">BNC / FIELD 01</div></div>
-    <div class="shot"><img src="./IMG-20260713-WA0001.jpg" alt="BNC AgroCare product"><div class="shotOverlay">BNC / FIELD 02</div></div>
-    <div class="shot"><img src="./IMG-20260713-WA0002.jpg" alt="BNC AgroCare product"><div class="shotOverlay">BNC / FIELD 03</div></div>
-    <div class="shot"><img src="./IMG-20260713-WA0003.jpg" alt="BNC AgroCare product"><div class="shotOverlay">BNC / FIELD 04</div></div>
-    <div class="shot"><img src="./FB_IMG_1789811599210.jpg" alt="BNC AgroCare product"><div class="shotOverlay">BNC / FIELD 05</div></div>
-    <div class="shot"><img src="./FB_IMG_1789811611633.jpg" alt="BNC AgroCare product"><div class="shotOverlay">BNC / FIELD 06</div></div>
-  </div>
-</section>
-
-<section id="studio" class="studioWrap">
-  <div class="studioPanel">
-    <div class="studioMain">
-      <div class="eyebrow">03 / OPERATIONS</div>
-      <h2>Invoice<br>Studio.</h2>
-      <p>The operational side of BNC AgroCare. Start from the real <strong>BNCFINAL.xlsx</strong> workbook, edit invoice data, work with live rows and preview the current workbook before downloading the latest XLSX.</p>
-      <div class="studioGrid">
-        <div class="studioItem"><strong>4 + 4</strong><span>Base product slots</span></div>
-        <div class="studioItem"><strong>LIVE</strong><span>Workbook preview</span></div>
-        <div class="studioItem"><strong>XLSX</strong><span>Download format</span></div>
-        <div class="studioItem"><strong>LOCAL</strong><span>Draft history</span></div>
+<main>
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid reveal">
+      <div class="hero-copy">
+        <div class="kicker">BNC Agro Care · Product catalogue</div>
+        <h1>Better agriculture.<br><span>Better organized.</span></h1>
+        <p>BNC Agro Care brings its product range, pack-size references and business workflow into one clear digital home.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#products">Browse products</a>
+          <a class="btn btn-secondary" href="./invoice/">Open Invoice Studio</a>
+        </div>
+        <div class="hero-facts">
+          <div class="hero-fact"><strong id="heroProducts">10</strong><span>Product references</span></div>
+          <div class="hero-fact"><strong id="heroPacks">22</strong><span>Pack formats</span></div>
+          <div class="hero-fact"><strong>01</strong><span>Invoice workspace</span></div>
+        </div>
       </div>
-    </div>
-    <div class="studioAside">
-      <div class="studioAsideInner">
-        <div class="eyebrow">BNC BUSINESS TOOL</div>
-        <h3>Keep the master.<br>Work the invoice.</h3>
-        <p>Add product rows, edit the live workbook preview, and download the latest invoice workbook without replacing the repository master.</p>
-        <a class="btn fill" href="./invoice/">LAUNCH INVOICE STUDIO ↗</a>
+      <div class="hero-photo">
+        <img src="./FB_IMG_1789811611633.jpg" alt="BNC Agro Care cover" fetchpriority="high">
+        <div class="photo-chip"><b>BNC Agro Care</b><span>Official project cover</span></div>
       </div>
     </div>
   </div>
 </section>
 
-<footer class="footer">
-  <span><strong>BNC AgroCare</strong> · Product & operations</span>
-  <span>Workbook source · BNCFINAL.xlsx</span>
-  <span>Tamasrazim project</span>
-</footer>
-</div>
+<div class="quick"><div class="container"><span>Product catalogue · Current reference</span><span>BNCFINAL.xlsx · Invoice Studio · XLSX workflow</span></div></div>
+
+<section class="section" id="products">
+  <div class="container">
+    <div class="section-head reveal">
+      <div><div class="eyebrow">01 · Product catalogue</div><h2>Know the range.</h2></div>
+      <p>Product names and pack formats are loaded directly from the shared BNC reference data. The site does not invent prices, claims or unsupported product information.</p>
+    </div>
+    <div class="catalog-tools reveal">
+      <input id="search" class="search" type="search" placeholder="Search product or pack size…" autocomplete="off">
+      <span id="catalogCount" class="catalog-count">10 products · 22 pack formats</span>
+    </div>
+    <div class="products" id="products"></div>
+  </div>
+</section>
+
+<section class="section feature" id="about">
+  <div class="container">
+    <div class="feature-grid">
+      <article class="feature-main reveal">
+        <div class="eyebrow" style="color:var(--lime)">02 · About the project</div>
+        <h2>Public catalogue outside.<br>Operational tools inside.</h2>
+        <p>The BNC public page is designed for clear product browsing. The Invoice Studio is separated into its own workspace so business operations can stay focused without cluttering the catalogue.</p>
+        <div class="feature-stats">
+          <div class="feature-stat"><strong>10</strong><span>Current products</span></div>
+          <div class="feature-stat"><strong>22</strong><span>Pack references</span></div>
+          <div class="feature-stat"><strong>4 + 4</strong><span>Base invoice slots</span></div>
+          <div class="feature-stat"><strong>50 + 50</strong><span>Maximum slots</span></div>
+        </div>
+      </article>
+      <article class="feature-side reveal">
+        <div class="eyebrow">Source of truth</div>
+        <h2>BNCFINAL.xlsx</h2>
+        <p>The invoice Studio works from the canonical workbook and its row-expansion JavaScript. The repository master remains protected while edited invoice work is downloaded as XLSX.</p>
+        <a class="btn" style="margin-top:12px;background:var(--green);color:#fff" href="./invoice/">Open Invoice Studio →</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="gallery">
+  <div class="container">
+    <div class="section-head reveal">
+      <div><div class="eyebrow">03 · Visual reference</div><h2>Product presence.</h2></div>
+      <p>Existing BNC project imagery is kept as a visual support layer so the actual product catalogue remains the focus.</p>
+    </div>
+    <div class="gallery reveal">
+      <figure class="tile"><img src="./FB_IMG_1789811611633.jpg" alt="BNC Agro Care cover"><figcaption class="tile-label">Cover</figcaption></figure>
+      <figure class="tile"><img src="./IMG-20260713-WA0000.jpg" alt="BNC Agro Care product"><figcaption class="tile-label">Product 01</figcaption></figure>
+      <figure class="tile"><img src="./IMG-20260713-WA0001.jpg" alt="BNC Agro Care product"><figcaption class="tile-label">Product 02</figcaption></figure>
+      <figure class="tile"><img src="./IMG-20260713-WA0002.jpg" alt="BNC Agro Care product"><figcaption class="tile-label">Product 03</figcaption></figure>
+      <figure class="tile"><img src="./IMG-20260713-WA0003.jpg" alt="BNC Agro Care product"><figcaption class="tile-label">Product 04</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section class="studio">
+  <div class="container">
+    <div class="studio-card reveal">
+      <div class="studio-main">
+        <div class="eyebrow">04 · Invoice Studio</div>
+        <h2>Run the paperwork<br>without changing the master.</h2>
+        <p>Edit the real workbook, add physical product rows, work in the live Sheet 01 preview and download the latest edited XLSX.</p>
+        <div class="studio-items">
+          <div class="studio-item"><strong>LIVE</strong><span>Workbook preview</span></div>
+          <div class="studio-item"><strong>+ ROW</strong><span>Insert before ST</span></div>
+          <div class="studio-item"><strong>XLSX</strong><span>Latest download</span></div>
+          <div class="studio-item"><strong>LOCAL</strong><span>Draft history</span></div>
+        </div>
+      </div>
+      <div class="studio-side">
+        <div>
+          <div class="kicker">BNC business tool</div>
+          <h3>Invoice Studio.</h3>
+          <p>Built around the BNC workbook rather than a fake document editor.</p>
+          <a class="btn btn-primary" href="./invoice/">Launch Studio →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <div class="container">
+    <div class="contact-card reveal">
+      <div>
+        <div class="eyebrow">05 · Business contact</div>
+        <h2>One project.<br>Two focused surfaces.</h2>
+        <p>Use the public catalogue for product information and the Invoice Studio for day-to-day document work.</p>
+        <div class="hero-actions">
+          <a class="btn" style="background:var(--green);color:#fff" href="./invoice/">Open Invoice Studio</a>
+          <a class="btn" style="background:var(--green-soft);color:var(--green)" href="#products">View products</a>
+        </div>
+      </div>
+      <div class="contact-info">
+        <small>Representative</small>
+        <a href="tel:+8801718306103">Md Rezaul Karim</a>
+        <small>Officer BNC Agro Care · Area Manager</small>
+        <a href="tel:+8801718306103">01718-306103</a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="footer"><div class="container footer-inner"><div>BNC Agro Care · Product catalogue & business operations</div><div>Canonical project · Tamasrazim main repository</div></div></footer>
 
 <script src="./reference/products.js"></script>
 <script>
-const grid=document.getElementById("productGrid");
+const data=window.BNC_PRODUCTS||[];
+const grid=document.getElementById("products");
 const search=document.getElementById("search");
-const count=document.getElementById("count");
-const heroCount=document.getElementById("heroCount");
+const catalogCount=document.getElementById("catalogCount");
+const heroProducts=document.getElementById("heroProducts");
+const heroPacks=document.getElementById("heroPacks");
+const totalPacks=data.reduce((n,p)=>n+(p.packs||[]).length,0);
+heroProducts.textContent=data.length;
+heroPacks.textContent=totalPacks;
 function esc(v){return String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
-function render(q=""){
-  const term=q.trim().toLowerCase();
-  const list=(window.BNC_PRODUCTS||[]).filter(p=>[p.name,...p.packs].join(" ").toLowerCase().includes(term));
-  count.textContent=list.length+" product"+(list.length===1?"":"s");
-  if(!term)heroCount.textContent=list.length;
-  grid.replaceChildren(...(list.length?list.map(p=>{
-    const el=document.createElement("article");
-    el.className="product";
-    el.innerHTML='<div class="productNum">'+esc(p.code)+'</div><div class="productArrow">↗</div><h3>'+esc(p.name)+'</h3><div class="packs">'+(p.packs||[]).map(x=>'<span class="pack">'+esc(x)+'</span>').join("")+'</div>';
-    return el;
-  }):[Object.assign(document.createElement("div"),{className:"product-empty",textContent:"No matching products."})]));
+function render(term=""){
+  const q=term.trim().toLowerCase();
+  const list=data.filter(p=>(p.name+" "+(p.packs||[]).join(" ")).toLowerCase().includes(q));
+  catalogCount.textContent=list.length+" product"+(list.length===1?"":"s")+" · "+list.reduce((n,p)=>n+(p.packs||[]).length,0)+" pack formats";
+  if(!list.length){
+    grid.innerHTML='<div style="grid-column:1/-1;padding:34px;border:1px dashed #cad3ca;border-radius:18px;text-align:center;color:#77837c">No matching BNC product found.</div>';
+    return;
+  }
+  grid.innerHTML=list.map(p=>'<article class="product"><div class="product-code">'+esc(p.code)+' · BNC PRODUCT</div><h3>'+esc(p.name)+'</h3><div class="product-note">Shared catalogue reference</div><div class="pack-title">Available pack formats</div><div class="packs">'+(p.packs||[]).map(x=>'<span class="pack">'+esc(x)+'</span>').join("")+'</div></article>').join("");
 }
 search.addEventListener("input",()=>render(search.value));
 render();
+
+const menu=document.getElementById("menu");
+const mobile=document.getElementById("mobileLinks");
+menu.addEventListener("click",()=>{const open=mobile.classList.toggle("open");menu.setAttribute("aria-expanded",String(open));menu.textContent=open?"Close":"Menu"});
+mobile.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>{mobile.classList.remove("open");menu.setAttribute("aria-expanded","false");menu.textContent="Menu"}));
+
+if("IntersectionObserver"in window){
+  const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");observer.unobserve(e.target)}}),{threshold:.08});
+  document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));
+}else document.querySelectorAll(".reveal").forEach(el=>el.classList.add("in"));
 </script>
 </body>
 </html>
