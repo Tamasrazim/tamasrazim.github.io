@@ -1440,24 +1440,9 @@ select.mini{
       <button data-act="save">Save<kbd>⌘S</kbd></button>
       <button data-act="samples">Examples</button>
       <button data-act="run" class="key">Run<kbd>⌘⏎</kbd></button>
-      <button id="accountBtn" class="auth-mini" type="button" aria-haspopup="true" aria-expanded="false">
-        <span class="auth-dot" id="accountAvatar">G</span><span id="accountLabel">Sign in</span>
-      </button>
       <button data-act="render" class="key">Render</button>
     </nav>
   </header>
-
-  <div id="accountPop" class="auth-pop" hidden>
-    <div class="auth-pop-head"><b>GOOGLE ACCOUNT</b><button id="accountClose" type="button">✕</button></div>
-    <div class="auth-user">
-      <img id="accountPhoto" alt="" hidden>
-      <span class="auth-avatar-large" id="accountAvatarLarge">G</span>
-      <div><strong id="accountName">Not signed in</strong><span id="accountEmail">Sign in to continue</span></div>
-    </div>
-    <button id="googleLoginBtn" class="auth-action primary" type="button"><span class="google-mark">G</span><span id="googleLoginText">Continue with Google</span></button>
-    <button id="googleLogoutBtn" class="auth-action" type="button" hidden>Sign out</button>
-    <p id="accountStatus" class="auth-note">Authentication is optional. Local projects continue to work without an account.</p>
-  </div>
 
   <div id="strip" role="status" aria-label="Render lifecycle"></div>
 
@@ -7708,142 +7693,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 else boot();
 })();
 </script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-  import {
-    getAuth,
-    GoogleAuthProvider,
-    signInWithPopup,
-    onAuthStateChanged,
-    signOut
-  } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDcq3ropNLl1P5cELcZH_soShxXzcZKQPE",
-    authDomain: "code2motion-tamasrazim.firebaseapp.com",
-    projectId: "code2motion-tamasrazim",
-    storageBucket: "code2motion-tamasrazim.firebasestorage.app",
-    messagingSenderId: "515865514530",
-    appId: "1:515865514530:web:34f990fa7a7d9c0aaa707b",
-    measurementId: "G-1EPZPPS2RN"
-  };
-
-  const firebaseApp = initializeApp(firebaseConfig);
-  const auth = getAuth(firebaseApp);
-  const provider = new GoogleAuthProvider();
-
-  const accountBtn = document.getElementById("accountBtn");
-  const accountPop = document.getElementById("accountPop");
-  const accountClose = document.getElementById("accountClose");
-  const googleLoginBtn = document.getElementById("googleLoginBtn");
-  const googleLogoutBtn = document.getElementById("googleLogoutBtn");
-  const googleLoginText = document.getElementById("googleLoginText");
-  const accountLabel = document.getElementById("accountLabel");
-  const accountAvatar = document.getElementById("accountAvatar");
-  const accountAvatarLarge = document.getElementById("accountAvatarLarge");
-  const accountPhoto = document.getElementById("accountPhoto");
-  const accountName = document.getElementById("accountName");
-  const accountEmail = document.getElementById("accountEmail");
-  const accountStatus = document.getElementById("accountStatus");
-  const googleConnection = document.getElementById("googleConnection");
-  const googleConnectionDot = document.getElementById("googleConnectionDot");
-  const driveConnection = document.getElementById("driveConnection");
-  const driveConnectionDot = document.getElementById("driveConnectionDot");
-
-  function initials(user) {
-    const value = (user.displayName || user.email || "G").trim();
-    return value.split(/\\s+/).slice(0,2).map(x => x[0]).join("").toUpperCase() || "G";
-  }
-
-  function showAccount(open) {
-    accountPop.hidden = !open;
-    accountBtn.setAttribute("aria-expanded", open ? "true" : "false");
-  }
-
-  accountBtn.addEventListener("click", () => {
-    showAccount(accountPop.hidden);
-  });
-
-  accountClose.addEventListener("click", () => showAccount(false));
-
-  document.addEventListener("click", (event) => {
-    if (!accountPop.hidden && !accountPop.contains(event.target) && !accountBtn.contains(event.target)) {
-      showAccount(false);
-    }
-  });
-
-  googleLoginBtn.addEventListener("click", async () => {
-    googleLoginBtn.disabled = true;
-    googleLoginText.textContent = "Opening Google…";
-    accountStatus.textContent = "Waiting for Google sign-in…";
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.error("Google sign-in failed:", error);
-      accountStatus.textContent = error && error.code === "auth/popup-closed-by-user"
-        ? "Sign-in window was closed."
-        : "Google sign-in failed. Check the Firebase provider and authorized domain.";
-    } finally {
-      googleLoginBtn.disabled = false;
-      googleLoginText.textContent = "Continue with Google";
-    }
-  });
-
-  googleLogoutBtn.addEventListener("click", async () => {
-    try {
-      await signOut(auth);
-      accountStatus.textContent = "Signed out.";
-    } catch (error) {
-      console.error("Google sign-out failed:", error);
-      accountStatus.textContent = "Sign-out failed.";
-    }
-  });
-
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      accountBtn.classList.remove("signed-in");
-      accountLabel.textContent = "Sign in";
-      accountAvatar.textContent = "G";
-      accountAvatarLarge.textContent = "G";
-      accountPhoto.hidden = true;
-      accountName.textContent = "Not signed in";
-      accountEmail.textContent = "Sign in to sync your identity";
-      googleLoginBtn.hidden = false;
-      googleLogoutBtn.hidden = true;
-      googleConnection.textContent = "Not connected";
-      googleConnectionDot.classList.add("muted");
-      driveConnection.textContent = "Sign in first";
-      driveConnectionDot.classList.add("muted");
-      accountStatus.textContent = "Authentication is optional. Local projects continue to work without an account.";
-      return;
-    }
-
-    const mark = initials(user);
-    accountBtn.classList.add("signed-in");
-    accountLabel.textContent = (user.displayName || "Account").split(" ")[0];
-    accountName.textContent = user.displayName || "Google user";
-    accountEmail.textContent = user.email || "Signed in";
-    accountAvatar.textContent = mark;
-    accountAvatarLarge.textContent = mark;
-
-    if (user.photoURL) {
-      accountPhoto.src = user.photoURL;
-      accountPhoto.hidden = false;
-      accountAvatarLarge.style.display = "none";
-    } else {
-      accountPhoto.hidden = true;
-      accountAvatarLarge.style.display = "grid";
-    }
-
-    googleLoginBtn.hidden = true;
-    googleLogoutBtn.hidden = false;
-    googleConnection.textContent = "Connected";
-    googleConnectionDot.classList.remove("muted");
-    driveConnection.textContent = "Not connected";
-    driveConnectionDot.classList.add("muted");
-    accountStatus.textContent = "Google identity connected. Drive storage will use a separate permission.";
-  });
-</script>
 
 
 <script>
