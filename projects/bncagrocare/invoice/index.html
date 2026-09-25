@@ -25,8 +25,8 @@
       <p>Enter the customer and product lines, verify the live totals, then generate the finished BNC invoice. The original PDF remains the master template.</p>
     </div>
     <div class="heroMeta">
-      <div class="metric"><strong>10</strong><span>products</span></div>
-      <div class="metric"><strong>22</strong><span>pack options</span></div>
+      <div class="metric"><strong id="rowMetric">4</strong><span>rows / side</span></div>
+      <div class="metric"><strong id="slotMetric">8</strong><span>product slots</span></div>
       <div class="metric"><strong>A4</strong><span>PDF output</span></div>
       <button id="previewBtn" class="primary">Generate PDF <span>→</span></button>
     </div>
@@ -50,10 +50,10 @@
       </article>
 
       <article class="panel">
-        <div class="panelHeader productHeader"><div><span class="ey">02 · PRODUCT LINES</span><h2>Invoice products</h2></div><button id="addBtn" class="secondary">+ Add product</button></div>
-        <div class="catalogNote"><span>Product and pack fields use the BNC reference.</span><b>CTN × RATE → AMOUNT</b></div>
+        <div class="panelHeader productHeader"><div><span class="ey">02 · PRODUCT LINES</span><h2>Invoice products</h2></div><button id="addBtn" class="secondary" type="button">+ Add product row</button></div>
+        <div class="catalogNote"><span>Each click inserts one physical invoice row. Left and right SL numbers rebalance automatically.</span><b>CTN × RATE → AMOUNT</b></div>
         <div class="productViewport">
-          <div class="legend"><span>SL</span><span>PRODUCT</span><span>PACK</span><span>CTN</span><span>RATE</span><span>AMOUNT</span><span></span></div>
+          <div class="pairLegend"><span>LEFT · SL 01 → N</span><span>RIGHT · SL N+1 → 2N</span><span></span></div>
           <div id="products"></div>
         </div>
         <div id="summary" class="summary"></div>
@@ -81,7 +81,7 @@
 </main>
 
 <footer>BNC AgroCare · Invoice Studio <span>·</span> Built by Tamasrazim</footer>
-<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script src="./js/app.js"></script>
 <script>if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});</script>
 </body>
