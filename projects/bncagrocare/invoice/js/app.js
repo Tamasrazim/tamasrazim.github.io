@@ -101,18 +101,18 @@ function addProductRow(){
 }
 function updateSummary(){
  const t=totals();
- $("#summary").innerHTML="<div class="sum"><span>Cartons</span><strong>"+t.cartons+"</strong></div><div class="sum"><span>Gross taka</span><strong>"+money(t.total)+"</strong></div><div class="sum"><span>Commission</span><strong>"+money(t.commission)+"</strong></div><div class="sum final"><span>Final total</span><strong>"+money(t.final)+"</strong></div>"
+ $("#summary").innerHTML='<div class="sum"><span>Cartons</span><strong>'+t.cartons+'</strong></div><div class="sum"><span>Gross taka</span><strong>'+money(t.total)+'</strong></div><div class="sum"><span>Commission</span><strong>'+money(t.commission)+'</strong></div><div class="sum final"><span>Final total</span><strong>'+money(t.final)+'</strong></div>';
 }
 
 function paperRow(p,sl){
- return "<div class="tr"><span>"+(hasData(p)?String(sl).padStart(2,"0"):"")+"</span><span title=""+safe(p.name)+"">"+safe(p.name)+"</span><span>"+safe(p.pack)+"</span><span>"+safe(p.ctn)+"</span><span>"+safe(p.rate?money(p.rate):"")+"</span><span>"+(p.ctn&&p.rate?money(num(p.ctn)*num(p.rate)):"")+"</span></div>"
+ return '<div class="tr"><span>'+(hasData(p)?String(sl).padStart(2,"0"):"")+'</span><span title="'+safe(p.name)+'">'+safe(p.name)+'</span><span>'+safe(p.pack)+'</span><span>'+safe(p.ctn)+'</span><span>'+safe(p.rate?money(p.rate):"")+'</span><span>'+(p.ctn&&p.rate?money(num(p.ctn)*num(p.rate)):"")+'</span></div>';
 }
 function paperCol(rows,side,totalRows){
- return "<div class="paperTable"><div class="th"><span>SL</span><span>PRODUCT</span><span>PACK</span><span>CTN</span><span>RATE</span><span>AMOUNT</span></div>"+rows.map((p,i)=>paperRow(p,slFor(i,side,totalRows))).join("")+"</div>"
+ return '<div class="paperTable"><div class="th"><span>SL</span><span>PRODUCT</span><span>PACK</span><span>CTN</span><span>RATE</span><span>AMOUNT</span></div>'+rows.map((p,i)=>paperRow(p,slFor(i,side,totalRows))).join("")+'</div>';
 }
 function renderPreview(){
  const totalRows=state.rows.length,shown=state.rows.slice(0,ROWS_PER_SIDE+FIRST_PAGE_EXTRA_ROWS),t=totals();
- $("#sheetPreview").innerHTML="<div class="a4Sheet"><div class="paperHeader"><div><div class="paperBrand">BNC AGROCARE</div><div class="paperTitle">INVOICE · XLSX</div></div><div class="paperMeta">REF "+safe(state.ref)+"<br>NO. "+safe(state.invoiceNo)+"<br>"+safe(displayDate(state.date))+"</div></div><div class="metaGrid"><div class="metaBox"><small>TRADER / DEALER</small><strong>"+safe(state.trader)+"</strong></div><div class="metaBox"><small>BUYER</small><strong>"+safe(state.buyer)+"</strong></div><div class="metaBox"><small>ADDRESS</small><strong>"+safe(state.address)+"</strong></div><div class="metaBox"><small>MOBILE</small><strong>"+safe(state.mobile)+"</strong></div></div><div class="paperTables">"+paperCol(shown.map(r=>r.left),"left",totalRows)+paperCol(shown.map(r=>r.right),"right",totalRows)+"</div>"+(state.rows.length>shown.length?"<div class="paperContinuation">+ "+(state.rows.length-shown.length)+" extra row(s) will be inserted into the workbook before ST.</div>":"")+"<div class="paperSummary"><div class="paperTotal"><span>TOTAL CARTON</span><strong>"+t.cartons+"</strong></div><div class="paperTotal"><span>GROSS TAKA</span><strong>"+money(t.total)+"</strong></div><div class="paperTotal"><span>COMMISSION</span><strong>"+money(t.commission)+"</strong></div><div class="paperTotal"><span>TOTAL AMOUNT</span><strong>"+money(t.final)+"</strong></div></div><div class="paperFoot"><span>Workbook source: BNCFINAL.xlsx</span><span>Output: .xlsx</span></div></div>";
+ $("#sheetPreview").innerHTML='<div class="a4Sheet"><div class="paperHeader"><div><div class="paperBrand">BNC AGROCARE</div><div class="paperTitle">INVOICE · XLSX</div></div><div class="paperMeta">REF '+safe(state.ref)+'<br>NO. '+safe(state.invoiceNo)+'<br>'+safe(displayDate(state.date))+'</div></div><div class="metaGrid"><div class="metaBox"><small>TRADER / DEALER</small><strong>'+safe(state.trader)+'</strong></div><div class="metaBox"><small>BUYER</small><strong>'+safe(state.buyer)+'</strong></div><div class="metaBox"><small>ADDRESS</small><strong>'+safe(state.address)+'</strong></div><div class="metaBox"><small>MOBILE</small><strong>'+safe(state.mobile)+'</strong></div></div><div class="paperTables">'+paperCol(shown.map(r=>r.left),"left",totalRows)+paperCol(shown.map(r=>r.right),"right",totalRows)+'</div>'+(state.rows.length>shown.length?'<div class="paperContinuation">+ '+(state.rows.length-shown.length)+' extra row(s) will be inserted into the workbook before ST.</div>':"")+'<div class="paperSummary"><div class="paperTotal"><span>TOTAL CARTON</span><strong>'+t.cartons+'</strong></div><div class="paperTotal"><span>GROSS TAKA</span><strong>'+money(t.total)+'</strong></div><div class="paperTotal"><span>COMMISSION</span><strong>'+money(t.commission)+'</strong></div><div class="paperTotal"><span>TOTAL AMOUNT</span><strong>'+money(t.final)+'</strong></div></div><div class="paperFoot"><span>Workbook source: BNCFINAL.xlsx</span><span>Output: .xlsx</span></div></div>';
 }
 
 function findInvoiceSheet(workbook){
@@ -208,7 +208,7 @@ function countInvoiceRows(ws){
  return stRow?Math.max(ROWS_PER_SIDE,stRow-11):ROWS_PER_SIDE
 }
 
-async function buildWorkbook(){
+async async function buildWorkbook(){
  if(buildWorkbook.busy)return lastBuffer;
  buildWorkbook.busy=true;$("#previewBtn").disabled=true;$("#xlsxState").textContent="Preparing...";setStatus("Loading BNCFINAL.xlsx...");
  try{
