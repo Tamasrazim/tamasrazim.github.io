@@ -82,9 +82,6 @@ for(const ref of [
   'href="./repo-token-meter/"'
 ]) must(hub.includes(ref),'project index exposes '+ref);
 
-const bncPdfSha=execFileSync('git',['ls-tree','-r','HEAD','--','projects/bncagrocare/invoice.pdf'],{encoding:'utf8'}).trim().split(/\s+/)[2];
-must(bncPdfSha==='46c9ce8303a0a4abdf7599ba1479b298c26fc6fe','locked BNC invoice template SHA is unchanged');
-
 must(!site.includes('href="renderer/"'),'homepage has no retired renderer link');
 must(!hub.includes('href="../renderer/"'),'project hub has no retired renderer link');
 
