@@ -427,19 +427,59 @@ async function ensureLiveWorkbook(){
   try{return await buildPromise}finally{buildPromise=null}
 }
 
+function formulaText(cell){
+  const v=cell?.value;
+  return v&&typeof v==="object"&&typeof v.formula==="string"?v.formula:"";
+}
+
+function cellNumber(address,stack=new Set()){
+  if(!liveSheet||stack.has(address))return 0;
+  const cell=liveSheet.getCell(address);
+  const v=cell?.value;
+  if(typeof v==="number")return v;
+  if(typeof v==="string"&&v.trim()!=="")return num(v);
+  if(!v||typeof v!=="object")return 0;
+  if(typeof v.result==="number")return v.result;
+  if(typeof v.formula==="string"){
+    const next=new Set(stack);next.add(address);
+    return formulaNumber(v.formula,next);
+  }
+  return 0;
+}
+
+function formulaNumber(formula,stack=new Set()){
+  let s=String(formula||"").trim().replace(/^=/,"");
+  if(/^SUM\(/i.test(s)&&s.endsWith(")")){
+    const inner=s.slice(4,-1);
+    const m=inner.match(/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/i);
+    if(m&&m[1].toUpperCase()===m[3].toUpperCase()){
+      let total=0;
+      const col=m[1].toUpperCase(),a=Number(m[2]),b=Number(m[4]);
+      for(let r=a;r<=b;r++)total+=cellNumber(col+r,stack);
+      return total;
+    }
+  }
+  const simple=s.match(/^\(?\s*([A-Z]+\d+|-?\d+(?:\.\d+)?)\s*\)?\s*([+\-*/])\s*\(?\s*([A-Z]+\d+|-?\d+(?:\.\d+)?)\s*\)?$/i);
+  if(simple){
+    const left=/^[A-Z]+\d+$/i.test(simple[1])?cellNumber(simple[1],stack):Number(simple[1]);
+    const right=/^[A-Z]+\d+$/i.test(simple[3])?cellNumber(simple[3],stack):Number(simple[3]);
+    if(simple[2]==="+")return left+right;
+    if(simple[2]==="-")return left-right;
+    if(simple[2]==="*")return left*right;
+    if(simple[2]==="/")return right===0?0:left/right;
+  }
+  const direct=Number(s);
+  return Number.isFinite(direct)?direct:0;
+}
+
 function recalcLiveFormulas(){
   formulaResults={};
   if(!liveSheet)return;
   liveSheet.eachRow(row=>row.eachCell({includeEmpty:false},cell=>{
-    if(!cell.formula)return;
-    const m=String(cell.formula).match(/^SUM\(([A-Z]+)(\d+):([A-Z]+)(\d+)\)$/i);
-    if(!m||m[1].toUpperCase()!==m[3].toUpperCase())return;
-    let total=0;
-    for(let r=Number(m[2]);r<=Number(m[4]);r++){
-      const value=liveSheet.getRow(r).getCell(cell.column).value;
-      total+=num(value);
-    }
-    formulaResults[cell.address]=total;
+    const formula=formulaText(cell);
+    if(!formula)return;
+    const result=formulaNumber(formula);
+    if(Number.isFinite(result))formulaResults[cell.address]=result;
   }));
 }
 
