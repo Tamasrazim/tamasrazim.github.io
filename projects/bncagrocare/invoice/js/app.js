@@ -208,7 +208,6 @@ function renderProducts(){
         formulaResults={};
         await ensureLiveWorkbook();
         rebalanceSL(liveSheet,state.rows.length);
-        recalcLiveFormulas();
         dirty=true;lastBuffer=null;
         renderProducts();
         saveDraft();
@@ -239,7 +238,6 @@ async function addProductRow(){
     window.BNCInsertProductRow(liveSheet);
     state.rows.push(blankRow());
     rebalanceSL(liveSheet,state.rows.length);
-    recalcLiveFormulas();
     dirty=true;lastBuffer=null;
     renderProducts();
     saveDraft();
@@ -566,7 +564,6 @@ function buildWorkbookPreviewSheet(ws){
     });
     el.addEventListener("blur",async()=>{
       if(!liveSheet)return;
-      recalcLiveFormulas();
       el.classList.remove("editing");
       setStatus("Live XLSX edited");
       await renderPreview();
