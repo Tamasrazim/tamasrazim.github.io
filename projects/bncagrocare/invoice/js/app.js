@@ -672,17 +672,22 @@ function columnNumberFromLetters(value){
 
 function colLetters(n){let s="";while(n){const r=(n-1)%26;s=String.fromCharCode(65+r)+s;n=Math.floor((n-1)/26)}return s}
 function fitWorkbookPreview(){
-  const host=$("#sheetPreview"),stage=host?.querySelector(".workbookFit"),sheet=stage?.querySelector(".workbookSheet"),grid=stage?.querySelector(".workbookGrid");
-  if(!stage||!sheet||!grid)return;
+  const host=$("#sheetPreview");
+  const stage=host?.querySelector(".workbookFit");
+  const sheet=stage?.querySelector(".workbookSheet");
+  const grid=stage?.querySelector(".workbookGrid");
+  const viewport=host?.closest(".workbookViewport");
+  if(!stage||!sheet||!grid||!viewport)return;
   const rawWidth=grid.offsetWidth+18;
   const rawHeight=grid.offsetHeight+18;
-  const available=Math.max(260,stage.clientWidth-12);
-  const scale=Math.min(1,available/rawWidth);
+  const availableWidth=Math.max(260,viewport.clientWidth-16);
+  const availableHeight=Math.max(320,viewport.clientHeight-16);
+  const scale=Math.min(1,availableWidth/rawWidth,availableHeight/rawHeight);
   sheet.style.width=rawWidth+"px";
   sheet.style.height=rawHeight+"px";
   sheet.style.transformOrigin="top center";
   sheet.style.transform="translateX(-50%) scale("+scale+")";
-  stage.style.height=Math.max(430,rawHeight*scale+12)+"px";
+  stage.style.height=Math.max(260,rawHeight*scale+12)+"px";
   const badge=$("#previewFitState");
   if(badge)badge.textContent=Math.round(scale*100)+"% · FIT";
 }
