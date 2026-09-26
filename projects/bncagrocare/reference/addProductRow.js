@@ -66,6 +66,36 @@ function restoreMerges(ws,ranges,startRow){
   }
 }
 
+function cloneBorder(border){
+  if(!border)return {};
+  if(typeof structuredClone==="function"){
+    try{return structuredClone(border)}catch{}
+  }
+  return JSON.parse(JSON.stringify(border));
+}
+
+function snapshotBorders(ws,firstRow,lastRow){
+  const out={};
+  for(let r=firstRow;r<=lastRow;r++){
+    out[r]=[];
+    for(let c=1;c<=MAX_COLUMNS;c++){
+      out[r][c]=cloneBorder(cellAt(ws,r,c).border);
+    }
+  }
+  return out;
+}
+
+function restoreShiftedBorders(ws,snapshot,firstRow,lastRow){
+  for(let r=firstRow;r<=lastRow;r++){
+    const source=snapshot[r];
+    if(!source)continue;
+    const targetRow=r+1;
+    for(let c=1;c<=MAX_COLUMNS;c++){
+      cellAt(ws,targetRow,c).border=cloneBorder(source[c]);
+    }
+  }
+}
+
 function clearProductRow(ws,row){
   for(let c=1;c<=MAX_COLUMNS;c++)cellAt(ws,row,c).value=null;
 }
@@ -91,6 +121,8 @@ function insertProductRowIntoWorksheet(ws){
 
   const stRow=findStRow(ws);
   const merges=mergeRanges(ws);
+  const bottomRow=ws.rowCount;
+  const borderSnapshot=snapshotBorders(ws,stRow,bottomRow);
 
   // Critical fix:
   // never insert a physical worksheet row while invoice merges are active.
@@ -104,6 +136,7 @@ function insertProductRowIntoWorksheet(ws){
     // The inserted row inherits the exact visual formatting of the
     // product row immediately above it.
     clearProductRow(ws,stRow);
+    restoreShiftedBorders(ws,borderSnapshot,stRow,bottomRow);
 
     const totalRows=stRow-PRODUCT_START_ROW+1;
     if(totalRows<MIN_ROWS_PER_SIDE){
