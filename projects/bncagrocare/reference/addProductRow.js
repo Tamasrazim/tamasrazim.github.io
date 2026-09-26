@@ -165,6 +165,9 @@ function insertProductRowIntoWorksheet(ws){
 
   }finally{
     restoreMerges(ws,merges,stRow);
+    // Merge restoration can rewrite edge borders on merged cells.
+    // Re-apply the complete original border map as the final operation.
+    restoreBordersAfterInsert(ws,borderSnapshot,stRow,bottomRow);
   }
 
   return stRow;
