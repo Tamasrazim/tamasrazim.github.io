@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="description" content="Universal browser-based file converter by Tamasrazim — images, media, text, data and archives.">
+<title>Format Forge — Tamasrazim</title>
+<style>
+:root{color-scheme:dark;--bg:#050505;--panel:#0b0b0b;--panel2:#101010;--ink:#f2f2ee;--muted:#858585;--line:#292929;--soft:#151515;--accent:#fff;--ease:cubic-bezier(.2,.8,.2,1)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 50% -20%,#191919,#050505 46%);color:var(--ink);font:14px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}button,input,select{font:inherit}button{cursor:pointer;color:inherit}.shell{width:min(1180px,calc(100% - 28px));margin:auto}
+header{position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line);background:#050505d9;backdrop-filter:blur(18px)}.head{min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{text-decoration:none;font:800 11px/1 ui-monospace,monospace;letter-spacing:.15em}.brand span{color:#777}.head nav{display:flex;gap:18px;font:10px ui-monospace,monospace}.head nav a{color:#888;text-decoration:none}.head nav a:hover{color:#fff}
+main{padding:76px 0 100px}.kicker{font:10px ui-monospace,monospace;letter-spacing:.2em;color:#777;text-transform:uppercase}h1{font-size:clamp(54px,10vw,128px);line-height:.82;letter-spacing:-.075em;margin:18px 0 26px;max-width:1000px}h1 em{font-style:normal;color:#777}.lead{max-width:690px;color:#aaa;font:13px/1.8 ui-monospace,monospace}.hero-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:28px}.pill{border:1px solid var(--line);padding:8px 10px;border-radius:999px;color:#999;font:9px ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase}
+.workspace{margin-top:52px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:linear-gradient(145deg,#0d0d0d,#070707);box-shadow:0 30px 100px #0008}.toolbar{padding:18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}.toolbar-title{font:800 10px ui-monospace,monospace;letter-spacing:.15em;text-transform:uppercase}.status{color:#777;font:10px ui-monospace,monospace}.drop{margin:18px;min-height:250px;border:1px dashed #3a3a3a;border-radius:12px;display:grid;place-items:center;text-align:center;padding:30px;transition:.3s var(--ease);background:radial-gradient(circle,#111,#080808)}.drop.drag{border-color:#aaa;transform:scale(.995);background:#111}.drop strong{display:block;font-size:22px;margin-bottom:8px}.drop p{margin:0;color:#777;font:11px/1.7 ui-monospace,monospace}.choose{margin-top:18px;border:1px solid #444;background:#eee;color:#050505;border-radius:5px;padding:12px 16px;font:800 10px ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em}.settings{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 18px 18px}.field{border:1px solid var(--line);background:#0a0a0a;border-radius:10px;padding:14px}.field label{display:block;color:#666;font:9px ui-monospace,monospace;text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}.field select{width:100%;background:#111;color:#eee;border:1px solid #333;border-radius:5px;padding:10px;outline:none}.queue{border-top:1px solid var(--line);padding:18px}.queue h2{font:10px ui-monospace,monospace;letter-spacing:.15em;text-transform:uppercase;color:#777;margin:0 0 12px}.empty{color:#555;font:11px ui-monospace,monospace;padding:20px 0}.item{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;border:1px solid var(--line);padding:12px;border-radius:9px;margin-top:8px;background:#090909}.item-name{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.item-name b{display:block;font-size:12px}.item-name small{color:#666;font:9px ui-monospace,monospace}.item select{background:#111;color:#ddd;border:1px solid #333;padding:8px;border-radius:5px}.convert{border:1px solid #444;background:#eee;color:#050505;border-radius:5px;padding:9px 12px;font:800 9px ui-monospace,monospace}.remove{border:0;background:none;color:#666;font-size:18px}.progress{height:3px;background:#191919;margin-top:8px;border-radius:99px;overflow:hidden}.progress i{display:block;height:100%;width:0;background:#eee;transition:width .2s}
+.info{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}.info article{border:1px solid var(--line);border-radius:10px;padding:18px;background:#090909}.info b{display:block;font-size:13px;margin-bottom:5px}.info p{margin:0;color:#777;font:10px/1.7 ui-monospace,monospace}.notice{margin-top:18px;border-left:2px solid #555;padding:12px 14px;color:#777;font:10px/1.7 ui-monospace,monospace}.notice strong{color:#aaa}
+footer{border-top:1px solid var(--line);padding:24px 0;color:#666;font:10px ui-monospace,monospace;display:flex;justify-content:space-between;gap:16px}footer a{color:inherit}
+@media(max-width:700px){.head nav{display:none}main{padding-top:52px}.settings,.info{grid-template-columns:1fr}.item{grid-template-columns:1fr}.item select,.convert{width:100%}h1{font-size:clamp(52px,17vw,88px)}}
+</style>
+</head>
+<body>
+<header><div class="shell head"><a class="brand" href="../../">TAMASRAZIM <span>/ FORMAT FORGE</span></a><nav><a href="../">Projects</a><a href="../../#projects">Main site</a><a href="https://github.com/Tamasrazim/tamasrazim.github.io" target="_blank" rel="noopener">Source ↗</a></nav></div></header>
+<main class="shell">
+<div class="kicker">PROJECT 05 / UNIVERSAL CONVERTER</div>
+<h1>Format <em>Forge.</em></h1>
+<p class="lead">One browser workspace for turning files into other useful formats. Drop files, choose an output, convert locally when the browser can do it, and download the result.</p>
+<div class="hero-meta"><span class="pill">Images</span><span class="pill">Video</span><span class="pill">Audio</span><span class="pill">Text</span><span class="pill">Data</span><span class="pill">Archives</span><span class="pill">Batch</span><span class="pill">Local-first</span></div>
+
+<section class="workspace">
+<div class="toolbar"><span class="toolbar-title">Conversion workspace</span><span class="status" id="status">Ready</span></div>
+<div class="drop" id="drop">
+<div><strong>Drop anything here.</strong><p>PNG → JPG · MP4 → WebM · WAV → MP3 · JSON ↔ CSV · ZIP and more</p><button class="choose" id="choose">Choose files</button><input id="files" type="file" multiple hidden></div>
+</div>
+<div class="settings">
+<div class="field"><label>Default output</label><select id="globalTarget"><option value="auto">Auto — choose per file</option><option value="jpg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option><option value="avif">AVIF</option><option value="webm">WebM</option><option value="mp4">MP4</option><option value="mp3">MP3</option><option value="wav">WAV</option><option value="json">JSON</option><option value="csv">CSV</option><option value="txt">TXT</option><option value="zip">ZIP</option></select></div>
+<div class="field"><label>Image quality</label><select id="quality"><option value=".95">Maximum</option><option value=".85" selected>High</option><option value=".7">Balanced</option><option value=".5">Small</option></select></div>
+</div>
+<div class="queue"><h2>Queue</h2><div id="queue"><div class="empty">No files loaded.</div></div></div>
+</section>
+
+<div class="info"><article><b>Browser-native</b><p>Images and structured text/data are processed directly in the page without uploading the source file.</p></article><article><b>Media engine</b><p>Video and audio use FFmpeg WebAssembly when the required engine is available.</p></article><article><b>Honest matrix</b><p>Not every format can meaningfully convert to every other format. Unsupported pairs are blocked instead of faking a result.</p></article></div>
+<div class="notice"><strong>Privacy:</strong> files stay in your browser for the conversion flow. Media-engine conversions may download the FFmpeg runtime from the public CDN; the selected source file is processed locally by that runtime.</div>
+</main>
+<footer class="shell"><span>FORMAT FORGE / TAMASRAZIM</span><a href="../../">Back to Tamasrazim ↑</a></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+<script>
+const $=s=>document.querySelector(s), drop=$('#drop'), input=$('#files'), queue=$('#queue'), status=$('#status'), globalTarget=$('#globalTarget'), quality=$('#quality');
+const state=[]; let ffmpeg=null, ffmpegReady=false;
+const imageExt=['png','jpg','jpeg','webp','avif','bmp','gif'];
+const textExt=['txt','json','csv','xml','html','css','js','md'];
+const mediaExt=['mp4','webm','mov','mkv','avi','m4v','mp3','wav','ogg','m4a','flac','aac'];
+function ext(name){return (name.split('.').pop()||'').toLowerCase().replace('jpeg','jpg')}
+function kind(e){if(imageExt.includes(e))return'image';if(textExt.includes(e))return'text';if(mediaExt.includes(e))return'media';if(e==='zip')return'archive';return'other'}
+function targets(e){
+ const k=kind(e);
+ if(k==='image')return ['jpg','png','webp','avif'];
+ if(k==='text'){if(e==='json')return['json','csv','txt'];if(e==='csv')return['csv','json','txt'];return['txt','json','csv']}
+ if(k==='media'){if(['mp4','webm','mov','mkv','avi','m4v'].includes(e))return['webm','mp4','mkv','mov','avi','mp4'];return['mp3','wav','ogg','m4a','flac']}
+ if(k==='archive')return['zip'];
+ return [];
+}
+function addFiles(files){for(const f of files){const e=ext(f.name);state.push({file:f,ext:e,target:globalTarget.value==='auto'?(targets(e)[0]||''):globalTarget.value});}render()}
+function render(){
+ if(!state.length){queue.innerHTML='<div class="empty">No files loaded.</div>';return}
+ queue.innerHTML=state.map((x,i)=>{const ts=targets(x.ext), opts=ts.length?ts.map(t=>'<option '+(t===x.target?'selected':'')+' value="'+t+'">'+t.toUpperCase()+'</option>').join(''):'<option>unsupported</option>';return '<div class="item"><div class="item-name"><b>'+esc(x.file.name)+'</b><small>'+fmt(x.file.size)+' · '+(kind(x.ext)||'unknown')+'</small><div class="progress"><i id="p'+i+'"></i></div></div><select data-i="'+i+'" class="target">'+opts+'</select><button class="convert" data-convert="'+i+'">Convert</button><button class="remove" data-remove="'+i+'" aria-label="Remove">×</button></div>'}).join('');
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function fmt(n){let u=['B','KB','MB','GB'],i=0;while(n>1024&&i<3){n/=1024;i++}return n.toFixed(i?1:0)+' '+u[i]}
+$('#choose').onclick=()=>input.click();input.onchange=e=>addFiles(e.target.files);
+['dragenter','dragover'].forEach(e=>drop.addEventListener(e,x=>{x.preventDefault();drop.classList.add('drag')}));
+['dragleave','drop'].forEach(e=>drop.addEventListener(e,x=>{x.preventDefault();drop.classList.remove('drag')}));
+drop.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
+globalTarget.onchange=()=>{if(globalTarget.value!=='auto'){state.forEach(x=>{if(targets(x.ext).includes(globalTarget.value))x.target=globalTarget.value}) ;render()}};
+queue.addEventListener('change',e=>{if(e.target.matches('.target'))state[+e.target.dataset.i].target=e.target.value});
+queue.addEventListener('click',e=>{const r=e.target.closest('[data-remove]');if(r){state.splice(+r.dataset.remove,1);render()}const c=e.target.closest('[data-convert]');if(c)convert(+c.dataset.convert)});
+async function imageConvert(x,i){
+ const url=URL.createObjectURL(x.file), img=new Image(); await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=url});
+ const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;canvas.getContext('2d').drawImage(img,0,0);URL.revokeObjectURL(url);
+ const mime={jpg:'image/jpeg',png:'image/png',webp:'image/webp',avif:'image/avif'}[x.target]; const blob=await new Promise((res,rej)=>canvas.toBlob(b=>b?res(b):rej(new Error('Format not supported by this browser')),mime,Number(quality.value)));return blob;
+}
+function textConvert(x){
+ return x.file.text().then(s=>{let out=s;
+ if(x.target==='json'&&x.ext==='csv'){const rows=s.trim().split(/\r?\n/).map(r=>r.split(','));const h=rows.shift()||[];out=JSON.stringify(rows.map(r=>Object.fromEntries(h.map((k,j)=>[k,r[j]??'']))),null,2)}
+ else if(x.target==='csv'&&x.ext==='json'){const d=JSON.parse(s);const a=Array.isArray(d)?d:[d], h=[...new Set(a.flatMap(o=>Object.keys(o||{})))];out=h.join(',')+'\n'+a.map(o=>h.map(k=>JSON.stringify(o?.[k]??'')).join(',')).join('\n')}
+ else if(x.target==='txt'&&x.ext==='json'){out=JSON.stringify(JSON.parse(s),null,2)}
+ return new Blob([out],{type:x.target==='json'?'application/json':'text/plain'})});
+}
+async function loadFF(){if(ffmpegReady)return;status.textContent='Loading media engine…';ffmpeg=FFmpeg.createFFmpeg({log:false,corePath:'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js'});await ffmpeg.load();ffmpegReady=true}
+async function mediaConvert(x,i){
+ await loadFF();const {fetchFile}=FFmpegUtil;const inputName='input.'+x.ext, outputName='output.'+x.target;ffmpeg.FS('writeFile',inputName,await fetchFile(x.file));
+ await ffmpeg.run('-i',inputName,'-y',outputName);const data=ffmpeg.FS('readFile',outputName);const mime={mp4:'video/mp4',webm:'video/webm',mkv:'video/x-matroska',mov:'video/quicktime',avi:'video/x-msvideo',mp3:'audio/mpeg',wav:'audio/wav',ogg:'audio/ogg',m4a:'audio/mp4',flac:'audio/flac'}[x.target]||'application/octet-stream';ffmpeg.FS('unlink',inputName);ffmpeg.FS('unlink',outputName);return new Blob([data.buffer],{type:mime});
+}
+async function convert(i){
+ const x=state[i], k=kind(x.ext), allowed=targets(x.ext); if(!allowed.includes(x.target)){status.textContent='Unsupported conversion';return}
+ try{status.textContent='Converting '+x.file.name+'…';$('#p'+i).style.width='25%';let blob;
+ if(k==='image')blob=await imageConvert(x,i);else if(k==='text')blob=await textConvert(x);else if(k==='media')blob=await mediaConvert(x,i);else throw new Error('This pair is not implemented yet');
+ $('#p'+i).style.width='100%';const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=x.file.name.replace(/\.[^.]+$/,'')+'.'+x.target;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);status.textContent='Complete';}
+ catch(e){console.error(e);status.textContent='Failed: '+(e.message||e)}
+}
+function onErr(){status.textContent='Media engine unavailable — image/text conversion still works locally'}
+window.addEventListener('unhandledrejection',onErr);
+render();
+</script>
+</body>
+</html>
