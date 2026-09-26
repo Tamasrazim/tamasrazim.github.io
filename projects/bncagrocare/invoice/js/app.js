@@ -57,15 +57,71 @@ function normalize(){
   if(!state.date)state.date=today();
 }
 function totals(){
-  let cartons=0,total=0;
+  let leftCartons=0,rightCartons=0,leftAmount=0,rightAmount=0;
   state.rows.forEach(r=>{
     const lc=Math.max(0,num(r.left.ctn));
     const rc=Math.max(0,num(r.right.ctn));
-    cartons+=lc+rc;
-    total+=lc*Math.max(0,num(r.left.rate))+rc*Math.max(0,num(r.right.rate));
+    const la=lc*Math.max(0,num(r.left.rate));
+    const ra=rc*Math.max(0,num(r.right.rate));
+    leftCartons+=lc;
+    rightCartons+=rc;
+    leftAmount+=la;
+    rightAmount+=ra;
   });
-  const commission=total*Math.max(0,num(state.commission))/100;
-  return {cartons,total,commission,final:Math.max(0,total-commission)};
+  const totalCartons=leftCartons+rightCartons;
+  const totalTaka=leftAmount+rightAmount;
+  const commissionPercent=Math.max(0,num(state.commission));
+  const commissionAmount=totalTaka*commissionPercent/100;
+  const finalTotal=Math.max(0,totalTaka-commissionAmount);
+  return {
+    leftCartons,rightCartons,totalCartons,
+    leftAmount,rightAmount,totalTaka,
+    commissionPercent,commissionAmount,finalTotal,
+    cartons:totalCartons,total:totalTaka,
+    commission:commissionAmount,final:finalTotal
+  };
+}
+
+function numberWords(value){
+  let n=Math.max(0,Math.round(num(value)));
+  const ones=["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+  const tens=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+  const words=x=>{
+    if(x<20)return ones[x];
+    if(x<100)return tens[Math.floor(x/10)]+(x%10?" "+ones[x%10]:"");
+    if(x<1000)return ones[Math.floor(x/100)]+" Hundred"+(x%100?" "+words(x%100):"");
+    if(x<100000)return words(Math.floor(x/1000))+" Thousand"+(x%1000?" "+words(x%1000):"");
+    if(x<10000000)return words(Math.floor(x/100000))+" Lakh"+(x%100000?" "+words(x%100000):"");
+    return words(Math.floor(x/10000000))+" Crore"+(x%10000000?" "+words(x%10000000):"");
+  };
+  return words(n)+" Taka Only";
+}
+
+function applyInvoiceCalculationsToLive(){
+  if(!liveSheet)return;
+  const stRow=findStRow(liveSheet);
+  const subtotalRow=stRow+1;
+  const totalRow=stRow+2;
+  const commissionRow=stRow+3;
+  const finalRow=stRow+4;
+  const wordsRow=stRow+5;
+
+  for(let r=PRODUCT_START_ROW;r<=stRow;r++){
+    cellAt(liveSheet,r,6).value={formula:"D"+r+"*E"+r};
+    cellAt(liveSheet,r,12).value={formula:"J"+r+"*K"+r};
+  }
+
+  cellAt(liveSheet,subtotalRow,4).value={formula:"SUM(D"+PRODUCT_START_ROW+":D"+stRow+")"};
+  cellAt(liveSheet,subtotalRow,6).value={formula:"SUM(F"+PRODUCT_START_ROW+":F"+stRow+")"};
+  cellAt(liveSheet,subtotalRow,12).value={formula:"SUM(L"+PRODUCT_START_ROW+":L"+stRow+")"};
+
+  cellAt(liveSheet,totalRow,4).value={formula:"D"+subtotalRow};
+  cellAt(liveSheet,totalRow,12).value={formula:"F"+subtotalRow+"+L"+subtotalRow};
+  cellAt(liveSheet,commissionRow,12).value=num(state.commission);
+  cellAt(liveSheet,finalRow,12).value=totals().finalTotal;
+  cellAt(liveSheet,wordsRow,4).value=numberWords(totals().finalTotal);
+
+  recalcLiveFormulas();
 }
 function syncFields(){
   document.querySelectorAll("[data-k]").forEach(el=>el.value=state[el.dataset.k]??"");
@@ -175,7 +231,7 @@ function syncProductSide(row,rowIndex,side){
       formula:side==="left"?"D"+dataRow+"*E"+dataRow:"J"+dataRow+"*K"+dataRow
     };
     rebalanceSL(liveSheet,state.rows.length);
-    recalcLiveFormulas();
+    applyInvoiceCalculationsToLive();
     dirty=true;lastBuffer=null;
     schedulePreview();
   });
@@ -353,6 +409,7 @@ async function addProductRow(){
     window.BNCInsertProductRow(liveSheet);
     state.rows.push(blankRow());
     rebalanceSL(liveSheet,state.rows.length);
+    applyInvoiceCalculationsToLive();
     dirty=true;lastBuffer=null;
     renderProducts();
     const newRow=document.querySelector("#products .pairRow:last-child");
@@ -534,6 +591,7 @@ async function ensureLiveWorkbook(){
         writeLine(liveSheet,i,totalRows,"right",state.rows[i].right);
       }
       rebalanceSL(liveSheet,totalRows);
+      applyInvoiceCalculationsToLive();
       setStatus("Live XLSX loaded");
       return liveWorkbook;
     }catch(error){
@@ -636,6 +694,7 @@ function applyHeaderEditsToLive(){
   putHeaderField(liveSheet,["address"],state.address);
   putHeaderField(liveSheet,["mobile","phone"],state.mobile);
   putHeaderField(liveSheet,["commission %","commission"],state.commission);
+  applyInvoiceCalculationsToLive();
 }
 
 function excelColor(v,fallback){
