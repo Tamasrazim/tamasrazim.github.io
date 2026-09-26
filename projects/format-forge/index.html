@@ -13,6 +13,20 @@ main{padding:76px 0 100px}.hero{animation:rise .8s var(--ease) both}.kicker{font
 .queue{border-top:1px solid var(--line);padding:18px}.queue-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.queue h2{font:10px ui-monospace,monospace;letter-spacing:.15em;text-transform:uppercase;color:#777;margin:0 0 12px}.empty{color:#555;font:11px ui-monospace,monospace;padding:20px 0}.item{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:12px;align-items:center;border:1px solid var(--line);padding:12px;border-radius:9px;margin-top:8px;background:#090909;animation:rise .45s var(--ease) both}.item-name{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.item-name b{display:block;font-size:12px}.item-name small{color:#666;font:9px ui-monospace,monospace}.item select{background:#111;color:#ddd;border:1px solid #333;padding:8px;border-radius:5px}.convert{border:1px solid #444;background:#eee;color:#050505;border-radius:5px;padding:9px 12px;font:800 9px ui-monospace,monospace;transition:.2s}.convert:hover{transform:translateY(-2px)}.remove{border:0;background:none;color:#666;font-size:18px}.progress{height:3px;background:#191919;margin-top:8px;border-radius:99px;overflow:hidden}.progress i{display:block;height:100%;width:0;background:#eee;transition:width .2s}
 .info{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}.info article{border:1px solid var(--line);border-radius:10px;padding:18px;background:#090909;transition:.35s var(--ease);animation:rise .7s var(--ease) both}.info article:nth-child(2){animation-delay:.08s}.info article:nth-child(3){animation-delay:.16s}.info article:hover{transform:translateY(-5px);border-color:#444}.info b{display:block;font-size:13px;margin-bottom:5px}.info p{margin:0;color:#777;font:10px/1.7 ui-monospace,monospace}.notice{margin-top:18px;border-left:2px solid #555;padding:12px 14px;color:#777;font:10px/1.7 ui-monospace,monospace}.notice strong{color:#aaa}footer{border-top:1px solid var(--line);padding:24px 0;color:#666;font:10px ui-monospace,monospace;display:flex;justify-content:space-between;gap:16px}
 @media(max-width:700px){.head nav{display:none}main{padding-top:52px}.settings,.info{grid-template-columns:1fr}.item{grid-template-columns:1fr}.item select,.convert,.action{width:100%}h1{font-size:clamp(52px,17vw,88px)}.actions{width:100%}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}}
+
+/* Forge control deck */
+.control-deck{margin-top:18px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.panel{border:1px solid var(--line);background:#090909;border-radius:12px;padding:16px;position:relative;overflow:hidden}
+.panel:before{content:"";position:absolute;left:-35%;top:0;width:55%;height:1px;background:linear-gradient(90deg,#fff0,#fff8,#fff0);animation:panelSweep 6s ease-in-out infinite}
+@keyframes panelSweep{0%{transform:translateX(-10%);opacity:0}45%{opacity:1}100%{transform:translateX(300%);opacity:0}}
+.panel h3{margin:0 0 12px;font:800 10px ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:#aaa}
+.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.panel label{display:block;color:#666;font:9px ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;margin:0 0 6px}
+.panel select,.panel input[type=text],.panel input[type=number]{width:100%;background:#111;color:#eee;border:1px solid #333;border-radius:6px;padding:9px;outline:none}
+.panel input[type=checkbox]{accent-color:#eee}.checkline{display:flex;align-items:center;gap:8px;color:#999;font:10px ui-monospace,monospace;margin-top:9px}
+.preset-row,.format-chips{display:flex;flex-wrap:wrap;gap:7px}.mini{border:1px solid #303030;background:#0e0e0e;color:#aaa;padding:7px 9px;border-radius:999px;font:9px ui-monospace,monospace;cursor:pointer;transition:.2s}.mini:hover,.mini.on{background:#eee;color:#050505;border-color:#eee;transform:translateY(-2px)}
+.deck-wide{grid-column:1/-1}.search-row{display:grid;grid-template-columns:1.5fr 1fr 1fr auto;gap:8px}.preview{margin-top:18px;display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:12px}.preview-stage{border:1px solid var(--line);border-radius:12px;background:#070707;min-height:280px;display:grid;place-items:center;padding:18px;overflow:hidden}.preview-stage img,.preview-stage video{max-width:100%;max-height:60vh;border-radius:8px}.preview-stage audio{width:min(100%,560px)}.preview-stage pre{width:100%;max-height:55vh;overflow:auto;white-space:pre-wrap;text-align:left;color:#aaa;font:11px/1.65 ui-monospace,monospace}.preview-meta{border:1px solid var(--line);border-radius:12px;background:#090909;padding:16px}.preview-meta b{display:block;font-size:13px;margin-bottom:5px}.preview-meta p{margin:5px 0;color:#777;font:10px/1.6 ui-monospace,monospace}.job-badge{display:inline-block;margin-top:6px;padding:4px 7px;border:1px solid #333;border-radius:999px;color:#888;font:8px ui-monospace,monospace;text-transform:uppercase}.ai-box{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:8px;align-items:end}.ai-result{margin-top:12px;color:#777;font:10px ui-monospace,monospace}.history-list{max-height:240px;overflow:auto}.history-row{display:grid;grid-template-columns:1fr auto;gap:12px;padding:9px 0;border-bottom:1px solid #181818}.history-row b{display:block;font-size:11px}.history-row small{color:#666;font:9px ui-monospace,monospace}.result-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+@media(max-width:900px){.control-deck{grid-template-columns:1fr 1fr}.preview{grid-template-columns:1fr}.ai-box{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.control-deck{grid-template-columns:1fr}.search-row{grid-template-columns:1fr}.ai-box{grid-template-columns:1fr}.panel-grid{grid-template-columns:1fr}}
 </style></head>
 <body>
 <header><div class="shell head"><a class="brand" href="../../">TAMASRAZIM <span>/ FORMAT FORGE</span></a><nav><a href="../">Projects</a><a href="../../#projects">Main site</a><a href="https://github.com/Tamasrazim/tamasrazim.github.io" target="_blank" rel="noopener">Source ↗</a></nav></div></header>
@@ -57,4 +71,191 @@ async function convert(i){const x=state[i],allowed=targets(x.ext);if(!allowed.in
 async function convertAll(){const jobs=state.map((x,i)=>targets(x.ext).includes(x.target)&&!x.output?i:null).filter(i=>i!==null);if(!jobs.length){flash('Nothing new to convert');return}convertAllBtn.disabled=true;for(const i of jobs)await convert(i);render();flash('Batch conversion complete')}
 async function downloadZip(){const ready=state.filter(x=>x.output);if(!ready.length)return;status.textContent='Building ZIP…';status.classList.add('live');const zip=new JSZip();for(const x of ready){const safe=x.path?x.path.replace(/\.[^.]+$/,'')+'.'+x.target:x.outputName;zip.file(safe,x.output)}const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='format-forge-export.zip';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);flash('ZIP ready — '+ready.length+' result'+(ready.length===1?'':'s'))}
 convertAllBtn.onclick=convertAll;downloadZipBtn.onclick=downloadZip;window.addEventListener('unhandledrejection',e=>{console.error(e.reason);status.textContent='Operation failed: '+(e.reason?.message||e.reason)});render();
-</script></body></html>
+</script>
+<script>
+(function(){
+  const forgeState = {batchStop:false, preview:-1, aiFiles:[], aiResults:[], aiSession:null, historyKey:'tamasrazim-forge-history-v2'};
+  const $f = s => document.querySelector(s);
+  const ext2 = n => (n.split('.').pop()||'').toLowerCase().replace('jpeg','jpg');
+  const forgeKind = e => {
+    if(['png','jpg','webp','avif','bmp','gif'].includes(e)) return 'image';
+    if(['mp4','webm','mov','mkv','avi','m4v','mp3','wav','ogg','m4a','flac','aac','gif'].includes(e)) return 'media';
+    if(['txt','json','csv','xml','html','css','js','md','srt','vtt','ass','rtf'].includes(e)) return 'text';
+    if(e==='pdf') return 'pdf';
+    if(['docx','xlsx','xls','pptx','ppt'].includes(e)) return 'office';
+    if(e==='zip') return 'archive';
+    return 'other';
+  };
+  const forgeTargets = e => {
+    const k=forgeKind(e);
+    if(k==='image') return ['jpg','png','webp','avif','pdf'];
+    if(k==='media'){
+      if(['mp4','webm','mov','mkv','avi','m4v'].includes(e)) return ['webm','mp4','mkv','mov','avi','gif'];
+      return ['mp3','wav','ogg','m4a','flac'];
+    }
+    if(k==='text'){
+      if(e==='json') return ['json','csv','txt','xlsx'];
+      if(e==='csv') return ['csv','json','txt','xlsx'];
+      if(e==='html') return ['html','txt'];
+      return ['txt','json','csv'];
+    }
+    if(k==='pdf') return ['png','jpg','webp'];
+    if(e==='docx') return ['html','txt'];
+    if(e==='xlsx'||e==='xls') return ['csv','json','txt'];
+    if(e==='pptx'||e==='ppt') return ['txt','json'];
+    return [];
+  };
+  targets = forgeTargets;
+
+  function saveHistory(entry){
+    try{const h=JSON.parse(localStorage.getItem(forgeState.historyKey)||'[]');h.unshift({...entry,time:new Date().toLocaleString()});localStorage.setItem(forgeState.historyKey,JSON.stringify(h.slice(0,50)));renderHistory()}catch{}
+  }
+  function renderHistory(){
+    const host=$f('#historyList');if(!host)return;
+    let h=[];try{h=JSON.parse(localStorage.getItem(forgeState.historyKey)||'[]')}catch{}
+    if(!h.length){host.innerHTML='<div class="empty">No operations yet.</div>';return}
+    host.innerHTML=h.map(x=>'<div class="history-row"><div><b>'+esc2(x.name||'Operation')+'</b><small>'+esc2(x.action||'')+' · '+esc2(x.time||'')+'</small></div><small>'+esc2(x.detail||'')+'</small></div>').join('');
+  }
+  function esc2(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+  function typeLabel(x){return forgeKind(x.ext)}
+  function filteredItems(){
+    const q=($f('#queueSearch')?.value||'').toLowerCase().trim(), f=$f('#queueFilter')?.value||'all', s=$f('#queueSort')?.value||'name';
+    const arr=state.map((x,i)=>({x,i})).filter(o=>{
+      const x=o.x,k=forgeKind(x.ext);
+      const office=k==='office';const okf=f==='all'||f===k||(f==='office'&&office);
+      return okf && (!q || x.file.name.toLowerCase().includes(q) || String(x.path||'').toLowerCase().includes(q));
+    });
+    arr.sort((a,b)=>{if(s==='size')return b.x.file.size-a.x.file.size;if(s==='type')return a.x.ext.localeCompare(b.x.ext);if(s==='status')return String(a.x.status||'').localeCompare(String(b.x.status||''));return a.x.file.name.localeCompare(b.x.file.name)});
+    return arr;
+  }
+  function renderForge(){
+    count.textContent=state.length+' file'+(state.length===1?'':'s');
+    const visible=filteredItems();
+    convertAllBtn.disabled=!state.some(x=>forgeTargets(x.ext).includes(x.target));
+    downloadZipBtn.disabled=!state.some(x=>(x.outputs||[]).length);
+    if(!state.length){queue.innerHTML='<div class="empty">No files loaded.</div>';return}
+    queue.innerHTML=visible.map(o=>{
+      const x=o.x,i=o.i,ts=forgeTargets(x.ext), opts=ts.length?ts.map(t=>'<option '+(t===x.target?'selected':'')+' value="'+t+'">'+t.toUpperCase()+'</option>').join(''):'<option value="">unsupported</option>';
+      const ready=(x.outputs||[]).length?'<span class="job-badge">ready '+x.outputs.length+'</span>':'';
+      const err=x.status==='failed'?'<span class="job-badge">failed</span>':'';
+      return '<div class="item"><div class="item-name"><b>'+esc2(x.file.name)+'</b><small>'+esc2(x.path||x.file.name)+' · '+fmt(x.file.size)+' · '+typeLabel(x)+' '+ready+err+'</small><div class="progress"><i id="p'+i+'" style="width:'+((x.status==='complete'||x.outputs?.length)?'100':'0')+'%"></i></div></div><select data-i="'+i+'" class="target" '+(!ts.length?'disabled':'')+'>'+opts+'</select><button class="convert" data-preview="'+i+'">Preview</button><button class="convert" data-convert="'+i+'" '+(!ts.length?'disabled':'')+'>Convert</button><button class="remove" data-rename="'+i+'" aria-label="Rename">✎</button><button class="remove" data-remove="'+i+'" aria-label="Remove">×</button></div>';
+    }).join('');
+  }
+  render=renderForge;
+
+  function triggerDownload(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000)}
+  function fitSize(w,h,max){if(!max)return [w,h];const m=Math.max(w,h);if(m<=max)return [w,h];const r=max/m;return [Math.max(1,Math.round(w*r)),Math.max(1,Math.round(h*r))]}
+  async function decodeImage(file){const url=URL.createObjectURL(file),img=new Image();await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=url});const [w,h]=fitSize(img.naturalWidth,img.naturalHeight,+$f('#imgMax').value||0);const rot=+$f('#imgRotate').value||0,swap=rot===90||rot===270,canvas=document.createElement('canvas');canvas.width=swap?h:w;canvas.height=swap?w:h;const ctx=canvas.getContext('2d');ctx.translate(canvas.width/2,canvas.height/2);ctx.rotate(rot*Math.PI/180);ctx.drawImage(img,-w/2,-h/2,w,h);URL.revokeObjectURL(url);return canvas}
+  async function imageExtended(x,target){const canvas=await decodeImage(x.file),mime={jpg:'image/jpeg',png:'image/png',webp:'image/webp',avif:'image/avif'}[target];if(target==='pdf'){const {jsPDF}=window.jspdf;const orient=canvas.width>=canvas.height?'landscape':'portrait',pdf=new jsPDF({orientation:orient,unit:'pt',format:[canvas.width,canvas.height]});pdf.addImage(canvas.toDataURL('image/jpeg',Number(quality.value)), 'JPEG',0,0,canvas.width,canvas.height);return [{name:x.file.name.replace(/\.[^.]+$/,'')+'.pdf',blob:pdf.output('blob'),target:'pdf'}]}const blob=await new Promise((res,rej)=>canvas.toBlob(b=>b?res(b):rej(new Error('Browser encoder unavailable for '+target)),mime,Number(quality.value)));return [{name:x.file.name.replace(/\.[^.]+$/,'')+'.'+target,blob,target}]}
+  function csvRows(s){return s.trim().split(/\r?\n/).map(r=>{const o=[];let c='',q=false;for(let i=0;i<r.length;i++){const ch=r[i];if(ch==='"'&&r[i+1]==='"'){c+='"';i++;continue}if(ch==='"'){q=!q;continue}if(ch===','&&!q){o.push(c);c=''}else c+=ch}o.push(c);return o})}
+  function jsonToCsv(d){const a=Array.isArray(d)?d:[d],h=[...new Set(a.flatMap(o=>Object.keys(o||{})))],q=v=>{const s=v==null?'':String(v);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};return new Blob([h.map(q).join(',')+'\n'+a.map(o=>h.map(k=>q(o?.[k])).join(',')).join('\n')],{type:'text/csv'})}
+  async function textExtended(x,target){
+    const s=await x.file.text(),e=x.ext;
+    if(target==='json'&&e==='csv')return [{name:x.file.name.replace(/\.[^.]+$/,'')+'.json',blob:new Blob([JSON.stringify(csvRows(s).slice(1).map(r=>Object.fromEntries((csvRows(s)[0]||[]).map((k,j)=>[k,r[j]||'']))),null,2)],{type:'application/json'}),target}];
+    if(target==='csv'&&e==='json')return [{name:x.file.name.replace(/\.[^.]+$/,'')+'.csv',blob:jsonToCsv(JSON.parse(s)),target}];
+    if(target==='xlsx'&&(e==='csv'||e==='json')){const wb=XLSX.utils.book_new(),ao=e==='csv'?XLSX.utils.aoa_to_sheet(csvRows(s)):XLSX.utils.json_to_sheet(Array.isArray(JSON.parse(s))?JSON.parse(s):[JSON.parse(s)]);XLSX.utils.book_append_sheet(wb,ao,'Sheet1');const bytes=XLSX.write(wb,{bookType:'xlsx',type:'array'});return [{name:x.file.name.replace(/\.[^.]+$/,'')+'.xlsx',blob:new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),target}]}
+    if(target==='txt'&&e==='json'){return [{name:x.file.name.replace(/\.[^.]+$/,'')+'.txt',blob:new Blob([JSON.stringify(JSON.parse(s),null,2)],{type:'text/plain'}),target}]}
+    return [{name:x.file.name.replace(/\.[^.]+$/,'')+'.'+target,blob:new Blob([s],{type:target==='json'?'application/json':'text/plain'}),target}]
+  }
+  async function officeExtended(x,target){
+    const buf=await x.file.arrayBuffer();
+    if(x.ext==='docx'){
+      if(!window.mammoth)throw new Error('DOCX engine unavailable');
+      if(target==='html'){const r=await mammoth.convertToHtml({arrayBuffer:buf});return [{name:x.file.name.replace(/\.[^.]+$/,'')+'.html',blob:new Blob([r.value],{type:'text/html'}),target}]}
+      const r=await mammoth.extractRawText({arrayBuffer:buf});return [{name:x.file.name.replace(/\.[^.]+$/,'')+'.txt',blob:new Blob([r.value],{type:'text/plain'}),target:'txt'}]
+    }
+    if(x.ext==='xlsx'||x.ext==='xls'){const wb=XLSX.read(buf,{type:'array'}),rows=[];for(const n of wb.SheetNames)rows.push({sheet:n,rows:XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1})});if(target==='json')return [{name:x.file.name.replace(/\.[^.]+$/,'')+'.json',blob:new Blob([JSON.stringify(rows,null,2)],{type:'application/json'}),target}];if(target==='csv'){const csv=wb.SheetNames.map(n=>'# '+n+'\n'+XLSX.utils.sheet_to_csv(wb.Sheets[n])).join('\n\n');return [{name:x.file.name.replace(/\.[^.]+$/,'')+'.csv',blob:new Blob([csv],{type:'text/csv'}),target}]}return [{name:x.file.name.replace(/\.[^.]+$/,'')+'.txt',blob:new Blob([rows.map(x=>x.sheet+'\n'+x.rows.map(r=>r.join('\t')).join('\n')).join('\n\n')],{type:'text/plain'}),target:'txt'}]}
+    if(x.ext==='pptx'||x.ext==='ppt'){const zip=await JSZip.loadAsync(buf),names=Object.keys(zip.files).filter(n=>/^ppt\/slides\/slide\d+\.xml$/.test(n)).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})),slides=[];for(let i=0;i<names.length;i++){const xml=await zip.files[names[i]].async('text'),doc=new DOMParser().parseFromString(xml,'application/xml');slides.push({slide:i+1,text:[...doc.getElementsByTagName('a:t')].map(n=>n.textContent).join(' ')})}const blob=target==='json'?new Blob([JSON.stringify(slides,null,2)],{type:'application/json'}):new Blob([slides.map(s=>'SLIDE '+s.slide+'\n'+s.text).join('\n\n')],{type:'text/plain'});return [{name:x.file.name.replace(/\.[^.]+$/,'')+'.'+target,blob,target}]}
+    throw new Error('Office format not implemented');
+  }
+  async function loadPdfJs(){if(forgeState.pdfjs)return forgeState.pdfjs;forgeState.pdfjs=import('https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.min.mjs').then(m=>{m.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.worker.min.mjs';return m});return forgeState.pdfjs}
+  async function pdfToImages(x,target){const pdfjs=await loadPdfJs(),pdf=await pdfjs.getDocument({data:await x.file.arrayBuffer()}).promise,res=[];for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p),vp=page.getViewport({scale:2}),canvas=document.createElement('canvas');canvas.width=Math.ceil(vp.width);canvas.height=Math.ceil(vp.height);await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;const mime=target==='webp'?'image/webp':target==='jpg'?'image/jpeg':'image/png',blob=await new Promise((r,j)=>canvas.toBlob(b=>b?r(b):j(new Error('PDF page encode failed')),mime,Number(quality.value)));res.push({name:x.file.name.replace(/\.[^.]+$/,'')+'-page-'+String(p).padStart(3,'0')+'.'+target,blob,target})}return res}
+  async function pdfMerge(){const files=state.filter(x=>x.ext==='pdf');if(files.length<2){status.textContent='Need at least two PDFs';return}status.textContent='Merging PDFs…';const {PDFDocument}=PDFLib,out=await PDFDocument.create();for(const x of files){const src=await PDFDocument.load(await x.file.arrayBuffer());const pages=await out.copyPages(src,src.getPageIndices());pages.forEach(p=>out.addPage(p))}triggerDownload(new Blob([await out.save()],{type:'application/pdf'}),'format-forge-merged.pdf');saveHistory({name:'PDF merge',action:'merged loaded PDFs',detail:files.length+' files'}) ;flash('Merged '+files.length+' PDFs')}
+  async function pdfSplit(){const x=state[forgeState.preview];if(!x||x.ext!=='pdf'){status.textContent='Preview/select a PDF first';return}const raw=prompt('Pages to extract (example: 1,3-5)','1');if(!raw)return;const picks=[];raw.split(',').forEach(part=>{const z=part.trim().split('-').map(Number);if(z.length===1&&z[0]>0)picks.push(z[0]-1);else if(z.length===2){for(let i=z[0];i<=z[1];i++)if(i>0)picks.push(i-1)}});const {PDFDocument}=PDFLib,src=await PDFDocument.load(await x.file.arrayBuffer()),out=await PDFDocument.create(),pages=await out.copyPages(src,picks.filter(i=>i<src.getPageCount()));pages.forEach(p=>out.addPage(p));triggerDownload(new Blob([await out.save()],{type:'application/pdf'}),x.file.name.replace(/\.[^.]+$/,'')+'-split.pdf');saveHistory({name:x.file.name,action:'split PDF',detail:raw});flash('PDF split ready')}
+  async function convertOne(x,target){
+    const k=forgeKind(x.ext);
+    if(k==='image')return imageExtended(x,target);
+    if(k==='text'||['rtf'].includes(x.ext))return textExtended(x,target);
+    if(k==='office')return officeExtended(x,target);
+    if(k==='pdf')return pdfToImages(x,target);
+    if(k==='media'){
+      if(target==='gif'&&['mp4','webm','mov','mkv','avi','m4v'].includes(x.ext)){await loadFF();const f=FFmpegUtil.fetchFile,inName='in.'+x.ext,outName='out.gif';ffmpeg.FS('writeFile',inName,await f(x.file));const args=[];const start=+$f('#trimStart').value||0,end=parseFloat($f('#trimEnd').value);if(start)args.push('-ss',String(start));args.push('-i',inName);if(Number.isFinite(end)&&end>start)args.push('-t',String(end-start));const fps=$f('#mediaFps').value!=='source'?+$f('#mediaFps').value:12;args.push('-vf','fps='+fps+',scale=iw:-1:flags=lanczos','-y',outName);await ffmpeg.run(...args);const d=ffmpeg.FS('readFile',outName);try{ffmpeg.FS('unlink',inName);ffmpeg.FS('unlink',outName)}catch{}return [{name:x.file.name.replace(/\.[^.]+$/,'')+'.gif',blob:new Blob([d.buffer],{type:'image/gif'}),target:'gif'}]}
+      await loadFF();const f=FFmpegUtil.fetchFile,inName='in.'+x.ext,outName='out.'+target;ffmpeg.FS('writeFile',inName,await f(x.file));const args=[];const start=+$f('#trimStart').value||0,end=parseFloat($f('#trimEnd').value);if(start)args.push('-ss',String(start));args.push('-i',inName);if(Number.isFinite(end)&&end>start)args.push('-t',String(end-start));const isVideo=['mp4','webm','mov','mkv','avi','m4v'].includes(x.ext);if(isVideo){const r=$f('#mediaRes').value, fps=$f('#mediaFps').value;if(r!=='source')args.push('-vf','scale=-2:'+r);if(fps!=='source'&&r==='source')args.push('-r',fps);args.push('-b:v',$f('#videoBitrate').value);args.push('-c:a','aac','-b:a',$f('#audioBitrate').value)}else args.push('-b:a',$f('#audioBitrate').value);args.push('-y',outName);await ffmpeg.run(...args);const d=ffmpeg.FS('readFile',outName),mime={mp4:'video/mp4',webm:'video/webm',mkv:'video/x-matroska',mov:'video/quicktime',avi:'video/x-msvideo',mp3:'audio/mpeg',wav:'audio/wav',ogg:'audio/ogg',m4a:'audio/mp4',flac:'audio/flac'}[target]||'application/octet-stream';try{ffmpeg.FS('unlink',inName);ffmpeg.FS('unlink',outName)}catch{}return [{name:x.file.name.replace(/\.[^.]+$/,'')+'.'+target,blob:new Blob([d.buffer],{type:mime}),target}]
+    }
+    throw new Error('Unsupported conversion pair');
+  }
+  async function extendedConvert(i,opts={batch:false}){
+    const x=state[i], allowed=forgeTargets(x.ext);if(!allowed.includes(x.target))return;
+    const wanted=($f('#multiMode')?.checked&&currentMultiTargets().length)?currentMultiTargets().filter(t=>allowed.includes(t)):[x.target];
+    if(!wanted.length)return;
+    x.status='processing';forgeState.batchStop=false;renderForge();
+    let outputs=[];
+    try{
+      for(const target of wanted){if(forgeState.batchStop)throw new Error('Batch stopped');status.textContent='Converting '+x.file.name+' → '+target.toUpperCase()+'…';const r=await convertOne(x,target);outputs=outputs.concat(r);renderProgress(i,Math.min(95,20+Math.round(outputs.length/wanted.length*70)))}
+      x.outputs=outputs;x.output=outputs[0]?.blob||null;x.outputName=outputs[0]?.name||'';x.status='complete';saveHistory({name:x.file.name,action:'convert',detail:outputs.map(o=>o.target).join(', ')});
+      if(!opts.batch&&$f('#autoDownload').checked&&outputs.length===1)triggerDownload(outputs[0].blob,outputs[0].name);
+      renderForge();flash('Complete: '+x.file.name);
+    }catch(e){x.status='failed';renderForge();status.textContent='Failed: '+(e.message||e);status.classList.add('live');throw e}
+  }
+  convert=extendedConvert;
+
+  function renderProgress(i,n){const p=$f('#p'+i);if(p)p.style.width=n+'%'}
+  function currentMultiTargets(){return [...document.querySelectorAll('#batchFormats .mini.on')].map(b=>b.dataset.format)}
+  function buildBatchFormats(){
+    const host=$f('#batchFormats');if(!host)return;host.innerHTML=['jpg','png','webp','avif','pdf','webm','mp4','mkv','mov','gif','mp3','wav','ogg','m4a','flac','json','csv','txt','xlsx'].map(f=>'<button class="mini" data-format="'+f+'">'+f.toUpperCase()+'</button>').join('');
+    host.querySelectorAll('.mini').forEach(b=>b.onclick=()=>b.classList.toggle('on'));
+  }
+  buildBatchFormats();
+
+  async function convertAllExtended(){const jobs=filteredItems().map(o=>o.i).filter(i=>forgeTargets(state[i].ext).includes(state[i].target)&&state[i].status!=='complete');if(!jobs.length){flash('Nothing new to convert');return}forgeState.batchStop=false;for(const i of jobs){if(forgeState.batchStop)break;try{await extendedConvert(i,{batch:true})}catch{}}renderForge();flash(forgeState.batchStop?'Batch stopped':'Batch conversion complete')}
+  async function downloadZipExtended(){const ready=state.filter(x=>(x.outputs||[]).length);if(!ready.length)return;status.textContent='Building ZIP…';const zip=new JSZip();for(const x of ready){for(const o of x.outputs){const rel=(x.path||x.file.name).replace(/\.[^.]+$/,'')+'-'+o.target+'.'+o.name.split('.').pop();zip.file(rel,o.blob)}}const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});triggerDownload(blob,'format-forge-export.zip');saveHistory({name:'Batch export',action:'download ZIP',detail:ready.length+' source files'});flash('ZIP ready')}
+  convertAllBtn.onclick=convertAllExtended;downloadZipBtn.onclick=downloadZipExtended;
+  $f('#clearQueue').onclick=()=>{state.splice(0,state.length);forgeState.preview=-1;renderForge();$f('#previewStage').innerHTML='<div class="empty">Queue cleared.</div>'};
+  ['queueSearch','queueFilter','queueSort'].forEach(id=>$f('#'+id).addEventListener('input',renderForge));
+  $f('#stopBatch').onclick=()=>{forgeState.batchStop=true;status.textContent='Stopping after current job…'};
+  $f('#retryFailed').onclick=async()=>{const bad=state.map((x,i)=>x.status==='failed'?i:-1).filter(i=>i>=0);for(const i of bad)try{await extendedConvert(i,{batch:true})}catch{}renderForge()};
+  $f('#renameSelected').onclick=()=>{const x=state[forgeState.preview];if(!x)return;const n=prompt('New filename',x.file.name);if(!n)return;x.file=new File([x.file],n,{type:x.file.type,lastModified:x.file.lastModified});x.ext=ext2(n);x.path=n;x.outputs=[];x.status='queued';renderForge();previewItem(forgeState.preview)};
+  document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-preset]').forEach(x=>x.classList.remove('on'));b.classList.add('on');const p=b.dataset.preset;if(p==='web'){$f('#quality').value='.8';$f('#imgMax').value='1920';$f('#mediaRes').value='1080';$f('#videoBitrate').value='5M'}else if(p==='small'){$f('#quality').value='.55';$f('#imgMax').value='1280';$f('#mediaRes').value='720';$f('#videoBitrate').value='2M'}else if(p==='stock'){$f('#quality').value='.95';$f('#imgMax').value='0';$f('#mediaRes').value='2160';$f('#videoBitrate').value='20M'}else if(p==='archive'){$f('#quality').value='.95';$f('#imgMax').value='0';$f('#mediaRes').value='source';$f('#videoBitrate').value='20M'}else{$f('#quality').value='.98';$f('#imgMax').value='0';$f('#mediaRes').value='source';$f('#videoBitrate').value='20M'}flash('Preset: '+p)});
+  function previewItem(i){const x=state[i];if(!x)return;forgeState.preview=i;$f('#previewName').textContent=x.file.name;$f('#previewInfo').textContent=fmt(x.file.size)+' · '+typeLabel(x)+' · '+(x.status||'queued');$f('#previewBadge').innerHTML='<span class="job-badge">'+(x.outputs?.length?'ready':'source')+'</span>';const stage=$f('#previewStage');stage.innerHTML='';const k=forgeKind(x.ext),url=URL.createObjectURL(x.file);if(k==='image'){const im=document.createElement('img');im.src=url;im.onload=()=>URL.revokeObjectURL(url);stage.appendChild(im)}else if(k==='media'&&['mp4','webm','mov','mkv','avi','m4v'].includes(x.ext)){const v=document.createElement('video');v.controls=true;v.src=url;stage.appendChild(v)}else if(k==='media'){const a=document.createElement('audio');a.controls=true;a.src=url;stage.appendChild(a)}else if(k==='pdf'){stage.innerHTML='<div class="empty">PDF selected. Use Preview again after PDF.js loads, or convert it to an image.</div>';previewPdfCanvas(x,stage)}else if(k==='text'){x.file.text().then(s=>{const pre=document.createElement('pre');pre.textContent=s.slice(0,30000);stage.appendChild(pre)})}else if(x.ext==='docx'){Promise.resolve().then(async()=>{try{const r=await mammoth.extractRawText({arrayBuffer:await x.file.arrayBuffer()});const pre=document.createElement('pre');pre.textContent=r.value.slice(0,30000);stage.appendChild(pre)}catch{stage.innerHTML='<div class="empty">DOCX preview unavailable.</div>'}})}else if(k==='office'){stage.innerHTML='<div class="empty">Office file loaded. Use Convert for structured extraction.</div>'}else if(k==='archive'){stage.innerHTML='<div class="empty">ZIP contents are extracted into the queue.</div>'}else{stage.innerHTML='<div class="empty">No visual preview for this type.</div>'}}
+  async function previewPdfCanvas(x,stage){try{const pdfjs=await loadPdfJs(),pdf=await pdfjs.getDocument({data:await x.file.arrayBuffer()}).promise,page=await pdf.getPage(1),vp=page.getViewport({scale:1.2}),can=document.createElement('canvas');can.width=Math.ceil(vp.width);can.height=Math.ceil(vp.height);stage.innerHTML='';stage.appendChild(can);await page.render({canvasContext:can.getContext('2d'),viewport:vp}).promise}catch(e){stage.innerHTML='<div class="empty">PDF preview unavailable: '+esc2(e.message)+'</div>'}}
+  queue.addEventListener('click',e=>{const p=e.target.closest('[data-preview]');if(p){previewItem(+p.dataset.preview);return}const rn=e.target.closest('[data-rename]');if(rn){forgeState.preview=+rn.dataset.rename;$f('#renameSelected').click();return}});
+  $f('#mergePdf').onclick=pdfMerge;$f('#splitPdf').onclick=pdfSplit;
+  async function frameExtract(file){await loadFF();const f=FFmpegUtil.fetchFile;ffmpeg.FS('writeFile','video.'+ext2(file.name),await f(file));await ffmpeg.run('-i','video.'+ext2(file.name),'-vf','fps='+($f('#mediaFps').value==='source'?1:$f('#mediaFps').value),'-vsync','0','frame-%05d.png');const zip=new JSZip();for(let i=1;;i++){const n='frame-'+String(i).padStart(5,'0')+'.png';try{zip.file(n,ffmpeg.FS('readFile',n));ffmpeg.FS('unlink',n)}catch{break}}try{ffmpeg.FS('unlink','video.'+ext2(file.name))}catch{}triggerDownload(await zip.generateAsync({type:'blob'}),'frames.zip');saveHistory({name:file.name,action:'extract frames',detail:'ZIP'})}
+  $f('#extractFrames').onclick=()=>{$f('#frameInput').click()};$f('#frameInput').onchange=async e=>{const f=e.target.files[0];if(f)try{await frameExtract(f)}catch(err){status.textContent='Frame extraction failed: '+err.message}};
+  $f('#sequenceVideo').onclick=()=>{$f('#sequenceInput').click()};$f('#sequenceInput').onchange=async e=>{const files=[...e.target.files].sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));if(!files.length)return;try{await loadFF();for(let i=0;i<files.length;i++)ffmpeg.FS('writeFile','frame'+String(i).padStart(5,'0')+'.png',await FFmpegUtil.fetchFile(files[i]));await ffmpeg.run('-framerate','30','-i','frame%05d.png','-c:v','libvpx-vp9','-pix_fmt','yuv420p','-y','sequence.webm');const d=ffmpeg.FS('readFile','sequence.webm');for(let i=0;i<files.length;i++)try{ffmpeg.FS('unlink','frame'+String(i).padStart(5,'0')+'.png')}catch{}try{ffmpeg.FS('unlink','sequence.webm')}catch{}triggerDownload(new Blob([d.buffer],{type:'video/webm'}),'image-sequence.webm');saveHistory({name:'Image sequence',action:'images → WebM',detail:files.length+' frames'});flash('Sequence video ready')}catch(err){status.textContent='Sequence failed: '+err.message}};
+  function aiImageData(canvas){return canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height)}
+  async function loadAiSession(){
+    if(forgeState.aiSession)return forgeState.aiSession;
+    if(!window.ort)throw new Error('ONNX Runtime unavailable');
+    ort.env.wasm.wasmPaths='https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/';
+    const providers=navigator.gpu?['webgpu','wasm']:['wasm'];
+    forgeState.aiSession=await ort.InferenceSession.create('https://huggingface.co/skillsafe-ai/realesrgan-x2plus/resolve/main/model.onnx',{executionProviders:providers});
+    return forgeState.aiSession;
+  }
+  async function upscaleOnce(srcCanvas,session,tileSize,progressCb){
+    const src=aiImageData(srcCanvas),w=srcCanvas.width,h=srcCanvas.height,scale=2,outW=w*2,outH=h*2;
+    if(outW*outH>120000000)throw new Error('Output would exceed the safe browser memory limit');
+    const out=new ImageData(outW,outH),overlap=24,step=Math.max(64,tileSize-overlap);
+    let done=0,total=Math.ceil(w/step)*Math.ceil(h/step),inputName=session.inputNames[0],outputName=session.outputNames[0];
+    for(let y0=0;y0<h;y0+=step){for(let x0=0;x0<w;x0+=step){
+      const x1=Math.min(w,x0+tileSize),y1=Math.min(h,y0+tileSize),tw=x1-x0,th=y1-y0,arr=new Float32Array(3*tw*th);
+      for(let y=0;y<th;y++)for(let x=0;x<tw;x++){const p=((y0+y)*w+(x0+x))*4,idx=y*tw+x;arr[idx]=src.data[p]/255;arr[tw*th+idx]=src.data[p+1]/255;arr[2*tw*th+idx]=src.data[p+2]/255}
+      const res=await session.run({[inputName]:new ort.Tensor('float32',arr,[1,3,th,tw])}),o=res[outputName],od=o.data,oh=o.dims[2],ow=o.dims[3];
+      const cl=x0>0?overlap:0,ct=y0>0?overlap:0,cr=x1<w?overlap:0,cb=y1<h?overlap:0;
+      for(let yy=ct;yy<oh/2-cb;yy++)for(let xx=cl;xx<ow/2-cr;xx++){const ox=(x0+xx)*2,oy=(y0+yy)*2,si=yy*ow+xx;for(let dy=0;dy<2;dy++)for(let dx=0;dx<2;dx++){const di=((oy+dy)*outW+(ox+dx))*4, sx=(si*4),rr=od[sx],gg=od[ow*oh+sx],bb=od[2*ow*oh+sx];out.data[di]=Math.max(0,Math.min(255,rr*255));out.data[di+1]=Math.max(0,Math.min(255,gg*255));out.data[di+2]=Math.max(0,Math.min(255,bb*255));out.data[di+3]=src.data[Math.min(h-1,Math.floor((y0+yy)))*w*4+Math.min(w-1,Math.floor(x0+xx))*4+3]}}
+      done++;if(progressCb)progressCb(done/total*100);
+    }}
+    const can=document.createElement('canvas');can.width=outW;can.height=outH;can.getContext('2d').putImageData(out,0,0);return can;
+  }
+  async function aiRun(){
+    if(!forgeState.aiFiles.length)return;const scale=+$f('#aiScale').value,tile=+$f('#aiTile').value;$f('#aiRun').disabled=true;forgeState.aiResults=[];
+    try{const session=await loadAiSession();for(let fi=0;fi<forgeState.aiFiles.length;fi++){const file=forgeState.aiFiles[fi],url=URL.createObjectURL(file),img=new Image();await new Promise((r,j)=>{img.onload=r;img.onerror=j;img.src=url});let can=document.createElement('canvas');can.width=img.naturalWidth;can.height=img.naturalHeight;can.getContext('2d').drawImage(img,0,0);URL.revokeObjectURL(url);for(let pass=0;pass<Math.log2(scale);pass++){const base=fi/forgeState.aiFiles.length,part=100/forgeState.aiFiles.length;can=await upscaleOnce(can,session,tile,p=>{$f('#aiStatus').textContent='AI '+file.name+' · pass '+(pass+1)+'/'+Math.log2(scale)+' · '+Math.round(base*100+part*p/100)+'%'});}const blob=await new Promise((r,j)=>can.toBlob(b=>b?r(b):j(new Error('Upscale encode failed')),'image/png'));forgeState.aiResults.push({name:file.name.replace(/\.[^.]+$/,'')+'-'+scale+'x.png',blob});} $f('#aiStatus').textContent='AI upscale complete · '+forgeState.aiResults.length+' result(s)';$f('#aiZip').disabled=false;saveHistory({name:'AI upscale',action:'Real-ESRGAN',detail:scale+'× · '+forgeState.aiResults.length+' images'});}catch(e){$f('#aiStatus').textContent='AI upscale failed: '+e.message}finally{$f('#aiRun').disabled=false}}
+  $f('#aiChoose').onclick=()=>$f('#aiInput').click();$f('#aiInput').onchange=e=>{forgeState.aiFiles=[...e.target.files];$f('#aiRun').disabled=!forgeState.aiFiles.length;$f('#aiStatus').textContent=forgeState.aiFiles.length+' image(s) selected'};
+  $f('#aiRun').onclick=aiRun;$f('#aiZip').onclick=async()=>{const z=new JSZip();forgeState.aiResults.forEach(x=>z.file(x.name,x.blob));triggerDownload(await z.generateAsync({type:'blob'}),'ai-upscaled-'+$f('#aiScale').value+'x.zip');flash('AI ZIP ready')};
+  $f('#clearHistory').onclick=()=>{localStorage.removeItem(forgeState.historyKey);renderHistory()};
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+  let deferredInstall=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;$f('#installForge').hidden=false});$f('#installForge').onclick=async()=>{if(!deferredInstall)return;deferredInstall.prompt();deferredInstall=null};
+  renderHistory();renderForge();window.addEventListener('unhandledrejection',e=>console.error(e.reason));
+})();
+</script>
+</body></html>
