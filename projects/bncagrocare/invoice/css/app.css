@@ -245,12 +245,14 @@ button{cursor:pointer}
 .catalogCode{font:900 6px ui-monospace,SFMono-Regular,Consolas,monospace;color:#739078;letter-spacing:.1em}
 .catalogName{font-size:10px;font-weight:850;line-height:1.05}
 .catalogPacks{color:#829087;font:800 6px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace}
-.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:13px;border-top:1px solid var(--line)}
+.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;padding:13px;border-top:1px solid var(--line)}
 .sum{padding:10px;border:1px solid var(--line);border-radius:11px;background:#fff;transition:transform .25s var(--ease),box-shadow .25s}
 .sum:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(11,33,23,.05)}
 .sum span{display:block;color:#7c8780;font:800 6.5px ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase}
 .sum strong{display:block;margin-top:4px;font-size:14px}
 .sum.final{background:var(--forest);border-color:var(--forest);color:#fff}
+.sum.words{grid-column:1 / -1;background:#f7faf8}
+.sum.words strong{font-size:12px;line-height:1.35}
 
 .historyRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line);transition:background .2s}
 .historyRow:hover{background:#fbfcf8}
