@@ -143,9 +143,18 @@ function buildSide(row,rowIndex,side,totalRows){
     input.addEventListener("input",e=>{
       row[key]=(key==="ctn"||key==="rate")?Math.max(0,num(e.target.value)):e.target.value;
       if(key==="name")refreshPackList(rowIndex,side);
+      if(key==="ctn"||key==="rate"){
+        amount.value=(row.ctn!==""&&row.rate!=="")?money(num(row.ctn)*num(row.rate)):"";
+      }
       ensureLiveWorkbook().then(()=>{
         writeLine(liveSheet,rowIndex,state.rows.length,side,row);
+        const amountCol=side==="left"?6:12;
+        const dataRow=PRODUCT_START_ROW+rowIndex;
+        liveSheet.getRow(dataRow).getCell(amountCol).value={
+          formula:side==="left"?"D"+dataRow+"*E"+dataRow:"J"+dataRow+"*K"+dataRow
+        };
         rebalanceSL(liveSheet,state.rows.length);
+        recalcLiveFormulas();
         dirty=true;lastBuffer=null;
         schedulePreview();
       }).catch(console.error);
