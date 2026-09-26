@@ -100,6 +100,13 @@ function clearProductRow(ws,row){
   for(let c=1;c<=MAX_COLUMNS;c++)cellAt(ws,row,c).value=null;
 }
 
+function setLineAmountFormulas(ws,firstRow,lastRow){
+  for(let r=firstRow;r<=lastRow;r++){
+    cellAt(ws,r,6).value={formula:"D"+r+"*E"+r};
+    cellAt(ws,r,12).value={formula:"J"+r+"*K"+r};
+  }
+}
+
 function rebalanceSL(ws,totalRows){
   for(let i=0;i<totalRows;i++){
     cellAt(ws,PRODUCT_START_ROW+i,LEFT_SL_COL).value=i+1;
@@ -144,6 +151,7 @@ function insertProductRowIntoWorksheet(ws){
     }
 
     rebalanceSL(ws,totalRows);
+    setLineAmountFormulas(ws,PRODUCT_START_ROW,stRow);
     rebuildSubtotalFormulas(ws,stRow);
 
   }finally{
