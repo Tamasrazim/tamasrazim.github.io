@@ -30,29 +30,6 @@ function findStRow(ws){
   throw new Error("Could not find the invoice subtotal row.");
 }
 
-function clone(value){
-  if(value==null)return value;
-  if(typeof structuredClone==="function"){
-    try{return structuredClone(value)}catch{}
-  }
-  return JSON.parse(JSON.stringify(value));
-}
-
-function bumpFormula(formula,startRow){
-  return String(formula).replace(/(\$?[A-Z]{1,3}\$?)(\d+)/g,(whole,col,rowText)=>{
-    const row=Number(rowText);
-    return row>=startRow?col+(row+1):whole;
-  });
-}
-
-function bumpAddress(address,startRow){
-  if(!address)return address;
-  return String(address).replace(/^(\$?[A-Z]{1,3}\$?)(\d+)$/i,(whole,col,rowText)=>{
-    const row=Number(rowText);
-    return row>=startRow?col+(row+1):whole;
-  });
-}
-
 function shiftMergeRange(range,startRow){
   const m=String(range).match(/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/i);
   if(!m)return range;
@@ -88,94 +65,14 @@ function restoreMerges(ws,ranges,startRow){
   }
 }
 
-function snapshotRows(ws,startRow,lastRow,maxCol){
-  const rows={};
-  for(let r=Math.max(1,startRow-1);r<=lastRow;r++){
-    const row=ws.getRow(r);
-    const cells=[];
-    for(let c=1;c<=maxCol;c++){
-      const cell=row.getCell(c);
-      // A merged child contains an internal MergeValue object that references
-      // its master Cell. Never copy that object as an ordinary cell value.
-      const keepValue=!cell.isMerged||cell.master===cell;
-      cells[c]={style:clone(cell.style),value:keepValue?clone(cell.value):null};
-    }
-    rows[r]={
-      height:row.height,
-      hidden:row.hidden,
-      outlineLevel:row.outlineLevel,
-      cells
-    };
-  }
-  return rows;
-}
-
-function shiftedValue(value,startRow){
-  if(value==null)return null;
-  if(typeof value!=="object")return value;
-  const next=clone(value);
-  if(next.formula)next.formula=bumpFormula(next.formula,startRow);
-  if(next.ref)next.ref=bumpAddress(next.ref,startRow);
-  if(next.sharedFormula)next.sharedFormula=bumpAddress(next.sharedFormula,startRow);
-  if(next.address)next.address=bumpAddress(next.address,startRow);
-  if(next.master)next.master=bumpAddress(next.master,startRow);
-  return next;
-}
-
-function writeCellSnapshot(target,source,startRow,keepValue=true){
-  target.value=null;
-  if(source?.style)target.style=clone(source.style);
-  if(keepValue)target.value=shiftedValue(source?.value,startRow);
-}
-
-function copyRowSnapshot(targetRow,sourceRow,startRow,maxCol,keepValues=true){
-  if(sourceRow?.height!=null)targetRow.height=sourceRow.height;
-  else delete targetRow.height;
-  targetRow.hidden=!!sourceRow?.hidden;
-  targetRow.outlineLevel=Number(sourceRow?.outlineLevel)||0;
-  for(let c=1;c<=maxCol;c++){
-    const target=targetRow.getCell(c);
-    const source=sourceRow?.cells?.[c];
-    writeCellSnapshot(target,source,startRow,keepValues);
-  }
-}
-
-function clearRow(ws,rowNumber,maxCol){
-  const row=ws.getRow(rowNumber);
-  for(let c=1;c<=maxCol;c++){
-    const cell=row.getCell(c);
-    cell.value=null;
-  }
-}
-
-function shiftRowsDownWithoutSplice(ws,startRow){
-  const last=findStRow(ws);
-  const maxCol=Math.max(MAX_COLUMNS,ws.columnCount||MAX_COLUMNS);
-  const rows=snapshotRows(ws,startRow,last,maxCol);
-  const merges=mergeRanges(ws);
-
-  // Work on ordinary cells while merges are detached. This avoids ExcelJS row.model
-  // reconstruction and therefore avoids malformed Cell/Row objects.
-  unmergeAll(ws,merges);
-
-  for(let r=last;r>=startRow;r--){
-    copyRowSnapshot(ws.getRow(r+1),rows[r],startRow,maxCol,true);
-  }
-
-  // The inserted row inherits the visual format of the row directly above ST,
-  // but it contains no product values or formulas.
-  copyRowSnapshot(ws.getRow(startRow),rows[startRow-1],startRow,maxCol,false);
-  clearRow(ws,startRow,maxCol);
-
-  restoreMerges(ws,merges,startRow);
-  return startRow;
+function clearCellsAtoL(ws,rowNumber){
+  for(let c=1;c<=MAX_COLUMNS;c++)cellAt(ws,rowNumber,c).value=null;
 }
 
 function rebuildTotals(ws,stRow){
   const totalsRow=stRow+1;
   [["D",4],["F",6],["L",12]].forEach(([letter,col])=>{
-    const cell=cellAt(ws,totalsRow,col);
-    cell.value={formula:"SUM("+letter+PRODUCT_START_ROW+":"+letter+stRow+")"};
+    cellAt(ws,totalsRow,col).value={formula:"SUM("+letter+PRODUCT_START_ROW+":"+letter+stRow+")"};
   });
 }
 
@@ -187,11 +84,28 @@ function rebalanceSL(ws,totalRows){
 }
 
 function insertProductRowIntoWorksheet(ws){
+  if(!ws||typeof ws.insertRow!=="function")throw new Error("ExcelJS worksheet row insertion is unavailable");
+
   const stRow=findStRow(ws);
-  shiftRowsDownWithoutSplice(ws,stRow);
-  const totalRows=Math.max(4,stRow-PRODUCT_START_ROW+1);
-  rebalanceSL(ws,totalRows);
-  rebuildTotals(ws,stRow);
+  const merges=mergeRanges(ws);
+
+  // ExcelJS can move normal rows correctly, but merged cells are the fragile part.
+  // Detach every merge, let ExcelJS create a real Row/Cell structure, then restore
+  // the merge ranges at their new addresses.
+  unmergeAll(ws,merges);
+
+  try{
+    // i+ copies the visual style from the row above without copying product values.
+    ws.insertRow(stRow,[], "i+");
+    clearCellsAtoL(ws,stRow);
+
+    const totalRows=Math.max(4,stRow-PRODUCT_START_ROW+1);
+    rebalanceSL(ws,totalRows);
+    rebuildTotals(ws,stRow);
+  }finally{
+    restoreMerges(ws,merges,stRow);
+  }
+
   return stRow;
 }
 
