@@ -119,7 +119,7 @@ function packListId(rowIndex,side){
   refreshPackList(rowIndex,side);
   return id;
 }
-function showProductSuggestions(query,row,rowIndex,side,input){
+function showProductSuggestions(query,row,rowIndex,side,input,refreshPackAssist){
   const dock=$("#productSuggestions"),rail=$("#catalogRail"),meta=$("#productSuggestMeta");
   if(!dock||!rail)return;
   clearTimeout(catalogHideTimer);
@@ -140,7 +140,7 @@ function showProductSuggestions(query,row,rowIndex,side,input){
       input.value=product.name;
       row.pack="";
       refreshPackList(rowIndex,side);
-      if(window._bncRefreshPackAssist)window._bncRefreshPackAssist();
+      if(typeof refreshPackAssist==="function")refreshPackAssist();
       syncProductSide(row,rowIndex,side);
       input.classList.remove("productPicked");
       void input.offsetWidth;
@@ -208,7 +208,7 @@ function buildSide(row,rowIndex,side,totalRows){
     if(key==="ctn"){input.type="number";input.min="0";input.step="1";input.inputMode="numeric"}
     if(key==="rate"){input.type="number";input.min="0";input.step=".01";input.inputMode="decimal"}
     input.addEventListener("focus",()=>{
-      if(key==="name")showProductSuggestions(input.value,row,rowIndex,side,input);
+      if(key==="name")showProductSuggestions(input.value,row,rowIndex,side,input,renderPackAssist);
       if(key==="pack"){
         renderPackAssist();
         wrap.classList.add("packFocused");
@@ -223,7 +223,7 @@ function buildSide(row,rowIndex,side,totalRows){
       if(key==="name"){
         refreshPackList(rowIndex,side);
         renderPackAssist();
-        showProductSuggestions(row.name,row,rowIndex,side,input);
+        showProductSuggestions(row.name,row,rowIndex,side,input,renderPackAssist);
       }
       if(key==="pack"&&packInput)packInput.value=row.pack;
       if(key==="ctn"||key==="rate"){
@@ -276,7 +276,6 @@ function buildSide(row,rowIndex,side,totalRows){
     }));
     packAssist.classList.add("hasPacks");
   };
-  window._bncRefreshPackAssist=renderPackAssist;
   renderPackAssist();
 
   wrap.append(fields,packAssist);
