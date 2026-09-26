@@ -1,0 +1,10 @@
+{
+  "name":"Format Forge — Tamasrazim",
+  "short_name":"Format Forge",
+  "description":"Browser-first file conversion, ZIP tools, PDF/document tools and local AI image upscaling.",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#050505",
+  "theme_color":"#050505",
+  "orientation":"any"
+}
