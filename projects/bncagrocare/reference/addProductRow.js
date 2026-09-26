@@ -73,23 +73,26 @@ function cloneStyle(style){
   return JSON.parse(JSON.stringify(style));
 }
 
-function snapshotTemplateRow(ws,rowNumber){
-  const row=ws.getRow(rowNumber);
-  const cells=[];
-  for(let c=1;c<=MAX_COLUMNS;c++){
-    const cell=row.getCell(c);
-    cells[c]=cloneStyle(cell.style);
+function snapshotRowBorders(ws,firstRow,lastRow,maxCol){
+  const rows={};
+  for(let r=firstRow;r<=lastRow;r++){
+    const row=ws.getRow(r);
+    rows[r]=[];
+    for(let c=1;c<=maxCol;c++)rows[r][c]=cloneStyle(row.getCell(c).border);
   }
-  return {height:row.height,cells};
+  return rows;
 }
 
-function restoreTemplateRowStyle(ws,rowNumber,snapshot){
+function restoreShiftedRowBorders(ws,snapshot,startRow,lastRow,maxCol){
   if(!snapshot)return;
-  const row=ws.getRow(rowNumber);
-  if(snapshot.height!=null)row.height=snapshot.height;
-  for(let c=1;c<=MAX_COLUMNS;c++){
-    const cell=row.getCell(c);
-    cell.style=cloneStyle(snapshot.cells[c]);
+  for(let r=startRow;r<=lastRow;r++){
+    const target=ws.getRow(r+1);
+    const source=snapshot[r];
+    if(!source)continue;
+    for(let c=1;c<=maxCol;c++){
+      const border=source[c];
+      if(border)target.getCell(c).border=cloneStyle(border);
+    }
   }
 }
 
@@ -128,9 +131,10 @@ function insertProductRowIntoWorksheet(ws){
     // i+ copies the visual style from the row above without copying product values.
     ws.insertRow(stRow,[], "i+");
     inserted=true;
-    // Explicitly restore the product-row style, especially borders, because
-    // merge teardown/rebuild can otherwise leave the inserted row unoutlined.
-    restoreTemplateRowStyle(ws,stRow,templateRow);
+    // The inserted row already inherits the correct product-row style from ExcelJS.
+    // Restore the original invoice borders on every row shifted below ST so the
+    // existing outer outline survives the merge teardown/rebuild.
+    restoreShiftedRowBorders(ws,borderSnapshot,stRow,ws.rowCount-1,maxCol);
     clearCellsAtoL(ws,stRow);
 
     const totalRows=Math.max(4,stRow-PRODUCT_START_ROW+1);
