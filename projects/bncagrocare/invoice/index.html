@@ -60,6 +60,13 @@
     <article class="card productCard">
       <div class="cardHead"><div><small>02 / PRODUCTS</small><h2>Line items</h2></div><button id="addBtn" class="addBtn" type="button">+ Add row</button></div>
       <div id="products"></div>
+      <div id="productSuggestions" class="productCatalogDock" hidden>
+        <div class="catalogDockHead">
+          <div><small>CATALOG / LIVE SUGGESTIONS</small><strong>Products & pack sizes</strong></div>
+          <span id="productSuggestMeta">10 PRODUCTS</span>
+        </div>
+        <div id="catalogRail" class="catalogRail"></div>
+      </div>
       <div id="summary" class="summary"></div>
     </article>
 
@@ -75,7 +82,7 @@
         <div><small>LIVE DOCUMENT</small><h2>Workbook preview</h2></div>
         <span id="xlsxState" class="state">READY</span>
       </div>
-      <div class="previewMeta"><span>Current invoice</span><strong>Direct sheet editing</strong></div>
+      <div class="previewMeta"><span>Current invoice</span><strong id="previewFitState">FIT TO PANE</strong></div>
       <div class="workbookViewport"><div id="sheetPreview" class="stage"><div class="emptyPage"><strong>Loading invoice…</strong><span>The current workbook will appear here.</span></div></div></div>
       <div class="previewActions"><button id="previewBtn" class="syncBtn" type="button">Refresh</button><button id="downloadBtn" class="downloadBtn" type="button">Download XLSX</button></div>
     </article>
