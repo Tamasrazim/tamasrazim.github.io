@@ -65,6 +65,34 @@ function restoreMerges(ws,ranges,startRow){
   }
 }
 
+function cloneStyle(style){
+  if(!style)return{};
+  if(typeof structuredClone==="function"){
+    try{return structuredClone(style)}catch{}
+  }
+  return JSON.parse(JSON.stringify(style));
+}
+
+function snapshotTemplateRow(ws,rowNumber){
+  const row=ws.getRow(rowNumber);
+  const cells=[];
+  for(let c=1;c<=MAX_COLUMNS;c++){
+    const cell=row.getCell(c);
+    cells[c]=cloneStyle(cell.style);
+  }
+  return {height:row.height,cells};
+}
+
+function restoreTemplateRowStyle(ws,rowNumber,snapshot){
+  if(!snapshot)return;
+  const row=ws.getRow(rowNumber);
+  if(snapshot.height!=null)row.height=snapshot.height;
+  for(let c=1;c<=MAX_COLUMNS;c++){
+    const cell=row.getCell(c);
+    cell.style=cloneStyle(snapshot.cells[c]);
+  }
+}
+
 function clearCellsAtoL(ws,rowNumber){
   for(let c=1;c<=MAX_COLUMNS;c++)cellAt(ws,rowNumber,c).value=null;
 }
@@ -87,6 +115,7 @@ function insertProductRowIntoWorksheet(ws){
   if(!ws||typeof ws.insertRow!=="function")throw new Error("ExcelJS worksheet row insertion is unavailable");
 
   const stRow=findStRow(ws);
+  const templateRow=snapshotTemplateRow(ws,stRow-1);
   const merges=mergeRanges(ws);
 
   // ExcelJS can move normal rows correctly, but merged cells are the fragile part.
@@ -99,6 +128,9 @@ function insertProductRowIntoWorksheet(ws){
     // i+ copies the visual style from the row above without copying product values.
     ws.insertRow(stRow,[], "i+");
     inserted=true;
+    // Explicitly restore the product-row style, especially borders, because
+    // merge teardown/rebuild can otherwise leave the inserted row unoutlined.
+    restoreTemplateRowStyle(ws,stRow,templateRow);
     clearCellsAtoL(ws,stRow);
 
     const totalRows=Math.max(4,stRow-PRODUCT_START_ROW+1);
