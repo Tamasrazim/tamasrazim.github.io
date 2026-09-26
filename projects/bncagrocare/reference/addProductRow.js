@@ -96,6 +96,56 @@ function restoreShiftedRowBorders(ws,snapshot,startRow,lastRow,maxCol){
   }
 }
 
+function formulaOfCell(cell){
+  const v=cell?.value;
+  return v&&typeof v==="object"&&typeof v.formula==="string"?v.formula:null;
+}
+
+function bumpFormulaRows(formula,startRow){
+  return String(formula).replace(/(\$?[A-Z]{1,3}\$?)(\d+)/g,(whole,col,rowText)=>{
+    const row=Number(rowText);
+    return row>=startRow?col+(row+1):whole;
+  });
+}
+
+function translateFormulaRow(formula,sourceRow,targetRow){
+  const delta=targetRow-sourceRow;
+  return String(formula).replace(/(\$?)([A-Z]{1,3})(\$?)(\d+)/g,(whole,colAbs,col,rowAbs,rowText)=>{
+    const row=Number(rowText);
+    if(rowAbs==="$")return whole;
+    return colAbs+col+rowAbs+(row===sourceRow?row+delta:row);
+  });
+}
+
+function snapshotFormulaRows(ws,startRow,lastRow,maxCol){
+  const formulas=[];
+  for(let r=startRow;r<=lastRow;r++){
+    for(let c=1;c<=maxCol;c++){
+      const formula=formulaOfCell(ws.getRow(r).getCell(c));
+      if(formula)formulas.push({row:r,col:c,formula});
+    }
+  }
+  return formulas;
+}
+
+function restoreShiftedFormulas(ws,formulas,startRow){
+  for(const item of formulas){
+    const targetRow=item.row+1;
+    const cell=ws.getRow(targetRow).getCell(item.col);
+    cell.value={formula:bumpFormulaRows(item.formula,startRow)};
+  }
+}
+
+function restoreInsertedRowFormulas(ws,templateRow,targetRow,maxCol){
+  for(let c=1;c<=maxCol;c++){
+    const source=ws.getRow(templateRow).getCell(c);
+    const formula=formulaOfCell(source);
+    if(formula)ws.getRow(targetRow).getCell(c).value={
+      formula:translateFormulaRow(formula,templateRow,targetRow)
+    };
+  }
+}
+
 function clearCellsAtoL(ws,rowNumber){
   for(let c=1;c<=MAX_COLUMNS;c++)cellAt(ws,rowNumber,c).value=null;
 }
@@ -131,15 +181,18 @@ function insertProductRowIntoWorksheet(ws){
     // i+ copies the visual style from the row above without copying product values.
     ws.insertRow(stRow,[], "i+");
     inserted=true;
-    // The inserted row already inherits the correct product-row style from ExcelJS.
+    // Restore formula cells shifted below the insertion point because ExcelJS
+    // moves rows but does not expand formula ranges for the new row.
+    restoreShiftedFormulas(ws,formulaSnapshot,stRow);
+    restoreInsertedRowFormulas(ws,stRow-1,stRow,maxCol);
     // Restore the original invoice borders on every row shifted below ST so the
     // existing outer outline survives the merge teardown/rebuild.
     restoreShiftedRowBorders(ws,borderSnapshot,stRow,ws.rowCount-1,maxCol);
     clearCellsAtoL(ws,stRow);
+    restoreInsertedRowFormulas(ws,stRow-1,stRow,maxCol);
 
     const totalRows=Math.max(4,stRow-PRODUCT_START_ROW+1);
     rebalanceSL(ws,totalRows);
-    rebuildTotals(ws,stRow);
   }finally{
     restoreMerges(ws,merges,inserted?stRow:null);
   }
