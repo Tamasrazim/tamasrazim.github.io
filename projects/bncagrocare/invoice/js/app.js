@@ -409,6 +409,7 @@ async function addProductRow(){
     window.BNCInsertProductRow(liveSheet);
     state.rows.push(blankRow());
     rebalanceSL(liveSheet,state.rows.length);
+    applyHeaderEditsToLive();
     applyInvoiceCalculationsToLive();
     dirty=true;lastBuffer=null;
     renderProducts();
