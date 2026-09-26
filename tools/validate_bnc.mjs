@@ -15,6 +15,11 @@ for(const id of ['products','summary','history','sheetPreview','previewBtn','dow
 must(!invoice.includes('Invoice Studio'),'invoice page has no retired Studio branding');
 must(!invoice.includes('pdfPreview'),'invoice page has no retired PDF preview');
 must(invoice.includes('navigator.serviceWorker.register("./sw.js")'),'invoice registers its service worker');
+must(invoice.includes('id="rowMetric">6'),'invoice starts with 6 master rows per side');
+must(invoice.includes('id="slotMetric">12'),'invoice starts with 12 master line slots');
+must(fs.existsSync(root+'/reference/BNCFINAL.xlsx'),'master BNC workbook exists');
+must(fs.existsSync(root+'/reference/addProductRow.js'),'master row helper exists');
+must(fs.existsSync(root+'/reference/AddProductRow.bas'),'fixed Excel VBA macro exists');
 
 for(const p of ['js/app.js','css/app.css','sw.js','manifest.webmanifest','icons/icon.svg']){
   must(fs.existsSync(root+'/invoice/'+p),'invoice '+p+' exists');
@@ -22,6 +27,7 @@ for(const p of ['js/app.js','css/app.css','sw.js','manifest.webmanifest','icons/
 
 execFileSync(process.execPath,['--check',root+'/invoice/js/app.js'],{stdio:'inherit'});
 execFileSync(process.execPath,['--check',root+'/invoice/sw.js'],{stdio:'inherit'});
+execFileSync(process.execPath,['--check',root+'/reference/addProductRow.js'],{stdio:'inherit'});
 
 const manifest=JSON.parse(read(root+'/invoice/manifest.webmanifest'));
 must(manifest.start_url==='./','invoice PWA start_url is relative');
