@@ -55,7 +55,7 @@ function unmergeAll(ws,ranges){
 
 function restoreMerges(ws,ranges,startRow){
   for(const range of ranges){
-    const shifted=shiftMergeRange(range,startRow);
+    const shifted=startRow==null?range:shiftMergeRange(range,startRow);
     try{
       if(typeof ws.mergeCellsWithoutStyle==="function")ws.mergeCellsWithoutStyle(shifted);
       else ws.mergeCells(shifted);
@@ -94,16 +94,18 @@ function insertProductRowIntoWorksheet(ws){
   // the merge ranges at their new addresses.
   unmergeAll(ws,merges);
 
+  let inserted=false;
   try{
     // i+ copies the visual style from the row above without copying product values.
     ws.insertRow(stRow,[], "i+");
+    inserted=true;
     clearCellsAtoL(ws,stRow);
 
     const totalRows=Math.max(4,stRow-PRODUCT_START_ROW+1);
     rebalanceSL(ws,totalRows);
     rebuildTotals(ws,stRow);
   }finally{
-    restoreMerges(ws,merges,stRow);
+    restoreMerges(ws,merges,inserted?stRow:null);
   }
 
   return stRow;
