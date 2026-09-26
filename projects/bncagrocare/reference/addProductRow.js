@@ -85,11 +85,17 @@ function snapshotBorders(ws,firstRow,lastRow){
   return out;
 }
 
-function restoreShiftedBorders(ws,snapshot,firstRow,lastRow){
-  for(let r=firstRow;r<=lastRow;r++){
-    const source=snapshot[r];
+function restoreBordersAfterInsert(ws,snapshot,startRow,originalBottom){
+  const finalBottom=originalBottom+1;
+  for(let targetRow=1;targetRow<=finalBottom;targetRow++){
+    let sourceRow;
+    if(targetRow<startRow)sourceRow=targetRow;
+    else if(targetRow===startRow)sourceRow=startRow-1;
+    else sourceRow=targetRow-1;
+
+    const source=snapshot[sourceRow];
     if(!source)continue;
-    const targetRow=r+1;
+
     for(let c=1;c<=MAX_COLUMNS;c++){
       cellAt(ws,targetRow,c).border=cloneBorder(source[c]);
     }
@@ -129,7 +135,10 @@ function insertProductRowIntoWorksheet(ws){
   const stRow=findStRow(ws);
   const merges=mergeRanges(ws);
   const bottomRow=ws.rowCount;
-  const borderSnapshot=snapshotBorders(ws,stRow,bottomRow);
+  // Snapshot the complete invoice outline, including header rows and the
+  // outer frame, because merge teardown can affect borders outside the
+  // inserted product-row area.
+  const borderSnapshot=snapshotBorders(ws,1,bottomRow);
 
   // Critical fix:
   // never insert a physical worksheet row while invoice merges are active.
@@ -140,10 +149,10 @@ function insertProductRowIntoWorksheet(ws){
   try{
     ws.insertRow(stRow,[], "i+");
 
-    // The inserted row inherits the exact visual formatting of the
-    // product row immediately above it.
+    // Keep the new row visually consistent while preserving the complete
+    // original invoice outline across the whole sheet.
     clearProductRow(ws,stRow);
-    restoreShiftedBorders(ws,borderSnapshot,stRow,bottomRow);
+    restoreBordersAfterInsert(ws,borderSnapshot,stRow,bottomRow);
 
     const totalRows=stRow-PRODUCT_START_ROW+1;
     if(totalRows<MIN_ROWS_PER_SIDE){
