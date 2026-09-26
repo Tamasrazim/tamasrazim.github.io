@@ -1910,7 +1910,7 @@ function scanBalance(code) {
 var SCOPE = [
   'motion', 'window', 'self', 'globalThis', 'document', 'parent', 'top', 'frames',
   'lerp', 'clamp', 'map', 'mix', 'smoothstep', 'smootherstep', 'ease', 'easings', 'spring',
-  'noise', 'fbm', 'random', 'randomRange', 'randomInt', 'pick', 'wrap', 'pingpong', 'TAU', 'PI',
+  'noise', 'fbm', 'random', 'randomRange', 'randomInt', 'pick', 'wrap', 'pingpong', 'TAU', 'TAU2', 'PI',
   'fetch', 'XMLHttpRequest', 'WebSocket', 'EventSource', 'importScripts', 'postMessage',
   'indexedDB', 'localStorage', 'sessionStorage', 'caches', 'Worker', 'SharedWorker',
   'close', 'open', 'location', 'history'
@@ -1940,7 +1940,8 @@ function createRuntime() {
       fbm: function (x, y, z, o, l, g) { return rt.noise.fbm(x, y, z, o, l, g); },
       setSeed: function (s) { rt.comp.seed = s | 0; rt.noise = makeNoise(s | 0); rt.rng = mulberry32(seedForFrame(m.frame)); },
       lerp: lerp, clamp: clamp, map: map, mix: mix, smoothstep: smoothstep, smootherstep: smootherstep,
-      ease: ease, easings: easings, spring: spring, wrap: wrap, pingpong: pingpong, TAU: TAU,
+      ease: ease, easings: easings, spring: spring, wrap: wrap, pingpong: pingpong, TAU: TAU, TAU2: TAU * 2,
+      center: { x: 0, y: 0 },
       asset: function (name) { return rt.assets[name] || null; },
       assets: rt.assets,
       simulation: simulation
@@ -2013,7 +2014,7 @@ function createRuntime() {
         case 'noise': return m.noise; case 'fbm': return m.fbm;
         case 'random': return m.random; case 'randomRange': return m.randomRange; case 'randomInt': return m.randomInt;
         case 'pick': return m.pick; case 'wrap': return wrap; case 'pingpong': return pingpong;
-        case 'TAU': return TAU; case 'PI': return Math.PI;
+        case 'TAU': return TAU; case 'TAU2': return TAU * 2; case 'PI': return Math.PI;
         default: return undefined;
       }
     });
@@ -2053,6 +2054,7 @@ function createRuntime() {
     m.loop = !!c.loop; m.loopDuration = c.loopDuration;
     m.loopProgress = c.loop ? wrap(t / c.loopDuration, 1) : clamp(t / c.duration, 0, 1);
     m.seed = c.seed | 0; m.aspect = c.aspect; m.scale = c.height / 1080;
+    m.center.x = c.width * 0.5; m.center.y = c.height * 0.5;
     m.isExport = !!opts.isExport; m.quality = opts.isExport ? 'export' : 'preview';
     rt.rng = mulberry32(seedForFrame(frame));
 
@@ -3730,6 +3732,252 @@ function renderFrame(time, frame, fps, ctx, width, height) {
       ctx.fillRect(x - 40 * s * speed, y - size * 0.18, 40 * s * speed, size * 0.36);
     }
   }
+  ctx.globalAlpha = 1;
+}
+</script>
+
+<script type="text/plain" id="sample-particle-dancer" data-title="Particle Dancer" data-desc="A full-body adult dancer built from deterministic particles. Transparent-safe and periodic." data-loop="1" data-loopdur="15" data-dur="15">
+// PARTICLE DANCER — full-body human figure built from deterministic particles.
+// The renderer owns the canvas, frame timing and loop. This sample only draws.
+
+const COUNT = 7200;
+
+function h(n) {
+  const x = Math.sin(n * 127.731 + 41.193) * 43758.5453123;
+  return x - Math.floor(x);
+}
+
+function capsule(ax, ay, bx, by, radius, u, v) {
+  const dx = bx - ax, dy = by - ay;
+  const len = Math.sqrt(dx * dx + dy * dy) || 1;
+  const nx = -dy / len, ny = dx / len;
+  const angle = v * TAU;
+  const radial = radius * Math.sqrt(u);
+  const px = ax + dx * u, py = ay + dy * u;
+  return [
+    px + nx * Math.cos(angle) * radial,
+    py + ny * Math.cos(angle) * radial
+  ];
+}
+
+function ellipse(cx, cy, rx, ry, u, v) {
+  const angle = u * TAU;
+  const radius = Math.sqrt(v);
+  return [
+    cx + Math.cos(angle) * rx * radius,
+    cy + Math.sin(angle) * ry * radius
+  ];
+}
+
+function pose(p, width, height) {
+  const S = Math.min(width, height);
+  const u = S / 1000;
+  const a = p * TAU;
+  const sway = Math.sin(a) * 0.028 * S;
+  const bounce = Math.abs(Math.sin(a)) * 0.008 * S;
+  const turn = Math.sin(a) * 0.045;
+
+  function P(x, y) {
+    const px = x * u, py = y * u;
+    return [
+      width * 0.5 + sway + px * Math.cos(turn) - py * Math.sin(turn),
+      height * 0.47 + bounce + px * Math.sin(turn) + py * Math.cos(turn)
+    ];
+  }
+
+  const head = P(0, -310);
+  const sL = P(-72, -227);
+  const sR = P(72, -227);
+
+  const elbowSwing = Math.sin(a) * 28;
+  const foreSwing = Math.sin(a * 2 + 0.5) * 44;
+
+  const eL = P(-138, -120 + elbowSwing);
+  const eR = P(138, -120 - elbowSwing);
+  const wL = P(-170, 10 + foreSwing);
+  const wR = P(170, 10 - foreSwing);
+
+  const hipC = P(0, 28);
+  const step = Math.sin(a) * 30;
+
+  const kneeL = P(-58 + step, 185);
+  const kneeR = P(58 - step, 185);
+  const ankleL = P(-72 + step * 1.15, 365);
+  const ankleR = P(72 - step * 1.15, 365);
+  const footL = P(-93 + step * 1.2, 418);
+  const footR = P(93 - step * 1.2, 418);
+
+  return {
+    u, head, sL, sR, eL, eR, wL, wR,
+    hipC, kneeL, kneeR, ankleL, ankleR, footL, footR
+  };
+}
+
+function renderFrame(time, frame, fps, ctx, width, height) {
+
+  const p = motion.loopProgress;
+  const P = pose(p, width, height);
+  const s = P.u;
+
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+
+  for (let i = 0; i < COUNT; i++) {
+
+    const r0 = h(i * 1.17 + 11);
+    const r1 = h(i * 2.31 + 71);
+    const r2 = h(i * 3.73 + 181);
+    const r3 = h(i * 5.91 + 291);
+    const r4 = h(i * 7.11 + 491);
+
+    let q;
+
+    if (r0 < 0.06) {
+      q = ellipse(P.head[0], P.head[1], 42 * s, 50 * s, r1, r2);
+
+    } else if (r0 < 0.34) {
+
+      const t = r1;
+      const y = -224 + t * 255;
+      let halfW;
+
+      if (t < 0.40) {
+        halfW = 78 - 27 * (t / 0.40);
+      } else {
+        halfW = 51 + 23 * ((t - 0.40) / 0.60);
+      }
+
+      const localX = (r2 * 2 - 1) * halfW;
+      const localY = y + (r3 - 0.5) * 10;
+
+      const lean = Math.sin(p * TAU) * 0.045;
+      const px = localX * s;
+      const py = localY * s;
+
+      q = [
+        P.head[0] + px * Math.cos(lean) - py * Math.sin(lean),
+        P.head[1] + px * Math.sin(lean) + py * Math.cos(lean) + 310 * s
+      ];
+
+    } else if (r0 < 0.45) {
+
+      q = capsule(
+        P.sL[0], P.sL[1],
+        P.eL[0], P.eL[1],
+        23 * s, r1, r2
+      );
+
+    } else if (r0 < 0.57) {
+
+      q = capsule(
+        P.eL[0], P.eL[1],
+        P.wL[0], P.wL[1],
+        17 * s, r1, r2
+      );
+
+    } else if (r0 < 0.69) {
+
+      q = capsule(
+        P.sR[0], P.sR[1],
+        P.eR[0], P.eR[1],
+        23 * s, r1, r2
+      );
+
+    } else if (r0 < 0.81) {
+
+      q = capsule(
+        P.eR[0], P.eR[1],
+        P.wR[0], P.wR[1],
+        17 * s, r1, r2
+      );
+
+    } else if (r0 < 0.895) {
+
+      q = capsule(
+        P.hipC[0] - 51 * s, P.hipC[1],
+        P.kneeL[0], P.kneeL[1],
+        34 * s, r1, r2
+      );
+
+    } else if (r0 < 0.98) {
+
+      q = capsule(
+        P.kneeL[0], P.kneeL[1],
+        P.ankleL[0], P.ankleL[1],
+        25 * s, r1, r2
+      );
+
+    } else {
+
+      q = capsule(
+        P.hipC[0] + 51 * s, P.hipC[1],
+        P.kneeR[0], P.kneeR[1],
+        34 * s, r1, r2
+      );
+    }
+
+    const driftA =
+      Math.sin(p * TAU + r4 * TAU) *
+      1.8 * s;
+
+    const driftB =
+      Math.cos(p * TAU * 2 + r2 * TAU) *
+      1.1 * s;
+
+    const shimmer =
+      0.55 +
+      0.45 *
+      Math.sin(
+        p * TAU +
+        r1 * TAU +
+        i * 0.002
+      );
+
+    ctx.globalAlpha =
+      0.28 + shimmer * 0.72;
+
+    ctx.fillStyle = '#ffffff';
+
+    ctx.beginPath();
+    ctx.arc(
+      q[0] + driftA,
+      q[1] + driftB,
+      (0.55 + r3 * 1.7) * s,
+      0,
+      TAU
+    );
+    ctx.fill();
+  }
+
+  const extremities = [
+    [P.wL, 15], [P.wR, 15],
+    [P.footL, 28], [P.footR, 28]
+  ];
+
+  for (let j = 0; j < extremities.length; j++) {
+    const e = extremities[j][0];
+    const radius = extremities[j][1] * s;
+
+    for (let k = 0; k < 80; k++) {
+      const u = h(j * 1000 + k * 13.7);
+      const v = h(j * 2000 + k * 17.9);
+      const q = ellipse(e[0], e[1], radius, radius * 0.55, u, v);
+
+      ctx.globalAlpha =
+        0.45 + h(k + j * 50) * 0.55;
+
+      ctx.beginPath();
+      ctx.arc(
+        q[0],
+        q[1],
+        (0.45 + h(k + 90) * 1.2) * s,
+        0,
+        TAU
+      );
+      ctx.fill();
+    }
+  }
+
   ctx.globalAlpha = 1;
 }
 </script>
@@ -6613,7 +6861,7 @@ var DOCS = [
   '<p>The live preview is not the render. The preview draws whatever frame it can, as fast as it can, at whatever raster fits your screen. The render walks <code>frame = 0 … frameCount-1</code> and evaluates your code at <code>time = frame / fps</code> for every single one. Slow is fine. Wrong is not.</p>',
 
   '<h5>QUICK START</h5>',
-  '<p>Write a function, press Run, scrub the timeline, press Render. Open <b>Examples</b> for ten complete animations to read or take apart.</p>',
+  '<p>Write a <code>renderFrame()</code> function, press Run, scrub the timeline, press Render. The renderer supplies the canvas context and frame timing; do not create a canvas or call <code>requestAnimationFrame()</code> yourself. Open <b>Examples</b> for eleven complete animations to read or take apart.</p>',
   '<pre>window.renderFrame = function (time, frame, fps, ctx, width, height) {\n  ctx.fillStyle = "#000";\n  ctx.fillRect(0, 0, width, height);\n  var x = width * 0.5 + Math.cos(time * 2) * 200;\n  ctx.fillStyle = "#fff";\n  ctx.beginPath();\n  ctx.arc(x, height * 0.5, 40, 0, Math.PI * 2);\n  ctx.fill();\n};</pre>',
   '<p>Fewer arguments are fine — <code>function (time, frame, fps, ctx, width, height)</code> is the full contract, and you can declare only the ones you need. An optional <code>window.setup(ctx, width, height)</code> runs once per compile.</p>',
 
