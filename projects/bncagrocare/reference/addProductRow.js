@@ -95,7 +95,10 @@ function snapshotRows(ws,startRow,lastRow,maxCol){
     const cells=[];
     for(let c=1;c<=maxCol;c++){
       const cell=row.getCell(c);
-      cells[c]={style:clone(cell.style),value:clone(cell.value)};
+      // A merged child contains an internal MergeValue object that references
+      // its master Cell. Never copy that object as an ordinary cell value.
+      const keepValue=!cell.isMerged||cell.master===cell;
+      cells[c]={style:clone(cell.style),value:keepValue?clone(cell.value):null};
     }
     rows[r]={
       height:row.height,
