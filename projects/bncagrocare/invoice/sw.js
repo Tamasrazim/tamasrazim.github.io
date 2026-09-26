@@ -1,4 +1,4 @@
-const CACHE="bnc-invoice-v10";
+const CACHE="bnc-invoice-v11";
 const CORE=["./","./index.html","./css/app.css","./js/app.js","./manifest.webmanifest","./icons/icon.svg","../reference/products.js","../reference/addProductRow.js","../reference/BNCFINAL.xlsx"];
 const EXCEL="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js";
 
