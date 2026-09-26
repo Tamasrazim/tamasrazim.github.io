@@ -3,7 +3,7 @@ const $=s=>document.querySelector(s);
 const SOURCE_VERSION=54;
 const TEMPLATE="../reference/BNCFINAL.xlsx?v="+SOURCE_VERSION;
 const DB="bnc-invoice-xlsx-v1";
-const ROWS_PER_SIDE=4;
+const ROWS_PER_SIDE=6;
 const MAX_ROWS_PER_SIDE=50;
 const PRODUCT_START_ROW=11;
 const PRODUCTS=window.BNC_PRODUCTS||[];
