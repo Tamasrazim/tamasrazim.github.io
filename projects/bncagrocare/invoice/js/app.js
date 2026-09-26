@@ -25,6 +25,7 @@ let liveSheet=null;
 let dirty=true;
 let headerTargets={};
 let formulaResults={};
+let catalogHideTimer=null;
 
 const num=v=>{const n=Number(v);return Number.isFinite(n)?n:0};
 const money=v=>num(v).toFixed(2);
@@ -118,6 +119,68 @@ function packListId(rowIndex,side){
   refreshPackList(rowIndex,side);
   return id;
 }
+function showProductSuggestions(query,row,rowIndex,side,input){
+  const dock=$("#productSuggestions"),rail=$("#catalogRail"),meta=$("#productSuggestMeta");
+  if(!dock||!rail)return;
+  clearTimeout(catalogHideTimer);
+  const q=String(query||"").trim().toLowerCase();
+  const matches=PRODUCTS.filter(p=>!q||p.name.toLowerCase().includes(q)||p.code===q).slice(0,8);
+  rail.replaceChildren(...matches.map((product,index)=>{
+    const card=document.createElement("button");
+    card.type="button";
+    card.className="catalogItem";
+    card.style.setProperty("--delay",(index*35)+"ms");
+    card.innerHTML=
+      '<span class="catalogCode">'+safe(product.code)+'</span>'+
+      '<span class="catalogName">'+safe(product.name)+'</span>'+
+      '<span class="catalogPacks">'+product.packs.length+' pack'+(product.packs.length===1?'':'s')+' · '+safe(product.packs.slice(0,2).join(" · "))+'</span>';
+    card.addEventListener("pointerdown",event=>{
+      event.preventDefault();
+      row.name=product.name;
+      input.value=product.name;
+      row.pack="";
+      refreshPackList(rowIndex,side);
+      if(window._bncRefreshPackAssist)window._bncRefreshPackAssist();
+      syncProductSide(row,rowIndex,side);
+      input.classList.remove("productPicked");
+      void input.offsetWidth;
+      input.classList.add("productPicked");
+      setTimeout(()=>input.classList.remove("productPicked"),500);
+      updateSummary();
+      saveDraft();
+    });
+    return card;
+  }));
+  if(meta)meta.textContent=matches.length+" PRODUCT"+(matches.length===1?"":"S");
+  dock.hidden=!matches.length;
+  dock.classList.toggle("isOpen",!!matches.length);
+}
+
+function hideProductSuggestions(){
+  const dock=$("#productSuggestions");
+  if(!dock)return;
+  clearTimeout(catalogHideTimer);
+  catalogHideTimer=setTimeout(()=>{
+    dock.classList.remove("isOpen");
+    setTimeout(()=>{dock.hidden=true},180);
+  },120);
+}
+
+function syncProductSide(row,rowIndex,side){
+  return ensureLiveWorkbook().then(()=>{
+    writeLine(liveSheet,rowIndex,state.rows.length,side,row);
+    const amountCol=side==="left"?6:12;
+    const dataRow=PRODUCT_START_ROW+rowIndex;
+    liveSheet.getRow(dataRow).getCell(amountCol).value={
+      formula:side==="left"?"D"+dataRow+"*E"+dataRow:"J"+dataRow+"*K"+dataRow
+    };
+    rebalanceSL(liveSheet,state.rows.length);
+    recalcLiveFormulas();
+    dirty=true;lastBuffer=null;
+    schedulePreview();
+  });
+}
+
 function buildSide(row,rowIndex,side,totalRows){
   const wrap=document.createElement("div");
   wrap.className="productSide "+side;
@@ -128,6 +191,7 @@ function buildSide(row,rowIndex,side,totalRows){
 
   const fields=document.createElement("div");
   fields.className="sideFields";
+  let packInput=null;
 
   [["name","PRODUCT","Product"],["pack","PACK","Pack size"],["ctn","CTN","0"],["rate","RATE / CTN","0.00"]].forEach(([key,label,placeholder])=>{
     const lab=document.createElement("label");
@@ -137,27 +201,35 @@ function buildSide(row,rowIndex,side,totalRows){
     input.autocomplete="off";
     input.placeholder=placeholder;
     if(key==="name")input.setAttribute("list","catalog");
-    if(key==="pack")input.setAttribute("list",packListId(rowIndex,side));
+    if(key==="pack"){
+      input.setAttribute("list",packListId(rowIndex,side));
+      packInput=input;
+    }
     if(key==="ctn"){input.type="number";input.min="0";input.step="1";input.inputMode="numeric"}
     if(key==="rate"){input.type="number";input.min="0";input.step=".01";input.inputMode="decimal"}
+    input.addEventListener("focus",()=>{
+      if(key==="name")showProductSuggestions(input.value,row,rowIndex,side,input);
+      if(key==="pack"){
+        renderPackAssist();
+        wrap.classList.add("packFocused");
+      }
+    });
+    input.addEventListener("blur",()=>{
+      if(key==="name")hideProductSuggestions();
+      if(key==="pack")setTimeout(()=>wrap.classList.remove("packFocused"),120);
+    });
     input.addEventListener("input",e=>{
       row[key]=(key==="ctn"||key==="rate")?Math.max(0,num(e.target.value)):e.target.value;
-      if(key==="name")refreshPackList(rowIndex,side);
+      if(key==="name"){
+        refreshPackList(rowIndex,side);
+        renderPackAssist();
+        showProductSuggestions(row.name,row,rowIndex,side,input);
+      }
+      if(key==="pack"&&packInput)packInput.value=row.pack;
       if(key==="ctn"||key==="rate"){
         amount.value=(row.ctn!==""&&row.rate!=="")?money(num(row.ctn)*num(row.rate)):"";
       }
-      ensureLiveWorkbook().then(()=>{
-        writeLine(liveSheet,rowIndex,state.rows.length,side,row);
-        const amountCol=side==="left"?6:12;
-        const dataRow=PRODUCT_START_ROW+rowIndex;
-        liveSheet.getRow(dataRow).getCell(amountCol).value={
-          formula:side==="left"?"D"+dataRow+"*E"+dataRow:"J"+dataRow+"*K"+dataRow
-        };
-        rebalanceSL(liveSheet,state.rows.length);
-        recalcLiveFormulas();
-        dirty=true;lastBuffer=null;
-        schedulePreview();
-      }).catch(console.error);
+      syncProductSide(row,rowIndex,side).catch(console.error);
       updateSummary();
       saveDraft();
     });
@@ -172,7 +244,42 @@ function buildSide(row,rowIndex,side,totalRows){
   amount.value=row.ctn!==""&&row.rate!==""?money(num(row.ctn)*num(row.rate)):"";
   amountLabel.append(amount);
   fields.append(amount);
-  wrap.append(fields);
+
+  const packAssist=document.createElement("div");
+  packAssist.className="packAssist";
+  const renderPackAssist=()=>{
+    const product=productByName(row.name);
+    packAssist.replaceChildren();
+    if(!product?.packs?.length){
+      packAssist.classList.remove("hasPacks");
+      packAssist.innerHTML='<span class="packHint">Choose a product to reveal pack sizes</span>';
+      return;
+    }
+    const label=document.createElement("span");
+    label.className="packAssistLabel";
+    label.textContent="PACK SUGGESTIONS";
+    packAssist.append(label,...product.packs.map((pack,index)=>{
+      const chip=document.createElement("button");
+      chip.type="button";
+      chip.className="packChip";
+      chip.style.setProperty("--delay",(index*40)+"ms");
+      chip.textContent=pack;
+      chip.addEventListener("pointerdown",event=>{
+        event.preventDefault();
+        row.pack=pack;
+        if(packInput)packInput.value=pack;
+        syncProductSide(row,rowIndex,side).catch(console.error);
+        chip.classList.add("picked");
+        setTimeout(()=>chip.classList.remove("picked"),450);
+      });
+      return chip;
+    }));
+    packAssist.classList.add("hasPacks");
+  };
+  window._bncRefreshPackAssist=renderPackAssist;
+  renderPackAssist();
+
+  wrap.append(fields,packAssist);
   return wrap;
 }
 
@@ -249,6 +356,13 @@ async function addProductRow(){
     rebalanceSL(liveSheet,state.rows.length);
     dirty=true;lastBuffer=null;
     renderProducts();
+    const newRow=document.querySelector("#products .pairRow:last-child");
+    if(newRow){
+      newRow.classList.add("rowEnter");
+      requestAnimationFrame(()=>newRow.classList.add("rowEnterActive"));
+      setTimeout(()=>newRow.classList.remove("rowEnter","rowEnterActive"),700);
+      newRow.scrollIntoView({behavior:"smooth",block:"nearest"});
+    }
     saveDraft();
     buildWorkbookPreviewSheet(liveSheet);
     setStatus("Live XLSX row added");
@@ -558,6 +672,22 @@ function columnNumberFromLetters(value){
 }
 
 function colLetters(n){let s="";while(n){const r=(n-1)%26;s=String.fromCharCode(65+r)+s;n=Math.floor((n-1)/26)}return s}
+function fitWorkbookPreview(){
+  const host=$("#sheetPreview"),stage=host?.querySelector(".workbookFit"),sheet=stage?.querySelector(".workbookSheet"),grid=stage?.querySelector(".workbookGrid");
+  if(!stage||!sheet||!grid)return;
+  const rawWidth=grid.offsetWidth+18;
+  const rawHeight=grid.offsetHeight+18;
+  const available=Math.max(260,stage.clientWidth-12);
+  const scale=Math.min(1,available/rawWidth);
+  sheet.style.width=rawWidth+"px";
+  sheet.style.height=rawHeight+"px";
+  sheet.style.transformOrigin="top center";
+  sheet.style.transform="translateX(-50%) scale("+scale+")";
+  stage.style.height=Math.max(430,rawHeight*scale+12)+"px";
+  const badge=$("#previewFitState");
+  if(badge)badge.textContent=Math.round(scale*100)+"% · FIT";
+}
+
 function buildWorkbookPreviewSheet(ws){
   const host=$("#sheetPreview");
   if(!host)return;
@@ -565,7 +695,8 @@ function buildWorkbookPreviewSheet(ws){
   const widths=[],heights=[],x=[0],y=[0];
   for(let c=1;c<=maxCol;c++){widths[c-1]=Math.max(28,Math.min(280,Math.round((Number(ws.getColumn(c).width)||10)*7.2)));x.push(x[x.length-1]+widths[c-1])}
   for(let r=1;r<=maxRow;r++){heights[r-1]=Math.max(12,Math.min(120,Math.round((Number(ws.getRow(r).height)||15)*1.333)));y.push(y[y.length-1]+heights[r-1])}
-  const stage=document.createElement("div");stage.className="workbookSheet";
+  const stage=document.createElement("div");stage.className="workbookFit";
+  const sheet=document.createElement("div");sheet.className="workbookSheet";
   const grid=document.createElement("div");grid.className="workbookGrid";
   grid.style.width=x[x.length-1]+"px";grid.style.height=y[y.length-1]+"px";
   const merges=(Array.isArray(ws.model?.merges)?ws.model.merges:[]).map(ref=>{
@@ -619,7 +750,10 @@ function buildWorkbookPreviewSheet(ws){
     });
     grid.append(el);
   }
-  stage.append(grid);host.replaceChildren(stage);
+  sheet.append(grid);
+  stage.append(sheet);
+  host.replaceChildren(stage);
+  fitWorkbookPreview();
   $("#xlsxState").textContent=dirty?"LIVE XLSX":"LIVE XLSX";
 }
 
@@ -644,6 +778,10 @@ function schedulePreview(){
   clearTimeout(previewTimer);
   previewTimer=setTimeout(()=>{renderPreview()},180);
 }
+window.addEventListener("resize",()=>fitWorkbookPreview());
+document.addEventListener("pointerdown",event=>{
+  if(!event.target.closest("#productSuggestions")&&!event.target.closest('input[list="catalog"]'))hideProductSuggestions();
+});
 
 
 async function downloadXlsx(){
