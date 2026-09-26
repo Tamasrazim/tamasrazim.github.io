@@ -1,4 +1,4 @@
-// BNC Agro Care invoice row helper
+// BNC Agro Care — master invoice row helper
 (function(global){
 "use strict";
 
@@ -6,6 +6,7 @@ const PRODUCT_START_ROW=11;
 const LEFT_SL_COL=1;
 const RIGHT_SL_COL=7;
 const MAX_COLUMNS=12;
+const MIN_ROWS_PER_SIDE=6;
 
 function textOfCell(cell){
   const v=cell?.value;
@@ -17,10 +18,8 @@ function textOfCell(cell){
   return "";
 }
 
-function cellAt(ws,rowNumber,colNumber){
-  const r=Number(rowNumber),c=Number(colNumber);
-  if(!Number.isInteger(r)||r<1||!Number.isInteger(c)||c<1)return null;
-  return ws.getRow(r).getCell(c);
+function cellAt(ws,row,col){
+  return ws.getRow(row).getCell(col);
 }
 
 function findStRow(ws){
@@ -28,6 +27,16 @@ function findStRow(ws){
     if(textOfCell(cellAt(ws,r,2)).toUpperCase()==="ST")return r;
   }
   throw new Error("Could not find the invoice subtotal row.");
+}
+
+function mergeRanges(ws){
+  if(ws._merges&&typeof ws._merges==="object"){
+    return Object.values(ws._merges)
+      .filter(Boolean)
+      .map(v=>String(v.range||v));
+  }
+  const model=ws.model;
+  return Array.isArray(model?.merges)?model.merges.map(String):[];
 }
 
 function shiftMergeRange(range,startRow){
@@ -39,14 +48,6 @@ function shiftMergeRange(range,startRow){
   return m[1]+r1+":"+m[3]+r2;
 }
 
-function mergeRanges(ws){
-  if(ws._merges&&typeof ws._merges==="object"){
-    return Object.values(ws._merges).filter(Boolean).map(v=>String(v.range));
-  }
-  const model=ws.model;
-  return Array.isArray(model?.merges)?model.merges.map(String):[];
-}
-
 function unmergeAll(ws,ranges){
   for(const range of ranges){
     try{ws.unMergeCells(range)}catch{}
@@ -55,7 +56,7 @@ function unmergeAll(ws,ranges){
 
 function restoreMerges(ws,ranges,startRow){
   for(const range of ranges){
-    const shifted=startRow==null?range:shiftMergeRange(range,startRow);
+    const shifted=shiftMergeRange(range,startRow);
     try{
       if(typeof ws.mergeCellsWithoutStyle==="function")ws.mergeCellsWithoutStyle(shifted);
       else ws.mergeCells(shifted);
@@ -65,96 +66,8 @@ function restoreMerges(ws,ranges,startRow){
   }
 }
 
-function cloneStyle(style){
-  if(!style)return{};
-  if(typeof structuredClone==="function"){
-    try{return structuredClone(style)}catch{}
-  }
-  return JSON.parse(JSON.stringify(style));
-}
-
-function snapshotRowBorders(ws,firstRow,lastRow,maxCol){
-  const rows={};
-  for(let r=firstRow;r<=lastRow;r++){
-    const row=ws.getRow(r);
-    rows[r]=[];
-    for(let c=1;c<=maxCol;c++)rows[r][c]=cloneStyle(row.getCell(c).border);
-  }
-  return rows;
-}
-
-function restoreShiftedRowBorders(ws,snapshot,startRow,lastRow,maxCol){
-  if(!snapshot)return;
-  for(let r=startRow;r<=lastRow;r++){
-    const target=ws.getRow(r+1);
-    const source=snapshot[r];
-    if(!source)continue;
-    for(let c=1;c<=maxCol;c++){
-      const border=source[c];
-      if(border)target.getCell(c).border=cloneStyle(border);
-    }
-  }
-}
-
-function formulaOfCell(cell){
-  const v=cell?.value;
-  return v&&typeof v==="object"&&typeof v.formula==="string"?v.formula:null;
-}
-
-function bumpFormulaRows(formula,startRow){
-  return String(formula).replace(/(\$?[A-Z]{1,3}\$?)(\d+)/g,(whole,col,rowText)=>{
-    const row=Number(rowText);
-    return row>=startRow?col+(row+1):whole;
-  });
-}
-
-function translateFormulaRow(formula,sourceRow,targetRow){
-  const delta=targetRow-sourceRow;
-  return String(formula).replace(/(\$?)([A-Z]{1,3})(\$?)(\d+)/g,(whole,colAbs,col,rowAbs,rowText)=>{
-    const row=Number(rowText);
-    if(rowAbs==="$")return whole;
-    return colAbs+col+rowAbs+(row===sourceRow?row+delta:row);
-  });
-}
-
-function snapshotFormulaRows(ws,startRow,lastRow,maxCol){
-  const formulas=[];
-  for(let r=startRow;r<=lastRow;r++){
-    for(let c=1;c<=maxCol;c++){
-      const formula=formulaOfCell(ws.getRow(r).getCell(c));
-      if(formula)formulas.push({row:r,col:c,formula});
-    }
-  }
-  return formulas;
-}
-
-function restoreShiftedFormulas(ws,formulas,startRow){
-  for(const item of formulas){
-    const targetRow=item.row+1;
-    const cell=ws.getRow(targetRow).getCell(item.col);
-    cell.value={formula:bumpFormulaRows(item.formula,startRow)};
-  }
-}
-
-function restoreInsertedRowFormulas(ws,templateRow,targetRow,maxCol){
-  for(let c=1;c<=maxCol;c++){
-    const source=ws.getRow(templateRow).getCell(c);
-    const formula=formulaOfCell(source);
-    if(formula)ws.getRow(targetRow).getCell(c).value={
-      formula:translateFormulaRow(formula,templateRow,targetRow)
-    };
-  }
-}
-
-function clearCellsAtoL(ws,rowNumber){
-  for(let c=1;c<=MAX_COLUMNS;c++)cellAt(ws,rowNumber,c).value=null;
-}
-
-function rebuildTotals(ws,stRow){
-  const totalsRow=stRow+1;
-  [["D",4],["F",6],["L",12]].forEach(([letter,col])=>{
-    cellAt(ws,totalsRow,col).value={formula:"SUM("+letter+PRODUCT_START_ROW+":"+letter+stRow+")"};
-  });
+function clearProductRow(ws,row){
+  for(let c=1;c<=MAX_COLUMNS;c++)cellAt(ws,row,c).value=null;
 }
 
 function rebalanceSL(ws,totalRows){
@@ -164,37 +77,44 @@ function rebalanceSL(ws,totalRows){
   }
 }
 
+function rebuildSubtotalFormulas(ws,stRow){
+  const totalsRow=stRow+1;
+  cellAt(ws,totalsRow,4).value={formula:"SUM(D"+PRODUCT_START_ROW+":D"+stRow+")"};
+  cellAt(ws,totalsRow,6).value={formula:"SUM(F"+PRODUCT_START_ROW+":F"+stRow+")"};
+  cellAt(ws,totalsRow,12).value={formula:"SUM(L"+PRODUCT_START_ROW+":L"+stRow+")"};
+}
+
 function insertProductRowIntoWorksheet(ws){
-  if(!ws||typeof ws.insertRow!=="function")throw new Error("ExcelJS worksheet row insertion is unavailable");
+  if(!ws||typeof ws.insertRow!=="function"){
+    throw new Error("ExcelJS worksheet row insertion is unavailable");
+  }
 
   const stRow=findStRow(ws);
-  const templateRow=snapshotTemplateRow(ws,stRow-1);
   const merges=mergeRanges(ws);
 
-  // ExcelJS can move normal rows correctly, but merged cells are the fragile part.
-  // Detach every merge, let ExcelJS create a real Row/Cell structure, then restore
-  // the merge ranges at their new addresses.
+  // Critical fix:
+  // never insert a physical worksheet row while invoice merges are active.
+  // Detach the merges, insert the product row, then restore every merge
+  // at its shifted address.
   unmergeAll(ws,merges);
 
-  let inserted=false;
   try{
-    // i+ copies the visual style from the row above without copying product values.
     ws.insertRow(stRow,[], "i+");
-    inserted=true;
-    // Restore formula cells shifted below the insertion point because ExcelJS
-    // moves rows but does not expand formula ranges for the new row.
-    restoreShiftedFormulas(ws,formulaSnapshot,stRow);
-    restoreInsertedRowFormulas(ws,stRow-1,stRow,maxCol);
-    // Restore the original invoice borders on every row shifted below ST so the
-    // existing outer outline survives the merge teardown/rebuild.
-    restoreShiftedRowBorders(ws,borderSnapshot,stRow,ws.rowCount-1,maxCol);
-    clearCellsAtoL(ws,stRow);
-    restoreInsertedRowFormulas(ws,stRow-1,stRow,maxCol);
 
-    const totalRows=Math.max(4,stRow-PRODUCT_START_ROW+1);
+    // The inserted row inherits the exact visual formatting of the
+    // product row immediately above it.
+    clearProductRow(ws,stRow);
+
+    const totalRows=stRow-PRODUCT_START_ROW+1;
+    if(totalRows<MIN_ROWS_PER_SIDE){
+      throw new Error("Invoice master must contain at least 6 product rows per side.");
+    }
+
     rebalanceSL(ws,totalRows);
+    rebuildSubtotalFormulas(ws,stRow);
+
   }finally{
-    restoreMerges(ws,merges,inserted?stRow:null);
+    restoreMerges(ws,merges,stRow);
   }
 
   return stRow;
@@ -213,7 +133,7 @@ async function addProductRow(file){
 
 global.BNCInsertProductRow=insertProductRowIntoWorksheet;
 global.BNCFindStRow=findStRow;
-global.BNCCountInvoiceRows=ws=>Math.max(4,findStRow(ws)-PRODUCT_START_ROW);
+global.BNCCountInvoiceRows=ws=>Math.max(MIN_ROWS_PER_SIDE,findStRow(ws)-PRODUCT_START_ROW);
 global.addProductRow=addProductRow;
 
 })(typeof window!=="undefined"?window:globalThis);
