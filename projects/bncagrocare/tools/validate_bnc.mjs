@@ -24,8 +24,8 @@ const row=fs.readFileSync(root+"/reference/addProductRow.js","utf8");
 if(!html.includes("Download XLSX"))throw Error("XLSX download control missing");
 if(!js.includes("writeBuffer"))throw Error("XLSX export missing");
 if(!js.includes("ensureLiveWorkbook"))throw Error("Live workbook loader missing");
-if(!row.includes("shiftRowsDownWithoutSplice"))throw Error("Merge-safe row engine missing");
-if(/\.insertRow\s*\(/.test(row)||/(?<!definedNames)\.spliceRows\s*\(/.test(row))throw Error("Fragile worksheet row insertion path still present");
+if(!row.includes("ws.insertRow(stRow,[]"))throw Error("ExcelJS row insertion path missing");
+if(!row.includes("unmergeAll(ws,merges)")||!row.includes("restoreMerges(ws,merges,stRow)"))throw Error("Merge-safe merge handling missing");
 
 for(const file of ["invoice/js/app.js","invoice/sw.js","reference/addProductRow.js"]){
   execFileSync(process.execPath,["--check",root+"/"+file]);
