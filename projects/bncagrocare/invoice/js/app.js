@@ -76,7 +76,6 @@ function bindFields(){
       state[k]=k==="commission"?Math.max(0,num(el.value)):el.value;
       ensureLiveWorkbook().then(()=>{
         applyHeaderEditsToLive();
-        recalcLiveFormulas();
         dirty=true;lastBuffer=null;
         schedulePreview();
       }).catch(console.error);
@@ -147,7 +146,6 @@ function buildSide(row,rowIndex,side,totalRows){
       ensureLiveWorkbook().then(()=>{
         writeLine(liveSheet,rowIndex,state.rows.length,side,row);
         rebalanceSL(liveSheet,state.rows.length);
-        recalcLiveFormulas();
         dirty=true;lastBuffer=null;
         schedulePreview();
       }).catch(console.error);
@@ -416,8 +414,6 @@ async function ensureLiveWorkbook(){
         writeLine(liveSheet,i,totalRows,"right",state.rows[i].right);
       }
       rebalanceSL(liveSheet,totalRows);
-      stage="formula calculation";
-      recalcLiveFormulas();
       setStatus("Live XLSX loaded");
       return liveWorkbook;
     }catch(error){
@@ -453,7 +449,6 @@ async function buildWorkbook(){
   await ensureLiveWorkbook();
   try{
     applyHeaderEditsToLive();
-    recalcLiveFormulas();
     if(liveWorkbook.calcProperties){
       liveWorkbook.calcProperties.fullCalcOnLoad=true;
       liveWorkbook.calcProperties.forceFullCalc=true;
@@ -554,14 +549,17 @@ function buildWorkbookPreviewSheet(ws){
     if(cell.fill?.type==="pattern")el.style.background=excelColor(cell.fill.fgColor,"#fff");
     const b=cell.border||{};
     el.style.borderTop=borderCss(b.top);el.style.borderRight=borderCss(b.right);el.style.borderBottom=borderCss(b.bottom);el.style.borderLeft=borderCss(b.left);
-    if(cell.formula)el.dataset.formula="1";
+    const rawValue=cell?.value;
+    if(rawValue&&typeof rawValue==="object"&&Object.prototype.hasOwnProperty.call(rawValue,"formula"))el.dataset.formula="1";
     el.addEventListener("focus",()=>{el.classList.add("editing");setStatus("Editing "+el.dataset.address)});
     el.addEventListener("input",()=>{
       if(!liveSheet)return;
       const live=liveSheet.getRow(r).getCell(c);
       const value=el.textContent.trim();
-      if(live.formula&&!value.startsWith("=")){live.value=value===""?null:value}
-      else if(!live.formula){
+      const liveValue=live?.value;
+      const liveIsFormula=liveValue&&typeof liveValue==="object"&&Object.prototype.hasOwnProperty.call(liveValue,"formula");
+      if(liveIsFormula&&!value.startsWith("=")){live.value=value===""?null:value}
+      else if(!liveIsFormula){
         live.value=value===""?null:(/^-?\d+(?:\.\d+)?$/.test(value)?Number(value):value);
       }
       dirty=true;lastBuffer=null;$("#xlsxState").textContent="EDITED";
@@ -586,7 +584,6 @@ async function renderPreview(){
   host.innerHTML='<div class="emptyPage"><strong>Syncing live XLSX…</strong><span>The preview is the current workbook state.</span></div>';
   try{
     await ensureLiveWorkbook();
-    recalcLiveFormulas();
     buildWorkbookPreviewSheet(liveSheet);
     dirty=false;
     setStatus("Live preview synced");
