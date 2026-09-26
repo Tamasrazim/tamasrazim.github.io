@@ -428,10 +428,15 @@ async function addProductRow(){
 function updateSummary(){
   const t=totals();
   $("#summary").innerHTML=
-    '<div class="sum"><span>Cartons</span><strong>'+t.cartons+"</strong></div>"+
-    '<div class="sum"><span>Gross taka</span><strong>'+money(t.total)+"</strong></div>"+
-    '<div class="sum"><span>Commission</span><strong>'+money(t.commission)+"</strong></div>"+
-    '<div class="sum final"><span>Final total</span><strong>'+money(t.final)+"</strong></div>";
+    '<div class="sum"><span>Left cartons</span><strong>'+t.leftCartons+"</strong></div>"+
+    '<div class="sum"><span>Right cartons</span><strong>'+t.rightCartons+"</strong></div>"+
+    '<div class="sum"><span>Total cartons</span><strong>'+t.totalCartons+"</strong></div>"+
+    '<div class="sum"><span>Left amount</span><strong>'+money(t.leftAmount)+"</strong></div>"+
+    '<div class="sum"><span>Right amount</span><strong>'+money(t.rightAmount)+"</strong></div>"+
+    '<div class="sum"><span>Gross total</span><strong>'+money(t.totalTaka)+"</strong></div>"+
+    '<div class="sum"><span>Commission ('+money(t.commissionPercent)+"%)</span><strong>"+money(t.commissionAmount)+"</strong></div>"+
+    '<div class="sum final"><span>Final total</span><strong>'+money(t.finalTotal)+"</strong></div>"+
+    '<div class="sum words"><span>Amount in words</span><strong>'+safe(numberWords(t.finalTotal))+"</strong></div>";
 }
 
 function cellAt(ws,rowNumber,colNumber){
