@@ -27,7 +27,7 @@ function findStRow(ws){
   for(let r=PRODUCT_START_ROW;r<=ws.rowCount;r++){
     if(textOfCell(cellAt(ws,r,2)).toUpperCase()==="ST")return r;
   }
-  throw new Error('Could not find the invoice subtotal row.');
+  throw new Error("Could not find the invoice subtotal row.");
 }
 
 function clone(value){
@@ -53,26 +53,6 @@ function bumpAddress(address,startRow){
   });
 }
 
-function bumpFormulaRefsAtOrBelow(ws,startRow){
-  for(let r=startRow;r<=ws.rowCount;r++){
-    const row=ws.getRow(r);
-    row.eachCell({includeEmpty:false},cell=>{
-      if(cell.formula){
-        cell.value={formula:bumpFormula(cell.formula,startRow)};
-      }
-    });
-  }
-}
-
-function mergeRanges(ws){
-  if(ws._merges&&typeof ws._merges==="object"){
-    return Object.values(ws._merges).filter(Boolean).map(v=>String(v.range));
-  }
-  const model=ws.model;
-  if(Array.isArray(model?.merges))return model.merges.map(String);
-  return [];
-}
-
 function shiftMergeRange(range,startRow){
   const m=String(range).match(/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/i);
   if(!m)return range;
@@ -80,6 +60,14 @@ function shiftMergeRange(range,startRow){
   if(r1>=startRow){r1++;r2++}
   else if(r2>=startRow){r2++}
   return m[1]+r1+":"+m[3]+r2;
+}
+
+function mergeRanges(ws){
+  if(ws._merges&&typeof ws._merges==="object"){
+    return Object.values(ws._merges).filter(Boolean).map(v=>String(v.range));
+  }
+  const model=ws.model;
+  return Array.isArray(model?.merges)?model.merges.map(String):[];
 }
 
 function unmergeAll(ws,ranges){
@@ -100,91 +88,91 @@ function restoreMerges(ws,ranges,startRow){
   }
 }
 
-function adjustRowModel(model,newNumber,startRow){
-  const next=clone(model);
-  if(!next)return null;
-  next.number=newNumber;
-  if(Array.isArray(next.cells)){
-    next.cells=next.cells.map(cell=>{
-      const c=clone(cell);
-      if(c.address)c.address=bumpAddress(c.address,startRow);
-      if(c.master)c.master=bumpAddress(c.master,startRow);
-      if(c.formula)c.formula=bumpFormula(c.formula,startRow);
-      if(c.ref)c.ref=bumpAddress(c.ref,startRow);
-      if(c.sharedFormula)c.sharedFormula=bumpAddress(c.sharedFormula,startRow);
-      return c;
-    });
+function snapshotRows(ws,startRow,lastRow,maxCol){
+  const rows={};
+  for(let r=Math.max(1,startRow-1);r<=lastRow;r++){
+    const row=ws.getRow(r);
+    const cells=[];
+    for(let c=1;c<=maxCol;c++){
+      const cell=row.getCell(c);
+      cells[c]={style:clone(cell.style),value:clone(cell.value)};
+    }
+    rows[r]={
+      height:row.height,
+      hidden:row.hidden,
+      outlineLevel:row.outlineLevel,
+      cells
+    };
   }
+  return rows;
+}
+
+function shiftedValue(value,startRow){
+  if(value==null)return null;
+  if(typeof value!=="object")return value;
+  const next=clone(value);
+  if(next.formula)next.formula=bumpFormula(next.formula,startRow);
+  if(next.ref)next.ref=bumpAddress(next.ref,startRow);
+  if(next.sharedFormula)next.sharedFormula=bumpAddress(next.sharedFormula,startRow);
+  if(next.address)next.address=bumpAddress(next.address,startRow);
+  if(next.master)next.master=bumpAddress(next.master,startRow);
   return next;
 }
 
+function writeCellSnapshot(target,source,startRow,keepValue=true){
+  target.value=null;
+  if(source?.style)target.style=clone(source.style);
+  if(keepValue)target.value=shiftedValue(source?.value,startRow);
+}
+
+function copyRowSnapshot(targetRow,sourceRow,startRow,maxCol,keepValues=true){
+  if(sourceRow?.height!=null)targetRow.height=sourceRow.height;
+  else delete targetRow.height;
+  targetRow.hidden=!!sourceRow?.hidden;
+  targetRow.outlineLevel=Number(sourceRow?.outlineLevel)||0;
+  for(let c=1;c<=maxCol;c++){
+    const target=targetRow.getCell(c);
+    const source=sourceRow?.cells?.[c];
+    writeCellSnapshot(target,source,startRow,keepValues);
+  }
+}
+
+function clearRow(ws,rowNumber,maxCol){
+  const row=ws.getRow(rowNumber);
+  for(let c=1;c<=maxCol;c++){
+    const cell=row.getCell(c);
+    cell.value=null;
+  }
+}
+
 function shiftRowsDownWithoutSplice(ws,startRow){
-  const last=ws.rowCount;
-  const sourceModelForInsert=clone(ws.findRow(startRow-1)?.model||null);
+  const last=findStRow(ws);
+  const maxCol=Math.max(MAX_COLUMNS,ws.columnCount||MAX_COLUMNS);
+  const rows=snapshotRows(ws,startRow,last,maxCol);
   const merges=mergeRanges(ws);
 
-  // ExcelJS's normal splice path can break templates with merged cells.
-  // Detach the merge layer first, rebuild rows from models, then restore shifted merges.
+  // Work on ordinary cells while merges are detached. This avoids ExcelJS row.model
+  // reconstruction and therefore avoids malformed Cell/Row objects.
   unmergeAll(ws,merges);
 
-  bumpFormulaRefsAtOrBelow(ws,startRow);
-
-  const models=[];
-  for(let r=startRow;r<=last;r++){
-    models[r]=ws.findRow(r)?.model||null;
-  }
-
-  // Detach all old row objects at and below the insertion point.
-  for(let r=startRow;r<=last+1;r++)ws._rows[r-1]=undefined;
-
-  // Rebuild shifted rows from row models. This never invokes insertRow/spliceRows.
   for(let r=last;r>=startRow;r--){
-    const source=models[r];
-    if(!source)continue;
-    const targetModel=adjustRowModel(source,r+1,startRow);
-    const target=ws.getRow(r+1);
-    target.model=targetModel;
+    copyRowSnapshot(ws.getRow(r+1),rows[r],startRow,maxCol,true);
   }
 
-  // Blank row with the same style/height as the row above ST.
-  const sourceModel=sourceModelForInsert;
-  const inserted=ws.getRow(startRow);
-  if(sourceModel){
-    const blankModel=clone(sourceModel);
-    blankModel.number=startRow;
-    if(Array.isArray(blankModel.cells)){
-      blankModel.cells=blankModel.cells.map(cell=>{
-        const c=clone(cell);
-        if(c.address)c.address=bumpAddress(c.address,startRow);
-        if(c.master)delete c.master;
-        delete c.formula;
-        delete c.sharedFormula;
-        delete c.result;
-        delete c.value;
-        delete c.text;
-        delete c.hyperlink;
-        delete c.comment;
-        c.type=0;
-        return c;
-      });
-    }
-    inserted.model=blankModel;
-  }else{
-    inserted.height=ws.getRow(startRow-1).height;
-  }
+  // The inserted row inherits the visual format of the row directly above ST,
+  // but it contains no product values or formulas.
+  copyRowSnapshot(ws.getRow(startRow),rows[startRow-1],startRow,maxCol,false);
+  clearRow(ws,startRow,maxCol);
 
   restoreMerges(ws,merges,startRow);
   return startRow;
 }
 
-function clearCellsAtoL(ws,rowNumber){
-  for(let c=1;c<=MAX_COLUMNS;c++)cellAt(ws,rowNumber,c).value=null;
-}
-
 function rebuildTotals(ws,stRow){
   const totalsRow=stRow+1;
   [["D",4],["F",6],["L",12]].forEach(([letter,col])=>{
-    cellAt(ws,totalsRow,col).value={formula:"SUM("+letter+PRODUCT_START_ROW+":"+letter+stRow+")"};
+    const cell=cellAt(ws,totalsRow,col);
+    cell.value={formula:"SUM("+letter+PRODUCT_START_ROW+":"+letter+stRow+")"};
   });
 }
 
@@ -198,7 +186,6 @@ function rebalanceSL(ws,totalRows){
 function insertProductRowIntoWorksheet(ws){
   const stRow=findStRow(ws);
   shiftRowsDownWithoutSplice(ws,stRow);
-  clearCellsAtoL(ws,stRow);
   const totalRows=Math.max(4,stRow-PRODUCT_START_ROW+1);
   rebalanceSL(ws,totalRows);
   rebuildTotals(ws,stRow);
