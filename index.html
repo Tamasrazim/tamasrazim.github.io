@@ -127,15 +127,22 @@
       "hasOccupation": [
         {
           "@type": "Occupation",
-          "name": "Web Developer"
+          "name": "Web Developer",
+          "startDate": "2023"
         },
         {
           "@type": "Occupation",
-          "name": "Software Developer"
+          "name": "Software Developer",
+          "startDate": "2023"
         },
         {
           "@type": "Occupation",
-          "name": "Computer Consultant"
+          "name": "Computer Consultant",
+          "startDate": "2023"
+        },
+        {
+          "@type": "Occupation",
+          "name": "Student"
         }
       ],
       "worksFor": {
@@ -179,8 +186,21 @@
         "https://www.twitch.tv/Tamasrazim",
         "https://steamcommunity.com/id/Tamasrazim",
         "https://discord.com/users/Tamasrazim",
-        "https://www.shutterstock.com/g/Tamasrazim",
-        "https://share.google/jtxjBq4Vk69NRbbOX"
+        "https://www.shutterstock.com/g/Tamasrazim"
+      ],
+      "workLocation": {
+        "@type": "Place",
+        "name": "Bangladesh"
+      },
+      "hasCredential": [
+        {
+          "@type": "EducationalOccupationalCredential",
+          "credentialCategory": "Diploma",
+          "educationalLevel": "Diploma in Computer Science and Technology",
+          "recognizedBy": {
+            "@id": "https://tamasrazim.github.io/#iitb"
+          }
+        }
       ]
     },
     {
@@ -299,6 +319,44 @@
       "publisher": {
         "@id": "https://tamasrazim.github.io/#person"
       }
+    },
+    {
+      "@type": "OrganizationRole",
+      "@id": "https://tamasrazim.github.io/#bnc-role",
+      "roleName": "Software / Web Designer and Digital Operations",
+      "startDate": "2026",
+      "member": {
+        "@id": "https://tamasrazim.github.io/#person"
+      },
+      "worksFor": {
+        "@id": "https://tamasrazim.github.io/projects/bncagrocare/#organization"
+      }
+    },
+    {
+      "@type": "OrganizationRole",
+      "@id": "https://tamasrazim.github.io/#shutterstock-role",
+      "roleName": "Stock Contributor",
+      "startDate": "2025",
+      "member": {
+        "@id": "https://tamasrazim.github.io/#person"
+      },
+      "memberOf": {
+        "@type": "Organization",
+        "name": "Shutterstock",
+        "url": "https://www.shutterstock.com/"
+      }
+    },
+    {
+      "@type": "ProfilePage",
+      "@id": "https://tamasrazim.github.io/#profile",
+      "url": "https://tamasrazim.github.io/",
+      "mainEntity": {
+        "@id": "https://tamasrazim.github.io/#person"
+      },
+      "isPartOf": {
+        "@id": "https://tamasrazim.github.io/#website"
+      },
+      "inLanguage": "en"
     }
   ]
 }
