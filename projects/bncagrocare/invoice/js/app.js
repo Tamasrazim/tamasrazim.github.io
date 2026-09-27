@@ -512,9 +512,40 @@ function safeSetCell(cell,value){
     return false;
   }
 }
+function findInvoiceNoTarget(ws){
+  let target=cachedHeaderTarget(ws,"invoiceNo");
+  if(target)return target;
+
+  // Prefer the existing 0002 value in the template.
+  target=scanCells(ws,(text)=>{
+    if(text==="0002"||text==="2")return true;
+    return /^invoice\s*no\.?\s*[:#]?\s*0002$/i.test(text);
+  });
+  if(target)return rememberHeaderTarget("invoiceNo",target);
+
+  // Otherwise find a short "No." label and use its nearest editable value cell.
+  const label=findExactHeader(ws,["no","no.","invoice no","invoice no."]);
+  if(label){
+    const candidates=[
+      cellAt(ws,label.row,label.col+1),
+      cellAt(ws,label.row,label.col+2),
+      cellAt(ws,label.row,label.col+3),
+      cellAt(ws,label.row+1,label.col),
+      cellAt(ws,label.row+1,label.col+1),
+      cellAt(ws,label.row+1,label.col+2)
+    ];
+    target=candidates.map(editableCell).find(cell=>cell && (
+      textOfCell(cell)==="" || /^0+$/.test(textOfCell(cell)) || /^\d{1,4}$/.test(textOfCell(cell))
+    ));
+    if(target)return rememberHeaderTarget("invoiceNo",target);
+  }
+  return null;
+}
+
 function putDirectHeaderField(ws,key,{exact=[],regex=null,value,required=false}){
   if(value==null||value==="")return true;
   let target=cachedHeaderTarget(ws,key);
+  if(key==="invoiceNo"&&!target)target=findInvoiceNoTarget(ws);
   if(!target){
     if(regex)target=findHeaderRegex(ws,regex);
     if(!target&&exact.length)target=findExactHeader(ws,exact);
@@ -746,8 +777,7 @@ function applyHeaderEditsToLive(){
   putDirectHeaderField(liveSheet,"invoiceNo",{
     exact:["0002","invoice no","invoice no.","invoice number"],
     regex:/^invoice\s*no\.?\s*[:#]?\s*\d+$/i,
-    value:state.invoiceNo,
-    required:true
+    value:state.invoiceNo
   });
 
   putDirectHeaderField(liveSheet,"trader",{
