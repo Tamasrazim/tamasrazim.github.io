@@ -443,7 +443,7 @@ function updateSummary(){
 function cellAt(ws,rowNumber,colNumber){
   const r=Number(rowNumber),c=Number(colNumber);
   if(!Number.isInteger(r)||r<1||!Number.isInteger(c)||c<1)return null;
-  return ws.getRow(r).getCell(c);
+  return editableCell(ws.getRow(r).getCell(c));
 }
 function textOfCell(cell){
   const v=cell?.value;
@@ -455,63 +455,118 @@ function textOfCell(cell){
   if(v.text!=null)return String(v.text).trim();
   return"";
 }
-function findCell(ws,labels){
-  const wanted=labels.map(v=>String(v).toLowerCase());
-  let exact=null,fuzzy=null;
+function editableCell(cell){
+  return cell?.master||cell;
+}
+function normalizeHeaderText(value){
+  return String(value??"")
+    .replace(/[\u00a0]/g," ")
+    .replace(/\s+/g," ")
+    .trim()
+    .toLowerCase();
+}
+function rememberHeaderTarget(key,cell){
+  const target=editableCell(cell);
+  if(target)headerTargets[key]=target.address;
+  return target;
+}
+function cachedHeaderTarget(ws,key){
+  const address=headerTargets[key];
+  if(!address)return null;
+  try{return editableCell(ws.getCell(address))}catch{return null}
+}
+function scanCells(ws,predicate){
+  let found=null;
   ws.eachRow(row=>{
     row.eachCell({includeEmpty:false},cell=>{
-      if(exact)return;
-      const s=textOfCell(cell).toLowerCase();
-      if(!s)return;
-      if(wanted.includes(s)){exact=exact||cell;return}
-      if(!fuzzy&&wanted.some(x=>s.includes(x)))fuzzy=cell;
+      if(found)return;
+      const target=editableCell(cell);
+      if(!target)return;
+      let text="";
+      try{text=textOfCell(target)}catch{}
+      if(predicate(normalizeHeaderText(text),target))found=target;
     });
   });
-  return exact||fuzzy;
+  return found;
 }
-function tryWrite(cell,value){
-  try{if(!cell)return false;cell.value=value;return true}catch{return false}
+function findExactHeader(ws,labels){
+  const wanted=labels.map(normalizeHeaderText);
+  return scanCells(ws,text=>wanted.includes(text));
 }
-function writeNextToLabel(ws,anchor,value){
-  if(!anchor||value==null)return false;
-  const candidates=[
-    cellAt(ws,anchor.row,anchor.col+1),
-    cellAt(ws,anchor.row,anchor.col+2),
-    cellAt(ws,anchor.row,anchor.col+3),
-    cellAt(ws,anchor.row+1,anchor.col),
-    cellAt(ws,anchor.row+1,anchor.col+1),
-    cellAt(ws,anchor.row+1,anchor.col+2),
-    cellAt(ws,anchor.row,anchor.col-1)
-  ];
-  for(const raw of candidates){
-    const cell=raw?.master||raw;
-    if(!cell||cell.address===anchor.address)continue;
-    if(!textOfCell(cell)&&tryWrite(cell,value))return true;
+function findHeaderRegex(ws,regex){
+  return scanCells(ws,text=>regex.test(text));
+}
+function safeSetCell(cell,value){
+  const target=editableCell(cell);
+  if(!target)return false;
+  try{
+    target.value=value;
+    return true;
+  }catch{
+    try{
+      if(target.master&&target.master!==target){
+        target.master.value=value;
+        return true;
+      }
+    }catch{}
+    return false;
   }
-  return false;
 }
-function putHeaderField(ws,labels,value,required=false){
+function putDirectHeaderField(ws,key,{exact=[],regex=null,value,required=false}){
   if(value==null||value==="")return true;
-  const key=labels.join("|");
-  if(headerTargets[key]){
-    const target=cellAt(ws,headerTargets[key].row,headerTargets[key].col);
-    if(target){target.value=value;return true}
+  let target=cachedHeaderTarget(ws,key);
+  if(!target){
+    if(regex)target=findHeaderRegex(ws,regex);
+    if(!target&&exact.length)target=findExactHeader(ws,exact);
   }
-  const anchor=findCell(ws,labels);
-  if(!anchor){if(required)throw Error("Could not find workbook field: "+labels[0]);return false}
-  const candidates=[
-    cellAt(ws,anchor.row,anchor.col+1),cellAt(ws,anchor.row,anchor.col+2),cellAt(ws,anchor.row,anchor.col+3),
-    cellAt(ws,anchor.row+1,anchor.col),cellAt(ws,anchor.row+1,anchor.col+1),cellAt(ws,anchor.row+1,anchor.col+2),cellAt(ws,anchor.row,anchor.col-1)
-  ];
-  for(const raw of candidates){
-    const target=raw?.master||raw;
-    if(!target||target.address===anchor.address)continue;
-    if(!textOfCell(target)){
-      target.value=value;headerTargets[key]={row:target.row,col:target.col};return true;
+  if(!target){
+    if(required)throw Error("Could not find workbook field: "+key);
+    return false;
+  }
+  if(!safeSetCell(target,value)){
+    if(required)throw Error("Could not write workbook field: "+key);
+    return false;
+  }
+  rememberHeaderTarget(key,target);
+  return true;
+}
+function findLabelAnchor(ws,labels){
+  return findExactHeader(ws,labels);
+}
+function putNextToHeaderField(ws,key,labels,value,required=false){
+  if(value==null||value==="")return true;
+  let target=cachedHeaderTarget(ws,key);
+  if(!target){
+    const anchor=findLabelAnchor(ws,labels);
+    if(anchor){
+      const candidates=[
+        cellAt(ws,anchor.row,anchor.col+1),
+        cellAt(ws,anchor.row,anchor.col+2),
+        cellAt(ws,anchor.row,anchor.col+3),
+        cellAt(ws,anchor.row+1,anchor.col),
+        cellAt(ws,anchor.row+1,anchor.col+1),
+        cellAt(ws,anchor.row+1,anchor.col+2)
+      ];
+      for(const raw of candidates){
+        const candidate=editableCell(raw);
+        if(!candidate||candidate.address===anchor.address)continue;
+        if(!textOfCell(candidate)){
+          target=candidate;
+          break;
+        }
+      }
     }
   }
-  if(required)throw Error("Could not place workbook field: "+labels[0]);
-  return false;
+  if(!target){
+    if(required)throw Error("Could not place workbook field: "+labels[0]);
+    return false;
+  }
+  if(!safeSetCell(target,value)){
+    if(required)throw Error("Could not write workbook field: "+labels[0]);
+    return false;
+  }
+  rememberHeaderTarget(key,target);
+  return true;
 }
 
 function findStRow(ws){
@@ -581,14 +636,7 @@ async function ensureLiveWorkbook(){
       liveSheet=findInvoiceSheet(liveWorkbook);
       if(!liveSheet)throw Error("Invoice sheet is unavailable");
       stage="header fields";
-      putHeaderField(liveSheet,["reference","ref"],state.ref);
-      putHeaderField(liveSheet,["invoice no","invoice number","invoice"],state.invoiceNo,true);
-      putHeaderField(liveSheet,["date"],displayDate(state.date),true);
-      putHeaderField(liveSheet,["trader / dealer","trader/dealer","trader","dealer"],state.trader);
-      putHeaderField(liveSheet,["buyer"],state.buyer);
-      putHeaderField(liveSheet,["address"],state.address);
-      putHeaderField(liveSheet,["mobile","phone"],state.mobile);
-      putHeaderField(liveSheet,["commission %","commission"],state.commission);
+      applyHeaderEditsToLive();
       stage="product rows";
       while(countInvoiceRows(liveSheet)<state.rows.length)window.BNCInsertProductRow(liveSheet);
       const totalRows=state.rows.length;
@@ -692,14 +740,44 @@ async function buildWorkbook(){
 
 function applyHeaderEditsToLive(){
   if(!liveSheet)return;
-  putHeaderField(liveSheet,["reference","ref"],state.ref);
-  putHeaderField(liveSheet,["invoice no","invoice number","invoice"],state.invoiceNo);
-  putHeaderField(liveSheet,["date"],displayDate(state.date));
-  putHeaderField(liveSheet,["trader / dealer","trader/dealer","trader","dealer"],state.trader);
-  putHeaderField(liveSheet,["buyer"],state.buyer);
-  putHeaderField(liveSheet,["address"],state.address);
-  putHeaderField(liveSheet,["mobile","phone"],state.mobile);
-  putHeaderField(liveSheet,["commission %","commission"],state.commission);
+
+  // Exact/placeholder-based mapping. Never fuzzy-match the generic word
+  // "invoice", because the template also contains the large INVOICE title.
+  putDirectHeaderField(liveSheet,"invoiceNo",{
+    exact:["0002","invoice no","invoice no.","invoice number"],
+    regex:/^invoice\s*no\.?\s*[:#]?\s*\d+$/i,
+    value:state.invoiceNo,
+    required:true
+  });
+
+  putDirectHeaderField(liveSheet,"trader",{
+    regex:/^m\s*\/\s*s\b.*trader/i,
+    exact:["trader / dealer","trader/dealer","m/s traders"],
+    value:state.trader
+  });
+
+  putDirectHeaderField(liveSheet,"buyer",{
+    regex:/^(buyer\s*)?name\s*:/i,
+    exact:["buyer","buyer name","name:"],
+    value:state.buyer
+  });
+
+  putDirectHeaderField(liveSheet,"address",{
+    exact:["address","dealer address","buyer address"],
+    value:state.address
+  });
+
+  putDirectHeaderField(liveSheet,"mobile",{
+    exact:["mobile","mobile:","phone","phone:"],
+    value:state.mobile
+  });
+
+  // These are label/value pairs in the template, so use exact label matching
+  // rather than the old fuzzy matcher.
+  putNextToHeaderField(liveSheet,"ref",["reference","ref"],state.ref);
+  putNextToHeaderField(liveSheet,"date",["date"],displayDate(state.date));
+  putNextToHeaderField(liveSheet,"commission",["commission %","commission"],state.commission);
+
   applyInvoiceCalculationsToLive();
 }
 
