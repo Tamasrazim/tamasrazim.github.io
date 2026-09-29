@@ -19,7 +19,8 @@
       "width",
       "height",
       "fps",
-      "duration"
+      "duration",
+      "sourceModules"
     ]
   },
   "ingestion": {

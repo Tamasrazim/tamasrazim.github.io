@@ -55,8 +55,9 @@ impl AssetService {
         let conn = db::open(&database)?;
 
         let (sha256, size_bytes) = hash_file(source)?;
+        let incoming_metadata = metadata.unwrap_or_else(|| Value::Object(Default::default()));
         if let Some(existing) = find_by_hash(&conn, &sha256)? {
-            return Ok(existing);
+            return merge_duplicate_metadata(&conn, &existing, incoming_metadata);
         }
 
         let target_dir = project.join("renders");
@@ -75,7 +76,7 @@ impl AssetService {
 
         let asset_id = uuid::Uuid::new_v4().to_string();
         let now = Utc::now().to_rfc3339();
-        let metadata_value = metadata.unwrap_or_else(|| Value::Object(Default::default()));
+        let metadata_value = incoming_metadata;
         let metadata_json = serde_json::to_string(&metadata_value)?;
         let relative_path = format!("renders/{}", target_name);
         let mime_type = mime_from_filename(&filename);
@@ -182,6 +183,62 @@ fn copy_file(source: &Path, target: &Path) -> Result<(), AssetError> {
     }
 
     Ok(())
+}
+
+fn merge_duplicate_metadata(
+    conn: &rusqlite::Connection,
+    existing: &AssetRecord,
+    incoming: Value,
+) -> Result<AssetRecord, AssetError> {
+    let mut merged = match existing.metadata.clone() {
+        Value::Object(value) => value,
+        _ => Map::new(),
+    };
+
+    let mut source_modules = match merged.remove("sourceModules") {
+        Some(Value::Array(values)) => values,
+        _ => Vec::new(),
+    };
+
+    if let Some(existing_module) = merged
+        .get("sourceModule")
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+    {
+        if !source_modules.iter().any(|item| item.as_str() == Some(existing_module)) {
+            source_modules.push(Value::String(existing_module.to_lowercase()));
+        }
+        merged.remove("sourceModule");
+    }
+
+    if let Value::Object(incoming_map) = incoming {
+        for (key, value) in incoming_map {
+            if key == "sourceModule" {
+                let module = value.as_str().unwrap_or_default().trim().to_lowercase();
+                if !module.is_empty() && !source_modules.iter().any(|item| item.as_str() == Some(module.as_str())) {
+                    source_modules.push(Value::String(module));
+                }
+            } else if key != "sourceModules" {
+                merged.insert(key, value);
+            }
+        }
+    }
+
+    if !source_modules.is_empty() {
+        merged.insert("sourceModules".into(), Value::Array(source_modules));
+    }
+
+    let now = Utc::now().to_rfc3339();
+    let metadata_json = serde_json::to_string(&Value::Object(merged.clone()))?;
+    conn.execute(
+        "UPDATE assets SET metadata_json=?1,updated_at=?2 WHERE asset_id=?3",
+        params![metadata_json, now, existing.asset_id],
+    )?;
+
+    let mut updated = existing.clone();
+    updated.metadata = Value::Object(merged);
+    Ok(updated)
 }
 
 fn find_by_hash(conn: &rusqlite::Connection, sha256: &str) -> Result<Option<AssetRecord>, AssetError> {
@@ -293,6 +350,40 @@ mod tests {
         );
 
         assert!(matches!(result, Err(AssetError::InvalidFilename)));
+    }
+
+    #[test]
+    fn deduplicate_merges_source_modules() {
+        let root = tempfile::tempdir().expect("temp directory");
+        let source = root.path().join("render.webm");
+        fs::write(&source, b"shared-output").expect("source");
+
+        let project_root = root.path().join("provenance.tamasrazim");
+        ProjectFixture::create(&project_root);
+
+        let service = AssetService::default();
+        let first = service.ingest(
+            project_root.to_str().unwrap(),
+            source.to_str().unwrap(),
+            "video",
+            Some(serde_json::json!({"sourceModule":"c2m"})),
+        ).expect("first ingest");
+        assert_eq!(first.metadata.get("sourceModule").and_then(Value::as_str), Some("c2m"));
+
+        let second = service.ingest(
+            project_root.to_str().unwrap(),
+            source.to_str().unwrap(),
+            "video",
+            Some(serde_json::json!({"sourceModule":"forge"})),
+        ).expect("second ingest");
+
+        let modules = second.metadata
+            .get("sourceModules")
+            .and_then(Value::as_array)
+            .expect("sourceModules");
+        assert_eq!(modules.len(), 2);
+        assert!(modules.iter().any(|v| v.as_str() == Some("c2m")));
+        assert!(modules.iter().any(|v| v.as_str() == Some("forge")));
     }
 
     #[test]
