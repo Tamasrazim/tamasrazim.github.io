@@ -2,6 +2,8 @@ name: KYNESTRA Windows Installer
 
 on:
   push:
+    branches:
+      - "kynestra-build"
     tags:
       - "kynestra-v*"
   workflow_dispatch:
