@@ -289,3 +289,12 @@ body > .site-footer{
   transform:scaleX(1);
   transform-origin:left;
 }
+
+/* Physical canvas feedback for desktop drag navigation. */
+@media(pointer:fine){
+  body:not(.axis-dragging){cursor:default;}
+  body.axis-dragging{cursor:grabbing;}
+  body.axis-dragging *{cursor:grabbing !important;}
+  body.axis-dragging .cursor-dot,
+  body.axis-dragging .cursor-ring{pointer-events:none;}
+}
