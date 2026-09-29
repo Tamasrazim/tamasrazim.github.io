@@ -2,21 +2,31 @@
 
 KYNESTRA is a modular desktop creative ecosystem.
 
-## Architecture
+## Foundation
 
-KYNESTRA is developed separately inside this folder and does not replace existing projects.
+The current desktop runtime uses Tauri 2 with a Rust Core and a vanilla frontend embedded directly by Tauri. The current shell does not require a Node runtime.
 
-## Modules
+Core owns:
+- project lifecycle
+- .tamasrazim package initialization and validation
+- SQLite metadata
+- persistent tasks
+- Core events
+- shared schema foundations
 
-- Core
+Modules:
 - Forge
 - C2M (Code Motion)
 - Stock Vault
 
-## Project Format
+## Repository boundary
+
+All KYNESTRA implementation lives under /KYNESTRA/. Existing production website and project files outside this folder are not part of the KYNESTRA build.
+
+## Desktop entry
+
+KYNESTRA/desktop/tauri/
+
+## Project format
 
 .tamasrazim
-
-## Development Status
-
-Alpha foundation phase.
