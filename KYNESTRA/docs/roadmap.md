@@ -41,8 +41,8 @@
 - Plugin system
 - Updater
 - Task recovery
-- Tests (unit/integration coverage in Core; native Windows build still unverified)
-- Windows packaging
+- Tests (unit/integration coverage in Core; native Windows release build runs through the installer workflow)
+- [x] Windows packaging and installer release workflow
 - Stable .tamasrazim migrations
 
 ## Alpha 0.5 — Core integrity hardening

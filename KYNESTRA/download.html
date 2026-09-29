@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>KYNESTRA — Download</title>
+  <meta name="description" content="Download and install KYNESTRA for Windows.">
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      background: #0a0a0a;
+      color: #f5f5f5;
+    }
+    main { width: min(680px, 100%); }
+    h1 { font-size: clamp(42px, 8vw, 84px); line-height: .9; margin: 0 0 18px; letter-spacing: -.06em; }
+    p { color: #aaa; line-height: 1.6; }
+    .card {
+      margin-top: 28px;
+      padding: 24px;
+      border: 1px solid #292929;
+      border-radius: 20px;
+      background: #111;
+    }
+    a.button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+      min-height: 52px;
+      padding: 0 24px;
+      border-radius: 12px;
+      background: #fff;
+      color: #000;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    code { color: #ddd; }
+    ol { color: #bbb; padding-left: 22px; line-height: 1.8; }
+    .muted { font-size: 14px; color: #777; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="muted">KYNESTRA · WINDOWS</p>
+    <h1>Install KYNESTRA.</h1>
+    <p>Download the current Windows setup executable, run it, and follow the normal Windows installer steps.</p>
+
+    <div class="card">
+      <strong>Windows installer</strong>
+      <p class="muted">The release workflow publishes the latest NSIS setup file as <code>KYNESTRA-setup.exe</code>.</p>
+      <a class="button" href="https://github.com/Tamasrazim/tamasrazim.github.io/releases/latest/download/KYNESTRA-setup.exe">Download KYNESTRA Setup</a>
+    </div>
+
+    <div class="card">
+      <strong>Install</strong>
+      <ol>
+        <li>Download <code>KYNESTRA-setup.exe</code>.</li>
+        <li>Open the file.</li>
+        <li>Follow the installer prompts.</li>
+        <li>Launch KYNESTRA from the installed app shortcut.</li>
+      </ol>
+    </div>
+
+    <p class="muted">KYNESTRA desktop packaging currently targets Windows x64 through the Tauri NSIS bundle.</p>
+  </main>
+</body>
+</html>
