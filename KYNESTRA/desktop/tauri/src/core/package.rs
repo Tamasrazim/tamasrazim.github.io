@@ -218,6 +218,11 @@ impl PackageService {
             return Err(error);
         }
 
+        if let Err(error) = ProjectManager::default().open(destination.to_string_lossy().as_ref()) {
+            let _ = fs::remove_dir_all(&destination);
+            return Err(PackageError::ImportedProjectInvalid(error.to_string()));
+        }
+
         Ok(ImportResult {
             project_path: destination.to_string_lossy().into_owned(),
             project_id: manifest.project_id,
@@ -407,6 +412,8 @@ pub enum PackageError {
     DestinationExists,
     #[error("unsafe package path: {0}")]
     UnsafePath(String),
+    #[error("imported project failed validation: {0}")]
+    ImportedProjectInvalid(String),
     #[error("package integrity mismatch: {0}")]
     IntegrityMismatch(String),
     #[error("filesystem error: {0}")]
@@ -596,6 +603,62 @@ mod tests {
         let archive = root.path().join("Symlinked.tamasrazim");
         let result = PackageService::default().export(project.to_str().unwrap(), archive.to_str().unwrap());
         assert!(matches!(result, Err(PackageError::InvalidProject)));
+    }
+
+    #[test]
+    fn import_rejects_invalid_project_database_and_cleans_destination() {
+        let root = tempfile::tempdir().expect("root");
+        let package_path = root.path().join("Broken.tamasrazim");
+        let destination_root = root.path().join("imported");
+
+        let manifest_bytes = br#"{"format":"tamasrazim","formatVersion":"0.1","projectId":"12345678-bad-db","name":"Broken","createdBy":"KYNESTRA"}"#;
+        let db_bytes = b"not-a-sqlite-database";
+
+        fn digest(bytes: &[u8]) -> String {
+            let mut hasher = Sha256::new();
+            hasher.update(bytes);
+            format!("{:x}", hasher.finalize())
+        }
+
+        let package_manifest = PackageManifest {
+            format: "tamasrazim".into(),
+            package_version: PACKAGE_FORMAT_VERSION,
+            project_id: "12345678-bad-db".into(),
+            name: "Broken".into(),
+            created_at: "now".into(),
+            files: vec![
+                PackageFile {
+                    path: "manifest.json".into(),
+                    size: manifest_bytes.len() as u64,
+                    sha256: digest(manifest_bytes),
+                },
+                PackageFile {
+                    path: "project.db".into(),
+                    size: db_bytes.len() as u64,
+                    sha256: digest(db_bytes),
+                },
+            ],
+        };
+
+        let file = File::create(&package_path).expect("package");
+        let mut zip = ZipWriter::new(file);
+        let options = SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);
+        let package_manifest_bytes = serde_json::to_vec_pretty(&package_manifest).expect("package manifest");
+        zip.start_file(PACKAGE_MANIFEST, options).expect("package manifest entry");
+        zip.write_all(&package_manifest_bytes).expect("package manifest write");
+        zip.start_file("manifest.json", options).expect("manifest entry");
+        zip.write_all(manifest_bytes).expect("manifest write");
+        zip.start_file("project.db", options).expect("db entry");
+        zip.write_all(db_bytes).expect("db write");
+        zip.finish().expect("finish");
+
+        let result = PackageService::default().import(
+            package_path.to_str().unwrap(),
+            &destination_root,
+        );
+
+        assert!(matches!(result, Err(PackageError::ImportedProjectInvalid(_))));
+        assert!(!destination_root.join("broken-12345678.tamasrazim").exists());
     }
 
     #[test]
