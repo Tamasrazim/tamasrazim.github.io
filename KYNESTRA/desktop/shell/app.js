@@ -8,11 +8,16 @@ const state = { projects: [], core: null, activeProject: null };
 
 const views = {
   home: renderHome,
-  forge: () => renderModule('Forge', 'Creation workspace boundary is ready. Forge will become the source and recipe module.'),
+  forge: renderForge,
   c2m: renderC2M,
   vault: renderVault,
   settings: renderSettings
 };
+
+async function renderForge() {
+  view.innerHTML =
+    '<div class="card"><h2>Forge</h2><p class="muted">KYNESTRA Forge currently ships the real Format Forge workspace as an independent module. It handles browser-first conversion, batch processing and ZIP export; the production page remains untouched.</p><div class="actions"><button id="launch-forge" class="action primary">Launch Forge</button></div><div class="notice">Forge is intentionally separate from C2M and Stock Vault. Core handoff contracts will be added without merging module internals.</div></div>';
+}
 
 async function renderC2M() {
   const project = state.activeProject;
@@ -295,5 +300,5 @@ document.querySelectorAll('#nav button').forEach(button => button.addEventListen
   views[name]();
 }));
 
-document.getElementById('view')?.addEventListener('click', event => { if (event.target?.id === 'launch-c2m') window.location.href = 'modules/c2m/renderer/index.html'; });
+document.getElementById('view')?.addEventListener('click', event => { if (event.target?.id === 'launch-c2m') window.location.href = 'modules/c2m/renderer/index.html'; if (event.target?.id === 'launch-forge') window.location.href = 'modules/forge/renderer/index.html'; });
 init();
