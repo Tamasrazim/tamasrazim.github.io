@@ -155,6 +155,11 @@ impl PackageService {
             }
         }
 
+        let inner_manifest_bytes = fs::read(destination.join("manifest.json"))?;
+        let inner_manifest: ProjectManifest = serde_json::from_slice(&inner_manifest_bytes)
+            .map_err(|_| PackageError::InvalidProjectManifest)?;
+        validate_manifest_consistency(&manifest, &inner_manifest)?;
+
         Ok(ImportResult {
             project_path: destination.to_string_lossy().into_owned(),
             project_id: manifest.project_id,
@@ -174,6 +179,17 @@ fn validate_project(path: &str) -> Result<PathBuf, PackageError> {
         return Err(PackageError::InvalidProject);
     }
     Ok(root)
+}
+
+fn validate_manifest_consistency(package: &PackageManifest, project: &ProjectManifest) -> Result<(), PackageError> {
+    if project.format != "tamasrazim"
+        || project.project_id != package.project_id
+        || project.name != package.name
+    {
+        return Err(PackageError::ManifestMismatch);
+    }
+
+    Ok(())
 }
 
 fn validate_package_manifest(manifest: &PackageManifest) -> Result<(), PackageError> {
@@ -292,6 +308,8 @@ pub enum PackageError {
     InvalidProjectManifest,
     #[error("invalid .tamasrazim package")]
     InvalidPackage,
+    #[error("package manifest does not match project manifest")]
+    ManifestMismatch,
     #[error("invalid package output path")]
     InvalidOutput,
     #[error("destination already exists")]
@@ -343,6 +361,35 @@ mod tests {
     #[test]
     fn package_manifest_rejects_windows_separator() {
         assert!(safe_relative_path(r"source\\outside.txt").is_err());
+    }
+
+    #[test]
+    fn package_manifest_must_match_project_manifest() {
+        let package = PackageManifest {
+            format: "tamasrazim".into(),
+            package_version: PACKAGE_FORMAT_VERSION,
+            project_id: "project-a".into(),
+            name: "Project A".into(),
+            created_at: "now".into(),
+            files: Vec::new(),
+        };
+        let matching = ProjectManifest {
+            format: "tamasrazim".into(),
+            format_version: "0.1".into(),
+            project_id: "project-a".into(),
+            name: "Project A".into(),
+            created_by: "KYNESTRA".into(),
+        };
+        assert!(validate_manifest_consistency(&package, &matching).is_ok());
+
+        let mismatched = ProjectManifest {
+            project_id: "project-b".into(),
+            ..matching
+        };
+        assert!(matches!(
+            validate_manifest_consistency(&package, &mismatched),
+            Err(PackageError::ManifestMismatch)
+        ));
     }
 
     #[test]
