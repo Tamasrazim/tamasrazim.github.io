@@ -66,6 +66,8 @@ impl PackageService {
         let project: ProjectManifest = serde_json::from_slice(&manifest_json)
             .map_err(|_| PackageError::InvalidProjectManifest)?;
 
+        validate_working_manifest(&project)?;
+
         let mut paths = Vec::new();
         collect_files(&root, &root, &mut paths)?;
         paths.sort();
@@ -201,11 +203,25 @@ fn validate_project(path: &str) -> Result<PathBuf, PackageError> {
     Ok(root)
 }
 
+fn validate_working_manifest(project: &ProjectManifest) -> Result<(), PackageError> {
+    if project.format != "tamasrazim"
+        || project.format_version != "0.1"
+        || project.project_id.trim().is_empty()
+        || project.name.trim().is_empty()
+        || project.created_by != "KYNESTRA"
+    {
+        return Err(PackageError::InvalidProjectManifest);
+    }
+
+    Ok(())
+}
+
 fn validate_manifest_consistency(package: &PackageManifest, project: &ProjectManifest) -> Result<(), PackageError> {
     if project.format != "tamasrazim"
         || project.format_version != "0.1"
         || project.project_id != package.project_id
         || project.name != package.name
+        || project.created_by != "KYNESTRA"
     {
         return Err(PackageError::ManifestMismatch);
     }
@@ -357,6 +373,24 @@ mod tests {
         assert!(safe_relative_path("../outside").is_err());
         assert!(safe_relative_path("/absolute").is_err());
         assert!(safe_relative_path("ok/file.txt").is_ok());
+    }
+
+    #[test]
+    fn working_manifest_requires_kynestra_creator() {
+        let valid = ProjectManifest {
+            format: "tamasrazim".into(),
+            format_version: "0.1".into(),
+            project_id: "id".into(),
+            name: "Name".into(),
+            created_by: "KYNESTRA".into(),
+        };
+        assert!(validate_working_manifest(&valid).is_ok());
+
+        let invalid = ProjectManifest {
+            created_by: "Other".into(),
+            ..valid
+        };
+        assert!(matches!(validate_working_manifest(&invalid), Err(PackageError::InvalidProjectManifest)));
     }
 
     #[test]
