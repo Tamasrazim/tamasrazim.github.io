@@ -1,4 +1,4 @@
-const CACHE = 'kynestra-c2m-pwa-v2';
+const CACHE = 'kynestra-c2m-pwa-v3';
 const CORE = [
   './',
   './index.html',
@@ -8,13 +8,3 @@ const CORE = [
 ];
 
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE)
-      .then(cache => cache.addAll(CORE))
-      .then(() => self.skipWaiting())
-  );
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys()
