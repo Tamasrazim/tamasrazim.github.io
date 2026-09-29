@@ -1,0 +1,33 @@
+{
+  "version": "0.1",
+  "sourceModules": [
+    "c2m",
+    "forge",
+    "external"
+  ],
+  "asset": {
+    "required": [
+      "assetId",
+      "filename",
+      "relativePath",
+      "kind"
+    ],
+    "optional": [
+      "mimeType",
+      "sizeBytes",
+      "sha256",
+      "width",
+      "height",
+      "fps",
+      "duration"
+    ]
+  },
+  "ingestion": {
+    "rule": "A successful C2M render may register an output as a Vault asset.",
+    "duplicateKey": [
+      "projectId",
+      "sha256"
+    ],
+    "status": "imported"
+  }
+}
