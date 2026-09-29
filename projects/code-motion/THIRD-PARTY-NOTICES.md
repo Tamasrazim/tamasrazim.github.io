@@ -1,4 +1,4 @@
-# Code → Motion technical note
+# KYNESTRA technical note
 
 ## Runtime dependencies
 
