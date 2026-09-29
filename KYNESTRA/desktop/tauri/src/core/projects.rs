@@ -126,13 +126,9 @@ impl ProjectManager {
                 continue;
             }
 
-            let manifest: ProjectManifest = match serde_json::from_slice(&fs::read(&manifest_path)?) {
-                Ok(value) => value,
-                Err(_) => continue,
-            };
-
-            if validate_manifest(&manifest).is_ok() {
-                projects.push(summary_from_manifest(&path, &manifest));
+            let path_string = path.to_string_lossy().into_owned();
+            if let Ok(project) = self.open(&path_string) {
+                projects.push(project);
             }
         }
 
@@ -336,6 +332,22 @@ mod tests {
             validated_root(&created.project.path),
             Err(ProjectError::DatabaseManifestMismatch)
         ));
+    }
+
+    #[test]
+    fn list_skips_project_with_database_mismatch() {
+        let root = tempfile::tempdir().expect("root");
+        let manager = ProjectManager::default();
+        let created = manager.create(root.path(), "Broken Project").expect("project");
+
+        let conn = db::open(&Path::new(&created.project.path).join("project.db")).expect("db");
+        conn.execute(
+            "UPDATE projects SET name='Wrong Name' WHERE project_id=?1",
+            [created.project.project_id.as_str()],
+        ).expect("update");
+
+        let listed = manager.list(root.path()).expect("list");
+        assert!(listed.is_empty());
     }
 
     #[test]
