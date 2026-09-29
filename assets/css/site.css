@@ -301,8 +301,9 @@
       position:absolute;left:0;bottom:25px;display:flex;align-items:center;gap:10px;
       font:500 .65rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)
     }
-    .scroll-cue span{position:relative;width:24px;height:1px;background:currentColor;overflow:hidden}
-    .scroll-cue span::after{
+    .scroll-cue-label{display:inline-block;white-space:nowrap}
+    .scroll-cue-line{position:relative;width:24px;height:1px;background:currentColor;overflow:hidden}
+    .scroll-cue-line::after{
       content:'';position:absolute;inset:0;background:currentColor;transform:translateX(-110%);
       animation:cue 1.8s ease-in-out infinite
     }
