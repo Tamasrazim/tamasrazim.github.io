@@ -169,7 +169,7 @@ impl RenderService {
         tasks.update(project_path, &task_id, "failed", 0.0, Some(error.into()))?;
 
         let reader = RenderJobReader::new(&conn, job_id)?;
-        Ok(reader.finish())
+        reader.finish()
     }
 
     pub fn recover(&self, project_path: &str, job_id: &str, tasks: &TaskService) -> Result<RenderJobRecord, RenderError> {
