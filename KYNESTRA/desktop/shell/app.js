@@ -5,7 +5,7 @@ const dialogApi = window.__TAURI__?.dialog ?? null;
 const title = document.getElementById('title');
 const view = document.getElementById('view');
 const statusEl = document.getElementById('status');
-const state = { projects: [], core: null, activeProject: null, currentView: 'home', refreshToken: 0 };
+const state = { projects: [], modules: [], core: null, activeProject: null, currentView: 'home', refreshToken: 0 };
 
 const views = {
   home: renderHome,
@@ -350,7 +350,10 @@ async function exportPackage() {
 
 function renderHome() {
   const cards = state.projects.map(p => '<div class="project"><b>'+escapeHtml(p.name)+'</b><code>'+escapeHtml(p.path)+'</code><div class="actions"><button class="action" data-open="'+escapeAttr(p.path)+'">Open</button></div></div>').join('');
-  view.innerHTML = '<div class="card"><h2>Core workspace</h2><p class="muted">The shell is connected to Rust Core. Working projects are local .tamasrazim directories; portable projects are ZIP-backed .tamasrazim packages with integrity manifests.</p><div class="actions"><button id="new-project" class="action primary">New Project</button><button id="import-package" class="action">Import .tamasrazim</button>'+(state.activeProject ? '<button id="export-package" class="action">Export Active Project</button>' : '')+'</div>'+(state.activeProject ? '<div class="notice">Active: <strong>'+escapeHtml(state.activeProject.name)+'</strong></div><div id="task-center" class="projects"><div class="notice">Loading Core tasks…</div></div>' : '')+'<div class="projects">'+(cards || '<div class="notice">No projects created yet.</div>')+'</div></div><div class="grid"><div class="tile"><b>Forge</b><span class="muted">Create</span></div><div class="tile"><b>C2M</b><span class="muted">Render</span></div><div class="tile"><b>Stock Vault</b><span class="muted">Manage</span></div></div>';
+  const modules = state.modules.length
+    ? state.modules.map(m => '<div class="project"><b>'+escapeHtml(m.display_name)+'</b><code>'+escapeHtml(m.id)+' · v'+escapeHtml(m.version)+'</code><span class="muted">'+escapeHtml(m.module_type)+' · '+escapeHtml(m.capabilities.join(' · '))+'</span></div>').join('')
+    : '<div class="notice">No module manifests loaded.</div>';
+  view.innerHTML = '<div class="card"><h2>Core workspace</h2><p class="muted">The shell is connected to Rust Core. Working projects are local .tamasrazim directories; portable projects are ZIP-backed .tamasrazim packages with integrity manifests.</p><div class="actions"><button id="new-project" class="action primary">New Project</button><button id="import-package" class="action">Import .tamasrazim</button>'+(state.activeProject ? '<button id="export-package" class="action">Export Active Project</button>' : '')+'</div>'+(state.activeProject ? '<div class="notice">Active: <strong>'+escapeHtml(state.activeProject.name)+'</strong></div><div id="task-center" class="projects"><div class="notice">Loading Core tasks…</div></div>' : '')+'<div class="projects">'+(cards || '<div class="notice">No projects created yet.</div>')+'</div></div><div class="card"><h3>Loaded Modules</h3><div class="projects">'+modules+'</div></div><div class="grid"><div class="tile"><b>Forge</b><span class="muted">Create</span></div><div class="tile"><b>C2M</b><span class="muted">Render</span></div><div class="tile"><b>Stock Vault</b><span class="muted">Manage</span></div></div>';
   document.getElementById('new-project')?.addEventListener('click', createProject);
   document.getElementById('import-package')?.addEventListener('click', importPackage);
   document.getElementById('export-package')?.addEventListener('click', exportPackage);
@@ -427,7 +430,8 @@ async function init() {
   try {
     if (invoke) {
       state.core = await api('core_status');
-      statusEl.textContent = 'CORE ONLINE · '+state.core.version;
+      state.modules = await api('list_modules');
+      statusEl.textContent = 'CORE ONLINE · '+state.core.version+' · '+state.modules.length+' MODULES';
       await refreshProjects();
       if (eventApi?.listen) await eventApi.listen('kynestra:event', handleCoreEvent);
     } else statusEl.textContent = 'WEB PREVIEW';

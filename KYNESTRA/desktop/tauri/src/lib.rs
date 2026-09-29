@@ -4,6 +4,7 @@ use core::accounts::AccountRecord;
 use core::assets::AssetRecord;
 use core::events::CoreEvent;
 use core::projects::{CreateProjectResult, ProjectSummary};
+use core::modules::ModuleManifest;
 use core::render::RenderJobRecord;
 use core::submissions::SubmissionRecord;
 use core::tasks::TaskRecord;
@@ -13,6 +14,11 @@ use tauri::{AppHandle, Manager};
 #[tauri::command]
 fn core_status() -> CoreStatus {
     CoreStatus { name: "KYNESTRA CORE".into(), version: env!("CARGO_PKG_VERSION").into(), status: "online".into() }
+}
+
+#[tauri::command]
+fn list_modules(app: AppHandle) -> Vec<ModuleManifest> {
+    app.state::<CoreState>().modules.clone()
 }
 
 #[tauri::command]
@@ -254,13 +260,14 @@ pub fn run() {
         .setup(|app| {
             let data_root=app.path().app_data_dir()?.join("projects");
             std::fs::create_dir_all(&data_root)?;
-            let state = CoreState::new(data_root.clone());
+            let state = CoreState::new(data_root.clone())
+                .map_err(|e| Box::<dyn std::error::Error>::from(e))?;
             state.tasks.recover_all(&data_root).map_err(|e| Box::<dyn std::error::Error>::from(e))?;
             app.manage(state);
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            core_status,list_projects,create_project,open_project,create_task,list_tasks,update_task,
+            core_status,list_modules,list_projects,create_project,open_project,create_task,list_tasks,update_task,
             create_render_job,start_render_job,recover_render_job,complete_render_job,fail_render_job,
             list_assets,list_render_jobs,list_accounts,create_account,update_account_status,
             list_submissions,set_submission_status,check_submission_public_status,export_project_package,import_project_package,ingest_module_output

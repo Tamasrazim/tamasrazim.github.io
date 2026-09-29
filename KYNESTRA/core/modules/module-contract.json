@@ -1,0 +1,26 @@
+{
+  "version": "0.1",
+  "name": "KYNESTRA Module Contract",
+  "required": [
+    "id",
+    "name",
+    "displayName",
+    "version",
+    "apiVersion",
+    "entry",
+    "type",
+    "capabilities"
+  ],
+  "rules": [
+    "Module IDs are lowercase stable identifiers.",
+    "apiVersion must match the Core-supported API version.",
+    "Capabilities describe module-owned behavior; Core-owned persistence remains behind Core commands.",
+    "Modules may declare events they consume or emit, but may not mutate another module's private implementation.",
+    "A builtin entry indicates a module that is surfaced by the desktop shell and Core without a separate renderer entry."
+  ],
+  "types": [
+    "renderer",
+    "converter",
+    "service"
+  ]
+}
