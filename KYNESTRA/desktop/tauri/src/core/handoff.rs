@@ -1,5 +1,5 @@
 use super::assets::{AssetError, AssetRecord, AssetService};
-use serde_json::{json, Map, Value};
+use serde_json::{Map, Value};
 
 #[derive(Default)]
 pub struct HandoffService;
