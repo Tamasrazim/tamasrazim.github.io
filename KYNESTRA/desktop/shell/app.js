@@ -443,5 +443,25 @@ document.querySelectorAll('#nav button').forEach(button => button.addEventListen
   views[name]();
 }));
 
-document.getElementById('view')?.addEventListener('click', event => { if (event.target?.id === 'launch-c2m') window.location.href = 'modules/c2m/renderer/index.html'; if (event.target?.id === 'launch-forge') window.location.href = 'modules/forge/renderer/index.html'; });
+async function launchC2M() {
+  const project = state.activeProject;
+  let query = '';
+  if (project) {
+    try {
+      const jobs = await api('list_render_jobs', { projectPath: project.path });
+      const handoffJob = jobs.find(job => job.status === 'running') || jobs.find(job => job.status === 'queued');
+      const params = new URLSearchParams({ projectPath: project.path });
+      if (handoffJob) params.set('jobId', handoffJob.job_id);
+      query = '?'+params.toString();
+    } catch (error) {
+      console.warn('Could not attach Core render context to C2M:', error);
+    }
+  }
+  window.location.href = 'modules/c2m/renderer/index.html'+query;
+}
+
+document.getElementById('view')?.addEventListener('click', event => {
+  if (event.target?.id === 'launch-c2m') launchC2M();
+  if (event.target?.id === 'launch-forge') window.location.href = 'modules/forge/renderer/index.html';
+});
 init();
