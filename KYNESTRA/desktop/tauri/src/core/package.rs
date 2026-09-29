@@ -52,7 +52,10 @@ impl PackageService {
         }
 
         let canonical_root = fs::canonicalize(&root)?;
-        let output_parent = output.parent().unwrap_or_else(|| Path::new("."));
+        let output_parent = output
+            .parent()
+            .filter(|value| !value.as_os_str().is_empty())
+            .unwrap_or_else(|| Path::new("."));
         fs::create_dir_all(output_parent)?;
         let canonical_parent = fs::canonicalize(output_parent)?;
 
