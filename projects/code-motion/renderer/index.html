@@ -17088,6 +17088,21 @@ function csvEscape(value) {
   var s = String(value == null ? '' : value);
   return '"' + s.replace(/"/g, '""') + '"';
 }
+function stockMetadataSingleCsv(entry) {
+  var rows = [
+    ['Commercial Title','Description','Keywords','Filename','Status'],
+    [
+      entry.commercialTitle,
+      entry.description,
+      entry.keywords.join(', '),
+      entry.filename,
+      entry.status
+    ]
+  ];
+  return rows.map(function (row) {
+    return row.map(csvEscape).join(',');
+  }).join('\\r\\n') + '\\r\\n';
+}
 function stockMetadataCsv(entries) {
   var rows = [['Commercial Title','Description','Keywords','Filename','Status']];
   entries.forEach(function (e) {
@@ -17295,6 +17310,25 @@ async function renderPrismBatch(limit, label) {
           completed++;
           metadataEntry.status = 'completed';
           batchLog('batch complete → ' + job.fileName, true);
+
+          /*
+           * Each flower gets its own CSV beside its video.
+           * The CSV uses the exact commercial-title stem:
+           * Prism Bluebell — Translucent Geometric Flower Animation.csv
+           */
+          try {
+            var metadataFileName = stockMeta.commercialTitle + '.csv';
+            var metadataBlob = new Blob([stockMetadataSingleCsv(metadataEntry)], {
+              type: 'text/csv;charset=utf-8'
+            });
+            await writeBlobToDirectory(outputDir, metadataBlob, metadataFileName);
+            metadataEntry.metadataFilename = metadataFileName;
+            batchLog('metadata saved → ' + metadataFileName, true);
+          } catch (metadataError) {
+            metadataEntry.status = 'metadata export failed';
+            batchLog('metadata export failed for ' + title + ' — ' +
+              String(metadataError && metadataError.message || metadataError), true);
+          }
         } else {
           failed++;
           metadataEntry.status = 'render failed';
