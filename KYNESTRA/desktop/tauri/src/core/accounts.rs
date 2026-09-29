@@ -34,6 +34,7 @@ impl AccountService {
         let conn = db::open(&Path::new(project_path).join("project.db"))?;
         let account_id = uuid::Uuid::new_v4().to_string();
         let now = Utc::now().to_rfc3339();
+        let profile_url = profile_url.filter(|v| !v.trim().is_empty());
 
         conn.execute(
             "INSERT INTO platform_accounts (account_id,platform,display_name,profile_url,status,created_at,updated_at)
@@ -42,7 +43,7 @@ impl AccountService {
                 account_id,
                 platform.trim(),
                 display_name.trim(),
-                profile_url.filter(|v| !v.trim().is_empty()),
+                profile_url,
                 now
             ],
         )?;
@@ -51,7 +52,7 @@ impl AccountService {
             account_id,
             platform: platform.trim().into(),
             display_name: display_name.trim().into(),
-            profile_url: profile_url.filter(|v| !v.trim().is_empty()),
+            profile_url,
             status: "unverified".into(),
             credential_ref: None,
         })
