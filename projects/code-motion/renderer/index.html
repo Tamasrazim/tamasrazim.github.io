@@ -17183,10 +17183,14 @@ async function renderPrismBatch(limit, label) {
     showTab('p-render');
     showMobile('rail');
     outputDir = await pickDirectory();
-    batchLog(suffixLabel + ' destination: ' + (outputDir.name || 'selected folder'), true);
+    batchLog(suffixLabel + ' destination: ' + (outputDir.name || 'selected folder') + ' · 50 videos per folder', true);
 
     for (var i = 0; i < samples.length; i++) {
       if (S.batchCancelled) break;
+
+      /* Render All groups videos + their matching CSV into folders of 50. */
+      var groupFolderName = pad(Math.floor(i / 50) + 1, 3);
+      var groupDir = await outputDir.getDirectoryHandle(groupFolderName, { create: true });
 
       var node = samples[i];
       var title = node.dataset.title || ('Prism Flower ' + (i + 1));
@@ -17300,9 +17304,10 @@ async function renderPrismBatch(limit, label) {
               continue;
             }
 
-            await writeBlobToDirectory(outputDir, result.blob, job.fileName);
+            await writeBlobToDirectory(groupDir, result.blob, job.fileName);
             result.savedToFolder = true;
             result.savedFolderName = outputDir.name || '';
+            result.savedGroupFolder = groupFolderName;
             break;
           } catch (error) {
             lastError = {
@@ -17327,12 +17332,12 @@ async function renderPrismBatch(limit, label) {
 
         completed++;
         metadataEntry.status = 'completed';
-        batchLog('batch complete → ' + job.fileName, true);
+        batchLog('batch complete → ' + groupFolderName + '/' + job.fileName, true);
 
         try {
           var metadataBlob = new Blob([stockMetadataSingleCsv(metadataEntry)], { type: 'text/csv;charset=utf-8' });
-          await writeBlobToDirectory(outputDir, metadataBlob, metadataEntry.metadataFilename);
-          batchLog('metadata saved → ' + metadataEntry.metadataFilename, true);
+          await writeBlobToDirectory(groupDir, metadataBlob, metadataEntry.metadataFilename);
+          batchLog('metadata saved → ' + groupFolderName + '/' + metadataEntry.metadataFilename, true);
         } catch (metadataError) {
           batchLog('metadata export failed for ' + title + ' — ' +
             String(metadataError && metadataError.message || metadataError), true);
