@@ -5,7 +5,7 @@ const dialogApi = window.__TAURI__?.dialog ?? null;
 const title = document.getElementById('title');
 const view = document.getElementById('view');
 const statusEl = document.getElementById('status');
-const state = { projects: [], core: null, activeProject: null };
+const state = { projects: [], core: null, activeProject: null, currentView: 'home', refreshToken: 0 };
 
 const views = {
   home: renderHome,
@@ -362,13 +362,49 @@ function escapeHtml(value) {
 }
 function escapeAttr(value) { return escapeHtml(value).replace(/`/g, '&#96;'); }
 
+async function handleCoreEvent(event) {
+  const type = event?.payload?.event_type;
+  if (!type) return;
+
+  if (type === 'project.created' || type === 'project.imported') {
+    await refreshProjects();
+    if (type === 'project.imported' && event?.payload?.payload?.path) {
+      state.activeProject = state.projects.find(p => p.path === event.payload.payload.path) || state.activeProject;
+    }
+    if (state.currentView === 'home') renderHome();
+    return;
+  }
+
+  if (!state.activeProject) return;
+
+  if (['render.started', 'render.completed', 'render.failed', 'task.recovered'].includes(type) && state.currentView === 'c2m') {
+    const token = ++state.refreshToken;
+    await new Promise(resolve => setTimeout(resolve, 0));
+    if (token === state.refreshToken) await renderC2M();
+    return;
+  }
+
+  if (type === 'asset.imported' && state.currentView === 'vault') {
+    const token = ++state.refreshToken;
+    await new Promise(resolve => setTimeout(resolve, 0));
+    if (token === state.refreshToken) await renderVault();
+    return;
+  }
+
+  if ((type === 'submission.updated' || type.startsWith('account.')) && ['vault', 'settings'].includes(state.currentView)) {
+    const token = ++state.refreshToken;
+    await new Promise(resolve => setTimeout(resolve, 0));
+    if (token === state.refreshToken) await views[state.currentView]();
+  }
+}
+
 async function init() {
   try {
     if (invoke) {
       state.core = await api('core_status');
       statusEl.textContent = 'CORE ONLINE · '+state.core.version;
       await refreshProjects();
-      if (eventApi?.listen) await eventApi.listen('kynestra:event', ({ payload }) => { if (payload?.event_type === 'project.created') refreshProjects().then(renderHome); });
+      if (eventApi?.listen) await eventApi.listen('kynestra:event', handleCoreEvent);
     } else statusEl.textContent = 'WEB PREVIEW';
   } catch (error) { statusEl.textContent = 'CORE ERROR'; console.error(error); }
   renderHome();
@@ -376,6 +412,7 @@ async function init() {
 
 document.querySelectorAll('#nav button').forEach(button => button.addEventListener('click', () => {
   const name = button.dataset.view;
+  state.currentView = name;
   title.textContent = name === 'c2m' ? 'C2M' : name === 'vault' ? 'Stock Vault' : name[0].toUpperCase()+name.slice(1);
   document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('active', b === button));
   views[name]();
