@@ -155,10 +155,26 @@ impl PackageService {
             }
         }
 
-        let inner_manifest_bytes = fs::read(destination.join("manifest.json"))?;
-        let inner_manifest: ProjectManifest = serde_json::from_slice(&inner_manifest_bytes)
-            .map_err(|_| PackageError::InvalidProjectManifest)?;
-        validate_manifest_consistency(&manifest, &inner_manifest)?;
+        let inner_manifest_bytes = match fs::read(destination.join("manifest.json")) {
+            Ok(bytes) => bytes,
+            Err(error) => {
+                let _ = fs::remove_dir_all(&destination);
+                return Err(PackageError::Io(error));
+            }
+        };
+
+        let inner_manifest: ProjectManifest = match serde_json::from_slice(&inner_manifest_bytes) {
+            Ok(manifest) => manifest,
+            Err(_) => {
+                let _ = fs::remove_dir_all(&destination);
+                return Err(PackageError::InvalidProjectManifest);
+            }
+        };
+
+        if let Err(error) = validate_manifest_consistency(&manifest, &inner_manifest) {
+            let _ = fs::remove_dir_all(&destination);
+            return Err(error);
+        }
 
         Ok(ImportResult {
             project_path: destination.to_string_lossy().into_owned(),
@@ -183,6 +199,7 @@ fn validate_project(path: &str) -> Result<PathBuf, PackageError> {
 
 fn validate_manifest_consistency(package: &PackageManifest, project: &ProjectManifest) -> Result<(), PackageError> {
     if project.format != "tamasrazim"
+        || project.format_version != "0.1"
         || project.project_id != package.project_id
         || project.name != package.name
     {
@@ -388,6 +405,18 @@ mod tests {
         };
         assert!(matches!(
             validate_manifest_consistency(&package, &mismatched),
+            Err(PackageError::ManifestMismatch)
+        ));
+
+        let incompatible_version = ProjectManifest {
+            format_version: "0.2".into(),
+            project_id: "project-a".into(),
+            name: "Project A".into(),
+            format: "tamasrazim".into(),
+            created_by: "KYNESTRA".into(),
+        };
+        assert!(matches!(
+            validate_manifest_consistency(&package, &incompatible_version),
             Err(PackageError::ManifestMismatch)
         ));
     }
