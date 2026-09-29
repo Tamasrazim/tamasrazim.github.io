@@ -1770,3 +1770,109 @@ body.is-scrubbing{cursor:ew-resize}
 @media(prefers-reduced-motion:reduce){
   .id-card::before,.id-constellation,.id-image-scan,.id-grid{animation:none}
 }
+
+
+@media(max-width:720px){
+  .hero{
+    min-height:100dvh;
+    align-items:center;
+    padding-top:76px;
+    padding-bottom:34px;
+  }
+  .hero-inner{
+    width:min(var(--max),calc(100% - 24px));
+    min-height:100%;
+    padding:72px 0 76px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+  }
+  .hero-kicker{
+    justify-content:center;
+    margin-bottom:22px;
+  }
+  .hero-title{
+    max-width:none;
+    width:100%;
+    font-size:clamp(3.05rem,15.5vw,5.8rem);
+    line-height:.9;
+    letter-spacing:-.07em;
+  }
+  .hero-line{
+    width:100%;
+    display:flex;
+    justify-content:center;
+  }
+  .hero-line:first-child > span{
+    max-width:8ch;
+    text-align:center;
+  }
+  .hero-line:nth-child(2) > span{
+    width:auto;
+  }
+  .hero-alias{
+    justify-content:center;
+    margin-top:22px;
+  }
+  .hero-bottom{
+    width:100%;
+    margin-top:28px;
+    flex-direction:column;
+    align-items:center;
+    gap:18px;
+  }
+  .hero-copy{
+    max-width:34ch;
+  }
+  .hero-actions{
+    justify-content:center;
+  }
+  .hero-meta{
+    display:none;
+  }
+  .hero-scan{
+    width:min(62vw,280px);
+    bottom:66px;
+  }
+  .scroll-cue{
+    left:50%;
+    bottom:18px;
+    transform:translateX(-50%);
+    justify-content:center;
+    width:max-content;
+    max-width:calc(100vw - 24px);
+    color:var(--dim);
+  }
+  .scroll-cue-line{
+    width:30px;
+  }
+
+  .about .container{
+    width:calc(100% - 24px);
+  }
+  .about-grid{
+    grid-template-columns:1fr;
+    gap:34px;
+  }
+  .about-copy{
+    text-align:left;
+  }
+  .id-wrap{
+    width:100%;
+  }
+  .id-card{
+    width:min(460px,calc(100vw - 24px));
+    padding:20px;
+    border-radius:13px;
+  }
+  .id-constellation{
+    width:100%;
+    height:100%;
+    right:0;
+    top:0;
+    object-fit:contain;
+    opacity:.78;
+  }
+}
