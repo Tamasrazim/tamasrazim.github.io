@@ -20,7 +20,6 @@
     "account.updated",
     "task.recovered",
     "project.exported",
-    "project.imported",
-    "asset.handoff.completed"
+    "project.imported"
   ]
 }
