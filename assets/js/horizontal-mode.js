@@ -542,8 +542,6 @@
   var pageItems=Array.prototype.slice.call(
     content.querySelectorAll(':scope > section, :scope > .band')
   );
-  var footer=document.querySelector('.axis-scroller > .site-footer');
-  if(footer)pageItems.push(footer);
 
   var rail=document.createElement('nav');
   rail.className='horizontal-rail';
@@ -562,7 +560,6 @@
   };
 
   function axisKey(item,index){
-    if(item===footer)return 'end';
     if(item.id)return item.id;
     if(item.classList.contains('band'))return 'signal-'+String(index+1);
     return 'section-'+String(index+1);
@@ -571,7 +568,6 @@
   function axisName(item,index){
     var id=item && item.id ? item.id : '';
     if(id && labels[id])return labels[id];
-    if(item===footer)return 'end';
     if(item && item.classList.contains('band'))return 'signal';
     return 'section '+String(index+1).padStart(2,'0');
   }
@@ -579,7 +575,7 @@
   var railButtons=[];
   pageItems.forEach(function(item,index){
     var id=item.id||'';
-    var label=labels[id] || (item.classList.contains('band')?'signal':item===footer?'end':'section '+String(index+1).padStart(2,'0'));
+    var label=labels[id] || (item.classList.contains('band')?'signal':'section '+String(index+1).padStart(2,'0'));
     var button=document.createElement('button');
     button.type='button';
     button.setAttribute('aria-label','Go to '+label+' · '+String(index+1)+' of '+String(pageItems.length));
