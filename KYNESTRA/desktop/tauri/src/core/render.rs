@@ -47,7 +47,7 @@ impl RenderService {
         let job_id = uuid::Uuid::new_v4().to_string();
         let now = Utc::now().to_rfc3339();
 
-        conn.execute(
+        if let Err(error) = conn.execute(
             "INSERT INTO render_jobs (job_id,task_id,project_id,status,format,composition_json,created_at)
              VALUES (?1,?2,?3,'queued',?4,?5,?6)",
             params![
@@ -58,7 +58,10 @@ impl RenderService {
                 composition.to_string(),
                 now
             ],
-        )?;
+        ) {
+            let _ = conn.execute("DELETE FROM tasks WHERE task_id=?1 AND status='queued'", params![task.task_id]);
+            return Err(RenderError::Sqlite(error));
+        }
 
         Ok(RenderJobRecord {
             job_id,
@@ -98,7 +101,13 @@ impl RenderService {
             return Err(RenderError::InvalidStartState);
         }
 
-        tasks.update(project_path, &task_id, "running", 0.0, Some("render started".into()))?;
+        if let Err(error) = tasks.update(project_path, &task_id, "running", 0.0, Some("render started".into())) {
+            let _ = conn.execute(
+                "UPDATE render_jobs SET status='queued',started_at=NULL,error=NULL WHERE job_id=?1 AND status='running'",
+                params![job_id],
+            );
+            return Err(RenderError::Task(error));
+        }
 
         let service = RenderJobReader::new(&conn, job_id)?;
         service.finish()
@@ -133,7 +142,15 @@ impl RenderService {
             return Err(RenderError::InvalidFinishState);
         }
 
-        tasks.update(project_path, &task_id, "completed", 1.0, Some("render completed and asset imported".into()))?;
+        if let Err(error) = tasks.update(project_path, &task_id, "completed", 1.0, Some("render completed and asset imported".into())) {
+            let _ = conn.execute(
+                "UPDATE render_jobs
+                 SET status='running',asset_id=NULL,output_relative_path=NULL,completed_at=NULL,error=NULL
+                 WHERE job_id=?1 AND status='completed'",
+                params![job_id],
+            );
+            return Err(RenderError::Task(error));
+        }
         let reader = RenderJobReader::new(&conn, job_id)?;
         reader.finish()
     }
@@ -166,7 +183,15 @@ impl RenderService {
             return Err(RenderError::InvalidFinishState);
         }
 
-        tasks.update(project_path, &task_id, "failed", 0.0, Some(error.into()))?;
+        if let Err(task_error) = tasks.update(project_path, &task_id, "failed", 0.0, Some(error.into())) {
+            let _ = conn.execute(
+                "UPDATE render_jobs
+                 SET status='running',completed_at=NULL,error=NULL
+                 WHERE job_id=?1 AND status='failed'",
+                params![job_id],
+            );
+            return Err(RenderError::Task(task_error));
+        }
 
         let reader = RenderJobReader::new(&conn, job_id)?;
         reader.finish()
@@ -189,7 +214,13 @@ impl RenderService {
             params![job_id],
         )?;
 
-        tasks.update(project_path, &task_id, "queued", 0.0, Some("recovered after application restart; ready to rerun".into()))?;
+        if let Err(error) = tasks.update(project_path, &task_id, "queued", 0.0, Some("recovered after application restart; ready to rerun".into())) {
+            let _ = conn.execute(
+                "UPDATE render_jobs SET status='recoverable' WHERE job_id=?1 AND status='queued'",
+                params![job_id],
+            );
+            return Err(RenderError::Task(error));
+        }
 
         let reader = RenderJobReader::new(&conn, job_id)?;
         Ok(reader.finish())

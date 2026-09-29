@@ -90,10 +90,14 @@ impl AccountService {
         validate_project(project_path)?;
         let conn = db::open(&Path::new(project_path).join("project.db"))?;
 
-        conn.execute(
+        let changed = conn.execute(
             "UPDATE platform_accounts SET status=?1,updated_at=?2 WHERE account_id=?3",
             params![status, Utc::now().to_rfc3339(), account_id],
         )?;
+
+        if changed != 1 {
+            return Err(AccountError::NotFound(account_id.into()));
+        }
 
         conn.query_row(
             "SELECT account_id,platform,display_name,profile_url,status,credential_ref
@@ -131,6 +135,30 @@ fn validate_status(status: &str) -> Result<(), AccountError> {
     }
 }
 
+    #[test]
+    fn unknown_account_returns_not_found() {
+        let root = tempfile::tempdir().expect("root");
+        let project = root.path().join("accounts.tamasrazim");
+        std::fs::create_dir_all(&project).expect("project");
+        std::fs::write(
+            project.join("manifest.json"),
+            r#"{"format":"tamasrazim","formatVersion":"0.1","projectId":"accounts","name":"Accounts","createdBy":"KYNESTRA"}"#,
+        ).expect("manifest");
+        let conn = db::open(&project.join("project.db")).expect("db");
+        conn.execute(
+            "INSERT INTO projects (project_id,name,format,format_version,root_path,created_at,updated_at)
+             VALUES ('accounts','Accounts','tamasrazim','0.1',?1,'now','now')",
+            [project.to_string_lossy().as_ref()],
+        ).expect("project row");
+
+        let result = AccountService::default().update_status(
+            project.to_str().unwrap(),
+            "missing-account",
+            "connected",
+        );
+        assert!(matches!(result, Err(AccountError::NotFound(id)) if id == "missing-account"));
+    }
+
 #[derive(Debug, thiserror::Error)]
 pub enum AccountError {
     #[error("invalid .tamasrazim project")]
@@ -139,6 +167,8 @@ pub enum AccountError {
     InvalidAccount,
     #[error("invalid account status")]
     InvalidStatus,
+    #[error("account not found: {0}")]
+    NotFound(String),
     #[error("database error: {0}")]
     Sqlite(#[from] rusqlite::Error),
 }

@@ -74,6 +74,20 @@ fn validate_manifest(manifest: &ModuleManifest) -> Result<(), ModuleRegistryErro
         return Err(ModuleRegistryError::InvalidManifest(manifest.id.clone()));
     }
 
+    let mut capabilities = std::collections::HashSet::new();
+    if manifest.capabilities.iter().any(|value| value.trim().is_empty()
+        || !capabilities.insert(value.trim().to_ascii_lowercase()))
+    {
+        return Err(ModuleRegistryError::InvalidManifest(manifest.id.clone()));
+    }
+
+    let mut events = std::collections::HashSet::new();
+    if manifest.events.iter().any(|value| value.trim().is_empty()
+        || !events.insert(value.trim().to_ascii_lowercase()))
+    {
+        return Err(ModuleRegistryError::InvalidManifest(manifest.id.clone()));
+    }
+
     Ok(())
 }
 
@@ -96,6 +110,28 @@ mod tests {
         let modules = ModuleRegistry::default().builtin().expect("builtin modules");
         assert_eq!(modules.len(), 3);
         assert_eq!(modules.iter().map(|m| m.id.as_str()).collect::<Vec<_>>(), vec!["c2m", "forge", "vault"]);
+    }
+
+    #[test]
+    fn duplicate_or_blank_capabilities_are_rejected() {
+        let mut manifest = ModuleManifest {
+            id: "c2m".into(),
+            name: "Code Motion".into(),
+            display_name: "Code Motion".into(),
+            version: "0.1.0".into(),
+            api_version: SUPPORTED_API_VERSION.into(),
+            entry: "renderer/index.html".into(),
+            module_type: "renderer".into(),
+            capabilities: vec!["render".into(), "render".into()],
+            events: Vec::new(),
+            boundaries: None,
+            dependencies: None,
+            handoff_command: None,
+        };
+        assert!(validate_manifest(&manifest).is_err());
+
+        manifest.capabilities = vec!["".into()];
+        assert!(validate_manifest(&manifest).is_err());
     }
 
     #[test]

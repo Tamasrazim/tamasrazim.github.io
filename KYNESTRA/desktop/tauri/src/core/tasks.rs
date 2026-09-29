@@ -32,9 +32,12 @@ impl TaskService {
         let now = Utc::now().to_rfc3339();
         let payload_json = serde_json::to_string(&payload.unwrap_or_else(|| Value::Object(Default::default())))?;
 
-        let project_id: Option<String> = conn
+        let project_id: String = conn
             .query_row("SELECT project_id FROM projects LIMIT 1", [], |row| row.get(0))
-            .ok();
+            .map_err(|error| match error {
+                rusqlite::Error::QueryReturnedNoRows => TaskError::ProjectRecordMissing,
+                other => TaskError::Sqlite(other),
+            })?;
 
         conn.execute(
             "INSERT INTO tasks (task_id,project_id,type,status,progress,created_at,payload_json)
@@ -44,7 +47,7 @@ impl TaskService {
 
         Ok(TaskRecord {
             task_id,
-            project_id,
+            project_id: Some(project_id),
             task_type: task_type.into(),
             status: "queued".into(),
             progress: 0.0,
@@ -156,7 +159,7 @@ impl TaskService {
             }
 
             let conn = db::open(&database)?;
-            let changed = conn.execute(
+            let task_changed = conn.execute(
                 "UPDATE tasks
                  SET status='recoverable',
                      message=COALESCE(message,'') || CASE WHEN COALESCE(message,'')='' THEN '' ELSE ' · ' END || 'interrupted by application restart'
@@ -164,16 +167,15 @@ impl TaskService {
                 [],
             )?;
 
-            if changed > 0 {
-                recovered += changed;
-                conn.execute(
-                    "UPDATE render_jobs
-                     SET status='recoverable',
-                         error=COALESCE(error,'interrupted by application restart')
-                     WHERE status='running'",
-                    [],
-                )?;
-            }
+            let render_changed = conn.execute(
+                "UPDATE render_jobs
+                 SET status='recoverable',
+                     error=COALESCE(error,'interrupted by application restart')
+                 WHERE status='running'",
+                [],
+            )?;
+
+            recovered += task_changed.max(render_changed);
         }
 
         Ok(recovered)
@@ -217,6 +219,8 @@ pub enum TaskError {
     InvalidStatus(String),
     #[error("task not found: {0}")]
     NotFound(String),
+    #[error("project database has no project record")]
+    ProjectRecordMissing,
     #[error("invalid task transition: {from} -> {to}")]
     InvalidTransition { from: String, to: String },
     #[error("database error: {0}")]
@@ -272,6 +276,57 @@ mod tests {
         assert_eq!(tasks[0].task_id, "task-list");
         assert_eq!(tasks[0].status, "queued");
         assert!((tasks[0].progress - 0.25).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn recovery_repairs_running_render_job_without_running_task() {
+        let root = tempfile::tempdir().expect("root");
+        let project = root.path().join("render-recover.tamasrazim");
+        fs::create_dir_all(&project).expect("project");
+        fs::write(
+            project.join("manifest.json"),
+            r#"{"format":"tamasrazim","formatVersion":"0.1","projectId":"render-test","name":"Render Recover","createdBy":"KYNESTRA"}"#,
+        ).expect("manifest");
+
+        let conn = db::open(&project.join("project.db")).expect("db");
+        conn.execute(
+            "INSERT INTO projects (project_id,name,format,format_version,root_path,created_at,updated_at)
+             VALUES ('render-test','Render Recover','tamasrazim','0.1',?1,'now','now')",
+            [project.to_string_lossy().as_ref()],
+        ).expect("project row");
+        conn.execute(
+            "INSERT INTO tasks (task_id,project_id,type,status,progress,created_at)
+             VALUES ('render-task','render-test','render','queued',0,'now')",
+            [],
+        ).expect("task row");
+        conn.execute(
+            "INSERT INTO render_jobs (job_id,task_id,project_id,status,format,composition_json,created_at)
+             VALUES ('render-job','render-task','render-test','running','webm','{}','now')",
+            [],
+        ).expect("render job");
+
+        let count = TaskService::default().recover_all(root.path()).expect("recover");
+        assert_eq!(count, 1);
+
+        let status: String = conn
+            .query_row("SELECT status FROM render_jobs WHERE job_id='render-job'", [], |row| row.get(0))
+            .expect("render status");
+        assert_eq!(status, "recoverable");
+    }
+
+    #[test]
+    fn task_creation_requires_project_record() {
+        let root = tempfile::tempdir().expect("root");
+        let project = root.path().join("missing-row.tamasrazim");
+        fs::create_dir_all(&project).expect("project");
+        fs::write(
+            project.join("manifest.json"),
+            r#"{"format":"tamasrazim","formatVersion":"0.1","projectId":"missing","name":"Missing","createdBy":"KYNESTRA"}"#,
+        ).expect("manifest");
+        db::open(&project.join("project.db")).expect("db");
+
+        let result = TaskService::default().create(project.to_str().unwrap(), "render", None);
+        assert!(matches!(result, Err(TaskError::ProjectRecordMissing)));
     }
 
     #[test]

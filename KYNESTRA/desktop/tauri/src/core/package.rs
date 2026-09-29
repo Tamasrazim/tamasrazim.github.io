@@ -2,6 +2,7 @@ use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
+    collections::HashSet,
     fs::{self, File},
     io::{Read, Write},
     path::{Component, Path, PathBuf},
@@ -51,7 +52,10 @@ impl PackageService {
         }
 
         let canonical_root = fs::canonicalize(&root)?;
-        let output_parent = output.parent().unwrap_or_else(|| Path::new("."));
+        let output_parent = output
+            .parent()
+            .filter(|value| !value.as_os_str().is_empty())
+            .unwrap_or_else(|| Path::new("."));
         fs::create_dir_all(output_parent)?;
         let canonical_parent = fs::canonicalize(output_parent)?;
 
@@ -94,23 +98,53 @@ impl PackageService {
             files,
         };
 
-        let file = File::create(&output)?;
-        let mut archive = ZipWriter::new(file);
-        let options = SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);
-
-        let bytes = serde_json::to_vec_pretty(&manifest)?;
-        archive.start_file(PACKAGE_MANIFEST, options)?;
-        archive.write_all(&bytes)?;
-
-        for item in &manifest.files {
-            let source = root.join(&item.path);
-            archive.start_file(&item.path, options)?;
-            let mut input = File::open(source)?;
-            std::io::copy(&mut input, &mut archive)?;
+        if output.exists() && !output.is_file() {
+            return Err(PackageError::InvalidOutput);
         }
 
-        archive.finish()?;
-        Ok(manifest)
+        let file_name = output
+            .file_name()
+            .and_then(|value| value.to_str())
+            .unwrap_or("project.tamasrazim");
+        let temp_name = format!(".{}.partial-{}", file_name, uuid::Uuid::new_v4());
+        let temp_output = output_parent.join(temp_name);
+
+        let write_result = (|| -> Result<(), PackageError> {
+            let file = File::create(&temp_output)?;
+            let mut archive = ZipWriter::new(file);
+            let options = SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);
+
+            let bytes = serde_json::to_vec_pretty(&manifest)?;
+            archive.start_file(PACKAGE_MANIFEST, options)?;
+            archive.write_all(&bytes)?;
+
+            for item in &manifest.files {
+                let source = root.join(&item.path);
+                archive.start_file(&item.path, options)?;
+                let mut input = File::open(source)?;
+                std::io::copy(&mut input, &mut archive)?;
+            }
+
+            archive.finish()?;
+            Ok(())
+        })();
+
+        match write_result {
+            Ok(()) => {
+                if output.exists() {
+                    fs::remove_file(&output)?;
+                }
+                if let Err(error) = fs::rename(&temp_output, &output) {
+                    let _ = fs::remove_file(&temp_output);
+                    return Err(PackageError::Io(error));
+                }
+                Ok(manifest)
+            }
+            Err(error) => {
+                let _ = fs::remove_file(&temp_output);
+                Err(error)
+            }
+        }
     }
 
     pub fn import(&self, package_path: &str, destination_root: &Path) -> Result<ImportResult, PackageError> {
@@ -234,11 +268,32 @@ fn validate_package_manifest(manifest: &PackageManifest) -> Result<(), PackageEr
         || manifest.package_version != PACKAGE_FORMAT_VERSION
         || manifest.project_id.trim().is_empty()
         || manifest.name.trim().is_empty()
+        || manifest.created_at.trim().is_empty()
+        || manifest.files.is_empty()
     {
         return Err(PackageError::InvalidPackage);
     }
 
-    if manifest.files.iter().any(|file| file.path.is_empty()) {
+    let mut seen = HashSet::new();
+    let mut has_manifest = false;
+    let mut has_database = false;
+
+    for file in &manifest.files {
+        if file.path.is_empty()
+            || file.path == PACKAGE_MANIFEST
+            || file.sha256.len() != 64
+            || !file.sha256.chars().all(|value| value.is_ascii_hexdigit())
+            || safe_relative_path(&file.path).is_err()
+            || !seen.insert(file.path.clone())
+        {
+            return Err(PackageError::InvalidPackage);
+        }
+
+        has_manifest |= file.path == "manifest.json";
+        has_database |= file.path == "project.db";
+    }
+
+    if !has_manifest || !has_database {
         return Err(PackageError::InvalidPackage);
     }
 
@@ -275,15 +330,18 @@ fn collect_files(root: &Path, current: &Path, output: &mut Vec<String>) -> Resul
             .to_string_lossy()
             .replace('\\', "/");
 
-        if path.is_dir() {
+        let file_type = fs::symlink_metadata(&path)?.file_type();
+        if file_type.is_symlink() {
+            return Err(PackageError::InvalidProject);
+        }
+
+        if file_type.is_dir() {
             if relative == "cache" || relative.starts_with("cache/") {
                 continue;
             }
             collect_files(root, &path, output)?;
-        } else if path.is_file() {
-            if relative != PACKAGE_MANIFEST {
-                output.push(relative);
-            }
+        } else if file_type.is_file() && relative != PACKAGE_MANIFEST {
+            output.push(relative);
         }
     }
     Ok(())
@@ -395,13 +453,17 @@ mod tests {
 
     #[test]
     fn package_manifest_rejects_incompatible_version() {
+        let valid_files = vec![
+            PackageFile { path: "manifest.json".into(), size: 1, sha256: "a".repeat(64) },
+            PackageFile { path: "project.db".into(), size: 1, sha256: "b".repeat(64) },
+        ];
         let mut manifest = PackageManifest {
             format: "tamasrazim".into(),
             package_version: PACKAGE_FORMAT_VERSION,
             project_id: "12345678".into(),
             name: "Test".into(),
             created_at: "now".into(),
-            files: Vec::new(),
+            files: valid_files,
         };
         assert!(validate_package_manifest(&manifest).is_ok());
 
@@ -416,6 +478,38 @@ mod tests {
     #[test]
     fn package_manifest_rejects_windows_separator() {
         assert!(safe_relative_path(r"source\\outside.txt").is_err());
+    }
+
+    #[test]
+    fn package_manifest_rejects_duplicate_and_reserved_paths() {
+        let base = PackageManifest {
+            format: "tamasrazim".into(),
+            package_version: PACKAGE_FORMAT_VERSION,
+            project_id: "12345678".into(),
+            name: "Test".into(),
+            created_at: "now".into(),
+            files: vec![
+                PackageFile { path: "manifest.json".into(), size: 1, sha256: "a".repeat(64) },
+                PackageFile { path: "project.db".into(), size: 1, sha256: "b".repeat(64) },
+            ],
+        };
+        assert!(validate_package_manifest(&base).is_ok());
+
+        let mut duplicate = base.clone();
+        duplicate.files.push(duplicate.files[0].clone());
+        assert!(validate_package_manifest(&duplicate).is_err());
+
+        let mut reserved = base.clone();
+        reserved.files.push(PackageFile {
+            path: PACKAGE_MANIFEST.into(),
+            size: 1,
+            sha256: "c".repeat(64),
+        });
+        assert!(validate_package_manifest(&reserved).is_err());
+
+        let mut missing_database = base;
+        missing_database.files.retain(|file| file.path != "project.db");
+        assert!(validate_package_manifest(&missing_database).is_err());
     }
 
     #[test]
@@ -476,6 +570,28 @@ mod tests {
             output.to_str().unwrap(),
         );
         assert!(matches!(result, Err(PackageError::InvalidOutput)));
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn export_rejects_symlinked_project_file() {
+        use std::os::unix::fs::symlink;
+
+        let root = tempfile::tempdir().expect("root");
+        let project = root.path().join("symlinked.tamasrazim");
+        fs::create_dir_all(&project).expect("project");
+        fs::write(
+            project.join("manifest.json"),
+            r#"{"format":"tamasrazim","formatVersion":"0.1","projectId":"symlink-123","name":"Symlinked","createdBy":"KYNESTRA"}"#,
+        ).expect("manifest");
+        fs::write(project.join("project.db"), b"sqlite-placeholder").expect("db");
+        let outside = root.path().join("outside.txt");
+        fs::write(&outside, b"outside").expect("outside");
+        symlink(&outside, project.join("source.txt")).expect("symlink");
+
+        let archive = root.path().join("Symlinked.tamasrazim");
+        let result = PackageService::default().export(project.to_str().unwrap(), archive.to_str().unwrap());
+        assert!(matches!(result, Err(PackageError::InvalidProject)));
     }
 
     #[test]

@@ -50,6 +50,10 @@ The package manifest includes:
 
 KYNESTRA verifies each packaged file after extraction before accepting the imported project.
 
+Package manifests must contain unique relative file paths, must include both `manifest.json` and `project.db`, and must not list the reserved `package-manifest.json` path. SHA-256 values are fixed-length hexadecimal digests. Package export writes to a temporary sibling file and only replaces the destination after the archive has finished successfully.
+
+Symlinks are not packaged, preventing a project file from resolving outside the working project through a link.
+
 ## Minimum project manifest
 
 - `format: tamasrazim`
@@ -65,5 +69,5 @@ KYNESTRA verifies each packaged file after extraction before accepting the impor
 - Project-relative paths are preferred.
 - Cache data is disposable.
 - Secrets and platform credentials never belong inside the project package.
-- Package extraction rejects absolute paths and parent-directory traversal.
+- Package extraction rejects absolute paths, parent-directory traversal, reserved manifest paths, and duplicate file entries.
 - Future format versions require explicit migrations.
