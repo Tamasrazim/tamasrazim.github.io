@@ -22,11 +22,12 @@
 - [x] Render output ingestion service
 - [x] SHA-256 duplicate detection
 - [ ] Automatic C2M completion handoff
-- [ ] Platform account configuration
-- [ ] Manual Submitted state
+- [x] Platform account metadata
+- [x] Account connection/disconnection state
+- [x] Submission status records
 - [ ] Exact filename/title publicity checks against configured contributor profile links
-- [ ] Independent platform status
-- [ ] Multi-platform account configuration
+- [ ] Independent platform status verification
+- [ ] Multi-platform account connectors
 
 ## Alpha 0.4 — Forge
 - Integrate Forge as its own module
