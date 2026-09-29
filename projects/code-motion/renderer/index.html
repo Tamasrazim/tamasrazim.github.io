@@ -17067,8 +17067,8 @@ async function renderPrismBatch(limit, label) {
 
   S.batchRendering = true;
   S.batchCancelled = false;
-  var suffixLabel = label || ('Render ' + samples.length);
 
+  var suffixLabel = label || ('Render ' + samples.length);
   var b50 = $('#render50Btn');
   var ball = $('#renderAllBtn');
   if (b50) b50.disabled = true;
@@ -17096,8 +17096,8 @@ async function renderPrismBatch(limit, label) {
   var completed = 0;
   var failed = 0;
   var batchFormat = S.exportFormat;
-
   var outputDir = null;
+
   try {
     showTab('p-render');
     showMobile('rail');
@@ -17106,7 +17106,6 @@ async function renderPrismBatch(limit, label) {
     outputDir = await pickDirectory();
     $('#stMsg').textContent = suffixLabel + ' — writing into "' + (outputDir.name || 'selected folder') + '"';
     logLine('batch destination folder: ' + (outputDir.name || 'selected folder'), true);
-
     $('#stMsg').textContent = suffixLabel + ' — preparing ' + samples.length + ' Prism Flowers…';
 
     for (var i = 0; i < samples.length; i++) {
@@ -17114,8 +17113,9 @@ async function renderPrismBatch(limit, label) {
 
       var node = samples[i];
       var title = node.dataset.title || ('Prism Flower ' + (i + 1));
+
       try {
-        var src = (node.textContent || '').replace(/^\\n/, '');
+        var src = (node.textContent || '').replace(/^\n/, '');
 
         S.id = null;
         S.version = 1;
@@ -17138,11 +17138,13 @@ async function renderPrismBatch(limit, label) {
         edSetValue(src);
         S.code = Ed.ta.value;
         S.frame = 0;
+        S.lastProgress = null;
         applyComp({});
         syncMetaUI();
         markDirty(false);
 
         $('#stMsg').textContent = suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length + ' · ' + title;
+
         var compiled = await run();
         if (!compiled || !compiled.ok) {
           failed++;
@@ -17155,23 +17157,56 @@ async function renderPrismBatch(limit, label) {
         job.metadata.title = title;
         job.fileName = fileNameFor(job.composition, job.metadata.title, batchFormat, null);
 
-        var renderOptions = { silent: true, outputDir: outputDir, batch: true };
-        if (job.format === 'png' && job.target === 'dir') {
-          renderOptions.outputDir = await outputDir.getDirectoryHandle(slugify(job.metadata.title || title), { create: true });
+        var result = null;
+        var attempts = 0;
+
+        while (attempts < 2 && !S.batchCancelled) {
+          attempts++;
+          $('#stMsg').textContent = suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length +
+            ' · ' + title + (attempts > 1 ? ' · retrying' : '');
+
+          result = await startRender(job, {
+            silent: true,
+            outputDir: outputDir,
+            batch: true
+          });
+
+          if (result && result.ok) break;
+
+          if (attempts < 2) {
+            logLine('transient batch render failure for ' + title + ' — retrying once', true);
+            await new Promise(function (resolve) { setTimeout(resolve, 350); });
+          }
         }
 
-        var result = await startRender(job, renderOptions);
         if (result && result.cancelled) {
           S.batchCancelled = true;
           break;
         }
-        if (result && result.ok && result.savedToFolder) {
-          completed++;
-          // Do not retain large completed blobs in the results panel during a long batch.
-          result.blob = null;
+
+        if (result && result.ok) {
+          if (!result.savedToFolder && result.blob) {
+            $('#stMsg').textContent = suffixLabel + ' — saving ' + job.fileName + '…';
+            await writeBlobToDirectory(outputDir, result.blob, job.fileName);
+            result.savedToFolder = true;
+            result.savedFolderName = outputDir.name || '';
+            logLine('batch fallback save → ' + job.fileName, true);
+          }
+
+          if (result.savedToFolder) {
+            completed++;
+            logLine('batch complete → ' + job.fileName, true);
+            result.blob = null;
+          } else {
+            failed++;
+            logLine('batch output failed for ' + title + ' — renderer returned no writable video blob', true);
+          }
         } else {
           failed++;
-          logLine('batch output failed for ' + title, true);
+          var batchError = result && result.error
+            ? (result.error.name + ': ' + result.error.message)
+            : 'unknown render failure';
+          logLine('batch output failed for ' + title + ' — ' + batchError, true);
         }
       } catch (itemError) {
         failed++;
@@ -17179,7 +17214,8 @@ async function renderPrismBatch(limit, label) {
         $('#stMsg').textContent = suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length + ' failed · ' + title;
       }
 
-      await new Promise(function (resolve) { setTimeout(resolve, 0); });
+      /* Give the encoder, decoder and Blob GC a clean boundary before the next flower. */
+      await new Promise(function (resolve) { setTimeout(resolve, 180); });
     }
   } catch (error) {
     failed++;
@@ -17212,7 +17248,6 @@ async function renderPrismBatch(limit, label) {
     await run();
 
     renderQueue();
-    if (outputDir) renderResults();
     if (b50) b50.disabled = false;
     if (ball) ball.disabled = false;
 
