@@ -203,8 +203,12 @@ fn is_transition_allowed(from: &str, to: &str) -> bool {
 
 fn validate_project_path(path: &str) -> Result<PathBuf, TaskError> {
     ProjectManager::default()
-        .validated_root(path)
-        .map_err(|_| TaskError::InvalidProject)
+        .open(path)
+        .map_err(|error| match error {
+            super::projects::ProjectError::DatabaseProjectMissing => TaskError::ProjectRecordMissing,
+            _ => TaskError::InvalidProject,
+        })
+        .map(|summary| PathBuf::from(summary.path))
 }
 
 #[derive(Debug, thiserror::Error)]
