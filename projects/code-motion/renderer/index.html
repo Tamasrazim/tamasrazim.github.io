@@ -17106,23 +17106,22 @@ async function restartBatchEngine() {
 }
 
 function stockMetadataForTitle(title) {
-  var raw = String(title || 'Flower').trim() || 'Flower';
+  var raw = String(title || 'Flower').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim() || 'Flower';
 
-  /* The project name is authoritative.
-     Collapse repeated leading "Prism " prefixes without adding a new one. */
-  var projectName = normalizeStockProjectName(raw);
-  var flower = projectName.indexOf('Prism ') === 0
-    ? projectName.slice(6).trim()
-    : projectName;
+  /* Project name is authoritative. Collapse any accidental repeated Prism prefix. */
+  var projectName = raw.replace(/^(?:Prism\s*)+/i, 'Prism ').trim() || 'Prism';
+  var flower = projectName.indexOf('Prism ') === 0 ? projectName.slice(6).trim() : projectName;
 
   var animationTitle = projectName + ' — Translucent Geometric Flower Animation';
   var illustrationTitle = projectName + ' — Translucent Geometric Flower illustration';
 
+  /* Stock descriptions are intentionally compact and reusable across the library. */
   var videoDescription =
-    'Translucent geometric ' + flower + ' with sculpted petals, pearl, pink, violet and golden gradients, delicate outlines and a glowing warm center. Smooth 10-second loop for motion graphics, stock footage, abstract botanical visuals, and decorative animation.';
+    'Translucent geometric ' + flower + ' with sculpted cupped petals, pearl, pink, violet and golden gradients, delicate outlines, and a glowing warm center. Smooth 10-second loop for motion graphics.';
   var illustrationDescription =
-    'Translucent geometric ' + flower + ' with sculpted petals, pearl, pink, violet and golden gradients, delicate outlines, and a glowing warm center. Decorative botanical illustration for modern design.';
+    'Translucent geometric ' + flower + ' with sculpted cupped petals, pearl, pink, violet and golden gradients, delicate outlines, and a glowing warm center. Elegant botanical illustration.';
 
+  /* 47 keywords per asset: flower-specific + common stock terms. */
   var commonKeywords = [
     'flower','floral','botanical','translucent','geometric','prism','geometric flower',
     'abstract','colorful','vivid','luminous','glowing','gradient','petals','bloom','nature',
@@ -17138,33 +17137,30 @@ function stockMetadataForTitle(title) {
   return {
     flower: flower,
     projectName: projectName,
-
     animation: {
       title: animationTitle,
       description: videoDescription,
       keywords: videoKeywords.slice(0, 50),
       filename: animationTitle + '.mp4',
       csvFilename: animationTitle + '.csv',
-      category: 'Nature,Backgrounds/Textures',
-      illustration: 'No',
+      category: '',
+      editorial: 'No',
       mature: 'No',
-      editorial: 'No'
+      illustration: 'No'
     },
-
     illustration: {
       title: illustrationTitle,
       description: illustrationDescription,
       keywords: illustrationKeywords.slice(0, 50),
       filename: projectName + '.jpg',
-      csvFilename: projectName + '.csv',
-      category: 'Nature,Arts',
-      illustration: 'Yes',
+      csvFilename: projectName + ' — Translucent Geometric Flower illustration.csv',
+      category: '',
+      editorial: 'No',
       mature: 'No',
-      editorial: 'No'
+      illustration: 'Yes'
     }
   };
 }
-
 function csvEscape(value) {
   var s = String(value == null ? '' : value);
   return '"' + s.replace(/"/g, '""') + '"';
@@ -17174,24 +17170,27 @@ function csvEscape(value) {
    Filename, Description, Keywords, Categories; optional Illustration,
    Mature Content and Editorial flags may follow. */
 function stockMetadataSingleCsv(entry) {
+  /*
+   * Exact Shutterstock example schema and order:
+   * Filename,Description,Keywords,Categories,Editorial,Mature content,illustration
+   */
   var rows = [
-    ['Filename','Description','Keywords','Categories','Illustration','Mature Content','Editorial'],
+    ['Filename','Description','Keywords','Categories','Editorial','Mature content','illustration'],
     [
       entry.filename,
       entry.description,
-      entry.keywords.join(', '),
+      entry.keywords.join(','),
       entry.category,
-      entry.illustration,
+      entry.editorial,
       entry.mature,
-      entry.editorial
+      entry.illustration
     ]
   ];
   return rows.map(function (row) {
     return row.map(csvEscape).join(',');
-  }).join('\\r\\n') + '\\r\\n';
+  }).join('\r\n') + '\r\n';
 }
-
-async function renderPrismBatch(limit, label) {
+function renderPrismBatch(limit, label) {
   if (S.batchRendering || S.rendering) return;
 
   var allPrisms = $$('script[type="text/plain"][id^="sample-"]').filter(function (node) {
@@ -17339,12 +17338,29 @@ async function renderPrismBatch(limit, label) {
           if (attempt > 1) {
             batchLog(
               suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length +
-              ' · ' + title + ' · retrying export',
+              ' · ' + title + ' · restarting renderer for retry',
               true
             );
-            /* MotionExport.run() creates a fresh render runtime and encoder
-               for every export, so restarting the worker here is unnecessary
-               and can destabilize the next batch item. */
+            try {
+              await restartBatchEngine();
+              S.compiled = false;
+              var retryCompile = await run();
+              if (!retryCompile || !retryCompile.ok) {
+                lastError = {
+                  name: 'BATCH RECOMPILE ERROR',
+                  message: 'The renderer restarted but the flower did not compile again.',
+                  detail: 'The retry was stopped before encoding.'
+                };
+                break;
+              }
+            } catch (restartError) {
+              lastError = {
+                name: restartError && restartError.name || 'BATCH RESTART ERROR',
+                message: String(restartError && restartError.message || restartError),
+                detail: String(restartError && restartError.stack || 'The renderer could not be restarted for the retry.')
+              };
+              break;
+            }
           }
 
           try {
