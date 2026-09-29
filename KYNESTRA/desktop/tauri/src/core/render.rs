@@ -113,6 +113,23 @@ impl RenderService {
         service.finish()
     }
 
+    pub fn ensure_running(&self, project_path: &str, job_id: &str) -> Result<(), RenderError> {
+        let root = validate_project(project_path)?;
+        let conn = db::open(&root.join("project.db"))?;
+        let status: String = conn
+            .query_row(
+                "SELECT status FROM render_jobs WHERE job_id=?1",
+                params![job_id],
+                |row| row.get(0),
+            )?;
+
+        if status == "running" {
+            Ok(())
+        } else {
+            Err(RenderError::InvalidFinishState)
+        }
+    }
+
     pub fn attach_asset(
         &self,
         project_path: &str,
