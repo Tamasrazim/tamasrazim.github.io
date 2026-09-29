@@ -489,6 +489,7 @@
       color:rgba(255,255,255,.36);font:600 .48rem var(--mono);letter-spacing:.13em
     }
     .id-signal-row span+span::before{content:'//';margin-right:10px;color:rgba(255,255,255,.18)}
+    .id-mobile-copy{display:none}
     .id-bottom{
       position:absolute;left:clamp(22px,3vw,30px);right:clamp(22px,3vw,30px);
       bottom:clamp(20px,2.6vw,26px);z-index:10
@@ -1874,5 +1875,38 @@ body.is-scrubbing{cursor:ew-resize}
     top:0;
     object-fit:contain;
     opacity:.78;
+  }
+  .id-kicker,
+  .id-online,
+  .id-status{
+    font-size:.64rem;
+  }
+  .id-name{
+    font-size:clamp(1.18rem,5.4vw,1.5rem);
+    line-height:1.05;
+    max-width:20ch;
+  }
+  .id-alias{
+    font-size:clamp(1.28rem,5.8vw,1.68rem);
+  }
+  .id-signal-row{
+    display:none;
+  }
+  .id-mobile-copy{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+    margin-top:14px;
+    color:rgba(255,255,255,.72);
+    font:600 clamp(.58rem,2.5vw,.72rem)/1.35 var(--mono);
+    letter-spacing:.01em;
+    max-width:30ch;
+    text-wrap:balance;
+  }
+  .id-mobile-copy span:first-child{
+    color:rgba(255,255,255,.9);
+    font-family:var(--display);
+    font-weight:700;
+    letter-spacing:-.02em;
   }
 }
