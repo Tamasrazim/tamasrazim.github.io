@@ -1,13 +1,23 @@
 # Stock Vault
 
-Stock Vault is the local asset library and publishing tracker.
+Stock Vault is KYNESTRA's local asset library and publishing tracker.
 
-Core behavior:
-1. Receive completed render assets from C2M.
-2. Store metadata and asset references locally.
-3. Let the user mark an asset as submitted to a platform.
-4. Check configured contributor or portfolio links using exact filename/title matching.
-5. Track each platform independently.
-6. Never infer rejection merely because an asset is not publicly found.
+## Current foundation
 
-Vault is not limited to Shutterstock. Platform connectors are separate.
+The Core can now register a rendered output into a project:
+
+1. A render job is persisted in Core.
+2. The completed output file is copied into the project's `renders/` directory.
+3. The asset is hashed with SHA-256.
+4. Duplicate content in the same project resolves to the existing asset.
+5. Vault reads the asset registry and shows the imported file.
+
+## Next Vault layer
+
+- platform account configuration
+- submission records and states
+- exact filename/title checks against configured contributor profile links
+- public-status checks
+- multi-platform connectors
+
+Vault is not limited to Shutterstock.
