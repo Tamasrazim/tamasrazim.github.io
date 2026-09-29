@@ -384,7 +384,7 @@
     @keyframes gridDrift{to{background-position:44px 22px,-22px 44px}}
     .id-constellation-media{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none;background:#000}
     .id-constellation{
-      position:absolute;width:76%;height:116%;right:-2%;top:-7%;object-fit:cover;object-position:center;
+      position:absolute;width:100%;height:100%;right:0;top:0;object-fit:contain;object-position:right center;
       filter:grayscale(1) contrast(1.12) brightness(.88);mix-blend-mode:screen;opacity:.82;
       -webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.15) 8%,#000 31%,#000 100%);
       mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.15) 8%,#000 31%,#000 100%);
