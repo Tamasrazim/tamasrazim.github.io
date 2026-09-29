@@ -46,4 +46,8 @@ See:
 - `/KYNESTRA/core/render/render-contract.json`
 - `/KYNESTRA/core/assets/asset-contract.json`
 
-Actual render-job orchestration and Vault ingestion are the next integration layer.
+C2M outputs can use the shared Core handoff command when running inside the desktop shell:
+
+`ingest_module_output(projectPath, sourcePath, "c2m", kind, metadata)`
+
+Core owns copying, hashing, deduplication, asset registration, and `asset.imported` emission.

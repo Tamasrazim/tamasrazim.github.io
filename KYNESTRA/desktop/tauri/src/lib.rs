@@ -149,6 +149,28 @@ fn set_submission_status(app: AppHandle, project_path: String, asset_id: String,
 }
 
 #[tauri::command]
+fn ingest_module_output(
+    app: AppHandle,
+    project_path: String,
+    source_path: String,
+    module: String,
+    kind: String,
+    metadata: Option<serde_json::Value>,
+) -> Result<AssetRecord, String> {
+    let state = app.state::<CoreState>();
+    let asset = state
+        .handoff
+        .ingest(&state.assets, &project_path, &source_path, &module, &kind, metadata)
+        .map_err(|e| e.to_string())?;
+
+    let event = CoreEvent::new("asset.imported", serde_json::to_value(&asset).map_err(|e| e.to_string())?);
+    state.events.persist(std::path::Path::new(&project_path), &event).map_err(|e| e.to_string())?;
+    state.events.publish(&app, event).map_err(|e| e.to_string())?;
+
+    Ok(asset)
+}
+
+#[tauri::command]
 fn export_project_package(
     app: AppHandle,
     project_path: String,
@@ -218,7 +240,7 @@ pub fn run() {
             core_status,list_projects,create_project,open_project,create_task,update_task,
             create_render_job,start_render_job,complete_render_job,fail_render_job,
             list_assets,list_render_jobs,list_accounts,create_account,update_account_status,
-            list_submissions,set_submission_status,check_submission_public_status,export_project_package,import_project_package
+            list_submissions,set_submission_status,check_submission_public_status,export_project_package,import_project_package,ingest_module_output
         ])
         .run(tauri::generate_context!())
         .expect("error while running KYNESTRA");
