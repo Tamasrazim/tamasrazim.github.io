@@ -14,13 +14,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<meta name="description" content="KYNESTRA — a browser-first deterministic animation renderer. Write JavaScript, preview it live, render every frame exactly.">
-<title>KYNESTRA — Tamasrazim</title>
+<meta name="description" content="TRILYVA — a browser-first deterministic animation renderer. Write JavaScript, preview it live, render every frame exactly.">
+<title>TRILYVA — Tamasrazim</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
 <style>
 /* ============================================================
-   KYNESTRA — TAMASRAZIM
+   TRILYVA — TAMASRAZIM
    Monochrome motion laboratory. No external assets.
    ============================================================ */
 :root{
@@ -1571,7 +1571,7 @@ select.mini{
             <div class="row"><label for="mComp">Composition</label><input type="text" id="mComp" spellcheck="false"></div>
             <div class="row"><label for="mDesc">Description</label><input type="text" id="mDesc" spellcheck="false"></div>
             <div class="row"><label for="mLang">Language</label><input type="text" id="mLang" spellcheck="false"></div>
-            <div class="row"><span class="lb">Software</span><span class="val dim" id="mSoft">KYNESTRA — Tamasrazim</span></div>
+            <div class="row"><span class="lb">Software</span><span class="val dim" id="mSoft">TRILYVA — Tamasrazim</span></div>
             <div class="row"><span class="lb">Version</span><span class="val dim" id="mVer">1.0.0</span></div>
           </div>
           <div class="sec">
@@ -2200,8 +2200,8 @@ function WebMMuxer(o) {
   function buildInfo(durationTicks) {
     return el('1549A966', concat([
       el('2AD7B1', uintBytes(timecodeScale, 4)),
-      elStr('4D80', o.muxingApp || 'KYNESTRA'),
-      elStr('5741', o.writingApp || 'KYNESTRA'),
+      elStr('4D80', o.muxingApp || 'TRILYVA'),
+      elStr('5741', o.writingApp || 'TRILYVA'),
       elStr('7BA9', (o.title || 'Untitled').slice(0, 120)),
       elFloat('4489', durationTicks)
     ]));
@@ -2214,7 +2214,7 @@ function WebMMuxer(o) {
     var entry = el('AE', concat([
       elUint('D7', 1, 1), el('73C5', uintBytes(trackUid, 4)), elUint('83', 1, 1),
       elUint('9C', 0, 1), elUint('88', 1, 1),
-      elStr('536E', o.trackName || 'KYNESTRA'),
+      elStr('536E', o.trackName || 'TRILYVA'),
       elStr('22B59C', 'und'),
       elStr('86', o.codecId || 'V_VP9'),
       el('23E383', uintBytes(Math.round(nsPerFrame), 4)),
@@ -15304,7 +15304,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 
 var SELF_SOURCE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
 var APP_VERSION = '1.0.0';
-var SOFTWARE = 'KYNESTRA — Tamasrazim';
+var SOFTWARE = 'TRILYVA — Tamasrazim';
 
 var $ = function (s, r) { return (r || document).querySelector(s); };
 var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
@@ -17192,7 +17192,7 @@ function stockMetadataSingleCsv(entry) {
     return row.map(csvEscape).join(',');
   }).join('\\r\\n') + '\\r\\n';
 }
-function renderPrismBatch(limit, label) {
+async function renderPrismBatch(limit, label) {
   if (S.batchRendering || S.rendering) return;
 
   var allPrisms = $$('script[type="text/plain"][id^="sample-"]').filter(function (node) {
