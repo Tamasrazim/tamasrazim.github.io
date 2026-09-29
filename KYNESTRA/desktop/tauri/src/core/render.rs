@@ -101,7 +101,7 @@ impl RenderService {
         tasks.update(project_path, &task_id, "running", 0.0, Some("render started".into()))?;
 
         let service = RenderJobReader::new(&conn, job_id)?;
-        Ok(service.finish())
+        service.finish()
     }
 
     pub fn attach_asset(
@@ -135,7 +135,7 @@ impl RenderService {
 
         tasks.update(project_path, &task_id, "completed", 1.0, Some("render completed and asset imported".into()))?;
         let reader = RenderJobReader::new(&conn, job_id)?;
-        Ok(reader.finish())
+        reader.finish()
     }
 
     pub fn fail(
@@ -260,7 +260,7 @@ impl<'a> RenderJobReader<'a> {
         Ok(Self { conn, job_id, status, started_at })
     }
 
-    fn finish(self) -> RenderJobRecord {
+    fn finish(self) -> Result<RenderJobRecord, RenderError> {
         self.conn.query_row(
             "SELECT job_id,task_id,project_id,status,format,composition_json,output_relative_path,asset_id,created_at,started_at,completed_at,error
              FROM render_jobs WHERE job_id=?1",
@@ -282,7 +282,7 @@ impl<'a> RenderJobReader<'a> {
                     error: row.get(11)?,
                 })
             },
-        ).expect("render job row disappeared")
+        ).map_err(RenderError::from)
     }
 }
 
