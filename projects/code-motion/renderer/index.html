@@ -17622,9 +17622,10 @@ function newProject(sampleId) {
   S.meta.composition = 'Comp 1';
   S.meta.description = node.dataset.desc || '';
   S.comp = CORE.composition({
-    duration: +node.dataset.dur || 10,
-    loop: node.dataset.loop === '1',
-    loopDuration: +node.dataset.loopdur || 10
+    duration: 10,
+    loop: true,
+    loopDuration: 10,
+    speed: 2
   });
   $('#projName').value = S.name;
   $('#projVer').textContent = 'v1';
