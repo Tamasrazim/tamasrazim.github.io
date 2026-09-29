@@ -42,6 +42,10 @@ window.__tamasrazimMotionCore=true;
 
 var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 var fine=window.matchMedia&&window.matchMedia('(pointer: fine)').matches;
+var horizontal=!!(document.body&&document.body.dataset.horizontalMode==='true');
+function pageX(){return horizontal?((document.body&&document.body.scrollLeft)||0):0;}
+function pageY(){return horizontal?0:(window.scrollY||0);}
+function pageMax(){return horizontal?Math.max(1,((document.body&&document.body.scrollWidth)||0)-innerWidth):Math.max(1,document.documentElement.scrollHeight-innerHeight);}
 if(reduce)return;
 
 var style=document.createElement('style');
@@ -106,7 +110,7 @@ var pointer={
   tx:innerWidth*.5,ty:innerHeight*.5,
   vx:0,vy:0,px:innerWidth*.5,py:innerHeight*.5
 };
-var scroll={y:window.scrollY||0,target:window.scrollY||0,velocity:0,last:window.scrollY||0};
+var scroll={x:pageX(),y:pageY(),targetX:pageX(),targetY:pageY(),velocityX:0,velocityY:0,lastX:pageX(),lastY:pageY()};
 var nodes=[],texts=[],email=null,emailLetters=[];
 var boundsDirty=true,last=performance.now(),raf=0;
 var pageVisible=!document.hidden;
@@ -162,11 +166,11 @@ if(email){
 }
 
 function refreshBounds(){
-  var sy=window.scrollY||0;
+  var sx=pageX(),sy=pageY();
   nodes.forEach(function(n){
     var r=n.el.getBoundingClientRect();
     n.w=r.width||1;n.h=r.height||1;
-    n.cx=r.left+n.w*.5;n.cy=r.top+n.h*.5+sy;
+    n.cx=r.left+n.w*.5+sx;n.cy=r.top+n.h*.5+sy;
   });
   texts.forEach(function(t){
     var r=t.el.getBoundingClientRect();
@@ -181,7 +185,9 @@ window.addEventListener('resize',invalidate,{passive:true});
 window.addEventListener('load',invalidate,{once:true});
 window.addEventListener('pointermove',function(e){pointer.tx=e.clientX;pointer.ty=e.clientY},{passive:true});
 window.addEventListener('blur',function(){pointer.tx=innerWidth*.5;pointer.ty=innerHeight*.5},{passive:true});
-window.addEventListener('scroll',function(){scroll.target=window.scrollY||0;invalidate()},{passive:true});
+(horizontal?document.body:window).addEventListener('scroll',function(){
+  scroll.targetX=pageX();scroll.targetY=pageY();invalidate();
+},{passive:true});
 
 function frame(now){
   if(!pageVisible){raf=requestAnimationFrame60(frame);return;}
@@ -195,15 +201,19 @@ function frame(now){
   pointer.vy=smooth(pointer.vy,(pointer.y-pointer.py)/Math.max(dt,.008),.2);
   pointer.px=pointer.x;pointer.py=pointer.y;
 
-  scroll.y=smooth(scroll.y,scroll.target,1-Math.exp(-dt*18));
-  scroll.velocity=smooth(scroll.velocity,(scroll.y-scroll.last)/Math.max(dt,.008),.16);
-  scroll.last=scroll.y;
+  scroll.x=smooth(scroll.x,scroll.targetX,1-Math.exp(-dt*18));
+  scroll.y=smooth(scroll.y,scroll.targetY,1-Math.exp(-dt*18));
+  scroll.velocityX=smooth(scroll.velocityX,(scroll.x-scroll.lastX)/Math.max(dt,.008),.16);
+  scroll.velocityY=smooth(scroll.velocityY,(scroll.y-scroll.lastY)/Math.max(dt,.008),.16);
+  scroll.lastX=scroll.x;scroll.lastY=scroll.y;
 
   var nx=(pointer.x/Math.max(1,innerWidth)-.5)*2;
   var ny=(pointer.y/Math.max(1,innerHeight)-.5)*2;
-  var maxScroll=Math.max(1,document.documentElement.scrollHeight-innerHeight);
-  var progress=clamp(scroll.y/maxScroll,0,1);
-  var energy=clamp(Math.hypot(pointer.vx,pointer.vy)*.0025+Math.abs(scroll.velocity)*.00045,0,1);
+  var maxScroll=pageMax();
+  var pageProgress=horizontal?scroll.x/maxScroll:scroll.y/maxScroll;
+  var pageVelocity=horizontal?scroll.velocityX:scroll.velocityY;
+  var progress=clamp(pageProgress,0,1);
+  var energy=clamp(Math.hypot(pointer.vx,pointer.vy)*.0025+Math.abs(pageVelocity)*.00045,0,1);
 
   root.style.setProperty('--motion-px',nx.toFixed(4));
   root.style.setProperty('--motion-py',ny.toFixed(4));
@@ -215,10 +225,15 @@ function frame(now){
   root.style.setProperty('--motion-energy',energy.toFixed(4));
 
   nodes.forEach(function(n){
+    var localX=n.cx-scroll.x;
     var localY=n.cy-scroll.y;
-    if(localY < -innerHeight*.4 || localY > innerHeight*1.4)return;
+    if(horizontal){
+      if(localX < -innerWidth*.4 || localX > innerWidth*1.4)return;
+    }else if(localY < -innerHeight*.4 || localY > innerHeight*1.4)return;
 
-    var dx=pointer.x-n.cx,dy=pointer.y-localY;
+    var screenX=horizontal?localX:localX;
+    var screenY=localY;
+    var dx=pointer.x-screenX,dy=pointer.y-screenY;
     var radius=Math.max(120,Math.min(500,Math.max(n.w,n.h)*1.2));
     var influence=ease(1-Math.hypot(dx,dy)/radius);
     var s=n.strength;
@@ -226,7 +241,7 @@ function frame(now){
     var ax=n.type==='hero'?8:n.type==='card'?5:n.type==='social'?3:n.type==='control'?2:n.type==='about'?2.4:2.6;
     var ay=n.type==='hero'?4.8:n.type==='card'?3.2:n.type==='social'?2:n.type==='control'?1.4:n.type==='about'?1.8:1.7;
 
-    var viewport=(innerHeight*.58-localY)/innerHeight;
+    var viewport=horizontal?(innerWidth*.58-localX)/innerWidth:(innerHeight*.58-localY)/innerHeight;
     var localScroll=clamp(viewport,-1,1);
     var scrollPower=n.type==='hero'?localScroll*.85:
       n.type==='card'?localScroll*1.1:
@@ -236,8 +251,8 @@ function frame(now){
 
     var vx=pointer.vx*.0035*s;
     var vy=pointer.vy*.0025*s;
-    var tx=nx*ax*s*influence+vx;
-    var ty=ny*ay*s*influence+vy+scrollPower*5;
+    var tx=nx*ax*s*influence+vx+(horizontal?scrollPower*5:0);
+    var ty=ny*ay*s*influence+vy+(horizontal?0:scrollPower*5);
     var targetScale=1+influence*(.014+.012*s)+energy*.008;
 
     n.x=smooth(n.x,tx,1-Math.exp(-dt*(9+influence*13)));
@@ -355,7 +370,7 @@ raf=requestAnimationFrame60(frame);
   var hero=document.querySelector('.hero-inner');
   var about=document.querySelector('.about-grid');
   var bands=Array.prototype.slice.call(document.querySelectorAll('.band-track'));
-  var state={x:innerWidth*.5,y:innerHeight*.5,vx:0,vy:0,scroll:window.scrollY||0,scrollV:0,lastScroll:window.scrollY||0,px:innerWidth*.5,py:innerHeight*.5};
+  var state={x:innerWidth*.5,y:innerHeight*.5,vx:0,vy:0,scroll:(horizontal?pageX():pageY()),scrollV:0,lastScroll:(horizontal?pageX():pageY()),px:innerWidth*.5,py:innerHeight*.5};
   var target={x:state.x,y:state.y,scroll:state.scroll},last=performance.now();
   function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
   function smooth(a,b,k){return a+(b-a)*k}
@@ -365,7 +380,7 @@ raf=requestAnimationFrame60(frame);
   if(about)about.classList.add('scene-reactive');
   cards.forEach(function(el){el.classList.add('scene-reactive')});
   window.addEventListener('pointermove',function(e){target.x=e.clientX;target.y=e.clientY},{passive:true});
-  window.addEventListener('scroll',function(){target.scroll=window.scrollY||0},{passive:true});
+  (horizontal?document.body:window).addEventListener('scroll',function(){target.scroll=horizontal?pageX():pageY()},{passive:true});
   window.addEventListener('blur',function(){target.x=innerWidth*.5;target.y=innerHeight*.5},{passive:true});
   function tick(now){
     if(!pageVisible){requestAnimationFrame30(tick);return;}
@@ -376,21 +391,31 @@ raf=requestAnimationFrame60(frame);
     state.px=state.x;state.py=state.y;state.scroll=smooth(state.scroll,target.scroll,1-Math.exp(-dt*12));
     state.scrollV=smooth(state.scrollV,(state.scroll-state.lastScroll)/dt,.14);state.lastScroll=state.scroll;
     var nx=(state.x/Math.max(1,innerWidth)-.5)*2,ny=(state.y/Math.max(1,innerHeight)-.5)*2;
-    var maxScroll=Math.max(1,document.documentElement.scrollHeight-innerHeight),progress=clamp(state.scroll/maxScroll,0,1);
+    var maxScroll=pageMax(),progress=clamp(state.scroll/maxScroll,0,1);
     var energy=clamp(Math.hypot(state.vx,state.vy)*.0022+Math.abs(state.scrollV)*.00042,0,1);
     root.style.setProperty('--scene-cx',nx.toFixed(4));root.style.setProperty('--scene-cy',ny.toFixed(4));
     root.style.setProperty('--scene-vx',state.vx.toFixed(2));root.style.setProperty('--scene-vy',state.vy.toFixed(2));
     root.style.setProperty('--scene-energy',energy.toFixed(4));root.style.setProperty('--scene-progress',progress.toFixed(4));
     root.style.setProperty('--scene-tilt',(nx*2.2+state.vx*.004).toFixed(3));
     sections.forEach(function(section){
-      var r=section.getBoundingClientRect(),center=r.top+r.height*.5,focus=ease(clamp(1-Math.abs(center-innerHeight*.5)/(innerHeight*.95),0,1)),local=(center-innerHeight*.5)/Math.max(innerHeight,r.height);
-      section.style.setProperty('--sr-x',(nx*(1.5+focus*2.8)+state.vx*.0012*focus).toFixed(2)+'px');
-      section.style.setProperty('--sr-y',(-local*(1.2+focus*1.6)+state.vy*.0008*focus).toFixed(2)+'px');
+      var r=section.getBoundingClientRect();
+      var center=horizontal?(r.left+r.width*.5):(r.top+r.height*.5);
+      var axisSize=horizontal?innerWidth:innerHeight;
+      var axisExtent=horizontal?r.width:r.height;
+      var focus=ease(clamp(1-Math.abs(center-axisSize*.5)/(axisSize*.95),0,1));
+      var local=(center-axisSize*.5)/Math.max(axisSize,axisExtent);
+      if(horizontal){
+        section.style.setProperty('--sr-x',(-local*(1.2+focus*1.6)+nx*(1.5+focus*2.8)+state.vx*.0012*focus).toFixed(2)+'px');
+        section.style.setProperty('--sr-y',(ny*.55+state.vy*.0008*focus).toFixed(2)+'px');
+      }else{
+        section.style.setProperty('--sr-x',(nx*(1.5+focus*2.8)+state.vx*.0012*focus).toFixed(2)+'px');
+        section.style.setProperty('--sr-y',(-local*(1.2+focus*1.6)+state.vy*.0008*focus).toFixed(2)+'px');
+      }
       section.style.setProperty('--sr-r',(nx*(.22+focus*.42)+state.vx*.0006).toFixed(3)+'deg');
       section.style.setProperty('--scene-focus',focus.toFixed(3));
     });
-    if(hero){var hr=hero.getBoundingClientRect(),hf=ease(clamp(1-Math.abs((hr.top+hr.height*.5)-innerHeight*.5)/(innerHeight*.9),0,1));hero.style.setProperty('--hero-scene-depth',(hf*14+energy*8).toFixed(2)+'px')}
-    if(about){var ar=about.getBoundingClientRect(),af=ease(clamp(1-Math.abs((ar.top+ar.height*.5)-innerHeight*.5)/(innerHeight*1.05),0,1));about.style.setProperty('--about-scene-progress',af.toFixed(3))}
+    if(hero){var hr=hero.getBoundingClientRect(),heroCenter=horizontal?(hr.left+hr.width*.5):(hr.top+hr.height*.5),hf=ease(clamp(1-Math.abs(heroCenter-(horizontal?innerWidth*.5:innerHeight*.5))/((horizontal?innerWidth:innerHeight)*.9),0,1));hero.style.setProperty('--hero-scene-depth',(hf*14+energy*8).toFixed(2)+'px')}
+    if(about){var ar=about.getBoundingClientRect(),aboutCenter=horizontal?(ar.left+ar.width*.5):(ar.top+ar.height*.5),af=ease(clamp(1-Math.abs(aboutCenter-(horizontal?innerWidth*.5:innerHeight*.5))/((horizontal?innerWidth:innerHeight)*1.05),0,1));about.style.setProperty('--about-scene-progress',af.toFixed(3))}
     cards.forEach(function(card,index){
       var r=card.getBoundingClientRect(),cx=r.left+r.width*.5,cy=r.top+r.height*.5,dist=Math.hypot(state.x-cx,state.y-cy),near=ease(1-dist/Math.max(260,Math.min(760,Math.max(r.width,r.height)*1.8)));
       card.style.setProperty('--sr-x',((state.x-cx)*.018*near+nx*(2.5+near*7)+state.vx*.0015*near).toFixed(2)+'px');
