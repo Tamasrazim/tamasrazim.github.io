@@ -279,6 +279,6 @@ pub fn run() {
             list_assets,package_flower_batch,list_render_jobs,list_accounts,create_account,update_account_status,
             list_submissions,set_submission_status,check_submission_public_status,export_project_package,import_project_package,ingest_module_output
         ])
-        .run(tauri::generate_context!())
+        .run(tauri::tauri_build_context!())
         .expect("error while running KYNESTRA");
 }
