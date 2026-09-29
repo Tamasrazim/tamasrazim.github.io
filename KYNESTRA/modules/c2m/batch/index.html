@@ -77,7 +77,7 @@ h1{font-size:clamp(28px,4vw,54px);line-height:.95;margin:8px 0 0;font-weight:600
     <button class="btn" id="nextBtn">Start Next Job</button>
     <button class="btn" id="openBtn">Open C2M Renderer</button>
     <button class="btn" id="manifestBtn">Export Batch Manifest</button>
-    <button class="btn" id="packageBtn">Package Rendered Files</button>
+    <button class="btn primary" id="packageBtn">DOWNLOAD EVERYTHING</button>
   </div>
 
   <main class="layout">
@@ -100,7 +100,7 @@ h1{font-size:clamp(28px,4vw,54px);line-height:.95;margin:8px 0 0;font-weight:600
         <strong>Transparency rule:</strong> the render source remains RGBA/transparent. Standard MP4/H.264 is not a universal alpha delivery format, so the batch package also supports a transparent first-frame PNG package. JPG first frames are intentionally flattened previews.
       </div>
       <div class="notice">
-        <strong>Packaging rule:</strong> files are sorted deterministically and split into folders of 50. The native KYNESTRA packager writes ZIPs directly to disk so 4K media is not loaded into browser memory.
+        <strong>One-click delivery:</strong> DOWNLOAD EVERYTHING creates one <code>FLOWER_BATCH_ALL.zip</code> containing all MP4 files, all first-frame JPGs, all transparent first-frame PNGs, checksums and the batch manifest. Files remain grouped in folders of 50 inside the single ZIP.
       </div>
       <div class="result" id="results"></div>
     </aside>
@@ -372,15 +372,13 @@ h1{font-size:clamp(28px,4vw,54px);line-height:.95;margin:8px 0 0;font-weight:600
     const outputDir = await dialog.open({multiple:false,directory:true,title:'Select ZIP destination folder'});
     if (typeof outputDir !== 'string' || !outputDir) return;
 
-    setStatus('Packaging MP4, JPG first frames and transparent PNG first frames…');
+    setStatus('Building one master ZIP with everything…');
     try {
       const result = await invoke('package_flower_batch', {inputDir:sourceDir,outputDir});
       $('results').innerHTML =
-        '<div class="path"><b>MP4 ZIP</b><br>'+escapeHtml(result.mp4_zip || 'not created')+'</div>'+
-        '<div class="path"><b>JPG ZIP</b><br>'+escapeHtml(result.jpg_zip || 'not created')+'</div>'+
-        '<div class="path"><b>Transparent PNG ZIP</b><br>'+escapeHtml(result.png_zip || 'not created')+'</div>'+
-        '<div class="path"><b>Counts</b><br>MP4: '+result.mp4_count+' · JPG: '+result.jpg_count+' · PNG: '+result.png_count+' · folders: '+result.folder_count+'</div>';
-      setStatus('Batch package complete.');
+        '<div class="path"><b>DOWNLOAD EVERYTHING</b><br>'+escapeHtml(result.all_zip || 'not created')+'</div>'+
+        '<div class="path"><b>Included</b><br>MP4: '+result.mp4_count+' · JPG: '+result.jpg_count+' · transparent PNG: '+result.png_count+' · folders: '+result.folder_count+'</div>';
+      setStatus('DOWNLOAD EVERYTHING ready — one master ZIP created.');
     } catch (error) {
       setStatus('Packaging failed: '+String(error));
     }
