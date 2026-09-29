@@ -1,0 +1,35 @@
+{
+  "version": "0.1",
+  "module": "c2m",
+  "jobStates": [
+    "queued",
+    "running",
+    "completed",
+    "failed",
+    "cancelled",
+    "recoverable"
+  ],
+  "requiredJobFields": [
+    "jobId",
+    "projectId",
+    "composition",
+    "output"
+  ],
+  "composition": {
+    "width": "integer",
+    "height": "integer",
+    "fps": "integer",
+    "duration": "number",
+    "frameCount": "integer"
+  },
+  "output": {
+    "format": "webm|mp4|png",
+    "relativePath": "project-relative path",
+    "sha256": "optional hex digest"
+  },
+  "events": {
+    "started": "render.started",
+    "completed": "render.completed",
+    "failed": "render.failed"
+  }
+}

@@ -9,10 +9,13 @@
 - Project create/open/save
 
 ## Alpha 0.2 — C2M
-- Copy the existing Code Motion renderer into KYNESTRA as a separate module copy
-- Never modify the production C2M renderer
-- Connect render jobs to Core
-- Register completed renders with Vault
+- [x] Copy the existing Code Motion renderer into KYNESTRA as a separate module copy
+- [x] Never modify the production C2M renderer
+- [x] Package the KYNESTRA C2M copy through the Tauri build
+- [x] Add C2M render and asset contracts
+- [x] Add desktop launch path to C2M
+- [ ] Connect live render jobs to Core
+- [ ] Register completed renders with Vault
 
 ## Alpha 0.3 — Stock Vault
 - Asset library and detail view
