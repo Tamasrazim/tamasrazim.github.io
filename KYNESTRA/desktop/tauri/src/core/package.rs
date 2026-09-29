@@ -218,6 +218,11 @@ impl PackageService {
             return Err(error);
         }
 
+        if let Err(error) = ProjectManager::default().open(destination.to_string_lossy().as_ref()) {
+            let _ = fs::remove_dir_all(&destination);
+            return Err(PackageError::ImportedProjectInvalid(error.to_string()));
+        }
+
         Ok(ImportResult {
             project_path: destination.to_string_lossy().into_owned(),
             project_id: manifest.project_id,
@@ -407,6 +412,8 @@ pub enum PackageError {
     DestinationExists,
     #[error("unsafe package path: {0}")]
     UnsafePath(String),
+    #[error("imported project failed validation: {0}")]
+    ImportedProjectInvalid(String),
     #[error("package integrity mismatch: {0}")]
     IntegrityMismatch(String),
     #[error("filesystem error: {0}")]
