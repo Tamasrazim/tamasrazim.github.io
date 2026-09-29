@@ -104,4 +104,6 @@ CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
 CREATE INDEX IF NOT EXISTS idx_render_jobs_project ON render_jobs(project_id);
 CREATE INDEX IF NOT EXISTS idx_render_jobs_status ON render_jobs(status);
 CREATE INDEX IF NOT EXISTS idx_submissions_asset ON submissions(asset_id);
+CREATE INDEX IF NOT EXISTS idx_submissions_account ON submissions(account_id);
+CREATE INDEX IF NOT EXISTS idx_accounts_platform ON platform_accounts(platform);
 CREATE INDEX IF NOT EXISTS idx_events_type ON events(event_type);
