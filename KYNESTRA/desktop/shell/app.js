@@ -11,7 +11,7 @@ const views = {
   forge: () => renderModule('Forge', 'Creation workspace boundary is ready. Forge will become the source and recipe module.'),
   c2m: renderC2M,
   vault: renderVault,
-  settings: () => renderModule('Settings', 'Core settings will be persisted through the shared settings service.')
+  settings: renderSettings
 };
 
 async function renderC2M() {
@@ -48,15 +48,112 @@ async function renderVault() {
     return;
   }
 
-  const assets = await api('list_assets', { projectPath: project.path });
+  const [assets, accounts, submissions] = await Promise.all([
+    api('list_assets', { projectPath: project.path }),
+    api('list_accounts', { projectPath: project.path }),
+    api('list_submissions', { projectPath: project.path })
+  ]);
+
   view.innerHTML =
-    '<div class="card"><h2>Stock Vault</h2><p class="muted">Assets registered from KYNESTRA render outputs are stored in the project asset registry and deduplicated by SHA-256.</p>'+
-    '<div class="notice">Project: <strong>'+escapeHtml(project.name)+'</strong> · '+assets.length+' asset'+(assets.length === 1 ? '' : 's')+'</div>'+
+    '<div class="card"><h2>Stock Vault</h2>'+
+    '<p class="muted">Assets, platform accounts, and submission states are tracked per project. Public-status verification remains a separate check and is never inferred from absence.</p>'+
+    '<div class="notice">Project: <strong>'+escapeHtml(project.name)+'</strong> · '+assets.length+' asset'+(assets.length===1?'':'s')+' · '+accounts.length+' account'+(accounts.length===1?'':'s')+'</div>'+
+    '<div class="actions">'+
+    '<button id="vault-add-account" class="action">Add Platform Account</button>'+
+    (accounts.length ? '<button id="vault-set-submission" class="action primary">Update Submission Status</button>' : '')+
+    '</div>'+
     '<div class="projects">'+(
       assets.length
-      ? assets.map(asset => '<div class="project"><b>'+escapeHtml(asset.filename)+'</b><code>'+escapeHtml(asset.relative_path)+'</code><span class="muted">'+escapeHtml(asset.kind)+' · '+formatBytes(asset.size_bytes)+' · SHA-256 '+escapeHtml(asset.sha256.slice(0,16))+'…</span></div>').join('')
+      ? assets.map(asset => {
+          const states=submissions.filter(s=>s.asset_id===asset.asset_id);
+          const stateText=states.length
+            ? states.map(s=>(s.platform||'Account')+' · '+s.status).join(' · ')
+            : 'not submitted';
+          return '<div class="project"><b>'+escapeHtml(asset.filename)+'</b><code>'+escapeHtml(asset.relative_path)+'</code><span class="muted">'+escapeHtml(asset.kind)+' · '+formatBytes(asset.size_bytes)+' · SHA-256 '+escapeHtml(asset.sha256.slice(0,16))+'…</span><span class="muted">Submission: '+escapeHtml(stateText)+'</span></div>';
+        }).join('')
       : '<div class="notice">Vault is empty for this project.</div>'
-    )+'</div></div>';
+    )+
+    '</div></div>';
+
+  document.getElementById('vault-add-account')?.addEventListener('click', createAccount);
+  document.getElementById('vault-set-submission')?.addEventListener('click', setSubmissionStatus);
+}
+
+async function renderSettings() {
+  const project = state.activeProject;
+  if (!project) {
+    renderModule('Settings', 'Open a .tamasrazim project first to manage platform accounts for that project.');
+    return;
+  }
+
+  const accounts = await api('list_accounts', { projectPath: project.path });
+  view.innerHTML =
+    '<div class="card"><h2>Accounts Manager</h2>'+
+    '<p class="muted">Store platform identity metadata and contributor profile links here. Secrets are represented only by credential references; credentials are not written into project files.</p>'+
+    '<div class="notice">Project: <strong>'+escapeHtml(project.name)+'</strong></div>'+
+    '<div class="actions"><button id="add-account" class="action primary">Add Account</button></div>'+
+    '<div class="projects">'+(
+      accounts.length
+      ? accounts.map(a => '<div class="project"><b>'+escapeHtml(a.platform)+' · '+escapeHtml(a.display_name)+'</b><code>'+escapeHtml(a.account_id)+'</code><span class="muted">'+escapeHtml(a.status)+(a.profile_url ? ' · '+escapeHtml(a.profile_url) : '')+'</span><div class="actions"><button class="action" data-account-status="'+escapeAttr(a.account_id)+'" data-status="'+escapeAttr(a.status==='connected'?'disconnected':'connected')+'">'+(a.status==='connected'?'Mark Disconnected':'Mark Connected')+'</button></div></div>').join('')
+      : '<div class="notice">No platform accounts configured.</div>'
+    )+
+    '</div></div>';
+
+  document.getElementById('add-account')?.addEventListener('click', createAccount);
+  document.querySelectorAll('[data-account-status]').forEach(button => button.addEventListener('click', () => updateAccountStatus(button.dataset.accountStatus, button.dataset.status)));
+}
+
+async function createAccount() {
+  const project=state.activeProject;
+  if (!project) return;
+  const platform=prompt('Platform name');
+  if (!platform) return;
+  const displayName=prompt('Account display name', platform);
+  if (!displayName) return;
+  const profileUrl=prompt('Contributor/profile URL (optional)') || null;
+  try {
+    await api('create_account', { projectPath: project.path, platform, displayName, profileUrl });
+    await renderSettings();
+  } catch (error) { alert(String(error)); }
+}
+
+async function updateAccountStatus(accountId, status) {
+  const project=state.activeProject;
+  if (!project) return;
+  try {
+    await api('update_account_status', { projectPath: project.path, accountId, status });
+    await renderSettings();
+  } catch (error) { alert(String(error)); }
+}
+
+async function setSubmissionStatus() {
+  const project=state.activeProject;
+  if (!project) return;
+  try {
+    const assets=await api('list_assets', { projectPath: project.path });
+    const accounts=await api('list_accounts', { projectPath: project.path });
+    if (!assets.length || !accounts.length) {
+      alert('Create an asset and a platform account first.');
+      return;
+    }
+    const assetId=prompt('Asset ID', assets[0].asset_id);
+    if (!assetId) return;
+    const accountId=prompt('Account ID', accounts[0].account_id);
+    if (!accountId) return;
+    const status=prompt('Status: not_submitted, submitted, pending, approved, rejected, unknown', 'submitted');
+    if (!status) return;
+    const publicUrl=prompt('Public URL (optional)') || null;
+    const reason=prompt('Status note (optional)') || null;
+    await api('set_submission_status', {
+      projectPath: project.path,
+      assetId,
+      accountId,
+      status,
+      publicUrl,
+      reason
+    });
+    await renderVault();
+  } catch (error) { alert(String(error)); }
 }
 
 async function createRenderJob() {
