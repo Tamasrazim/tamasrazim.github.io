@@ -1,4 +1,4 @@
-# Code → Motion — Tamasrazim
+# KYNESTRA — Tamasrazim
 
 Browser-first deterministic code-driven animation workspace.
 
@@ -19,7 +19,7 @@ The workspace entry is:
 ## Project files
 
 - `index.html` — project landing page.
-- `renderer/index.html` — canonical Code → Motion workspace.
+- `renderer/index.html` — canonical KYNESTRA workspace.
 - `renderer/media-stack.js` — media capability and container/codec descriptors.
 - `renderer/manifest.webmanifest` — workspace PWA manifest.
 - `renderer/sw.js` — workspace service worker.
@@ -33,7 +33,7 @@ Older inbound links are preserved through:
 - `/code-motion-tamasrazim.html`
 - `/code-motion-tamasrazim2.html`
 
-Both redirect to the current Code → Motion workspace.
+Both redirect to the current KYNESTRA workspace.
 
 The archived `legacy-renderer.html` is not used by normal navigation.
 
