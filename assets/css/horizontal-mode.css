@@ -270,3 +270,11 @@ body > .site-footer{
     transition:none;
   }
 }
+
+.site-header .nav a.axis-active{
+  color:var(--white);
+}
+.site-header .nav a.axis-active::after{
+  transform:scaleX(1);
+  transform-origin:left;
+}
