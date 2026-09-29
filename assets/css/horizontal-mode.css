@@ -514,3 +514,37 @@ body.axis-dragging .cursor-ring{
     display:none!important;
   }
 }
+
+/* Whole-page active state + screen-reader section status. */
+.axis-live-status{
+  position:fixed;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
+}
+
+main#content > section.axis-is-active,
+main#content > .band.axis-is-active{
+  --axis-focus:1;
+}
+
+body[data-axis-speed="fast"] main#content > section.axis-is-active .section-inner{
+  filter:brightness(1.012);
+}
+
+body[data-axis-speed="moving"] main#content > section.axis-is-near .section-inner{
+  opacity:.96;
+}
+
+@media(prefers-reduced-motion:reduce){
+  body[data-axis-speed="fast"] main#content > section.axis-is-active .section-inner,
+  body[data-axis-speed="moving"] main#content > section.axis-is-near .section-inner{
+    filter:none;
+    opacity:1;
+  }
+}
