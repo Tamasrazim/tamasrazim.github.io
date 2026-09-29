@@ -103,6 +103,8 @@ impl ProjectManager {
             return Err(ProjectError::MissingDatabase);
         }
 
+        validate_database_identity(&root, &manifest)?;
+
         Ok(summary_from_manifest(&root, &manifest))
     }
 
@@ -137,6 +139,42 @@ impl ProjectManager {
         projects.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
         Ok(projects)
     }
+}
+
+fn validate_database_identity(root: &Path, manifest: &ProjectManifest) -> Result<(), ProjectError> {
+    let conn = db::open(&root.join("project.db"))?;
+    let row = conn.query_row(
+        "SELECT project_id,name,format,format_version,root_path FROM projects LIMIT 1",
+        [],
+        |row| {
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+                row.get::<_, String>(3)?,
+                row.get::<_, Option<String>>(4)?,
+            ))
+        },
+    );
+
+    let (project_id, name, format, format_version, root_path) =
+        row.map_err(|error| match error {
+            rusqlite::Error::QueryReturnedNoRows => ProjectError::DatabaseProjectMissing,
+            other => ProjectError::Sqlite(other),
+        })?;
+
+    let expected_root = root.to_string_lossy();
+
+    if project_id != manifest.project_id
+        || name != manifest.name
+        || format != FORMAT
+        || format_version != FORMAT_VERSION
+        || root_path.as_deref().map(str::trim).filter(|value| !value.is_empty()).map(|value| value != expected_root.as_ref()).unwrap_or(false)
+    {
+        return Err(ProjectError::DatabaseManifestMismatch);
+    }
+
+    Ok(())
 }
 
 fn summary_from_manifest(root: &Path, manifest: &ProjectManifest) -> ProjectSummary {
@@ -201,6 +239,10 @@ pub enum ProjectError {
     InvalidManifest,
     #[error("project database is missing")]
     MissingDatabase,
+    #[error("project database has no project record")]
+    DatabaseProjectMissing,
+    #[error("project database does not match manifest")]
+    DatabaseManifestMismatch,
     #[error("filesystem error: {0}")]
     Io(#[from] std::io::Error),
     #[error("serialization error: {0}")]
@@ -241,6 +283,24 @@ mod tests {
 
         let opened = manager.open(&created.project.path).expect("open project");
         assert_eq!(opened.project_id, created.project.project_id);
+    }
+
+    #[test]
+    fn rejects_database_manifest_mismatch() {
+        let root = tempfile::tempdir().expect("root");
+        let manager = ProjectManager::default();
+
+        let created = manager.create(root.path(), "Consistent Project").expect("project");
+        let conn = db::open(&Path::new(&created.project.path).join("project.db")).expect("db");
+        conn.execute(
+            "UPDATE projects SET project_id='different-id' WHERE project_id=?1",
+            [created.project.project_id.as_str()],
+        ).expect("update");
+
+        assert!(matches!(
+            manager.open(&created.project.path),
+            Err(ProjectError::DatabaseManifestMismatch)
+        ));
     }
 
     #[test]
