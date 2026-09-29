@@ -190,6 +190,16 @@ window.addEventListener('blur',function(){pointer.tx=innerWidth*.5;pointer.ty=in
   scroll.targetX=pageX();scroll.targetY=pageY();invalidate();
 },{passive:true});
 
+  /* Nested vertical panels are independent scroll containers in horizontal mode.
+     Invalidate cached element bounds whenever one of them moves. */
+  if(horizontal){
+    Array.prototype.forEach.call(document.querySelectorAll('main#content > section, main#content > .band'),function(panel){
+      if(panel.scrollHeight>panel.clientHeight+1){
+        panel.addEventListener('scroll',function(){invalidate();},{passive:true});
+      }
+    });
+  }
+
 function frame(now){
   if(!pageVisible){raf=requestAnimationFrame60(frame);return;}
   var dt=Math.min(.05,Math.max(.008,(now-last)/1000));last=now;
