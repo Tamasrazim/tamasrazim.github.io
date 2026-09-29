@@ -389,7 +389,7 @@ fn sanitize_name(value: &str) -> String {
     value
         .chars()
         .map(|c| match c {
-            '/' | '\\\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|' => '_',
+            '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|' => '_',
             c if c.is_control() => '_',
             c => c,
         })
