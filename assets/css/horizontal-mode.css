@@ -850,14 +850,29 @@ body[data-axis-speed="fast"]{
 
 
 /* ---------- Seamless scene handoff ---------- */
-/* Each viewport overlaps the next just enough to read as one continuous spatial surface. */
+/* Sections overlap and dissolve into one another instead of ending on a visible edge. */
 main#content > section{
+  --edge-dissolve:clamp(52px,8vw,124px);
   margin-right:-5.5vw;
   padding-right:5.5vw;
   position:relative;
   z-index:1;
   border-right:0;
-  box-shadow:inset -1px 0 rgba(243,243,239,.018),inset -72px 0 96px -88px rgba(243,243,239,.12);
+  box-shadow:none;
+  -webkit-mask-image:linear-gradient(
+    90deg,
+    #000 0,
+    #000 calc(100% - var(--edge-dissolve)),
+    rgba(0,0,0,.82) calc(100% - var(--edge-dissolve) * .55),
+    transparent 100%
+  );
+  mask-image:linear-gradient(
+    90deg,
+    #000 0,
+    #000 calc(100% - var(--edge-dissolve)),
+    rgba(0,0,0,.82) calc(100% - var(--edge-dissolve) * .55),
+    transparent 100%
+  );
 }
 main#content > section::before{
   content:"";
@@ -865,27 +880,23 @@ main#content > section::before{
   top:0;
   right:0;
   bottom:0;
-  width:clamp(52px,8vw,124px);
+  width:var(--edge-dissolve);
   pointer-events:none;
   z-index:3;
-  background:
-    radial-gradient(ellipse at 100% 50%,rgba(243,243,239,.065),transparent 64%),
-    linear-gradient(90deg,transparent 0%,rgba(5,5,5,.012) 45%,rgba(5,5,5,.10) 100%);
-  opacity:calc(.72 + var(--axis-velocity-abs) * .28);
+  background:linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(5,5,5,.018) 34%,
+    rgba(5,5,5,.055) 74%,
+    rgba(5,5,5,.11) 100%
+  );
+  opacity:.65;
   transition:opacity .35s var(--ease);
 }
 main#content > section::after{
-  content:"";
-  position:absolute;
-  top:10%;
-  right:1px;
-  bottom:10%;
-  width:1px;
-  pointer-events:none;
-  z-index:4;
-  background:linear-gradient(180deg,transparent,rgba(243,243,239,.052) 24%,rgba(243,243,239,.068) 50%,rgba(243,243,239,.052) 76%,transparent);
-  box-shadow:0 0 32px rgba(243,243,239,.025);
+  display:none;
 }
+
 main#content > .band{
   flex-basis:calc(100vw - 2vw);
   width:calc(100vw - 2vw);
@@ -900,20 +911,26 @@ main#content > .band::after{
 
 .axis-scroller > .site-footer{
   position:relative;
-  box-shadow:inset 72px 0 96px -88px rgba(243,243,239,.10);
+  margin-left:-5.5vw;
+  padding-left:5.5vw;
+  box-shadow:none;
 }
 .axis-scroller > .site-footer::before{
   content:"";
   position:absolute;
-  top:10%;
-  left:1px;
-  bottom:10%;
-  width:1px;
+  top:0;
+  left:0;
+  bottom:0;
+  width:clamp(52px,8vw,124px);
   pointer-events:none;
-  background:linear-gradient(180deg,transparent,rgba(243,243,239,.052) 24%,rgba(243,243,239,.068) 50%,rgba(243,243,239,.052) 76%,transparent);
-  box-shadow:0 0 32px rgba(243,243,239,.025);
+  background:linear-gradient(
+    90deg,
+    rgba(5,5,5,.11) 0%,
+    rgba(5,5,5,.055) 26%,
+    rgba(5,5,5,.018) 62%,
+    transparent 100%
+  );
 }
-
 @media(max-width:1100px){
   main#content > section{
     margin-right:-4vw;
