@@ -24,7 +24,7 @@ The Tauri desktop runtime now has a Rust Core with:
 
 Modules:
 
-- Forge
+- Forge (Format Forge integration)
 - C2M (Code Motion)
 - Stock Vault
 
