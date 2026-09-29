@@ -17,6 +17,7 @@ The Tauri desktop runtime now has a Rust Core with:
 - project-local Stock Vault asset listing
 - platform account metadata and connection state
 - per-asset submission tracking
+- shared Forge/C2M/Core asset handoff API
 - generic public-status verification
 - ZIP-backed portable .tamasrazim packages
 - SHA-256 package integrity verification
