@@ -101,6 +101,7 @@
   }
 
   function goTo(el,smooth){
+    cancelWheel();
     var left=horizontalTarget(el);
     scroller.scrollTo({
       left:left,
@@ -120,6 +121,18 @@
 
   var snapTimer=0;
   var speedTimer=0;
+  var wheelRAF=0;
+  var wheelTarget=0;
+  var wheelLastTime=0;
+
+  function cancelWheel(){
+    if(wheelRAF){
+      cancelAnimationFrame(wheelRAF);
+      wheelRAF=0;
+    }
+    wheelTarget=scroller.scrollLeft;
+    wheelLastTime=0;
+  }
 
   function cancelSnap(){
     window.clearTimeout(snapTimer);
@@ -163,6 +176,43 @@
     return e.deltaY;
   }
 
+  function animateWheel(now){
+    if(!wheelRAF)return;
+
+    if(!wheelLastTime)wheelLastTime=now;
+    var dt=Math.min(.05,Math.max(.008,(now-wheelLastTime)/1000));
+    wheelLastTime=now;
+
+    var current=scroller.scrollLeft;
+    var distance=wheelTarget-current;
+    var blend=1-Math.exp(-dt*17);
+    var next=current+distance*blend;
+
+    if(Math.abs(distance)<0.35){
+      scroller.scrollLeft=wheelTarget;
+      wheelRAF=0;
+      wheelLastTime=0;
+      scheduleProgress();
+      scheduleSectionState();
+      scheduleSnap();
+      return;
+    }
+
+    scroller.scrollLeft=next;
+    scheduleProgress();
+    scheduleSectionState();
+    wheelRAF=requestAnimationFrame(animateWheel);
+  }
+
+  function pushWheel(delta){
+    var currentTarget=wheelRAF ? wheelTarget : scroller.scrollLeft;
+    wheelTarget=Math.max(0,Math.min(maxHorizontal(),currentTarget+delta));
+    if(!wheelRAF){
+      wheelLastTime=0;
+      wheelRAF=requestAnimationFrame(animateWheel);
+    }
+  }
+
   window.addEventListener('wheel',function(e){
     cancelSnap();
     if(e.ctrlKey || isEditable(e.target))return;
@@ -180,15 +230,12 @@
     var delta=Math.abs(wheelX)>Math.abs(wheelY) ? wheelX : wheelY;
     if(Math.abs(delta)<0.5)return;
 
-    var before=scroller.scrollLeft;
-    var next=Math.max(0,Math.min(maxHorizontal(),before+delta));
+    var beforeTarget=wheelRAF ? wheelTarget : scroller.scrollLeft;
+    var nextTarget=Math.max(0,Math.min(maxHorizontal(),beforeTarget+delta));
 
-    if(next!==before){
-      scroller.scrollLeft=next;
-      scheduleProgress();
-      scheduleSectionState();
-      scheduleSnap();
+    if(nextTarget!==beforeTarget){
       e.preventDefault();
+      pushWheel(delta);
     }
   },{passive:false,capture:true});
 
@@ -203,6 +250,7 @@
   if(fine && !reduce){
     scroller.addEventListener('pointerdown',function(e){
       if(e.button!==0 || isDragExcluded(e.target))return;
+      cancelWheel();
       cancelSnap();
       drag.active=true;
       drag.startX=e.clientX;
@@ -252,6 +300,7 @@
 
     progressControl.addEventListener('pointerdown',function(e){
       if(e.button!==0)return;
+      cancelWheel();
       cancelSnap();
       scrub.active=true;
       scrub.pointerId=e.pointerId;
@@ -329,6 +378,7 @@
 
   /* Keep in-page navigation horizontal and predictable. */
   document.addEventListener('click',function(e){
+    cancelWheel();
     var anchor=e.target.closest ? e.target.closest('a[href^="#"]') : null;
     if(!anchor)return;
 
@@ -351,6 +401,7 @@
   });
 
   function goToHash(){
+    cancelWheel();
     cancelSnap();
     var id=decodeURIComponent(location.hash.replace(/^#/,''));
     if(!id){
@@ -449,6 +500,7 @@
   });
 
   window.addEventListener('blur',function(){
+    cancelWheel();
     cancelSnap();
     if(typeof drag!=='undefined'){
       drag.active=false;
@@ -470,6 +522,7 @@
 
   window.addEventListener('keydown',function(e){
     if(e.key!=='Escape')return;
+    cancelWheel();
     cancelSnap();
     if(typeof drag!=='undefined'){
       drag.active=false;
