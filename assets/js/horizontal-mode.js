@@ -9,6 +9,7 @@
   var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var progressFill=document.getElementById('progressFill');
   var scroller=document.body;
+  scroller.dataset.horizontalMode='true';
   var raf=0;
 
   function maxHorizontal(){
@@ -53,6 +54,14 @@
   }
 
   /* Mouse wheel becomes horizontal page travel. Native horizontal trackpads remain native. */
+  function verticalPanelCanScroll(target,delta){
+    var panel=target && target.closest ? target.closest('main#content > section, main#content > .band') : null;
+    if(!panel || panel.scrollHeight<=panel.clientHeight+1)return false;
+    if(delta>0)return panel.scrollTop < panel.scrollHeight-panel.clientHeight-1;
+    if(delta<0)return panel.scrollTop>1;
+    return false;
+  }
+
   window.addEventListener('wheel',function(e){
     if(e.ctrlKey || isEditable(e.target))return;
 
@@ -63,6 +72,9 @@
     }
 
     if(Math.abs(delta)<0.5)return;
+
+    /* Let a section consume vertical wheel input while it still has vertical content. */
+    if(verticalPanelCanScroll(e.target,delta))return;
 
     var before=scroller.scrollLeft;
     var next=Math.max(0,Math.min(maxHorizontal(),before+delta));
