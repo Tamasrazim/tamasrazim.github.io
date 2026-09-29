@@ -76,4 +76,5 @@ document.querySelectorAll('#nav button').forEach(button => button.addEventListen
   views[name]();
 }));
 
+document.getElementById('view')?.addEventListener('click', event => { if (event.target?.id === 'launch-c2m') window.location.href = 'modules/c2m/renderer/index.html'; });
 init();
