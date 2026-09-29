@@ -2,10 +2,15 @@
 /* ---------- Horizontal page mode ---------- */
 html{
   height:100%;
-  overflow:hidden;
+  overflow-x:auto;
+  overflow-y:hidden;
   scroll-behavior:smooth;
+  scroll-snap-type:x proximity;
+  scrollbar-width:none;
+  overscroll-behavior:none;
   background:var(--black);
 }
+html::-webkit-scrollbar{display:none}
 
 body{
   width:max-content;
@@ -15,13 +20,9 @@ body{
   display:flex;
   flex-direction:row;
   align-items:stretch;
-  overflow-x:scroll;
-  overflow-y:hidden;
-  overscroll-behavior:none;
-  scroll-snap-type:x proximity;
-  scrollbar-width:none;
+  overflow:visible;
+  overscroll-behavior:visible;
 }
-body::-webkit-scrollbar{display:none}
 
 main#content{
   flex:0 0 auto;
@@ -648,7 +649,7 @@ body[data-axis-edge="end"] .horizontal-index-readout::after{
 
 /* Explicitly establish body as the horizontal scroll container. */
 html{
-  overflow-x:hidden;
+  overflow-x:auto;
   overflow-y:hidden;
 }
 body{
