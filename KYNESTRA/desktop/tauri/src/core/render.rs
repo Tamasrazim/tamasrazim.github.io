@@ -122,12 +122,16 @@ impl RenderService {
             |row| row.get(0),
         )?;
 
-        conn.execute(
+        let changed = conn.execute(
             "UPDATE render_jobs
              SET status='completed',asset_id=?1,output_relative_path=?2,completed_at=?3,error=NULL
-             WHERE job_id=?4",
+             WHERE job_id=?4 AND status='running'",
             params![asset_id, output_relative_path, now, job_id],
         )?;
+
+        if changed != 1 {
+            return Err(RenderError::InvalidFinishState);
+        }
 
         tasks.update(project_path, &task_id, "completed", 1.0, Some("render completed and asset imported".into()))?;
         let reader = RenderJobReader::new(&conn, job_id)?;
@@ -151,10 +155,17 @@ impl RenderService {
             |row| row.get(0),
         )?;
 
-        conn.execute(
-            "UPDATE render_jobs SET status='failed',completed_at=?1,error=?2 WHERE job_id=?3",
+        let changed = conn.execute(
+            "UPDATE render_jobs
+             SET status='failed',completed_at=?1,error=?2
+             WHERE job_id=?3 AND status='running'",
             params![now, error, job_id],
         )?;
+
+        if changed != 1 {
+            return Err(RenderError::InvalidFinishState);
+        }
+
         tasks.update(project_path, &task_id, "failed", 0.0, Some(error.into()))?;
 
         let reader = RenderJobReader::new(&conn, job_id)?;
@@ -281,6 +292,8 @@ pub enum RenderError {
     InvalidProject,
     #[error("render job is not queued")]
     InvalidStartState,
+    #[error("render job is not running")]
+    InvalidFinishState,
     #[error("database error: {0}")]
     Sqlite(#[from] rusqlite::Error),
     #[error("task error: {0}")]

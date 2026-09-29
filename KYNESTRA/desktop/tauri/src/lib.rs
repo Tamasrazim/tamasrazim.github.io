@@ -59,7 +59,14 @@ fn list_tasks(app: AppHandle, project_path: String) -> Result<Vec<TaskRecord>, S
 fn update_task(app: AppHandle, project_path: String, task_id: String, status: String, progress: f64, message: Option<String>) -> Result<TaskRecord,String> {
     let state=app.state::<CoreState>();
     let task=state.tasks.update(&project_path,&task_id,&status,progress,message).map_err(|e| e.to_string())?;
-    let event_name=match status.as_str(){"completed"=>"task.completed","failed"=>"task.failed","running"=>"task.started",_=>"task.progress"};
+    let event_name=match status.as_str() {
+        "completed"=>"task.completed",
+        "failed"=>"task.failed",
+        "running"=>"task.started",
+        "cancelled"=>"task.cancelled",
+        "recoverable"=>"task.recovered",
+        _=>"task.progress"
+    };
     let event=CoreEvent::new(event_name,serde_json::to_value(&task).map_err(|e| e.to_string())?);
     state.events.persist(std::path::Path::new(&project_path),&event).map_err(|e| e.to_string())?;
     state.events.publish(&app,event).map_err(|e| e.to_string())?;
