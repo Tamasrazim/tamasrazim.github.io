@@ -36,7 +36,7 @@ async function restoreActiveProject() {
 
 async function renderForge() {
   view.innerHTML =
-    '<div class="card"><h2>Forge</h2><p class="muted">KYNESTRA Forge currently ships the real Format Forge workspace as an independent module. It handles browser-first conversion, batch processing and ZIP export; the production page remains untouched.</p><div class="actions"><button id="launch-forge" class="action primary">Launch Forge</button></div><div class="notice">Forge is intentionally separate from C2M and Stock Vault. Core handoff contracts will be added without merging module internals.</div></div>';
+    '<div class="card"><h2>Forge</h2><p class="muted">KYNESTRA Forge currently ships the real Format Forge workspace as an independent module. It handles browser-first conversion, batch processing and ZIP export; the production page remains untouched.</p><div class="actions"><button id="launch-forge" class="action primary">Launch Forge</button></div><div class="notice">Forge is intentionally separate from KYNESTRA and Stock Vault. Core handoff contracts will be added without merging module internals.</div></div>';
 }
 
 async function renderC2M() {
@@ -46,7 +46,7 @@ async function renderC2M() {
     : '<div class="notice">Open a .tamasrazim project first to create a Core render job.</div>';
 
   view.innerHTML =
-    '<div class="card"><h2>KYNESTRA</h2><p class="muted">KYNESTRA ships its own C2M renderer copy. Core render jobs and Vault ingestion are now connected around it.</p>'+
+    '<div class="card"><h2>KYNESTRA</h2><p class="muted">KYNESTRA ships its own renderer. Core render jobs and Vault ingestion are now connected around it.</p>'+
     active+
     '<div class="actions">'+
     '<button id="launch-c2m" class="action primary">Launch KYNESTRA Renderer</button>'+
@@ -276,7 +276,7 @@ async function recoverRenderJob(jobId) {
       projectPath: state.activeProject.path,
       jobId
     });
-    alert('Render job recovered and returned to queued state. Rerun it from the C2M module.');
+    alert('Render job recovered and returned to queued state. Rerun it from the KYNESTRA module.');
     await renderC2M();
   } catch (error) {
     alert(String(error));
@@ -439,7 +439,7 @@ function renderHome() {
   const modules = state.modules.length
     ? state.modules.map(m => '<div class="project"><b>'+escapeHtml(m.display_name)+'</b><code>'+escapeHtml(m.id)+' · v'+escapeHtml(m.version)+'</code><span class="muted">'+escapeHtml(m.module_type)+' · '+escapeHtml(m.capabilities.join(' · '))+'</span></div>').join('')
     : '<div class="notice">No module manifests loaded.</div>';
-  view.innerHTML = '<div class="card"><h2>Core workspace</h2><p class="muted">The shell is connected to Rust Core. Working projects are local .tamasrazim directories; portable projects are ZIP-backed .tamasrazim packages with integrity manifests.</p><div class="actions"><button id="new-project" class="action primary">New Project</button><button id="open-project-folder" class="action">Open Project Folder</button><button id="import-package" class="action">Import .tamasrazim</button>'+(state.activeProject ? '<button id="export-package" class="action">Export Active Project</button>' : '')+'</div>'+(state.activeProject ? '<div class="notice">Active: <strong>'+escapeHtml(state.activeProject.name)+'</strong></div><div id="task-center" class="projects"><div class="notice">Loading Core tasks…</div></div>' : '')+'<div class="projects">'+(cards || '<div class="notice">No projects created yet.</div>')+'</div></div><div class="card"><h3>Loaded Modules</h3><div class="projects">'+modules+'</div></div><div class="grid"><button class="tile" data-launch-view="forge"><b>Forge</b><span class="muted">Create</span></button><button class="tile" data-launch-view="c2m"><b>C2M</b><span class="muted">Render</span></button><button class="tile" data-launch-view="vault"><b>Stock Vault</b><span class="muted">Manage</span></button></div>';
+  view.innerHTML = '<div class="card"><h2>Core workspace</h2><p class="muted">The shell is connected to Rust Core. Working projects are local .tamasrazim directories; portable projects are ZIP-backed .tamasrazim packages with integrity manifests.</p><div class="actions"><button id="new-project" class="action primary">New Project</button><button id="open-project-folder" class="action">Open Project Folder</button><button id="import-package" class="action">Import .tamasrazim</button>'+(state.activeProject ? '<button id="export-package" class="action">Export Active Project</button>' : '')+'</div>'+(state.activeProject ? '<div class="notice">Active: <strong>'+escapeHtml(state.activeProject.name)+'</strong></div><div id="task-center" class="projects"><div class="notice">Loading Core tasks…</div></div>' : '')+'<div class="projects">'+(cards || '<div class="notice">No projects created yet.</div>')+'</div></div><div class="card"><h3>Loaded Modules</h3><div class="projects">'+modules+'</div></div><div class="grid"><button class="tile" data-launch-view="forge"><b>Forge</b><span class="muted">Create</span></button><button class="tile" data-launch-view="c2m"><b>KYNESTRA</b><span class="muted">Render</span></button><button class="tile" data-launch-view="vault"><b>Stock Vault</b><span class="muted">Manage</span></button></div>';
   document.getElementById('new-project')?.addEventListener('click', createProject);
   document.getElementById('open-project-folder')?.addEventListener('click', openProjectFolder);
   document.getElementById('import-package')?.addEventListener('click', importPackage);
@@ -448,7 +448,7 @@ function renderHome() {
   document.querySelectorAll('[data-launch-view]').forEach(button => button.addEventListener('click', () => {
     const name = button.dataset.launchView;
     state.currentView = name;
-    title.textContent = name === 'c2m' ? 'C2M' : name === 'vault' ? 'Stock Vault' : 'Forge';
+    title.textContent = name === 'c2m' ? 'KYNESTRA' : name === 'vault' ? 'Stock Vault' : 'Forge';
     document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('active', b.dataset.view === name));
     views[name]();
   }));
@@ -537,7 +537,7 @@ async function init() {
 document.querySelectorAll('#nav button').forEach(button => button.addEventListener('click', () => {
   const name = button.dataset.view;
   state.currentView = name;
-  title.textContent = name === 'c2m' ? 'C2M' : name === 'vault' ? 'Stock Vault' : name === 'task-center' ? 'Task Center' : name[0].toUpperCase()+name.slice(1);
+  title.textContent = name === 'c2m' ? 'KYNESTRA' : name === 'vault' ? 'Stock Vault' : name === 'task-center' ? 'Task Center' : name[0].toUpperCase()+name.slice(1);
   document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('active', b === button));
   views[name]();
 }));
@@ -553,7 +553,7 @@ async function launchC2M() {
       if (handoffJob) params.set('jobId', handoffJob.job_id);
       query = '?'+params.toString();
     } catch (error) {
-      console.warn('Could not attach Core render context to C2M:', error);
+      console.warn('Could not attach Core render context to KYNESTRA:', error);
     }
   }
   window.location.href = 'modules/c2m/renderer/index.html'+query;
