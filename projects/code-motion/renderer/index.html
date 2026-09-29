@@ -1393,6 +1393,7 @@ select.mini{
       <button data-act="samples">Prism Flowers</button>
       <button data-act="run" class="key">Run<kbd>⌘⏎</kbd></button>
       <button data-act="render" class="key">Render</button>
+      <button data-act="render50" class="key" title="Render the first 50 Prism Flowers with the current output settings">Render ×50</button>
     </nav>
   </header>
 
@@ -1644,6 +1645,7 @@ select.mini{
             <button class="btn" data-act="queueRun" id="queueRunBtn">Run queue</button>
             <p class="note">Each job stores its own frozen copy of the code, composition, loop, metadata and format.
               Editing the project afterwards does not change a job that is already queued.</p>
+            <p class="note">Render ×50 uses the first 50 Prism Flowers and runs them through the same deterministic renderer one after another, with your current format, resolution, FPS and quality settings.</p>
           </div>
           <div class="sec">
             <h4>COMPLETED</h4>
@@ -15509,7 +15511,7 @@ var S = {
   compiled: false, lastError: null, hash: '',
   previewBusy: false, previewFps: 0, previewRaster: { w: 0, h: 0, s: 1 },
   compareMode: false, compareSplit: 0.5, compareBitmap: null,
-  rendering: false, queue: [], results: [], caps: {}, stage: 'IDLE',
+  rendering: false, batchRendering: false, batchCancelled: false, queue: [], results: [], caps: {}, stage: 'IDLE',
   exportFormat: 'mp4', quality: 'standard', timebase: 'ms', checksums: true, pngTarget: 'zip'
 };
 
@@ -17010,6 +17012,141 @@ function renderResults() {
 }
 
 /* ---------------- queue ---------------- */
+async function render50PrismBatch() {
+  if (S.rendering || S.batchRendering) return;
+  var samples = $('script[type="text/plain"][id^="sample-"]').filter(function (node) {
+    return /prism/i.test(node.dataset.title || '');
+  }).slice(0, 50);
+
+  if (samples.length < 50) {
+    $('#stMsg').textContent = 'Only ' + samples.length + ' Prism Flowers are available; batch needs 50.';
+    return;
+  }
+
+  S.batchRendering = true;
+  S.batchCancelled = false;
+
+  var snapshot = {
+    id: S.id,
+    name: S.name,
+    version: S.version,
+    created: S.created,
+    dirty: S.dirty,
+    code: S.code,
+    comp: S.comp ? JSON.parse(JSON.stringify(S.comp)) : null,
+    meta: S.meta ? JSON.parse(JSON.stringify(S.meta)) : null,
+    frame: S.frame,
+    compiled: S.compiled,
+    lastError: S.lastError,
+    hash: S.hash,
+    exportFormat: S.exportFormat,
+    quality: S.quality,
+    timebase: S.timebase,
+    checksums: S.checksums
+  };
+
+  var completed = 0;
+  var failed = 0;
+  var originalFormat = S.exportFormat;
+  var batchFormat = originalFormat === 'dir' ? 'zip' : originalFormat;
+
+  try {
+    $('#stMsg').textContent = 'Render ×50 starting — preparing 50 Prism Flowers…';
+    showTab('p-render');
+    showMobile('rail');
+
+    for (var i = 0; i < samples.length; i++) {
+      if (S.batchCancelled) break;
+
+      var node = samples[i];
+      var title = node.dataset.title || ('Prism Flower ' + (i + 1));
+      var src = (node.textContent || '').replace(/^\n/, '');
+
+      S.id = null;
+      S.version = 1;
+      S.name = title;
+      S.meta = defaultMeta();
+      S.meta.title = title;
+      S.meta.description = node.dataset.desc || '';
+      S.comp = CORE.composition(merge(snapshot.comp || {}, {
+        duration: +node.dataset.dur || (snapshot.comp ? snapshot.comp.frameCount / snapshot.comp.fps : 10),
+        loop: node.dataset.loop === '1',
+        loopDuration: +node.dataset.loopdur || (+node.dataset.dur || 10)
+      }));
+      S.exportFormat = batchFormat;
+      S.quality = snapshot.quality;
+      S.timebase = snapshot.timebase;
+      S.checksums = snapshot.checksums;
+      $('#projName').value = title;
+      $('#projVer').textContent = 'v1';
+      edSetValue(src);
+      S.code = Ed.ta.value;
+      S.frame = 0;
+      applyComp({});
+      syncMetaUI();
+      markDirty(false);
+
+      $('#stMsg').textContent = 'Render ×50 — ' + (i + 1) + ' / 50 · ' + title;
+      var compiled = await run();
+      if (!compiled || !compiled.ok) {
+        failed++;
+        logLine('batch skipped ' + title + ' — compile failed', true);
+        continue;
+      }
+
+      var job = buildJob({ exportFormat: batchFormat });
+      job.label = title;
+      job.fileName = slugify(title) + '_' + job.composition.width + 'x' + job.composition.height + '_' +
+        job.composition.fps + 'fps_' + ((job.composition.frameCount / job.composition.fps).toFixed(2)).replace(/\.00$/, '') +
+        extFor(batchFormat);
+
+      var result = await startRender(job, { silent: true });
+      if (result && result.cancelled) {
+        S.batchCancelled = true;
+        break;
+      }
+      if (result && result.ok) completed++;
+      else failed++;
+
+      await new Promise(function (resolve) { setTimeout(resolve, 0); });
+    }
+  } catch (error) {
+    failed++;
+    $('#stMsg').textContent = 'Render ×50 failed: ' + String(error && error.message || error);
+  } finally {
+    S.batchRendering = false;
+
+    S.id = snapshot.id;
+    S.name = snapshot.name;
+    S.version = snapshot.version;
+    S.created = snapshot.created;
+    S.meta = snapshot.meta ? JSON.parse(JSON.stringify(snapshot.meta)) : defaultMeta();
+    S.comp = snapshot.comp ? CORE.composition(snapshot.comp) : CORE.composition({});
+    S.exportFormat = snapshot.exportFormat;
+    S.quality = snapshot.quality;
+    S.timebase = snapshot.timebase;
+    S.checksums = snapshot.checksums;
+    S.code = snapshot.code || '';
+    edSetValue(S.code);
+    $('#projName').value = S.name;
+    $('#projVer').textContent = 'v' + S.version;
+    S.frame = snapshot.frame;
+    S.compiled = false;
+    S.lastError = snapshot.lastError;
+    S.hash = snapshot.hash;
+    applyComp({});
+    syncMetaUI();
+    markDirty(snapshot.dirty);
+    await run();
+
+    renderQueue();
+    renderResults();
+
+    var status = S.batchCancelled ? 'stopped' : 'complete';
+    $('#stMsg').textContent = 'Render ×50 ' + status + ' — ' + completed + ' completed, ' + failed + ' failed.';
+  }
+}
+
 function queueAdd() {
   withCompiled().then(function (ok) {
     if (!ok) return;
@@ -17914,6 +18051,7 @@ var ACTS = {
     withCompiled().then(function (ok) { if (ok) analyseJob(); });
   },
   startRender: function () { withCompiled().then(function (ok) { if (ok) startRender(buildJob()); }); },
+  render50: function () { render50PrismBatch(); },
   cancelRender: cancelRender,
   analyze: analyseJob,
   analyzeLoop: analyseLoop,
