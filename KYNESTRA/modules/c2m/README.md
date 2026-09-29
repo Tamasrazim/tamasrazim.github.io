@@ -1,4 +1,4 @@
-# C2M — Code Motion
+# C2M — TRILYVA
 
 C2M is KYNESTRA's JavaScript animation renderer module.
 
