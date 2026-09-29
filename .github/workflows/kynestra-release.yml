@@ -47,7 +47,6 @@ jobs:
               git push
             }
           }
-        run: cargo generate-lockfile
 
       - name: Run tests
         run: cargo test --locked
