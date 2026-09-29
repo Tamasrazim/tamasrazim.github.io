@@ -1,4 +1,5 @@
 use super::db;
+use super::projects::ProjectManager;
 use chrono::Utc;
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
@@ -153,11 +154,11 @@ impl TaskService {
                 continue;
             }
 
-            let database = path.join("project.db");
-            if !database.is_file() {
-                continue;
-            }
-
+            let valid_root = match ProjectManager::default().validated_root(path.to_string_lossy().as_ref()) {
+                Ok(value) => value,
+                Err(_) => continue,
+            };
+            let database = valid_root.join("project.db");
             let conn = db::open(&database)?;
             let task_changed = conn.execute(
                 "UPDATE tasks
@@ -201,14 +202,9 @@ fn is_transition_allowed(from: &str, to: &str) -> bool {
 }
 
 fn validate_project_path(path: &str) -> Result<PathBuf, TaskError> {
-    let root = Path::new(path);
-    if root.extension().and_then(|v| v.to_str()) != Some("tamasrazim") {
-        return Err(TaskError::InvalidProject);
-    }
-    if !root.join("manifest.json").is_file() || !root.join("project.db").is_file() {
-        return Err(TaskError::InvalidProject);
-    }
-    Ok(root.to_path_buf())
+    ProjectManager::default()
+        .validated_root(path)
+        .map_err(|_| TaskError::InvalidProject)
 }
 
 #[derive(Debug, thiserror::Error)]

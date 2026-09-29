@@ -1,3 +1,5 @@
+use super::db;
+use super::projects::ProjectManager;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -226,15 +228,9 @@ impl PackageService {
 }
 
 fn validate_project(path: &str) -> Result<PathBuf, PackageError> {
-    let root = PathBuf::from(path);
-    if root.extension().and_then(|v| v.to_str()) != Some("tamasrazim")
-        || !root.is_dir()
-        || !root.join("manifest.json").is_file()
-        || !root.join("project.db").is_file()
-    {
-        return Err(PackageError::InvalidProject);
-    }
-    Ok(root)
+    ProjectManager::default()
+        .validated_root(path)
+        .map_err(|_| PackageError::InvalidProject)
 }
 
 fn validate_working_manifest(project: &ProjectManifest) -> Result<(), PackageError> {
@@ -562,7 +558,11 @@ mod tests {
             project.join("manifest.json"),
             r#"{"format":"tamasrazim","formatVersion":"0.1","projectId":"inside-123","name":"Inside","createdBy":"KYNESTRA"}"#,
         ).expect("manifest");
-        fs::write(project.join("project.db"), b"sqlite-placeholder").expect("db");
+        let conn = db::open(&project.join("project.db")).expect("db");
+        conn.execute(
+            "INSERT INTO projects (project_id,name,format,format_version,root_path,created_at,updated_at) VALUES ('inside-123','Inside','tamasrazim','0.1',?1,'now','now')",
+            [project.to_string_lossy().as_ref()],
+        ).expect("project row");
 
         let output = project.join("backup.tamasrazim");
         let result = PackageService::default().export(
@@ -584,7 +584,11 @@ mod tests {
             project.join("manifest.json"),
             r#"{"format":"tamasrazim","formatVersion":"0.1","projectId":"symlink-123","name":"Symlinked","createdBy":"KYNESTRA"}"#,
         ).expect("manifest");
-        fs::write(project.join("project.db"), b"sqlite-placeholder").expect("db");
+        let conn = db::open(&project.join("project.db")).expect("db");
+        conn.execute(
+            "INSERT INTO projects (project_id,name,format,format_version,root_path,created_at,updated_at) VALUES ('symlink-123','Symlinked','tamasrazim','0.1',?1,'now','now')",
+            [project.to_string_lossy().as_ref()],
+        ).expect("project row");
         let outside = root.path().join("outside.txt");
         fs::write(&outside, b"outside").expect("outside");
         symlink(&outside, project.join("source.txt")).expect("symlink");
@@ -605,7 +609,11 @@ mod tests {
             project.join("manifest.json"),
             r#"{"format":"tamasrazim","formatVersion":"0.1","projectId":"12345678-aaaa-bbbb-cccc-dddddddddddd","name":"Round Trip","createdBy":"KYNESTRA"}"#,
         ).expect("manifest");
-        fs::write(project.join("project.db"), b"sqlite-placeholder").expect("db");
+        let conn = db::open(&project.join("project.db")).expect("db");
+        conn.execute(
+            "INSERT INTO projects (project_id,name,format,format_version,root_path,created_at,updated_at) VALUES ('12345678-aaaa-bbbb-cccc-dddddddddddd','Round Trip','tamasrazim','0.1',?1,'now','now')",
+            [project.to_string_lossy().as_ref()],
+        ).expect("project row");
         let mut source = File::create(project.join("source/example.js")).expect("source");
         source.write_all(b"const x = 1;").expect("write source");
 
