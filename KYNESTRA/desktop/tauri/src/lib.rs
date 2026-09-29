@@ -238,6 +238,7 @@ struct CoreStatus { name:String, version:String, status:String }
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             let data_root=app.path().app_data_dir()?.join("projects");
             std::fs::create_dir_all(&data_root)?;

@@ -4,6 +4,7 @@
   "description": "KYNESTRA default desktop capability",
   "windows": ["main"],
   "permissions": [
-    "core:default"
+    "core:default",
+    "dialog:default"
   ]
 }

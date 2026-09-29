@@ -1,5 +1,6 @@
 const invoke = window.__TAURI__?.core?.invoke ?? null;
 const eventApi = window.__TAURI__?.event ?? null;
+const dialogApi = window.__TAURI__?.dialog ?? null;
 
 const title = document.getElementById('title');
 const view = document.getElementById('view');
@@ -222,12 +223,51 @@ async function recoverRenderJob(jobId) {
   }
 }
 
+async function pickRenderOutput() {
+  if (!dialogApi?.open) {
+    const fallback = prompt('Absolute path to the rendered output file');
+    return fallback || null;
+  }
+  const selected = await dialogApi.open({
+    multiple: false,
+    directory: false,
+    title: 'Select rendered output',
+    filters: [{ name: 'Media', extensions: ['webm', 'mp4', 'mov', 'mkv', 'png', 'jpg', 'jpeg', 'gif'] }, { name: 'All files', extensions: ['*'] }]
+  });
+  return typeof selected === 'string' ? selected : null;
+}
+
+async function pickTamasrazimPackage() {
+  if (!dialogApi?.open) {
+    const fallback = prompt('Absolute path to the .tamasrazim package');
+    return fallback || null;
+  }
+  const selected = await dialogApi.open({
+    multiple: false,
+    directory: false,
+    title: 'Open .tamasrazim package',
+    filters: [{ name: 'KYNESTRA Project', extensions: ['tamasrazim'] }]
+  });
+  return typeof selected === 'string' ? selected : null;
+}
+
+async function saveTamasrazimPackage() {
+  if (!dialogApi?.save) {
+    const fallback = prompt('Output path for the .tamasrazim package');
+    return fallback || null;
+  }
+  return dialogApi.save({
+    title: 'Export .tamasrazim package',
+    filters: [{ name: 'KYNESTRA Project', extensions: ['tamasrazim'] }]
+  });
+}
+
 async function completeRenderJob() {
   if (!state.activeProject) return;
   try {
     const jobId = prompt('Render job ID');
     if (!jobId) return;
-    const sourcePath = prompt('Absolute path to the rendered output file');
+    const sourcePath = await pickRenderOutput();
     if (!sourcePath) return;
     const asset = await api('complete_render_job', {
       projectPath: state.activeProject.path,
@@ -280,6 +320,32 @@ async function createProject() {
 async function openProject(path) {
   try { state.activeProject = await api('open_project', { path }); renderHome(); }
   catch (error) { alert(String(error)); }
+}
+
+async function importPackage() {
+  if (!invoke) return;
+  const packagePath = await pickTamasrazimPackage();
+  if (!packagePath) return;
+  try {
+    const result = await api('import_project_package', { packagePath });
+    state.activeProject = await api('open_project', { path: result.project_path });
+    await refreshProjects();
+    alert('Imported '+result.name+' with '+result.files_verified+' verified files.');
+    renderHome();
+  } catch (error) { alert(String(error)); }
+}
+
+async function exportPackage() {
+  if (!state.activeProject) return;
+  const outputPath = await saveTamasrazimPackage();
+  if (!outputPath) return;
+  try {
+    const result = await api('export_project_package', {
+      projectPath: state.activeProject.path,
+      outputPath
+    });
+    alert('Exported '+result.name+' · '+result.files.length+' files verified into the package manifest.');
+  } catch (error) { alert(String(error)); }
 }
 
 function renderHome() {
