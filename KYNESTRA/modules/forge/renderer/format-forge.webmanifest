@@ -1,0 +1,11 @@
+{
+  "name": "KYNESTRA Forge — Format Forge",
+  "short_name": "KYNESTRA Forge",
+  "description": "KYNESTRA Forge conversion and batch-processing workspace.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "orientation": "any",
+  "scope": "./"
+}
