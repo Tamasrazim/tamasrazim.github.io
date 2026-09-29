@@ -375,7 +375,7 @@ body{
 
 main#content > section,
 main#content > .band{
-  contain:layout paint;
+  contain:layout;
 }
 
 body.axis-dragging,
