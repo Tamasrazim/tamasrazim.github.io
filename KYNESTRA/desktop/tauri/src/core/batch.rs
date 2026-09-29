@@ -401,6 +401,34 @@ mod tests {
     use super::*;
 
     #[test]
+    fn write_zip_rejects_source_changes_and_cleans_partial_output() {
+        let root = tempfile::tempdir().expect("root");
+        let source = root.path().join("flower.mp4");
+        fs::write(&source, b"original").expect("source");
+
+        let (sha256, chunks, size) = hash_file(&source).expect("hash");
+        fs::write(&source, b"changed").expect("mutate");
+
+        let entry = FileEntry {
+            source: source.clone(),
+            name: "flower.mp4".into(),
+            sha256,
+            chunks,
+            size,
+        };
+        let output = root.path().join("FLOWERS_MP4.zip");
+
+        let result = write_zip(&output, &[entry], "video/mp4", true);
+        assert!(result.is_err());
+        assert!(!output.exists());
+        assert!(!root.path().join(".FLOWERS_MP4.zip.partial-").exists());
+        assert!(fs::read_dir(root.path())
+            .expect("directory")
+            .filter_map(Result::ok)
+            .all(|entry| entry.path().file_name().and_then(|v| v.to_str()).map(|v| !v.starts_with(".FLOWERS_MP4.zip.partial-")).unwrap_or(true)));
+    }
+
+    #[test]
     fn first_frame_png_detection_is_strict_enough() {
         assert!(is_first_frame_png_name(Path::new("flower-first-frame.png")));
         assert!(is_first_frame_png_name(Path::new("frame-000000.png")));
