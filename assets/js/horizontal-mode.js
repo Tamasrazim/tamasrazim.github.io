@@ -187,12 +187,18 @@
     goTo(target,!reduce);
   });
 
-  window.addEventListener('hashchange',function(){
+  function goToHash(){
     var id=decodeURIComponent(location.hash.replace(/^#/,''));
-    if(!id)return;
+    if(!id){
+      goTo(document.getElementById('top'),!reduce);
+      return;
+    }
     var target=document.getElementById(id);
     if(target)goTo(target,!reduce);
-  });
+  }
+
+  window.addEventListener('hashchange',goToHash);
+  window.addEventListener('popstate',goToHash);
 
   /* Desktop keyboard navigation follows the page axis. */
   window.addEventListener('keydown',function(e){
@@ -202,6 +208,19 @@
     var key=e.key;
     var current=scroller.scrollLeft;
     var max=maxHorizontal();
+
+    if(/^\d$/.test(key)){
+      var sectionIndex=Number(key)-1;
+      if(sectionIndex>=0 && sectionIndex<pageItems.length){
+        e.preventDefault();
+        goTo(pageItems[sectionIndex],!reduce);
+        var sectionId=pageItems[sectionIndex].id||'';
+        if(sectionId && history.pushState){
+          history.pushState(null,'','#'+encodeURIComponent(sectionId));
+        }
+        return;
+      }
+    }
 
     if(key==='ArrowRight'){
       e.preventDefault();
