@@ -43,7 +43,7 @@ window.__tamasrazimMotionCore=true;
 var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 var fine=window.matchMedia&&window.matchMedia('(pointer: fine)').matches;
 var horizontal=!!(document.body&&document.body.dataset.horizontalMode==='true');
-var axisScroller=document.scrollingElement || document.documentElement;
+var axisScroller=document.getElementById('axisScroller') || document.scrollingElement || document.documentElement;
 function pageX(){return horizontal?(axisScroller.scrollLeft||0):0;}
 function pageY(){return horizontal?0:(window.scrollY||0);}
 function pageMax(){return horizontal?Math.max(1,(axisScroller.scrollWidth||0)-innerWidth):Math.max(1,document.documentElement.scrollHeight-innerHeight);}
