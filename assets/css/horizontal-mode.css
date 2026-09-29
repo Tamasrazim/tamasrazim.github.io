@@ -966,3 +966,83 @@ main#content > .band::after{
     margin-right:-1vw;
   }
 }
+
+/* ---------- Mobile interaction / viewport pass ---------- */
+@media(max-width:720px){
+  html{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    overscroll-behavior:none;
+  }
+
+  body{
+    width:100%;
+    min-width:0;
+    height:100%;
+    min-height:100%;
+    overflow:hidden;
+  }
+
+  .axis-scroller{
+    width:100vw;
+    height:100dvh;
+    min-height:100svh;
+    overflow-x:auto;
+    overflow-y:hidden;
+    touch-action:pan-x pan-y;
+    overscroll-behavior-x:contain;
+    overscroll-behavior-y:none;
+    scroll-snap-type:none!important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .axis-scroller > main#content{
+    height:100dvh;
+    min-height:100svh;
+  }
+
+  main#content > section{
+    flex:0 0 100vw;
+    width:100vw;
+    min-width:100vw;
+    height:100dvh;
+    min-height:100svh;
+    overflow-x:hidden;
+    overflow-y:auto;
+    touch-action:pan-x pan-y;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;
+    overscroll-behavior-y:contain;
+  }
+
+  .axis-scroller > .site-footer{
+    flex:0 0 100vw;
+    width:100vw;
+    min-width:100vw;
+    height:100dvh;
+    min-height:100svh;
+    overflow:hidden;
+    touch-action:pan-x pan-y;
+  }
+
+  /* Desktop edge fades are unnecessary on narrow screens and can hide content. */
+  .axis-scroller::before,
+  .axis-scroller::after{
+    display:none;
+  }
+
+  .horizontal-rail{
+    bottom:calc(8px + env(safe-area-inset-bottom));
+    right:50%;
+    max-width:calc(100vw - 24px);
+  }
+
+  .horizontal-index-readout{
+    display:none;
+  }
+
+  .site-progress{
+    top:env(safe-area-inset-top);
+  }
+}
