@@ -43,9 +43,10 @@ window.__tamasrazimMotionCore=true;
 var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 var fine=window.matchMedia&&window.matchMedia('(pointer: fine)').matches;
 var horizontal=!!(document.body&&document.body.dataset.horizontalMode==='true');
-function pageX(){return horizontal?((document.body&&document.body.scrollLeft)||0):0;}
+var axisScroller=document.scrollingElement || document.documentElement;
+function pageX(){return horizontal?(axisScroller.scrollLeft||0):0;}
 function pageY(){return horizontal?0:(window.scrollY||0);}
-function pageMax(){return horizontal?Math.max(1,((document.body&&document.body.scrollWidth)||0)-innerWidth):Math.max(1,document.documentElement.scrollHeight-innerHeight);}
+function pageMax(){return horizontal?Math.max(1,(axisScroller.scrollWidth||0)-innerWidth):Math.max(1,document.documentElement.scrollHeight-innerHeight);}
 if(reduce)return;
 
 var style=document.createElement('style');
@@ -185,7 +186,7 @@ window.addEventListener('resize',invalidate,{passive:true});
 window.addEventListener('load',invalidate,{once:true});
 window.addEventListener('pointermove',function(e){pointer.tx=e.clientX;pointer.ty=e.clientY},{passive:true});
 window.addEventListener('blur',function(){pointer.tx=innerWidth*.5;pointer.ty=innerHeight*.5},{passive:true});
-(horizontal?document.body:window).addEventListener('scroll',function(){
+(horizontal?axisScroller:window).addEventListener('scroll',function(){
   scroll.targetX=pageX();scroll.targetY=pageY();invalidate();
 },{passive:true});
 
@@ -386,7 +387,7 @@ raf=requestAnimationFrame60(frame);
   if(about)about.classList.add('scene-reactive');
   cards.forEach(function(el){el.classList.add('scene-reactive')});
   window.addEventListener('pointermove',function(e){target.x=e.clientX;target.y=e.clientY},{passive:true});
-  (horizontal?document.body:window).addEventListener('scroll',function(){target.scroll=horizontal?pageX():pageY()},{passive:true});
+  (horizontal?axisScroller:window).addEventListener('scroll',function(){target.scroll=horizontal?pageX():pageY()},{passive:true});
   window.addEventListener('blur',function(){target.x=innerWidth*.5;target.y=innerHeight*.5},{passive:true});
   function tick(now){
     if(!pageVisible){requestAnimationFrame30(tick);return;}
