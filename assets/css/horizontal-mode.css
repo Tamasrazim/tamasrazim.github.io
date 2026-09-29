@@ -351,3 +351,18 @@ body[data-axis-speed="fast"] .horizontal-rail button.is-active::before{
   .horizontal-index-readout::before,
   .horizontal-index-readout::after{display:none}
 }
+
+/* Batch-10 scrubber interaction safeguards. */
+.site-progress{
+  user-select:none;
+  -webkit-user-select:none;
+}
+body.is-scrubbing .horizontal-rail,
+body.is-scrubbing .horizontal-index-readout{
+  opacity:0;
+  pointer-events:none;
+}
+body.is-scrubbing .scroll-cue{
+  opacity:0;
+  transition:opacity .2s var(--ease);
+}
