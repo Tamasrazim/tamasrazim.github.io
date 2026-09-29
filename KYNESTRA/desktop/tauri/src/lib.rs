@@ -51,6 +51,11 @@ fn create_task(app: AppHandle, project_path: String, task_type: String, payload:
 }
 
 #[tauri::command]
+fn list_tasks(app: AppHandle, project_path: String) -> Result<Vec<TaskRecord>, String> {
+    app.state::<CoreState>().tasks.list(&project_path).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 fn update_task(app: AppHandle, project_path: String, task_id: String, status: String, progress: f64, message: Option<String>) -> Result<TaskRecord,String> {
     let state=app.state::<CoreState>();
     let task=state.tasks.update(&project_path,&task_id,&status,progress,message).map_err(|e| e.to_string())?;
@@ -248,7 +253,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            core_status,list_projects,create_project,open_project,create_task,update_task,
+            core_status,list_projects,create_project,open_project,create_task,list_tasks,update_task,
             create_render_job,start_render_job,recover_render_job,complete_render_job,fail_render_job,
             list_assets,list_render_jobs,list_accounts,create_account,update_account_status,
             list_submissions,set_submission_status,check_submission_public_status,export_project_package,import_project_package,ingest_module_output
