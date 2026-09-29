@@ -67,7 +67,7 @@
   scroller.addEventListener('scroll',function(){
     if(scroller.dataset.axisSpeed!=='settled')scheduleProgress();
   },{passive:true});
-  if('onscrollend' in window){
+  if('onscrollend' in scroller){
     scroller.addEventListener('scrollend',scheduleSnap,{passive:true});
   }
   window.addEventListener('resize',function(){
@@ -416,6 +416,14 @@
 
   window.addEventListener('blur',function(){
     cancelSnap();
+    if(typeof drag!=='undefined'){
+      drag.active=false;
+      drag.pointerId=null;
+    }
+    if(typeof scrub!=='undefined'){
+      scrub.active=false;
+      scrub.pointerId=null;
+    }
     scroller.classList.remove('axis-dragging','is-scrubbing');
   },{passive:true});
 
@@ -429,6 +437,14 @@
   window.addEventListener('keydown',function(e){
     if(e.key!=='Escape')return;
     cancelSnap();
+    if(typeof drag!=='undefined'){
+      drag.active=false;
+      drag.pointerId=null;
+    }
+    if(typeof scrub!=='undefined'){
+      scrub.active=false;
+      scrub.pointerId=null;
+    }
     scroller.classList.remove('axis-dragging','is-scrubbing');
   });
 
@@ -569,10 +585,9 @@
   /* Mobile remains native horizontal touch scrolling. */
   if(!fine){
     document.documentElement.style.scrollBehavior='auto';
-    document.body.style.touchAction='pan-x';
   }
 
-  if('onscrollend' in window){
+  if('onscrollend' in scroller){
     scroller.addEventListener('scrollend',function(){
       scroller.dataset.axisSpeed='settled';
       scheduleSectionState();
