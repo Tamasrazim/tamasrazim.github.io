@@ -50,12 +50,16 @@ impl PackageService {
             return Err(PackageError::InvalidOutput);
         }
 
-        if root == output {
-            return Err(PackageError::InvalidOutput);
-        }
+        let canonical_root = fs::canonicalize(&root)?;
+        let output_parent = output.parent().unwrap_or_else(|| Path::new("."));
+        fs::create_dir_all(output_parent)?;
+        let canonical_parent = fs::canonicalize(output_parent)?;
 
-        if let Some(parent) = output.parent() {
-            fs::create_dir_all(parent)?;
+        if output == root
+            || canonical_parent == canonical_root
+            || canonical_parent.starts_with(&canonical_root)
+        {
+            return Err(PackageError::InvalidOutput);
         }
 
         let manifest_json = fs::read(root.join("manifest.json"))?;
@@ -419,6 +423,25 @@ mod tests {
             validate_manifest_consistency(&package, &incompatible_version),
             Err(PackageError::ManifestMismatch)
         ));
+    }
+
+    #[test]
+    fn export_rejects_output_inside_project() {
+        let root = tempfile::tempdir().expect("root");
+        let project = root.path().join("inside.tamasrazim");
+        fs::create_dir_all(&project).expect("project");
+        fs::write(
+            project.join("manifest.json"),
+            r#"{"format":"tamasrazim","formatVersion":"0.1","projectId":"inside-123","name":"Inside","createdBy":"KYNESTRA"}"#,
+        ).expect("manifest");
+        fs::write(project.join("project.db"), b"sqlite-placeholder").expect("db");
+
+        let output = project.join("backup.tamasrazim");
+        let result = PackageService::default().export(
+            project.to_str().unwrap(),
+            output.to_str().unwrap(),
+        );
+        assert!(matches!(result, Err(PackageError::InvalidOutput)));
     }
 
     #[test]
