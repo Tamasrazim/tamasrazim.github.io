@@ -1393,7 +1393,8 @@ select.mini{
       <button data-act="samples">Prism Flowers</button>
       <button data-act="run" class="key">Run<kbd>⌘⏎</kbd></button>
       <button data-act="render" class="key">Render</button>
-      <button data-act="render50" class="key" title="Render the first 50 Prism Flowers with the current output settings">Render ×50</button>
+      <button data-act="render50" class="key" id="render50Btn" title="Render the first 50 Prism Flowers with the current output settings">Render ×50</button>
+      <button data-act="renderAll" class="key" id="renderAllBtn" title="Render every Prism Flower in the library with the current output settings">Render All</button>
     </nav>
   </header>
 
@@ -17015,22 +17016,31 @@ function renderResults() {
 }
 
 /* ---------------- queue ---------------- */
-async function render50PrismBatch() {
+async function renderPrismBatch(limit, label) {
   if (S.rendering || S.batchRendering) return;
-  var samples = $('script[type="text/plain"][id^="sample-"]').filter(function (node) {
-    return /prism/i.test(node.dataset.title || '');
-  }).slice(0, 50);
 
-  if (samples.length < 50) {
-    $('#stMsg').textContent = 'Only ' + samples.length + ' Prism Flowers are available; batch needs 50.';
+  var allPrisms = $$('script[type="text/plain"][id^="sample-"]').filter(function (node) {
+    return /prism/i.test(node.dataset.title || '');
+  });
+  var samples = typeof limit === 'number' ? allPrisms.slice(0, limit) : allPrisms.slice();
+
+  if (typeof limit === 'number' && samples.length < limit) {
+    $('#stMsg').textContent = 'Only ' + samples.length + ' Prism Flowers are available; batch needs ' + limit + '.';
+    return;
+  }
+  if (!samples.length) {
+    $('#stMsg').textContent = 'No Prism Flowers are available.';
     return;
   }
 
   S.batchRendering = true;
   S.batchCancelled = false;
-  var batchBtn = $('#render50Btn');
-  if (batchBtn) batchBtn.disabled = true;
-  $('#stMsg').textContent = 'Render ×50 — validating 50 Prism Flowers…';
+  var suffixLabel = label || ('Render ' + samples.length);
+
+  var b50 = $('#render50Btn');
+  var ball = $('#renderAllBtn');
+  if (b50) b50.disabled = true;
+  if (ball) ball.disabled = true;
 
   var snapshot = {
     id: S.id,
@@ -17053,13 +17063,12 @@ async function render50PrismBatch() {
 
   var completed = 0;
   var failed = 0;
-  var originalFormat = S.exportFormat;
-  var batchFormat = originalFormat === 'dir' ? 'zip' : originalFormat;
+  var batchFormat = S.exportFormat === 'dir' ? 'zip' : S.exportFormat;
 
   try {
-    $('#stMsg').textContent = 'Render ×50 starting — preparing 50 Prism Flowers…';
     showTab('p-render');
     showMobile('rail');
+    $('#stMsg').textContent = suffixLabel + ' — preparing ' + samples.length + ' Prism Flowers…';
 
     for (var i = 0; i < samples.length; i++) {
       if (S.batchCancelled) break;
@@ -17092,7 +17101,7 @@ async function render50PrismBatch() {
       syncMetaUI();
       markDirty(false);
 
-      $('#stMsg').textContent = 'Render ×50 — ' + (i + 1) + ' / 50 · ' + title;
+      $('#stMsg').textContent = suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length + ' · ' + title;
       var compiled = await run();
       if (!compiled || !compiled.ok) {
         failed++;
@@ -17103,7 +17112,8 @@ async function render50PrismBatch() {
       var job = buildJob({ exportFormat: batchFormat });
       job.label = title;
       job.fileName = slugify(title) + '_' + job.composition.width + 'x' + job.composition.height + '_' +
-        job.composition.fps + 'fps_' + ((job.composition.frameCount / job.composition.fps).toFixed(2)).replace(/\.00$/, '') +
+        job.composition.fps + 'fps_' +
+        ((job.composition.frameCount / job.composition.fps).toFixed(2)).replace(/\.00$/, '') +
         extFor(batchFormat);
 
       var result = await startRender(job, { silent: true });
@@ -17118,7 +17128,8 @@ async function render50PrismBatch() {
     }
   } catch (error) {
     failed++;
-    $('#stMsg').textContent = 'Render ×50 failed: ' + String(error && error.message || error);
+    $('#stMsg').textContent = suffixLabel + ' failed: ' + String(error && error.message || error);
+    logLine(suffixLabel + ' failed — ' + String(error && error.stack || error), true);
   } finally {
     S.batchRendering = false;
 
@@ -17147,13 +17158,15 @@ async function render50PrismBatch() {
 
     renderQueue();
     renderResults();
-    var finalBatchBtn = $('#render50Btn');
-    if (finalBatchBtn) finalBatchBtn.disabled = false;
+    if (b50) b50.disabled = false;
+    if (ball) ball.disabled = false;
 
     var status = S.batchCancelled ? 'stopped' : 'complete';
-    $('#stMsg').textContent = 'Render ×50 ' + status + ' — ' + completed + ' completed, ' + failed + ' failed.';
+    $('#stMsg').textContent = suffixLabel + ' ' + status + ' — ' + completed + ' completed, ' + failed + ' failed.';
   }
 }
+function render50PrismBatch() { return renderPrismBatch(50, 'Render ×50'); }
+function renderAllPrismBatch() { return renderPrismBatch(null, 'Render All'); }
 
 function queueAdd() {
   withCompiled().then(function (ok) {
@@ -18068,6 +18081,10 @@ var ACTS = {
       $('#stMsg').textContent = 'Render ×50 failed: ' + String(e && e.message || e);
       logLine('Render ×50 failed — ' + String(e && e.stack || e), true);
     });
+  },
+  renderAll: function () {
+    if (S.rendering || S.batchRendering) return;
+    renderAllPrismBatch();
   },
   cancelRender: cancelRender,
   analyze: analyseJob,
