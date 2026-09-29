@@ -13,6 +13,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: kynestra-windows-installer-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   windows-installer:
     runs-on: windows-latest
@@ -39,7 +43,7 @@ jobs:
         run: cargo install tauri-cli --version "2.12.0" --locked
 
       - name: Build NSIS installer
-        run: cargo tauri build --bundles nsis
+        run: cargo tauri build --locked --bundles nsis
 
       - name: Normalize installer filename
         shell: pwsh
@@ -50,11 +54,24 @@ jobs:
           }
           Copy-Item $installer.FullName "target/release/bundle/nsis/KYNESTRA-Setup.exe" -Force
 
+      - name: Validate installer
+        shell: pwsh
+        run: |
+          $installer = Get-Item "target/release/bundle/nsis/KYNESTRA-Setup.exe"
+          if ($installer.Length -lt 100KB) {
+            throw "Installer is unexpectedly small: $($installer.Length) bytes."
+          }
+          $hash = (Get-FileHash $installer.FullName -Algorithm SHA256).Hash.ToLower()
+          "$hash  KYNESTRA-Setup.exe" | Set-Content "target/release/bundle/nsis/KYNESTRA-Setup.exe.sha256" -Encoding ascii
+          Write-Host "KYNESTRA-Setup.exe: $($installer.Length) bytes"
+          Write-Host "SHA-256: $hash"
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
           name: KYNESTRA-Windows-Installer
-          path: KYNESTRA/desktop/tauri/target/release/bundle/nsis/KYNESTRA-Setup.exe
+          path: |
+            KYNESTRA/desktop/tauri/target/release/bundle/nsis/KYNESTRA-Setup.exe
+            KYNESTRA/desktop/tauri/target/release/bundle/nsis/KYNESTRA-Setup.exe.sha256
           if-no-files-found: error
 
       - name: Publish installer to repository
