@@ -17144,7 +17144,7 @@ async function renderPrismBatch(limit, label) {
       var job = buildJob({ exportFormat: batchFormat });
       job.label = title;
       // Batch outputs use the animation metadata title as the filename.
-      job.fileName = slugify(job.metadata.title || title) + extFor(batchFormat);
+      job.fileName = fileNameFor(job.composition, job.metadata.title || title, batchFormat, null);
 
       var renderOptions = { silent: true, outputDir: outputDir };
       if (job.format === 'png' && job.target === 'dir') {
