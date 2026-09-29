@@ -16745,6 +16745,38 @@ function writeBlobToDirectory(dirHandle, blob, fileName) {
   });
 }
 
+function renderFirstFrameJpg(job) {
+  return Engine.api.renderOne(0, job.composition.width, job.composition.height).then(function (r) {
+    if (!r || !r.ok || !r.bitmap) {
+      throw new Error('The first-frame renderer did not return an image.');
+    }
+
+    var bitmap = r.bitmap;
+    var canvas = document.createElement('canvas');
+    canvas.width = job.composition.width;
+    canvas.height = job.composition.height;
+
+    var ctx = canvas.getContext('2d', { alpha: false });
+    ctx.fillStyle = job.composition.background || '#000000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+
+    if (bitmap && typeof bitmap.close === 'function') bitmap.close();
+
+    return new Promise(function (resolve, reject) {
+      canvas.toBlob(function (blob) {
+        canvas.width = 1;
+        canvas.height = 1;
+        if (!blob) {
+          reject(new Error('The browser could not encode the first frame as JPEG.'));
+          return;
+        }
+        resolve(blob);
+      }, 'image/jpeg', 0.96);
+    });
+  });
+}
+
 function renderStat(p, job) {
   var c = job.composition;
   var pct = p.total ? (p.done / p.total) : 0;
@@ -17069,69 +17101,67 @@ async function restartBatchEngine() {
 }
 
 function stockMetadataForTitle(title) {
-  var clean = String(title || 'Prism Flower').replace(/^Prism\\s+/i, '').trim();
-  var flower = clean || 'Flower';
-  var commercialTitle = 'Prism ' + flower + ' — Translucent Geometric Flower Animation';
-  var description = 'Translucent geometric ' + flower + ' flower animation featuring luminous prism-like petals, layered color, soft gradients and seamless 10-second motion on a clean transparent background.';
-  var keywords = [
+  var raw = String(title || 'Prism Flower').trim();
+  var flower = raw.replace(/^Prism\\s+/i, '').trim() || 'Flower';
+  var projectName = /^Prism\\s+/i.test(raw) ? raw : ('Prism ' + flower);
+  var animationTitle = projectName + ' — Translucent Geometric Flower Animation';
+  var illustrationTitle = projectName + ' — Translucent Geometric Flower illustration';
+  var baseKeywords = [
     flower.toLowerCase(),
     'flower','floral','botanical','translucent','geometric','prism','geometric flower',
-    'flower animation','seamless loop','10 second loop','abstract','colorful','vivid',
-    'luminous','glowing','gradient','petals','bloom','nature','decorative','design',
-    'background','transparent','alpha','motion','motion graphics','animation','3d',
-    'pseudo 3d','digital art','abstract nature','botanical animation','flower loop',
-    'seamless animation','modern','elegant','vibrant','iridescent','refraction','light',
-    'texture','organic','spring','floral design','stock footage','4k','60fps'
+    'abstract','colorful','vivid','luminous','glowing','gradient','petals','bloom','nature',
+    'decorative','design','background','transparent','alpha','motion','motion graphics',
+    'animation','3d','pseudo 3d','digital art','abstract nature','botanical animation',
+    'flower loop','seamless animation','seamless loop','10 second loop','modern','elegant',
+    'vibrant','iridescent','refraction','light','texture','organic','spring','floral design',
+    '4k','60fps'
   ];
+  var videoKeywords = baseKeywords.slice();
+  videoKeywords.push('stock footage');
+  var illustrationKeywords = baseKeywords.slice();
+  illustrationKeywords.push('illustration','still image');
+
   return {
-    commercialTitle: commercialTitle,
-    description: description,
-    keywords: keywords,
-    keywordCount: keywords.length
+    flower: flower,
+    projectName: projectName,
+
+    animation: {
+      title: animationTitle,
+      description: 'Translucent geometric ' + flower + ' flower animation featuring luminous prism-like petals, layered color, soft gradients and seamless 10-second motion in a polished botanical design.',
+      keywords: videoKeywords,
+      filename: animationTitle + '.mp4',
+      csvFilename: animationTitle + '.csv'
+    },
+
+    illustration: {
+      title: illustrationTitle,
+      description: 'Translucent geometric ' + flower + ' flower illustration featuring luminous prism-like petals, layered color, soft gradients and refined botanical detail in a polished decorative design.',
+      keywords: illustrationKeywords,
+      filename: projectName + '.jpg',
+      csvFilename: projectName + '.csv'
+    }
   };
 }
+
 function csvEscape(value) {
   var s = String(value == null ? '' : value);
   return '"' + s.replace(/"/g, '""') + '"';
 }
+
 function stockMetadataSingleCsv(entry) {
   var rows = [
-    ['Commercial Title','Description','Keywords','Filename','Status'],
+    ['Title','Description','Keywords','Filename','Status'],
     [
-      entry.commercialTitle,
+      entry.title,
       entry.description,
       entry.keywords.join(', '),
       entry.filename,
-      entry.status
+      entry.status || 'completed'
     ]
   ];
   return rows.map(function (row) {
     return row.map(csvEscape).join(',');
   }).join('\\r\\n') + '\\r\\n';
-}
-function stockMetadataCsv(entries) {
-  var rows = [['Commercial Title','Description','Keywords','Filename','Status']];
-  entries.forEach(function (e) {
-    rows.push([
-      e.commercialTitle,
-      e.description,
-      e.keywords.join(', '),
-      e.filename,
-      e.status
-    ]);
-  });
-  return rows.map(function (row) {
-    return row.map(csvEscape).join(',');
-  }).join('\\r\\n') + '\\r\\n';
-}
-function stockMetadataJson(entries, count) {
-  return JSON.stringify({
-    format: 'tamasrazim-stock-metadata',
-    version: 1,
-    generatedAt: new Date().toISOString(),
-    count: count,
-    items: entries
-  }, null, 2);
 }
 
 async function renderPrismBatch(limit, label) {
@@ -17172,7 +17202,9 @@ async function renderPrismBatch(limit, label) {
     timebase: S.timebase, checksums: S.checksums
   };
 
-  var completed = 0, failed = 0, outputDir = null, batchMetadata = [];
+  var completed = 0;
+  var failed = 0;
+  var outputDir = null;
 
   function batchLog(msg, hi) {
     logLine(msg, !!hi);
@@ -17182,31 +17214,40 @@ async function renderPrismBatch(limit, label) {
   try {
     showTab('p-render');
     showMobile('rail');
+
     outputDir = await pickDirectory();
-    batchLog(suffixLabel + ' destination: ' + (outputDir.name || 'selected folder') + ' · 50 videos per folder', true);
+    batchLog(suffixLabel + ' destination: ' + (outputDir.name || 'selected folder') +
+      ' · groups of 50 · 4 files per flower', true);
 
     for (var i = 0; i < samples.length; i++) {
       if (S.batchCancelled) break;
 
-      /* Render All groups videos + their matching CSV into folders of 50. */
+      /* 50 flowers per folder: 001, 002, 003, ... */
       var groupFolderName = pad(Math.floor(i / 50) + 1, 3);
       var groupDir = await outputDir.getDirectoryHandle(groupFolderName, { create: true });
 
       var node = samples[i];
       var title = node.dataset.title || ('Prism Flower ' + (i + 1));
       var stockMeta = stockMetadataForTitle(title);
-      var ext = snapshot.exportFormat === 'webm' ? '.webm' : '.mp4';
+
       var metadataEntry = {
-        flower: title.replace(/^Prism\s+/i, '').trim(),
-        commercialTitle: stockMeta.commercialTitle,
-        description: stockMeta.description,
-        keywords: stockMeta.keywords,
-        keywordCount: stockMeta.keywordCount,
-        filename: stockMeta.commercialTitle + ext,
-        metadataFilename: stockMeta.commercialTitle + '.csv',
-        status: 'pending'
+        animation: {
+          title: stockMeta.animation.title,
+          description: stockMeta.animation.description,
+          keywords: stockMeta.animation.keywords,
+          filename: stockMeta.animation.filename,
+          csvFilename: stockMeta.animation.csvFilename,
+          status: 'pending'
+        },
+        illustration: {
+          title: stockMeta.illustration.title,
+          description: stockMeta.illustration.description,
+          keywords: stockMeta.illustration.keywords,
+          filename: stockMeta.illustration.filename,
+          csvFilename: stockMeta.illustration.csvFilename,
+          status: 'pending'
+        }
       };
-      batchMetadata.push(metadataEntry);
 
       try {
         var src = (node.textContent || '').replace(/^\n/, '');
@@ -17217,19 +17258,23 @@ async function renderPrismBatch(limit, label) {
         S.meta = defaultMeta();
         S.meta.title = title;
         S.meta.description = node.dataset.desc || '';
+
+        /* Exactly 10 seconds. The Prism source itself is already 2× faster. */
         S.comp = CORE.composition(merge(snapshot.comp || {}, {
           duration: 10,
           loop: true,
           loopDuration: 10,
-          speed: 2
+          speed: 1
         }));
-        S.exportFormat = snapshot.exportFormat === 'dir' ? 'mp4' : snapshot.exportFormat;
-        if (S.exportFormat !== 'mp4' && S.exportFormat !== 'webm') S.exportFormat = 'mp4';
+
+        /* Batch deliverable is MP4 + JPG + CSVs. */
+        S.exportFormat = 'mp4';
         S.quality = snapshot.quality;
         S.timebase = snapshot.timebase;
         S.checksums = snapshot.checksums;
         S.frame = 0;
         S.lastProgress = null;
+
         edSetValue(src);
         S.code = Ed.ta.value;
         $('#projName').value = title;
@@ -17238,45 +17283,69 @@ async function renderPrismBatch(limit, label) {
         syncMetaUI();
         markDirty(false);
 
-        batchLog(suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length + ' · ' + title);
+        batchLog(
+          suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length + ' · ' + title +
+          ' · folder ' + groupFolderName
+        );
 
         var compiled = await run();
         if (!compiled || !compiled.ok) {
           failed++;
-          metadataEntry.status = 'compile failed';
+          metadataEntry.animation.status = 'compile failed';
+          metadataEntry.illustration.status = 'compile failed';
           batchLog('batch skipped ' + title + ' — compile failed', true);
           continue;
         }
 
-        var job = buildJob({ exportFormat: S.exportFormat });
+        var job = buildJob({ exportFormat: 'mp4' });
         job.label = title;
-        job.metadata.title = stockMeta.commercialTitle;
-        job.metadata.description = stockMeta.description;
-        job.metadata.slug = slugify(stockMeta.commercialTitle);
-        job.composition.speed = 2;
-        job.fileName = stockMeta.commercialTitle + ext;
-        metadataEntry.filename = job.fileName;
+        job.metadata.title = stockMeta.animation.title;
+        job.metadata.description = stockMeta.animation.description;
+        job.metadata.slug = slugify(stockMeta.animation.title);
+        job.composition.speed = 1;
+        job.fileName = stockMeta.animation.filename;
 
         var result = null;
         var lastError = null;
 
         for (var attempt = 1; attempt <= 2 && !S.batchCancelled; attempt++) {
           if (attempt > 1) {
-            batchLog(suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length + ' · ' + title + ' · retrying', true);
-            try { await restartBatchEngine(); } catch (restartError) {
-              batchLog('renderer restart failed — ' + String(restartError.message || restartError), true);
+            batchLog(
+              suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length +
+              ' · ' + title + ' · retrying',
+              true
+            );
+            try { await restartBatchEngine(); }
+            catch (restartError) {
+              batchLog('renderer restart failed — ' +
+                String(restartError.message || restartError), true);
+            }
+
+            /* Recompile the flower in the fresh engine before retrying. */
+            try {
+              var recomp = await run();
+              if (!recomp || !recomp.ok) {
+                lastError = { name: 'COMPILE ERROR', message: 'The restarted renderer could not compile this flower.' };
+                continue;
+              }
+            } catch (recompileError) {
+              lastError = {
+                name: recompileError && recompileError.name || 'COMPILE ERROR',
+                message: String(recompileError && recompileError.message || recompileError)
+              };
+              continue;
             }
           }
 
           try {
-            var sawFirst = false;
             function batchProgress(p) {
-              if (!sawFirst) { sawFirst = true; setStage('RENDERING'); }
               S.lastProgress = p;
               renderStat(p, job);
-              $('#stMsg').textContent = suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length +
+              $('#stMsg').textContent =
+                suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length +
                 ' · ' + title + ' · frame ' + p.frame + ' / ' + p.total;
             }
+
             function batchEngineLog(msg) {
               logLine(msg);
               if (/encoder configured/.test(msg)) setStage('RENDERING');
@@ -17284,79 +17353,146 @@ async function renderPrismBatch(limit, label) {
               if (/^muxed /.test(msg)) setStage('FINALISING');
             }
 
-            /* Direct export path: do not route batch jobs through startRender/finishRender.
-               Those functions intentionally manage the interactive single-render UI state. */
             result = await Engine.api.exportJob(
               job, 0, null, null, batchEngineLog, batchProgress
             );
 
             if (!result || !result.ok) {
-              lastError = result && result.error
-                ? result.error
-                : { name: 'BATCH EXPORT ERROR', message: 'The export engine returned no usable result.', detail: 'No output Blob was returned.' };
+              lastError = (result && result.error) ? result.error : {
+                name: 'BATCH EXPORT ERROR',
+                message: 'The export engine returned no usable result.',
+                detail: 'No completed export result was returned.'
+              };
               result = null;
               continue;
             }
 
             if (!result.blob) {
-              lastError = { name: 'BATCH OUTPUT ERROR', message: 'The renderer completed but returned no output file.', detail: 'The batch expects a video Blob from the export engine.' };
+              lastError = {
+                name: 'BATCH OUTPUT ERROR',
+                message: 'The renderer completed but returned no MP4 blob.',
+                detail: 'The MP4 export must return a Blob before the batch can save it.'
+              };
               result = null;
               continue;
             }
 
-            await writeBlobToDirectory(groupDir, result.blob, job.fileName);
-            result.savedToFolder = true;
-            result.savedFolderName = outputDir.name || '';
-            result.savedGroupFolder = groupFolderName;
             break;
           } catch (error) {
             lastError = {
               name: error && error.name || 'BATCH EXPORT ERROR',
               message: String(error && error.message || error),
-              detail: String(error && error.stack || 'The direct batch export failed.')
+              detail: String(error && error.stack || 'The MP4 batch export failed.')
             };
             result = null;
           }
         }
 
-        if (!result || !result.savedToFolder) {
+        if (!result || !result.ok || !result.blob) {
           failed++;
-          metadataEntry.status = 'render failed';
+          metadataEntry.animation.status = 'render failed';
+          metadataEntry.illustration.status = 'render failed';
+
           var reason = lastError
             ? lastError.name + ': ' + lastError.message
-            : 'unknown batch export failure';
-          batchLog('batch output failed for ' + title + ' — ' + reason, true);
-          if (lastError && lastError.detail) logLine('DETAIL — ' + lastError.detail);
+            : 'unknown render failure';
+
+          batchLog(
+            'batch output failed for ' + title + ' — ' + reason,
+            true
+          );
+          if (lastError && lastError.detail) {
+            logLine('DETAIL — ' + lastError.detail);
+          }
           continue;
         }
 
-        completed++;
-        metadataEntry.status = 'completed';
-        batchLog('batch complete → ' + groupFolderName + '/' + job.fileName, true);
+        /* Save the MP4 with the exact commercial title. */
+        await writeBlobToDirectory(
+          groupDir,
+          result.blob,
+          stockMeta.animation.filename
+        );
+        metadataEntry.animation.status = 'completed';
+        batchLog(
+          'MP4 saved → ' + groupFolderName + '/' + stockMeta.animation.filename,
+          true
+        );
 
-        try {
-          var metadataBlob = new Blob([stockMetadataSingleCsv(metadataEntry)], { type: 'text/csv;charset=utf-8' });
-          await writeBlobToDirectory(groupDir, metadataBlob, metadataEntry.metadataFilename);
-          batchLog('metadata saved → ' + groupFolderName + '/' + metadataEntry.metadataFilename, true);
-        } catch (metadataError) {
-          batchLog('metadata export failed for ' + title + ' — ' +
-            String(metadataError && metadataError.message || metadataError), true);
-        }
+        /* Render and save the first frame as a JPG using project-name only. */
+        var firstFrameBlob = await renderFirstFrameJpg(job);
+        await writeBlobToDirectory(
+          groupDir,
+          firstFrameBlob,
+          stockMeta.illustration.filename
+        );
+        metadataEntry.illustration.status = 'completed';
+        batchLog(
+          'JPG saved → ' + groupFolderName + '/' + stockMeta.illustration.filename,
+          true
+        );
+
+        /* One CSV for the MP4 metadata. */
+        var animationCsv = new Blob(
+          [stockMetadataSingleCsv(metadataEntry.animation)],
+          { type: 'text/csv;charset=utf-8' }
+        );
+        await writeBlobToDirectory(
+          groupDir,
+          animationCsv,
+          stockMeta.animation.csvFilename
+        );
+        batchLog(
+          'MP4 CSV saved → ' + groupFolderName + '/' + stockMeta.animation.csvFilename,
+          true
+        );
+
+        /* One CSV for the JPG metadata. */
+        var illustrationCsv = new Blob(
+          [stockMetadataSingleCsv(metadataEntry.illustration)],
+          { type: 'text/csv;charset=utf-8' }
+        );
+        await writeBlobToDirectory(
+          groupDir,
+          illustrationCsv,
+          stockMeta.illustration.csvFilename
+        );
+        batchLog(
+          'JPG CSV saved → ' + groupFolderName + '/' + stockMeta.illustration.csvFilename,
+          true
+        );
+
+        completed++;
 
         if (i < samples.length - 1 && !S.batchCancelled) {
-          /* Drop the completed encoder/worker before opening the next long-lived 4K encode. */
-          try { await restartBatchEngine(); } catch (restartError) {
-            batchLog('renderer restart after ' + title + ' failed — ' +
-              String(restartError && restartError.message || restartError), true);
+          /* Fresh renderer before the next 4K encode. */
+          try { await restartBatchEngine(); }
+          catch (restartError) {
+            batchLog(
+              'renderer restart after ' + title + ' failed — ' +
+              String(restartError && restartError.message || restartError),
+              true
+            );
           }
-          await new Promise(function (resolve) { setTimeout(resolve, 250); });
+
+          /* Recompile happens on the next item. */
+          await new Promise(function (resolve) { setTimeout(resolve, 150); });
         }
       } catch (itemError) {
         failed++;
-        metadataEntry.status = 'batch error';
-        batchLog('batch item failed — ' + title + ' — ' +
-          String(itemError && itemError.message || itemError), true);
-        if (itemError && itemError.stack) logLine('DETAIL — ' + itemError.stack);
+
+        metadataEntry.animation.status = 'item failed';
+        metadataEntry.illustration.status = 'item failed';
+
+        batchLog(
+          'batch item failed — ' + title + ' — ' +
+          String(itemError && itemError.message || itemError),
+          true
+        );
+        if (itemError && itemError.stack) {
+          logLine('DETAIL — ' + itemError.stack);
+        }
+
         try { await restartBatchEngine(); } catch (restartError) {}
       }
     }
@@ -17365,7 +17501,11 @@ async function renderPrismBatch(limit, label) {
       $('#stMsg').textContent = suffixLabel + ' cancelled — no folder selected.';
     } else {
       failed++;
-      batchLog(suffixLabel + ' failed — ' + String(error && error.message || error), true);
+      batchLog(
+        suffixLabel + ' failed — ' +
+        String(error && error.message || error),
+        true
+      );
       if (error && error.stack) logLine('DETAIL — ' + error.stack);
     }
   } finally {
@@ -17393,24 +17533,6 @@ async function renderPrismBatch(limit, label) {
     markDirty(snapshot.dirty);
     try { await run(); } catch (restoreError) {}
 
-    if (outputDir && batchMetadata.length) {
-      try {
-        await writeBlobToDirectory(
-          outputDir,
-          new Blob([stockMetadataCsv(batchMetadata)], { type: 'text/csv;charset=utf-8' }),
-          'STOCK_METADATA.csv'
-        );
-        await writeBlobToDirectory(
-          outputDir,
-          new Blob([stockMetadataJson(batchMetadata, samples.length)], { type: 'application/json;charset=utf-8' }),
-          'STOCK_METADATA.json'
-        );
-      } catch (metadataError) {
-        batchLog('stock metadata summary export failed — ' +
-          String(metadataError && metadataError.message || metadataError), true);
-      }
-    }
-
     if (b50) b50.disabled = false;
     if (ball) ball.disabled = false;
     $('#stDot').className = 'dot ok';
@@ -17419,10 +17541,14 @@ async function renderPrismBatch(limit, label) {
 
     var status = S.batchCancelled ? 'stopped' : 'complete';
     if (outputDir && !S.batchCancelled) {
-      $('#stMsg').textContent = suffixLabel + ' complete — ' + completed + ' written to "' +
-        (outputDir.name || 'selected folder') + '", ' + failed + ' failed.';
+      $('#stMsg').textContent =
+        suffixLabel + ' complete — ' + completed +
+        ' flowers written to "' + (outputDir.name || 'selected folder') +
+        '", ' + failed + ' failed. Each 50-flower folder contains 50 MP4 + 50 JPG + 100 CSV files.';
     } else {
-      $('#stMsg').textContent = suffixLabel + ' ' + status + ' — ' + completed + ' completed, ' + failed + ' failed.';
+      $('#stMsg').textContent =
+        suffixLabel + ' ' + status + ' — ' + completed + ' completed, ' +
+        failed + ' failed.';
     }
   }
 }
