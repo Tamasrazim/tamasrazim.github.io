@@ -24,6 +24,7 @@ The production Format Forge page is not modified by KYNESTRA development.
 - text/data conversion
 - media conversion through the existing FFmpeg browser runtime
 - ZIP output
+- optional in-app registration of completed outputs into Stock Vault through the shared Core handoff
 
 ## Desktop packaging
 

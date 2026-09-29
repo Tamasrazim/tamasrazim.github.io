@@ -11,7 +11,8 @@
     "zip-export",
     "image-conversion",
     "text-conversion",
-    "media-conversion"
+    "media-conversion",
+    "core-handoff"
   ],
   "boundaries": {
     "productionCopy": "projects/format-forge",
