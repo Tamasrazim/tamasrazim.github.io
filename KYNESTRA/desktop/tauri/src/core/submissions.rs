@@ -42,7 +42,7 @@ impl SubmissionService {
 
         let existing: Result<String, rusqlite::Error> = conn.query_row(
             "SELECT submission_id FROM submissions
-             WHERE asset_id=?1 AND account_id=CASE WHEN ?2='' THEN NULL ELSE ?2 END
+             WHERE asset_id=?1 AND ((account_id IS NULL AND ?2='') OR account_id=?2)
              LIMIT 1",
             params![asset_id, account],
             |row| row.get(0),
