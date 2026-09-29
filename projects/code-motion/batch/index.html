@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>C2M Flower Batch Lab — Tamasrazim</title>
+<title>KYNESTRA Flower Batch Lab — Tamasrazim</title>
 <style>
 :root{
   --bg:#050506;--panel:#0b0b0d;--panel2:#111114;--line:#26262b;
@@ -70,12 +70,12 @@ h1{font-size:clamp(28px,4vw,54px);line-height:.95;margin:8px 0 0;font-weight:600
   </header>
 
   <div class="toolbar">
-    <button class="btn" id="backBtn">Back to C2M</button>
+    <button class="btn" id="backBtn">Back to KYNESTRA</button>
     <button class="btn" id="regenBtn">Generate 50 Ideas</button>
     <button class="btn" id="firstBtn">Select First 50</button>
     <button class="btn primary" id="queueBtn">Queue 50 Core Jobs</button>
     <button class="btn" id="nextBtn">Start Next Job</button>
-    <button class="btn" id="openBtn">Open C2M Renderer</button>
+    <button class="btn" id="openBtn">Open KYNESTRA Renderer</button>
     <button class="btn" id="manifestBtn">Export Batch Manifest</button>
     <button class="btn primary" id="packageBtn">DOWNLOAD EVERYTHING</button>
   </div>
@@ -114,12 +114,12 @@ h1{font-size:clamp(28px,4vw,54px);line-height:.95;margin:8px 0 0;font-weight:600
         <input class="search" id="search" placeholder="Filter flower studies or idea tokens">
         <div class="count" id="selectedCount">0 / 50 selected</div>
       </div>
-      <div class="cards" id="cards"><div class="notice">Loading the current C2M flower library…</div></div>
+      <div class="cards" id="cards"><div class="notice">Loading the current KYNESTRA flower library…</div></div>
       <div class="status" id="status">Ready.</div>
     </section>
   </main>
 
-  <footer class="footer">C2M Flower Batch Lab — deterministic staging + native packaging</footer>
+  <footer class="footer">KYNESTRA Flower Batch Lab — deterministic staging + native packaging</footer>
 </div>
 
 <script>
@@ -338,7 +338,7 @@ h1{font-size:clamp(28px,4vw,54px);line-height:.95;margin:8px 0 0;font-weight:600
       created++;
       setStatus('Queued '+created+' / '+selected.length+' Core render jobs…');
     }
-    setStatus('Queued '+created+' Core render jobs. Start the next job to hand it to C2M.');
+    setStatus('Queued '+created+' Core render jobs. Start the next job to hand it to KYNESTRA.');
   }
 
   async function startNextJob() {
