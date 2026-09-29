@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   type TEXT NOT NULL,
   status TEXT NOT NULL,
   progress REAL NOT NULL DEFAULT 0,
+  message TEXT,
   created_at TEXT NOT NULL,
   started_at TEXT,
   finished_at TEXT,
@@ -48,7 +49,8 @@ CREATE TABLE IF NOT EXISTS platform_accounts (
   status TEXT NOT NULL DEFAULT 'unverified',
   credential_ref TEXT,
   created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL
+  updated_at TEXT NOT NULL,
+  metadata_json TEXT NOT NULL DEFAULT '{}'
 );
 
 CREATE TABLE IF NOT EXISTS submissions (
@@ -56,13 +58,30 @@ CREATE TABLE IF NOT EXISTS submissions (
   asset_id TEXT NOT NULL,
   account_id TEXT,
   status TEXT NOT NULL DEFAULT 'not_submitted',
+  submitted_at TEXT,
   last_checked_at TEXT,
   public_url TEXT,
   status_reason TEXT,
+  metadata_json TEXT NOT NULL DEFAULT '{}',
   FOREIGN KEY(asset_id) REFERENCES assets(asset_id) ON DELETE CASCADE,
   FOREIGN KEY(account_id) REFERENCES platform_accounts(account_id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value_json TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS events (
+  event_id TEXT PRIMARY KEY,
+  event_type TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  payload_json TEXT NOT NULL,
+  delivered_at TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_assets_project ON assets(project_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
 CREATE INDEX IF NOT EXISTS idx_submissions_asset ON submissions(asset_id);
+CREATE INDEX IF NOT EXISTS idx_events_type ON events(event_type);
