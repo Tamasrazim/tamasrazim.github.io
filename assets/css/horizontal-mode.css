@@ -850,13 +850,41 @@ body[data-axis-speed="fast"]{
 
 
 /* ---------- Seamless scene handoff ---------- */
-/* Keep full-height scenes, but let the next scene enter before the current one is completely gone. */
+/* Each viewport overlaps the next just enough to read as one continuous spatial surface. */
 main#content > section{
-  margin-right:-5vw;
-  padding-right:5vw;
+  margin-right:-5.5vw;
+  padding-right:5.5vw;
   position:relative;
   z-index:1;
-  border-right:1px solid rgba(243,243,239,.035);
+  border-right:0;
+  box-shadow:inset -1px 0 rgba(243,243,239,.018),inset -72px 0 96px -88px rgba(243,243,239,.12);
+}
+main#content > section::before{
+  content:"";
+  position:absolute;
+  top:0;
+  right:0;
+  bottom:0;
+  width:clamp(52px,8vw,124px);
+  pointer-events:none;
+  z-index:3;
+  background:
+    radial-gradient(ellipse at 100% 50%,rgba(243,243,239,.065),transparent 64%),
+    linear-gradient(90deg,transparent 0%,rgba(5,5,5,.012) 45%,rgba(5,5,5,.10) 100%);
+  opacity:calc(.72 + var(--axis-velocity-abs) * .28);
+  transition:opacity .35s var(--ease);
+}
+main#content > section::after{
+  content:"";
+  position:absolute;
+  top:10%;
+  right:1px;
+  bottom:10%;
+  width:1px;
+  pointer-events:none;
+  z-index:4;
+  background:linear-gradient(180deg,transparent,rgba(243,243,239,.052) 24%,rgba(243,243,239,.068) 50%,rgba(243,243,239,.052) 76%,transparent);
+  box-shadow:0 0 32px rgba(243,243,239,.025);
 }
 main#content > .band{
   flex-basis:calc(100vw - 2vw);
@@ -866,18 +894,24 @@ main#content > .band{
   position:relative;
   z-index:2;
 }
-main#content > section::after{
-  content:"";
-  position:absolute;
-  top:0;
-  right:0;
-  bottom:0;
-  width:5vw;
-  pointer-events:none;
-  background:linear-gradient(90deg,transparent,rgba(5,5,5,.035));
-}
 main#content > .band::after{
   width:2vw;
+}
+
+.axis-scroller > .site-footer{
+  position:relative;
+  box-shadow:inset 72px 0 96px -88px rgba(243,243,239,.10);
+}
+.axis-scroller > .site-footer::before{
+  content:"";
+  position:absolute;
+  top:10%;
+  left:1px;
+  bottom:10%;
+  width:1px;
+  pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(243,243,239,.052) 24%,rgba(243,243,239,.068) 50%,rgba(243,243,239,.052) 76%,transparent);
+  box-shadow:0 0 32px rgba(243,243,239,.025);
 }
 
 @media(max-width:1100px){
