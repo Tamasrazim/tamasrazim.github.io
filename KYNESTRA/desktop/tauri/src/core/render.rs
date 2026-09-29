@@ -1,4 +1,5 @@
 use super::db;
+use super::projects::ProjectManager;
 use super::tasks::{TaskError, TaskRecord, TaskService};
 use chrono::Utc;
 use rusqlite::params;
@@ -278,14 +279,9 @@ fn require_running_status(status: &str) -> Result<(), RenderError> {
 }
 
 fn validate_project(path: &str) -> Result<std::path::PathBuf, RenderError> {
-    let root = Path::new(path);
-    if root.extension().and_then(|v| v.to_str()) != Some("tamasrazim") {
-        return Err(RenderError::InvalidProject);
-    }
-    if !root.join("manifest.json").is_file() || !root.join("project.db").is_file() {
-        return Err(RenderError::InvalidProject);
-    }
-    Ok(root.to_path_buf())
+    ProjectManager::default()
+        .validated_root(path)
+        .map_err(|_| RenderError::InvalidProject)
 }
 
 struct RenderJobReader<'a> {
