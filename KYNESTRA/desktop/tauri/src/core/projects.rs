@@ -49,43 +49,53 @@ impl ProjectManager {
         let folder = format!("{}-{}.tamasrazim", slugify(&clean_name), &project_id[..8]);
         let project_root = root.join(folder);
 
-        for directory in ["modules/forge", "modules/c2m", "modules/vault", "source", "assets", "renders", "previews"] {
-            fs::create_dir_all(project_root.join(directory))?;
+        let result = (|| -> Result<CreateProjectResult, ProjectError> {
+            for directory in ["modules/forge", "modules/c2m", "modules/vault", "source", "assets", "renders", "previews"] {
+                fs::create_dir_all(project_root.join(directory))?;
+            }
+
+            let manifest = ProjectManifest {
+                format: FORMAT.into(),
+                format_version: FORMAT_VERSION.into(),
+                project_id: project_id.clone(),
+                name: clean_name.clone(),
+                created_by: "KYNESTRA".into(),
+            };
+
+            fs::write(
+                project_root.join("manifest.json"),
+                serde_json::to_vec_pretty(&manifest)?,
+            )?;
+
+            let database_path = project_root.join("project.db");
+            let conn = db::open(&database_path)?;
+            let now = Utc::now().to_rfc3339();
+
+            conn.execute(
+                "INSERT INTO projects (project_id,name,format,format_version,root_path,created_at,updated_at)
+                 VALUES (?1,?2,?3,?4,?5,?6,?7)",
+                params![
+                    project_id,
+                    clean_name,
+                    FORMAT,
+                    FORMAT_VERSION,
+                    project_root.to_string_lossy(),
+                    now,
+                    now
+                ],
+            )?;
+
+            let project = summary_from_manifest(&project_root, &manifest);
+            Ok(CreateProjectResult { project, manifest })
+        })();
+
+        match result {
+            Ok(value) => Ok(value),
+            Err(error) => {
+                let _ = fs::remove_dir_all(&project_root);
+                Err(error)
+            }
         }
-
-        let manifest = ProjectManifest {
-            format: FORMAT.into(),
-            format_version: FORMAT_VERSION.into(),
-            project_id: project_id.clone(),
-            name: clean_name.clone(),
-            created_by: "KYNESTRA".into(),
-        };
-
-        fs::write(
-            project_root.join("manifest.json"),
-            serde_json::to_vec_pretty(&manifest)?,
-        )?;
-
-        let database_path = project_root.join("project.db");
-        let conn = db::open(&database_path)?;
-        let now = Utc::now().to_rfc3339();
-
-        conn.execute(
-            "INSERT INTO projects (project_id,name,format,format_version,root_path,created_at,updated_at)
-             VALUES (?1,?2,?3,?4,?5,?6,?7)",
-            params![
-                project_id,
-                clean_name,
-                FORMAT,
-                FORMAT_VERSION,
-                project_root.to_string_lossy(),
-                now,
-                now
-            ],
-        )?;
-
-        let project = summary_from_manifest(&project_root, &manifest);
-        Ok(CreateProjectResult { project, manifest })
     }
 
     pub fn open(&self, path: &str) -> Result<ProjectSummary, ProjectError> {
