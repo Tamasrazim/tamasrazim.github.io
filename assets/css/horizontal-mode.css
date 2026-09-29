@@ -366,3 +366,151 @@ body.is-scrubbing .scroll-cue{
   opacity:0;
   transition:opacity .2s var(--ease);
 }
+
+/* ---------- 50-pass responsive / accessibility layer ---------- */
+body{
+  touch-action:auto;
+}
+
+main#content > section,
+main#content > .band{
+  contain:layout paint;
+}
+
+body.axis-dragging,
+body.is-scrubbing{
+  user-select:none;
+  -webkit-user-select:none;
+}
+
+body.axis-dragging{
+  overscroll-behavior-x:none;
+}
+
+body.is-scrubbing .site-progress{
+  touch-action:none;
+}
+
+.horizontal-rail{
+  contain:layout paint style;
+  will-change:opacity,transform;
+}
+
+.horizontal-rail button{
+  min-height:22px;
+}
+
+.horizontal-index-readout{
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+
+.site-progress{
+  user-select:none;
+  -webkit-user-select:none;
+  touch-action:none;
+}
+
+.site-progress:hover span,
+.site-progress:focus-visible span{
+  box-shadow:0 0 26px rgba(243,243,239,.58);
+}
+
+.site-progress:focus-visible{
+  outline:1px solid rgba(243,243,239,.42);
+  outline-offset:2px;
+}
+
+body.is-scrubbing .site-progress span{
+  height:3px;
+  box-shadow:0 0 34px rgba(243,243,239,.7);
+}
+
+body.is-scrubbing .cursor-dot,
+body.is-scrubbing .cursor-ring,
+body.axis-dragging .cursor-dot,
+body.axis-dragging .cursor-ring{
+  opacity:0!important;
+}
+
+@supports not ((backdrop-filter:blur(1px))){
+  .horizontal-rail{
+    background:rgba(5,5,5,.86);
+  }
+}
+
+@media(max-width:720px){
+  .horizontal-rail{
+    bottom:calc(14px + env(safe-area-inset-bottom));
+    max-width:calc(100vw - 24px);
+    overflow:hidden;
+  }
+
+  .horizontal-index-readout{
+    left:16px;
+    bottom:calc(16px + env(safe-area-inset-bottom));
+  }
+
+  .site-progress{
+    top:env(safe-area-inset-top);
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  body{scroll-snap-type:none}
+  .horizontal-rail,
+  .horizontal-rail button,
+  .horizontal-rail button::before,
+  .horizontal-rail button::after,
+  .horizontal-index-readout::before,
+  .horizontal-index-readout::after,
+  .site-progress,
+  .site-progress span{
+    transition:none!important;
+  }
+}
+
+@media(forced-colors:active){
+  .horizontal-rail,
+  .site-progress,
+  .horizontal-index-readout{
+    forced-color-adjust:auto;
+  }
+
+  .horizontal-rail button.is-active::before{
+    background:CanvasText;
+    box-shadow:none;
+  }
+}
+
+@media print{
+  html,body{
+    overflow:visible!important;
+    height:auto!important;
+    min-height:0!important;
+  }
+
+  main#content{
+    display:block!important;
+    width:auto!important;
+    height:auto!important;
+  }
+
+  main#content > section,
+  main#content > .band,
+  body > .site-footer{
+    width:auto!important;
+    min-width:0!important;
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+    page-break-inside:avoid;
+  }
+
+  .horizontal-rail,
+  .horizontal-index-readout,
+  .site-progress{
+    display:none!important;
+  }
+}
