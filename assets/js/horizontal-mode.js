@@ -9,10 +9,11 @@
   var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var progressFill=document.getElementById('progressFill');
   var progressControl=document.getElementById('siteProgress');
-  var scroller=document.scrollingElement || document.documentElement;
+  var scroller=document.getElementById('axisScroller') || document.scrollingElement || document.documentElement;
   var stateNode=document.body;
   scroller.dataset.horizontalMode='true';
   stateNode.dataset.horizontalMode='true';
+  scroller.setAttribute('tabindex','-1');
   var readout=null;
   var liveStatus=null;
   var lastActiveIndex=-1;
