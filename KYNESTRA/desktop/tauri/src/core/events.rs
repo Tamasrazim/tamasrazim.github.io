@@ -29,8 +29,8 @@ impl CoreEvent {
 pub struct EventBus;
 
 impl EventBus {
-    pub fn publish(&self, app: &AppHandle, event: CoreEvent) -> tauri::Result<()> {
-        app.emit("kynestra:event", &event)
+    pub fn publish(&self, app: &AppHandle, event: CoreEvent) {
+        let _ = app.emit("kynestra:event", &event);
     }
 
     pub fn persist(&self, project_path: &Path, event: &CoreEvent) -> Result<(), rusqlite::Error> {
