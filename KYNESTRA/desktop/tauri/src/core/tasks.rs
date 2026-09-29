@@ -189,6 +189,34 @@ mod tests {
     use std::fs;
 
     #[test]
+    fn list_returns_recent_tasks() {
+        let root = tempfile::tempdir().expect("root");
+        let project = root.path().join("list.tamasrazim");
+        fs::create_dir_all(&project).expect("project");
+        fs::write(
+            project.join("manifest.json"),
+            r#"{"format":"tamasrazim","formatVersion":"0.1","projectId":"test-list","name":"List","createdBy":"KYNESTRA"}"#,
+        ).expect("manifest");
+        let conn = db::open(&project.join("project.db")).expect("db");
+        conn.execute(
+            "INSERT INTO projects (project_id,name,format,format_version,root_path,created_at,updated_at)
+             VALUES ('test-list','List','tamasrazim','0.1',?1,'now','now')",
+            [project.to_string_lossy().as_ref()],
+        ).expect("project row");
+        conn.execute(
+            "INSERT INTO tasks (task_id,project_id,type,status,progress,created_at,message)
+             VALUES ('task-list','test-list','render','queued',0.25,'2026-01-01T00:00:00Z','queued')",
+            [],
+        ).expect("task row");
+
+        let tasks = TaskService::default().list(project.to_str().unwrap()).expect("list");
+        assert_eq!(tasks.len(), 1);
+        assert_eq!(tasks[0].task_id, "task-list");
+        assert_eq!(tasks[0].status, "queued");
+        assert!((tasks[0].progress - 0.25).abs() < f64::EPSILON);
+    }
+
+    #[test]
     fn recovery_marks_running_tasks() {
         let root = tempfile::tempdir().expect("root");
         let project = root.path().join("recover.tamasrazim");
