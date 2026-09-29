@@ -219,10 +219,11 @@
       button.setAttribute('aria-current',active?'page':'false');
     });
 
-    /* Keep the primary header navigation visually synchronized with the page axis. */
+    /* Keep desktop + mobile header navigation visually synchronized with the page axis. */
     var activeItem=pageItems[closest];
     var activeId=activeItem && activeItem.id ? activeItem.id : '';
-    document.querySelectorAll('.site-header .nav a[href^="#"]').forEach(function(link){
+
+    document.querySelectorAll('.site-header .nav a[href^="#"], .site-header .header-contact[href^="#"], .mobile-nav a[href^="#"]').forEach(function(link){
       var href=link.getAttribute('href')||'';
       var linkId=href.slice(1);
       var active=linkId===activeId;
@@ -230,6 +231,8 @@
       if(active)link.setAttribute('aria-current','page');
       else link.removeAttribute('aria-current');
     });
+
+    document.body.dataset.axisSection=activeId||'top';
 
     /* Reflect the visible section in the URL without creating history entries. */
     if(activeId && activeId!=='top'){
