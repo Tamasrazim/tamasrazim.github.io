@@ -61,6 +61,13 @@
       document.documentElement.style.setProperty('--axis-velocity',measuredNormalized.toFixed(4));
       document.documentElement.style.setProperty('--axis-velocity-abs',Math.abs(measuredNormalized).toFixed(4));
     }
+    window.clearTimeout(velocityResetTimer);
+    velocityResetTimer=window.setTimeout(function(){
+      if(!wheelRAF){
+        document.documentElement.style.setProperty('--axis-velocity','0');
+        document.documentElement.style.setProperty('--axis-velocity-abs','0');
+      }
+    },140);
     window.clearTimeout(speedTimer);
     speedTimer=window.setTimeout(function(){
       stateNode.dataset.axisSpeed='settled';
@@ -88,7 +95,7 @@
   function isEditable(target){
     if(!target)return false;
     var tag=(target.tagName||'').toLowerCase();
-    return tag==='input'||tag==='textarea'||tag==='select'||tag==='button'||target.isContentEditable;
+    return tag==='input'||tag==='textarea'||tag==='select'||target.isContentEditable;
   }
 
   function horizontalTarget(el){
@@ -115,27 +122,11 @@
   }
 
   /* Mouse wheel becomes horizontal page travel. Native horizontal trackpads remain native. */
-  function verticalPanelCanScroll(target,delta){
-    var panel=target && target.closest ? target.closest('main#content > section, main#content > .band') : null;
-    if(!panel || panel.scrollHeight<=panel.clientHeight+1)return false;
-    if(delta>0)return panel.scrollTop < panel.scrollHeight-panel.clientHeight-1;
-    if(delta<0)return panel.scrollTop>1;
-    return false;
-  }
-
   var speedTimer=0;
+  var velocityResetTimer=0;
   var wheelRAF=0;
   var wheelVelocity=0;
   var wheelLastTime=0;
-
-  function cancelWheel(){
-    if(wheelRAF){
-      cancelAnimationFrame(wheelRAF);
-      wheelRAF=0;
-    }
-    wheelTarget=scroller.scrollLeft;
-    wheelLastTime=0;
-  }
 
   function normalizeWheelDelta(e){
     if(e.deltaMode===1)return e.deltaY*16;
@@ -665,7 +656,7 @@
 
     var cueLabel=document.querySelector('.scroll-cue-label');
     if(cueLabel){
-      cueLabel.textContent=closest===0 ? 'Next section' : (closest===pageItems.length-1 ? 'End of axis' : 'Next section');
+      cueLabel.textContent=closest===pageItems.length-1 ? 'End of axis' : 'Keep scrolling';
     }
     if(axisNext){
       var atEnd=closest===pageItems.length-1;
