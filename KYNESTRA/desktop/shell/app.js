@@ -350,11 +350,26 @@ async function exportPackage() {
 
 function renderHome() {
   const cards = state.projects.map(p => '<div class="project"><b>'+escapeHtml(p.name)+'</b><code>'+escapeHtml(p.path)+'</code><div class="actions"><button class="action" data-open="'+escapeAttr(p.path)+'">Open</button></div></div>').join('');
-  view.innerHTML = '<div class="card"><h2>Core workspace</h2><p class="muted">The shell is connected to Rust Core. Working projects are local .tamasrazim directories; portable projects are ZIP-backed .tamasrazim packages with integrity manifests.</p><div class="actions"><button id="new-project" class="action primary">New Project</button><button id="import-package" class="action">Import .tamasrazim</button>'+(state.activeProject ? '<button id="export-package" class="action">Export Active Project</button>' : '')+'</div>'+(state.activeProject ? '<div class="notice">Active: <strong>'+escapeHtml(state.activeProject.name)+'</strong></div>' : '')+'<div class="projects">'+(cards || '<div class="notice">No projects created yet.</div>')+'</div></div><div class="grid"><div class="tile"><b>Forge</b><span class="muted">Create</span></div><div class="tile"><b>C2M</b><span class="muted">Render</span></div><div class="tile"><b>Stock Vault</b><span class="muted">Manage</span></div></div>';
+  view.innerHTML = '<div class="card"><h2>Core workspace</h2><p class="muted">The shell is connected to Rust Core. Working projects are local .tamasrazim directories; portable projects are ZIP-backed .tamasrazim packages with integrity manifests.</p><div class="actions"><button id="new-project" class="action primary">New Project</button><button id="import-package" class="action">Import .tamasrazim</button>'+(state.activeProject ? '<button id="export-package" class="action">Export Active Project</button>' : '')+'</div>'+(state.activeProject ? '<div class="notice">Active: <strong>'+escapeHtml(state.activeProject.name)+'</strong></div><div id="task-center" class="projects"><div class="notice">Loading Core tasks…</div></div>' : '')+'<div class="projects">'+(cards || '<div class="notice">No projects created yet.</div>')+'</div></div><div class="grid"><div class="tile"><b>Forge</b><span class="muted">Create</span></div><div class="tile"><b>C2M</b><span class="muted">Render</span></div><div class="tile"><b>Stock Vault</b><span class="muted">Manage</span></div></div>';
   document.getElementById('new-project')?.addEventListener('click', createProject);
   document.getElementById('import-package')?.addEventListener('click', importPackage);
   document.getElementById('export-package')?.addEventListener('click', exportPackage);
   document.querySelectorAll('[data-open]').forEach(btn => btn.addEventListener('click', () => openProject(btn.dataset.open)));
+
+  if (state.activeProject) loadTaskCenter(state.activeProject.path);
+}
+
+async function loadTaskCenter(projectPath) {
+  const target = document.getElementById('task-center');
+  if (!target) return;
+  try {
+    const tasks = await api('list_tasks', { projectPath });
+    target.innerHTML = tasks.length
+      ? tasks.slice(0, 12).map(task => '<div class="project"><b>'+escapeHtml(task.status.toUpperCase())+' · '+escapeHtml(task.task_type)+'</b><code>'+escapeHtml(task.task_id)+'</code><span class="muted">'+Math.round(Number(task.progress)*100)+'%'+(task.message ? ' · '+escapeHtml(task.message) : '')+'</span></div>').join('')
+      : '<div class="notice">No Core tasks for this project yet.</div>';
+  } catch (error) {
+    target.innerHTML = '<div class="notice">Task Center unavailable: '+escapeHtml(error)+'</div>';
+  }
 }
 
 function escapeHtml(value) {
@@ -365,6 +380,16 @@ function escapeAttr(value) { return escapeHtml(value).replace(/`/g, '&#96;'); }
 async function handleCoreEvent(event) {
   const type = event?.payload?.event_type;
   if (!type) return;
+
+  if (type === 'task.created' || type === 'task.started' || type === 'task.progress' || type === 'task.completed' || type === 'task.failed' || type === 'task.recovered') {
+    if (state.currentView === 'home' && state.activeProject) {
+      await loadTaskCenter(state.activeProject.path);
+    }
+    if (['c2m'].includes(state.currentView)) {
+      await renderC2M();
+    }
+    return;
+  }
 
   if (type === 'project.created' || type === 'project.imported') {
     await refreshProjects();
