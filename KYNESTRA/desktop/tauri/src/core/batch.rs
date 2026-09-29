@@ -17,6 +17,7 @@ pub struct FlowerBatchPackageResult {
     pub mp4_zip: Option<String>,
     pub jpg_zip: Option<String>,
     pub png_zip: Option<String>,
+    pub all_zip: Option<String>,
     pub mp4_count: usize,
     pub jpg_count: usize,
     pub png_count: usize,
@@ -73,11 +74,13 @@ pub fn package_flower_batch(input_dir: &str, output_dir: &str) -> Result<FlowerB
     let mp4_zip = write_optional_zip(output, "FLOWERS_MP4.zip", &mp4, "video/mp4", true)?;
     let jpg_zip = write_optional_zip(output, "FLOWERS_FIRST_FRAME_JPG.zip", &jpg, "image/jpeg", false)?;
     let png_zip = write_optional_zip(output, "FLOWERS_FIRST_FRAME_PNG_TRANSPARENT.zip", &png, "image/png", false)?;
+    let all_zip = write_master_zip(output, &mp4, &jpg, &png)?;
 
     Ok(FlowerBatchPackageResult {
         mp4_zip,
         jpg_zip,
         png_zip,
+        all_zip,
         mp4_count: mp4.len(),
         jpg_count: jpg.len(),
         png_count: png.len(),
@@ -383,6 +386,199 @@ fn write_zip(
             Err(error)
         }
     }
+}
+
+fn write_master_zip(
+    output: &Path,
+    mp4: &[FileEntry],
+    jpg: &[FileEntry],
+    png: &[FileEntry],
+) -> Result<Option<String>, String> {
+    let total = mp4.len() + jpg.len() + png.len();
+    if total == 0 {
+        return Ok(None);
+    }
+
+    let path = output.join("FLOWER_BATCH_ALL.zip");
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("Could not create {}: {e}", parent.display()))?;
+    }
+
+    let file_name = path.file_name().and_then(|v| v.to_str()).unwrap_or("FLOWER_BATCH_ALL.zip");
+    let temp_path = path
+        .parent()
+        .unwrap_or_else(|| Path::new("."))
+        .join(format!(".{file_name}.partial-{}", uuid::Uuid::new_v4()));
+
+    let result = (|| -> Result<(), String> {
+        let file = File::create(&temp_path)
+            .map_err(|e| format!("Could not create {}: {e}", temp_path.display()))?;
+        let mut zip = ZipWriter::new(file);
+        let options = SimpleFileOptions::default().compression_method(CompressionMethod::Stored);
+        let mut checksums = String::new();
+        let mut chunks = String::new();
+
+        append_master_entries(&mut zip, options, mp4, "MP4", &mut checksums, &mut chunks)?;
+        append_master_entries(&mut zip, options, jpg, "FIRST_FRAME_JPG", &mut checksums, &mut chunks)?;
+        append_master_entries(&mut zip, options, png, "FIRST_FRAME_PNG_TRANSPARENT", &mut checksums, &mut chunks)?;
+
+        zip.start_file("CHECKSUMS.sha256", options)
+            .map_err(|e| format!("ZIP checksum entry failed: {e}"))?;
+        zip.write_all(checksums.as_bytes())
+            .map_err(|e| format!("ZIP checksum write failed: {e}"))?;
+
+        zip.start_file("CHUNK-CHECKSUMS.sha256", options)
+            .map_err(|e| format!("ZIP chunk checksum entry failed: {e}"))?;
+        zip.write_all(chunks.as_bytes())
+            .map_err(|e| format!("ZIP chunk checksum write failed: {e}"))?;
+
+        let manifest = serde_json::json!({
+            "kind": "c2m-flower-batch-all",
+            "fileCount": total,
+            "groups": {
+                "mp4": mp4.len(),
+                "firstFrameJpg": jpg.len(),
+                "firstFramePngTransparent": png.len()
+            },
+            "groupSize": GROUP_SIZE,
+            "folderCount": {
+                "mp4": mp4.len().div_ceil(GROUP_SIZE),
+                "firstFrameJpg": jpg.len().div_ceil(GROUP_SIZE),
+                "firstFramePngTransparent": png.len().div_ceil(GROUP_SIZE)
+            },
+            "renderContract": {
+                "width": 3840,
+                "height": 2160,
+                "fps": 60,
+                "durationSeconds": 10,
+                "frames": 600,
+                "quality": "maximum",
+                "transparentSource": true,
+                "frameChecksumsRequested": true,
+                "chunkChecksumsRequested": true
+            },
+            "delivery": {
+                "singleDownload": "FLOWER_BATCH_ALL.zip",
+                "layout": [
+                    "MP4/001..",
+                    "FIRST_FRAME_JPG/001..",
+                    "FIRST_FRAME_PNG_TRANSPARENT/001.."
+                ],
+                "note": "Standard H.264 MP4 and JPG do not universally carry alpha. Transparent first-frame delivery uses PNG."
+            },
+            "integrity": {
+                "wholeFile": "SHA-256",
+                "chunks": { "algorithm": "SHA-256", "sizeBytes": CHUNK_SIZE }
+            }
+        });
+
+        let manifest_bytes = serde_json::to_vec_pretty(&manifest)
+            .map_err(|e| format!("Manifest encode failed: {e}"))?;
+        zip.start_file("BATCH-MANIFEST.json", options)
+            .map_err(|e| format!("ZIP manifest entry failed: {e}"))?;
+        zip.write_all(&manifest_bytes)
+            .map_err(|e| format!("ZIP manifest write failed: {e}"))?;
+
+        zip.finish()
+            .map_err(|e| format!("ZIP finalize failed: {e}"))?;
+        Ok(())
+    })();
+
+    match result {
+        Ok(()) => {
+            if path.exists() {
+                fs::remove_file(&path)
+                    .map_err(|e| format!("Could not replace {}: {e}", path.display()))?;
+            }
+            if let Err(error) = fs::rename(&temp_path, &path) {
+                let _ = fs::remove_file(&temp_path);
+                return Err(format!("Could not finalize {}: {error}", path.display()));
+            }
+            Ok(Some(path.to_string_lossy().to_string()))
+        }
+        Err(error) => {
+            let _ = fs::remove_file(&temp_path);
+            Err(error)
+        }
+    }
+}
+
+fn append_master_entries(
+    zip: &mut ZipWriter<File>,
+    options: SimpleFileOptions,
+    files: &[FileEntry],
+    root: &str,
+    checksums: &mut String,
+    chunks: &mut String,
+) -> Result<(), String> {
+    for (index, item) in files.iter().enumerate() {
+        let folder = format!("{:03}", index / GROUP_SIZE + 1);
+        let basename = sanitize_name(
+            Path::new(&item.name)
+                .file_name()
+                .and_then(|x| x.to_str())
+                .unwrap_or("asset"),
+        );
+        let archive_name = format!("{root}/{folder}/{basename}");
+        let mut source = File::open(&item.source)
+            .map_err(|e| format!("Could not open {}: {e}", item.source.display()))?;
+
+        zip.start_file(&archive_name, options)
+            .map_err(|e| format!("ZIP start failed: {e}"))?;
+
+        let mut whole = Sha256::new();
+        let mut offset = 0_u64;
+        let mut chunk_index = 0_u64;
+        let mut buf = vec![0_u8; CHUNK_SIZE];
+
+        loop {
+            let read = source
+                .read(&mut buf)
+                .map_err(|e| format!("Read failed for {}: {e}", item.source.display()))?;
+            if read == 0 { break; }
+
+            let bytes = &buf[..read];
+            zip.write_all(bytes)
+                .map_err(|e| format!("ZIP write failed for {}: {e}", item.source.display()))?;
+            whole.update(bytes);
+
+            let mut chunk = Sha256::new();
+            chunk.update(bytes);
+            let actual = ChunkDigest {
+                index: chunk_index,
+                offset,
+                size: read as u64,
+                sha256: hex_bytes(&chunk.finalize()),
+            };
+            let expected = item.chunks.get(chunk_index as usize)
+                .ok_or_else(|| format!("Chunk count changed for {}", item.source.display()))?;
+            if &actual != expected {
+                return Err(format!(
+                    "Source changed while packaging: {} (chunk {})",
+                    item.source.display(),
+                    chunk_index
+                ));
+            }
+
+            offset += read as u64;
+            chunk_index += 1;
+        }
+
+        let actual_sha256 = hex_bytes(&whole.finalize());
+        if actual_sha256 != item.sha256 || offset != item.size {
+            return Err(format!("Source changed while packaging: {}", item.source.display()));
+        }
+
+        checksums.push_str(&format!("{}  {}  {}\n", item.sha256, archive_name, item.size));
+        for chunk in &item.chunks {
+            chunks.push_str(&format!(
+                "{}  {}  offset={}  size={}  chunk={}\n",
+                chunk.sha256, archive_name, chunk.offset, chunk.size, chunk.index
+            ));
+        }
+    }
+    Ok(())
 }
 
 fn sanitize_name(value: &str) -> String {
