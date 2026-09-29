@@ -10,7 +10,10 @@
   var progressFill=document.getElementById('progressFill');
   var scroller=document.body;
   scroller.dataset.horizontalMode='true';
+  var readout=null;
   var raf=0;
+  var motionLast=0;
+  var motionLastTime=performance.now();
 
   function maxHorizontal(){
     return Math.max(0,scroller.scrollWidth-window.innerWidth);
@@ -19,9 +22,25 @@
   function progress(){
     var max=maxHorizontal();
     var amount=max?Math.max(0,Math.min(1,scroller.scrollLeft/max)):0;
+    var now=performance.now();
+    var delta=scroller.scrollLeft-motionLast;
+    var elapsed=Math.max(16,now-motionLastTime);
+    var speed=Math.min(1,Math.abs(delta)/Math.max(1,window.innerWidth)*1000/elapsed);
+
     if(progressFill){
       progressFill.style.transform='scaleX('+amount+')';
+      progressFill.style.setProperty('--axis-speed',speed.toFixed(3));
     }
+
+    if(Math.abs(delta)>0.5){
+      scroller.dataset.axisDirection=delta>0?'right':'left';
+      scroller.dataset.axisSpeed=speed>.035?'fast':speed>.012?'moving':'settled';
+    }else{
+      scroller.dataset.axisSpeed='settled';
+    }
+
+    motionLast=scroller.scrollLeft;
+    motionLastTime=now;
     raf=0;
   }
 
@@ -262,7 +281,7 @@
   rail.className='horizontal-rail';
   rail.setAttribute('aria-label','Horizontal page sections');
 
-  var readout=document.createElement('div');
+  readout=document.createElement('div');
   readout.className='horizontal-index-readout';
   readout.setAttribute('aria-hidden','true');
 
