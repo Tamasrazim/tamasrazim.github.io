@@ -8,15 +8,16 @@
   var fine=window.matchMedia && window.matchMedia('(pointer:fine)').matches;
   var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var progressFill=document.getElementById('progressFill');
+  var scroller=document.body;
   var raf=0;
 
   function maxHorizontal(){
-    return Math.max(0,document.documentElement.scrollWidth-window.innerWidth);
+    return Math.max(0,scroller.scrollWidth-window.innerWidth);
   }
 
   function progress(){
     var max=maxHorizontal();
-    var amount=max?Math.max(0,Math.min(1,window.scrollX/max)):0;
+    var amount=max?Math.max(0,Math.min(1,scroller.scrollLeft/max)):0;
     if(progressFill){
       progressFill.style.transform='scaleX('+amount+')';
     }
@@ -27,7 +28,7 @@
     if(!raf)raf=requestAnimationFrame(progress);
   }
 
-  window.addEventListener('scroll',scheduleProgress,{passive:true});
+  scroller.addEventListener('scroll',scheduleProgress,{passive:true});
   window.addEventListener('resize',scheduleProgress,{passive:true});
 
   function isEditable(target){
@@ -39,12 +40,12 @@
   function horizontalTarget(el){
     if(!el)return 0;
     var rect=el.getBoundingClientRect();
-    return Math.max(0,Math.min(maxHorizontal(),window.scrollX+rect.left));
+    return Math.max(0,Math.min(maxHorizontal(),scroller.scrollLeft+rect.left));
   }
 
   function goTo(el,smooth){
     var left=horizontalTarget(el);
-    window.scrollTo({
+    scroller.scrollTo({
       left:left,
       top:0,
       behavior:smooth?'smooth':'auto'
@@ -63,10 +64,10 @@
 
     if(Math.abs(delta)<0.5)return;
 
-    var before=window.scrollX;
+    var before=scroller.scrollLeft;
     var next=Math.max(0,Math.min(maxHorizontal(),before+delta));
     if(next!==before){
-      window.scrollTo({left:next,top:0,behavior:'auto'});
+      scroller.scrollTo({left:next,top:0,behavior:'auto'});
       e.preventDefault();
     }
   },{passive:false});
@@ -105,27 +106,27 @@
 
     var step=Math.max(280,Math.round(window.innerWidth*.86));
     var key=e.key;
-    var current=window.scrollX;
+    var current=scroller.scrollLeft;
     var max=maxHorizontal();
 
     if(key==='ArrowRight'){
       e.preventDefault();
-      window.scrollTo({left:Math.min(max,current+step),top:0,behavior:'smooth'});
+      scroller.scrollTo({left:Math.min(max,current+step),top:0,behavior:'smooth'});
     }else if(key==='ArrowLeft'){
       e.preventDefault();
-      window.scrollTo({left:Math.max(0,current-step),top:0,behavior:'smooth'});
+      scroller.scrollTo({left:Math.max(0,current-step),top:0,behavior:'smooth'});
     }else if(key==='PageDown'){
       e.preventDefault();
-      window.scrollTo({left:Math.min(max,current+window.innerWidth*.92),top:0,behavior:'smooth'});
+      scroller.scrollTo({left:Math.min(max,current+window.innerWidth*.92),top:0,behavior:'smooth'});
     }else if(key==='PageUp'){
       e.preventDefault();
-      window.scrollTo({left:Math.max(0,current-window.innerWidth*.92),top:0,behavior:'smooth'});
+      scroller.scrollTo({left:Math.max(0,current-window.innerWidth*.92),top:0,behavior:'smooth'});
     }else if(key==='Home'){
       e.preventDefault();
-      window.scrollTo({left:0,top:0,behavior:'smooth'});
+      scroller.scrollTo({left:0,top:0,behavior:'smooth'});
     }else if(key==='End'){
       e.preventDefault();
-      window.scrollTo({left:max,top:0,behavior:'smooth'});
+      scroller.scrollTo({left:max,top:0,behavior:'smooth'});
     }
   });
 
