@@ -20,5 +20,6 @@
   "dependencies": {
     "jszip": "external-runtime",
     "ffmpeg": "external-runtime"
-  }
+  },
+  "handoffCommand": "ingest_module_output"
 }
