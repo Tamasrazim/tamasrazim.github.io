@@ -25,19 +25,13 @@ fn list_projects(app: AppHandle) -> Result<Vec<ProjectSummary>, String> {
 fn create_project(app: AppHandle, name: String) -> Result<CreateProjectResult, String> {
     let state = app.state::<CoreState>();
     let result = state.projects.create(&state.data_root, &name).map_err(|e| e.to_string())?;
-
-    state
-        .events
-        .publish(
-            &app,
-            CoreEvent::new("project.created", serde_json::json!({
-                "projectId": result.project.project_id,
-                "name": result.project.name,
-                "path": result.project.path,
-            })),
-        )
-        .map_err(|e| e.to_string())?;
-
+    let event = CoreEvent::new("project.created", serde_json::json!({
+        "projectId": result.project.project_id,
+        "name": result.project.name,
+        "path": result.project.path
+    }));
+    state.events.persist(std::path::Path::new(&result.project.path), &event).map_err(|e| e.to_string())?;
+    state.events.publish(&app, event).map_err(|e| e.to_string())?;
     Ok(result)
 }
 
@@ -45,75 +39,38 @@ fn create_project(app: AppHandle, name: String) -> Result<CreateProjectResult, S
 fn open_project(app: AppHandle, path: String) -> Result<ProjectSummary, String> {
     let state = app.state::<CoreState>();
     let result = state.projects.open(&path).map_err(|e| e.to_string())?;
-
-    state
-        .events
-        .publish(
-            &app,
-            CoreEvent::new("project.opened", serde_json::json!({
-                "projectId": result.project_id,
-                "path": result.path,
-            })),
-        )
-        .map_err(|e| e.to_string())?;
-
+    let event = CoreEvent::new("project.opened", serde_json::json!({
+        "projectId": result.project_id,
+        "path": result.path
+    }));
+    state.events.persist(std::path::Path::new(&result.path), &event).map_err(|e| e.to_string())?;
+    state.events.publish(&app, event).map_err(|e| e.to_string())?;
     Ok(result)
 }
 
 #[tauri::command]
-fn create_task(
-    app: AppHandle,
-    project_path: String,
-    task_type: String,
-    payload: Option<serde_json::Value>,
-) -> Result<TaskRecord, String> {
+fn create_task(app: AppHandle, project_path: String, task_type: String, payload: Option<serde_json::Value>) -> Result<TaskRecord, String> {
     let state = app.state::<CoreState>();
-    let task = state
-        .tasks
-        .create(&project_path, &task_type, payload)
-        .map_err(|e| e.to_string())?;
-
-    state
-        .events
-        .publish(
-            &app,
-            CoreEvent::new("task.created", serde_json::to_value(&task).map_err(|e| e.to_string())?),
-        )
-        .map_err(|e| e.to_string())?;
-
+    let task = state.tasks.create(&project_path, &task_type, payload).map_err(|e| e.to_string())?;
+    let event = CoreEvent::new("task.created", serde_json::to_value(&task).map_err(|e| e.to_string())?);
+    state.events.persist(std::path::Path::new(&project_path), &event).map_err(|e| e.to_string())?;
+    state.events.publish(&app, event).map_err(|e| e.to_string())?;
     Ok(task)
 }
 
 #[tauri::command]
-fn update_task(
-    app: AppHandle,
-    project_path: String,
-    task_id: String,
-    status: String,
-    progress: f64,
-    message: Option<String>,
-) -> Result<TaskRecord, String> {
+fn update_task(app: AppHandle, project_path: String, task_id: String, status: String, progress: f64, message: Option<String>) -> Result<TaskRecord, String> {
     let state = app.state::<CoreState>();
-    let task = state
-        .tasks
-        .update(&project_path, &task_id, &status, progress, message)
-        .map_err(|e| e.to_string())?;
-
+    let task = state.tasks.update(&project_path, &task_id, &status, progress, message).map_err(|e| e.to_string())?;
     let event_name = match status.as_str() {
         "completed" => "task.completed",
         "failed" => "task.failed",
         "running" => "task.started",
-        _ => "task.progress",
+        _ => "task.progress"
     };
-
-    state
-        .events
-        .publish(
-            &app,
-            CoreEvent::new(event_name, serde_json::to_value(&task).map_err(|e| e.to_string())?),
-        )
-        .map_err(|e| e.to_string())?;
-
+    let event = CoreEvent::new(event_name, serde_json::to_value(&task).map_err(|e| e.to_string())?);
+    state.events.persist(std::path::Path::new(&project_path), &event).map_err(|e| e.to_string())?;
+    state.events.publish(&app, event).map_err(|e| e.to_string())?;
     Ok(task)
 }
 
@@ -130,18 +87,10 @@ pub fn run() {
         .setup(|app| {
             let data_root = app.path().app_data_dir()?.join("projects");
             std::fs::create_dir_all(&data_root)?;
-
             app.manage(CoreState::new(data_root));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![
-            core_status,
-            list_projects,
-            create_project,
-            open_project,
-            create_task,
-            update_task
-        ])
+        .invoke_handler(tauri::generate_handler![core_status,list_projects,create_project,open_project,create_task,update_task])
         .run(tauri::generate_context!())
         .expect("error while running KYNESTRA");
 }
