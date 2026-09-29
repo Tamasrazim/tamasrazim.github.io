@@ -63,7 +63,27 @@ impl TaskService {
         let root = validate_project_path(project_path)?;
         let conn = db::open(&root.join("project.db"))?;
 
+        validate_status(status)?;
         let progress = progress.clamp(0.0, 1.0);
+
+        let current_status: String = conn
+            .query_row(
+                "SELECT status FROM tasks WHERE task_id=?1",
+                params![task_id],
+                |row| row.get(0),
+            )
+            .map_err(|err| match err {
+                rusqlite::Error::QueryReturnedNoRows => TaskError::NotFound(task_id.into()),
+                other => TaskError::Sqlite(other),
+            })?;
+
+        if !is_transition_allowed(&current_status, status) {
+            return Err(TaskError::InvalidTransition {
+                from: current_status,
+                to: status.into(),
+            });
+        }
+
         let finished_at = if matches!(status, "completed" | "failed" | "cancelled") {
             Some(Utc::now().to_rfc3339())
         } else {
@@ -160,6 +180,24 @@ impl TaskService {
     }
 }
 
+fn validate_status(status: &str) -> Result<(), TaskError> {
+    match status {
+        "queued" | "running" | "paused" | "recoverable" | "completed" | "failed" | "cancelled" => Ok(()),
+        _ => Err(TaskError::InvalidStatus(status.into())),
+    }
+}
+
+fn is_transition_allowed(from: &str, to: &str) -> bool {
+    match from {
+        "queued" => matches!(to, "running" | "cancelled"),
+        "running" => matches!(to, "paused" | "recoverable" | "completed" | "failed" | "cancelled"),
+        "paused" => matches!(to, "running" | "cancelled"),
+        "recoverable" => matches!(to, "queued" | "cancelled"),
+        "completed" | "failed" | "cancelled" => false,
+        _ => false,
+    }
+}
+
 fn validate_project_path(path: &str) -> Result<PathBuf, TaskError> {
     let root = Path::new(path);
     if root.extension().and_then(|v| v.to_str()) != Some("tamasrazim") {
@@ -175,6 +213,12 @@ fn validate_project_path(path: &str) -> Result<PathBuf, TaskError> {
 pub enum TaskError {
     #[error("invalid .tamasrazim project path")]
     InvalidProject,
+    #[error("unknown task status: {0}")]
+    InvalidStatus(String),
+    #[error("task not found: {0}")]
+    NotFound(String),
+    #[error("invalid task transition: {from} -> {to}")]
+    InvalidTransition { from: String, to: String },
     #[error("database error: {0}")]
     Sqlite(#[from] rusqlite::Error),
     #[error("serialization error: {0}")]
@@ -187,6 +231,20 @@ pub enum TaskError {
 mod tests {
     use super::*;
     use std::fs;
+
+    #[test]
+    fn rejects_unknown_status() {
+        assert!(matches!(validate_status("bogus"), Err(TaskError::InvalidStatus(_))));
+    }
+
+    #[test]
+    fn enforces_task_lifecycle_transitions() {
+        assert!(is_transition_allowed("queued", "running"));
+        assert!(is_transition_allowed("running", "completed"));
+        assert!(is_transition_allowed("recoverable", "queued"));
+        assert!(!is_transition_allowed("completed", "running"));
+        assert!(!is_transition_allowed("queued", "completed"));
+    }
 
     #[test]
     fn list_returns_recent_tasks() {
