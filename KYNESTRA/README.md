@@ -22,6 +22,7 @@ The Tauri desktop runtime now has a Rust Core with:
 - ZIP-backed portable .tamasrazim packages
 - SHA-256 package integrity verification
 - restart recovery for interrupted tasks
+- validated built-in module registry
 
 Modules:
 
@@ -40,3 +41,5 @@ All KYNESTRA implementation lives under /KYNESTRA/. Existing production website 
 ## Desktop entry
 
 KYNESTRA/desktop/tauri/
+
+Core validates module.json descriptors for all three built-in modules before the desktop state is created.
