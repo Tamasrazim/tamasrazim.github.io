@@ -17048,6 +17048,20 @@ function renderResults() {
 }
 
 /* ---------------- queue ---------------- */
+async function restartBatchEngine() {
+  var old = Engine.api;
+  try {
+    if (old && old.raw && typeof old.raw.terminate === 'function') {
+      old.raw.terminate();
+    }
+  } catch (e) {}
+  Engine.api = null;
+  Engine.worker = null;
+  Engine.mode = 'none';
+  Engine.ready = false;
+  await bootEngine();
+}
+
 async function renderPrismBatch(limit, label) {
   if (S.rendering || S.batchRendering) return;
 
@@ -17084,8 +17098,6 @@ async function renderPrismBatch(limit, label) {
     comp: S.comp ? JSON.parse(JSON.stringify(S.comp)) : null,
     meta: S.meta ? JSON.parse(JSON.stringify(S.meta)) : null,
     frame: S.frame,
-    compiled: S.compiled,
-    lastError: S.lastError,
     hash: S.hash,
     exportFormat: S.exportFormat,
     quality: S.quality,
@@ -17096,7 +17108,14 @@ async function renderPrismBatch(limit, label) {
   var completed = 0;
   var failed = 0;
   var batchFormat = S.exportFormat;
+  if (batchFormat === 'dir') batchFormat = 'mp4';
+
   var outputDir = null;
+
+  function batchLog(msg, hi) {
+    logLine(msg, !!hi);
+    $('#stMsg').textContent = msg;
+  }
 
   try {
     showTab('p-render');
@@ -17104,9 +17123,7 @@ async function renderPrismBatch(limit, label) {
 
     $('#stMsg').textContent = suffixLabel + ' — choose the destination folder…';
     outputDir = await pickDirectory();
-    $('#stMsg').textContent = suffixLabel + ' — writing into "' + (outputDir.name || 'selected folder') + '"';
-    logLine('batch destination folder: ' + (outputDir.name || 'selected folder'), true);
-    $('#stMsg').textContent = suffixLabel + ' — preparing ' + samples.length + ' Prism Flowers…';
+    batchLog('batch destination folder: ' + (outputDir.name || 'selected folder'), true);
 
     for (var i = 0; i < samples.length; i++) {
       if (S.batchCancelled) break;
@@ -17143,12 +17160,12 @@ async function renderPrismBatch(limit, label) {
         syncMetaUI();
         markDirty(false);
 
-        $('#stMsg').textContent = suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length + ' · ' + title;
+        batchLog(suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length + ' · ' + title);
 
         var compiled = await run();
         if (!compiled || !compiled.ok) {
           failed++;
-          logLine('batch skipped ' + title + ' — compile failed', true);
+          batchLog('batch skipped ' + title + ' — compile failed', true);
           continue;
         }
 
@@ -17162,20 +17179,58 @@ async function renderPrismBatch(limit, label) {
 
         while (attempts < 2 && !S.batchCancelled) {
           attempts++;
-          $('#stMsg').textContent = suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length +
-            ' · ' + title + (attempts > 1 ? ' · retrying' : '');
+          batchLog(suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length + ' · ' + title +
+            (attempts > 1 ? ' · retrying' : ''));
 
-          result = await startRender(job, {
-            silent: true,
-            outputDir: outputDir,
-            batch: true
-          });
+          var sawFirstFrame = false;
+          setStage('PREPARING');
+          $('#stDot').className = 'dot busy';
+          $('#rprog').classList.remove('idle');
+          $('#rprog').classList.add('scan');
+          $('#rprog').querySelector('i').style.width = '0%';
+          renderStat({ frame: 0, done: 0, total: job.composition.frameCount, elapsedMs: 0, renderFps: 0, msPerFrame: 0, bytes: 0 }, job);
+
+          var onLog = function (msg) {
+            logLine(msg);
+            if (/encoder configured/.test(msg)) setStage('RENDERING');
+            if (/flushing encoder/.test(msg)) setStage('ENCODING');
+            if (/^muxed /.test(msg)) setStage('FINALISING');
+          };
+          var onProgress = function (p) {
+            if (!sawFirstFrame) {
+              sawFirstFrame = true;
+              setStage('RENDERING');
+              $('#rprog').classList.remove('scan');
+            }
+            S.lastProgress = p;
+            renderStat(p, job);
+            $('#stMsg').textContent = suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length +
+              ' · ' + title + ' · frame ' + (p.frame + 1) + '/' + p.total;
+          };
+
+          try {
+            result = await Engine.api.exportJob(job, 0, null, null, onLog, onProgress);
+          } catch (exportError) {
+            result = {
+              ok: false,
+              stage: 'crash',
+              error: {
+                name: exportError && exportError.name || 'EXPORT ERROR',
+                message: String(exportError && exportError.message || exportError),
+                detail: String(exportError && exportError.stack || 'Batch export call failed.')
+              }
+            };
+          }
 
           if (result && result.ok) break;
 
           if (attempts < 2) {
-            logLine('transient batch render failure for ' + title + ' — retrying once', true);
-            await new Promise(function (resolve) { setTimeout(resolve, 350); });
+            var reason = result && result.error
+              ? (result.error.name + ': ' + result.error.message)
+              : 'unknown render failure';
+            batchLog('transient batch render failure for ' + title + ' — ' + reason + ' — restarting renderer and retrying once', true);
+            await restartBatchEngine();
+            await new Promise(function (resolve) { setTimeout(resolve, 250); });
           }
         }
 
@@ -17184,43 +17239,39 @@ async function renderPrismBatch(limit, label) {
           break;
         }
 
-        if (result && result.ok) {
-          if (!result.savedToFolder && result.blob) {
-            $('#stMsg').textContent = suffixLabel + ' — saving ' + job.fileName + '…';
-            await writeBlobToDirectory(outputDir, result.blob, job.fileName);
-            result.savedToFolder = true;
-            result.savedFolderName = outputDir.name || '';
-            logLine('batch fallback save → ' + job.fileName, true);
-          }
-
-          if (result.savedToFolder) {
-            completed++;
-            logLine('batch complete → ' + job.fileName, true);
-            result.blob = null;
-          } else {
-            failed++;
-            logLine('batch output failed for ' + title + ' — renderer returned no writable video blob', true);
-          }
+        if (result && result.ok && result.blob) {
+          batchLog('saving ' + job.fileName + '…');
+          await writeBlobToDirectory(outputDir, result.blob, job.fileName);
+          completed++;
+          batchLog('batch complete → ' + job.fileName, true);
         } else {
           failed++;
           var batchError = result && result.error
             ? (result.error.name + ': ' + result.error.message)
             : 'unknown render failure';
-          logLine('batch output failed for ' + title + ' — ' + batchError, true);
+          batchLog('batch output failed for ' + title + ' — ' + batchError, true);
+        }
+
+        /* A fresh worker between video files prevents encoder/GPU state from leaking
+           across 4K MP4 jobs and keeps long batches deterministic. */
+        if (i < samples.length - 1 && !S.batchCancelled) {
+          await restartBatchEngine();
         }
       } catch (itemError) {
         failed++;
-        logLine('batch item failed — ' + title + ' — ' + String(itemError && itemError.stack || itemError), true);
-        $('#stMsg').textContent = suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length + ' failed · ' + title;
+        batchLog('batch item failed — ' + title + ' — ' + String(itemError && itemError.stack || itemError), true);
+        try { await restartBatchEngine(); } catch (restartError) {
+          batchLog('renderer restart failed — ' + String(restartError && restartError.message || restartError), true);
+        }
       }
-
-      /* Give the encoder, decoder and Blob GC a clean boundary before the next flower. */
-      await new Promise(function (resolve) { setTimeout(resolve, 180); });
     }
   } catch (error) {
-    failed++;
-    $('#stMsg').textContent = suffixLabel + ' failed: ' + String(error && error.message || error);
-    logLine(suffixLabel + ' failed — ' + String(error && error.stack || error), true);
+    if (!(error && (error.name === 'AbortError' || error.code === 20))) {
+      failed++;
+      batchLog(suffixLabel + ' failed — ' + String(error && error.stack || error), true);
+    } else {
+      $('#stMsg').textContent = suffixLabel + ' cancelled — no folder selected.';
+    }
   } finally {
     S.batchRendering = false;
 
@@ -17239,17 +17290,22 @@ async function renderPrismBatch(limit, label) {
     $('#projName').value = S.name;
     $('#projVer').textContent = 'v' + S.version;
     S.frame = snapshot.frame;
-    S.compiled = false;
-    S.lastError = snapshot.lastError;
     S.hash = snapshot.hash;
+    S.compiled = false;
     applyComp({});
     syncMetaUI();
     markDirty(snapshot.dirty);
-    await run();
+
+    try { await run(); } catch (restoreError) {
+      batchLog('batch finished, but project restore failed — ' + String(restoreError && restoreError.message || restoreError), true);
+    }
 
     renderQueue();
     if (b50) b50.disabled = false;
     if (ball) ball.disabled = false;
+    $('#stDot').className = 'dot ok';
+    $('#rprog').classList.remove('scan');
+    toyShow(false);
 
     var status = S.batchCancelled ? 'stopped' : 'complete';
     if (label === 'Render All' && outputDir && !S.batchCancelled) {
@@ -17260,6 +17316,7 @@ async function renderPrismBatch(limit, label) {
     }
   }
 }
+
 function render50PrismBatch() { return renderPrismBatch(50, 'Render ×50'); }
 function renderAllPrismBatch() { return renderPrismBatch(null, 'Render All'); }
 
