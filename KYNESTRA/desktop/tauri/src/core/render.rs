@@ -149,6 +149,29 @@ impl RenderService {
         Ok(reader.finish())
     }
 
+    pub fn recover(&self, project_path: &str, job_id: &str, tasks: &TaskService) -> Result<RenderJobRecord, RenderError> {
+        let root = validate_project(project_path)?;
+        let conn = db::open(&root.join("project.db"))?;
+
+        let task_id: String = conn.query_row(
+            "SELECT task_id FROM render_jobs WHERE job_id=?1 AND status='recoverable'",
+            params![job_id],
+            |row| row.get(0),
+        )?;
+
+        conn.execute(
+            "UPDATE render_jobs
+             SET status='queued',started_at=NULL,completed_at=NULL,asset_id=NULL,output_relative_path=NULL,error=NULL
+             WHERE job_id=?1 AND status='recoverable'",
+            params![job_id],
+        )?;
+
+        tasks.update(project_path, &task_id, "queued", 0.0, Some("recovered after application restart; ready to rerun".into()))?;
+
+        let reader = RenderJobReader::new(&conn, job_id)?;
+        Ok(reader.finish())
+    }
+
     pub fn list(&self, project_path: &str) -> Result<Vec<RenderJobRecord>, RenderError> {
         let root = validate_project(project_path)?;
         let conn = db::open(&root.join("project.db"))?;
