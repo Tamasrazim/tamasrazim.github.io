@@ -141,7 +141,7 @@ mod tests {
     use super::*;
 
     #[test]
-        fn unknown_account_returns_not_found() {
+    fn unknown_account_returns_not_found() {
             let root = tempfile::tempdir().expect("root");
             let project = root.path().join("accounts.tamasrazim");
             std::fs::create_dir_all(&project).expect("project");
@@ -162,7 +162,7 @@ mod tests {
                 "connected",
             );
             assert!(matches!(result, Err(AccountError::NotFound(id)) if id == "missing-account"));
-        }
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
