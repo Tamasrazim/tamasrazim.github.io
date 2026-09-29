@@ -28,6 +28,7 @@
 
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var finePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+    var pageScroller = document.scrollingElement || document.documentElement;
 
     function q(selector, root){ return (root || document).querySelector(selector); }
     function qa(selector, root){ return Array.prototype.slice.call((root || document).querySelectorAll(selector)); }
@@ -92,11 +93,11 @@
         progressTick = false;
         return;
       }
-      var horizontalMode = false;
+      var horizontalMode = document.body && document.body.dataset.horizontalMode === 'true';
       var max = horizontalMode
-        ? Math.max(1, document.body.scrollWidth - window.innerWidth)
+        ? Math.max(1, pageScroller.scrollWidth - window.innerWidth)
         : Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      var position = horizontalMode ? document.body.scrollLeft : window.scrollY;
+      var position = horizontalMode ? pageScroller.scrollLeft : window.scrollY;
       var amount = Math.max(0, Math.min(1, position / max));
       if(progressFill) progressFill.style.transform = 'scaleX(' + amount + ')';
       progressTick = false;
@@ -123,12 +124,12 @@
 
       var left=section.offsetLeft || 0;
       var right=left + (section.offsetWidth || window.innerWidth);
-      var current=document.body.scrollLeft;
+      var current=pageScroller.scrollLeft;
       var viewportRight=current + window.innerWidth;
 
       if(left < current + 12 || right > viewportRight - 12){
         document.body.scrollTo({
-          left:Math.max(0,Math.min(document.body.scrollWidth-window.innerWidth,left)),
+          left:Math.max(0,Math.min(pageScroller.scrollWidth-window.innerWidth,left)),
           top:0,
           behavior:reduced?'auto':'smooth'
         });
