@@ -1,4 +1,4 @@
-use std::{env,fs,path::PathBuf};
+use std::{env, fs, path::PathBuf};
 
 fn main() {
     sync_c2m_assets().expect("failed to sync KYNESTRA C2M assets");

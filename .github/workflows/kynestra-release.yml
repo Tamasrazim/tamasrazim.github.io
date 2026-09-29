@@ -2,6 +2,8 @@ name: KYNESTRA Windows Installer
 
 on:
   push:
+    branches:
+      - "kynestra-build"
     tags:
       - "kynestra-v*"
   workflow_dispatch:
@@ -18,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -49,3 +51,10 @@ jobs:
           generateReleaseNotes: true
           args: --bundles nsis
           releaseAssetNamePattern: KYNESTRA[setup].[ext]
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: KYNESTRA-Windows-Installer
+          path: KYNESTRA/desktop/tauri/target/release/bundle/nsis/*-setup.exe
+          if-no-files-found: error
