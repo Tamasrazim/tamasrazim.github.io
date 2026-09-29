@@ -17106,22 +17106,26 @@ async function restartBatchEngine() {
 }
 
 function stockMetadataForTitle(title) {
-  var raw = String(title || 'Flower').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim() || 'Flower';
+  var raw = String(title || 'Flower')
+    .replace(/\u00a0/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim() || 'Flower';
 
-  /* Project name is authoritative. Collapse any accidental repeated Prism prefix. */
-  var projectName = raw.replace(/^(?:Prism\s*)+/i, 'Prism ').trim() || 'Prism';
-  var flower = projectName.indexOf('Prism ') === 0 ? projectName.slice(6).trim() : projectName;
+  /* Project name contains exactly one Prism prefix. */
+  var clean = raw.replace(/^(?:Prism\s*)+/i, '').trim() || 'Flower';
+  var projectName = 'Prism ' + clean;
 
   var animationTitle = projectName + ' — Translucent Geometric Flower Animation';
   var illustrationTitle = projectName + ' — Translucent Geometric Flower illustration';
 
-  /* Stock descriptions are intentionally compact and reusable across the library. */
   var videoDescription =
-    'Translucent geometric ' + flower + ' with sculpted cupped petals, pearl, pink, violet and golden gradients, delicate outlines, and a glowing warm center. Smooth 10-second loop for motion graphics.';
-  var illustrationDescription =
-    'Translucent geometric ' + flower + ' with sculpted cupped petals, pearl, pink, violet and golden gradients, delicate outlines, and a glowing warm center. Elegant botanical illustration.';
+    'Translucent geometric ' + clean +
+    ' with multiple elegant layers of sculpted cupped petals, luminous pearl, pink, violet and golden gradients, delicate outlines, and a glowing warm center. Smooth 10-second seamless loop designed for motion graphics, stock footage, abstract botanical visuals, and decorative animation.';
 
-  /* 47 keywords per asset: flower-specific + common stock terms. */
+  var illustrationDescription =
+    'Translucent geometric ' + clean +
+    ' with multiple elegant layers of sculpted cupped petals, luminous pearl, pink, violet and golden gradients, delicate outlines, and a glowing warm center. Decorative botanical illustration for abstract nature and modern design.';
+
   var commonKeywords = [
     'flower','floral','botanical','translucent','geometric','prism','geometric flower',
     'abstract','colorful','vivid','luminous','glowing','gradient','petals','bloom','nature',
@@ -17131,11 +17135,12 @@ function stockMetadataForTitle(title) {
     'iridescent','refraction','light','texture','organic','spring','floral design',
     'creative','ornamental','sculpted petals'
   ];
-  var videoKeywords = [flower.toLowerCase()].concat(commonKeywords, ['stock footage','video']);
-  var illustrationKeywords = [flower.toLowerCase()].concat(commonKeywords, ['illustration','still image']);
+
+  var videoKeywords = [clean.toLowerCase()].concat(commonKeywords, ['stock footage','video']);
+  var illustrationKeywords = [clean.toLowerCase()].concat(commonKeywords, ['illustration','still image']);
 
   return {
-    flower: flower,
+    flower: clean,
     projectName: projectName,
     animation: {
       title: animationTitle,
@@ -17143,7 +17148,7 @@ function stockMetadataForTitle(title) {
       keywords: videoKeywords.slice(0, 50),
       filename: animationTitle + '.mp4',
       csvFilename: animationTitle + '.csv',
-      category: '',
+      category: 'Nature',
       editorial: 'No',
       mature: 'No',
       illustration: 'No'
@@ -17153,8 +17158,8 @@ function stockMetadataForTitle(title) {
       description: illustrationDescription,
       keywords: illustrationKeywords.slice(0, 50),
       filename: projectName + '.jpg',
-      csvFilename: projectName + ' — Translucent Geometric Flower illustration.csv',
-      category: '',
+      csvFilename: illustrationTitle + '.csv',
+      category: 'Nature,Arts',
       editorial: 'No',
       mature: 'No',
       illustration: 'Yes'
@@ -17170,25 +17175,22 @@ function csvEscape(value) {
    Filename, Description, Keywords, Categories; optional Illustration,
    Mature Content and Editorial flags may follow. */
 function stockMetadataSingleCsv(entry) {
-  /*
-   * Exact Shutterstock example schema and order:
-   * Filename,Description,Keywords,Categories,Editorial,Mature content,illustration
-   */
+  /* Shutterstock CSV fields. */
   var rows = [
-    ['Filename','Description','Keywords','Categories','Editorial','Mature content','illustration'],
+    ['Filename','Description','Keywords','Categories','Illustration','Mature Content','Editorial'],
     [
       entry.filename,
       entry.description,
       entry.keywords.join(','),
       entry.category,
-      entry.editorial,
+      entry.illustration,
       entry.mature,
-      entry.illustration
+      entry.editorial
     ]
   ];
   return rows.map(function (row) {
     return row.map(csvEscape).join(',');
-  }).join('\r\n') + '\r\n';
+  }).join('\\r\\n') + '\\r\\n';
 }
 function renderPrismBatch(limit, label) {
   if (S.batchRendering || S.rendering) return;
