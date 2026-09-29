@@ -1,4 +1,5 @@
 use super::db;
+use super::projects::ProjectManager;
 use chrono::Utc;
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
@@ -152,14 +153,9 @@ impl AssetService {
 }
 
 fn validate_project(path: &str) -> Result<PathBuf, AssetError> {
-    let root = Path::new(path);
-    if root.extension().and_then(|v| v.to_str()) != Some("tamasrazim") {
-        return Err(AssetError::InvalidProject);
-    }
-    if !root.join("manifest.json").is_file() || !root.join("project.db").is_file() {
-        return Err(AssetError::InvalidProject);
-    }
-    Ok(root.to_path_buf())
+    ProjectManager::default()
+        .validated_root(path)
+        .map_err(|_| AssetError::InvalidProject)
 }
 
 fn hash_file(path: &Path) -> Result<(String, u64), AssetError> {
