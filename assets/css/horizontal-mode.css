@@ -15,7 +15,7 @@ body{
   display:flex;
   flex-direction:row;
   align-items:stretch;
-  overflow-x:auto;
+  overflow-x:scroll;
   overflow-y:hidden;
   overscroll-behavior:none;
   scroll-snap-type:x proximity;
@@ -644,4 +644,16 @@ body[data-axis-edge="end"] .horizontal-index-readout::after{
   right:auto;
   margin:0;
   transform:none!important;
+}
+
+/* Explicitly establish body as the horizontal scroll container. */
+html{
+  overflow-x:hidden;
+  overflow-y:hidden;
+}
+body{
+  position:relative;
+  isolation:isolate;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
 }
