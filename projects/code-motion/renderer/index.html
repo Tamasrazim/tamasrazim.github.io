@@ -16724,6 +16724,17 @@ function pickDirectory() {
   return window.showDirectoryPicker({ mode: 'readwrite', id: 'code-motion-frames' });
 }
 
+function writeBlobToDirectory(dirHandle, blob, fileName) {
+  if (!dirHandle || !blob) throw new Error('Render output folder is not available.');
+  return dirHandle.getFileHandle(fileName, { create: true }).then(function (fileHandle) {
+    return fileHandle.createWritable().then(function (writable) {
+      return writable.write(blob).then(function () {
+        return writable.close();
+      });
+    });
+  });
+}
+
 function renderStat(p, job) {
   var c = job.composition;
   var pct = p.total ? (p.done / p.total) : 0;
@@ -16788,6 +16799,17 @@ function startRender(job, opts) {
     setStage('PREPARING');
     logLine('engine: ' + (Engine.mode === 'worker' ? 'worker + OffscreenCanvas' : 'main thread fallback'));
     return Engine.api.exportJob(job, 0, dirHandle, null, onLog, onProgress);
+  }).then(function (result) {
+    if (result && result.ok && opts.outputDir && result.blob) {
+      $('#stMsg').textContent = 'saving ' + job.fileName + ' to the selected folder…';
+      return writeBlobToDirectory(opts.outputDir, result.blob, job.fileName).then(function () {
+        result.savedToFolder = true;
+        result.savedFolderName = opts.outputDir.name || '';
+        logLine('saved output → ' + job.fileName, true);
+        return result;
+      });
+    }
+    return result;
   }).then(function (result) {
     return finishRender(job, result, opts);
   }).catch(function (e) {
@@ -17065,9 +17087,18 @@ async function renderPrismBatch(limit, label) {
   var failed = 0;
   var batchFormat = S.exportFormat === 'dir' ? 'zip' : S.exportFormat;
 
+  var outputDir = null;
   try {
     showTab('p-render');
     showMobile('rail');
+
+    if (label === 'Render All') {
+      $('#stMsg').textContent = 'Render All — choose the destination folder…';
+      outputDir = await pickDirectory();
+      $('#stMsg').textContent = 'Render All — writing into "' + (outputDir.name || 'selected folder') + '"';
+      logLine('batch destination folder: ' + (outputDir.name || 'selected folder'), true);
+    }
+
     $('#stMsg').textContent = suffixLabel + ' — preparing ' + samples.length + ' Prism Flowers…';
 
     for (var i = 0; i < samples.length; i++) {
@@ -17116,7 +17147,10 @@ async function renderPrismBatch(limit, label) {
         ((job.composition.frameCount / job.composition.fps).toFixed(2)).replace(/\.00$/, '') +
         extFor(batchFormat);
 
-      var result = await startRender(job, { silent: true });
+      var result = await startRender(job, {
+        silent: true,
+        outputDir: outputDir
+      });
       if (result && result.cancelled) {
         S.batchCancelled = true;
         break;
@@ -17162,7 +17196,12 @@ async function renderPrismBatch(limit, label) {
     if (ball) ball.disabled = false;
 
     var status = S.batchCancelled ? 'stopped' : 'complete';
-    $('#stMsg').textContent = suffixLabel + ' ' + status + ' — ' + completed + ' completed, ' + failed + ' failed.';
+    if (label === 'Render All' && outputDir && !S.batchCancelled) {
+      $('#stMsg').textContent = suffixLabel + ' complete — ' + completed + ' written to "' +
+        (outputDir.name || 'selected folder') + '", ' + failed + ' failed.';
+    } else {
+      $('#stMsg').textContent = suffixLabel + ' ' + status + ' — ' + completed + ' completed, ' + failed + ' failed.';
+    }
   }
 }
 function render50PrismBatch() { return renderPrismBatch(50, 'Render ×50'); }
@@ -18084,7 +18123,20 @@ var ACTS = {
   },
   renderAll: function () {
     if (S.rendering || S.batchRendering) return;
-    renderAllPrismBatch();
+    renderAllPrismBatch().catch(function (e) {
+      S.batchRendering = false;
+      var b50 = $('#render50Btn'), ball = $('#renderAllBtn');
+      if (b50) b50.disabled = false;
+      if (ball) ball.disabled = false;
+      if (e && (e.name === 'AbortError' || e.code === 20)) {
+        $('#stMsg').textContent = 'Render All cancelled — no folder selected.';
+        logLine('Render All cancelled before rendering started.');
+        return;
+      }
+      setStage('IDLE', true);
+      $('#stMsg').textContent = 'Render All failed: ' + String(e && e.message || e);
+      logLine('Render All failed — ' + String(e && e.stack || e), true);
+    });
   },
   cancelRender: cancelRender,
   analyze: analyseJob,
