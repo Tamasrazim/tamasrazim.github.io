@@ -16478,10 +16478,10 @@ function stampNow() {
 }
 function normalizeStockProjectName(name) {
   var raw = String(name || 'Untitled')
-    .replace(/\\u00a0/g, ' ')
-    .replace(/\\s+/g, ' ')
+    .replace(/\u00a0/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim() || 'Untitled';
-  return raw.replace(/^(?:Prism\\s*)+/i, 'Prism ').trim() || 'Prism';
+  return raw.replace(/^(?:Prism\s*)+/i, 'Prism ').trim() || 'Prism';
 }
 function fileNameFor(comp, name, fmt, stamp) {
   if (fmt === 'mp4') {
