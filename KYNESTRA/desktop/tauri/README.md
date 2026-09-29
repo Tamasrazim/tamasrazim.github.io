@@ -29,4 +29,5 @@ Tauri serves ../shell directly through frontendDist. No Node runtime is required
 - SQLite initialization
 - project listing/opening
 - persistent task create/update
+- recoverable render-job reset after interrupted sessions
 - Core event emission
