@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 use std::{
-    collections::HashMap,
     fs::{self, File},
     io::{Read, Write},
     path::{Path, PathBuf},
@@ -196,22 +195,38 @@ fn merge_duplicate_metadata(
         _ => Map::new(),
     };
 
+    let mut source_modules = match merged.remove("sourceModules") {
+        Some(Value::Array(values)) => values,
+        _ => Vec::new(),
+    };
+
+    if let Some(existing_module) = merged
+        .get("sourceModule")
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+    {
+        if !source_modules.iter().any(|item| item.as_str() == Some(existing_module)) {
+            source_modules.push(Value::String(existing_module.to_lowercase()));
+        }
+        merged.remove("sourceModule");
+    }
+
     if let Value::Object(incoming_map) = incoming {
         for (key, value) in incoming_map {
             if key == "sourceModule" {
                 let module = value.as_str().unwrap_or_default().trim().to_lowercase();
-                if !module.is_empty() {
-                    let entry = merged.entry("sourceModules").or_insert_with(|| Value::Array(Vec::new()));
-                    if let Value::Array(modules) = entry {
-                        if !modules.iter().any(|item| item.as_str() == Some(module.as_str())) {
-                            modules.push(Value::String(module));
-                        }
-                    }
+                if !module.is_empty() && !source_modules.iter().any(|item| item.as_str() == Some(module.as_str())) {
+                    source_modules.push(Value::String(module));
                 }
             } else if key != "sourceModules" {
                 merged.insert(key, value);
             }
         }
+    }
+
+    if !source_modules.is_empty() {
+        merged.insert("sourceModules".into(), Value::Array(source_modules));
     }
 
     let now = Utc::now().to_rfc3339();
@@ -335,6 +350,40 @@ mod tests {
         );
 
         assert!(matches!(result, Err(AssetError::InvalidFilename)));
+    }
+
+    #[test]
+    fn deduplicate_merges_source_modules() {
+        let root = tempfile::tempdir().expect("temp directory");
+        let source = root.path().join("render.webm");
+        fs::write(&source, b"shared-output").expect("source");
+
+        let project_root = root.path().join("provenance.tamasrazim");
+        ProjectFixture::create(&project_root);
+
+        let service = AssetService::default();
+        let first = service.ingest(
+            project_root.to_str().unwrap(),
+            source.to_str().unwrap(),
+            "video",
+            Some(serde_json::json!({"sourceModule":"c2m"})),
+        ).expect("first ingest");
+        assert_eq!(first.metadata.get("sourceModule").and_then(Value::as_str), Some("c2m"));
+
+        let second = service.ingest(
+            project_root.to_str().unwrap(),
+            source.to_str().unwrap(),
+            "video",
+            Some(serde_json::json!({"sourceModule":"forge"})),
+        ).expect("second ingest");
+
+        let modules = second.metadata
+            .get("sourceModules")
+            .and_then(Value::as_array)
+            .expect("sourceModules");
+        assert_eq!(modules.len(), 2);
+        assert!(modules.iter().any(|v| v.as_str() == Some("c2m")));
+        assert!(modules.iter().any(|v| v.as_str() == Some("forge")));
     }
 
     #[test]
