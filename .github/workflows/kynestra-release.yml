@@ -6,6 +6,8 @@ on:
       - "kynestra-build"
     tags:
       - "kynestra-v*"
+    paths-ignore:
+      - "KYNESTRA/releases/**"
   workflow_dispatch:
 
 permissions:
@@ -67,3 +69,17 @@ jobs:
           name: KYNESTRA-Windows-Installer
           path: KYNESTRA/desktop/tauri/target/release/bundle/nsis/KYNESTRA-Setup.exe
           if-no-files-found: error
+      - name: Commit installer to repository
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          New-Item -ItemType Directory -Force "KYNESTRA/releases" | Out-Null
+          Copy-Item "KYNESTRA/desktop/tauri/target/release/bundle/nsis/KYNESTRA-Setup.exe" "KYNESTRA/releases/KYNESTRA-Setup.exe" -Force
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "KYNESTRA/releases/KYNESTRA-Setup.exe"
+          if (-not (git diff --cached --quiet)) {
+            git commit -m "build: publish KYNESTRA Windows installer"
+            git push
+          }
