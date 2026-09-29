@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "KYNESTRA C2M — Code Motion",
-  "short_name": "KYNESTRA C2M",
-  "description": "KYNESTRA Code Motion deterministic animation renderer.",
+  "name": "KYNESTRA",
+  "short_name": "KYNESTRA",
+  "description": "KYNESTRA deterministic animation renderer.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
