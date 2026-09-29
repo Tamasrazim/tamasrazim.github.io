@@ -47,7 +47,7 @@ impl AssetService {
             .ok_or(AssetError::InvalidFilename)?
             .to_string();
 
-        if filename == "manifest.json" || filename == "project.db" || filename.contains('/') || filename.contains('\') {
+        if filename == "manifest.json" || filename == "project.db" || filename.contains('/') || filename.contains('\\') {
             return Err(AssetError::InvalidFilename);
         }
 
@@ -235,9 +235,20 @@ fn mime_from_filename(filename: &str) -> Option<String> {
         "mp4" => "video/mp4",
         "mov" => "video/quicktime",
         "mkv" => "video/x-matroska",
+        "avi" => "video/x-msvideo",
         "png" => "image/png",
         "jpg" | "jpeg" => "image/jpeg",
         "gif" => "image/gif",
+        "webp" => "image/webp",
+        "avif" => "image/avif",
+        "mp3" => "audio/mpeg",
+        "wav" => "audio/wav",
+        "ogg" => "audio/ogg",
+        "m4a" => "audio/mp4",
+        "flac" => "audio/flac",
+        "zip" => "application/zip",
+        "json" => "application/json",
+        "txt" | "csv" | "md" => "text/plain",
         _ => return None,
     };
     Some(mime.into())
@@ -263,6 +274,26 @@ pub enum AssetError {
 mod tests {
     use super::*;
     use std::io::Write;
+
+    #[test]
+    fn rejects_windows_style_filename() {
+        let root = tempfile::tempdir().expect("temp directory");
+        let source = root.path().join("safe.txt");
+        File::create(&source).expect("source");
+
+        let project_root = root.path().join("filename-check.tamasrazim");
+        ProjectFixture::create(&project_root);
+
+        let service = AssetService::default();
+        let result = service.ingest(
+            project_root.to_str().unwrap(),
+            root.path().join(r"nested\file.txt").to_string_lossy().as_ref(),
+            "text",
+            None,
+        );
+
+        assert!(matches!(result, Err(AssetError::SourceMissing)));
+    }
 
     #[test]
     fn ingest_hashes_and_deduplicates() {
