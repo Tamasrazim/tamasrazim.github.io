@@ -72,11 +72,7 @@
   scroller.addEventListener('scroll',function(){
     if(stateNode.dataset.axisSpeed!=='settled')scheduleProgress();
   },{passive:true});
-  if('onscrollend' in scroller){
-    scroller.addEventListener('scrollend',scheduleSnap,{passive:true});
-  }
   window.addEventListener('resize',function(){
-    cancelSnap();
     scheduleProgress();
     scheduleSectionState();
   },{passive:true});
@@ -119,10 +115,9 @@
     return false;
   }
 
-  var snapTimer=0;
   var speedTimer=0;
   var wheelRAF=0;
-  var wheelTarget=0;
+  var wheelVelocity=0;
   var wheelLastTime=0;
 
   function cancelWheel(){
@@ -134,46 +129,19 @@
     wheelLastTime=0;
   }
 
-  function cancelSnap(){
-    window.clearTimeout(snapTimer);
-    snapTimer=0;
-  }
-
-  function nearestSectionLeft(){
-    if(!pageItems.length)return scroller.scrollLeft;
-    var center=scroller.scrollLeft+window.innerWidth*.5;
-    var bestLeft=scroller.scrollLeft;
-    var bestDistance=Infinity;
-
-    pageItems.forEach(function(item){
-      var left=item.offsetLeft||0;
-      var width=item.offsetWidth||window.innerWidth;
-      var distance=Math.abs((left+Math.min(width,window.innerWidth)*.5)-center);
-      if(distance<bestDistance){
-        bestDistance=distance;
-        bestLeft=left;
-      }
-    });
-
-    return Math.max(0,Math.min(maxHorizontal(),bestLeft));
-  }
-
-  function scheduleSnap(){
-    if(reduce)return;
-    cancelSnap();
-    snapTimer=window.setTimeout(function(){
-      var current=scroller.scrollLeft;
-      var target=nearestSectionLeft();
-      var threshold=Math.max(18,window.innerWidth*.012);
-      if(Math.abs(target-current)<threshold)return;
-      scroller.scrollTo({left:target,top:0,behavior:'smooth'});
-    },180);
-  }
-
   function normalizeWheelDelta(e){
     if(e.deltaMode===1)return e.deltaY*16;
     if(e.deltaMode===2)return e.deltaY*window.innerHeight;
     return e.deltaY;
+  }
+
+  function cancelWheel(){
+    if(wheelRAF){
+      cancelAnimationFrame(wheelRAF);
+      wheelRAF=0;
+    }
+    wheelVelocity=0;
+    wheelLastTime=0;
   }
 
   function animateWheel(now){
@@ -183,30 +151,38 @@
     var dt=Math.min(.05,Math.max(.008,(now-wheelLastTime)/1000));
     wheelLastTime=now;
 
+    var velocity=wheelVelocity;
+    var friction=Math.exp(-8.5*dt);
     var current=scroller.scrollLeft;
-    var distance=wheelTarget-current;
-    var blend=1-Math.exp(-dt*17);
-    var next=current+distance*blend;
+    var next=current+velocity*dt;
+    var max=maxHorizontal();
 
-    if(Math.abs(distance)<0.35){
-      scroller.scrollLeft=wheelTarget;
-      wheelRAF=0;
-      wheelLastTime=0;
-      scheduleProgress();
-      scheduleSectionState();
-      scheduleSnap();
-      return;
+    if(next<=0 || next>=max){
+      next=Math.max(0,Math.min(max,next));
+      wheelVelocity=0;
+    }else{
+      wheelVelocity=velocity*friction;
     }
 
     scroller.scrollLeft=next;
     scheduleProgress();
     scheduleSectionState();
+
+    if(Math.abs(wheelVelocity)<4){
+      wheelVelocity=0;
+      wheelRAF=0;
+      wheelLastTime=0;
+      scheduleProgress();
+      scheduleSectionState();
+      return;
+    }
+
     wheelRAF=requestAnimationFrame(animateWheel);
   }
 
   function pushWheel(delta){
-    var currentTarget=wheelRAF ? wheelTarget : scroller.scrollLeft;
-    wheelTarget=Math.max(0,Math.min(maxHorizontal(),currentTarget+delta));
+    wheelVelocity += delta*10.5;
+    wheelVelocity=Math.max(-4200,Math.min(4200,wheelVelocity));
     if(!wheelRAF){
       wheelLastTime=0;
       wheelRAF=requestAnimationFrame(animateWheel);
@@ -214,7 +190,6 @@
   }
 
   window.addEventListener('wheel',function(e){
-    cancelSnap();
     if(e.ctrlKey || isEditable(e.target))return;
 
     /* Horizontal mode owns desktop wheel input.
@@ -230,13 +205,8 @@
     var delta=Math.abs(wheelX)>Math.abs(wheelY) ? wheelX : wheelY;
     if(Math.abs(delta)<0.5)return;
 
-    var beforeTarget=wheelRAF ? wheelTarget : scroller.scrollLeft;
-    var nextTarget=Math.max(0,Math.min(maxHorizontal(),beforeTarget+delta));
-
-    if(nextTarget!==beforeTarget){
-      e.preventDefault();
-      pushWheel(delta);
-    }
+    e.preventDefault();
+    pushWheel(delta);
   },{passive:false,capture:true});
 
   /* Desktop drag-to-pan: only starts from non-interactive page surfaces. */
@@ -251,7 +221,6 @@
     scroller.addEventListener('pointerdown',function(e){
       if(e.button!==0 || isDragExcluded(e.target))return;
       cancelWheel();
-      cancelSnap();
       drag.active=true;
       drag.startX=e.clientX;
       drag.startScroll=scroller.scrollLeft;
@@ -301,7 +270,6 @@
     progressControl.addEventListener('pointerdown',function(e){
       if(e.button!==0)return;
       cancelWheel();
-      cancelSnap();
       scrub.active=true;
       scrub.pointerId=e.pointerId;
       stateNode.classList.add('is-scrubbing');
@@ -325,7 +293,6 @@
       scrub.active=false;
       scrub.pointerId=null;
       stateNode.classList.remove('is-scrubbing');
-      scheduleSnap();
     }
 
     progressControl.addEventListener('pointerup',endScrub);
@@ -347,7 +314,6 @@
       scroller.scrollTo({left:maxHorizontal()*next,top:0,behavior:'smooth'});
       scheduleProgress();
       scheduleSectionState();
-      scheduleSnap();
     });
   }
 
@@ -366,7 +332,6 @@
       });
       var nextIndex=Math.min(pageItems.length-1,activeIndex+1);
       if(nextIndex===activeIndex)return;
-      cancelSnap();
       goTo(pageItems[nextIndex],!reduce);
       var id=pageItems[nextIndex].id||'';
       if(id && history.pushState){
@@ -390,7 +355,6 @@
     if(!target)return;
 
     e.preventDefault();
-    cancelSnap();
     var nextHash='#'+encodeURIComponent(id);
     if(history.pushState){
       if(location.hash!==nextHash)history.pushState(null,'',nextHash);
@@ -402,7 +366,6 @@
 
   function goToHash(){
     cancelWheel();
-    cancelSnap();
     var id=decodeURIComponent(location.hash.replace(/^#/,''));
     if(!id){
       goTo(document.getElementById('top'),!reduce);
@@ -462,46 +425,37 @@
     if(key===' ' && !e.shiftKey){
       e.preventDefault();
       scroller.scrollTo({left:Math.min(max,current+window.innerWidth*.92),top:0,behavior:'smooth'});
-      scheduleSnap();
       return;
     }
     if(key===' ' && e.shiftKey){
       e.preventDefault();
       scroller.scrollTo({left:Math.max(0,current-window.innerWidth*.92),top:0,behavior:'smooth'});
-      scheduleSnap();
       return;
     }
 
     if(key==='ArrowRight'){
       e.preventDefault();
       scroller.scrollTo({left:Math.min(max,current+step),top:0,behavior:'smooth'});
-      scheduleSnap();
     }else if(key==='ArrowLeft'){
       e.preventDefault();
       scroller.scrollTo({left:Math.max(0,current-step),top:0,behavior:'smooth'});
-      scheduleSnap();
     }else if(key==='PageDown'){
       e.preventDefault();
       scroller.scrollTo({left:Math.min(max,current+window.innerWidth*.92),top:0,behavior:'smooth'});
-      scheduleSnap();
     }else if(key==='PageUp'){
       e.preventDefault();
       scroller.scrollTo({left:Math.max(0,current-window.innerWidth*.92),top:0,behavior:'smooth'});
-      scheduleSnap();
     }else if(key==='Home'){
       e.preventDefault();
       scroller.scrollTo({left:0,top:0,behavior:'smooth'});
-      scheduleSnap();
     }else if(key==='End'){
       e.preventDefault();
       scroller.scrollTo({left:max,top:0,behavior:'smooth'});
-      scheduleSnap();
     }
   });
 
   window.addEventListener('blur',function(){
     cancelWheel();
-    cancelSnap();
     if(typeof drag!=='undefined'){
       drag.active=false;
       drag.pointerId=null;
@@ -515,7 +469,6 @@
 
   document.addEventListener('visibilitychange',function(){
     if(document.hidden){
-      cancelSnap();
       window.clearTimeout(speedTimer);
     }
   },{passive:true});
@@ -523,7 +476,6 @@
   window.addEventListener('keydown',function(e){
     if(e.key!=='Escape')return;
     cancelWheel();
-    cancelSnap();
     if(typeof drag!=='undefined'){
       drag.active=false;
       drag.pointerId=null;
@@ -535,11 +487,11 @@
     stateNode.classList.remove('axis-dragging','is-scrubbing');
   });
 
-  /* Add an explicit horizontal cue to the first viewport without changing content. */
+  /* Keep the axis continuous: the cue describes motion, never a page stop. */
   var cue=document.querySelector('.scroll-cue');
   if(cue){
     var label=cue.querySelector('.scroll-cue-label');
-    if(label)label.textContent='Scroll horizontally';
+    if(label)label.textContent='Keep scrolling';
   }
 
 
@@ -591,7 +543,6 @@
     button.setAttribute('data-label',label);
     button.dataset.index=String(index);
     button.addEventListener('click',function(){
-      cancelSnap();
       goTo(item,!reduce);
       if(id && history.pushState){
         var railHash='#'+encodeURIComponent(id);
@@ -733,7 +684,6 @@
     scroller.addEventListener('scrollend',function(){
       stateNode.dataset.axisSpeed='settled';
       scheduleSectionState();
-      scheduleSnap();
     },{passive:true});
   }
 
