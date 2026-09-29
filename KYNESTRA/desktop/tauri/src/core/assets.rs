@@ -2,7 +2,7 @@ use super::db;
 use chrono::Utc;
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
 use std::{
     fs::{self, File},
