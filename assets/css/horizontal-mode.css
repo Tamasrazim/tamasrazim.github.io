@@ -298,3 +298,56 @@ body > .site-footer{
   body.axis-dragging .cursor-dot,
   body.axis-dragging .cursor-ring{pointer-events:none;}
 }
+
+/* Directional travel HUD. */
+.horizontal-index-readout::before{
+  content:'';
+  width:18px;
+  height:1px;
+  background:currentColor;
+  opacity:0;
+  transform:scaleX(.35);
+  transform-origin:center;
+  transition:opacity .22s var(--ease),transform .22s var(--ease);
+}
+body[data-axis-direction="right"] .horizontal-index-readout::before{
+  opacity:.42;
+  transform:scaleX(1);
+}
+body[data-axis-direction="left"] .horizontal-index-readout::before{
+  opacity:.42;
+  transform:scaleX(1);
+}
+body[data-axis-direction="right"] .horizontal-index-readout::after{
+  content:'→';
+  margin-left:-26px;
+  transform:translateX(26px);
+}
+body[data-axis-direction="left"] .horizontal-index-readout::after{
+  content:'←';
+  margin-left:-26px;
+  transform:translateX(26px);
+}
+.horizontal-index-readout::after{
+  position:absolute;
+  left:0;
+  font:500 .72rem var(--mono);
+  color:var(--muted);
+  opacity:0;
+  transition:opacity .22s var(--ease),transform .22s var(--ease);
+}
+body[data-axis-speed="moving"] .horizontal-index-readout::after,
+body[data-axis-speed="fast"] .horizontal-index-readout::after{
+  opacity:1;
+}
+body[data-axis-speed="fast"] .horizontal-rail{
+  opacity:.88;
+  box-shadow:0 20px 70px rgba(0,0,0,.22),0 0 26px rgba(243,243,239,.045);
+}
+body[data-axis-speed="fast"] .horizontal-rail button.is-active::before{
+  box-shadow:0 0 22px rgba(243,243,239,.48);
+}
+@media(max-width:720px){
+  .horizontal-index-readout::before,
+  .horizontal-index-readout::after{display:none}
+}
