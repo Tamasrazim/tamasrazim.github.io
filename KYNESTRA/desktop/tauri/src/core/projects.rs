@@ -301,6 +301,15 @@ mod tests {
             manager.open(&created.project.path),
             Err(ProjectError::DatabaseManifestMismatch)
         ));
+
+        let project_root = Path::new(&created.project.path);
+        let conn = db::open(&project_root.join("project.db")).expect("db");
+        conn.execute("DELETE FROM projects", []).expect("delete project row");
+
+        assert!(matches!(
+            manager.open(&created.project.path),
+            Err(ProjectError::DatabaseProjectMissing)
+        ));
     }
 
     #[test]
