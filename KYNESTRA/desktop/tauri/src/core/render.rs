@@ -113,6 +113,19 @@ impl RenderService {
         service.finish()
     }
 
+    pub fn ensure_running(&self, project_path: &str, job_id: &str) -> Result<(), RenderError> {
+        let root = validate_project(project_path)?;
+        let conn = db::open(&root.join("project.db"))?;
+        let status: String = conn
+            .query_row(
+                "SELECT status FROM render_jobs WHERE job_id=?1",
+                params![job_id],
+                |row| row.get(0),
+            )?;
+
+        require_running_status(&status)
+    }
+
     pub fn attach_asset(
         &self,
         project_path: &str,
@@ -256,6 +269,14 @@ impl RenderService {
     }
 }
 
+fn require_running_status(status: &str) -> Result<(), RenderError> {
+    if status == "running" {
+        Ok(())
+    } else {
+        Err(RenderError::InvalidFinishState)
+    }
+}
+
 fn validate_project(path: &str) -> Result<std::path::PathBuf, RenderError> {
     let root = Path::new(path);
     if root.extension().and_then(|v| v.to_str()) != Some("tamasrazim") {
@@ -330,3 +351,22 @@ pub enum RenderError {
     #[error("task error: {0}")]
     Task(#[from] TaskError),
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn only_running_jobs_can_complete() {
+        assert!(require_running_status("running").is_ok());
+        assert!(matches!(
+            require_running_status("queued"),
+            Err(RenderError::InvalidFinishState)
+        ));
+        assert!(matches!(
+            require_running_status("completed"),
+            Err(RenderError::InvalidFinishState)
+        ));
+    }
+}
+

@@ -102,6 +102,7 @@ fn start_render_job(app: AppHandle, project_path: String, job_id: String) -> Res
 #[tauri::command]
 fn complete_render_job(app: AppHandle, project_path: String, job_id: String, source_path: String, kind: String, metadata: Option<serde_json::Value>) -> Result<AssetRecord,String> {
     let state=app.state::<CoreState>();
+    state.render.ensure_running(&project_path,&job_id).map_err(|e| e.to_string())?;
     let asset=state.assets.ingest(&project_path,&source_path,&kind,metadata).map_err(|e| e.to_string())?;
     let job=state.render.attach_asset(&project_path,&job_id,&asset.asset_id,&asset.relative_path,&state.tasks).map_err(|e| e.to_string())?;
     let imported=CoreEvent::new("asset.imported",serde_json::to_value(&asset).map_err(|e| e.to_string())?);
