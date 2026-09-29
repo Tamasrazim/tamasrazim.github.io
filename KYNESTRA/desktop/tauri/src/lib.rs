@@ -209,7 +209,9 @@ pub fn run() {
         .setup(|app| {
             let data_root=app.path().app_data_dir()?.join("projects");
             std::fs::create_dir_all(&data_root)?;
-            app.manage(CoreState::new(data_root));
+            let state = CoreState::new(data_root.clone());
+            state.tasks.recover_all(&data_root).map_err(|e| Box::<dyn std::error::Error>::from(e))?;
+            app.manage(state);
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
