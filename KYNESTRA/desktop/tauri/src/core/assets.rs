@@ -340,10 +340,10 @@ mod tests {
     use std::io::Write;
 
     #[test]
-    fn rejects_windows_style_filename() {
+    fn rejects_reserved_filename() {
         let root = tempfile::tempdir().expect("temp directory");
-        let source = root.path().join(r"bad\name.txt");
-        fs::write(&source, b"invalid filename test").expect("source");
+        let source = root.path().join("manifest.json");
+        fs::write(&source, b"invalid asset filename test").expect("source");
 
         let project_root = root.path().join("filename-check.tamasrazim");
         ProjectFixture::create(&project_root);
