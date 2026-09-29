@@ -60,6 +60,15 @@ impl AssetService {
             return merge_duplicate_metadata(&conn, &existing, incoming_metadata);
         }
 
+        let project_id: String = conn.query_row(
+            "SELECT project_id FROM projects LIMIT 1",
+            [],
+            |row| row.get(0),
+        )?;
+
+        let metadata_value = incoming_metadata;
+        let metadata_json = serde_json::to_string(&metadata_value)?;
+
         let target_dir = project.join("renders");
         fs::create_dir_all(&target_dir)?;
 
@@ -75,16 +84,8 @@ impl AssetService {
             return Err(error);
         }
 
-        let project_id: String = conn.query_row(
-            "SELECT project_id FROM projects LIMIT 1",
-            [],
-            |row| row.get(0),
-        )?;
-
         let asset_id = uuid::Uuid::new_v4().to_string();
         let now = Utc::now().to_rfc3339();
-        let metadata_value = incoming_metadata;
-        let metadata_json = serde_json::to_string(&metadata_value)?;
         let relative_path = format!("renders/{}", target_name);
         let mime_type = mime_from_filename(&filename);
 
