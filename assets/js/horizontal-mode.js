@@ -128,6 +128,22 @@
   var wheelVelocity=0;
   var wheelLastTime=0;
 
+  function getScrollablePanel(target){
+    if(!target || !target.closest)return null;
+    var panel=target.closest('main#content > section, main#content > .band');
+    if(!panel || panel.scrollHeight<=panel.clientHeight+1)return null;
+    return panel;
+  }
+
+  function canConsumeVertical(panel,delta){
+    if(!panel || Math.abs(delta)<0.5)return false;
+    var top=panel.scrollTop;
+    var max=Math.max(0,panel.scrollHeight-panel.clientHeight);
+    if(delta>0)return top < max-1;
+    if(delta<0)return top > 1;
+    return false;
+  }
+
   function normalizeWheelDelta(e){
     if(e.deltaMode===1)return e.deltaY*16;
     if(e.deltaMode===2)return e.deltaY*window.innerHeight;
@@ -196,13 +212,19 @@
   window.addEventListener('wheel',function(e){
     if(e.ctrlKey || isEditable(e.target))return;
 
-    /* Horizontal mode owns desktop wheel input.
-       Hold Shift to deliberately scroll inside a panel vertically. */
-    var panel=e.target && e.target.closest ? e.target.closest('main#content > section, main#content > .band') : null;
     var wheelY=normalizeWheelDelta(e);
     var wheelX=e.deltaX;
+    var panel=getScrollablePanel(e.target);
 
-    if(e.shiftKey && panel && panel.scrollHeight>panel.clientHeight+1 && Math.abs(wheelY)>0.5){
+    /* A section owns vertical wheel input while it still has room to move.
+       Once the section reaches its top/bottom, the same wheel gesture returns
+       control to the horizontal page axis. */
+    if(panel && Math.abs(wheelY)>=Math.abs(wheelX) && canConsumeVertical(panel,wheelY)){
+      e.preventDefault();
+      panel.scrollTop=Math.max(0,Math.min(
+        panel.scrollHeight-panel.clientHeight,
+        panel.scrollTop+wheelY
+      ));
       return;
     }
 
