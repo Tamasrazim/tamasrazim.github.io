@@ -14,6 +14,8 @@
   scroller.dataset.horizontalMode='true';
   stateNode.dataset.horizontalMode='true';
   scroller.setAttribute('tabindex','-1');
+  document.documentElement.style.setProperty('--axis-velocity','0');
+  document.documentElement.style.setProperty('--axis-velocity-abs','0');
   var readout=null;
   var liveStatus=null;
   var lastActiveIndex=-1;
@@ -51,8 +53,14 @@
       stateNode.dataset.axisSpeed='settled';
     }
 
+    var measuredVelocity=(delta/Math.max(1,elapsed))*1000;
+    var measuredNormalized=Math.max(-1,Math.min(1,measuredVelocity/1800));
     document.documentElement.style.setProperty('--axis-progress',amount.toFixed(4));
     document.documentElement.style.setProperty('--axis-speed',speed.toFixed(4));
+    if(!wheelRAF){
+      document.documentElement.style.setProperty('--axis-velocity',measuredNormalized.toFixed(4));
+      document.documentElement.style.setProperty('--axis-velocity-abs',Math.abs(measuredNormalized).toFixed(4));
+    }
     window.clearTimeout(speedTimer);
     speedTimer=window.setTimeout(function(){
       stateNode.dataset.axisSpeed='settled';
@@ -152,6 +160,9 @@
     wheelLastTime=now;
 
     var velocity=wheelVelocity;
+    var visualVelocity=Math.max(-1,Math.min(1,velocity/1800));
+    document.documentElement.style.setProperty('--axis-velocity',visualVelocity.toFixed(4));
+    document.documentElement.style.setProperty('--axis-velocity-abs',Math.abs(visualVelocity).toFixed(4));
     var friction=Math.exp(-8.5*dt);
     var current=scroller.scrollLeft;
     var next=current+velocity*dt;
@@ -170,6 +181,8 @@
 
     if(Math.abs(wheelVelocity)<4){
       wheelVelocity=0;
+      document.documentElement.style.setProperty('--axis-velocity','0');
+      document.documentElement.style.setProperty('--axis-velocity-abs','0');
       wheelRAF=0;
       wheelLastTime=0;
       scheduleProgress();
