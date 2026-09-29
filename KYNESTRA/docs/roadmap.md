@@ -31,9 +31,11 @@
 - [ ] Multi-platform account connectors
 
 ## Alpha 0.4 — Forge
-- Integrate Forge as its own module
-- Preserve Forge-specific workflows
-- Optional handoff into C2M
+- [x] Integrate the existing Format Forge workspace as its own KYNESTRA module
+- [x] Preserve Forge-specific conversion workflows
+- [x] Package Forge through the Tauri build
+- [ ] Core asset handoff from Forge outputs
+- [ ] Optional handoff into C2M
 
 ## Beta / v1.0
 - Plugin system
