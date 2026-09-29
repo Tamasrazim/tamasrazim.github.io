@@ -82,7 +82,7 @@ const axisCss=read('assets/css/horizontal-mode.css');
 
 must(motion.includes('Nested vertical panels are independent scroll containers'),'motion core tracks nested vertical panels');
 must(motion.includes('panel.addEventListener(\'scroll\''),'motion core invalidates nested panel bounds');
-must(!axisCss.includes('contain:layout paint'),'horizontal mode does not paint-clip seamless section overlap');
+must(!/main#content > section,\s*\nmain#content > \.band\{\s*\n\s*contain:layout paint/.test(axisCss),'homepage sections are not paint-contained');
 
 
 for(const ref of [
