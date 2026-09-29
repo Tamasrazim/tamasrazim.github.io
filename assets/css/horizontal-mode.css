@@ -933,8 +933,13 @@ main#content > .band::after{
 }
 @media(max-width:1100px){
   main#content > section{
+    --edge-dissolve:clamp(44px,7vw,104px);
     margin-right:-4vw;
     padding-right:4vw;
+  }
+  .axis-scroller > .site-footer{
+    margin-left:-4vw;
+    padding-left:4vw;
   }
   main#content > .band{
     flex-basis:calc(100vw - 1.5vw);
@@ -946,8 +951,13 @@ main#content > .band::after{
 
 @media(max-width:720px){
   main#content > section{
+    --edge-dissolve:clamp(34px,9vw,72px);
     margin-right:-2vw;
     padding-right:2vw;
+  }
+  .axis-scroller > .site-footer{
+    margin-left:-2vw;
+    padding-left:2vw;
   }
   main#content > .band{
     flex-basis:98vw;
