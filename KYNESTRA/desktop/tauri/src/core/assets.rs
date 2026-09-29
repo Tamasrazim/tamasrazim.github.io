@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 use std::{
+    collections::HashMap,
     fs::{self, File},
     io::{Read, Write},
     path::{Path, PathBuf},
@@ -55,8 +56,9 @@ impl AssetService {
         let conn = db::open(&database)?;
 
         let (sha256, size_bytes) = hash_file(source)?;
+        let incoming_metadata = metadata.unwrap_or_else(|| Value::Object(Default::default()));
         if let Some(existing) = find_by_hash(&conn, &sha256)? {
-            return Ok(existing);
+            return merge_duplicate_metadata(&conn, &existing, incoming_metadata);
         }
 
         let target_dir = project.join("renders");
@@ -75,7 +77,7 @@ impl AssetService {
 
         let asset_id = uuid::Uuid::new_v4().to_string();
         let now = Utc::now().to_rfc3339();
-        let metadata_value = metadata.unwrap_or_else(|| Value::Object(Default::default()));
+        let metadata_value = incoming_metadata;
         let metadata_json = serde_json::to_string(&metadata_value)?;
         let relative_path = format!("renders/{}", target_name);
         let mime_type = mime_from_filename(&filename);
@@ -182,6 +184,46 @@ fn copy_file(source: &Path, target: &Path) -> Result<(), AssetError> {
     }
 
     Ok(())
+}
+
+fn merge_duplicate_metadata(
+    conn: &rusqlite::Connection,
+    existing: &AssetRecord,
+    incoming: Value,
+) -> Result<AssetRecord, AssetError> {
+    let mut merged = match existing.metadata.clone() {
+        Value::Object(value) => value,
+        _ => Map::new(),
+    };
+
+    if let Value::Object(incoming_map) = incoming {
+        for (key, value) in incoming_map {
+            if key == "sourceModule" {
+                let module = value.as_str().unwrap_or_default().trim().to_lowercase();
+                if !module.is_empty() {
+                    let entry = merged.entry("sourceModules").or_insert_with(|| Value::Array(Vec::new()));
+                    if let Value::Array(modules) = entry {
+                        if !modules.iter().any(|item| item.as_str() == Some(module.as_str())) {
+                            modules.push(Value::String(module));
+                        }
+                    }
+                }
+            } else if key != "sourceModules" {
+                merged.insert(key, value);
+            }
+        }
+    }
+
+    let now = Utc::now().to_rfc3339();
+    let metadata_json = serde_json::to_string(&Value::Object(merged.clone()))?;
+    conn.execute(
+        "UPDATE assets SET metadata_json=?1,updated_at=?2 WHERE asset_id=?3",
+        params![metadata_json, now, existing.asset_id],
+    )?;
+
+    let mut updated = existing.clone();
+    updated.metadata = Value::Object(merged);
+    Ok(updated)
 }
 
 fn find_by_hash(conn: &rusqlite::Connection, sha256: &str) -> Result<Option<AssetRecord>, AssetError> {
