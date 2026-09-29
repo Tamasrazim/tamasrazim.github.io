@@ -175,7 +175,7 @@ function refreshBounds(){
   texts.forEach(function(t){
     var r=t.el.getBoundingClientRect();
     t.w=r.width||1;t.h=r.height||1;
-    t.cx=r.left+t.w*.5;t.cy=r.top+t.h*.5+sy;
+    t.cx=r.left+t.w*.5+sx;t.cy=r.top+t.h*.5+sy;
   });
   boundsDirty=false;
 }
@@ -266,14 +266,20 @@ function frame(now){
   });
 
   texts.forEach(function(t){
+    var localX=t.cx-scroll.x;
     var localY=t.cy-scroll.y;
-    if(localY < -innerHeight*.35 || localY > innerHeight*1.35)return;
-    var dist=Math.hypot(pointer.x-t.cx,pointer.y-localY);
+    if(horizontal){
+      if(localX < -innerWidth*.35 || localX > innerWidth*1.35)return;
+    }else if(localY < -innerHeight*.35 || localY > innerHeight*1.35)return;
+
+    var screenX=horizontal?localX:t.cx;
+    var screenY=horizontal?localY:localY;
+    var dist=Math.hypot(pointer.x-screenX,pointer.y-screenY);
     var radius=Math.max(110,Math.min(300,Math.max(t.w,t.h)*1.18));
     var f=ease(1-dist/radius);
     t.s=smooth(t.s,1+f*.065,1-Math.exp(-dt*14));
     t.y=smooth(t.y,-f*(2.2+energy*2),1-Math.exp(-dt*13));
-    t.x=smooth(t.x,(pointer.x-t.cx)/Math.max(1,t.w)*f*2.2,1-Math.exp(-dt*11));
+    t.x=smooth(t.x,(pointer.x-screenX)/Math.max(1,t.w)*f*2.2,1-Math.exp(-dt*11));
     t.el.style.setProperty('--mt-s',t.s.toFixed(4));
     t.el.style.setProperty('--mt-y',t.y.toFixed(2)+'px');
     t.el.style.setProperty('--mt-x',t.x.toFixed(2)+'px');
