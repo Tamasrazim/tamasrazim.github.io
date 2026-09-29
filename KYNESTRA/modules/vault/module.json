@@ -1,0 +1,25 @@
+{
+  "id": "vault",
+  "name": "Stock Vault",
+  "displayName": "Stock Vault",
+  "version": "0.1.0",
+  "apiVersion": "0.1",
+  "entry": "builtin",
+  "type": "service",
+  "capabilities": [
+    "asset-library",
+    "submission-tracking",
+    "public-status-verification",
+    "platform-accounts"
+  ],
+  "events": [
+    "asset.imported",
+    "submission.updated",
+    "account.connected",
+    "account.disconnected",
+    "account.updated"
+  ],
+  "boundaries": {
+    "kynestraCopy": "KYNESTRA/modules/vault"
+  }
+}
