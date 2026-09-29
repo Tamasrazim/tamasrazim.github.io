@@ -12,6 +12,8 @@
   var scroller=document.body;
   scroller.dataset.horizontalMode='true';
   var readout=null;
+  var liveStatus=null;
+  var lastActiveIndex=-1;
   var raf=0;
   var motionLast=0;
   var motionLastTime=performance.now();
@@ -451,7 +453,7 @@
   /* Add an explicit horizontal cue to the first viewport without changing content. */
   var cue=document.querySelector('.scroll-cue');
   if(cue){
-    var label=cue.querySelector('small');
+    var label=cue.querySelector('.scroll-cue-label');
     if(label)label.textContent='Scroll horizontally';
   }
 
@@ -502,6 +504,14 @@
 
   document.body.appendChild(rail);
   document.body.appendChild(readout);
+
+  liveStatus=document.createElement('div');
+  liveStatus.className='axis-live-status';
+  liveStatus.setAttribute('aria-live','polite');
+  liveStatus.setAttribute('aria-atomic','true');
+  liveStatus.setAttribute('role','status');
+  liveStatus.textContent='Home · section 1 of '+String(pageItems.length);
+  document.body.appendChild(liveStatus);
 
   function updateSectionState(){
     if(!pageItems.length)return;
@@ -566,6 +576,17 @@
     readout.dataset.section=activeId||'top';
     readout.dataset.index=String(closest+1);
     readout.dataset.total=String(pageItems.length);
+
+    pageItems.forEach(function(item,index){
+      item.classList.toggle('axis-is-active',index===closest);
+      item.classList.toggle('axis-is-near',Math.abs(index-closest)===1);
+    });
+
+    if(liveStatus && lastActiveIndex!==closest){
+      var spokenName=name.charAt(0).toUpperCase()+name.slice(1);
+      liveStatus.textContent=spokenName+' · section '+String(closest+1)+' of '+String(pageItems.length);
+      lastActiveIndex=closest;
+    }
   }
 
   var stateRAF=0;
