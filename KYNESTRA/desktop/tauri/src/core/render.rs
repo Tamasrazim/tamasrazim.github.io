@@ -123,11 +123,7 @@ impl RenderService {
                 |row| row.get(0),
             )?;
 
-        if status == "running" {
-            Ok(())
-        } else {
-            Err(RenderError::InvalidFinishState)
-        }
+        require_running_status(&status)
     }
 
     pub fn attach_asset(
@@ -273,6 +269,14 @@ impl RenderService {
     }
 }
 
+fn require_running_status(status: &str) -> Result<(), RenderError> {
+    if status == "running" {
+        Ok(())
+    } else {
+        Err(RenderError::InvalidFinishState)
+    }
+}
+
 fn validate_project(path: &str) -> Result<std::path::PathBuf, RenderError> {
     let root = Path::new(path);
     if root.extension().and_then(|v| v.to_str()) != Some("tamasrazim") {
@@ -347,3 +351,22 @@ pub enum RenderError {
     #[error("task error: {0}")]
     Task(#[from] TaskError),
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn only_running_jobs_can_complete() {
+        assert!(require_running_status("running").is_ok());
+        assert!(matches!(
+            require_running_status("queued"),
+            Err(RenderError::InvalidFinishState)
+        ));
+        assert!(matches!(
+            require_running_status("completed"),
+            Err(RenderError::InvalidFinishState)
+        ));
+    }
+}
+
