@@ -32,9 +32,12 @@ impl TaskService {
         let now = Utc::now().to_rfc3339();
         let payload_json = serde_json::to_string(&payload.unwrap_or_else(|| Value::Object(Default::default())))?;
 
-        let project_id: Option<String> = conn
+        let project_id: String = conn
             .query_row("SELECT project_id FROM projects LIMIT 1", [], |row| row.get(0))
-            .ok();
+            .map_err(|error| match error {
+                rusqlite::Error::QueryReturnedNoRows => TaskError::ProjectRecordMissing,
+                other => TaskError::Sqlite(other),
+            })?;
 
         conn.execute(
             "INSERT INTO tasks (task_id,project_id,type,status,progress,created_at,payload_json)
@@ -44,7 +47,7 @@ impl TaskService {
 
         Ok(TaskRecord {
             task_id,
-            project_id,
+            project_id: Some(project_id),
             task_type: task_type.into(),
             status: "queued".into(),
             progress: 0.0,
@@ -156,7 +159,7 @@ impl TaskService {
             }
 
             let conn = db::open(&database)?;
-            let changed = conn.execute(
+            let task_changed = conn.execute(
                 "UPDATE tasks
                  SET status='recoverable',
                      message=COALESCE(message,'') || CASE WHEN COALESCE(message,'')='' THEN '' ELSE ' · ' END || 'interrupted by application restart'
@@ -164,16 +167,15 @@ impl TaskService {
                 [],
             )?;
 
-            if changed > 0 {
-                recovered += changed;
-                conn.execute(
-                    "UPDATE render_jobs
-                     SET status='recoverable',
-                         error=COALESCE(error,'interrupted by application restart')
-                     WHERE status='running'",
-                    [],
-                )?;
-            }
+            let render_changed = conn.execute(
+                "UPDATE render_jobs
+                 SET status='recoverable',
+                     error=COALESCE(error,'interrupted by application restart')
+                 WHERE status='running'",
+                [],
+            )?;
+
+            recovered += task_changed.max(render_changed);
         }
 
         Ok(recovered)
@@ -217,6 +219,8 @@ pub enum TaskError {
     InvalidStatus(String),
     #[error("task not found: {0}")]
     NotFound(String),
+    #[error("project database has no project record")]
+    ProjectRecordMissing,
     #[error("invalid task transition: {from} -> {to}")]
     InvalidTransition { from: String, to: String },
     #[error("database error: {0}")]
