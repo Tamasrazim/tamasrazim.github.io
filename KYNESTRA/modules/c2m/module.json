@@ -1,0 +1,24 @@
+{
+  "id": "c2m",
+  "name": "C2M",
+  "displayName": "Code Motion",
+  "version": "0.1.0",
+  "apiVersion": "0.1",
+  "entry": "renderer/index.html",
+  "type": "renderer",
+  "capabilities": [
+    "javascript-animation",
+    "preview",
+    "deterministic-render",
+    "video-export"
+  ],
+  "events": [
+    "render.started",
+    "render.completed",
+    "render.failed"
+  ],
+  "boundaries": {
+    "productionCopy": "projects/code-motion/renderer",
+    "kynestraCopy": "KYNESTRA/modules/c2m/renderer"
+  }
+}
