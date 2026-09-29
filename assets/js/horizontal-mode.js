@@ -5,24 +5,6 @@
   var content=document.getElementById('content');
   if(!content)return;
 
-  /* Hard 60 FPS ceiling for the site's continuous axis work. */
-  var __axis60Last=new WeakMap();
-  var __axis60Interval=1000/60;
-  function requestAnimationFrame60(callback){
-    function schedule(){
-      window.requestAnimationFrame(function(now){
-        var last=__axis60Last.get(callback);
-        if(last===undefined || now-last>=(__axis60Interval-0.25)){
-          __axis60Last.set(callback,now);
-          callback(now);
-        }else{
-          window.setTimeout(schedule,Math.max(0,__axis60Interval-(now-last)));
-        }
-      });
-    }
-    schedule();
-  }
-
   var fine=window.matchMedia && window.matchMedia('(pointer:fine)').matches;
   var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var progressFill=document.getElementById('progressFill');
@@ -98,7 +80,7 @@
   }
 
   function scheduleProgress(){
-    if(!raf)raf=requestAnimationFrame60(progress);
+    if(!raf)raf=window.requestAnimationFrame(progress);
   }
 
   scroller.addEventListener('scroll',scheduleProgress,{passive:true});
@@ -215,7 +197,7 @@
       return;
     }
 
-    wheelRAF=requestAnimationFrame60(animateWheel);
+    wheelRAF=window.requestAnimationFrame(animateWheel);
   }
 
   function pushWheel(delta){
@@ -223,7 +205,7 @@
     wheelVelocity=Math.max(-4200,Math.min(4200,wheelVelocity));
     if(!wheelRAF){
       wheelLastTime=0;
-      wheelRAF=requestAnimationFrame60(animateWheel);
+      wheelRAF=window.requestAnimationFrame(animateWheel);
     }
   }
 
@@ -725,7 +707,7 @@
   var stateRAF=0;
   function scheduleSectionState(){
     if(stateRAF)return;
-    stateRAF=requestAnimationFrame60(function(){
+    stateRAF=window.requestAnimationFrame(function(){
       stateRAF=0;
       updateSectionState();
       scheduleProgress();
