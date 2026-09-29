@@ -397,12 +397,19 @@ function renderHome() {
   const modules = state.modules.length
     ? state.modules.map(m => '<div class="project"><b>'+escapeHtml(m.display_name)+'</b><code>'+escapeHtml(m.id)+' · v'+escapeHtml(m.version)+'</code><span class="muted">'+escapeHtml(m.module_type)+' · '+escapeHtml(m.capabilities.join(' · '))+'</span></div>').join('')
     : '<div class="notice">No module manifests loaded.</div>';
-  view.innerHTML = '<div class="card"><h2>Core workspace</h2><p class="muted">The shell is connected to Rust Core. Working projects are local .tamasrazim directories; portable projects are ZIP-backed .tamasrazim packages with integrity manifests.</p><div class="actions"><button id="new-project" class="action primary">New Project</button><button id="open-project-folder" class="action">Open Project Folder</button><button id="import-package" class="action">Import .tamasrazim</button>'+(state.activeProject ? '<button id="export-package" class="action">Export Active Project</button>' : '')+'</div>'+(state.activeProject ? '<div class="notice">Active: <strong>'+escapeHtml(state.activeProject.name)+'</strong></div><div id="task-center" class="projects"><div class="notice">Loading Core tasks…</div></div>' : '')+'<div class="projects">'+(cards || '<div class="notice">No projects created yet.</div>')+'</div></div><div class="card"><h3>Loaded Modules</h3><div class="projects">'+modules+'</div></div><div class="grid"><div class="tile"><b>Forge</b><span class="muted">Create</span></div><div class="tile"><b>C2M</b><span class="muted">Render</span></div><div class="tile"><b>Stock Vault</b><span class="muted">Manage</span></div></div>';
+  view.innerHTML = '<div class="card"><h2>Core workspace</h2><p class="muted">The shell is connected to Rust Core. Working projects are local .tamasrazim directories; portable projects are ZIP-backed .tamasrazim packages with integrity manifests.</p><div class="actions"><button id="new-project" class="action primary">New Project</button><button id="open-project-folder" class="action">Open Project Folder</button><button id="import-package" class="action">Import .tamasrazim</button>'+(state.activeProject ? '<button id="export-package" class="action">Export Active Project</button>' : '')+'</div>'+(state.activeProject ? '<div class="notice">Active: <strong>'+escapeHtml(state.activeProject.name)+'</strong></div><div id="task-center" class="projects"><div class="notice">Loading Core tasks…</div></div>' : '')+'<div class="projects">'+(cards || '<div class="notice">No projects created yet.</div>')+'</div></div><div class="card"><h3>Loaded Modules</h3><div class="projects">'+modules+'</div></div><div class="grid"><button class="tile" data-launch-view="forge"><b>Forge</b><span class="muted">Create</span></button><button class="tile" data-launch-view="c2m"><b>C2M</b><span class="muted">Render</span></button><button class="tile" data-launch-view="vault"><b>Stock Vault</b><span class="muted">Manage</span></button></div>';
   document.getElementById('new-project')?.addEventListener('click', createProject);
   document.getElementById('open-project-folder')?.addEventListener('click', openProjectFolder);
   document.getElementById('import-package')?.addEventListener('click', importPackage);
   document.getElementById('export-package')?.addEventListener('click', exportPackage);
   document.querySelectorAll('[data-open]').forEach(btn => btn.addEventListener('click', () => openProject(btn.dataset.open)));
+  document.querySelectorAll('[data-launch-view]').forEach(button => button.addEventListener('click', () => {
+    const name = button.dataset.launchView;
+    state.currentView = name;
+    title.textContent = name === 'c2m' ? 'C2M' : name === 'vault' ? 'Stock Vault' : 'Forge';
+    document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+    views[name]();
+  }));
 
   if (state.activeProject) loadTaskCenter(state.activeProject.path);
 }
