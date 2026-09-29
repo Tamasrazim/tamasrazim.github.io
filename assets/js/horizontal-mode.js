@@ -9,8 +9,10 @@
   var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var progressFill=document.getElementById('progressFill');
   var progressControl=document.getElementById('siteProgress');
-  var scroller=document.body;
+  var scroller=document.scrollingElement || document.documentElement;
+  var stateNode=document.body;
   scroller.dataset.horizontalMode='true';
+  stateNode.dataset.horizontalMode='true';
   var readout=null;
   var liveStatus=null;
   var lastActiveIndex=-1;
@@ -42,17 +44,17 @@
     }
 
     if(Math.abs(delta)>0.5){
-      scroller.dataset.axisDirection=delta>0?'right':'left';
-      scroller.dataset.axisSpeed=speed>.035?'fast':speed>.012?'moving':'settled';
+      stateNode.dataset.axisDirection=delta>0?'right':'left';
+      stateNode.dataset.axisSpeed=speed>.035?'fast':speed>.012?'moving':'settled';
     }else{
-      scroller.dataset.axisSpeed='settled';
+      stateNode.dataset.axisSpeed='settled';
     }
 
     document.documentElement.style.setProperty('--axis-progress',amount.toFixed(4));
     document.documentElement.style.setProperty('--axis-speed',speed.toFixed(4));
     window.clearTimeout(speedTimer);
     speedTimer=window.setTimeout(function(){
-      scroller.dataset.axisSpeed='settled';
+      stateNode.dataset.axisSpeed='settled';
       document.documentElement.style.setProperty('--axis-speed','0');
     },220);
 
@@ -67,7 +69,7 @@
 
   scroller.addEventListener('scroll',scheduleProgress,{passive:true});
   scroller.addEventListener('scroll',function(){
-    if(scroller.dataset.axisSpeed!=='settled')scheduleProgress();
+    if(stateNode.dataset.axisSpeed!=='settled')scheduleProgress();
   },{passive:true});
   if('onscrollend' in scroller){
     scroller.addEventListener('scrollend',scheduleSnap,{passive:true});
@@ -206,7 +208,7 @@
       drag.startScroll=scroller.scrollLeft;
       drag.pointerId=e.pointerId;
       drag.moved=false;
-      scroller.classList.add('axis-dragging');
+      stateNode.classList.add('axis-dragging');
       try{scroller.setPointerCapture(e.pointerId);}catch(_err){}
     });
 
@@ -223,7 +225,7 @@
       if(!drag.active || (e && e.pointerId!==drag.pointerId))return;
       drag.active=false;
       drag.pointerId=null;
-      scroller.classList.remove('axis-dragging');
+      stateNode.classList.remove('axis-dragging');
       if(drag.moved)scheduleSnap();
     }
 
@@ -252,10 +254,10 @@
       cancelSnap();
       scrub.active=true;
       scrub.pointerId=e.pointerId;
-      scroller.classList.add('is-scrubbing');
+      stateNode.classList.add('is-scrubbing');
       try{progressControl.setPointerCapture(e.pointerId);}catch(_err){}
       setProgressFromClientX(e.clientX);
-      scroller.dataset.axisSpeed='fast';
+      stateNode.dataset.axisSpeed='fast';
       e.preventDefault();
       e.stopPropagation();
     });
@@ -263,7 +265,7 @@
     progressControl.addEventListener('pointermove',function(e){
       if(!scrub.active || e.pointerId!==scrub.pointerId)return;
       setProgressFromClientX(e.clientX);
-      scroller.dataset.axisSpeed='fast';
+      stateNode.dataset.axisSpeed='fast';
       e.preventDefault();
       e.stopPropagation();
     });
@@ -272,7 +274,7 @@
       if(!scrub.active || (e && e.pointerId!==scrub.pointerId))return;
       scrub.active=false;
       scrub.pointerId=null;
-      scroller.classList.remove('is-scrubbing');
+      stateNode.classList.remove('is-scrubbing');
       scheduleSnap();
     }
 
@@ -430,7 +432,7 @@
       scrub.active=false;
       scrub.pointerId=null;
     }
-    scroller.classList.remove('axis-dragging','is-scrubbing');
+    stateNode.classList.remove('axis-dragging','is-scrubbing');
   },{passive:true});
 
   document.addEventListener('visibilitychange',function(){
@@ -451,7 +453,7 @@
       scrub.active=false;
       scrub.pointerId=null;
     }
-    scroller.classList.remove('axis-dragging','is-scrubbing');
+    stateNode.classList.remove('axis-dragging','is-scrubbing');
   });
 
   /* Add an explicit horizontal cue to the first viewport without changing content. */
@@ -645,7 +647,7 @@
 
   if('onscrollend' in scroller){
     scroller.addEventListener('scrollend',function(){
-      scroller.dataset.axisSpeed='settled';
+      stateNode.dataset.axisSpeed='settled';
       scheduleSectionState();
       scheduleSnap();
     },{passive:true});
