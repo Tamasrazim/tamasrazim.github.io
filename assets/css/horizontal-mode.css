@@ -628,3 +628,20 @@ body[data-axis-edge="end"] .horizontal-index-readout::after{
     opacity:1;
   }
 }
+
+/* Context labels sit outside the index without covering its value. */
+.horizontal-index-readout{
+  overflow:visible;
+}
+.horizontal-index-readout::before{
+  right:100%;
+  left:auto;
+  margin-right:13px;
+  transform:none;
+}
+.horizontal-index-readout::after{
+  left:calc(100% + 18px);
+  right:auto;
+  margin:0;
+  transform:none!important;
+}
