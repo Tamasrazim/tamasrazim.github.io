@@ -731,3 +731,61 @@ body{
     width:auto!important;
   }
 }
+
+
+/* ---------- Continuous experience pass ---------- */
+/* One spatial canvas, not a row of page slides. */
+.axis-scroller{
+  scroll-snap-type:none!important;
+  scroll-behavior:auto!important;
+  overscroll-behavior-x:contain;
+}
+
+main#content > section,
+main#content > .band,
+.axis-scroller > .site-footer{
+  scroll-snap-align:none!important;
+}
+
+main#content > section.axis-is-active,
+main#content > .band.axis-is-active,
+.axis-scroller > .site-footer.axis-is-active{
+  box-shadow:none;
+}
+
+main#content > section.axis-is-near,
+main#content > .band.axis-is-near{
+  opacity:1;
+}
+
+body[data-axis-speed="moving"] main#content > section.axis-is-near .section-inner,
+body[data-axis-speed="fast"] main#content > section.axis-is-active .section-inner{
+  filter:none;
+}
+
+/* Soften the viewport edges while preserving the page's existing black/white identity. */
+.axis-scroller::before,
+.axis-scroller::after{
+  content:"";
+  position:fixed;
+  top:0;
+  bottom:0;
+  width:min(9vw,120px);
+  z-index:12;
+  pointer-events:none;
+}
+.axis-scroller::before{
+  left:0;
+  background:linear-gradient(90deg,rgba(5,5,5,.24),transparent);
+}
+.axis-scroller::after{
+  right:0;
+  background:linear-gradient(270deg,rgba(5,5,5,.24),transparent);
+}
+
+@media(max-width:720px){
+  .axis-scroller::before,
+  .axis-scroller::after{
+    width:7vw;
+  }
+}
