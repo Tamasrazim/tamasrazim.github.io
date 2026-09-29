@@ -1,0 +1,49 @@
+name: Publish KYNESTRA installer to main
+
+on:
+  push:
+    branches:
+      - "kynestra-build"
+    paths:
+      - "KYNESTRA/releases/KYNESTRA-Setup.exe"
+      - ".github/workflows/publish-kynestra-main.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout kynestra-build
+        uses: actions/checkout@v5
+        with:
+          ref: kynestra-build
+          fetch-depth: 0
+
+      - name: Publish exact installer to main
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f "KYNESTRA/releases/KYNESTRA-Setup.exe"
+
+          git fetch origin main
+          git worktree add ../main-tree origin/main
+
+          mkdir -p "../main-tree/KYNESTRA/releases"
+          cp -f "KYNESTRA/releases/KYNESTRA-Setup.exe"             "../main-tree/KYNESTRA/releases/KYNESTRA-Setup.exe"
+
+          cd ../main-tree
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "KYNESTRA/releases/KYNESTRA-Setup.exe"
+
+          if git diff --cached --quiet; then
+            echo "Main already contains the same installer."
+            exit 0
+          fi
+
+          git commit -m "build: publish KYNESTRA Windows installer to main"
+          git push origin HEAD:main
