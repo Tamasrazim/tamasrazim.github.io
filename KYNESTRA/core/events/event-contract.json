@@ -5,6 +5,7 @@
   "events": [
     "project.created",
     "project.updated",
+    "project.opened",
     "task.created",
     "task.started",
     "task.progress",
@@ -20,6 +21,7 @@
     "account.updated",
     "task.recovered",
     "project.exported",
-    "project.imported"
+    "project.imported",
+    "task.cancelled"
   ]
 }
