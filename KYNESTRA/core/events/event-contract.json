@@ -1,6 +1,6 @@
 {
   "version": "0.1",
-  "delivery": "at-least-once",
+  "delivery": "durable-log-plus-live-emission",
   "idempotentHandlers": true,
   "events": [
     "project.created",
@@ -23,5 +23,6 @@
     "project.exported",
     "project.imported",
     "task.cancelled"
-  ]
+  ],
+  "deliveryGuarantee": "Live Tauri notifications are best-effort; every emitted event is persisted to the project's event log before publication. Future replay consumers can read the persisted log."
 }
