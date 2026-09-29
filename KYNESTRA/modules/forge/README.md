@@ -40,7 +40,7 @@ The copied Format Forge implementation currently loads JSZip and FFmpeg browser 
 
 ## Architecture boundary
 
-Forge does not call C2M or Stock Vault private code. Forge outputs can use the shared Core handoff command when running inside the desktop shell:
+Forge does not call the KYNESTRA renderer or Stock Vault private code. Forge outputs can use the shared Core handoff command when running inside the desktop shell:
 
 `ingest_module_output(projectPath, sourcePath, "forge", kind, metadata)`
 
