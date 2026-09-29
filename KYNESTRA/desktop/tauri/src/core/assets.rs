@@ -65,8 +65,15 @@ impl AssetService {
 
         let target_name = unique_target_name(&target_dir, &filename, &sha256);
         let target = target_dir.join(&target_name);
+        let partial = target_dir.join(format!(".{}.partial", target_name));
 
-        copy_file(source, &target)?;
+        let write_result = copy_file(source, &partial).and_then(|_| {
+            fs::rename(&partial, &target).map_err(AssetError::Io)
+        });
+        if let Err(error) = write_result {
+            let _ = fs::remove_file(&partial);
+            return Err(error);
+        }
 
         let project_id: String = conn.query_row(
             "SELECT project_id FROM projects LIMIT 1",
@@ -81,7 +88,7 @@ impl AssetService {
         let relative_path = format!("renders/{}", target_name);
         let mime_type = mime_from_filename(&filename);
 
-        conn.execute(
+        if let Err(error) = conn.execute(
             "INSERT INTO assets (asset_id,project_id,kind,filename,relative_path,mime_type,size_bytes,sha256,created_at,updated_at,metadata_json)
              VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11)",
             params![
@@ -97,7 +104,10 @@ impl AssetService {
                 now,
                 metadata_json
             ],
-        )?;
+        ) {
+            let _ = fs::remove_file(&target);
+            return Err(AssetError::Sqlite(error));
+        }
 
         Ok(AssetRecord {
             asset_id,
@@ -384,6 +394,39 @@ mod tests {
         assert_eq!(modules.len(), 2);
         assert!(modules.iter().any(|v| v.as_str() == Some("c2m")));
         assert!(modules.iter().any(|v| v.as_str() == Some("forge")));
+    }
+
+    #[test]
+    fn ingest_does_not_leave_partial_file_on_database_failure() {
+        let root = tempfile::tempdir().expect("root");
+        let source = root.path().join("render.webm");
+        fs::write(&source, b"rollback-test").expect("source");
+
+        let project_root = root.path().join("rollback.tamasrazim");
+        fs::create_dir_all(project_root.join("renders")).expect("renders");
+        fs::write(
+            project_root.join("manifest.json"),
+            r#"{"format":"tamasrazim","formatVersion":"0.1","projectId":"rollback","name":"Rollback","createdBy":"KYNESTRA"}"#,
+        ).expect("manifest");
+        let conn = db::open(&project_root.join("project.db")).expect("db");
+        conn.execute(
+            "INSERT INTO projects (project_id,name,format,format_version,root_path,created_at,updated_at)
+             VALUES ('rollback','Rollback','tamasrazim','0.1',?1,'now','now')",
+            [project_root.to_string_lossy().as_ref()],
+        ).expect("project row");
+        conn.execute(
+            "CREATE TRIGGER reject_asset_insert BEFORE INSERT ON assets BEGIN SELECT RAISE(ABORT, 'forced rollback'); END;",
+            [],
+        ).expect("trigger");
+
+        let result = AssetService::default().ingest(
+            project_root.to_str().unwrap(),
+            source.to_str().unwrap(),
+            "video",
+            None,
+        );
+        assert!(matches!(result, Err(AssetError::Sqlite(_))));
+        assert!(!project_root.join("renders").join("render.webm").exists());
     }
 
     #[test]
