@@ -1,3 +1,4 @@
+use super::projects::ProjectManager;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -226,15 +227,9 @@ impl PackageService {
 }
 
 fn validate_project(path: &str) -> Result<PathBuf, PackageError> {
-    let root = PathBuf::from(path);
-    if root.extension().and_then(|v| v.to_str()) != Some("tamasrazim")
-        || !root.is_dir()
-        || !root.join("manifest.json").is_file()
-        || !root.join("project.db").is_file()
-    {
-        return Err(PackageError::InvalidProject);
-    }
-    Ok(root)
+    ProjectManager::default()
+        .validated_root(path)
+        .map_err(|_| PackageError::InvalidProject)
 }
 
 fn validate_working_manifest(project: &ProjectManifest) -> Result<(), PackageError> {
