@@ -116,8 +116,8 @@ mod tests {
     fn duplicate_or_blank_capabilities_are_rejected() {
         let mut manifest = ModuleManifest {
             id: "c2m".into(),
-            name: "Code Motion".into(),
-            display_name: "Code Motion".into(),
+            name: "KYNESTRA".into(),
+            display_name: "KYNESTRA".into(),
             version: "0.1.0".into(),
             api_version: SUPPORTED_API_VERSION.into(),
             entry: "renderer/index.html".into(),
