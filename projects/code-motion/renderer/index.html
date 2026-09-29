@@ -17062,6 +17062,57 @@ async function restartBatchEngine() {
   await bootEngine();
 }
 
+function stockMetadataForTitle(title) {
+  var clean = String(title || 'Prism Flower').replace(/^Prism\\s+/i, '').trim();
+  var flower = clean || 'Flower';
+  var commercialTitle = 'Prism ' + flower + ' — Translucent Geometric Flower Animation';
+  var description = 'Translucent geometric ' + flower + ' flower animation featuring luminous prism-like petals, layered color, soft gradients and seamless 10-second motion on a clean transparent background.';
+  var keywords = [
+    flower.toLowerCase(),
+    'flower','floral','botanical','translucent','geometric','prism','geometric flower',
+    'flower animation','seamless loop','10 second loop','abstract','colorful','vivid',
+    'luminous','glowing','gradient','petals','bloom','nature','decorative','design',
+    'background','transparent','alpha','motion','motion graphics','animation','3d',
+    'pseudo 3d','digital art','abstract nature','botanical animation','flower loop',
+    'seamless animation','modern','elegant','vibrant','iridescent','refraction','light',
+    'texture','organic','spring','floral design','stock footage','4k','60fps'
+  ];
+  return {
+    commercialTitle: commercialTitle,
+    description: description,
+    keywords: keywords,
+    keywordCount: keywords.length
+  };
+}
+function csvEscape(value) {
+  var s = String(value == null ? '' : value);
+  return '"' + s.replace(/"/g, '""') + '"';
+}
+function stockMetadataCsv(entries) {
+  var rows = [['Commercial Title','Description','Keywords','Filename','Status']];
+  entries.forEach(function (e) {
+    rows.push([
+      e.commercialTitle,
+      e.description,
+      e.keywords.join(', '),
+      e.filename,
+      e.status
+    ]);
+  });
+  return rows.map(function (row) {
+    return row.map(csvEscape).join(',');
+  }).join('\\r\\n') + '\\r\\n';
+}
+function stockMetadataJson(entries, count) {
+  return JSON.stringify({
+    format: 'tamasrazim-stock-metadata',
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    count: count,
+    items: entries
+  }, null, 2);
+}
+
 async function renderPrismBatch(limit, label) {
   if (S.rendering || S.batchRendering) return;
 
@@ -17111,6 +17162,7 @@ async function renderPrismBatch(limit, label) {
   if (batchFormat === 'dir') batchFormat = 'mp4';
 
   var outputDir = null;
+  var batchMetadata = [];
 
   function batchLog(msg, hi) {
     logLine(msg, !!hi);
@@ -17165,6 +17217,7 @@ async function renderPrismBatch(limit, label) {
         var compiled = await run();
         if (!compiled || !compiled.ok) {
           failed++;
+          metadataEntry.status = 'compile failed';
           batchLog('batch skipped ' + title + ' — compile failed', true);
           continue;
         }
@@ -17173,6 +17226,18 @@ async function renderPrismBatch(limit, label) {
         job.label = title;
         job.metadata.title = title;
         job.fileName = fileNameFor(job.composition, job.metadata.title, batchFormat, null);
+
+        var stockMeta = stockMetadataForTitle(title);
+        var metadataEntry = {
+          flower: title.replace(/^Prism\\s+/i, '').trim(),
+          commercialTitle: stockMeta.commercialTitle,
+          description: stockMeta.description,
+          keywords: stockMeta.keywords,
+          keywordCount: stockMeta.keywordCount,
+          filename: job.fileName,
+          status: 'pending'
+        };
+        batchMetadata.push(metadataEntry);
 
         var result = null;
         var attempts = 0;
@@ -17243,9 +17308,11 @@ async function renderPrismBatch(limit, label) {
           batchLog('saving ' + job.fileName + '…');
           await writeBlobToDirectory(outputDir, result.blob, job.fileName);
           completed++;
+          metadataEntry.status = 'completed';
           batchLog('batch complete → ' + job.fileName, true);
         } else {
           failed++;
+          metadataEntry.status = 'render failed';
           var batchError = result && result.error
             ? (result.error.name + ': ' + result.error.message)
             : 'unknown render failure';
@@ -17301,6 +17368,25 @@ async function renderPrismBatch(limit, label) {
     }
 
     renderQueue();
+
+    if (outputDir && batchMetadata.length) {
+      try {
+        await writeBlobToDirectory(
+          outputDir,
+          new Blob([stockMetadataCsv(batchMetadata)], { type: 'text/csv;charset=utf-8' }),
+          'STOCK_METADATA.csv'
+        );
+        await writeBlobToDirectory(
+          outputDir,
+          new Blob([stockMetadataJson(batchMetadata, samples.length)], { type: 'application/json;charset=utf-8' }),
+          'STOCK_METADATA.json'
+        );
+        batchLog('stock metadata saved — STOCK_METADATA.csv + STOCK_METADATA.json', true);
+      } catch (metadataError) {
+        batchLog('stock metadata export failed — ' + String(metadataError && metadataError.message || metadataError), true);
+      }
+    }
+
     if (b50) b50.disabled = false;
     if (ball) ball.disabled = false;
     $('#stDot').className = 'dot ok';
