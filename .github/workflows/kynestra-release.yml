@@ -33,17 +33,17 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Generate Cargo.lock for this build
-        run: cargo generate-lockfile
-
-      - name: Run tests
-        run: cargo test --locked
-
       - name: Install Tauri CLI
         run: cargo install tauri-cli --version "2.12.0" --locked
 
       - name: Generate Windows app icons
         run: cargo tauri icon icons/kynestra-source.svg
+
+      - name: Generate Cargo.lock for this build
+        run: cargo generate-lockfile
+
+      - name: Run tests
+        run: cargo test --locked
 
       - name: Build NSIS installer
         run: cargo tauri build --locked --bundles nsis
