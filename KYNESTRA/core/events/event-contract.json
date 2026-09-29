@@ -16,6 +16,7 @@
     "asset.imported",
     "submission.updated",
     "account.connected",
-    "account.disconnected"
+    "account.disconnected",
+    "account.updated"
   ]
 }

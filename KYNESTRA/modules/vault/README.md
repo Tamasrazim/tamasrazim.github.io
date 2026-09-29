@@ -21,3 +21,11 @@ The Core can now register a rendered output into a project:
 - multi-platform connectors
 
 Vault is not limited to Shutterstock.
+
+## Account and submission foundation
+
+Accounts store platform name, display name, contributor/profile URL, connection state, and an optional credential reference. They do not store passwords or secret tokens in the project database.
+
+Submission records track `not_submitted`, `submitted`, `pending`, `approved`, `rejected`, or `unknown` states per asset/account pair.
+
+Public verification is intentionally separate: a missing public result is not treated as rejection.

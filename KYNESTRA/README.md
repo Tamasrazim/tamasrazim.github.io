@@ -15,6 +15,8 @@ The Tauri desktop runtime now has a Rust Core with:
 - persistent render jobs
 - SHA-256 asset ingestion and deduplication
 - project-local Stock Vault asset listing
+- platform account metadata and connection state
+- per-asset submission tracking
 
 Modules:
 
