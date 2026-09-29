@@ -4,7 +4,7 @@
 
   window.addEventListener('DOMContentLoaded',function(){
     var script=document.createElement('script');
-    script.src='./assets/js/motion-core.js?v=20260929-9';
+    script.src='./assets/js/motion-core.js?v=20260929-10';
     script.async=true;
     document.body.appendChild(script);
   },{once:true});
