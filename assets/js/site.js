@@ -105,7 +105,7 @@
     function queueProgress(){
       if(!progressTick){
         progressTick = true;
-        window.requestAnimationFrame(updateProgress);
+        requestAnimationFrame60(updateProgress);
       }
     }
     window.addEventListener('scroll', queueProgress, {passive:true});
