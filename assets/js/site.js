@@ -128,7 +128,7 @@
       var viewportRight=current + window.innerWidth;
 
       if(left < current + 12 || right > viewportRight - 12){
-        document.body.scrollTo({
+        pageScroller.scrollTo({
           left:Math.max(0,Math.min(pageScroller.scrollWidth-window.innerWidth,left)),
           top:0,
           behavior:reduced?'auto':'smooth'
