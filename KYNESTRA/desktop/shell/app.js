@@ -60,14 +60,14 @@ async function renderVault() {
     '<div class="notice">Project: <strong>'+escapeHtml(project.name)+'</strong> · '+assets.length+' asset'+(assets.length===1?'':'s')+' · '+accounts.length+' account'+(accounts.length===1?'':'s')+'</div>'+
     '<div class="actions">'+
     '<button id="vault-add-account" class="action">Add Platform Account</button>'+
-    (accounts.length ? '<button id="vault-set-submission" class="action primary">Update Submission Status</button>' : '')+
+    (accounts.length ? '<button id="vault-set-submission" class="action">Update Submission Status</button><button id="vault-check-public" class="action primary">Check Public Status</button>' : '')+
     '</div>'+
     '<div class="projects">'+(
       assets.length
       ? assets.map(asset => {
           const states=submissions.filter(s=>s.asset_id===asset.asset_id);
           const stateText=states.length
-            ? states.map(s=>(s.platform||'Account')+' · '+s.status).join(' · ')
+            ? states.map(s=>(s.platform||'Account')+' · '+s.status+' · public '+s.public_status).join(' · ')
             : 'not submitted';
           return '<div class="project"><b>'+escapeHtml(asset.filename)+'</b><code>'+escapeHtml(asset.relative_path)+'</code><span class="muted">'+escapeHtml(asset.kind)+' · '+formatBytes(asset.size_bytes)+' · SHA-256 '+escapeHtml(asset.sha256.slice(0,16))+'…</span><span class="muted">Submission: '+escapeHtml(stateText)+'</span></div>';
         }).join('')
@@ -77,6 +77,7 @@ async function renderVault() {
 
   document.getElementById('vault-add-account')?.addEventListener('click', createAccount);
   document.getElementById('vault-set-submission')?.addEventListener('click', setSubmissionStatus);
+  document.getElementById('vault-check-public')?.addEventListener('click', checkSubmissionPublicStatus);
 }
 
 async function renderSettings() {
@@ -152,6 +153,26 @@ async function setSubmissionStatus() {
       publicUrl,
       reason
     });
+    await renderVault();
+  } catch (error) { alert(String(error)); }
+}
+
+async function checkSubmissionPublicStatus() {
+  const project=state.activeProject;
+  if (!project) return;
+  try {
+    const submissions=await api('list_submissions', { projectPath: project.path });
+    if (!submissions.length) {
+      alert('Create a submission record first.');
+      return;
+    }
+    const submissionId=prompt('Submission ID', submissions[0].submission_id);
+    if (!submissionId) return;
+    const result=await api('check_submission_public_status', {
+      projectPath: project.path,
+      submissionId
+    });
+    alert('Public status: '+result.public_status+'\n\n'+result.reason);
     await renderVault();
   } catch (error) { alert(String(error)); }
 }

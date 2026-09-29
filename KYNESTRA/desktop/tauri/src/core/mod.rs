@@ -6,6 +6,7 @@ pub mod projects;
 pub mod render;
 pub mod submissions;
 pub mod tasks;
+pub mod verification;
 
 use std::path::PathBuf;
 
@@ -16,6 +17,7 @@ use projects::ProjectManager;
 use render::RenderService;
 use submissions::SubmissionService;
 use tasks::TaskService;
+use verification::VerificationService;
 
 pub struct CoreState {
     pub data_root: PathBuf,
@@ -25,6 +27,7 @@ pub struct CoreState {
     pub assets: AssetService,
     pub accounts: AccountService,
     pub submissions: SubmissionService,
+    pub verification: VerificationService,
     pub events: EventBus,
 }
 
@@ -38,6 +41,7 @@ impl CoreState {
             assets: AssetService::default(),
             accounts: AccountService::default(),
             submissions: SubmissionService::default(),
+            verification: VerificationService::default(),
             events: EventBus::default(),
         }
     }

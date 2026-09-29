@@ -148,6 +148,20 @@ fn set_submission_status(app: AppHandle, project_path: String, asset_id: String,
     Ok(submission)
 }
 
+#[tauri::command]
+async fn check_submission_public_status(
+    app: AppHandle,
+    project_path: String,
+    submission_id: String,
+) -> Result<core::verification::PublicStatusResult, String> {
+    let state = app.state::<CoreState>();
+    let result = state.verification.check(&project_path, &submission_id).await.map_err(|e| e.to_string())?;
+    let event = CoreEvent::new("submission.updated", serde_json::to_value(&result).map_err(|e| e.to_string())?);
+    state.events.persist(std::path::Path::new(&project_path), &event).map_err(|e| e.to_string())?;
+    state.events.publish(&app, event).map_err(|e| e.to_string())?;
+    Ok(result)
+}
+
 #[derive(serde::Serialize)]
 struct CoreStatus { name:String, version:String, status:String }
 
@@ -164,7 +178,7 @@ pub fn run() {
             core_status,list_projects,create_project,open_project,create_task,update_task,
             create_render_job,start_render_job,complete_render_job,fail_render_job,
             list_assets,list_render_jobs,list_accounts,create_account,update_account_status,
-            list_submissions,set_submission_status
+            list_submissions,set_submission_status,check_submission_public_status
         ])
         .run(tauri::generate_context!())
         .expect("error while running KYNESTRA");
