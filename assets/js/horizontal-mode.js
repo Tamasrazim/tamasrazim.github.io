@@ -37,7 +37,7 @@
     if(progressControl){
       var percent=Math.round(amount*100);
       progressControl.setAttribute('aria-valuenow',String(percent));
-      var activeSection=readout && readout.dataset.section ? readout.dataset.section : 'page';
+      var activeSection=readout && readout.dataset.name ? readout.dataset.name : 'page';
       progressControl.setAttribute('aria-valuetext',percent+'% · '+activeSection);
     }
 
