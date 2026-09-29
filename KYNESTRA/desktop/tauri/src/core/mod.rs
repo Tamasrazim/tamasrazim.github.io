@@ -5,6 +5,7 @@ pub mod events;
 pub mod package;
 pub mod projects;
 pub mod handoff;
+pub mod modules;
 pub mod render;
 pub mod submissions;
 pub mod tasks;
@@ -14,6 +15,7 @@ use std::path::PathBuf;
 
 use accounts::AccountService;
 use handoff::HandoffService;
+use modules::ModuleRegistry;
 use assets::AssetService;
 use events::EventBus;
 use package::PackageService;
@@ -34,12 +36,15 @@ pub struct CoreState {
     pub submissions: SubmissionService,
     pub verification: VerificationService,
     pub package: PackageService,
+    pub modules: Vec<modules::ModuleManifest>,
     pub events: EventBus,
 }
 
 impl CoreState {
-    pub fn new(data_root: PathBuf) -> Self {
-        Self {
+    pub fn new(data_root: PathBuf) -> Result<Self, modules::ModuleRegistryError> {
+        let modules = ModuleRegistry::default().builtin()?;
+
+        Ok(Self {
             data_root,
             projects: ProjectManager::default(),
             tasks: TaskService::default(),
@@ -50,7 +55,8 @@ impl CoreState {
             submissions: SubmissionService::default(),
             verification: VerificationService::default(),
             package: PackageService::default(),
+            modules,
             events: EventBus::default(),
-        }
+        })
     }
 }
