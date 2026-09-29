@@ -153,7 +153,7 @@ fn list_accounts(app: AppHandle, project_path: String) -> Result<Vec<AccountReco
 fn create_account(app: AppHandle, project_path: String, platform: String, display_name: String, profile_url: Option<String>) -> Result<AccountRecord,String> {
     let state=app.state::<CoreState>();
     let account=state.accounts.create(&project_path,&platform,&display_name,profile_url).map_err(|e| e.to_string())?;
-    let event=CoreEvent::new("account.connected",serde_json::to_value(&account).map_err(|e| e.to_string())?);
+    let event=CoreEvent::new("account.updated",serde_json::to_value(&account).map_err(|e| e.to_string())?);
     state.events.persist(std::path::Path::new(&project_path),&event).map_err(|e| e.to_string())?;
     state.events.publish(&app,event);
     Ok(account)
