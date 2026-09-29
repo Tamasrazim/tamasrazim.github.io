@@ -17,6 +17,9 @@
     "submission.updated",
     "account.connected",
     "account.disconnected",
-    "account.updated"
+    "account.updated",
+    "task.recovered",
+    "project.exported",
+    "project.imported"
   ]
 }

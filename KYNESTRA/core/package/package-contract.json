@@ -1,0 +1,21 @@
+{
+  "version": "0.2",
+  "extension": ".tamasrazim",
+  "container": "zip",
+  "packageVersion": 1,
+  "integrity": "sha256-per-file",
+  "excludes": [
+    "cache/**"
+  ],
+  "requiredEntries": [
+    "package-manifest.json",
+    "manifest.json",
+    "project.db"
+  ],
+  "extraction": {
+    "rejectAbsolutePaths": true,
+    "rejectParentTraversal": true,
+    "verifySize": true,
+    "verifySha256": true
+  }
+}
