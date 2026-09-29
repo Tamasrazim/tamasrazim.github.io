@@ -1,0 +1,19 @@
+{
+  "version": "0.1",
+  "command": "ingest_module_output",
+  "input": {
+    "projectPath": "working .tamasrazim directory",
+    "sourcePath": "existing filesystem output",
+    "module": "forge|c2m|external",
+    "kind": "asset kind",
+    "metadata": "JSON object"
+  },
+  "behavior": [
+    "Core copies the source into project storage",
+    "Core computes SHA-256",
+    "Core deduplicates by SHA-256",
+    "Core records sourceModule in asset metadata",
+    "Core emits asset.imported"
+  ],
+  "event": "asset.imported"
+}
