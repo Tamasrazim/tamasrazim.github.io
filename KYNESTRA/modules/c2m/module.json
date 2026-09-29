@@ -1,7 +1,7 @@
 {
   "id": "c2m",
-  "name": "C2M",
-  "displayName": "Code Motion",
+  "name": "KYNESTRA",
+  "displayName": "KYNESTRA",
   "version": "0.1.0",
   "apiVersion": "0.1",
   "entry": "renderer/index.html",
