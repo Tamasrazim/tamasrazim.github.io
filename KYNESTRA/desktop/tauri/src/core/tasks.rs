@@ -63,16 +63,45 @@ impl TaskService {
         let root = validate_project_path(project_path)?;
         let conn = db::open(&root.join("project.db"))?;
 
+        validate_status(status)?;
+
+        let current_status: String = conn.query_row(
+            "SELECT status FROM tasks WHERE task_id=?1",
+            params![task_id],
+            |row| row.get(0),
+        )?;
+
+        if current_status == status {
+            return conn.query_row(
+                "SELECT task_id,project_id,type,status,progress,message FROM tasks WHERE task_id=?1",
+                params![task_id],
+                |row| {
+                    Ok(TaskRecord {
+                        task_id: row.get(0)?,
+                        project_id: row.get(1)?,
+                        task_type: row.get(2)?,
+                        status: row.get(3)?,
+                        progress: row.get(4)?,
+                        message: row.get(5)?,
+                    })
+                },
+            ).map_err(TaskError::from);
+        }
+
+        validate_transition(&current_status, status)?;
+
         let progress = progress.clamp(0.0, 1.0);
         let finished_at = if matches!(status, "completed" | "failed" | "cancelled") {
             Some(Utc::now().to_rfc3339())
+        } else if current_status != status {
+            None
         } else {
             None
         };
 
         conn.execute(
             "UPDATE tasks
-             SET status=?1,progress=?2,message=?3,finished_at=COALESCE(?4,finished_at),
+             SET status=?1,progress=?2,message=?3,finished_at=?4,
                  started_at=CASE WHEN ?1='running' AND started_at IS NULL THEN ?5 ELSE started_at END
              WHERE task_id=?6",
             params![status, progress, message, finished_at, Utc::now().to_rfc3339(), task_id],
@@ -171,10 +200,41 @@ fn validate_project_path(path: &str) -> Result<PathBuf, TaskError> {
     Ok(root.to_path_buf())
 }
 
+fn validate_status(status: &str) -> Result<(), TaskError> {
+    match status {
+        "queued" | "running" | "paused" | "recoverable" | "completed" | "failed" | "cancelled" => Ok(()),
+        _ => Err(TaskError::InvalidStatus(status.into())),
+    }
+}
+
+fn validate_transition(current: &str, next: &str) -> Result<(), TaskError> {
+    let allowed = match current {
+        "queued" => matches!(next, "running" | "cancelled"),
+        "running" => matches!(next, "paused" | "recoverable" | "completed" | "failed" | "cancelled"),
+        "paused" => matches!(next, "running" | "cancelled"),
+        "recoverable" => matches!(next, "queued" | "cancelled"),
+        "completed" | "failed" | "cancelled" => false,
+        _ => false,
+    };
+
+    if allowed {
+        Ok(())
+    } else {
+        Err(TaskError::InvalidTransition {
+            current: current.into(),
+            next: next.into(),
+        })
+    }
+}
+
 #[derive(Debug, thiserror::Error)]
 pub enum TaskError {
     #[error("invalid .tamasrazim project path")]
     InvalidProject,
+    #[error("invalid task status: {0}")]
+    InvalidStatus(String),
+    #[error("invalid task transition: {current} -> {next}")]
+    InvalidTransition { current: String, next: String },
     #[error("database error: {0}")]
     Sqlite(#[from] rusqlite::Error),
     #[error("serialization error: {0}")]
@@ -187,6 +247,18 @@ pub enum TaskError {
 mod tests {
     use super::*;
     use std::fs;
+
+    #[test]
+    fn task_status_transitions_are_validated() {
+        assert!(validate_transition("queued", "running").is_ok());
+        assert!(validate_transition("running", "paused").is_ok());
+        assert!(validate_transition("paused", "running").is_ok());
+        assert!(validate_transition("running", "completed").is_ok());
+        assert!(validate_transition("recoverable", "queued").is_ok());
+        assert!(validate_transition("completed", "running").is_err());
+        assert!(validate_transition("failed", "queued").is_err());
+        assert!(validate_status("invalid").is_err());
+    }
 
     #[test]
     fn list_returns_recent_tasks() {
