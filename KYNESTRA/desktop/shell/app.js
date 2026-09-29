@@ -9,10 +9,109 @@ const state = { projects: [], core: null, activeProject: null };
 const views = {
   home: renderHome,
   forge: () => renderModule('Forge', 'Creation workspace boundary is ready. Forge will become the source and recipe module.'),
-  c2m: () => renderModule('C2M', 'Code Motion is the renderer module. The production renderer remains outside KYNESTRA.'),
-  vault: () => renderModule('Stock Vault', 'Vault will ingest completed C2M renders and track platform states independently.'),
+  c2m: renderC2M,
+  vault: renderVault,
   settings: () => renderModule('Settings', 'Core settings will be persisted through the shared settings service.')
 };
+
+async function renderC2M() {
+  const project = state.activeProject;
+  const active = project
+    ? '<div class="notice">Active project: <strong>'+escapeHtml(project.name)+'</strong></div>'
+    : '<div class="notice">Open a .tamasrazim project first to create a Core render job.</div>';
+
+  view.innerHTML =
+    '<div class="card"><h2>Code Motion</h2><p class="muted">KYNESTRA ships its own C2M renderer copy. Core render jobs and Vault ingestion are now connected around it.</p>'+
+    active+
+    '<div class="actions">'+
+    '<button id="launch-c2m" class="action primary">Launch C2M Renderer</button>'+
+    (project ? '<button id="new-render-job" class="action">Create Core Render Job</button><button id="import-render-output" class="action">Register Render Output</button>' : '')+
+    '</div>'+
+    '<div id="render-job-list" class="projects"></div></div>';
+
+  if (!project) return;
+
+  const jobs = await api('list_render_jobs', { projectPath: project.path });
+  const list = document.getElementById('render-job-list');
+  list.innerHTML = jobs.length
+    ? jobs.map(job => '<div class="project"><b>'+escapeHtml(job.status.toUpperCase())+' · '+escapeHtml(job.format)+'</b><code>'+escapeHtml(job.job_id)+'</code><span class="muted">'+escapeHtml(JSON.stringify(job.composition))+'</span></div>').join('')
+    : '<div class="notice">No render jobs yet.</div>';
+
+  document.getElementById('new-render-job')?.addEventListener('click', createRenderJob);
+  document.getElementById('import-render-output')?.addEventListener('click', completeRenderJob);
+}
+
+async function renderVault() {
+  const project = state.activeProject;
+  if (!project) {
+    renderModule('Stock Vault', 'Open a .tamasrazim project first. Vault is project-local.');
+    return;
+  }
+
+  const assets = await api('list_assets', { projectPath: project.path });
+  view.innerHTML =
+    '<div class="card"><h2>Stock Vault</h2><p class="muted">Assets registered from KYNESTRA render outputs are stored in the project asset registry and deduplicated by SHA-256.</p>'+
+    '<div class="notice">Project: <strong>'+escapeHtml(project.name)+'</strong> · '+assets.length+' asset'+(assets.length === 1 ? '' : 's')+'</div>'+
+    '<div class="projects">'+(
+      assets.length
+      ? assets.map(asset => '<div class="project"><b>'+escapeHtml(asset.filename)+'</b><code>'+escapeHtml(asset.relative_path)+'</code><span class="muted">'+escapeHtml(asset.kind)+' · '+formatBytes(asset.size_bytes)+' · SHA-256 '+escapeHtml(asset.sha256.slice(0,16))+'…</span></div>').join('')
+      : '<div class="notice">Vault is empty for this project.</div>'
+    )+'</div></div>';
+}
+
+async function createRenderJob() {
+  if (!state.activeProject) return;
+  try {
+    const format = prompt('Output format', 'webm') || 'webm';
+    const duration = Number(prompt('Duration in seconds', '15')) || 15;
+    const fps = Number(prompt('FPS', '60')) || 60;
+    const composition = {
+      width: 3840,
+      height: 2160,
+      fps,
+      duration,
+      frameCount: Math.round(duration * fps)
+    };
+    const job = await api('create_render_job', {
+      projectPath: state.activeProject.path,
+      format,
+      composition
+    });
+    await api('start_render_job', { projectPath: state.activeProject.path, jobId: job.job_id });
+    await renderC2M();
+  } catch (error) {
+    alert(String(error));
+  }
+}
+
+async function completeRenderJob() {
+  if (!state.activeProject) return;
+  try {
+    const jobId = prompt('Render job ID');
+    if (!jobId) return;
+    const sourcePath = prompt('Absolute path to the rendered output file');
+    if (!sourcePath) return;
+    const asset = await api('complete_render_job', {
+      projectPath: state.activeProject.path,
+      jobId,
+      sourcePath,
+      kind: 'video',
+      metadata: { source: 'c2m' }
+    });
+    alert('Imported '+asset.filename+' into Stock Vault.');
+    await renderC2M();
+  } catch (error) {
+    alert(String(error));
+  }
+}
+
+function formatBytes(value) {
+  const n = Number(value) || 0;
+  if (n < 1024) return n+' B';
+  if (n < 1024*1024) return (n/1024).toFixed(1)+' KB';
+  if (n < 1024*1024*1024) return (n/1024/1024).toFixed(1)+' MB';
+  return (n/1024/1024/1024).toFixed(2)+' GB';
+}
 
 function renderModule(name, text) {
   view.innerHTML = '<div class="card"><h2>'+name+'</h2><p class="muted">'+text+'</p></div>';

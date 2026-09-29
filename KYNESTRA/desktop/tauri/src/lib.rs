@@ -1,7 +1,9 @@
 mod core;
 
+use core::assets::AssetRecord;
 use core::events::CoreEvent;
 use core::projects::{CreateProjectResult, ProjectSummary};
+use core::render::RenderJobRecord;
 use core::tasks::TaskRecord;
 use core::CoreState;
 use tauri::{AppHandle, Manager};
@@ -74,6 +76,90 @@ fn update_task(app: AppHandle, project_path: String, task_id: String, status: St
     Ok(task)
 }
 
+#[tauri::command]
+fn create_render_job(
+    app: AppHandle,
+    project_path: String,
+    format: String,
+    composition: serde_json::Value,
+) -> Result<RenderJobRecord, String> {
+    let state = app.state::<CoreState>();
+    let job = state.render.create(&project_path, &format, composition, &state.tasks).map_err(|e| e.to_string())?;
+    let event = CoreEvent::new("task.created", serde_json::json!({
+        "taskId": job.task_id,
+        "type": "render",
+        "projectId": job.project_id,
+        "jobId": job.job_id
+    }));
+    state.events.persist(std::path::Path::new(&project_path), &event).map_err(|e| e.to_string())?;
+    state.events.publish(&app, event).map_err(|e| e.to_string())?;
+    Ok(job)
+}
+
+#[tauri::command]
+fn start_render_job(app: AppHandle, project_path: String, job_id: String) -> Result<RenderJobRecord, String> {
+    let state = app.state::<CoreState>();
+    let job = state.render.start(&project_path, &job_id).map_err(|e| e.to_string())?;
+    let event = CoreEvent::new("render.started", serde_json::to_value(&job).map_err(|e| e.to_string())?);
+    state.events.persist(std::path::Path::new(&project_path), &event).map_err(|e| e.to_string())?;
+    state.events.publish(&app, event).map_err(|e| e.to_string())?;
+    Ok(job)
+}
+
+#[tauri::command]
+fn complete_render_job(
+    app: AppHandle,
+    project_path: String,
+    job_id: String,
+    source_path: String,
+    kind: String,
+    metadata: Option<serde_json::Value>,
+) -> Result<AssetRecord, String> {
+    let state = app.state::<CoreState>();
+    let asset = state.assets.ingest(&project_path, &source_path, &kind, metadata).map_err(|e| e.to_string())?;
+    let job = state.render.attach_asset(&project_path, &job_id, &asset.asset_id, &asset.relative_path, &state.tasks).map_err(|e| e.to_string())?;
+
+    let imported = CoreEvent::new("asset.imported", serde_json::to_value(&asset).map_err(|e| e.to_string())?);
+    state.events.persist(std::path::Path::new(&project_path), &imported).map_err(|e| e.to_string())?;
+    state.events.publish(&app, imported).map_err(|e| e.to_string())?;
+
+    let completed = CoreEvent::new("render.completed", serde_json::json!({
+        "job": job,
+        "asset": asset
+    }));
+    state.events.persist(std::path::Path::new(&project_path), &completed).map_err(|e| e.to_string())?;
+    state.events.publish(&app, completed).map_err(|e| e.to_string())?;
+
+    Ok(asset)
+}
+
+#[tauri::command]
+fn fail_render_job(
+    app: AppHandle,
+    project_path: String,
+    job_id: String,
+    error: String,
+) -> Result<RenderJobRecord, String> {
+    let state = app.state::<CoreState>();
+    let job = state.render.fail(&project_path, &job_id, &error, &state.tasks).map_err(|e| e.to_string())?;
+    let event = CoreEvent::new("render.failed", serde_json::to_value(&job).map_err(|e| e.to_string())?);
+    state.events.persist(std::path::Path::new(&project_path), &event).map_err(|e| e.to_string())?;
+    state.events.publish(&app, event).map_err(|e| e.to_string())?;
+    Ok(job)
+}
+
+#[tauri::command]
+fn list_assets(app: AppHandle, project_path: String) -> Result<Vec<AssetRecord>, String> {
+    let state = app.state::<CoreState>();
+    state.assets.list(&project_path).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn list_render_jobs(app: AppHandle, project_path: String) -> Result<Vec<RenderJobRecord>, String> {
+    let state = app.state::<CoreState>();
+    state.render.list(&project_path).map_err(|e| e.to_string())
+}
+
 #[derive(serde::Serialize)]
 struct CoreStatus {
     name: String,
@@ -90,7 +176,20 @@ pub fn run() {
             app.manage(CoreState::new(data_root));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![core_status,list_projects,create_project,open_project,create_task,update_task])
+        .invoke_handler(tauri::generate_handler![
+            core_status,
+            list_projects,
+            create_project,
+            open_project,
+            create_task,
+            update_task,
+            create_render_job,
+            start_render_job,
+            complete_render_job,
+            fail_render_job,
+            list_assets,
+            list_render_jobs
+        ])
         .run(tauri::generate_context!())
         .expect("error while running KYNESTRA");
 }

@@ -41,6 +41,24 @@ CREATE TABLE IF NOT EXISTS tasks (
   FOREIGN KEY(project_id) REFERENCES projects(project_id) ON DELETE SET NULL
 );
 
+CREATE TABLE IF NOT EXISTS render_jobs (
+  job_id TEXT PRIMARY KEY,
+  task_id TEXT NOT NULL UNIQUE,
+  project_id TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'queued',
+  format TEXT NOT NULL,
+  composition_json TEXT NOT NULL,
+  output_relative_path TEXT,
+  asset_id TEXT,
+  created_at TEXT NOT NULL,
+  started_at TEXT,
+  completed_at TEXT,
+  error TEXT,
+  FOREIGN KEY(task_id) REFERENCES tasks(task_id) ON DELETE CASCADE,
+  FOREIGN KEY(project_id) REFERENCES projects(project_id) ON DELETE CASCADE,
+  FOREIGN KEY(asset_id) REFERENCES assets(asset_id) ON DELETE SET NULL
+);
+
 CREATE TABLE IF NOT EXISTS platform_accounts (
   account_id TEXT PRIMARY KEY,
   platform TEXT NOT NULL,
@@ -83,5 +101,7 @@ CREATE TABLE IF NOT EXISTS events (
 
 CREATE INDEX IF NOT EXISTS idx_assets_project ON assets(project_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+CREATE INDEX IF NOT EXISTS idx_render_jobs_project ON render_jobs(project_id);
+CREATE INDEX IF NOT EXISTS idx_render_jobs_status ON render_jobs(status);
 CREATE INDEX IF NOT EXISTS idx_submissions_asset ON submissions(asset_id);
 CREATE INDEX IF NOT EXISTS idx_events_type ON events(event_type);

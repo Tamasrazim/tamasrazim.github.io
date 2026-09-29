@@ -1,18 +1,24 @@
+pub mod assets;
 pub mod db;
 pub mod events;
 pub mod projects;
+pub mod render;
 pub mod tasks;
 
 use std::path::PathBuf;
 
+use assets::AssetService;
 use events::EventBus;
 use projects::ProjectManager;
+use render::RenderService;
 use tasks::TaskService;
 
 pub struct CoreState {
     pub data_root: PathBuf,
     pub projects: ProjectManager,
     pub tasks: TaskService,
+    pub render: RenderService,
+    pub assets: AssetService,
     pub events: EventBus,
 }
 
@@ -22,6 +28,8 @@ impl CoreState {
             data_root,
             projects: ProjectManager::default(),
             tasks: TaskService::default(),
+            render: RenderService::default(),
+            assets: AssetService::default(),
             events: EventBus::default(),
         }
     }
