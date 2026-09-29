@@ -96,6 +96,16 @@ fn complete_render_job(app: AppHandle, project_path: String, job_id: String, sou
 }
 
 #[tauri::command]
+fn recover_render_job(app: AppHandle, project_path: String, job_id: String) -> Result<RenderJobRecord,String> {
+    let state=app.state::<CoreState>();
+    let job=state.render.recover(&project_path,&job_id,&state.tasks).map_err(|e| e.to_string())?;
+    let event=CoreEvent::new("task.recovered",serde_json::to_value(&job).map_err(|e| e.to_string())?);
+    state.events.persist(std::path::Path::new(&project_path),&event).map_err(|e| e.to_string())?;
+    state.events.publish(&app,event).map_err(|e| e.to_string())?;
+    Ok(job)
+}
+
+#[tauri::command]
 fn fail_render_job(app: AppHandle, project_path: String, job_id: String, error: String) -> Result<RenderJobRecord,String> {
     let state=app.state::<CoreState>();
     let job=state.render.fail(&project_path,&job_id,&error,&state.tasks).map_err(|e| e.to_string())?;
@@ -238,7 +248,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             core_status,list_projects,create_project,open_project,create_task,update_task,
-            create_render_job,start_render_job,complete_render_job,fail_render_job,
+            create_render_job,start_render_job,recover_render_job,complete_render_job,fail_render_job,
             list_assets,list_render_jobs,list_accounts,create_account,update_account_status,
             list_submissions,set_submission_status,check_submission_public_status,export_project_package,import_project_package,ingest_module_output
         ])
