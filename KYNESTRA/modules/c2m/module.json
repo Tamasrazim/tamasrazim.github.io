@@ -20,5 +20,6 @@
   "boundaries": {
     "productionCopy": "projects/code-motion/renderer",
     "kynestraCopy": "KYNESTRA/modules/c2m/renderer"
-  }
+  },
+  "handoffCommand": "ingest_module_output"
 }
