@@ -49,6 +49,13 @@
     }
 
     if(menuButton && mobileNav){
+      window.addEventListener('keydown', function(e){
+        if(e.key==='Escape' && mobileNav.classList.contains('is-open')) closeMenu();
+      });
+      window.addEventListener('pointerdown', function(e){
+        if(!mobileNav.classList.contains('is-open')) return;
+        if(e.target===mobileNav) closeMenu();
+      }, {passive:true});
       menuButton.addEventListener('click', function(){
         var open = mobileNav.classList.toggle('is-open');
         menuButton.setAttribute('aria-expanded', String(open));
@@ -66,20 +73,38 @@
       clock.textContent = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
     }
     updateClock();
-    window.setInterval(updateClock, 1000);
+    var clockTimer = window.setInterval(updateClock, 1000);
+    document.addEventListener('visibilitychange', function(){
+      if(document.hidden){
+        window.clearInterval(clockTimer);
+      }else{
+        updateClock();
+        clockTimer = window.setInterval(updateClock, 1000);
+      }
+    }, {passive:true});
 
-    /* ---------- Scroll progress ---------- */
+    /* ---------- Scroll progress ----------
+       Horizontal mode owns the progress line once its axis is active. */
     var progressFill = q('#progressFill');
     var progressTick = false;
     function updateProgress(){
-      var max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      var amount = Math.max(0, Math.min(1, window.scrollY / max));
+      var horizontalMode = document.body && document.body.dataset.horizontalMode === 'true';
+      var max = horizontalMode
+        ? Math.max(1, document.body.scrollWidth - window.innerWidth)
+        : Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      var position = horizontalMode ? document.body.scrollLeft : window.scrollY;
+      var amount = Math.max(0, Math.min(1, position / max));
       if(progressFill) progressFill.style.transform = 'scaleX(' + amount + ')';
       progressTick = false;
     }
-    window.addEventListener('scroll', function(){
-      if(!progressTick){ progressTick = true; window.requestAnimationFrame(updateProgress); }
-    }, {passive:true});
+    function queueProgress(){
+      if(!progressTick){
+        progressTick = true;
+        window.requestAnimationFrame(updateProgress);
+      }
+    }
+    window.addEventListener('scroll', queueProgress, {passive:true});
+    window.addEventListener('resize', queueProgress, {passive:true});
     updateProgress();
 
     /* ---------- Reveal ---------- */
