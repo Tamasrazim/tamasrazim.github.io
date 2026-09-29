@@ -450,13 +450,17 @@ mod tests {
 
     #[test]
     fn package_manifest_rejects_incompatible_version() {
+        let valid_files = vec![
+            PackageFile { path: "manifest.json".into(), size: 1, sha256: "a".repeat(64) },
+            PackageFile { path: "project.db".into(), size: 1, sha256: "b".repeat(64) },
+        ];
         let mut manifest = PackageManifest {
             format: "tamasrazim".into(),
             package_version: PACKAGE_FORMAT_VERSION,
             project_id: "12345678".into(),
             name: "Test".into(),
             created_at: "now".into(),
-            files: Vec::new(),
+            files: valid_files,
         };
         assert!(validate_package_manifest(&manifest).is_ok());
 
@@ -471,6 +475,38 @@ mod tests {
     #[test]
     fn package_manifest_rejects_windows_separator() {
         assert!(safe_relative_path(r"source\\outside.txt").is_err());
+    }
+
+    #[test]
+    fn package_manifest_rejects_duplicate_and_reserved_paths() {
+        let base = PackageManifest {
+            format: "tamasrazim".into(),
+            package_version: PACKAGE_FORMAT_VERSION,
+            project_id: "12345678".into(),
+            name: "Test".into(),
+            created_at: "now".into(),
+            files: vec![
+                PackageFile { path: "manifest.json".into(), size: 1, sha256: "a".repeat(64) },
+                PackageFile { path: "project.db".into(), size: 1, sha256: "b".repeat(64) },
+            ],
+        };
+        assert!(validate_package_manifest(&base).is_ok());
+
+        let mut duplicate = base.clone();
+        duplicate.files.push(duplicate.files[0].clone());
+        assert!(validate_package_manifest(&duplicate).is_err());
+
+        let mut reserved = base.clone();
+        reserved.files.push(PackageFile {
+            path: PACKAGE_MANIFEST.into(),
+            size: 1,
+            sha256: "c".repeat(64),
+        });
+        assert!(validate_package_manifest(&reserved).is_err());
+
+        let mut missing_database = base;
+        missing_database.files.retain(|file| file.path != "project.db");
+        assert!(validate_package_manifest(&missing_database).is_err());
     }
 
     #[test]
@@ -531,6 +567,28 @@ mod tests {
             output.to_str().unwrap(),
         );
         assert!(matches!(result, Err(PackageError::InvalidOutput)));
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn export_rejects_symlinked_project_file() {
+        use std::os::unix::fs::symlink;
+
+        let root = tempfile::tempdir().expect("root");
+        let project = root.path().join("symlinked.tamasrazim");
+        fs::create_dir_all(&project).expect("project");
+        fs::write(
+            project.join("manifest.json"),
+            r#"{"format":"tamasrazim","formatVersion":"0.1","projectId":"symlink-123","name":"Symlinked","createdBy":"KYNESTRA"}"#,
+        ).expect("manifest");
+        fs::write(project.join("project.db"), b"sqlite-placeholder").expect("db");
+        let outside = root.path().join("outside.txt");
+        fs::write(&outside, b"outside").expect("outside");
+        symlink(&outside, project.join("source.txt")).expect("symlink");
+
+        let archive = root.path().join("Symlinked.tamasrazim");
+        let result = PackageService::default().export(project.to_str().unwrap(), archive.to_str().unwrap());
+        assert!(matches!(result, Err(PackageError::InvalidProject)));
     }
 
     #[test]
