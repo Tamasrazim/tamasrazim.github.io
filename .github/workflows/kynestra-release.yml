@@ -36,32 +36,20 @@ jobs:
       - name: Run tests
         run: cargo test
 
-      - name: Build and publish installer
-        uses: tauri-apps/tauri-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          projectPath: KYNESTRA/desktop/tauri
-          tagName: kynestra-v__VERSION__
-          releaseName: KYNESTRA v__VERSION__
-          releaseBody: |
-            Windows installer for KYNESTRA.
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version "2.12.0" --locked
 
-            Download the KYNESTRA setup executable and run it to install the desktop app.
-          releaseDraft: false
-          prerelease: false
-          generateReleaseNotes: true
-          args: --bundles nsis
-          releaseAssetNamePattern: KYNESTRA[setup].[ext]
+      - name: Build NSIS installer
+        run: cargo tauri build --bundles nsis
 
       - name: Normalize installer filename
         shell: pwsh
         run: |
-          $installer = Get-ChildItem "KYNESTRA/desktop/tauri/target/release/bundle/nsis/*-setup.exe" -File | Select-Object -First 1
+          $installer = Get-ChildItem "target/release/bundle/nsis/*-setup.exe" -File | Select-Object -First 1
           if (-not $installer) {
             throw "NSIS installer was not produced."
           }
-          Copy-Item $installer.FullName "KYNESTRA/desktop/tauri/target/release/bundle/nsis/KYNESTRA-Setup.exe" -Force
+          Copy-Item $installer.FullName "target/release/bundle/nsis/KYNESTRA-Setup.exe" -Force
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
@@ -69,13 +57,13 @@ jobs:
           name: KYNESTRA-Windows-Installer
           path: KYNESTRA/desktop/tauri/target/release/bundle/nsis/KYNESTRA-Setup.exe
           if-no-files-found: error
-      - name: Commit installer to repository
+
+      - name: Publish installer to repository
+        if: github.ref == 'refs/heads/kynestra-build'
         shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          New-Item -ItemType Directory -Force "KYNESTRA/releases" | Out-Null
-          Copy-Item "KYNESTRA/desktop/tauri/target/release/bundle/nsis/KYNESTRA-Setup.exe" "KYNESTRA/releases/KYNESTRA-Setup.exe" -Force
+          New-Item -ItemType Directory -Force "$env:GITHUB_WORKSPACE/KYNESTRA/releases" | Out-Null
+          Copy-Item "target/release/bundle/nsis/KYNESTRA-Setup.exe" "$env:GITHUB_WORKSPACE/KYNESTRA/releases/KYNESTRA-Setup.exe" -Force
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "KYNESTRA/releases/KYNESTRA-Setup.exe"
@@ -83,3 +71,16 @@ jobs:
             git commit -m "build: publish KYNESTRA Windows installer"
             git push
           }
+
+      - name: Publish tagged GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --title "KYNESTRA $tag" --notes "Windows installer for KYNESTRA."
+          }
+          gh release upload $tag "target/release/bundle/nsis/KYNESTRA-Setup.exe" --clobber
