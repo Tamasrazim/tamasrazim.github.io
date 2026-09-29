@@ -46,10 +46,10 @@ async function renderC2M() {
     : '<div class="notice">Open a .tamasrazim project first to create a Core render job.</div>';
 
   view.innerHTML =
-    '<div class="card"><h2>Code Motion</h2><p class="muted">KYNESTRA ships its own C2M renderer copy. Core render jobs and Vault ingestion are now connected around it.</p>'+
+    '<div class="card"><h2>KYNESTRA</h2><p class="muted">KYNESTRA ships its own C2M renderer copy. Core render jobs and Vault ingestion are now connected around it.</p>'+
     active+
     '<div class="actions">'+
-    '<button id="launch-c2m" class="action primary">Launch C2M Renderer</button>'+
+    '<button id="launch-c2m" class="action primary">Launch KYNESTRA Renderer</button>'+
     (project ? '<button id="launch-c2m-batch" class="action">Flower Batch Lab</button><button id="new-render-job" class="action">Create Core Render Job</button><button id="import-render-output" class="action">Register Render Output</button>' : '')+
     '</div>'+
     '<div id="render-job-list" class="projects"></div></div>';
