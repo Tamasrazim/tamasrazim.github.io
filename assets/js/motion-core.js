@@ -219,7 +219,7 @@ function frame(now){
   root.style.setProperty('--motion-py',ny.toFixed(4));
   root.style.setProperty('--motion-vx',pointer.vx.toFixed(2));
   root.style.setProperty('--motion-vy',pointer.vy.toFixed(2));
-  root.style.setProperty('--motion-scroll',scroll.y.toFixed(2));
+  root.style.setProperty('--motion-scroll',(horizontal?scroll.x:scroll.y).toFixed(2));
   root.style.setProperty('--motion-scroll-v',(horizontal?scroll.velocityX:scroll.velocityY).toFixed(2));
   root.style.setProperty('--motion-progress',progress.toFixed(4));
   root.style.setProperty('--motion-energy',energy.toFixed(4));
