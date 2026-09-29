@@ -1,5 +1,5 @@
 /**
- * Code → Motion V2 media-stack compatibility descriptor.
+ * KYNESTRA V2 media-stack compatibility descriptor.
  *
  * V2 uses the browser/device WebCodecs implementation for encoding and
  * contains its own small local muxers for the supported MP4/WebM outputs.
@@ -23,7 +23,7 @@
     link.id = 'tamasrazim-batch-link';
     link.href = '../batch/index.html';
     link.textContent = 'FLOWER BATCH';
-    link.setAttribute('aria-label', 'Open C2M Flower Batch Lab');
+    link.setAttribute('aria-label', 'Open KYNESTRA Flower Batch Lab');
     Object.assign(link.style, {
       position:'fixed',
       top:'12px',
