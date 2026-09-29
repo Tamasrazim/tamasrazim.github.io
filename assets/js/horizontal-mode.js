@@ -469,7 +469,7 @@
   var pageItems=Array.prototype.slice.call(
     content.querySelectorAll(':scope > section, :scope > .band')
   );
-  var footer=document.querySelector('body > .site-footer');
+  var footer=document.querySelector('.axis-scroller > .site-footer');
   if(footer)pageItems.push(footer);
 
   var rail=document.createElement('nav');
