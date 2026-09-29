@@ -107,6 +107,7 @@
     var delta=e.deltaY;
     if(Math.abs(e.deltaX)>Math.abs(e.deltaY) && Math.abs(e.deltaX)>0){
       scheduleProgress();
+      scheduleSnap();
       return;
     }
 
