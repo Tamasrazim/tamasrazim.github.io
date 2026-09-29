@@ -278,3 +278,14 @@ body > .site-footer{
   transform:scaleX(1);
   transform-origin:left;
 }
+
+/* Axis state shared by desktop contact and mobile navigation. */
+.site-header .header-contact.axis-active,
+.mobile-nav a.axis-active{
+  color:var(--white);
+}
+.site-header .header-contact.axis-active::after,
+.mobile-nav a.axis-active::after{
+  transform:scaleX(1);
+  transform-origin:left;
+}
