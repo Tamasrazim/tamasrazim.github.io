@@ -257,7 +257,7 @@
       drag.active=false;
       drag.pointerId=null;
       stateNode.classList.remove('axis-dragging');
-      if(drag.moved)scheduleSnap();
+      if(drag.moved)scheduleProgress();
     }
 
     scroller.addEventListener('pointerup',endDrag);
