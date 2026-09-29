@@ -25,8 +25,9 @@
 - [x] Platform account metadata
 - [x] Account connection/disconnection state
 - [x] Submission status records
-- [ ] Exact filename/title publicity checks against configured contributor profile links
-- [ ] Independent platform status verification
+- [x] Generic exact-filename public-status check against configured profile links
+- [x] Separate found/not_found/blocked/unknown verification result
+- [ ] Platform-specific connectors for client-rendered stock sites
 - [ ] Multi-platform account connectors
 
 ## Alpha 0.4 — Forge
