@@ -195,7 +195,7 @@ fn validate_package_manifest(manifest: &PackageManifest) -> Result<(), PackageEr
 fn safe_relative_path(value: &str) -> Result<PathBuf, PackageError> {
     let path = Path::new(value);
 
-    if path.is_absolute() || value.contains('\') {
+    if path.is_absolute() || value.contains('\\') {
         return Err(PackageError::UnsafePath(value.into()));
     }
 
@@ -220,7 +220,7 @@ fn collect_files(root: &Path, current: &Path, output: &mut Vec<String>) -> Resul
             .strip_prefix(root)
             .map_err(|_| PackageError::InvalidProject)?
             .to_string_lossy()
-            .replace('\', "/");
+            .replace('\\', "/");
 
         if path.is_dir() {
             if relative == "cache" || relative.starts_with("cache/") {
@@ -318,6 +318,31 @@ mod tests {
         assert!(safe_relative_path("../outside").is_err());
         assert!(safe_relative_path("/absolute").is_err());
         assert!(safe_relative_path("ok/file.txt").is_ok());
+    }
+
+    #[test]
+    fn package_manifest_rejects_incompatible_version() {
+        let mut manifest = PackageManifest {
+            format: "tamasrazim".into(),
+            package_version: PACKAGE_FORMAT_VERSION,
+            project_id: "12345678".into(),
+            name: "Test".into(),
+            created_at: "now".into(),
+            files: Vec::new(),
+        };
+        assert!(validate_package_manifest(&manifest).is_ok());
+
+        manifest.format = "other".into();
+        assert!(validate_package_manifest(&manifest).is_err());
+
+        manifest.format = "tamasrazim".into();
+        manifest.package_version = PACKAGE_FORMAT_VERSION + 1;
+        assert!(validate_package_manifest(&manifest).is_err());
+    }
+
+    #[test]
+    fn package_manifest_rejects_windows_separator() {
+        assert!(safe_relative_path(r"source\\outside.txt").is_err());
     }
 
     #[test]
