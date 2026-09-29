@@ -81,14 +81,25 @@ impl RenderService {
         let conn = db::open(&root.join("project.db"))?;
         let now = Utc::now().to_rfc3339();
 
+        let task_id: String = conn.query_row(
+            "SELECT task_id FROM render_jobs WHERE job_id=?1",
+            params![job_id],
+            |row| row.get(0),
+        )?;
+
         conn.execute(
-            "UPDATE render_jobs SET status='running',started_at=?1 WHERE job_id=?2",
+            "UPDATE render_jobs SET status='running',started_at=?1,error=NULL WHERE job_id=?2 AND status='queued'",
             params![now, job_id],
         )?;
 
-        let mut service = RenderJobReader::new(&conn, job_id)?;
-        service.status = "running".into();
-        service.started_at = Some(now);
+        let changed = conn.changes();
+        if changed == 0 {
+            return Err(RenderError::InvalidStartState);
+        }
+
+        tasks.update(project_path, &task_id, "running", 0.0, Some("render started".into()))?;
+
+        let service = RenderJobReader::new(&conn, job_id)?;
         Ok(service.finish())
     }
 
@@ -267,6 +278,8 @@ impl<'a> RenderJobReader<'a> {
 pub enum RenderError {
     #[error("invalid .tamasrazim project")]
     InvalidProject,
+    #[error("render job is not queued")]
+    InvalidStartState,
     #[error("database error: {0}")]
     Sqlite(#[from] rusqlite::Error),
     #[error("task error: {0}")]
