@@ -18,8 +18,8 @@
 | --- | --- |
 | `/` | Main Tamasrazim personal website |
 | `/projects/` | Public project index |
-| `/projects/code-motion/` | Code → Motion project |
-| `/projects/code-motion/renderer/` | Code → Motion workspace |
+| `/projects/code-motion/` | KYNESTRA project |
+| `/projects/code-motion/renderer/` | KYNESTRA workspace |
 | `/asset-vault/` | Stock Asset Vault |
 | `/projects/bncagrocare/` | BNC Agro Care customer-facing website |
 | `/projects/bncagrocare/invoice/` | BNC Agro Care representative invoice app |
