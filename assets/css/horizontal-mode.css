@@ -71,7 +71,7 @@ main#content > .band .band-track{
   will-change:transform;
 }
 
-body > .site-footer{
+.axis-scroller > .site-footer{
   flex:0 0 100vw;
   width:100vw;
   min-width:100vw;
@@ -500,7 +500,7 @@ body.axis-dragging .cursor-ring{
 
   main#content > section,
   main#content > .band,
-  body > .site-footer{
+  .axis-scroller > .site-footer{
     width:auto!important;
     min-width:0!important;
     height:auto!important;
@@ -553,13 +553,13 @@ body[data-axis-speed="moving"] main#content > section.axis-is-near .section-inne
 /* ---------- Spatial axis context ---------- */
 main#content > section,
 main#content > .band,
-body > .site-footer{
+.axis-scroller > .site-footer{
   --axis-distance:1;
 }
 
 main#content > section.axis-is-active,
 main#content > .band.axis-is-active,
-body > .site-footer.axis-is-active{
+.axis-scroller > .site-footer.axis-is-active{
   box-shadow:inset 1px 0 rgba(243,243,239,.035),inset -1px 0 rgba(243,243,239,.018);
 }
 
