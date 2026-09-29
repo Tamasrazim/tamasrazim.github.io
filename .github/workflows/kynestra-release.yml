@@ -1,0 +1,51 @@
+name: KYNESTRA Windows Installer
+
+on:
+  push:
+    tags:
+      - "kynestra-v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows-installer:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: KYNESTRA/desktop/tauri
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          components: rustfmt
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Run tests
+        run: cargo test
+
+      - name: Build and publish installer
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: KYNESTRA/desktop/tauri
+          tagName: kynestra-v__VERSION__
+          releaseName: KYNESTRA v__VERSION__
+          releaseBody: |
+            Windows installer for KYNESTRA.
+
+            Download the KYNESTRA setup executable and run it to install the desktop app.
+          releaseDraft: false
+          prerelease: false
+          generateReleaseNotes: true
+          args: --bundles nsis
+          releaseAssetNamePattern: KYNESTRA[setup].[ext]
