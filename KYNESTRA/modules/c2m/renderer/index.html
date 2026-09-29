@@ -5945,7 +5945,67 @@ function cancelRender() {
   $('#cancelBtn').disabled = true;
 }
 
-/* ---------------- completion ---------------- */
+/* ---------------- KYNESTRA Core handoff ---------------- */
+function kynestraCoreContext() {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var projectPath = params.get('projectPath');
+    var jobId = params.get('jobId');
+    var tauri = window.__TAURI__;
+    var invoke = tauri && tauri.core && tauri.core.invoke;
+    var dialog = tauri && tauri.dialog;
+    if (!projectPath || !jobId || typeof invoke !== 'function' || !dialog || typeof dialog.open !== 'function') return null;
+    return { projectPath: projectPath, jobId: jobId, invoke: invoke, dialog: dialog };
+  } catch (error) {
+    return null;
+  }
+}
+
+function kynestraOutputKind(job) {
+  if (job.format === 'webm' || job.format === 'mp4') return 'video';
+  if (job.format === 'png') return job.target === 'zip' ? 'archive' : 'image';
+  return 'file';
+}
+
+function kynestraOutputFilter(job) {
+  if (job.format === 'webm') return ['webm'];
+  if (job.format === 'mp4') return ['mp4'];
+  if (job.format === 'png' && job.target === 'zip') return ['zip'];
+  return ['*'];
+}
+
+async function sendToKynestraVault(rec) {
+  var ctx = kynestraCoreContext();
+  if (!ctx || !rec || !rec.blob || rec.verify.status !== 'VALID') return;
+
+  var selected = await ctx.dialog.open({
+    multiple: false,
+    directory: false,
+    title: 'Select the rendered file to register in Stock Vault',
+    filters: [
+      { name: 'Expected output', extensions: kynestraOutputFilter(rec.job) },
+      { name: 'All files', extensions: ['*'] }
+    ]
+  });
+
+  if (typeof selected !== 'string' || !selected) return;
+
+  var result = await ctx.invoke('complete_render_job', {
+    projectPath: ctx.projectPath,
+    jobId: ctx.jobId,
+    sourcePath: selected,
+    kind: kynestraOutputKind(rec.job),
+    metadata: {
+      source: 'c2m',
+      handoffVersion: '0.1',
+      fileName: rec.job.fileName,
+      receipt: receiptFor(rec)
+    }
+  });
+
+  alert('Sent '+result.filename+' to KYNESTRA Stock Vault.');
+}
+
 function showCompletion(rec) {
   var job = rec.job, c = job.composition, st = rec.result.stats, v = rec.verify;
   var body = el('div');
@@ -5987,6 +6047,11 @@ function showCompletion(rec) {
   if (rec.blob) {
     foot.push({ label: 'Download ' + (job.format === 'mp4' ? 'MP4' : job.format === 'webm' ? 'WebM' : 'ZIP'), solid: true, fn: function () { download(rec.blob, job.fileName); } });
     if (job.format === 'webm' || job.format === 'mp4') foot.push({ label: 'View output', fn: function () { viewOutput(rec); } });
+    if (kynestraCoreContext() && v.status === 'VALID') {
+      foot.push({ label: 'Send to Stock Vault', fn: function () {
+        sendToKynestraVault(rec).catch(function (error) { alert('KYNESTRA handoff failed: ' + String(error)); });
+      } });
+    }
   } else if (rec.dir) {
     foot.push({ label: 'Frames are already in your folder', solid: true, fn: function () { closeModal(); } });
   }
