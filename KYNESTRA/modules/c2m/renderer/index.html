@@ -16462,10 +16462,15 @@ function stampNow() {
     pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
 }
 function fileNameFor(comp, name, fmt, stamp) {
-  if (fmt === 'mp4') return 'tamasrazim-animation-' + (stamp || stampNow()) + '.mp4';
+  if (fmt === 'mp4') {
+    var rawTitle = String(name || 'Untitled').trim() || 'Untitled';
+    var title = rawTitle.replace(/^(?:Prism[ ]+)+/i, 'Prism ').trim();
+    return title + ' — Translucent Geometric Flower Animation.mp4';
+  }
   var secs = comp.frameCount / comp.fps;
   var dur = (Math.abs(secs - Math.round(secs)) < 1e-6) ? Math.round(secs) + 's' : secs.toFixed(2) + 's';
-  return slugify(name || 'untitled') + '_' + comp.width + 'x' + comp.height + '_' + comp.fps + 'fps_' + dur + extFor(fmt);
+  var suffix = fmt === 'webm' ? '.webm' : fmt === 'zip' ? '.zip' : '/';
+  return slugify(name || 'untitled') + '_' + comp.width + 'x' + comp.height + '_' + comp.fps + 'fps_' + dur + suffix;
 }
 function syncFileName() {
   if (!S.comp) return;
