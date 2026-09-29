@@ -394,6 +394,31 @@
       from{transform:scale(1.015) translate3d(0,0,0)}
       to{transform:scale(1.045) translate3d(-1.1%,.6%,0)}
     }
+    .id-star-field{
+      position:absolute;right:0;top:50%;height:100%;aspect-ratio:1/1;
+      transform:translateY(-50%) scale(1.015);transform-origin:center;
+      z-index:4;pointer-events:none;mix-blend-mode:screen;
+      animation:idConstellationDrift 10s ease-in-out infinite alternate;
+    }
+    .id-star{
+      position:absolute;left:var(--x);top:var(--y);width:var(--s);aspect-ratio:1;
+      border-radius:50%;background:#fff;opacity:.16;
+      transform:translate(-50%,-50%) scale(.8);
+      box-shadow:0 0 3px rgba(255,255,255,.72),0 0 7px rgba(255,255,255,.26);
+      animation:idStarFlicker var(--t) ease-in-out var(--d) infinite;
+    }
+    .id-star-bright{
+      opacity:.72;
+      box-shadow:0 0 3px rgba(255,255,255,.95),0 0 9px rgba(255,255,255,.62),0 0 17px rgba(255,255,255,.18);
+    }
+    @keyframes idStarFlicker{
+      0%,100%{opacity:.12;transform:translate(-50%,-50%) scale(.72)}
+      18%{opacity:.44;transform:translate(-50%,-50%) scale(1)}
+      31%{opacity:.2;transform:translate(-50%,-50%) scale(.84)}
+      52%{opacity:.7;transform:translate(-50%,-50%) scale(1.08)}
+      68%{opacity:.26;transform:translate(-50%,-50%) scale(.78)}
+      84%{opacity:.52;transform:translate(-50%,-50%) scale(.96)}
+    }
     .id-image-wash{
       position:absolute;inset:0;
       background:
