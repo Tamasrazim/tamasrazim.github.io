@@ -1632,3 +1632,22 @@
   opacity:1;
   transform:none;
 }
+
+/* Interactive page-axis progress scrubber. */
+.site-progress{
+  height:8px;
+  pointer-events:auto;
+  cursor:pointer;
+  touch-action:none;
+}
+.site-progress span{height:2px;pointer-events:none}
+.site-progress:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 1px rgba(243,243,239,.28),0 4px 18px rgba(243,243,239,.08);
+}
+.site-progress::after{
+  content:'';
+  position:absolute;
+  left:0;right:0;top:0;height:2px;
+}
+body.is-scrubbing{cursor:ew-resize}
