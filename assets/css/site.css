@@ -398,7 +398,11 @@
       position:absolute;right:0;top:50%;height:100%;aspect-ratio:1/1;
       transform:translateY(-50%) scale(1.015);transform-origin:center;
       z-index:4;pointer-events:none;mix-blend-mode:screen;
-      animation:idConstellationDrift 10s ease-in-out infinite alternate;
+      animation:idStarFieldDrift 10s ease-in-out infinite alternate;
+    }
+    @keyframes idStarFieldDrift{
+      from{transform:translateY(-50%) scale(1.015)}
+      to{transform:translateY(-50%) scale(1.045) translate3d(-1.1%,.6%,0)}
     }
     .id-star{
       position:absolute;left:var(--x);top:var(--y);width:var(--s);aspect-ratio:1;
