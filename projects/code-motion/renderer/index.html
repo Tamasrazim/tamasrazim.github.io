@@ -17101,23 +17101,23 @@ async function restartBatchEngine() {
 }
 
 function stockMetadataForTitle(title) {
-  var raw = String(title || 'Prism Flower').trim();
-  var flower = raw.replace(/^Prism\\s+/i, '').trim() || 'Flower';
-  var projectName = /^Prism\\s+/i.test(raw) ? raw : ('Prism ' + flower);
+  var raw = String(title || 'Flower').trim() || 'Flower';
 
-  /* Shutterstock-ready titles: the animation and JPG use different titles,
-     while the project name itself stays identical to the renderer metadata. */
+  /* The project name is authoritative.
+     Collapse repeated leading "Prism " prefixes without adding a new one. */
+  var projectName = raw.replace(/^(?:Prism[ ]+)+/i, 'Prism ').trim() || 'Flower';
+  var flower = projectName.indexOf('Prism ') === 0
+    ? projectName.slice(6).trim()
+    : projectName;
+
   var animationTitle = projectName + ' — Translucent Geometric Flower Animation';
   var illustrationTitle = projectName + ' — Translucent Geometric Flower illustration';
 
-  /* Keep metadata factual, compact, and under Shutterstock's 150-character
-     submission field while preserving the user's stock-description style. */
   var videoDescription =
-    'Translucent geometric ' + flower + ' with sculpted petals, pearl, pink, violet and golden gradients, delicate outlines and a glowing warm center. Smooth 10-second loop for motion graphics and stock footage.';
+    'Translucent geometric ' + flower + ' with sculpted petals, pearl, pink, violet and golden gradients, delicate outlines and a glowing warm center. Smooth 10-second loop for motion graphics, stock footage, abstract botanical visuals, and decorative animation.';
   var illustrationDescription =
-    'Translucent geometric ' + flower + ' with sculpted petals, pearl, pink, violet and golden gradients, delicate outlines and a glowing warm center. Decorative botanical illustration for modern design.';
+    'Translucent geometric ' + flower + ' with sculpted petals, pearl, pink, violet and golden gradients, delicate outlines, and a glowing warm center. Decorative botanical illustration for modern design.';
 
-  /* 46 base terms + the flower name = 47. */
   var commonKeywords = [
     'flower','floral','botanical','translucent','geometric','prism','geometric flower',
     'abstract','colorful','vivid','luminous','glowing','gradient','petals','bloom','nature',
