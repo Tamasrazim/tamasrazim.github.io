@@ -257,7 +257,8 @@
     railButtons.forEach(function(button,index){
       var active=index===closest;
       button.classList.toggle('is-active',active);
-      button.setAttribute('aria-current',active?'page':'false');
+      if(active)button.setAttribute('aria-current','page');
+      else button.removeAttribute('aria-current');
     });
 
     /* Keep desktop + mobile header navigation visually synchronized with the page axis. */
@@ -291,6 +292,7 @@
     var name=current?current.getAttribute('data-label'):'page';
 
     readout.innerHTML='<strong>'+number+'</strong><span>/ '+total+' · '+name+'</span>';
+    readout.dataset.section=activeId||'top';
   }
 
   var stateRAF=0;
