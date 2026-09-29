@@ -68,8 +68,7 @@ const siteJs=read('assets/js/site.js');
 
 must(site.includes('id="axisScroller" class="axis-scroller"'),'homepage has dedicated horizontal axis container');
 must(site.includes('horizontal-mode.js?v='),'homepage loads horizontal axis controller');
-must(!/<span class="band-item">Gaming<\\/span>/.test(site),'homepage marquee has no Gaming item');
-must(!/<span class="band-item">Web Development<\\/span>/.test(site),'homepage marquee has no Web Development item');
+must(!/<div class="band" aria-hidden="true">/.test(site),'homepage has no marquee bands');
 must(!axis.includes('scheduleSnap'),'horizontal controller has no legacy snap handler');
 must(!axis.includes('wheelTarget'),'horizontal controller has no legacy wheel target');
 must((axis.match(/function cancelWheel\\(/g)||[]).length===1,'horizontal controller has one wheel cancel routine');
