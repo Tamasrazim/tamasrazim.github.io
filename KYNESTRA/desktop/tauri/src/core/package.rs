@@ -2,6 +2,7 @@ use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
+    collections::HashSet,
     fs::{self, File},
     io::{Read, Write},
     path::{Component, Path, PathBuf},
@@ -94,23 +95,53 @@ impl PackageService {
             files,
         };
 
-        let file = File::create(&output)?;
-        let mut archive = ZipWriter::new(file);
-        let options = SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);
-
-        let bytes = serde_json::to_vec_pretty(&manifest)?;
-        archive.start_file(PACKAGE_MANIFEST, options)?;
-        archive.write_all(&bytes)?;
-
-        for item in &manifest.files {
-            let source = root.join(&item.path);
-            archive.start_file(&item.path, options)?;
-            let mut input = File::open(source)?;
-            std::io::copy(&mut input, &mut archive)?;
+        if output.exists() && !output.is_file() {
+            return Err(PackageError::InvalidOutput);
         }
 
-        archive.finish()?;
-        Ok(manifest)
+        let file_name = output
+            .file_name()
+            .and_then(|value| value.to_str())
+            .unwrap_or("project.tamasrazim");
+        let temp_name = format!(".{}.partial-{}", file_name, uuid::Uuid::new_v4());
+        let temp_output = output_parent.join(temp_name);
+
+        let write_result = (|| -> Result<(), PackageError> {
+            let file = File::create(&temp_output)?;
+            let mut archive = ZipWriter::new(file);
+            let options = SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);
+
+            let bytes = serde_json::to_vec_pretty(&manifest)?;
+            archive.start_file(PACKAGE_MANIFEST, options)?;
+            archive.write_all(&bytes)?;
+
+            for item in &manifest.files {
+                let source = root.join(&item.path);
+                archive.start_file(&item.path, options)?;
+                let mut input = File::open(source)?;
+                std::io::copy(&mut input, &mut archive)?;
+            }
+
+            archive.finish()?;
+            Ok(())
+        })();
+
+        match write_result {
+            Ok(()) => {
+                if output.exists() {
+                    fs::remove_file(&output)?;
+                }
+                if let Err(error) = fs::rename(&temp_output, &output) {
+                    let _ = fs::remove_file(&temp_output);
+                    return Err(PackageError::Io(error));
+                }
+                Ok(manifest)
+            }
+            Err(error) => {
+                let _ = fs::remove_file(&temp_output);
+                Err(error)
+            }
+        }
     }
 
     pub fn import(&self, package_path: &str, destination_root: &Path) -> Result<ImportResult, PackageError> {
@@ -234,11 +265,32 @@ fn validate_package_manifest(manifest: &PackageManifest) -> Result<(), PackageEr
         || manifest.package_version != PACKAGE_FORMAT_VERSION
         || manifest.project_id.trim().is_empty()
         || manifest.name.trim().is_empty()
+        || manifest.created_at.trim().is_empty()
+        || manifest.files.is_empty()
     {
         return Err(PackageError::InvalidPackage);
     }
 
-    if manifest.files.iter().any(|file| file.path.is_empty()) {
+    let mut seen = HashSet::new();
+    let mut has_manifest = false;
+    let mut has_database = false;
+
+    for file in &manifest.files {
+        if file.path.is_empty()
+            || file.path == PACKAGE_MANIFEST
+            || file.sha256.len() != 64
+            || !file.sha256.chars().all(|value| value.is_ascii_hexdigit())
+            || safe_relative_path(&file.path).is_err()
+            || !seen.insert(file.path.clone())
+        {
+            return Err(PackageError::InvalidPackage);
+        }
+
+        has_manifest |= file.path == "manifest.json";
+        has_database |= file.path == "project.db";
+    }
+
+    if !has_manifest || !has_database {
         return Err(PackageError::InvalidPackage);
     }
 
@@ -275,15 +327,18 @@ fn collect_files(root: &Path, current: &Path, output: &mut Vec<String>) -> Resul
             .to_string_lossy()
             .replace('\\', "/");
 
-        if path.is_dir() {
+        let file_type = fs::symlink_metadata(&path)?.file_type();
+        if file_type.is_symlink() {
+            return Err(PackageError::InvalidProject);
+        }
+
+        if file_type.is_dir() {
             if relative == "cache" || relative.starts_with("cache/") {
                 continue;
             }
             collect_files(root, &path, output)?;
-        } else if path.is_file() {
-            if relative != PACKAGE_MANIFEST {
-                output.push(relative);
-            }
+        } else if file_type.is_file() && relative != PACKAGE_MANIFEST {
+            output.push(relative);
         }
     }
     Ok(())
