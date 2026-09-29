@@ -169,9 +169,16 @@ fn validate_database_identity(root: &Path, manifest: &ProjectManifest) -> Result
         || name != manifest.name
         || format != FORMAT
         || format_version != FORMAT_VERSION
-        || root_path.as_deref().map(str::trim).filter(|value| !value.is_empty()).map(|value| value != expected_root.as_ref()).unwrap_or(false)
     {
         return Err(ProjectError::DatabaseManifestMismatch);
+    }
+
+    if root_path.as_deref().map(str::trim).filter(|value| !value.is_empty()).map(|value| value != expected_root.as_ref()).unwrap_or(false) {
+        let now = Utc::now().to_rfc3339();
+        conn.execute(
+            "UPDATE projects SET root_path=?1,updated_at=?2 WHERE project_id=?3",
+            params![expected_root.as_ref(), now, manifest.project_id],
+        )?;
     }
 
     Ok(())
@@ -283,6 +290,26 @@ mod tests {
 
         let opened = manager.open(&created.project.path).expect("open project");
         assert_eq!(opened.project_id, created.project.project_id);
+    }
+
+    #[test]
+    fn opening_moved_project_refreshes_root_path() {
+        let root = tempfile::tempdir().expect("root");
+        let manager = ProjectManager::default();
+
+        let created = manager.create(root.path(), "Movable Project").expect("project");
+        let old_path = PathBuf::from(&created.project.path);
+        let moved_path = root.path().join("moved.tamasrazim");
+        fs::rename(&old_path, &moved_path).expect("move project");
+
+        let opened = manager.open(moved_path.to_str().unwrap()).expect("open moved project");
+        assert_eq!(opened.project_id, created.project.project_id);
+
+        let conn = db::open(&moved_path.join("project.db")).expect("db");
+        let root_path: String = conn
+            .query_row("SELECT root_path FROM projects WHERE project_id=?1", [created.project.project_id.as_str()], |row| row.get(0))
+            .expect("root path");
+        assert_eq!(root_path, moved_path.to_string_lossy());
     }
 
     #[test]
