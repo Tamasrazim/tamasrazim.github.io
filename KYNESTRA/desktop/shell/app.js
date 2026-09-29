@@ -460,8 +460,14 @@ async function launchC2M() {
   window.location.href = 'modules/c2m/renderer/index.html'+query;
 }
 
+function launchForge() {
+  const project = state.activeProject;
+  const query = project ? '?'+new URLSearchParams({ projectPath: project.path }).toString() : '';
+  window.location.href = 'modules/forge/renderer/index.html'+query;
+}
+
 document.getElementById('view')?.addEventListener('click', event => {
   if (event.target?.id === 'launch-c2m') launchC2M();
-  if (event.target?.id === 'launch-forge') window.location.href = 'modules/forge/renderer/index.html';
+  if (event.target?.id === 'launch-forge') launchForge();
 });
 init();
