@@ -17038,7 +17038,7 @@ function renderResults() {
 }
 
 /* ---------------- queue ---------------- */
-async function renderPrismBatch(limit, label) {
+async async function renderPrismBatch(limit, label) {
   if (S.rendering || S.batchRendering) return;
 
   var allPrisms = $$('script[type="text/plain"][id^="sample-"]').filter(function (node) {
@@ -17085,19 +17085,17 @@ async function renderPrismBatch(limit, label) {
 
   var completed = 0;
   var failed = 0;
-  var batchFormat = S.exportFormat === 'dir' ? 'zip' : S.exportFormat;
+  var batchFormat = S.exportFormat;
 
   var outputDir = null;
   try {
     showTab('p-render');
     showMobile('rail');
 
-    if (label === 'Render All') {
-      $('#stMsg').textContent = 'Render All — choose the destination folder…';
-      outputDir = await pickDirectory();
-      $('#stMsg').textContent = 'Render All — writing into "' + (outputDir.name || 'selected folder') + '"';
-      logLine('batch destination folder: ' + (outputDir.name || 'selected folder'), true);
-    }
+    $('#stMsg').textContent = suffixLabel + ' — choose the destination folder…';
+    outputDir = await pickDirectory();
+    $('#stMsg').textContent = suffixLabel + ' — writing into "' + (outputDir.name || 'selected folder') + '"';
+    logLine('batch destination folder: ' + (outputDir.name || 'selected folder'), true);
 
     $('#stMsg').textContent = suffixLabel + ' — preparing ' + samples.length + ' Prism Flowers…';
 
@@ -17142,15 +17140,14 @@ async function renderPrismBatch(limit, label) {
 
       var job = buildJob({ exportFormat: batchFormat });
       job.label = title;
-      job.fileName = slugify(title) + '_' + job.composition.width + 'x' + job.composition.height + '_' +
-        job.composition.fps + 'fps_' +
-        ((job.composition.frameCount / job.composition.fps).toFixed(2)).replace(/\.00$/, '') +
-        extFor(batchFormat);
+      // Batch outputs use the animation metadata title as the filename.
+      job.fileName = slugify(job.metadata.title || title) + extFor(batchFormat);
 
-      var result = await startRender(job, {
-        silent: true,
-        outputDir: outputDir
-      });
+      var renderOptions = { silent: true, outputDir: outputDir };
+      if (job.format === 'png' && job.target === 'dir') {
+        renderOptions.outputDir = await outputDir.getDirectoryHandle(slugify(job.metadata.title || title), { create: true });
+      }
+      var result = await startRender(job, renderOptions);
       if (result && result.cancelled) {
         S.batchCancelled = true;
         break;
