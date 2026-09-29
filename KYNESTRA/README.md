@@ -11,13 +11,13 @@ The Tauri desktop runtime now has a Rust Core with:
 - SQLite metadata
 - persistent tasks
 - Core event persistence/emission
-- C2M module packaging
+- KYNESTRA renderer module packaging
 - persistent render jobs
 - SHA-256 asset ingestion and deduplication
 - project-local Stock Vault asset listing
 - platform account metadata and connection state
 - per-asset submission tracking
-- shared Forge/C2M/Core asset handoff API
+- shared Forge/KYNESTRA/Core asset handoff API
 - generic public-status verification
 - ZIP-backed portable .tamasrazim packages
 - SHA-256 package integrity verification
@@ -27,7 +27,7 @@ The Tauri desktop runtime now has a Rust Core with:
 Modules:
 
 - Forge (Format Forge integration)
-- C2M (Code Motion)
+- KYNESTRA Renderer
 - Stock Vault
 
 ## Repository boundary
