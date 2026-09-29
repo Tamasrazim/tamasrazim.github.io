@@ -219,6 +219,28 @@
       button.setAttribute('aria-current',active?'page':'false');
     });
 
+    /* Keep the primary header navigation visually synchronized with the page axis. */
+    var activeItem=pageItems[closest];
+    var activeId=activeItem && activeItem.id ? activeItem.id : '';
+    document.querySelectorAll('.site-header .nav a[href^="#"]').forEach(function(link){
+      var href=link.getAttribute('href')||'';
+      var linkId=href.slice(1);
+      var active=linkId===activeId;
+      link.classList.toggle('axis-active',active);
+      if(active)link.setAttribute('aria-current','page');
+      else link.removeAttribute('aria-current');
+    });
+
+    /* Reflect the visible section in the URL without creating history entries. */
+    if(activeId && activeId!=='top'){
+      var nextHash='#'+encodeURIComponent(activeId);
+      if(location.hash!==nextHash && !document.body.classList.contains('is-locked')){
+        if(history.replaceState)history.replaceState(null,'',nextHash);
+      }
+    }else if(activeId==='top' && location.hash){
+      if(history.replaceState)history.replaceState(null,'',location.pathname+location.search);
+    }
+
     var current=railButtons[closest];
     var number=String(closest+1).padStart(2,'0');
     var total=String(pageItems.length).padStart(2,'0');
