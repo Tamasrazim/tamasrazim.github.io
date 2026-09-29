@@ -1844,7 +1844,7 @@ function makeNoise(seed) {
 var COMP_DEFAULTS = {
   width: 1920, height: 1080, fps: 60, duration: 10,
   background: '#000000', transparent: false, seed: 12345,
-  loop: false, loopDuration: 10, speed: 1, reverse: false,
+  loop: false, loopDuration: 10, speed: 2, reverse: false,
   colorSpace: 'srgb', pixelAspect: 1
 };
 /* frameCount = round(duration * fps); frames are 0 .. frameCount-1; time = frame / fps.
@@ -15379,7 +15379,7 @@ function mainEngine() {
     c.width = w; c.height = h;
     c.setAttribute('aria-hidden', 'true');
     host.appendChild(c);
-    return { canvas: c, ctx: c.getContext('2d', { alpha: true }), role: 'render-target' };
+    return { canvas: c, ctx: c.getContext('2d', { alpha: true, colorSpace: 'srgb' }), role: 'render-target' };
   }
   function releaseExport(o) {
     if (o && o.canvas && o.canvas.parentNode) o.canvas.parentNode.removeChild(o.canvas);
@@ -17113,11 +17113,9 @@ function stockMetadataForTitle(title) {
   /* Keep metadata factual, compact, and under Shutterstock's 150-character
      submission field while preserving the user's stock-description style. */
   var videoDescription =
-    'Translucent geometric ' + flower +
-    ' with sculpted petals, luminous gradients, delicate outlines, and a glowing center. Smooth 10-second seamless motion for motion graphics.';
+    'Translucent geometric ' + flower + ' with sculpted petals, pearl, pink, violet and golden gradients, delicate outlines and a glowing warm center. Smooth 10-second loop for motion graphics and stock footage.';
   var illustrationDescription =
-    'Translucent geometric ' + flower +
-    ' with sculpted petals, luminous gradients, delicate outlines, and a glowing center. Decorative botanical illustration for modern design.';
+    'Translucent geometric ' + flower + ' with sculpted petals, pearl, pink, violet and golden gradients, delicate outlines and a glowing warm center. Decorative botanical illustration for modern design.';
 
   /* 46 base terms + the flower name = 47. */
   var commonKeywords = [
@@ -17241,7 +17239,7 @@ async function renderPrismBatch(limit, label) {
 
     outputDir = await pickDirectory();
     batchLog(suffixLabel + ' destination: ' + (outputDir.name || 'selected folder') +
-      ' · groups of 50 · 4 files per flower', true);
+      ' · groups of 50 · 4 files per flower (MP4 + JPG + 2 CSV)', true);
 
     for (var i = 0; i < samples.length; i++) {
       if (S.batchCancelled) break;
@@ -17288,12 +17286,12 @@ async function renderPrismBatch(limit, label) {
           duration: 10,
           loop: true,
           loopDuration: 10,
-          speed: 1
+          speed: 2
         }));
 
         /* Batch deliverable is MP4 + JPG + CSVs. */
         S.exportFormat = 'mp4';
-        S.quality = snapshot.quality;
+        S.quality = 'max';
         S.timebase = snapshot.timebase;
         S.checksums = snapshot.checksums;
         S.frame = 0;
@@ -17775,7 +17773,7 @@ function refreshDiag() {
   });
   kvRow(dl, 'PNG sequence', 'SUPPORTED — canvas encodes each frame, ZIP is written here', 'ok');
   kvRow(dl, 'ZIP container', 'SUPPORTED — stored (uncompressed) entries, 4 GB ceiling', 'ok');
-  kvRow(dl, 'Canvas color space', 'sRGB requested on all C2M canvas contexts; browser honors the option when supported. Video H.264 is not falsely tagged as Rec.709 by the browser muxer.', 'ok');
+  kvRow(dl, 'Canvas color space', 'sRGB is the actual C2M canvas target. Shutterstock currently prefers Rec.709 for video, but this browser MP4 muxer does not expose a verified Rec.709 container tag, so C2M does not falsely claim one.', 'warn');
   kvRow(dl, 'Render target', Engine.mode === 'worker'
     ? 'OffscreenCanvas inside the worker — there is no DOM in there, and VideoFrame is built from that canvas and nothing else.'
     : 'canvas#render-target in this document — VideoFrame is built from that element and nothing else.', 'ok');
