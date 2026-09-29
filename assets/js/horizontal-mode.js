@@ -40,8 +40,15 @@
 
   function horizontalTarget(el){
     if(!el)return 0;
-    var rect=el.getBoundingClientRect();
-    return Math.max(0,Math.min(maxHorizontal(),scroller.scrollLeft+rect.left));
+    /* Use layout coordinates, not transformed visual coordinates.
+       The scene engine intentionally translates sections for depth. */
+    var left=0;
+    var node=el;
+    while(node && node!==scroller){
+      left+=node.offsetLeft||0;
+      node=node.offsetParent;
+    }
+    return Math.max(0,Math.min(maxHorizontal(),left));
   }
 
   function goTo(el,smooth){
@@ -244,8 +251,10 @@
     var closestDistance=Infinity;
 
     pageItems.forEach(function(item,index){
-      var rect=item.getBoundingClientRect();
-      var itemCenter=rect.left+Math.min(rect.width,window.innerWidth)*.5;
+      /* Active state follows layout position, never the visual parallax transform. */
+      var left=item.offsetLeft||0;
+      var width=item.offsetWidth||window.innerWidth;
+      var itemCenter=left-scroller.scrollLeft+Math.min(width,window.innerWidth)*.5;
       var distance=Math.abs(itemCenter-center);
 
       if(distance<closestDistance){
