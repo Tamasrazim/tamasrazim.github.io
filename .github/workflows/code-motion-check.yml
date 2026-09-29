@@ -1,4 +1,4 @@
-name: Code → Motion V2 Check
+name: KYNESTRA V2 Check
 
 on:
   push:
@@ -26,5 +26,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate Code → Motion V2
+      - name: Validate KYNESTRA V2
         run: node tools/validate_code_motion.mjs
