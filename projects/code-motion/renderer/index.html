@@ -16475,10 +16475,9 @@ function stampNow() {
 function fileNameFor(comp, name, fmt, stamp) {
   var title = String(name || 'Untitled').trim();
   var stockSuffix = ' — Translucent Geometric Flower Animation';
-  var stockTitle = title.replace(/\\s*—\\s*Translucent Geometric Flower Animation$/i, '') + stockSuffix;
-  if (fmt === 'mp4' || fmt === 'webm') {
-    return stockTitle + extFor(fmt);
-  }
+  var cleanTitle = title.replace(/\\s*—\\s*Translucent Geometric Flower Animation$/i, '').trim();
+  var stockTitle = cleanTitle + stockSuffix;
+  if (fmt === 'mp4' || fmt === 'webm') return stockTitle + extFor(fmt);
   var secs = comp.frameCount / comp.fps;
   var dur = (Math.abs(secs - Math.round(secs)) < 1e-6) ? Math.round(secs) + 's' : secs.toFixed(2) + 's';
   return slugify(title) + '_' + comp.width + 'x' + comp.height + '_' + comp.fps + 'fps_' + dur + extFor(fmt);
@@ -16765,7 +16764,7 @@ function startRender(job, opts) {
   S.renderStart = Date.now();
   S.activeJob = job;
   $('#cancelBtn').disabled = false;
-  $$('[data-act=startRender], [data-act=queueRun]').forEach(function (b) { b.disabled = true; });
+  $('[data-act=startRender], [data-act=queueRun], [data-act=render], [data-act=render50], [data-act=renderAll]').forEach(function (b) { b.disabled = true; });
   $('#stDot').className = 'dot busy';
   showTab('p-render');
   clearLog();
@@ -16829,7 +16828,9 @@ function finishRender(job, result, opts) {
   S.rendering = false;
   S.activeJob = null;
   $('#cancelBtn').disabled = true;
-  $('[data-act=startRender], [data-act=queueRun]').forEach(function (b) { b.disabled = false; });
+  if (!S.batchRendering) {
+    $('[data-act=startRender], [data-act=queueRun], [data-act=render], [data-act=render50], [data-act=renderAll]').forEach(function (b) { b.disabled = false; });
+  }
   var batchBtn = $('#render50Btn');
   if (batchBtn) batchBtn.disabled = !!S.batchRendering;
   $('#stDot').className = 'dot ok';
@@ -16893,10 +16894,14 @@ function finishRender(job, result, opts) {
     blob: result.blob || null, dir: !!result.dir,
     log: (S.logLines || []).slice()
   };
-  S.results.unshift(rec);
-  renderResults();
-  $('#stMsg').textContent = 'render complete — ' + v.status + ' · ' + fmtBytes(st.bytes);
-  if (!opts.silent) showCompletion(rec);
+  if (!opts.batch) {
+    S.results.unshift(rec);
+    renderResults();
+  }
+  $('#stMsg').textContent = opts.batch
+    ? ('saved ' + job.fileName + ' — ' + v.status)
+    : ('render complete — ' + v.status + ' · ' + fmtBytes(st.bytes));
+  if (!opts.silent && !opts.batch) showCompletion(rec);
   return result;
 }
 
@@ -17109,56 +17114,70 @@ async function renderPrismBatch(limit, label) {
 
       var node = samples[i];
       var title = node.dataset.title || ('Prism Flower ' + (i + 1));
-      var src = (node.textContent || '').replace(/^\n/, '');
+      try {
+        var src = (node.textContent || '').replace(/^\\n/, '');
 
-      S.id = null;
-      S.version = 1;
-      S.name = title;
-      S.meta = defaultMeta();
-      S.meta.title = title;
-      S.meta.description = node.dataset.desc || '';
-      S.comp = CORE.composition(merge(snapshot.comp || {}, {
-        duration: +node.dataset.dur || (snapshot.comp ? snapshot.comp.frameCount / snapshot.comp.fps : 10),
-        loop: node.dataset.loop === '1',
-        loopDuration: +node.dataset.loopdur || (+node.dataset.dur || 10)
-      }));
-      S.exportFormat = batchFormat;
-      S.quality = snapshot.quality;
-      S.timebase = snapshot.timebase;
-      S.checksums = snapshot.checksums;
-      $('#projName').value = title;
-      $('#projVer').textContent = 'v1';
-      edSetValue(src);
-      S.code = Ed.ta.value;
-      S.frame = 0;
-      applyComp({});
-      syncMetaUI();
-      markDirty(false);
+        S.id = null;
+        S.version = 1;
+        S.name = title;
+        S.meta = defaultMeta();
+        S.meta.title = title;
+        S.meta.description = node.dataset.desc || '';
+        S.comp = CORE.composition(merge(snapshot.comp || {}, {
+          duration: 10,
+          loop: true,
+          loopDuration: 10,
+          speed: 2
+        }));
+        S.exportFormat = batchFormat;
+        S.quality = snapshot.quality;
+        S.timebase = snapshot.timebase;
+        S.checksums = snapshot.checksums;
+        $('#projName').value = title;
+        $('#projVer').textContent = 'v1';
+        edSetValue(src);
+        S.code = Ed.ta.value;
+        S.frame = 0;
+        applyComp({});
+        syncMetaUI();
+        markDirty(false);
 
-      $('#stMsg').textContent = suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length + ' · ' + title;
-      var compiled = await run();
-      if (!compiled || !compiled.ok) {
+        $('#stMsg').textContent = suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length + ' · ' + title;
+        var compiled = await run();
+        if (!compiled || !compiled.ok) {
+          failed++;
+          logLine('batch skipped ' + title + ' — compile failed', true);
+          continue;
+        }
+
+        var job = buildJob({ exportFormat: batchFormat });
+        job.label = title;
+        job.metadata.title = title;
+        job.fileName = fileNameFor(job.composition, job.metadata.title, batchFormat, null);
+
+        var renderOptions = { silent: true, outputDir: outputDir, batch: true };
+        if (job.format === 'png' && job.target === 'dir') {
+          renderOptions.outputDir = await outputDir.getDirectoryHandle(slugify(job.metadata.title || title), { create: true });
+        }
+
+        var result = await startRender(job, renderOptions);
+        if (result && result.cancelled) {
+          S.batchCancelled = true;
+          break;
+        }
+        if (result && result.ok && result.savedToFolder) {
+          completed++;
+          // Do not retain large completed blobs in the results panel during a long batch.
+          result.blob = null;
+        } else {
+          failed++;
+          logLine('batch output failed for ' + title, true);
+        }
+      } catch (itemError) {
         failed++;
-        logLine('batch skipped ' + title + ' — compile failed', true);
-        continue;
+        logLine('batch item failed — ' + title + ' — ' + String(itemError && itemError.stack || itemError), true);
+        $('#stMsg').textContent = suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length + ' failed · ' + title;
       }
-
-      var job = buildJob({ exportFormat: batchFormat });
-      job.label = title;
-      // Batch outputs use the animation metadata title as the filename.
-      job.fileName = fileNameFor(job.composition, job.metadata.title || title, batchFormat, null);
-
-      var renderOptions = { silent: true, outputDir: outputDir };
-      if (job.format === 'png' && job.target === 'dir') {
-        renderOptions.outputDir = await outputDir.getDirectoryHandle(slugify(job.metadata.title || title), { create: true });
-      }
-      var result = await startRender(job, renderOptions);
-      if (result && result.cancelled) {
-        S.batchCancelled = true;
-        break;
-      }
-      if (result && result.ok) completed++;
-      else failed++;
 
       await new Promise(function (resolve) { setTimeout(resolve, 0); });
     }
@@ -17193,7 +17212,7 @@ async function renderPrismBatch(limit, label) {
     await run();
 
     renderQueue();
-    renderResults();
+    if (outputDir) renderResults();
     if (b50) b50.disabled = false;
     if (ball) ball.disabled = false;
 
