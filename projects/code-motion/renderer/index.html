@@ -17334,29 +17334,12 @@ async function renderPrismBatch(limit, label) {
           if (attempt > 1) {
             batchLog(
               suffixLabel + ' — ' + (i + 1) + ' / ' + samples.length +
-              ' · ' + title + ' · retrying',
+              ' · ' + title + ' · retrying export',
               true
             );
-            try { await restartBatchEngine(); }
-            catch (restartError) {
-              batchLog('renderer restart failed — ' +
-                String(restartError.message || restartError), true);
-            }
-
-            /* Recompile the flower in the fresh engine before retrying. */
-            try {
-              var recomp = await run();
-              if (!recomp || !recomp.ok) {
-                lastError = { name: 'COMPILE ERROR', message: 'The restarted renderer could not compile this flower.' };
-                continue;
-              }
-            } catch (recompileError) {
-              lastError = {
-                name: recompileError && recompileError.name || 'COMPILE ERROR',
-                message: String(recompileError && recompileError.message || recompileError)
-              };
-              continue;
-            }
+            /* MotionExport.run() creates a fresh render runtime and encoder
+               for every export, so restarting the worker here is unnecessary
+               and can destabilize the next batch item. */
           }
 
           try {
@@ -17487,18 +17470,9 @@ async function renderPrismBatch(limit, label) {
         completed++;
 
         if (i < samples.length - 1 && !S.batchCancelled) {
-          /* Fresh renderer before the next 4K encode. */
-          try { await restartBatchEngine(); }
-          catch (restartError) {
-            batchLog(
-              'renderer restart after ' + title + ' failed — ' +
-              String(restartError && restartError.message || restartError),
-              true
-            );
-          }
-
-          /* Recompile happens on the next item. */
-          await new Promise(function (resolve) { setTimeout(resolve, 150); });
+          /* Keep the worker alive between flowers. Each MotionExport.run()
+             creates a fresh runtime, encoder and muxer for the next item. */
+          await new Promise(function (resolve) { setTimeout(resolve, 30); });
         }
       } catch (itemError) {
         failed++;
@@ -17515,7 +17489,8 @@ async function renderPrismBatch(limit, label) {
           logLine('DETAIL — ' + itemError.stack);
         }
 
-        try { await restartBatchEngine(); } catch (restartError) {}
+        /* Do not restart the worker after a normal item error.
+           The following export creates a new runtime and can continue safely. */
       }
     }
   } catch (error) {
