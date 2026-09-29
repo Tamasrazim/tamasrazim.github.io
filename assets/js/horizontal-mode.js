@@ -69,6 +69,38 @@
     return false;
   }
 
+  var snapTimer=0;
+
+  function nearestSectionLeft(){
+    if(!pageItems.length)return scroller.scrollLeft;
+    var center=scroller.scrollLeft+window.innerWidth*.5;
+    var bestLeft=scroller.scrollLeft;
+    var bestDistance=Infinity;
+
+    pageItems.forEach(function(item){
+      var left=item.offsetLeft||0;
+      var width=item.offsetWidth||window.innerWidth;
+      var distance=Math.abs((left+Math.min(width,window.innerWidth)*.5)-center);
+      if(distance<bestDistance){
+        bestDistance=distance;
+        bestLeft=left;
+      }
+    });
+
+    return Math.max(0,Math.min(maxHorizontal(),bestLeft));
+  }
+
+  function scheduleSnap(){
+    if(reduce)return;
+    window.clearTimeout(snapTimer);
+    snapTimer=window.setTimeout(function(){
+      var current=scroller.scrollLeft;
+      var target=nearestSectionLeft();
+      if(Math.abs(target-current)<18)return;
+      scroller.scrollTo({left:target,top:0,behavior:'smooth'});
+    },140);
+  }
+
   window.addEventListener('wheel',function(e){
     if(e.ctrlKey || isEditable(e.target))return;
 
@@ -88,6 +120,7 @@
     if(next!==before){
       scroller.scrollTo({left:next,top:0,behavior:'auto'});
       e.preventDefault();
+      scheduleSnap();
     }
   },{passive:false});
 
