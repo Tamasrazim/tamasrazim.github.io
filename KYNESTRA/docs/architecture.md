@@ -8,7 +8,7 @@ KYNESTRA is a single desktop application with a small Core and independent modul
 - Event bus
 - Persistent task registry
 - Settings
-- Module loading
+- Module registry and descriptor validation
 - Safe filesystem operations
 
 ## Modules
