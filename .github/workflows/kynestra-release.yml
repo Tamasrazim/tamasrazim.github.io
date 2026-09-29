@@ -29,8 +29,11 @@ jobs:
         with:
           toolchain: stable
 
+      - name: Generate Cargo.lock
+        run: cargo generate-lockfile
+
       - name: Run tests
-        run: cargo test
+        run: cargo test --locked
 
       - name: Install Tauri CLI
         run: cargo install tauri-cli --version "2.12.0" --locked
@@ -60,6 +63,7 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force "$env:GITHUB_WORKSPACE/KYNESTRA/releases" | Out-Null
           Copy-Item "target/release/bundle/nsis/KYNESTRA-Setup.exe" "$env:GITHUB_WORKSPACE/KYNESTRA/releases/KYNESTRA-Setup.exe" -Force
+          Set-Location $env:GITHUB_WORKSPACE
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "KYNESTRA/releases/KYNESTRA-Setup.exe"
