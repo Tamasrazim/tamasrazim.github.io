@@ -52,9 +52,18 @@ jobs:
           args: --bundles nsis
           releaseAssetNamePattern: KYNESTRA[setup].[ext]
 
+      - name: Normalize installer filename
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem "KYNESTRA/desktop/tauri/target/release/bundle/nsis/*-setup.exe" -File | Select-Object -First 1
+          if (-not $installer) {
+            throw "NSIS installer was not produced."
+          }
+          Copy-Item $installer.FullName "KYNESTRA/desktop/tauri/target/release/bundle/nsis/KYNESTRA-Setup.exe" -Force
+
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
           name: KYNESTRA-Windows-Installer
-          path: KYNESTRA/desktop/tauri/target/release/bundle/nsis/*-setup.exe
+          path: KYNESTRA/desktop/tauri/target/release/bundle/nsis/KYNESTRA-Setup.exe
           if-no-files-found: error
