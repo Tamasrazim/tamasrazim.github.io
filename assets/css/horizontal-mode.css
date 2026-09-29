@@ -94,3 +94,179 @@ body > .site-footer{
 .scroll-cue{
   right:auto;
 }
+
+
+/* ---------- Horizontal section rail ---------- */
+.horizontal-rail{
+  position:fixed;
+  right:clamp(14px,2.4vw,34px);
+  top:50%;
+  z-index:1450;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:7px;
+  transform:translateY(-50%);
+  padding:9px;
+  border:1px solid rgba(243,243,239,.09);
+  border-radius:9px;
+  background:rgba(5,5,5,.32);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  box-shadow:0 18px 60px rgba(0,0,0,.16);
+  opacity:.62;
+  transition:opacity .35s var(--ease),transform .35s var(--ease),background .35s var(--ease);
+}
+.horizontal-rail:hover,
+.horizontal-rail:focus-within{
+  opacity:1;
+  transform:translateY(-50%) translateX(-2px);
+  background:rgba(5,5,5,.54);
+}
+.horizontal-rail::before{
+  content:'PAGE AXIS';
+  margin:0 2px 4px 0;
+  font:700 .48rem var(--mono);
+  letter-spacing:.16em;
+  color:var(--dim);
+}
+.horizontal-rail button{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:7px;
+  min-width:31px;
+  height:20px;
+  padding:0 2px 0 6px;
+  color:var(--dim);
+  cursor:pointer;
+  transition:color .25s var(--ease);
+}
+.horizontal-rail button::before{
+  content:'';
+  order:2;
+  width:4px;
+  height:4px;
+  border:1px solid currentColor;
+  border-radius:50%;
+  transition:width .3s var(--ease),height .3s var(--ease),background .3s var(--ease),box-shadow .3s var(--ease);
+}
+.horizontal-rail button::after{
+  content:attr(data-label);
+  position:absolute;
+  right:25px;
+  top:50%;
+  transform:translateY(-50%) translateX(4px);
+  padding:4px 6px;
+  border:1px solid var(--line);
+  border-radius:4px;
+  background:rgba(5,5,5,.92);
+  color:var(--white);
+  font:600 .48rem var(--mono);
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s var(--ease),transform .2s var(--ease);
+}
+.horizontal-rail button:hover::after,
+.horizontal-rail button:focus-visible::after{
+  opacity:1;
+  transform:translateY(-50%) translateX(0);
+}
+.horizontal-rail button:hover,
+.horizontal-rail button:focus-visible{
+  color:var(--white);
+  outline:none;
+}
+.horizontal-rail button.is-active{
+  color:var(--white);
+}
+.horizontal-rail button.is-active::before{
+  width:14px;
+  height:5px;
+  border-radius:999px;
+  background:currentColor;
+  box-shadow:0 0 16px rgba(243,243,239,.32);
+}
+.horizontal-rail button:focus-visible{
+  box-shadow:0 0 0 1px rgba(243,243,239,.25);
+  border-radius:4px;
+}
+
+.horizontal-index-readout{
+  position:fixed;
+  left:clamp(14px,2.4vw,34px);
+  bottom:clamp(16px,2.8vw,34px);
+  z-index:1450;
+  display:flex;
+  align-items:baseline;
+  gap:9px;
+  pointer-events:none;
+  opacity:.56;
+  font-family:var(--mono);
+}
+.horizontal-index-readout strong{
+  font-size:clamp(.9rem,1.2vw,1.05rem);
+  letter-spacing:.04em;
+}
+.horizontal-index-readout span{
+  font-size:.5rem;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--dim);
+}
+
+@media(max-width:720px){
+  .horizontal-rail{
+    top:auto;
+    right:50%;
+    bottom:14px;
+    flex-direction:row;
+    align-items:center;
+    transform:translateX(50%);
+    gap:5px;
+    padding:7px 8px;
+    border-radius:999px;
+  }
+  .horizontal-rail:hover,
+  .horizontal-rail:focus-within{
+    transform:translateX(50%);
+  }
+  .horizontal-rail::before{
+    display:none;
+  }
+  .horizontal-rail button{
+    min-width:20px;
+    width:20px;
+    height:20px;
+    justify-content:center;
+    padding:0;
+  }
+  .horizontal-rail button::before{
+    width:4px;
+    height:4px;
+  }
+  .horizontal-rail button.is-active::before{
+    width:11px;
+    height:4px;
+  }
+  .horizontal-rail button::after{
+    display:none;
+  }
+  .horizontal-index-readout{
+    left:16px;
+    bottom:16px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .horizontal-rail,
+  .horizontal-rail button,
+  .horizontal-rail button::before,
+  .horizontal-rail button::after{
+    transition:none;
+  }
+}
