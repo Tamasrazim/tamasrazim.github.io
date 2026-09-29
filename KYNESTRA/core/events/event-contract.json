@@ -1,0 +1,21 @@
+{
+  "version": "0.1",
+  "delivery": "at-least-once",
+  "idempotentHandlers": true,
+  "events": [
+    "project.created",
+    "project.updated",
+    "task.created",
+    "task.started",
+    "task.progress",
+    "task.completed",
+    "task.failed",
+    "render.started",
+    "render.completed",
+    "render.failed",
+    "asset.imported",
+    "submission.updated",
+    "account.connected",
+    "account.disconnected"
+  ]
+}
