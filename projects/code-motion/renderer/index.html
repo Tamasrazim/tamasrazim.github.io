@@ -16479,9 +16479,8 @@ function stampNow() {
 function fileNameFor(comp, name, fmt, stamp) {
   if (fmt === 'mp4') {
     var rawTitle = String(name || 'Untitled').trim() || 'Untitled';
-    /* Metadata titles must contain exactly one leading Prism. */
-    var flowerName = rawTitle.replace(/^(?:Prism\s+)+/i, '').trim() || 'Untitled';
-    var title = 'Prism ' + flowerName;
+    /* Preserve the project/metadata title, but collapse accidental repeated Prism prefixes. */
+    var title = rawTitle.replace(/^(?:Prism\s+)+/i, 'Prism ').trim();
     return title + ' — Translucent Geometric Flower Animation.mp4';
   }
   var secs = comp.frameCount / comp.fps;
