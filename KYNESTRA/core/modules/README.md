@@ -4,7 +4,7 @@ Core validates the built-in module manifests during desktop startup.
 
 Current built-ins:
 
-- c2m — Code Motion renderer
+- c2m — KYNESTRA renderer
 - forge — Format Forge converter
 - vault — Stock Vault service
 
