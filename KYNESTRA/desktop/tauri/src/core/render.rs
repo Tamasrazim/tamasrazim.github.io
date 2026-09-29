@@ -237,7 +237,7 @@ impl RenderService {
         }
 
         let reader = RenderJobReader::new(&conn, job_id)?;
-        Ok(reader.finish())
+        reader.finish()
     }
 
     pub fn list(&self, project_path: &str) -> Result<Vec<RenderJobRecord>, RenderError> {
