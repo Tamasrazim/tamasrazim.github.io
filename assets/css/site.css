@@ -513,7 +513,6 @@
       margin-right:10px;
       color:rgba(255,255,255,.28);
     }
-    .id-mobile-copy{display:none}
     .id-bottom{
       position:absolute;left:clamp(22px,3vw,30px);right:clamp(22px,3vw,30px);
       bottom:clamp(20px,2.6vw,26px);z-index:10
