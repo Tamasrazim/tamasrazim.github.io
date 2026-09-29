@@ -1,0 +1,17 @@
+{
+  "version": "0.1",
+  "module": "forge",
+  "type": "converter",
+  "outputs": {
+    "file": "converted asset or ZIP",
+    "handoff": "Core asset import"
+  },
+  "events": [
+    "asset.created",
+    "task.created",
+    "task.completed",
+    "task.failed"
+  ],
+  "currentImplementation": "Format Forge workspace copy",
+  "future": "native Core project handoff"
+}
