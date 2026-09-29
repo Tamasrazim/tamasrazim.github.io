@@ -149,6 +149,44 @@ fn set_submission_status(app: AppHandle, project_path: String, asset_id: String,
 }
 
 #[tauri::command]
+fn export_project_package(
+    app: AppHandle,
+    project_path: String,
+    output_path: String,
+) -> Result<core::package::PackageManifest, String> {
+    let state = app.state::<CoreState>();
+    let result = state.package.export(&project_path, &output_path).map_err(|e| e.to_string())?;
+    let event = CoreEvent::new("project.exported", serde_json::json!({
+        "projectId": result.project_id,
+        "name": result.name,
+        "outputPath": output_path,
+        "files": result.files.len()
+    }));
+    state.events.persist(std::path::Path::new(&project_path), &event).map_err(|e| e.to_string())?;
+    state.events.publish(&app, event).map_err(|e| e.to_string())?;
+    Ok(result)
+}
+
+#[tauri::command]
+fn import_project_package(
+    app: AppHandle,
+    package_path: String,
+) -> Result<core::package::ImportResult, String> {
+    let state = app.state::<CoreState>();
+    let result = state.package.import(&package_path, &state.data_root).map_err(|e| e.to_string())?;
+    let opened = state.projects.open(&result.project_path).map_err(|e| e.to_string())?;
+    let event = CoreEvent::new("project.imported", serde_json::json!({
+        "projectId": opened.project_id,
+        "name": opened.name,
+        "path": opened.path,
+        "filesVerified": result.files_verified
+    }));
+    state.events.persist(std::path::Path::new(&opened.path), &event).map_err(|e| e.to_string())?;
+    state.events.publish(&app, event).map_err(|e| e.to_string())?;
+    Ok(result)
+}
+
+#[tauri::command]
 async fn check_submission_public_status(
     app: AppHandle,
     project_path: String,
@@ -178,7 +216,7 @@ pub fn run() {
             core_status,list_projects,create_project,open_project,create_task,update_task,
             create_render_job,start_render_job,complete_render_job,fail_render_job,
             list_assets,list_render_jobs,list_accounts,create_account,update_account_status,
-            list_submissions,set_submission_status,check_submission_public_status
+            list_submissions,set_submission_status,check_submission_public_status,export_project_package,import_project_package
         ])
         .run(tauri::generate_context!())
         .expect("error while running KYNESTRA");
