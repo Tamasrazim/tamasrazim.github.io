@@ -141,6 +141,11 @@ impl ProjectManager {
     }
 }
 
+pub(crate) fn validated_root(path: &str) -> Result<PathBuf, ProjectError> {
+    let summary = ProjectManager::default().open(path)?;
+    Ok(PathBuf::from(summary.path))
+}
+
 fn validate_database_identity(root: &Path, manifest: &ProjectManifest) -> Result<(), ProjectError> {
     let conn = db::open(&root.join("project.db"))?;
     let row = conn.query_row(
@@ -313,6 +318,24 @@ mod tests {
             .query_row("SELECT root_path FROM projects WHERE project_id=?1", [created.project.project_id.as_str()], |row| row.get(0))
             .expect("root path");
         assert_eq!(root_path, moved_path.to_string_lossy());
+    }
+
+    #[test]
+    fn validated_root_rejects_database_manifest_mismatch() {
+        let root = tempfile::tempdir().expect("root");
+        let manager = ProjectManager::default();
+        let created = manager.create(root.path(), "Boundary Project").expect("project");
+
+        let conn = db::open(&Path::new(&created.project.path).join("project.db")).expect("db");
+        conn.execute(
+            "UPDATE projects SET name='Wrong Name' WHERE project_id=?1",
+            [created.project.project_id.as_str()],
+        ).expect("update");
+
+        assert!(matches!(
+            validated_root(&created.project.path),
+            Err(ProjectError::DatabaseManifestMismatch)
+        ));
     }
 
     #[test]
