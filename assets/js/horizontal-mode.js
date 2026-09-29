@@ -425,12 +425,12 @@
 
       if(Math.abs(nextTop-panel.scrollTop)>0.5){
         e.preventDefault();
-        panel.scrollTo({top:nextTop,left:0,behavior:reduced?'auto':'smooth'});
+        panel.scrollTo({top:nextTop,left:0,behavior:reduce?'auto':'smooth'});
         return;
       }
     }
 
-    if(!e.ctrlKey && !e.metaKey && !e.altKey && /^\\d$/.test(key)){
+    if(!e.ctrlKey && !e.metaKey && !e.altKey && /^\d$/.test(key)){
       var sectionIndex=Number(key)-1;
       if(sectionIndex>=0 && sectionIndex<pageItems.length){
         e.preventDefault();
