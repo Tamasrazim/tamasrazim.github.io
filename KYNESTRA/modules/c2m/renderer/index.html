@@ -16461,10 +16461,16 @@ function stampNow() {
   return '' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' +
     pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
 }
+function normalizeStockProjectName(name) {
+  var raw = String(name || 'Untitled')
+    .replace(/\\u00a0/g, ' ')
+    .replace(/\\s+/g, ' ')
+    .trim() || 'Untitled';
+  return raw.replace(/^(?:Prism\\s*)+/i, 'Prism ').trim() || 'Prism';
+}
 function fileNameFor(comp, name, fmt, stamp) {
   if (fmt === 'mp4') {
-    var rawTitle = String(name || 'Untitled').trim() || 'Untitled';
-    var title = rawTitle.replace(/^(?:Prism[ ]+)+/i, 'Prism ').trim();
+    var title = normalizeStockProjectName(name);
     return title + ' — Translucent Geometric Flower Animation.mp4';
   }
   var secs = comp.frameCount / comp.fps;
