@@ -1,4 +1,4 @@
-# KYNESTRA — Tamasrazim
+# TRILYVA — Tamasrazim
 
 Browser-first deterministic code-driven animation workspace.
 
