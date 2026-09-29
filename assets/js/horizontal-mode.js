@@ -404,16 +404,33 @@
   window.addEventListener('hashchange',goToHash);
   window.addEventListener('popstate',goToHash);
 
-  /* Desktop keyboard navigation follows the page axis. */
+  /* Desktop keyboard navigation follows the same hybrid rule:
+     vertical keys move inside an overflowing section before the page axis. */
   window.addEventListener('keydown',function(e){
     if(isEditable(e.target) || document.body.classList.contains('is-locked'))return;
 
-    var step=Math.max(280,Math.round(window.innerWidth*.86));
     var key=e.key;
     var current=scroller.scrollLeft;
     var max=maxHorizontal();
+    var panel=getScrollablePanel(e.target);
 
-    if(!e.ctrlKey && !e.metaKey && !e.altKey && /^\d$/.test(key)){
+    if(panel && (key==='ArrowDown'||key==='ArrowUp'||key==='PageDown'||key==='PageUp')){
+      var amount=(key==='ArrowDown'||key==='PageDown')
+        ? (key==='PageDown'?window.innerHeight*.82:Math.max(120,window.innerHeight*.14))
+        : -(key==='PageUp'?window.innerHeight*.82:Math.max(120,window.innerHeight*.14));
+      var nextTop=Math.max(0,Math.min(
+        panel.scrollHeight-panel.clientHeight,
+        panel.scrollTop+amount
+      ));
+
+      if(Math.abs(nextTop-panel.scrollTop)>0.5){
+        e.preventDefault();
+        panel.scrollTo({top:nextTop,left:0,behavior:reduced?'auto':'smooth'});
+        return;
+      }
+    }
+
+    if(!e.ctrlKey && !e.metaKey && !e.altKey && /^\\d$/.test(key)){
       var sectionIndex=Number(key)-1;
       if(sectionIndex>=0 && sectionIndex<pageItems.length){
         e.preventDefault();
@@ -461,10 +478,10 @@
 
     if(key==='ArrowRight'){
       e.preventDefault();
-      scroller.scrollTo({left:Math.min(max,current+step),top:0,behavior:'smooth'});
+      scroller.scrollTo({left:Math.min(max,current+Math.max(280,Math.round(window.innerWidth*.86))),top:0,behavior:'smooth'});
     }else if(key==='ArrowLeft'){
       e.preventDefault();
-      scroller.scrollTo({left:Math.max(0,current-step),top:0,behavior:'smooth'});
+      scroller.scrollTo({left:Math.max(0,current-Math.max(280,Math.round(window.innerWidth*.86))),top:0,behavior:'smooth'});
     }else if(key==='PageDown'){
       e.preventDefault();
       scroller.scrollTo({left:Math.min(max,current+window.innerWidth*.92),top:0,behavior:'smooth'});
