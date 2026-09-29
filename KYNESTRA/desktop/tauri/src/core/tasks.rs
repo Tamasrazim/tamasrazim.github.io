@@ -95,6 +95,28 @@ impl TaskService {
         .map_err(TaskError::from)
     }
 
+    pub fn list(&self, project_path: &str) -> Result<Vec<TaskRecord>, TaskError> {
+        let root = validate_project_path(project_path)?;
+        let conn = db::open(&root.join("project.db"))?;
+        let mut stmt = conn.prepare(
+            "SELECT task_id,project_id,type,status,progress,message
+             FROM tasks ORDER BY created_at DESC"
+        )?;
+
+        let rows = stmt.query_map([], |row| {
+            Ok(TaskRecord {
+                task_id: row.get(0)?,
+                project_id: row.get(1)?,
+                task_type: row.get(2)?,
+                status: row.get(3)?,
+                progress: row.get(4)?,
+                message: row.get(5)?,
+            })
+        })?;
+
+        Ok(rows.collect::<Result<Vec<_>, _>>()?)
+    }
+
     pub fn recover_all(&self, root: &Path) -> Result<usize, TaskError> {
         if !root.is_dir() {
             return Ok(0);
