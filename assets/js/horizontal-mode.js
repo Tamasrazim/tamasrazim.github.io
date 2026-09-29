@@ -35,7 +35,8 @@
     if(progressControl){
       var percent=Math.round(amount*100);
       progressControl.setAttribute('aria-valuenow',String(percent));
-      progressControl.setAttribute('aria-valuetext',percent+'%');
+      var activeSection=readout && readout.dataset.section ? readout.dataset.section : 'page';
+      progressControl.setAttribute('aria-valuetext',percent+'% · '+activeSection);
     }
 
     if(Math.abs(delta)>0.5){
@@ -184,6 +185,7 @@
       drag.active=false;
       drag.pointerId=null;
       scroller.classList.remove('axis-dragging');
+      if(drag.moved)scheduleSnap();
     }
 
     scroller.addEventListener('pointerup',endDrag);
@@ -203,6 +205,8 @@
       scheduleProgress();
       scheduleSectionState();
     }
+
+    progressControl.setAttribute('aria-orientation','horizontal');
 
     progressControl.addEventListener('pointerdown',function(e){
       if(e.button!==0)return;
@@ -249,6 +253,7 @@
       scroller.scrollTo({left:maxHorizontal()*next,top:0,behavior:'smooth'});
       scheduleProgress();
       scheduleSectionState();
+      scheduleSnap();
     });
   }
 
@@ -308,24 +313,52 @@
       }
     }
 
+    if(key==='0'){
+      e.preventDefault();
+      goTo(pageItems[0],!reduce);
+      return;
+    }
+
+    if(key==='[' || key===']'){
+      var activeIndex=0;
+      var activeHash=location.hash ? decodeURIComponent(location.hash.slice(1)) : '';
+      pageItems.forEach(function(item,index){
+        if((item.id||'')===activeHash)activeIndex=index;
+      });
+      var nextIndex=key==='['?Math.max(0,activeIndex-1):Math.min(pageItems.length-1,activeIndex+1);
+      e.preventDefault();
+      goTo(pageItems[nextIndex],!reduce);
+      var nextId=pageItems[nextIndex].id||'';
+      if(nextId && history.pushState){
+        history.pushState(null,'','#'+encodeURIComponent(nextId));
+      }
+      return;
+    }
+
     if(key==='ArrowRight'){
       e.preventDefault();
       scroller.scrollTo({left:Math.min(max,current+step),top:0,behavior:'smooth'});
+      scheduleSnap();
     }else if(key==='ArrowLeft'){
       e.preventDefault();
       scroller.scrollTo({left:Math.max(0,current-step),top:0,behavior:'smooth'});
+      scheduleSnap();
     }else if(key==='PageDown'){
       e.preventDefault();
       scroller.scrollTo({left:Math.min(max,current+window.innerWidth*.92),top:0,behavior:'smooth'});
+      scheduleSnap();
     }else if(key==='PageUp'){
       e.preventDefault();
       scroller.scrollTo({left:Math.max(0,current-window.innerWidth*.92),top:0,behavior:'smooth'});
+      scheduleSnap();
     }else if(key==='Home'){
       e.preventDefault();
       scroller.scrollTo({left:0,top:0,behavior:'smooth'});
+      scheduleSnap();
     }else if(key==='End'){
       e.preventDefault();
       scroller.scrollTo({left:max,top:0,behavior:'smooth'});
+      scheduleSnap();
     }
   });
 
