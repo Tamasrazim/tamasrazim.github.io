@@ -18,12 +18,15 @@
 - [ ] Register completed renders with Vault
 
 ## Alpha 0.3 — Stock Vault
-- Asset library and detail view
-- Automatic ingestion from C2M render completion
-- Manual Submitted state
-- Exact filename/title publicity checks against configured contributor profile links
-- Independent platform status
-- Multi-platform account configuration
+- [x] Asset registry and listing
+- [x] Render output ingestion service
+- [x] SHA-256 duplicate detection
+- [ ] Automatic C2M completion handoff
+- [ ] Platform account configuration
+- [ ] Manual Submitted state
+- [ ] Exact filename/title publicity checks against configured contributor profile links
+- [ ] Independent platform status
+- [ ] Multi-platform account configuration
 
 ## Alpha 0.4 — Forge
 - Integrate Forge as its own module
