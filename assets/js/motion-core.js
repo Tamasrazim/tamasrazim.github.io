@@ -21,7 +21,7 @@
 
     var __raf30Last = new WeakMap();
     var __raf30Interval = 1000 / 30;
-    function requestAnimationFrame30(callback){
+    function requestAnimationFrame60(callback){
       function schedule30(){
         window.requestAnimationFrame(function(now){
           var last = __raf30Last.get(callback);
@@ -400,7 +400,7 @@ raf=requestAnimationFrame60(frame);
   (horizontal?axisScroller:window).addEventListener('scroll',function(){target.scroll=horizontal?pageX():pageY()},{passive:true});
   window.addEventListener('blur',function(){target.x=innerWidth*.5;target.y=innerHeight*.5},{passive:true});
   function tick(now){
-    if(!pageVisible){requestAnimationFrame30(tick);return;}
+    if(!pageVisible){requestAnimationFrame60(tick);return;}
     var dt=Math.min(.033,Math.max(.008,(now-last)/1000));last=now;
     var k=1-Math.exp(-dt*8.5);
     state.x=smooth(state.x,target.x,k);state.y=smooth(state.y,target.y,k);
@@ -441,9 +441,9 @@ raf=requestAnimationFrame60(frame);
       card.style.setProperty('--scene-card-near',near.toFixed(3));card.style.setProperty('--scene-card-energy',energy.toFixed(3));
     });
     bands.forEach(function(track,index){track.style.setProperty('--scene-band-x',((index%2?-1:1)*(progress*120+nx*14)).toFixed(2)+'px');track.style.setProperty('--scene-band-skew',(nx*.7+state.vx*.0015).toFixed(3)+'deg')});
-    requestAnimationFrame30(tick);
+    requestAnimationFrame60(tick);
   }
-  requestAnimationFrame30(tick);
+  requestAnimationFrame60(tick);
 })();
 /* Secondary 3D scene environment disabled for performance.
    Core motion + the lighter scene engine provide the site's motion language. */
