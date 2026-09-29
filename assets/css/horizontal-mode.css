@@ -789,3 +789,61 @@ body[data-axis-speed="fast"] main#content > section.axis-is-active .section-inne
     width:7vw;
   }
 }
+
+
+/* ---------- Velocity-responsive composition ---------- */
+/* The page keeps moving continuously; content gains a small inertial "drag" while the axis is moving. */
+:root{
+  --axis-velocity:0;
+  --axis-velocity-abs:0;
+}
+
+main#content > section > .section-inner{
+  translate:calc(var(--axis-velocity) * -14px) 0;
+  scale:calc(1 + var(--axis-velocity-abs) * .008) 1;
+  will-change:translate,scale;
+}
+main#content > section.hero > .hero-inner{
+  translate:calc(var(--axis-velocity) * -20px) 0;
+  scale:calc(1 + var(--axis-velocity-abs) * .012) 1;
+}
+
+main#content > .band .band-track{
+  scale:calc(1 + var(--axis-velocity-abs) * .018) 1;
+  will-change:scale;
+}
+
+main#content > .band::after{
+  margin-top:calc(var(--axis-velocity) * -18px);
+  opacity:calc(.55 + var(--axis-velocity-abs) * .35);
+}
+
+.axis-scroller > .site-footer > *{
+  translate:calc(var(--axis-velocity) * -12px) 0;
+  will-change:translate;
+}
+
+body[data-axis-speed="fast"]{
+  --velocity-glow:1;
+}
+
+@media(max-width:720px){
+  main#content > section > .section-inner{
+    translate:calc(var(--axis-velocity) * -8px) 0;
+    scale:1;
+  }
+  main#content > section.hero > .hero-inner{
+    translate:calc(var(--axis-velocity) * -10px) 0;
+    scale:1;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  main#content > section > .section-inner,
+  main#content > section.hero > .hero-inner,
+  main#content > .band .band-track,
+  .axis-scroller > .site-footer > *{
+    translate:0 0;
+    scale:1;
+  }
+}
