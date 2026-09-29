@@ -165,7 +165,7 @@ fn validate_name(name: &str) -> Result<String, ProjectError> {
         return Err(ProjectError::InvalidName);
     }
 
-    if value.chars().any(|c| matches!(c, '/' | '\' | ':' | '*' | '?' | '"' | '<' | '>' | '|')) {
+    if value.chars().any(|c| matches!(c, '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|')) {
         return Err(ProjectError::InvalidName);
     }
 
@@ -211,11 +211,46 @@ pub enum ProjectError {
 
 #[cfg(test)]
 mod tests {
-    use super::slugify;
+    use super::*;
 
     #[test]
     fn slugify_is_stable() {
         assert_eq!(slugify("My Flower Project"), "my-flower-project");
         assert_eq!(slugify("A/B"), "a-b");
+    }
+
+    #[test]
+    fn create_list_and_open_project() {
+        let root = tempfile::tempdir().expect("temp directory");
+        let manager = ProjectManager::default();
+
+        let created = manager
+            .create(root.path(), "My Flower Project")
+            .expect("project creation");
+
+        assert_eq!(created.project.name, "My Flower Project");
+        assert_eq!(created.manifest.format, FORMAT);
+        assert!(Path::new(&created.project.path).join("manifest.json").is_file());
+        assert!(Path::new(&created.project.path).join("project.db").is_file());
+        assert!(Path::new(&created.project.path).join("source").is_dir());
+        assert!(Path::new(&created.project.path).join("renders").is_dir());
+
+        let listed = manager.list(root.path()).expect("list projects");
+        assert_eq!(listed.len(), 1);
+        assert_eq!(listed[0].project_id, created.project.project_id);
+
+        let opened = manager.open(&created.project.path).expect("open project");
+        assert_eq!(opened.project_id, created.project.project_id);
+    }
+
+    #[test]
+    fn rejects_unsafe_names() {
+        let root = tempfile::tempdir().expect("temp directory");
+        let manager = ProjectManager::default();
+
+        assert!(matches!(
+            manager.create(root.path(), "bad/name"),
+            Err(ProjectError::InvalidName)
+        ));
     }
 }
