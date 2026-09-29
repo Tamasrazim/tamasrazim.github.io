@@ -15,6 +15,24 @@ const views = {
   settings: renderSettings
 };
 
+function rememberActiveProject(path) {
+  try {
+    if (path) localStorage.setItem('kynestra.activeProjectPath', path);
+    else localStorage.removeItem('kynestra.activeProjectPath');
+  } catch (_) {}
+}
+
+async function restoreActiveProject() {
+  try {
+    const path = localStorage.getItem('kynestra.activeProjectPath');
+    if (!path) return;
+    state.activeProject = await api('open_project', { path });
+  } catch (_) {
+    rememberActiveProject(null);
+    state.activeProject = null;
+  }
+}
+
 async function renderForge() {
   view.innerHTML =
     '<div class="card"><h2>Forge</h2><p class="muted">KYNESTRA Forge currently ships the real Format Forge workspace as an independent module. It handles browser-first conversion, batch processing and ZIP export; the production page remains untouched.</p><div class="actions"><button id="launch-forge" class="action primary">Launch Forge</button></div><div class="notice">Forge is intentionally separate from C2M and Stock Vault. Core handoff contracts will be added without merging module internals.</div></div>';
@@ -303,7 +321,10 @@ async function api(command, args) {
 async function refreshProjects() {
   if (!invoke) return;
   state.projects = await api('list_projects');
-  if (state.activeProject && !state.projects.some(p => p.project_id === state.activeProject.project_id)) state.activeProject = null;
+  if (state.activeProject && !state.projects.some(p => p.project_id === state.activeProject.project_id)) {
+    state.activeProject = null;
+    rememberActiveProject(null);
+  }
 }
 
 async function createProject() {
@@ -312,13 +333,18 @@ async function createProject() {
   try {
     const result = await api('create_project', { name });
     state.activeProject = result.project;
+    rememberActiveProject(result.project.path);
     await refreshProjects();
     renderHome();
   } catch (error) { alert(String(error)); }
 }
 
 async function openProject(path) {
-  try { state.activeProject = await api('open_project', { path }); renderHome(); }
+  try {
+    state.activeProject = await api('open_project', { path });
+    rememberActiveProject(state.activeProject.path);
+    renderHome();
+  }
   catch (error) { alert(String(error)); }
 }
 
@@ -346,6 +372,7 @@ async function importPackage() {
   try {
     const result = await api('import_project_package', { packagePath });
     state.activeProject = await api('open_project', { path: result.project_path });
+    rememberActiveProject(state.activeProject.path);
     await refreshProjects();
     alert('Imported '+result.name+' with '+result.files_verified+' verified files.');
     renderHome();
@@ -451,6 +478,7 @@ async function init() {
       state.modules = await api('list_modules');
       statusEl.textContent = 'CORE ONLINE · '+state.core.version+' · '+state.modules.length+' MODULES';
       await refreshProjects();
+      await restoreActiveProject();
       if (eventApi?.listen) await eventApi.listen('kynestra:event', handleCoreEvent);
     } else statusEl.textContent = 'WEB PREVIEW';
   } catch (error) { statusEl.textContent = 'CORE ERROR'; console.error(error); }
