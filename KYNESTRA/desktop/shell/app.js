@@ -12,6 +12,7 @@ const views = {
   forge: renderForge,
   c2m: renderC2M,
   vault: renderVault,
+  'task-center': renderTaskCenter,
   settings: renderSettings
 };
 
@@ -103,6 +104,47 @@ async function renderVault() {
   document.getElementById('vault-add-account')?.addEventListener('click', createAccount);
   document.getElementById('vault-set-submission')?.addEventListener('click', setSubmissionStatus);
   document.getElementById('vault-check-public')?.addEventListener('click', checkSubmissionPublicStatus);
+}
+
+async function renderTaskCenter() {
+  const project = state.activeProject;
+  if (!project) {
+    renderModule('Task Center', 'Open a .tamasrazim project first. Tasks are stored per project.');
+    return;
+  }
+
+  try {
+    const tasks = await api('list_tasks', { projectPath: project.path });
+    const grouped = tasks.reduce((counts, task) => {
+      counts[task.status] = (counts[task.status] || 0) + 1;
+      return counts;
+    }, {});
+
+    const summary = Object.entries(grouped)
+      .map(([status, count]) => escapeHtml(status)+': '+count)
+      .join(' · ') || 'No tasks';
+
+    view.innerHTML =
+      '<div class="card"><h2>Task Center</h2>'+
+      '<p class="muted">Live Core task state for the active .tamasrazim project. Task lifecycle changes are persisted in the project database and surfaced here.</p>'+
+      '<div class="notice">Project: <strong>'+escapeHtml(project.name)+'</strong> · '+summary+'</div>'+
+      '<div class="actions"><button id="task-refresh" class="action primary">Refresh</button><button id="task-home" class="action">Home</button></div>'+
+      '<div class="projects">'+(
+        tasks.length
+          ? tasks.map(task => '<div class="project"><b>'+escapeHtml(task.status.toUpperCase())+' · '+escapeHtml(task.task_type)+'</b><code>'+escapeHtml(task.task_id)+'</code><span class="muted">'+Math.round(Number(task.progress)*100)+'%'+(task.message ? ' · '+escapeHtml(task.message) : '')+'</span></div>').join('')
+          : '<div class="notice">No tasks for this project yet.</div>'
+      )+'</div></div>';
+
+    document.getElementById('task-refresh')?.addEventListener('click', renderTaskCenter);
+    document.getElementById('task-home')?.addEventListener('click', () => {
+      state.currentView = 'home';
+      title.textContent = 'Home';
+      document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('active', b.dataset.view === 'home'));
+      renderHome();
+    });
+  } catch (error) {
+    renderModule('Task Center', 'Unable to load tasks: '+escapeHtml(error));
+  }
 }
 
 async function renderSettings() {
@@ -495,7 +537,7 @@ async function init() {
 document.querySelectorAll('#nav button').forEach(button => button.addEventListener('click', () => {
   const name = button.dataset.view;
   state.currentView = name;
-  title.textContent = name === 'c2m' ? 'C2M' : name === 'vault' ? 'Stock Vault' : name[0].toUpperCase()+name.slice(1);
+  title.textContent = name === 'c2m' ? 'C2M' : name === 'vault' ? 'Stock Vault' : name === 'task-center' ? 'Task Center' : name[0].toUpperCase()+name.slice(1);
   document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('active', b === button));
   views[name]();
 }));
