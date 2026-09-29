@@ -1,4 +1,4 @@
-const CACHE = 'tamasrazim-code-motion-pwa-v8';
+const CACHE = 'tamasrazim-code-motion-pwa-v9';
 const CORE = [
   './',
   './index.html',
