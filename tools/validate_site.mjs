@@ -77,6 +77,13 @@ must(!siteJs.includes('document.body.scrollTo'),'site focus routing uses the ded
 must(axis.includes('function getScrollablePanel'),'horizontal controller supports vertical section panels');
 must(axis.includes('function canConsumeVertical'),'horizontal controller detects available vertical travel');
 must(axis.includes('panel.scrollTop=Math.max'),'horizontal controller applies vertical panel scrolling');
+const motion=read('assets/js/motion-core.js');
+const axisCss=read('assets/css/horizontal-mode.css');
+
+must(motion.includes('Nested vertical panels are independent scroll containers'),'motion core tracks nested vertical panels');
+must(motion.includes('panel.addEventListener(\'scroll\''),'motion core invalidates nested panel bounds');
+must(!axisCss.includes('contain:layout paint'),'horizontal mode does not paint-clip seamless section overlap');
+
 
 for(const ref of [
   'href="projects/code-motion/"',
