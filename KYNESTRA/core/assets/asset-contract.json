@@ -24,7 +24,7 @@
     ]
   },
   "ingestion": {
-    "rule": "A successful C2M render may register an output as a Vault asset.",
+    "rule": "A successful KYNESTRA render may register an output as a Vault asset.",
     "duplicateKey": [
       "projectId",
       "sha256"
