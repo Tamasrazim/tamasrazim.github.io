@@ -17038,7 +17038,7 @@ function renderResults() {
 }
 
 /* ---------------- queue ---------------- */
-async async function renderPrismBatch(limit, label) {
+async function renderPrismBatch(limit, label) {
   if (S.rendering || S.batchRendering) return;
 
   var allPrisms = $$('script[type="text/plain"][id^="sample-"]').filter(function (node) {
