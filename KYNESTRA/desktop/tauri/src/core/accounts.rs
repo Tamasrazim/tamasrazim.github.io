@@ -135,29 +135,35 @@ fn validate_status(status: &str) -> Result<(), AccountError> {
     }
 }
 
-    #[test]
-    fn unknown_account_returns_not_found() {
-        let root = tempfile::tempdir().expect("root");
-        let project = root.path().join("accounts.tamasrazim");
-        std::fs::create_dir_all(&project).expect("project");
-        std::fs::write(
-            project.join("manifest.json"),
-            r#"{"format":"tamasrazim","formatVersion":"0.1","projectId":"accounts","name":"Accounts","createdBy":"KYNESTRA"}"#,
-        ).expect("manifest");
-        let conn = db::open(&project.join("project.db")).expect("db");
-        conn.execute(
-            "INSERT INTO projects (project_id,name,format,format_version,root_path,created_at,updated_at)
-             VALUES ('accounts','Accounts','tamasrazim','0.1',?1,'now','now')",
-            [project.to_string_lossy().as_ref()],
-        ).expect("project row");
 
-        let result = AccountService::default().update_status(
-            project.to_str().unwrap(),
-            "missing-account",
-            "connected",
-        );
-        assert!(matches!(result, Err(AccountError::NotFound(id)) if id == "missing-account"));
-    }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+        fn unknown_account_returns_not_found() {
+            let root = tempfile::tempdir().expect("root");
+            let project = root.path().join("accounts.tamasrazim");
+            std::fs::create_dir_all(&project).expect("project");
+            std::fs::write(
+                project.join("manifest.json"),
+                r#"{"format":"tamasrazim","formatVersion":"0.1","projectId":"accounts","name":"Accounts","createdBy":"KYNESTRA"}"#,
+            ).expect("manifest");
+            let conn = db::open(&project.join("project.db")).expect("db");
+            conn.execute(
+                "INSERT INTO projects (project_id,name,format,format_version,root_path,created_at,updated_at)
+                 VALUES ('accounts','Accounts','tamasrazim','0.1',?1,'now','now')",
+                [project.to_string_lossy().as_ref()],
+            ).expect("project row");
+    
+            let result = AccountService::default().update_status(
+                project.to_str().unwrap(),
+                "missing-account",
+                "connected",
+            );
+            assert!(matches!(result, Err(AccountError::NotFound(id)) if id == "missing-account"));
+        }
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum AccountError {
