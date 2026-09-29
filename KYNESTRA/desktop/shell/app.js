@@ -39,10 +39,11 @@ async function renderC2M() {
   const jobs = await api('list_render_jobs', { projectPath: project.path });
   const list = document.getElementById('render-job-list');
   list.innerHTML = jobs.length
-    ? jobs.map(job => '<div class="project"><b>'+escapeHtml(job.status.toUpperCase())+' · '+escapeHtml(job.format)+'</b><code>'+escapeHtml(job.job_id)+'</code><span class="muted">'+escapeHtml(JSON.stringify(job.composition))+'</span></div>').join('')
+    ? jobs.map(job => '<div class="project"><b>'+escapeHtml(job.status.toUpperCase())+' · '+escapeHtml(job.format)+'</b><code>'+escapeHtml(job.job_id)+'</code><span class="muted">'+escapeHtml(JSON.stringify(job.composition))+'</span>'+(job.status==='recoverable' ? '<span class="muted">The previous process stopped before completion. Recovery resets this job to queued so C2M can rerun it cleanly.</span><div class="actions"><button class="action" data-recover-job="'+escapeAttr(job.job_id)+'">Recover Job</button></div>' : '')+'</div>').join('')
     : '<div class="notice">No render jobs yet.</div>';
 
   document.getElementById('new-render-job')?.addEventListener('click', createRenderJob);
+  document.querySelectorAll('[data-recover-job]').forEach(button => button.addEventListener('click', () => recoverRenderJob(button.dataset.recoverJob)));
   document.getElementById('import-render-output')?.addEventListener('click', completeRenderJob);
 }
 
@@ -201,6 +202,20 @@ async function createRenderJob() {
       composition
     });
     await api('start_render_job', { projectPath: state.activeProject.path, jobId: job.job_id });
+    await renderC2M();
+  } catch (error) {
+    alert(String(error));
+  }
+}
+
+async function recoverRenderJob(jobId) {
+  if (!state.activeProject) return;
+  try {
+    await api('recover_render_job', {
+      projectPath: state.activeProject.path,
+      jobId
+    });
+    alert('Render job recovered and returned to queued state. Rerun it from the C2M module.');
     await renderC2M();
   } catch (error) {
     alert(String(error));
