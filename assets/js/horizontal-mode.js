@@ -302,6 +302,31 @@
     });
   }
 
+  /* Hero next-section control. */
+  var axisNext=document.getElementById('axisNext');
+  if(axisNext){
+    axisNext.addEventListener('click',function(){
+      var activeIndex=0;
+      pageItems.forEach(function(item,index){
+        var left=item.offsetLeft||0;
+        var width=item.offsetWidth||window.innerWidth;
+        var center=left-scroller.scrollLeft+Math.min(width,window.innerWidth)*.5;
+        if(Math.abs(center-window.innerWidth*.5)<Math.abs((pageItems[activeIndex].offsetLeft||0)-scroller.scrollLeft+Math.min(pageItems[activeIndex].offsetWidth||window.innerWidth,window.innerWidth)*.5-window.innerWidth*.5)){
+          activeIndex=index;
+        }
+      });
+      var nextIndex=Math.min(pageItems.length-1,activeIndex+1);
+      if(nextIndex===activeIndex)return;
+      cancelSnap();
+      goTo(pageItems[nextIndex],!reduce);
+      var id=pageItems[nextIndex].id||'';
+      if(id && history.pushState){
+        var hash='#'+encodeURIComponent(id);
+        if(location.hash!==hash)history.pushState(null,'',hash);
+      }
+    });
+  }
+
   /* Keep in-page navigation horizontal and predictable. */
   document.addEventListener('click',function(e){
     var anchor=e.target.closest ? e.target.closest('a[href^="#"]') : null;
@@ -623,7 +648,12 @@
 
     var cueLabel=document.querySelector('.scroll-cue-label');
     if(cueLabel){
-      cueLabel.textContent=closest===0 ? 'Scroll horizontally' : (closest===pageItems.length-1 ? 'End of axis' : 'Continue horizontally');
+      cueLabel.textContent=closest===0 ? 'Next section' : (closest===pageItems.length-1 ? 'End of axis' : 'Next section');
+    }
+    if(axisNext){
+      var atEnd=closest===pageItems.length-1;
+      axisNext.disabled=atEnd;
+      axisNext.setAttribute('aria-label',atEnd?'End of horizontal page axis':'Go to '+axisName(pageItems[Math.min(pageItems.length-1,closest+1)],Math.min(pageItems.length-1,closest+1)));
     }
   }
 
