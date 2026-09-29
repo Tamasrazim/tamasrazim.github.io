@@ -9,7 +9,7 @@ const renderer = fs.readFileSync('projects/code-motion/renderer/index.html', 'ut
 const project = fs.readFileSync('projects/code-motion/index.html', 'utf8');
 const media = fs.readFileSync('projects/code-motion/renderer/media-stack.js', 'utf8');
 
-must(renderer.includes('<title>Code → Motion — Tamasrazim</title>'), 'current Code Motion title exists');
+must(renderer.includes('<title>KYNESTRA — Tamasrazim</title>'), 'current KYNESTRA title exists');
 
 for (const token of [
   'function renderFrame(',
@@ -72,4 +72,4 @@ try {
   throw new Error('media descriptor syntax: ' + error.message);
 }
 
-console.log('Code → Motion V2 validation complete.');
+console.log('KYNESTRA V2 validation complete.');
