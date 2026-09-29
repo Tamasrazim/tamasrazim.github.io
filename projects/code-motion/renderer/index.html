@@ -16478,7 +16478,9 @@ function stampNow() {
 }
 function fileNameFor(comp, name, fmt, stamp) {
   if (fmt === 'mp4') {
-    return (String(name || 'Untitled').trim() || 'Untitled') + ' — Translucent Geometric Flower Animation.mp4';
+    var title = (String(name || 'Untitled').trim() || 'Untitled')
+      .replace(/^Prism\\s+Prism\\s+/i, 'Prism ');
+    return title + ' — Translucent Geometric Flower Animation.mp4';
   }
   var secs = comp.frameCount / comp.fps;
   var dur = (Math.abs(secs - Math.round(secs)) < 1e-6) ? Math.round(secs) + 's' : secs.toFixed(2) + 's';
