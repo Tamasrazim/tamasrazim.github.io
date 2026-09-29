@@ -1,4 +1,4 @@
-# C2M — TRILYVA
+# TRILYVA
 
 C2M is KYNESTRA's JavaScript animation renderer module.
 
