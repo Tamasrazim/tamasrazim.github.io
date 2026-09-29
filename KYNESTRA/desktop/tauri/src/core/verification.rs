@@ -1,4 +1,5 @@
 use super::db;
+use super::projects::ProjectManager;
 use chrono::Utc;
 use reqwest::Client;
 use rusqlite::params;
@@ -163,13 +164,9 @@ impl VerificationService {
 }
 
 fn validate_project(path: &str) -> Result<PathBuf, VerificationError> {
-    let root = Path::new(path);
-    if root.extension().and_then(|v| v.to_str()) != Some("tamasrazim")
-        || !root.join("project.db").is_file()
-    {
-        return Err(VerificationError::InvalidProject);
-    }
-    Ok(root.to_path_buf())
+    ProjectManager::default()
+        .validated_root(path)
+        .map_err(|_| VerificationError::InvalidProject)
 }
 
 #[derive(Debug, thiserror::Error)]
