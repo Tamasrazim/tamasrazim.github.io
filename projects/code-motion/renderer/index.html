@@ -16478,8 +16478,10 @@ function stampNow() {
 }
 function fileNameFor(comp, name, fmt, stamp) {
   if (fmt === 'mp4') {
-    var title = (String(name || 'Untitled').trim() || 'Untitled')
-      .replace(/^Prism\\s+Prism\\s+/i, 'Prism ');
+    var rawTitle = String(name || 'Untitled').trim() || 'Untitled';
+    /* Metadata titles must contain exactly one leading Prism. */
+    var flowerName = rawTitle.replace(/^(?:Prism\s+)+/i, '').trim() || 'Untitled';
+    var title = 'Prism ' + flowerName;
     return title + ' — Translucent Geometric Flower Animation.mp4';
   }
   var secs = comp.frameCount / comp.fps;
