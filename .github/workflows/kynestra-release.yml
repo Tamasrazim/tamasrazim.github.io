@@ -46,7 +46,7 @@ jobs:
         run: cargo test --locked
 
       - name: Build NSIS installer
-        run: cargo tauri build --locked --bundles nsis
+        run: cargo tauri build --bundles nsis -- --locked
 
       - name: Normalize installer filename
         shell: pwsh
