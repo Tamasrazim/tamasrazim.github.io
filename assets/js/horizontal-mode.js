@@ -46,6 +46,14 @@
       scroller.dataset.axisSpeed='settled';
     }
 
+    document.documentElement.style.setProperty('--axis-progress',amount.toFixed(4));
+    document.documentElement.style.setProperty('--axis-speed',speed.toFixed(4));
+    window.clearTimeout(speedTimer);
+    speedTimer=window.setTimeout(function(){
+      scroller.dataset.axisSpeed='settled';
+      document.documentElement.style.setProperty('--axis-speed','0');
+    },220);
+
     motionLast=scroller.scrollLeft;
     motionLastTime=now;
     raf=0;
@@ -56,7 +64,17 @@
   }
 
   scroller.addEventListener('scroll',scheduleProgress,{passive:true});
-  window.addEventListener('resize',scheduleProgress,{passive:true});
+  scroller.addEventListener('scroll',function(){
+    if(scroller.dataset.axisSpeed!=='settled')scheduleProgress();
+  },{passive:true});
+  if('onscrollend' in window){
+    scroller.addEventListener('scrollend',scheduleSnap,{passive:true});
+  }
+  window.addEventListener('resize',function(){
+    cancelSnap();
+    scheduleProgress();
+    scheduleSectionState();
+  },{passive:true});
 
   function isEditable(target){
     if(!target)return false;
@@ -96,6 +114,12 @@
   }
 
   var snapTimer=0;
+  var speedTimer=0;
+
+  function cancelSnap(){
+    window.clearTimeout(snapTimer);
+    snapTimer=0;
+  }
 
   function nearestSectionLeft(){
     if(!pageItems.length)return scroller.scrollLeft;
@@ -118,19 +142,27 @@
 
   function scheduleSnap(){
     if(reduce)return;
-    window.clearTimeout(snapTimer);
+    cancelSnap();
     snapTimer=window.setTimeout(function(){
       var current=scroller.scrollLeft;
       var target=nearestSectionLeft();
-      if(Math.abs(target-current)<18)return;
+      var threshold=Math.max(18,window.innerWidth*.012);
+      if(Math.abs(target-current)<threshold)return;
       scroller.scrollTo({left:target,top:0,behavior:'smooth'});
-    },140);
+    },180);
+  }
+
+  function normalizeWheelDelta(e){
+    if(e.deltaMode===1)return e.deltaY*16;
+    if(e.deltaMode===2)return e.deltaY*window.innerHeight;
+    return e.deltaY;
   }
 
   window.addEventListener('wheel',function(e){
+    cancelSnap();
     if(e.ctrlKey || isEditable(e.target))return;
 
-    var delta=e.deltaY;
+    var delta=normalizeWheelDelta(e);
     if(Math.abs(e.deltaX)>Math.abs(e.deltaY) && Math.abs(e.deltaX)>0){
       scheduleProgress();
       scheduleSnap();
@@ -162,6 +194,7 @@
   if(fine && !reduce){
     scroller.addEventListener('pointerdown',function(e){
       if(e.button!==0 || isDragExcluded(e.target))return;
+      cancelSnap();
       drag.active=true;
       drag.startX=e.clientX;
       drag.startScroll=scroller.scrollLeft;
@@ -210,11 +243,13 @@
 
     progressControl.addEventListener('pointerdown',function(e){
       if(e.button!==0)return;
+      cancelSnap();
       scrub.active=true;
       scrub.pointerId=e.pointerId;
       scroller.classList.add('is-scrubbing');
       try{progressControl.setPointerCapture(e.pointerId);}catch(_err){}
       setProgressFromClientX(e.clientX);
+      scroller.dataset.axisSpeed='fast';
       e.preventDefault();
       e.stopPropagation();
     });
@@ -222,6 +257,7 @@
     progressControl.addEventListener('pointermove',function(e){
       if(!scrub.active || e.pointerId!==scrub.pointerId)return;
       setProgressFromClientX(e.clientX);
+      scroller.dataset.axisSpeed='fast';
       e.preventDefault();
       e.stopPropagation();
     });
@@ -270,8 +306,10 @@
     if(!target)return;
 
     e.preventDefault();
+    cancelSnap();
+    var nextHash='#'+encodeURIComponent(id);
     if(history.pushState){
-      history.pushState(null,'','#'+encodeURIComponent(id));
+      if(location.hash!==nextHash)history.pushState(null,'',nextHash);
     }else{
       location.hash=id;
     }
@@ -279,6 +317,7 @@
   });
 
   function goToHash(){
+    cancelSnap();
     var id=decodeURIComponent(location.hash.replace(/^#/,''));
     if(!id){
       goTo(document.getElementById('top'),!reduce);
@@ -293,14 +332,14 @@
 
   /* Desktop keyboard navigation follows the page axis. */
   window.addEventListener('keydown',function(e){
-    if(isEditable(e.target))return;
+    if(isEditable(e.target) || document.body.classList.contains('is-locked'))return;
 
     var step=Math.max(280,Math.round(window.innerWidth*.86));
     var key=e.key;
     var current=scroller.scrollLeft;
     var max=maxHorizontal();
 
-    if(/^\d$/.test(key)){
+    if(!e.ctrlKey && !e.metaKey && !e.altKey && /^\d$/.test(key)){
       var sectionIndex=Number(key)-1;
       if(sectionIndex>=0 && sectionIndex<pageItems.length){
         e.preventDefault();
@@ -313,13 +352,13 @@
       }
     }
 
-    if(key==='0'){
+    if(!e.ctrlKey && !e.metaKey && !e.altKey && key==='0'){
       e.preventDefault();
       goTo(pageItems[0],!reduce);
       return;
     }
 
-    if(key==='[' || key===']'){
+    if(!e.ctrlKey && !e.metaKey && !e.altKey && (key==='[' || key===']')){
       var activeIndex=0;
       var activeHash=location.hash ? decodeURIComponent(location.hash.slice(1)) : '';
       pageItems.forEach(function(item,index){
@@ -332,6 +371,19 @@
       if(nextId && history.pushState){
         history.pushState(null,'','#'+encodeURIComponent(nextId));
       }
+      return;
+    }
+
+    if(key===' ' && !e.shiftKey){
+      e.preventDefault();
+      scroller.scrollTo({left:Math.min(max,current+window.innerWidth*.92),top:0,behavior:'smooth'});
+      scheduleSnap();
+      return;
+    }
+    if(key===' ' && e.shiftKey){
+      e.preventDefault();
+      scroller.scrollTo({left:Math.max(0,current-window.innerWidth*.92),top:0,behavior:'smooth'});
+      scheduleSnap();
       return;
     }
 
@@ -360,6 +412,24 @@
       scroller.scrollTo({left:max,top:0,behavior:'smooth'});
       scheduleSnap();
     }
+  });
+
+  window.addEventListener('blur',function(){
+    cancelSnap();
+    scroller.classList.remove('axis-dragging','is-scrubbing');
+  },{passive:true});
+
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){
+      cancelSnap();
+      window.clearTimeout(speedTimer);
+    }
+  },{passive:true});
+
+  window.addEventListener('keydown',function(e){
+    if(e.key!=='Escape')return;
+    cancelSnap();
+    scroller.classList.remove('axis-dragging','is-scrubbing');
   });
 
   /* Add an explicit horizontal cue to the first viewport without changing content. */
@@ -399,13 +469,15 @@
     var label=labels[id] || (item.classList.contains('band')?'signal':item===footer?'end':'section '+String(index+1).padStart(2,'0'));
     var button=document.createElement('button');
     button.type='button';
-    button.setAttribute('aria-label','Go to '+label);
+    button.setAttribute('aria-label','Go to '+label+' · '+String(index+1)+' of '+String(pageItems.length));
     button.setAttribute('data-label',label);
     button.dataset.index=String(index);
     button.addEventListener('click',function(){
+      cancelSnap();
       goTo(item,!reduce);
-      if(id && history.replaceState){
-        history.replaceState(null,'','#'+encodeURIComponent(id));
+      if(id && history.pushState){
+        var railHash='#'+encodeURIComponent(id);
+        if(location.hash!==railHash)history.pushState(null,'',railHash);
       }
     });
     rail.appendChild(button);
@@ -456,6 +528,8 @@
     });
 
     document.body.dataset.axisSection=activeId||'top';
+    document.body.dataset.axisIndex=String(closest+1);
+    document.body.dataset.axisTotal=String(pageItems.length);
 
     /* Reflect the visible section in the URL without creating history entries. */
     if(activeId && activeId!=='top'){
@@ -474,6 +548,8 @@
 
     readout.innerHTML='<strong>'+number+'</strong><span>/ '+total+' · '+name+'</span>';
     readout.dataset.section=activeId||'top';
+    readout.dataset.index=String(closest+1);
+    readout.dataset.total=String(pageItems.length);
   }
 
   var stateRAF=0;
@@ -493,6 +569,15 @@
   /* Mobile remains native horizontal touch scrolling. */
   if(!fine){
     document.documentElement.style.scrollBehavior='auto';
+    document.body.style.touchAction='pan-x';
+  }
+
+  if('onscrollend' in window){
+    scroller.addEventListener('scrollend',function(){
+      scroller.dataset.axisSpeed='settled';
+      scheduleSectionState();
+      scheduleSnap();
+    },{passive:true});
   }
 
   /* Deep-link to a section after the layout has established its width. */
@@ -504,5 +589,6 @@
     },60);
   }
 
+  scheduleSectionState();
   scheduleProgress();
 })();
