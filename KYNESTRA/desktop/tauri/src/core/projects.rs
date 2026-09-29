@@ -41,6 +41,9 @@ pub struct CreateProjectResult {
 pub struct ProjectManager;
 
 impl ProjectManager {
+    pub(crate) fn validated_root(&self, path: &str) -> Result<PathBuf, ProjectError> {
+        validated_root(path)
+    }
     pub fn create(&self, root: &Path, name: &str) -> Result<CreateProjectResult, ProjectError> {
         let clean_name = validate_name(name)?;
         fs::create_dir_all(root)?;
