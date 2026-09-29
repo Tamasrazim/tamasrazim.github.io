@@ -3,7 +3,6 @@ name: KYNESTRA Windows Installer
 on:
   push:
     branches:
-      - "main"
       - "kynestra-build"
     tags:
       - "kynestra-v*"
