@@ -3531,7 +3531,7 @@ var assets = {};
 
 function mk(w, h) {
   var c = new OffscreenCanvas(w, h);
-  return { canvas: c, ctx: c.getContext('2d', { alpha: true, willReadFrequently: false }) };
+  return { canvas: c, ctx: c.getContext('2d', { alpha: true, willReadFrequently: false, colorSpace: 'srgb' }) };
 }
 /* The export render target. There is no DOM in here, so it is an
    OffscreenCanvas rather than <canvas id="render-target">; it is still a real
@@ -3580,7 +3580,7 @@ self.onmessage = function (ev) {
         var w = m.rasterW, h = m.rasterH;
         if (!previewCanvas || previewCanvas.width !== w || previewCanvas.height !== h) {
           previewCanvas = new OffscreenCanvas(w, h);
-          previewCtx = previewCanvas.getContext('2d', { alpha: true });
+          previewCtx = previewCanvas.getContext('2d', { alpha: true, colorSpace: 'srgb' });
         }
         var r = rt.renderInto(previewCtx, m.frame, { rasterScale: m.scale });
         if (!r.ok) { send({ type: 'preview', id: id, ok: false, error: r.error, frame: m.frame }); break; }
@@ -15365,7 +15365,7 @@ function mainEngine() {
   var rt = CORE.createRuntime(), assets = {}, cancelled = false;
   function mk(w, h) {
     var c = document.createElement('canvas'); c.width = w; c.height = h;
-    return { canvas: c, ctx: c.getContext('2d', { alpha: true }) };
+    return { canvas: c, ctx: c.getContext('2d', { alpha: true, colorSpace: 'srgb' }) };
   }
   /* The export render target is a real, inspectable canvas element:
      <canvas id="render-target">. VideoFrame is built from this and nothing
@@ -16756,7 +16756,7 @@ function renderFirstFrameJpg(job) {
     canvas.width = job.composition.width;
     canvas.height = job.composition.height;
 
-    var ctx = canvas.getContext('2d', { alpha: false });
+    var ctx = canvas.getContext('2d', { alpha: false, colorSpace: 'srgb' });
     ctx.fillStyle = job.composition.background || '#000000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
@@ -17104,22 +17104,33 @@ function stockMetadataForTitle(title) {
   var raw = String(title || 'Prism Flower').trim();
   var flower = raw.replace(/^Prism\\s+/i, '').trim() || 'Flower';
   var projectName = /^Prism\\s+/i.test(raw) ? raw : ('Prism ' + flower);
+
+  /* Shutterstock-ready titles: the animation and JPG use different titles,
+     while the project name itself stays identical to the renderer metadata. */
   var animationTitle = projectName + ' — Translucent Geometric Flower Animation';
   var illustrationTitle = projectName + ' — Translucent Geometric Flower illustration';
-  var baseKeywords = [
-    flower.toLowerCase(),
+
+  /* Keep metadata factual, compact, and under Shutterstock's 150-character
+     submission field while preserving the user's stock-description style. */
+  var videoDescription =
+    'Translucent geometric ' + flower +
+    ' with sculpted petals, luminous gradients, delicate outlines, and a glowing center. Smooth 10-second seamless motion for motion graphics.';
+  var illustrationDescription =
+    'Translucent geometric ' + flower +
+    ' with sculpted petals, luminous gradients, delicate outlines, and a glowing center. Decorative botanical illustration for modern design.';
+
+  /* 46 base terms + the flower name = 47. */
+  var commonKeywords = [
     'flower','floral','botanical','translucent','geometric','prism','geometric flower',
     'abstract','colorful','vivid','luminous','glowing','gradient','petals','bloom','nature',
-    'decorative','design','background','transparent','alpha','motion','motion graphics',
-    'animation','3d','pseudo 3d','digital art','abstract nature','botanical animation',
-    'flower loop','seamless animation','seamless loop','10 second loop','modern','elegant',
-    'vibrant','iridescent','refraction','light','texture','organic','spring','floral design',
-    '4k','60fps'
+    'decorative','design','background','motion','motion graphics','animation','3d',
+    'pseudo 3d','digital art','abstract nature','botanical animation','flower loop',
+    'seamless animation','seamless loop','10 second loop','modern','elegant','vibrant',
+    'iridescent','refraction','light','texture','organic','spring','floral design',
+    'creative','ornamental','sculpted petals'
   ];
-  var videoKeywords = baseKeywords.slice();
-  videoKeywords.push('stock footage');
-  var illustrationKeywords = baseKeywords.slice();
-  illustrationKeywords.push('illustration','still image');
+  var videoKeywords = [flower.toLowerCase()].concat(commonKeywords, ['stock footage','video']);
+  var illustrationKeywords = [flower.toLowerCase()].concat(commonKeywords, ['illustration','still image']);
 
   return {
     flower: flower,
@@ -17127,18 +17138,26 @@ function stockMetadataForTitle(title) {
 
     animation: {
       title: animationTitle,
-      description: 'Translucent geometric ' + flower + ' flower animation featuring luminous prism-like petals, layered color, soft gradients and seamless 10-second motion in a polished botanical design.',
-      keywords: videoKeywords,
+      description: videoDescription,
+      keywords: videoKeywords.slice(0, 50),
       filename: animationTitle + '.mp4',
-      csvFilename: animationTitle + '.csv'
+      csvFilename: animationTitle + '.csv',
+      category: 'Nature,Backgrounds/Textures',
+      illustration: 'No',
+      mature: 'No',
+      editorial: 'No'
     },
 
     illustration: {
       title: illustrationTitle,
-      description: 'Translucent geometric ' + flower + ' flower illustration featuring luminous prism-like petals, layered color, soft gradients and refined botanical detail in a polished decorative design.',
-      keywords: illustrationKeywords,
+      description: illustrationDescription,
+      keywords: illustrationKeywords.slice(0, 50),
       filename: projectName + '.jpg',
-      csvFilename: projectName + '.csv'
+      csvFilename: projectName + '.csv',
+      category: 'Nature,Arts',
+      illustration: 'Yes',
+      mature: 'No',
+      editorial: 'No'
     }
   };
 }
@@ -17148,15 +17167,20 @@ function csvEscape(value) {
   return '"' + s.replace(/"/g, '""') + '"';
 }
 
+/* Shutterstock's CSV contract uses exact columns:
+   Filename, Description, Keywords, Categories; optional Illustration,
+   Mature Content and Editorial flags may follow. */
 function stockMetadataSingleCsv(entry) {
   var rows = [
-    ['Title','Description','Keywords','Filename','Status'],
+    ['Filename','Description','Keywords','Categories','Illustration','Mature Content','Editorial'],
     [
-      entry.title,
+      entry.filename,
       entry.description,
       entry.keywords.join(', '),
-      entry.filename,
-      entry.status || 'completed'
+      entry.category,
+      entry.illustration,
+      entry.mature,
+      entry.editorial
     ]
   ];
   return rows.map(function (row) {
@@ -17751,6 +17775,7 @@ function refreshDiag() {
   });
   kvRow(dl, 'PNG sequence', 'SUPPORTED — canvas encodes each frame, ZIP is written here', 'ok');
   kvRow(dl, 'ZIP container', 'SUPPORTED — stored (uncompressed) entries, 4 GB ceiling', 'ok');
+  kvRow(dl, 'Canvas color space', 'sRGB requested on all C2M canvas contexts; browser honors the option when supported. Video H.264 is not falsely tagged as Rec.709 by the browser muxer.', 'ok');
   kvRow(dl, 'Render target', Engine.mode === 'worker'
     ? 'OffscreenCanvas inside the worker — there is no DOM in there, and VideoFrame is built from that canvas and nothing else.'
     : 'canvas#render-target in this document — VideoFrame is built from that element and nothing else.', 'ok');
