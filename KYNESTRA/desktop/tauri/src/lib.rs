@@ -79,7 +79,7 @@ fn create_render_job(app: AppHandle, project_path: String, format: String, compo
 #[tauri::command]
 fn start_render_job(app: AppHandle, project_path: String, job_id: String) -> Result<RenderJobRecord,String> {
     let state=app.state::<CoreState>();
-    let job=state.render.start(&project_path,&job_id).map_err(|e| e.to_string())?;
+    let job=state.render.start(&project_path,&job_id,&state.tasks).map_err(|e| e.to_string())?;
     let event=CoreEvent::new("render.started",serde_json::to_value(&job).map_err(|e| e.to_string())?);
     state.events.persist(std::path::Path::new(&project_path),&event).map_err(|e| e.to_string())?;
     state.events.publish(&app,event).map_err(|e| e.to_string())?;
