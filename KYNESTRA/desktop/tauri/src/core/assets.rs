@@ -278,8 +278,8 @@ mod tests {
     #[test]
     fn rejects_windows_style_filename() {
         let root = tempfile::tempdir().expect("temp directory");
-        let source = root.path().join("safe.txt");
-        File::create(&source).expect("source");
+        let source = root.path().join(r"bad\name.txt");
+        fs::write(&source, b"invalid filename test").expect("source");
 
         let project_root = root.path().join("filename-check.tamasrazim");
         ProjectFixture::create(&project_root);
@@ -287,12 +287,12 @@ mod tests {
         let service = AssetService::default();
         let result = service.ingest(
             project_root.to_str().unwrap(),
-            root.path().join(r"nested\file.txt").to_string_lossy().as_ref(),
+            source.to_string_lossy().as_ref(),
             "text",
             None,
         );
 
-        assert!(matches!(result, Err(AssetError::SourceMissing)));
+        assert!(matches!(result, Err(AssetError::InvalidFilename)));
     }
 
     #[test]
