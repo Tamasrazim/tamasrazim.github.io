@@ -1,0 +1,96 @@
+
+/* ---------- Horizontal page mode ---------- */
+html{
+  height:100%;
+  overflow:hidden;
+  scroll-behavior:smooth;
+  background:var(--black);
+}
+
+body{
+  width:max-content;
+  min-width:100vw;
+  height:100vh;
+  min-height:100vh;
+  display:flex;
+  flex-direction:row;
+  align-items:stretch;
+  overflow-x:auto;
+  overflow-y:hidden;
+  overscroll-behavior:none;
+  scroll-snap-type:x proximity;
+  scrollbar-width:none;
+}
+body::-webkit-scrollbar{display:none}
+
+main#content{
+  flex:0 0 auto;
+  width:max-content;
+  min-width:100vw;
+  height:100vh;
+  min-height:100svh;
+  display:flex;
+  flex-direction:row;
+  align-items:stretch;
+  position:relative;
+  z-index:2;
+}
+
+main#content > section,
+main#content > .band{
+  flex:0 0 100vw;
+  width:100vw;
+  min-width:100vw;
+  height:100vh;
+  min-height:100svh;
+  scroll-snap-align:start;
+  scroll-snap-stop:normal;
+  scroll-margin-left:0;
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior-x:contain;
+  overscroll-behavior-y:contain;
+  scrollbar-width:none;
+}
+main#content > section::-webkit-scrollbar,
+main#content > .band::-webkit-scrollbar{display:none}
+
+main#content > section{
+  scroll-margin-top:0;
+}
+
+main#content > .band{
+  display:grid;
+  place-items:center;
+  align-content:center;
+}
+
+main#content > .band .band-track{
+  transform:translate3d(0,0,0);
+  will-change:transform;
+}
+
+body > .site-footer{
+  flex:0 0 100vw;
+  width:100vw;
+  min-width:100vw;
+  height:100vh;
+  min-height:100svh;
+  display:flex;
+  align-items:flex-end;
+  overflow:hidden;
+  scroll-snap-align:start;
+}
+
+.site-footer .footer-inner{
+  width:min(var(--max),calc(100% - var(--page-pad)*2));
+  margin:0 auto;
+}
+
+.site-header{
+  width:100vw;
+}
+
+.scroll-cue{
+  right:auto;
+}
