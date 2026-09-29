@@ -4,6 +4,7 @@ pub mod db;
 pub mod events;
 pub mod package;
 pub mod projects;
+pub mod handoff;
 pub mod render;
 pub mod submissions;
 pub mod tasks;
@@ -12,6 +13,7 @@ pub mod verification;
 use std::path::PathBuf;
 
 use accounts::AccountService;
+use handoff::HandoffService;
 use assets::AssetService;
 use events::EventBus;
 use package::PackageService;
@@ -28,6 +30,7 @@ pub struct CoreState {
     pub render: RenderService,
     pub assets: AssetService,
     pub accounts: AccountService,
+    pub handoff: HandoffService,
     pub submissions: SubmissionService,
     pub verification: VerificationService,
     pub package: PackageService,
@@ -43,6 +46,7 @@ impl CoreState {
             render: RenderService::default(),
             assets: AssetService::default(),
             accounts: AccountService::default(),
+            handoff: HandoffService::default(),
             submissions: SubmissionService::default(),
             verification: VerificationService::default(),
             package: PackageService::default(),
