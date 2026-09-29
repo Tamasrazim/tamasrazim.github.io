@@ -32,7 +32,7 @@ fn create_project(app: AppHandle, name: String) -> Result<CreateProjectResult, S
     let result = state.projects.create(&state.data_root, &name).map_err(|e| e.to_string())?;
     let event = CoreEvent::new("project.created", serde_json::json!({"projectId":result.project.project_id,"name":result.project.name,"path":result.project.path}));
     state.events.persist(std::path::Path::new(&result.project.path), &event).map_err(|e| e.to_string())?;
-    state.events.publish(&app, event).map_err(|e| e.to_string())?;
+    state.events.publish(&app, event);
     Ok(result)
 }
 
@@ -42,7 +42,7 @@ fn open_project(app: AppHandle, path: String) -> Result<ProjectSummary, String> 
     let result = state.projects.open(&path).map_err(|e| e.to_string())?;
     let event = CoreEvent::new("project.opened", serde_json::json!({"projectId":result.project_id,"path":result.path}));
     state.events.persist(std::path::Path::new(&result.path), &event).map_err(|e| e.to_string())?;
-    state.events.publish(&app, event).map_err(|e| e.to_string())?;
+    state.events.publish(&app, event);
     Ok(result)
 }
 
@@ -52,7 +52,7 @@ fn create_task(app: AppHandle, project_path: String, task_type: String, payload:
     let task = state.tasks.create(&project_path,&task_type,payload).map_err(|e| e.to_string())?;
     let event=CoreEvent::new("task.created",serde_json::to_value(&task).map_err(|e| e.to_string())?);
     state.events.persist(std::path::Path::new(&project_path),&event).map_err(|e| e.to_string())?;
-    state.events.publish(&app,event).map_err(|e| e.to_string())?;
+    state.events.publish(&app,event);
     Ok(task)
 }
 
@@ -75,7 +75,7 @@ fn update_task(app: AppHandle, project_path: String, task_id: String, status: St
     };
     let event=CoreEvent::new(event_name,serde_json::to_value(&task).map_err(|e| e.to_string())?);
     state.events.persist(std::path::Path::new(&project_path),&event).map_err(|e| e.to_string())?;
-    state.events.publish(&app,event).map_err(|e| e.to_string())?;
+    state.events.publish(&app,event);
     Ok(task)
 }
 
@@ -85,7 +85,7 @@ fn create_render_job(app: AppHandle, project_path: String, format: String, compo
     let job=state.render.create(&project_path,&format,composition,&state.tasks).map_err(|e| e.to_string())?;
     let event=CoreEvent::new("task.created",serde_json::json!({"taskId":job.task_id,"type":"render","projectId":job.project_id,"jobId":job.job_id}));
     state.events.persist(std::path::Path::new(&project_path),&event).map_err(|e| e.to_string())?;
-    state.events.publish(&app,event).map_err(|e| e.to_string())?;
+    state.events.publish(&app,event);
     Ok(job)
 }
 
@@ -95,7 +95,7 @@ fn start_render_job(app: AppHandle, project_path: String, job_id: String) -> Res
     let job=state.render.start(&project_path,&job_id,&state.tasks).map_err(|e| e.to_string())?;
     let event=CoreEvent::new("render.started",serde_json::to_value(&job).map_err(|e| e.to_string())?);
     state.events.persist(std::path::Path::new(&project_path),&event).map_err(|e| e.to_string())?;
-    state.events.publish(&app,event).map_err(|e| e.to_string())?;
+    state.events.publish(&app,event);
     Ok(job)
 }
 
@@ -107,10 +107,10 @@ fn complete_render_job(app: AppHandle, project_path: String, job_id: String, sou
     let job=state.render.attach_asset(&project_path,&job_id,&asset.asset_id,&asset.relative_path,&state.tasks).map_err(|e| e.to_string())?;
     let imported=CoreEvent::new("asset.imported",serde_json::to_value(&asset).map_err(|e| e.to_string())?);
     state.events.persist(std::path::Path::new(&project_path),&imported).map_err(|e| e.to_string())?;
-    state.events.publish(&app,imported).map_err(|e| e.to_string())?;
+    state.events.publish(&app,imported);
     let completed=CoreEvent::new("render.completed",serde_json::json!({"job":job,"asset":asset}));
     state.events.persist(std::path::Path::new(&project_path),&completed).map_err(|e| e.to_string())?;
-    state.events.publish(&app,completed).map_err(|e| e.to_string())?;
+    state.events.publish(&app,completed);
     Ok(asset)
 }
 
@@ -120,7 +120,7 @@ fn recover_render_job(app: AppHandle, project_path: String, job_id: String) -> R
     let job=state.render.recover(&project_path,&job_id,&state.tasks).map_err(|e| e.to_string())?;
     let event=CoreEvent::new("task.recovered",serde_json::to_value(&job).map_err(|e| e.to_string())?);
     state.events.persist(std::path::Path::new(&project_path),&event).map_err(|e| e.to_string())?;
-    state.events.publish(&app,event).map_err(|e| e.to_string())?;
+    state.events.publish(&app,event);
     Ok(job)
 }
 
@@ -130,7 +130,7 @@ fn fail_render_job(app: AppHandle, project_path: String, job_id: String, error: 
     let job=state.render.fail(&project_path,&job_id,&error,&state.tasks).map_err(|e| e.to_string())?;
     let event=CoreEvent::new("render.failed",serde_json::to_value(&job).map_err(|e| e.to_string())?);
     state.events.persist(std::path::Path::new(&project_path),&event).map_err(|e| e.to_string())?;
-    state.events.publish(&app,event).map_err(|e| e.to_string())?;
+    state.events.publish(&app,event);
     Ok(job)
 }
 
@@ -149,7 +149,7 @@ fn create_account(app: AppHandle, project_path: String, platform: String, displa
     let account=state.accounts.create(&project_path,&platform,&display_name,profile_url).map_err(|e| e.to_string())?;
     let event=CoreEvent::new("account.connected",serde_json::to_value(&account).map_err(|e| e.to_string())?);
     state.events.persist(std::path::Path::new(&project_path),&event).map_err(|e| e.to_string())?;
-    state.events.publish(&app,event).map_err(|e| e.to_string())?;
+    state.events.publish(&app,event);
     Ok(account)
 }
 
@@ -160,7 +160,7 @@ fn update_account_status(app: AppHandle, project_path: String, account_id: Strin
     let event_type=if status=="connected"{"account.connected"}else if status=="disconnected"{"account.disconnected"}else{"account.updated"};
     let event=CoreEvent::new(event_type,serde_json::to_value(&account).map_err(|e| e.to_string())?);
     state.events.persist(std::path::Path::new(&project_path),&event).map_err(|e| e.to_string())?;
-    state.events.publish(&app,event).map_err(|e| e.to_string())?;
+    state.events.publish(&app,event);
     Ok(account)
 }
 
@@ -173,7 +173,7 @@ fn set_submission_status(app: AppHandle, project_path: String, asset_id: String,
     let submission=state.submissions.set_status(&project_path,&asset_id,account_id,&status,public_url,reason).map_err(|e| e.to_string())?;
     let event=CoreEvent::new("submission.updated",serde_json::to_value(&submission).map_err(|e| e.to_string())?);
     state.events.persist(std::path::Path::new(&project_path),&event).map_err(|e| e.to_string())?;
-    state.events.publish(&app,event).map_err(|e| e.to_string())?;
+    state.events.publish(&app,event);
     Ok(submission)
 }
 
@@ -194,7 +194,7 @@ fn ingest_module_output(
 
     let event = CoreEvent::new("asset.imported", serde_json::to_value(&asset).map_err(|e| e.to_string())?);
     state.events.persist(std::path::Path::new(&project_path), &event).map_err(|e| e.to_string())?;
-    state.events.publish(&app, event).map_err(|e| e.to_string())?;
+    state.events.publish(&app, event);
 
     Ok(asset)
 }
@@ -214,7 +214,7 @@ fn export_project_package(
         "files": result.files.len()
     }));
     state.events.persist(std::path::Path::new(&project_path), &event).map_err(|e| e.to_string())?;
-    state.events.publish(&app, event).map_err(|e| e.to_string())?;
+    state.events.publish(&app, event);
     Ok(result)
 }
 
@@ -233,7 +233,7 @@ fn import_project_package(
         "filesVerified": result.files_verified
     }));
     state.events.persist(std::path::Path::new(&opened.path), &event).map_err(|e| e.to_string())?;
-    state.events.publish(&app, event).map_err(|e| e.to_string())?;
+    state.events.publish(&app, event);
     Ok(result)
 }
 
@@ -247,7 +247,7 @@ async fn check_submission_public_status(
     let result = state.verification.check(&project_path, &submission_id).await.map_err(|e| e.to_string())?;
     let event = CoreEvent::new("submission.updated", serde_json::to_value(&result).map_err(|e| e.to_string())?);
     state.events.persist(std::path::Path::new(&project_path), &event).map_err(|e| e.to_string())?;
-    state.events.publish(&app, event).map_err(|e| e.to_string())?;
+    state.events.publish(&app, event);
     Ok(result)
 }
 
