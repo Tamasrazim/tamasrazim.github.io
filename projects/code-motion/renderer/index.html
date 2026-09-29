@@ -3157,7 +3157,11 @@ function exportMP4(cfg) {
       },
       error: function (e) { hardError = e; }
     });
-    try { encoder.configure(sel.config); }
+    var encoderConfig = Object.assign({}, sel.config);
+    if (job.batchEncoderMode === 'software') encoderConfig.hardwareAcceleration = 'prefer-software';
+    else if (job.batchEncoderMode === 'hardware') encoderConfig.hardwareAcceleration = 'prefer-hardware';
+    cfg.onLog('encoder mode: ' + (job.batchEncoderMode || 'browser default'));
+    try { encoder.configure(encoderConfig); }
     catch (e) {
       release();
       return {
@@ -17252,7 +17256,8 @@ async function renderPrismBatch(limit, label) {
         var job = buildJob({ exportFormat: batchFormat });
         job.label = title;
         job.metadata.title = title;
-        job.fileName = fileNameFor(job.composition, job.metadata.title, batchFormat, null);
+        job.fileName = stockMeta.commercialTitle + extFor(batchFormat);
+        job.batchEncoderMode = 'hardware';
         metadataEntry.filename = job.fileName;
 
         var result = null;
@@ -17295,9 +17300,10 @@ async function renderPrismBatch(limit, label) {
               : (result && result.ok
                 ? 'render completed but the output was not saved to the selected folder'
                 : 'unknown render failure');
-            batchLog('transient batch render failure for ' + title + ' — ' + reason + ' — restarting renderer and retrying once', true);
+            job.batchEncoderMode = 'software';
+            batchLog('transient batch render failure for ' + title + ' — ' + reason + ' — restarting renderer and retrying with software H.264', true);
             await restartBatchEngine();
-            await new Promise(function (resolve) { setTimeout(resolve, 250); });
+            await new Promise(function (resolve) { setTimeout(resolve, 1500); });
           }
         }
 
@@ -17343,7 +17349,10 @@ async function renderPrismBatch(limit, label) {
         /* A fresh worker between video files prevents encoder/GPU state from leaking
            across 4K MP4 jobs and keeps long batches deterministic. */
         if (i < samples.length - 1 && !S.batchCancelled) {
+          /* Let Chromium release the previous 4K encoder/GPU session before
+             creating the next batch encoder. */
           await restartBatchEngine();
+          await new Promise(function (resolve) { setTimeout(resolve, 750); });
         }
       } catch (itemError) {
         failed++;
