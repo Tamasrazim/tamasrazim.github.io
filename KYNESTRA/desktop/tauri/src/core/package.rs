@@ -407,6 +407,18 @@ mod tests {
             validate_manifest_consistency(&package, &mismatched),
             Err(PackageError::ManifestMismatch)
         ));
+
+        let incompatible_version = ProjectManifest {
+            format_version: "0.2".into(),
+            project_id: "project-a".into(),
+            name: "Project A".into(),
+            format: "tamasrazim".into(),
+            created_by: "KYNESTRA".into(),
+        };
+        assert!(matches!(
+            validate_manifest_consistency(&package, &incompatible_version),
+            Err(PackageError::ManifestMismatch)
+        ));
     }
 
     #[test]
