@@ -198,6 +198,9 @@ fn validate_manifest(manifest: &ProjectManifest) -> Result<(), ProjectError> {
     if manifest.format != FORMAT || manifest.format_version != FORMAT_VERSION {
         return Err(ProjectError::UnsupportedFormat);
     }
+    if manifest.created_by != "KYNESTRA" {
+        return Err(ProjectError::InvalidManifest);
+    }
     if manifest.project_id.is_empty() || manifest.name.trim().is_empty() {
         return Err(ProjectError::InvalidManifest);
     }
@@ -337,6 +340,18 @@ mod tests {
             manager.open(&created.project.path),
             Err(ProjectError::DatabaseProjectMissing)
         ));
+    }
+
+    #[test]
+    fn rejects_non_kynestra_manifest() {
+        let manifest = ProjectManifest {
+            format: FORMAT.into(),
+            format_version: FORMAT_VERSION.into(),
+            project_id: "id".into(),
+            name: "Name".into(),
+            created_by: "Other".into(),
+        };
+        assert!(matches!(validate_manifest(&manifest), Err(ProjectError::InvalidManifest)));
     }
 
     #[test]
