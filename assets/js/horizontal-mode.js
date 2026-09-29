@@ -164,26 +164,30 @@
     cancelSnap();
     if(e.ctrlKey || isEditable(e.target))return;
 
-    var delta=normalizeWheelDelta(e);
-    if(Math.abs(e.deltaX)>Math.abs(e.deltaY) && Math.abs(e.deltaX)>0){
-      scheduleProgress();
-      scheduleSnap();
+    /* Horizontal mode owns desktop wheel input.
+       Hold Shift to deliberately scroll inside a panel vertically. */
+    var panel=e.target && e.target.closest ? e.target.closest('main#content > section, main#content > .band') : null;
+    var wheelY=normalizeWheelDelta(e);
+    var wheelX=e.deltaX;
+
+    if(e.shiftKey && panel && panel.scrollHeight>panel.clientHeight+1 && Math.abs(wheelY)>0.5){
       return;
     }
 
+    var delta=Math.abs(wheelX)>Math.abs(wheelY) ? wheelX : wheelY;
     if(Math.abs(delta)<0.5)return;
-
-    /* Let a section consume vertical wheel input while it still has vertical content. */
-    if(verticalPanelCanScroll(e.target,delta))return;
 
     var before=scroller.scrollLeft;
     var next=Math.max(0,Math.min(maxHorizontal(),before+delta));
+
     if(next!==before){
-      scroller.scrollTo({left:next,top:0,behavior:'auto'});
-      e.preventDefault();
+      scroller.scrollLeft=next;
+      scheduleProgress();
+      scheduleSectionState();
       scheduleSnap();
+      e.preventDefault();
     }
-  },{passive:false});
+  },{passive:false,capture:true});
 
   /* Desktop drag-to-pan: only starts from non-interactive page surfaces. */
   var drag={active:false,startX:0,startScroll:0,pointerId:null,moved:false};
