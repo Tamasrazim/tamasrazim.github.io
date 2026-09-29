@@ -72,7 +72,7 @@ must(!/<div class="band" aria-hidden="true">/.test(site),'homepage has no marque
 must(/<footer class="site-footer">/.test(site),'homepage has the footer at the end of the axis');
 must(!axis.includes('scheduleSnap'),'horizontal controller has no legacy snap handler');
 must(!axis.includes('wheelTarget'),'horizontal controller has no legacy wheel target');
-must((axis.match(/function cancelWheel\\(/g)||[]).length===1,'horizontal controller has one wheel cancel routine');
+must((axis.match(/function cancelWheel\(/g)||[]).length===1,'horizontal controller has one wheel cancel routine');
 must(!siteJs.includes('document.body.scrollTo'),'site focus routing uses the dedicated axis container');
 must(axis.includes('function getScrollablePanel'),'horizontal controller supports vertical section panels');
 must(axis.includes('function canConsumeVertical'),'horizontal controller detects available vertical travel');
