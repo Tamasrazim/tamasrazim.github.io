@@ -28,7 +28,7 @@
 
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var finePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
-    var pageScroller = document.scrollingElement || document.documentElement;
+    var pageScroller = document.getElementById('axisScroller') || document.scrollingElement || document.documentElement;
 
     function q(selector, root){ return (root || document).querySelector(selector); }
     function qa(selector, root){ return Array.prototype.slice.call((root || document).querySelectorAll(selector)); }
