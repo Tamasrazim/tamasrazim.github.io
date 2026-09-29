@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>C2M Flower Batch Lab — Tamasrazim</title>
+<style>
+:root{
+  --bg:#050506;--panel:#0b0b0d;--panel2:#111114;--line:#26262b;
+  --line2:#35353c;--ink:#f3f3f5;--mut:#85858e;--mut2:#5b5b64;
+  --good:#fff;--radius:14px;--mono:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans)}
+body{padding:22px}
+button,input{font:inherit}
+button{cursor:pointer}
+.shell{max-width:1500px;margin:auto}
+.top{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;padding:10px 0 20px;border-bottom:1px solid var(--line)}
+.kicker{font:700 10px/1 var(--mono);letter-spacing:.2em;color:var(--mut);text-transform:uppercase}
+h1{font-size:clamp(28px,4vw,54px);line-height:.95;margin:8px 0 0;font-weight:600;letter-spacing:-.04em}
+.top-right{font:600 10px/1.6 var(--mono);letter-spacing:.12em;color:var(--mut);text-align:right}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;padding:14px 0}
+.btn{border:1px solid var(--line2);background:var(--panel);color:var(--ink);padding:10px 13px;border-radius:10px}
+.btn:hover{border-color:#fff;background:#161619}
+.btn.primary{background:#fff;color:#000;border-color:#fff}
+.btn[disabled]{opacity:.35;cursor:not-allowed}
+.layout{display:grid;grid-template-columns:360px minmax(0,1fr);gap:14px;align-items:start}
+.panel{border:1px solid var(--line);background:var(--panel);border-radius:var(--radius);overflow:hidden}
+.panel-head{padding:14px 15px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center}
+.panel-title{font:700 10px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase}
+.meta{color:var(--mut);font:500 10px/1.5 var(--mono)}
+.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
+.spec{background:var(--panel2);padding:13px}
+.spec b{display:block;font:700 9px/1 var(--mono);letter-spacing:.12em;color:var(--mut);margin-bottom:6px}
+.spec strong{font:700 16px/1 var(--mono)}
+.notice{margin:14px;padding:12px;border:1px solid var(--line);background:#09090b;color:var(--mut);font:500 10px/1.65 var(--mono)}
+.notice strong{color:var(--ink)}
+.idea-bar{display:flex;flex-wrap:wrap;gap:8px;padding:14px;border-bottom:1px solid var(--line)}
+.search{flex:1;min-width:160px;background:#09090b;border:1px solid var(--line);border-radius:9px;padding:10px 11px;color:var(--ink)}
+.count{font:700 10px/1 var(--mono);color:var(--mut)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:12px}
+.card{position:relative;border:1px solid var(--line);background:#09090b;border-radius:11px;padding:13px;min-height:176px;transition:.15s ease}
+.card:hover{border-color:var(--line2);transform:translateY(-1px)}
+.card.on{border-color:#fff;box-shadow:0 0 0 1px #fff inset}
+.check{position:absolute;top:10px;right:10px;width:18px;height:18px;accent-color:#fff}
+.card h3{margin:0 28px 8px 0;font-size:15px;line-height:1.08}
+.card p{margin:0;color:var(--mut);font:500 10px/1.55 var(--mono)}
+.tokens{display:flex;flex-wrap:wrap;gap:5px;margin-top:11px}
+.token{border:1px solid var(--line);padding:4px 6px;border-radius:999px;color:#c9c9cf;font:600 8px/1 var(--mono);letter-spacing:.06em}
+.status{padding:12px 14px;border-top:1px solid var(--line);font:600 10px/1.4 var(--mono);color:var(--mut)}
+.queue{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:12px}
+.q{border:1px solid var(--line);border-radius:9px;background:#09090b;padding:10px}
+.q b{display:block;font:700 9px/1.25 var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.q span{display:block;margin-top:5px;color:var(--mut);font:500 8px/1.3 var(--mono)}
+.result{padding:12px;display:grid;gap:8px}
+.path{padding:10px 11px;border:1px solid var(--line);background:#09090b;border-radius:8px;font:500 9px/1.5 var(--mono);word-break:break-all}
+.footer{padding:22px 0 4px;color:var(--mut2);font:600 9px/1 var(--mono);letter-spacing:.13em;text-transform:uppercase}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){body{padding:12px}.cards{grid-template-columns:1fr}.queue{grid-template-columns:repeat(2,1fr)}.top{align-items:flex-start;flex-direction:column}.top-right{text-align:left}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <div><div class="kicker">CODE → MOTION / BATCH LAB</div><h1>Flower Render Queue.</h1></div>
+    <div class="top-right">IDEA → QUEUE → 4K/60 → VERIFY → PACKAGE</div>
+  </header>
+
+  <div class="toolbar">
+    <button class="btn" id="backBtn">Back to C2M</button>
+    <button class="btn" id="regenBtn">Generate 50 Ideas</button>
+    <button class="btn" id="firstBtn">Select First 50</button>
+    <button class="btn primary" id="queueBtn">Queue 50 Core Jobs</button>
+    <button class="btn" id="nextBtn">Start Next Job</button>
+    <button class="btn" id="openBtn">Open C2M Renderer</button>
+    <button class="btn" id="manifestBtn">Export Batch Manifest</button>
+    <button class="btn" id="packageBtn">Package Rendered Files</button>
+  </div>
+
+  <main class="layout">
+    <aside class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Locked Render Contract</div>
+        <div class="meta" id="runtimeState">WEB PREVIEW</div>
+      </div>
+      <div class="spec-grid">
+        <div class="spec"><b>Resolution</b><strong>3840×2160</strong></div>
+        <div class="spec"><b>Frame rate</b><strong>60 FPS</strong></div>
+        <div class="spec"><b>Duration</b><strong>10.000 s</strong></div>
+        <div class="spec"><b>Total frames</b><strong>600</strong></div>
+        <div class="spec"><b>Container</b><strong>MP4</strong></div>
+        <div class="spec"><b>Quality</b><strong>MAXIMUM</strong></div>
+        <div class="spec"><b>Alpha source</b><strong>ON</strong></div>
+        <div class="spec"><b>Checksums</b><strong>ON</strong></div>
+      </div>
+      <div class="notice">
+        <strong>Transparency rule:</strong> the render source remains RGBA/transparent. Standard MP4/H.264 is not a universal alpha delivery format, so the batch package also supports a transparent first-frame PNG package. JPG first frames are intentionally flattened previews.
+      </div>
+      <div class="notice">
+        <strong>Packaging rule:</strong> files are sorted deterministically and split into folders of 50. The native KYNESTRA packager writes ZIPs directly to disk so 4K media is not loaded into browser memory.
+      </div>
+      <div class="result" id="results"></div>
+    </aside>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Idea Discovery</div>
+        <div class="count" id="libraryCount">Loading flower library…</div>
+      </div>
+      <div class="idea-bar">
+        <input class="search" id="search" placeholder="Filter flower studies or idea tokens">
+        <div class="count" id="selectedCount">0 / 50 selected</div>
+      </div>
+      <div class="cards" id="cards"><div class="notice">Loading the current C2M flower library…</div></div>
+      <div class="status" id="status">Ready.</div>
+    </section>
+  </main>
+
+  <footer class="footer">C2M Flower Batch Lab — deterministic staging + native packaging</footer>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const params = new URLSearchParams(location.search);
+  const projectPath = params.get('projectPath') || '';
+  const invoke = window.__TAURI__?.core?.invoke || null;
+  const dialog = window.__TAURI__?.dialog || null;
+
+  const state = {
+    flowers: [],
+    selected: new Set(),
+    generated: false,
+    projectPath,
+    jobs: [],
+    native: typeof invoke === 'function'
+  };
+
+  const $ = id => document.getElementById(id);
+
+  $('runtimeState').textContent = state.native ? 'TAURI CORE ONLINE' : 'WEB PREVIEW';
+
+  function hashString(text) {
+    let h = 2166136261;
+    for (let i = 0; i < text.length; i++) {
+      h ^= text.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+
+  function pick(list, seed, offset) {
+    return list[(seed + offset) % list.length];
+  }
+
+  const motions = [
+    'petal breathing','slow radial fold','glass-like sway','spiral opening',
+    'faceted pulse','soft bloom compression','micro tilt + breathing','center-led deformation'
+  ];
+  const lights = [
+    'prismatic edge glow','internal caustic shimmer','soft rim light','luminous center bloom',
+    'slow spectral sweep','crystal refraction','inner facet glow','subtle backlight'
+  ];
+  const palettes = [
+    'ruby / amber / violet','cyan / orchid / white','emerald / teal / gold',
+    'coral / magenta / blue','indigo / cyan / silver','saffron / pink / violet',
+    'mint / aqua / lilac','crimson / rose / ice'
+  ];
+  const depths = [
+    'translucent facets','layered glass petals','soft polygon relief',
+    'curved prism folds','stacked transparent planes','crystalline petal edges'
+  ];
+  const centers = [
+    'glowing radial core','spiral luminous center','faceted jewel core','soft starburst center',
+    'layered geometric seed','bright translucent nucleus'
+  ];
+
+  function ideaFor(flower, index) {
+    const seed = hashString(flower.id || flower.title) + index * 131;
+    return {
+      motion: pick(motions, seed, 0),
+      light: pick(lights, seed, 7),
+      palette: pick(palettes, seed, 13),
+      depth: pick(depths, seed, 19),
+      center: pick(centers, seed, 23)
+    };
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  }
+
+  function setStatus(message) {
+    $('status').textContent = message;
+  }
+
+  function renderCards() {
+    const query = $('search').value.trim().toLowerCase();
+    const items = state.flowers.filter(f => {
+      const hay = (f.title + ' ' + f.id + ' ' + Object.values(f.idea).join(' ')).toLowerCase();
+      return !query || hay.includes(query);
+    });
+    $('libraryCount').textContent = state.flowers.length + ' studies';
+    $('selectedCount').textContent = state.selected.size + ' / 50 selected';
+
+    if (!items.length) {
+      $('cards').innerHTML = '<div class="notice">No flower studies match the filter.</div>';
+      return;
+    }
+
+    $('cards').innerHTML = items.map(f => {
+      const on = state.selected.has(f.id);
+      return '<label class="card '+(on ? 'on':'')+'">' +
+        '<input class="check" type="checkbox" data-select="'+escapeHtml(f.id)+'" '+(on?'checked':'')+'>' +
+        '<h3>'+escapeHtml(f.title)+'</h3>' +
+        '<p>'+escapeHtml(f.desc || 'Prism flower study')+'</p>' +
+        '<div class="tokens">' +
+          '<span class="token">'+escapeHtml(f.idea.motion)+'</span>' +
+          '<span class="token">'+escapeHtml(f.idea.light)+'</span>' +
+          '<span class="token">'+escapeHtml(f.idea.palette)+'</span>' +
+          '<span class="token">'+escapeHtml(f.idea.depth)+'</span>' +
+          '<span class="token">'+escapeHtml(f.idea.center)+'</span>' +
+        '</div></label>';
+    }).join('');
+  }
+
+  async function loadFlowerLibrary() {
+    try {
+      const response = await fetch('../renderer/index.html', { cache: 'no-store' });
+      if (!response.ok) throw new Error('Renderer library request failed: '+response.status);
+      const source = await response.text();
+      const doc = new DOMParser().parseFromString(source, 'text/html');
+      const nodes = Array.from(doc.querySelectorAll('script[type="text/plain"][id^="sample-"]'));
+      const flowers = nodes.map((node, index) => ({
+        id: node.id,
+        title: node.getAttribute('data-title') || node.id.slice(7),
+        desc: node.getAttribute('data-desc') || '',
+        code: node.textContent || '',
+        idea: {}
+      })).filter(item => /prism/i.test(item.title));
+      flowers.forEach((flower, index) => { flower.idea = ideaFor(flower, index); });
+      state.flowers = flowers;
+      state.generated = true;
+      renderCards();
+      setStatus('Loaded '+flowers.length+' Prism studies. Idea combinations are deterministic.');
+      $('regenBtn').textContent = 'Regenerate Idea Mix';
+    } catch (error) {
+      setStatus('Library load failed: '+(error && error.message ? error.message : error));
+      $('cards').innerHTML = '<div class="notice">Could not read the current flower library. The batch contract is still available for manifest export.</div>';
+    }
+  }
+
+  function selectFirst50() {
+    state.selected.clear();
+    for (const flower of state.flowers.slice(0,50)) state.selected.add(flower.id);
+    renderCards();
+    setStatus('Selected first 50 flower studies.');
+  }
+
+  function exportManifest() {
+    const selected = state.flowers.filter(f => state.selected.has(f.id));
+    if (!selected.length) {
+      setStatus('Select at least one flower study first.');
+      return;
+    }
+    const payload = {
+      kind: 'c2m-flower-batch',
+      version: '1',
+      generatedAt: new Date().toISOString(),
+      contract: {
+        width: 3840,
+        height: 2160,
+        fps: 60,
+        duration: 10,
+        frameCount: 600,
+        container: 'mp4',
+        quality: 'maximum',
+        transparentSource: true,
+        frameChecksums: true,
+        chunksPerFolder: 50,
+        firstFrameJpg: true,
+        firstFrameTransparentPng: true
+      },
+      projectPath: state.projectPath || null,
+      flowers: selected.map((f, i) => ({
+        index: i + 1,
+        id: f.id,
+        title: f.title,
+        description: f.desc,
+        idea: f.idea
+      }))
+    };
+    const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'c2m-flower-batch-manifest.json';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    setStatus('Batch manifest exported.');
+  }
+
+  async function queueJobs() {
+    if (!state.native || !state.projectPath) {
+      setStatus('Core job queue requires the KYNESTRA desktop runtime and an active project.');
+      return;
+    }
+    const selected = state.flowers.filter(f => state.selected.has(f.id)).slice(0,50);
+    if (!selected.length) {
+      setStatus('Select flower studies first.');
+      return;
+    }
+    if (selected.length < 50) setStatus('Queueing '+selected.length+' jobs. The requested package size is 50 per folder.');
+    let created = 0;
+    for (const flower of selected) {
+      await invoke('create_render_job', {
+        projectPath: state.projectPath,
+        format: 'mp4',
+        composition: {
+          width: 3840,
+          height: 2160,
+          fps: 60,
+          duration: 10,
+          frameCount: 600,
+          transparentSource: true,
+          quality: 'maximum',
+          frameChecksums: true,
+          chunkChecksums: true,
+          flowerId: flower.id,
+          flowerTitle: flower.title,
+          idea: flower.idea
+        }
+      });
+      created++;
+      setStatus('Queued '+created+' / '+selected.length+' Core render jobs…');
+    }
+    setStatus('Queued '+created+' Core render jobs. Start the next job to hand it to C2M.');
+  }
+
+  async function startNextJob() {
+    if (!state.native || !state.projectPath) {
+      setStatus('Start-next requires the KYNESTRA desktop runtime.');
+      return;
+    }
+    const jobs = await invoke('list_render_jobs', {projectPath:state.projectPath});
+    const next = jobs.find(job => job.status === 'queued');
+    if (!next) {
+      setStatus('No queued render job found.');
+      return;
+    }
+    await invoke('start_render_job', {projectPath:state.projectPath, jobId:next.job_id});
+    const q = new URLSearchParams({projectPath:state.projectPath,jobId:next.job_id});
+    location.href = '../renderer/index.html?'+q.toString();
+  }
+
+  function openRenderer() {
+    const q = state.projectPath ? '?'+new URLSearchParams({projectPath:state.projectPath}).toString() : '';
+    location.href = '../renderer/index.html'+q;
+  }
+
+  async function packageRenderedFiles() {
+    if (!state.native || !dialog || typeof dialog.open !== 'function') {
+      setStatus('Native packaging is available inside KYNESTRA desktop.');
+      return;
+    }
+    const sourceDir = await dialog.open({multiple:false,directory:true,title:'Select rendered flower output folder'});
+    if (typeof sourceDir !== 'string' || !sourceDir) return;
+    const outputDir = await dialog.open({multiple:false,directory:true,title:'Select ZIP destination folder'});
+    if (typeof outputDir !== 'string' || !outputDir) return;
+
+    setStatus('Packaging MP4, JPG first frames and transparent PNG first frames…');
+    try {
+      const result = await invoke('package_flower_batch', {inputDir:sourceDir,outputDir});
+      $('results').innerHTML =
+        '<div class="path"><b>MP4 ZIP</b><br>'+escapeHtml(result.mp4_zip || 'not created')+'</div>'+
+        '<div class="path"><b>JPG ZIP</b><br>'+escapeHtml(result.jpg_zip || 'not created')+'</div>'+
+        '<div class="path"><b>Transparent PNG ZIP</b><br>'+escapeHtml(result.png_zip || 'not created')+'</div>'+
+        '<div class="path"><b>Counts</b><br>MP4: '+result.mp4_count+' · JPG: '+result.jpg_count+' · PNG: '+result.png_count+' · folders: '+result.folder_count+'</div>';
+      setStatus('Batch package complete.');
+    } catch (error) {
+      setStatus('Packaging failed: '+String(error));
+    }
+  }
+
+  $('regenBtn').addEventListener('click', () => {
+    state.flowers.forEach((flower,index) => flower.idea = ideaFor(flower,index + Math.floor(Math.random()*9999)));
+    renderCards();
+    setStatus('Generated a new deterministic-style idea mix for the current library.');
+  });
+  $('firstBtn').addEventListener('click', selectFirst50);
+  $('queueBtn').addEventListener('click', queueJobs);
+  $('nextBtn').addEventListener('click', startNextJob);
+  $('openBtn').addEventListener('click', openRenderer);
+  $('manifestBtn').addEventListener('click', exportManifest);
+  $('packageBtn').addEventListener('click', packageRenderedFiles);
+  $('backBtn').addEventListener('click', () => {
+    location.href = projectPath ? '../renderer/index.html?'+new URLSearchParams({projectPath:projectPath}).toString() : '../renderer/index.html';
+  });
+  $('search').addEventListener('input', renderCards);
+  $('cards').addEventListener('change', event => {
+    const box = event.target.closest('[data-select]');
+    if (!box) return;
+    const id = box.dataset.select;
+    if (box.checked) {
+      if (state.selected.size >= 50) {
+        box.checked = false;
+        setStatus('The batch is capped at 50 selected studies per render package.');
+        return;
+      }
+      state.selected.add(id);
+    } else {
+      state.selected.delete(id);
+    }
+    renderCards();
+  });
+
+  loadFlowerLibrary();
+})();
+</script>
+</body>
+</html>

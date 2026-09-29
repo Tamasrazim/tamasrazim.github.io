@@ -63,3 +63,8 @@ Open the workspace through:
 `/projects/code-motion/renderer/`
 
 The workspace is intentionally an `index.html` application directory rather than a standalone `.html` route.
+
+
+## Flower Batch Lab
+
+The batch surface is available at `batch/index.html`. It discovers the current Prism flower studies, builds deterministic idea combinations, prepares the fixed 3840×2160 / 60 FPS / 10 second contract, stages Core render jobs, and exposes the KYNESTRA-native ZIP packaging workflow.

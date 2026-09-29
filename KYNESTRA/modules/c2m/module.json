@@ -10,7 +10,10 @@
     "javascript-animation",
     "preview",
     "deterministic-render",
-    "video-export"
+    "video-export",
+    "batch-render",
+    "batch-package",
+    "idea-discovery"
   ],
   "events": [
     "render.started",

@@ -1,4 +1,5 @@
 pub mod accounts;
+pub mod batch;
 pub mod assets;
 pub mod db;
 pub mod events;

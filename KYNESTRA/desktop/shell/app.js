@@ -49,7 +49,7 @@ async function renderC2M() {
     active+
     '<div class="actions">'+
     '<button id="launch-c2m" class="action primary">Launch C2M Renderer</button>'+
-    (project ? '<button id="new-render-job" class="action">Create Core Render Job</button><button id="import-render-output" class="action">Register Render Output</button>' : '')+
+    (project ? '<button id="launch-c2m-batch" class="action">Flower Batch Lab</button><button id="new-render-job" class="action">Create Core Render Job</button><button id="import-render-output" class="action">Register Render Output</button>' : '')+
     '</div>'+
     '<div id="render-job-list" class="projects"></div></div>';
 
@@ -510,6 +510,16 @@ async function launchC2M() {
   window.location.href = 'modules/c2m/renderer/index.html'+query;
 }
 
+function launchC2MBatch() {
+  const project = state.activeProject;
+  if (!project) {
+    alert('Open a .tamasrazim project first.');
+    return;
+  }
+  const query = '?'+new URLSearchParams({ projectPath: project.path }).toString();
+  window.location.href = 'modules/c2m/batch/index.html'+query;
+}
+
 function launchForge() {
   const project = state.activeProject;
   const query = project ? '?'+new URLSearchParams({ projectPath: project.path }).toString() : '';
@@ -518,6 +528,7 @@ function launchForge() {
 
 document.getElementById('view')?.addEventListener('click', event => {
   if (event.target?.id === 'launch-c2m') launchC2M();
+  if (event.target?.id === 'launch-c2m-batch') launchC2MBatch();
   if (event.target?.id === 'launch-forge') launchForge();
 });
 init();

@@ -51,3 +51,10 @@ C2M outputs can use the shared Core handoff command when running inside the desk
 `ingest_module_output(projectPath, sourcePath, "c2m", kind, metadata)`
 
 Core owns copying, hashing, deduplication, asset registration, and `asset.imported` emission.
+
+
+## Flower Batch Lab
+
+`/KYNESTRA/modules/c2m/batch/index.html` provides Prism flower idea discovery, 4K/60/10s batch-job staging, deterministic selection of 50 studies, and native 50-per-folder packaging.
+
+The native KYNESTRA package writer emits MP4, JPG first-frame, and transparent PNG first-frame ZIPs when those rendered deliverables are present, with SHA-256 file and chunk manifests. JPG is a flattened preview; PNG is the alpha-preserving first-frame deliverable.
