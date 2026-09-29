@@ -1618,6 +1618,7 @@ select.mini{
           <div class="sec">
             <h4>RENDER</h4>
             <button class="btn solid" data-act="startRender">Render every frame</button>
+            <button class="btn" data-act="render50" id="render50Btn">Render 50 Prism Flowers</button>
             <div class="btn-row">
               <button class="btn" data-act="queueAdd">Add to queue</button>
               <button class="btn" data-act="cancelRender" id="cancelBtn" disabled>Cancel</button>
@@ -1645,7 +1646,7 @@ select.mini{
             <button class="btn" data-act="queueRun" id="queueRunBtn">Run queue</button>
             <p class="note">Each job stores its own frozen copy of the code, composition, loop, metadata and format.
               Editing the project afterwards does not change a job that is already queued.</p>
-            <p class="note">Render ×50 uses the first 50 Prism Flowers and runs them through the same deterministic renderer one after another, with your current format, resolution, FPS and quality settings.</p>
+            <p class="note">Render 50 Prism Flowers renders the first 50 Prism Flower studies one after another using the current resolution, FPS, format and quality. It is a batch operation inside Code Motion.</p>
           </div>
           <div class="sec">
             <h4>COMPLETED</h4>
@@ -16800,7 +16801,9 @@ function finishRender(job, result, opts) {
   S.rendering = false;
   S.activeJob = null;
   $('#cancelBtn').disabled = true;
-  $$('[data-act=startRender], [data-act=queueRun]').forEach(function (b) { b.disabled = false; });
+  $('[data-act=startRender], [data-act=queueRun]').forEach(function (b) { b.disabled = false; });
+  var batchBtn = $('#render50Btn');
+  if (batchBtn) batchBtn.disabled = !!S.batchRendering;
   $('#stDot').className = 'dot ok';
   var prog = $('#rprog');
   prog.classList.remove('scan');
@@ -17025,6 +17028,9 @@ async function render50PrismBatch() {
 
   S.batchRendering = true;
   S.batchCancelled = false;
+  var batchBtn = $('#render50Btn');
+  if (batchBtn) batchBtn.disabled = true;
+  $('#stMsg').textContent = 'Render ×50 — validating 50 Prism Flowers…';
 
   var snapshot = {
     id: S.id,
@@ -17141,6 +17147,8 @@ async function render50PrismBatch() {
 
     renderQueue();
     renderResults();
+    var finalBatchBtn = $('#render50Btn');
+    if (finalBatchBtn) finalBatchBtn.disabled = false;
 
     var status = S.batchCancelled ? 'stopped' : 'complete';
     $('#stMsg').textContent = 'Render ×50 ' + status + ' — ' + completed + ' completed, ' + failed + ' failed.';
@@ -18051,7 +18059,16 @@ var ACTS = {
     withCompiled().then(function (ok) { if (ok) analyseJob(); });
   },
   startRender: function () { withCompiled().then(function (ok) { if (ok) startRender(buildJob()); }); },
-  render50: function () { render50PrismBatch(); },
+  render50: function () {
+    if (S.rendering || S.batchRendering) return;
+    render50PrismBatch().catch(function (e) {
+      S.batchRendering = false;
+      var b = $('#render50Btn'); if (b) b.disabled = false;
+      setStage('IDLE', true);
+      $('#stMsg').textContent = 'Render ×50 failed: ' + String(e && e.message || e);
+      logLine('Render ×50 failed — ' + String(e && e.stack || e), true);
+    });
+  },
   cancelRender: cancelRender,
   analyze: analyseJob,
   analyzeLoop: analyseLoop,
