@@ -1,13 +1,15 @@
 {
   "version": "0.1",
+  "name": "KYNESTRA Task Contract",
+  "storage": "project.db",
   "statuses": [
     "queued",
     "running",
     "paused",
+    "recoverable",
     "completed",
     "failed",
-    "cancelled",
-    "recoverable"
+    "cancelled"
   ],
   "task": {
     "required": [
@@ -16,9 +18,30 @@
       "status",
       "progress"
     ],
+    "optional": [
+      "projectId",
+      "message"
+    ],
     "progressRange": [
       0,
       1
     ]
-  }
+  },
+  "lifecycle": {
+    "queued": "Accepted by Core and waiting to execute.",
+    "running": "Execution has started.",
+    "paused": "Execution is intentionally suspended and may resume.",
+    "recoverable": "Execution was interrupted and requires an explicit recovery or rerun path.",
+    "completed": "Execution finished successfully.",
+    "failed": "Execution terminated with an error.",
+    "cancelled": "Execution was intentionally stopped."
+  },
+  "rules": [
+    "Core is the source of truth for task persistence.",
+    "Modules must not write task rows directly.",
+    "Interrupted running tasks are promoted to recoverable during application startup.",
+    "Completion, failure and cancellation are terminal states.",
+    "Recoverable is not equivalent to failed.",
+    "Event handlers must tolerate duplicate delivery."
+  ]
 }
