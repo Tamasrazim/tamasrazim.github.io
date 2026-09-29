@@ -235,6 +235,58 @@
     pushWheel(delta);
   },{passive:false,capture:true});
 
+  /* Mobile touch-to-pan: horizontal swipes move the entire page axis,
+     while predominantly vertical swipes remain available to inner sections. */
+  var mobileTouch=window.matchMedia && window.matchMedia('(max-width: 720px)').matches;
+  if(mobileTouch){
+    var touch={active:false,startX:0,startY:0,startScroll:0,locked:false,moved:false};
+
+    scroller.addEventListener('touchstart',function(e){
+      if(!e.touches || e.touches.length!==1)return;
+      var p=e.touches[0];
+      touch.active=true;
+      touch.startX=p.clientX;
+      touch.startY=p.clientY;
+      touch.startScroll=scroller.scrollLeft;
+      touch.locked=false;
+      touch.moved=false;
+    },{passive:true});
+
+    scroller.addEventListener('touchmove',function(e){
+      if(!touch.active || !e.touches || e.touches.length!==1)return;
+      var p=e.touches[0];
+      var dx=p.clientX-touch.startX;
+      var dy=p.clientY-touch.startY;
+
+      if(!touch.locked && (Math.abs(dx)>8 || Math.abs(dy)>8)){
+        /* Only claim the gesture once horizontal intent is clear. */
+        touch.locked=Math.abs(dx)>Math.abs(dy)+3;
+      }
+
+      if(!touch.locked)return;
+      touch.moved=true;
+      e.preventDefault();
+      scroller.scrollLeft=touch.startScroll-dx;
+      scheduleProgress();
+      scheduleSectionState();
+    },{passive:false});
+
+    scroller.addEventListener('touchend',function(){
+      if(!touch.active)return;
+      touch.active=false;
+      touch.locked=false;
+      if(touch.moved){
+        scheduleProgress();
+        scheduleSectionState();
+      }
+    },{passive:true});
+
+    scroller.addEventListener('touchcancel',function(){
+      touch.active=false;
+      touch.locked=false;
+    },{passive:true});
+  }
+
   /* Desktop drag-to-pan: only starts from non-interactive page surfaces. */
   var drag={active:false,startX:0,startScroll:0,pointerId:null,moved:false};
 
