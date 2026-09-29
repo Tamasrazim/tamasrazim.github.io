@@ -84,6 +84,47 @@
     }
   },{passive:false});
 
+  /* Desktop drag-to-pan: only starts from non-interactive page surfaces. */
+  var drag={active:false,startX:0,startScroll:0,pointerId:null,moved:false};
+
+  function isDragExcluded(target){
+    if(!target || !target.closest)return true;
+    return !!target.closest('a,button,input,textarea,select,summary,[contenteditable="true"],[draggable="true"]');
+  }
+
+  if(fine && !reduce){
+    scroller.addEventListener('pointerdown',function(e){
+      if(e.button!==0 || isDragExcluded(e.target))return;
+      drag.active=true;
+      drag.startX=e.clientX;
+      drag.startScroll=scroller.scrollLeft;
+      drag.pointerId=e.pointerId;
+      drag.moved=false;
+      scroller.classList.add('axis-dragging');
+      try{scroller.setPointerCapture(e.pointerId);}catch(_err){}
+    });
+
+    scroller.addEventListener('pointermove',function(e){
+      if(!drag.active || e.pointerId!==drag.pointerId)return;
+      var delta=e.clientX-drag.startX;
+      if(Math.abs(delta)>4)drag.moved=true;
+      if(!drag.moved)return;
+      scroller.scrollLeft=drag.startScroll-delta;
+      e.preventDefault();
+    });
+
+    function endDrag(e){
+      if(!drag.active || (e && e.pointerId!==drag.pointerId))return;
+      drag.active=false;
+      drag.pointerId=null;
+      scroller.classList.remove('axis-dragging');
+    }
+
+    scroller.addEventListener('pointerup',endDrag);
+    scroller.addEventListener('pointercancel',endDrag);
+    scroller.addEventListener('lostpointercapture',function(){endDrag();});
+  }
+
   /* Keep in-page navigation horizontal and predictable. */
   document.addEventListener('click',function(e){
     var anchor=e.target.closest ? e.target.closest('a[href^="#"]') : null;
