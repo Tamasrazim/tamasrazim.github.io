@@ -481,6 +481,21 @@
     contact:'contact'
   };
 
+  function axisKey(item,index){
+    if(item===footer)return 'end';
+    if(item.id)return item.id;
+    if(item.classList.contains('band'))return 'signal-'+String(index+1);
+    return 'section-'+String(index+1);
+  }
+
+  function axisName(item,index){
+    var id=item && item.id ? item.id : '';
+    if(id && labels[id])return labels[id];
+    if(item===footer)return 'end';
+    if(item && item.classList.contains('band'))return 'signal';
+    return 'section '+String(index+1).padStart(2,'0');
+  }
+
   var railButtons=[];
   pageItems.forEach(function(item,index){
     var id=item.id||'';
@@ -543,6 +558,10 @@
     /* Keep desktop + mobile header navigation visually synchronized with the page axis. */
     var activeItem=pageItems[closest];
     var activeId=activeItem && activeItem.id ? activeItem.id : '';
+    var activeKey=axisKey(activeItem,closest);
+    var activeName=axisName(activeItem,closest);
+    var previousName=closest>0 ? axisName(pageItems[closest-1],closest-1) : '';
+    var nextName=closest<pageItems.length-1 ? axisName(pageItems[closest+1],closest+1) : '';
 
     document.querySelectorAll('.site-header .nav a[href^="#"], .site-header .header-contact[href^="#"], .mobile-nav a[href^="#"]').forEach(function(link){
       var href=link.getAttribute('href')||'';
@@ -553,9 +572,11 @@
       else link.removeAttribute('aria-current');
     });
 
-    document.body.dataset.axisSection=activeId||'top';
+    document.body.dataset.axisSection=activeKey;
+    document.body.dataset.axisName=activeName;
     document.body.dataset.axisIndex=String(closest+1);
     document.body.dataset.axisTotal=String(pageItems.length);
+    document.body.dataset.axisEdge=closest===0?'start':(closest===pageItems.length-1?'end':'middle');
 
     /* Reflect the visible section in the URL without creating history entries. */
     if(activeId && activeId!=='top'){
@@ -570,22 +591,32 @@
     var current=railButtons[closest];
     var number=String(closest+1).padStart(2,'0');
     var total=String(pageItems.length).padStart(2,'0');
-    var name=current?current.getAttribute('data-label'):'page';
+    var name=current?current.getAttribute('data-label'):activeName;
 
     readout.innerHTML='<strong>'+number+'</strong><span>/ '+total+' · '+name+'</span>';
-    readout.dataset.section=activeId||'top';
+    readout.dataset.section=activeKey;
+    readout.dataset.name=activeName;
+    readout.dataset.prev=previousName;
+    readout.dataset.next=nextName;
     readout.dataset.index=String(closest+1);
     readout.dataset.total=String(pageItems.length);
 
     pageItems.forEach(function(item,index){
-      item.classList.toggle('axis-is-active',index===closest);
-      item.classList.toggle('axis-is-near',Math.abs(index-closest)===1);
+      var distance=Math.abs(index-closest);
+      item.classList.toggle('axis-is-active',distance===0);
+      item.classList.toggle('axis-is-near',distance===1);
+      item.style.setProperty('--axis-distance',String(Math.min(1,distance)));
     });
 
     if(liveStatus && lastActiveIndex!==closest){
-      var spokenName=name.charAt(0).toUpperCase()+name.slice(1);
+      var spokenName=activeName.charAt(0).toUpperCase()+activeName.slice(1);
       liveStatus.textContent=spokenName+' · section '+String(closest+1)+' of '+String(pageItems.length);
       lastActiveIndex=closest;
+    }
+
+    var cueLabel=document.querySelector('.scroll-cue-label');
+    if(cueLabel){
+      cueLabel.textContent=closest===0 ? 'Scroll horizontally' : (closest===pageItems.length-1 ? 'End of axis' : 'Continue horizontally');
     }
   }
 
