@@ -1,0 +1,24 @@
+{
+  "id": "forge",
+  "name": "Format Forge",
+  "displayName": "Forge",
+  "version": "0.1.0",
+  "apiVersion": "0.1",
+  "entry": "renderer/index.html",
+  "type": "converter",
+  "capabilities": [
+    "batch-conversion",
+    "zip-export",
+    "image-conversion",
+    "text-conversion",
+    "media-conversion"
+  ],
+  "boundaries": {
+    "productionCopy": "projects/format-forge",
+    "kynestraCopy": "KYNESTRA/modules/forge/renderer"
+  },
+  "dependencies": {
+    "jszip": "external-runtime",
+    "ffmpeg": "external-runtime"
+  }
+}
