@@ -20,6 +20,8 @@ concurrency:
 jobs:
   windows-installer:
     runs-on: windows-latest
+    env:
+      WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
     defaults:
       run:
         working-directory: KYNESTRA/desktop/tauri
@@ -41,6 +43,38 @@ jobs:
 
       - name: Generate Cargo.lock for this build
         run: cargo generate-lockfile
+
+      - name: Prepare Windows code signing
+        if: env.WINDOWS_CERTIFICATE != ''
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+          WINDOWS_TIMESTAMP_URL: ${{ secrets.WINDOWS_TIMESTAMP_URL }}
+        run: |
+          New-Item -ItemType Directory -Force "certificate" | Out-Null
+          Set-Content -Path "certificate/certificate.txt" -Value $env:WINDOWS_CERTIFICATE -NoNewline
+          certutil -decode "certificate/certificate.txt" "certificate/certificate.pfx" | Out-Null
+          Remove-Item "certificate/certificate.txt" -Force
+
+          $password = ConvertTo-SecureString $env:WINDOWS_CERTIFICATE_PASSWORD -AsPlainText -Force
+          $cert = Import-PfxCertificate -FilePath "certificate/certificate.pfx" -CertStoreLocation "Cert:\CurrentUser\My" -Password $password
+
+          if (-not $cert) { throw "Windows code-signing certificate could not be imported." }
+          $thumbprint = ($cert | Select-Object -First 1).Thumbprint
+          if (-not $thumbprint) { throw "Imported certificate has no thumbprint." }
+          if (-not $env:WINDOWS_TIMESTAMP_URL) { throw "WINDOWS_TIMESTAMP_URL is required when code signing is enabled." }
+
+          $configPath = "tauri.conf.json"
+          $config = Get-Content $configPath -Raw | ConvertFrom-Json
+          if (-not $config.bundle.windows) {
+            $config.bundle | Add-Member -MemberType NoteProperty -Name windows -Value ([pscustomobject]@{})
+          }
+          $config.bundle.windows.certificateThumbprint = $thumbprint
+          $config.bundle.windows.digestAlgorithm = "sha256"
+          $config.bundle.windows.timestampUrl = $env:WINDOWS_TIMESTAMP_URL
+          $config | ConvertTo-Json -Depth 20 | Set-Content $configPath -Encoding utf8
+          Write-Host "Windows signing prepared for certificate $thumbprint"
 
       - name: Run tests
         run: cargo test --locked
@@ -68,6 +102,18 @@ jobs:
           "$hash  KYNESTRA-Setup.exe" | Set-Content "target/release/bundle/nsis/KYNESTRA-Setup.exe.sha256" -Encoding ascii
           Write-Host "KYNESTRA-Setup.exe: $($installer.Length) bytes"
           Write-Host "SHA-256: $hash"
+
+      - name: Verify Windows signature
+        if: env.WINDOWS_CERTIFICATE != ''
+        shell: pwsh
+        run: |
+          $installer = Get-Item "target/release/bundle/nsis/KYNESTRA-Setup.exe"
+          $signature = Get-AuthenticodeSignature $installer.FullName
+          if ($signature.Status -ne "Valid") { throw "KYNESTRA installer signature is not valid: $($signature.Status)" }
+          if (-not $signature.SignerCertificate.Subject) { throw "KYNESTRA installer has no signer certificate." }
+          Write-Host "Signed by: $($signature.SignerCertificate.Subject)"
+          Write-Host "Signature status: $($signature.Status)"
+
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
