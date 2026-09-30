@@ -47,7 +47,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
     <button class="btn" id="runBtn">Run</button>
     <button class="btn" id="epsBtn" disabled>Export EPS</button>
     <button class="btn" id="svgBtn" disabled>Export SVG</button>
-    <button class="btn" id="metaBtn">Metadata</button>
+    <button class="btn" id="metaBtn">Adobe CSV</button>
     <button class="btn primary" id="allBtn">Export All</button>
   </div>
 </header>
@@ -110,6 +110,11 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
     <div class="stat"><span>Text</span><b>vector text</b></div>
     <div class="stat"><span>Raster</span><b>none required</b></div>
     <div class="notice">Each recorded fill/stroke/path becomes its own EPS object. Illustrator can select those vector objects individually after opening the EPS.</div>
+  </div>
+
+  <div class="section">
+    <h3>ADOBE STOCK METADATA</h3>
+    <div class="notice">CSV uses Adobe Stock fields only: <b>Filename</b>, <b>Title</b>, <b>Keywords</b>. Filename ≤30 characters, title ≤70 characters, keywords ≤50 and ordered by importance.</div>
   </div>
 
   <div class="section">
@@ -326,22 +331,37 @@ function fillFlowers(){
   flowerInfo.textContent=(currentFlower>=0?((currentFlower+1)+' / '):'')+LIB.length+' Prism Flowers';
 }
 function csvEsc(v){const s=String(v??'');return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}
-function flowerDescription(f){
-  let s=(f.desc||('Prism Flower vector artwork — '+f.title+'.')).replace(/\s+/g,' ').trim();
-  if(s.length<150)s+=' Colorful botanical geometry, translucent petals, luminous gradients and polished decorative vector composition for contemporary creative projects.';
-  if(s.length>200)s=s.slice(0,197).replace(/[ ,.;:-]+$/,'')+'.';
-  return s;
+function adobeFilename(f,i){
+  const flower=safeName(f.title).replace(/^prism-?/i,'')||'flower';
+  const stem=('prism-'+String(i+1).padStart(4,'0')+'-'+flower).slice(0,26);
+  return stem+'.eps';
+}
+function adobeTitle(f){
+  const flower=String(f.title||'Prism Flower')
+    .replace(/^Prism\s+/i,'')
+    .replace(/[-_]+/g,' ')
+    .replace(/[^A-Za-z0-9 ]+/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+  return ('Prism '+flower+' flower vector illustration').replace(/\s+/g,' ').trim().slice(0,70).trim();
 }
 function flowerKeywords(f){
-  const flower=f.title.replace(/^Prism\s+/i,'').toLowerCase();
-  const base=[flower,'prism','prism flower','flower','floral','botanical','vector','eps','postscript','illustration','digital art','abstract','colorful','vibrant','luminous','gradient','petals','nature','decorative','design','background','ornamental','translucent','geometric','creative','modern','contemporary','graphic','artwork','visual','composition','glowing','color','shape','pattern','stylized','botanical art','floral design','vector art','flower illustration','digital illustration','decorative art','abstract floral','nature design','creative background','prismatic','prismatic flower','colorful flower'];
-  return [...new Set(base)].slice(0,48);
+  const flower=String(f.title||'Prism Flower').replace(/^Prism\s+/i,'').toLowerCase();
+  const base=[
+    flower,'prism flower','flower','floral','botanical','petals','colorful','vibrant','ornamental','nature','flower illustration',
+    'vector','vector art','digital art','abstract','gradient','luminous','geometric','decorative','design','artwork','visual',
+    'composition','glowing','color','shape','pattern','stylized','botanical art','floral design','digital illustration',
+    'decorative art','abstract floral','nature design','creative background','prismatic','prismatic flower','modern',
+    'contemporary','graphic','creative','translucent','colorful flower','botanical illustration','floral artwork',
+    'nature illustration','ornamental design','abstract flower','modern floral','decorative botanical','prismatic design'
+  ];
+  return [...new Set(base.map(x=>String(x).replace(/\s+/g,' ').trim()).filter(Boolean))].slice(0,50);
 }
 function metadataCsv(){
-  const h=['Filename','Description','Keywords','Categories','Illustration','Mature Content','Editorial'];
+  const h=['Filename','Title','Keywords'];
   const rows=[h];
-  LIB.forEach(f=>rows.push([safeName(f.title)+'.eps',flowerDescription(f),flowerKeywords(f).join(', '),'Nature,Arts','Yes','No','No']));
-  return rows.map(r=>r.map(csvEsc).join(',')).join('\r\n')+'\r\n';
+  LIB.forEach((f,i)=>rows.push([adobeFilename(f,i),adobeTitle(f),flowerKeywords(f).join(', ')]));
+  return rows.map(r=>r.map(csvEsc).join('\r\n')).join('\r\n')+'\r\n';
 }
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2500)}
 async function pickFolder(){if(!window.showDirectoryPicker)throw new Error('Folder export requires Chrome or Edge with File System Access support.');return window.showDirectoryPicker({mode:'readwrite'})}
@@ -349,7 +369,7 @@ async function exportAll(){
   const dir=await pickFolder();let done=0,failed=0;allBtn.disabled=true;
   for(let i=0;i<LIB.length;i++){
     try{
-      const scene=buildFlowerScene(LIB[i]),name=safeName(LIB[i].title)+(LIB[i].title?'-'+String(i+1).padStart(4,'0'):'')+'.eps';
+      const scene=buildFlowerScene(LIB[i]),name=adobeFilename(LIB[i],i);
       const h=await dir.getFileHandle(name,{create:true}),w=await h.createWritable();await w.write(generateEps(scene));await w.close();done++;
     }catch(e){failed++;console.error(LIB[i].title,e)}
     if((i+1)%10===0||i===LIB.length-1)setStatus('Export All — '+(i+1)+' / '+LIB.length+' · saved '+done+(failed?' · failed '+failed:'')); 
@@ -358,12 +378,12 @@ async function exportAll(){
 }
 async function exportMetadata(){
   try{
-    const dir=await pickFolder(),h=await dir.getFileHandle('prism-flowers-metadata.csv',{create:true}),w=await h.createWritable();await w.write(metadataCsv());await w.close();flash('Metadata saved — '+LIB.length+' Prism Flowers.');
+    const csv=metadataCsv();if(new TextEncoder().encode(csv).length>1000000)throw new Error('Adobe CSV exceeds the 1 MB upload limit.');const dir=await pickFolder(),h=await dir.getFileHandle('adobe-stock-metadata.csv',{create:true}),w=await h.createWritable();await w.write(csv);await w.close();flash('Adobe CSV saved — '+LIB.length+' Prism Flowers.');
   }catch(e){setStatus('Metadata export failed: '+(e.message||e),'bad')}
 }
 function onInput(){syncLines();modeEl.textContent='CUSTOM';currentFlower=-1}
 $('#runBtn').onclick=runCurrent;
-epsBtn.onclick=()=>{if(!lastScene)return;downloadBlob(new Blob([generateEps(lastScene)],{type:'application/postscript'}),currentFlower>=0?safeName(LIB[currentFlower].title)+'.eps':'code-to-eps.eps')}
+epsBtn.onclick=()=>{if(!lastScene)return;downloadBlob(new Blob([generateEps(lastScene)],{type:'application/postscript'}),currentFlower>=0?adobeFilename(LIB[currentFlower],currentFlower):'code-to-eps.eps')}
 svgBtn.onclick=()=>{if(!lastScene)return;downloadBlob(new Blob([sceneToSvg(lastScene)],{type:'image/svg+xml;charset=utf-8'}),currentFlower>=0?safeName(LIB[currentFlower].title)+'.svg':'code-to-eps.svg')}
 allBtn.onclick=async()=>{try{await exportAll()}catch(e){allBtn.disabled=false;setStatus('Export All failed: '+(e.message||e),'bad')}}
 metaBtn.onclick=exportMetadata;
