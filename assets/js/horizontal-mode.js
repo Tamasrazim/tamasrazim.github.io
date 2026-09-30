@@ -127,6 +127,36 @@
   var wheelRAF=0;
   var wheelVelocity=0;
   var wheelLastTime=0;
+  var axisRoll=0;
+  var axisRollTarget=0;
+  var axisRollRAF=0;
+
+  function setAxisRollFromVelocity(velocity){
+    axisRollTarget=Math.max(-16,Math.min(16,-velocity*.024));
+    if(!axisRollRAF)axisRollRAF=window.requestAnimationFrame(animateAxisRoll);
+  }
+
+  function animateAxisRoll(){
+    axisRoll+=(axisRollTarget-axisRoll)*.2;
+    document.documentElement.style.setProperty('--axis-roll',axisRoll.toFixed(3)+'deg');
+    axisRollTarget*=.88;
+    if(Math.abs(axisRoll)<.025 && Math.abs(axisRollTarget)<.025){
+      axisRoll=0;
+      axisRollTarget=0;
+      document.documentElement.style.setProperty('--axis-roll','0deg');
+      axisRollRAF=0;
+      return;
+    }
+    axisRollRAF=window.requestAnimationFrame(animateAxisRoll);
+  }
+
+  function loopAxisPosition(value){
+    var max=maxHorizontal();
+    if(max<=1)return Math.max(0,Math.min(max,value));
+    if(value<0) return max + (value % max);
+    if(value>max) return value % max;
+    return value;
+  }
 
   function getScrollablePanel(target){
     if(!target || !target.closest)return null;
@@ -175,12 +205,9 @@
     var next=current+velocity*dt;
     var max=maxHorizontal();
 
-    if(next<=0 || next>=max){
-      next=Math.max(0,Math.min(max,next));
-      wheelVelocity=0;
-    }else{
-      wheelVelocity=velocity*friction;
-    }
+    next=loopAxisPosition(next);
+    wheelVelocity=velocity*friction;
+    setAxisRollFromVelocity(velocity);
 
     scroller.scrollLeft=next;
     scheduleProgress();
@@ -239,7 +266,7 @@
      while predominantly vertical swipes remain available to inner sections. */
   var mobileTouch=window.matchMedia && window.matchMedia('(max-width: 720px)').matches;
   if(mobileTouch){
-    var touch={active:false,startX:0,startY:0,startScroll:0,locked:false,moved:false};
+    var touch={active:false,startX:0,startY:0,startScroll:0,locked:false,moved:false,lastX:0,lastTime:0};
 
     scroller.addEventListener('touchstart',function(e){
       if(!e.touches || e.touches.length!==1)return;
@@ -250,6 +277,8 @@
       touch.startScroll=scroller.scrollLeft;
       touch.locked=false;
       touch.moved=false;
+      touch.lastX=p.clientX;
+      touch.lastTime=performance.now();
     },{passive:true});
 
     scroller.addEventListener('touchmove',function(e){
@@ -265,8 +294,14 @@
 
       if(!touch.locked)return;
       touch.moved=true;
+      var now=performance.now();
+      var dt=Math.max(8,now-touch.lastTime);
+      var velocity=(p.clientX-touch.lastX)/(dt/1000);
+      touch.lastX=p.clientX;
+      touch.lastTime=now;
       e.preventDefault();
-      scroller.scrollLeft=touch.startScroll-dx;
+      scroller.scrollLeft=loopAxisPosition(touch.startScroll-dx);
+      setAxisRollFromVelocity(velocity);
       scheduleProgress();
       scheduleSectionState();
     },{passive:false});
@@ -275,6 +310,7 @@
       if(!touch.active)return;
       touch.active=false;
       touch.locked=false;
+      axisRollTarget=0;
       if(touch.moved){
         scheduleProgress();
         scheduleSectionState();
@@ -288,7 +324,7 @@
   }
 
   /* Desktop drag-to-pan: only starts from non-interactive page surfaces. */
-  var drag={active:false,startX:0,startScroll:0,pointerId:null,moved:false};
+  var drag={active:false,startX:0,startScroll:0,pointerId:null,moved:false,lastX:0,lastTime:0};
 
   function isDragExcluded(target){
     if(!target || !target.closest)return true;
@@ -304,6 +340,8 @@
       drag.startScroll=scroller.scrollLeft;
       drag.pointerId=e.pointerId;
       drag.moved=false;
+      drag.lastX=e.clientX;
+      drag.lastTime=performance.now();
       stateNode.classList.add('axis-dragging');
       try{scroller.setPointerCapture(e.pointerId);}catch(_err){}
     });
@@ -313,7 +351,13 @@
       var delta=e.clientX-drag.startX;
       if(Math.abs(delta)>4)drag.moved=true;
       if(!drag.moved)return;
-      scroller.scrollLeft=drag.startScroll-delta;
+      var now=performance.now();
+      var dt=Math.max(8,now-drag.lastTime);
+      var velocity=(e.clientX-drag.lastX)/(dt/1000);
+      drag.lastX=e.clientX;
+      drag.lastTime=now;
+      scroller.scrollLeft=loopAxisPosition(drag.startScroll-delta);
+      setAxisRollFromVelocity(velocity);
       e.preventDefault();
     });
 
@@ -322,6 +366,7 @@
       drag.active=false;
       drag.pointerId=null;
       stateNode.classList.remove('axis-dragging');
+      axisRollTarget=0;
       if(drag.moved)scheduleProgress();
     }
 
@@ -408,8 +453,7 @@
           activeIndex=index;
         }
       });
-      var nextIndex=Math.min(pageItems.length-1,activeIndex+1);
-      if(nextIndex===activeIndex)return;
+      var nextIndex=(activeIndex+1)%pageItems.length;
       goTo(pageItems[nextIndex],!reduce);
       var id=pageItems[nextIndex].id||'';
       if(id && history.pushState){
@@ -586,7 +630,7 @@
   var cue=document.querySelector('.scroll-cue');
   if(cue){
     var label=cue.querySelector('.scroll-cue-label');
-    if(label)label.textContent='Keep scrolling';
+    if(label)label.textContent='Scroll sideways';
   }
 
 
@@ -747,12 +791,12 @@
 
     var cueLabel=document.querySelector('.scroll-cue-label');
     if(cueLabel){
-      cueLabel.textContent=closest===pageItems.length-1 ? 'End of axis' : 'Keep scrolling';
+      cueLabel.textContent='Scroll sideways';
     }
     if(axisNext){
-      var atEnd=closest===pageItems.length-1;
-      axisNext.disabled=atEnd;
-      axisNext.setAttribute('aria-label',atEnd?'End of horizontal page axis':'Go to '+axisName(pageItems[Math.min(pageItems.length-1,closest+1)],Math.min(pageItems.length-1,closest+1)));
+      axisNext.disabled=false;
+      var cueNext=(closest+1)%pageItems.length;
+      axisNext.setAttribute('aria-label','Go to '+axisName(pageItems[cueNext],cueNext));
     }
   }
 
