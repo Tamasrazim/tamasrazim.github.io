@@ -49,6 +49,8 @@ main{padding:76px 0 100px}.hero{animation:rise .8s var(--ease) both}.kicker{font
 .meta-log{margin-top:12px;color:#777;font:9px/1.7 ui-monospace,monospace;white-space:pre-wrap}
 .meta-ok{color:#ddd}.meta-error{color:#aaa}.meta-summary:empty,.meta-log:empty{display:none}.meta-summary{max-height:180px;overflow:auto}
 @media(max-width:700px){.meta-modal{padding:12px}.meta-summary{grid-template-columns:1fr}}
+/* CSV 50-to-1 merger */
+.merge50-note{color:#777;font:9px/1.6 ui-monospace,monospace;margin-top:8px}
 </style><script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -96,7 +98,7 @@ main{padding:76px 0 100px}.hero{animation:rise .8s var(--ease) both}.kicker{font
 <main class="shell">
 <section class="hero"><div class="kicker">PROJECT 05 / UNIVERSAL CONVERTER</div><h1>Format <em>Forge.</em></h1><p class="lead">A browser-first conversion workspace with folder intake, ZIP extraction, batch conversion and one-click ZIP export. The interface is animated; file work stays local whenever the browser engine can do it.</p><div class="hero-meta"><span class="pill">Images</span><span class="pill">Video</span><span class="pill">Audio</span><span class="pill">Text</span><span class="pill">Data</span><span class="pill">ZIP</span><span class="pill">Batch</span><span class="pill">Local-first</span></div></section>
 <section class="workspace">
-<div class="toolbar"><span class="toolbar-title">Conversion workspace</span><div class="actions"><button class="action" id="folder">Select folder</button><button class="action" id="generateMetadata">Generate metadata</button><button class="action" id="generateMetadata19">Generate 19 folders</button><button class="action" id="zipSelect">Open ZIP</button><button class="action primary" id="convertAll" disabled>Convert all</button><button class="action" id="downloadZip" disabled>Download as ZIP</button><span class="status" id="status">Ready</span></div></div>
+<div class="toolbar"><span class="toolbar-title">Conversion workspace</span><div class="actions"><button class="action" id="folder">Select folder</button><button class="action" id="generateMetadata">Generate metadata</button><button class="action" id="generateMetadata19">Generate 19 folders</button><button class="action" id="merge50Csv">Merge 50 CSVs → 1</button><input id="merge50CsvInput" type="file" accept=".csv,text/csv" multiple hidden><button class="action" id="zipSelect">Open ZIP</button><button class="action primary" id="convertAll" disabled>Convert all</button><button class="action" id="downloadZip" disabled>Download as ZIP</button><span class="status" id="status">Ready</span></div></div>
 <div class="drop" id="drop"><div><strong>Drop files, folders or ZIPs.</strong><p>PNG → JPG · MP4 → WebM · WAV → MP3 · JSON ↔ CSV · ZIP extraction · batch export</p><button class="choose" id="choose">Choose files</button><input id="files" type="file" multiple hidden><input id="folderInput" type="file" webkitdirectory directory multiple hidden><input id="zipInput" type="file" accept=".zip,application/zip" hidden></div></div>
 <div class="settings"><div class="field"><label>Default output</label><select id="globalTarget"><option value="auto">Auto — choose per file</option><option value="jpg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option><option value="avif">AVIF</option><option value="webm">WebM</option><option value="mp4">MP4</option><option value="mp3">MP3</option><option value="wav">WAV</option><option value="json">JSON</option><option value="csv">CSV</option><option value="txt">TXT</option></select></div><div class="field"><label>Image quality</label><select id="quality"><option value=".95">Maximum</option><option value=".85" selected>High</option><option value=".7">Balanced</option><option value=".5">Small</option></select></div></div>
 <div class="queue"><div class="queue-head"><h2>Queue</h2><span class="status" id="count">0 files</span></div><div id="queue"><div class="empty">No files loaded.</div></div></div></section>
@@ -519,6 +521,23 @@ async function extractZip(file){status.textContent='Extracting ZIP…';status.cl
 function render(){count.textContent=state.length+' file'+(state.length===1?'':'s');convertAllBtn.disabled=!state.some(x=>targets(x.ext).includes(x.target));downloadZipBtn.disabled=!state.some(x=>x.output);if(!state.length){queue.innerHTML='<div class="empty">No files loaded.</div>';return}queue.innerHTML=state.map((x,i)=>{const ts=targets(x.ext),opts=ts.length?ts.map(t=>'<option '+(t===x.target?'selected':'')+' value="'+t+'">'+t.toUpperCase()+'</option>').join(''):'<option value="">unsupported</option>';return '<div class="item"><div class="item-name"><b>'+esc(x.file.name)+'</b><small>'+esc(x.path)+' · '+fmt(x.file.size)+' · '+kind(x.ext)+(x.output?' · READY':'')+'</small><div class="progress"><i id="p'+i+'" style="width:'+(x.output?'100%':'0')+'"></i></div></div><select data-i="'+i+'" class="target" '+(!ts.length?'disabled':'')+'>'+opts+'</select><button class="convert" data-convert="'+i+'" '+(!ts.length?'disabled':'')+'>Convert</button><button class="remove" data-remove="'+i+'" aria-label="Remove">×</button></div>'}).join('')}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}function fmt(n){let u=['B','KB','MB','GB'],i=0;while(n>1024&&i<3){n/=1024;i++}return n.toFixed(i?1:0)+' '+u[i]}
 function flash(t){status.textContent=t;status.classList.add('live');setTimeout(()=>{if(status.textContent===t){status.textContent='Ready';status.classList.remove('live')}},2200)}
+
+const merge50CsvBtn=$('#merge50Csv'),merge50CsvInput=$('#merge50CsvInput');
+if(merge50CsvBtn&&merge50CsvInput){
+  merge50CsvBtn.onclick=()=>merge50CsvInput.click();
+  merge50CsvInput.onchange=async e=>{
+    const files=[...e.target.files];
+    try{
+      await merge50CsvSelection(files);
+    }catch(err){
+      status.textContent='50-to-1 CSV merge failed: '+(err?.message||err);
+      status.classList.add('live');
+      console.error(err);
+    }finally{
+      e.target.value='';
+    }
+  };
+}
 $('#choose').onclick=()=>input.click();$('#folder').onclick=()=>folderInput.click();$('#zipSelect').onclick=()=>zipInput.click();input.onchange=e=>addFiles(e.target.files);folderInput.onchange=e=>addFiles(e.target.files);zipInput.onchange=async e=>{const f=e.target.files[0];if(f)try{await extractZip(f)}catch(err){status.textContent='ZIP extraction failed: '+err.message}};
 ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag')}));['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag')}));
 drop.addEventListener('drop',async e=>{const files=[...e.dataTransfer.files];const zips=files.filter(f=>ext(f.name)==='zip'),normal=files.filter(f=>ext(f.name)!=='zip');if(normal.length)addFiles(normal);for(const z of zips)try{await extractZip(z)}catch(err){status.textContent='ZIP extraction failed: '+err.message}});
@@ -528,6 +547,70 @@ queue.addEventListener('click',e=>{const r=e.target.closest('[data-remove]');if(
 async function imageConvert(x){const url=URL.createObjectURL(x.file),img=new Image();await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=url});const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;canvas.getContext('2d').drawImage(img,0,0);URL.revokeObjectURL(url);const mime={jpg:'image/jpeg',png:'image/png',webp:'image/webp',avif:'image/avif'}[x.target];return new Promise((res,rej)=>canvas.toBlob(b=>b?res(b):rej(new Error('Format not supported by this browser')),mime,Number(quality.value)))}
 function csvToObjects(s){const rows=s.trim().split(/\r?\n/).map(r=>{const out=[];let cur='',q=false;for(let i=0;i<r.length;i++){const ch=r[i];if(ch==='"'&&r[i+1]==='"'){cur+='"';i++;continue}if(ch==='"'){q=!q;continue}if(ch===','&&!q){out.push(cur);cur=''}else cur+=ch}out.push(cur);return out});const h=rows.shift()||[];return rows.filter(r=>r.some(Boolean)).map(r=>Object.fromEntries(h.map((k,j)=>[k,r[j]??''])))}
 function objectsToCsv(d){const a=Array.isArray(d)?d:[d],h=[...new Set(a.flatMap(o=>Object.keys(o||{})))],q=v=>{const s=v==null?'':String(v);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};return h.map(q).join(',')+'\n'+a.map(o=>h.map(k=>q(o?.[k])).join(',')).join('\n')}
+function mergeFiftyCsvFiles(files){
+  if(!files||files.length!==50){
+    throw new Error('Select exactly 50 CSV files. Selected: '+(files?files.length:0)+'.');
+  }
+  const sorted=[...files].sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'}));
+  const expectedHeader=null;
+  return Promise.all(sorted.map(f=>f.text())).then(texts=>{
+    let header=null, rows=[];
+    texts.forEach((text,idx)=>{
+      const parsed=csvToRows(text);
+      if(!parsed.length)throw new Error('CSV '+sorted[idx].name+' is empty.');
+      const h=parsed[0];
+      if(!header)header=h;
+      else if(h.length!==header.length||h.some((v,i)=>String(v).trim()!==String(header[i]).trim())){
+        throw new Error('Header mismatch in '+sorted[idx].name+'. All 50 CSVs must use the same columns.');
+      }
+      rows.push(...parsed.slice(1).filter(r=>r.some(v=>String(v).trim()!=='')).map(r=>{
+        const out=new Array(header.length).fill('');
+        for(let i=0;i<header.length;i++)out[i]=r[i]??'';
+        return out;
+      }));
+    });
+    return {header,rows,count:rows.length,names:sorted.map(f=>f.name)};
+  });
+}
+function csvToRows(s){
+  const text=String(s??'').replace(/^\uFEFF/,'');
+  const rows=[];let row=[],cell='',quoted=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(quoted){
+      if(ch==='"'){
+        if(text[i+1]==='"'){cell+='"';i++;}
+        else quoted=false;
+      }else cell+=ch;
+    }else{
+      if(ch==='"')quoted=true;
+      else if(ch===','){row.push(cell);cell='';}
+      else if(ch==='\n'){row.push(cell);rows.push(row);row=[];cell='';}
+      else if(ch==='\r'){}
+      else cell+=ch;
+    }
+  }
+  if(cell!==''||row.length){row.push(cell);rows.push(row);}
+  return rows;
+}
+function rowsToCsv(rows){
+  const q=v=>{const s=String(v??'');return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
+  return rows.map(r=>r.map(q).join(',')).join('\r\n')+'\r\n';
+}
+async function merge50CsvSelection(files){
+  status.textContent='Reading 50 CSVs…';status.classList.add('live');
+  const result=await mergeFiftyCsvFiles(files);
+  const csv=rowsToCsv([result.header,...result.rows]);
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='merged-50-csv.csv';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+  flash('Merged 50 CSVs → 1 · '+result.count+' data rows');
+  return result;
+}
+
 async function textConvert(x){const s=await x.file.text();let out=s;if(x.target==='json'&&x.ext==='csv')out=JSON.stringify(csvToObjects(s),null,2);else if(x.target==='csv'&&x.ext==='json')out=objectsToCsv(JSON.parse(s));else if(x.target==='txt'&&x.ext==='json')out=JSON.stringify(JSON.parse(s),null,2);return new Blob([out],{type:x.target==='json'?'application/json':'text/plain'})}
 async function loadFF(){if(ffmpegReady)return;if(!window.FFmpeg)throw new Error('FFmpeg runtime unavailable');ffmpeg=new FFmpeg.createFFmpeg({log:false,corePath:'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.6/dist/umd/ffmpeg-core.js'});await ffmpeg.load();ffmpegReady=true}
 async function mediaConvert(x){await loadFF();const fetchFile=FFmpegUtil.fetchFile,inputName='input.'+x.ext,outputName='output.'+x.target;ffmpeg.FS('writeFile',inputName,await fetchFile(x.file));await ffmpeg.run('-i',inputName,'-y',outputName);const data=ffmpeg.FS('readFile',outputName);const mime={mp4:'video/mp4',webm:'video/webm',mkv:'video/x-matroska',mov:'video/quicktime',avi:'video/x-msvideo',mp3:'audio/mpeg',wav:'audio/wav',ogg:'audio/ogg',m4a:'audio/mp4',flac:'audio/flac'}[x.target]||'application/octet-stream';try{ffmpeg.FS('unlink',inputName);ffmpeg.FS('unlink',outputName)}catch{}return new Blob([data.buffer],{type:mime})}
