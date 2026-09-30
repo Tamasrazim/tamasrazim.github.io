@@ -38231,4 +38231,241 @@ ctx.beginPath();ctx.moveTo(Math.cos(ang)*r1,Math.sin(ang)*r1);ctx.lineTo(x2,y2);
 ctx.beginPath();ctx.arc(x2,y2,1.8*s,0,TAU);ctx.fillStyle=col(15,20,.86);ctx.fill();}
 ctx.beginPath();ctx.arc(0,0,4.6*s,0,TAU);ctx.fillStyle="rgba(255,255,242,.98)";ctx.fill();ctx.restore();}
 </script>
+
+<script type="text/plain" id="sample-prism-aurora-snowflake" data-title="Prism Aurora Snowflake" data-desc="Translucent Aurora Snowflake Christmas animation with crystalline radial geometry, luminous cyan, violet, blue and silver gradients, and elegant winter motion." data-loop="1" data-loopdur="10" data-dur="10">
+function renderFrame(time,frame,fps,ctx,width,height){
+  const a=motion.loopProgress*TAU*2,s=motion.scale,spin=a*.16;
+  ctx.save();ctx.translate(width*.5,height*.5);ctx.rotate(spin);
+  const arms=6,halo=150*s;
+  const g=ctx.createRadialGradient(0,0,4*s,0,0,halo);
+  g.addColorStop(0,"rgba(255,255,255,.95)");g.addColorStop(.35,"rgba(150,230,255,.42)");g.addColorStop(1,"rgba(85,120,255,0)");
+  ctx.beginPath();ctx.arc(0,0,halo,0,TAU);ctx.fillStyle=g;ctx.fill();
+  for(let r=0;r<3;r++){
+    const len=(168-r*28)*s,w=(24-r*5)*s;
+    for(let k=0;k<arms;k++){
+      const ang=TAU*k/arms, q=a+k*.22+r*.7;
+      ctx.save();ctx.rotate(ang);
+      const pg=ctx.createLinearGradient(0,0,len,0);
+      pg.addColorStop(0,"rgba(255,255,255,.92)");
+      pg.addColorStop(.25,"rgba(120,210,255,.78)");
+      pg.addColorStop(.68,"rgba(190,100,255,.62)");
+      pg.addColorStop(1,"rgba(255,255,255,.18)");
+      ctx.fillStyle=pg;
+      ctx.beginPath();ctx.moveTo(0,-w*.22);ctx.lineTo(len*.22,-w);ctx.lineTo(len*.84,-w*.35);ctx.lineTo(len,0);ctx.lineTo(len*.84,w*.35);ctx.lineTo(len*.22,w);ctx.closePath();ctx.fill();
+      for(let j=1;j<=4;j++){
+        const p=j/5,xx=len*p, yy=(Math.sin(q+j*.9)*.18+0.34)*w;
+        ctx.beginPath();ctx.moveTo(xx,0);ctx.lineTo(xx-w*.8,yy);ctx.lineTo(xx+w*.15,yy*.4);ctx.closePath();
+        ctx.fillStyle="rgba(255,255,255,.40)";ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+  ctx.beginPath();ctx.arc(0,0,12*s,0,TAU);ctx.fillStyle="rgba(255,255,255,.96)";ctx.fill();
+  ctx.restore();
+}
+</script>
+
+<script type="text/plain" id="sample-prism-velvet-ornament" data-title="Prism Velvet Ornament" data-desc="Translucent Velvet Ornament Christmas animation with layered spherical geometry, ruby, emerald, gold and violet gradients, and polished festive highlights." data-loop="1" data-loopdur="10" data-dur="10">
+function renderFrame(time,frame,fps,ctx,width,height){
+  const a=motion.loopProgress*TAU*2,s=motion.scale,b=.96+Math.sin(a)*.035;
+  ctx.save();ctx.translate(width*.5,height*.5);ctx.scale(b,b);
+  const r=120*s;
+  const g=ctx.createRadialGradient(-r*.34,-r*.42,8*s,r*.1,r*.1,r);
+  g.addColorStop(0,"rgba(255,255,255,.98)");g.addColorStop(.18,"rgba(255,210,238,.9)");
+  g.addColorStop(.42,"rgba(208,42,96,.88)");g.addColorStop(.72,"rgba(92,20,86,.86)");g.addColorStop(1,"rgba(18,8,28,.32)");
+  ctx.beginPath();ctx.arc(0,10*s,r,0,TAU);ctx.fillStyle=g;ctx.fill();
+  ctx.save();ctx.rotate(Math.sin(a*.6)*.06);
+  for(let i=-2;i<=2;i++){
+    ctx.beginPath();ctx.ellipse(i*24*s,-12*s,10*s,100*s,Math.sin(a+i)*.16,0,TAU);
+    ctx.strokeStyle=i%2?"rgba(255,226,124,.6)":"rgba(50,255,190,.4)";ctx.lineWidth=5*s;ctx.stroke();
+  }
+  ctx.restore();
+  ctx.fillStyle="rgba(225,190,90,.95)";ctx.fillRect(-20*s,-130*s,40*s,28*s);
+  ctx.strokeStyle="rgba(255,240,170,.75)";ctx.lineWidth=4*s;ctx.strokeRect(-17*s,-128*s,34*s,22*s);
+  ctx.beginPath();ctx.arc(0,-144*s,19*s,Math.PI,TAU);ctx.strokeStyle="rgba(255,230,120,.9)";ctx.lineWidth=5*s;ctx.stroke();
+  for(let k=0;k<10;k++){const ang=TAU*k/10+a*.25,x=Math.cos(ang)*150*s,y=Math.sin(ang)*150*s;
+    ctx.beginPath();ctx.arc(x,y,2.2*s,0,TAU);ctx.fillStyle="rgba(255,248,205,.55)";ctx.fill();}
+  ctx.restore();
+}
+</script>
+
+<script type="text/plain" id="sample-prism-candy-cane" data-title="Prism Candy Cane" data-desc="Translucent Candy Cane Christmas animation with sculpted spiral geometry, vivid ruby, pearl and mint gradients, and smooth festive rotation." data-loop="1" data-loopdur="10" data-dur="10">
+function renderFrame(time,frame,fps,ctx,width,height){
+  const a=motion.loopProgress*TAU*2,s=motion.scale;
+  ctx.save();ctx.translate(width*.5,height*.5);ctx.rotate(Math.sin(a)*.035);
+  const w=58*s,h=190*s;
+  for(let pass=0;pass<3;pass++){
+    ctx.save();ctx.rotate((a+pass*.35)*.08);
+    const g=ctx.createLinearGradient(-w,0,w,0);
+    g.addColorStop(0,"rgba(255,255,255,.95)");g.addColorStop(.28,"rgba(230,245,255,.85)");
+    g.addColorStop(.52,"rgba(220,48,72,.92)");g.addColorStop(.75,"rgba(255,255,255,.9)");g.addColorStop(1,"rgba(95,255,206,.55)");
+    ctx.strokeStyle=g;ctx.lineWidth=46*s;ctx.lineCap="round";
+    ctx.beginPath();ctx.moveTo(-8*s,180*s);ctx.lineTo(-8*s,-38*s);
+    ctx.bezierCurveTo(-8*s,-150*s,95*s,-164*s,112*s,-84*s);
+    ctx.stroke();
+  }
+  ctx.strokeStyle="rgba(255,255,255,.55)";ctx.lineWidth=2*s;
+  for(let j=0;j<7;j++){const y=(j/6-.5)*290*s+Math.sin(a+j)*5*s;
+    ctx.beginPath();ctx.moveTo(-40*s,y-12*s);ctx.lineTo(40*s,y+12*s);ctx.stroke();}
+  ctx.restore();
+}
+</script>
+
+<script type="text/plain" id="sample-prism-holly-ember" data-title="Prism Holly Ember" data-desc="Translucent Holly Ember Christmas animation with layered geometric leaves, glowing ruby berries, emerald gradients and warm golden accents." data-loop="1" data-loopdur="10" data-dur="10">
+function renderFrame(time,frame,fps,ctx,width,height){
+  const a=motion.loopProgress*TAU*2,s=motion.scale;
+  ctx.save();ctx.translate(width*.5,height*.5);
+  for(let k=0;k<12;k++){
+    const ang=TAU*k/12+a*.12,rx=Math.cos(ang)*100*s,ry=Math.sin(ang)*70*s;
+    ctx.save();ctx.translate(rx,ry);ctx.rotate(ang+.35*Math.sin(a+k));
+    const g=ctx.createLinearGradient(-34*s,-58*s,36*s,62*s);
+    g.addColorStop(0,"rgba(190,255,215,.92)");g.addColorStop(.35,"rgba(23,175,104,.9)");
+    g.addColorStop(.75,"rgba(3,76,55,.92)");g.addColorStop(1,"rgba(3,20,20,.5)");
+    ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,-62*s);ctx.bezierCurveTo(40*s,-28*s,42*s,26*s,0,62*s);
+    ctx.bezierCurveTo(-42*s,26*s,-40*s,-28*s,0,-62*s);ctx.closePath();ctx.fill();
+    ctx.strokeStyle="rgba(255,255,255,.28)";ctx.lineWidth=1.2*s;ctx.stroke();
+    ctx.restore();
+  }
+  for(let k=0;k<7;k++){
+    const ang=TAU*k/7-a*.2,x=Math.cos(ang)*34*s,y=Math.sin(ang)*26*s;
+    const g=ctx.createRadialGradient(x-5*s,y-5*s,1*s,x,y,19*s);
+    g.addColorStop(0,"rgba(255,255,255,.96)");g.addColorStop(.35,"rgba(255,95,120,.92)");g.addColorStop(1,"rgba(125,0,25,.2)");
+    ctx.beginPath();ctx.arc(x,y,18*s,0,TAU);ctx.fillStyle=g;ctx.fill();
+  }
+  ctx.restore();
+}
+</script>
+
+<script type="text/plain" id="sample-prism-christmas-star" data-title="Prism Christmas Star" data-desc="Translucent Christmas Star animation with faceted radial geometry, champagne gold, ruby, cyan and pearl gradients, and a glowing festive center." data-loop="1" data-loopdur="10" data-dur="10">
+function renderFrame(time,frame,fps,ctx,width,height){
+  const a=motion.loopProgress*TAU*2,s=motion.scale,rot=a*.08;
+  ctx.save();ctx.translate(width*.5,height*.5);ctx.rotate(rot);
+  for(let layer=0;layer<5;layer++){
+    const pts=10,rin=(42+layer*15)*s,rout=(142-layer*18)*s,off=a*(.12+layer*.015);
+    const g=ctx.createRadialGradient(0,0,10*s,0,0,rout);
+    g.addColorStop(0,"rgba(255,255,255,.98)");g.addColorStop(.3,layer%2?"rgba(255,210,120,.8)":"rgba(150,240,255,.78)");
+    g.addColorStop(.7,layer%2?"rgba(205,54,75,.58)":"rgba(118,84,255,.55)");g.addColorStop(1,"rgba(255,255,255,0)");
+    ctx.beginPath();
+    for(let i=0;i<pts;i++){const rr=i%2?rout:rin,ang=TAU*i/pts-Math.PI/2+off,x=Math.cos(ang)*rr,y=Math.sin(ang)*rr;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+    ctx.closePath();ctx.fillStyle=g;ctx.fill();
+    ctx.strokeStyle="rgba(255,255,255,.3)";ctx.lineWidth=1*s;ctx.stroke();
+  }
+  ctx.beginPath();ctx.arc(0,0,18*s,0,TAU);ctx.fillStyle="rgba(255,250,220,.96)";ctx.fill();
+  ctx.restore();
+}
+</script>
+
+<script type="text/plain" id="sample-prism-frost-wreath" data-title="Prism Frost Wreath" data-desc="Translucent Frost Wreath Christmas animation with elegant geometric evergreen forms, icy blue, emerald, silver and cranberry gradients, and seamless circular motion." data-loop="1" data-loopdur="10" data-dur="10">
+function renderFrame(time,frame,fps,ctx,width,height){
+  const a=motion.loopProgress*TAU*2,s=motion.scale;
+  ctx.save();ctx.translate(width*.5,height*.5);
+  for(let k=0;k<28;k++){
+    const ang=TAU*k/28+a*.13,r=(108+Math.sin(a*1.3+k)*7)*s;
+    const x=Math.cos(ang)*r,y=Math.sin(ang)*r;
+    ctx.save();ctx.translate(x,y);ctx.rotate(ang+Math.PI*.5);
+    const g=ctx.createLinearGradient(0,-48*s,0,44*s);
+    g.addColorStop(0,"rgba(235,255,255,.92)");g.addColorStop(.35,"rgba(38,190,116,.85)");
+    g.addColorStop(1,"rgba(5,63,48,.45)");
+    ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,-46*s);ctx.lineTo(15*s,-6*s);ctx.lineTo(7*s,34*s);ctx.lineTo(0,48*s);ctx.lineTo(-7*s,34*s);ctx.lineTo(-15*s,-6*s);ctx.closePath();ctx.fill();
+    ctx.restore();
+  }
+  for(let k=0;k<12;k++){
+    const ang=TAU*k/12-a*.17,x=Math.cos(ang)*73*s,y=Math.sin(ang)*73*s;
+    ctx.beginPath();ctx.arc(x,y,8*s,0,TAU);ctx.fillStyle=k%2?"rgba(220,42,70,.86)":"rgba(245,196,80,.84)";ctx.fill();
+  }
+  ctx.beginPath();ctx.arc(0,0,56*s,0,TAU);ctx.strokeStyle="rgba(210,245,255,.32)";ctx.lineWidth=7*s;ctx.stroke();
+  ctx.restore();
+}
+</script>
+
+<script type="text/plain" id="sample-prism-gift-bow" data-title="Prism Gift Bow" data-desc="Translucent Gift Bow Christmas animation with sculpted ribbon geometry, ruby, magenta, gold and pearl gradients, and graceful looping motion." data-loop="1" data-loopdur="10" data-dur="10">
+function renderFrame(time,frame,fps,ctx,width,height){
+  const a=motion.loopProgress*TAU*2,s=motion.scale,b=1+Math.sin(a)*.025;
+  ctx.save();ctx.translate(width*.5,height*.5);ctx.scale(b,b);
+  function ribbon(side){
+    ctx.save();ctx.scale(side,1);
+    const g=ctx.createLinearGradient(-20*s,-120*s,80*s,100*s);
+    g.addColorStop(0,"rgba(255,255,255,.92)");g.addColorStop(.3,"rgba(255,84,125,.86)");
+    g.addColorStop(.67,"rgba(175,31,93,.85)");g.addColorStop(1,"rgba(255,210,90,.55)");
+    ctx.fillStyle=g;ctx.beginPath();
+    ctx.moveTo(0,0);ctx.bezierCurveTo(14*s,-90*s,88*s,-120*s,112*s,-56*s);
+    ctx.bezierCurveTo(128*s,-8*s,73*s,27*s,15*s,30*s);
+    ctx.lineTo(5*s,110*s);ctx.lineTo(48*s,91*s);ctx.lineTo(61*s,135*s);ctx.lineTo(-2*s,75*s);ctx.closePath();ctx.fill();
+    ctx.restore();
+  }
+  ribbon(1);ribbon(-1);
+  ctx.beginPath();ctx.roundRect(-19*s,-18*s,38*s,54*s,9*s);ctx.fillStyle="rgba(255,215,92,.95)";ctx.fill();
+  ctx.strokeStyle="rgba(255,255,255,.65)";ctx.lineWidth=2*s;ctx.stroke();
+  ctx.restore();
+}
+</script>
+
+<script type="text/plain" id="sample-prism-icicle-halo" data-title="Prism Icicle Halo" data-desc="Translucent Icicle Halo Christmas animation with crystalline radial spikes, silver, ice blue, violet and pearl gradients, and hypnotic winter rotation." data-loop="1" data-loopdur="10" data-dur="10">
+function renderFrame(time,frame,fps,ctx,width,height){
+  const a=motion.loopProgress*TAU*2,s=motion.scale;
+  ctx.save();ctx.translate(width*.5,height*.5);
+  const ring=116*s;
+  for(let k=0;k<20;k++){
+    const ang=TAU*k/20-a*.1,len=(52+18*Math.sin(a+k))*s;
+    ctx.save();ctx.rotate(ang);
+    const g=ctx.createLinearGradient(0,0,0,-len);
+    g.addColorStop(0,"rgba(255,255,255,.95)");g.addColorStop(.45,"rgba(125,220,255,.62)");
+    g.addColorStop(1,"rgba(160,100,255,0)");
+    ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(-7*s,-ring);ctx.lineTo(0,-ring-len);ctx.lineTo(7*s,-ring);ctx.closePath();ctx.fill();
+    ctx.strokeStyle="rgba(255,255,255,.4)";ctx.lineWidth=1*s;ctx.stroke();
+    ctx.restore();
+  }
+  for(let k=0;k<10;k++){
+    const ang=TAU*k/10+a*.14,r=61*s,x=Math.cos(ang)*r,y=Math.sin(ang)*r;
+    ctx.beginPath();ctx.arc(x,y,5*s,0,TAU);ctx.fillStyle=k%2?"rgba(220,60,115,.75)":"rgba(248,203,82,.8)";ctx.fill();
+  }
+  const g=ctx.createRadialGradient(0,0,2*s,0,0,52*s);g.addColorStop(0,"rgba(255,255,255,.98)");
+  g.addColorStop(.25,"rgba(150,230,255,.72)");g.addColorStop(1,"rgba(95,70,255,0)");
+  ctx.beginPath();ctx.arc(0,0,52*s,0,TAU);ctx.fillStyle=g;ctx.fill();
+  ctx.restore();
+}
+</script>
+
+<script type="text/plain" id="sample-prism-jingle-bell" data-title="Prism Jingle Bell" data-desc="Translucent Jingle Bell Christmas animation with polished bell geometry, gold, ruby and icy highlights, soft shine, and rhythmic festive motion." data-loop="1" data-loopdur="10" data-dur="10">
+function renderFrame(time,frame,fps,ctx,width,height){
+  const a=motion.loopProgress*TAU*2,s=motion.scale,sw=Math.sin(a)*.11;
+  ctx.save();ctx.translate(width*.5,height*.5);ctx.rotate(sw*.35);
+  const g=ctx.createLinearGradient(-90*s,-100*s,92*s,120*s);
+  g.addColorStop(0,"rgba(255,255,240,.98)");g.addColorStop(.2,"rgba(255,224,120,.95)");
+  g.addColorStop(.52,"rgba(210,135,28,.94)");g.addColorStop(.8,"rgba(120,60,10,.82)");g.addColorStop(1,"rgba(255,225,115,.4)");
+  ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(-88*s,-52*s);ctx.quadraticCurveTo(-72*s,75*s,-38*s,98*s);
+  ctx.quadraticCurveTo(0,121*s,38*s,98*s);ctx.quadraticCurveTo(72*s,75*s,88*s,-52*s);
+  ctx.quadraticCurveTo(0,-106*s,-88*s,-52*s);ctx.closePath();ctx.fill();
+  ctx.strokeStyle="rgba(255,255,255,.5)";ctx.lineWidth=2*s;ctx.stroke();
+  ctx.beginPath();ctx.arc(0,-80*s,35*s,Math.PI,TAU);ctx.fillStyle="rgba(185,125,30,.95)";ctx.fill();
+  ctx.beginPath();ctx.ellipse(Math.sin(a*1.7)*10*s,72*s,23*s,18*s,0,0,TAU);
+  ctx.fillStyle="rgba(255,214,88,.98)";ctx.fill();
+  for(let k=0;k<8;k++){const x=Math.cos(TAU*k/8+a*.3)*112*s,y=Math.sin(TAU*k/8+a*.3)*112*s;
+    ctx.beginPath();ctx.arc(x,y,2.5*s,0,TAU);ctx.fillStyle="rgba(255,250,205,.72)";ctx.fill();}
+  ctx.restore();
+}
+</script>
+
+<script type="text/plain" id="sample-prism-north-star" data-title="Prism North Star" data-desc="Translucent North Star Christmas animation with elegant compass-like facets, icy cyan, deep blue, silver and violet gradients, and luminous winter motion." data-loop="1" data-loopdur="10" data-dur="10">
+function renderFrame(time,frame,fps,ctx,width,height){
+  const a=motion.loopProgress*TAU*2,s=motion.scale;
+  ctx.save();ctx.translate(width*.5,height*.5);ctx.rotate(-a*.045);
+  for(let ring=0;ring<4;ring++){
+    const n=8,ro=(150-ring*27)*s,ri=(26+ring*12)*s;
+    for(let k=0;k<n;k++){
+      const ang=TAU*k/n+(ring%2?Math.PI/n:0)+a*.06;
+      ctx.save();ctx.rotate(ang);
+      const g=ctx.createLinearGradient(0,-ri,0,-ro);
+      g.addColorStop(0,"rgba(255,255,255,.96)");g.addColorStop(.35,"rgba(106,214,255,.78)");
+      g.addColorStop(.7,"rgba(73,92,255,.58)");g.addColorStop(1,"rgba(200,130,255,0)");
+      ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(-7*s,-ri);ctx.lineTo(0,-ro);ctx.lineTo(7*s,-ri);ctx.closePath();ctx.fill();
+      ctx.restore();
+    }
+  }
+  ctx.beginPath();ctx.arc(0,0,17*s,0,TAU);ctx.fillStyle="rgba(255,255,255,.96)";ctx.fill();
+  ctx.beginPath();ctx.arc(0,0,42*s,0,TAU);ctx.strokeStyle="rgba(180,240,255,.34)";ctx.lineWidth=4*s;ctx.stroke();
+  ctx.restore();
+}
+</script>
+
 </html>
