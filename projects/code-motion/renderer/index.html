@@ -1371,33 +1371,6 @@ select.mini{
 }
 
 
-/* Shutterstock metadata generator */
-#stockMetaModal{position:fixed;inset:0;z-index:1200;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.78);backdrop-filter:blur(12px)}
-#stockMetaModal.on{display:flex}
-.stock-meta-card{width:min(620px,calc(100vw - 28px));border:1px solid var(--rule-hi);background:#0a0a0c;box-shadow:0 30px 100px rgba(0,0,0,.65);animation:stockMetaIn 180ms ease-out}
-@keyframes stockMetaIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
-.stock-meta-head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--rule)}
-.stock-meta-head b{font:600 11px var(--mono);letter-spacing:.16em}
-.stock-meta-head .sp{flex:1}
-.stock-meta-close{padding:5px 8px;border:1px solid var(--rule);color:var(--mut);font:10px var(--mono)}
-.stock-meta-close:hover{color:#fff;border-color:var(--rule-hi)}
-.stock-meta-body{padding:16px}
-.stock-meta-step{border:1px solid var(--rule);background:#0d0d0f;padding:13px;margin-bottom:10px}
-.stock-meta-step:last-child{margin-bottom:0}
-.stock-meta-step h4{font:600 9.5px var(--mono);letter-spacing:.18em;color:var(--mut);margin:0 0 9px}
-.stock-meta-step p{color:var(--mut);font-size:11px;line-height:1.55;margin:0 0 10px}
-.stock-meta-step select{width:100%;background:#08080a;border:1px solid var(--rule);padding:9px 10px;color:#fff;font:11px var(--mono)}
-.stock-meta-actions{display:flex;gap:7px;flex-wrap:wrap}
-.stock-meta-btn{padding:9px 11px;border:1px solid var(--rule-hi);background:#0b0b0d;color:#fff;font:600 10px var(--mono);letter-spacing:.1em}
-.stock-meta-btn:hover{background:#fff;color:#000}
-.stock-meta-btn.primary{background:#fff;color:#000;border-color:#fff}
-.stock-meta-btn:disabled{opacity:.4;cursor:not-allowed}
-.stock-meta-status{margin-top:10px;border-top:1px solid var(--rule);padding-top:10px;color:var(--mut);font:10px/1.6 var(--mono);white-space:pre-wrap}
-.stock-meta-counts{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
-.stock-meta-counts div{border:1px solid var(--rule);background:#08080a;padding:8px}
-.stock-meta-counts b{display:block;font:600 16px var(--mono);color:#fff}
-.stock-meta-counts span{font:8px var(--mono);letter-spacing:.1em;color:var(--mut)}
-@media(max-width:700px){.stock-meta-card{width:100%}}
 </style>
 </head>
 <body>
@@ -1406,23 +1379,6 @@ select.mini{
 <div id="cursor" aria-hidden="true"></div>
 
 <div id="app">
-<div id="stockMetaModal" aria-hidden="true">
-<section class="stock-meta-card" role="dialog" aria-modal="true" aria-labelledby="stockMetaTitle">
-<div class="stock-meta-head"><b id="stockMetaTitle">SHUTTERSTOCK METADATA</b><span class="sp"></span><button type="button" class="stock-meta-close" id="stockMetaClose">CLOSE</button></div>
-<div class="stock-meta-body">
-<div class="stock-meta-step"><h4>01 / FOLDER NUMBER</h4><p>Select the batch folder number. Each folder must contain exactly 50 JPG/JPEG files and 50 MP4 files.</p>
-<select id="stockMetaFolderName"><option value="">Select 001–019</option><option value="001">001</option><option value="002">002</option><option value="003">003</option><option value="004">004</option><option value="005">005</option><option value="006">006</option><option value="007">007</option><option value="008">008</option><option value="009">009</option><option value="010">010</option><option value="011">011</option><option value="012">012</option><option value="013">013</option><option value="014">014</option><option value="015">015</option><option value="016">016</option><option value="017">017</option><option value="018">018</option><option value="019">019</option></select></div>
-<div class="stock-meta-step"><h4>02 / SOURCE FOLDER</h4><p>Select that exact folder from disk. TRILYVA checks the folder name and the 50 + 50 file count before generating anything.</p>
-<div class="stock-meta-actions"><button type="button" class="stock-meta-btn primary" id="stockMetaPickSource">SELECT SOURCE FOLDER</button></div>
-<div class="stock-meta-counts" id="stockMetaCounts" hidden><div><b id="stockMetaJpg">0</b><span>JPG / JPEG</span></div><div><b id="stockMetaMp4">0</b><span>MP4</span></div><div><b id="stockMetaTotal">0</b><span>TOTAL</span></div></div>
-<div class="stock-meta-status" id="stockMetaStatus">Waiting for folder selection.</div></div>
-<div class="stock-meta-step"><h4>03 / SAVE</h4><p>After validation, TRILYVA creates one CSV containing all 100 files and then asks which folder should receive it.</p>
-<div class="stock-meta-actions"><button type="button" class="stock-meta-btn" id="stockMetaSave" disabled>GENERATE + CHOOSE DOWNLOAD FOLDER</button></div></div>
-
-</div></section></div>
-
-
-
   <header id="hdr">
     <div class="brand"><b>CODE<span class="ar">→</span>MOTION</b><em>TAMASRAZIM</em></div>
     <div class="proj" id="projWrap">
@@ -1439,7 +1395,6 @@ select.mini{
       <button data-act="render" class="key">Render</button>
       <button data-act="render50" class="key" id="render50Btn" title="Render the first 50 Prism Flowers with the current output settings">Render ×50</button>
       <button data-act="renderAll" class="key" id="renderAllBtn" title="Render every Prism Flower in the library with the current output settings">Render All</button>
-      <button data-act="generateMetadata" class="key" id="metadataBtn" title="Create Shutterstock CSV metadata for all Prism Flowers, grouped into folders of 50">Generate Metadata</button>
     </nav>
   </header>
 
@@ -15562,7 +15517,7 @@ var S = {
   compiled: false, lastError: null, hash: '',
   previewBusy: false, previewFps: 0, previewRaster: { w: 0, h: 0, s: 1 },
   compareMode: false, compareSplit: 0.5, compareBitmap: null,
-  rendering: false, batchRendering: false, batchCancelled: false, metadataGenerating: false, metadata19Generating: false, queue: [], results: [], caps: {}, stage: 'IDLE',
+  rendering: false, batchRendering: false, batchCancelled: false, metadata19Generating: false, queue: [], results: [], caps: {}, stage: 'IDLE',
   exportFormat: 'mp4', quality: 'standard', timebase: 'ms', checksums: true, pngTarget: 'zip'
 };
 
@@ -17237,137 +17192,6 @@ function stockMetadataSingleCsv(entry) {
     return row.map(csvEscape).join(',');
   }).join('\\r\\n') + '\\r\\n';
 }
-var STOCK_META_STATE={open:false,folderName:'',sourceDir:null,files:[]};
-
-function stockMetaDescriptionForFile(fileName,kind){
-  var raw=String(fileName||'').replace(/\.(?:jpe?g|mp4)$/i,'').replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
-  raw=raw.replace(/^prism\s*/i,'').replace(/\b(?:render|animation|video|image|final|copy|export|loop|10s|10sec|4k|60fps)\b/gi,' ').replace(/\s+/g,' ').trim()||'geometric flower';
-  var text=raw+' featuring translucent geometric petals, luminous gradients, layered forms, delicate highlights and a glowing botanical center, presented as a vivid '+(kind==='video'?'10-second seamless motion clip':'polished still illustration')+' for modern backgrounds, creative design and abstract botanical visuals.';
-  if(text.length<150) text+=' Elegant color, symmetry and refined detail create a clean contemporary stock asset.';
-  if(text.length>200) text=text.slice(0,197).replace(/[\s,.;:-]+$/,'')+'.';
-  return text;
-}
-
-function stockMetaKeywordsForFile(fileName,kind){
-  var raw=String(fileName||'').replace(/\.(?:jpe?g|mp4)$/i,'').replace(/[_-]+/g,' ').replace(/^prism\s*/i,'').replace(/\s+/g,' ').trim().toLowerCase();
-  var subject=raw.split(/\s+/).filter(function(w){return w.length>2&&!/^\d+$/.test(w)&&!/^(?:render|animation|video|image|final|copy|export|loop|10s|10sec|4k|60fps)$/.test(w);});
-  var base=subject.concat([
-    'flower','floral','botanical','flower design','prism flower','translucent','geometric','geometric flower',
-    'abstract','colorful','vivid','vibrant','luminous','glowing','gradient','petals','bloom','nature',
-    'decorative','artistic','digital art','background','backdrop','wallpaper','design','pattern','texture',
-    'elegant','modern','contemporary','ornamental','iridescent','refraction','light','color','multicolor',
-    'radiant','dreamy','layered','organic','spring','botanical art','nature art','visual','creative',
-    'composition','symmetry'
-  ]);
-  if(kind==='video') base.push('animation','motion graphics','seamless loop','animated background','stock footage');
-  else base.push('illustration','still image','artwork','decorative illustration');
-  var out=[],seen={};
-  base.forEach(function(word){var k=String(word).trim().toLowerCase();if(!k||seen[k])return;seen[k]=true;out.push(k);});
-  ['creative background','floral design','abstract nature','visual design','rich color','polished','stylized','ornate','beautiful','stock asset'].forEach(function(word){if(out.length<48&&!seen[word]){seen[word]=true;out.push(word);}});
-  return out.slice(0,48);
-}
-
-function stockMetaCsvForFiles(files){
-  var rows=[['Filename','Description','Keywords','Categories','Illustration','Mature Content','Editorial']];
-  files.slice().sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'});}).forEach(function(file){
-    var isVideo=/\.mp4$/i.test(file.name);
-    rows.push([
-      file.name,
-      stockMetaDescriptionForFile(file.name,isVideo?'video':'image'),
-      stockMetaKeywordsForFile(file.name,isVideo?'video':'image').join(','),
-      isVideo?'Nature,Abstract':'Nature,Arts',
-      isVideo?'No':'Yes',
-      'No',
-      'No'
-    ]);
-  });
-  return rows.map(function(row){return row.map(function(value){var s=String(value==null?'':value);return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}).join(',');}).join('\r\n')+'\r\n';
-}
-
-function stockMetaSetStatus(text,error){var node=$('#stockMetaStatus');if(!node)return;node.textContent=text;node.style.color=error?'#fff':'';}
-function stockMetaSetCounts(jpg,mp4){$('#stockMetaCounts').hidden=false;$('#stockMetaJpg').textContent=jpg;$('#stockMetaMp4').textContent=mp4;$('#stockMetaTotal').textContent=jpg+mp4;}
-function stockMetaOpen(){var modal=$('#stockMetaModal');if(!modal)return;STOCK_META_STATE.open=true;modal.classList.add('on');modal.setAttribute('aria-hidden','false');}
-function stockMetaClose(){var modal=$('#stockMetaModal');if(!modal)return;STOCK_META_STATE.open=false;modal.classList.remove('on');modal.setAttribute('aria-hidden','true');}
-
-async function stockMetaReadFolder(handle,expectedName){
-  if(!handle||typeof handle.values!=='function') throw new Error('The selected folder could not be read.');
-  if(handle.name!==expectedName) throw new Error('Selected folder is "'+handle.name+'". Please select folder '+expectedName+'.');
-  var files=[];
-  for await(var item of handle.values()){
-    if(!item||item.kind!=='file')continue;
-    if(/\.(?:jpe?g|mp4)$/i.test(item.name))files.push(await item.getFile());
-  }
-  var jpg=files.filter(function(f){return /\.jpe?g$/i.test(f.name);});
-  var mp4=files.filter(function(f){return /\.mp4$/i.test(f.name);});
-  stockMetaSetCounts(jpg.length,mp4.length);
-  if(jpg.length!==50||mp4.length!==50)throw new Error('Folder '+expectedName+' must contain exactly 50 JPG/JPEG + 50 MP4. Found '+jpg.length+' JPG/JPEG + '+mp4.length+' MP4.');
-  return jpg.concat(mp4);
-}
-
-async function generateStockMetadataFolders(){
-  if(S.batchRendering||S.rendering||S.metadataGenerating)return;
-  var select=$('#stockMetaFolderName'),pick=$('#stockMetaPickSource'),save=$('#stockMetaSave');
-  S.metadataGenerating=true;
-  if(pick)pick.disabled=true;
-  try{
-    stockMetaOpen();
-    var folderName=select&&select.value;
-    if(!/^0(?:0[1-9]|1[0-9])$/.test(folderName)){stockMetaSetStatus('Select a folder number from 001 to 019 first.',true);return;}
-    if(typeof window.showDirectoryPicker!=='function'){stockMetaSetStatus('This browser does not support the folder picker. Use current Chrome or Edge over HTTPS.',true);return;}
-    stockMetaSetStatus('Choose the actual source folder '+folderName+'.');
-    var source=await window.showDirectoryPicker({mode:'read',id:'trilyva-stock-source'});
-    var files=await stockMetaReadFolder(source,folderName);
-    STOCK_META_STATE.folderName=folderName;
-    STOCK_META_STATE.sourceDir=source;
-    STOCK_META_STATE.files=files;
-    stockMetaSetStatus('Validated '+folderName+' — 50 JPG/JPEG + 50 MP4. You can now generate the 100-row CSV.');
-    if(save)save.disabled=false;
-  }catch(error){
-    if(error&&(error.name==='AbortError'||error.code===20))stockMetaSetStatus('Source-folder selection cancelled.',true);
-    else stockMetaSetStatus('Validation failed: '+String(error&&error.message||error),true);
-  }finally{
-    S.metadataGenerating=false;
-    if(pick)pick.disabled=false;
-  }
-}
-
-async function stockMetaGenerateAndSave(){
-  if(!STOCK_META_STATE.files.length){stockMetaSetStatus('Select and validate the source folder first.',true);return;}
-  var save=$('#stockMetaSave');
-  if(save)save.disabled=true;
-  try{
-    stockMetaSetStatus('Generating metadata for 100 files…');
-    var csv=stockMetaCsvForFiles(STOCK_META_STATE.files);
-    var destination=await window.showDirectoryPicker({mode:'readwrite',id:'trilyva-stock-meta-dest'});
-    var fileName=STOCK_META_STATE.folderName+'_metadata.csv';
-    await writeBlobToDirectory(destination,new Blob([csv],{type:'text/csv;charset=utf-8'}),fileName);
-    stockMetaSetStatus('Saved '+fileName+' successfully — 100 rows: 50 JPG/JPEG + 50 MP4.');
-    $('#stMsg').textContent='Metadata saved — '+fileName;
-    logLine('METADATA SAVED — '+fileName+' · 100 rows · source folder '+STOCK_META_STATE.folderName,true);
-  }catch(error){
-    if(error&&(error.name==='AbortError'||error.code===20))stockMetaSetStatus('Download-folder selection cancelled. The CSV was generated but was not saved.',true);
-    else stockMetaSetStatus('Metadata save failed: '+String(error&&error.message||error),true);
-  }finally{
-    if(save)save.disabled=false;
-  }
-}
-
-function initStockMetadataUI(){
-  var modal=$('#stockMetaModal');
-  if(!modal||modal.dataset.ready==='1')return;
-  modal.dataset.ready='1';
-  $('#stockMetaClose').addEventListener('click',stockMetaClose);
-  modal.addEventListener('click',function(ev){if(ev.target===modal)stockMetaClose();});
-  $('#stockMetaFolderName').addEventListener('change',function(){
-    STOCK_META_STATE.folderName=this.value;STOCK_META_STATE.files=[];STOCK_META_STATE.sourceDir=null;
-    $('#stockMetaCounts').hidden=true;$('#stockMetaSave').disabled=true;
-    stockMetaSetStatus(this.value?'Folder '+this.value+' selected. Now choose the matching source folder.':'Select folder 001–019.');
-  });
-  $('#stockMetaPickSource').addEventListener('click',generateStockMetadataFolders);
-  $('#stockMetaSave').addEventListener('click',stockMetaGenerateAndSave);
-  document.addEventListener('keydown',function(ev){if(ev.key==='Escape'&&STOCK_META_STATE.open)stockMetaClose();});
-}
-
 
 async function renderPrismBatch(limit, label) {
   if (S.batchRendering || S.rendering) return;
@@ -18686,11 +18510,6 @@ var ACTS = {
       logLine('Render All failed — ' + String(e && e.stack || e), true);
     });
   },
-  generateMetadata: function () {
-    if (S.rendering || S.batchRendering || S.metadataGenerating) return;
-    stockMetaOpen();
-    stockMetaSetStatus('Select folder 001–019, then choose the matching source folder.');
-  },
   cancelRender: cancelRender,
   analyze: analyseJob,
   analyzeLoop: analyseLoop,
@@ -18789,7 +18608,6 @@ function initDispatch() {
    Boot
    ============================================================ */
 function boot() {
-  initStockMetadataUI();
   setStage('IDLE');
   $('#stEngine').textContent = 'starting engine';
   $('#stDot').className = 'dot busy';
