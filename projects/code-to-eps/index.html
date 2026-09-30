@@ -365,15 +365,36 @@ function metadataCsv(){
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2500)}
 async function pickFolder(){if(!window.showDirectoryPicker)throw new Error('Folder export requires Chrome or Edge with File System Access support.');return window.showDirectoryPicker({mode:'readwrite'})}
 async function exportAll(){
-  const dir=await pickFolder();let done=0,failed=0;allBtn.disabled=true;
-  for(let i=0;i<LIB.length;i++){
-    try{
-      const scene=buildFlowerScene(LIB[i]),name=adobeFilename(LIB[i],i);
-      const h=await dir.getFileHandle(name,{create:true}),w=await h.createWritable();await w.write(generateEps(scene));await w.close();done++;
-    }catch(e){failed++;console.error(LIB[i].title,e)}
-    if((i+1)%10===0||i===LIB.length-1)setStatus('Export All — '+(i+1)+' / '+LIB.length+' · saved '+done+(failed?' · failed '+failed:'')); 
+  const dir=await pickFolder();
+  let done=0,failed=0;
+  allBtn.disabled=true;
+  try{
+    const batchSize=50;
+    const totalBatches=Math.ceil(LIB.length/batchSize);
+    for(let i=0;i<LIB.length;i++){
+      try{
+        const batchNo=String(Math.floor(i/batchSize)+1).padStart(3,'0');
+        const batchDir=await dir.getDirectoryHandle(batchNo,{create:true});
+        const scene=buildFlowerScene(LIB[i]);
+        const name=adobeFilename(LIB[i],i);
+        const h=await batchDir.getFileHandle(name,{create:true});
+        const w=await h.createWritable();
+        await w.write(generateEps(scene));
+        await w.close();
+        done++;
+      }catch(e){
+        failed++;
+        console.error(LIB[i].title,e);
+      }
+      if((i+1)%10===0||i===LIB.length-1){
+        const batchNo=String(Math.floor(i/batchSize)+1).padStart(3,'0');
+        setStatus('Export All — '+(i+1)+' / '+LIB.length+' · folder '+batchNo+' / '+String(totalBatches).padStart(3,'0')+' · saved '+done+(failed?' · failed '+failed:''));
+      }
+    }
+  }finally{
+    allBtn.disabled=false;
   }
-  allBtn.disabled=false;flash('Export All finished — '+done+' EPS files'+(failed?' · '+failed+' failed':''));
+  flash('Export All finished — '+done+' EPS files in '+Math.ceil(LIB.length/50)+' folders'+(failed?' · '+failed+' failed':''));
 }
 async function exportMetadata(){
   try{
