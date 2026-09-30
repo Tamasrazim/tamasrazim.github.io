@@ -27,6 +27,28 @@ main{padding:76px 0 100px}.hero{animation:rise .8s var(--ease) both}.kicker{font
 .deck-wide{grid-column:1/-1}.search-row{display:grid;grid-template-columns:1.5fr 1fr 1fr auto;gap:8px}.preview{margin-top:18px;display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:12px}.preview-stage{border:1px solid var(--line);border-radius:12px;background:#070707;min-height:280px;display:grid;place-items:center;padding:18px;overflow:hidden}.preview-stage img,.preview-stage video{max-width:100%;max-height:60vh;border-radius:8px}.preview-stage audio{width:min(100%,560px)}.preview-stage pre{width:100%;max-height:55vh;overflow:auto;white-space:pre-wrap;text-align:left;color:#aaa;font:11px/1.65 ui-monospace,monospace}.preview-meta{border:1px solid var(--line);border-radius:12px;background:#090909;padding:16px}.preview-meta b{display:block;font-size:13px;margin-bottom:5px}.preview-meta p{margin:5px 0;color:#777;font:10px/1.6 ui-monospace,monospace}.job-badge{display:inline-block;margin-top:6px;padding:4px 7px;border:1px solid #333;border-radius:999px;color:#888;font:8px ui-monospace,monospace;text-transform:uppercase}.ai-box{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:8px;align-items:end}.ai-result{margin-top:12px;color:#777;font:10px ui-monospace,monospace}.history-list{max-height:240px;overflow:auto}.history-row{display:grid;grid-template-columns:1fr auto;gap:12px;padding:9px 0;border-bottom:1px solid #181818}.history-row b{display:block;font-size:11px}.history-row small{color:#666;font:9px ui-monospace,monospace}.result-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 @media(max-width:900px){.control-deck{grid-template-columns:1fr 1fr}.preview{grid-template-columns:1fr}.ai-box{grid-template-columns:1fr 1fr}}
 @media(max-width:700px){.control-deck{grid-template-columns:1fr}.search-row{grid-template-columns:1fr}.ai-box{grid-template-columns:1fr}.panel-grid{grid-template-columns:1fr}}
+
+/* Stock metadata generator */
+.meta-modal{position:fixed;inset:0;z-index:2000;display:none;place-items:center;padding:24px;background:#000b;backdrop-filter:blur(14px)}
+.meta-modal.open{display:grid}
+.meta-card{width:min(620px,100%);border:1px solid #3a3a3a;border-radius:16px;background:linear-gradient(145deg,#111,#070707);box-shadow:0 40px 140px #000;overflow:hidden;animation:rise .35s var(--ease) both}
+.meta-card-head{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 20px;border-bottom:1px solid var(--line)}
+.meta-card-head h2{margin:0;font:800 12px ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase}
+.meta-close{border:1px solid #333;background:#0b0b0b;color:#888;width:32px;height:32px;border-radius:6px;font:16px/1 system-ui}
+.meta-body{padding:20px}
+.meta-step{border:1px solid var(--line);border-radius:11px;padding:15px;background:#0a0a0a;margin-bottom:12px}
+.meta-step:last-child{margin-bottom:0}
+.meta-step strong{display:block;font-size:12px;margin-bottom:5px}
+.meta-step p{margin:0 0 12px;color:#777;font:10px/1.7 ui-monospace,monospace}
+.meta-select{width:100%;background:#111;color:#eee;border:1px solid #333;border-radius:7px;padding:11px;outline:none}
+.meta-folder-btn{width:100%;border:1px solid #eee;background:#eee;color:#050505;border-radius:7px;padding:12px;font:800 10px ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em}
+.meta-folder-btn:disabled{opacity:.4;cursor:not-allowed}
+.meta-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.meta-stat{border:1px solid #222;border-radius:8px;padding:10px;background:#0d0d0d}
+.meta-stat b{display:block;font-size:16px}.meta-stat span{color:#666;font:8px ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em}
+.meta-log{margin-top:12px;color:#777;font:9px/1.7 ui-monospace,monospace;white-space:pre-wrap}
+.meta-ok{color:#ddd}.meta-error{color:#aaa}
+@media(max-width:700px){.meta-modal{padding:12px}.meta-summary{grid-template-columns:1fr}}
 </style><script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -74,10 +96,37 @@ main{padding:76px 0 100px}.hero{animation:rise .8s var(--ease) both}.kicker{font
 <main class="shell">
 <section class="hero"><div class="kicker">PROJECT 05 / UNIVERSAL CONVERTER</div><h1>Format <em>Forge.</em></h1><p class="lead">A browser-first conversion workspace with folder intake, ZIP extraction, batch conversion and one-click ZIP export. The interface is animated; file work stays local whenever the browser engine can do it.</p><div class="hero-meta"><span class="pill">Images</span><span class="pill">Video</span><span class="pill">Audio</span><span class="pill">Text</span><span class="pill">Data</span><span class="pill">ZIP</span><span class="pill">Batch</span><span class="pill">Local-first</span></div></section>
 <section class="workspace">
-<div class="toolbar"><span class="toolbar-title">Conversion workspace</span><div class="actions"><button class="action" id="folder">Select folder</button><button class="action" id="zipSelect">Open ZIP</button><button class="action primary" id="convertAll" disabled>Convert all</button><button class="action" id="downloadZip" disabled>Download as ZIP</button><span class="status" id="status">Ready</span></div></div>
+<div class="toolbar"><span class="toolbar-title">Conversion workspace</span><div class="actions"><button class="action" id="folder">Select folder</button><button class="action" id="generateMetadata">Generate metadata</button><button class="action" id="zipSelect">Open ZIP</button><button class="action primary" id="convertAll" disabled>Convert all</button><button class="action" id="downloadZip" disabled>Download as ZIP</button><span class="status" id="status">Ready</span></div></div>
 <div class="drop" id="drop"><div><strong>Drop files, folders or ZIPs.</strong><p>PNG → JPG · MP4 → WebM · WAV → MP3 · JSON ↔ CSV · ZIP extraction · batch export</p><button class="choose" id="choose">Choose files</button><input id="files" type="file" multiple hidden><input id="folderInput" type="file" webkitdirectory directory multiple hidden><input id="zipInput" type="file" accept=".zip,application/zip" hidden></div></div>
 <div class="settings"><div class="field"><label>Default output</label><select id="globalTarget"><option value="auto">Auto — choose per file</option><option value="jpg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option><option value="avif">AVIF</option><option value="webm">WebM</option><option value="mp4">MP4</option><option value="mp3">MP3</option><option value="wav">WAV</option><option value="json">JSON</option><option value="csv">CSV</option><option value="txt">TXT</option></select></div><div class="field"><label>Image quality</label><select id="quality"><option value=".95">Maximum</option><option value=".85" selected>High</option><option value=".7">Balanced</option><option value=".5">Small</option></select></div></div>
 <div class="queue"><div class="queue-head"><h2>Queue</h2><span class="status" id="count">0 files</span></div><div id="queue"><div class="empty">No files loaded.</div></div></div></section>
+
+<div class="meta-modal" id="metadataModal" aria-hidden="true">
+  <div class="meta-card" role="dialog" aria-modal="true" aria-labelledby="metadataModalTitle">
+    <div class="meta-card-head">
+      <h2 id="metadataModalTitle">Generate Shutterstock metadata</h2>
+      <button class="meta-close" id="metadataClose" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="meta-body">
+      <div class="meta-step">
+        <strong>01 / Folder</strong>
+        <p>Select the batch folder number. The selected folder must contain exactly 50 JPG images and 50 MP4 videos. Metadata will be created for those 100 files only.</p>
+        <select class="meta-select" id="metadataFolderName">
+          <option value="">Select folder</option>
+          <option value="001">001</option><option value="002">002</option><option value="003">003</option><option value="004">004</option><option value="005">005</option><option value="006">006</option><option value="007">007</option><option value="008">008</option><option value="009">009</option><option value="010">010</option><option value="011">011</option><option value="012">012</option><option value="013">013</option><option value="014">014</option><option value="015">015</option><option value="016">016</option><option value="017">017</option><option value="018">018</option><option value="019">019</option>
+        </select>
+      </div>
+      <div class="meta-step">
+        <strong>02 / Choose the folder</strong>
+        <p>The browser will ask you to select the actual local folder. Once selected, Forge validates it, generates the CSV, and asks where to save it.</p>
+        <button class="meta-folder-btn" id="metadataChooseFolder" type="button">Select folder</button>
+        <input id="metadataFolderInput" type="file" webkitdirectory directory multiple hidden>
+        <div class="meta-summary" id="metadataSummary"></div>
+        <div class="meta-log" id="metadataLog">Waiting for folder selection.</div>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="info"><article><b>Folder mode</b><p>Select an entire directory and Forge keeps each file's relative folder path for ZIP export.</p></article><article><b>ZIP extractor</b><p>Drop or select a ZIP and its entries are unpacked in-browser into the conversion queue.</p></article><article><b>Batch output</b><p>Convert one file or everything at once, then package every completed result into one downloadable ZIP.</p></article></div>
 <div class="notice"><strong>Privacy:</strong> files stay in your browser for the conversion flow. Media conversion may load the FFmpeg runtime from a public CDN; the selected source file is processed locally by that runtime. Unsupported format pairs remain blocked.</div>
 </main><footer class="shell"><span>FORMAT FORGE / TAMASRAZIM</span><a href="../../">Back to Tamasrazim ↑</a></footer>
@@ -85,6 +134,187 @@ main{padding:76px 0 100px}.hero{animation:rise .8s var(--ease) both}.kicker{font
 <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.11.1/dist/index.min.js"></script>
 <script>
+
+/* Shutterstock metadata generator */
+const metadataModal=$('#metadataModal'),
+      metadataClose=$('#metadataClose'),
+      metadataFolderName=$('#metadataFolderName'),
+      metadataChooseFolder=$('#metadataChooseFolder'),
+      metadataFolderInput=$('#metadataFolderInput'),
+      metadataSummary=$('#metadataSummary'),
+      metadataLog=$('#metadataLog');
+
+function openMetadataModal(){
+  if(!metadataModal)return;
+  metadataModal.classList.add('open');
+  metadataModal.setAttribute('aria-hidden','false');
+  metadataLog.textContent='Waiting for folder selection.';
+}
+function closeMetadataModal(){
+  if(!metadataModal)return;
+  metadataModal.classList.remove('open');
+  metadataModal.setAttribute('aria-hidden','true');
+}
+function metadataSetLog(message,kind){
+  metadataLog.textContent=message;
+  metadataLog.className='meta-log'+(kind==='ok'?' meta-ok':kind==='error'?' meta-error':'');
+}
+function metadataCsvEscape(value){
+  const s=String(value??'');
+  return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;
+}
+function metadataWordsFromName(fileName){
+  const base=fileName.replace(/\.[^.]+$/,'')
+    .replace(/[_.-]+/g,' ')
+    .replace(/\b(\d{3,}|final|copy|export|render|video|image|still|frame|v\d+)\b/gi,' ')
+    .replace(/\s+/g,' ').trim().toLowerCase();
+  const words=base.split(/\s+/).filter(Boolean);
+  return words.filter((w,i)=>w.length>2&&words.indexOf(w)===i).slice(0,8);
+}
+function metadataTheme(fileName){
+  const s=fileName.toLowerCase();
+  if(/christmas|xmas|holiday|snow|santa|ornament|gift|winter/.test(s))return{main:'holiday abstract design',cats:['Holidays','Backgrounds/Textures'],extra:['christmas','holiday','winter','festive','seasonal']};
+  if(/flower|floral|lotus|lily|rose|tulip|daisy|botanical|plant|leaf|nature/.test(s))return{main:'abstract floral nature design',cats:['Nature','Backgrounds/Textures'],extra:['flower','floral','botanical','nature','plant']};
+  if(/geometry|geometric|prism|crystal|polygon|shape|cube|sphere|spiral|grid/.test(s))return{main:'colorful geometric abstract design',cats:['Abstract','Backgrounds/Textures'],extra:['geometric','geometry','shape','pattern','abstract']};
+  return{main:'colorful abstract digital design',cats:['Abstract','Backgrounds/Textures'],extra:['abstract','digital','design','pattern','background']};
+}
+function metadataDescription(file,folder){
+  const theme=metadataTheme(file.name), tokens=metadataWordsFromName(file.name);
+  const tokenText=tokens.length?' featuring '+tokens.slice(0,3).join(', '):'';
+  const medium=file.name.toLowerCase().endsWith('.mp4')
+    ?'seamless animated motion'
+    :'polished digital artwork';
+  let text='Vivid '+theme.main+tokenText+' with luminous gradients, layered forms, balanced composition and '+medium+' for modern backgrounds, media, presentations and creative design projects.';
+  if(text.length<150){
+    text+=' Clean visual structure, vivid color and flexible negative space make the asset suitable for contemporary commercial creative work.';
+  }
+  if(text.length>200)text=text.slice(0,197).replace(/[ ,.;:-]+$/,'')+'.';
+  return text;
+}
+function metadataKeywords(file){
+  const theme=metadataTheme(file.name);
+  const filenameWords=metadataWordsFromName(file.name);
+  const base=[
+    ...filenameWords,
+    ...theme.extra,
+    'colorful','vibrant','vivid','gradient','luminous','glowing','multicolor',
+    'modern','contemporary','creative','decorative','graphic','visual','composition',
+    'texture','wallpaper','backdrop','background','design','art','digital art',
+    'abstract art','geometric art','motion graphics','visual effect','design element',
+    'copy space','presentation background','web background','social media background',
+    'creative background','modern background','dynamic','flowing','movement',
+    'pattern','shape','shapes','symmetry','color','visual design','digital background',
+    'decorative background','contemporary design','abstract background'
+  ];
+  const cleaned=[],seen=new Set();
+  for(const word of base){
+    const k=String(word).trim().toLowerCase();
+    if(!k||seen.has(k))continue;
+    seen.add(k);cleaned.push(k);
+    if(cleaned.length===48)break;
+  }
+  const pad=['creative concept','ornamental','rich color','polished','stylized','artistic'];
+  for(const word of pad){
+    if(cleaned.length>=48)break;
+    if(!seen.has(word)){seen.add(word);cleaned.push(word)}
+  }
+  return cleaned.slice(0,48);
+}
+function metadataCategoryPair(file){
+  return metadataTheme(file.name).cats.join(', ');
+}
+function metadataIllustration(file){
+  return file.name.toLowerCase().endsWith('.jpg')||file.name.toLowerCase().endsWith('.jpeg')?'Yes':'No';
+}
+function generateMetadataCsv(files,folderName){
+  const header=['Filename','Description','Keywords','Categories','Illustration','Mature Content','Editorial'];
+  const rows=[header];
+  const sorted=[...files].sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'}));
+  for(const file of sorted){
+    rows.push([
+      file.name,
+      metadataDescription(file,folderName),
+      metadataKeywords(file).join(', '),
+      metadataCategoryPair(file),
+      metadataIllustration(file),
+      'No',
+      'No'
+    ]);
+  }
+  return rows.map(row=>row.map(metadataCsvEscape).join(',')).join('\r\n')+'\r\n';
+}
+function metadataFindFolderRoot(files){
+  const roots=new Set();
+  for(const file of files){
+    const rel=file.webkitRelativePath||file.name;
+    const parts=rel.split('/');
+    if(parts.length>1)roots.add(parts[0]);
+  }
+  return [...roots];
+}
+async function metadataSaveCsv(csv,folderName){
+  const suggested=folderName+'_metadata.csv';
+  if(typeof window.showDirectoryPicker==='function'){
+    const dir=await window.showDirectoryPicker({mode:'readwrite',id:'shutterstock-metadata'});
+    const handle=await dir.getFileHandle(suggested,{create:true});
+    const writable=await handle.createWritable();
+    await writable.write(csv);
+    await writable.close();
+    return {mode:'folder',name:suggested};
+  }
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement('a');
+  link.href=url;link.download=suggested;document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+  return {mode:'download',name:suggested};
+}
+async function metadataHandleFolderSelection(){
+  const folderName=metadataFolderName.value;
+  const files=[...metadataFolderInput.files];
+  metadataFolderInput.value='';
+  if(!folderName){metadataSetLog('Select a folder number first.','error');return}
+  if(!files.length){metadataSetLog('No files were selected.','error');return}
+  const roots=metadataFindFolderRoot(files);
+  if(roots.length!==1||roots[0]!==folderName){
+    metadataSetLog('Selected folder does not match '+folderName+'. Detected root: '+(roots.join(', ')||'unknown')+'. Select the '+folderName+' folder itself.','error');
+    return;
+  }
+  const jpg=files.filter(f=>/\.(jpe?g)$/i.test(f.name));
+  const mp4=files.filter(f=>/\.mp4$/i.test(f.name));
+  metadataSummary.innerHTML='<div class="meta-stat"><b>'+jpg.length+'</b><span>JPG / JPEG</span></div><div class="meta-stat"><b>'+mp4.length+'</b><span>MP4</span></div><div class="meta-stat"><b>'+files.length+'</b><span>Total selected</span></div>';
+  if(jpg.length!==50||mp4.length!==50){
+    metadataSetLog('Validation failed. '+folderName+' must contain exactly 50 JPG/JPEG files and 50 MP4 files. Nothing was saved.','error');
+    return;
+  }
+  try{
+    metadataChooseFolder.disabled=true;
+    metadataSetLog('Generating 100 metadata rows…');
+    const csv=generateMetadataCsv([...jpg,...mp4],folderName);
+    metadataSetLog('Metadata generated. Choose the download folder to save '+folderName+'_metadata.csv.');
+    const result=await metadataSaveCsv(csv,folderName);
+    metadataSetLog('Saved '+result.name+' successfully. 100 rows generated: 50 JPG/JPEG + 50 MP4.','ok');
+    flash('Metadata saved: '+result.name);
+  }catch(error){
+    if(error&&error.name==='AbortError'){
+      metadataSetLog('Save-folder selection cancelled. Metadata is still generated, but no file was written. Click Select folder again to retry.','error');
+    }else{
+      console.error(error);
+      metadataSetLog('Metadata save failed: '+(error?.message||error),'error');
+    }
+  }finally{
+    metadataChooseFolder.disabled=false;
+  }
+}
+if(metadataClose)metadataClose.onclick=closeMetadataModal;
+if(metadataModal)metadataModal.addEventListener('click',e=>{if(e.target===metadataModal)closeMetadataModal()});
+if(metadataFolderName)metadataFolderName.onchange=()=>metadataSetLog(metadataFolderName.value?'Folder '+metadataFolderName.value+' selected. Now choose the actual folder.':'Waiting for folder selection.');
+if(metadataChooseFolder)metadataChooseFolder.onclick=()=>metadataFolderInput.click();
+if(metadataFolderInput)metadataFolderInput.onchange=metadataHandleFolderSelection;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&metadataModal?.classList.contains('open'))closeMetadataModal()});
+const generateMetadataBtn=$('#generateMetadata');
+if(generateMetadataBtn)generateMetadataBtn.onclick=openMetadataModal;
+
 const $=s=>document.querySelector(s),drop=$('#drop'),input=$('#files'),folderInput=$('#folderInput'),zipInput=$('#zipInput'),queue=$('#queue'),status=$('#status'),count=$('#count'),globalTarget=$('#globalTarget'),quality=$('#quality'),convertAllBtn=$('#convertAll'),downloadZipBtn=$('#downloadZip');
 const state=[];let ffmpeg=null,ffmpegReady=false;
 const imageExt=['png','jpg','jpeg','webp','avif','bmp','gif'],textExt=['txt','json','csv','xml','html','css','js','md'],mediaExt=['mp4','webm','mov','mkv','avi','m4v','mp3','wav','ogg','m4a','flac','aac'];
