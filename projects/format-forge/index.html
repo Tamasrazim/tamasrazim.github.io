@@ -98,7 +98,7 @@ main{padding:76px 0 100px}.hero{animation:rise .8s var(--ease) both}.kicker{font
 <main class="shell">
 <section class="hero"><div class="kicker">PROJECT 05 / UNIVERSAL CONVERTER</div><h1>Format <em>Forge.</em></h1><p class="lead">A browser-first conversion workspace with folder intake, ZIP extraction, batch conversion and one-click ZIP export. The interface is animated; file work stays local whenever the browser engine can do it.</p><div class="hero-meta"><span class="pill">Images</span><span class="pill">Video</span><span class="pill">Audio</span><span class="pill">Text</span><span class="pill">Data</span><span class="pill">ZIP</span><span class="pill">Batch</span><span class="pill">Local-first</span></div></section>
 <section class="workspace">
-<div class="toolbar"><span class="toolbar-title">Conversion workspace</span><div class="actions"><button class="action" id="folder">Select folder</button><button class="action" id="generateMetadata">Generate metadata</button><button class="action" id="generateMetadata19">Generate 19 folders</button><button class="action" id="merge50Csv">Merge 50 CSVs → 1</button><input id="merge50CsvInput" type="file" accept=".csv,text/csv" multiple hidden><button class="action" id="zipSelect">Open ZIP</button><button class="action primary" id="convertAll" disabled>Convert all</button><button class="action" id="downloadZip" disabled>Download as ZIP</button><span class="status" id="status">Ready</span></div></div>
+<div class="toolbar"><span class="toolbar-title">Conversion workspace</span><div class="actions"><button class="action" id="folder">Select folder</button><button class="action" id="generateMetadata">Generate Adobe metadata</button><button class="action" id="generateMetadata19">Generate Adobe 001–019</button><button class="action" id="merge50Csv">Merge 50 CSVs → 1</button><input id="merge50CsvInput" type="file" accept=".csv,text/csv" multiple hidden><button class="action" id="zipSelect">Open ZIP</button><button class="action primary" id="convertAll" disabled>Convert all</button><button class="action" id="downloadZip" disabled>Download as ZIP</button><span class="status" id="status">Ready</span></div></div>
 <div class="drop" id="drop"><div><strong>Drop files, folders or ZIPs.</strong><p>PNG → JPG · MP4 → WebM · WAV → MP3 · JSON ↔ CSV · ZIP extraction · batch export</p><button class="choose" id="choose">Choose files</button><input id="files" type="file" multiple hidden><input id="folderInput" type="file" webkitdirectory directory multiple hidden><input id="zipInput" type="file" accept=".zip,application/zip" hidden></div></div>
 <div class="settings"><div class="field"><label>Default output</label><select id="globalTarget"><option value="auto">Auto — choose per file</option><option value="jpg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option><option value="avif">AVIF</option><option value="webm">WebM</option><option value="mp4">MP4</option><option value="mp3">MP3</option><option value="wav">WAV</option><option value="json">JSON</option><option value="csv">CSV</option><option value="txt">TXT</option></select></div><div class="field"><label>Image quality</label><select id="quality"><option value=".95">Maximum</option><option value=".85" selected>High</option><option value=".7">Balanced</option><option value=".5">Small</option></select></div></div>
 <div class="queue"><div class="queue-head"><h2>Queue</h2><span class="status" id="count">0 files</span></div><div id="queue"><div class="empty">No files loaded.</div></div></div></section>
@@ -106,13 +106,13 @@ main{padding:76px 0 100px}.hero{animation:rise .8s var(--ease) both}.kicker{font
 <div class="meta-modal" id="metadataModal" aria-hidden="true">
   <div class="meta-card" role="dialog" aria-modal="true" aria-labelledby="metadataModalTitle">
     <div class="meta-card-head">
-      <h2 id="metadataModalTitle">Generate Shutterstock metadata</h2>
+      <h2 id="metadataModalTitle">Generate Adobe Stock metadata</h2>
       <button class="meta-close" id="metadataClose" type="button" aria-label="Close">×</button>
     </div>
     <div class="meta-body">
       <div class="meta-step">
         <strong>01 / Folder</strong>
-        <p>Select the batch folder number. Folders 001–018 must contain 50 JPG + 50 MP4. Folder 019 is the final partial batch and may contain the remaining matching JPG + MP4 files (for the current 937-asset set, 37 + 37).</p>
+        <p>Select the batch folder number. Folders 001–018 normally contain 50 JPG + 50 MP4. Folder 019 can contain the remaining matching JPG + MP4 files. Existing rendered filenames are preserved exactly in the Adobe CSV.</p>
         <select class="meta-select" id="metadataFolderName">
           <option value="">Select folder</option>
           <option value="001">001</option><option value="002">002</option><option value="003">003</option><option value="004">004</option><option value="005">005</option><option value="006">006</option><option value="007">007</option><option value="008">008</option><option value="009">009</option><option value="010">010</option><option value="011">011</option><option value="012">012</option><option value="013">013</option><option value="014">014</option><option value="015">015</option><option value="016">016</option><option value="017">017</option><option value="018">018</option><option value="019">019</option>
@@ -138,367 +138,35 @@ main{padding:76px 0 100px}.hero{animation:rise .8s var(--ease) both}.kicker{font
 <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.11.1/dist/index.min.js"></script>
 <script>
 
-/* Shutterstock metadata generator */
+/* Adobe Stock metadata generator */
 const metadataQuery=s=>document.querySelector(s);
-const metadataModal=metadataQuery('#metadataModal'),
-      metadataClose=metadataQuery('#metadataClose'),
-      metadataFolderName=metadataQuery('#metadataFolderName'),
-      metadataChooseFolder=metadataQuery('#metadataChooseFolder'),
-      metadataFolderInput=metadataQuery('#metadataFolderInput'),
-      metadataSaveFolder=metadataQuery('#metadataSaveFolder'),
-      metadataSummary=metadataQuery('#metadataSummary'),
-      metadataLog=metadataQuery('#metadataLog');
-
-function openMetadataModal(){
-  if(!metadataModal)return;
-  metadataModal.classList.add('open');
-  metadataModal.setAttribute('aria-hidden','false');
-  metadataLog.textContent='Waiting for folder selection.';
-}
-function closeMetadataModal(){
-  if(!metadataModal)return;
-  metadataModal.classList.remove('open');
-  metadataModal.setAttribute('aria-hidden','true');
-}
-function metadataSetLog(message,kind){
-  metadataLog.textContent=message;
-  metadataLog.className='meta-log'+(kind==='ok'?' meta-ok':kind==='error'?' meta-error':'');
-}
-function metadataCsvEscape(value){
-  const s=String(value??'');
-  return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;
-}
-function metadataWordsFromName(fileName){
-  const base=fileName.replace(/\.[^.]+$/,'')
-    .replace(/[_.-]+/g,' ')
-    .replace(/\b(\d{3,}|final|copy|export|render|video|image|still|frame|v\d+)\b/gi,' ')
-    .replace(/\s+/g,' ').trim().toLowerCase();
-  const words=base.split(/\s+/).filter(Boolean);
-  return words.filter((w,i)=>w.length>2&&words.indexOf(w)===i).slice(0,8);
-}
-function metadataTheme(fileName){
-  const s=fileName.toLowerCase();
-  if(/christmas|xmas|holiday|snow|santa|ornament|gift|winter/.test(s))return{main:'holiday abstract design',cats:['Holidays','Backgrounds/Textures'],extra:['christmas','holiday','winter','festive','seasonal']};
-  if(/flower|floral|lotus|lily|rose|tulip|daisy|botanical|plant|leaf|nature/.test(s))return{main:'abstract floral nature design',cats:['Nature','Backgrounds/Textures'],extra:['flower','floral','botanical','nature','plant']};
-  if(/geometry|geometric|prism|crystal|polygon|shape|cube|sphere|spiral|grid/.test(s))return{main:'colorful geometric abstract design',cats:['Abstract','Backgrounds/Textures'],extra:['geometric','geometry','shape','pattern','abstract']};
-  return{main:'colorful abstract digital design',cats:['Abstract','Backgrounds/Textures'],extra:['abstract','digital','design','pattern','background']};
-}
-function metadataDescription(file,folder){
-  const theme=metadataTheme(file.name), tokens=metadataWordsFromName(file.name);
-  const tokenText=tokens.length?' featuring '+tokens.slice(0,3).join(', '):'';
-  const medium=file.name.toLowerCase().endsWith('.mp4')
-    ?'seamless animated motion'
-    :'polished digital artwork';
-  let text='Vivid '+theme.main+tokenText+' with luminous gradients, layered forms, balanced composition and '+medium+' for modern backgrounds, media, presentations and creative design projects.';
-  if(text.length<150){
-    text+=' Clean visual structure, vivid color and flexible negative space make the asset suitable for contemporary commercial creative work.';
-  }
-  if(text.length>200)text=text.slice(0,197).replace(/[ ,.;:-]+$/,'')+'.';
-  return text;
-}
-function metadataKeywords(file){
-  const theme=metadataTheme(file.name);
-  const filenameWords=metadataWordsFromName(file.name);
-  const base=[
-    ...filenameWords,
-    ...theme.extra,
-    'colorful','vibrant','vivid','gradient','luminous','glowing','multicolor',
-    'modern','contemporary','creative','decorative','graphic','visual','composition',
-    'texture','wallpaper','backdrop','background','design','art','digital art',
-    'abstract art','geometric art','motion graphics','visual effect','design element',
-    'copy space','presentation background','web background','social media background',
-    'creative background','modern background','dynamic','flowing','movement',
-    'pattern','shape','shapes','symmetry','color','visual design','digital background',
-    'decorative background','contemporary design','abstract background'
-  ];
-  const cleaned=[],seen=new Set();
-  for(const word of base){
-    const k=String(word).trim().toLowerCase();
-    if(!k||seen.has(k))continue;
-    seen.add(k);cleaned.push(k);
-    if(cleaned.length===48)break;
-  }
-  const pad=['creative concept','ornamental','rich color','polished','stylized','artistic'];
-  for(const word of pad){
-    if(cleaned.length>=48)break;
-    if(!seen.has(word)){seen.add(word);cleaned.push(word)}
-  }
-  return cleaned.slice(0,48);
-}
-function metadataCategoryPair(file){
-  return metadataTheme(file.name).cats.join(', ');
-}
-function metadataIllustration(file){
-  return file.name.toLowerCase().endsWith('.jpg')||file.name.toLowerCase().endsWith('.jpeg')?'Yes':'No';
-}
-function generateMetadataCsv(files,folderName){
-  const header=['Filename','Description','Keywords','Categories','Illustration','Mature Content','Editorial'];
-  const rows=[header];
-  const sorted=[...files].sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'}));
-  for(const file of sorted){
-    rows.push([
-      file.name,
-      metadataDescription(file,folderName),
-      metadataKeywords(file).join(', '),
-      metadataCategoryPair(file),
-      metadataIllustration(file),
-      'No',
-      'No'
-    ]);
-  }
-  return rows.map(row=>row.map(metadataCsvEscape).join(',')).join('\r\n')+'\r\n';
-}
-function metadataFindFolderRoot(files){
-  const roots=new Set();
-  for(const file of files){
-    const rel=file.webkitRelativePath||file.name;
-    const parts=rel.split('/');
-    if(parts.length>1)roots.add(parts[0]);
-  }
-  return [...roots];
-}
-let metadataPendingCsv=null,metadataPendingName='';
-let metadata19Pending=null,metadata19Destination=null;
-
-function metadata19FoldersFromFiles(files){
-  const groups=new Map();
-  for(const file of files){
-    const rel=file.webkitRelativePath||file.name;
-    const parts=rel.split('/').filter(Boolean);
-    let folder=null;
-    for(const part of parts){
-      if(/^0(0[1-9]|1[0-9])$/.test(part)){ folder=part; break; }
-    }
-    if(!folder) continue;
-    if(!groups.has(folder)) groups.set(folder,[]);
-    groups.get(folder).push(file);
-  }
-  return groups;
-}
-function metadata19Count(group){
-  return {
-    jpg:group.filter(f=>/\.(jpe?g)$/i.test(f.name)),
-    mp4:group.filter(f=>/\.mp4$/i.test(f.name))
-  };
-}
-function metadata19Filename(folderName){ return folderName+'_metadata.csv'; }
-
-async function metadata19SaveAll(){
-  if(!metadata19Pending || !metadata19Destination) return;
-  const dir=metadata19Destination;
-  let saved=0;
-  for(const item of metadata19Pending){
-    const handle=await dir.getFileHandle(metadata19Filename(item.folder),{create:true});
-    const writable=await handle.createWritable();
-    await writable.write(item.csv);
-    await writable.close();
-    saved++;
-  }
-  return saved;
-}
-async function metadata19ChooseDestination(){
-  try{
-    const dir=typeof window.showDirectoryPicker==='function'
-      ? await window.showDirectoryPicker({mode:'readwrite',id:'tr-meta-dst'})
-      : null;
-    if(!dir){
-      metadata19Log.textContent='This browser does not support the folder writer. Use the generated CSV downloads instead.';
-      return;
-    }
-    metadata19Destination=dir;
-    metadata19ChooseDestination.disabled=true;
-    const saved=await metadata19SaveAll();
-    metadata19Log.textContent='Saved '+saved+' folder CSV files to the selected destination.';
-    flash('Saved '+saved+' metadata CSV files');
-    metadata19Pending=null;
-    metadata19ChooseDestination.hidden=true;
-  }catch(error){
-    if(error&&error.name==='AbortError'){
-      metadata19Log.textContent='Destination selection cancelled. The generated CSVs are still ready.';
-    }else{
-      console.error(error);
-      metadata19Log.textContent='19-folder metadata save failed: '+(error?.message||error);
-    }
-  }finally{
-    metadata19ChooseDestination.disabled=false;
-  }
-}
-async function metadata19SelectSource(){
-  if(typeof window.showDirectoryPicker!=='function'){
-    metadata19Log.textContent='Folder picker is unavailable in this browser. Falling back to the parent-folder file picker.';
-    metadata19Input.value='';
-    metadata19Input.click();
-    return;
-  }
-  try{
-    const parent=await window.showDirectoryPicker({mode:'read',id:'tr-meta-19-src'});
-    const items=[];
-    const report=[];
-    for(let n=1;n<=19;n++){
-      const folder=String(n).padStart(3,'0');
-      let dir;
-      try{ dir=await parent.getDirectoryHandle(folder,{create:false}); }
-      catch(e){
-        report.push(folder+': missing');
-        continue;
-      }
-      const jpg=[],mp4=[];
-      for await(const entry of dir.values()){
-        if(entry.kind!=='file')continue;
-        const name=entry.name;
-        if(/\\.(jpe?g)$/i.test(name))jpg.push(await entry.getFile());
-        else if(/\\.mp4$/i.test(name))mp4.push(await entry.getFile());
-      }
-      if(!jpg.length&&!mp4.length){
-        report.push(folder+': empty');
-        continue;
-      }
-      const csv=generateMetadataCsv([...jpg,...mp4],folder);
-      items.push({folder,csv,jpg:jpg.length,mp4:mp4.length});
-      report.push(folder+': '+jpg.length+' JPG + '+mp4.length+' MP4'+((jpg.length===50&&mp4.length===50)?'':' (PARTIAL)'));
-    }
-    if(!items.length){
-      metadata19Summary.innerHTML='';
-      metadata19Log.textContent='No 001–019 folders with JPG/MP4 files were found in the selected parent folder.';
-      return;
-    }
-    metadata19Pending=items;
-    metadata19Summary.innerHTML=items.map(x=>{
-      const complete=x.jpg===50&&x.mp4===50;
-      const note=complete?'READY':'PARTIAL — '+Math.max(0,50-x.jpg)+' JPG + '+Math.max(0,50-x.mp4)+' MP4 missing';
-      return '<div class="meta-stat"><b>'+x.folder+'</b><span>'+x.jpg+' JPG · '+x.mp4+' MP4</span><small class="'+(complete?'meta-ok':'meta-error')+'">'+note+'</small></div>';
-    }).join('');
-    const partial=items.filter(x=>x.jpg!==50||x.mp4!==50).length;
-    metadata19Log.textContent='Read '+items.length+' folders. '+(partial?'Some folders are partial; metadata will be generated for the files that actually exist.':'All folders contain 50 JPG + 50 MP4.')+'\\n'+report.join('\\n')+'\\nSelect a destination to save the folder CSVs.';
-    metadata19ChooseDestination.hidden=false;
-  }catch(error){
-    if(error&&error.name==='AbortError'){
-      metadata19Log.textContent='Source-folder selection cancelled.';
-    }else{
-      console.error(error);
-      metadata19Log.textContent='19-folder scan failed: '+(error?.message||error);
-    }
-  }
-}
-
-async function metadata19HandleSelection(){
-  const files=[...metadata19FolderInput.files];
-  metadata19FolderInput.value='';
-  if(!files.length){metadata19Log.textContent='No parent folder files were selected.';return;}
-  const groups=metadata19FoldersFromFiles(files);
-  const items=[];
-  const report=[];
-  for(let n=1;n<=19;n++){
-    const folder=String(n).padStart(3,'0');
-    const group=groups.get(folder)||[];
-    const counts=metadata19Count(group);
-    if(!counts.jpg.length&&!counts.mp4.length){
-      report.push(folder+': missing');
-      continue;
-    }
-    const csv=generateMetadataCsv([...counts.jpg,...counts.mp4],folder);
-    items.push({folder,csv,jpg:counts.jpg.length,mp4:counts.mp4.length});
-    report.push(folder+': '+counts.jpg.length+' JPG + '+counts.mp4.length+' MP4'+((counts.jpg.length===50&&counts.mp4.length===50)?'':' (PARTIAL)'));
-  }
-  if(!items.length){
-    metadata19Summary.innerHTML='';
-    metadata19Log.textContent='No 001–019 folders were detected.';
-    return;
-  }
-  metadata19Pending=items;
-  metadata19Summary.innerHTML=items.map(x=>'<div class="meta-stat"><b>'+x.folder+'</b><span>'+x.jpg+' JPG · '+x.mp4+' MP4</span></div>').join('');
-  metadata19Log.textContent='Generated '+items.length+' CSV files.\\n'+report.join('\\n')+'\\nSelect a destination to save them.';
-  metadata19ChooseDestination.hidden=false;
-}
-
-
-async function metadataSaveCsv(csv,folderName){
-  const suggested=folderName+'_metadata.csv';
-  if(typeof window.showDirectoryPicker==='function'){
-    const dir=await window.showDirectoryPicker({mode:'readwrite',id:'tr-meta-dst'});
-    const handle=await dir.getFileHandle(suggested,{create:true});
-    const writable=await handle.createWritable();
-    await writable.write(csv);
-    await writable.close();
-    return {mode:'folder',name:suggested};
-  }
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const link=document.createElement('a');
-  link.href=url;link.download=suggested;document.body.appendChild(link);link.click();link.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1500);
-  return {mode:'download',name:suggested};
-}
-async function metadataSavePending(){
-  if(!metadataPendingCsv||!metadataPendingName)return;
-  try{
-    metadataSaveFolder.disabled=true;
-    const result=await metadataSaveCsv(metadataPendingCsv,metadataPendingName);
-    metadataSetLog('Saved '+result.name+' successfully. '+metadataPendingCsv.split('\r\n').slice(1,-1).length+' metadata rows generated.','ok');
-    flash('Metadata saved: '+result.name);
-    metadataPendingCsv=null;metadataPendingName='';
-    metadataSaveFolder.hidden=true;
-  }catch(error){
-    if(error&&error.name==='AbortError'){
-      metadataSetLog('Save-folder selection cancelled. The generated CSV is ready; choose the download folder again.','error');
-    }else{
-      console.error(error);
-      metadataSetLog('Metadata save failed: '+(error?.message||error),'error');
-    }
-  }finally{
-    metadataSaveFolder.disabled=false;
-  }
-}
-async function metadataHandleFolderSelection(){
-  const folderName=metadataFolderName.value;
-  const files=[...metadataFolderInput.files];
-  metadataFolderInput.value='';
-  if(!folderName){metadataSetLog('Select a folder number first.','error');return}
-  if(!files.length){metadataSetLog('No files were selected.','error');return}
-  const roots=metadataFindFolderRoot(files);
-  if(roots.length!==1||roots[0]!==folderName){
-    metadataSetLog('Selected folder does not match '+folderName+'. Detected root: '+(roots.join(', ')||'unknown')+'. Select the '+folderName+' folder itself.','error');
-    return;
-  }
-  const jpg=files.filter(f=>/\.(jpe?g)$/i.test(f.name));
-  const mp4=files.filter(f=>/\.mp4$/i.test(f.name));
-  metadataSummary.innerHTML='<div class="meta-stat"><b>'+jpg.length+'</b><span>JPG / JPEG</span></div><div class="meta-stat"><b>'+mp4.length+'</b><span>MP4</span></div><div class="meta-stat"><b>'+files.length+'</b><span>Total selected</span></div>';
-  const finalPartial = folderName === '019' && jpg.length === mp4.length && jpg.length > 0 && jpg.length <= 50;
-  const completeBatch = jpg.length === 50 && mp4.length === 50;
-  if(!completeBatch && !finalPartial){
-    metadataSetLog('Validation failed. '+folderName+' must contain 50 JPG/JPEG + 50 MP4, except folder 019 which may contain the matching final partial batch.','error');
-    return;
-  }
-  try{
-    metadataChooseFolder.disabled=true;
-    const rowCount = jpg.length + mp4.length;
-    metadataSetLog('Generating '+rowCount+' metadata rows…');
-    const csv=generateMetadataCsv([...jpg,...mp4],folderName);
-    metadataPendingCsv=csv;
-    metadataPendingName=folderName;
-    metadataSaveFolder.hidden=false;
-    metadataSetLog(rowCount+' metadata rows generated. Choose the download folder to save '+folderName+'_metadata.csv.','ok');
-  }catch(error){
-    if(error&&error.name==='AbortError'){
-      metadataSetLog('Save-folder selection cancelled. Metadata is still generated, but no file was written. Click Select folder again to retry.','error');
-    }else{
-      console.error(error);
-      metadataSetLog('Metadata save failed: '+(error?.message||error),'error');
-    }
-  }finally{
-    metadataChooseFolder.disabled=false;
-  }
-}
+const metadataModal=metadataQuery('#metadataModal'),metadataClose=metadataQuery('#metadataClose'),metadataFolderName=metadataQuery('#metadataFolderName'),metadataChooseFolder=metadataQuery('#metadataChooseFolder'),metadataFolderInput=metadataQuery('#metadataFolderInput'),metadataSaveFolder=metadataQuery('#metadataSaveFolder'),metadataSummary=metadataQuery('#metadataSummary'),metadataLog=metadataQuery('#metadataLog');
+function openMetadataModal(){if(!metadataModal)return;metadataModal.classList.add('open');metadataModal.setAttribute('aria-hidden','false');metadataLog.textContent='Waiting for folder selection.'}
+function closeMetadataModal(){if(!metadataModal)return;metadataModal.classList.remove('open');metadataModal.setAttribute('aria-hidden','true')}
+function metadataSetLog(message,kind){metadataLog.textContent=message;metadataLog.className='meta-log'+(kind==='ok'?' meta-ok':kind==='error'?' meta-error':'')}
+function metadataCsvEscape(value){const s=String(value??'');return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}
+function metadataWordsFromName(fileName){const base=fileName.replace(/\.[^.]+$/,'').replace(/^0*(\d{1,3})[-_. ]+/,'').replace(/[_.-]+/g,' ').replace(/\b(final|copy|export|render|video|image|still|frame|v\d+)\b/gi,' ').replace(/\s+/g,' ').trim().toLowerCase();return base.split(/\s+/).filter(Boolean).filter((w,i,a)=>w.length>1&&a.indexOf(w)===i)}
+function metadataTitleCase(s){return String(s).split(/\s+/).filter(Boolean).map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ')}
+function metadataTheme(fileName){const s=fileName.toLowerCase();if(/flower|floral|carnation|cosmos|marigold|snapdragon|foxglove|lotus|lily|rose|tulip|daisy|botanical|plant|leaf|petal|orchid|peony|lavender|hibiscus|poppy|sunflower/.test(s))return{kind:'floral',extra:['flower','floral','botanical','petals','nature','plant','blossom','garden','ornamental','organic','colorful','vibrant','prismatic','abstract','motion graphics']};if(/geometry|geometric|prism|crystal|polygon|shape|cube|sphere|spiral|grid|polygonal/.test(s))return{kind:'geometric',extra:['geometric','geometry','prism','abstract','shape','pattern','polygon','crystal','colorful','vibrant','gradient','motion graphics','dynamic','modern','design']};if(/christmas|xmas|holiday|snow|santa|ornament|gift|winter/.test(s))return{kind:'holiday',extra:['holiday','christmas','winter','festive','seasonal','ornament','celebration','colorful','glowing','abstract','motion graphics']};return{kind:'abstract',extra:['abstract','digital','colorful','vibrant','gradient','luminous','glowing','modern','creative','motion graphics','dynamic','background','design']}}
+function metadataTitle(file,folder){const theme=metadataTheme(file.name),stem=metadataTitleCase(metadataWordsFromName(file.name).slice(0,8).join(' '));let title=stem||(theme.kind==='floral'?'Prism Flower':theme.kind==='geometric'?'Prism Geometry':'Abstract Design');if(theme.kind==='floral')title+=' floral motion background';else if(theme.kind==='geometric')title+=' geometric abstract motion background';else title+=' abstract motion background';if(!/\.mp4$/i.test(file.name))title=title.replace(/motion background$/,'vector illustration');return title.replace(/\s+/g,' ').trim().slice(0,70).replace(/[ ,.;:-]+$/,'').trim()}
+function metadataKeywords(file){const theme=metadataTheme(file.name),out=[];const push=x=>{const k=String(x||'').trim().toLowerCase();if(k&&!out.includes(k)&&out.length<50)out.push(k)};for(const w of metadataWordsFromName(file.name))push(w);for(const w of theme.extra)push(w);for(const w of ['background','motion background','abstract background','digital art','vector art','illustration','animation','animated','loop','seamless loop','motion design','motion graphics','visual effect','graphic design','creative','decorative','modern','contemporary','color','colorful','vibrant','multicolor','gradient','luminous','glowing','dynamic','flowing','composition','design element','wallpaper','backdrop','copy space','presentation background','web background','social media background','creative background','decorative background','digital background','visual design','artwork','pattern','shape','ornamental','stylized','abstract art','contemporary design','creative media'])push(w);return out.slice(0,50)}
+function metadataGenerateReport(files){return{longNames:files.filter(f=>String(f.name).length>30),oversizeTitles:files.map(f=>metadataTitle(f,'')).filter(t=>t.length>70)}}
+function generateMetadataCsv(files,folderName){const rows=[['Filename','Title','Keywords']];[...files].sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'})).forEach(file=>rows.push([file.name,metadataTitle(file,folderName),metadataKeywords(file).join(', ')]));return rows.map(r=>r.map(metadataCsvEscape).join(',')).join('\r\n')+'\r\n'}
+function metadataFindFolderRoot(files){const roots=new Set();for(const file of files){const p=(file.webkitRelativePath||file.name).split('/');if(p.length>1)roots.add(p[0])}return [...roots]}
+let metadataPendingCsv=null,metadataPendingName='',metadata19Pending=null,metadata19Destination=null;
+function metadata19FoldersFromFiles(files){const groups=new Map();for(const file of files){const parts=(file.webkitRelativePath||file.name).split('/').filter(Boolean),folder=parts.find(part=>/^0(0[1-9]|1[0-9])$/.test(part));if(!folder)continue;if(!groups.has(folder))groups.set(folder,[]);groups.get(folder).push(file)}return groups}
+function metadata19Count(group){return{jpg:group.filter(f=>/\.(jpe?g)$/i.test(f.name)),mp4:group.filter(f=>/\.mp4$/i.test(f.name))}}
+function metadata19Filename(folderName){return folderName+'_adobe_metadata.csv'}
+async function metadata19SaveAll(){if(!metadata19Pending||!metadata19Destination)return 0;let saved=0;for(const item of metadata19Pending){const h=await metadata19Destination.getFileHandle(metadata19Filename(item.folder),{create:true}),w=await h.createWritable();await w.write(item.csv);await w.close();saved++}return saved}
+async function metadata19ChooseDestination(){try{const dir=typeof window.showDirectoryPicker==='function'?await window.showDirectoryPicker({mode:'readwrite',id:'tr-adobe-19-dst'}):null;if(!dir){metadata19Log.textContent='Folder saving is unavailable in this browser. Use the single-folder Adobe CSV download instead.';return}metadata19Destination=dir;metadata19ChooseDestination.disabled=true;const saved=await metadata19SaveAll();metadata19Log.textContent='Saved '+saved+' Adobe CSV files to the selected destination.';flash('Saved '+saved+' Adobe CSV files');metadata19Pending=null;metadata19ChooseDestination.hidden=true}catch(error){if(error?.name==='AbortError')metadata19Log.textContent='Destination selection cancelled. The generated Adobe CSVs are still ready.';else{console.error(error);metadata19Log.textContent='Adobe metadata save failed: '+(error?.message||error)}}finally{metadata19ChooseDestination.disabled=false}}
+async function metadata19SelectSource(){if(typeof window.showDirectoryPicker!=='function'){metadata19Log.textContent='Folder picker is unavailable. Falling back to the parent-folder file picker.';metadata19Input.value='';metadata19Input.click();return}try{const parent=await window.showDirectoryPicker({mode:'read',id:'tr-adobe-19-src'}),items=[],report=[];for(let n=1;n<=19;n++){const folder=String(n).padStart(3,'0');let dir;try{dir=await parent.getDirectoryHandle(folder,{create:false})}catch(e){report.push(folder+': missing');continue}const jpg=[],mp4=[];for await(const entry of dir.values()){if(entry.kind!=='file')continue;if(/\.(jpe?g)$/i.test(entry.name))jpg.push(await entry.getFile());else if(/\.mp4$/i.test(entry.name))mp4.push(await entry.getFile())}if(!jpg.length&&!mp4.length){report.push(folder+': empty');continue}const all=[...jpg,...mp4],meta=metadataGenerateReport(all);items.push({folder,csv:generateMetadataCsv(all,folder),jpg:jpg.length,mp4:mp4.length,longNames:meta.longNames.length});report.push(folder+': '+jpg.length+' JPG + '+mp4.length+' MP4'+((jpg.length===50&&mp4.length===50)?'':' (PARTIAL)')+(meta.longNames.length?' · '+meta.longNames.length+' filename(s) >30 chars':''))}if(!items.length){metadata19Summary.innerHTML='';metadata19Log.textContent='No 001–019 folders with JPG/MP4 files were found in the selected parent folder.';return}metadata19Pending=items;const longCount=items.reduce((n,x)=>n+x.longNames,0),partial=items.filter(x=>x.jpg!==50||x.mp4!==50).length;metadata19Summary.innerHTML=items.map(x=>'<div class="meta-stat"><b>'+x.folder+'</b><span>'+x.jpg+' JPG · '+x.mp4+' MP4</span><small class="'+(x.longNames?'meta-error':'meta-ok')+'">'+(x.longNames?x.longNames+' filename(s) >30 chars':'Adobe-ready filenames')+'</small></div>').join('');metadata19Log.textContent='Adobe CSVs generated for '+items.length+' folders. '+(partial?'Some folders are partial. ':'All detected folders contain 50 JPG + 50 MP4. ')+(longCount?'Warning: '+longCount+' current filename(s) exceed Adobe’s 30-character Filename limit. ':'All current filenames are within Adobe’s 30-character Filename limit. ')+'Existing filenames are preserved exactly.';metadata19ChooseDestination.hidden=false}catch(error){if(error?.name==='AbortError')metadata19Log.textContent='Source-folder selection cancelled.';else{console.error(error);metadata19Log.textContent='Adobe 001–019 scan failed: '+(error?.message||error)}}}
+async function metadata19HandleSelection(){const files=[...metadata19FolderInput.files];metadata19FolderInput.value='';if(!files.length){metadata19Log.textContent='No parent folder files were selected.';return}const groups=metadata19FoldersFromFiles(files),items=[],report=[];for(let n=1;n<=19;n++){const folder=String(n).padStart(3,'0'),group=groups.get(folder)||[],counts=metadata19Count(group);if(!counts.jpg.length&&!counts.mp4.length){report.push(folder+': missing');continue}const all=[...counts.jpg,...counts.mp4],meta=metadataGenerateReport(all);items.push({folder,csv:generateMetadataCsv(all,folder),jpg:counts.jpg.length,mp4:counts.mp4.length,longNames:meta.longNames.length});report.push(folder+': '+counts.jpg.length+' JPG + '+counts.mp4.length+' MP4'+((counts.jpg.length===50&&counts.mp4.length===50)?'':' (PARTIAL)')+(meta.longNames.length?' · '+meta.longNames.length+' filename(s) >30 chars':''))}if(!items.length){metadata19Summary.innerHTML='';metadata19Log.textContent='No 001–019 folders were detected.';return}metadata19Pending=items;const longCount=items.reduce((n,x)=>n+x.longNames,0);metadata19Summary.innerHTML=items.map(x=>'<div class="meta-stat"><b>'+x.folder+'</b><span>'+x.jpg+' JPG · '+x.mp4+' MP4</span><small class="'+(x.longNames?'meta-error':'meta-ok')+'">'+(x.longNames?x.longNames+' filename(s) >30 chars':'Adobe-ready filenames')+'</small></div>').join('');metadata19Log.textContent='Generated '+items.length+' Adobe CSV files. '+(longCount?'Warning: '+longCount+' filename(s) exceed Adobe’s 30-character Filename limit. ':'')+'Your rendered filenames are kept unchanged in the CSV.';metadata19ChooseDestination.hidden=false}
+async function metadataSaveCsv(csv,folderName){const suggested=folderName+'_adobe_metadata.csv';if(typeof window.showDirectoryPicker==='function'){const dir=await window.showDirectoryPicker({mode:'readwrite',id:'tr-adobe-dst'}),handle=await dir.getFileHandle(suggested,{create:true}),w=await handle.createWritable();await w.write(csv);await w.close();return{mode:'folder',name:suggested}}const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=suggested;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);return{mode:'download',name:suggested}}
+async function metadataSavePending(){if(!metadataPendingCsv||!metadataPendingName)return;try{metadataSaveFolder.disabled=true;const result=await metadataSaveCsv(metadataPendingCsv,metadataPendingName),countRows=metadataPendingCsv.split('\r\n').slice(1,-1).filter(Boolean).length;metadataSetLog('Saved '+result.name+' — '+countRows+' Adobe metadata rows.','ok');flash('Adobe CSV saved: '+result.name);metadataPendingCsv=null;metadataPendingName='';metadataSaveFolder.hidden=true}catch(error){if(error?.name==='AbortError')metadataSetLog('Save-folder selection cancelled. The generated Adobe CSV is still ready.','error');else{console.error(error);metadataSetLog('Adobe metadata save failed: '+(error?.message||error),'error')}}finally{metadataSaveFolder.disabled=false}}
+async function metadataHandleFolderSelection(){const folderName=metadataFolderName.value,files=[...metadataFolderInput.files];metadataFolderInput.value='';if(!folderName){metadataSetLog('Select a folder number first.','error');return}if(!files.length){metadataSetLog('No files were selected.','error');return}const roots=metadataFindFolderRoot(files);if(roots.length!==1||roots[0]!==folderName){metadataSetLog('Selected folder does not match '+folderName+'. Detected root: '+(roots.join(', ')||'unknown')+'. Select the '+folderName+' folder itself.','error');return}const jpg=files.filter(f=>/\.(jpe?g)$/i.test(f.name)),mp4=files.filter(f=>/\.mp4$/i.test(f.name));metadataSummary.innerHTML='<div class="meta-stat"><b>'+jpg.length+'</b><span>JPG / JPEG</span></div><div class="meta-stat"><b>'+mp4.length+'</b><span>MP4</span></div><div class="meta-stat"><b>'+files.length+'</b><span>Total selected</span></div>';const finalPartial=folderName==='019'&&jpg.length===mp4.length&&jpg.length>0&&jpg.length<=50,completeBatch=jpg.length===50&&mp4.length===50;if(!completeBatch&&!finalPartial){metadataSetLog('Adobe batch validation failed. '+folderName+' must contain 50 JPG/JPEG + 50 MP4, except folder 019 which may contain the matching final partial batch.','error');return}try{metadataChooseFolder.disabled=true;const rowCount=jpg.length+mp4.length,all=[...jpg,...mp4],meta=metadataGenerateReport(all),csv=generateMetadataCsv(all,folderName);metadataPendingCsv=csv;metadataPendingName=folderName;metadataSaveFolder.hidden=false;metadataSetLog(rowCount+' Adobe metadata rows generated. '+(meta.longNames.length?'Warning: '+meta.longNames.length+' filename(s) exceed Adobe’s 30-character Filename limit; rendered filenames were preserved exactly. ':'Choose the destination folder to save '+folderName+'_adobe_metadata.csv.'),meta.longNames.length?'error':'ok')}catch(error){console.error(error);metadataSetLog('Adobe metadata generation failed: '+(error?.message||error),'error')}finally{metadataChooseFolder.disabled=false}}
 if(metadataClose)metadataClose.onclick=closeMetadataModal;
-const metadata19ChooseButton=metadataQuery('#metadata19ChooseDestination');
-const metadata19Summary=metadataQuery('#metadata19Summary');
-const metadata19Log=metadataQuery('#metadata19Log');
-const metadata19Input=metadataQuery('#metadata19FolderInput');
-const metadata19GenerateButton=metadataQuery('#generateMetadata19');
-if(metadata19GenerateButton)metadata19GenerateButton.onclick=()=>{
-  metadata19Log.textContent='Select the parent folder containing 001–019.';
-  metadata19SelectSource();
-};
+const metadata19ChooseButton=metadataQuery('#metadata19ChooseDestination'),metadata19Summary=metadataQuery('#metadata19Summary'),metadata19Log=metadataQuery('#metadata19Log'),metadata19Input=metadataQuery('#metadata19FolderInput'),metadata19GenerateButton=metadataQuery('#generateMetadata19');
+if(metadata19GenerateButton)metadata19GenerateButton.onclick=()=>{metadata19Log.textContent='Select the parent folder containing 001–019.';metadata19SelectSource()};
 if(metadata19Input)metadata19Input.onchange=metadata19HandleSelection;
 if(metadata19ChooseButton)metadata19ChooseButton.onclick=metadata19ChooseDestination;
 if(metadataModal)metadataModal.addEventListener('click',e=>{if(e.target===metadataModal)closeMetadataModal()});
