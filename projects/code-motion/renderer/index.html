@@ -1395,6 +1395,7 @@ select.mini{
       <button data-act="render" class="key">Render</button>
       <button data-act="render50" class="key" id="render50Btn" title="Render the first 50 Prism Flowers with the current output settings">Render ×50</button>
       <button data-act="renderAll" class="key" id="renderAllBtn" title="Render every Prism Flower in the library with the current output settings">Render All</button>
+      <button data-act="generateMetadata" class="key" id="metadataBtn" title="Create Shutterstock CSV metadata for all Prism Flowers, grouped into folders of 50">Generate Metadata</button>
     </nav>
   </header>
 
@@ -15517,7 +15518,7 @@ var S = {
   compiled: false, lastError: null, hash: '',
   previewBusy: false, previewFps: 0, previewRaster: { w: 0, h: 0, s: 1 },
   compareMode: false, compareSplit: 0.5, compareBitmap: null,
-  rendering: false, batchRendering: false, batchCancelled: false, queue: [], results: [], caps: {}, stage: 'IDLE',
+  rendering: false, batchRendering: false, batchCancelled: false, metadataGenerating: false, queue: [], results: [], caps: {}, stage: 'IDLE',
   exportFormat: 'mp4', quality: 'standard', timebase: 'ms', checksums: true, pngTarget: 'zip'
 };
 
@@ -17192,6 +17193,102 @@ function stockMetadataSingleCsv(entry) {
     return row.map(csvEscape).join(',');
   }).join('\\r\\n') + '\\r\\n';
 }
+async function generateStockMetadataFolders() {
+  if (S.batchRendering || S.rendering || S.metadataGenerating) return;
+
+  var samples = $('script[type="text/plain"][id^="sample-"]').filter(function (node) {
+    return /prism/i.test(node.dataset.title || '');
+  });
+
+  if (!samples.length) {
+    $('#stMsg').textContent = 'No Prism Flowers are available for metadata generation.';
+    return;
+  }
+
+  if (typeof window.showDirectoryPicker !== 'function') {
+    $('#stMsg').textContent = 'Metadata generation needs the browser folder picker. Use current Chrome/Edge on HTTPS.';
+    return;
+  }
+
+  S.metadataGenerating = true;
+  var button = $('#metadataBtn');
+  if (button) button.disabled = true;
+
+  try {
+    showTab('p-render');
+    showMobile('rail');
+
+    var root = await pickDirectory();
+    var folderCount = Math.ceil(samples.length / 50);
+
+    logLine(
+      'METADATA — selected folder: ' + (root.name || 'selected folder') +
+      ' · ' + samples.length + ' flowers · ' + folderCount + ' folders',
+      true
+    );
+
+    for (var i = 0; i < samples.length; i++) {
+      var folderName = pad(Math.floor(i / 50) + 1, 3);
+      var folder = await root.getDirectoryHandle(folderName, { create: true });
+      var title = samples[i].dataset.title || ('Prism Flower ' + (i + 1));
+      var meta = stockMetadataForTitle(title);
+
+      var animationCsv = new Blob(
+        [stockMetadataSingleCsv(meta.animation)],
+        { type: 'text/csv;charset=utf-8' }
+      );
+      var illustrationCsv = new Blob(
+        [stockMetadataSingleCsv(meta.illustration)],
+        { type: 'text/csv;charset=utf-8' }
+      );
+
+      await writeBlobToDirectory(folder, animationCsv, meta.animation.csvFilename);
+      await writeBlobToDirectory(folder, illustrationCsv, meta.illustration.csvFilename);
+
+      $('#stMsg').textContent =
+        'Metadata — ' + (i + 1) + ' / ' + samples.length +
+        ' · ' + title + ' · folder ' + folderName;
+
+      if ((i + 1) % 5 === 0 || i === samples.length - 1) {
+        logLine(
+          'metadata written → ' + folderName + '/' +
+          meta.animation.csvFilename + ' + ' +
+          meta.illustration.csvFilename
+        );
+      }
+
+      await new Promise(function (resolve) { setTimeout(resolve, 0); });
+    }
+
+    var fullFolders = Math.floor(samples.length / 50);
+    var remainder = samples.length % 50;
+    $('#stMsg').textContent =
+      'Metadata complete — ' + samples.length + ' flowers, ' +
+      (fullFolders + (remainder ? 1 : 0)) +
+      ' folders. Each flower has 2 CSV files.';
+    logLine(
+      'METADATA COMPLETE — ' + samples.length +
+      ' flowers · ' + folderCount +
+      ' folders · 2 CSVs per flower',
+      true
+    );
+  } catch (error) {
+    if (error && (error.name === 'AbortError' || error.code === 20)) {
+      $('#stMsg').textContent = 'Metadata generation cancelled — no folder selected.';
+      logLine('metadata generation cancelled.');
+    } else {
+      $('#stMsg').textContent = 'Metadata generation failed — ' + String(error && error.message || error);
+      logLine(
+        'METADATA FAILED — ' + String(error && error.stack || error),
+        true
+      );
+    }
+  } finally {
+    S.metadataGenerating = false;
+    if (button) button.disabled = false;
+  }
+}
+
 async function renderPrismBatch(limit, label) {
   if (S.batchRendering || S.rendering) return;
 
@@ -18508,6 +18605,10 @@ var ACTS = {
       $('#stMsg').textContent = 'Render All failed: ' + String(e && e.message || e);
       logLine('Render All failed — ' + String(e && e.stack || e), true);
     });
+  },
+  generateMetadata: function () {
+    if (S.rendering || S.batchRendering || S.metadataGenerating) return;
+    generateStockMetadataFolders();
   },
   cancelRender: cancelRender,
   analyze: analyseJob,
