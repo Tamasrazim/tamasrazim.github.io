@@ -110,7 +110,7 @@ main{padding:76px 0 100px}.hero{animation:rise .8s var(--ease) both}.kicker{font
     <div class="meta-body">
       <div class="meta-step">
         <strong>01 / Folder</strong>
-        <p>Select the batch folder number. The selected folder must contain exactly 50 JPG images and 50 MP4 videos. Metadata will be created for those 100 files only.</p>
+        <p>Select the batch folder number. Folders 001–018 must contain 50 JPG + 50 MP4. Folder 019 is the final partial batch and may contain the remaining matching JPG + MP4 files (for the current 937-asset set, 37 + 37).</p>
         <select class="meta-select" id="metadataFolderName">
           <option value="">Select folder</option>
           <option value="001">001</option><option value="002">002</option><option value="003">003</option><option value="004">004</option><option value="005">005</option><option value="006">006</option><option value="007">007</option><option value="008">008</option><option value="009">009</option><option value="010">010</option><option value="011">011</option><option value="012">012</option><option value="013">013</option><option value="014">014</option><option value="015">015</option><option value="016">016</option><option value="017">017</option><option value="018">018</option><option value="019">019</option>
@@ -432,7 +432,7 @@ async function metadataSavePending(){
   try{
     metadataSaveFolder.disabled=true;
     const result=await metadataSaveCsv(metadataPendingCsv,metadataPendingName);
-    metadataSetLog('Saved '+result.name+' successfully. 100 rows generated: 50 JPG/JPEG + 50 MP4.','ok');
+    metadataSetLog('Saved '+result.name+' successfully. '+metadataPendingCsv.split('\r\n').slice(1,-1).length+' metadata rows generated.','ok');
     flash('Metadata saved: '+result.name);
     metadataPendingCsv=null;metadataPendingName='';
     metadataSaveFolder.hidden=true;
@@ -461,18 +461,21 @@ async function metadataHandleFolderSelection(){
   const jpg=files.filter(f=>/\.(jpe?g)$/i.test(f.name));
   const mp4=files.filter(f=>/\.mp4$/i.test(f.name));
   metadataSummary.innerHTML='<div class="meta-stat"><b>'+jpg.length+'</b><span>JPG / JPEG</span></div><div class="meta-stat"><b>'+mp4.length+'</b><span>MP4</span></div><div class="meta-stat"><b>'+files.length+'</b><span>Total selected</span></div>';
-  if(jpg.length!==50||mp4.length!==50){
-    metadataSetLog('Validation failed. '+folderName+' must contain exactly 50 JPG/JPEG files and 50 MP4 files. Nothing was saved.','error');
+  const finalPartial = folderName === '019' && jpg.length === mp4.length && jpg.length > 0 && jpg.length <= 50;
+  const completeBatch = jpg.length === 50 && mp4.length === 50;
+  if(!completeBatch && !finalPartial){
+    metadataSetLog('Validation failed. '+folderName+' must contain 50 JPG/JPEG + 50 MP4, except folder 019 which may contain the matching final partial batch.','error');
     return;
   }
   try{
     metadataChooseFolder.disabled=true;
-    metadataSetLog('Generating 100 metadata rows…');
+    const rowCount = jpg.length + mp4.length;
+    metadataSetLog('Generating '+rowCount+' metadata rows…');
     const csv=generateMetadataCsv([...jpg,...mp4],folderName);
     metadataPendingCsv=csv;
     metadataPendingName=folderName;
     metadataSaveFolder.hidden=false;
-    metadataSetLog('100 metadata rows generated. Choose the download folder to save '+folderName+'_metadata.csv.','ok');
+    metadataSetLog(rowCount+' metadata rows generated. Choose the download folder to save '+folderName+'_metadata.csv.','ok');
   }catch(error){
     if(error&&error.name==='AbortError'){
       metadataSetLog('Save-folder selection cancelled. Metadata is still generated, but no file was written. Click Select folder again to retry.','error');
