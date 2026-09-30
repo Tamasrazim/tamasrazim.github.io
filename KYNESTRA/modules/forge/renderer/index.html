@@ -121,6 +121,7 @@ main{padding:76px 0 100px}.hero{animation:rise .8s var(--ease) both}.kicker{font
         <p>The browser will ask you to select the actual local folder. Once selected, Forge validates it, generates the CSV, and asks where to save it.</p>
         <button class="meta-folder-btn" id="metadataChooseFolder" type="button">Select folder</button>
         <input id="metadataFolderInput" type="file" webkitdirectory directory multiple hidden>
+        <button class="meta-folder-btn" id="metadataSaveFolder" type="button" hidden>Choose download folder</button>
         <div class="meta-summary" id="metadataSummary"></div>
         <div class="meta-log" id="metadataLog">Waiting for folder selection.</div>
       </div>
@@ -252,6 +253,8 @@ function metadataFindFolderRoot(files){
   }
   return [...roots];
 }
+let metadataPendingCsv=null,metadataPendingName='';
+
 async function metadataSaveCsv(csv,folderName){
   const suggested=folderName+'_metadata.csv';
   if(typeof window.showDirectoryPicker==='function'){
@@ -268,6 +271,26 @@ async function metadataSaveCsv(csv,folderName){
   link.href=url;link.download=suggested;document.body.appendChild(link);link.click();link.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1500);
   return {mode:'download',name:suggested};
+}
+async function metadataSavePending(){
+  if(!metadataPendingCsv||!metadataPendingName)return;
+  try{
+    metadataSaveFolder.disabled=true;
+    const result=await metadataSaveCsv(metadataPendingCsv,metadataPendingName);
+    metadataSetLog('Saved '+result.name+' successfully. 100 rows generated: 50 JPG/JPEG + 50 MP4.','ok');
+    flash('Metadata saved: '+result.name);
+    metadataPendingCsv=null;metadataPendingName='';
+    metadataSaveFolder.hidden=true;
+  }catch(error){
+    if(error&&error.name==='AbortError'){
+      metadataSetLog('Save-folder selection cancelled. The generated CSV is ready; choose the download folder again.','error');
+    }else{
+      console.error(error);
+      metadataSetLog('Metadata save failed: '+(error?.message||error),'error');
+    }
+  }finally{
+    metadataSaveFolder.disabled=false;
+  }
 }
 async function metadataHandleFolderSelection(){
   const folderName=metadataFolderName.value;
@@ -291,10 +314,10 @@ async function metadataHandleFolderSelection(){
     metadataChooseFolder.disabled=true;
     metadataSetLog('Generating 100 metadata rows…');
     const csv=generateMetadataCsv([...jpg,...mp4],folderName);
-    metadataSetLog('Metadata generated. Choose the download folder to save '+folderName+'_metadata.csv.');
-    const result=await metadataSaveCsv(csv,folderName);
-    metadataSetLog('Saved '+result.name+' successfully. 100 rows generated: 50 JPG/JPEG + 50 MP4.','ok');
-    flash('Metadata saved: '+result.name);
+    metadataPendingCsv=csv;
+    metadataPendingName=folderName;
+    metadataSaveFolder.hidden=false;
+    metadataSetLog('100 metadata rows generated. Choose the download folder to save '+folderName+'_metadata.csv.','ok');
   }catch(error){
     if(error&&error.name==='AbortError'){
       metadataSetLog('Save-folder selection cancelled. Metadata is still generated, but no file was written. Click Select folder again to retry.','error');
@@ -311,6 +334,7 @@ if(metadataModal)metadataModal.addEventListener('click',e=>{if(e.target===metada
 if(metadataFolderName)metadataFolderName.onchange=()=>metadataSetLog(metadataFolderName.value?'Folder '+metadataFolderName.value+' selected. Now choose the actual folder.':'Waiting for folder selection.');
 if(metadataChooseFolder)metadataChooseFolder.onclick=()=>metadataFolderInput.click();
 if(metadataFolderInput)metadataFolderInput.onchange=metadataHandleFolderSelection;
+if(metadataSaveFolder)metadataSaveFolder.onclick=metadataSavePending;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&metadataModal?.classList.contains('open'))closeMetadataModal()});
 const generateMetadataBtn=$('#generateMetadata');
 if(generateMetadataBtn)generateMetadataBtn.onclick=openMetadataModal;
