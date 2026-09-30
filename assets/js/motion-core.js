@@ -339,7 +339,7 @@ raf=window.requestAnimationFrame(frame);
     '.scene-bridge:before,.scene-bridge:after{content:"";position:absolute;left:50%;top:50%;border:1px solid rgba(243,243,239,.09);border-radius:50%;transform:translate(-50%,-50%) scale(calc(1 + var(--scene-progress)*.85 + var(--scene-energy)*.2))}' +
     '.scene-bridge:before{width:34vw;height:34vw}.scene-bridge:after{width:64vw;height:64vw;opacity:.42}' +
     '.scene-mark{position:absolute;width:1px;height:42vh;left:calc(50% + var(--scene-cx)*18vw);top:29%;background:linear-gradient(transparent,rgba(243,243,239,.22),transparent);transform:rotate(calc(var(--scene-tilt)*2.2deg + var(--scene-progress)*22deg));transform-origin:50% 50%}' +
-    '.scene-reactive{--sr-x:0px;--sr-y:0px;--sr-r:0deg;position:relative;transform:translate3d(var(--sr-x),var(--sr-y),0) rotate(var(--sr-r));will-change:transform}' +
+    '.scene-reactive{--sr-x:0px;--sr-y:0px;--sr-r:0deg;--axis-roll:0deg;position:relative;transform:translate3d(var(--sr-x),var(--sr-y),0) rotate(calc(var(--sr-r) + var(--axis-roll)));will-change:transform}' +
     '@media(pointer:coarse){body:before,.scene-bridge{display:none}.scene-reactive{transform:none!important}}';
   document.head.appendChild(style);
   var bridge=document.createElement('div');bridge.className='scene-bridge';bridge.setAttribute('aria-hidden','true');
