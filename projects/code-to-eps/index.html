@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="description" content="CODE→EPS — JavaScript-driven vector artwork with live preview and real EPS export.">
+<link rel="manifest" href="./code-to-eps.webmanifest">
+<title>CODE→EPS — Tamasrazim</title>
+<style>
+:root{color-scheme:dark;--bg:#050505;--panel:#0a0a0a;--panel2:#0d0d0d;--ink:#f3f3ef;--muted:#808078;--line:#242424;--line2:#343434;--good:#dfffd7;--bad:#ffd7d7;--ease:cubic-bezier(.2,.7,.2,1)}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:radial-gradient(circle at 50% -10%,#171715 0,#050505 42%);color:var(--ink);font:13px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:hidden}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+.app{height:100%;display:grid;grid-template-rows:58px 1fr}
+.top{border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 14px;gap:14px;background:rgba(5,5,5,.86);backdrop-filter:blur(16px);z-index:5}
+.brand{font:800 11px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em;white-space:nowrap}.brand span{color:#6f6f69}.top-sp{flex:1}
+.actionbar{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.btn{background:#0d0d0d;border:1px solid var(--line2);color:#bbb;padding:8px 10px;border-radius:5px;font:800 9px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase}.btn:hover{background:#eee;color:#050505;border-color:#eee}.btn.primary{background:#eee;color:#050505;border-color:#eee}.btn:disabled{opacity:.35;cursor:not-allowed}
+.main{min-height:0;display:grid;grid-template-columns:minmax(300px,34%) minmax(340px,1fr) 250px}
+.panel{min-width:0;min-height:0;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column}.panel:last-child{border-right:0;border-left:1px solid var(--line)}
+.phead{height:42px;display:flex;align-items:center;gap:9px;padding:0 12px;border-bottom:1px solid var(--line);font:800 9px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.15em;color:#898983;text-transform:uppercase}.phead .sp{flex:1}
+.editor-wrap{position:relative;min-height:0;flex:1;display:grid;grid-template-columns:48px 1fr;background:#070707}.lines{padding:14px 10px 14px 0;text-align:right;color:#3f3f3b;background:#080808;border-right:1px solid #161616;font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;overflow:hidden;user-select:none}.lines span{display:block}
+#code{width:100%;height:100%;resize:none;border:0;outline:0;background:transparent;color:#ddd;padding:14px 16px;font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:2;white-space:pre;overflow:auto}
+.status{min-height:42px;border-top:1px solid var(--line);padding:10px 12px;color:#777;font:10px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap}.status.good{color:var(--good)}.status.bad{color:var(--bad)}
+.stage{background:#060606;min-width:0;min-height:0;display:flex;flex-direction:column}.stagebar{height:42px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 12px;gap:8px;font:800 9px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.15em;color:#898983;text-transform:uppercase}.stagebar .sp{flex:1}.stagebar input{width:72px;background:#0c0c0c;border:1px solid #303030;border-radius:4px;color:#ddd;padding:5px 7px;font:10px ui-monospace,monospace}
+.preview-shell{position:relative;min-height:0;flex:1;display:grid;place-items:center;padding:26px;overflow:auto;background-image:linear-gradient(45deg,#101010 25%,transparent 25%),linear-gradient(-45deg,#101010 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#101010 75%),linear-gradient(-45deg,transparent 75%,#101010 75%);background-size:24px 24px;background-position:0 0,0 12px,12px -12px,-12px 0}
+.paper{position:relative;width:min(88%,900px);aspect-ratio:1.4142;background:#fff;box-shadow:0 30px 100px rgba(0,0,0,.55);overflow:hidden}.paper svg{display:block;width:100%;height:100%}.empty-stage{color:#555;text-align:center;font:10px/1.7 ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase}
+.inspector{overflow:auto}.section{padding:13px;border-bottom:1px solid var(--line)}.section h3{margin:0 0 10px;color:#8c8c84;font:800 9px ui-monospace,monospace;letter-spacing:.15em;text-transform:uppercase}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field label{display:block;color:#62625d;font:8px ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}.field input,.field select{width:100%;background:#101010;color:#ddd;border:1px solid #2b2b2b;border-radius:5px;padding:8px;font:10px ui-monospace,monospace}.stat{display:flex;justify-content:space-between;gap:8px;color:#777;font:9px ui-monospace,monospace;margin:6px 0}.stat b{color:#ddd;font-weight:600}.hint{color:#666;font:9px/1.7 ui-monospace,monospace}.api{display:grid;gap:7px}.api code{display:block;color:#aaa;background:#0f0f0f;border:1px solid #222;padding:8px;border-radius:5px;font:9px/1.6 ui-monospace,monospace;white-space:pre-wrap}
+.file-input{display:none}
+.toast{position:fixed;right:14px;bottom:14px;z-index:20;max-width:min(480px,calc(100vw - 28px));padding:10px 12px;background:#0d0d0d;border:1px solid #303030;color:#bbb;border-radius:6px;font:10px/1.5 ui-monospace,monospace;box-shadow:0 18px 60px rgba(0,0,0,.45);transform:translateY(14px);opacity:0;pointer-events:none;transition:.25s var(--ease)}.toast.on{transform:none;opacity:1}
+@media(max-width:980px){body{overflow:auto}.app{height:auto;min-height:100%}.main{grid-template-columns:1fr}.panel{min-height:420px;border-right:0;border-bottom:1px solid var(--line)}.panel:last-child{border-left:0}.paper{width:min(90vw,900px)}.top{position:sticky;top:0}.actionbar{overflow:auto;flex-wrap:nowrap}}
+@media(max-width:650px){.brand span{display:none}.top{padding:0 9px}.actionbar{gap:4px}.btn{padding:8px}.editor-wrap{grid-template-columns:40px 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+  <div class="brand">CODE<span>→</span>EPS <span>/ TAMASRAZIM</span></div>
+  <div class="top-sp"></div>
+  <div class="actionbar">
+    <button class="btn" id="newBtn">New</button>
+    <button class="btn" id="openBtn">Open JS</button>
+    <button class="btn" id="saveJsBtn">Save JS</button>
+    <button class="btn" id="svgBtn" disabled>Export SVG</button>
+    <button class="btn primary" id="epsBtn" disabled>Export EPS</button>
+    <button class="btn" id="runBtn">Run</button>
+  </div>
+</header>
+
+<main class="main">
+<section class="panel">
+  <div class="phead"><span>JAVASCRIPT SOURCE</span><span class="sp"></span><span id="dirty">READY</span></div>
+  <div class="editor-wrap">
+    <div class="lines" id="lines"></div>
+    <textarea id="code" spellcheck="false" aria-label="JavaScript vector code"></textarea>
+  </div>
+  <div class="status" id="status">Ready. Write vector code and press RUN.</div>
+</section>
+
+<section class="stage">
+  <div class="stagebar"><span>VECTOR PREVIEW</span><span class="sp"></span><span id="sceneStats">0 objects</span></div>
+  <div class="preview-shell" id="previewShell">
+    <div class="paper" id="paper"><div class="empty-stage">Run your JavaScript</div></div>
+  </div>
+</section>
+
+<aside class="panel inspector">
+  <div class="phead">DOCUMENT</div>
+  <div class="section">
+    <div class="grid2">
+      <div class="field"><label>Width</label><input id="w" type="number" min="1" value="1200"></div>
+      <div class="field"><label>Height</label><input id="h" type="number" min="1" value="848"></div>
+    </div>
+    <div class="hint" style="margin-top:8px">Coordinates use a top-left origin like SVG/Canvas. EPS export maps the same coordinate space to PostScript.</div>
+  </div>
+  <div class="section">
+    <h3>OUTPUT</h3>
+    <div class="stat"><span>Format</span><b>EPS / PostScript</b></div>
+    <div class="stat"><span>Vector</span><b>Native paths</b></div>
+    <div class="stat"><span>Raster image</span><b>Not required</b></div>
+    <div class="stat"><span>Backend</span><b>None</b></div>
+  </div>
+  <div class="section">
+    <h3>API</h3>
+    <div class="api">
+      <code>v.rect(x,y,w,h)
+v.circle(x,y,r)
+v.ellipse(x,y,rx,ry)
+v.line(x1,y1,x2,y2)
+v.path(fn)
+v.text("Hello",x,y,size)</code>
+      <code>v.fill("#7c3aed")
+v.stroke("#111")
+v.width(4)
+v.opacity(.9)
+v.save() / v.restore()
+v.translate(x,y)
+v.rotate(deg)
+v.scale(x,y)</code>
+    </div>
+  </div>
+  <div class="section">
+    <h3>PROJECT</h3>
+    <div class="hint">Everything runs locally in the browser. The generated EPS is plain PostScript text, so it can be inspected and opened by vector applications that support EPS.</div>
+  </div>
+</aside>
+</main>
+</div>
+
+<input id="fileInput" class="file-input" type="file" accept=".js,.txt,text/javascript,text/plain">
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+'use strict';
+
+const DEFAULT_CODE = `const cx = W / 2;
+const cy = H / 2;
+
+v.background("#ffffff");
+
+for (let i = 0; i < 18; i++) {
+  const a = i * Math.PI * 2 / 18;
+  const r = 250 + Math.sin(i * 0.9) * 35;
+  const x = cx + Math.cos(a) * r;
+  const y = cy + Math.sin(a) * r;
+
+  v.save();
+  v.translate(x, y);
+  v.rotate(i * 20);
+
+  v.fill("#" + ["7c3aed","06b6d4","f59e0b","ef4444","22c55e"][i % 5]);
+  v.opacity(0.82);
+  v.ellipse(0, 0, 105, 28);
+
+  v.restore();
+}
+
+v.fill("#111111");
+v.opacity(1);
+v.circle(cx, cy, 92);
+
+v.fill("#ffffff");
+v.text("CODE", cx, cy - 8, 30, "Helvetica-Bold", "center");
+v.text("→EPS", cx, cy + 28, 25, "Helvetica", "center");
+`;
+
+const $ = s => document.querySelector(s);
+const code = $('#code'), lines = $('#lines'), status = $('#status'), paper = $('#paper');
+const wInput = $('#w'), hInput = $('#h'), epsBtn = $('#epsBtn'), svgBtn = $('#svgBtn');
+const dirty = $('#dirty'), sceneStats = $('#sceneStats'), toast = $('#toast');
+const fileInput = $('#fileInput');
+let lastScene = null;
+let toastTimer = 0;
+
+function esc(s){
+  return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+function clamp(n,a,b){return Math.max(a,Math.min(b,n))}
+function num(v,d=0){const n=Number(v);return Number.isFinite(n)?n:d}
+function hexColor(s){
+  s=String(s||'#000').trim();
+  if(/^#([0-9a-f]{3})$/i.test(s)){
+    const m=s.match(/^#([0-9a-f]{3})$/i)[1];
+    s='#'+m.split('').map(x=>x+x).join('');
+  }
+  if(/^#([0-9a-f]{6})$/i.test(s)){
+    const m=s.match(/^#([0-9a-f]{6})$/i)[1];
+    return [parseInt(m.slice(0,2),16)/255,parseInt(m.slice(2,4),16)/255,parseInt(m.slice(4,6),16)/255];
+  }
+  const rgb=s.match(/^rgba?\(([^)]+)\)$/i);
+  if(rgb){
+    const a=rgb[1].split(',').map(Number);
+    return [clamp(a[0]/255,0,1),clamp(a[1]/255,0,1),clamp(a[2]/255,0,1)];
+  }
+  const named={black:[0,0,0],white:[1,1,1],red:[1,0,0],green:[0,0.5,0],blue:[0,0,1],yellow:[1,1,0],cyan:[0,1,1],magenta:[1,0,1],gray:[.5,.5,.5],grey:[.5,.5,.5]};
+  return named[s.toLowerCase()]||[0,0,0];
+}
+function colorHex(s){
+  const c=hexColor(s).map(x=>Math.round(x*255));
+  return '#'+c.map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function psNum(n){return Number(n).toFixed(3).replace(/\.000$/,'').replace(/(\.\d*?)0+$/,'$1')}
+function matrixIdentity(){return [1,0,0,1,0,0]}
+function matrixMultiply(a,b){
+  return [
+    a[0]*b[0]+a[2]*b[1],
+    a[1]*b[0]+a[3]*b[1],
+    a[0]*b[2]+a[2]*b[3],
+    a[1]*b[2]+a[3]*b[3],
+    a[0]*b[4]+a[2]*b[5]+a[4],
+    a[1]*b[4]+a[3]*b[5]+a[5]
+  ];
+}
+function matrixPoint(m,x,y){return [m[0]*x+m[2]*y+m[4],m[1]*x+m[3]*y+m[5]]}
+
+class Scene {
+  constructor(W,H){
+    this.W=W;this.H=H;this.ops=[];this.stack=[];this.matrix=matrixIdentity();
+    this.state={fill:'#000000',stroke:null,width:1,opacity:1};
+    this.backgroundValue=null;
+  }
+  save(){this.stack.push({matrix:this.matrix.slice(),state:{...this.state}});this.ops.push({t:'save'});return this}
+  restore(){const s=this.stack.pop();if(s){this.matrix=s.matrix;this.state=s.state};this.ops.push({t:'restore'});return this}
+  translate(x,y){this.matrix=matrixMultiply(this.matrix,[1,0,0,1,num(x),num(y)]);return this}
+  rotate(deg){const r=num(deg)*Math.PI/180,c=Math.cos(r),s=Math.sin(r);this.matrix=matrixMultiply(this.matrix,[c,s,-s,c,0,0]);return this}
+  scale(x,y=x){this.matrix=matrixMultiply(this.matrix,[num(x,1),0,0,num(y,1),0,0]);return this}
+  fill(c){this.state.fill=c;return this}
+  stroke(c){this.state.stroke=c;return this}
+  noStroke(){this.state.stroke=null;return this}
+  width(n){this.state.width=Math.max(0,num(n,1));return this}
+  opacity(n){this.state.opacity=clamp(num(n,1),0,1);return this}
+  background(c){this.backgroundValue=c;this.ops.push({t:'background',c});return this}
+  _style(extra={}){return {fill:this.state.fill,stroke:this.state.stroke,width:this.state.width,opacity:this.state.opacity,m:this.matrix.slice(),...extra}}
+  rect(x,y,w,h,r=0){this.ops.push({t:'rect',x:num(x),y:num(y),w:num(w),h:num(h),r:Math.max(0,num(r)),...this._style()});return this}
+  circle(x,y,r){this.ops.push({t:'circle',x:num(x),y:num(y),r:Math.abs(num(r)),...this._style()});return this}
+  ellipse(x,y,rx,ry){this.ops.push({t:'ellipse',x:num(x),y:num(y),rx:Math.abs(num(rx)),ry:Math.abs(num(ry)),...this._style()});return this}
+  line(x1,y1,x2,y2){this.ops.push({t:'line',x1:num(x1),y1:num(y1),x2:num(x2),y2:num(y2),...this._style({fill:null})});return this}
+  path(fn){
+    const p=new PathRecorder();
+    if(typeof fn==='function')fn(p);
+    this.ops.push({t:'path',commands:p.commands.slice(),...this._style()});
+    return this;
+  }
+  text(value,x,y,size=16,font='Helvetica',anchor='left'){
+    this.ops.push({t:'text',text:String(value),x:num(x),y:num(y),size:Math.max(1,num(size,16)),font:String(font||'Helvetica'),anchor:String(anchor||'left'),...this._style()});
+    return this;
+  }
+}
+
+class PathRecorder{
+  constructor(){this.commands=[]}
+  moveTo(x,y){this.commands.push(['M',num(x),num(y)]);return this}
+  lineTo(x,y){this.commands.push(['L',num(x),num(y)]);return this}
+  bezierTo(x1,y1,x2,y2,x3,y3){this.commands.push(['C',num(x1),num(y1),num(x2),num(y2),num(x3),num(y3)]);return this}
+  quadraticTo(x1,y1,x2,y2){
+    const last=this.commands.slice().reverse().find(c=>c[0]==='M'||c[0]==='L'||c[0]==='C');
+    const x0=last?last[last.length-2]:0,y0=last?last[last.length-1]:0;
+    this.bezierTo(x0+2/3*(x1-x0),y0+2/3*(y1-y0),x2+2/3*(x1-x2),y2+2/3*(y1-y2),x2,y2);
+    return this;
+  }
+  close(){this.commands.push(['Z']);return this}
+}
+
+function transformScene(scene){
+  const ops=[];
+  for(const op of scene.ops){
+    if(op.t==='save'||op.t==='restore'||op.t==='background'){ops.push({...op});continue}
+    if(op.t==='rect' || op.t==='circle' || op.t==='ellipse' || op.t==='text'){
+      ops.push({...op, matrix:op.m});
+    }else if(op.t==='line'){
+      ops.push({...op,p1:matrixPoint(op.m,op.x1,op.y1),p2:matrixPoint(op.m,op.x2,op.y2)});
+    }else if(op.t==='path'){
+      ops.push({...op,commands:op.commands.map(c=>{
+        if(c[0]==='Z')return c;
+        if(c[0]==='M'||c[0]==='L'){const p=matrixPoint(op.m,c[1],c[2]);return [c[0],p[0],p[1]]}
+        if(c[0]==='C'){const p1=matrixPoint(op.m,c[1],c[2]),p2=matrixPoint(op.m,c[3],c[4]),p3=matrixPoint(op.m,c[5],c[6]);return ['C',...p1,...p2,...p3]}
+        return c;
+      })});
+    }
+  }
+  return ops;
+}
+function svgStyle(op){
+  const fill=op.fill?colorHex(op.fill):'none',stroke=op.stroke?colorHex(op.stroke):'none';
+  return 'fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+psNum(op.width)+'" opacity="'+psNum(op.opacity)+'"';
+}
+function matrixAttr(m){return 'matrix('+m.map(psNum).join(' ')+')'}
+function renderSvg(scene){
+  const ops=scene.ops;let s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+scene.W+' '+scene.H+'" width="'+scene.W+'" height="'+scene.H+'">';
+  if(scene.backgroundValue)s+='<rect width="100%" height="100%" fill="'+colorHex(scene.backgroundValue)+'"/>';
+  for(const op of ops){
+    if(op.t==='background'||op.t==='save'||op.t==='restore')continue;
+    const st=svgStyle(op);
+    if(op.t==='rect'){
+      s+='<rect x="'+psNum(op.x)+'" y="'+psNum(op.y)+'" width="'+psNum(op.w)+'" height="'+psNum(op.h)+'"'+(op.r?' rx="'+psNum(op.r)+'"':'')+' transform="'+matrixAttr(op.m)+'" '+st+'/>';
+    }else if(op.t==='circle'){
+      s+='<circle cx="'+psNum(op.x)+'" cy="'+psNum(op.y)+'" r="'+psNum(op.r)+'" transform="'+matrixAttr(op.m)+'" '+st+'/>';
+    }else if(op.t==='ellipse'){
+      s+='<ellipse cx="'+psNum(op.x)+'" cy="'+psNum(op.y)+'" rx="'+psNum(op.rx)+'" ry="'+psNum(op.ry)+'" transform="'+matrixAttr(op.m)+'" '+st+'/>';
+    }else if(op.t==='line'){
+      s+='<line x1="'+psNum(op.x1)+'" y1="'+psNum(op.y1)+'" x2="'+psNum(op.x2)+'" y2="'+psNum(op.y2)+'" transform="'+matrixAttr(op.m)+'" '+st+'/>';
+    }else if(op.t==='path'){
+      let d='';
+      for(const c of op.commands){if(c[0]==='M')d+='M '+psNum(c[1])+' '+psNum(c[2])+' ';else if(c[0]==='L')d+='L '+psNum(c[1])+' '+psNum(c[2])+' ';else if(c[0]==='C')d+='C '+c.slice(1).map(psNum).join(' ')+' ';else if(c[0]==='Z')d+='Z ';}
+      s+='<path d="'+d.trim()+'" transform="'+matrixAttr(op.m)+'" '+st+'/>';
+    }else if(op.t==='text'){
+      const a=op.anchor==='center'?'middle':op.anchor==='right'?'end':'start';
+      s+='<text x="'+psNum(op.x)+'" y="'+psNum(op.y)+'" transform="'+matrixAttr(op.m)+'" fill="'+colorHex(op.fill||'#000')+'" opacity="'+psNum(op.opacity)+'" font-family="'+esc(op.font)+'" font-size="'+psNum(op.size)+'" text-anchor="'+a+'">'+esc(op.text)+'</text>';
+    }
+  }
+  return s+'</svg>';
+}
+
+function psColor(c,opacity){
+  const rgb=hexColor(c);return psNum(rgb[0])+' '+psNum(rgb[1])+' '+psNum(rgb[2])+' setrgbcolor';
+}
+function psTransform(m){
+  return psNum(m[0])+' '+psNum(m[1])+' '+psNum(m[2])+' '+psNum(m[3])+' '+psNum(m[4])+' '+psNum(m[5])+' concat';
+}
+function psPath(commands){
+  let out='';
+  for(const c of commands){
+    if(c[0]==='M')out+=psNum(c[1])+' '+psNum(c[2])+' moveto\n';
+    else if(c[0]==='L')out+=psNum(c[1])+' '+psNum(c[2])+' lineto\n';
+    else if(c[0]==='C')out+=c.slice(1).map(psNum).join(' ')+' curveto\n';
+    else if(c[0]==='Z')out+='closepath\n';
+  }
+  return out;
+}
+function escPs(s){
+  return String(s).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)').replace(/[\r\n]+/g,' ');
+}
+function emitShape(op){
+  let out='gsave\n'+psTransform(op.m)+'\n';
+  if(op.t==='rect'){
+    if(op.r){
+      const r=Math.min(op.r,Math.abs(op.w)/2,Math.abs(op.h)/2),x=op.x,y=op.y,w=op.w,h=op.h,k=.5522847498;
+      out+='newpath\n'+psNum(x+r)+' '+psNum(y)+' moveto\n'+
+        psNum(x+w-r)+' '+psNum(y)+' lineto\n'+
+        psNum(x+w-r+k*r)+' '+psNum(y)+' '+psNum(x+w)+' '+psNum(y+r-k*r)+' '+psNum(x+w)+' '+psNum(y+r)+' curveto\n'+
+        psNum(x+w)+' '+psNum(y+h-r)+' lineto\n'+
+        psNum(x+w)+' '+psNum(y+h-r+k*r)+' '+psNum(x+w-r+k*r)+' '+psNum(y+h)+' '+psNum(x+w-r)+' '+psNum(y+h)+' curveto\n'+
+        psNum(x+r)+' '+psNum(y+h)+' lineto\n'+
+        psNum(x+r-k*r)+' '+psNum(y+h)+' '+psNum(x)+' '+psNum(y+h-r+k*r)+' '+psNum(x)+' '+psNum(y+h-r)+' curveto\n'+
+        psNum(x)+' '+psNum(y+r)+' lineto\n'+
+        psNum(x)+' '+psNum(y+r-k*r)+' '+psNum(x+r-k*r)+' '+psNum(y)+' '+psNum(x+r)+' '+psNum(y)+' curveto closepath\n';
+    }else{
+      out+='newpath '+psNum(op.x)+' '+psNum(op.y)+' moveto '+psNum(op.x+op.w)+' 0 rlineto 0 '+psNum(op.h)+' rlineto '+psNum(-op.w)+' 0 rlineto closepath\n';
+    }
+  }else if(op.t==='circle'){
+    out+='newpath '+psNum(op.x)+' '+psNum(op.y)+' '+psNum(op.r)+' 0 360 arc closepath\n';
+  }else if(op.t==='ellipse'){
+    out+='newpath gsave '+psNum(op.x)+' '+psNum(op.y)+' translate '+psNum(op.rx)+' '+psNum(op.ry)+' scale 0 0 1 0 360 arc closepath grestore\n';
+  }else if(op.t==='line'){
+    out+='newpath '+psNum(op.x1)+' '+psNum(op.y1)+' moveto '+psNum(op.x2)+' '+psNum(op.y2)+' lineto\n';
+  }else if(op.t==='path'){
+    out+='newpath\n'+psPath(op.commands);
+  }else if(op.t==='text'){
+    const align=op.anchor==='center'?'.5':'right'===op.anchor?'1':'0';
+    out+='/'+op.font.replace(/[^a-zA-Z0-9-]/g,'')+' findfont '+psNum(op.size)+' scalefont setfont\n'+
+      psNum(op.x)+' '+psNum(op.y)+' moveto\n('+escPs(op.text)+') dup stringwidth pop '+align+' mul neg 0 rmoveto show\n';
+  }
+  if(op.t==='text'){
+    out+=psColor(op.fill||'#000000',op.opacity)+'\n';
+  }else{
+    if(op.fill)out+=psColor(op.fill,op.opacity)+'\n';
+    if(op.stroke)out+='gsave '+psColor(op.stroke,op.opacity)+' '+psNum(op.width)+' setlinewidth stroke grestore\n';
+  }
+  if(op.t==='line'||op.t==='path'){
+    if(op.stroke)out+=psColor(op.stroke,op.opacity)+'\n'+psNum(op.width)+' setlinewidth stroke\n';
+    else if(op.fill)out+='fill\n';
+  }else if(op.t!=='text'){
+    if(op.fill&&op.stroke){
+      out+='fill\ngsave '+psColor(op.stroke,op.opacity)+' '+psNum(op.width)+' setlinewidth stroke grestore\n';
+    }else if(op.fill)out+='fill\n';
+    else if(op.stroke)out+=psColor(op.stroke,op.opacity)+' '+psNum(op.width)+' setlinewidth stroke\n';
+  }
+  out+='grestore\n';
+  return out;
+}
+function generateEps(scene){
+  const body=[];
+  body.push('%!PS-Adobe-3.0 EPSF-3.0');
+  body.push('%%Creator: Tamasrazim CODE→EPS');
+  body.push('%%Title: CODE→EPS Artwork');
+  body.push('%%BoundingBox: 0 0 '+Math.round(scene.W)+' '+Math.round(scene.H));
+  body.push('%%LanguageLevel: 2');
+  body.push('%%Pages: 1');
+  body.push('%%EndComments');
+  body.push('/Helvetica /Helvetica def');
+  body.push('0 '+Math.round(scene.H)+' translate');
+  body.push('1 -1 scale');
+  if(scene.backgroundValue){
+    body.push(psColor(scene.backgroundValue)+' 0 0 '+Math.round(scene.W)+' '+Math.round(scene.H)+' rectfill');
+  }
+  for(const op of scene.ops){
+    if(op.t==='background'||op.t==='save'||op.t==='restore')continue;
+    body.push(emitShape(op));
+  }
+  body.push('showpage');
+  body.push('%%EOF');
+  return body.join('\n')+'\n';
+}
+
+function buildScene(){
+  const W=Math.max(1,Math.round(num(wInput.value,1200)));
+  const H=Math.max(1,Math.round(num(hInput.value,848)));
+  const scene=new Scene(W,H);
+  const runner=new Function('v','W','H','time',code.value+'\n//# sourceURL=code-to-eps-user.js');
+  runner(scene,W,H,0);
+  return scene;
+}
+function render(){
+  try{
+    const scene=buildScene();
+    lastScene=scene;
+    paper.innerHTML=renderSvg(scene);
+    sceneStats.textContent=scene.ops.filter(o=>!['save','restore','background'].includes(o.t)).length+' objects';
+    status.textContent='Render complete — '+scene.ops.length+' scene operations.';
+    status.className='status good';
+    epsBtn.disabled=false;svgBtn.disabled=false;
+    dirty.textContent='READY';
+    return true;
+  }catch(e){
+    lastScene=null;epsBtn.disabled=true;svgBtn.disabled=true;
+    status.textContent='ERROR: '+(e&&e.message||e);
+    status.className='status bad';
+    dirty.textContent='ERROR';
+    return false;
+  }
+}
+function downloadBlob(blob,name){
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2500);
+}
+function exportEps(){
+  if(!lastScene)return;
+  downloadBlob(new Blob([generateEps(lastScene)],{type:'application/postscript'}),'code-to-eps.eps');
+  flash('EPS exported.');
+}
+function exportSvg(){
+  if(!lastScene)return;
+  downloadBlob(new Blob([renderSvg(lastScene)],{type:'image/svg+xml;charset=utf-8'}),'code-to-eps.svg');
+  flash('SVG exported.');
+}
+function flash(t){
+  clearTimeout(toastTimer);toast.textContent=t;toast.classList.add('on');
+  toastTimer=setTimeout(()=>toast.classList.remove('on'),2200);
+}
+function syncLines(){
+  const n=code.value.split('\n').length;
+  lines.innerHTML=Array.from({length:n},(_,i)=>'<span>'+(i+1)+'</span>').join('');
+}
+function markDirty(){dirty.textContent='EDITED';dirty.style.color='#aaa'}
+code.value=DEFAULT_CODE;
+syncLines();
+code.addEventListener('input',()=>{syncLines();markDirty()});
+code.addEventListener('scroll',()=>{lines.scrollTop=code.scrollTop});
+code.addEventListener('keydown',e=>{
+  if(e.key==='Tab'){e.preventDefault();const s=code.selectionStart;code.setRangeText('  ',s,code.selectionEnd,'end');syncLines();markDirty()}
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();render()}
+});
+$('#runBtn').onclick=render;
+epsBtn.onclick=exportEps;
+svgBtn.onclick=exportSvg;
+$('#newBtn').onclick=()=>{if(!confirm('Replace the current code with the starter example?'))return;code.value=DEFAULT_CODE;wInput.value=1200;hInput.value=848;syncLines();render()};
+$('#saveJsBtn').onclick=()=>downloadBlob(new Blob([code.value],{type:'text/javascript;charset=utf-8'}),'code-to-eps.js');
+$('#openBtn').onclick=()=>fileInput.click();
+fileInput.onchange=async e=>{const f=e.target.files[0];if(!f)return;code.value=await f.text();syncLines();markDirty();render();fileInput.value=''};
+[wInput,hInput].forEach(el=>el.addEventListener('change',()=>{if(lastScene)render()}));
+window.addEventListener('error',e=>{if(e.error){status.textContent='ERROR: '+e.error.message;status.className='status bad'}});
+render();
+})();
+</script>
+</body>
+</html>
