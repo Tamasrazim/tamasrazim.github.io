@@ -266,7 +266,7 @@
      while predominantly vertical swipes remain available to inner sections. */
   var mobileTouch=window.matchMedia && window.matchMedia('(max-width: 720px)').matches;
   if(mobileTouch){
-    var touch={active:false,startX:0,startY:0,startScroll:0,locked:false,moved:false,lastX:0,lastTime:0};
+    var touch={active:false,startX:0,startY:0,startScroll:0,locked:false,moved:false,lastX:0,lastTime:0,velocity:0};
 
     scroller.addEventListener('touchstart',function(e){
       if(!e.touches || e.touches.length!==1)return;
@@ -279,6 +279,7 @@
       touch.moved=false;
       touch.lastX=p.clientX;
       touch.lastTime=performance.now();
+      touch.velocity=0;
     },{passive:true});
 
     scroller.addEventListener('touchmove',function(e){
@@ -299,6 +300,7 @@
       var velocity=(p.clientX-touch.lastX)/(dt/1000);
       touch.lastX=p.clientX;
       touch.lastTime=now;
+      touch.velocity=velocity;
       e.preventDefault();
       scroller.scrollLeft=loopAxisPosition(touch.startScroll-dx);
       setAxisRollFromVelocity(velocity);
@@ -310,6 +312,13 @@
       if(!touch.active)return;
       touch.active=false;
       touch.locked=false;
+      if(touch.moved && Math.abs(touch.velocity)>60){
+        wheelVelocity=Math.max(-4200,Math.min(4200,-touch.velocity*.9));
+        if(!wheelRAF){
+          wheelLastTime=0;
+          wheelRAF=window.requestAnimationFrame(animateWheel);
+        }
+      }
       axisRollTarget=0;
       if(touch.moved){
         scheduleProgress();
@@ -324,7 +333,7 @@
   }
 
   /* Desktop drag-to-pan: only starts from non-interactive page surfaces. */
-  var drag={active:false,startX:0,startScroll:0,pointerId:null,moved:false,lastX:0,lastTime:0};
+  var drag={active:false,startX:0,startScroll:0,pointerId:null,moved:false,lastX:0,lastTime:0,velocity:0};
 
   function isDragExcluded(target){
     if(!target || !target.closest)return true;
@@ -342,6 +351,7 @@
       drag.moved=false;
       drag.lastX=e.clientX;
       drag.lastTime=performance.now();
+      drag.velocity=0;
       stateNode.classList.add('axis-dragging');
       try{scroller.setPointerCapture(e.pointerId);}catch(_err){}
     });
@@ -356,6 +366,7 @@
       var velocity=(e.clientX-drag.lastX)/(dt/1000);
       drag.lastX=e.clientX;
       drag.lastTime=now;
+      drag.velocity=velocity;
       scroller.scrollLeft=loopAxisPosition(drag.startScroll-delta);
       setAxisRollFromVelocity(velocity);
       e.preventDefault();
@@ -363,6 +374,13 @@
 
     function endDrag(e){
       if(!drag.active || (e && e.pointerId!==drag.pointerId))return;
+      if(drag.moved && Math.abs(drag.velocity)>60){
+        wheelVelocity=Math.max(-4200,Math.min(4200,-drag.velocity*.9));
+        if(!wheelRAF){
+          wheelLastTime=0;
+          wheelRAF=window.requestAnimationFrame(animateWheel);
+        }
+      }
       drag.active=false;
       drag.pointerId=null;
       stateNode.classList.remove('axis-dragging');
