@@ -1395,6 +1395,7 @@ select.mini{
       <button data-act="render" class="key">Render</button>
       <button data-act="render50" class="key" id="render50Btn" title="Render the first 50 Prism Flowers with the current output settings">Render ×50</button>
       <button data-act="renderAll" class="key" id="renderAllBtn" title="Render every Prism Flower in the library with the current output settings">Render All</button>
+      <button data-act="renderAllPng" class="key" id="renderAllPngBtn" title="Render every Prism Flower as a 3840×2160 transparent PNG, grouped in folders of 50">Render PNG All</button>
     </nav>
   </header>
 
@@ -16807,7 +16808,7 @@ function startRender(job, opts) {
   S.renderStart = Date.now();
   S.activeJob = job;
   $('#cancelBtn').disabled = false;
-  $('[data-act=startRender], [data-act=queueRun], [data-act=render], [data-act=render50], [data-act=renderAll]').forEach(function (b) { b.disabled = true; });
+  $('[data-act=startRender], [data-act=queueRun], [data-act=render], [data-act=render50], [data-act=renderAll], [data-act=renderAllPng]').forEach(function (b) { b.disabled = true; });
   $('#stDot').className = 'dot busy';
   showTab('p-render');
   clearLog();
@@ -16872,7 +16873,7 @@ function finishRender(job, result, opts) {
   S.activeJob = null;
   $('#cancelBtn').disabled = true;
   if (!S.batchRendering) {
-    $('[data-act=startRender], [data-act=queueRun], [data-act=render], [data-act=render50], [data-act=renderAll]').forEach(function (b) { b.disabled = false; });
+    $('[data-act=startRender], [data-act=queueRun], [data-act=render], [data-act=render50], [data-act=renderAll], [data-act=renderAllPng]').forEach(function (b) { b.disabled = false; });
   }
   var batchBtn = $('#render50Btn');
   if (batchBtn) batchBtn.disabled = !!S.batchRendering;
@@ -17574,6 +17575,176 @@ async function renderPrismBatch(limit, label) {
   }
 }
 
+async function renderAllPrismPng(){
+  if (S.rendering || S.batchRendering) return;
+  var allPrisms = $$('script[type="text/plain"][id^="sample-"]').filter(function (node) {
+    return /prism/i.test(node.dataset.title || '');
+  });
+  if (!allPrisms.length) {
+    $('#stMsg').textContent = 'No Prism Flowers are available.';
+    return;
+  }
+  if (typeof window.showDirectoryPicker !== 'function') {
+    $('#stMsg').textContent = 'Render PNG All needs a browser folder picker. Use current Chrome/Edge on HTTPS.';
+    return;
+  }
+
+  S.batchRendering = true;
+  S.batchCancelled = false;
+
+  var b50 = $('#render50Btn'), ball = $('#renderAllBtn'), bpng = $('#renderAllPngBtn');
+  if (b50) b50.disabled = true;
+  if (ball) ball.disabled = true;
+  if (bpng) bpng.disabled = true;
+
+  var snapshot = {
+    id: S.id, name: S.name, version: S.version, created: S.created, dirty: S.dirty,
+    code: S.code, comp: S.comp ? JSON.parse(JSON.stringify(S.comp)) : null,
+    meta: S.meta ? JSON.parse(JSON.stringify(S.meta)) : null, frame: S.frame,
+    hash: S.hash, exportFormat: S.exportFormat, quality: S.quality,
+    timebase: S.timebase, checksums: S.checksums
+  };
+
+  var completed = 0, failed = 0, outputDir = null;
+
+  try {
+    showTab('p-render');
+    showMobile('rail');
+    outputDir = await pickDirectory();
+
+    for (var i = 0; i < allPrisms.length; i++) {
+      if (S.batchCancelled) break;
+
+      var groupFolderName = pad(Math.floor(i / 50) + 1, 3);
+      var groupDir = await outputDir.getDirectoryHandle(groupFolderName, { create: true });
+      var node = allPrisms[i];
+      var title = node.dataset.title || ('Prism Flower ' + (i + 1));
+      var src = (node.textContent || '').replace(/^\n/, '');
+
+      try {
+        S.id = null;
+        S.version = 1;
+        S.name = title;
+        S.meta = defaultMeta();
+        S.meta.title = title;
+        S.meta.description = node.dataset.desc || '';
+
+        S.comp = CORE.composition(merge(snapshot.comp || {}, {
+          width: 3840,
+          height: 2160,
+          fps: 60,
+          duration: 1 / 60,
+          loop: false,
+          loopDuration: 1 / 60,
+          speed: 1,
+          transparent: true,
+          background: '#000000'
+        }));
+
+        S.exportFormat = 'png';
+        S.quality = 'max';
+        S.timebase = snapshot.timebase;
+        S.checksums = false;
+        S.frame = 0;
+        S.lastProgress = null;
+
+        edSetValue(src);
+        S.code = Ed.ta.value;
+        $('#projName').value = title;
+        $('#projVer').textContent = 'v1';
+        applyComp({});
+        syncMetaUI();
+        markDirty(false);
+
+        var compiled = await run();
+        if (!compiled || !compiled.ok) {
+          failed++;
+          logLine('PNG compile failed — ' + title, true);
+          continue;
+        }
+
+        var job = buildJob({
+          exportFormat: 'png',
+          composition: {
+            width: 3840,
+            height: 2160,
+            fps: 60,
+            duration: 1 / 60,
+            loop: false,
+            loopDuration: 1 / 60,
+            speed: 1,
+            transparent: true,
+            background: '#000000'
+          }
+        });
+        job.format = 'png';
+        job.target = 'dir';
+        job.fileName = slugify(title) + '.png';
+        job.metadata.title = title;
+        job.metadata.description = node.dataset.desc || '';
+
+        var result = await Engine.api.exportJob(
+          job, 0, groupDir, null,
+          function (msg) { logLine(msg); },
+          function (p) {
+            $('#stMsg').textContent =
+              'Render PNG All — 4K transparent · ' + (i + 1) + ' / ' + allPrisms.length +
+              ' · ' + title + ' · frame ' + p.frame;
+          }
+        );
+
+        if (!result || !result.ok) {
+          throw new Error(result && result.error ? (result.error.message || 'PNG export failed') : 'PNG export failed');
+        }
+
+        try { await groupDir.removeEntry('manifest.json'); } catch (removeError) {}
+
+        completed++;
+      } catch (flowerError) {
+        failed++;
+        logLine('PNG batch failed — ' + title + ' — ' + String(flowerError && flowerError.stack || flowerError), true);
+      }
+    }
+  } catch (e) {
+    if (!(e && (e.name === 'AbortError' || e.code === 20))) throw e;
+  } finally {
+    S.id = snapshot.id;
+    S.version = snapshot.version;
+    S.name = snapshot.name;
+    S.created = snapshot.created;
+    S.dirty = snapshot.dirty;
+    S.comp = snapshot.comp ? CORE.composition(snapshot.comp) : CORE.composition({});
+    S.meta = snapshot.meta ? JSON.parse(JSON.stringify(snapshot.meta)) : defaultMeta();
+    S.frame = snapshot.frame;
+    S.hash = snapshot.hash;
+    S.exportFormat = snapshot.exportFormat;
+    S.quality = snapshot.quality;
+    S.timebase = snapshot.timebase;
+    S.checksums = snapshot.checksums;
+    S.code = snapshot.code || '';
+
+    edSetValue(S.code);
+    $('#projName').value = S.name;
+    $('#projVer').textContent = 'v' + S.version;
+    S.frame = Math.min(S.frame, Math.max(0, S.comp.frameCount - 1));
+    S.compiled = false;
+    applyComp({});
+    syncMetaUI();
+    markDirty(snapshot.dirty);
+    try { await run(); } catch (restoreError) {}
+
+    S.batchRendering = false;
+    if (b50) b50.disabled = false;
+    if (ball) ball.disabled = false;
+    if (bpng) bpng.disabled = false;
+    $('#stDot').className = 'dot ok';
+    $('#rprog').classList.remove('scan');
+    toyShow(false);
+    $('#stMsg').textContent =
+      (S.batchCancelled ? 'Render PNG All stopped — ' : 'Render PNG All complete — ') +
+      completed + ' written, ' + failed + ' failed. 4K transparent PNGs are grouped in folders of 50.';
+  }
+}
 function render50PrismBatch() { return renderPrismBatch(50, 'Render ×50'); }
 function renderAllPrismBatch() { return renderPrismBatch(null, 'Render All'); }
 
@@ -18508,6 +18679,24 @@ var ACTS = {
       setStage('IDLE', true);
       $('#stMsg').textContent = 'Render All failed: ' + String(e && e.message || e);
       logLine('Render All failed — ' + String(e && e.stack || e), true);
+    });
+  },
+  renderAllPng: function () {
+    if (S.rendering || S.batchRendering) return;
+    renderAllPrismPng().catch(function (e) {
+      S.batchRendering = false;
+      var b50 = $('#render50Btn'), ball = $('#renderAllBtn'), bpng = $('#renderAllPngBtn');
+      if (b50) b50.disabled = false;
+      if (ball) ball.disabled = false;
+      if (bpng) bpng.disabled = false;
+      if (e && (e.name === 'AbortError' || e.code === 20)) {
+        $('#stMsg').textContent = 'Render PNG All cancelled — no folder selected.';
+        logLine('Render PNG All cancelled before rendering started.');
+        return;
+      }
+      setStage('IDLE', true);
+      $('#stMsg').textContent = 'Render PNG All failed: ' + String(e && e.message || e);
+      logLine('Render PNG All failed — ' + String(e && e.stack || e), true);
     });
   },
   cancelRender: cancelRender,
