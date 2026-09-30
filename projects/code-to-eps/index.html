@@ -282,7 +282,7 @@ function pathSvg(c){let s='';for(const q of c){if(q[0]==='M')s+='M '+psNum(q[1])
 function buildVecScene(){const W=Math.max(1,Math.round(num(wEl.value,1200))),H=Math.max(1,Math.round(num(hEl.value,848))),s=new Scene(W,H),v=new Vec(s);new Function('v','W','H','time','frame',codeEl.value+'\n//# sourceURL=code-to-eps-user.js')(v,W,H,currentFrame,Math.round(currentFrame*60));return s}
 function buildFlowerScene(f){
   const W=Math.max(1,Math.round(num(wEl.value,3840))),H=Math.max(1,Math.round(num(hEl.value,2160))),s=new Scene(W,H),ctx=new RecorderCtx(s,W,H),time=currentFrame*10,frame=Math.round(currentFrame*600),motion={loopProgress:currentFrame,scale:1},TAU=Math.PI*2;
-  const run=new Function('time','frame','fps','ctx','width','height','motion','TAU',f.code+'\n//# sourceURL=code-to-eps-'+f.id+'.js');
+  const run=new Function('time','frame','fps','ctx','width','height','motion','TAU',f.code+'\nif(typeof renderFrame==="function"){renderFrame(time,frame,fps,ctx,width,height,motion);}\n//# sourceURL=code-to-eps-'+f.id+'.js');
   run(time,frame,60,ctx,W,H,motion,TAU);
   return s;
 }
@@ -290,7 +290,7 @@ function drawFlowerPreview(f){
   const W=Math.max(1,Math.round(num(wEl.value,3840))),H=Math.max(1,Math.round(num(hEl.value,2160)));
   paper.innerHTML='<canvas width="'+W+'" height="'+H+'"></canvas>';
   const ctx=paper.querySelector('canvas').getContext('2d');
-  const run=new Function('time','frame','fps','ctx','width','height','motion','TAU',f.code+'\n//# sourceURL=code-to-eps-preview-'+f.id+'.js');
+  const run=new Function('time','frame','fps','ctx','width','height','motion','TAU',f.code+'\nif(typeof renderFrame==="function"){renderFrame(time,frame,fps,ctx,width,height,motion);}\n//# sourceURL=code-to-eps-preview-'+f.id+'.js');
   run(currentFrame*10,Math.round(currentFrame*600),60,ctx,W,H,{loopProgress:currentFrame,scale:1},Math.PI*2);
 }
 function runCurrent(){
