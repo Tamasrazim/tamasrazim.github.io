@@ -23,7 +23,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 .status{min-height:42px;border-top:1px solid var(--line);padding:9px 11px;color:#777;font:10px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap}.status.good{color:var(--good)}.status.bad{color:var(--bad)}
 .stage{background:#060606}.stagebar .sp{flex:1}.stagebar input{width:70px;background:#0d0d0d;border:1px solid #303030;border-radius:4px;color:#ddd;padding:5px 6px;font:10px ui-monospace,monospace}
 .preview{min-height:0;flex:1;display:grid;place-items:center;padding:22px;overflow:auto;background-image:linear-gradient(45deg,#101010 25%,transparent 25%),linear-gradient(-45deg,#101010 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#101010 75%),linear-gradient(-45deg,transparent 75%,#101010 75%);background-size:24px 24px;background-position:0 0,0 12px,12px -12px,-12px 0}
-.paper{width:min(92%,980px);aspect-ratio:1.4142;background:#fff;box-shadow:0 30px 100px rgba(0,0,0,.55);overflow:hidden}.paper canvas{display:block;width:100%;height:100%}
+.paper{width:min(92%,980px);aspect-ratio:1.4142;background:transparent;box-shadow:0 30px 100px rgba(0,0,0,.55);overflow:hidden}.paper canvas{display:block;width:100%;height:100%}
 .inspector{overflow:auto}.section{padding:12px;border-bottom:1px solid var(--line)}.section h3{margin:0 0 9px;color:#8c8c84;font:800 9px/1 ui-monospace,monospace;letter-spacing:.15em;text-transform:uppercase}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}.field label{display:block;color:#64645e;font:8px ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}.field input,.field select{width:100%;background:#101010;color:#ddd;border:1px solid #2b2b2b;border-radius:5px;padding:8px;font:10px ui-monospace,monospace;outline:0}
 #flowerSearch{margin-bottom:7px}.flower-list{height:250px;width:100%;background:#0d0d0d;color:#ddd;border:1px solid #2b2b2b;border-radius:5px;padding:5px;font:9px ui-monospace,monospace}.mini-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.mini-actions .btn{padding:7px 8px}
 .stat{display:flex;justify-content:space-between;gap:8px;margin:5px 0;color:#707069;font:9px ui-monospace,monospace}.stat b{color:#ddd;font-weight:600}.hint{color:#666;font:9px/1.7 ui-monospace,monospace}
@@ -99,6 +99,8 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
       <div class="field"><label>Width</label><input id="w" type="number" min="1" value="3840"></div>
       <div class="field"><label>Height</label><input id="h" type="number" min="1" value="2160"></div>
     </div>
+    <div class="field" style="margin-top:8px"><label>EPS Background</label><select id="epsBg"><option value="#ffffff" selected>White — Illustrator-safe</option><option value="none">None — no background object</option></select></div>
+    <div class="hint" style="margin-top:7px">Preview stays transparent. EPS itself does not support standard transparency; white preserves translucent artwork's appearance, and the background is a separate editable object.</div>
   </div>
 
   <div class="section">
@@ -126,7 +128,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 const $=s=>document.querySelector(s);
 const codeEl=$('#code'),linesEl=$('#lines'),statusEl=$('#status'),paper=$('#paper'),modeEl=$('#mode');
 const epsBtn=$('#epsBtn'),svgBtn=$('#svgBtn'),allBtn=$('#allBtn'),metaBtn=$('#metaBtn');
-const wEl=$('#w'),hEl=$('#h'),frameEl=$('#frame'),frameReadout=$('#frameReadout');
+const wEl=$('#w'),hEl=$('#h'),frameEl=$('#frame'),frameReadout=$('#frameReadout'),epsBgEl=$('#epsBg');
 const flowerList=$('#flowerList'),flowerSearch=$('#flowerSearch'),flowerInfo=$('#flowerInfo');
 const fileInput=$('#fileInput'),objectCount=$('#objectCount'),toast=$('#toast');
 const DEFAULT_CODE=`v.background("#ffffff");
@@ -232,7 +234,14 @@ class Vec{
   path(fn){const p=new RecorderCtx(this.s,this.s.W,this.s.H);p.m=this.m.slice();p.fillStyle=this.st.fill;p.strokeStyle=this.st.stroke||'#000';p.lineWidth=this.st.width;if(typeof fn==='function')fn(p);for(const o of this.s.ops.slice(-0)){void o}if(p.path.length)this.s.add({t:'path',commands:p.path.slice(),fill:this.st.fill,stroke:this.st.stroke,width:this.st.width,opacity:this.st.opacity,m:this.m.slice()});return this}
   text(text,x,y,size=16,font='Helvetica',anchor='left'){this.s.add({t:'text',text:String(text),x:num(x),y:num(y),size:Math.max(1,num(size,16)),font:String(font||'Helvetica'),anchor:String(anchor||'left'),fill:this.st.fill||'#000',stroke:null,width:0,opacity:this.st.opacity,m:this.m.slice()});return this}
 }
-function psColor(c){const x=cssColor(c);return psNum(x.r)+' '+psNum(x.g)+' '+psNum(x.b)+' setrgbcolor'}
+function psColor(c,opacity=1){
+  const x=cssColor(c);
+  const a=clamp((x.a==null?1:x.a)*clamp(num(opacity,1),0,1),0,1);
+  let r=x.r,g=x.g,b=x.b;
+  const bg=epsBgEl&&epsBgEl.value!=='none'?cssColor(epsBgEl.value):null;
+  if(a<1&&bg){r=r*a+bg.r*(1-a);g=g*a+bg.g*(1-a);b=b*a+bg.b*(1-a)}
+  return psNum(r)+' '+psNum(g)+' '+psNum(b)+' setrgbcolor'
+}
 function psTransform(m){return psNum(m[0])+' '+psNum(m[1])+' '+psNum(m[2])+' '+psNum(m[3])+' '+psNum(m[4])+' '+psNum(m[5])+' concat'}
 function escPs(s){return String(s).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)').replace(/[\r\n]+/g,' ')}
 function pathPs(cmds){let s='';for(const c of cmds){if(c[0]==='M')s+=psNum(c[1])+' '+psNum(c[2])+' moveto\n';else if(c[0]==='L')s+=psNum(c[1])+' '+psNum(c[2])+' lineto\n';else if(c[0]==='C')s+=c.slice(1).map(psNum).join(' ')+' curveto\n';else if(c[0]==='Z')s+='closepath\n'}return s}
@@ -246,16 +255,20 @@ function emitOp(o,i){
   else if(o.t==='ellipse')s+='newpath gsave '+psNum(o.x)+' '+psNum(o.y)+' translate '+psNum(o.rx)+' '+psNum(o.ry)+' scale 0 0 1 0 360 arc closepath grestore\n';
   else if(o.t==='line')s+='newpath '+psNum(o.x1)+' '+psNum(o.y1)+' moveto '+psNum(o.x2)+' '+psNum(o.y2)+' lineto\n';
   else if(o.t==='path')s+='newpath\n'+pathPs(o.commands);
-  else if(o.t==='text')s+='/'+o.font.replace(/[^A-Za-z0-9-]/g,'')+' findfont '+psNum(o.size)+' scalefont setfont '+psNum(o.x)+' '+psNum(o.y)+' moveto ('+escPs(o.text)+') '+(o.anchor==='center'?'dup stringwidth pop 2 div neg 0 rmoveto ':o.anchor==='right'?'dup stringwidth pop neg 0 rmoveto ':'')+'show\n';
-  if(o.t==='text')s+=psColor(o.fill||'#000')+'\nshow\n';
-  else if(o.fill){s+=psColor(o.fill)+'\nfill\n';if(o.stroke)s+='gsave '+psColor(o.stroke)+' '+psNum(o.width||1)+' setlinewidth stroke grestore\n'}
-  else if(o.stroke)s+=psColor(o.stroke)+' '+psNum(o.width||1)+' setlinewidth stroke\n';
+  else if(o.t==='text')s+='/'+o.font.replace(/[^A-Za-z0-9-]/g,'')+' findfont '+psNum(o.size)+' scalefont setfont '+psNum(o.x)+' '+psNum(o.y)+' moveto ('+escPs(o.text)+') '+(o.anchor==='center'?'dup stringwidth pop 2 div neg 0 rmoveto ':o.anchor==='right'?'dup stringwidth pop neg 0 rmoveto ':'')+'\n';
+  if(o.t==='text')s+=psColor(o.fill||'#000',o.opacity)+'\nshow\n';
+  else if(o.fill){s+=psColor(o.fill,o.opacity)+'\nfill\n';if(o.stroke)s+='gsave '+psColor(o.stroke,o.opacity)+' '+psNum(o.width||1)+' setlinewidth stroke grestore\n'}
+  else if(o.stroke)s+=psColor(o.stroke,o.opacity)+' '+psNum(o.width||1)+' setlinewidth stroke\n';
   s+='grestore\n%%EndObject\n';
   return s;
 }
 function generateEps(scene){
-  const lines=['%!PS-Adobe-3.0 EPSF-3.0','%%Creator: Tamasrazim CODE→EPS','%%Title: Editable Vector Artwork','%%BoundingBox: 0 0 '+Math.round(scene.W)+' '+Math.round(scene.H),'%%LanguageLevel: 2','%%Pages: 1','%%EndComments','0 '+Math.round(scene.H)+' translate','1 -1 scale'];
-  if(scene.bg)lines.push(psColor(scene.bg)+' 0 0 '+Math.round(scene.W)+' '+Math.round(scene.H)+' rectfill');
+  const W=Math.round(scene.W),H=Math.round(scene.H);
+  const lines=['%!PS-Adobe-3.0 EPSF-3.0','%%Creator: Tamasrazim CODE→EPS','%%Title: Editable Vector Artwork','%%BoundingBox: 0 0 '+W+' '+H,'%%HiResBoundingBox: 0 0 '+W.toFixed(3)+' '+H.toFixed(3),'%%DocumentData: Clean7Bit','%%LanguageLevel: 3','%%Pages: 1','%%EndComments','0 '+H+' translate','1 -1 scale'];
+  if(epsBgEl&&epsBgEl.value!=='none'){
+    const bg=cssColor(epsBgEl.value);
+    lines.push(psNum(bg.r)+' '+psNum(bg.g)+' '+psNum(bg.b)+' setrgbcolor 0 0 '+W+' '+H+' rectfill');
+  }
   let n=0;
   for(const o of scene.ops){if(o.t==='save'||o.t==='restore')continue;n++;lines.push(emitOp(o,n))}
   lines.push('showpage','%%EOF');
@@ -365,6 +378,7 @@ $('#saveJsBtn').onclick=()=>downloadBlob(new Blob([codeEl.value],{type:'text/jav
 $('#openBtn').onclick=()=>fileInput.click();
 fileInput.onchange=async e=>{const f=e.target.files[0];if(!f)return;currentFlower=-1;codeEl.value=await f.text();syncLines();runCurrent();fileInput.value=''};
 [wEl,hEl].forEach(x=>x.onchange=runCurrent);
+epsBgEl.onchange=()=>{if(currentFlower>=0)runCurrent();else runCurrent()};
 codeEl.addEventListener('input',onInput);
 codeEl.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();const p=codeEl.selectionStart;codeEl.setRangeText('  ',p,codeEl.selectionEnd,'end');syncLines()}if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runCurrent()}});
 codeEl.addEventListener('scroll',()=>linesEl.scrollTop=codeEl.scrollTop);
@@ -374,7 +388,7 @@ async function boot(){
     if(!r.ok)throw new Error('Prism library request failed: '+r.status);
     LIB=await r.json();
     if(!Array.isArray(LIB)||LIB.length!==947)throw new Error('Expected 947 Prism Flowers, found '+(LIB?.length||0));
-    fillFlowers();codeEl.value=DEFAULT_CODE;syncLines();runCurrent();setStatus('Ready — '+LIB.length+' Prism Flowers loaded.','good');
+    fillFlowers();codeEl.value=DEFAULT_CODE;syncLines();runCurrent();setStatus('Ready — '+LIB.length+' Prism Flowers loaded. Preview is transparent; EPS background is configurable.','good');
   }catch(e){codeEl.value=DEFAULT_CODE;syncLines();runCurrent();setStatus('Library error: '+(e.message||e),'bad')}
 }
 boot();
