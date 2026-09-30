@@ -114,7 +114,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 
   <div class="section">
     <h3>ADOBE STOCK METADATA</h3>
-    <div class="notice">CSV uses Adobe Stock fields only: <b>Filename</b>, <b>Title</b>, <b>Keywords</b>. Filename ≤30 characters, title ≤70 characters, keywords ≤50 and ordered by importance.</div>
+    <div class="notice">Export All creates numbered folders in batches of 50 EPS files, plus one matching Adobe CSV inside each folder. CSV fields: <b>Filename</b>, <b>Title</b>, <b>Keywords</b>.</div>
   </div>
 
   <div class="section">
@@ -356,45 +356,62 @@ function flowerKeywords(f){
   ];
   return [...new Set(base.map(x=>String(x).replace(/\s+/g,' ').trim()).filter(Boolean))].slice(0,50);
 }
-function metadataCsv(){
+function metadataCsv(items=LIB.map((f,i)=>({f,i}))){
   const h=['Filename','Title','Keywords'];
   const rows=[h];
-  LIB.forEach((f,i)=>rows.push([adobeFilename(f,i),adobeTitle(f),flowerKeywords(f).join(', ')]));
-  return rows.map(r=>r.map(csvEsc).join('\r\n')).join('\r\n')+'\r\n';
+  items.forEach(({f,i})=>rows.push([adobeFilename(f,i),adobeTitle(f),flowerKeywords(f).join(', ')]));
+  return rows.map(r=>r.map(csvEsc).join(',')).join('\r\n')+'\r\n';
 }
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2500)}
 async function pickFolder(){if(!window.showDirectoryPicker)throw new Error('Folder export requires Chrome or Edge with File System Access support.');return window.showDirectoryPicker({mode:'readwrite'})}
 async function exportAll(){
   const dir=await pickFolder();
-  let done=0,failed=0;
+  let done=0,failed=0,csvSaved=0;
   allBtn.disabled=true;
   try{
     const batchSize=50;
     const totalBatches=Math.ceil(LIB.length/batchSize);
-    for(let i=0;i<LIB.length;i++){
+    for(let start=0;start<LIB.length;start+=batchSize){
+      const end=Math.min(start+batchSize,LIB.length);
+      const batchNo=String(Math.floor(start/batchSize)+1).padStart(3,'0');
+      const batchDir=await dir.getDirectoryHandle(batchNo,{create:true});
+      const batchItems=[];
+      for(let i=start;i<end;i++){
+        try{
+          const scene=buildFlowerScene(LIB[i]);
+          const name=adobeFilename(LIB[i],i);
+          const h=await batchDir.getFileHandle(name,{create:true});
+          const w=await h.createWritable();
+          await w.write(generateEps(scene));
+          await w.close();
+          batchItems.push({f:LIB[i],i});
+          done++;
+        }catch(e){
+          failed++;
+          console.error(LIB[i].title,e);
+        }
+        if((done+failed)%10===0||i===end-1){
+          setStatus('Export All — '+done+' / '+LIB.length+' EPS · folder '+batchNo+' / '+String(totalBatches).padStart(3,'0')+' · '+batchItems.length+' in current folder');
+        }
+      }
       try{
-        const batchNo=String(Math.floor(i/batchSize)+1).padStart(3,'0');
-        const batchDir=await dir.getDirectoryHandle(batchNo,{create:true});
-        const scene=buildFlowerScene(LIB[i]);
-        const name=adobeFilename(LIB[i],i);
-        const h=await batchDir.getFileHandle(name,{create:true});
-        const w=await h.createWritable();
-        await w.write(generateEps(scene));
-        await w.close();
-        done++;
+        const csv=metadataCsv(batchItems);
+        const csvHandle=await batchDir.getFileHandle('adobe-stock-metadata.csv',{create:true});
+        const csvWriter=await csvHandle.createWritable();
+        await csvWriter.write(csv);
+        await csvWriter.close();
+        csvSaved++;
       }catch(e){
         failed++;
-        console.error(LIB[i].title,e);
+        console.error('CSV '+batchNo,e);
       }
-      if((i+1)%10===0||i===LIB.length-1){
-        const batchNo=String(Math.floor(i/batchSize)+1).padStart(3,'0');
-        setStatus('Export All — '+(i+1)+' / '+LIB.length+' · folder '+batchNo+' / '+String(totalBatches).padStart(3,'0')+' · saved '+done+(failed?' · failed '+failed:''));
-      }
+      setStatus('Export All — folder '+batchNo+' complete · '+batchItems.length+' EPS + Adobe CSV');
     }
   }finally{
     allBtn.disabled=false;
   }
-  flash('Export All finished — '+done+' EPS files in '+Math.ceil(LIB.length/50)+' folders'+(failed?' · '+failed+' failed':''));
+  const totalBatches=Math.ceil(LIB.length/50);
+  flash('Export All finished — '+done+' EPS + '+csvSaved+' Adobe CSVs across '+totalBatches+' folders'+(failed?' · '+failed+' failed':''));
 }
 async function exportMetadata(){
   try{
