@@ -1398,6 +1398,7 @@ select.mini{
 .stock-meta-counts b{display:block;font:600 16px var(--mono);color:#fff}
 .stock-meta-counts span{font:8px var(--mono);letter-spacing:.1em;color:var(--mut)}
 @media(max-width:700px){.stock-meta-card{width:100%}}
+.stock-meta19-card{width:min(760px,100%)}
 </style>
 </head>
 <body>
@@ -1418,8 +1419,21 @@ select.mini{
 <div class="stock-meta-status" id="stockMetaStatus">Waiting for folder selection.</div></div>
 <div class="stock-meta-step"><h4>03 / SAVE</h4><p>After validation, TRILYVA creates one CSV containing all 100 files and then asks which folder should receive it.</p>
 <div class="stock-meta-actions"><button type="button" class="stock-meta-btn" id="stockMetaSave" disabled>GENERATE + CHOOSE DOWNLOAD FOLDER</button></div></div>
+
 </div></section></div>
 
+<div id="stockMeta19Modal" aria-hidden="true">
+<section class="stock-meta-card stock-meta19-card" role="dialog" aria-modal="true" aria-labelledby="stockMeta19Title">
+<div class="stock-meta-head"><b id="stockMeta19Title">19-FOLDER SHUTTERSTOCK METADATA</b><span class="sp"></span><button type="button" class="stock-meta-close" id="stockMeta19Close">CLOSE</button></div>
+<div class="stock-meta-body">
+<div class="stock-meta-step"><h4>01 / SOURCE ROOT</h4><p>Select the parent folder that contains folders <b>001</b> through <b>019</b>. Each child folder must contain exactly 50 JPG/JPEG files and 50 MP4 files.</p>
+<div class="stock-meta-actions"><button type="button" class="stock-meta-btn primary" id="stockMeta19PickSource">SELECT 001–019 ROOT FOLDER</button></div>
+<div class="stock-meta-status" id="stockMeta19Status">Waiting for the 001–019 parent folder.</div></div>
+<div class="stock-meta-step"><h4>02 / VALIDATE</h4><p>TRILYVA checks all 19 folders before generating anything. Total expected input: <b>950 JPG/JPEG + 950 MP4 = 1,900 files.</b></p>
+<div class="stock-meta-counts" id="stockMeta19Counts" hidden><div><b id="stockMeta19Folders">0</b><span>FOLDERS</span></div><div><b id="stockMeta19Jpg">0</b><span>JPG / JPEG</span></div><div><b id="stockMeta19Mp4">0</b><span>MP4</span></div></div></div>
+<div class="stock-meta-step"><h4>03 / SAVE</h4><p>After validation, TRILYVA creates <b>19 separate CSV files</b>, one for each source folder, with 100 asset rows per CSV. Each CSV uses the Shutterstock columns: Filename, Description, Keywords, Categories, Illustration, Mature Content, Editorial.</p>
+<div class="stock-meta-actions"><button type="button" class="stock-meta-btn" id="stockMeta19Save" disabled>GENERATE 19 CSVs + CHOOSE DOWNLOAD FOLDER</button></div></div>
+</div></section></div>
 
   <header id="hdr">
     <div class="brand"><b>CODE<span class="ar">→</span>MOTION</b><em>TAMASRAZIM</em></div>
@@ -1438,6 +1452,7 @@ select.mini{
       <button data-act="render50" class="key" id="render50Btn" title="Render the first 50 Prism Flowers with the current output settings">Render ×50</button>
       <button data-act="renderAll" class="key" id="renderAllBtn" title="Render every Prism Flower in the library with the current output settings">Render All</button>
       <button data-act="generateMetadata" class="key" id="metadataBtn" title="Create Shutterstock CSV metadata for all Prism Flowers, grouped into folders of 50">Generate Metadata</button>
+      <button data-act="generateMetadata19" class="key" id="metadata19Btn" title="Generate Shutterstock CSV metadata for folders 001–019, 50 JPG/JPEG + 50 MP4 per folder">Generate 19 Folders</button>
     </nav>
   </header>
 
@@ -15560,7 +15575,7 @@ var S = {
   compiled: false, lastError: null, hash: '',
   previewBusy: false, previewFps: 0, previewRaster: { w: 0, h: 0, s: 1 },
   compareMode: false, compareSplit: 0.5, compareBitmap: null,
-  rendering: false, batchRendering: false, batchCancelled: false, metadataGenerating: false, queue: [], results: [], caps: {}, stage: 'IDLE',
+  rendering: false, batchRendering: false, batchCancelled: false, metadataGenerating: false, metadata19Generating: false, queue: [], results: [], caps: {}, stage: 'IDLE',
   exportFormat: 'mp4', quality: 'standard', timebase: 'ms', checksums: true, pngTarget: 'zip'
 };
 
@@ -17366,6 +17381,125 @@ function initStockMetadataUI(){
   document.addEventListener('keydown',function(ev){if(ev.key==='Escape'&&STOCK_META_STATE.open)stockMetaClose();});
 }
 
+var STOCK_META19_STATE={open:false,rootDir:null,folders:[]};
+
+function stockMeta19Open(){
+  var modal=$('#stockMeta19Modal'); if(!modal)return;
+  STOCK_META19_STATE.open=true;
+  modal.classList.add('on');
+  modal.setAttribute('aria-hidden','false');
+}
+function stockMeta19Close(){
+  var modal=$('#stockMeta19Modal'); if(!modal)return;
+  STOCK_META19_STATE.open=false;
+  modal.classList.remove('on');
+  modal.setAttribute('aria-hidden','true');
+}
+function stockMeta19SetStatus(text,error){
+  var node=$('#stockMeta19Status'); if(!node)return;
+  node.textContent=text;
+  node.style.color=error?'#fff':'';
+}
+function stockMeta19SetCounts(folderCount,jpg,mp4){
+  $('#stockMeta19Counts').hidden=false;
+  $('#stockMeta19Folders').textContent=folderCount;
+  $('#stockMeta19Jpg').textContent=jpg;
+  $('#stockMeta19Mp4').textContent=mp4;
+}
+async function stockMeta19ValidateRoot(root){
+  if(!root||typeof root.getDirectoryHandle!=='function') throw new Error('The selected root folder could not be accessed.');
+  var folders=[], totalJpg=0, totalMp4=0;
+  for(var n=1;n<=19;n++){
+    var folderName=pad(n,3), handle;
+    try{
+      handle=await root.getDirectoryHandle(folderName,{create:false});
+    }catch(e){
+      throw new Error('Missing folder '+folderName+'. Expected folders 001 through 019.');
+    }
+    var files=[];
+    for await(var item of handle.values()){
+      if(!item||item.kind!=='file')continue;
+      if(/\.(?:jpe?g|mp4)$/i.test(item.name))files.push(await item.getFile());
+    }
+    var jpg=files.filter(function(f){return /\.jpe?g$/i.test(f.name);});
+    var mp4=files.filter(function(f){return /\.mp4$/i.test(f.name);});
+    if(jpg.length!==50||mp4.length!==50){
+      throw new Error('Folder '+folderName+' is invalid: found '+jpg.length+' JPG/JPEG + '+mp4.length+' MP4; expected exactly 50 + 50.');
+    }
+    folders.push({name:folderName,handle:handle,files:jpg.concat(mp4)});
+    totalJpg+=50; totalMp4+=50;
+    stockMeta19SetCounts(folders.length,totalJpg,totalMp4);
+    stockMeta19SetStatus('Validated '+folders.length+'/19 folders — '+totalJpg+' JPG/JPEG + '+totalMp4+' MP4.');
+  }
+  return folders;
+}
+async function generateStockMetadata19(){
+  if(S.batchRendering||S.rendering||S.metadataGenerating||S.metadata19Generating)return;
+  if(typeof window.showDirectoryPicker!=='function'){
+    stockMeta19Open();
+    stockMeta19SetStatus('This browser does not support the folder picker. Use current Chrome or Edge over HTTPS.',true);
+    return;
+  }
+  var pick=$('#stockMeta19PickSource'),save=$('#stockMeta19Save');
+  S.metadata19Generating=true;
+  if(pick)pick.disabled=true;
+  if(save)save.disabled=true;
+  try{
+    stockMeta19Open();
+    stockMeta19SetStatus('Choose the parent folder containing 001 through 019.');
+    var root=await window.showDirectoryPicker({mode:'read',id:'trilyva-stock-19-source'});
+    var folders=await stockMeta19ValidateRoot(root);
+    STOCK_META19_STATE.rootDir=root;
+    STOCK_META19_STATE.folders=folders;
+    stockMeta19SetStatus('Validated all 19 folders — 950 JPG/JPEG + 950 MP4. Choose a destination folder.');
+    if(save)save.disabled=false;
+  }catch(error){
+    if(error&&(error.name==='AbortError'||error.code===20))stockMeta19SetStatus('Source-root selection cancelled.',true);
+    else stockMeta19SetStatus('19-folder validation failed: '+String(error&&error.message||error),true);
+  }finally{
+    S.metadata19Generating=false;
+    if(pick)pick.disabled=false;
+  }
+}
+async function stockMeta19GenerateAndSave(){
+  var folders=STOCK_META19_STATE.folders;
+  if(!folders.length){stockMeta19SetStatus('Select and validate the 001–019 root folder first.',true);return;}
+  var save=$('#stockMeta19Save');
+  if(save)save.disabled=true;
+  try{
+    stockMeta19SetStatus('Choose the destination folder for the 19 CSV files.');
+    var destination=await window.showDirectoryPicker({mode:'readwrite',id:'trilyva-stock-19-destination'});
+    for(var i=0;i<folders.length;i++){
+      var folder=folders[i];
+      var csv=stockMetaCsvForFiles(folder.files);
+      var fileName=folder.name+'_metadata.csv';
+      await writeBlobToDirectory(destination,new Blob([csv],{type:'text/csv;charset=utf-8'}),fileName);
+      stockMeta19SetStatus('Saved '+(i+1)+'/19 — '+fileName+' · 100 rows.');
+    }
+    stockMeta19SetStatus('DONE — 19 CSV files created, 100 rows each, 1,900 assets covered.');
+    $('#stMsg').textContent='19-folder metadata complete — 19 CSV files saved.';
+    logLine('METADATA ×19 SAVED — 19 CSV files · 1,900 asset rows',true);
+  }catch(error){
+    if(error&&(error.name==='AbortError'||error.code===20)){
+      stockMeta19SetStatus('Destination-folder selection cancelled. No CSVs were written after cancellation.',true);
+    }else{
+      stockMeta19SetStatus('19-folder metadata save failed: '+String(error&&error.message||error),true);
+      logLine('METADATA ×19 FAILED — '+String(error&&error.stack||error),true);
+    }
+  }finally{
+    if(save)save.disabled=false;
+  }
+}
+function initStockMetadata19UI(){
+  var modal=$('#stockMeta19Modal'); if(!modal||modal.dataset.ready==='1')return;
+  modal.dataset.ready='1';
+  $('#stockMeta19Close').addEventListener('click',stockMeta19Close);
+  modal.addEventListener('click',function(ev){if(ev.target===modal)stockMeta19Close();});
+  $('#stockMeta19PickSource').addEventListener('click',generateStockMetadata19);
+  $('#stockMeta19Save').addEventListener('click',stockMeta19GenerateAndSave);
+  document.addEventListener('keydown',function(ev){if(ev.key==='Escape'&&STOCK_META19_STATE.open)stockMeta19Close();});
+}
+
 async function renderPrismBatch(limit, label) {
   if (S.batchRendering || S.rendering) return;
 
@@ -18687,6 +18821,10 @@ var ACTS = {
     if (S.rendering || S.batchRendering || S.metadataGenerating) return;
     stockMetaOpen();
   },
+  generateMetadata19: function () {
+    if (S.rendering || S.batchRendering || S.metadataGenerating || S.metadata19Generating) return;
+    stockMeta19Open();
+  },
   cancelRender: cancelRender,
   analyze: analyseJob,
   analyzeLoop: analyseLoop,
@@ -18786,6 +18924,7 @@ function initDispatch() {
    ============================================================ */
 function boot() {
   initStockMetadataUI();
+  initStockMetadata19UI();
   setStage('IDLE');
   $('#stEngine').textContent = 'starting engine';
   $('#stDot').className = 'dot busy';
