@@ -17351,7 +17351,7 @@ async function stockMetaGenerateAndSave(){
   try{
     stockMetaSetStatus('Generating metadata for 100 files…');
     var csv=stockMetaCsvForFiles(STOCK_META_STATE.files);
-    var destination=await window.showDirectoryPicker({mode:'readwrite',id:'trilyva-stock-metadata-destination'});
+    var destination=await window.showDirectoryPicker({mode:'readwrite',id:'trilyva-stock-meta-dest'});
     var fileName=STOCK_META_STATE.folderName+'_metadata.csv';
     await writeBlobToDirectory(destination,new Blob([csv],{type:'text/csv;charset=utf-8'}),fileName);
     stockMetaSetStatus('Saved '+fileName+' successfully — 100 rows: 50 JPG/JPEG + 50 MP4.');
