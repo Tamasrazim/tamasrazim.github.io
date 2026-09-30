@@ -275,8 +275,8 @@ function metadata19FoldersFromFiles(files){
 }
 function metadata19Count(group){
   return {
-    jpg:group.filter(f=>/\\.(jpe?g)$/i.test(f.name)),
-    mp4:group.filter(f=>/\\.mp4$/i.test(f.name))
+    jpg:group.filter(f=>/\.(jpe?g)$/i.test(f.name)),
+    mp4:group.filter(f=>/\.mp4$/i.test(f.name))
   };
 }
 function metadata19Filename(folderName){ return folderName+'_metadata.csv'; }
@@ -428,6 +428,8 @@ async function metadataHandleFolderSelection(){
 }
 if(metadataClose)metadataClose.onclick=closeMetadataModal;
 const metadata19ChooseButton=metadataQuery('#metadata19ChooseDestination');
+const metadata19Summary=metadataQuery('#metadata19Summary');
+const metadata19Log=metadataQuery('#metadata19Log');
 const metadata19Input=metadataQuery('#metadata19FolderInput');
 const metadata19GenerateButton=metadataQuery('#generateMetadata19');
 if(metadata19GenerateButton)metadata19GenerateButton.onclick=()=>{
