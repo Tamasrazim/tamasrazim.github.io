@@ -137,13 +137,15 @@ main{padding:76px 0 100px}.hero{animation:rise .8s var(--ease) both}.kicker{font
 <script>
 
 /* Shutterstock metadata generator */
-const metadataModal=$('#metadataModal'),
-      metadataClose=$('#metadataClose'),
-      metadataFolderName=$('#metadataFolderName'),
-      metadataChooseFolder=$('#metadataChooseFolder'),
-      metadataFolderInput=$('#metadataFolderInput'),
-      metadataSummary=$('#metadataSummary'),
-      metadataLog=$('#metadataLog');
+const metadataQuery=s=>document.querySelector(s);
+const metadataModal=metadataQuery('#metadataModal'),
+      metadataClose=metadataQuery('#metadataClose'),
+      metadataFolderName=metadataQuery('#metadataFolderName'),
+      metadataChooseFolder=metadataQuery('#metadataChooseFolder'),
+      metadataFolderInput=metadataQuery('#metadataFolderInput'),
+      metadataSaveFolder=metadataQuery('#metadataSaveFolder'),
+      metadataSummary=metadataQuery('#metadataSummary'),
+      metadataLog=metadataQuery('#metadataLog');
 
 function openMetadataModal(){
   if(!metadataModal)return;
@@ -336,7 +338,7 @@ if(metadataChooseFolder)metadataChooseFolder.onclick=()=>metadataFolderInput.cli
 if(metadataFolderInput)metadataFolderInput.onchange=metadataHandleFolderSelection;
 if(metadataSaveFolder)metadataSaveFolder.onclick=metadataSavePending;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&metadataModal?.classList.contains('open'))closeMetadataModal()});
-const generateMetadataBtn=$('#generateMetadata');
+const generateMetadataBtn=metadataQuery('#generateMetadata');
 if(generateMetadataBtn)generateMetadataBtn.onclick=openMetadataModal;
 
 const $=s=>document.querySelector(s),drop=$('#drop'),input=$('#files'),folderInput=$('#folderInput'),zipInput=$('#zipInput'),queue=$('#queue'),status=$('#status'),count=$('#count'),globalTarget=$('#globalTarget'),quality=$('#quality'),convertAllBtn=$('#convertAll'),downloadZipBtn=$('#downloadZip');
