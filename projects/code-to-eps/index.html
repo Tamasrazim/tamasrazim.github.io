@@ -333,8 +333,7 @@ function fillFlowers(){
 function csvEsc(v){const s=String(v??'');return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}
 function adobeFilename(f,i){
   const flower=safeName(f.title).replace(/^prism-?/i,'')||'flower';
-  const stem=('prism-'+String(i+1).padStart(4,'0')+'-'+flower).slice(0,26);
-  return stem+'.eps';
+  return ('prism-'+flower).slice(0,26)+'.eps';
 }
 function adobeTitle(f){
   const flower=String(f.title||'Prism Flower')
