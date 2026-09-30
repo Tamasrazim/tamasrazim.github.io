@@ -321,6 +321,64 @@ async function metadata19ChooseDestination(){
     metadata19ChooseDestination.disabled=false;
   }
 }
+async function metadata19SelectSource(){
+  if(typeof window.showDirectoryPicker!=='function'){
+    metadata19Log.textContent='Folder picker is unavailable in this browser. Falling back to the parent-folder file picker.';
+    metadata19Input.value='';
+    metadata19Input.click();
+    return;
+  }
+  try{
+    const parent=await window.showDirectoryPicker({mode:'read',id:'tr-meta-19-src'});
+    const items=[];
+    const report=[];
+    for(let n=1;n<=19;n++){
+      const folder=String(n).padStart(3,'0');
+      let dir;
+      try{ dir=await parent.getDirectoryHandle(folder,{create:false}); }
+      catch(e){
+        report.push(folder+': missing');
+        continue;
+      }
+      const jpg=[],mp4=[];
+      for await(const entry of dir.values()){
+        if(entry.kind!=='file')continue;
+        const name=entry.name;
+        if(/\\.(jpe?g)$/i.test(name))jpg.push(await entry.getFile());
+        else if(/\\.mp4$/i.test(name))mp4.push(await entry.getFile());
+      }
+      if(!jpg.length&&!mp4.length){
+        report.push(folder+': empty');
+        continue;
+      }
+      const csv=generateMetadataCsv([...jpg,...mp4],folder);
+      items.push({folder,csv,jpg:jpg.length,mp4:mp4.length});
+      report.push(folder+': '+jpg.length+' JPG + '+mp4.length+' MP4'+((jpg.length===50&&mp4.length===50)?'':' (PARTIAL)'));
+    }
+    if(!items.length){
+      metadata19Summary.innerHTML='';
+      metadata19Log.textContent='No 001–019 folders with JPG/MP4 files were found in the selected parent folder.';
+      return;
+    }
+    metadata19Pending=items;
+    metadata19Summary.innerHTML=items.map(x=>{
+      const complete=x.jpg===50&&x.mp4===50;
+      const note=complete?'READY':'PARTIAL — '+Math.max(0,50-x.jpg)+' JPG + '+Math.max(0,50-x.mp4)+' MP4 missing';
+      return '<div class="meta-stat"><b>'+x.folder+'</b><span>'+x.jpg+' JPG · '+x.mp4+' MP4</span><small class="'+(complete?'meta-ok':'meta-error')+'">'+note+'</small></div>';
+    }).join('');
+    const partial=items.filter(x=>x.jpg!==50||x.mp4!==50).length;
+    metadata19Log.textContent='Read '+items.length+' folders. '+(partial?'Some folders are partial; metadata will be generated for the files that actually exist.':'All folders contain 50 JPG + 50 MP4.')+'\\n'+report.join('\\n')+'\\nSelect a destination to save the folder CSVs.';
+    metadata19ChooseDestination.hidden=false;
+  }catch(error){
+    if(error&&error.name==='AbortError'){
+      metadata19Log.textContent='Source-folder selection cancelled.';
+    }else{
+      console.error(error);
+      metadata19Log.textContent='19-folder scan failed: '+(error?.message||error);
+    }
+  }
+}
+
 async function metadata19HandleSelection(){
   const files=[...metadata19FolderInput.files];
   metadata19FolderInput.value='';
@@ -434,8 +492,7 @@ const metadata19Input=metadataQuery('#metadata19FolderInput');
 const metadata19GenerateButton=metadataQuery('#generateMetadata19');
 if(metadata19GenerateButton)metadata19GenerateButton.onclick=()=>{
   metadata19Log.textContent='Select the parent folder containing 001–019.';
-  metadata19Input.value='';
-  metadata19Input.click();
+  metadata19SelectSource();
 };
 if(metadata19Input)metadata19Input.onchange=metadata19HandleSelection;
 if(metadata19ChooseButton)metadata19ChooseButton.onclick=metadata19ChooseDestination;
