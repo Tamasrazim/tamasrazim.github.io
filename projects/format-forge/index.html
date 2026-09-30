@@ -47,7 +47,7 @@ main{padding:76px 0 100px}.hero{animation:rise .8s var(--ease) both}.kicker{font
 .meta-stat{border:1px solid #222;border-radius:8px;padding:10px;background:#0d0d0d}
 .meta-stat b{display:block;font-size:16px}.meta-stat span{color:#666;font:8px ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em}
 .meta-log{margin-top:12px;color:#777;font:9px/1.7 ui-monospace,monospace;white-space:pre-wrap}
-.meta-ok{color:#ddd}.meta-error{color:#aaa}
+.meta-ok{color:#ddd}.meta-error{color:#aaa}.meta-summary:empty,.meta-log:empty{display:none}.meta-summary{max-height:180px;overflow:auto}
 @media(max-width:700px){.meta-modal{padding:12px}.meta-summary{grid-template-columns:1fr}}
 </style><script type="application/ld+json">
 {
@@ -96,7 +96,7 @@ main{padding:76px 0 100px}.hero{animation:rise .8s var(--ease) both}.kicker{font
 <main class="shell">
 <section class="hero"><div class="kicker">PROJECT 05 / UNIVERSAL CONVERTER</div><h1>Format <em>Forge.</em></h1><p class="lead">A browser-first conversion workspace with folder intake, ZIP extraction, batch conversion and one-click ZIP export. The interface is animated; file work stays local whenever the browser engine can do it.</p><div class="hero-meta"><span class="pill">Images</span><span class="pill">Video</span><span class="pill">Audio</span><span class="pill">Text</span><span class="pill">Data</span><span class="pill">ZIP</span><span class="pill">Batch</span><span class="pill">Local-first</span></div></section>
 <section class="workspace">
-<div class="toolbar"><span class="toolbar-title">Conversion workspace</span><div class="actions"><button class="action" id="folder">Select folder</button><button class="action" id="generateMetadata">Generate metadata</button><button class="action" id="zipSelect">Open ZIP</button><button class="action primary" id="convertAll" disabled>Convert all</button><button class="action" id="downloadZip" disabled>Download as ZIP</button><span class="status" id="status">Ready</span></div></div>
+<div class="toolbar"><span class="toolbar-title">Conversion workspace</span><div class="actions"><button class="action" id="folder">Select folder</button><button class="action" id="generateMetadata">Generate metadata</button><button class="action" id="generateMetadata19">Generate 19 folders</button><button class="action" id="zipSelect">Open ZIP</button><button class="action primary" id="convertAll" disabled>Convert all</button><button class="action" id="downloadZip" disabled>Download as ZIP</button><span class="status" id="status">Ready</span></div></div>
 <div class="drop" id="drop"><div><strong>Drop files, folders or ZIPs.</strong><p>PNG → JPG · MP4 → WebM · WAV → MP3 · JSON ↔ CSV · ZIP extraction · batch export</p><button class="choose" id="choose">Choose files</button><input id="files" type="file" multiple hidden><input id="folderInput" type="file" webkitdirectory directory multiple hidden><input id="zipInput" type="file" accept=".zip,application/zip" hidden></div></div>
 <div class="settings"><div class="field"><label>Default output</label><select id="globalTarget"><option value="auto">Auto — choose per file</option><option value="jpg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option><option value="avif">AVIF</option><option value="webm">WebM</option><option value="mp4">MP4</option><option value="mp3">MP3</option><option value="wav">WAV</option><option value="json">JSON</option><option value="csv">CSV</option><option value="txt">TXT</option></select></div><div class="field"><label>Image quality</label><select id="quality"><option value=".95">Maximum</option><option value=".85" selected>High</option><option value=".7">Balanced</option><option value=".5">Small</option></select></div></div>
 <div class="queue"><div class="queue-head"><h2>Queue</h2><span class="status" id="count">0 files</span></div><div id="queue"><div class="empty">No files loaded.</div></div></div></section>
@@ -121,7 +121,7 @@ main{padding:76px 0 100px}.hero{animation:rise .8s var(--ease) both}.kicker{font
         <p>The browser will ask you to select the actual local folder. Once selected, Forge validates it, generates the CSV, and asks where to save it.</p>
         <button class="meta-folder-btn" id="metadataChooseFolder" type="button">Select folder</button>
         <input id="metadataFolderInput" type="file" webkitdirectory directory multiple hidden>
-        <button class="meta-folder-btn" id="metadataSaveFolder" type="button" hidden>Choose download folder</button>
+        <button class="meta-folder-btn" id="metadataSaveFolder" type="button" hidden>Choose download folder</button><button class="meta-folder-btn" id="metadata19ChooseDestination" type="button" hidden>Choose 19-folder CSV destination</button><input id="metadata19FolderInput" type="file" webkitdirectory directory multiple hidden><div class="meta-summary" id="metadata19Summary"></div><div class="meta-log" id="metadata19Log"></div>
         <div class="meta-summary" id="metadataSummary"></div>
         <div class="meta-log" id="metadataLog">Waiting for folder selection.</div>
       </div>
@@ -256,11 +256,106 @@ function metadataFindFolderRoot(files){
   return [...roots];
 }
 let metadataPendingCsv=null,metadataPendingName='';
+let metadata19Pending=null,metadata19Destination=null;
+
+function metadata19FoldersFromFiles(files){
+  const groups=new Map();
+  for(const file of files){
+    const rel=file.webkitRelativePath||file.name;
+    const parts=rel.split('/').filter(Boolean);
+    let folder=null;
+    for(const part of parts){
+      if(/^0(0[1-9]|1[0-9])$/.test(part)){ folder=part; break; }
+    }
+    if(!folder) continue;
+    if(!groups.has(folder)) groups.set(folder,[]);
+    groups.get(folder).push(file);
+  }
+  return groups;
+}
+function metadata19Count(group){
+  return {
+    jpg:group.filter(f=>/\\.(jpe?g)$/i.test(f.name)),
+    mp4:group.filter(f=>/\\.mp4$/i.test(f.name))
+  };
+}
+function metadata19Filename(folderName){ return folderName+'_metadata.csv'; }
+
+async function metadata19SaveAll(){
+  if(!metadata19Pending || !metadata19Destination) return;
+  const dir=metadata19Destination;
+  let saved=0;
+  for(const item of metadata19Pending){
+    const handle=await dir.getFileHandle(metadata19Filename(item.folder),{create:true});
+    const writable=await handle.createWritable();
+    await writable.write(item.csv);
+    await writable.close();
+    saved++;
+  }
+  return saved;
+}
+async function metadata19ChooseDestination(){
+  try{
+    const dir=typeof window.showDirectoryPicker==='function'
+      ? await window.showDirectoryPicker({mode:'readwrite',id:'tr-meta-dst'})
+      : null;
+    if(!dir){
+      metadata19Log.textContent='This browser does not support the folder writer. Use the generated CSV downloads instead.';
+      return;
+    }
+    metadata19Destination=dir;
+    metadata19ChooseDestination.disabled=true;
+    const saved=await metadata19SaveAll();
+    metadata19Log.textContent='Saved '+saved+' folder CSV files to the selected destination.';
+    flash('Saved '+saved+' metadata CSV files');
+    metadata19Pending=null;
+    metadata19ChooseDestination.hidden=true;
+  }catch(error){
+    if(error&&error.name==='AbortError'){
+      metadata19Log.textContent='Destination selection cancelled. The generated CSVs are still ready.';
+    }else{
+      console.error(error);
+      metadata19Log.textContent='19-folder metadata save failed: '+(error?.message||error);
+    }
+  }finally{
+    metadata19ChooseDestination.disabled=false;
+  }
+}
+async function metadata19HandleSelection(){
+  const files=[...metadata19FolderInput.files];
+  metadata19FolderInput.value='';
+  if(!files.length){metadata19Log.textContent='No parent folder files were selected.';return;}
+  const groups=metadata19FoldersFromFiles(files);
+  const items=[];
+  const report=[];
+  for(let n=1;n<=19;n++){
+    const folder=String(n).padStart(3,'0');
+    const group=groups.get(folder)||[];
+    const counts=metadata19Count(group);
+    if(!counts.jpg.length&&!counts.mp4.length){
+      report.push(folder+': missing');
+      continue;
+    }
+    const csv=generateMetadataCsv([...counts.jpg,...counts.mp4],folder);
+    items.push({folder,csv,jpg:counts.jpg.length,mp4:counts.mp4.length});
+    report.push(folder+': '+counts.jpg.length+' JPG + '+counts.mp4.length+' MP4'+((counts.jpg.length===50&&counts.mp4.length===50)?'':' (PARTIAL)'));
+  }
+  if(!items.length){
+    metadata19Summary.innerHTML='';
+    metadata19Log.textContent='No 001–019 folders were detected.';
+    return;
+  }
+  metadata19Pending=items;
+  metadata19Summary.innerHTML=items.map(x=>'<div class="meta-stat"><b>'+x.folder+'</b><span>'+x.jpg+' JPG · '+x.mp4+' MP4</span></div>').join('');
+  metadata19Log.textContent='Generated '+items.length+' CSV files.\\n'+report.join('\\n')+'\\nSelect a destination to save them.';
+  metadata19ChooseDestination.hidden=false;
+}
+
 
 async function metadataSaveCsv(csv,folderName){
   const suggested=folderName+'_metadata.csv';
   if(typeof window.showDirectoryPicker==='function'){
-    const dir=await window.showDirectoryPicker({mode:'readwrite',id:'shutterstock-metadata'});
+    const dir=await window.showDirectoryPicker({mode:'readwrite',id:'tr-meta-dst'});
     const handle=await dir.getFileHandle(suggested,{create:true});
     const writable=await handle.createWritable();
     await writable.write(csv);
@@ -332,6 +427,16 @@ async function metadataHandleFolderSelection(){
   }
 }
 if(metadataClose)metadataClose.onclick=closeMetadataModal;
+const metadata19ChooseButton=metadataQuery('#metadata19ChooseDestination');
+const metadata19Input=metadataQuery('#metadata19FolderInput');
+const metadata19GenerateButton=metadataQuery('#generateMetadata19');
+if(metadata19GenerateButton)metadata19GenerateButton.onclick=()=>{
+  metadata19Log.textContent='Select the parent folder containing 001–019.';
+  metadata19Input.value='';
+  metadata19Input.click();
+};
+if(metadata19Input)metadata19Input.onchange=metadata19HandleSelection;
+if(metadata19ChooseButton)metadata19ChooseButton.onclick=metadata19ChooseDestination;
 if(metadataModal)metadataModal.addEventListener('click',e=>{if(e.target===metadataModal)closeMetadataModal()});
 if(metadataFolderName)metadataFolderName.onchange=()=>metadataSetLog(metadataFolderName.value?'Folder '+metadataFolderName.value+' selected. Now choose the actual folder.':'Waiting for folder selection.');
 if(metadataChooseFolder)metadataChooseFolder.onclick=()=>metadataFolderInput.click();
