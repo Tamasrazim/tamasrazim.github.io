@@ -179,13 +179,21 @@ function metadata19MakeBatches(files){
 async function metadata19SaveAll(){
   if(!metadata19Pending || !metadata19Destination)return 0;
   let saved=0;
+  const folders=new Map();
   for(const item of metadata19Pending){
-    const folder=await metadata19Destination.getDirectoryHandle(String(item.batch).padStart(3,'0'),{create:true});
-    const handle=await folder.getFileHandle('adobe_metadata.csv',{create:true});
-    const writable=await handle.createWritable();
-    await writable.write(item.csv);
-    await writable.close();
-    saved++;
+    if(!folders.has(item.folder))folders.set(item.folder,[]);
+    folders.get(item.folder).push(item);
+  }
+  for(const [folderName,items] of folders){
+    const folder=await metadata19Destination.getDirectoryHandle(String(folderName).padStart(3,'0'),{create:true});
+    for(const item of items){
+      const filename=item.kind==='jpg'?'adobe-jpg.csv':'adobe-mp4.csv';
+      const handle=await folder.getFileHandle(filename,{create:true});
+      const writable=await handle.createWritable();
+      await writable.write(item.csv);
+      await writable.close();
+      saved++;
+    }
   }
   return saved;
 }
@@ -198,8 +206,8 @@ async function metadata19ChooseDestination(){
     metadata19Destination=dir;
     metadata19ChooseDestination.disabled=true;
     const saved=await metadata19SaveAll();
-    metadata19Log.textContent='Saved '+saved+' Adobe 50-row batch folders.';
-    flash('Saved '+saved+' Adobe batch folders');
+    metadata19Log.textContent='Saved '+saved+' Adobe CSV files — JPG and MP4 stay in separate 50-file batches.';
+    flash('Saved '+saved+' Adobe batch CSVs');
     metadata19Pending=null;
     metadata19ChooseDestination.hidden=true;
   }catch(error){
@@ -216,33 +224,40 @@ async function metadata19SelectSource(){
   }
   try{
     const parent=await window.showDirectoryPicker({mode:'read',id:'tr-adobe-19-src'});
-    const sourceFiles=[],report=[];
-    let total=0;
+    const batches=[];
+    const report=[];
+    let folderCount=0,csvCount=0;
     for(let n=1;n<=19;n++){
       const folder=String(n).padStart(3,'0');
       let dir;
       try{dir=await parent.getDirectoryHandle(folder,{create:false})}
       catch(e){report.push(folder+': missing');continue}
-      const files=[];
+      const jpg=[],mp4=[];
       for await(const entry of dir.values()){
         if(entry.kind!=='file')continue;
-        if(/\.(jpe?g|mp4)$/i.test(entry.name))files.push(await entry.getFile());
+        if(/\.(jpe?g)$/i.test(entry.name))jpg.push(await entry.getFile());
+        else if(/\.mp4$/i.test(entry.name))mp4.push(await entry.getFile());
       }
-      if(!files.length){report.push(folder+': empty');continue}
-      const jpg=files.filter(f=>/\.(jpe?g)$/i.test(f.name)).length;
-      const mp4=files.filter(f=>/\.mp4$/i.test(f.name)).length;
-      const meta=metadataGenerateReport(files);
-      sourceFiles.push(...metadata19OrderedFiles(files));
-      total+=files.length;
-      report.push(folder+': '+jpg+' JPG + '+mp4+' MP4'+((jpg===50&&mp4===50)?'':' (PARTIAL)')+(meta.longNames.length?' · '+meta.longNames.length+' filename(s) >30 chars':''));
+      if(!jpg.length&&!mp4.length){report.push(folder+': empty');continue}
+      folderCount++;
+      if(jpg.length){batches.push({folder,kind:'jpg',csv:generateMetadataCsv(metadata19OrderedFiles(jpg),'JPG '+folder),rows:jpg.length});csvCount++}
+      if(mp4.length){batches.push({folder,kind:'mp4',csv:generateMetadataCsv(metadata19OrderedFiles(mp4),'MP4 '+folder),rows:mp4.length});csvCount++}
+      report.push(folder+': '+jpg.length+' JPG + '+mp4.length+' MP4'+((jpg.length===50&&mp4.length===50)?'':' (PARTIAL)'));
     }
-    if(!sourceFiles.length){metadata19Summary.innerHTML='';metadata19Log.textContent='No 001–019 folders with JPG/MP4 files were found in the selected parent folder.';return}
-    const batches=metadata19MakeBatches(sourceFiles);
-    metadata19Pending=batches.map((files,i)=>({batch:i+1,csv:generateMetadataCsv(files,'batch-'+String(i+1).padStart(3,'0')),rows:files.length}));
-    const exact=metadata19Pending.filter(x=>x.rows===50).length;
-    const remainder=metadata19Pending.length&&metadata19Pending.at(-1).rows<50?metadata19Pending.at(-1).rows:0;
-    metadata19Summary.innerHTML=metadata19Pending.map(x=>'<div class="meta-stat"><b>'+String(x.batch).padStart(3,'0')+'</b><span>'+x.rows+' rows</span><small class="'+(x.rows===50?'meta-ok':'meta-error')+'">'+(x.rows===50?'50-row batch':'final remainder')+'</small></div>').join('');
-    metadata19Log.textContent='Generated '+metadata19Pending.length+' Adobe CSV batch folders from '+total+' rendered files. '+exact+' full 50-row batches'+(remainder?' + '+remainder+' final rows':'')+'.\\n'+report.join('\\n')+'\\nFilenames are preserved exactly from the rendered JPG/MP4 files.';
+    if(!batches.length){
+      metadata19Summary.innerHTML='';
+      metadata19Log.textContent='No 001–019 folders with JPG/MP4 files were found in the selected parent folder.';
+      return;
+    }
+    metadata19Pending=batches;
+    const full=batches.filter(x=>x.rows===50).length;
+    const partial=batches.filter(x=>x.rows!==50).length;
+    metadata19Summary.innerHTML=batches.map(x=>{
+      const label=x.kind==='jpg'?'JPG':'MP4';
+      const ok=x.rows===50;
+      return '<div class="meta-stat"><b>'+x.folder+' / '+label+'</b><span>'+x.rows+' rows</span><small class="'+(ok?'meta-ok':'meta-error')+'">'+(ok?'50-row batch':'final partial batch')+'</small></div>';
+    }).join('');
+    metadata19Log.textContent='Prepared '+csvCount+' Adobe CSV files across '+folderCount+' source folders. '+full+' full 50-row batches'+(partial?' · '+partial+' partial batch(es)':'')+'.\n'+report.join('\n')+'\nEach source folder stays separate; JPG and MP4 metadata are never merged.';
     metadata19ChooseDestination.hidden=false;
   }catch(error){
     if(error?.name==='AbortError')metadata19Log.textContent='Source-folder selection cancelled.';
@@ -253,25 +268,32 @@ async function metadata19HandleSelection(){
   const files=[...metadata19FolderInput.files];
   metadata19FolderInput.value='';
   if(!files.length){metadata19Log.textContent='No parent folder files were selected.';return}
-  const groups=metadata19FoldersFromFiles(files),sourceFiles=[],report=[];
-  let total=0;
+  const groups=metadata19FoldersFromFiles(files);
+  const batches=[];
+  const report=[];
+  let folderCount=0,csvCount=0;
   for(let n=1;n<=19;n++){
-    const folder=String(n).padStart(3,'0'),group=groups.get(folder)||[],counts=metadata19Count(group);
-    if(!counts.jpg.length&&!counts.mp4.length){report.push(folder+': missing');continue}
-    const all=metadata19OrderedFiles(group),meta=metadataGenerateReport(all);
-    sourceFiles.push(...all);
-    total+=all.length;
-    report.push(folder+': '+counts.jpg.length+' JPG + '+counts.mp4.length+' MP4'+((counts.jpg.length===50&&counts.mp4.length===50)?'':' (PARTIAL)')+(meta.longNames.length?' · '+meta.longNames.length+' filename(s) >30 chars':''));
+    const folder=String(n).padStart(3,'0');
+    const group=groups.get(folder)||[];
+    const jpg=group.filter(f=>/\.(jpe?g)$/i.test(f.name));
+    const mp4=group.filter(f=>/\.mp4$/i.test(f.name));
+    if(!jpg.length&&!mp4.length){report.push(folder+': missing');continue}
+    folderCount++;
+    if(jpg.length){batches.push({folder,kind:'jpg',csv:generateMetadataCsv(metadata19OrderedFiles(jpg),'JPG '+folder),rows:jpg.length});csvCount++}
+    if(mp4.length){batches.push({folder,kind:'mp4',csv:generateMetadataCsv(metadata19OrderedFiles(mp4),'MP4 '+folder),rows:mp4.length});csvCount++}
+    report.push(folder+': '+jpg.length+' JPG + '+mp4.length+' MP4'+((jpg.length===50&&mp4.length===50)?'':' (PARTIAL)'));
   }
-  if(!sourceFiles.length){metadata19Summary.innerHTML='';metadata19Log.textContent='No 001–019 folders were detected.';return}
-  const batches=metadata19MakeBatches(sourceFiles);
-  metadata19Pending=batches.map((batch,i)=>({batch:i+1,csv:generateMetadataCsv(batch,'batch-'+String(i+1).padStart(3,'0')),rows:batch.length}));
-  const exact=metadata19Pending.filter(x=>x.rows===50).length;
-  const remainder=metadata19Pending.length&&metadata19Pending.at(-1).rows<50?metadata19Pending.at(-1).rows:0;
-  metadata19Summary.innerHTML=metadata19Pending.map(x=>'<div class="meta-stat"><b>'+String(x.batch).padStart(3,'0')+'</b><span>'+x.rows+' rows</span><small class="'+(x.rows===50?'meta-ok':'meta-error')+'">'+(x.rows===50?'50-row batch':'final remainder')+'</small></div>').join('');
-  metadata19Log.textContent='Generated '+metadata19Pending.length+' Adobe CSV batch folders from '+total+' rendered files. '+exact+' full 50-row batches'+(remainder?' + '+remainder+' final rows':'')+'.\\n'+report.join('\\n')+'\\nFilenames are preserved exactly from the rendered JPG/MP4 files.';
+  if(!batches.length){
+    metadata19Summary.innerHTML='';
+    metadata19Log.textContent='No 001–019 folders were detected.';
+    return;
+  }
+  metadata19Pending=batches;
+  metadata19Summary.innerHTML=batches.map(x=>'<div class="meta-stat"><b>'+x.folder+' / '+(x.kind==='jpg'?'JPG':'MP4')+'</b><span>'+x.rows+' rows</span><small class="'+(x.rows===50?'meta-ok':'meta-error')+'">'+(x.rows===50?'50-row batch':'final partial batch')+'</small></div>').join('');
+  metadata19Log.textContent='Generated '+csvCount+' Adobe CSV files across '+folderCount+' source folders.\nEach source folder remains separate; JPG and MP4 are separate 50-row metadata batches. Rendered filenames are preserved exactly.\n'+report.join('\n');
   metadata19ChooseDestination.hidden=false;
 }
+
 async function metadataSaveCsv(csv,folderName){const suggested=folderName+'_adobe_metadata.csv';if(typeof window.showDirectoryPicker==='function'){const dir=await window.showDirectoryPicker({mode:'readwrite',id:'tr-adobe-dst'}),handle=await dir.getFileHandle(suggested,{create:true}),w=await handle.createWritable();await w.write(csv);await w.close();return{mode:'folder',name:suggested}}const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=suggested;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);return{mode:'download',name:suggested}}
 async function metadataSavePending(){if(!metadataPendingCsv||!metadataPendingName)return;try{metadataSaveFolder.disabled=true;const result=await metadataSaveCsv(metadataPendingCsv,metadataPendingName),countRows=metadataPendingCsv.split('\r\n').slice(1,-1).filter(Boolean).length;metadataSetLog('Saved '+result.name+' — '+countRows+' Adobe metadata rows.','ok');flash('Adobe CSV saved: '+result.name);metadataPendingCsv=null;metadataPendingName='';metadataSaveFolder.hidden=true}catch(error){if(error?.name==='AbortError')metadataSetLog('Save-folder selection cancelled. The generated Adobe CSV is still ready.','error');else{console.error(error);metadataSetLog('Adobe metadata save failed: '+(error?.message||error),'error')}}finally{metadataSaveFolder.disabled=false}}
 async function metadataHandleFolderSelection(){const folderName=metadataFolderName.value,files=[...metadataFolderInput.files];metadataFolderInput.value='';if(!folderName){metadataSetLog('Select a folder number first.','error');return}if(!files.length){metadataSetLog('No files were selected.','error');return}const roots=metadataFindFolderRoot(files);if(roots.length!==1||roots[0]!==folderName){metadataSetLog('Selected folder does not match '+folderName+'. Detected root: '+(roots.join(', ')||'unknown')+'. Select the '+folderName+' folder itself.','error');return}const jpg=files.filter(f=>/\.(jpe?g)$/i.test(f.name)),mp4=files.filter(f=>/\.mp4$/i.test(f.name));metadataSummary.innerHTML='<div class="meta-stat"><b>'+jpg.length+'</b><span>JPG / JPEG</span></div><div class="meta-stat"><b>'+mp4.length+'</b><span>MP4</span></div><div class="meta-stat"><b>'+files.length+'</b><span>Total selected</span></div>';const finalPartial=folderName==='019'&&jpg.length===mp4.length&&jpg.length>0&&jpg.length<=50,completeBatch=jpg.length===50&&mp4.length===50;if(!completeBatch&&!finalPartial){metadataSetLog('Adobe batch validation failed. '+folderName+' must contain 50 JPG/JPEG + 50 MP4, except folder 019 which may contain the matching final partial batch.','error');return}try{metadataChooseFolder.disabled=true;const rowCount=jpg.length+mp4.length,all=[...jpg,...mp4],meta=metadataGenerateReport(all),csv=generateMetadataCsv(all,folderName);metadataPendingCsv=csv;metadataPendingName=folderName;metadataSaveFolder.hidden=false;metadataSetLog(rowCount+' Adobe metadata rows generated. '+(meta.longNames.length?'Warning: '+meta.longNames.length+' filename(s) exceed Adobe’s 30-character Filename limit; rendered filenames were preserved exactly. ':'Choose the destination folder to save '+folderName+'_adobe_metadata.csv.'),meta.longNames.length?'error':'ok')}catch(error){console.error(error);metadataSetLog('Adobe metadata generation failed: '+(error?.message||error),'error')}finally{metadataChooseFolder.disabled=false}}
