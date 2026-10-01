@@ -49,6 +49,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
     <button class="btn" id="svgBtn" disabled>Export SVG</button>
     <button class="btn" id="metaBtn">Adobe CSV</button>
     <button class="btn" id="allSvgBtn">Export All SVG</button>
+    <button class="btn" id="iconStockBtn">Stock Icons 10K</button>
     <button class="btn primary" id="allBtn">Export All EPS</button>
   </div>
 </header>
@@ -86,6 +87,30 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
     <div class="hint" id="flowerInfo" style="margin-top:7px">0 / 947</div>
   </div>
 
+  <div class="section" id="iconStockSection">
+    <h3>STOCK ICONS · 10,000</h3>
+    <select id="iconFamily" aria-label="Stock icon family"></select>
+    <div class="grid2" style="margin-top:8px">
+      <div class="field"><label>Icon number</label><input id="iconNumber" type="number" min="1" max="100" value="1"></div>
+      <div class="field"><label>Family items</label><input value="100" readonly></div>
+    </div>
+    <div class="mini-actions" style="margin-top:8px">
+      <button class="btn" id="loadIcon">Load Icon</button>
+      <button class="btn" id="prevIcon">Prev</button>
+      <button class="btn" id="nextIcon">Next</button>
+    </div>
+    <div class="hint" id="iconInfo" style="margin-top:7px">10,000 original stock icons · 100 families · 5 visual systems</div>
+    <div class="mini-actions" style="margin-top:8px;flex-wrap:wrap">
+      <button class="btn" id="iconEpsBtn" disabled>Icon EPS</button>
+      <button class="btn" id="iconSvgBtn" disabled>Icon SVG</button>
+      <button class="btn" id="iconMetaBtn">Icon CSV</button>
+    </div>
+    <div class="mini-actions" style="margin-top:8px;flex-wrap:wrap">
+      <button class="btn" id="allIconSvgBtn">Export All Icon SVG</button>
+      <button class="btn primary" id="allIconEpsBtn">Export All Icon EPS</button>
+    </div>
+  </div>
+
   <div class="section">
     <h3>EPS FRAME</h3>
     <div class="frame">
@@ -97,7 +122,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
   <div class="section">
     <h3>DOCUMENT</h3>
     <div class="field"><label>EPS target</label><select id="epsProfile"><option value="shutterstock10" selected>Shutterstock — Illustrator 10 RGB</option><option value="shutterstock8">Shutterstock — Illustrator 8 RGB</option><option value="generic">Generic EPSF-3.0</option></select></div>
-    <div class="field" style="margin-top:8px"><label>Resolution preset</label><select id="resPreset"><option value="3840x2160" selected>4K — 3840 × 2160</option><option value="7680x4320">8K — 7680 × 4320</option><option value="custom">Custom</option></select></div>
+    <div class="field" style="margin-top:8px"><label>Resolution preset</label><select id="resPreset"><option value="3840x2160" selected>4K — 3840 × 2160</option><option value="7680x4320">8K — 7680 × 4320</option><option value="4000x4000">Adobe Icon — 4000 × 4000</option><option value="custom">Custom</option></select></div>
     <div class="grid2" style="margin-top:8px">
       <div class="field"><label>Width</label><input id="w" type="number" min="1" value="3840"></div>
       <div class="field"><label>Height</label><input id="h" type="number" min="1" value="2160"></div>
@@ -138,6 +163,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 <input id="fileInput" class="file-input" type="file" accept=".js,.txt,text/javascript,text/plain">
 <div id="toast" class="toast"></div>
 
+<script src="./vector-icon-library.js"></script>
 <script>
 (()=>{'use strict';
 const $=s=>document.querySelector(s);
@@ -146,6 +172,7 @@ const epsBtn=$('#epsBtn'),svgBtn=$('#svgBtn'),allBtn=$('#allBtn'),metaBtn=$('#me
 const wEl=$('#w'),hEl=$('#h'),epsProfileEl=$('#epsProfile'),resPresetEl=$('#resPreset'),frameEl=$('#frame'),frameReadout=$('#frameReadout'),epsBgEl=$('#epsBg');
 const flowerList=$('#flowerList'),flowerSearch=$('#flowerSearch'),flowerInfo=$('#flowerInfo');
 const fileInput=$('#fileInput'),objectCount=$('#objectCount'),stockBboxEl=$('#stockBbox'),stockResultEl=$('#stockResult'),toast=$('#toast');
+const iconFamilyEl=$('#iconFamily'),iconNumberEl=$('#iconNumber'),iconInfoEl=$('#iconInfo'),iconEpsBtn=$('#iconEpsBtn'),iconSvgBtn=$('#iconSvgBtn'),allIconSvgBtn=$('#allIconSvgBtn'),allIconEpsBtn=$('#allIconEpsBtn'),iconMetaBtn=$('#iconMetaBtn'),iconStockSection=$('#iconStockSection');
 const DEFAULT_CODE=`v.background("#ffffff");
 const cx=W/2, cy=H/2;
 
@@ -797,6 +824,95 @@ function runCurrent(){
     return true;
   }catch(e){lastScene=null;epsBtn.disabled=true;svgBtn.disabled=true;setStatus('ERROR: '+(e&&e.message||e),'bad');return false}
 }
+
+function iconItemAt(n){const lib=window.TAMAS_ICON_LIBRARY;if(!lib)return null;return lib.items[clamp(Math.round(num(n,1))-1,0,lib.items.length-1)]}
+function iconItemFromControls(){
+  const lib=window.TAMAS_ICON_LIBRARY;
+  if(!lib)return null;
+  const fi=Number(iconFamilyEl.value||1)-1;
+  const ni=clamp(Math.round(num(iconNumberEl.value,1))-1,0,99);
+  const start=fi*lib.perFamily;
+  return lib.items[start+ni]||null;
+}
+function fillIconFamilies(){
+  const lib=window.TAMAS_ICON_LIBRARY;
+  if(!lib||!iconFamilyEl)return;
+  iconFamilyEl.innerHTML=lib.families.map(f=>'<option value="'+f.index+'">'+esc(f.name)+'</option>').join('');
+}
+function buildIconScene(item){
+  if(!item||!window.TAMAS_ICON_LIBRARY)throw new Error('Icon library not loaded');
+  const W=4000,H=4000,s=new Scene(W,H),v=new Vec(s);
+  window.TAMAS_ICON_LIBRARY.render(v,W,H,item);
+  return s;
+}
+function drawIconPreview(item){
+  const scene=buildIconScene(item);
+  paper.innerHTML=sceneToSvg(scene);
+  const svg=paper.querySelector('svg');
+  if(svg){svg.style.width='100%';svg.style.height='100%';svg.style.display='block'}
+}
+function loadIcon(item){
+  if(!item)return;
+  currentFlower=-1;
+  currentFrame=0;
+  customMode=false;
+  epsBgEl.value='none';
+  if(iconFamilyEl)iconFamilyEl.value=String(item.familyIndex);
+  if(iconNumberEl)iconNumberEl.value=String(item.conceptIndex*10+item.variant+1);
+  wEl.value=4000;hEl.value=4000;resPresetEl.value='4000x4000';
+  codeEl.value=window.TAMAS_ICON_LIBRARY.codeFor(item);
+  syncLines();
+  lastScene=buildIconScene(item);
+  modeEl.textContent='ICON STOCK';
+  objectCount.textContent=lastScene.ops.filter(x=>x.t!=='save'&&x.t!=='restore').length+' OBJECTS';
+  drawIconPreview(item);
+  epsBtn.disabled=false;svgBtn.disabled=false;iconEpsBtn.disabled=false;iconSvgBtn.disabled=false;
+  iconInfoEl.textContent=item.id+' · '+item.title+' · '+item.family+' · 4,000×4,000 · transparent · '+item.keywords.length+' keywords';
+  updateStockPreflight(lastScene);
+  setStatus('Icon loaded — '+item.title+' · '+objectCount.textContent+' · transparent vector','good');
+}
+function currentIconItem(){return iconItemFromControls()}
+function exportIconCsv(){
+  try{
+    const lib=window.TAMAS_ICON_LIBRARY;
+    const h=['Filename','Title','Description','Keywords','Category','Family','Style'];
+    const rows=[h];
+    for(const item of lib.items)rows.push([item.filename.eps,item.title,item.description,item.keywords.join(', '),'Graphics Resources',item.family,item.styleName]);
+    const csv=rows.map(r=>r.map(csvEsc).join(',')).join('\r\n')+'\r\n';
+    if(new TextEncoder().encode(csv).length>1000000)throw new Error('Full 10K CSV exceeds the 1 MB portal limit; use the 50-item folder CSVs from batch export.');
+    downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),'stock-icon-metadata.csv');
+  }catch(e){setStatus('Icon CSV failed: '+(e.message||e),'bad')}
+}
+async function exportAllIcons(kind='eps'){
+  const lib=window.TAMAS_ICON_LIBRARY;
+  if(!lib)throw new Error('Icon library not loaded');
+  const dir=await pickFolder();
+  const batchSize=50,totalBatches=Math.ceil(lib.items.length/batchSize);
+  const btn=kind==='eps'?allIconEpsBtn:allIconSvgBtn;btn.disabled=true;
+  let done=0,failed=0;
+  try{
+    for(let start=0;start<lib.items.length;start+=batchSize){
+      const end=Math.min(start+batchSize,lib.items.length),batchNo=String(Math.floor(start/batchSize)+1).padStart(3,'0');
+      const batchDir=await dir.getDirectoryHandle(batchNo,{create:true}),rows=[],used=new Set();
+      for(let i=start;i<end;i++){
+        const item=lib.items[i];
+        try{
+          const scene=buildIconScene(item);
+          const ext=kind==='eps'?'eps':'svg',blob=kind==='eps'?new Blob([(()=>{const e=generateEps(scene,{strictStock:true});validateEps(e,null,null);return e})()],{type:'application/postscript'}):new Blob([sceneToSvg(scene)],{type:'image/svg+xml;charset=utf-8'});
+          const stem=(item.filename[ext]||('icon-'+item.id+'.'+ext)).replace(/\.(eps|svg)$/i,'');
+          const h=await getUniqueFileHandle(batchDir,stem,ext,used),w=await h.createWritable();await w.write(blob);await w.close();
+          rows.push([h.name,item.title,item.description,item.keywords.join(', '),'Graphics Resources',item.family,item.styleName]);done++;
+        }catch(e){failed++;console.error(item.id,e)}
+        if((done+failed)%10===0||i===end-1)setStatus('Icon batch — '+done+' / '+lib.items.length+' '+kind.toUpperCase()+' · folder '+batchNo+' / '+String(totalBatches).padStart(3,'0'));
+      }
+      const csv=[['Filename','Title','Description','Keywords','Category','Family','Style'],...rows].map(r=>r.map(csvEsc).join(',')).join('\r\n')+'\r\n';
+      const ch=await batchDir.getFileHandle('adobe-stock-metadata.csv',{create:true}),cw=await ch.createWritable();await cw.write(csv);await cw.close();
+    }
+    setStatus('Icon batch complete — '+done+' '+kind.toUpperCase()+' · '+failed+' failed · 200 folders × 50','good');
+  }finally{btn.disabled=false}
+}
+function runIconFromControls(){const item=currentIconItem();if(item)loadIcon(item)}
+
 function loadFlower(i){
   if(i<0||i>=LIB.length)return;
   currentFlower=i;const f=LIB[i];currentFrame=num(frameEl.value,0)/1000;codeEl.value=f.code;syncLines();modeEl.textContent='PRISM';flowerInfo.textContent=(i+1)+' / '+LIB.length+' · '+f.title;runCurrent();
@@ -961,6 +1077,18 @@ svgBtn.onclick=()=>{if(!lastScene)return;downloadBlob(new Blob([sceneToSvg(lastS
 allBtn.onclick=async()=>{try{await exportAll()}catch(e){allBtn.disabled=false;setStatus('Export All failed: '+(e.message||e),'bad')}}
 $('#allSvgBtn').onclick=async()=>{try{await exportAllSvg()}catch(e){$('#allSvgBtn').disabled=false;setStatus('Export All SVG failed: '+(e.message||e),'bad')}}
 metaBtn.onclick=exportMetadata;
+fillIconFamilies();
+$('#iconStockBtn').onclick=()=>{iconStockSection?.scrollIntoView({block:'center',behavior:'smooth'});iconNumberEl?.focus()};
+$('#loadIcon').onclick=()=>runIconFromControls();
+$('#prevIcon').onclick=()=>{const item=currentIconItem();if(item){const i=Math.max(0,item.index-1);const next=iconItemAt(i+1);if(next)loadIcon(next)}};
+$('#nextIcon').onclick=()=>{const item=currentIconItem();if(item){const next=iconItemAt(item.index+2);if(next)loadIcon(next)}};
+iconFamilyEl.onchange=()=>{iconNumberEl.value=1;runIconFromControls()};
+iconNumberEl.onchange=()=>runIconFromControls();
+iconEpsBtn.onclick=()=>{const item=currentIconItem();if(!item||!lastScene)return;try{const e=generateEps(lastScene,{strictStock:true});validateEps(e,null,null);downloadBlob(new Blob([e],{type:'application/postscript'}),item.filename.eps)}catch(e){setStatus('Icon EPS failed: '+(e.message||e),'bad')}};
+iconSvgBtn.onclick=()=>{const item=currentIconItem();if(!item||!lastScene)return;downloadBlob(new Blob([sceneToSvg(lastScene)],{type:'image/svg+xml;charset=utf-8'}),item.filename.svg)};
+iconMetaBtn.onclick=exportIconCsv;
+allIconEpsBtn.onclick=async()=>{try{await exportAllIcons('eps')}catch(e){allIconEpsBtn.disabled=false;setStatus('All Icon EPS failed: '+(e.message||e),'bad')}};
+allIconSvgBtn.onclick=async()=>{try{await exportAllIcons('svg')}catch(e){allIconSvgBtn.disabled=false;setStatus('All Icon SVG failed: '+(e.message||e),'bad')}};
 $('#loadFlower').onclick=()=>loadFlower(Number(flowerList.value));
 $('#prevFlower').onclick=()=>loadFlower(clamp(currentFlower-1,0,LIB.length-1));
 $('#nextFlower').onclick=()=>loadFlower(clamp(currentFlower+1,0,LIB.length-1));
@@ -971,7 +1099,7 @@ $('#newBtn').onclick=()=>{currentFlower=-1;customMode=true;codeEl.value=DEFAULT_
 $('#saveJsBtn').onclick=()=>downloadBlob(new Blob([codeEl.value],{type:'text/javascript;charset=utf-8'}),'code-to-eps.js');
 $('#openBtn').onclick=()=>fileInput.click();
 fileInput.onchange=async e=>{const f=e.target.files[0];if(!f)return;currentFlower=-1;codeEl.value=await f.text();syncLines();runCurrent();fileInput.value=''};
-resPresetEl.onchange=()=>{const v=resPresetEl.value;if(v==='3840x2160'||v==='7680x4320'){const [w,h]=v.split('x').map(Number);wEl.value=w;hEl.value=h;}runCurrent()};
+resPresetEl.onchange=()=>{const v=resPresetEl.value;if(v==='3840x2160'||v==='7680x4320'||v==='4000x4000'){const [w,h]=v.split('x').map(Number);wEl.value=w;hEl.value=h;}runCurrent()};
 epsProfileEl.onchange=()=>{if(epsProfileEl.value!=='generic'&&epsBgEl.value!=='none'){epsBgEl.value='none';}runCurrent()};
 [wEl,hEl].forEach(x=>{x.oninput=()=>{resPresetEl.value='custom'};x.onchange=runCurrent});
 epsBgEl.onchange=()=>{if(currentFlower>=0)runCurrent();else runCurrent()};
@@ -997,7 +1125,8 @@ async function boot(){
     if(!r.ok)throw new Error('Prism library request failed: '+r.status);
     LIB=await r.json();
     if(!Array.isArray(LIB)||LIB.length!==947)throw new Error('Expected 947 Prism Flowers, found '+(LIB?.length||0));
-    fillFlowers();codeEl.value=DEFAULT_CODE;syncLines();runCurrent();runEpsSelfTests();setStatus('Ready — '+LIB.length+' Prism Flowers loaded. EPS/SVG export engines validated.','good');
+    if(window.TAMAS_ICON_LIBRARY?.total!==10000)throw new Error('Expected 10,000 stock icons, found '+(window.TAMAS_ICON_LIBRARY?.total||0));
+    fillFlowers();fillIconFamilies();codeEl.value=DEFAULT_CODE;syncLines();runCurrent();runEpsSelfTests();setStatus('Ready — '+LIB.length+' Prism Flowers loaded. EPS/SVG export engines validated.','good');
   }catch(e){codeEl.value=DEFAULT_CODE;syncLines();runCurrent();setStatus('Library error: '+(e.message||e),'bad')}
 }
 boot();
