@@ -113,7 +113,15 @@ function run(){
     const w=Number(document.getElementById('width').value)||1200;
     const h=Number(document.getElementById('height').value)||1200;
     const bg=document.getElementById('background').value.trim();
-    const fn=new Function('W','H',codeEl.value);
+    const fn=new Function('__W','__H',`
+      const __width=__W,__height=__H;
+      return (function(){
+        const W=__width,H=__height;
+        return (function(){
+          ${codeEl.value}
+        })();
+      })();
+    `);
     const result=fn(w,h);
     currentSvg=normalizeSvg(result,w,h,bg);
     preview.srcdoc=currentSvg;
