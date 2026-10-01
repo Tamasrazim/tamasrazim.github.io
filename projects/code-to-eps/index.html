@@ -49,6 +49,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
     <button class="btn" id="svgBtn" disabled>Export SVG</button>
     <button class="btn" id="metaBtn">Adobe CSV</button>
     <button class="btn" id="allSvgBtn">Export All SVG</button>
+    <button class="btn" id="allPrismOneSvgBtn">Prism All → One SVG</button>
     <button class="btn" id="iconStockBtn">Stock Icons 10K</button>
     <button class="btn primary" id="allBtn">Export All EPS</button>
   </div>
@@ -1067,6 +1068,58 @@ async function exportAllSvg(){
   }
   flash('Export All SVG finished — '+done+' SVG + '+csvSaved+' Adobe CSVs across '+totalBatches+' folders'+(failed?' · '+failed+' failed':''));
 }
+function uniqueSvgIds(svg,prefix){
+  return String(svg)
+    .replace(/id="(grad-[^"]+)"/g,(m,id)=>'id="'+prefix+'-'+id+'"')
+    .replace(/url\(#(grad-[^)]+)\)/g,(m,id)=>'url(#'+prefix+'-'+id+')');
+}
+function innerSvg(svg){
+  return String(svg)
+    .replace(/^<svg[^>]*>/i,'')
+    .replace(/<\/svg>\s*$/i,'');
+}
+async function exportAllPrismOneSvg(){
+  const btn=$('#allPrismOneSvgBtn');
+  btn.disabled=true;
+  try{
+    const cols=31, tileW=480, tileH=270, rows=Math.ceil(LIB.length/cols);
+    const W=cols*tileW,H=rows*tileH;
+    const parts=[];
+    parts.push('<?xml version="1.0" encoding="UTF-8"?>');
+    parts.push('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">');
+    parts.push('<title>Prism Flowers — '+LIB.length+' Editable Vector Flowers</title>');
+    parts.push('<desc>All Prism Flower assets arranged as independent editable vector groups in one SVG document.</desc>');
+    for(let i=0;i<LIB.length;i++){
+      const f=LIB[i];
+      try{
+        const scene=buildFlowerScene(f);
+        const raw=sceneToSvg(scene);
+        const body=uniqueSvgIds(innerSvg(raw),'prism'+String(i+1).padStart(4,'0'));
+        const x=(i%cols)*tileW,y=Math.floor(i/cols)*tileH;
+        const sx=tileW/scene.W,sy=tileH/scene.H;
+        parts.push('<g id="prism-'+String(i+1).padStart(4,'0')+'" transform="translate('+x+' '+y+') scale('+psNum(sx)+' '+psNum(sy)+')">');
+        parts.push('<title>'+esc(f.title||('Prism Flower '+(i+1)))+'</title>');
+        parts.push(body);
+        parts.push('</g>');
+      }catch(e){
+        console.error('One-SVG '+f.title,e);
+      }
+      if((i+1)%20===0||i===LIB.length-1){
+        setStatus('Prism All → One SVG — '+(i+1)+' / '+LIB.length+' flowers composed');
+        await new Promise(r=>setTimeout(r,0));
+      }
+    }
+    parts.push('</svg>');
+    const blob=new Blob([parts.join('')],{type:'image/svg+xml;charset=utf-8'});
+    downloadBlob(blob,'prism-flowers-all-'+LIB.length+'.svg');
+    flash('Prism All → One SVG finished — '+LIB.length+' independent vector flower groups in one SVG.');
+  }catch(e){
+    setStatus('Prism One-SVG failed: '+(e.message||e),'bad');
+  }finally{
+    btn.disabled=false;
+  }
+}
+
 async function exportMetadata(){
   try{
     const csv=metadataCsv();if(new TextEncoder().encode(csv).length>1000000)throw new Error('Adobe CSV exceeds the 1 MB upload limit.');const dir=await pickFolder(),h=await dir.getFileHandle('adobe-stock-metadata.csv',{create:true}),w=await h.createWritable();await w.write(csv);await w.close();flash('Adobe CSV saved — '+LIB.length+' Prism Flowers.');
@@ -1077,7 +1130,8 @@ $('#runBtn').onclick=runCurrent;
 epsBtn.onclick=()=>{if(!lastScene)return;try{const eps=generateEps(lastScene);validateEps(eps,null,null);downloadBlob(new Blob([eps],{type:'application/postscript'}),currentFlower>=0?adobeFilename(LIB[currentFlower],currentFlower):'code-to-eps.eps')}catch(e){setStatus('EPS validation failed: '+(e.message||e),'bad')}}
 svgBtn.onclick=()=>{if(!lastScene)return;downloadBlob(new Blob([sceneToSvg(lastScene)],{type:'image/svg+xml;charset=utf-8'}),currentFlower>=0?safeName(LIB[currentFlower].title)+'.svg':'code-to-eps.svg')}
 allBtn.onclick=async()=>{try{await exportAll()}catch(e){allBtn.disabled=false;setStatus('Export All failed: '+(e.message||e),'bad')}}
-$('#allSvgBtn').onclick=async()=>{try{await exportAllSvg()}catch(e){$('#allSvgBtn').disabled=false;setStatus('Export All SVG failed: '+(e.message||e),'bad')}}
+$('#allSvgBtn').onclick=async()=>{try{await exportAllSvg()}catch(e){$('#allSvgBtn').disabled=false;setStatus('Export All SVG failed: '+(e.message||e),'bad')}};
+$('#allPrismOneSvgBtn').onclick=()=>exportAllPrismOneSvg();
 metaBtn.onclick=exportMetadata;
 fillIconFamilies();
 $('#iconStockBtn').onclick=()=>{iconStockSection?.scrollIntoView({block:'center',behavior:'smooth'});loadIcon(iconItemAt(1));iconNumberEl?.focus()};
