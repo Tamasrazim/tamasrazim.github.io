@@ -124,7 +124,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 
   <div class="section">
     <h3>ADOBE STOCK METADATA</h3>
-    <div class="notice">Export All EPS creates numbered folders in batches of 50 EPS files, plus one matching Adobe CSV inside each folder. CSV fields: <b>Filename</b>, <b>Title</b>, <b>Keywords</b>.</div>
+    <div class="notice">Export All EPS and Export All SVG create numbered folders in batches of 50, plus one matching Adobe CSV inside each folder. CSV filenames exactly match the generated EPS/SVG files. Fields: <b>Filename</b>, <b>Title</b>, <b>Keywords</b>.</div>
   </div>
 
   <div class="section">
@@ -897,7 +897,7 @@ async function exportAll(){
 }
 async function exportAllSvg(){
   const dir=await pickFolder();
-  let done=0,failed=0;
+  let done=0,failed=0,csvSaved=0;
   const batchSize=50;
   const totalBatches=Math.ceil(LIB.length/batchSize);
   const btn=$('#allSvgBtn');
@@ -907,6 +907,7 @@ async function exportAllSvg(){
       const end=Math.min(start+batchSize,LIB.length);
       const batchNo=String(Math.floor(start/batchSize)+1).padStart(3,'0');
       const batchDir=await dir.getDirectoryHandle(batchNo,{create:true});
+      const batchItems=[];
       const usedNames=new Set();
       for(let i=start;i<end;i++){
         try{
@@ -914,25 +915,39 @@ async function exportAllSvg(){
           const svg=sceneToSvg(scene);
           const base='prism-'+safeName(LIB[i].title||('flower-'+(i+1)));
           const h=await getUniqueFileHandle(batchDir,base,'svg',usedNames);
+          const finalName=h.name;
           const w=await h.createWritable();
           await w.write(svg);
           await w.close();
+          batchItems.push({f:LIB[i],i,filename:finalName});
           done++;
         }catch(e){
           failed++;
           console.error('SVG '+LIB[i].title,e);
         }
         if((done+failed)%10===0||i===end-1){
-          setStatus('Export All SVG — '+done+' / '+LIB.length+' SVG · folder '+batchNo+' / '+String(totalBatches).padStart(3,'0'));
+          setStatus('Export All SVG — '+done+' / '+LIB.length+' SVG · folder '+batchNo+' / '+String(totalBatches).padStart(3,'0')+' · '+batchItems.length+' in current folder');
         }
         await new Promise(r=>setTimeout(r,0));
       }
+      try{
+        const csv=metadataCsv(batchItems);
+        const csvHandle=await batchDir.getFileHandle('adobe-stock-metadata.csv',{create:true});
+        const csvWriter=await csvHandle.createWritable();
+        await csvWriter.write(csv);
+        await csvWriter.close();
+        csvSaved++;
+      }catch(e){
+        failed++;
+        console.error('SVG CSV '+batchNo,e);
+      }
+      setStatus('Export All SVG — folder '+batchNo+' complete · '+batchItems.length+' SVG + Adobe CSV');
       if(typeof gc==='function')gc();
     }
   }finally{
     btn.disabled=false;
   }
-  flash('Export All SVG finished — '+done+' SVG across '+totalBatches+' folders'+(failed?' · '+failed+' failed':''));
+  flash('Export All SVG finished — '+done+' SVG + '+csvSaved+' Adobe CSVs across '+totalBatches+' folders'+(failed?' · '+failed+' failed':''));
 }
 async function exportMetadata(){
   try{
