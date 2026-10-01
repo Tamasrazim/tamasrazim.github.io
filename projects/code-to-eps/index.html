@@ -1122,16 +1122,14 @@ async function exportAllPrismOneSvg(){
     parts.push('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">');
     parts.push('<title>Prism Flowers — '+FLOWERS.length+' Editable Vector Flowers</title>');
     parts.push('<desc>Exact 16:9 presentation sheet containing '+FLOWERS.length+' Prism Flower vector assets. Each artwork is scaled from its actual vector bounds so the flowers remain large and readable.</desc>');
-    parts.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#ffffff"/>');
-    parts.push('<rect x="0" y="0" width="'+W+'" height="'+headerH+'" fill="#0b0b0b"/>');
-    parts.push('<text x="'+outerPad+'" y="176" font-family="Georgia, Times New Roman, serif" font-size="150" font-weight="600" letter-spacing="1" fill="#ffffff">'+sheetTitle+'</text>');
-    parts.push('<text x="'+outerPad+'" y="315" font-family="Georgia, Times New Roman, serif" font-size="52" font-weight="400" fill="#d7d7d7">'+sheetSubtitle+'</text>');
+    parts.push('<text x="'+outerPad+'" y="176" font-family="Georgia, Times New Roman, serif" font-size="150" font-weight="600" letter-spacing="1" fill="#111111">'+sheetTitle+'</text>');
+    parts.push('<text x="'+outerPad+'" y="315" font-family="Georgia, Times New Roman, serif" font-size="52" font-weight="400" fill="#333333">'+sheetSubtitle+'</text>');
     parts.push('<text x="'+outerPad+'" y="420" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="500" letter-spacing="2" fill="#9a9a9a">'+sheetMeta+'</text>');
     parts.push('<line x1="'+outerPad+'" y1="475" x2="'+(W-outerPad)+'" y2="475" stroke="#333333" stroke-width="2"/>');
-    parts.push('<text x="'+outerPad+'" y="575" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" letter-spacing="4" fill="#ffffff">Three flowers, up close</text>');
-    parts.push('<text x="'+outerPad+'" y="638" font-family="Georgia, Times New Roman, serif" font-size="34" font-style="italic" font-weight="400" fill="#a4a4a4">Scabiosa · Nigela · Snapdragon</text>');
-    parts.push('<text x="'+(W-outerPad)+'" y="155" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="600" letter-spacing="4" fill="#ffffff">botanical vector studies</text>');
-    parts.push('<text x="'+(W-outerPad)+'" y="215" text-anchor="end" font-family="Georgia, Times New Roman, serif" font-size="28" font-style="italic" font-weight="400" fill="#8f8f8f">a small visual catalogue</text>');
+    parts.push('<text x="'+outerPad+'" y="575" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" letter-spacing="4" fill="#111111">Three flowers, up close</text>');
+    parts.push('<text x="'+outerPad+'" y="638" font-family="Georgia, Times New Roman, serif" font-size="34" font-style="italic" font-weight="400" fill="#555555">Scabiosa · Nigela · Snapdragon</text>');
+    parts.push('<text x="'+(W-outerPad)+'" y="155" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="600" letter-spacing="4" fill="#111111">botanical vector studies</text>');
+    parts.push('<text x="'+(W-outerPad)+'" y="215" text-anchor="end" font-family="Georgia, Times New Roman, serif" font-size="28" font-style="italic" font-weight="400" fill="#777777">a small visual catalogue</text>');
 
     const demoKeys=['scabiosa','nigela','snapdragon'];
     const demoAliases={nigela:['nigela','nigella']};
@@ -1160,7 +1158,7 @@ async function exportAllPrismOneSvg(){
         const ty=boxY+8+(demoH-54)/2-(b.y+b.h/2)*scale;
         const clipId=idPrefix+'-clip';
         parts.push('<clipPath id="'+clipId+'"><rect x="'+boxX+'" y="'+boxY+'" width="'+demoW+'" height="'+demoH+'" rx="20"/></clipPath>');
-        parts.push('<rect x="'+boxX+'" y="'+boxY+'" width="'+demoW+'" height="'+demoH+'" rx="20" fill="#ffffff" stroke="#353535" stroke-width="2"/>');
+        parts.push('<rect x="'+boxX+'" y="'+boxY+'" width="'+demoW+'" height="'+demoH+'" rx="20" fill="none" stroke="#bdbdbd" stroke-width="2"/>');
         parts.push('<g id="'+idPrefix+'" clip-path="url(#'+clipId+')">');
         parts.push('<g id="'+idPrefix+'-artwork" transform="translate('+psNum(tx)+' '+psNum(ty)+') scale('+psNum(scale)+' '+psNum(scale)+')">');
         parts.push(body);
@@ -1187,7 +1185,7 @@ async function exportAllPrismOneSvg(){
         const name=esc(prismFlowerName(f,i));
         const numLabel=String(i+1).padStart(3,'0');
         parts.push('<g id="'+idPrefix+'" transform="translate('+psNum(x)+' '+psNum(y)+')">');
-        parts.push('<rect x="10" y="10" width="'+psNum(tileW-20)+'" height="'+psNum(tileH-20)+'" rx="16" fill="#fafafa" stroke="#e8e8e8" stroke-width="1.5"/>');
+        parts.push('<rect x="10" y="10" width="'+psNum(tileW-20)+'" height="'+psNum(tileH-20)+'" rx="16" fill="none" stroke="#d7d7d7" stroke-width="1.5"/>');
         parts.push('<title>'+name+'</title>');
         parts.push('<g id="'+idPrefix+'-artwork" transform="translate('+psNum(drawX)+' '+psNum(drawY)+') scale('+psNum(scale)+' '+psNum(scale)+')">');
         parts.push(body);
