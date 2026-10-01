@@ -182,7 +182,7 @@
     if(idAlias) idAlias.addEventListener('mouseenter', function(){ scrambleTo(idAlias,'TAMASRAZIM',260); });
 
     /* ---------- Magnetic interaction ---------- */
-    if(!reduced && finePointer){
+    if(!reduced){
       qa('.magnetic').forEach(function(el){
         el.addEventListener('mousemove', function(e){
           var r = el.getBoundingClientRect();
@@ -197,7 +197,7 @@
     /* ---------- Cursor ---------- */
     var dot = q('#cursorDot');
     var ring = q('#cursorRing');
-    if(finePointer && !reduced && dot && ring){
+    if(!reduced && dot && ring){
       var mx=0,my=0,rx=0,ry=0,hasMoved=false;
       window.addEventListener('mousemove', function(e){
         mx=e.clientX;my=e.clientY;
@@ -222,7 +222,7 @@
 
 
     /* ---------- Global mouse field / everywhere interaction ---------- */
-    if(!reduced && finePointer){
+    if(!reduced){
       var pointerTargets=[
         ['.hero-title','drift',0.018,0.014,2.8,3.6],
         ['.hero-kicker','soft',0.010,0.008,0,0],
@@ -299,7 +299,7 @@
 
 
     /* ---------- Local text zoom everywhere ---------- */
-    if(!reduced && finePointer){
+    if(!reduced){
       var textTargets=qa([
         '.nav a',
         '.header-contact',
@@ -395,7 +395,7 @@
     }, {passive:true});
 
     /* ---------- Photo-plane mouse interaction ---------- */
-    if(!reduced && finePointer){
+    if(!reduced){
       var projectCards=qa('.project-card');
       projectCards.forEach(function(card,index){
         var photo=card.querySelector('.project-photo');
