@@ -195,11 +195,20 @@ function psNum(n){return Number(n).toFixed(3).replace(/\.000$/,'').replace(/(\.\
 function mi(){return[1,0,0,1,0,0]}
 function mm(a,b){return[a[0]*b[0]+a[2]*b[1],a[1]*b[0]+a[3]*b[1],a[0]*b[2]+a[2]*b[3],a[1]*b[2]+a[3]*b[3],a[0]*b[4]+a[2]*b[5]+a[4],a[1]*b[4]+a[3]*b[5]+a[5]]}
 class GradientPaint{constructor(kind,args){this.kind=kind;this.args=args;this.stops=[]}addColorStop(o,c){this.stops.push({offset:clamp(num(o),0,1),color:c});this.stops.sort((a,b)=>a.offset-b.offset)}flat(){if(!this.stops.length)return'#000';return this.stops[Math.floor(this.stops.length/2)].color}}
-class Scene{constructor(W,H){this.W=W;this.H=H;this.ops=[];this.bg=null}bgColor(c){this.bg=c}add(o){this.ops.push(o)}}
+class GroupNode{
+  constructor(){this.t='group';this.children=[];this.m=mi()}
+  add(o){this.children.push(o);return o}
+}
+class Scene{
+  constructor(W,H){this.W=W;this.H=H;this.ops=[];this.bg=null}
+  bgColor(c){this.bg=c}
+  add(o){this.ops.push(o);return o}
+  group(){const g=new GroupNode();this.ops.push(g);return g}
+}
 class RecorderCtx{
-  constructor(scene,W,H){this.s=scene;this.canvas={width:W,height:H};this.m=mi();this.stack=[];this.path=[];this.fillStyle='#000';this.strokeStyle='#000';this.lineWidth=1;this.lineCap='butt'}
-  save(){this.stack.push({m:this.m.slice(),fill:this.fillStyle,stroke:this.strokeStyle,width:this.lineWidth,cap:this.lineCap});this.s.add({t:'save'});return this}
-  restore(){const q=this.stack.pop();if(q){this.m=q.m;this.fillStyle=q.fill;this.strokeStyle=q.stroke;this.lineWidth=q.width;this.lineCap=q.cap}this.s.add({t:'restore'});return this}
+  constructor(scene,W,H){this.s=scene;this.canvas={width:W,height:H};this.m=mi();this.stack=[];this.path=[];this.fillStyle='#000';this.strokeStyle='#000';this.lineWidth=1;this.lineCap='butt';this.globalAlpha=1}
+  save(){this.stack.push({m:this.m.slice(),fill:this.fillStyle,stroke:this.strokeStyle,width:this.lineWidth,cap:this.lineCap,alpha:this.globalAlpha});this.s.add({t:'save'});return this}
+  restore(){const q=this.stack.pop();if(q){this.m=q.m;this.fillStyle=q.fill;this.strokeStyle=q.stroke;this.lineWidth=q.width;this.lineCap=q.cap;this.globalAlpha=q.alpha==null?1:q.alpha}this.s.add({t:'restore'});return this}
   translate(x,y){this.m=mm(this.m,[1,0,0,1,num(x),num(y)]);return this}
   rotate(a){const r=num(a),c=Math.cos(r),s=Math.sin(r);this.m=mm(this.m,[c,s,-s,c,0,0]);return this}
   scale(x,y=x){this.m=mm(this.m,[num(x,1),0,0,num(y,1),0,0]);return this}
@@ -216,15 +225,18 @@ class RecorderCtx{
   createLinearGradient(a,b,c,d){return new GradientPaint('linear',[num(a),num(b),num(c),num(d)])}
   createRadialGradient(a,b,c,d,e,f){return new GradientPaint('radial',[num(a),num(b),num(c),num(d),num(e),num(f)])}
   _paint(p){return p instanceof GradientPaint?p.flat():p}
-  fillRect(x,y,w,h){this.s.add({t:'rect',x:num(x),y:num(y),w:num(w),h:num(h),fill:this._paint(this.fillStyle),stroke:null,width:0,m:this.m.slice()});return this}
-  strokeRect(x,y,w,h){this.s.add({t:'rect',x:num(x),y:num(y),w:num(w),h:num(h),fill:null,stroke:this._paint(this.strokeStyle),width:num(this.lineWidth,1),m:this.m.slice()});return this}
-  fill(){if(this.path.length)this.s.add({t:'path',commands:this.path.slice(),fill:this._paint(this.fillStyle),stroke:null,width:0,m:this.m.slice()});return this}
-  stroke(){if(this.path.length)this.s.add({t:'path',commands:this.path.slice(),fill:null,stroke:this._paint(this.strokeStyle),width:num(this.lineWidth,1),m:this.m.slice()});return this}
+  fillRect(x,y,w,h){this.s.add({t:'rect',x:num(x),y:num(y),w:num(w),h:num(h),fill:this._paint(this.fillStyle),stroke:null,width:0,opacity:this.globalAlpha,m:this.m.slice()});return this}
+  strokeRect(x,y,w,h){this.s.add({t:'rect',x:num(x),y:num(y),w:num(w),h:num(h),fill:null,stroke:this._paint(this.strokeStyle),width:num(this.lineWidth,1),opacity:this.globalAlpha,m:this.m.slice()});return this}
+  fill(){if(this.path.length)this.s.add({t:'path',commands:this.path.slice(),fill:this._paint(this.fillStyle),stroke:null,width:0,opacity:this.globalAlpha,m:this.m.slice()});return this}
+  stroke(){if(this.path.length)this.s.add({t:'path',commands:this.path.slice(),fill:null,stroke:this._paint(this.strokeStyle),width:num(this.lineWidth,1),opacity:this.globalAlpha,m:this.m.slice()});return this}
 }
 class Vec{
-  constructor(scene){this.s=scene;this.m=mi();this.stack=[];this.st={fill:'#000',stroke:null,width:1,opacity:1}}
-  save(){this.stack.push({m:this.m.slice(),st:{...this.st}});this.s.add({t:'save'});return this}
-  restore(){const q=this.stack.pop();if(q){this.m=q.m;this.st=q.st}this.s.add({t:'restore'});return this}
+  constructor(scene){this.s=scene;this.m=mi();this.stack=[];this.groups=[];this.st={fill:'#000',stroke:null,width:1,opacity:1}}
+  _target(){return this.groups.length?this.groups[this.groups.length-1]:this.s}
+  _add(o){return this._target().add(o)}
+  group(fn){const g=new GroupNode();g.m=this.m.slice();this._target().add(g);this.groups.push(g);try{if(typeof fn==='function')fn(this)}finally{this.groups.pop()}return this}
+  save(){this.stack.push({m:this.m.slice(),st:{...this.st}});this._add({t:'save'});return this}
+  restore(){const q=this.stack.pop();if(q){this.m=q.m;this.st=q.st}this._add({t:'restore'});return this}
   translate(x,y){this.m=mm(this.m,[1,0,0,1,num(x),num(y)]);return this}
   rotate(deg){const r=num(deg)*Math.PI/180,c=Math.cos(r),s=Math.sin(r);this.m=mm(this.m,[c,s,-s,c,0,0]);return this}
   scale(x,y=x){this.m=mm(this.m,[num(x,1),0,0,num(y,1),0,0]);return this}
@@ -234,12 +246,12 @@ class Vec{
   width(n){this.st.width=Math.max(0,num(n,1));return this}
   opacity(n){this.st.opacity=clamp(num(n,1),0,1);return this}
   background(c){this.s.bg=c;return this}
-  rect(x,y,w,h,r=0){this.s.add({t:'rect',x:num(x),y:num(y),w:num(w),h:num(h),r:num(r),...this.st,m:this.m.slice()});return this}
-  circle(x,y,r){this.s.add({t:'circle',x:num(x),y:num(y),r:Math.abs(num(r)),...this.st,m:this.m.slice()});return this}
-  ellipse(x,y,rx,ry){this.s.add({t:'ellipse',x:num(x),y:num(y),rx:Math.abs(num(rx)),ry:Math.abs(num(ry)),...this.st,m:this.m.slice()});return this}
-  line(x1,y1,x2,y2){this.s.add({t:'line',x1:num(x1),y1:num(y1),x2:num(x2),y2:num(y2),fill:null,stroke:this.st.stroke||this.st.fill,width:this.st.width,opacity:this.st.opacity,m:this.m.slice()});return this}
-  path(fn){const p=new RecorderCtx(this.s,this.s.W,this.s.H);p.m=this.m.slice();p.fillStyle=this.st.fill;p.strokeStyle=this.st.stroke||'#000';p.lineWidth=this.st.width;if(typeof fn==='function')fn(p);for(const o of this.s.ops.slice(-0)){void o}if(p.path.length)this.s.add({t:'path',commands:p.path.slice(),fill:this.st.fill,stroke:this.st.stroke,width:this.st.width,opacity:this.st.opacity,m:this.m.slice()});return this}
-  text(text,x,y,size=16,font='Helvetica',anchor='left'){this.s.add({t:'text',text:String(text),x:num(x),y:num(y),size:Math.max(1,num(size,16)),font:String(font||'Helvetica'),anchor:String(anchor||'left'),fill:this.st.fill||'#000',stroke:null,width:0,opacity:this.st.opacity,m:this.m.slice()});return this}
+  rect(x,y,w,h,r=0){this._add({t:'rect',x:num(x),y:num(y),w:num(w),h:num(h),r:num(r),...this.st,m:this.m.slice()});return this}
+  circle(x,y,r){this._add({t:'circle',x:num(x),y:num(y),r:Math.abs(num(r)),...this.st,m:this.m.slice()});return this}
+  ellipse(x,y,rx,ry){this._add({t:'ellipse',x:num(x),y:num(y),rx:Math.abs(num(rx)),ry:Math.abs(num(ry)),...this.st,m:this.m.slice()});return this}
+  line(x1,y1,x2,y2){this._add({t:'line',x1:num(x1),y1:num(y1),x2:num(x2),y2:num(y2),fill:null,stroke:this.st.stroke||this.st.fill,width:this.st.width,opacity:this.st.opacity,m:this.m.slice()});return this}
+  path(fn){const p=new RecorderCtx(this.s,this.s.W,this.s.H);p.m=this.m.slice();p.fillStyle=this.st.fill;p.strokeStyle=this.st.stroke||'#000';p.lineWidth=this.st.width;p.globalAlpha=this.st.opacity;if(typeof fn==='function')fn(p);if(p.path.length)this._add({t:'path',commands:p.path.slice(),fill:this.st.fill,stroke:this.st.stroke,width:this.st.width,opacity:this.st.opacity,m:this.m.slice()});return this}
+  text(text,x,y,size=16,font='Helvetica',anchor='left'){this._add({t:'text',text:String(text),x:num(x),y:num(y),size:Math.max(1,num(size,16)),font:String(font||'Helvetica'),anchor:String(anchor||'left'),fill:this.st.fill||'#000',stroke:null,width:0,opacity:this.st.opacity,m:this.m.slice()});return this}
 }
 function psColor(c,opacity=1){
   const x=cssColor(c);
@@ -406,21 +418,26 @@ function emitObjectPath(o,commands,H){
   }
   return parts.join('\n')+'\n';
 }
-function emitOp(o,i,H){
+function emitOp(o,i,H,parentM=identityM()){
   if(!o||o.t==='save'||o.t==='restore')return '';
+  if(o.t==='group'){
+    const gm=mulM(parentM,o.m||identityM());
+    let gs='%%BeginObject: CODEEPS_GROUP_'+String(i).padStart(5,'0')+'\ngsave\n';
+    let n=0;
+    for(const child of o.children||[]){n++;gs+=emitOp(child,i+'.'+n,H,gm)}
+    gs+='grestore\n%%EndObject\n';
+    return gs;
+  }
+  const merged={...o,m:mulM(parentM,o.m||identityM())};
   let s='%%BeginObject: CODEEPS_'+String(i).padStart(5,'0')+'\ngsave\n';
   let commands=null;
-  if(o.t==='rect')commands=rectCommands(o.x,o.y,o.w,o.h,o.r||0);
-  else if(o.t==='circle')commands=ellipseCommands(o.x,o.y,o.r,o.r,0);
-  else if(o.t==='ellipse')commands=ellipseCommands(o.x,o.y,o.rx,o.ry,0);
-  else if(o.t==='line')commands=[['M',o.x1,o.y1],['L',o.x2,o.y2]];
-  else if(o.t==='path')commands=o.commands||[];
-  if(commands){
-    s+=emitObjectPath(o,commands,H);
-  }else if(o.t==='text'){
-    const glyphs=textCommands(o.text,o.x,o.y,o.size,o.anchor);
-    s+=emitObjectPath({...o,stroke:null},glyphs,H);
-  }
+  if(merged.t==='rect')commands=rectCommands(merged.x,merged.y,merged.w,merged.h,merged.r||0);
+  else if(merged.t==='circle')commands=ellipseCommands(merged.x,merged.y,merged.r,merged.r,0);
+  else if(merged.t==='ellipse')commands=ellipseCommands(merged.x,merged.y,merged.rx,merged.ry,0);
+  else if(merged.t==='line')commands=[['M',merged.x1,merged.y1],['L',merged.x2,merged.y2]];
+  else if(merged.t==='path')commands=merged.commands||[];
+  if(commands)s+=emitObjectPath(merged,commands,H);
+  else if(merged.t==='text')s+=emitObjectPath({...merged,stroke:null},textCommands(merged.text,merged.x,merged.y,merged.size,merged.anchor),H);
   s+='grestore\n%%EndObject\n';
   return s;
 }
@@ -486,18 +503,24 @@ function runEpsSelfTests(){
 function sceneToSvg(scene){
   let s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+scene.W+' '+scene.H+'" width="'+scene.W+'" height="'+scene.H+'">';
   if(scene.bg)s+='<rect width="100%" height="100%" fill="'+hexColor(scene.bg)+'"/>';
-  for(const o of scene.ops){
-    if(o.t==='save'||o.t==='restore')continue;
+  function emitSvgOp(o,parentM=identityM()){
+    if(!o||o.t==='save'||o.t==='restore')return '';
+    const mergedM=mulM(parentM,o.m||identityM());
+    if(o.t==='group'){
+      return (o.children||[]).map(child=>emitSvgOp(child,mergedM)).join('');
+    }
     const fill=o.fill?hexColor(o.fill):'none',stroke=o.stroke?hexColor(o.stroke):'none';
     const st='fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+psNum(o.width||0)+'" opacity="'+psNum(o.opacity==null?1:o.opacity)+'"';
-    const tr='matrix('+o.m.map(psNum).join(' ')+')';
-    if(o.t==='rect')s+='<rect x="'+psNum(o.x)+'" y="'+psNum(o.y)+'" width="'+psNum(o.w)+'" height="'+psNum(o.h)+'"'+(o.r?' rx="'+psNum(o.r)+'"':'')+' transform="'+tr+'" '+st+'/>';
-    else if(o.t==='circle')s+='<circle cx="'+psNum(o.x)+'" cy="'+psNum(o.y)+'" r="'+psNum(o.r)+'" transform="'+tr+'" '+st+'/>';
-    else if(o.t==='ellipse')s+='<ellipse cx="'+psNum(o.x)+'" cy="'+psNum(o.y)+'" rx="'+psNum(o.rx)+'" ry="'+psNum(o.ry)+'" transform="'+tr+'" '+st+'/>';
-    else if(o.t==='line')s+='<line x1="'+psNum(o.x1)+'" y1="'+psNum(o.y1)+'" x2="'+psNum(o.x2)+'" y2="'+psNum(o.y2)+'" transform="'+tr+'" '+st+'/>';
-    else if(o.t==='path')s+='<path d="'+pathSvg(o.commands)+'" transform="'+tr+'" '+st+'/>';
-    else if(o.t==='text')s+='<text x="'+psNum(o.x)+'" y="'+psNum(o.y)+'" transform="'+tr+'" fill="'+hexColor(o.fill||'#000')+'" font-family="'+esc(o.font)+'" font-size="'+psNum(o.size)+'" text-anchor="'+(o.anchor==='center'?'middle':o.anchor==='right'?'end':'start')+'">'+esc(o.text)+'</text>';
+    const tr='matrix('+mergedM.map(psNum).join(' ')+' )'.replace(' )',')');
+    if(o.t==='rect')return '<rect x="'+psNum(o.x)+'" y="'+psNum(o.y)+'" width="'+psNum(o.w)+'" height="'+psNum(o.h)+'"'+(o.r?' rx="'+psNum(o.r)+'"':'')+' transform="'+tr+'" '+st+'/>';
+    if(o.t==='circle')return '<circle cx="'+psNum(o.x)+'" cy="'+psNum(o.y)+'" r="'+psNum(o.r)+'" transform="'+tr+'" '+st+'/>';
+    if(o.t==='ellipse')return '<ellipse cx="'+psNum(o.x)+'" cy="'+psNum(o.y)+'" rx="'+psNum(o.rx)+'" ry="'+psNum(o.ry)+'" transform="'+tr+'" '+st+'/>';
+    if(o.t==='line')return '<line x1="'+psNum(o.x1)+'" y1="'+psNum(o.y1)+'" x2="'+psNum(o.x2)+'" y2="'+psNum(o.y2)+'" transform="'+tr+'" '+st+'/>';
+    if(o.t==='path')return '<path d="'+pathSvg(o.commands)+'" transform="'+tr+'" '+st+'/>';
+    if(o.t==='text')return '<text x="'+psNum(o.x)+'" y="'+psNum(o.y)+'" transform="'+tr+'" fill="'+hexColor(o.fill||'#000')+'" font-family="'+esc(o.font)+'" font-size="'+psNum(o.size)+'" text-anchor="'+(o.anchor==='center'?'middle':o.anchor==='right'?'end':'start')+'">'+esc(o.text)+'</text>';
+    return '';
   }
+  for(const o of scene.ops)s+=emitSvgOp(o);
   return s+'</svg>';
 }
 function pathSvg(c){let s='';for(const q of c){if(q[0]==='M')s+='M '+psNum(q[1])+' '+psNum(q[2])+' ';else if(q[0]==='L')s+='L '+psNum(q[1])+' '+psNum(q[2])+' ';else if(q[0]==='C')s+='C '+q.slice(1).map(psNum).join(' ')+' ';else if(q[0]==='Z')s+='Z '}return s.trim()}
