@@ -248,37 +248,239 @@ function psColor(c,opacity=1){
   if(a<1&&bg){r=r*a+bg.r*(1-a);g=g*a+bg.g*(1-a);b=b*a+bg.b*(1-a)}
   return psNum(r)+' '+psNum(g)+' '+psNum(b)+' setrgbcolor'
 }
-function psTransform(m){return psNum(m[0])+' '+psNum(m[1])+' '+psNum(m[2])+' '+psNum(m[3])+' '+psNum(m[4])+' '+psNum(m[5])+' concat'}
-function escPs(s){return String(s).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)').replace(/[\r\n]+/g,' ')}
-function pathPs(cmds){let s='';for(const c of cmds){if(c[0]==='M')s+=psNum(c[1])+' '+psNum(c[2])+' moveto\n';else if(c[0]==='L')s+=psNum(c[1])+' '+psNum(c[2])+' lineto\n';else if(c[0]==='C')s+=c.slice(1).map(psNum).join(' ')+' curveto\n';else if(c[0]==='Z')s+='closepath\n'}return s}
-function emitOp(o,i){
-  let s='%%BeginObject: CODEEPS_'+String(i+1).padStart(5,'0')+'\ngsave\n'+psTransform(o.m||mi())+'\n';
-  if(o.t==='rect'){
-    const x=o.x,y=o.y,w=o.w,h=o.h;
-    if(o.r){const r=Math.min(Math.abs(o.r),Math.abs(w)/2,Math.abs(h)/2),k=.5522848;s+='newpath '+psNum(x+r)+' '+psNum(y)+' moveto '+psNum(x+w-r)+' '+psNum(y)+' lineto '+psNum(x+w-r+k*r)+' '+psNum(y)+' '+psNum(x+w)+' '+psNum(y+r-k*r)+' '+psNum(x+w)+' '+psNum(y+r)+' curveto '+psNum(x+w)+' '+psNum(y+h-r)+' lineto '+psNum(x+w)+' '+psNum(y+h-r+k*r)+' '+psNum(x+w-r+k*r)+' '+psNum(y+h)+' '+psNum(x+w-r)+' '+psNum(y+h)+' curveto '+psNum(x+r)+' '+psNum(y+h)+' lineto '+psNum(x+r-k*r)+' '+psNum(y+h)+' '+psNum(x)+' '+psNum(y+h-r+k*r)+' '+psNum(x)+' '+psNum(y+h-r)+' curveto '+psNum(x)+' '+psNum(y+r)+' lineto '+psNum(x)+' '+psNum(y+r-k*r)+' '+psNum(x+r-k*r)+' '+psNum(y)+' '+psNum(x+r)+' '+psNum(y)+' curveto closepath\n'}
-    else s+='newpath '+psNum(x)+' '+psNum(y)+' moveto '+psNum(w)+' 0 rlineto 0 '+psNum(h)+' rlineto '+psNum(-w)+' 0 rlineto closepath\n';
-  }else if(o.t==='circle')s+='newpath '+psNum(o.x)+' '+psNum(o.y)+' '+psNum(o.r)+' 0 360 arc closepath\n';
-  else if(o.t==='ellipse')s+='newpath gsave '+psNum(o.x)+' '+psNum(o.y)+' translate '+psNum(o.rx)+' '+psNum(o.ry)+' scale 0 0 1 0 360 arc closepath grestore\n';
-  else if(o.t==='line')s+='newpath '+psNum(o.x1)+' '+psNum(o.y1)+' moveto '+psNum(o.x2)+' '+psNum(o.y2)+' lineto\n';
-  else if(o.t==='path')s+='newpath\n'+pathPs(o.commands);
-  else if(o.t==='text')s+='/'+o.font.replace(/[^A-Za-z0-9-]/g,'')+' findfont '+psNum(o.size)+' scalefont setfont '+psNum(o.x)+' '+psNum(o.y)+' moveto ('+escPs(o.text)+') '+(o.anchor==='center'?'dup stringwidth pop 2 div neg 0 rmoveto ':o.anchor==='right'?'dup stringwidth pop neg 0 rmoveto ':'')+'\n';
-  if(o.t==='text')s+=psColor(o.fill||'#000',o.opacity)+'\nshow\n';
-  else if(o.fill){s+=psColor(o.fill,o.opacity)+'\nfill\n';if(o.stroke)s+='gsave '+psColor(o.stroke,o.opacity)+' '+psNum(o.width||1)+' setlinewidth stroke grestore\n'}
-  else if(o.stroke)s+=psColor(o.stroke,o.opacity)+' '+psNum(o.width||1)+' setlinewidth stroke\n';
+function identityM(){return[1,0,0,1,0,0]}
+function mulM(a,b){return[
+  a[0]*b[0]+a[2]*b[1],
+  a[1]*b[0]+a[3]*b[1],
+  a[0]*b[2]+a[2]*b[3],
+  a[1]*b[2]+a[3]*b[3],
+  a[0]*b[4]+a[2]*b[5]+a[4],
+  a[1]*b[4]+a[3]*b[5]+a[5]
+]}
+function applyM(m,x,y){return[
+  m[0]*x+m[2]*y+m[4],
+  m[1]*x+m[3]*y+m[5]
+]}
+function epsM(m,H){return mulM([1,0,0,-1,0,H],m||identityM())}
+function transformedCommands(cmds,m){
+  const out=[];
+  for(const c of cmds){
+    if(c[0]==='M'||c[0]==='L'){
+      const p=applyM(m,c[1],c[2]);out.push([c[0],p[0],p[1]]);
+    }else if(c[0]==='C'){
+      const p1=applyM(m,c[1],c[2]),p2=applyM(m,c[3],c[4]),p3=applyM(m,c[5],c[6]);
+      out.push(['C',p1[0],p1[1],p2[0],p2[1],p3[0],p3[1]]);
+    }else if(c[0]==='Z') out.push(['Z']);
+  }
+  return out;
+}
+function pathPs(cmds){
+  let s='';
+  for(const c of cmds){
+    if(c[0]==='M')s+=psNum(c[1])+' '+psNum(c[2])+' moveto\n';
+    else if(c[0]==='L')s+=psNum(c[1])+' '+psNum(c[2])+' lineto\n';
+    else if(c[0]==='C')s+=c.slice(1).map(psNum).join(' ')+' curveto\n';
+    else if(c[0]==='Z')s+='closepath\n';
+  }
+  return s;
+}
+function ellipseCommands(cx,cy,rx,ry,rot=0){
+  const k=.5522847498307936,rr=num(rot),co=Math.cos(rr),si=Math.sin(rr);
+  const p=(x,y)=>[cx+(x*rx)*co-(y*ry)*si,cy+(x*rx)*si+(y*ry)*co];
+  const q=[['M',...p(1,0)],
+    ['C',...p(1,k),...p(k,1),...p(0,1)],
+    ['C',...p(-k,1),...p(-1,k),...p(-1,0)],
+    ['C',...p(-1,-k),...p(-k,-1),...p(0,-1)],
+    ['C',...p(k,-1),...p(1,-k),...p(1,0)],['Z']];
+  return q;
+}
+function rectCommands(x,y,w,h,r=0){
+  if(!r)return [['M',x,y],['L',x+w,y],['L',x+w,y+h],['L',x,y+h],['Z']];
+  const q=Math.min(Math.abs(r),Math.abs(w)/2,Math.abs(h)/2),k=.5522847498307936;
+  return [
+    ['M',x+q,y],['L',x+w-q,y],
+    ['C',x+w-q+k*q,y,x+w,y+q-k*q,x+w,y+q],
+    ['L',x+w,y+h-q],
+    ['C',x+w,y+h-q+k*q,x+w-q+k*q,y+h,x+w-q,y+h],
+    ['L',x+q,y+h],
+    ['C',x+q-k*q,y+h,x,y+h-q+k*q,x,y+h-q],
+    ['L',x,y+q],
+    ['C',x,y+q-k*q,x+q-k*q,y,x+q,y],['Z']
+  ];
+}
+function opacityColor(c,opacity){
+  const x=cssColor(c),a=clamp((x.a==null?1:x.a)*clamp(num(opacity,1),0,1),0,1);
+  const bg=epsBgEl&&epsBgEl.value!=='none'?cssColor(epsBgEl.value):{r:1,g:1,b:1};
+  return [x.r*a+bg.r*(1-a),x.g*a+bg.g*(1-a),x.b*a+bg.b*(1-a)];
+}
+function rgbPs(c,opacity=1){
+  const v=opacityColor(c,opacity);
+  return psNum(v[0])+' '+psNum(v[1])+' '+psNum(v[2])+' setrgbcolor';
+}
+function strokeScale(m){
+  const sx=Math.hypot(m[0],m[1]),sy=Math.hypot(m[2],m[3]);
+  return (sx+sy)/2 || 1;
+}
+
+/* Compact path-vector font. Text is deliberately emitted as editable vector paths,
+   avoiding external fonts and PostScript font operators. */
+const GLYPHS={
+ 'A':['01110','10001','10001','11111','10001','10001','10001'],
+ 'B':['11110','10001','10001','11110','10001','10001','11110'],
+ 'C':['01111','10000','10000','10000','10000','10000','01111'],
+ 'D':['11110','10001','10001','10001','10001','10001','11110'],
+ 'E':['11111','10000','10000','11110','10000','10000','11111'],
+ 'F':['11111','10000','10000','11110','10000','10000','10000'],
+ 'G':['01111','10000','10000','10111','10001','10001','01111'],
+ 'H':['10001','10001','10001','11111','10001','10001','10001'],
+ 'I':['11111','00100','00100','00100','00100','00100','11111'],
+ 'J':['00111','00010','00010','00010','10010','10010','01100'],
+ 'K':['10001','10010','10100','11000','10100','10010','10001'],
+ 'L':['10000','10000','10000','10000','10000','10000','11111'],
+ 'M':['10001','11011','10101','10101','10001','10001','10001'],
+ 'N':['10001','11001','10101','10011','10001','10001','10001'],
+ 'O':['01110','10001','10001','10001','10001','10001','01110'],
+ 'P':['11110','10001','10001','11110','10000','10000','10000'],
+ 'Q':['01110','10001','10001','10001','10101','10010','01101'],
+ 'R':['11110','10001','10001','11110','10100','10010','10001'],
+ 'S':['01111','10000','10000','01110','00001','00001','11110'],
+ 'T':['11111','00100','00100','00100','00100','00100','00100'],
+ 'U':['10001','10001','10001','10001','10001','10001','01110'],
+ 'V':['10001','10001','10001','10001','10001','01010','00100'],
+ 'W':['10001','10001','10001','10101','10101','10101','01010'],
+ 'X':['10001','10001','01010','00100','01010','10001','10001'],
+ 'Y':['10001','10001','01010','00100','00100','00100','00100'],
+ 'Z':['11111','00001','00010','00100','01000','10000','11111'],
+ '0':['01110','10001','10011','10101','11001','10001','01110'],
+ '1':['00100','01100','00100','00100','00100','00100','01110'],
+ '2':['01110','10001','00001','00010','00100','01000','11111'],
+ '3':['11110','00001','00001','01110','00001','00001','11110'],
+ '4':['00010','00110','01010','10010','11111','00010','00010'],
+ '5':['11111','10000','10000','11110','00001','00001','11110'],
+ '6':['01110','10000','10000','11110','10001','10001','01110'],
+ '7':['11111','00001','00010','00100','01000','01000','01000'],
+ '8':['01110','10001','10001','01110','10001','10001','01110'],
+ '9':['01110','10001','10001','01111','00001','00001','01110'],
+ '-':['00000','00000','00000','11111','00000','00000','00000'],
+ '+':['00000','00100','00100','11111','00100','00100','00000'],
+ '.':['00000','00000','00000','00000','00000','00110','00110'],
+ ',':['00000','00000','00000','00000','00110','00100','01000'],
+ ':':['00000','00110','00110','00000','00110','00110','00000'],
+ '!':['00100','00100','00100','00100','00100','00000','00100'],
+ '?':['01110','10001','00001','00010','00100','00000','00100'],
+ '/':['00001','00010','00100','01000','10000','00000','00000'],
+ '→':['00000','00100','00110','11111','00110','00100','00000']
+};
+function textCommands(text,x,y,size,anchor='left'){
+  const str=String(text).normalize('NFKC').replace(/[^\x20-\x7E→]/g,'?');
+  const cell=Math.max(1,num(size,16)/7),gap=Math.max(1,cell),advance=6*cell;
+  const total=Math.max(0,str.length*advance-gap);
+  let ox=num(x),top=num(y)-size*.82;
+  if(anchor==='center')ox-=total/2;
+  else if(anchor==='right')ox-=total;
+  const out=[];
+  for(let i=0;i<str.length;i++){
+    const rows=GLYPHS[str[i]]||GLYPHS[str[i].toUpperCase()]||GLYPHS['?'];
+    const gx=ox+i*advance;
+    for(let r=0;r<rows.length;r++){
+      for(let col=0;col<rows[r].length;col++){
+        if(rows[r][col]!=='1')continue;
+        const px=gx+col*cell,py=top+r*cell;
+        out.push(['M',px,py],['L',px+cell,py],['L',px+cell,py+cell],['L',px,py+cell],['Z']);
+      }
+    }
+  }
+  return out;
+}
+function emitObjectPath(o,commands,H){
+  const m=epsM(o.m||identityM(),H);
+  const tc=transformedCommands(commands,m);
+  const geom='newpath\n'+pathPs(tc);
+  const parts=[];
+  if(o.fill){
+    parts.push(geom,rgbPs(o.fill,o.opacity),'fill');
+  }
+  if(o.stroke){
+    parts.push(geom,rgbPs(o.stroke,o.opacity),psNum(Math.max(.01,num(o.width,1)*strokeScale(m)))+' setlinewidth','stroke');
+  }
+  return parts.join('\n')+'\n';
+}
+function emitOp(o,i,H){
+  if(!o||o.t==='save'||o.t==='restore')return '';
+  let s='%%BeginObject: CODEEPS_'+String(i).padStart(5,'0')+'\ngsave\n';
+  let commands=null;
+  if(o.t==='rect')commands=rectCommands(o.x,o.y,o.w,o.h,o.r||0);
+  else if(o.t==='circle')commands=ellipseCommands(o.x,o.y,o.r,o.r,0);
+  else if(o.t==='ellipse')commands=ellipseCommands(o.x,o.y,o.rx,o.ry,0);
+  else if(o.t==='line')commands=[['M',o.x1,o.y1],['L',o.x2,o.y2]];
+  else if(o.t==='path')commands=o.commands||[];
+  if(commands){
+    s+=emitObjectPath(o,commands,H);
+  }else if(o.t==='text'){
+    const glyphs=textCommands(o.text,o.x,o.y,o.size,o.anchor);
+    s+=emitObjectPath({...o,stroke:null},glyphs,H);
+  }
   s+='grestore\n%%EndObject\n';
   return s;
 }
+function validateEps(eps,W,H){
+  if(typeof eps!=='string'||!eps.startsWith('%!PS-Adobe-3.0 EPSF-3.0\n'))throw new Error('EPS header invalid');
+  if(!/%%BoundingBox: 0 0 \d+ \d+\n/.test(eps))throw new Error('EPS BoundingBox invalid');
+  if(!/%%HiResBoundingBox: 0 0 [0-9.]+ [0-9.]+\n/.test(eps))throw new Error('EPS HiResBoundingBox invalid');
+  if(!eps.includes('%%LanguageLevel: 3'))throw new Error('EPS LanguageLevel missing');
+  if(!eps.includes('%%EndComments'))throw new Error('EPS comments not terminated');
+  if(!eps.endsWith('%%EOF\n'))throw new Error('EPS EOF marker missing');
+  if(/NaN|Infinity/.test(eps))throw new Error('EPS contains invalid number');
+  if(/[^\x09\x0A\x0D\x20-\x7E]/.test(eps))throw new Error('EPS contains non-ASCII bytes');
+  const gs=(eps.match(/\bgsave\b/g)||[]).length,gr=(eps.match(/\bgrestore\b/g)||[]).length;
+  if(gs!==gr)throw new Error('EPS gsave/grestore mismatch');
+  const forbidden=/\b(?:arc|arcn|arct|rlineto|rcurveto|concat|findfont|scalefont|stringwidth|show|clip|image|colorimage|setcmykcolor)\b/;
+  if(forbidden.test(eps))throw new Error('EPS contains unsupported PostScript operator');
+  if(W!=null&&H!=null){
+    const m=eps.match(/%%BoundingBox: 0 0 (\d+) (\d+)/);
+    if(!m||Number(m[1])!==Math.round(W)||Number(m[2])!==Math.round(H))throw new Error('EPS BoundingBox mismatch');
+  }
+  return true;
+}
 function generateEps(scene){
-  const W=Math.round(scene.W),H=Math.round(scene.H);
-  const lines=['%!PS-Adobe-3.0 EPSF-3.0','%%Creator: Tamasrazim CODE→EPS','%%Title: Editable Vector Artwork','%%BoundingBox: 0 0 '+W+' '+H,'%%HiResBoundingBox: 0 0 '+W.toFixed(3)+' '+H.toFixed(3),'%%DocumentData: Clean7Bit','%%LanguageLevel: 3','%%Pages: 1','%%EndComments','0 '+H+' translate','1 -1 scale'];
+  const W=Math.max(1,Math.round(num(scene.W,1))),H=Math.max(1,Math.round(num(scene.H,1)));
+  const lines=[
+    '%!PS-Adobe-3.0 EPSF-3.0',
+    '%%Creator: Tamasrazim CODE-EPS',
+    '%%Title: Editable Vector Artwork',
+    '%%BoundingBox: 0 0 '+W+' '+H,
+    '%%HiResBoundingBox: 0 0 '+W.toFixed(3)+' '+H.toFixed(3),
+    '%%DocumentData: Clean7Bit',
+    '%%LanguageLevel: 3',
+    '%%Pages: 1',
+    '%%EndComments'
+  ];
   if(epsBgEl&&epsBgEl.value!=='none'){
     const bg=cssColor(epsBgEl.value);
-    lines.push(psNum(bg.r)+' '+psNum(bg.g)+' '+psNum(bg.b)+' setrgbcolor 0 0 '+W+' '+H+' rectfill');
+    const bgObj={fill:'#'+[bg.r,b.g,b.b].map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join(''),stroke:null,width:0,opacity:1,m:identityM()};
+    lines.push('%%BeginObject: CODEEPS_BACKGROUND','gsave',emitObjectPath(bgObj,rectCommands(0,0,W,H),H),'grestore','%%EndObject');
   }
   let n=0;
-  for(const o of scene.ops){if(o.t==='save'||o.t==='restore')continue;n++;lines.push(emitOp(o,n))}
-  lines.push('showpage','%%EOF');
-  return lines.join('\n')+'\n';
+  for(const o of scene.ops){if(!o||o.t==='save'||o.t==='restore')continue;n++;lines.push(emitOp(o,n,H));}
+  lines.push('showpage','%%EOF','');
+  const eps=lines.join('\n');
+  validateEps(eps,W,H);
+  return eps;
+}
+function uniqueBatchName(base,ext,used){
+  const root=safeName(base)||'artwork';
+  let name=root+'.'+ext,idx=2;
+  while(used.has(name))name=root+'-'+String(idx++).padStart(2,'0')+'.'+ext;
+  used.add(name);
+  return name;
+}
+function runEpsSelfTests(){
+  const s=new Scene(320,180),v=new Vec(s);
+  v.fill('#ff0066').rect(10,10,100,50,8).fill('#00c8ff').circle(180,60,30).stroke('#111').width(3).line(30,140,280,140).fill('#fff').text('CODE→EPS',160,125,24,'Helvetica','center');
+  const eps=generateEps(s);
+  validateEps(eps,320,180);
+  if(/rlineto|arc|findfont|show|concat/.test(eps))throw new Error('EPS self-test found forbidden operator');
+  return {ok:true,bytes:eps.length};
 }
 function sceneToSvg(scene){
   let s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+scene.W+' '+scene.H+'" width="'+scene.W+'" height="'+scene.H+'">';
@@ -360,7 +562,7 @@ function flowerKeywords(f){
 function metadataCsv(items=LIB.map((f,i)=>({f,i}))){
   const h=['Filename','Title','Keywords'];
   const rows=[h];
-  items.forEach(({f,i})=>rows.push([adobeFilename(f,i),adobeTitle(f),flowerKeywords(f).join(', ')]));
+  items.forEach(({f,i,filename})=>rows.push([filename||adobeFilename(f,i),adobeTitle(f),flowerKeywords(f).join(', ')]));
   return rows.map(r=>r.map(csvEsc).join(',')).join('\r\n')+'\r\n';
 }
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2500)}
@@ -377,15 +579,19 @@ async function exportAll(){
       const batchNo=String(Math.floor(start/batchSize)+1).padStart(3,'0');
       const batchDir=await dir.getDirectoryHandle(batchNo,{create:true});
       const batchItems=[];
+      const usedNames=new Set();
       for(let i=start;i<end;i++){
         try{
           const scene=buildFlowerScene(LIB[i]);
           const name=adobeFilename(LIB[i],i);
-          const h=await batchDir.getFileHandle(name,{create:true});
+          const finalName=uniqueBatchName(name.replace(/\.eps$/i,''),'eps',usedNames);
+          const eps=generateEps(scene);
+          validateEps(eps,scene.W,scene.H);
+          const h=await batchDir.getFileHandle(finalName,{create:false}).catch(()=>batchDir.getFileHandle(finalName,{create:true}));
           const w=await h.createWritable();
-          await w.write(generateEps(scene));
+          await w.write(eps);
           await w.close();
-          batchItems.push({f:LIB[i],i});
+          batchItems.push({f:LIB[i],i,filename:finalName});
           done++;
         }catch(e){
           failed++;
@@ -426,12 +632,13 @@ async function exportAllSvg(){
       const end=Math.min(start+batchSize,LIB.length);
       const batchNo=String(Math.floor(start/batchSize)+1).padStart(3,'0');
       const batchDir=await dir.getDirectoryHandle(batchNo,{create:true});
+      const usedNames=new Set();
       for(let i=start;i<end;i++){
         try{
           const scene=buildFlowerScene(LIB[i]);
           const svg=sceneToSvg(scene);
-          const base=safeName(LIB[i].title||('flower-'+(i+1)));
-          const name='prism-'+base+'.svg';
+          const base='prism-'+safeName(LIB[i].title||('flower-'+(i+1)));
+          const name=uniqueBatchName(base,'svg',usedNames);
           const h=await batchDir.getFileHandle(name,{create:true});
           const w=await h.createWritable();
           await w.write(svg);
@@ -460,7 +667,7 @@ async function exportMetadata(){
 }
 function onInput(){syncLines();modeEl.textContent='CUSTOM';currentFlower=-1}
 $('#runBtn').onclick=runCurrent;
-epsBtn.onclick=()=>{if(!lastScene)return;downloadBlob(new Blob([generateEps(lastScene)],{type:'application/postscript'}),currentFlower>=0?adobeFilename(LIB[currentFlower],currentFlower):'code-to-eps.eps')}
+epsBtn.onclick=()=>{if(!lastScene)return;try{const eps=generateEps(lastScene);validateEps(eps,lastScene.W,lastScene.H);downloadBlob(new Blob([eps],{type:'application/postscript'}),currentFlower>=0?adobeFilename(LIB[currentFlower],currentFlower):'code-to-eps.eps')}catch(e){setStatus('EPS validation failed: '+(e.message||e),'bad')}}
 svgBtn.onclick=()=>{if(!lastScene)return;downloadBlob(new Blob([sceneToSvg(lastScene)],{type:'image/svg+xml;charset=utf-8'}),currentFlower>=0?safeName(LIB[currentFlower].title)+'.svg':'code-to-eps.svg')}
 allBtn.onclick=async()=>{try{await exportAll()}catch(e){allBtn.disabled=false;setStatus('Export All failed: '+(e.message||e),'bad')}}
 $('#allSvgBtn').onclick=async()=>{try{await exportAllSvg()}catch(e){$('#allSvgBtn').disabled=false;setStatus('Export All SVG failed: '+(e.message||e),'bad')}}
@@ -486,7 +693,7 @@ async function boot(){
     if(!r.ok)throw new Error('Prism library request failed: '+r.status);
     LIB=await r.json();
     if(!Array.isArray(LIB)||LIB.length!==947)throw new Error('Expected 947 Prism Flowers, found '+(LIB?.length||0));
-    fillFlowers();codeEl.value=DEFAULT_CODE;syncLines();runCurrent();setStatus('Ready — '+LIB.length+' Prism Flowers loaded. Preview is transparent; EPS background is configurable.','good');
+    fillFlowers();codeEl.value=DEFAULT_CODE;syncLines();runCurrent();runEpsSelfTests();setStatus('Ready — '+LIB.length+' Prism Flowers loaded. EPS/SVG export engines validated.','good');
   }catch(e){codeEl.value=DEFAULT_CODE;syncLines();runCurrent();setStatus('Library error: '+(e.message||e),'bad')}
 }
 boot();
