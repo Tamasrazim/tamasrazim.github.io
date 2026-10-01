@@ -234,7 +234,7 @@ class Vec{
   constructor(scene){this.s=scene;this.m=mi();this.stack=[];this.groups=[];this.st={fill:'#000',stroke:null,width:1,opacity:1}}
   _target(){return this.groups.length?this.groups[this.groups.length-1]:this.s}
   _add(o){return this._target().add(o)}
-  group(fn){const g=new GroupNode();g.m=this.m.slice();this._target().add(g);this.groups.push(g);try{if(typeof fn==='function')fn(this)}finally{this.groups.pop()}return this}
+  group(fn){const savedM=this.m.slice(),g=new GroupNode();g.m=savedM.slice();this._target().add(g);this.groups.push(g);this.m=identityM();try{if(typeof fn==='function')fn(this)}finally{this.m=savedM;this.groups.pop()}return this}
   save(){this.stack.push({m:this.m.slice(),st:{...this.st}});this._add({t:'save'});return this}
   restore(){const q=this.stack.pop();if(q){this.m=q.m;this.st=q.st}this._add({t:'restore'});return this}
   translate(x,y){this.m=mm(this.m,[1,0,0,1,num(x),num(y)]);return this}
@@ -495,6 +495,7 @@ function uniqueBatchName(base,ext,used){
 function runEpsSelfTests(){
   const s=new Scene(320,180),v=new Vec(s);
   v.fill('#ff0066').rect(10,10,100,50,8).fill('#00c8ff').circle(180,60,30).stroke('#111').width(3).line(30,140,280,140).fill('#fff').text('CODE→EPS',160,125,24,'Helvetica','center');
+  v.translate(250,30).group(()=>{v.scale(0.5).fill('#00ff66').rect(0,0,80,40);});
   const eps=generateEps(s);
   validateEps(eps,320,180);
   if(/rlineto|arc|findfont|show|concat/.test(eps))throw new Error('EPS self-test found forbidden operator');
