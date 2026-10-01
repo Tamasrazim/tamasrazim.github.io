@@ -54,7 +54,7 @@ function draw(v,k,cx,cy,s,style,variant){
  switch(k){
   case'arrow':outline(()=>{v.line(x-s*.28,y,x+s*.28,y);poly(v,[[x+s*.08,y-s*.18],[x+s*.30,y],[x+s*.08,y+s*.18]])});break;
   case'search':outline(()=>{v.circle(x-s*.07,y-s*.06,s*.22);v.line(x+s*.10,y+s*.11,x+s*.30,y+s*.31)});break;
-  case'menu':outline(()=>{-[-.18,0,.18].forEach(a=>v.line(x-s*.28,y+s*a,x+s*.28,y+s*a))});break;
+  case'menu':outline(()=>{[-.18,0,.18].forEach(a=>v.line(x-s*.28,y+s*a,x+s*.28,y+s*a))});break;
   case'close':outline(()=>{v.line(x-s*.22,y-s*.22,x+s*.22,y+s*.22);v.line(x+s*.22,y-s*.22,x-s*.22,y+s*.22)});break;
   case'gear':both(()=>{v.circle(x,y,s*.22);for(let i=0;i<8;i++){const t=i*Math.PI/4;v.rect(x+Math.cos(t)*s*.29-s*.05,y+Math.sin(t)*s*.29-s*.05,s*.10,s*.10,s*.02)}});break;
   case'filter':outline(()=>{v.line(x-s*.28,y-s*.24,x+s*.28,y-s*.24);v.line(x-s*.19,y,x+s*.19,y);v.line(x-s*.08,y+s*.24,x+s*.08,y+s*.24);v.line(x-s*.28,y-s*.24,x-s*.08,y+s*.24)});break;
@@ -179,9 +179,10 @@ function draw(v,k,cx,cy,s,style,variant){
  if(n===3)v.rect(x-s*.34,y-s*.34,s*.08,s*.04,s*.01);
  if(n===4)v.circle(x,y+s*.34,s*.018);
 }
+const ALIAS={stethoscope:'medical',hospital:'building',ambulance:'truck',syringe:'key',thermometer:'drop',record:'document',graduation:'certificate',pencil:'brush',ruler:'document',school:'building',person:'people',bulb:'sun',passport:'document',hotel:'building',ticket:'tag',pin:'target',suitcase:'bag',scooter:'bike',traffic:'bell',parking:'target',fuel:'bottle',charging:'star',sofa:'bed',lamp:'bulb',broom:'brush',kitchen:'store',laundry:'box',plant:'sprout',bread:'burger',chef:'person',molecule:'atom',magnet:'gear',math:'chart',lab:'building',experiment:'flask',presentation:'document',check:'close',scan:'search',medical:'medical',certificate:'document',rings:'link',party:'gift',wave:'wind',mic:'phone',headphones:'phone',game:'gear',magic:'star',firewall:'shield',fingerprint:'eye',password:'lock',tunnel:'link',alert:'bell',safe:'box',currency:'coin',calculator:'document',barcode:'document',comment:'message',broadcast:'megaphone',keyboard:'document',mouse:'circle',usb:'box',tablet:'monitor',laptop:'monitor',database:'box',chip:'gear',beauty:'star'}; 
 function render(v,W,H,item){
  const s=Math.min(W,H)*.58,cx=W/2,cy=H/2,style=item.style,seed=h(String(item.seed));
- v.save();v.rotate(((seed%7)-3)*.55);draw(v,item.kind||item.conceptKey,cx,cy,s,style,item.variant);v.restore();
+ v.save();v.rotate(((seed%7)-3)*.55);draw(v,ALIAS[item.kind||item.conceptKey]||item.kind||item.conceptKey,cx,cy,s,style,item.variant);v.restore();
 }
 const items=META.map((m,i)=>Object.assign({index:i,kind:F[m.familyIndex-1].kinds[m.conceptIndex]},m));
 const families=F.map((f,i)=>Object.assign({index:i+1},f));
