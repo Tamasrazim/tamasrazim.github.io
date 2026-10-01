@@ -563,7 +563,7 @@ function runEpsSelfTests(){
   const eps=generateEps(s);
   const geps=generateEps(gs);
   validateEps(eps,320,180);validateEps(geps,160,90);
-  if(/rlineto|arc|findfont|show|concat/.test(eps))throw new Error('EPS self-test found forbidden operator');
+  if(/\b(?:rlineto|arc|findfont|show|concat)\b/.test(eps))throw new Error('EPS self-test found forbidden operator');
   return {ok:true,bytes:eps.length};
 }
 function sceneToSvg(scene){
