@@ -529,8 +529,8 @@ function sceneBounds(scene,includeBackground){
   if(includeBackground&&epsBgEl&&epsBgEl.value!=='none'){
     add(0,0);add(num(scene.W,0),num(scene.H,0));
   }
-  if(!Number.isFinite(b.minX))return{x:0,y:0,w:0,h:0,maxX:0,maxY:0};
-  return{x:b.minX,y:b.minY,w:Math.max(0,b.maxX-b.minX),h:Math.max(0,b.maxY-b.minY),maxX:b.maxX,maxY:b.maxY};
+  if(!Number.isFinite(b.minX))return{minX:0,minY:0,maxX:0,maxY:0,x:0,y:0,w:0,h:0};
+  return{minX:b.minX,minY:b.minY,maxX:b.maxX,maxY:b.maxY,x:b.minX,y:b.minY,w:Math.max(0,b.maxX-b.minX),h:Math.max(0,b.maxY-b.minY)};
 }
 function validateSceneForStock(scene,bounds,cfg){
   if(!cfg.stock)return;
@@ -538,9 +538,12 @@ function validateSceneForStock(scene,bounds,cfg){
   if(bounds.minX < -tol || bounds.minY < -tol || bounds.maxX > scene.W+tol || bounds.maxY > scene.H+tol){
     throw new Error('Artwork extends outside the canvas bounds');
   }
-  const mp=(Math.ceil(bounds.w)*Math.ceil(bounds.h))/1000000;
-  if(mp<4)throw new Error('Artwork bounding box is '+mp.toFixed(3)+' MP; Shutterstock requires at least 4 MP');
-  if(mp>25)throw new Error('Artwork bounding box is '+mp.toFixed(3)+' MP; Shutterstock allows at most 25 MP');
+}
+function stockScaleForBounds(bounds){
+  const area=Math.max(1,bounds.w*bounds.h);
+  if(area<4000000)return Math.sqrt(4500000/area);
+  if(area>25000000)return Math.sqrt(24000000/area);
+  return 1;
 }
 function expandStrokeForEps(o,commands,H){
   if(!o.stroke)return '';
@@ -630,13 +633,15 @@ function generateEps(scene,options={}){
   const bounds=sceneBounds(scene,includeBackground);
   if(bounds.w<=0||bounds.h<=0)throw new Error('Artwork has no vector bounds');
   if(strictStock)validateSceneForStock(scene,bounds,{stock:true});
-  const W=Math.max(1,Math.ceil(bounds.w)),H=Math.max(1,Math.ceil(bounds.h));
-  const shift=[1,0,0,1,-bounds.x,-bounds.y];
+  const scale=strictStock?stockScaleForBounds(bounds):1;
+  const W=Math.max(1,Math.ceil(bounds.w*scale)),H=Math.max(1,Math.ceil(bounds.h*scale));
+  const shift=[scale,0,0,scale,-bounds.x*scale,-bounds.y*scale];
   const lines=[
     '%!PS-Adobe-3.0 EPSF-3.0',
     '%%Creator: Tamasrazim CODE-EPS',
     '%%Title: Editable Vector Artwork',
     strictStock?'%%AI8_CreatorVersion: '+cfg.version+'.0':'%%AI8_CreatorVersion: generic',
+    strictStock?'%%CODEEPS_StockProfile: Shutterstock RGB EPS '+cfg.version:'%%CODEEPS_StockProfile: Generic EPSF-3.0',
     '%%DocumentProcessColors: RGB',
     '%%BoundingBox: 0 0 '+W+' '+H,
     '%%HiResBoundingBox: 0 0 '+bounds.w.toFixed(3)+' '+bounds.h.toFixed(3),
@@ -836,7 +841,7 @@ async function exportAll(){
         try{
           const scene=buildFlowerScene(LIB[i]);
           const name=adobeFilename(LIB[i],i);
-          const eps=generateEps(scene,{strictStock:true});
+          const eps=generateEps(scene,{strictStock:epsProfileConfig().stock});
           validateEps(eps,null,null);
           const h=await getUniqueFileHandle(batchDir,name.replace(/\.eps$/i,''),'eps',usedNames);
           const finalName=h.name;
