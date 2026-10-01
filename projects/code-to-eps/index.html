@@ -438,8 +438,8 @@ function commandBounds(cmds){
     if(c[0]==='M'||c[0]==='L')add(c[1],c[2]);
     else if(c[0]==='C'){add(c[1],c[2]);add(c[3],c[4]);add(c[5],c[6])}
   }
-  if(!Number.isFinite(minX))return{x:0,y:0,w:1,h:1,cx:0,cy:0};
-  return{x:minX,y:minY,w:Math.max(1,maxX-minX),h:Math.max(1,maxY-minY),cx:(minX+maxX)/2,cy:(minY+maxY)/2};
+  if(!Number.isFinite(minX))return{minX:0,minY:0,maxX:0,maxY:0,x:0,y:0,w:1,h:1,cx:0,cy:0};
+  return{minX,maxX,minY,maxY,x:minX,y:minY,w:Math.max(1,maxX-minX),h:Math.max(1,maxY-minY),cx:(minX+maxX)/2,cy:(minY+maxY)/2};
 }
 function gradientLocalMatrix(g,box,t){
   const s=1-.82*t;
