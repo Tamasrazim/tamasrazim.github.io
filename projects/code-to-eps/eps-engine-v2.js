@@ -1,99 +1,84 @@
-/* CODE→EPS v2 EPS Engine
- * Production-safe PostScript serializer foundation.
- * No direct Canvas -> PostScript conversion.
+/* CODE→EPS v2
+ * Scene Graph -> EPS Serializer -> Validator
+ * Tamasrazim
  */
+(function(global){'use strict';
 
-(function(global){
-'use strict';
+const EPS={};
 
-class VectorScene {
-  constructor(width,height){
-    this.width=width;
-    this.height=height;
-    this.objects=[];
-  }
-  add(object){
-    this.objects.push(object);
-    return object;
-  }
+function safeNumber(v){const n=Number(v);return Number.isFinite(n)?Number(n.toFixed(3)):0;}
+function safeText(v){return String(v??'').replace(/[^\x20-\x7E]/g,'').replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');}
+function rgb(c){if(Array.isArray(c))return c.map(safeNumber).join(' ');let h=String(c||'#000').replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');return [0,2,4].map(i=>safeNumber(parseInt(h.slice(i,i+2),16)/255)).join(' ');}
+
+class SceneGraph{
+ constructor(width=3840,height=2160){this.width=width;this.height=height;this.children=[];}
+ add(o){this.children.push(o);return o;}
+}
+class Transform{
+ constructor(){this.a=1;this.b=0;this.c=0;this.d=1;this.e=0;this.f=0;}
+}
+class Group{
+ constructor(){this.type='group';this.children=[];this.transform=new Transform();}
+ add(o){this.children.push(o);return o;}
+}
+class Path{
+ constructor(){this.type='path';this.commands=[];this.fill=null;this.stroke=null;this.strokeWidth=1;this.opacity=1;this.transform=new Transform();}
+}
+class TextObject{
+ constructor(text,x,y,size=12,font='Helvetica'){this.type='text';this.text=text;this.x=x;this.y=y;this.size=size;this.font=font;this.transform=new Transform();}
 }
 
-function safeNumber(value){
-  const n=Number(value);
-  return Number.isFinite(n)?Number(n.toFixed(3)):0;
+function emitTransform(t){return `${safeNumber(t.a)} ${safeNumber(t.b)} ${safeNumber(t.c)} ${safeNumber(t.d)} ${safeNumber(t.e)} ${safeNumber(t.f)} concat\n`;}
+
+class Serializer{
+ static write(scene){
+ let out=[];
+ out.push('%!PS-Adobe-3.0 EPSF-3.0');
+ out.push('%%Creator: Tamasrazim CODE-EPS');
+ out.push('%%Title: CODE-EPS Vector Artwork');
+ out.push(`%%BoundingBox: 0 0 ${Math.round(scene.width)} ${Math.round(scene.height)}`);
+ out.push(`%%HiResBoundingBox: 0 0 ${scene.width}.0 ${scene.height}.0`);
+ out.push('%%LanguageLevel: 3');
+ out.push('%%Pages: 1');
+ out.push('%%EndComments');
+ scene.children.forEach(o=>out.push(this.object(o)));
+ out.push('%%EOF');
+ return out.join('\n').replace(/[^\x09\x0A\x0D\x20-\x7E]/g,'');
+ }
+ static object(o){
+ if(o.type==='group')return o.children.map(this.object).join('\n');
+ if(o.type==='text')return `(${safeText(o.text)}) show`;
+ if(o.type!=='path')return '';
+ let s='gsave\n';
+ for(const c of o.commands){
+  if(c[0]==='M')s+=`${safeNumber(c[1])} ${safeNumber(c[2])} moveto\n`;
+  if(c[0]==='L')s+=`${safeNumber(c[1])} ${safeNumber(c[2])} lineto\n`;
+  if(c[0]==='C')s+=`${c.slice(1).map(safeNumber).join(' ')} curveto\n`;
+  if(c[0]==='Z')s+='closepath\n';
+ }
+ if(o.fill)s+=`${rgb(o.fill)} setrgbcolor\nfill\n`;
+ if(o.stroke)s+=`${rgb(o.stroke)} setrgbcolor\n${safeNumber(o.strokeWidth)} setlinewidth\nstroke\n`;
+ return s+'grestore';
+ }
 }
 
-function psString(value){
-  return String(value)
-    .replace(/\\/g,'\\\\')
-    .replace(/\(/g,'\\(')
-    .replace(/\)/g,'\\)')
-    .replace(/[^\x20-\x7E\r\n\t]/g,'');
+function validate(e){
+ if(typeof e!=='string')return false;
+ if(!e.startsWith('%!PS-Adobe-3.0 EPSF-3.0'))return false;
+ if(!e.includes('%%BoundingBox'))return false;
+ if(!e.includes('%%EOF'))return false;
+ if(/NaN|Infinity/.test(e))return false;
+ if(/[^\x00-\x7F]/.test(e))return false;
+ return true;
 }
 
-function rgb(value){
-  if(Array.isArray(value)) return value.map(v=>safeNumber(v)).join(' ');
-  return '0 0 0';
-}
+EPS.SceneGraph=SceneGraph;
+EPS.Group=Group;
+EPS.Path=Path;
+EPS.Text=TextObject;
+EPS.Serializer=Serializer;
+EPS.serialize=Serializer.write;
+EPS.validate=validate;
 
-class EPSWriter {
-  constructor(width,height,title='Artwork'){
-    this.width=width;
-    this.height=height;
-    this.title=title;
-    this.lines=[];
-  }
-
-  header(){
-    this.lines.push('%!PS-Adobe-3.0 EPSF-3.0');
-    this.lines.push('%%Creator: Tamasrazim CODE-EPS');
-    this.lines.push('%%Title: '+psString(this.title));
-    this.lines.push('%%BoundingBox: 0 0 '+this.width+' '+this.height);
-    this.lines.push('%%HiResBoundingBox: 0 0 '+this.width+' '+this.height);
-    this.lines.push('%%LanguageLevel: 3');
-    this.lines.push('%%Pages: 1');
-    this.lines.push('%%EndComments');
-  }
-
-  path(commands,style={}){
-    this.lines.push('gsave');
-    if(style.fill){
-      this.lines.push(rgb(style.fill)+' setrgbcolor');
-    }
-    for(const command of commands){
-      const c=command[0];
-      if(c==='M') this.lines.push(safeNumber(command[1])+' '+safeNumber(command[2])+' moveto');
-      if(c==='L') this.lines.push(safeNumber(command[1])+' '+safeNumber(command[2])+' lineto');
-      if(c==='C') this.lines.push(command.slice(1).map(safeNumber).join(' ')+' curveto');
-      if(c==='Z') this.lines.push('closepath');
-    }
-    if(style.stroke) this.lines.push('stroke');
-    else this.lines.push('fill');
-    this.lines.push('grestore');
-  }
-
-  finish(){
-    this.lines.push('showpage');
-    this.lines.push('%%EOF');
-    return this.lines.join('\n');
-  }
-}
-
-function validateEPS(eps){
-  if(!eps.startsWith('%!PS-Adobe-3.0 EPSF')) throw new Error('Invalid EPS header');
-  if(!eps.includes('%%BoundingBox')) throw new Error('Missing BoundingBox');
-  if(!eps.includes('%%EOF')) throw new Error('Missing EOF');
-  if(/NaN|Infinity/.test(eps)) throw new Error('Invalid numeric value');
-  if(/[^\x00-\x7F]/.test(eps)) throw new Error('Non ASCII data');
-  return true;
-}
-
-global.CODE_EPS_V2={
-  VectorScene,
-  EPSWriter,
-  validateEPS,
-  safeNumber,
-  psString
-};
-
+global.CODE_EPS_V2=EPS;
 })(typeof window!=='undefined'?window:this);
