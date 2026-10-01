@@ -3,6 +3,23 @@
 if(window.__tamasrazimMotionCore)return;
 window.__tamasrazimMotionCore=true;
 
+/* Main-site motion governor: continuous effects update at a hard 60 FPS cap. */
+var __motion60Last=0;
+function requestAnimationFrame60(callback){
+  window.requestAnimationFrame(function(now){
+    var wait=__motion60Last ? (1000/60)-(now-__motion60Last) : 0;
+    if(wait<=0){
+      __motion60Last=now;
+      callback(now);
+    }else{
+      window.setTimeout(function(){
+        __motion60Last=performance.now();
+        callback(__motion60Last);
+      },wait);
+    }
+  });
+}
+
 var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 var fine=window.matchMedia&&window.matchMedia('(pointer: fine)').matches;
 var horizontal=!!(document.body&&document.body.dataset.horizontalMode==='true');
@@ -164,7 +181,7 @@ window.addEventListener('blur',function(){pointer.tx=innerWidth*.5;pointer.ty=in
   }
 
 function frame(now){
-  if(!pageVisible){raf=window.requestAnimationFrame(frame);return;}
+  if(!pageVisible){raf=requestAnimationFrame60(frame);return;}
   var dt=Math.min(.05,Math.max(.008,(now-last)/1000));last=now;
   if(boundsDirty)refreshBounds();
 
@@ -324,9 +341,9 @@ function frame(now){
     email.style.setProperty('--if-scale',wordScale.toFixed(4));
   }
 
-  raf=window.requestAnimationFrame(frame);
+  raf=requestAnimationFrame60(frame);
 }
-raf=window.requestAnimationFrame(frame);
+raf=requestAnimationFrame60(frame);
 /* ---------- Tamasrazim Scene Engine: continuous motion ---------- */
 (function(){
   var sceneReduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -363,7 +380,7 @@ raf=window.requestAnimationFrame(frame);
   (horizontal?axisScroller:window).addEventListener('scroll',function(){target.scroll=horizontal?pageX():pageY()},{passive:true});
   window.addEventListener('blur',function(){target.x=innerWidth*.5;target.y=innerHeight*.5},{passive:true});
   function tick(now){
-    if(!pageVisible){window.requestAnimationFrame(tick);return;}
+    if(!pageVisible){requestAnimationFrame60(tick);return;}
     var dt=Math.min(.033,Math.max(.008,(now-last)/1000));last=now;
     var k=1-Math.exp(-dt*8.5);
     state.x=smooth(state.x,target.x,k);state.y=smooth(state.y,target.y,k);
@@ -404,9 +421,9 @@ raf=window.requestAnimationFrame(frame);
       card.style.setProperty('--scene-card-near',near.toFixed(3));card.style.setProperty('--scene-card-energy',energy.toFixed(3));
     });
     bands.forEach(function(track,index){track.style.setProperty('--scene-band-x',((index%2?-1:1)*(progress*120+nx*14)).toFixed(2)+'px');track.style.setProperty('--scene-band-skew',(nx*.7+state.vx*.0015).toFixed(3)+'deg')});
-    window.requestAnimationFrame(tick);
+    requestAnimationFrame60(tick);
   }
-  window.requestAnimationFrame(tick);
+  requestAnimationFrame60(tick);
 })();
 /* Secondary 3D scene environment disabled for performance.
    Core motion + the lighter scene engine provide the site's motion language. */
