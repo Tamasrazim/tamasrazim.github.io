@@ -62,7 +62,7 @@ header{position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line);back
 </div>
 
 <div class="panel">
-<div class="panel-head"><span>PREVIEW</span><div class="actions"><button class="btn" id="downloadSvg">Export SVG</button><button class="btn primary" id="downloadEps">Export EPS</button></div></div>
+<div class="panel-head"><span>PREVIEW</span><div class="actions"><button class="btn" id="copySvg">Copy SVG</button><button class="btn" id="downloadSvg">Export SVG</button><button class="btn primary" id="downloadEps">Export EPS</button></div></div>
 <div class="preview"><iframe id="preview" title="SVG preview" sandbox=""></iframe></div>
 <div class="status" id="epsStatus">EPS export supports vector paths, primitives, transforms, solid fills and strokes. Unsupported SVG features are reported before export.</div>
 </div>
@@ -124,6 +124,7 @@ function run(){
 function downloadBlob(blob,name){
   const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
 }
+async function copySvg(){if(!currentSvg)run();if(!currentSvg)return;try{await navigator.clipboard.writeText(currentSvg);setStatus('SVG copied to clipboard.',true);}catch(err){setStatus('Clipboard unavailable: '+(err.message||err),false);}}
 function downloadSvg(){if(!currentSvg)run();if(currentSvg)downloadBlob(new Blob([currentSvg],{type:'image/svg+xml;charset=utf-8'}),'code-to-svg.svg');}
 
 function parseNum(v,d=0){const n=parseFloat(v);return Number.isFinite(n)?n:d;}
@@ -146,6 +147,8 @@ function parseStyle(el,parent){
   if(!out.fill)out.fill='none';
   if(!out.stroke)out.stroke='none';
   if(!out['stroke-width'])out['stroke-width']='1';
+  if(out['fill-opacity'] && out['fill-opacity']!=='1') out.__opacityWarning=true;
+  if(out['stroke-opacity'] && out['stroke-opacity']!=='1') out.__opacityWarning=true;
   return out;
 }
 function matrixMultiply(a,b){return[a[0]*b[0]+a[2]*b[1],a[1]*b[0]+a[3]*b[1],a[0]*b[2]+a[2]*b[3],a[1]*b[2]+a[3]*b[3],a[0]*b[4]+a[2]*b[5]+a[4],a[1]*b[4]+a[3]*b[5]+a[5]];}
@@ -168,7 +171,7 @@ function pathToPs(d){
   return out.join('\n');
 }
 function elemToPs(el, inherited, warnings, depth=0){
-  const tag=el.tagName.toLowerCase();const st=parseStyle(el,inherited);if(st.display==='none'||st.visibility==='hidden')return '';
+  const tag=el.tagName.toLowerCase();const st=parseStyle(el,inherited);if(st.__opacityWarning)warnings.add('Transparency/opacity is not preserved in EPS; use opaque fills and strokes for exact output.');if(st.display==='none'||st.visibility==='hidden')return '';
   let local=transformMatrix(el.getAttribute('transform')),inner='';const fill=colorToRgb(st.fill),stroke=colorToRgb(st.stroke);
   if(st.fill && /^url\(/i.test(st.fill))warnings.add('Gradient/pattern fill was not preserved; use solid fills for exact EPS vectors.');
   if(st.stroke && /^url\(/i.test(st.stroke))warnings.add('Gradient/pattern stroke was not preserved.');
@@ -199,7 +202,7 @@ function svgToEps(svg,w,h,page){
   const sx=pw/vw,sy=ph/vh,scale=Math.min(sx,sy),ox=(pw-vw*scale)/2-vx*scale,oy=(ph-vh*scale)/2-vy*scale;
   const body=elemToPs(root,{},warnings);
   let ps='%!PS-Adobe-3.0 EPSF-3.0\n%%Creator: Tamasrazim Code → SVG / EPS\n%%Title: Code to SVG / EPS\n%%BoundingBox: 0 0 '+Math.ceil(pw)+' '+Math.ceil(ph)+'\n%%Pages: 1\n%%EndComments\n';
-  ps+='gsave\n'+ox.toFixed(4)+' '+oy.toFixed(4)+' translate\n'+scale.toFixed(8)+' '+scale.toFixed(8)+' scale\n'+body+'grestore\nshowpage\n%%EOF\n';
+  ps+='gsave\n'+ox.toFixed(4)+' '+(oy+vh*scale).toFixed(4)+' translate\n'+scale.toFixed(8)+' '+(-scale).toFixed(8)+' scale\n'+body+'grestore\nshowpage\n%%EOF\n';
   return {text:ps,w:pw,h:ph,warnings:[...warnings]};
 }
 function validateEps(svg){
@@ -222,6 +225,7 @@ function downloadEps(){
 }
 document.getElementById('reset').onclick=()=>{codeEl.value=EXAMPLE;run();};
 document.getElementById('run').onclick=run;
+document.getElementById('copySvg').onclick=copySvg;
 document.getElementById('downloadSvg').onclick=downloadSvg;
 document.getElementById('downloadEps').onclick=downloadEps;
 codeEl.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();run();}});
