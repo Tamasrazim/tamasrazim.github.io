@@ -96,7 +96,8 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 
   <div class="section">
     <h3>DOCUMENT</h3>
-    <div class="grid2">
+    <div class="field"><label>Resolution preset</label><select id="resPreset"><option value="3840x2160" selected>4K — 3840 × 2160</option><option value="7680x4320">8K — 7680 × 4320</option><option value="custom">Custom</option></select></div>
+    <div class="grid2" style="margin-top:8px">
       <div class="field"><label>Width</label><input id="w" type="number" min="1" value="3840"></div>
       <div class="field"><label>Height</label><input id="h" type="number" min="1" value="2160"></div>
     </div>
@@ -107,10 +108,10 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
   <div class="section">
     <h3>EDITABILITY</h3>
     <div class="stat"><span>Objects</span><b>separate paths</b></div>
-    <div class="stat"><span>Transforms</span><b>native PostScript</b></div>
-    <div class="stat"><span>Text</span><b>vector text</b></div>
+    <div class="stat"><span>Transforms</span><b>baked into vectors</b></div>
+    <div class="stat"><span>Text</span><b>vector glyph paths</b></div>
     <div class="stat"><span>Raster</span><b>none required</b></div>
-    <div class="notice">Each recorded fill/stroke/path becomes its own EPS object. Illustrator can select those vector objects individually after opening the EPS.</div>
+    <div class="notice">Each recorded fill/stroke/path becomes its own EPS object. Transforms are baked into geometry and text is emitted as editable vector glyph paths, so the EPS has no external font dependency.</div>
   </div>
 
   <div class="section">
@@ -134,7 +135,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 const $=s=>document.querySelector(s);
 const codeEl=$('#code'),linesEl=$('#lines'),statusEl=$('#status'),paper=$('#paper'),modeEl=$('#mode');
 const epsBtn=$('#epsBtn'),svgBtn=$('#svgBtn'),allBtn=$('#allBtn'),metaBtn=$('#metaBtn');
-const wEl=$('#w'),hEl=$('#h'),frameEl=$('#frame'),frameReadout=$('#frameReadout'),epsBgEl=$('#epsBg');
+const wEl=$('#w'),hEl=$('#h'),resPresetEl=$('#resPreset'),frameEl=$('#frame'),frameReadout=$('#frameReadout'),epsBgEl=$('#epsBg');
 const flowerList=$('#flowerList'),flowerSearch=$('#flowerSearch'),flowerInfo=$('#flowerInfo');
 const fileInput=$('#fileInput'),objectCount=$('#objectCount'),toast=$('#toast');
 const DEFAULT_CODE=`v.background("#ffffff");
@@ -682,7 +683,8 @@ $('#newBtn').onclick=()=>{currentFlower=-1;customMode=true;codeEl.value=DEFAULT_
 $('#saveJsBtn').onclick=()=>downloadBlob(new Blob([codeEl.value],{type:'text/javascript;charset=utf-8'}),'code-to-eps.js');
 $('#openBtn').onclick=()=>fileInput.click();
 fileInput.onchange=async e=>{const f=e.target.files[0];if(!f)return;currentFlower=-1;codeEl.value=await f.text();syncLines();runCurrent();fileInput.value=''};
-[wEl,hEl].forEach(x=>x.onchange=runCurrent);
+resPresetEl.onchange=()=>{const v=resPresetEl.value;if(v==='3840x2160'||v==='7680x4320'){const [w,h]=v.split('x').map(Number);wEl.value=w;hEl.value=h;}runCurrent()};
+[wEl,hEl].forEach(x=>{x.oninput=()=>{resPresetEl.value='custom'};x.onchange=runCurrent});
 epsBgEl.onchange=()=>{if(currentFlower>=0)runCurrent();else runCurrent()};
 codeEl.addEventListener('input',onInput);
 codeEl.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();const p=codeEl.selectionStart;codeEl.setRangeText('  ',p,codeEl.selectionEnd,'end');syncLines()}if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runCurrent()}});
