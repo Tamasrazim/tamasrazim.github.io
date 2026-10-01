@@ -557,8 +557,12 @@ function runEpsSelfTests(){
   const s=new Scene(320,180),v=new Vec(s);
   v.fill('#ff0066').rect(10,10,100,50,8).fill('#00c8ff').circle(180,60,30).stroke('#111').width(3).line(30,140,280,140).fill('#fff').text('CODE→EPS',160,125,24,'Helvetica','center');
   v.translate(250,30).group(()=>{v.scale(0.5).fill('#00ff66').rect(0,0,80,40);});
+  const gs=new Scene(160,90),gc=new RecorderCtx(gs,160,90),grad=gc.createLinearGradient(0,0,160,0);
+  grad.addColorStop(0,'#ff00aa');grad.addColorStop(0.5,'rgba(0,255,255,.7)');grad.addColorStop(1,'#ffffff');
+  gc.fillStyle=grad;gc.fillRect(0,0,160,90);
   const eps=generateEps(s);
-  validateEps(eps,320,180);
+  const geps=generateEps(gs);
+  validateEps(eps,320,180);validateEps(geps,160,90);
   if(/rlineto|arc|findfont|show|concat/.test(eps))throw new Error('EPS self-test found forbidden operator');
   return {ok:true,bytes:eps.length};
 }
@@ -606,7 +610,6 @@ function sceneToSvg(scene){
   }
   if(scene.bg)s+='<rect width="100%" height="100%" fill="'+hexColor(scene.bg)+'"/>';
   for(const o of scene.ops)s+=emitSvgOp(o);
-  if(defs.length)s=s.replace('<svg ','<svg ')+s.slice(0,0);
   if(defs.length){
     const block='<defs>'+defs.join('')+'</defs>';
     s=s.replace('>','>'+block,1);
