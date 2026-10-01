@@ -75,6 +75,14 @@ const epsFnEnd=codeEps.indexOf('function uniqueBatchName(',epsFnStart);
 const epsFn=epsFnStart>=0&&epsFnEnd>epsFnStart?codeEps.slice(epsFnStart,epsFnEnd):'';
 for(const banned of ['arc','rlineto','findfont','concat']) must(!new RegExp('\\b'+banned+'\\b').test(epsFn),'CODE-EPS serializer has no '+banned+' operator');
 must(codeEps.includes('function runEpsSelfTests()'),'CODE-EPS includes EPS self-tests');
+must(codeEps.includes('window.CODE_EPS_V2=Object.freeze('),'CODE-EPS exposes the consolidated v2 engine API');
+for(const retired of [
+  'projects/code-to-eps/eps-engine-v2.js',
+  'projects/code-to-eps/vector-scene-bridge-v2.js',
+  'projects/code-to-eps/svg-export-all-v2.js',
+  'projects/code-to-eps/svg-folder-export-v2.js',
+  'projects/code-to-eps/svg-export-ui-hook-v2.js'
+]) must(!exists(retired),retired+' is retired and not part of the canonical single-file engine');
 
 for(const file of [
   'assets/js/boot.js',
