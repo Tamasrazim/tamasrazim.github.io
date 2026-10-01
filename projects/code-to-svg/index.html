@@ -128,13 +128,13 @@ function downloadSvg(){if(!currentSvg)run();if(currentSvg)downloadBlob(new Blob(
 
 function parseNum(v,d=0){const n=parseFloat(v);return Number.isFinite(n)?n:d;}
 function colorToRgb(value){
-  if(!value || value==='none' || /^url\\(/i.test(value)) return null;
+  if(!value || value==='none' || /^url\(/i.test(value)) return null;
   value=value.trim().toLowerCase();
   const names={black:'#000000',white:'#ffffff',red:'#ff0000',green:'#008000',blue:'#0000ff',yellow:'#ffff00',gray:'#808080',grey:'#808080'};
   value=names[value]||value;
   let m=value.match(/^#([0-9a-f]{3})$/i);if(m)value='#'+m[1].split('').map(x=>x+x).join('');
   m=value.match(/^#([0-9a-f]{6})$/i);if(m)return[m[1].slice(0,2),m[1].slice(2,4),m[1].slice(4,6)].map(x=>parseInt(x,16)/255);
-  m=value.match(/^rgba?\\(([^)]+)\\)$/i);if(m){const p=m[1].split(',').map(x=>x.trim());const rgb=p.slice(0,3).map(x=>x.endsWith('%')?parseFloat(x)*2.55:parseFloat(x));if(rgb.every(Number.isFinite))return rgb.map(x=>Math.max(0,Math.min(255,x))/255);}
+  m=value.match(/^rgba?\(([^)]+)\)$/i);if(m){const p=m[1].split(',').map(x=>x.trim());const rgb=p.slice(0,3).map(x=>x.endsWith('%')?parseFloat(x)*2.55:parseFloat(x));if(rgb.every(Number.isFinite))return rgb.map(x=>Math.max(0,Math.min(255,x))/255);}
   return null;
 }
 function parseStyle(el,parent){
@@ -148,8 +148,8 @@ function parseStyle(el,parent){
   return out;
 }
 function matrixMultiply(a,b){return[a[0]*b[0]+a[2]*b[1],a[1]*b[0]+a[3]*b[1],a[0]*b[2]+a[2]*b[3],a[1]*b[2]+a[3]*b[3],a[0]*b[4]+a[2]*b[5]+a[4],a[1]*b[4]+a[3]*b[5]+a[5]];}
-function transformMatrix(s){let m=[1,0,0,1,0,0];for(const part of (s||'').matchAll(/([a-zA-Z]+)\\(([^)]*)\\)/g)){const op=part[1].toLowerCase(),n=part[2].trim().split(/[ ,]+/).filter(Boolean).map(Number);let q=[1,0,0,1,0,0];if(op==='translate')q=[1,0,0,1,n[0]||0,n[1]||0];else if(op==='scale')q=[n[0]??1,0,0,n[1]??n[0]??1,0,0];else if(op==='rotate'){const a=(n[0]||0)*Math.PI/180,c=Math.cos(a),ss=Math.sin(a);q=[c,ss,-ss,c,0,0];if(n.length>2){const t1=[1,0,0,1,n[1],n[2]],t2=[1,0,0,1,-n[1],-n[2]];q=matrixMultiply(matrixMultiply(t1,q),t2);}}else if(op==='matrix'&&n.length>=6)q=n.slice(0,6);m=matrixMultiply(m,q);}return m;}
-function pathTokens(d){return d.match(/[a-zA-Z]|[-+]?(?:\\d*\\.\\d+|\\d+\\.?)(?:[eE][-+]?\\d+)?/g)||[];}
+function transformMatrix(s){let m=[1,0,0,1,0,0];for(const part of (s||'').matchAll(/([a-zA-Z]+)\(([^)]*)\)/g)){const op=part[1].toLowerCase(),n=part[2].trim().split(/[ ,]+/).filter(Boolean).map(Number);let q=[1,0,0,1,0,0];if(op==='translate')q=[1,0,0,1,n[0]||0,n[1]||0];else if(op==='scale')q=[n[0]??1,0,0,n[1]??n[0]??1,0,0];else if(op==='rotate'){const a=(n[0]||0)*Math.PI/180,c=Math.cos(a),ss=Math.sin(a);q=[c,ss,-ss,c,0,0];if(n.length>2){const t1=[1,0,0,1,n[1],n[2]],t2=[1,0,0,1,-n[1],-n[2]];q=matrixMultiply(matrixMultiply(t1,q),t2);}}else if(op==='matrix'&&n.length>=6)q=n.slice(0,6);m=matrixMultiply(m,q);}return m;}
+function pathTokens(d){return d.match(/[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?/g)||[];}
 function pathToPs(d){
   const t=pathTokens(d);let i=0,cmd='',x=0,y=0,sx=0,sy=0,px=0,py=0,out=[];
   function num(){return parseFloat(t[i++]);}
@@ -164,48 +164,48 @@ function pathToPs(d){
     else if(c==='Z'){emit('closepath');x=sx;y=sy;}
     else {throw new Error('EPS path exporter does not support SVG command '+c+' yet.');}
   }
-  return out.join('\\n');
+  return out.join('\n');
 }
 function elemToPs(el, inherited, warnings, depth=0){
   const tag=el.tagName.toLowerCase();const st=parseStyle(el,inherited);if(st.display==='none'||st.visibility==='hidden')return '';
   let local=transformMatrix(el.getAttribute('transform')),inner='';const fill=colorToRgb(st.fill),stroke=colorToRgb(st.stroke);
-  if(st.fill && /^url\\(/i.test(st.fill))warnings.add('Gradient/pattern fill was not preserved; use solid fills for exact EPS vectors.');
-  if(st.stroke && /^url\\(/i.test(st.stroke))warnings.add('Gradient/pattern stroke was not preserved.');
-  if(tag==='g'||tag==='svg'){for(const ch of el.children)inner+=elemToPs(ch,st,warnings,depth+1);return local.some((v,j)=>v!==[1,0,0,1,0,0][j])?'gsave\\n['+local.join(' ')+'] concat\\n'+inner+'grestore\\n':inner;}
+  if(st.fill && /^url\(/i.test(st.fill))warnings.add('Gradient/pattern fill was not preserved; use solid fills for exact EPS vectors.');
+  if(st.stroke && /^url\(/i.test(st.stroke))warnings.add('Gradient/pattern stroke was not preserved.');
+  if(tag==='g'||tag==='svg'){for(const ch of el.children)inner+=elemToPs(ch,st,warnings,depth+1);return local.some((v,j)=>v!==[1,0,0,1,0,0][j])?'gsave\n['+local.join(' ')+'] concat\n'+inner+'grestore\n':inner;}
   let geometry='';
   const n=v=>parseNum(v);
-  if(tag==='rect'){const x=n(el.getAttribute('x')),y=n(el.getAttribute('y')),w=n(el.getAttribute('width')),h=n(el.getAttribute('height'));if(el.getAttribute('rx'))warnings.add('Rounded rectangle corners are approximated as square corners in EPS.');geometry=x+' '+y+' moveto\\n'+(x+w)+' '+y+' lineto\\n'+(x+w)+' '+(y+h)+' lineto\\n'+x+' '+(y+h)+' lineto\\nclosepath\\n';}
+  if(tag==='rect'){const x=n(el.getAttribute('x')),y=n(el.getAttribute('y')),w=n(el.getAttribute('width')),h=n(el.getAttribute('height'));if(el.getAttribute('rx'))warnings.add('Rounded rectangle corners are approximated as square corners in EPS.');geometry=x+' '+y+' moveto\n'+(x+w)+' '+y+' lineto\n'+(x+w)+' '+(y+h)+' lineto\n'+x+' '+(y+h)+' lineto\nclosepath\n';}
   else if(tag==='circle'){const cx=n(el.getAttribute('cx')),cy=n(el.getAttribute('cy')),r=n(el.getAttribute('r'));geometry=circlePs(cx,cy,r);}
-  else if(tag==='ellipse'){const cx=n(el.getAttribute('cx')),cy=n(el.getAttribute('cy')),rx=n(el.getAttribute('rx')),ry=n(el.getAttribute('ry'));geometry='gsave\\n'+cx+' '+cy+' translate\\n'+rx+' '+ry+' scale\\n0 0 1 0 360 arc\\ngrestore\\n';}
-  else if(tag==='line'){geometry=n(el.getAttribute('x1'))+' '+n(el.getAttribute('y1'))+' moveto\\n'+n(el.getAttribute('x2'))+' '+n(el.getAttribute('y2'))+' lineto\\n';}
-  else if(tag==='polyline'||tag==='polygon'){const pts=(el.getAttribute('points')||'').trim().split(/[ ,]+/).map(Number);if(pts.length>=4){geometry=pts[0]+' '+pts[1]+' moveto\\n';for(let j=2;j+1<pts.length;j+=2)geometry+=pts[j]+' '+pts[j+1]+' lineto\\n';if(tag==='polygon')geometry+='closepath\\n';}}
+  else if(tag==='ellipse'){const cx=n(el.getAttribute('cx')),cy=n(el.getAttribute('cy')),rx=n(el.getAttribute('rx')),ry=n(el.getAttribute('ry'));geometry='gsave\n'+cx+' '+cy+' translate\n'+rx+' '+ry+' scale\n0 0 1 0 360 arc\ngrestore\n';}
+  else if(tag==='line'){geometry=n(el.getAttribute('x1'))+' '+n(el.getAttribute('y1'))+' moveto\n'+n(el.getAttribute('x2'))+' '+n(el.getAttribute('y2'))+' lineto\n';}
+  else if(tag==='polyline'||tag==='polygon'){const pts=(el.getAttribute('points')||'').trim().split(/[ ,]+/).map(Number);if(pts.length>=4){geometry=pts[0]+' '+pts[1]+' moveto\n';for(let j=2;j+1<pts.length;j+=2)geometry+=pts[j]+' '+pts[j+1]+' lineto\n';if(tag==='polygon')geometry+='closepath\n';}}
   else if(tag==='path'){geometry=pathToPs(el.getAttribute('d')||'');}
   else if(tag==='text'||tag==='tspan'){warnings.add('Text is not outlined in EPS; convert text to paths before stock submission.');return '';}
   else if(tag==='defs'||tag==='title'||tag==='desc')return '';
   else {warnings.add('Skipped unsupported SVG element: '+tag);return '';}
   if(!geometry)return '';
-  let ps='gsave\\n'+localMatrixPs(local);
-  if(fill){ps+=fill[0]+' '+fill[1]+' '+fill[2]+' setrgbcolor\\n'+geometry+'fill\\n';}
-  if(stroke){ps+=stroke[0]+' '+stroke[1]+' '+stroke[2]+' setrgbcolor\\n'+n(st['stroke-width'])+' setlinewidth\\n'+geometry+'stroke\\n';}
-  ps+='grestore\\n';return ps;
+  let ps='gsave\n'+localMatrixPs(local);
+  if(fill){ps+=fill[0]+' '+fill[1]+' '+fill[2]+' setrgbcolor\n'+geometry+'fill\n';}
+  if(stroke){ps+=stroke[0]+' '+stroke[1]+' '+stroke[2]+' setrgbcolor\n'+n(st['stroke-width'])+' setlinewidth\n'+geometry+'stroke\n';}
+  ps+='grestore\n';return ps;
 }
-function localMatrixPs(m){return m.some((v,j)=>v!==[1,0,0,1,0,0][j])?'['+m.join(' ')+'] concat\\n':'';}
-function circlePs(cx,cy,r){return cx+' '+cy+' '+r+' 0 360 arc\\n';}
+function localMatrixPs(m){return m.some((v,j)=>v!==[1,0,0,1,0,0][j])?'['+m.join(' ')+'] concat\n':'';}
+function circlePs(cx,cy,r){return cx+' '+cy+' '+r+' 0 360 arc\n';}
 function svgToEps(svg,w,h,page){
   const doc=new DOMParser().parseFromString(svg,'image/svg+xml');const root=doc.documentElement;const warnings=new Set();
   let pw=w,ph=h;if(page==='a4'){pw=595;ph=842;}else if(page==='a4l'){pw=842;ph=595;}
   const vb=(root.getAttribute('viewBox')||('0 0 '+w+' '+h)).trim().split(/[ ,]+/).map(Number),vx=vb[0]||0,vy=vb[1]||0,vw=vb[2]||w,vh=vb[3]||h;
   const sx=pw/vw,sy=ph/vh,scale=Math.min(sx,sy),ox=(pw-vw*scale)/2-vx*scale,oy=(ph-vh*scale)/2-vy*scale;
   const body=elemToPs(root,{},warnings);
-  let ps='%!PS-Adobe-3.0 EPSF-3.0\\n%%Creator: Tamasrazim Code → SVG / EPS\\n%%Title: Code to SVG / EPS\\n%%BoundingBox: 0 0 '+Math.ceil(pw)+' '+Math.ceil(ph)+'\\n%%Pages: 1\\n%%EndComments\\n';
-  ps+='gsave\\n'+ox.toFixed(4)+' '+oy.toFixed(4)+' translate\\n'+scale.toFixed(8)+' '+scale.toFixed(8)+' scale\\n'+body+'grestore\\nshowpage\\n%%EOF\\n';
+  let ps='%!PS-Adobe-3.0 EPSF-3.0\n%%Creator: Tamasrazim Code → SVG / EPS\n%%Title: Code to SVG / EPS\n%%BoundingBox: 0 0 '+Math.ceil(pw)+' '+Math.ceil(ph)+'\n%%Pages: 1\n%%EndComments\n';
+  ps+='gsave\n'+ox.toFixed(4)+' '+oy.toFixed(4)+' translate\n'+scale.toFixed(8)+' '+scale.toFixed(8)+' scale\n'+body+'grestore\nshowpage\n%%EOF\n';
   return {text:ps,w:pw,h:ph,warnings:[...warnings]};
 }
 function validateEps(svg){
   try{
     const w=Number(document.getElementById('width').value)||1200,h=Number(document.getElementById('height').value)||1200;
     const r=svgToEps(svg,w,h,document.getElementById('epsPage').value);
-    if(r.warnings.length){epsStatus.textContent='EPS ready with notes:\\n• '+r.warnings.join('\\n• ');epsStatus.className='status';}
+    if(r.warnings.length){epsStatus.textContent='EPS ready with notes:\n• '+r.warnings.join('\n• ');epsStatus.className='status';}
     else{epsStatus.textContent='EPS ready — vector primitives/path data detected with no exporter warnings.';epsStatus.className='status ok';}
   }catch(err){epsStatus.textContent='EPS validation failed: '+(err.message||err);epsStatus.className='status bad';}
 }
@@ -215,7 +215,7 @@ function downloadEps(){
     const w=Number(document.getElementById('width').value)||1200,h=Number(document.getElementById('height').value)||1200;
     const r=svgToEps(currentSvg,w,h,document.getElementById('epsPage').value);
     downloadBlob(new Blob([r.text],{type:'application/postscript'}),'code-to-svg.eps');
-    epsStatus.textContent='EPS exported'+(r.warnings.length?' with notes:\\n• '+r.warnings.join('\\n• '):'.');
+    epsStatus.textContent='EPS exported'+(r.warnings.length?' with notes:\n• '+r.warnings.join('\n• '):'.');
     epsStatus.className='status '+(r.warnings.length?'':'ok');
   }catch(err){epsStatus.textContent='EPS export failed: '+(err.message||err);epsStatus.className='status bad';}
 }
