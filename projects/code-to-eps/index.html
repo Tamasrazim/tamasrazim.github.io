@@ -48,6 +48,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
     <button class="btn" id="epsBtn" disabled>Export EPS</button>
     <button class="btn" id="svgBtn" disabled>Export SVG</button>
     <button class="btn" id="metaBtn">Adobe CSV</button>
+    <button class="btn" id="allSvgBtn">Export All SVG</button>
     <button class="btn primary" id="allBtn">Export All</button>
   </div>
 </header>
@@ -413,6 +414,45 @@ async function exportAll(){
   const totalBatches=Math.ceil(LIB.length/50);
   flash('Export All finished — '+done+' EPS + '+csvSaved+' Adobe CSVs across '+totalBatches+' folders'+(failed?' · '+failed+' failed':''));
 }
+async function exportAllSvg(){
+  const dir=await pickFolder();
+  let done=0,failed=0;
+  const batchSize=50;
+  const totalBatches=Math.ceil(LIB.length/batchSize);
+  const btn=$('#allSvgBtn');
+  btn.disabled=true;
+  try{
+    for(let start=0;start<LIB.length;start+=batchSize){
+      const end=Math.min(start+batchSize,LIB.length);
+      const batchNo=String(Math.floor(start/batchSize)+1).padStart(3,'0');
+      const batchDir=await dir.getDirectoryHandle(batchNo,{create:true});
+      for(let i=start;i<end;i++){
+        try{
+          const scene=buildFlowerScene(LIB[i]);
+          const svg=sceneToSvg(scene);
+          const base=safeName(LIB[i].title||('flower-'+(i+1)));
+          const name='prism-'+base+'.svg';
+          const h=await batchDir.getFileHandle(name,{create:true});
+          const w=await h.createWritable();
+          await w.write(svg);
+          await w.close();
+          done++;
+        }catch(e){
+          failed++;
+          console.error('SVG '+LIB[i].title,e);
+        }
+        if((done+failed)%10===0||i===end-1){
+          setStatus('Export All SVG — '+done+' / '+LIB.length+' SVG · folder '+batchNo+' / '+String(totalBatches).padStart(3,'0'));
+        }
+        await new Promise(r=>setTimeout(r,0));
+      }
+      if(typeof gc==='function')gc();
+    }
+  }finally{
+    btn.disabled=false;
+  }
+  flash('Export All SVG finished — '+done+' SVG across '+totalBatches+' folders'+(failed?' · '+failed+' failed':''));
+}
 async function exportMetadata(){
   try{
     const csv=metadataCsv();if(new TextEncoder().encode(csv).length>1000000)throw new Error('Adobe CSV exceeds the 1 MB upload limit.');const dir=await pickFolder(),h=await dir.getFileHandle('adobe-stock-metadata.csv',{create:true}),w=await h.createWritable();await w.write(csv);await w.close();flash('Adobe CSV saved — '+LIB.length+' Prism Flowers.');
@@ -423,6 +463,7 @@ $('#runBtn').onclick=runCurrent;
 epsBtn.onclick=()=>{if(!lastScene)return;downloadBlob(new Blob([generateEps(lastScene)],{type:'application/postscript'}),currentFlower>=0?adobeFilename(LIB[currentFlower],currentFlower):'code-to-eps.eps')}
 svgBtn.onclick=()=>{if(!lastScene)return;downloadBlob(new Blob([sceneToSvg(lastScene)],{type:'image/svg+xml;charset=utf-8'}),currentFlower>=0?safeName(LIB[currentFlower].title)+'.svg':'code-to-eps.svg')}
 allBtn.onclick=async()=>{try{await exportAll()}catch(e){allBtn.disabled=false;setStatus('Export All failed: '+(e.message||e),'bad')}}
+$('#allSvgBtn').onclick=async()=>{try{await exportAllSvg()}catch(e){$('#allSvgBtn').disabled=false;setStatus('Export All SVG failed: '+(e.message||e),'bad')}}
 metaBtn.onclick=exportMetadata;
 $('#loadFlower').onclick=()=>loadFlower(Number(flowerList.value));
 $('#prevFlower').onclick=()=>loadFlower(clamp(currentFlower-1,0,LIB.length-1));
