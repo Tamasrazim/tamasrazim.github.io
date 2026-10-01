@@ -194,7 +194,26 @@ function hexColor(s){const c=cssColor(s);return'#'+[c.r,c.g,c.b].map(v=>Math.rou
 function psNum(n){return Number(n).toFixed(3).replace(/\.000$/,'').replace(/(\.\d*?)0+$/,'$1')}
 function mi(){return[1,0,0,1,0,0]}
 function mm(a,b){return[a[0]*b[0]+a[2]*b[1],a[1]*b[0]+a[3]*b[1],a[0]*b[2]+a[2]*b[3],a[1]*b[2]+a[3]*b[3],a[0]*b[4]+a[2]*b[5]+a[4],a[1]*b[4]+a[3]*b[5]+a[5]]}
-class GradientPaint{constructor(kind,args){this.kind=kind;this.args=args;this.stops=[]}addColorStop(o,c){this.stops.push({offset:clamp(num(o),0,1),color:c});this.stops.sort((a,b)=>a.offset-b.offset)}flat(){if(!this.stops.length)return'#000';return this.stops[Math.floor(this.stops.length/2)].color}}
+class GradientPaint{
+  constructor(kind,args){this.kind=kind;this.args=args;this.stops=[]}
+  addColorStop(o,c){this.stops.push({offset:clamp(num(o),0,1),color:c});this.stops.sort((a,b)=>a.offset-b.offset);return this}
+  sample(t){
+    if(!this.stops.length)return{r:0,g:0,b:0,a:1};
+    const u=clamp(num(t),0,1);
+    if(u<=this.stops[0].offset)return cssColor(this.stops[0].color);
+    const last=this.stops[this.stops.length-1];
+    if(u>=last.offset)return cssColor(last.color);
+    for(let i=1;i<this.stops.length;i++){
+      const a=this.stops[i-1],b=this.stops[i];
+      if(u<=b.offset){
+        const q=(u-a.offset)/Math.max(.000001,b.offset-a.offset),ca=cssColor(a.color),cb=cssColor(b.color);
+        return{r:ca.r+(cb.r-ca.r)*q,g:ca.g+(cb.g-ca.g)*q,b:ca.b+(cb.b-ca.b)*q,a:ca.a+(cb.a-ca.a)*q};
+      }
+    }
+    return cssColor(last.color);
+  }
+  flat(){return this.sample(.5)}
+}
 class GroupNode{
   constructor(){this.t='group';this.children=[];this.m=mi()}
   add(o){this.children.push(o);return o}
@@ -224,7 +243,7 @@ class RecorderCtx{
   roundRect(x,y,w,h,r){const q=Math.min(Math.abs(num(r)),Math.abs(w)/2,Math.abs(h)/2),k=.5522848;return this.moveTo(x+q,y).lineTo(x+w-q,y).bezierCurveTo(x+w-q+k*q,y,x+w,y+q-k*q,x+w,y+q).lineTo(x+w,y+h-q).bezierCurveTo(x+w,y+h-q+k*q,x+w-q+k*q,y+h,x+w-q,y+h).lineTo(x+q,y+h).bezierCurveTo(x+q-k*q,y+h,x,y+h-q+k*q,x,y+h-q).lineTo(x,y+q).bezierCurveTo(x,y+q-k*q,x+q-k*q,y,x+q,y).closePath()}
   createLinearGradient(a,b,c,d){return new GradientPaint('linear',[num(a),num(b),num(c),num(d)])}
   createRadialGradient(a,b,c,d,e,f){return new GradientPaint('radial',[num(a),num(b),num(c),num(d),num(e),num(f)])}
-  _paint(p){return p instanceof GradientPaint?p.flat():p}
+  _paint(p){return p}
   fillRect(x,y,w,h){this.s.add({t:'rect',x:num(x),y:num(y),w:num(w),h:num(h),fill:this._paint(this.fillStyle),stroke:null,width:0,opacity:this.globalAlpha,m:this.m.slice()});return this}
   strokeRect(x,y,w,h){this.s.add({t:'rect',x:num(x),y:num(y),w:num(w),h:num(h),fill:null,stroke:this._paint(this.strokeStyle),width:num(this.lineWidth,1),opacity:this.globalAlpha,m:this.m.slice()});return this}
   fill(){if(this.path.length)this.s.add({t:'path',commands:this.path.slice(),fill:this._paint(this.fillStyle),stroke:null,width:0,opacity:this.globalAlpha,m:this.m.slice()});return this}
@@ -322,7 +341,8 @@ function rectCommands(x,y,w,h,r=0){
   ];
 }
 function opacityColor(c,opacity){
-  const x=cssColor(c),a=clamp((x.a==null?1:x.a)*clamp(num(opacity,1),0,1),0,1);
+  const x=(c&&typeof c==='object'&&'r' in c)?c:cssColor(c);
+  const a=clamp((x.a==null?1:x.a)*clamp(num(opacity,1),0,1),0,1);
   const bg=epsBgEl&&epsBgEl.value!=='none'?cssColor(epsBgEl.value):{r:1,g:1,b:1};
   return [x.r*a+bg.r*(1-a),x.g*a+bg.g*(1-a),x.b*a+bg.b*(1-a)];
 }
@@ -405,18 +425,40 @@ function textCommands(text,x,y,size,anchor='left'){
   }
   return out;
 }
-function emitObjectPath(o,commands,H){
-  const m=epsM(o.m||identityM(),H);
-  const tc=transformedCommands(commands,m);
-  const geom='newpath\n'+pathPs(tc);
-  const parts=[];
-  if(o.fill){
-    parts.push(geom,rgbPs(o.fill,o.opacity),'fill');
+function commandBounds(cmds){
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  const add=(x,y)=>{if(Number.isFinite(x)&&Number.isFinite(y)){minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y)}};
+  for(const c of cmds){
+    if(c[0]==='M'||c[0]==='L')add(c[1],c[2]);
+    else if(c[0]==='C'){add(c[1],c[2]);add(c[3],c[4]);add(c[5],c[6])}
   }
-  if(o.stroke){
-    parts.push(geom,rgbPs(o.stroke,o.opacity),psNum(Math.max(.01,num(o.width,1)*strokeScale(m)))+' setlinewidth','stroke');
-  }
+  if(!Number.isFinite(minX))return{x:0,y:0,w:1,h:1,cx:0,cy:0};
+  return{x:minX,y:minY,w:Math.max(1,maxX-minX),h:Math.max(1,maxY-minY),cx:(minX+maxX)/2,cy:(minY+maxY)/2};
+}
+function gradientLocalMatrix(g,box,t){
+  const s=1-.82*t;
+  const cx=g.kind==='radial'&&g.args.length>=6?num(g.args[3],box.cx):box.cx;
+  const cy=g.kind==='radial'&&g.args.length>=6?num(g.args[4],box.cy):box.cy;
+  return [s,0,0,s,cx*(1-s),cy*(1-s)];
+}
+function emitSolidObjectPath(o,commands,H){
+  const m=epsM(o.m||identityM(),H),tc=transformedCommands(commands,m),geom='newpath\n'+pathPs(tc),parts=[];
+  if(o.fill)parts.push(geom,rgbPs(o.fill,o.opacity),'fill');
+  if(o.stroke)parts.push(geom,rgbPs(o.stroke,o.opacity),psNum(Math.max(.01,num(o.width,1)*strokeScale(m)))+' setlinewidth','stroke');
   return parts.join('\n')+'\n';
+}
+function emitObjectPath(o,commands,H){
+  if(o.fill instanceof GradientPaint&&o.fill.stops.length>1){
+    const box=commandBounds(commands),layers=Math.min(7,Math.max(3,o.fill.stops.length));
+    let out='';
+    for(let i=0;i<layers;i++){
+      const t=i/(layers-1),sample=o.fill.sample(t),gm=gradientLocalMatrix(o.fill,box,t);
+      out+=emitSolidObjectPath({...o,fill:sample,m:mulM(o.m||identityM(),gm),stroke:null},commands,H);
+    }
+    if(o.stroke)out+=emitSolidObjectPath({...o,fill:null},commands,H);
+    return out;
+  }
+  return emitSolidObjectPath(o,commands,H);
 }
 function emitOp(o,i,H,parentM=identityM()){
   if(!o||o.t==='save'||o.t==='restore')return '';
@@ -521,15 +563,37 @@ function runEpsSelfTests(){
   return {ok:true,bytes:eps.length};
 }
 function sceneToSvg(scene){
-  let s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+scene.W+' '+scene.H+'" width="'+scene.W+'" height="'+scene.H+'">';
-  if(scene.bg)s+='<rect width="100%" height="100%" fill="'+hexColor(scene.bg)+'"/>';
+  let s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 '+scene.W+' '+scene.H+'" width="'+scene.W+'" height="'+scene.H+'">';
+  const defs=[];
+  const gradientIds=new Map();
+  function gradientId(g){
+    if(!(g instanceof GradientPaint))return null;
+    if(gradientIds.has(g))return gradientIds.get(g);
+    const id='grad-'+String(gradientIds.size+1);
+    gradientIds.set(g,id);
+    let d='';
+    if(g.kind==='linear'){
+      d='<linearGradient id="'+id+'" x1="'+psNum(g.args[0])+'" y1="'+psNum(g.args[1])+'" x2="'+psNum(g.args[2])+'" y2="'+psNum(g.args[3])+'" gradientUnits="userSpaceOnUse">';
+    }else{
+      d='<radialGradient id="'+id+'" cx="'+psNum(g.args[3])+'" cy="'+psNum(g.args[4])+'" r="'+psNum(g.args[5])+'" fx="'+psNum(g.args[0])+'" fy="'+psNum(g.args[1])+'" fr="'+psNum(g.args[2])+'" gradientUnits="userSpaceOnUse">';
+    }
+    for(const stop of g.stops){
+      const x=cssColor(stop.color);
+      d+='<stop offset="'+psNum(stop.offset*100)+'%" stop-color="'+hexColor(stop.color)+'" stop-opacity="'+psNum(x.a==null?1:x.a)+'"/>';
+    }
+    d+=g.kind==='linear'?'</linearGradient>':'</radialGradient>';
+    defs.push(d);
+    return id;
+  }
+  function paint(fill){
+    if(fill instanceof GradientPaint)return 'url(#'+gradientId(fill)+')';
+    return fill?hexColor(fill):'none';
+  }
   function emitSvgOp(o,parentM=identityM()){
     if(!o||o.t==='save'||o.t==='restore')return '';
     const mergedM=mulM(parentM,o.m||identityM());
-    if(o.t==='group'){
-      return (o.children||[]).map(child=>emitSvgOp(child,mergedM)).join('');
-    }
-    const fill=o.fill?hexColor(o.fill):'none',stroke=o.stroke?hexColor(o.stroke):'none';
+    if(o.t==='group')return (o.children||[]).map(child=>emitSvgOp(child,mergedM)).join('');
+    const fill=paint(o.fill),stroke=paint(o.stroke);
     const st='fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+psNum(o.width||0)+'" opacity="'+psNum(o.opacity==null?1:o.opacity)+'"';
     const tr='matrix('+mergedM.map(psNum).join(' ')+')';
     if(o.t==='rect')return '<rect x="'+psNum(o.x)+'" y="'+psNum(o.y)+'" width="'+psNum(o.w)+'" height="'+psNum(o.h)+'"'+(o.r?' rx="'+psNum(o.r)+'"':'')+' transform="'+tr+'" '+st+'/>';
@@ -540,7 +604,13 @@ function sceneToSvg(scene){
     if(o.t==='text')return '<text x="'+psNum(o.x)+'" y="'+psNum(o.y)+'" transform="'+tr+'" fill="'+hexColor(o.fill||'#000')+'" font-family="'+esc(o.font)+'" font-size="'+psNum(o.size)+'" text-anchor="'+(o.anchor==='center'?'middle':o.anchor==='right'?'end':'start')+'">'+esc(o.text)+'</text>';
     return '';
   }
+  if(scene.bg)s+='<rect width="100%" height="100%" fill="'+hexColor(scene.bg)+'"/>';
   for(const o of scene.ops)s+=emitSvgOp(o);
+  if(defs.length)s=s.replace('<svg ','<svg ')+s.slice(0,0);
+  if(defs.length){
+    const block='<defs>'+defs.join('')+'</defs>';
+    s=s.replace('>','>'+block,1);
+  }
   return s+'</svg>';
 }
 function pathSvg(c){let s='';for(const q of c){if(q[0]==='M')s+='M '+psNum(q[1])+' '+psNum(q[2])+' ';else if(q[0]==='L')s+='L '+psNum(q[1])+' '+psNum(q[2])+' ';else if(q[0]==='C')s+='C '+q.slice(1).map(psNum).join(' ')+' ';else if(q[0]==='Z')s+='Z '}return s.trim()}
