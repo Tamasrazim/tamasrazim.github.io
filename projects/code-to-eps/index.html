@@ -108,6 +108,8 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 
   <div class="section">
     <h3>STOCK EPS SAFETY</h3>
+    <div class="stat"><span>Artwork bbox</span><b id="stockBbox">—</b></div>
+    <div class="stat"><span>Stock result</span><b id="stockResult">—</b></div>
     <div class="notice">Shutterstock mode enforces RGB-only EPS, Illustrator 8/10 targeting, artwork bounding-box sizing, 4–25 MP bounds, vector text outlines, expanded strokes, and a 100 MB file limit.</div>
   </div>
 
@@ -143,7 +145,7 @@ const codeEl=$('#code'),linesEl=$('#lines'),statusEl=$('#status'),paper=$('#pape
 const epsBtn=$('#epsBtn'),svgBtn=$('#svgBtn'),allBtn=$('#allBtn'),metaBtn=$('#metaBtn');
 const wEl=$('#w'),hEl=$('#h'),epsProfileEl=$('#epsProfile'),resPresetEl=$('#resPreset'),frameEl=$('#frame'),frameReadout=$('#frameReadout'),epsBgEl=$('#epsBg');
 const flowerList=$('#flowerList'),flowerSearch=$('#flowerSearch'),flowerInfo=$('#flowerInfo');
-const fileInput=$('#fileInput'),objectCount=$('#objectCount'),toast=$('#toast');
+const fileInput=$('#fileInput'),objectCount=$('#objectCount'),stockBboxEl=$('#stockBbox'),stockResultEl=$('#stockResult'),toast=$('#toast');
 const DEFAULT_CODE=`v.background("#ffffff");
 const cx=W/2, cy=H/2;
 
@@ -774,11 +776,24 @@ function drawFlowerPreview(f){
   const run=new Function('time','frame','fps','ctx','width','height','motion','TAU',f.code+'\nif(typeof renderFrame==="function"){renderFrame(time,frame,fps,ctx,width,height,motion);}\n//# sourceURL=code-to-eps-preview-'+f.id+'.js');
   run(currentFrame*10,Math.round(currentFrame*600),60,ctx,W,H,{loopProgress:currentFrame,scale:1},Math.PI*2);
 }
+function updateStockPreflight(scene){
+  if(!stockBboxEl||!stockResultEl)return;
+  const cfg=epsProfileConfig();
+  if(!cfg.stock){stockBboxEl.textContent='generic';stockResultEl.textContent='not enforced';return}
+  const b=sceneBounds(scene,false);
+  if(!b.w||!b.h){stockBboxEl.textContent='no artwork';stockResultEl.textContent='FAIL';return}
+  const rawW=Math.ceil(b.w),rawH=Math.ceil(b.h),rawMp=rawW*rawH/1000000;
+  const scale=stockScaleForBounds(b),outW=Math.ceil(b.w*scale),outH=Math.ceil(b.h*scale),outMp=outW*outH/1000000;
+  const outside=b.minX<0||b.minY<0||b.maxX>scene.W||b.maxY>scene.H;
+  stockBboxEl.textContent=rawW+'×'+rawH+' · '+rawMp.toFixed(3)+' MP → '+outW+'×'+outH+' · '+outMp.toFixed(3)+' MP';
+  if(outside){stockResultEl.textContent='FAIL — artwork outside canvas';return}
+  stockResultEl.textContent=(scale!==1?'AUTO-SCALED · ':'')+'PASS';
+}
 function runCurrent(){
   try{
     if(currentFlower>=0){drawFlowerPreview(LIB[currentFlower]);lastScene=buildFlowerScene(LIB[currentFlower]);objectCount.textContent=lastScene.ops.filter(x=>x.t!=='save'&&x.t!=='restore').length+' OBJECTS';modeEl.textContent='PRISM';}
     else {lastScene=buildVecScene();paper.innerHTML='<div style="width:100%;height:100%">'+sceneToSvg(lastScene)+'</div>';objectCount.textContent=lastScene.ops.filter(x=>x.t!=='save'&&x.t!=='restore').length+' OBJECTS';modeEl.textContent='CUSTOM';}
-    epsBtn.disabled=false;svgBtn.disabled=false;setStatus('Render complete — '+objectCount.textContent,'good');
+    epsBtn.disabled=false;svgBtn.disabled=false;updateStockPreflight(lastScene);setStatus('Render complete — '+objectCount.textContent,'good');
     return true;
   }catch(e){lastScene=null;epsBtn.disabled=true;svgBtn.disabled=true;setStatus('ERROR: '+(e&&e.message||e),'bad');return false}
 }
