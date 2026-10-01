@@ -889,5 +889,6 @@
       resetNode();
     })();
 
+    window.__tamasrazimSiteEffectsReady=true;
 })();
   
