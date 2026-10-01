@@ -55,7 +55,7 @@ header{position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line);back
 <div class="controls">
 <div class="field"><label>Width</label><input id="width" type="number" min="1" value="1200"></div>
 <div class="field"><label>Height</label><input id="height" type="number" min="1" value="1200"></div>
-<div class="field"><label>Background</label><input id="background" type="text" value="#ffffff"></div>
+<div class="field"><label>Background</label><input id="background" type="text" value=""></div>
 <div class="field"><label>EPS page</label><select id="epsPage"><option value="art">Use artboard</option><option value="a4">A4 portrait</option><option value="a4l">A4 landscape</option></select></div>
 </div>
 <div class="status" id="status">Ready.</div>
@@ -81,7 +81,7 @@ for (let i = 0; i < 24; i++) {
   const a = (i / 24) * Math.PI * 2;
   const x = W / 2 + Math.cos(a) * 250;
   const y = H / 2 + Math.sin(a) * 250;
-  parts.push('<rect x="' + (x - 90) + '" y="' + (y - 26) + '" width="180" height="52" rx="26" transform="rotate(' + (i * 15) + ' ' + x + ' ' + y + ')" fill="hsl(' + (i * 15) + ',85%,60%)"/>');
+  parts.push('<rect x="' + (x - 90) + '" y="' + (y - 26) + '" width="180" height="52" transform="rotate(' + (i * 15) + ' ' + x + ' ' + y + ')" fill="hsl(' + (i * 15) + ',85%,60%)"/>');
 }
 
 parts.push('<circle cx="600" cy="600" r="120" fill="#111"/>');
@@ -135,6 +135,7 @@ function colorToRgb(value){
   let m=value.match(/^#([0-9a-f]{3})$/i);if(m)value='#'+m[1].split('').map(x=>x+x).join('');
   m=value.match(/^#([0-9a-f]{6})$/i);if(m)return[m[1].slice(0,2),m[1].slice(2,4),m[1].slice(4,6)].map(x=>parseInt(x,16)/255);
   m=value.match(/^rgba?\(([^)]+)\)$/i);if(m){const p=m[1].split(',').map(x=>x.trim());const rgb=p.slice(0,3).map(x=>x.endsWith('%')?parseFloat(x)*2.55:parseFloat(x));if(rgb.every(Number.isFinite))return rgb.map(x=>Math.max(0,Math.min(255,x))/255);}
+  m=value.match(/^hsla?\(([^)]+)\)$/i);if(m){const p=m[1].split(',').map(x=>x.trim());const hh=(parseFloat(p[0])%360+360)%360/360,ss=Math.max(0,Math.min(100,parseFloat(p[1])))/100,ll=Math.max(0,Math.min(100,parseFloat(p[2])))/100;const k=n=>(n+hh*12)%12,a=ss*Math.min(ll,1-ll),f=n=>ll-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));return [f(0),f(8),f(4)];}
   return null;
 }
 function parseStyle(el,parent){
