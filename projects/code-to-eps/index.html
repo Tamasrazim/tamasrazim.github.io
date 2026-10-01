@@ -492,6 +492,25 @@ function uniqueBatchName(base,ext,used){
   used.add(name);
   return name;
 }
+async function getUniqueFileHandle(dir,stem,ext,used){
+  let idx=1;
+  while(true){
+    const suffix=idx===1?'':'-'+String(idx).padStart(2,'0');
+    const name=safeName(stem)+suffix+'.'+ext;
+    if(!used.has(name)){
+      try{
+        await dir.getFileHandle(name,{create:false});
+      }catch(e){
+        if(e&&e.name==='NotFoundError'){
+          used.add(name);
+          return dir.getFileHandle(name,{create:true});
+        }
+        throw e;
+      }
+    }
+    idx++;
+  }
+}
 function runEpsSelfTests(){
   const s=new Scene(320,180),v=new Vec(s);
   v.fill('#ff0066').rect(10,10,100,50,8).fill('#00c8ff').circle(180,60,30).stroke('#111').width(3).line(30,140,280,140).fill('#fff').text('CODE→EPS',160,125,24,'Helvetica','center');
@@ -609,10 +628,10 @@ async function exportAll(){
         try{
           const scene=buildFlowerScene(LIB[i]);
           const name=adobeFilename(LIB[i],i);
-          const finalName=uniqueBatchName(name.replace(/\.eps$/i,''),'eps',usedNames);
           const eps=generateEps(scene);
           validateEps(eps,scene.W,scene.H);
-          const h=await batchDir.getFileHandle(finalName,{create:false}).catch(()=>batchDir.getFileHandle(finalName,{create:true}));
+          const h=await getUniqueFileHandle(batchDir,name.replace(/\.eps$/i,''),'eps',usedNames);
+          const finalName=h.name;
           const w=await h.createWritable();
           await w.write(eps);
           await w.close();
@@ -663,8 +682,7 @@ async function exportAllSvg(){
           const scene=buildFlowerScene(LIB[i]);
           const svg=sceneToSvg(scene);
           const base='prism-'+safeName(LIB[i].title||('flower-'+(i+1)));
-          const name=uniqueBatchName(base,'svg',usedNames);
-          const h=await batchDir.getFileHandle(name,{create:true});
+          const h=await getUniqueFileHandle(batchDir,base,'svg',usedNames);
           const w=await h.createWritable();
           await w.write(svg);
           await w.close();
