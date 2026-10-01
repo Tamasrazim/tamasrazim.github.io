@@ -103,7 +103,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
       <div class="field"><label>Height</label><input id="h" type="number" min="1" value="2160"></div>
     </div>
     <div class="field" style="margin-top:8px"><label>EPS Background</label><select id="epsBg"><option value="#ffffff" selected>White — Illustrator-safe</option><option value="none">None — no background object</option></select></div>
-    <div class="hint" style="margin-top:7px">Preview stays transparent. EPS itself does not support standard transparency; white preserves translucent artwork's appearance, and the background is a separate editable object.</div>
+    <div class="hint" style="margin-top:7px">Stock profiles force a transparent export background so the EPS bounding box tracks the artwork itself. Generic EPS keeps the selected background rectangle.</div>
   </div>
 
   <div class="section">
@@ -641,6 +641,9 @@ function generateEps(scene,options={}){
     '%%Creator: Tamasrazim CODE-EPS',
     '%%Title: Editable Vector Artwork',
     strictStock?'%%AI8_CreatorVersion: '+cfg.version+'.0':'%%AI8_CreatorVersion: generic',
+    strictStock?'%AI5_FileFormat 6.0':'%%CODEEPS_GenericFileFormat',
+    strictStock?'%AI3_ColorUsage: Color':'%%CODEEPS_GenericColorUsage',
+    strictStock?'%AI5_ArtSize: '+W+' '+H:'%%CODEEPS_GenericArtSize',
     strictStock?'%%CODEEPS_StockProfile: Shutterstock RGB EPS '+cfg.version:'%%CODEEPS_StockProfile: Generic EPSF-3.0',
     '%%DocumentProcessColors: RGB',
     '%%BoundingBox: 0 0 '+W+' '+H,
