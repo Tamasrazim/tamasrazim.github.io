@@ -512,7 +512,7 @@ function sceneToSvg(scene){
     }
     const fill=o.fill?hexColor(o.fill):'none',stroke=o.stroke?hexColor(o.stroke):'none';
     const st='fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+psNum(o.width||0)+'" opacity="'+psNum(o.opacity==null?1:o.opacity)+'"';
-    const tr='matrix('+mergedM.map(psNum).join(' ')+' )'.replace(' )',')');
+    const tr='matrix('+mergedM.map(psNum).join(' ')+')';
     if(o.t==='rect')return '<rect x="'+psNum(o.x)+'" y="'+psNum(o.y)+'" width="'+psNum(o.w)+'" height="'+psNum(o.h)+'"'+(o.r?' rx="'+psNum(o.r)+'"':'')+' transform="'+tr+'" '+st+'/>';
     if(o.t==='circle')return '<circle cx="'+psNum(o.x)+'" cy="'+psNum(o.y)+'" r="'+psNum(o.r)+'" transform="'+tr+'" '+st+'/>';
     if(o.t==='ellipse')return '<ellipse cx="'+psNum(o.x)+'" cy="'+psNum(o.y)+'" rx="'+psNum(o.rx)+'" ry="'+psNum(o.ry)+'" transform="'+tr+'" '+st+'/>';
