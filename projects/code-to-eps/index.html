@@ -1078,6 +1078,14 @@ function innerSvg(svg){
     .replace(/^<svg[^>]*>/i,'')
     .replace(/<\/svg>\s*$/i,'');
 }
+function prismFlowerName(f,i){
+  const raw = f?.flowerName ?? f?.name ?? f?.flower ?? f?.species ?? f?.title ?? f?.kind ?? f?.type ?? ('Flower '+(i+1));
+  return String(raw)
+    .replace(/^prism\s*[-→:]?\s*/i,'')
+    .replace(/^flower\s*[-#]?\s*\d+\s*[-:]?\s*/i,'')
+    .replace(/\s+/g,' ')
+    .trim() || ('Flower '+(i+1));
+}
 async function exportAllPrismOneSvg(){
   const btn=$('#allPrismOneSvgBtn');
   btn.disabled=true;
@@ -1099,7 +1107,7 @@ async function exportAllPrismOneSvg(){
         const body=uniqueSvgIds(innerSvg(raw),'prism'+String(i+1).padStart(4,'0'));
         const x=(i%cols)*tileW,y=Math.floor(i/cols)*tileH;
         const sx=tileW/scene.W,sy=artH/scene.H;
-        const name=esc(f.title||('Prism Flower '+(i+1)));
+        const name=esc(prismFlowerName(f,i));
         parts.push('<g id="prism-'+String(i+1).padStart(4,'0')+'" transform="translate('+x+' '+y+')">');
         parts.push('<title>'+name+'</title>');
         parts.push('<g id="prism-'+String(i+1).padStart(4,'0')+'-artwork" transform="scale('+psNum(sx)+' '+psNum(sy)+')">');
