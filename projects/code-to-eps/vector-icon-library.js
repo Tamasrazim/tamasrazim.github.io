@@ -46,7 +46,7 @@ for(const f of F)for(let c=0;c<10;c++)for(let v=0;v<10;v++){
 }
 const poly=(v,p)=>v.path(q=>{q.moveTo(p[0][0],p[0][1]);for(let i=1;i<p.length;i++)q.lineTo(p[i][0],p[i][1]);q.closePath()});
 function draw(v,k,cx,cy,s,style,variant){
- const P=pal(variant+cx/100000), ink=P.ink, ac=P.accent, soft=P.soft, S=STYLES.find(x=>x.slug===style), sw=S.sw;
+ const P=pal((variant+Math.floor(cx/100))%8), ink=P.ink, ac=P.accent, soft=P.soft, S=STYLES.find(x=>x.slug===style), sw=S.sw;
  const outline=(fn)=>{v.fill(null).stroke(ink).width(sw||70);fn()};
  const filled=(fn)=>{v.fill(ac).stroke(style==='solid'?ac:ink).width(sw||55);fn()};
  const both=(fn)=>{v.fill(style==='monoline'||style==='rounded'?null:ac).stroke(ink).width(sw||70);fn()};
