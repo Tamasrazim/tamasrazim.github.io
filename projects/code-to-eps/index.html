@@ -1146,7 +1146,7 @@ async function exportAllPrismOneSvg(){
         const body=uniqueSvgIds(innerSvg(raw),idPrefix);
         const boxX=demoStartX+d*(demoW+demoGap);
         const boxY=demoY;
-        const scale=.65;
+        const scale=.9;
         const visualH=demoH-54;
         const fitScale=Math.min(scale,(demoW-24)/scene.W,visualH/scene.H);
         const tx=boxX+demoW/2-(scene.W*fitScale)/2;
