@@ -34,7 +34,7 @@ function checkScript(file){
 }
 function checkInlineScripts(file){
   const html=read(file);
-  const matches=[...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)];
+  const matches=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
   must(matches.length>0,file+' contains an inline script');
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'code-eps-'));
   try{
@@ -73,7 +73,7 @@ must(codeEps.includes('function validateEps('),'CODE-EPS validates EPS before wr
 const epsFnStart=codeEps.indexOf('function generateEps(scene){');
 const epsFnEnd=codeEps.indexOf('function uniqueBatchName(',epsFnStart);
 const epsFn=epsFnStart>=0&&epsFnEnd>epsFnStart?codeEps.slice(epsFnStart,epsFnEnd):'';
-for(const banned of ['arc','rlineto','findfont','concat']) must(!new RegExp('\\\\b'+banned+'\\\\b').test(epsFn),'CODE-EPS serializer has no '+banned+' operator');
+for(const banned of ['arc','rlineto','findfont','concat']) must(!new RegExp('\\b'+banned+'\\b').test(epsFn),'CODE-EPS serializer has no '+banned+' operator');
 must(codeEps.includes('function runEpsSelfTests()'),'CODE-EPS includes EPS self-tests');
 
 for(const file of [
