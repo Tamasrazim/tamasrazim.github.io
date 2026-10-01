@@ -978,7 +978,7 @@
     </div>
   </aside>
 
-  <script src="./assets/js/site.js?v=20261001-6"></script>
+  <script src="./assets/js/site.js?v=20261001-7"></script>
   <script src="./assets/js/horizontal-mode.js?v=20261001-5"></script>
   <script>
 (function(){
@@ -1111,7 +1111,7 @@
   /* Give the normal engine time to initialize. If it did not mark the page as motion-ready,
      activate the rescue stack. */
   setTimeout(function(){
-    if(!document.documentElement.classList.contains('motion-ready'))start();
+    if(!window.__tamasrazimSiteEffectsReady!==true)start();
   },700);
 })();
 </script>
