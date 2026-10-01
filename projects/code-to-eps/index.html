@@ -16,7 +16,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 .brand{font:800 11px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em;white-space:nowrap}.brand i{font-style:normal;color:#74746d}.top-sp{flex:1}
 .actions{display:flex;gap:5px;overflow:auto}.btn{border:1px solid var(--line2);background:#0c0c0c;color:#bdbdb7;border-radius:5px;padding:8px 9px;font:800 9px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}.btn:hover{background:#f0f0ec;color:#050505;border-color:#f0f0ec}.btn.primary{background:#f0f0ec;color:#050505;border-color:#f0f0ec}.btn:disabled{opacity:.35;cursor:not-allowed}
 .main{min-height:0;display:grid;grid-template-columns:minmax(310px,33%) minmax(390px,1fr) 280px}
-.panel,.stage{min-width:0;min-height:0;background:var(--panel);display:flex;flex-direction:column}.panel{border-right:1px solid var(--line)}.right{border-left:1px solid var(--line);border-right:0}
+.panel,.stage{min-width:0;min-height:0;background:var(--panel);display:flex;flex-direction:column}.panel{border-right:1px solid var(--line)}.right{border-left:1px solid var(--line);border-right:0;overflow:auto;min-height:0}
 .phead,.stagebar{height:42px;display:flex;align-items:center;gap:9px;padding:0 11px;border-bottom:1px solid var(--line);font:800 9px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.15em;color:#888880;text-transform:uppercase}.sp{flex:1}
 .editor-wrap{display:grid;grid-template-columns:45px 1fr;min-height:0;flex:1;background:#070707}.lines{padding:14px 9px 14px 0;text-align:right;color:#3f3f39;background:#080808;border-right:1px solid #161616;font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;overflow:hidden;user-select:none}.lines span{display:block}
 #code{width:100%;height:100%;resize:none;border:0;outline:0;background:transparent;color:#ddd;padding:14px 15px;font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:2;white-space:pre;overflow:auto}
@@ -853,6 +853,7 @@ function drawIconPreview(item){
 }
 function loadIcon(item){
   if(!item)return;
+  if(paper)paper.style.aspectRatio='1 / 1';
   currentFlower=-1;
   currentFrame=0;
   customMode=false;
@@ -915,6 +916,7 @@ function runIconFromControls(){const item=currentIconItem();if(item)loadIcon(ite
 
 function loadFlower(i){
   if(i<0||i>=LIB.length)return;
+  if(paper)paper.style.aspectRatio='1.4142 / 1';
   currentFlower=i;const f=LIB[i];currentFrame=num(frameEl.value,0)/1000;codeEl.value=f.code;syncLines();modeEl.textContent='PRISM';flowerInfo.textContent=(i+1)+' / '+LIB.length+' · '+f.title;runCurrent();
 }
 function fillFlowers(){
@@ -1078,7 +1080,7 @@ allBtn.onclick=async()=>{try{await exportAll()}catch(e){allBtn.disabled=false;se
 $('#allSvgBtn').onclick=async()=>{try{await exportAllSvg()}catch(e){$('#allSvgBtn').disabled=false;setStatus('Export All SVG failed: '+(e.message||e),'bad')}}
 metaBtn.onclick=exportMetadata;
 fillIconFamilies();
-$('#iconStockBtn').onclick=()=>{iconStockSection?.scrollIntoView({block:'center',behavior:'smooth'});iconNumberEl?.focus()};
+$('#iconStockBtn').onclick=()=>{iconStockSection?.scrollIntoView({block:'center',behavior:'smooth'});loadIcon(iconItemAt(1));iconNumberEl?.focus()};
 $('#loadIcon').onclick=()=>runIconFromControls();
 $('#prevIcon').onclick=()=>{const item=currentIconItem();if(item){const i=Math.max(0,item.index-1);const next=iconItemAt(i+1);if(next)loadIcon(next)}};
 $('#nextIcon').onclick=()=>{const item=currentIconItem();if(item){const next=iconItemAt(item.index+2);if(next)loadIcon(next)}};
