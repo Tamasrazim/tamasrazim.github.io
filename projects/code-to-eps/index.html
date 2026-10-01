@@ -1093,15 +1093,19 @@ async function exportAllPrismOneSvg(){
   const btn=$('#allPrismOneSvgBtn');
   btn.disabled=true;
   try{
-    // Presentation sheet: large stock-style contact grid plus three real
-    // Prism Flower detail demos in the header at exactly 800% scale.
-    const cols=5;
-    const tileW=520, tileH=500;
-    const artBoxW=460, artBoxH=410;
-    const artTop=14, labelY=468;
-    const headerH=270, outerPad=40;
+    // Exact 16:9 landscape presentation board with all 947 flowers,
+    // plus three 65% header demos whose names stay inside their cards.
+    const W=16000,H=9000;
+    const cols=41;
+    const headerH=900;
     const rows=Math.ceil(LIB.length/cols);
-    const W=cols*tileW,H=headerH+rows*tileH;
+    const tileW=W/cols;
+    const tileH=(H-headerH)/rows;
+    const artBoxW=Math.max(1,tileW-44);
+    const artBoxH=Math.max(1,tileH-62);
+    const artTop=14;
+    const labelY=tileH-30;
+    const outerPad=220;
     const sheetTitle='PRISM FLOWERS';
     const sheetSubtitle='Editable Vector Flower Collection';
     const sheetMeta=LIB.length+' ORIGINAL FLOWERS  ·  INDEPENDENT SVG GROUPS  ·  '+new Date().getFullYear();
@@ -1109,23 +1113,23 @@ async function exportAllPrismOneSvg(){
     parts.push('<?xml version="1.0" encoding="UTF-8"?>');
     parts.push('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">');
     parts.push('<title>Prism Flowers — '+LIB.length+' Editable Vector Flowers</title>');
-    parts.push('<desc>Five-column presentation sheet of Prism Flowers with a collection header, three flower demonstrations, large evenly spaced artwork, actual flower names, and editable SVG groups.</desc>');
+    parts.push('<desc>Exact 16:9 presentation sheet of Prism Flowers with a collection header, three flower demonstrations, evenly spaced artwork, actual flower names, and editable SVG groups.</desc>');
     parts.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#ffffff"/>');
     parts.push('<rect x="0" y="0" width="'+W+'" height="'+headerH+'" fill="#0b0b0b"/>');
-    parts.push('<text x="'+outerPad+'" y="66" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="800" letter-spacing="4" fill="#ffffff">'+sheetTitle+'</text>');
-    parts.push('<text x="'+outerPad+'" y="104" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="400" letter-spacing="1" fill="#d7d7d7">'+sheetSubtitle+'</text>');
-    parts.push('<text x="'+outerPad+'" y="137" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="600" letter-spacing="1.8" fill="#909090">'+sheetMeta+'</text>');
-    parts.push('<line x1="'+outerPad+'" y1="157" x2="'+(W-outerPad)+'" y2="157" stroke="#2e2e2e" stroke-width="1"/>');
-    parts.push('<text x="'+outerPad+'" y="190" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" letter-spacing="2.4" fill="#ffffff">DETAIL PREVIEW</text>');
-    parts.push('<text x="'+outerPad+'" y="213" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" letter-spacing="1" fill="#8f8f8f">Three flower examples · shown at natural scale</text>');
-    parts.push('<text x="'+(W-outerPad)+'" y="44" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" letter-spacing="2" fill="#ffffff">VECTOR FLOWER COLLECTION</text>');
-    parts.push('<text x="'+(W-outerPad)+'" y="66" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" letter-spacing="1" fill="#8f8f8f">BOTANICAL VECTOR SERIES</text>');
+    parts.push('<text x="'+outerPad+'" y="180" font-family="Arial, Helvetica, sans-serif" font-size="180" font-weight="800" letter-spacing="18" fill="#ffffff">'+sheetTitle+'</text>');
+    parts.push('<text x="'+outerPad+'" y="330" font-family="Arial, Helvetica, sans-serif" font-size="76" font-weight="400" letter-spacing="5" fill="#d7d7d7">'+sheetSubtitle+'</text>');
+    parts.push('<text x="'+outerPad+'" y="455" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="600" letter-spacing="7" fill="#909090">'+sheetMeta+'</text>');
+    parts.push('<line x1="'+outerPad+'" y1="515" x2="'+(W-outerPad)+'" y2="515" stroke="#2e2e2e" stroke-width="3"/>');
+    parts.push('<text x="'+outerPad+'" y="620" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="700" letter-spacing="8" fill="#ffffff">DETAIL PREVIEW</text>');
+    parts.push('<text x="'+outerPad+'" y="700" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="400" letter-spacing="3" fill="#8f8f8f">Three flower examples · natural presentation scale</text>');
+    parts.push('<text x="'+(W-outerPad)+'" y="150" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="700" letter-spacing="8" fill="#ffffff">VECTOR FLOWER COLLECTION</text>');
+    parts.push('<text x="'+(W-outerPad)+'" y="235" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="400" letter-spacing="4" fill="#8f8f8f">BOTANICAL VECTOR SERIES</text>');
 
     const demoKeys=['scabiosa','nigela','snapdragon'];
     const demoAliases={nigela:['nigela','nigella']};
-    const demoCount=3, demoW=180, demoH=150, demoGap=18;
+    const demoCount=3, demoW=250, demoH=220, demoGap=24;
     const demoStartX=W-outerPad-(demoCount*demoW+(demoCount-1)*demoGap);
-    const demoY=100;
+    const demoY=410;
     for(let d=0;d<demoCount;d++){
       const target=demoKeys[d];
       const aliases=demoAliases[target]||[target];
@@ -1142,20 +1146,21 @@ async function exportAllPrismOneSvg(){
         const body=uniqueSvgIds(innerSvg(raw),idPrefix);
         const boxX=demoStartX+d*(demoW+demoGap);
         const boxY=demoY;
-        const scale=Math.min((demoW-20)/scene.W,(demoH-20)/scene.H);
-        const tx=boxX+demoW/2-(scene.W*scale)/2;
-        const ty=boxY+demoH/2-(scene.H*scale)/2;
+        const scale=.65;
+        const visualH=demoH-54;
+        const fitScale=Math.min(scale,(demoW-24)/scene.W,visualH/scene.H);
+        const tx=boxX+demoW/2-(scene.W*fitScale)/2;
+        const ty=boxY+8+(visualH-scene.H*fitScale)/2;
         const clipId=idPrefix+'-clip';
-        parts.push('<clipPath id="'+clipId+'"><rect x="'+boxX+'" y="'+boxY+'" width="'+demoW+'" height="'+demoH+'" rx="14"/></clipPath>');
-        parts.push('<rect x="'+boxX+'" y="'+boxY+'" width="'+demoW+'" height="'+demoH+'" rx="14" fill="#ffffff" stroke="#353535" stroke-width="1.5"/>');
+        parts.push('<clipPath id="'+clipId+'"><rect x="'+boxX+'" y="'+boxY+'" width="'+demoW+'" height="'+demoH+'" rx="20"/></clipPath>');
+        parts.push('<rect x="'+boxX+'" y="'+boxY+'" width="'+demoW+'" height="'+demoH+'" rx="20" fill="#ffffff" stroke="#353535" stroke-width="2"/>');
         parts.push('<g id="'+idPrefix+'" clip-path="url(#'+clipId+')">');
-        parts.push('<g id="'+idPrefix+'-artwork" transform="translate('+psNum(tx)+' '+psNum(ty)+') scale('+psNum(scale)+' '+psNum(scale)+')">');
+        parts.push('<g id="'+idPrefix+'-artwork" transform="translate('+psNum(tx)+' '+psNum(ty)+') scale('+psNum(fitScale)+' '+psNum(fitScale)+')">');
         parts.push(body);
         parts.push('</g>');
         parts.push('</g>');
         const demoName=esc(prismFlowerName(f,di));
-        parts.push('<text x="'+psNum(boxX+demoW/2)+'" y="'+psNum(boxY+demoH+21)+'" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" letter-spacing="1" fill="#ffffff">'+demoName+'</text>');
-
+        parts.push('<text x="'+psNum(boxX+demoW/2)+'" y="'+psNum(boxY+demoH-18)+'" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" letter-spacing="1.5" fill="#111111">'+demoName+'</text>');
       }catch(err){
         console.error('Header demo '+target,err);
       }
@@ -1175,28 +1180,27 @@ async function exportAllPrismOneSvg(){
         const drawX=(tileW-drawW)/2,drawY=artTop+(artBoxH-drawH)/2;
         const name=esc(prismFlowerName(f,i));
         const numLabel=String(i+1).padStart(3,'0');
-        parts.push('<g id="'+idPrefix+'" transform="translate('+x+' '+y+')">');
-        parts.push('<rect x="18" y="16" width="'+(tileW-36)+'" height="'+(tileH-34)+'" rx="18" fill="#fafafa" stroke="#e8e8e8" stroke-width="1"/>');
+        parts.push('<g id="'+idPrefix+'" transform="translate('+psNum(x)+' '+psNum(y)+')">');
+        parts.push('<rect x="12" y="12" width="'+psNum(tileW-24)+'" height="'+psNum(tileH-24)+'" rx="16" fill="#fafafa" stroke="#e8e8e8" stroke-width="1.5"/>');
         parts.push('<title>'+name+'</title>');
         parts.push('<g id="'+idPrefix+'-artwork" transform="translate('+psNum(drawX)+' '+psNum(drawY)+') scale('+psNum(scale)+' '+psNum(scale)+')">');
         parts.push(body);
         parts.push('</g>');
         parts.push('<text id="'+idPrefix+'-name" x="'+psNum(tileW/2)+'" y="'+psNum(labelY)+'" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#111111">'+name+'</text>');
-        parts.push('<text id="'+idPrefix+'-number" x="'+psNum(tileW/2)+'" y="'+psNum(labelY+20)+'" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="600" letter-spacing="2" fill="#8a8a8a">'+numLabel+'</text>');
-        parts.push('<line x1="'+psNum(tileW/2-26)+'" y1="'+psNum(labelY+34)+'" x2="'+psNum(tileW/2+26)+'" y2="'+psNum(labelY+34)+'" stroke="#dddddd" stroke-width="1"/>');
+        parts.push('<text id="'+idPrefix+'-number" x="'+psNum(tileW/2)+'" y="'+psNum(labelY+22)+'" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="600" letter-spacing="2" fill="#8a8a8a">'+numLabel+'</text>');
         parts.push('</g>');
       }catch(e){
         console.error('One-SVG '+f.title,e);
       }
-      if((i+1)%10===0||i===LIB.length-1){
-        setStatus('Prism All → One SVG — '+(i+1)+' / '+LIB.length+' flowers composed with 800% header demos');
+      if((i+1)%20===0||i===LIB.length-1){
+        setStatus('Prism All → One SVG — '+(i+1)+' / '+LIB.length+' flowers composed · 16:9 board');
         await new Promise(r=>setTimeout(r,0));
       }
     }
     parts.push('</svg>');
     const blob=new Blob([parts.join('')],{type:'image/svg+xml;charset=utf-8'});
     downloadBlob(blob,'prism-flowers-all-'+LIB.length+'.svg');
-    flash('Prism All → One SVG finished — '+LIB.length+' flowers with an 100% detail header.');
+    flash('Prism All → One SVG finished — exact 16:9 board with 65% header demos.');
   }catch(e){
     setStatus('Prism One-SVG failed: '+(e.message||e),'bad');
   }finally{
