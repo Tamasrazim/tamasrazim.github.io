@@ -517,7 +517,7 @@ function generateEps(scene){
   ];
   if(epsBgEl&&epsBgEl.value!=='none'){
     const bg=cssColor(epsBgEl.value);
-    const bgObj={fill:'#'+[bg.r,b.g,b.b].map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join(''),stroke:null,width:0,opacity:1,m:identityM()};
+    const bgObj={fill:'#'+[bg.r,bg.g,bg.b].map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join(''),stroke:null,width:0,opacity:1,m:identityM()};
     lines.push('%%BeginObject: CODEEPS_BACKGROUND','gsave',emitObjectPath(bgObj,rectCommands(0,0,W,H),H),'grestore','%%EndObject');
   }
   let n=0;
