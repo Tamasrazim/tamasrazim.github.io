@@ -96,13 +96,19 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 
   <div class="section">
     <h3>DOCUMENT</h3>
-    <div class="field"><label>Resolution preset</label><select id="resPreset"><option value="3840x2160" selected>4K — 3840 × 2160</option><option value="7680x4320">8K — 7680 × 4320</option><option value="custom">Custom</option></select></div>
+    <div class="field"><label>EPS target</label><select id="epsProfile"><option value="shutterstock10" selected>Shutterstock — Illustrator 10 RGB</option><option value="shutterstock8">Shutterstock — Illustrator 8 RGB</option><option value="generic">Generic EPSF-3.0</option></select></div>
+    <div class="field" style="margin-top:8px"><label>Resolution preset</label><select id="resPreset"><option value="3840x2160" selected>4K — 3840 × 2160</option><option value="7680x4320">8K — 7680 × 4320</option><option value="custom">Custom</option></select></div>
     <div class="grid2" style="margin-top:8px">
       <div class="field"><label>Width</label><input id="w" type="number" min="1" value="3840"></div>
       <div class="field"><label>Height</label><input id="h" type="number" min="1" value="2160"></div>
     </div>
     <div class="field" style="margin-top:8px"><label>EPS Background</label><select id="epsBg"><option value="#ffffff" selected>White — Illustrator-safe</option><option value="none">None — no background object</option></select></div>
     <div class="hint" style="margin-top:7px">Preview stays transparent. EPS itself does not support standard transparency; white preserves translucent artwork's appearance, and the background is a separate editable object.</div>
+  </div>
+
+  <div class="section">
+    <h3>STOCK EPS SAFETY</h3>
+    <div class="notice">Shutterstock mode enforces RGB-only EPS, Illustrator 8/10 targeting, artwork bounding-box sizing, 4–25 MP bounds, vector text outlines, expanded strokes, and a 100 MB file limit.</div>
   </div>
 
   <div class="section">
@@ -135,7 +141,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 const $=s=>document.querySelector(s);
 const codeEl=$('#code'),linesEl=$('#lines'),statusEl=$('#status'),paper=$('#paper'),modeEl=$('#mode');
 const epsBtn=$('#epsBtn'),svgBtn=$('#svgBtn'),allBtn=$('#allBtn'),metaBtn=$('#metaBtn');
-const wEl=$('#w'),hEl=$('#h'),resPresetEl=$('#resPreset'),frameEl=$('#frame'),frameReadout=$('#frameReadout'),epsBgEl=$('#epsBg');
+const wEl=$('#w'),hEl=$('#h'),epsProfileEl=$('#epsProfile'),resPresetEl=$('#resPreset'),frameEl=$('#frame'),frameReadout=$('#frameReadout'),epsBgEl=$('#epsBg');
 const flowerList=$('#flowerList'),flowerSearch=$('#flowerSearch'),flowerInfo=$('#flowerInfo');
 const fileInput=$('#fileInput'),objectCount=$('#objectCount'),toast=$('#toast');
 const DEFAULT_CODE=`v.background("#ffffff");
@@ -441,10 +447,116 @@ function gradientLocalMatrix(g,box,t){
   const cy=g.kind==='radial'&&g.args.length>=6?num(g.args[4],box.cy):box.cy;
   return [s,0,0,s,cx*(1-s),cy*(1-s)];
 }
+
+function epsProfileConfig(){
+  const p=epsProfileEl?epsProfileEl.value:'shutterstock10';
+  if(p==='shutterstock8')return{stock:true,version:'8',language:2};
+  if(p==='shutterstock10')return{stock:true,version:'10',language:2};
+  return{stock:false,version:'generic',language:3};
+}
+function flattenCommands(cmds,curveSteps=8){
+  const paths=[],points=[];
+  let current=null,last=null;
+  const pushPath=()=>{if(current&&current.length>1)paths.push(current);current=null};
+  for(const c of cmds||[]){
+    if(c[0]==='M'){
+      pushPath();current=[[num(c[1]),num(c[2])]];last=current[0];points.push(last);
+    }else if(c[0]==='L'&&current){
+      last=[num(c[1]),num(c[2])];current.push(last);points.push(last);
+    }else if(c[0]==='C'&&current){
+      const p0=last,p1=[num(c[1]),num(c[2])],p2=[num(c[3]),num(c[4])],p3=[num(c[5]),num(c[6])];
+      for(let i=1;i<=curveSteps;i++){
+        const t=i/curveSteps,u=1-t;
+        const p=[u*u*u*p0[0]+3*u*u*t*p1[0]+3*u*t*t*p2[0]+t*t*t*p3[0],u*u*u*p0[1]+3*u*u*t*p1[1]+3*u*t*t*p2[1]+t*t*t*p3[1]];
+        current.push(p);points.push(p);
+      }
+      last=p3;
+    }else if(c[0]==='Z'){
+      if(current&&current.length>2)current.closed=true;
+      pushPath();
+    }
+  }
+  pushPath();
+  return paths;
+}
+function strokeToFillPolygons(cmds,width){
+  const hw=Math.max(.01,num(width,1))/2;
+  const polys=[];
+  for(const pts0 of flattenCommands(cmds,8)){
+    const pts=pts0.slice();
+    if(pts.length<2)continue;
+    const closed=!!pts0.closed;
+    const end=closed?pts.length:pts.length-1;
+    for(let i=0;i<end-1;i++){
+      const a=pts[i],b=pts[i+1],dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy)||1;
+      const nx=-dy/len*hw,ny=dx/len*hw;
+      polys.push([['M',a[0]+nx,a[1]+ny],['L',b[0]+nx,b[1]+ny],['L',b[0]-nx,b[1]-ny],['L',a[0]-nx,a[1]-ny],['Z']]);
+    }
+    const capPts=closed?pts:pts.concat([pts[pts.length-1]]);
+    for(let i=0;i<capPts.length;i++){
+      const p=capPts[i],segments=8,poly=[['M',p[0]+hw,p[1]]];
+      for(let k=1;k<=segments;k++){
+        const a=k*Math.PI*2/segments;
+        poly.push(['L',p[0]+Math.cos(a)*hw,p[1]+Math.sin(a)*hw]);
+      }
+      poly.push(['Z']);polys.push(poly);
+    }
+  }
+  return polys;
+}
+function sceneBounds(scene,includeBackground){
+  const b={minX:Infinity,minY:Infinity,maxX:-Infinity,maxY:-Infinity};
+  const add=(x,y)=>{if(Number.isFinite(x)&&Number.isFinite(y)){b.minX=Math.min(b.minX,x);b.minY=Math.min(b.minY,y);b.maxX=Math.max(b.maxX,x);b.maxY=Math.max(b.maxY,y)}};
+  const addObj=(o,parentM=identityM())=>{
+    if(!o||o.t==='save'||o.t==='restore')return;
+    const m=mulM(parentM,o.m||identityM());
+    if(o.t==='group'){for(const ch of o.children||[])addObj(ch,m);return}
+    let cmds=null;
+    if(o.t==='rect')cmds=rectCommands(o.x,o.y,o.w,o.h,o.r||0);
+    else if(o.t==='circle')cmds=ellipseCommands(o.x,o.y,o.r,o.r,0);
+    else if(o.t==='ellipse')cmds=ellipseCommands(o.x,o.y,o.rx,o.ry,0);
+    else if(o.t==='line')cmds=[['M',o.x1,o.y1],['L',o.x2,o.y2]];
+    else if(o.t==='path')cmds=o.commands||[];
+    else if(o.t==='text')cmds=textCommands(o.text,o.x,o.y,o.size,o.anchor);
+    if(!cmds)return;
+    const tc=transformedCommands(cmds,m);
+    const cb=commandBounds(tc);
+    let pad=0;
+    if(o.stroke)pad=Math.max(pad,num(o.width,1)*strokeScale(m)/2);
+    add(cb.minX-pad,cb.minY-pad);add(cb.maxX+pad,cb.maxY+pad);
+  };
+  for(const o of scene.ops)addObj(o);
+  if(includeBackground&&epsBgEl&&epsBgEl.value!=='none'){
+    add(0,0);add(num(scene.W,0),num(scene.H,0));
+  }
+  if(!Number.isFinite(b.minX))return{x:0,y:0,w:0,h:0,maxX:0,maxY:0};
+  return{x:b.minX,y:b.minY,w:Math.max(0,b.maxX-b.minX),h:Math.max(0,b.maxY-b.minY),maxX:b.maxX,maxY:b.maxY};
+}
+function validateSceneForStock(scene,bounds,cfg){
+  if(!cfg.stock)return;
+  const tol=.5;
+  if(bounds.minX < -tol || bounds.minY < -tol || bounds.maxX > scene.W+tol || bounds.maxY > scene.H+tol){
+    throw new Error('Artwork extends outside the canvas bounds');
+  }
+  const mp=(Math.ceil(bounds.w)*Math.ceil(bounds.h))/1000000;
+  if(mp<4)throw new Error('Artwork bounding box is '+mp.toFixed(3)+' MP; Shutterstock requires at least 4 MP');
+  if(mp>25)throw new Error('Artwork bounding box is '+mp.toFixed(3)+' MP; Shutterstock allows at most 25 MP');
+}
+function expandStrokeForEps(o,commands,H){
+  if(!o.stroke)return '';
+  const m=epsM(o.m||identityM(),H),tc=transformedCommands(commands,m);
+  const width=Math.max(.01,num(o.width,1)*strokeScale(m));
+  const polygons=strokeToFillPolygons(tc,width);
+  let out='';
+  for(const poly of polygons){
+    out+='newpath\n'+pathPs(poly)+'\n'+rgbPs(o.stroke,o.opacity)+'\nfill\n';
+  }
+  return out;
+}
 function emitSolidObjectPath(o,commands,H){
   const m=epsM(o.m||identityM(),H),tc=transformedCommands(commands,m),geom='newpath\n'+pathPs(tc),parts=[];
   if(o.fill)parts.push(geom,rgbPs(o.fill,o.opacity),'fill');
-  if(o.stroke)parts.push(geom,rgbPs(o.stroke,o.opacity),psNum(Math.max(.01,num(o.width,1)*strokeScale(m)))+' setlinewidth','stroke');
+  if(o.stroke)parts.push(expandStrokeForEps(o,commands,H));
   return parts.join('\n')+'\n';
 }
 function emitObjectPath(o,commands,H){
@@ -483,48 +595,69 @@ function emitOp(o,i,H,parentM=identityM()){
   s+='grestore\n%%EndObject\n';
   return s;
 }
-function validateEps(eps,W,H){
+function validateEps(eps,expectedW,expectedH,meta={}){
+  const cfg=epsProfileConfig();
   if(typeof eps!=='string'||!eps.startsWith('%!PS-Adobe-3.0 EPSF-3.0\n'))throw new Error('EPS header invalid');
   if(!/%%BoundingBox: 0 0 \d+ \d+\n/.test(eps))throw new Error('EPS BoundingBox invalid');
   if(!/%%HiResBoundingBox: 0 0 [0-9.]+ [0-9.]+\n/.test(eps))throw new Error('EPS HiResBoundingBox invalid');
-  if(!eps.includes('%%LanguageLevel: 3'))throw new Error('EPS LanguageLevel missing');
+  if(!eps.includes('%%DocumentProcessColors: RGB'))throw new Error('EPS must declare RGB process colors');
+  if(cfg.stock&&!eps.includes('%%AI8_CreatorVersion: '+cfg.version+'.0'))throw new Error('Illustrator '+cfg.version+' compatibility marker missing');
   if(!eps.includes('%%EndComments'))throw new Error('EPS comments not terminated');
   if(!eps.endsWith('%%EOF\n'))throw new Error('EPS EOF marker missing');
   if(/NaN|Infinity/.test(eps))throw new Error('EPS contains invalid number');
   if(/[^\x09\x0A\x0D\x20-\x7E]/.test(eps))throw new Error('EPS contains non-ASCII bytes');
+  if(eps.length>100*1024*1024)throw new Error('EPS exceeds Shutterstock 100 MB limit');
   const gs=(eps.match(/\bgsave\b/g)||[]).length,gr=(eps.match(/\bgrestore\b/g)||[]).length;
   if(gs!==gr)throw new Error('EPS gsave/grestore mismatch');
-  const forbidden=/\b(?:arc|arcn|arct|rlineto|rcurveto|concat|findfont|scalefont|stringwidth|show|clip|image|colorimage|setcmykcolor)\b/;
-  if(forbidden.test(eps))throw new Error('EPS contains unsupported PostScript operator');
-  if(W!=null&&H!=null){
-    const m=eps.match(/%%BoundingBox: 0 0 (\d+) (\d+)/);
-    if(!m||Number(m[1])!==Math.round(W)||Number(m[2])!==Math.round(H))throw new Error('EPS BoundingBox mismatch');
+  const forbidden=/\b(?:arc|arcn|arct|rlineto|rcurveto|concat|findfont|scalefont|stringwidth|show|clip|image|colorimage|setcmykcolor|setgray|sethsbcolor)\b/;
+  if(forbidden.test(eps))throw new Error('EPS contains unsupported or non-RGB PostScript operator');
+  if(/\b(?:setlinewidth|setlinecap|setlinejoin)\b/.test(eps))throw new Error('EPS contains unexpanded stroke operators');
+  const m=eps.match(/%%BoundingBox: 0 0 (\d+) (\d+)/);
+  if(!m)throw new Error('EPS BoundingBox missing');
+  if(expectedW!=null&&expectedH!=null&&meta.artboardCheck){
+    if(Number(m[1])!==Math.round(expectedW)||Number(m[2])!==Math.round(expectedH))throw new Error('EPS artboard BoundingBox mismatch');
+  }
+  if(meta.stockBounds){
+    const mp=(Number(m[1])*Number(m[2]))/1000000;
+    if(mp<4||mp>25)throw new Error('EPS BoundingBox is '+mp.toFixed(3)+' MP, outside Shutterstock 4–25 MP range');
   }
   return true;
 }
-function generateEps(scene){
-  const W=Math.max(1,Math.round(num(scene.W,1))),H=Math.max(1,Math.round(num(scene.H,1)));
+function generateEps(scene,options={}){
+  const cfg=epsProfileConfig();
+  const strictStock=options.strictStock==null?cfg.stock:!!options.strictStock;
+  const includeBackground=!strictStock&&epsBgEl&&epsBgEl.value!=='none';
+  const bounds=sceneBounds(scene,includeBackground);
+  if(bounds.w<=0||bounds.h<=0)throw new Error('Artwork has no vector bounds');
+  if(strictStock)validateSceneForStock(scene,bounds,{stock:true});
+  const W=Math.max(1,Math.ceil(bounds.w)),H=Math.max(1,Math.ceil(bounds.h));
+  const shift=[1,0,0,1,-bounds.x,-bounds.y];
   const lines=[
     '%!PS-Adobe-3.0 EPSF-3.0',
     '%%Creator: Tamasrazim CODE-EPS',
     '%%Title: Editable Vector Artwork',
+    strictStock?'%%AI8_CreatorVersion: '+cfg.version+'.0':'%%AI8_CreatorVersion: generic',
+    '%%DocumentProcessColors: RGB',
     '%%BoundingBox: 0 0 '+W+' '+H,
-    '%%HiResBoundingBox: 0 0 '+W.toFixed(3)+' '+H.toFixed(3),
+    '%%HiResBoundingBox: 0 0 '+bounds.w.toFixed(3)+' '+bounds.h.toFixed(3),
     '%%DocumentData: Clean7Bit',
-    '%%LanguageLevel: 3',
+    '%%LanguageLevel: '+cfg.language,
     '%%Pages: 1',
     '%%EndComments'
   ];
-  if(epsBgEl&&epsBgEl.value!=='none'){
+  if(includeBackground){
     const bg=cssColor(epsBgEl.value);
-    const bgObj={fill:'#'+[bg.r,bg.g,bg.b].map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join(''),stroke:null,width:0,opacity:1,m:identityM()};
-    lines.push('%%BeginObject: CODEEPS_BACKGROUND','gsave',emitObjectPath(bgObj,rectCommands(0,0,W,H),H),'grestore','%%EndObject');
+    const bgObj={fill:'#'+[bg.r,bg.g,bg.b].map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join(''),stroke:null,width:0,opacity:1,m:shift};
+    lines.push('%%BeginObject: CODEEPS_BACKGROUND','gsave',emitObjectPath(bgObj,rectCommands(0,0,scene.W,scene.H),H),'grestore','%%EndObject');
   }
   let n=0;
-  for(const o of scene.ops){if(!o||o.t==='save'||o.t==='restore')continue;n++;lines.push(emitOp(o,n,H));}
+  for(const o of scene.ops){
+    if(!o||o.t==='save'||o.t==='restore')continue;
+    n++;lines.push(emitOp(o,n,H,shift));
+  }
   lines.push('showpage','%%EOF','');
   const eps=lines.join('\n');
-  validateEps(eps,W,H);
+  validateEps(eps,W,H,{stockBounds:strictStock,artboardCheck:false});
   return eps;
 }
 function uniqueBatchName(base,ext,used){
@@ -560,9 +693,11 @@ function runEpsSelfTests(){
   const gs=new Scene(160,90),gc=new RecorderCtx(gs,160,90),grad=gc.createLinearGradient(0,0,160,0);
   grad.addColorStop(0,'#ff00aa');grad.addColorStop(0.5,'rgba(0,255,255,.7)');grad.addColorStop(1,'#ffffff');
   gc.fillStyle=grad;gc.fillRect(0,0,160,90);
-  const eps=generateEps(s);
-  const geps=generateEps(gs);
-  validateEps(eps,320,180);validateEps(geps,160,90);
+  const oldProfile=epsProfileEl.value;epsProfileEl.value='generic';
+  const eps=generateEps(s,{strictStock:false});
+  const geps=generateEps(gs,{strictStock:false});
+  validateEps(eps,null,null);validateEps(geps,null,null);
+  epsProfileEl.value=oldProfile;
   if(/\b(?:rlineto|arc|findfont|show|concat)\b/.test(eps))throw new Error('EPS self-test found forbidden operator');
   return {ok:true,bytes:eps.length};
 }
@@ -701,8 +836,8 @@ async function exportAll(){
         try{
           const scene=buildFlowerScene(LIB[i]);
           const name=adobeFilename(LIB[i],i);
-          const eps=generateEps(scene);
-          validateEps(eps,scene.W,scene.H);
+          const eps=generateEps(scene,{strictStock:true});
+          validateEps(eps,null,null);
           const h=await getUniqueFileHandle(batchDir,name.replace(/\.eps$/i,''),'eps',usedNames);
           const finalName=h.name;
           const w=await h.createWritable();
@@ -783,7 +918,7 @@ async function exportMetadata(){
 }
 function onInput(){syncLines();modeEl.textContent='CUSTOM';currentFlower=-1}
 $('#runBtn').onclick=runCurrent;
-epsBtn.onclick=()=>{if(!lastScene)return;try{const eps=generateEps(lastScene);validateEps(eps,lastScene.W,lastScene.H);downloadBlob(new Blob([eps],{type:'application/postscript'}),currentFlower>=0?adobeFilename(LIB[currentFlower],currentFlower):'code-to-eps.eps')}catch(e){setStatus('EPS validation failed: '+(e.message||e),'bad')}}
+epsBtn.onclick=()=>{if(!lastScene)return;try{const eps=generateEps(lastScene);validateEps(eps,null,null);downloadBlob(new Blob([eps],{type:'application/postscript'}),currentFlower>=0?adobeFilename(LIB[currentFlower],currentFlower):'code-to-eps.eps')}catch(e){setStatus('EPS validation failed: '+(e.message||e),'bad')}}
 svgBtn.onclick=()=>{if(!lastScene)return;downloadBlob(new Blob([sceneToSvg(lastScene)],{type:'image/svg+xml;charset=utf-8'}),currentFlower>=0?safeName(LIB[currentFlower].title)+'.svg':'code-to-eps.svg')}
 allBtn.onclick=async()=>{try{await exportAll()}catch(e){allBtn.disabled=false;setStatus('Export All failed: '+(e.message||e),'bad')}}
 $('#allSvgBtn').onclick=async()=>{try{await exportAllSvg()}catch(e){$('#allSvgBtn').disabled=false;setStatus('Export All SVG failed: '+(e.message||e),'bad')}}
@@ -799,6 +934,7 @@ $('#saveJsBtn').onclick=()=>downloadBlob(new Blob([codeEl.value],{type:'text/jav
 $('#openBtn').onclick=()=>fileInput.click();
 fileInput.onchange=async e=>{const f=e.target.files[0];if(!f)return;currentFlower=-1;codeEl.value=await f.text();syncLines();runCurrent();fileInput.value=''};
 resPresetEl.onchange=()=>{const v=resPresetEl.value;if(v==='3840x2160'||v==='7680x4320'){const [w,h]=v.split('x').map(Number);wEl.value=w;hEl.value=h;}runCurrent()};
+epsProfileEl.onchange=()=>{if(epsProfileEl.value!=='generic'&&epsBgEl.value!=='none'){epsBgEl.value='none';}runCurrent()};
 [wEl,hEl].forEach(x=>{x.oninput=()=>{resPresetEl.value='custom'};x.onchange=runCurrent});
 epsBgEl.onchange=()=>{if(currentFlower>=0)runCurrent();else runCurrent()};
 codeEl.addEventListener('input',onInput);
@@ -813,7 +949,9 @@ window.CODE_EPS_V2=Object.freeze({
   generateEps,
   validateEps,
   sceneToSvg,
-  runEpsSelfTests
+  runEpsSelfTests,
+  sceneBounds,
+  validateSceneForStock
 });
 async function boot(){
   try{
