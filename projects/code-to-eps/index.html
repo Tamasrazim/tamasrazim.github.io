@@ -1082,13 +1082,15 @@ async function exportAllPrismOneSvg(){
   const btn=$('#allPrismOneSvgBtn');
   btn.disabled=true;
   try{
-    const cols=31, tileW=480, tileH=270, rows=Math.ceil(LIB.length/cols);
+    // Reserve a dedicated caption strip under every flower so the exported
+    // one-SVG sheet is human-readable as well as fully editable.
+    const cols=31, tileW=480, tileH=300, artH=254, labelY=282, rows=Math.ceil(LIB.length/cols);
     const W=cols*tileW,H=rows*tileH;
     const parts=[];
     parts.push('<?xml version="1.0" encoding="UTF-8"?>');
     parts.push('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">');
     parts.push('<title>Prism Flowers — '+LIB.length+' Editable Vector Flowers</title>');
-    parts.push('<desc>All Prism Flower assets arranged as independent editable vector groups in one SVG document.</desc>');
+    parts.push('<desc>All Prism Flower assets arranged as independent editable vector groups in one SVG document, with each flower name shown beneath its artwork.</desc>');
     for(let i=0;i<LIB.length;i++){
       const f=LIB[i];
       try{
@@ -1096,23 +1098,27 @@ async function exportAllPrismOneSvg(){
         const raw=sceneToSvg(scene);
         const body=uniqueSvgIds(innerSvg(raw),'prism'+String(i+1).padStart(4,'0'));
         const x=(i%cols)*tileW,y=Math.floor(i/cols)*tileH;
-        const sx=tileW/scene.W,sy=tileH/scene.H;
-        parts.push('<g id="prism-'+String(i+1).padStart(4,'0')+'" transform="translate('+x+' '+y+') scale('+psNum(sx)+' '+psNum(sy)+')">');
-        parts.push('<title>'+esc(f.title||('Prism Flower '+(i+1)))+'</title>');
+        const sx=tileW/scene.W,sy=artH/scene.H;
+        const name=esc(f.title||('Prism Flower '+(i+1)));
+        parts.push('<g id="prism-'+String(i+1).padStart(4,'0')+'" transform="translate('+x+' '+y+')">');
+        parts.push('<title>'+name+'</title>');
+        parts.push('<g id="prism-'+String(i+1).padStart(4,'0')+'-artwork" transform="scale('+psNum(sx)+' '+psNum(sy)+')">');
         parts.push(body);
+        parts.push('</g>');
+        parts.push('<text id="prism-'+String(i+1).padStart(4,'0')+'-name" x="'+psNum(tileW/2)+'" y="'+psNum(labelY)+'" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="600" fill="#111111" textLength="'+psNum(tileW-28)+'" lengthAdjust="spacingAndGlyphs">'+name+'</text>');
         parts.push('</g>');
       }catch(e){
         console.error('One-SVG '+f.title,e);
       }
       if((i+1)%20===0||i===LIB.length-1){
-        setStatus('Prism All → One SVG — '+(i+1)+' / '+LIB.length+' flowers composed');
+        setStatus('Prism All → One SVG — '+(i+1)+' / '+LIB.length+' flowers composed with names');
         await new Promise(r=>setTimeout(r,0));
       }
     }
     parts.push('</svg>');
     const blob=new Blob([parts.join('')],{type:'image/svg+xml;charset=utf-8'});
     downloadBlob(blob,'prism-flowers-all-'+LIB.length+'.svg');
-    flash('Prism All → One SVG finished — '+LIB.length+' independent vector flower groups in one SVG.');
+    flash('Prism All → One SVG finished — '+LIB.length+' flowers with editable names underneath.');
   }catch(e){
     setStatus('Prism One-SVG failed: '+(e.message||e),'bad');
   }finally{
