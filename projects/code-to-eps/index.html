@@ -1114,9 +1114,9 @@ async function exportAllPrismOneSvg(){
     const artTop=12;
     const labelY=tileH-29;
     const outerPad=220;
-    const sheetTitle='PRISM FLOWERS';
-    const sheetSubtitle='Editable Vector Flower Collection';
-    const sheetMeta=FLOWERS.length+' PRISM FLOWERS  ·  '+LIB.length+' LIBRARY ASSETS  ·  2026';
+    const sheetTitle='A collection of prism flowers';
+    const sheetSubtitle='colour, light and botanical form — drawn as editable vectors';
+    const sheetMeta=FLOWERS.length+' flowers in this sheet';
     const parts=[];
     parts.push('<?xml version="1.0" encoding="UTF-8"?>');
     parts.push('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">');
@@ -1124,14 +1124,14 @@ async function exportAllPrismOneSvg(){
     parts.push('<desc>Exact 16:9 presentation sheet containing '+FLOWERS.length+' Prism Flower vector assets. Each artwork is scaled from its actual vector bounds so the flowers remain large and readable.</desc>');
     parts.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#ffffff"/>');
     parts.push('<rect x="0" y="0" width="'+W+'" height="'+headerH+'" fill="#0b0b0b"/>');
-    parts.push('<text x="'+outerPad+'" y="180" font-family="Arial, Helvetica, sans-serif" font-size="180" font-weight="800" letter-spacing="18" fill="#ffffff">'+sheetTitle+'</text>');
-    parts.push('<text x="'+outerPad+'" y="330" font-family="Arial, Helvetica, sans-serif" font-size="76" font-weight="400" letter-spacing="5" fill="#d7d7d7">'+sheetSubtitle+'</text>');
-    parts.push('<text x="'+outerPad+'" y="455" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="600" letter-spacing="7" fill="#909090">'+sheetMeta+'</text>');
-    parts.push('<line x1="'+outerPad+'" y1="515" x2="'+(W-outerPad)+'" y2="515" stroke="#2e2e2e" stroke-width="3"/>');
-    parts.push('<text x="'+outerPad+'" y="620" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="700" letter-spacing="8" fill="#ffffff">DETAIL PREVIEW</text>');
-    parts.push('<text x="'+outerPad+'" y="700" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="400" letter-spacing="3" fill="#8f8f8f">Scabiosa · Nigela · Snapdragon</text>');
-    parts.push('<text x="'+(W-outerPad)+'" y="150" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="700" letter-spacing="8" fill="#ffffff">VECTOR FLOWER COLLECTION</text>');
-    parts.push('<text x="'+(W-outerPad)+'" y="235" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="400" letter-spacing="4" fill="#8f8f8f">BOTANICAL VECTOR SERIES</text>');
+    parts.push('<text x="'+outerPad+'" y="176" font-family="Georgia, Times New Roman, serif" font-size="150" font-weight="600" letter-spacing="1" fill="#ffffff">'+sheetTitle+'</text>');
+    parts.push('<text x="'+outerPad+'" y="315" font-family="Georgia, Times New Roman, serif" font-size="52" font-weight="400" fill="#d7d7d7">'+sheetSubtitle+'</text>');
+    parts.push('<text x="'+outerPad+'" y="420" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="500" letter-spacing="2" fill="#9a9a9a">'+sheetMeta+'</text>');
+    parts.push('<line x1="'+outerPad+'" y1="475" x2="'+(W-outerPad)+'" y2="475" stroke="#333333" stroke-width="2"/>');
+    parts.push('<text x="'+outerPad+'" y="575" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" letter-spacing="4" fill="#ffffff">Three flowers, up close</text>');
+    parts.push('<text x="'+outerPad+'" y="638" font-family="Georgia, Times New Roman, serif" font-size="34" font-style="italic" font-weight="400" fill="#a4a4a4">Scabiosa · Nigela · Snapdragon</text>');
+    parts.push('<text x="'+(W-outerPad)+'" y="155" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="600" letter-spacing="4" fill="#ffffff">botanical vector studies</text>');
+    parts.push('<text x="'+(W-outerPad)+'" y="215" text-anchor="end" font-family="Georgia, Times New Roman, serif" font-size="28" font-style="italic" font-weight="400" fill="#8f8f8f">a small visual catalogue</text>');
 
     const demoKeys=['scabiosa','nigela','snapdragon'];
     const demoAliases={nigela:['nigela','nigella']};
