@@ -1,0 +1,27 @@
+name: CODE-EPS Check
+
+on:
+  push:
+    paths:
+      - 'projects/code-to-eps/**'
+      - 'tools/validate_site.mjs'
+      - '.github/workflows/code-to-eps-check.yml'
+  pull_request:
+    paths:
+      - 'projects/code-to-eps/**'
+      - 'tools/validate_site.mjs'
+      - '.github/workflows/code-to-eps-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate CODE-EPS site and 10K icon catalog
+        run: node tools/validate_site.mjs
