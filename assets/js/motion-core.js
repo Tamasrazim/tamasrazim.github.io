@@ -1,24 +1,44 @@
 (function(){
 'use strict';
+    /* Site animation governor: keep continuous JS motion at a maximum of 60 updates/sec.
+       The renderer/export engine is independent and may still render at 120 FPS. */
+    var __raf60Last = new WeakMap();
+    var __raf60Interval = 1000 / 60;
+    function requestAnimationFrame60(callback){
+      function schedule(){
+        window.requestAnimationFrame(function(now){
+          var last = __raf60Last.get(callback);
+          if(last === undefined || now - last >= (__raf60Interval - 0.25)){
+            __raf60Last.set(callback, now);
+            callback(now);
+          }else{
+            window.setTimeout(schedule, Math.max(0, __raf60Interval - (now - last)));
+          }
+        });
+      }
+      schedule();
+    }
+
+    var __raf30Last = new WeakMap();
+    var __raf30Interval = 1000 / 30;
+    function requestAnimationFrame60(callback){
+      function schedule30(){
+        window.requestAnimationFrame(function(now){
+          var last = __raf30Last.get(callback);
+          if(last === undefined || now - last >= (__raf30Interval - 0.5)){
+            __raf30Last.set(callback, now);
+            callback(now);
+          }else{
+            window.setTimeout(schedule30, Math.max(0, __raf30Interval - (now - last)));
+          }
+        });
+      }
+      schedule30();
+    }
+
+
 if(window.__tamasrazimMotionCore)return;
 window.__tamasrazimMotionCore=true;
-
-/* Main-site motion governor: continuous effects update at a hard 60 FPS cap. */
-var __motion60Last=0;
-function requestAnimationFrame60(callback){
-  window.requestAnimationFrame(function(now){
-    var wait=__motion60Last ? (1000/60)-(now-__motion60Last) : 0;
-    if(wait<=0){
-      __motion60Last=now;
-      callback(now);
-    }else{
-      window.setTimeout(function(){
-        __motion60Last=performance.now();
-        callback(__motion60Last);
-      },wait);
-    }
-  });
-}
 
 var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 var fine=window.matchMedia&&window.matchMedia('(pointer: fine)').matches;
@@ -356,7 +376,7 @@ raf=requestAnimationFrame60(frame);
     '.scene-bridge:before,.scene-bridge:after{content:"";position:absolute;left:50%;top:50%;border:1px solid rgba(243,243,239,.09);border-radius:50%;transform:translate(-50%,-50%) scale(calc(1 + var(--scene-progress)*.85 + var(--scene-energy)*.2))}' +
     '.scene-bridge:before{width:34vw;height:34vw}.scene-bridge:after{width:64vw;height:64vw;opacity:.42}' +
     '.scene-mark{position:absolute;width:1px;height:42vh;left:calc(50% + var(--scene-cx)*18vw);top:29%;background:linear-gradient(transparent,rgba(243,243,239,.22),transparent);transform:rotate(calc(var(--scene-tilt)*2.2deg + var(--scene-progress)*22deg));transform-origin:50% 50%}' +
-    '.scene-reactive{--sr-x:0px;--sr-y:0px;--sr-r:0deg;--axis-roll:0deg;position:relative;transform-style:preserve-3d;transform:translate3d(var(--sr-x),var(--sr-y),0) rotateY(calc(var(--axis-roll)*.82)) rotate(var(--sr-r));will-change:transform}' +
+    '.scene-reactive{--sr-x:0px;--sr-y:0px;--sr-r:0deg;position:relative;transform:translate3d(var(--sr-x),var(--sr-y),0) rotate(var(--sr-r));will-change:transform}' +
     '@media(pointer:coarse){body:before,.scene-bridge{display:none}.scene-reactive{transform:none!important}}';
   document.head.appendChild(style);
   var bridge=document.createElement('div');bridge.className='scene-bridge';bridge.setAttribute('aria-hidden','true');
