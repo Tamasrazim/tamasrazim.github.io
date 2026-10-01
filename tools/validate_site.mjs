@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import os from 'node:os';
+
 
 const ROOT=process.cwd();
 const must=(ok,msg)=>{if(!ok)throw new Error(msg);console.log('PASS',msg)};
@@ -30,6 +32,22 @@ function checkScript(file){
   execFileSync(process.execPath,['--check',path.join(ROOT,file)],{stdio:'inherit'});
   console.log('PASS',file+' JavaScript parses');
 }
+function checkInlineScripts(file){
+  const html=read(file);
+  const matches=[...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)];
+  must(matches.length>0,file+' contains an inline script');
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'code-eps-'));
+  try{
+    matches.forEach((m,i)=>{
+      const temp=path.join(dir,'inline-'+i+'.mjs');
+      fs.writeFileSync(temp,m[1],'utf8');
+      execFileSync(process.execPath,['--check',temp],{stdio:'inherit'});
+    });
+    console.log('PASS',file+' inline JavaScript parses');
+  }finally{
+    fs.rmSync(dir,{recursive:true,force:true});
+  }
+}
 
 const htmlFiles=[
   'index.html',
@@ -39,10 +57,24 @@ const htmlFiles=[
   'projects/code-motion/renderer/index.html',
   'projects/bncagrocare/index.html',
   'projects/bncagrocare/invoice/index.html',
-  'projects/repo-token-meter/index.html'
+  'projects/repo-token-meter/index.html',
+  'projects/code-to-eps/index.html'
 ];
 for(const file of htmlFiles) must(exists(file),file+' exists');
 for(const file of htmlFiles) checkLocalRefs(file);
+
+checkInlineScripts('projects/code-to-eps/index.html');
+
+const codeEps=read('projects/code-to-eps/index.html');
+must(codeEps.includes('id="allSvgBtn"'),'CODE-EPS exposes Export All SVG');
+must(codeEps.includes('async function exportAllSvg()'),'CODE-EPS has the SVG batch exporter');
+must(codeEps.includes('const batchSize=50;'),'CODE-EPS batches exports in groups of 50');
+must(codeEps.includes('function validateEps('),'CODE-EPS validates EPS before writing');
+const epsFnStart=codeEps.indexOf('function generateEps(scene){');
+const epsFnEnd=codeEps.indexOf('function uniqueBatchName(',epsFnStart);
+const epsFn=epsFnStart>=0&&epsFnEnd>epsFnStart?codeEps.slice(epsFnStart,epsFnEnd):'';
+for(const banned of ['arc','rlineto','findfont','concat']) must(!new RegExp('\\\\b'+banned+'\\\\b').test(epsFn),'CODE-EPS serializer has no '+banned+' operator');
+must(codeEps.includes('function runEpsSelfTests()'),'CODE-EPS includes EPS self-tests');
 
 for(const file of [
   'assets/js/boot.js',
