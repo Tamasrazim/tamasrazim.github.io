@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import os from 'node:os';
+import vm from 'node:vm';
 
 
 const ROOT=process.cwd();
@@ -153,5 +154,45 @@ for(const ref of [
 
 must(!site.includes('href="renderer/"'),'homepage has no retired renderer link');
 must(!hub.includes('href="../renderer/"'),'project hub has no retired renderer link');
+
+const iconLibrarySource=read('projects/code-to-eps/vector-icon-library.js');
+execFileSync(process.execPath,['--check',path.join(ROOT,'projects/code-to-eps/vector-icon-library.js')]);
+const iconCtx={window:{}};
+vm.runInNewContext(iconLibrarySource,iconCtx,{filename:'vector-icon-library.js'});
+const iconLib=iconCtx.window.TAMAS_ICON_LIBRARY;
+must(iconLib && iconLib.total===10000,'CODE-EPS icon library contains exactly 10,000 assets');
+must(iconLib.families.length===100,'CODE-EPS icon library contains 100 families');
+must(iconLib.domains.length===20,'CODE-EPS icon library contains 20 subject domains');
+must(iconLib.perFamily===100,'CODE-EPS icon library has 100 variants per family');
+must(iconLib.items.length===10000,'CODE-EPS icon item array contains 10,000 records');
+const iconIds=new Set(),iconFiles=new Set();
+for(const item of iconLib.items){
+  must(!iconIds.has(item.id),'CODE-EPS icon IDs are unique: '+item.id); iconIds.add(item.id);
+  must(item.title.length<=70,'CODE-EPS icon title <=70 chars: '+item.id);
+  must(item.description.length>=150&&item.description.length<=200,'CODE-EPS icon description 150–200 chars: '+item.id);
+  must(item.keywords.length>=45&&item.keywords.length<=50,'CODE-EPS icon keyword count 45–50: '+item.id);
+  must(item.filename.eps.endsWith('.eps')&&item.filename.svg.endsWith('.svg'),'CODE-EPS icon filenames have EPS/SVG extensions: '+item.id);
+  must(!iconFiles.has(item.filename.eps),'CODE-EPS EPS filenames are unique: '+item.filename.eps); iconFiles.add(item.filename.eps);
+}
+const fakePath=()=>({moveTo(){},lineTo(){},bezierCurveTo(){},closePath(){}});
+const fakeVec=new Proxy({},{
+  get(target,key){
+    if(key==='path') return fn=>{fn(fakePath());return fakeVec};
+    return (...args)=>fakeVec;
+  }
+});
+const sampleSet=[0,1,9,10,99,100,999,1000,4999,5000,9999];
+iconCtx.TAMAS_ICON_LIBRARY=iconLib;
+for(const idx of sampleSet){
+  const item=iconLib.items[idx];
+  const fn=new Function('v','W','H',iconLib.codeFor(item)+'\nreturn renderFrame;');
+  const renderFrame=fn(fakeVec,4000,4000);
+  renderFrame(0,0,60,fakeVec,4000,4000);
+}
+must(read('projects/code-to-eps/index.html').includes('./vector-icon-library.js'),'CODE-EPS loads canonical 10K icon library');
+must(read('projects/code-to-eps/index.html').includes('id="iconFamily"'),'CODE-EPS exposes stock icon family selector');
+must(read('projects/code-to-eps/index.html').includes('id="allIconEpsBtn"'),'CODE-EPS exposes 10K icon EPS batch export');
+must(read('projects/code-to-eps/index.html').includes('id="allIconSvgBtn"'),'CODE-EPS exposes 10K icon SVG batch export');
+must(read('projects/code-to-eps/index.html').includes('const batchSize=50'),'CODE-EPS icon batch exporter uses groups of 50');
 
 console.log('Global site validation complete.');
