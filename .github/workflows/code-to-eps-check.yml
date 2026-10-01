@@ -4,12 +4,12 @@ on:
   push:
     paths:
       - 'projects/code-to-eps/**'
-      - 'tools/validate_site.mjs'
+      - 'tools/validate_code_eps.mjs'
       - '.github/workflows/code-to-eps-check.yml'
   pull_request:
     paths:
       - 'projects/code-to-eps/**'
-      - 'tools/validate_site.mjs'
+      - 'tools/validate_code_eps.mjs'
       - '.github/workflows/code-to-eps-check.yml'
 
 permissions:
@@ -23,5 +23,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate CODE-EPS site and 10K icon catalog
-        run: node tools/validate_site.mjs
+      - name: Validate CODE-EPS 10K stock icon catalog
+        run: node tools/validate_code_eps.mjs
