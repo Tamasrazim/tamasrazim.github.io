@@ -1117,42 +1117,6 @@ async function exportAllPrismOneSvg(){
     parts.push('<desc>Transparent 16:9 presentation sheet of 937 Prism-style flower vector icons with three flower examples in the header.</desc>');
     parts.push('<text x="'+outerPad+'" y="250" font-family="Georgia, Times New Roman, serif" font-size="150" font-weight="600" fill="#111111">937 flower icon</text>');
 
-    const demoKeys=['scabiosa','nigela','snapdragon'];
-    const demoAliases={nigela:['nigela','nigella']};
-    const demoCount=3, demoW=250, demoH=300, demoGap=28;
-    const demoStartX=W-outerPad-(demoCount*demoW+(demoCount-1)*demoGap);
-    const demoY=90;
-    for(let d=0;d<demoCount;d++){
-      const target=demoKeys[d];
-      const aliases=demoAliases[target]||[target];
-      const di=FLOWERS.findIndex(f=>{
-        const n=String(f?.flowerName??f?.name??f?.flower??f?.species??f?.kind??f?.type??f?.title??'').toLowerCase().replace(/[^a-z0-9]+/g,' ');
-        return aliases.some(a=>n.includes(a));
-      });
-      if(di<0)continue;
-      const f=FLOWERS[di];
-      try{
-        const scene=buildFlowerScene(f);
-        const raw=sceneToSvg(scene);
-        const idPrefix='header-demo-'+(d+1);
-        const body=uniqueSvgIds(innerSvg(raw),idPrefix);
-        const b=sceneBounds(scene,false);
-        if(!(b.w>0&&b.h>0))continue;
-        const boxX=demoStartX+d*(demoW+demoGap);
-        const boxY=demoY;
-        const scale=Math.min(.65,(demoW-24)/b.w,(demoH-24)/b.h);
-        const tx=boxX+demoW/2-(b.x+b.w/2)*scale;
-        const ty=boxY+demoH/2-(b.y+b.h/2)*scale;
-        const clipId=idPrefix+'-clip';
-        parts.push('<clipPath id="'+clipId+'"><rect x="'+boxX+'" y="'+boxY+'" width="'+demoW+'" height="'+demoH+'" rx="22"/></clipPath>');
-        parts.push('<rect x="'+boxX+'" y="'+boxY+'" width="'+demoW+'" height="'+demoH+'" rx="22" fill="none" stroke="#bdbdbd" stroke-width="2"/>');
-        parts.push('<g id="'+idPrefix+'" clip-path="url(#'+clipId+')">');
-        parts.push('<g id="'+idPrefix+'-artwork" transform="translate('+psNum(tx)+' '+psNum(ty)+') scale('+psNum(scale)+' '+psNum(scale)+')">');
-        parts.push(body);
-        parts.push('</g></g>');
-      }catch(err){console.error('Header demo '+target,err)}
-    }
-
     for(let i=0;i<FLOWERS.length;i++){
       const f=FLOWERS[i];
       try{
