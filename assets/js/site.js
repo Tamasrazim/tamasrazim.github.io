@@ -1,6 +1,31 @@
 
   (function(){
     'use strict';
+    /* Site animation governor: keep continuous JS motion at a maximum of 60 updates/sec.
+       The renderer/export engine is independent and may still render at 120 FPS. */
+    var __raf60Last = new WeakMap();
+    var __raf60Pending = new WeakSet();
+    var __raf60Interval = 1000 / 60;
+    function requestAnimationFrame60(callback){
+      if(__raf60Pending.has(callback)) return true;
+      __raf60Pending.add(callback);
+      function schedule(){
+        window.requestAnimationFrame(function(now){
+          var last = __raf60Last.get(callback);
+          if(last === undefined || now - last >= (__raf60Interval - 0.25)){
+            __raf60Last.set(callback, now);
+            __raf60Pending.delete(callback);
+            callback(now);
+          }else{
+            window.setTimeout(schedule, Math.max(0, __raf60Interval - (now - last)));
+          }
+        });
+      }
+      schedule();
+      return true;
+    }
+
+
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var finePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
     var pageScroller = document.getElementById('axisScroller') || document.scrollingElement || document.documentElement;
@@ -80,7 +105,7 @@
     function queueProgress(){
       if(!progressTick){
         progressTick = true;
-        window.requestAnimationFrame(updateProgress);
+        requestAnimationFrame60(updateProgress);
       }
     }
     window.addEventListener('scroll', queueProgress, {passive:true});
@@ -142,10 +167,10 @@
           else output += i < reveal ? target[i] : scramble[Math.floor(Math.random()*scramble.length)];
         }
         el.textContent = output;
-        if(progress < 1) window.requestAnimationFrame(frame);
+        if(progress < 1) requestAnimationFrame60(frame);
         else el.textContent = target;
       }
-      window.requestAnimationFrame(frame);
+      requestAnimationFrame60(frame);
     }
 
     var alias = q('#aliasText');
@@ -243,7 +268,7 @@
           item.el.style.setProperty('--pd-ry',ry.toFixed(3)+'deg');
         });
 
-        pointerRAF=window.requestAnimationFrame(pointerTick);
+        pointerRAF=requestAnimationFrame60(pointerTick);
       }
 
       window.addEventListener('pointermove',function(e){
@@ -251,7 +276,7 @@
         var y=(e.clientY/window.innerHeight-.5)*2;
         pointerTX=Math.max(-1,Math.min(1,x));
         pointerTY=Math.max(-1,Math.min(1,y));
-        if(!pointerRAF) pointerRAF=window.requestAnimationFrame(pointerTick);
+        if(!pointerRAF) pointerRAF=requestAnimationFrame60(pointerTick);
       },{passive:true});
 
       document.addEventListener('mouseleave',function(){
@@ -344,12 +369,12 @@
       window.addEventListener('pointermove',function(e){
         textPoint.x=e.clientX;
         textPoint.y=e.clientY;
-        if(!zoomRAF) zoomRAF=window.requestAnimationFrame(textZoomTick);
+        if(!zoomRAF) zoomRAF=requestAnimationFrame60(textZoomTick);
       },{passive:true});
 
       window.addEventListener('blur',function(){
         textPoint.x=-9999;textPoint.y=-9999;
-        if(!zoomRAF) zoomRAF=window.requestAnimationFrame(textZoomTick);
+        if(!zoomRAF) zoomRAF=requestAnimationFrame60(textZoomTick);
       });
     }
 
@@ -410,14 +435,14 @@
           photo.style.setProperty('--photo-ry',ry.toFixed(3)+'deg');
 
           if(inside || Math.abs(tx-x)>.05 || Math.abs(ty-y)>.05 || Math.abs(trx-rx)>.05 || Math.abs(try_-ry)>.05){
-            raf=window.requestAnimationFrame(tick);
+            raf=requestAnimationFrame60(tick);
           }else{
             raf=0;
           }
         }
 
         function wake(){
-          if(!raf) raf=window.requestAnimationFrame(tick);
+          if(!raf) raf=requestAnimationFrame60(tick);
         }
 
         card.addEventListener('pointerenter',function(){
@@ -529,9 +554,9 @@
         ctx.fillStyle='rgba(243,243,239,.045)';
         ctx.fillRect(0,beam,w,1);
 
-        window.requestAnimationFrame(frame);
+        requestAnimationFrame60(frame);
       }
-      window.requestAnimationFrame(frame);
+      requestAnimationFrame60(frame);
     })();
 
     /* ---------- Global motion field ---------- */
@@ -595,8 +620,8 @@
 
       var fieldNextFrame=0;
       function stepField(now){
-        if(!running){last=now;window.requestAnimationFrame(stepField);return;}
-        if(now<fieldNextFrame){window.requestAnimationFrame(stepField);return;}
+        if(!running){last=now;requestAnimationFrame60(stepField);return;}
+        if(now<fieldNextFrame){requestAnimationFrame60(stepField);return;}
         fieldNextFrame=now+33.333;
         var dt=Math.min(32,now-last);last=now;
         sectionPulse += dt*.0007;
@@ -699,7 +724,7 @@
           ctx.fill();
         }
 
-        window.requestAnimationFrame(stepField);
+        requestAnimationFrame60(stepField);
       }
 
       window.addEventListener('resize',resizeField,{passive:true});
@@ -716,7 +741,7 @@
       pointer.y=height*.42;
       pointer.tx=pointer.x;
       pointer.ty=pointer.y;
-      window.requestAnimationFrame(stepField);
+      requestAnimationFrame60(stepField);
     }
     /* ---------- Keep the page quiet when offscreen ---------- */
     var bands=qa('.band-track');
