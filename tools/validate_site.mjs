@@ -76,6 +76,13 @@ const epsFn=epsFnStart>=0&&epsFnEnd>epsFnStart?codeEps.slice(epsFnStart,epsFnEnd
 for(const banned of ['arc','rlineto','findfont','concat']) must(!new RegExp('\\b'+banned+'\\b').test(epsFn),'CODE-EPS serializer has no '+banned+' operator');
 must(codeEps.includes('function runEpsSelfTests()'),'CODE-EPS includes EPS self-tests');
 must(codeEps.includes('window.CODE_EPS_V2=Object.freeze('),'CODE-EPS exposes the consolidated v2 engine API');
+must(codeEps.includes('id="epsProfile"'),'CODE-EPS exposes EPS target profile selection');
+must(codeEps.includes('value="shutterstock10"'),'CODE-EPS defaults to Shutterstock Illustrator 10 RGB');
+must(codeEps.includes('function stockScaleForBounds('),'CODE-EPS has 4–25 MP artwork normalization');
+must(codeEps.includes('function strokeToFillPolygons('),'CODE-EPS expands strokes to vector fills');
+must(codeEps.includes('%%DocumentProcessColors: RGB'),'CODE-EPS emits RGB-only process color declaration');
+must(codeEps.includes('%%AI8_CreatorVersion:'),'CODE-EPS emits Illustrator legacy compatibility marker');
+must(codeEps.includes('100*1024*1024'),'CODE-EPS enforces the 100 MB EPS limit');
 for(const retired of [
   'projects/code-to-eps/eps-engine-v2.js',
   'projects/code-to-eps/vector-scene-bridge-v2.js',
