@@ -1,0 +1,10 @@
+{
+  "name":"Code → SVG / EPS — Tamasrazim",
+  "short_name":"Code → SVG",
+  "description":"Browser-first procedural vector generation with SVG and EPS export.",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#050505",
+  "theme_color":"#050505",
+  "icons":[{"src":"../../favicon.svg","sizes":"any","type":"image/svg+xml"}]
+}
