@@ -1109,7 +1109,7 @@ async function exportAllPrismOneSvg(){
     parts.push('<?xml version="1.0" encoding="UTF-8"?>');
     parts.push('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">');
     parts.push('<title>Prism Flowers — '+LIB.length+' Editable Vector Flowers</title>');
-    parts.push('<desc>Five-column presentation sheet of Prism Flowers with a collection header, three 100% detail demonstrations, large evenly spaced artwork, actual flower names, and editable SVG groups.</desc>');
+    parts.push('<desc>Five-column presentation sheet of Prism Flowers with a collection header, three flower demonstrations, large evenly spaced artwork, actual flower names, and editable SVG groups.</desc>');
     parts.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#ffffff"/>');
     parts.push('<rect x="0" y="0" width="'+W+'" height="'+headerH+'" fill="#0b0b0b"/>');
     parts.push('<text x="'+outerPad+'" y="66" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="800" letter-spacing="4" fill="#ffffff">'+sheetTitle+'</text>');
@@ -1117,7 +1117,7 @@ async function exportAllPrismOneSvg(){
     parts.push('<text x="'+outerPad+'" y="137" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="600" letter-spacing="1.8" fill="#909090">'+sheetMeta+'</text>');
     parts.push('<line x1="'+outerPad+'" y1="157" x2="'+(W-outerPad)+'" y2="157" stroke="#2e2e2e" stroke-width="1"/>');
     parts.push('<text x="'+outerPad+'" y="190" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" letter-spacing="2.4" fill="#ffffff">DETAIL PREVIEW</text>');
-    parts.push('<text x="'+outerPad+'" y="213" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" letter-spacing="1" fill="#8f8f8f">Three real flowers · 100% zoom · close-up vector detail</text>');
+    parts.push('<text x="'+outerPad+'" y="213" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="400" letter-spacing="1" fill="#8f8f8f">Three flower examples · shown at natural scale</text>');
     parts.push('<text x="'+(W-outerPad)+'" y="44" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" letter-spacing="2" fill="#ffffff">VECTOR FLOWER COLLECTION</text>');
     parts.push('<text x="'+(W-outerPad)+'" y="66" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" letter-spacing="1" fill="#8f8f8f">BOTANICAL VECTOR SERIES</text>');
 
@@ -1155,7 +1155,7 @@ async function exportAllPrismOneSvg(){
         parts.push('</g>');
         const demoName=esc(prismFlowerName(f,di));
         parts.push('<text x="'+psNum(boxX+demoW/2)+'" y="'+psNum(boxY+demoH+21)+'" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" letter-spacing="1" fill="#ffffff">'+demoName+'</text>');
-        parts.push('<text x="'+psNum(boxX+demoW/2)+'" y="'+psNum(boxY+demoH+37)+'" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="8" font-weight="600" letter-spacing="1.6" fill="#777777">100% detail</text>');
+
       }catch(err){
         console.error('Header demo '+target,err);
       }
