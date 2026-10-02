@@ -2846,6 +2846,25 @@ var H264_CANDIDATES = [
 /* Probes the real width, height, frame rate and bitrate. Nothing is assumed
    supported: the first configuration the browser actually accepts is the one
    the exporter uses, and its exact string is reported. */
+/* Conservative H.264 Level 6.2 reference ceilings used only to explain
+   impossible requests. Browser support is still probed independently. */
+var H264_L62_MAX_MBPS = 16711680;
+var H264_L62_MAX_BITRATE = 800000000;
+function h264LimitNote(width, height, fps, bitrate) {
+  var mbpf = Math.ceil(width / 16) * Math.ceil(height / 16);
+  var mbps = mbpf * fps;
+  var notes = [];
+  if (mbps > H264_L62_MAX_MBPS) {
+    notes.push('The frame size × frame rate is above the H.264 Level 6.2 processing ceiling (' +
+      Math.round(mbps).toLocaleString() + ' macroblocks/s requested vs ' +
+      H264_L62_MAX_MBPS.toLocaleString() + ' allowed).');
+  }
+  if (bitrate > H264_L62_MAX_BITRATE) {
+    notes.push('The requested bitrate is above the H.264 Level 6.2 ceiling of ' +
+      Math.round(H264_L62_MAX_BITRATE / 1000000) + ' Mbps.');
+  }
+  return notes.join(' ');
+}
 function probeH264(width, height, fps, bitrate) {
   var out = { available: false, supported: [], selected: null, reason: '', tried: [], width: 0, height: 0, fps: fps, bitrate: 0 };
   if (typeof VideoEncoder === 'undefined' || !VideoEncoder.isConfigSupported || typeof VideoFrame === 'undefined') {
@@ -2863,7 +2882,12 @@ function probeH264(width, height, fps, bitrate) {
   function next() {
     if (i >= H264_CANDIDATES.length) {
       out.available = out.supported.length > 0;
-      if (!out.available) out.reason = 'No H.264 configuration was accepted at ' + w + '×' + h + ' / ' + fps + ' fps / ' + Math.round(br / 1000) + ' kbps. ' + H264_CANDIDATES.length + ' profile and level combinations were tried.';
+      if (!out.available) {
+        var limit = h264LimitNote(w, h, fps, br);
+        out.reason = 'No H.264 configuration was accepted at ' + w + '×' + h + ' / ' + fps + ' fps / ' + Math.round(br / 1000) + ' kbps. ' +
+          H264_CANDIDATES.length + ' profile and level combinations were tried.' +
+          (limit ? ' ' + limit : '');
+      }
       return out;
     }
     var c = H264_CANDIDATES[i++];
@@ -5741,23 +5765,44 @@ function refreshMedia() {
         if (i) wrap.appendChild(document.createTextNode(' \u00B7 '));
         var b = el('button', 'btn', a.label);
         b.style.cssText = 'padding:2px 6px;font-size:9px;margin:2px 0';
-        b.addEventListener('click', function () { applyComp(a.patch); });
+        b.addEventListener('click', function () {
+          applyComp(a.patch);
+          if (a.probeBitrate) {
+            S.customBitrateMbps = +(a.probeBitrate / 1000000).toFixed(1);
+            $('#oBitrate').value = S.customBitrateMbps;
+            markDirty();
+            refreshMedia();
+            $('#stMsg').textContent = 'H.264 fallback applied · ' + a.label;
+          }
+        });
         wrap.appendChild(b);
       });
       box.appendChild(wrap);
     });
   });
 }
-/* Only offers a fallback the browser has actually accepted — nothing is assumed. */
+/* Only offers a fallback the browser has actually accepted — nothing is assumed.
+   Fallback probes use a codec-safe bitrate ceiling so a high custom bitrate does
+   not hide otherwise valid resolution / frame-rate alternatives. */
 function suggestH264(c) {
   var tries = [];
-  if (c.width > 1920) tries.push({ label: '1920\u00D71080 / ' + c.fps + ' fps', w: 1920, h: 1080, fps: c.fps, patch: { width: 1920, height: 1080 } });
-  if (c.fps > 30) tries.push({ label: c.width + '\u00D7' + c.height + ' / 30 fps', w: c.width, h: c.height, fps: 30, patch: { fps: 30 } });
-  if (c.width > 1920 && c.fps > 30) tries.push({ label: '1920\u00D71080 / 30 fps', w: 1920, h: 1080, fps: 30, patch: { width: 1920, height: 1080, fps: 30 } });
-  if (c.width > 1280) tries.push({ label: '1280\u00D7720 / 30 fps', w: 1280, h: 720, fps: 30, patch: { width: 1280, height: 720, fps: 30 } });
+  if (c.width > 1920) tries.push({ label: '1920×1080 / ' + c.fps + ' fps', w: 1920, h: 1080, fps: c.fps, patch: { width: 1920, height: 1080 } });
+  if (c.fps > 30) tries.push({ label: c.width + '×' + c.height + ' / 30 fps', w: c.width, h: c.height, fps: 30, patch: { fps: 30 } });
+  if (c.width > 1920 && c.fps > 30) tries.push({ label: '1920×1080 / 30 fps', w: 1920, h: 1080, fps: 30, patch: { width: 1920, height: 1080, fps: 30 } });
+  if (c.width > 1280) tries.push({ label: '1280×720 / 30 fps', w: 1280, h: 720, fps: 30, patch: { width: 1280, height: 720, fps: 30 } });
+  function fallbackBitrate(w, h, fps) {
+    var auto = ENC.bitrateFor(w, h, fps, S.quality);
+    var requested = requestedBitrate(w, h, fps);
+    return Math.min(H264_L62_MAX_BITRATE, Math.max(500000, Math.min(requested, auto * 4)));
+  }
   return Promise.all(tries.map(function (t) {
-    return ENC.probeH264(t.w, t.h, t.fps, requestedBitrate(t.w, t.h, t.fps))
-      .then(function (p) { return p.available ? t : null; });
+    return ENC.probeH264(t.w, t.h, t.fps, fallbackBitrate(t.w, t.h, t.fps))
+      .then(function (p) {
+        if (!p.available) return null;
+        t.probeBitrate = p.bitrate;
+        t.label += ' · ' + Math.round(p.bitrate / 1000000) + ' Mbps';
+        return t;
+      });
   })).then(function (rs) { return rs.filter(Boolean); });
 }
 
@@ -5848,6 +5893,7 @@ function analyseJob() {
           rows.push(['Render target', Engine.mode === 'worker' ? 'OffscreenCanvas in the worker' : 'canvas#render-target in the document']);
           if (!probe.available) {
             warn.push('H.264 unavailable at ' + c.width + '×' + c.height + ' / ' + c.fps + ' FPS. ' + probe.reason);
+            warn.push('The renderer itself is still valid at this composition. The codec probe blocks only this MP4 path; PNG sequence export remains available.');
             warn.push('Nothing will be written under a false name: pick a configuration the probe accepts, or export the PNG sequence and mux it with ffmpeg.');
           }
         } else if (job.format === 'webm') {
@@ -5951,7 +5997,61 @@ function renderStat(p, job) {
   $('#rstat').innerHTML = html;
 }
 
+function renderPreflight(job) {
+  if (!job || job.format === 'png') return Promise.resolve({ ok: true });
+  var c = job.composition;
+  var task = job.format === 'mp4'
+    ? ENC.probeH264(c.width, c.height, c.fps, job.bitrate)
+    : ENC.probeEncoders(c.width, c.height, c.fps, job.bitrate);
+  return task.then(function (p) {
+    if (job.format === 'mp4') S.h264 = p;
+    if (p && p.available) return { ok: true, probe: p };
+    var label = job.format === 'mp4' ? 'H.264 / AVC' : 'VP9 / VP8';
+    var reason = p && p.reason ? p.reason : ('No accepted ' + label + ' configuration was found.');
+    return {
+      ok: false,
+      probe: p,
+      error: {
+        name: 'CodecUnavailable',
+        message: label + ' is unavailable for ' + c.width + '×' + c.height + ' at ' + c.fps + ' fps.',
+        detail: reason + ' Export the PNG sequence, or change the composition to a configuration accepted by the browser probe.'
+      }
+    };
+  }).catch(function (e) {
+    return {
+      ok: false,
+      error: {
+        name: e && e.name || 'CodecProbeError',
+        message: String(e && e.message || e),
+        detail: 'The codec capability probe failed before rendering, so no media file was started. PNG sequence export remains available.'
+      }
+    };
+  });
+}
+function showPreflightFailure(job, pre) {
+  setStage('VALIDATING', true);
+  $('#stDot').className = 'dot';
+  logLine('VALIDATION FAILED — ' + pre.error.name + ': ' + pre.error.message, true);
+  var c = job.composition;
+  $('#rstat').innerHTML = '<div class="warnbox"><b>WHAT · export blocked before rendering</b>' +
+    'FORMAT · ' + esc(job.format.toUpperCase()) + '\n' +
+    'CONFIG · ' + esc(c.width + '×' + c.height + ' · ' + c.fps + ' fps') + '\n' +
+    'WHY · ' + esc(pre.error.message) + '\n' +
+    'DETAIL · ' + esc(pre.error.detail) +
+    '</div>';
+  $('#stMsg').textContent = pre.error.message;
+}
 function startRender(job, opts) {
+  if (S.rendering) return Promise.resolve(null);
+  return renderPreflight(job).then(function (pre) {
+    if (!pre.ok) {
+      showPreflightFailure(job, pre);
+      return { ok: false, stage: 'validate', error: pre.error, probe: pre.probe || null };
+    }
+    return startRenderNow(job, opts);
+  });
+}
+function startRenderNow(job, opts) {
   opts = opts || {};
   if (S.rendering) return Promise.resolve(null);
   S.rendering = true;
