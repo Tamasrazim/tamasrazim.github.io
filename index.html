@@ -655,6 +655,19 @@
         <div><span>Reduced motion</span><strong id="panelReduced">—</strong></div>
       </div>
 
+      <div class="system-telemetry" aria-label="Live activity telemetry">
+        <div class="telemetry-head">
+          <span>Activity history</span>
+          <strong id="panelActivity">IDLE</strong>
+        </div>
+        <div class="telemetry-graph" id="telemetryGraph" aria-hidden="true"></div>
+      </div>
+
+      <div class="system-mini-stats">
+        <div><span>Connection</span><strong id="panelConnection">ONLINE</strong></div>
+        <div><span>Session</span><strong id="panelSession">00:00</strong></div>
+      </div>
+
       <div class="system-panel-actions">
         <button class="button" id="panelStress" type="button">Run 60s stress test</button>
         <button class="button button-ghost" id="panelReport" type="button">Copy system report</button>
