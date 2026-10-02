@@ -19,28 +19,14 @@
       schedule();
     }
 
-    var __raf30Last = new WeakMap();
-    var __raf30Interval = 1000 / 30;
-    function requestAnimationFrame60(callback){
-      function schedule30(){
-        window.requestAnimationFrame(function(now){
-          var last = __raf30Last.get(callback);
-          if(last === undefined || now - last >= (__raf30Interval - 0.5)){
-            __raf30Last.set(callback, now);
-            callback(now);
-          }else{
-            window.setTimeout(schedule30, Math.max(0, __raf30Interval - (now - last)));
-          }
-        });
-      }
-      schedule30();
-    }
-
-
 if(window.__tamasrazimMotionCore)return;
 window.__tamasrazimMotionCore=true;
 
 var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+window.__tamasrazimMotionState={
+  reduced:!!reduce,
+  startedAt:performance.now()
+};
 var fine=window.matchMedia&&window.matchMedia('(pointer: fine)').matches;
 var horizontal=!!(document.body&&document.body.dataset.horizontalMode==='true');
 var axisScroller=document.getElementById('axisScroller') || document.scrollingElement || document.documentElement;
@@ -105,6 +91,8 @@ document.head.appendChild(style);
 
 var root=document.documentElement;
 root.classList.add('motion-ready');
+root.dataset.motionEngine='active';
+window.__tamasrazimMotionActive=true;
 
 var pointer={
   x:innerWidth*.5,y:innerHeight*.5,
