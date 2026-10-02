@@ -243,14 +243,6 @@
       transform-origin:left center;
       transition:width .16s linear;
     }
-    .hud-keys{
-      padding-left:6px;
-      margin-left:1px;
-      border-left:1px solid rgba(243,243,239,.1);
-      color:rgba(243,243,239,.34);
-      letter-spacing:.02em;
-      font-size:.5rem;
-    }
     @keyframes hudPulse{
       0%,100%{transform:scale(.8);box-shadow:0 0 0 0 currentColor}
       50%{transform:scale(1.25);box-shadow:0 0 0 4px transparent}
