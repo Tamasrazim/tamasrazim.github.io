@@ -3,4 +3,4 @@ const CORE = [
   './',
   './index.html',
   './media-stack.js',
-  '../../code-to-eps/prism-library.json',
+  './library/prism-library.json',
