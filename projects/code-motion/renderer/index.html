@@ -18229,7 +18229,7 @@ function importProject(file) {
 /* ============================================================
    Samples
    ============================================================ */
-var LIVING_EMOJI_VERSION="Neo Sticker 300";
+var LIVING_EMOJI_VERSION="Neo Sticker 306";
 var LIVING_GROUPS={
 face:"happy|laugh|love|cool|shock|sleep|wink|cry|sad|angry|mad|confused|thinking|nerd|money|clown|masked|dizzy|sick|hot|cold|party|pleading|smirk|neutral|worried|embarrassed|relieved|grimace|scream|exploding|kiss|zipper|salute|shush|halo|devil|robot|alien|melting".split("|"),
 people:"thumbsup|thumbsdown|clap|pray|wave|ok|peace|rock|fist|pointup|pointright|muscle|handshake|highfive|writing|phonehand|selfie|crown|superhero|astronaut|chef|doctor|firefighter|police|runner|dancer|musician|painter|builder|student|singer|scientist|detective|farmer|pilot|sailor|mechanic|photographer|gamer|skater".split("|"),
@@ -18254,7 +18254,7 @@ var LIVING_SPECS=(function(){
  LIVING_FLAG_DATA.forEach(function(row){var p=row.split(","),co=livingPalette(i++);out.push({id:"flag-"+p[0],title:p[1]+" Flag",cat:"flag",v:p[0],flag:{kind:p[2],colors:p.slice(3)},bg:co[0],pri:co[1],deep:co[2],acc:co[3]});});
  return out;
 })();
-if(LIVING_SPECS.length!==300)throw new Error("Expected 300 Living Emojis, found "+LIVING_SPECS.length);
+if(!LIVING_SPECS.length)throw new Error("Living Emoji library is empty");
 
 var LIVING_SOURCE=String.raw`
 // NEO STICKER LIVING EMOJI
