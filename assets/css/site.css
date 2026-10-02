@@ -145,6 +145,15 @@
       100%{opacity:0;scale:1.5}
     }
 
+    .site-header.is-scrolled{
+      padding-block:9px;
+      background:rgba(5,5,5,.86);
+      border-bottom-color:rgba(243,243,239,.13);
+      box-shadow:0 10px 32px rgba(0,0,0,.18);
+    }
+    .site-header.is-scrolled .brand{
+      background:rgba(243,243,239,.065);
+    }
     .site-header{
       position:fixed;left:0;right:0;top:0;z-index:1400;
       padding:14px 0;
