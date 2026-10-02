@@ -1406,6 +1406,9 @@ select.mini{
         <button data-act="fmtIndent">Reindent</button>
         <button data-act="undo">Undo</button>
         <button data-act="redo">Redo</button>
+        <button data-act="analyzeSource">Analyze</button>
+        <button data-act="pasteSource">Paste</button>
+        <button data-act="clearSource">Clear</button>
       </div>
       <div id="find" class="hide">
         <input id="findQ" placeholder="find" spellcheck="false" aria-label="Find">
@@ -4897,6 +4900,52 @@ function edGoToLine(n) {
   edMarks();
 }
 
+function analyzeSource() {
+  showTab('p-render');
+  showMobile('rail');
+  identifyFrame();
+}
+function clearSource() {
+  if (!Ed.ta) return;
+  var hadCode = !!Ed.ta.value;
+  if (!hadCode) {
+    $('#stMsg').textContent = 'animation source is already empty';
+    Ed.ta.focus();
+    return;
+  }
+  edSnapshot(true);
+  Ed.ta.value = '';
+  Ed.ta.selectionStart = Ed.ta.selectionEnd = 0;
+  S.compiled = false;
+  S.lastError = null;
+  edChanged(true);
+  $('#edState').textContent = 'cleared — run to apply';
+  $('#stMsg').textContent = 'animation source cleared';
+  Ed.ta.focus();
+}
+async function pasteSource() {
+  if (!Ed.ta) return;
+  if (!navigator.clipboard || !navigator.clipboard.readText) {
+    $('#stMsg').textContent = 'clipboard read is unavailable in this browser — use Ctrl+V / ⌘V';
+    Ed.ta.focus();
+    return;
+  }
+  try {
+    var text = await navigator.clipboard.readText();
+    if (!text) {
+      $('#stMsg').textContent = 'clipboard is empty';
+      Ed.ta.focus();
+      return;
+    }
+    edInsert(text);
+    $('#stMsg').textContent = 'pasted ' + text.length + ' characters';
+    Ed.ta.focus();
+    edMarks();
+  } catch (e) {
+    $('#stMsg').textContent = 'clipboard permission denied — use Ctrl+V / ⌘V';
+    Ed.ta.focus();
+  }
+}
 function initEditor() {
   Ed.ta = $('#ta'); Ed.hl = $('#hl'); Ed.gutter = $('#gutter');
   Ed.gutter.innerHTML = '';
@@ -7516,6 +7565,9 @@ var ACTS = {
   cancelRender: cancelRender,
   analyze: analyseJob,
   identifyFrame: identifyFrame,
+  analyzeSource: analyzeSource,
+  clearSource: clearSource,
+  pasteSource: pasteSource,
   analyzeLoop: analyseLoop,
   testMenu: testMenu,
   queueAdd: queueAdd,
