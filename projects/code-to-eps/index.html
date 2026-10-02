@@ -49,7 +49,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
     <button class="btn" id="svgBtn" disabled>Export SVG</button>
     <button class="btn" id="metaBtn">Adobe CSV</button>
     <button class="btn" id="allSvgBtn">Export All SVG</button>
-    <button class="btn" id="allPrismOneSvgBtn">Prism All → One SVG</button>
+    <button class="btn" id="allPrismOneSvgBtn">Prism → 150 SVG</button>
     <button class="btn" id="iconStockBtn">Stock Icons 10K</button>
     <button class="btn primary" id="allBtn">Export All EPS</button>
   </div>
@@ -1093,68 +1093,86 @@ async function exportAllPrismOneSvg(){
   const btn=$('#allPrismOneSvgBtn');
   btn.disabled=true;
   try{
-    // Transparent 16:9 Prism sheet with a simple label and three real
-    // flower demos at the top; the main grid contains artwork only.
+    // Export the 937 flower library as separate transparent 16:9 SVG sheets.
+    // Each full sheet contains 150 flower icons; the final sheet contains the remainder.
     const NON_FLOWER_IDS=new Set([
       'prism-aurora-snowflake','prism-velvet-ornament','prism-candy-cane',
       'prism-holly-ember','prism-christmas-star','prism-frost-wreath',
       'prism-gift-bow','prism-icicle-halo','prism-jingle-bell','prism-north-star'
     ]);
     const FLOWERS=LIB.filter(f=>!NON_FLOWER_IDS.has(String(f.id||'')));
+    const perSvg=150;
     const W=16000,H=9000;
-    const cols=40;
-    const headerH=780;
-    const rows=Math.ceil(FLOWERS.length/cols);
+    const cols=15;
+    const rowsPerFull=10;
     const tileW=W/cols;
-    const tileH=(H-headerH)/rows;
-    const artBoxW=Math.max(1,tileW-30);
-    const artBoxH=Math.max(1,tileH-30);
-    const outerPad=220;
-    const parts=[];
-    parts.push('<?xml version="1.0" encoding="UTF-8"?>');
-    parts.push('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">');
-    parts.push('<title>937 flower icon</title>');
-    parts.push('<desc>Transparent 16:9 presentation sheet of 937 Prism-style flower vector icons with three flower examples in the header.</desc>');
-    parts.push('<text x="'+outerPad+'" y="250" font-family="Georgia, Times New Roman, serif" font-size="150" font-weight="600" fill="#111111">937 flower icon</text>');
+    const fullTileH=H/rowsPerFull;
+    const totalSheets=Math.ceil(FLOWERS.length/perSvg);
 
-    for(let i=0;i<FLOWERS.length;i++){
-      const f=FLOWERS[i];
-      try{
-        const scene=buildFlowerScene(f);
-        const raw=sceneToSvg(scene);
-        const idPrefix='prism'+String(i+1).padStart(4,'0');
-        const body=uniqueSvgIds(innerSvg(raw),idPrefix);
-        const b=sceneBounds(scene,false);
-        if(!(b.w>0&&b.h>0))throw new Error('Flower has no vector bounds');
-        const col=i%cols,row=Math.floor(i/cols);
-        const x=col*tileW,y=headerH+row*tileH;
-        const scale=Math.min(artBoxW/b.w,artBoxH/b.h);
-        const drawX=tileW/2-(b.x+b.w/2)*scale;
-        const drawY=(artBoxH-b.h*scale)/2-b.y*scale;
-        parts.push('<g id="'+idPrefix+'" transform="translate('+psNum(x)+' '+psNum(y)+')">');
-        parts.push('<title>'+esc(prismFlowerName(f,i))+'</title>');
-        parts.push('<g id="'+idPrefix+'-artwork" transform="translate('+psNum(drawX)+' '+psNum(drawY)+') scale('+psNum(scale)+' '+psNum(scale)+')">');
-        parts.push(body);
-        parts.push('</g>');
-        parts.push('</g>');
-      }catch(e){console.error('One-SVG '+f.title,e)}
-      if((i+1)%20===0||i===FLOWERS.length-1){
-        setStatus('Prism All → One SVG — '+(i+1)+' / '+FLOWERS.length+' flowers composed · transparent · 16:9');
-        await new Promise(r=>setTimeout(r,0));
+    for(let sheet=0;sheet<totalSheets;sheet++){
+      const startIndex=sheet*perSvg;
+      const endIndex=Math.min(startIndex+perSvg,FLOWERS.length);
+      const count=endIndex-startIndex;
+      const rows=Math.ceil(count/cols);
+      const tileH=H/rows;
+      const artPad=70;
+      const artBoxW=Math.max(1,tileW-artPad);
+      const artBoxH=Math.max(1,tileH-artPad);
+      const parts=[];
+      parts.push('<?xml version="1.0" encoding="UTF-8"?>');
+      parts.push('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">');
+      parts.push('<title>Prism flower icons '+String(sheet+1).padStart(3,'0')+' — '+count+' icons</title>');
+      parts.push('<desc>Transparent 16:9 SVG sheet containing '+count+' Prism-style flower vector icons.</desc>');
+
+      for(let local=0;local<count;local++){
+        const globalIndex=startIndex+local;
+        const f=FLOWERS[globalIndex];
+        try{
+          const scene=buildFlowerScene(f);
+          const raw=sceneToSvg(scene);
+          const idPrefix='prism'+String(globalIndex+1).padStart(4,'0');
+          const body=uniqueSvgIds(innerSvg(raw),idPrefix);
+          const b=sceneBounds(scene,false);
+          if(!(b.w>0&&b.h>0))throw new Error('Flower has no vector bounds');
+
+          const col=local%cols;
+          const row=Math.floor(local/cols);
+          const x=col*tileW;
+          const y=row*tileH;
+          const scale=Math.min(artBoxW/b.w,artBoxH/b.h);
+          const drawX=tileW/2-(b.x+b.w/2)*scale;
+          const drawY=tileH/2-(b.y+b.h/2)*scale;
+
+          parts.push('<g id="'+idPrefix+'" transform="translate('+psNum(x)+' '+psNum(y)+')">');
+          parts.push('<g id="'+idPrefix+'-artwork" transform="translate('+psNum(drawX)+' '+psNum(drawY)+') scale('+psNum(scale)+' '+psNum(scale)+')">');
+          parts.push(body);
+          parts.push('</g>');
+          parts.push('</g>');
+        }catch(e){
+          console.error('Prism SVG sheet '+(sheet+1)+' '+f.title,e);
+        }
+
+        if((local+1)%10===0||local===count-1){
+          setStatus('Prism SVG sheets — '+(globalIndex+1)+' / '+FLOWERS.length+' flowers · sheet '+String(sheet+1).padStart(3,'0')+' / '+String(totalSheets).padStart(3,'0')+' · '+count+' on this SVG');
+          await new Promise(r=>setTimeout(r,0));
+        }
       }
+
+      parts.push('</svg>');
+      const blob=new Blob([parts.join('')],{type:'image/svg+xml;charset=utf-8'});
+      const first=String(startIndex+1).padStart(3,'0');
+      const last=String(endIndex).padStart(3,'0');
+      downloadBlob(blob,'prism-flowers-'+first+'-'+last+'.svg');
+      await new Promise(r=>setTimeout(r,300));
     }
 
-    parts.push('</svg>');
-    const blob=new Blob([parts.join('')],{type:'image/svg+xml;charset=utf-8'});
-    downloadBlob(blob,'prism-flowers-all-'+FLOWERS.length+'.svg');
-    flash('Prism All → One SVG finished — '+FLOWERS.length+' flower icons + 3 demos.');
+    flash('Prism SVG export finished — '+totalSheets+' SVGs · '+FLOWERS.length+' flowers · 150 per SVG except the final '+(FLOWERS.length%perSvg||perSvg)+'.');
   }catch(e){
-    setStatus('Prism One-SVG failed: '+(e.message||e),'bad');
+    setStatus('Prism SVG sheets failed: '+(e.message||e),'bad');
   }finally{
     btn.disabled=false;
   }
 }
-
 async function exportMetadata(){
   try{
     const csv=metadataCsv();if(new TextEncoder().encode(csv).length>1000000)throw new Error('Adobe CSV exceeds the 1 MB upload limit.');const dir=await pickFolder(),h=await dir.getFileHandle('adobe-stock-metadata.csv',{create:true}),w=await h.createWritable();await w.write(csv);await w.close();flash('Adobe CSV saved — '+LIB.length+' Prism Flowers.');
