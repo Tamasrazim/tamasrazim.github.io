@@ -216,10 +216,11 @@
 
     /* ---------- Live activity HUD ---------- */
     (function initActivityHud(){
-      var hud=q('#systemHud'),fpsNode=q('#hudFps'),bar=q('#hudBar');
+      var hud=q('#systemHud'),fpsNode=q('#hudFps'),bar=q('#hudBar'),sectionNode=q('#hudSection'),header=q('.site-header');
       if(!hud||!fpsNode||!bar)return;
 
-      var last=performance.now(),smoothFps=60,lastX=0,lastY=0,px=0,py=0,scrollLast=0,energy=0;
+      var sectionNodes=qa('main#content > section');
+      var last=performance.now(),smoothFps=60,px=0,py=0,scrollLast=0,energy=0;
       var activeUntil=0;
 
       function pulse(x,y){
