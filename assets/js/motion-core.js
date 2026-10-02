@@ -1,32 +1,9 @@
 (function(){
 'use strict';
-    /* Site animation governor: keep continuous JS motion at a maximum of 60 updates/sec.
-       The renderer/export engine is independent and may still render at 120 FPS. */
-    var __raf60Last = new WeakMap();
-    var __raf60Interval = 1000 / 60;
-    function requestAnimationFrame60(callback){
-      function schedule(){
-        window.requestAnimationFrame(function(now){
-          var last = __raf60Last.get(callback);
-          if(last === undefined || now - last >= (__raf60Interval - 0.25)){
-            __raf60Last.set(callback, now);
-            callback(now);
-          }else{
-            window.setTimeout(schedule, Math.max(0, __raf60Interval - (now - last)));
-          }
-        });
-      }
-      schedule();
-    }
-
 if(window.__tamasrazimMotionCore)return;
 window.__tamasrazimMotionCore=true;
 
 var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-window.__tamasrazimMotionState={
-  reduced:!!reduce,
-  startedAt:performance.now()
-};
 var fine=window.matchMedia&&window.matchMedia('(pointer: fine)').matches;
 var horizontal=!!(document.body&&document.body.dataset.horizontalMode==='true');
 var axisScroller=document.getElementById('axisScroller') || document.scrollingElement || document.documentElement;
@@ -91,8 +68,6 @@ document.head.appendChild(style);
 
 var root=document.documentElement;
 root.classList.add('motion-ready');
-root.dataset.motionEngine='active';
-window.__tamasrazimMotionActive=true;
 
 var pointer={
   x:innerWidth*.5,y:innerHeight*.5,
@@ -189,7 +164,7 @@ window.addEventListener('blur',function(){pointer.tx=innerWidth*.5;pointer.ty=in
   }
 
 function frame(now){
-  if(!pageVisible){raf=requestAnimationFrame60(frame);return;}
+  if(!pageVisible){raf=window.requestAnimationFrame(frame);return;}
   var dt=Math.min(.05,Math.max(.008,(now-last)/1000));last=now;
   if(boundsDirty)refreshBounds();
 
@@ -349,9 +324,9 @@ function frame(now){
     email.style.setProperty('--if-scale',wordScale.toFixed(4));
   }
 
-  raf=requestAnimationFrame60(frame);
+  raf=window.requestAnimationFrame(frame);
 }
-raf=requestAnimationFrame60(frame);
+raf=window.requestAnimationFrame(frame);
 /* ---------- Tamasrazim Scene Engine: continuous motion ---------- */
 (function(){
   var sceneReduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -388,7 +363,7 @@ raf=requestAnimationFrame60(frame);
   (horizontal?axisScroller:window).addEventListener('scroll',function(){target.scroll=horizontal?pageX():pageY()},{passive:true});
   window.addEventListener('blur',function(){target.x=innerWidth*.5;target.y=innerHeight*.5},{passive:true});
   function tick(now){
-    if(!pageVisible){requestAnimationFrame60(tick);return;}
+    if(!pageVisible){window.requestAnimationFrame(tick);return;}
     var dt=Math.min(.033,Math.max(.008,(now-last)/1000));last=now;
     var k=1-Math.exp(-dt*8.5);
     state.x=smooth(state.x,target.x,k);state.y=smooth(state.y,target.y,k);
@@ -429,9 +404,9 @@ raf=requestAnimationFrame60(frame);
       card.style.setProperty('--scene-card-near',near.toFixed(3));card.style.setProperty('--scene-card-energy',energy.toFixed(3));
     });
     bands.forEach(function(track,index){track.style.setProperty('--scene-band-x',((index%2?-1:1)*(progress*120+nx*14)).toFixed(2)+'px');track.style.setProperty('--scene-band-skew',(nx*.7+state.vx*.0015).toFixed(3)+'deg')});
-    requestAnimationFrame60(tick);
+    window.requestAnimationFrame(tick);
   }
-  requestAnimationFrame60(tick);
+  window.requestAnimationFrame(tick);
 })();
 /* Secondary 3D scene environment disabled for performance.
    Core motion + the lighter scene engine provide the site's motion language. */
