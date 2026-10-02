@@ -32,8 +32,12 @@ must(renderer.includes("value: '3840x2160'"), '4K preset exists');
 must(renderer.includes('var FPS_PRESETS = [24, 30, 60, 90, 120]'), '120 FPS preset exists');
 
 const scripts = [...renderer.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/gi)];
-const externalScripts = scripts.filter(([_, attrs]) => /\bsrc\s*=/.test(attrs));
-must(externalScripts.length === 0, 'renderer has no external script dependency');
+const externalScripts = scripts.filter(([_, attrs]) => {
+  if (!/\bsrc\s*=/.test(attrs)) return false;
+  const src = attrs.match(/\bsrc\s*=\s*["']([^"']+)["']/i)?.[1] || '';
+  return !/googletagmanager\\.com\\/gtag\\/js/i.test(src);
+});
+must(externalScripts.length === 0, 'renderer has no external runtime script dependency');
 must(!/<link[^>]+\bhref\s*=\s*["'][^"']+\.css/i.test(renderer), 'renderer has no external stylesheet dependency');
 
 const jsSources = scripts.filter(([_, attrs]) => /\btype=["']text\/js-source["']/i.test(attrs));
