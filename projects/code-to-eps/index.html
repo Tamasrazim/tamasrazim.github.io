@@ -1382,6 +1382,7 @@ function livingGlyphPath(ctx,points){
   ctx.closePath();
 }
 function drawLivingBase(ctx,g){
+  const TAU=Math.PI*2;
   const p=g.palette;
   ctx.fillStyle=p.deep;
   ctx.globalAlpha=.24;
@@ -1412,6 +1413,7 @@ function drawLivingBase(ctx,g){
   ctx.globalAlpha=1;
 }
 function drawLivingFace(ctx,g){
+  const TAU=Math.PI*2;
   const p=g.palette;
   const ink=p.ink;
   ctx.fillStyle=ink;
@@ -1489,6 +1491,7 @@ function drawLivingFace(ctx,g){
   }
 }
 function drawLivingSymbol(ctx,g){
+  const TAU=Math.PI*2;
   const p=g.palette;
   ctx.fillStyle=p.light;
   const star=(cx,cy,r1,r2,n=5)=>{
