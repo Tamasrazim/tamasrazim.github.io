@@ -4490,7 +4490,7 @@ function drawFlag(c,f){
   else{c.fillStyle=f.colors[0];c.fillRect(0,0,W,H);c.fillStyle=f.colors[1];circ(c,W/2,H/2,66,f.colors[1]);}
   c.strokeStyle="rgba(20,22,30,.82)";c.lineWidth=11;c.strokeRect(0,0,W,H);c.restore();
 }
-function renderFrame(time,frame,fps,ctx,width,height,motion){
+function renderFrame(time,frame,fps,ctx,width,height){
   var p=motion.loopProgress,t=p*TAU,bob=Math.sin(t*2)*5,spin=t*.08;
   ctx.fillStyle=BG;ctx.fillRect(0,0,width,height);
   ctx.save();ctx.translate(width*.5,height*.53+bob);ctx.rotate(Math.sin(t)*.018);
