@@ -50,6 +50,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
     <button class="btn" id="metaBtn">Adobe CSV</button>
     <button class="btn" id="allSvgBtn">Export All SVG</button>
     <button class="btn" id="allPrismOneSvgBtn">Prism All → One SVG</button>
+    <button class="btn" id="livingGlyphPreviewBtn">Preview Living Glyph</button>
     <button class="btn" id="livingGlyphsBtn">Living Glyphs → 150 SVG</button>
     <button class="btn" id="iconStockBtn">Stock Icons 10K</button>
     <button class="btn primary" id="allBtn">Export All EPS</button>
@@ -1568,6 +1569,31 @@ function livingGlyphMetadataRow(filename,index,count){
   ];
   return [filename,title,[...new Set(keywords)].slice(0,50).join(', '),'8',''];
 }
+let livingGlyphPreviewIndex=0;
+function previewLivingGlyph(index=livingGlyphPreviewIndex){
+  const g=LIVING_GLYPHS[clamp(index,0,LIVING_GLYPHS.length-1)];
+  if(!g)return;
+  livingGlyphPreviewIndex=(g.index+1)%LIVING_GLYPHS.length;
+  currentFlower=-1;
+  customMode=false;
+  if(paper)paper.style.aspectRatio='1 / 1';
+  const oldW=wEl.value,oldH=hEl.value;
+  wEl.value='1000';hEl.value='1000';
+  resPresetEl.value='custom';
+  epsBgEl.value='none';
+  lastScene=buildLivingGlyphScene(g);
+  paper.innerHTML=sceneToSvg(lastScene);
+  const svg=paper.querySelector('svg');
+  if(svg){svg.style.width='100%';svg.style.height='100%';svg.style.display='block'}
+  modeEl.textContent='LIVING GLYPH';
+  objectCount.textContent=lastScene.ops.filter(x=>x.t!=='save'&&x.t!=='restore').length+' OBJECTS';
+  codeEl.value='// '+g.title+'\\n// Original Living Glyph vector artwork preview';
+  syncLines();
+  epsBtn.disabled=false;svgBtn.disabled=false;
+  updateStockPreflight(lastScene);
+  setStatus('Living Glyph preview — '+(g.index+1)+' / '+LIVING_GLYPHS.length+' · '+g.title,'good');
+  wEl.value=oldW;hEl.value=oldH;
+}
 async function exportLivingGlyphs(){
   const btn=$('#livingGlyphsBtn');
   btn.disabled=true;
@@ -1666,6 +1692,7 @@ svgBtn.onclick=()=>{if(!lastScene)return;downloadBlob(new Blob([sceneToSvg(lastS
 allBtn.onclick=async()=>{try{await exportAll()}catch(e){allBtn.disabled=false;setStatus('Export All failed: '+(e.message||e),'bad')}}
 $('#allSvgBtn').onclick=async()=>{try{await exportAllSvg()}catch(e){$('#allSvgBtn').disabled=false;setStatus('Export All SVG failed: '+(e.message||e),'bad')}};
 $('#allPrismOneSvgBtn').onclick=()=>exportAllPrismOneSvg();
+$('#livingGlyphPreviewBtn').onclick=()=>previewLivingGlyph();
 $('#livingGlyphsBtn').onclick=()=>exportLivingGlyphs();
 metaBtn.onclick=exportMetadata;
 fillIconFamilies();
