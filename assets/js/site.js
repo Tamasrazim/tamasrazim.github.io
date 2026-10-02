@@ -163,6 +163,8 @@
         }
 
         button.addEventListener('click',start);
+        window.__tamasrazimStressStart=start;
+        window.__tamasrazimStressStop=stop;
         window.addEventListener('pagehide',stop,{once:true});
       }catch(e){}
     })();
@@ -281,6 +283,135 @@
 
       requestAnimationFrame60(tick);
     })();
+
+    /* ---------- Live system panel ---------- */
+    (function initSystemPanel(){
+      var hud=q('#systemHud');
+      var mobileTrigger=q('#mobileSystemTrigger');
+      var panel=q('#systemPanel');
+      var close=q('#systemPanelClose');
+      if(!panel)return;
+
+      var section=q('#hudSection');
+      var panelSection=q('#panelSection');
+      var panelMotion=q('#panelMotion');
+      var panelViewport=q('#panelViewport');
+      var panelDpr=q('#panelDpr');
+      var panelReduced=q('#panelReduced');
+      var panelStress=q('#panelStress');
+      var panelReport=q('#panelReport');
+      var panelStatus=q('#panelStatus');
+      var reportTimer=0;
+
+      function update(){
+        if(panelSection&&section) panelSection.textContent=section.textContent||'TOP';
+        if(panelMotion){
+          panelMotion.textContent=document.documentElement.classList.contains('motion-ready')||
+            window.__tamasrazimSiteEffectsReady ? 'ACTIVE' : 'BOOTING';
+        }
+        if(panelViewport) panelViewport.textContent=window.innerWidth+'×'+window.innerHeight;
+        if(panelDpr) panelDpr.textContent=(window.devicePixelRatio||1).toFixed(2)+'×';
+        if(panelReduced){
+          panelReduced.textContent=window.matchMedia&&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'ON' : 'OFF';
+        }
+        if(panelStress){
+          var state=document.documentElement.dataset.mobileStress;
+          if(state==='running') panelStress.textContent='Stress test running';
+          else if(state && /s$/.test(state)) panelStress.textContent='Stress test · '+state;
+          else panelStress.textContent='Run 60s stress test';
+        }
+      }
+
+      function open(){
+        if(panel.hidden){
+          panel.hidden=false;
+          panel.setAttribute('aria-hidden','false');
+        }
+        requestAnimationFrame(function(){
+          panel.classList.add('is-open');
+        });
+        if(hud)hud.setAttribute('aria-expanded','true');
+        update();
+        clearInterval(reportTimer);
+        reportTimer=window.setInterval(update,250);
+      }
+
+      function hide(){
+        panel.classList.remove('is-open');
+        if(hud)hud.setAttribute('aria-expanded','false');
+        clearInterval(reportTimer);
+        reportTimer=0;
+        window.setTimeout(function(){
+          if(!panel.classList.contains('is-open')){
+            panel.hidden=true;
+            panel.setAttribute('aria-hidden','true');
+          }
+        },320);
+      }
+
+      function toggle(){
+        if(panel.hidden||!panel.classList.contains('is-open'))open();
+        else hide();
+      }
+
+      if(hud)hud.addEventListener('click',toggle);
+      if(mobileTrigger)mobileTrigger.addEventListener('click',function(){
+        var menu=q('#mobileNav'),menuButton=q('#menuButton');
+        if(menu)menu.classList.remove('is-open');
+        if(menuButton){
+          menuButton.setAttribute('aria-expanded','false');
+          menuButton.setAttribute('aria-label','Open menu');
+        }
+        if(document.body)document.body.classList.remove('is-locked');
+        open();
+      });
+      if(close)close.addEventListener('click',hide);
+
+      panel.addEventListener('pointerdown',function(e){
+        if(e.target===panel)hide();
+      },{passive:true});
+
+      if(panelStress)panelStress.addEventListener('click',function(){
+        if(typeof window.__tamasrazimStressStart==='function'){
+          window.__tamasrazimStressStart();
+          panelStatus.textContent='60-second stress test started.';
+          update();
+        }else{
+          panelStatus.textContent='Stress engine is still initializing.';
+        }
+      });
+
+      if(panelReport)panelReport.addEventListener('click',function(){
+        var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var report=[
+          'TAMASRAZIM SITE REPORT',
+          'Section: '+(section&&section.textContent||'TOP'),
+          'Viewport: '+innerWidth+'×'+innerHeight,
+          'Pixel ratio: '+(window.devicePixelRatio||1).toFixed(2)+'×',
+          'Motion: '+(document.documentElement.classList.contains('motion-ready')?'ACTIVE':'BOOTING'),
+          'Reduced motion: '+(reduced?'ON':'OFF'),
+          'Renderer cap: 60 FPS',
+          'Stress state: '+(document.documentElement.dataset.mobileStress||'idle')
+        ].join('\n');
+
+        function done(){
+          if(panelStatus)panelStatus.textContent='System report copied.';
+        }
+
+        if(navigator.clipboard&&navigator.clipboard.writeText){
+          navigator.clipboard.writeText(report).then(done).catch(function(){fallbackCopy(report,done);});
+        }else{
+          fallbackCopy(report,done);
+        }
+      });
+
+      window.addEventListener('resize',update,{passive:true});
+      window.addEventListener('scroll',function(){
+        if(!panel.hidden)update();
+      },{passive:true});
+    })();
+
     document.addEventListener('visibilitychange', function(){
       if(document.hidden){
         window.clearInterval(clockTimer);
