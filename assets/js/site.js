@@ -33,12 +33,6 @@
     /* ---------- Bounded mobile stress benchmark ---------- */
     (function(){
       try{
-        var mobile=window.matchMedia && (
-          window.matchMedia('(pointer: coarse)').matches ||
-          window.matchMedia('(max-width: 768px)').matches
-        );
-        if(!mobile) return;
-
         var button=document.createElement('button');
         button.type='button';
         button.textContent='60s STRESS TEST';
