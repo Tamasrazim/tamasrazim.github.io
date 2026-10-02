@@ -30,6 +30,117 @@
     var finePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
     var pageScroller = document.getElementById('axisScroller') || document.scrollingElement || document.documentElement;
 
+    /* ---------- Bounded mobile stress benchmark ---------- */
+    (function(){
+      try{
+        var params=new URLSearchParams(window.location.search);
+        var seconds=Math.max(1,Math.min(60,Number(params.get('stress')||0)));
+        var mobile=window.matchMedia && (
+          window.matchMedia('(pointer: coarse)').matches ||
+          window.matchMedia('(max-width: 768px)').matches
+        );
+        if(!seconds || !mobile) return;
+
+        var started=performance.now();
+        var duration=seconds*1000;
+        var stopped=false;
+        var canvas=document.createElement('canvas');
+        canvas.setAttribute('aria-hidden','true');
+        canvas.style.cssText='position:fixed;inset:0;width:100%;height:100%;z-index:9998;pointer-events:none;opacity:.08;mix-blend-mode:screen;';
+        document.body.appendChild(canvas);
+        var ctx=canvas.getContext('2d',{alpha:true,desynchronized:true});
+        var dpr=Math.min(2,window.devicePixelRatio||1);
+        var width=0,height=0;
+        var particles;
+        var count=Math.min(12000,Math.max(4000,Math.floor((innerWidth*innerHeight)/48)));
+        var raf=0;
+
+        function resize(){
+          width=Math.max(1,Math.floor(innerWidth*dpr));
+          height=Math.max(1,Math.floor(innerHeight*dpr));
+          canvas.width=width;
+          canvas.height=height;
+        }
+        resize();
+        window.addEventListener('resize',resize,{passive:true});
+
+        particles=new Float32Array(count*6);
+        for(var i=0;i<count;i++){
+          var o=i*6;
+          particles[o]=(i*0.61803398875%1)*width;
+          particles[o+1]=(i*0.41421356237%1)*height;
+          particles[o+2]=0.15+(i%97)/120;
+          particles[o+3]=i%628;
+          particles[o+4]=0;
+          particles[o+5]=0;
+        }
+
+        function stop(){
+          if(stopped)return;
+          stopped=true;
+          cancelAnimationFrame(raf);
+          window.removeEventListener('resize',resize);
+          if(canvas.parentNode)canvas.parentNode.removeChild(canvas);
+          document.documentElement.dataset.mobileStress='complete';
+        }
+
+        function tick(now){
+          if(stopped)return;
+          if(now-started>=duration){stop();return;}
+
+          var t=now*0.001;
+          var p=particles;
+          var w=width,h=height;
+          var work=0;
+
+          /* Heavy but bounded CPU workload: vector field + trigonometric transform. */
+          for(var i=0;i<p.length;i+=6){
+            var x=p[i],y=p[i+1],a=p[i+3];
+            var nx=Math.sin(y*0.004+t*1.73+a*0.013);
+            var ny=Math.cos(x*0.003-t*1.21+a*0.017);
+            var s=(p[i+2]+0.35)+0.12*Math.sin(t*2.7+a);
+            var dx=(w*0.5-x)/(w||1),dy=(h*0.5-y)/(h||1);
+            var pull=(dx*dx+dy*dy+0.0001);
+            x+=nx*s+(dx/pull)*0.018;
+            y+=ny*s+(dy/pull)*0.018;
+
+            /* Additional mixing keeps the workload compute-bound instead of draw-bound. */
+            for(var k=0;k<3;k++){
+              x=Math.sin(x*0.017+k*0.31+t)*17+x*0.9992;
+              y=Math.cos(y*0.013-k*0.27-t)*13+y*0.9991;
+              work+=x*y*0.0000001;
+            }
+
+            if(x<0)x+=w;
+            else if(x>=w)x-=w;
+            if(y<0)y+=h;
+            else if(y>=h)y-=h;
+            p[i]=x;p[i+1]=y;
+          }
+
+          /* Tiny GPU/draw pass so the mobile compositor is exercised too. */
+          ctx.clearRect(0,0,w,h);
+          ctx.globalAlpha=0.55;
+          ctx.fillStyle='#ffffff';
+          for(var j=0;j<Math.min(1800,count);j+=3){
+            var q=j*6;
+            ctx.fillRect(p[q],p[q+1],1.5*dpr,1.5*dpr);
+          }
+          ctx.globalAlpha=1;
+
+          /* Prevent aggressive JS elimination in optimizing engines. */
+          window.__mobileStressSink=work;
+          document.documentElement.dataset.mobileStress=Math.floor((now-started)/1000);
+          raf=requestAnimationFrame(tick);
+        }
+
+        document.documentElement.dataset.mobileStress='running';
+        raf=requestAnimationFrame(tick);
+        window.addEventListener('pagehide',stop,{once:true});
+      }catch(e){}
+    })();
+
+
     function q(selector, root){ return (root || document).querySelector(selector); }
     function qa(selector, root){ return Array.prototype.slice.call((root || document).querySelectorAll(selector)); }
 
