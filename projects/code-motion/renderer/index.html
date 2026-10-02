@@ -4559,7 +4559,7 @@ function newProject(){if(!confirmDiscard())return;S.name='untitled';$('#projName
 function confirmDiscard(){return !S.dirty || window.confirm('Current changes are unsaved. Continue without saving?');}
 function loadSample(s){if(!confirmDiscard())return;S.name=s.title.toLowerCase().replace(/[^a-z0-9]+/g,'-');$('#projName').value=S.name;installCode(s.code);markDirty(true);}
 function sampleCards(){const box=$('#sampleList');box.innerHTML='';samples.forEach(s=>{const n=document.createElement('div');n.className='sample';n.innerHTML='<h5>'+s.title+'</h5><p>'+s.desc+'</p>';n.addEventListener('click',()=>loadSample(s));box.appendChild(n);});}
-const PRISM_LIBRARY_URL='../../code-to-eps/prism-library.json';
+const PRISM_LIBRARY_URL='./library/prism-library.json';
 let prismLibraryCache=null;
 const PRISM_EXTRA_LIBRARY=[
 {name:'Prism Radiant Daisy',id:'prism-radiant-daisy',desc:'Procedural translucent daisy study.',code:`function renderFrame(time,frame,fps,ctx,width,height,motion){const a=motion.loopProgress*TAU,s=motion.scale;ctx.fillStyle="#050506";ctx.fillRect(0,0,width,height);ctx.save();ctx.translate(width/2,height/2);for(let i=0;i<18;i++){const q=i*TAU/18+a*.25;ctx.save();ctx.rotate(q);ctx.fillStyle="hsla(12,95%,70%,.28)";ctx.beginPath();ctx.ellipse(0,-105*s,30*s,105*s,0,0,TAU);ctx.fill();ctx.restore();}ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(0,0,28*s,0,TAU);ctx.fill();ctx.restore();}`},
@@ -4579,7 +4579,7 @@ async function loadPrismLibrary(){
   return prismLibraryCache;
 }
 
-const TRILYVA_PRISM_LIBRARY_URL='../../code-to-eps/prism-library.json';
+const TRILYVA_PRISM_LIBRARY_URL='./library/prism-library.json';
 let trilyvaPrismCache=null;
 
 async function loadTrilyvaPrismLibrary(){
