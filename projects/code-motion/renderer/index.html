@@ -1489,8 +1489,8 @@ select.mini{
           <div class="sec">
             <h4>RESOLUTION</h4>
             <div class="seg" id="segRes"></div>
-            <div class="row"><label for="cW">Width</label><input type="number" id="cW" min="2" max="8192" step="2"></div>
-            <div class="row"><label for="cH">Height</label><input type="number" id="cH" min="2" max="8192" step="2"></div>
+            <div class="row"><label for="cW">Width</label><input type="number" id="cW" min="2" max="16384" step="2"></div>
+            <div class="row"><label for="cH">Height</label><input type="number" id="cH" min="2" max="16384" step="2"></div>
             <div class="row"><span class="lb">Aspect</span><span class="val dim" id="cAspect">16:9 · 1.7778</span></div>
             <div class="row"><span class="lb">Megapixels</span><span class="val dim" id="cMp">2.07 MP</span></div>
           </div>
@@ -1590,6 +1590,10 @@ select.mini{
             <div id="media" class="media"><div class="mrow"><b>—</b><em>CHECKING</em></div></div>
             <div class="row"><label for="oQuality">Quality</label>
               <select id="oQuality"><option value="draft">Draft</option><option value="standard">Standard</option><option value="high">High</option><option value="max">Maximum</option></select></div>
+            <div class="row"><label for="oBitrate">Custom bitrate</label>
+              <input type="number" id="oBitrate" min="0" max="2000" step="0.1" value="25" inputmode="decimal">
+              <span class="num" style="font-size:10px;color:var(--mut)">Mbps</span></div>
+            <p class="note">0 = automatic quality bitrate. Any positive value overrides the quality preset and is passed to the encoder probe and final render.</p>
             <div class="row"><label for="oTimebase">WebM timebase</label>
               <select id="oTimebase"><option value="ms">1 ms (compatible)</option><option value="exact">Exact 1/fps tick</option></select></div>
             <div class="row"><label for="oChecksum">Frame checksums</label>
@@ -2889,7 +2893,7 @@ function sanitiseBitrate(v, width, height, fps) {
   if (!isFinite(n) || n <= 0) n = bitrateFor(width, height, fps, 'standard');
   n = Math.round(n);
   if (n < 100000) n = 100000;
-  if (n > 800000000) n = 800000000;
+  if (n > 2000000000) n = 2000000000;
   return n;
 }
 
@@ -2897,14 +2901,15 @@ var CODECS = [
   { id: 'vp09.00.10.08', container: 'V_VP9', label: 'VP9 profile 0' },
   { id: 'vp8', container: 'V_VP8', label: 'VP8' }
 ];
-function probeEncoders(width, height, fps) {
+function probeEncoders(width, height, fps, bitrate) {
   if (typeof VideoEncoder === 'undefined' || !VideoEncoder.isConfigSupported) {
     return Promise.resolve({ available: false, reason: 'VideoEncoder (WebCodecs) is not implemented in this browser.', supported: [] });
   }
   var w = Math.max(2, width - (width % 2)), h = Math.max(2, height - (height % 2));
+  var probeBitrate = sanitiseBitrate(bitrate === undefined ? 6000000 : bitrate, w, h, fps);
   var tests = CODECS.map(function (c) {
     return VideoEncoder.isConfigSupported({
-      codec: c.id, width: w, height: h, bitrate: 6000000,
+      codec: c.id, width: w, height: h, bitrate: probeBitrate,
       framerate: fps, latencyMode: 'quality'
     }).then(function (r) { return { codec: c, supported: !!r.supported }; })
       .catch(function () { return { codec: c, supported: false }; });
@@ -3016,7 +3021,7 @@ function exportWebM(cfg) {
   if (comp.width % 2 || comp.height % 2) {
     return Promise.resolve({ ok: false, error: { name: 'CompositionError', message: 'VP8/VP9 need even pixel dimensions. Current composition is ' + comp.width + '×' + comp.height + '.', detail: 'Round the width and height to even numbers in the Composition panel.' } });
   }
-  return enc.probeEncoders(comp.width, comp.height, comp.fps).then(function (probe) {
+  return enc.probeEncoders(comp.width, comp.height, comp.fps, job.bitrate).then(function (probe) {
     if (!probe.available) return { ok: false, error: { name: 'CapabilityError', message: probe.reason, detail: 'Render a PNG sequence instead.' } };
     var codec = probe.supported[0];
     var scale = job.timebase === 'exact' ? Math.round(1e9 / comp.fps) : 1000000;
@@ -3043,10 +3048,10 @@ function exportWebM(cfg) {
     var gop = Math.max(1, Math.round(comp.fps * 2));
     encoder.configure({
       codec: codec.id, width: comp.width, height: comp.height,
-      bitrate: enc.bitrateFor(comp.width, comp.height, comp.fps, job.quality),
+      bitrate: enc.sanitiseBitrate(job.bitrate, comp.width, comp.height, comp.fps),
       framerate: comp.fps, latencyMode: 'quality'
     });
-    cfg.onLog('encoder configured: ' + codec.label + ' (' + codec.id + ') @ ' + Math.round(enc.bitrateFor(comp.width, comp.height, comp.fps, job.quality) / 1000) + ' kbps');
+    cfg.onLog('encoder configured: ' + codec.label + ' (' + codec.id + ') @ ' + Math.round(enc.sanitiseBitrate(job.bitrate, comp.width, comp.height, comp.fps) / 1000) + ' kbps');
 
     function drain(limit) {
       if (hardError) return Promise.reject(hardError);
@@ -4700,7 +4705,7 @@ var S = {
   previewBusy: false, previewFps: 0, previewRaster: { w: 0, h: 0, s: 1 },
   compareMode: false, compareSplit: 0.5, compareBitmap: null,
   rendering: false, queue: [], results: [], caps: {}, stage: 'IDLE',
-  exportFormat: 'mp4', quality: 'standard', timebase: 'ms', checksums: true, pngTarget: 'zip'
+  exportFormat: 'mp4', quality: 'standard', timebase: 'ms', checksums: true, pngTarget: 'zip', customBitrateMbps: 25
 };
 
 var STAGES = ['IDLE', 'VALIDATING', 'PREPARING', 'ANALYSING', 'RENDERING', 'ENCODING', 'FINALISING', 'VERIFYING', 'COMPLETE'];
@@ -5307,9 +5312,10 @@ function segMark(host, value) {
 var RES_PRESETS = [
   { label: '720p', value: '1280x720' }, { label: '1080p', value: '1920x1080' },
   { label: '1440p', value: '2560x1440' }, { label: '4K', value: '3840x2160' },
+  { label: '8K', value: '7680x4320' }, { label: '16K', value: '15360x8640' },
   { label: '1:1', value: '1080x1080' }, { label: '9:16', value: '1080x1920' }
 ];
-var FPS_PRESETS = [24, 30, 60, 90, 120];
+var FPS_PRESETS = [24, 30, 60, 90, 120, 144, 165, 180, 240];
 var DUR_PRESETS = [4, 10, 15, 20, 30, 60];
 var LOOPDUR_PRESETS = [2, 4, 5, 6, 8, 10, 15, 20, 30, 60];
 var SPEED_PRESETS = [0.25, 0.5, 1, 2, 4];
@@ -5341,8 +5347,8 @@ function initComp() {
       var patch = {}; patch[key] = v; applyComp(patch);
     });
   }
-  numField('#cW', 'width', { min: 2, max: 8192 });
-  numField('#cH', 'height', { min: 2, max: 8192 });
+  numField('#cW', 'width', { min: 2, max: 16384 });
+  numField('#cH', 'height', { min: 2, max: 16384 });
   numField('#cFps', 'fps', { min: 1, max: 240 });
   numField('#cDur', 'duration', { min: 0.05, max: 3600 });
   numField('#cLoopDur', 'loopDuration', { min: 0.05, max: 3600 });
@@ -5634,6 +5640,11 @@ var FMT = [
   { label: 'PNG\u00B7ZIP', value: 'zip', title: 'Every frame as a PNG inside one archive' },
   { label: 'PNG\u00B7DIR', value: 'dir', title: 'Every frame written straight to a folder you choose' }
 ];
+function requestedBitrate(width, height, fps) {
+  var custom = Number(S.customBitrateMbps);
+  if (isFinite(custom) && custom > 0) return custom * 1000000;
+  return ENC.bitrateFor(width, height, fps, S.quality);
+}
 function initRenderPanel() {
   var dirOk = typeof window.showDirectoryPicker === 'function';
   buildSeg($('#segFmt'), FMT.map(function (f) {
@@ -5649,7 +5660,17 @@ function initRenderPanel() {
   $('#oQuality').value = S.quality;
   $('#oTimebase').value = S.timebase;
   $('#oChecksum').value = S.checksums ? 'on' : 'off';
+  $('#oBitrate').value = S.customBitrateMbps;
+  $('#oBitrate').value = Number.isFinite(Number(S.customBitrateMbps)) ? S.customBitrateMbps : 25;
   $('#oQuality').addEventListener('change', function () { S.quality = $('#oQuality').value; refreshMedia(); markDirty(); });
+  $('#oBitrate').addEventListener('change', function () {
+    var v = parseFloat($('#oBitrate').value);
+    if (!isFinite(v) || v < 0) v = 0;
+    v = Math.min(2000, v);
+    S.customBitrateMbps = v;
+    $('#oBitrate').value = v;
+    refreshMedia(); markDirty();
+  });
   $('#oTimebase').addEventListener('change', function () { S.timebase = $('#oTimebase').value; markDirty(); });
   $('#oChecksum').addEventListener('change', function () { S.checksums = $('#oChecksum').value === 'on'; markDirty(); });
   syncFileName();
@@ -5699,7 +5720,7 @@ function refreshMedia() {
     });
     return;
   }
-  var br = ENC.bitrateFor(c.width, c.height, c.fps, S.quality);
+  var br = requestedBitrate(c.width, c.height, c.fps);
   ENC.probeH264(c.width, c.height, c.fps, br).then(function (p) {
     if (seq !== mediaSeq) return;
     S.h264 = p;
@@ -5735,7 +5756,7 @@ function suggestH264(c) {
   if (c.width > 1920 && c.fps > 30) tries.push({ label: '1920\u00D71080 / 30 fps', w: 1920, h: 1080, fps: 30, patch: { width: 1920, height: 1080, fps: 30 } });
   if (c.width > 1280) tries.push({ label: '1280\u00D7720 / 30 fps', w: 1280, h: 720, fps: 30, patch: { width: 1280, height: 720, fps: 30 } });
   return Promise.all(tries.map(function (t) {
-    return ENC.probeH264(t.w, t.h, t.fps, ENC.bitrateFor(t.w, t.h, t.fps, S.quality))
+    return ENC.probeH264(t.w, t.h, t.fps, requestedBitrate(t.w, t.h, t.fps))
       .then(function (p) { return p.available ? t : null; });
   })).then(function (rs) { return rs.filter(Boolean); });
 }
@@ -5764,7 +5785,7 @@ function buildJob(over) {
     target: fmt === 'dir' ? 'dir' : 'zip',
     exportFormat: fmt,
     quality: S.quality, timebase: S.timebase, checksums: S.checksums,
-    bitrate: ENC.sanitiseBitrate(ENC.bitrateFor(comp.width, comp.height, comp.fps, S.quality), comp.width, comp.height, comp.fps),
+    bitrate: ENC.sanitiseBitrate(requestedBitrate(comp.width, comp.height, comp.fps), comp.width, comp.height, comp.fps),
     tags: buildTags(comp, meta),
     createdAt: new Date().toISOString(),
     test: over.test || null
@@ -6459,7 +6480,7 @@ function projectRecord() {
   return {
     id: S.id, name: S.name, version: S.version,
     code: Ed.ta.value, comp: S.comp, meta: S.meta,
-    exportPrefs: { format: S.exportFormat, quality: S.quality, timebase: S.timebase, checksums: S.checksums },
+    exportPrefs: { format: S.exportFormat, quality: S.quality, timebase: S.timebase, checksums: S.checksums, customBitrateMbps: S.customBitrateMbps },
     created: S.created, modified: new Date().toISOString()
   };
 }
@@ -6517,6 +6538,8 @@ function loadProjectRecord(rec) {
   S.quality = p.quality || 'standard';
   S.timebase = p.timebase || 'ms';
   S.checksums = p.checksums !== false;
+  S.customBitrateMbps = isFinite(Number(p.customBitrateMbps)) && Number(p.customBitrateMbps) >= 0 ? Math.min(2000, Number(p.customBitrateMbps)) : 25;
+  S.customBitrateMbps = isFinite(Number(p.customBitrateMbps)) && Number(p.customBitrateMbps) >= 0 ? Math.min(2000, Number(p.customBitrateMbps)) : 25;
   S.code = rec.code || '';
   edSetValue(S.code);
   $('#projName').value = S.name;
@@ -6628,7 +6651,7 @@ function toTmotion() {
     loop: { enabled: !!c.loop, duration: c.loopDuration },
     timeRemap: { rate: c.speed, reverse: !!c.reverse },
     metadata: S.meta,
-    exportPrefs: { format: S.exportFormat, quality: S.quality, timebase: S.timebase, checksums: S.checksums },
+    exportPrefs: { format: S.exportFormat, quality: S.quality, timebase: S.timebase, checksums: S.checksums, customBitrateMbps: S.customBitrateMbps },
     frameModel: 'frameCount = round(duration * fps); frames 0..frameCount-1; time = frame / fps * rate'
   };
 }
