@@ -611,14 +611,14 @@
 
       <div class="header-right">
         <span class="clock" id="clock" aria-label="Local time"></span>
-        <span class="system-hud" id="systemHud" aria-label="Live site activity">
+        <button class="system-hud" id="systemHud" type="button" aria-label="Open live system panel" aria-expanded="false" aria-controls="systemPanel">
           <span class="hud-dot" aria-hidden="true"></span>
           <span class="hud-label">LIVE</span>
           <span class="hud-section" id="hudSection">TOP</span>
           <span class="hud-fps" id="hudFps">60</span>
           <span class="hud-unit">FPS</span>
           <span class="hud-bar" aria-hidden="true"><i id="hudBar"></i></span>
-        </span>
+        </button>
         <a class="header-contact" href="#contact">Contact</a>
         <button class="menu-button" id="menuButton" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNav">
           <span></span><span></span>
@@ -632,8 +632,36 @@
     <a href="#projects">Projects</a>
     <a href="#socials">Socials</a>
     <a href="#contact">Contact</a>
+    <button class="mobile-system-trigger" id="mobileSystemTrigger" type="button">System / Diagnostics</button>
     <p class="mobile-meta">Robiul Rumman Razim — Tamasrazim.<br>Technology, projects, systems and digital work.</p>
   </nav>
+
+  <aside class="system-panel" id="systemPanel" hidden aria-hidden="true">
+    <div class="system-panel-inner">
+      <div class="system-panel-head">
+        <div>
+          <span class="eyebrow">Live system</span>
+          <h2>Site diagnostics.</h2>
+        </div>
+        <button class="system-panel-close" id="systemPanelClose" type="button" aria-label="Close system panel">×</button>
+      </div>
+
+      <div class="system-stats" id="systemStats">
+        <div><span>Section</span><strong id="panelSection">TOP</strong></div>
+        <div><span>Motion</span><strong id="panelMotion">ACTIVE</strong></div>
+        <div><span>Frame cap</span><strong>60 FPS</strong></div>
+        <div><span>Viewport</span><strong id="panelViewport">—</strong></div>
+        <div><span>Pixel ratio</span><strong id="panelDpr">—</strong></div>
+        <div><span>Reduced motion</span><strong id="panelReduced">—</strong></div>
+      </div>
+
+      <div class="system-panel-actions">
+        <button class="button" id="panelStress" type="button">Run 60s stress test</button>
+        <button class="button button-ghost" id="panelReport" type="button">Copy system report</button>
+      </div>
+      <p class="system-panel-note" id="panelStatus">Live values update while the panel is open.</p>
+    </div>
+  </aside>
 
   <div id="axisScroller" class="axis-scroller">
   <main id="content">
