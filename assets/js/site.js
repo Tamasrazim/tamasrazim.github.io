@@ -252,6 +252,26 @@
         energy=Math.min(1,energy*.78+Math.min(1,(pointerSpeed*.045)+(scrollSpeed*.018)));
         var live=now<activeUntil||energy>.055;
 
+        if(sectionNode&&sectionNodes.length){
+          var horizontal=!!(document.body&&document.body.dataset.horizontalMode==='true');
+          var viewport=horizontal?window.innerWidth:window.innerHeight;
+          var midpoint=viewport*.5,best=null,bestDist=Infinity;
+          sectionNodes.forEach(function(section){
+            var rect=section.getBoundingClientRect();
+            var center=horizontal?rect.left+rect.width*.5:rect.top+rect.height*.5;
+            var dist=Math.abs(center-midpoint);
+            if(dist<bestDist){bestDist=dist;best=section;}
+          });
+          if(best){
+            var label=(best.getAttribute('data-hud-name')||best.id||'section').replace(/[-_]+/g,' ');
+            sectionNode.textContent=label.toUpperCase();
+          }
+        }
+
+        if(header){
+          header.classList.toggle('is-scrolled',Math.abs(sx+sy)>28);
+        }
+
         fpsNode.textContent=Math.round(smoothFps);
         bar.style.width=Math.round(energy*100)+'%';
         hud.classList.toggle('is-active',live);
