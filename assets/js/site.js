@@ -274,6 +274,8 @@
           header.classList.toggle('is-scrolled',Math.abs(sx+sy)>28);
         }
 
+        window.__tamasrazimHudEnergy=energy;
+        window.__tamasrazimHudFps=Math.round(smoothFps);
         fpsNode.textContent=Math.round(smoothFps);
         bar.style.width=Math.round(energy*100)+'%';
         hud.classList.toggle('is-active',live);
@@ -301,7 +303,23 @@
       var panelStress=q('#panelStress');
       var panelReport=q('#panelReport');
       var panelStatus=q('#panelStatus');
+      var panelActivity=q('#panelActivity');
+      var panelConnection=q('#panelConnection');
+      var panelSession=q('#panelSession');
+      var telemetryGraph=q('#telemetryGraph');
+      var telemetryBars=[];
       var reportTimer=0;
+      var sessionStarted=performance.now();
+
+      if(telemetryGraph){
+        for(var gi=0;gi<28;gi++){
+          var barNode=document.createElement('i');
+          barNode.className='telemetry-bar';
+          barNode.style.height=(10+(gi%5)*7)+'%';
+          telemetryGraph.appendChild(barNode);
+          telemetryBars.push(barNode);
+        }
+      }
 
       function update(){
         if(panelSection&&section) panelSection.textContent=section.textContent||'TOP';
@@ -314,6 +332,25 @@
         if(panelReduced){
           panelReduced.textContent=window.matchMedia&&
             window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'ON' : 'OFF';
+        }
+
+        var energy=Number(window.__tamasrazimHudEnergy)||0;
+        var net=navigator.onLine!==false;
+        if(panelConnection) panelConnection.textContent=net?'ONLINE':'OFFLINE';
+        if(panelActivity){
+          panelActivity.textContent=energy>.7?'HIGH':energy>.25?'MOVING':'IDLE';
+        }
+        if(panelSession){
+          var elapsed=Math.max(0,Math.floor((performance.now()-sessionStarted)/1000));
+          panelSession.textContent=String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(elapsed%60).padStart(2,'0');
+        }
+        if(telemetryBars.length){
+          for(var bi=0;bi<telemetryBars.length-1;bi++){
+            telemetryBars[bi].style.height=telemetryBars[bi+1].style.height||'10%';
+          }
+          var nextHeight=Math.max(8,Math.min(100,10+energy*90));
+          telemetryBars[telemetryBars.length-1].style.height=nextHeight.toFixed(1)+'%';
+          telemetryBars[telemetryBars.length-1].style.opacity=(.35+energy*.65).toFixed(2);
         }
         if(panelStress){
           var state=document.documentElement.dataset.mobileStress;
@@ -391,6 +428,9 @@
           'Pixel ratio: '+(window.devicePixelRatio||1).toFixed(2)+'×',
           'Motion: '+(document.documentElement.classList.contains('motion-ready')?'ACTIVE':'BOOTING'),
           'Reduced motion: '+(reduced?'ON':'OFF'),
+          'Connection: '+(navigator.onLine===false?'OFFLINE':'ONLINE'),
+          'Session: '+(panelSession&&panelSession.textContent||'00:00'),
+          'Activity: '+(panelActivity&&panelActivity.textContent||'IDLE'),
           'Renderer cap: 60 FPS',
           'Stress state: '+(document.documentElement.dataset.mobileStress||'idle')
         ].join('\n');
@@ -406,6 +446,8 @@
         }
       });
 
+      window.addEventListener('online',update,{passive:true});
+      window.addEventListener('offline',update,{passive:true});
       window.addEventListener('resize',update,{passive:true});
       window.addEventListener('scroll',function(){
         if(!panel.hidden)update();
