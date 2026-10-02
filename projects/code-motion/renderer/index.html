@@ -7040,8 +7040,11 @@ function intelAnalyzePixels(data,w,h){
       var ang=Math.PI*2*k2/16, x1=Math.round(cxp+Math.cos(ang)*ry*w/24), y1=Math.round(cyp+Math.sin(ang)*ry*h/24);
       var x2=Math.round(cxp-Math.cos(ang)*ry*w/24), y2=Math.round(cyp-Math.sin(ang)*ry*h/24);
       if(x1>=0&&x1<w&&y1>=0&&y1<h&&x2>=0&&x2<w&&y2>=0&&y2<h){
-        var a1=data[(y1*w+x1)*4+3],a2=data[(y2*w+x2)*4+3];
-        radial += 1-Math.abs(a1-a2)/255; samples++;
+        var p1=(y1*w+x1)*4,p2=(y2*w+x2)*4;
+        var a1=data[p1+3]/255,a2=data[p2+3]/255;
+        var lum1=(.299*data[p1]+.587*data[p1+1]+.114*data[p1+2])/255;
+        var lum2=(.299*data[p2]+.587*data[p2+1]+.114*data[p2+2])/255;
+        radial += (1-Math.abs(lum1-lum2))*.82 + (1-Math.abs(a1-a2))*.18; samples++;
       }
     }
   }
