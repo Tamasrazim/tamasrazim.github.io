@@ -236,6 +236,8 @@
           window.scrollTo({top:Math.max(0,top),behavior:behavior});
         }
         history.replaceState(null,'','#'+(section.id||'top'));
+        var hudSection=q('#hudSection');
+        if(hudSection) hudSection.textContent=(section.id||'top').replace(/[-_]+/g,' ').toUpperCase();
       }
 
       window.addEventListener('keydown',function(e){
