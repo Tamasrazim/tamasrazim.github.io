@@ -213,6 +213,53 @@
     }
     updateClock();
     var clockTimer = window.setInterval(updateClock, 1000);
+
+    /* ---------- Live activity HUD ---------- */
+    (function initActivityHud(){
+      var hud=q('#systemHud'),fpsNode=q('#hudFps'),bar=q('#hudBar');
+      if(!hud||!fpsNode||!bar)return;
+
+      var last=performance.now(),smoothFps=60,lastX=0,lastY=0,px=0,py=0,scrollLast=0,energy=0;
+      var activeUntil=0;
+
+      function pulse(x,y){
+        px=x;py=y;
+        activeUntil=performance.now()+420;
+      }
+
+      window.addEventListener('pointermove',function(e){pulse(e.clientX,e.clientY);},{passive:true});
+      window.addEventListener('scroll',function(){
+        scrollLast=pageScroller && pageScroller.scrollTop || window.scrollY || 0;
+        activeUntil=performance.now()+420;
+      },{passive:true});
+
+      function tick(now){
+        var dt=Math.max(.001,(now-last)/1000);
+        last=now;
+
+        var instant=Math.min(60,1/dt);
+        smoothFps=smoothFps*.86+instant*.14;
+
+        var sx=pageScroller && pageScroller.scrollLeft || 0;
+        var sy=pageScroller && pageScroller.scrollTop || window.scrollY || 0;
+        var scrollSpeed=Math.abs((sx+sy)-scrollLast);
+        scrollLast=sx+sy;
+
+        var pointerSpeed=Math.hypot(px-(window.__hudPx||px),py-(window.__hudPy||py));
+        window.__hudPx=px;window.__hudPy=py;
+
+        energy=Math.min(1,energy*.78+Math.min(1,(pointerSpeed*.045)+(scrollSpeed*.018)));
+        var live=now<activeUntil||energy>.055;
+
+        fpsNode.textContent=Math.round(smoothFps);
+        bar.style.width=Math.round(energy*100)+'%';
+        hud.classList.toggle('is-active',live);
+
+        requestAnimationFrame60(tick);
+      }
+
+      requestAnimationFrame60(tick);
+    })();
     document.addEventListener('visibilitychange', function(){
       if(document.hidden){
         window.clearInterval(clockTimer);
