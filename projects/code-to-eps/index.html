@@ -50,6 +50,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
     <button class="btn" id="metaBtn">Adobe CSV</button>
     <button class="btn" id="allSvgBtn">Export All SVG</button>
     <button class="btn" id="allPrismOneSvgBtn">Prism → 150 SVG</button>
+    <button class="btn" id="prismSevenMetaBtn">7 Metadata CSV</button>
     <button class="btn" id="iconStockBtn">Stock Icons 10K</button>
     <button class="btn primary" id="allBtn">Export All EPS</button>
   </div>
@@ -1400,12 +1401,37 @@ async function exportAllPrismOneSvg(){
       await new Promise(r=>setTimeout(r,300));
     }
 
-    const csv=sheetMetadataCsv(sheetMetadata);
-    if(new TextEncoder().encode(csv).length>1000000)throw new Error('Adobe CSV exceeds the 1 MB upload limit.');
-    downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),'prism-flowers-adobe-stock-metadata.csv');
-    flash('Prism SVG export finished — '+totalSheets+' SVGs + Adobe CSV · '+FLOWERS.length+' flowers · 150 per SVG except the final '+(FLOWERS.length%perSvg||perSvg)+'.');
+    flash('Prism SVG export finished — '+totalSheets+' SVGs · '+FLOWERS.length+' flowers · 150 per SVG except the final '+(FLOWERS.length%perSvg||perSvg)+'.');
   }catch(e){
     setStatus('Prism SVG sheets failed: '+(e.message||e),'bad');
+  }finally{
+    btn.disabled=false;
+  }
+}
+async function downloadSevenPrismMetadata(){
+  const btn=$('#prismSevenMetaBtn');
+  btn.disabled=true;
+  try{
+    const NON_FLOWER_IDS=PRISM_NON_FLOWER_IDS;
+    const FLOWERS=LIB.filter(f=>!NON_FLOWER_IDS.has(String(f.id||'')));
+    const perSvg=150;
+    const totalSheets=Math.ceil(FLOWERS.length/perSvg);
+
+    for(let sheet=0;sheet<totalSheets;sheet++){
+      const startIndex=sheet*perSvg;
+      const endIndex=Math.min(startIndex+perSvg,FLOWERS.length);
+      const count=endIndex-startIndex;
+      const first=String(startIndex+1).padStart(3,'0');
+      const last=String(endIndex).padStart(3,'0');
+      const filename='prism-flowers-'+first+'-'+last+'.svg';
+      const csv=sheetMetadataCsv([[filename,sheetMetadataRow(filename,sheet,count)[1],sheetMetadataRow(filename,sheet,count)[2],sheetMetadataRow(filename,sheet,count)[3],sheetMetadataRow(filename,sheet,count)[4]]]);
+      downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),'prism-flowers-'+first+'-'+last+'-metadata.csv');
+      setStatus('Prism metadata — '+(sheet+1)+' / '+totalSheets+' CSVs downloaded · '+filename);
+      await new Promise(r=>setTimeout(r,350));
+    }
+    flash('7 Adobe metadata CSVs downloaded — one for each Prism SVG sheet.');
+  }catch(e){
+    setStatus('Prism metadata download failed: '+(e.message||e),'bad');
   }finally{
     btn.disabled=false;
   }
@@ -1422,6 +1448,7 @@ svgBtn.onclick=()=>{if(!lastScene)return;downloadBlob(new Blob([sceneToSvg(lastS
 allBtn.onclick=async()=>{try{await exportAll()}catch(e){allBtn.disabled=false;setStatus('Export All failed: '+(e.message||e),'bad')}}
 $('#allSvgBtn').onclick=async()=>{try{await exportAllSvg()}catch(e){$('#allSvgBtn').disabled=false;setStatus('Export All SVG failed: '+(e.message||e),'bad')}};
 $('#allPrismOneSvgBtn').onclick=()=>exportAllPrismOneSvg();
+$('#prismSevenMetaBtn').onclick=()=>downloadSevenPrismMetadata();
 metaBtn.onclick=exportMetadata;
 fillIconFamilies();
 $('#iconStockBtn').onclick=()=>{iconStockSection?.scrollIntoView({block:'center',behavior:'smooth'});loadIcon(iconItemAt(1));iconNumberEl?.focus()};
