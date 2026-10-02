@@ -3,15 +3,13 @@ name: Renderer Check
 on:
   push:
     paths:
-      - "renderer/**"
-      - "tools/**"
-      - "scripts/**"
+      - "projects/code-motion/**"
+      - "tools/validate_code_motion.mjs"
       - ".github/workflows/renderer-check.yml"
   pull_request:
     paths:
-      - "renderer/**"
-      - "tools/**"
-      - "scripts/**"
+      - "projects/code-motion/**"
+      - "tools/validate_code_motion.mjs"
       - ".github/workflows/renderer-check.yml"
 
 permissions:
@@ -23,12 +21,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Python syntax check
-        run: python3 -m py_compile tools/validate_renderer.py
-
-      - name: Validate renderer contracts
-        run: python3 tools/validate_renderer.py --root .
-
-      - name: Run shell validation
-        run: bash scripts/check-renderer.sh
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate canonical TRILYVA renderer
+        run: node tools/validate_code_motion.mjs
