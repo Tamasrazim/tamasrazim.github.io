@@ -971,7 +971,7 @@ function sheetMetadataRow(filename,index,count){
     'isolated','transparent','svg','stock vector','creative assets','ornamental design',
     'flower graphics','botanical graphics','floral graphics','icon sheet','graphic resources'
   ];
-  return [filename,title,[...new Set(keywords)].slice(0,50).join(', '),'14',''];
+  return [filename,title,[...new Set(keywords)].slice(0,50).join(', ') ,'8',''];
 }
 function metadataCsv(items=LIB.map((f,i)=>({f,i}))){
   const h=['Filename','Title','Keywords','Category','Releases'];
@@ -980,7 +980,7 @@ function metadataCsv(items=LIB.map((f,i)=>({f,i}))){
     filename||adobeFilename(f,i),
     adobeTitle(f),
     flowerKeywords(f).join(', '),
-    '14',
+    '8',
     ''
   ]));
   return rows.map(r=>r.map(csvEsc).join(',')).join('\r\n')+'\r\n';
