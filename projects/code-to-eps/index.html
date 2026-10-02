@@ -1286,7 +1286,7 @@ for(let i=0;i<28;i++){
   return specs.map((s,i)=>({
     id:'prism-extra-'+String(i+1).padStart(2,'0'),
     title:s.name,
-    flowerName:s.name.replace(/^Prisms+/,''),
+    flowerName:s.name.replace(/^Prism\s+/,''),
     description:'Original Prism-style procedural flower vector illustration.',
     keywords:[],
     code:prismExtraFlowerCode(s)
@@ -1297,7 +1297,7 @@ async function exportAllPrismOneSvg(){
   const btn=$('#allPrismOneSvgBtn');
   btn.disabled=true;
   try{
-    // Export the 937 flower library as separate transparent 16:9 SVG sheets.
+    // Export the 950-flower library as separate transparent 16:9 SVG sheets.
     // Each full sheet contains 150 flower icons; the final sheet contains the remainder.
     const FLOWERS=LIB.filter(f=>!PRISM_NON_FLOWER_IDS.has(String(f.id||'')));
     const perSvg=150;
