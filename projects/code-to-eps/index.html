@@ -1472,7 +1472,7 @@ function drawLivingFace(ctx,g){
     }else if(g.mood==='robot'){
       ctx.fillStyle=ink;ctx.beginPath();ctx.roundRect(-104,-76,208,130,34);ctx.fill();
       ctx.fillStyle=p.light;ctx.beginPath();ctx.roundRect(-68,-40,48,40,12);ctx.fill();ctx.roundRect(20,-40,48,40,12);ctx.fill();
-      ctx.fillStyle=p.accent;ctx.beginPath();ctx.rect(-10,68,20,18);ctx.fill();
+      ctx.fillStyle=p.accent;ctx.fillRect(-10,68,20,18);
     }else if(g.mood==='cat'){
       ctx.fillStyle=ink;
       livingGlyphPath(ctx,[[-88,32],[-118,-92],[-18,-40],[0,-112],[18,-40],[118,-92],[88,32],[74,84],[-74,84]]);
@@ -1502,7 +1502,7 @@ function drawLivingSymbol(ctx,g){
     star(0,20,178,28,4);
   }else if(g.symbol==='moon'){
     ctx.beginPath();ctx.arc(-18,18,142,0,TAU);ctx.fill();
-    ctx.globalCompositeOperation='destination-out';ctx.beginPath();ctx.arc(42,-24,126,0,TAU);ctx.fill();ctx.globalCompositeOperation='source-over';
+    ctx.fillStyle=g.palette.base;ctx.beginPath();ctx.arc(42,-24,126,0,TAU);ctx.fill();
   }else if(g.symbol==='sun'){
     ctx.fillStyle=p.light;for(let i=0;i<12;i++){const a=i*TAU/12;ctx.save();ctx.rotate(a);ctx.fillRect(-10,-194,20,62);ctx.restore()}
     ctx.beginPath();ctx.arc(0,24,118,0,TAU);ctx.fill();
