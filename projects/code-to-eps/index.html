@@ -932,17 +932,25 @@ function adobeFilename(f,i){
   const flower=safeName(f.title).replace(/^prism-?/i,'')||'flower';
   return 'prism-'+flower+'.eps';
 }
-function adobeTitle(f){
-  const flower=String(f.title||'Prism Flower')
+function flowerDisplayName(f){
+  return String(f.title||'Prism Flower')
     .replace(/^Prism\s+/i,'')
     .replace(/[-_]+/g,' ')
     .replace(/[^A-Za-z0-9 ]+/g,' ')
     .replace(/\s+/g,' ')
-    .trim();
+    .trim() || 'Flower';
+}
+function adobeTitle(f){
+  const flower=flowerDisplayName(f);
   return ('Prism '+flower+' flower vector illustration').replace(/\s+/g,' ').trim().slice(0,70).trim();
 }
+function adobeDescription(f){
+  const flower=flowerDisplayName(f);
+  return ('Colorful Prism-style '+flower.toLowerCase()+' flower vector illustration with luminous geometric petals, vibrant gradient color, and a clean ornamental botanical design for creative stock use.')
+    .replace(/\s+/g,' ').trim().slice(0,200).trim();
+}
 function flowerKeywords(f){
-  const flower=String(f.title||'Prism Flower').replace(/^Prism\s+/i,'').toLowerCase();
+  const flower=flowerDisplayName(f).toLowerCase();
   const base=[
     flower,'prism flower','flower','floral','botanical','petals','colorful','vibrant','ornamental','nature','flower illustration',
     'vector','vector art','digital art','abstract','gradient','luminous','geometric','decorative','design','artwork','visual',
@@ -954,9 +962,14 @@ function flowerKeywords(f){
   return [...new Set(base.map(x=>String(x).replace(/\s+/g,' ').trim()).filter(Boolean))].slice(0,50);
 }
 function metadataCsv(items=LIB.map((f,i)=>({f,i}))){
-  const h=['Filename','Title','Keywords'];
+  const h=['Filename','Title','Description','Keywords'];
   const rows=[h];
-  items.forEach(({f,i,filename})=>rows.push([filename||adobeFilename(f,i),adobeTitle(f),flowerKeywords(f).join(', ')]));
+  items.forEach(({f,i,filename})=>rows.push([
+    filename||adobeFilename(f,i),
+    adobeTitle(f),
+    adobeDescription(f),
+    flowerKeywords(f).join(', ')
+  ]));
   return rows.map(r=>r.map(csvEsc).join(',')).join('\r\n')+'\r\n';
 }
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2500)}
