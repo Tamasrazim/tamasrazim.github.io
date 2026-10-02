@@ -4409,19 +4409,48 @@ async function loadTrilyvaPrismLibrary(){
   if(!r.ok)throw new Error('Prism library request failed: '+r.status);
   const raw=await r.json();
   if(!Array.isArray(raw))throw new Error('Prism library payload is not an array.');
-  trilyvaPrismCache=raw.filter(f=>f&&typeof f.code==='string'&&f.title);
+  trilyvaPrismCache=raw
+    .filter(f=>f&&f.title)
+    .map(f=>{
+      const code=typeof f.code==='string'?f.code:
+        (typeof f.source==='string'?f.source:
+        (typeof f.renderCode==='string'?f.renderCode:''));
+      return Object.assign({},f,{code});
+    })
+    .filter(f=>typeof f.code==='string'&&f.code.trim());
   return trilyvaPrismCache;
 }
 function trilyvaLibraryEscape(v){return String(v??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
-function trilyvaLoadLibraryCode(title,code){
-  S.name=String(title||'untitled');
+async function trilyvaLoadLibraryCode(title,code){
+  const name=String(title||'untitled').trim()||'untitled';
+  const source=String(code||'').replace(/\r/g,'');
+  if(!source.trim()){
+    $('#stMsg').textContent='Library item has no executable render code.';
+    return {ok:false};
+  }
+  S.name=name;
   $('#projName').value=S.name;
-  edSetValue(String(code||''));
-  S.code=String(code||'');
-  markDirty();
+  if(!S.comp) S.comp=CORE.composition({});
+  S.meta=merge(defaultMeta(),S.meta||{});
+  S.meta.title=name;
+  S.meta.composition=S.meta.composition||'Comp 1';
+  S.frame=0;
+  S.compiled=false;
+  S.lastError=null;
+  edSetValue(source);
+  S.code=source;
+  syncMetaUI();
   syncFileName();
-  closeModal();
-  run();
+  markDirty(true);
+  const result=await run();
+  if(result&&result.ok){
+    closeModal();
+    $('#stMsg').textContent='Loaded library item · '+name;
+    setStage('IDLE');
+  }else{
+    $('#stMsg').textContent='Library item failed to compile · '+name;
+  }
+  return result||{ok:false};
 }
 function openTrilyvaLibrary(){
   const body=document.createElement('div');
@@ -4471,7 +4500,10 @@ function openTrilyvaLibrary(){
       const text=document.createElement('div');text.style.cssText='min-width:0;flex:1;';
       text.innerHTML='<h5>'+trilyvaLibraryEscape(x.title)+'</h5><p>'+trilyvaLibraryEscape(x.id||((mode==='prism'?'prism':'emoji')+'-'+(i+1)))+'</p>';
       const load=document.createElement('button');load.className='x';load.textContent='LOAD';
-      load.onclick=()=>trilyvaLoadLibraryCode(x.title,x.code);
+      load.type='button';
+      load.onclick=(ev)=>{ev.preventDefault();ev.stopPropagation();trilyvaLoadLibraryCode(x.title,x.code).catch(e=>{
+        $('#stMsg').textContent='Library load failed · '+String(e.message||e);
+      });};
       it.append(text,load);frag.appendChild(it);
     });
     list.replaceChildren(frag);
