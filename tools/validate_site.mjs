@@ -27,7 +27,7 @@ function checkLocalRefs(file){
   // DOM ids belong to actual markup, not JavaScript strings/comments.
   const markup=html
     .replace(/<!--[\s\S]*?-->/g,'')
-    .replace(/<script(?:\\s[^>]*)?>[\\s\\S]*?<\\/script>/gi,'');
+    .replace(/<script(?:\s[^>]*)?>[\s\S]*?<\/script>/gi,'');
   const ids=[...markup.matchAll(/\bid=["']([^"']+)["']/gi)].map(x=>x[1]);
   const dup=ids.filter((id,i)=>ids.indexOf(id)!==i);
   must(!dup.length,file+' has no duplicate DOM ids');
