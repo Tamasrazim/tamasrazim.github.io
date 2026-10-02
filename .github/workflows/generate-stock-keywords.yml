@@ -1,0 +1,148 @@
+name: Generate 5M Stock Keywords
+
+on:
+  push:
+    paths:
+      - ".github/workflows/generate-stock-keywords.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Generate corpus
+        shell: python
+        run: |
+          from pathlib import Path
+          import re, gzip, json
+
+          root = Path("projects/code-motion/renderer/keyword-library")
+          root.mkdir(parents=True, exist_ok=True)
+
+          categories = [
+            "Abstract","Animals Wildlife","Arts","Backgrounds Textures",
+            "Beauty Fashion","Buildings Landmarks","Business Finance",
+            "Celebrities","Education","Food Drink","Healthcare Medical",
+            "Holidays","Industrial","Interiors","Miscellaneous","Nature",
+            "Objects","Parks Outdoor","People","Religion","Science",
+            "Signs Symbols","Sports Recreation","Technology","Transportation",
+            "Vintage"
+          ]
+
+          common_subjects = """design image graphic artwork composition concept visual pattern texture background surface shape form color light shadow gradient particle geometry abstract motif wallpaper illustration template poster banner frame border ornament icon symbol object detail scene arrangement collection set render animation motion loop transition overlay effect sparkle glow flare bokeh blur focus depth perspective space copyspace negative foreground outline contour circle sphere cube line curve wave ripple star grid ribbon smoke fog reflection silhouette style visual art creative digital media colorful seamless decorative modern minimal luxury elegant fluid organic translucent transparent iridescent luminous vibrant soft polished cinematic conceptual atmospheric dreamy surreal professional isolated centered wide vertical square horizontal""".split()
+
+          common_styles = """abstract artistic balanced bold bright calm clean classic colorful contemporary creative dark delicate digital dramatic dynamic elegant ethereal futuristic geometric glowing golden graceful graphic harmonic icy luminous minimal modern natural neon organic pastel polished premium realistic retro rustic seamless simple smooth subtle textured translucent transparent vibrant vintage warm white cinematic professional luxury stylish symmetrical layered monochrome multicolor iridescent metallic silky velvet matte glossy crystalline sculptural fluid experimental playful serene atmospheric dreamy surreal photorealistic handcrafted isolated macro panoramic flat seasonal festive naturalistic conceptual decorative""".split()
+
+          common_contexts = """advertising marketing branding socialmedia web publishing print packaging presentation editorial commercial promotional creative business lifestyle design project portfolio campaign mockup template wallpaper poster cover content media communication digital online offline premium modern contemporary seasonal everyday professional personal corporate educational inspirational conceptual decorative artistic visual""".split()
+
+          anchors = {
+            "Abstract":"fractal blur polygon geometry ripple wave vortex spiral gradient fluid particle kaleidoscope prism mesh noise distortion symmetry shadow light colorflow liquid crystal neon spectrum",
+            "Animals Wildlife":"animal wildlife mammal bird cat dog horse elephant tiger lion bear fox rabbit deer wolf whale dolphin fish butterfly insect reptile amphibian panda penguin owl eagle parrot flamingo giraffe zebra monkey",
+            "Arts":"painting drawing sculpture canvas brush palette watercolor acrylic oil ink sketch craft pottery ceramic gallery museum artist studio easel illustration printmaking collage typography calligraphy",
+            "Backgrounds Textures":"wallpaper texture pattern paper fabric marble stone wood concrete metal glass grain noise textile seamless backdrop backdropspace surface gradient bokeh geometric floral abstract",
+            "Beauty Fashion":"fashion beauty clothing apparel makeup cosmetics hairstyle skincare perfume jewelry accessory handbag footwear model runway portrait salon makeupartist lipstick foundation dress suit denim luxury",
+            "Buildings Landmarks":"architecture building landmark skyscraper tower bridge monument temple cathedral museum palace castle house apartment office hotel cityscape skyline facade window doorway staircase street",
+            "Business Finance":"business finance office startup entrepreneur investment banking money currency accounting calculator chart graph growth strategy meeting teamwork leadership economy commerce retail marketing",
+            "Celebrities":"celebrity performer actor actress singer musician athlete presenter politician publicfigure premiere redcarpet interview award concert festival entertainment portrait editorial media",
+            "Education":"school classroom student teacher learning study book library notebook pencil chalkboard university college lecture homework exam graduation campus science mathematics language training workshop",
+            "Food Drink":"food drink meal cuisine cooking recipe restaurant kitchen ingredient fruit vegetable dessert bread coffee tea juice wine beverage breakfast lunch dinner snack bakery pasta pizza salad",
+            "Healthcare Medical":"healthcare medical medicine doctor nurse hospital clinic patient laboratory pharmacy treatment diagnosis wellness fitness nutrition therapy prevention anatomy healthcaretechnology stethoscope syringe pill tablet",
+            "Holidays":"holiday christmas halloween easter ramadan diwali hanukkah wedding birthday anniversary festival vacation celebration party ornament gift decoration fireworks seasonal winter summer spring autumn",
+            "Industrial":"industrial factory manufacturing construction mining engineering tool machine worker helmet electricity energy welding steel blueprint pipeline warehouse logistics equipment infrastructure trade repair",
+            "Interiors":"interior room livingroom bedroom kitchen bathroom office studio hotel lobby restaurant classroom library hallway furniture sofa chair table lamp cabinet window decor home workspace",
+            "Miscellaneous":"object item collection assortment utility concept novelty accessory household everyday random creative generic isolated product package tool container material shape symbol",
+            "Nature":"nature plant flower leaf tree forest mountain ocean water river lake cloud sky sun moon star garden meadow field grass branch petal botanical ecology environment landscape wildlife",
+            "Objects":"object bottle box book cup glass vase clock phone camera laptop keyboard headphones tool hammer scissors key lock lamp chair table bag suitcase package product device",
+            "Parks Outdoor":"park outdoor camping hiking trekking picnic gardening playground sailing surfing cycling beach trail tent backpack canoe kayak adventure recreation landscape travel",
+            "People":"person people portrait woman man child family group friend couple worker professional student face hand eye smile gesture lifestyle human diversity community",
+            "Religion":"religion spirituality faith prayer worship church mosque temple synagogue altar candle rosary cross crescent mandala meditation scripture holy celebration pilgrimage",
+            "Science":"science laboratory chemistry biology physics astronomy technology microscope flask molecule atom dna genome planet space telescope research experiment data medicine robotics",
+            "Signs Symbols":"sign symbol icon logo flag arrow badge warning direction information interface emoji emblem mark indicator pictogram label button map heart star check plus minus target",
+            "Sports Recreation":"sport fitness running cycling swimming soccer football basketball tennis volleyball yoga gym exercise athlete competition training recreation hiking skating skiing surfing",
+            "Technology":"technology computer laptop smartphone tablet software code programming ai artificialintelligence machinelearning robotics internet network cloud database cybersecurity data server circuit processor electronics digital interface app",
+            "Transportation":"transportation car automobile truck bus train railway subway airplane aircraft helicopter boat ship yacht bicycle motorcycle scooter road highway airport station terminal traffic logistics delivery",
+            "Vintage":"vintage retro antique classic oldfashioned sepia nostalgia heritage historic analog film grain grunge typewriter postcard record vinyl camera furniture automobile fashion decoration"
+          }
+
+          per_category = 5_000_000 // len(categories)
+          remainder = 5_000_000 % len(categories)
+          target_per = [per_category + (1 if i < remainder else 0) for i in range(len(categories))]
+
+          # Ten 500K shards; each is safely below GitHub's 100 MB single-file ceiling.
+          handles = []
+          for i in range(10):
+              handles.append((root / f"keywords_{i+1:02d}.txt").open("w", encoding="utf-8", newline="\n"))
+
+          shard = 0
+          shard_count = 0
+          total = 0
+
+          try:
+              for cat, target in zip(categories, target_per):
+                  cat_words = [w.lower() for w in re.findall(r"[A-Za-z]+", cat)]
+                  subs = list(dict.fromkeys(anchors[cat].split() + common_subjects))
+                  styles = list(dict.fromkeys(common_styles))
+                  contexts = list(dict.fromkeys(anchors[cat].split()[:35] + common_contexts))
+
+                  produced = 0
+                  for subject in subs:
+                      if produced >= target: break
+                      for style in styles:
+                          if produced >= target: break
+                          for context in contexts:
+                              if produced >= target: break
+
+                              phrase = " ".join(cat_words + [subject, style, context])
+                              handles[shard].write(phrase + "\n")
+                              produced += 1
+                              total += 1
+                              shard_count += 1
+
+                              if shard_count == 500_000 and shard < 9:
+                                  handles[shard].close()
+                                  shard += 1
+                                  shard_count = 0
+
+                  if produced != target:
+                      raise RuntimeError(f"{cat}: generated {produced}, expected {target}")
+
+          finally:
+              for h in handles:
+                  try: h.close()
+                  except: pass
+
+          lines = sum(1 for p in root.glob("keywords_*.txt") for _ in p.open("r", encoding="utf-8"))
+          if lines != 5_000_000:
+              raise RuntimeError(f"expected 5,000,000 lines, got {lines}")
+
+          manifest = {
+              "entries": 5_000_000,
+              "unique_by_construction": True,
+              "shards": 10,
+              "entries_per_shard": 500_000,
+              "categories": categories,
+              "source": "Shutterstock current contributor category taxonomy",
+              "note": "Research corpus; metadata submitted to stock platforms must remain content-relevant."
+          }
+          (root / "MANIFEST.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+          with gzip.open(root / "stock-keywords-5m.txt.gz", "wt", encoding="utf-8", compresslevel=9) as gz:
+              for i in range(1, 11):
+                  with (root / f"keywords_{i:02d}.txt").open(encoding="utf-8") as f:
+                      for line in f:
+                          gz.write(line)
+
+      - name: Commit corpus
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add projects/code-motion/renderer/keyword-library
+          git commit -m "TRILYVA: add 5M unique stock keyword research corpus" || exit 0
+          git push
