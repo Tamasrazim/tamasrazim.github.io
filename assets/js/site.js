@@ -205,6 +205,68 @@
       window.addEventListener('resize', function(){ if(window.innerWidth > 1050) closeMenu(); }, {passive:true});
     }
 
+    /* ---------- Keyboard section navigation ---------- */
+    (function initSectionKeys(){
+      var sections=qa('main#content > section');
+      if(!sections.length)return;
+
+      function blocked(target){
+        if(!target)return false;
+        var tag=(target.tagName||'').toLowerCase();
+        return tag==='input'||tag==='textarea'||tag==='select'||tag==='button'||target.isContentEditable;
+      }
+
+      function go(index){
+        var section=sections[index];
+        if(!section)return;
+        var horizontal=!!(document.body&&document.body.dataset.horizontalMode==='true');
+        var behavior=reduced?'auto':'smooth';
+
+        if(horizontal){
+          pageScroller.scrollTo({
+            left:Math.max(0,Math.min(
+              pageScroller.scrollWidth-window.innerWidth,
+              section.offsetLeft||0
+            )),
+            top:0,
+            behavior:behavior
+          });
+        }else{
+          var top=window.scrollY+(section.getBoundingClientRect().top||0)-12;
+          window.scrollTo({top:Math.max(0,top),behavior:behavior});
+        }
+        history.replaceState(null,'','#'+(section.id||'top'));
+      }
+
+      window.addEventListener('keydown',function(e){
+        if(blocked(e.target))return;
+
+        var number=e.key>='1'&&e.key<='5' ? Number(e.key)-1 : -1;
+        if(number>=0 && number<sections.length){
+          e.preventDefault();
+          go(number);
+          return;
+        }
+
+        if(e.key==='['||e.key===']'){
+          var current=0,best=Infinity,horizontal=!!(document.body&&document.body.dataset.horizontalMode==='true');
+          var midpoint=(horizontal?window.innerWidth:window.innerHeight)*.5;
+          sections.forEach(function(section,i){
+            var r=section.getBoundingClientRect();
+            var center=horizontal?r.left+r.width*.5:r.top+r.height*.5;
+            var d=Math.abs(center-midpoint);
+            if(d<best){best=d;current=i;}
+          });
+
+          var next=e.key===']' ? Math.min(sections.length-1,current+1) : Math.max(0,current-1);
+          if(next!==current){
+            e.preventDefault();
+            go(next);
+          }
+        }
+      });
+    })();
+
     /* ---------- Local time ---------- */
     var clock = q('#clock');
     function updateClock(){
