@@ -18844,7 +18844,11 @@ function boot() {
 
     return openDB().then(function () { return countStores(); }, function () { return null; });
   }).then(function () {
-    return newProject('sample-prism-carnation');
+    return newProject('sample-prism-carnation').then(function () {
+      if (String(location.hash || '').toLowerCase() === '#living-emojis' && typeof emojiSamplesDialog === 'function') {
+        setTimeout(emojiSamplesDialog, 0);
+      }
+    });
   }).then(function () {
     refreshDiag();
     $('#stMsg').textContent = Engine.bootNote + ' Press Run after editing, or Render when you are ready.';
