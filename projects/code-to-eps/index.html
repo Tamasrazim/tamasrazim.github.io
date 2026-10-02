@@ -49,8 +49,8 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
     <button class="btn" id="svgBtn" disabled>Export SVG</button>
     <button class="btn" id="metaBtn">Adobe CSV</button>
     <button class="btn" id="allSvgBtn">Export All SVG</button>
-    <button class="btn" id="allPrismOneSvgBtn">Prism → 150 SVG</button>
-    <button class="btn" id="prismSevenMetaBtn">7 Metadata CSV</button>
+    <button class="btn" id="allPrismOneSvgBtn">Prism All → One SVG</button>
+    <button class="btn" id="livingGlyphsBtn">Living Glyphs → 150 SVG</button>
     <button class="btn" id="iconStockBtn">Stock Icons 10K</button>
     <button class="btn primary" id="allBtn">Export All EPS</button>
   </div>
@@ -1326,116 +1326,334 @@ for(let i=0;i<28;i++){
   }));
 }
 
+
+const LIVING_GLYPH_PALETTES=[
+  {base:'#ffcf5a',deep:'#e08a22',light:'#fff2b3',accent:'#ff6b6b',ink:'#231f20'},
+  {base:'#69d6ff',deep:'#2684b5',light:'#c9f5ff',accent:'#8b5cf6',ink:'#17212b'},
+  {base:'#ff7fb5',deep:'#c63d78',light:'#ffd4e5',accent:'#7c5cff',ink:'#2a1621'},
+  {base:'#9be15d',deep:'#4d9f36',light:'#e9ffd1',accent:'#17b890',ink:'#172019'},
+  {base:'#b58cff',deep:'#6842b5',light:'#eadfff',accent:'#ffcc4d',ink:'#21192f'}
+];
+const LIVING_GLYPH_SPECS=[
+  {name:'Joy Core',type:'face',mood:'joy',shape:'circle'},
+  {name:'Wink Core',type:'face',mood:'wink',shape:'squircle'},
+  {name:'Sleep Core',type:'face',mood:'sleep',shape:'circle'},
+  {name:'Shock Core',type:'face',mood:'shock',shape:'diamond'},
+  {name:'Love Core',type:'face',mood:'love',shape:'circle'},
+  {name:'Cool Core',type:'face',mood:'cool',shape:'squircle'},
+  {name:'Dizzy Core',type:'face',mood:'dizzy',shape:'hex'},
+  {name:'Mischief Core',type:'face',mood:'mischief',shape:'bean'},
+  {name:'Soft Core',type:'face',mood:'soft',shape:'circle'},
+  {name:'Fierce Core',type:'face',mood:'fierce',shape:'diamond'},
+  {name:'Heart Glyph',type:'symbol',symbol:'heart',shape:'circle'},
+  {name:'Star Glyph',type:'symbol',symbol:'star',shape:'squircle'},
+  {name:'Spark Glyph',type:'symbol',symbol:'spark',shape:'diamond'},
+  {name:'Moon Glyph',type:'symbol',symbol:'moon',shape:'circle'},
+  {name:'Sun Glyph',type:'symbol',symbol:'sun',shape:'circle'},
+  {name:'Cloud Glyph',type:'symbol',symbol:'cloud',shape:'bean'},
+  {name:'Flame Glyph',type:'symbol',symbol:'flame',shape:'drop'},
+  {name:'Bolt Glyph',type:'symbol',symbol:'bolt',shape:'diamond'},
+  {name:'Gem Glyph',type:'symbol',symbol:'gem',shape:'hex'},
+  {name:'Planet Glyph',type:'symbol',symbol:'planet',shape:'circle'},
+  {name:'Orbit Glyph',type:'symbol',symbol:'orbit',shape:'squircle'},
+  {name:'Wave Glyph',type:'symbol',symbol:'wave',shape:'bean'},
+  {name:'Flower Glyph',type:'symbol',symbol:'flower',shape:'circle'},
+  {name:'Shell Glyph',type:'symbol',symbol:'shell',shape:'drop'},
+  {name:'Comet Glyph',type:'symbol',symbol:'comet',shape:'circle'},
+  {name:'Ghost Glyph',type:'symbol',symbol:'ghost',shape:'squircle'},
+  {name:'Alien Glyph',type:'face',mood:'alien',shape:'bean'},
+  {name:'Robot Glyph',type:'face',mood:'robot',shape:'hex'},
+  {name:'Cat Glyph',type:'face',mood:'cat',shape:'diamond'},
+  {name:'Bug Glyph',type:'face',mood:'bug',shape:'circle'}
+];
+const LIVING_GLYPHS=LIVING_GLYPH_SPECS.flatMap((spec,specIndex)=>LIVING_GLYPH_PALETTES.map((palette,paletteIndex)=>({
+  ...spec,
+  palette,
+  variant:paletteIndex,
+  index:specIndex*LIVING_GLYPH_PALETTES.length+paletteIndex,
+  id:'living-glyph-'+String(specIndex*LIVING_GLYPH_PALETTES.length+paletteIndex+1).padStart(3,'0'),
+  title:'Living Glyph — '+spec.name+' '+String(paletteIndex+1)
+})));
+
+function livingGlyphPath(ctx,points){
+  ctx.beginPath();
+  points.forEach((p,i)=>{if(i)ctx.lineTo(p[0],p[1]);else ctx.moveTo(p[0],p[1])});
+  ctx.closePath();
+}
+function drawLivingBase(ctx,g){
+  const p=g.palette;
+  ctx.fillStyle=p.deep;
+  ctx.globalAlpha=.24;
+  if(g.shape==='circle'){ctx.beginPath();ctx.arc(0,28,248,0,TAU);ctx.fill()}
+  else if(g.shape==='squircle'){ctx.beginPath();ctx.roundRect(-248, -220+28,496,496,132);ctx.fill()}
+  else if(g.shape==='diamond'){livingGlyphPath(ctx,[[0,-238+28],[222,28],[0,294],[-222,28]]);ctx.fill()}
+  else if(g.shape==='hex'){livingGlyphPath(ctx,[[0,-258+28],[224,-115+28],[224,171+28],[0,314+28],[-224,171+28],[-224,-115+28]]);ctx.fill()}
+  else if(g.shape==='bean'){ctx.beginPath();ctx.moveTo(-190,-230+28);ctx.bezierCurveTo(120,-310+28,278,-126+28,210,116+28);ctx.bezierCurveTo(150,330+28,-178,290+28,-226,90+28);ctx.bezierCurveTo(-280,-96+28,-242,-196+28,-190,-230+28);ctx.closePath();ctx.fill()}
+  else {ctx.beginPath();ctx.moveTo(0,-252+28);ctx.bezierCurveTo(180,-120+28,238,60+28,0,286+28);ctx.bezierCurveTo(-238,60+28,-180,-120+28,0,-252+28);ctx.closePath();ctx.fill()}
+  ctx.globalAlpha=1;
+
+  ctx.fillStyle=p.base;
+  if(g.shape==='circle'){ctx.beginPath();ctx.arc(0,0,248,0,TAU);ctx.fill()}
+  else if(g.shape==='squircle'){ctx.beginPath();ctx.roundRect(-248,-248,496,496,132);ctx.fill()}
+  else if(g.shape==='diamond'){livingGlyphPath(ctx,[[0,-238],[222,28],[0,294],[-222,28]]);ctx.fill()}
+  else if(g.shape==='hex'){livingGlyphPath(ctx,[[0,-258],[224,-115],[224,171],[0,314],[-224,171],[-224,-115]]);ctx.fill()}
+  else if(g.shape==='bean'){ctx.beginPath();ctx.moveTo(-190,-258);ctx.bezierCurveTo(120,-338,278,-154,210,88);ctx.bezierCurveTo(150,302,-178,262,-226,62);ctx.bezierCurveTo(-280,-124,-242,-224,-190,-258);ctx.closePath();ctx.fill()}
+  else {ctx.beginPath();ctx.moveTo(0,-252);ctx.bezierCurveTo(180,-120,238,60,0,286);ctx.bezierCurveTo(-238,60,-180,-120,0,-252);ctx.closePath();ctx.fill()}
+
+  ctx.fillStyle=p.light;
+  ctx.globalAlpha=.64;
+  ctx.beginPath();ctx.ellipse(-72,-116,104,54,-.5,0,TAU);ctx.fill();
+  ctx.globalAlpha=1;
+
+  ctx.fillStyle=p.accent;
+  ctx.globalAlpha=.8;
+  ctx.beginPath();ctx.arc(162,-150,24,0,TAU);ctx.fill();
+  ctx.globalAlpha=1;
+}
+function drawLivingFace(ctx,g){
+  const p=g.palette;
+  const ink=p.ink;
+  ctx.fillStyle=ink;
+
+  const eye=(x,y,rx,ry=rx)=>{
+    ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU);ctx.fill();
+  };
+
+  if(g.mood==='joy'){
+    eye(-76,-28,23,30);eye(76,-28,23,30);
+    ctx.fillStyle=ink;ctx.beginPath();ctx.arc(0,42,94,0,Math.PI);ctx.lineTo(92,48);ctx.quadraticCurveTo(0,138,-92,48);ctx.closePath();ctx.fill();
+    ctx.fillStyle=p.light;ctx.beginPath();ctx.ellipse(0,76,48,27,0,0,TAU);ctx.fill();
+  }else if(g.mood==='wink'){
+    eye(-78,-28,23,28);
+    ctx.strokeStyle=ink;ctx.lineWidth=22;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(48,-28);ctx.lineTo(100,-15);ctx.stroke();
+    ctx.fillStyle=ink;ctx.beginPath();ctx.arc(0,52,72,0,Math.PI);ctx.lineTo(70,58);ctx.quadraticCurveTo(0,108,-70,58);ctx.closePath();ctx.fill();
+  }else if(g.mood==='sleep'){
+    ctx.strokeStyle=ink;ctx.lineWidth=20;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(-110,-12);ctx.quadraticCurveTo(-78,-42,-46,-12);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(46,-12);ctx.quadraticCurveTo(78,-42,110,-12);ctx.stroke();
+    ctx.fillStyle=ink;ctx.beginPath();ctx.moveTo(-48,48);ctx.quadraticCurveTo(0,92,48,48);ctx.lineTo(36,58);ctx.quadraticCurveTo(0,78,-36,58);ctx.closePath();ctx.fill();
+  }else if(g.mood==='shock'){
+    eye(-76,-30,20,34);eye(76,-30,20,34);
+    ctx.fillStyle=ink;ctx.beginPath();ctx.arc(0,72,54,0,TAU);ctx.fill();
+  }else if(g.mood==='love'){
+    const heart=(x,y,s)=>{
+      ctx.beginPath();ctx.moveTo(x,y+18*s);ctx.bezierCurveTo(x-44*s,y-12*s,x-52*s,y-62*s,x,y-34*s);ctx.bezierCurveTo(x+52*s,y-62*s,x+44*s,y-12*s,x,y+18*s);ctx.closePath();ctx.fill();
+    };
+    heart(-68,-20,.65);heart(68,-20,.65);heart(0,76,.95);
+  }else if(g.mood==='cool'){
+    ctx.fillStyle=ink;ctx.beginPath();ctx.roundRect(-120,-62,98,68,28);ctx.fill();ctx.beginPath();ctx.roundRect(22,-62,98,68,28);ctx.fill();
+    ctx.strokeStyle=ink;ctx.lineWidth=16;ctx.beginPath();ctx.moveTo(-22,-30);ctx.lineTo(22,-30);ctx.stroke();
+    ctx.fillStyle=p.light;ctx.beginPath();ctx.ellipse(-74,-28,24,10,-.35,0,TAU);ctx.fill();ctx.beginPath();ctx.ellipse(68,-28,24,10,-.35,0,TAU);ctx.fill();
+    ctx.fillStyle=ink;ctx.beginPath();ctx.arc(0,72,60,0,Math.PI);ctx.lineTo(60,80);ctx.quadraticCurveTo(0,118,-60,80);ctx.closePath();ctx.fill();
+  }else if(g.mood==='dizzy'){
+    ctx.strokeStyle=ink;ctx.lineWidth=18;ctx.beginPath();ctx.moveTo(-100,-42);ctx.lineTo(-48,8);ctx.lineTo(-105,58);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(100,-42);ctx.lineTo(48,8);ctx.lineTo(105,58);ctx.stroke();
+    ctx.fillStyle=ink;ctx.beginPath();ctx.arc(0,70,34,0,TAU);ctx.fill();
+  }else if(g.mood==='mischief'){
+    ctx.save();ctx.rotate(-.1);ctx.beginPath();ctx.ellipse(-72,-26,24,30,0,0,TAU);ctx.fill();ctx.restore();
+    ctx.save();ctx.rotate(.1);ctx.beginPath();ctx.ellipse(72,-26,24,30,0,0,TAU);ctx.fill();ctx.restore();
+    ctx.fillStyle=ink;ctx.beginPath();ctx.moveTo(-74,66);ctx.quadraticCurveTo(0,16,74,66);ctx.quadraticCurveTo(0,122,-74,66);ctx.closePath();ctx.fill();
+  }else if(g.mood==='soft'){
+    ctx.strokeStyle=ink;ctx.lineWidth=18;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(-95,-20);ctx.quadraticCurveTo(-74,-48,-48,-20);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(48,-20);ctx.quadraticCurveTo(74,-48,95,-20);ctx.stroke();
+    ctx.fillStyle=ink;ctx.beginPath();ctx.arc(0,58,18,0,TAU);ctx.fill();
+  }else if(g.mood==='fierce'){
+    ctx.save();ctx.rotate(-.18);ctx.beginPath();ctx.ellipse(-78,-28,24,34,0,0,TAU);ctx.fill();ctx.restore();
+    ctx.save();ctx.rotate(.18);ctx.beginPath();ctx.ellipse(78,-28,24,34,0,0,TAU);ctx.fill();ctx.restore();
+    ctx.strokeStyle=ink;ctx.lineWidth=18;ctx.beginPath();ctx.moveTo(-105,-78);ctx.lineTo(-48,-58);ctx.moveTo(48,-58);ctx.lineTo(105,-78);ctx.stroke();
+    ctx.fillStyle=ink;ctx.beginPath();ctx.moveTo(-74,70);ctx.quadraticCurveTo(0,20,74,70);ctx.quadraticCurveTo(0,114,-74,70);ctx.closePath();ctx.fill();
+  }else{
+    // Character-like originals: alien, robot, cat, and bug.
+    if(g.mood==='alien'){
+      eye(-68,-18,28,42);eye(68,-18,28,42);
+      ctx.fillStyle=p.light;ctx.beginPath();ctx.arc(-68,-12,9,0,TAU);ctx.arc(68,-12,9,0,TAU);ctx.fill();
+      ctx.fillStyle=ink;ctx.beginPath();ctx.arc(0,62,26,0,TAU);ctx.fill();
+    }else if(g.mood==='robot'){
+      ctx.fillStyle=ink;ctx.beginPath();ctx.roundRect(-104,-76,208,130,34);ctx.fill();
+      ctx.fillStyle=p.light;ctx.beginPath();ctx.roundRect(-68,-40,48,40,12);ctx.fill();ctx.roundRect(20,-40,48,40,12);ctx.fill();
+      ctx.fillStyle=p.accent;ctx.beginPath();ctx.rect(-10,68,20,18);ctx.fill();
+    }else if(g.mood==='cat'){
+      ctx.fillStyle=ink;
+      livingGlyphPath(ctx,[[-88,32],[-118,-92],[-18,-40],[0,-112],[18,-40],[118,-92],[88,32],[74,84],[-74,84]]);
+      ctx.fill();
+      ctx.fillStyle=p.light;ctx.beginPath();ctx.arc(-38,14,12,0,TAU);ctx.arc(38,14,12,0,TAU);ctx.fill();
+      ctx.fillStyle=p.ink;ctx.beginPath();ctx.arc(0,54,10,0,TAU);ctx.fill();
+    }else if(g.mood==='bug'){
+      ctx.fillStyle=ink;ctx.beginPath();ctx.ellipse(0,24,86,108,0,0,TAU);ctx.fill();
+      ctx.fillStyle=p.light;ctx.beginPath();ctx.arc(-30,-8,12,0,TAU);ctx.arc(30,-8,12,0,TAU);ctx.fill();
+      ctx.strokeStyle=ink;ctx.lineWidth=16;ctx.lineCap='round';
+      [-1,1].forEach(s=>{ctx.beginPath();ctx.moveTo(s*54,10);ctx.lineTo(s*110,-28);ctx.moveTo(s*58,48);ctx.lineTo(s*112,62);ctx.stroke()});
+    }
+  }
+}
+function drawLivingSymbol(ctx,g){
+  const p=g.palette;
+  ctx.fillStyle=p.light;
+  const star=(cx,cy,r1,r2,n=5)=>{
+    const pts=[];for(let i=0;i<n*2;i++){const a=-Math.PI/2+i*Math.PI/n,r=i%2?r2:r1;pts.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r])}
+    livingGlyphPath(ctx,pts);ctx.fill();
+  };
+  if(g.symbol==='heart'){
+    ctx.beginPath();ctx.moveTo(0,160);ctx.bezierCurveTo(-154,56,-176,-56,0,-150);ctx.bezierCurveTo(176,-56,154,56,0,160);ctx.closePath();ctx.fill();
+  }else if(g.symbol==='star'){
+    star(0,20,150,66,5);
+  }else if(g.symbol==='spark'){
+    star(0,20,178,28,4);
+  }else if(g.symbol==='moon'){
+    ctx.beginPath();ctx.arc(-18,18,142,0,TAU);ctx.fill();
+    ctx.globalCompositeOperation='destination-out';ctx.beginPath();ctx.arc(42,-24,126,0,TAU);ctx.fill();ctx.globalCompositeOperation='source-over';
+  }else if(g.symbol==='sun'){
+    ctx.fillStyle=p.light;for(let i=0;i<12;i++){const a=i*TAU/12;ctx.save();ctx.rotate(a);ctx.fillRect(-10,-194,20,62);ctx.restore()}
+    ctx.beginPath();ctx.arc(0,24,118,0,TAU);ctx.fill();
+  }else if(g.symbol==='cloud'){
+    ctx.beginPath();ctx.arc(-74,48,72,0,TAU);ctx.arc(0,10,94,0,TAU);ctx.arc(82,52,68,0,TAU);ctx.fill();ctx.fillRect(-128,48,258,78);
+  }else if(g.symbol==='flame'){
+    ctx.fillStyle=p.accent;ctx.beginPath();ctx.moveTo(0,-176);ctx.bezierCurveTo(116,-76,106,4,28,84);ctx.bezierCurveTo(20,150,-84,154,-112,66);ctx.bezierCurveTo(-142,-22,-54,-68,0,-176);ctx.closePath();ctx.fill();
+    ctx.fillStyle=p.light;ctx.beginPath();ctx.moveTo(12,-86);ctx.bezierCurveTo(64,-30,55,28,16,70);ctx.bezierCurveTo(-30,86,-58,45,-42,6);ctx.bezierCurveTo(-28,-30,-2,-44,12,-86);ctx.closePath();ctx.fill();
+  }else if(g.symbol==='bolt'){
+    livingGlyphPath(ctx,[[-20,-176],[108,-34],[24,-34],[72,168],[-98,10],[-8,10]]);ctx.fill();
+  }else if(g.symbol==='gem'){
+    livingGlyphPath(ctx,[[0,-168],[126,-62],[92,108],[0,168],[-92,108],[-126,-62]]);ctx.fill();
+    ctx.strokeStyle=p.accent;ctx.lineWidth=14;ctx.beginPath();ctx.moveTo(0,-168);ctx.lineTo(0,168);ctx.moveTo(-126,-62);ctx.lineTo(126,-62);ctx.stroke();
+  }else if(g.symbol==='planet'){
+    ctx.fillStyle=p.light;ctx.beginPath();ctx.arc(0,18,110,0,TAU);ctx.fill();
+    ctx.strokeStyle=p.accent;ctx.lineWidth=28;ctx.beginPath();ctx.ellipse(0,40,176,54,-.18,0,TAU);ctx.stroke();
+  }else if(g.symbol==='orbit'){
+    ctx.strokeStyle=p.light;ctx.lineWidth=28;ctx.beginPath();ctx.ellipse(0,20,166,92,-.35,0,TAU);ctx.stroke();
+    ctx.beginPath();ctx.ellipse(0,20,166,92,.35,0,TAU);ctx.stroke();
+    ctx.fillStyle=p.accent;ctx.beginPath();ctx.arc(0,20,44,0,TAU);ctx.fill();
+  }else if(g.symbol==='wave'){
+    ctx.strokeStyle=p.light;ctx.lineWidth=38;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-170,44);ctx.bezierCurveTo(-110,-40,-58,-40,0,44);ctx.bezierCurveTo(58,128,110,128,170,44);ctx.stroke();
+    ctx.strokeStyle=p.accent;ctx.lineWidth=18;ctx.beginPath();ctx.moveTo(-170,88);ctx.bezierCurveTo(-110,8,-58,8,0,88);ctx.bezierCurveTo(58,168,110,168,170,88);ctx.stroke();
+  }else if(g.symbol==='flower'){
+    for(let i=0;i<8;i++){const a=i*TAU/8;ctx.save();ctx.rotate(a);ctx.beginPath();ctx.ellipse(0,-100,54,100,0,0,TAU);ctx.fill();ctx.restore()}
+    ctx.fillStyle=p.accent;ctx.beginPath();ctx.arc(0,0,58,0,TAU);ctx.fill();
+  }else if(g.symbol==='shell'){
+    ctx.strokeStyle=p.light;ctx.lineWidth=24;ctx.lineCap='round';
+    for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(0,48+i*8,76+i*18,Math.PI*.15,Math.PI*.92);ctx.stroke()}
+  }else if(g.symbol==='comet'){
+    ctx.strokeStyle=p.accent;ctx.lineWidth=34;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-150,100);ctx.bezierCurveTo(-42,74,-8,24,70,-30);ctx.stroke();
+    ctx.fillStyle=p.light;ctx.beginPath();ctx.arc(78,-34,82,0,TAU);ctx.fill();
+  }else if(g.symbol==='ghost'){
+    ctx.fillStyle=p.light;ctx.beginPath();ctx.moveTo(-150,150);ctx.lineTo(-150,-26);ctx.bezierCurveTo(-150,-148,150,-148,150,-26);ctx.lineTo(150,150);ctx.lineTo(96,108);ctx.lineTo(42,150);ctx.lineTo(0,108);ctx.lineTo(-42,150);ctx.lineTo(-96,108);ctx.closePath();ctx.fill();
+    ctx.fillStyle=p.ink;ctx.beginPath();ctx.arc(-54,-4,18,0,TAU);ctx.arc(54,-4,18,0,TAU);ctx.fill();
+  }
+}
+function buildLivingGlyphScene(g){
+  const s=new Scene(1000,1000),ctx=new RecorderCtx(s,1000,1000);
+  ctx.translate(500,500);
+  drawLivingBase(ctx,g);
+  if(g.type==='face')drawLivingFace(ctx,g); else drawLivingSymbol(ctx,g);
+  // tiny signature notch makes the family feel like a coherent glyph system
+  ctx.fillStyle=g.palette.accent;
+  ctx.globalAlpha=.85;
+  ctx.beginPath();ctx.arc(-166,154,10+(g.variant*2),0,TAU);ctx.fill();
+  ctx.globalAlpha=1;
+  return s;
+}
+
+function livingGlyphMetadataRow(filename,index,count){
+  const item=LIVING_GLYPHS[index];
+  const title=('Living Glyph '+item.name+' vector icon '+String(index+1).padStart(3,'0')).slice(0,70);
+  const keywords=[
+    'living glyph','emoji','emoji icon','vector icon','graphic resource','character icon',
+    'expressive icon','cute icon','modern icon','colorful icon','vector','svg','editable vector',
+    'digital art','graphic design','icon design','sticker','symbol','illustration','creative',
+    'playful','abstract icon','character','avatar','messaging','social media','ui icon',
+    'app icon','web icon','digital sticker','design element','colorful','geometric','modern',
+    'contemporary','visual language','glyph','icon set','expression','emotion','symbol set',
+    'decorative','stock vector','isolated','transparent','graphic resource','original design',
+    item.name.toLowerCase()
+  ];
+  return [filename,title,[...new Set(keywords)].slice(0,50).join(', '),'8',''];
+}
+async function exportLivingGlyphs(){
+  const btn=$('#livingGlyphsBtn');
+  btn.disabled=true;
+  try{
+    const perSvg=150;
+    const totalSheets=Math.ceil(LIVING_GLYPHS.length/perSvg);
+    const metadata=[];
+    const W=16000,H=9000,cols=15,tileW=W/cols;
+    for(let sheet=0;sheet<totalSheets;sheet++){
+      const start=sheet*perSvg,end=Math.min(start+perSvg,LIVING_GLYPHS.length),count=end-start;
+      const rows=Math.ceil(count/cols),tileH=H/rows,artPad=70;
+      const parts=[
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">',
+        '<title>Living Glyphs '+String(sheet+1).padStart(3,'0')+' — '+count+' vector icons</title>',
+        '<desc>Original Living Glyph vector emoji-style graphic resource sheet.</desc>'
+      ];
+      for(let local=0;local<count;local++){
+        const index=start+local,g=LIVING_GLYPHS[index],scene=buildLivingGlyphScene(g),raw=sceneToSvg(scene),body=uniqueSvgIds(innerSvg(raw),'lg'+String(index+1).padStart(3,'0')),b=sceneBounds(scene,false);
+        const scale=Math.min((tileW-artPad)/b.w,(tileH-artPad)/b.h);
+        const x=(local%cols)*tileW,y=Math.floor(local/cols)*tileH;
+        const drawX=tileW/2-(b.x+b.w/2)*scale,drawY=tileH/2-(b.y+b.h/2)*scale;
+        parts.push('<g id="lg'+String(index+1).padStart(3,'0')+'" transform="translate('+psNum(x)+' '+psNum(y)+')">');
+        parts.push('<g transform="translate('+psNum(drawX)+' '+psNum(drawY)+') scale('+psNum(scale)+' '+psNum(scale)+')">');
+        parts.push(body,'</g></g>');
+      }
+      parts.push('</svg>');
+      const filename='living-glyphs-'+String(start+1).padStart(3,'0')+'-'+String(end).padStart(3,'0')+'.svg';
+      downloadBlob(new Blob([parts.join('')],{type:'image/svg+xml;charset=utf-8'}),filename);
+      metadata.push(livingGlyphMetadataRow(filename,start,count));
+      setStatus('Living Glyphs — '+end+' / '+LIVING_GLYPHS.length+' · sheet '+(sheet+1)+' / '+totalSheets);
+      await new Promise(r=>setTimeout(r,350));
+    }
+    const csv=[
+      ['Filename','Title','Keywords','Category','Releases'],
+      ...metadata
+    ].map(row=>row.map(csvEsc).join(',')).join('\r\n')+'\r\n';
+    downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),'living-glyphs-adobe-stock-metadata.csv');
+    flash('Living Glyphs complete — '+LIVING_GLYPHS.length+' original vector glyphs · '+totalSheets+' SVG sheet(s) + Adobe CSV.');
+  }catch(e){
+    setStatus('Living Glyphs failed: '+(e.message||e),'bad');
+  }finally{
+    btn.disabled=false;
+  }
+}
+
 async function exportAllPrismOneSvg(){
   const btn=$('#allPrismOneSvgBtn');
   btn.disabled=true;
   try{
-    // Export the 950-flower library as separate transparent 16:9 SVG sheets.
-    // Each full sheet contains 150 flower icons; the final sheet contains the remainder.
     const FLOWERS=LIB.filter(f=>!PRISM_NON_FLOWER_IDS.has(String(f.id||'')));
-    const perSvg=150;
-    const W=16000,H=9000;
-    const cols=15;
-    const rowsPerFull=10;
-    const tileW=W/cols;
-    const fullTileH=H/rowsPerFull;
-    const totalSheets=Math.ceil(FLOWERS.length/perSvg);
-    const sheetMetadata=[];
-
-    for(let sheet=0;sheet<totalSheets;sheet++){
-      const startIndex=sheet*perSvg;
-      const endIndex=Math.min(startIndex+perSvg,FLOWERS.length);
-      const count=endIndex-startIndex;
-      const rows=Math.ceil(count/cols);
-      const tileH=H/rows;
-      const artPad=70;
-      const artBoxW=Math.max(1,tileW-artPad);
-      const artBoxH=Math.max(1,tileH-artPad);
-      const parts=[];
-      parts.push('<?xml version="1.0" encoding="UTF-8"?>');
-      parts.push('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">');
-      parts.push('<title>Prism flower icons '+String(sheet+1).padStart(3,'0')+' — '+count+' icons</title>');
-      parts.push('<desc>Transparent 16:9 SVG sheet containing '+count+' Prism-style flower vector icons.</desc>');
-
-      for(let local=0;local<count;local++){
-        const globalIndex=startIndex+local;
-        const f=FLOWERS[globalIndex];
-        try{
-          const scene=buildFlowerScene(f);
-          const raw=sceneToSvg(scene);
-          const idPrefix='prism'+String(globalIndex+1).padStart(4,'0');
-          const body=uniqueSvgIds(innerSvg(raw),idPrefix);
-          const b=sceneBounds(scene,false);
-          if(!(b.w>0&&b.h>0))throw new Error('Flower has no vector bounds');
-
-          const col=local%cols;
-          const row=Math.floor(local/cols);
-          const x=col*tileW;
-          const y=row*tileH;
-          const scale=Math.min(artBoxW/b.w,artBoxH/b.h);
-          const drawX=tileW/2-(b.x+b.w/2)*scale;
-          const drawY=tileH/2-(b.y+b.h/2)*scale;
-
-          parts.push('<g id="'+idPrefix+'" transform="translate('+psNum(x)+' '+psNum(y)+')">');
-          parts.push('<g id="'+idPrefix+'-artwork" transform="translate('+psNum(drawX)+' '+psNum(drawY)+') scale('+psNum(scale)+' '+psNum(scale)+')">');
-          parts.push(body);
-          parts.push('</g>');
-          parts.push('</g>');
-        }catch(e){
-          console.error('Prism SVG sheet '+(sheet+1)+' '+f.title,e);
-        }
-
-        if((local+1)%10===0||local===count-1){
-          setStatus('Prism SVG sheets — '+(globalIndex+1)+' / '+FLOWERS.length+' flowers · sheet '+String(sheet+1).padStart(3,'0')+' / '+String(totalSheets).padStart(3,'0')+' · '+count+' on this SVG');
-          await new Promise(r=>setTimeout(r,0));
-        }
+    const W=16000,H=9000,cols=40,headerH=780;
+    const rows=Math.ceil(FLOWERS.length/cols);
+    const tileW=W/cols,tileH=(H-headerH)/rows,artBoxW=Math.max(1,tileW-30),artBoxH=Math.max(1,tileH-30);
+    const parts=[
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">',
+      '<title>'+FLOWERS.length+' flower icon</title>',
+      '<desc>Transparent 16:9 presentation sheet of '+FLOWERS.length+' Prism-style flower vector icons.</desc>',
+      '<text x="220" y="250" font-family="Georgia, Times New Roman, serif" font-size="150" font-weight="600" fill="#111111">'+FLOWERS.length+' flower icon</text>'
+    ];
+    for(let i=0;i<FLOWERS.length;i++){
+      const f=FLOWERS[i];
+      try{
+        const scene=buildFlowerScene(f),raw=sceneToSvg(scene),idPrefix='prism'+String(i+1).padStart(4,'0'),body=uniqueSvgIds(innerSvg(raw),idPrefix),b=sceneBounds(scene,false);
+        if(!(b.w>0&&b.h>0))throw new Error('Flower has no vector bounds');
+        const col=i%cols,row=Math.floor(i/cols),x=col*tileW,y=headerH+row*tileH;
+        const scale=Math.min(artBoxW/b.w,artBoxH/b.h),drawX=tileW/2-(b.x+b.w/2)*scale,drawY=(artBoxH-b.h*scale)/2-b.y*scale;
+        parts.push('<g id="'+idPrefix+'" transform="translate('+psNum(x)+' '+psNum(y)+')"><g id="'+idPrefix+'-artwork" transform="translate('+psNum(drawX)+' '+psNum(drawY)+') scale('+psNum(scale)+' '+psNum(scale)+')">'+body+'</g></g>');
+      }catch(e){console.error('Prism One-SVG '+f.title,e)}
+      if((i+1)%25===0||i===FLOWERS.length-1){
+        setStatus('Prism All → One SVG — '+(i+1)+' / '+FLOWERS.length+' flowers · transparent · 16:9');
+        await new Promise(r=>setTimeout(r,0));
       }
-
-      parts.push('</svg>');
-      const blob=new Blob([parts.join('')],{type:'image/svg+xml;charset=utf-8'});
-      const first=String(startIndex+1).padStart(3,'0');
-      const last=String(endIndex).padStart(3,'0');
-      const filename='prism-flowers-'+first+'-'+last+'.svg';
-      downloadBlob(blob,filename);
-      sheetMetadata.push(sheetMetadataRow(filename,sheet,count));
-      await new Promise(r=>setTimeout(r,300));
     }
-
-    flash('Prism SVG export finished — '+totalSheets+' SVGs · '+FLOWERS.length+' flowers · 150 per SVG except the final '+(FLOWERS.length%perSvg||perSvg)+'.');
+    parts.push('</svg>');
+    downloadBlob(new Blob([parts.join('')],{type:'image/svg+xml;charset=utf-8'}),'prism-flowers-all-'+FLOWERS.length+'.svg');
+    flash('Prism All → One SVG finished — '+FLOWERS.length+' flower icons.');
   }catch(e){
-    setStatus('Prism SVG sheets failed: '+(e.message||e),'bad');
+    setStatus('Prism One-SVG failed: '+(e.message||e),'bad');
   }finally{
     btn.disabled=false;
   }
 }
-async function downloadSevenPrismMetadata(){
-  const btn=$('#prismSevenMetaBtn');
-  btn.disabled=true;
-  try{
-    const NON_FLOWER_IDS=PRISM_NON_FLOWER_IDS;
-    const FLOWERS=LIB.filter(f=>!NON_FLOWER_IDS.has(String(f.id||'')));
-    const perSvg=150;
-    const totalSheets=Math.ceil(FLOWERS.length/perSvg);
 
-    for(let sheet=0;sheet<totalSheets;sheet++){
-      const startIndex=sheet*perSvg;
-      const endIndex=Math.min(startIndex+perSvg,FLOWERS.length);
-      const count=endIndex-startIndex;
-      const first=String(startIndex+1).padStart(3,'0');
-      const last=String(endIndex).padStart(3,'0');
-      const filename='prism-flowers-'+first+'-'+last+'.svg';
-      const csv=sheetMetadataCsv([[filename,sheetMetadataRow(filename,sheet,count)[1],sheetMetadataRow(filename,sheet,count)[2],sheetMetadataRow(filename,sheet,count)[3],sheetMetadataRow(filename,sheet,count)[4]]]);
-      downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),'prism-flowers-'+first+'-'+last+'-metadata.csv');
-      setStatus('Prism metadata — '+(sheet+1)+' / '+totalSheets+' CSVs downloaded · '+filename);
-      await new Promise(r=>setTimeout(r,350));
-    }
-    flash('7 Adobe metadata CSVs downloaded — one for each Prism SVG sheet.');
-  }catch(e){
-    setStatus('Prism metadata download failed: '+(e.message||e),'bad');
-  }finally{
-    btn.disabled=false;
-  }
-}
+
 async function exportMetadata(){
   try{
     const csv=metadataCsv();if(new TextEncoder().encode(csv).length>1000000)throw new Error('Adobe CSV exceeds the 1 MB upload limit.');const dir=await pickFolder(),h=await dir.getFileHandle('adobe-stock-metadata.csv',{create:true}),w=await h.createWritable();await w.write(csv);await w.close();flash('Adobe CSV saved — '+LIB.length+' Prism Flowers.');
@@ -1448,7 +1666,7 @@ svgBtn.onclick=()=>{if(!lastScene)return;downloadBlob(new Blob([sceneToSvg(lastS
 allBtn.onclick=async()=>{try{await exportAll()}catch(e){allBtn.disabled=false;setStatus('Export All failed: '+(e.message||e),'bad')}}
 $('#allSvgBtn').onclick=async()=>{try{await exportAllSvg()}catch(e){$('#allSvgBtn').disabled=false;setStatus('Export All SVG failed: '+(e.message||e),'bad')}};
 $('#allPrismOneSvgBtn').onclick=()=>exportAllPrismOneSvg();
-$('#prismSevenMetaBtn').onclick=()=>downloadSevenPrismMetadata();
+$('#livingGlyphsBtn').onclick=()=>exportLivingGlyphs();
 metaBtn.onclick=exportMetadata;
 fillIconFamilies();
 $('#iconStockBtn').onclick=()=>{iconStockSection?.scrollIntoView({block:'center',behavior:'smooth'});loadIcon(iconItemAt(1));iconNumberEl?.focus()};
