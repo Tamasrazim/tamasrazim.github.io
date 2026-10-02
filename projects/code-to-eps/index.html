@@ -78,14 +78,14 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 <aside class="panel right">
   <div class="phead">PRISM LIBRARY</div>
   <div class="section">
-    <input id="flowerSearch" type="text" placeholder="Search 947 Prism Flowers">
+    <input id="flowerSearch" type="text" placeholder="Search 950 Prism Flowers">
     <select id="flowerList" class="flower-list" size="11" aria-label="Prism Flowers"></select>
     <div class="mini-actions">
       <button class="btn" id="loadFlower">Load</button>
       <button class="btn" id="prevFlower">Prev</button>
       <button class="btn" id="nextFlower">Next</button>
     </div>
-    <div class="hint" id="flowerInfo" style="margin-top:7px">0 / 947</div>
+    <div class="hint" id="flowerInfo" style="margin-top:7px">0 / 950</div>
   </div>
 
   <div class="section" id="iconStockSection">
@@ -1089,18 +1089,217 @@ function prismFlowerName(f,i){
     .replace(/\s+/g,' ')
     .trim() || ('Flower '+(i+1));
 }
+
+const PRISM_NON_FLOWER_IDS=new Set([
+  'prism-aurora-snowflake','prism-velvet-ornament','prism-candy-cane',
+  'prism-holly-ember','prism-christmas-star','prism-frost-wreath',
+  'prism-gift-bow','prism-icicle-halo','prism-jingle-bell','prism-north-star'
+]);
+
+function prismExtraFlowerCode(spec){
+  const h=spec.hue;
+  return `
+const cx=width/2,cy=height/2,TAU=Math.PI*2;
+const H=${h};
+function grad(y){
+  const g=ctx.createRadialGradient(0,y*0.22,18,0,y,Math.max(220,Math.abs(y)*1.45));
+  g.addColorStop(0,'hsl('+((H+25)%360)+',95%,88%)');
+  g.addColorStop(.38,'hsl('+((H+5)%360)+',92%,66%)');
+  g.addColorStop(.78,'hsl('+((H+335)%360)+',88%,48%)');
+  g.addColorStop(1,'hsl('+((H+315)%360)+',82%,30%)');
+  return g;
+}
+function edge(){
+  const g=ctx.createLinearGradient(0,-260,0,260);
+  g.addColorStop(0,'hsl('+((H+35)%360)+',100%,90%)');
+  g.addColorStop(.5,'hsl('+H+',90%,63%)');
+  g.addColorStop(1,'hsl('+((H+320)%360)+',80%,34%)');
+  return g;
+}
+ctx.save();
+ctx.translate(cx,cy);
+${spec.body}
+ctx.restore();
+`;
+}
+
+function buildExtraPrismFlowers(){
+  const specs=[
+    {name:'Prism Radiant Daisy',hue:12,body:`
+for(let i=0;i<18;i++){
+  const a=i*TAU/18;
+  ctx.save();ctx.rotate(a);
+  ctx.fillStyle=grad(-230);
+  ctx.beginPath();ctx.ellipse(0,-225,88,245,0,0,TAU);ctx.fill();ctx.restore();
+}
+ctx.fillStyle='hsl('+((H+45)%360)+',95%,54%)';ctx.beginPath();ctx.arc(0,0,92,0,TAU);ctx.fill();
+ctx.fillStyle='hsl('+((H+28)%360)+',98%,78%)';ctx.beginPath();ctx.arc(-18,-20,30,0,TAU);ctx.fill();
+`},
+    {name:'Prism Moon Lotus',hue:205,body:`
+for(let ring=0;ring<2;ring++)for(let i=0;i<9;i++){
+  const a=(i+(ring?.5:0))*TAU/9;
+  ctx.save();ctx.rotate(a);ctx.translate(0,ring?18:0);
+  ctx.fillStyle=grad(-245);
+  ctx.beginPath();ctx.ellipse(0,-190,118,275,0,0,TAU);ctx.fill();ctx.restore();
+}
+ctx.fillStyle='hsl('+((H+40)%360)+',92%,76%)';ctx.beginPath();ctx.arc(0,12,112,0,TAU);ctx.fill();
+`},
+    {name:'Prism Dahlia Spiral',hue:330,body:`
+for(let i=0;i<32;i++){
+  const a=i*TAU/32;
+  const r=278-52*(i%3)/2;
+  ctx.save();ctx.rotate(a+(i%2)*.035);
+  ctx.translate(0,-r);
+  ctx.scale(1-.012*(i%4),1+.12*(i%3));
+  ctx.fillStyle=grad(-r);
+  ctx.beginPath();ctx.ellipse(0,0,62,180,0,0,TAU);ctx.fill();ctx.restore();
+}
+for(let i=0;i<18;i++){
+  const a=i*TAU/18;
+  ctx.save();ctx.rotate(a);ctx.fillStyle=edge();ctx.beginPath();ctx.ellipse(0,-115,54,135,0,0,TAU);ctx.fill();ctx.restore();
+}
+ctx.fillStyle='#f7d77a';ctx.beginPath();ctx.arc(0,0,72,0,TAU);ctx.fill();
+`},
+    {name:'Prism Silk Cosmos',hue:278,body:`
+for(let i=0;i<8;i++){
+  const a=i*TAU/8;
+  ctx.save();ctx.rotate(a);
+  ctx.fillStyle=grad(-235);
+  ctx.beginPath();
+  ctx.moveTo(0,-18);ctx.bezierCurveTo(-132,-78,-160,-196,0,-286);
+  ctx.bezierCurveTo(160,-196,132,-78,0,-18);ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+ctx.fillStyle='hsl('+((H+55)%360)+',96%,62%)';ctx.beginPath();ctx.arc(0,-12,74,0,TAU);ctx.fill();
+ctx.fillStyle='hsl('+((H+15)%360)+',100%,88%)';for(let i=0;i<12;i++){const a=i*TAU/12;ctx.beginPath();ctx.arc(Math.cos(a)*54,Math.sin(a)*54-12,13,0,TAU);ctx.fill()}
+`},
+    {name:'Prism Chrysanthemum Burst',hue:42,body:`
+for(let ring=0;ring<3;ring++)for(let i=0;i<14;i++){
+  const n=14, a=i*TAU/n+(ring%2)*Math.PI/n, r=100+ring*82;
+  ctx.save();ctx.rotate(a);ctx.translate(0,-r);
+  ctx.fillStyle=grad(-r);
+  ctx.beginPath();ctx.ellipse(0,0,28+ring*8,118+ring*18,0,0,TAU);ctx.fill();ctx.restore();
+}
+ctx.fillStyle='hsl('+((H+18)%360)+',94%,50%)';ctx.beginPath();ctx.arc(0,0,70,0,TAU);ctx.fill();
+`},
+    {name:'Prism Velvet Camellia',hue:352,body:`
+for(let ring=0;ring<3;ring++)for(let i=0;i<8;i++){
+  const a=i*TAU/8+(ring*.17);
+  const r=ring*56;
+  ctx.save();ctx.rotate(a);ctx.translate(0,-170+r);
+  ctx.fillStyle=grad(-170+r);
+  ctx.beginPath();ctx.ellipse(0,0,118-ring*10,182-ring*22,0,0,TAU);ctx.fill();ctx.restore();
+}
+ctx.fillStyle='hsl('+((H+30)%360)+',96%,88%)';ctx.beginPath();ctx.arc(0,0,82,0,TAU);ctx.fill();
+`},
+    {name:'Prism Orchid Flame',hue:300,body:`
+const petal=(a,sx,sy,dy)=>{
+  ctx.save();ctx.rotate(a);ctx.translate(0,dy);ctx.scale(sx,sy);
+  ctx.fillStyle=grad(-205);ctx.beginPath();
+  ctx.moveTo(0,0);ctx.bezierCurveTo(-120,-30,-132,-188,0,-235);
+  ctx.bezierCurveTo(132,-188,120,-30,0,0);ctx.closePath();ctx.fill();ctx.restore();
+};
+petal(-1.15,.72,1,18);petal(-.38,1,1,0);petal(.38,1,1,0);petal(1.15,.72,1,18);petal(0,1.05,.58,54);
+ctx.fillStyle='hsl('+((H+52)%360)+',100%,70%)';ctx.beginPath();ctx.ellipse(0,58,88,58,0,0,TAU);ctx.fill();
+`},
+    {name:'Prism Poppy Wave',hue:8,body:`
+for(let i=0;i<6;i++){
+  const a=i*TAU/6;
+  ctx.save();ctx.rotate(a);
+  ctx.fillStyle=grad(-205);
+  ctx.beginPath();
+  ctx.moveTo(0,10);
+  ctx.bezierCurveTo(-150,-20,-182,-135,-82,-230);
+  ctx.bezierCurveTo(-34,-275,42,-270,82,-228);
+  ctx.bezierCurveTo(180,-126,150,-18,0,10);
+  ctx.closePath();ctx.fill();ctx.restore();
+}
+ctx.fillStyle='hsl('+((H+32)%360)+',88%,46%)';ctx.beginPath();ctx.arc(0,0,88,0,TAU);ctx.fill();
+ctx.strokeStyle='hsl('+((H+12)%360)+',50%,22%)';ctx.lineWidth=16;
+for(let i=0;i<18;i++){const a=i*TAU/18;ctx.beginPath();ctx.moveTo(Math.cos(a)*28,Math.sin(a)*28);ctx.lineTo(Math.cos(a)*82,Math.sin(a)*82);ctx.stroke()}
+`},
+    {name:'Prism Protea Crown',hue:118,body:`
+for(let i=0;i<24;i++){
+  const a=i*TAU/24;
+  ctx.save();ctx.rotate(a);
+  ctx.fillStyle=grad(-240);
+  ctx.beginPath();
+  ctx.moveTo(-52,-14);ctx.quadraticCurveTo(-86,-142,0,-300);
+  ctx.quadraticCurveTo(86,-142,52,-14);ctx.closePath();ctx.fill();ctx.restore();
+}
+ctx.fillStyle='hsl('+((H+35)%360)+',96%,72%)';ctx.beginPath();ctx.arc(0,10,86,0,TAU);ctx.fill();
+ctx.fillStyle='hsl('+((H+8)%360)+',75%,38%)';ctx.beginPath();ctx.arc(0,10,54,0,TAU);ctx.fill();
+`},
+    {name:'Prism Marigold Sun',hue:26,body:`
+for(let ring=0;ring<2;ring++)for(let i=0;i<18;i++){
+  const a=i*TAU/18+(ring?.09:0),r=ring?90:155;
+  ctx.save();ctx.rotate(a);ctx.translate(0,-r);
+  ctx.fillStyle=grad(-r);
+  ctx.beginPath();ctx.ellipse(0,0,54,116,0,0,TAU);ctx.fill();ctx.restore();
+}
+ctx.fillStyle='hsl('+((H+8)%360)+',100%,55%)';ctx.beginPath();ctx.arc(0,0,88,0,TAU);ctx.fill();
+for(let i=0;i<18;i++){const a=i*TAU/18;ctx.fillStyle='hsl('+((H+35)%360)+',90%,72%)';ctx.beginPath();ctx.arc(Math.cos(a)*62,Math.sin(a)*62,10,0,TAU);ctx.fill()}
+`},
+    {name:'Prism Iris Crown',hue:252,body:`
+for(let i=0;i<3;i++){
+  const a=-.95+i*.95;
+  ctx.save();ctx.rotate(a);ctx.fillStyle=grad(-210);
+  ctx.beginPath();ctx.moveTo(0,30);ctx.bezierCurveTo(-126,-5,-140,-168,0,-265);ctx.bezierCurveTo(140,-168,126,-5,0,30);ctx.closePath();ctx.fill();ctx.restore();
+}
+for(let i=0;i<3;i++){
+  const a=Math.PI-0.95+i*.95;
+  ctx.save();ctx.rotate(a);ctx.fillStyle=edge();
+  ctx.beginPath();ctx.moveTo(0,40);ctx.bezierCurveTo(-104,18,-126,-78,0,-160);ctx.bezierCurveTo(126,-78,104,18,0,40);ctx.closePath();ctx.fill();ctx.restore();
+}
+ctx.fillStyle='hsl('+((H+42)%360)+',100%,76%)';ctx.beginPath();ctx.ellipse(0,36,70,52,0,0,TAU);ctx.fill();
+`},
+    {name:'Prism Hibiscus Bloom',hue:318,body:`
+for(let i=0;i<5;i++){
+  const a=i*TAU/5;
+  ctx.save();ctx.rotate(a);
+  ctx.fillStyle=grad(-210);
+  ctx.beginPath();
+  ctx.moveTo(0,24);
+  ctx.bezierCurveTo(-152,-12,-178,-132,0,-262);
+  ctx.bezierCurveTo(178,-132,152,-12,0,24);ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+ctx.strokeStyle='hsl('+((H+22)%360)+',88%,34%)';ctx.lineWidth=20;
+ctx.beginPath();ctx.moveTo(0,24);ctx.lineTo(0,-210);ctx.stroke();
+for(let i=0;i<9;i++){const y=-205+i*27;ctx.fillStyle='hsl('+((H+52)%360)+',100%,76%)';ctx.beginPath();ctx.arc((i%2?12:-12),y,11,0,TAU);ctx.fill()}
+`},
+    {name:'Prism Anemone Orbit',hue:190,body:`
+for(let i=0;i<12;i++){
+  const a=i*TAU/12;
+  ctx.save();ctx.rotate(a);
+  ctx.fillStyle=grad(-215);
+  ctx.beginPath();ctx.ellipse(0,-205,72,218,0,0,TAU);ctx.fill();ctx.restore();
+}
+ctx.fillStyle='hsl('+((H+18)%360)+',92%,35%)';ctx.beginPath();ctx.arc(0,0,102,0,TAU);ctx.fill();
+for(let i=0;i<28;i++){
+  const a=i*TAU/28,r=30+(i%4)*14;
+  ctx.fillStyle=i%2?'#fff1a8':'hsl('+((H+42)%360)+',100%,78%)';
+  ctx.beginPath();ctx.arc(Math.cos(a)*r,Math.sin(a)*r,8+(i%3)*3,0,TAU);ctx.fill();
+}
+`}
+  ];
+  return specs.map((s,i)=>({
+    id:'prism-extra-'+String(i+1).padStart(2,'0'),
+    title:s.name,
+    flowerName:s.name.replace(/^Prisms+/,''),
+    description:'Original Prism-style procedural flower vector illustration.',
+    keywords:[],
+    code:prismExtraFlowerCode(s)
+  }));
+}
+
 async function exportAllPrismOneSvg(){
   const btn=$('#allPrismOneSvgBtn');
   btn.disabled=true;
   try{
     // Export the 937 flower library as separate transparent 16:9 SVG sheets.
     // Each full sheet contains 150 flower icons; the final sheet contains the remainder.
-    const NON_FLOWER_IDS=new Set([
-      'prism-aurora-snowflake','prism-velvet-ornament','prism-candy-cane',
-      'prism-holly-ember','prism-christmas-star','prism-frost-wreath',
-      'prism-gift-bow','prism-icicle-halo','prism-jingle-bell','prism-north-star'
-    ]);
-    const FLOWERS=LIB.filter(f=>!NON_FLOWER_IDS.has(String(f.id||'')));
+    const FLOWERS=LIB.filter(f=>!PRISM_NON_FLOWER_IDS.has(String(f.id||'')));
     const perSvg=150;
     const W=16000,H=9000;
     const cols=15;
@@ -1232,8 +1431,11 @@ async function boot(){
   try{
     const r=await fetch('./prism-library.json',{cache:'no-store'});
     if(!r.ok)throw new Error('Prism library request failed: '+r.status);
-    LIB=await r.json();
-    if(!Array.isArray(LIB)||LIB.length!==947)throw new Error('Expected 947 Prism Flowers, found '+(LIB?.length||0));
+    const rawLibrary=await r.json();
+    if(!Array.isArray(rawLibrary)||rawLibrary.length!==947)throw new Error('Expected source library of 947 items, found '+(rawLibrary?.length||0));
+    LIB=rawLibrary.filter(f=>!PRISM_NON_FLOWER_IDS.has(String(f?.id||'')));
+    LIB.push(...buildExtraPrismFlowers());
+    if(LIB.length!==950)throw new Error('Expected 950 Prism Flowers after cleanup + extras, found '+(LIB?.length||0));
     if(window.TAMAS_ICON_LIBRARY?.total!==10000)throw new Error('Expected 10,000 stock icons, found '+(window.TAMAS_ICON_LIBRARY?.total||0));
     fillFlowers();fillIconFamilies();codeEl.value=DEFAULT_CODE;syncLines();runCurrent();runEpsSelfTests();setStatus('Ready — '+LIB.length+' Prism Flowers loaded. EPS/SVG export engines validated.','good');
   }catch(e){codeEl.value=DEFAULT_CODE;syncLines();runCurrent();setStatus('Library error: '+(e.message||e),'bad')}
