@@ -87,8 +87,8 @@ async function exportMP4(opts){if(typeof MediaRecorder==='undefined')throw new E
 var APP_VERSION = '1.0.0';
 const $=(s,r=document)=>r.querySelector(s);const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const sourceBlocks=$$('#work ~ #src-utils, #src-utils, #src-motion, #src-muxers, #src-export').map(n=>n.textContent).join('\n');
-let API;try{API=Function(sourceBlocks+'\nreturn {clamp,fmtTime,safeJSON,makeCanvas,parseResolution,wrapAngle,buildMotion,createRuntime,renderFrame,runFrames,WebMMuxer,MP4Muxer,concat,encodeWebM,exportWebM,exportMP4};')();}catch(e){console.error(e);document.body.innerHTML='<pre style="color:#fff;background:#050506;padding:20px">TRILYVA BOOT ERROR\n'+String(e)+'</pre>';return;}
-const {buildMotion,createRuntime,renderFrame,exportWebM,exportMP4,parseResolution,clamp}=API;
+let API;try{API=Function(sourceBlocks+'\nreturn {TAU,clamp,fmtTime,safeJSON,makeCanvas,parseResolution,wrapAngle,buildMotion,createRuntime,renderFrame,runFrames,WebMMuxer,MP4Muxer,concat,encodeWebM,exportWebM,exportMP4};')();}catch(e){console.error(e);document.body.innerHTML='<pre style="color:#fff;background:#050506;padding:20px">TRILYVA BOOT ERROR\n'+String(e)+'</pre>';return;}
+const {TAU,buildMotion,createRuntime,renderFrame,exportWebM,exportMP4,parseResolution,clamp}=API;
 var FPS_PRESETS = [24, 30, 60, 90, 120];
 var FOUR_K_PRESET = {value: '3840x2160'};
 const S={name:'untitled',code:'',fps:60,duration:10,width:1920,height:1080,container:'webm',codec:'vp9',frame:0,playing:true,loop:true,dirty:false,stage:'CODE',runtime:null,compiled:null,rendering:false,download:null,zoom:'fit',lastError:null};
