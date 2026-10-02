@@ -30,6 +30,14 @@
     var finePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
     var pageScroller = document.getElementById('axisScroller') || document.scrollingElement || document.documentElement;
 
+    /* ---------- F12 quick reload ---------- */
+    window.addEventListener('keydown', function(e){
+      if(e.key === 'F12'){
+        e.preventDefault();
+        window.location.reload();
+      }
+    });
+
     /* ---------- Bounded mobile stress benchmark ---------- */
     (function(){
       try{
