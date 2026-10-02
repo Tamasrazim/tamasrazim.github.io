@@ -1391,6 +1391,7 @@ select.mini{
       <button data-act="open">Open</button>
       <button data-act="save">Save<kbd>⌘S</kbd></button>
       <button data-act="samples">Prism Flowers</button>
+      <button data-act="emojis">Living Emojis</button>
       <button data-act="run" class="key">Run<kbd>⌘⏎</kbd></button>
       <button data-act="render" class="key">Render</button>
       <button data-act="render50" class="key" id="render50Btn" title="Render the first 50 Prism Flowers with the current output settings">Render ×50</button>
@@ -18236,6 +18237,26 @@ function sampleList() {
     };
   });
 }
+function emojiSampleList() {
+  return sampleList().filter(function (s) { return /^sample-emoji-/.test(s.id); });
+}
+function emojiSamplesDialog() {
+  var body = el('div');
+  body.appendChild(elHTML('<p class="note">Modern soft-3D emoji studies built as editable C2M vector animations. Each sample is a complete 10-second loop you can read, edit, preview and render.</p>'));
+  var box = el('div', 'list');
+  emojiSampleList().forEach(function (s) {
+    var it = el('div', 'it');
+    it.appendChild(el('h5', null, s.title));
+    it.appendChild(el('p', null, s.desc + ' · ' + s.lines + ' lines · ' + s.dur + ' s' + (s.loop ? ' · loops every ' + s.loopdur + ' s' : '')));
+    it.addEventListener('click', function () {
+      closeModal();
+      askDiscard('Load "' + s.title + '"?', function () { newProject(s.id); });
+    });
+    box.appendChild(it);
+  });
+  body.appendChild(box);
+  openModal('LIVING EMOJIS', body, [{ label: 'Close', fn: closeModal }]);
+}
 function samplesDialog() {
   var body = el('div');
   body.appendChild(elHTML('<p class="note">Each Prism Flower is a complete animation you can read and edit. Loading one replaces the editor contents and sets a matching 10-second loop.</p>'));
@@ -18648,6 +18669,7 @@ var ACTS = {
   open: openProjectDialog,
   save: function (ev) { saveProject(ev && ev.shiftKey ? 'as' : null); },
   samples: samplesDialog,
+  emojis: emojiSamplesDialog,
   run: function () { run(); },
   render: function () {
     showTab('p-render'); showMobile('rail');
@@ -38658,4 +38680,697 @@ function renderFrame(time,frame,fps,ctx,width,height){
 }
 </script>
 
+<script type="text/plain" id="sample-emoji-happy" data-title="Living Emoji — Joy" data-desc="Soft 3D smiling emoji with glossy highlights and gentle breathing." data-loop="1" data-loopdur="10" data-dur="10">
+// LIVING EMOJI — JOY
+const BG="#f4f0ea", PRIMARY="#ffd86e", DEEP="#e89b35", ACCENT="#ff6e8a";
+function rr(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  ctx.fill();
+}
+function eye(ctx,x,y,s){
+  ctx.fillStyle="#252229";
+  ctx.beginPath();ctx.ellipse(x,y,24*s,31*s,0,0,TAU);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.96)";
+  ctx.beginPath();ctx.arc(x-8*s,y-10*s,8*s,0,TAU);ctx.fill();
+}
+function body(ctx,t,w,h){
+  const p=motion.loopProgress;
+  const bob=Math.sin(p*TAU)*6;
+  const tilt=Math.sin(p*TAU)*0.025;
+  ctx.save();
+  ctx.translate(w*.5,h*.55+bob);
+  ctx.rotate(tilt);
+
+  ctx.fillStyle="rgba(0,0,0,.20)";
+  ctx.beginPath();ctx.ellipse(0,235,185,34,0,0,TAU);ctx.fill();
+
+  const g=ctx.createLinearGradient(-190,-220,190,250);
+  g.addColorStop(0,"#ffffff");
+  g.addColorStop(.10,PRIMARY);
+  g.addColorStop(.68,PRIMARY);
+  g.addColorStop(1,DEEP);
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(0,0,235,0,TAU);ctx.fill();
+
+  ctx.globalAlpha=.48;
+  ctx.fillStyle="#ffffff";
+  ctx.beginPath();ctx.ellipse(-72,-118,108,55,-.58,0,TAU);ctx.fill();
+  ctx.globalAlpha=1;
+
+  
+    eye(ctx,-76,-18,1); eye(ctx,76,-18,1);
+    ctx.fillStyle="#252229";
+    ctx.beginPath();ctx.moveTo(-82,43);ctx.bezierCurveTo(-52,92,52,92,82,43);ctx.bezierCurveTo(62,136,-62,136,-82,43);ctx.closePath();ctx.fill();
+    ctx.fillStyle="#fff7fb";ctx.beginPath();ctx.ellipse(0,78,42,24,0,0,TAU);ctx.fill();
+  
+
+  const sweep=(p*TAU*2)%TAU;
+  ctx.save();ctx.globalAlpha=.12;ctx.translate(Math.cos(sweep)*70,Math.sin(sweep)*42);
+  ctx.fillStyle="#ffffff";ctx.beginPath();ctx.ellipse(0,-188,44,16,-.6,0,TAU);ctx.fill();ctx.restore();
+
+  ctx.restore();
+}
+function renderFrame(time,frame,fps,ctx,width,height){
+  ctx.fillStyle=BG;ctx.fillRect(0,0,width,height);
+  body(ctx,time,width,height);
+}
+</script>
+
+<script type="text/plain" id="sample-emoji-laugh" data-title="Living Emoji — Laugh" data-desc="Bright laughing emoji with animated bounce and dimensional shine." data-loop="1" data-loopdur="10" data-dur="10">
+// LIVING EMOJI — LAUGH
+const BG="#efe8e3", PRIMARY="#ffb4c7", DEEP="#d96286", ACCENT="#8f6bff";
+function rr(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  ctx.fill();
+}
+function eye(ctx,x,y,s){
+  ctx.fillStyle="#252229";
+  ctx.beginPath();ctx.ellipse(x,y,24*s,31*s,0,0,TAU);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.96)";
+  ctx.beginPath();ctx.arc(x-8*s,y-10*s,8*s,0,TAU);ctx.fill();
+}
+function body(ctx,t,w,h){
+  const p=motion.loopProgress;
+  const bob=Math.sin(p*TAU)*6;
+  const tilt=Math.sin(p*TAU)*0.025;
+  ctx.save();
+  ctx.translate(w*.5,h*.55+bob);
+  ctx.rotate(tilt);
+
+  ctx.fillStyle="rgba(0,0,0,.20)";
+  ctx.beginPath();ctx.ellipse(0,235,185,34,0,0,TAU);ctx.fill();
+
+  const g=ctx.createLinearGradient(-190,-220,190,250);
+  g.addColorStop(0,"#ffffff");
+  g.addColorStop(.10,PRIMARY);
+  g.addColorStop(.68,PRIMARY);
+  g.addColorStop(1,DEEP);
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(0,0,235,0,TAU);ctx.fill();
+
+  ctx.globalAlpha=.48;
+  ctx.fillStyle="#ffffff";
+  ctx.beginPath();ctx.ellipse(-72,-118,108,55,-.58,0,TAU);ctx.fill();
+  ctx.globalAlpha=1;
+
+  
+    eye(ctx,-82,-22,1); eye(ctx,82,-22,1);
+    ctx.strokeStyle="#252229";ctx.lineWidth=20;ctx.lineCap="round";
+    ctx.beginPath();ctx.moveTo(-116,-70);ctx.lineTo(-58,-48);ctx.moveTo(58,-48);ctx.lineTo(116,-70);ctx.stroke();
+    ctx.fillStyle="#252229";
+    ctx.beginPath();ctx.moveTo(-95,52);ctx.bezierCurveTo(-58,120,58,120,95,52);ctx.bezierCurveTo(58,153,-58,153,-95,52);ctx.closePath();ctx.fill();
+    ctx.fillStyle="#fff7fb";ctx.beginPath();ctx.ellipse(0,90,54,28,0,0,TAU);ctx.fill();
+  
+
+  const sweep=(p*TAU*2)%TAU;
+  ctx.save();ctx.globalAlpha=.12;ctx.translate(Math.cos(sweep)*70,Math.sin(sweep)*42);
+  ctx.fillStyle="#ffffff";ctx.beginPath();ctx.ellipse(0,-188,44,16,-.6,0,TAU);ctx.fill();ctx.restore();
+
+  ctx.restore();
+}
+function renderFrame(time,frame,fps,ctx,width,height){
+  ctx.fillStyle=BG;ctx.fillRect(0,0,width,height);
+  body(ctx,time,width,height);
+}
+</script>
+
+<script type="text/plain" id="sample-emoji-love" data-title="Living Emoji — Love" data-desc="Modern heart-eyed emoji with soft volume and floating expression." data-loop="1" data-loopdur="10" data-dur="10">
+// LIVING EMOJI — LOVE
+const BG="#f4ecef", PRIMARY="#ff92b7", DEEP="#d8577d", ACCENT="#ffcf5b";
+function rr(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  ctx.fill();
+}
+function eye(ctx,x,y,s){
+  ctx.fillStyle="#252229";
+  ctx.beginPath();ctx.ellipse(x,y,24*s,31*s,0,0,TAU);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.96)";
+  ctx.beginPath();ctx.arc(x-8*s,y-10*s,8*s,0,TAU);ctx.fill();
+}
+function body(ctx,t,w,h){
+  const p=motion.loopProgress;
+  const bob=Math.sin(p*TAU)*6;
+  const tilt=Math.sin(p*TAU)*0.025;
+  ctx.save();
+  ctx.translate(w*.5,h*.55+bob);
+  ctx.rotate(tilt);
+
+  ctx.fillStyle="rgba(0,0,0,.20)";
+  ctx.beginPath();ctx.ellipse(0,235,185,34,0,0,TAU);ctx.fill();
+
+  const g=ctx.createLinearGradient(-190,-220,190,250);
+  g.addColorStop(0,"#ffffff");
+  g.addColorStop(.10,PRIMARY);
+  g.addColorStop(.68,PRIMARY);
+  g.addColorStop(1,DEEP);
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(0,0,235,0,TAU);ctx.fill();
+
+  ctx.globalAlpha=.48;
+  ctx.fillStyle="#ffffff";
+  ctx.beginPath();ctx.ellipse(-72,-118,108,55,-.58,0,TAU);ctx.fill();
+  ctx.globalAlpha=1;
+
+  
+    function heart(x,y,s){
+      ctx.fillStyle="#252229";ctx.beginPath();
+      ctx.moveTo(x,y+28*s);
+      ctx.bezierCurveTo(x-52*s,y-6*s,x-58*s,y-58*s,x,y-26*s);
+      ctx.bezierCurveTo(x+58*s,y-58*s,x+52*s,y-6*s,x,y+28*s);ctx.closePath();ctx.fill();
+    }
+    heart(-78,-14,.72);heart(78,-14,.72);heart(0,82,.98);
+  
+
+  const sweep=(p*TAU*2)%TAU;
+  ctx.save();ctx.globalAlpha=.12;ctx.translate(Math.cos(sweep)*70,Math.sin(sweep)*42);
+  ctx.fillStyle="#ffffff";ctx.beginPath();ctx.ellipse(0,-188,44,16,-.6,0,TAU);ctx.fill();ctx.restore();
+
+  ctx.restore();
+}
+function renderFrame(time,frame,fps,ctx,width,height){
+  ctx.fillStyle=BG;ctx.fillRect(0,0,width,height);
+  body(ctx,time,width,height);
+}
+</script>
+
+<script type="text/plain" id="sample-emoji-cool" data-title="Living Emoji — Cool" data-desc="Glossy sunglasses emoji with rounded reflective lenses." data-loop="1" data-loopdur="10" data-dur="10">
+// LIVING EMOJI — COOL
+const BG="#eceff4", PRIMARY="#76d9ff", DEEP="#367fb6", ACCENT="#7766ff";
+function rr(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  ctx.fill();
+}
+function eye(ctx,x,y,s){
+  ctx.fillStyle="#252229";
+  ctx.beginPath();ctx.ellipse(x,y,24*s,31*s,0,0,TAU);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.96)";
+  ctx.beginPath();ctx.arc(x-8*s,y-10*s,8*s,0,TAU);ctx.fill();
+}
+function body(ctx,t,w,h){
+  const p=motion.loopProgress;
+  const bob=Math.sin(p*TAU)*6;
+  const tilt=Math.sin(p*TAU)*0.025;
+  ctx.save();
+  ctx.translate(w*.5,h*.55+bob);
+  ctx.rotate(tilt);
+
+  ctx.fillStyle="rgba(0,0,0,.20)";
+  ctx.beginPath();ctx.ellipse(0,235,185,34,0,0,TAU);ctx.fill();
+
+  const g=ctx.createLinearGradient(-190,-220,190,250);
+  g.addColorStop(0,"#ffffff");
+  g.addColorStop(.10,PRIMARY);
+  g.addColorStop(.68,PRIMARY);
+  g.addColorStop(1,DEEP);
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(0,0,235,0,TAU);ctx.fill();
+
+  ctx.globalAlpha=.48;
+  ctx.fillStyle="#ffffff";
+  ctx.beginPath();ctx.ellipse(-72,-118,108,55,-.58,0,TAU);ctx.fill();
+  ctx.globalAlpha=1;
+
+  
+    ctx.fillStyle="#252229";rr(ctx,-132,-64,108,78,30);rr(ctx,24,-64,108,78,30);
+    ctx.strokeStyle="#252229";ctx.lineWidth=16;ctx.beginPath();ctx.moveTo(-24,-27);ctx.lineTo(24,-27);ctx.stroke();
+    ctx.fillStyle="#ffffff";ctx.globalAlpha=.82;
+    ctx.beginPath();ctx.ellipse(-96,-40,26,11,-.35,0,TAU);ctx.fill();
+    ctx.beginPath();ctx.ellipse(58,-40,26,11,-.35,0,TAU);ctx.fill();
+    ctx.globalAlpha=1;
+    ctx.fillStyle="#252229";ctx.beginPath();ctx.arc(0,75,62,0,Math.PI);ctx.lineTo(62,82);ctx.quadraticCurveTo(0,126,-62,82);ctx.closePath();ctx.fill();
+  
+
+  const sweep=(p*TAU*2)%TAU;
+  ctx.save();ctx.globalAlpha=.12;ctx.translate(Math.cos(sweep)*70,Math.sin(sweep)*42);
+  ctx.fillStyle="#ffffff";ctx.beginPath();ctx.ellipse(0,-188,44,16,-.6,0,TAU);ctx.fill();ctx.restore();
+
+  ctx.restore();
+}
+function renderFrame(time,frame,fps,ctx,width,height){
+  ctx.fillStyle=BG;ctx.fillRect(0,0,width,height);
+  body(ctx,time,width,height);
+}
+</script>
+
+<script type="text/plain" id="sample-emoji-shock" data-title="Living Emoji — Shock" data-desc="Inflated surprised emoji with strong expression and pulse." data-loop="1" data-loopdur="10" data-dur="10">
+// LIVING EMOJI — SHOCK
+const BG="#f0eee8", PRIMARY="#ffd36d", DEEP="#e18d2a", ACCENT="#ff7e66";
+function rr(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  ctx.fill();
+}
+function eye(ctx,x,y,s){
+  ctx.fillStyle="#252229";
+  ctx.beginPath();ctx.ellipse(x,y,24*s,31*s,0,0,TAU);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.96)";
+  ctx.beginPath();ctx.arc(x-8*s,y-10*s,8*s,0,TAU);ctx.fill();
+}
+function body(ctx,t,w,h){
+  const p=motion.loopProgress;
+  const bob=Math.sin(p*TAU)*6;
+  const tilt=Math.sin(p*TAU)*0.025;
+  ctx.save();
+  ctx.translate(w*.5,h*.55+bob);
+  ctx.rotate(tilt);
+
+  ctx.fillStyle="rgba(0,0,0,.20)";
+  ctx.beginPath();ctx.ellipse(0,235,185,34,0,0,TAU);ctx.fill();
+
+  const g=ctx.createLinearGradient(-190,-220,190,250);
+  g.addColorStop(0,"#ffffff");
+  g.addColorStop(.10,PRIMARY);
+  g.addColorStop(.68,PRIMARY);
+  g.addColorStop(1,DEEP);
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(0,0,235,0,TAU);ctx.fill();
+
+  ctx.globalAlpha=.48;
+  ctx.fillStyle="#ffffff";
+  ctx.beginPath();ctx.ellipse(-72,-118,108,55,-.58,0,TAU);ctx.fill();
+  ctx.globalAlpha=1;
+
+  
+    eye(ctx,-80,-24,1);eye(ctx,80,-24,1);
+    ctx.fillStyle="#252229";ctx.beginPath();ctx.ellipse(0,76,52,68,0,0,TAU);ctx.fill();
+    ctx.fillStyle="#ffffff";ctx.beginPath();ctx.ellipse(0,89,18,33,0,0,TAU);ctx.fill();
+  
+
+  const sweep=(p*TAU*2)%TAU;
+  ctx.save();ctx.globalAlpha=.12;ctx.translate(Math.cos(sweep)*70,Math.sin(sweep)*42);
+  ctx.fillStyle="#ffffff";ctx.beginPath();ctx.ellipse(0,-188,44,16,-.6,0,TAU);ctx.fill();ctx.restore();
+
+  ctx.restore();
+}
+function renderFrame(time,frame,fps,ctx,width,height){
+  ctx.fillStyle=BG;ctx.fillRect(0,0,width,height);
+  body(ctx,time,width,height);
+}
+</script>
+
+<script type="text/plain" id="sample-emoji-sleep" data-title="Living Emoji — Sleepy" data-desc="Soft sleeping emoji with floating animated Z shapes." data-loop="1" data-loopdur="10" data-dur="10">
+// LIVING EMOJI — SLEEPY
+const BG="#e9edf4", PRIMARY="#9edaff", DEEP="#568fc3", ACCENT="#8f79ff";
+function rr(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  ctx.fill();
+}
+function eye(ctx,x,y,s){
+  ctx.fillStyle="#252229";
+  ctx.beginPath();ctx.ellipse(x,y,24*s,31*s,0,0,TAU);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.96)";
+  ctx.beginPath();ctx.arc(x-8*s,y-10*s,8*s,0,TAU);ctx.fill();
+}
+function body(ctx,t,w,h){
+  const p=motion.loopProgress;
+  const bob=Math.sin(p*TAU)*6;
+  const tilt=Math.sin(p*TAU)*0.025;
+  ctx.save();
+  ctx.translate(w*.5,h*.55+bob);
+  ctx.rotate(tilt);
+
+  ctx.fillStyle="rgba(0,0,0,.20)";
+  ctx.beginPath();ctx.ellipse(0,235,185,34,0,0,TAU);ctx.fill();
+
+  const g=ctx.createLinearGradient(-190,-220,190,250);
+  g.addColorStop(0,"#ffffff");
+  g.addColorStop(.10,PRIMARY);
+  g.addColorStop(.68,PRIMARY);
+  g.addColorStop(1,DEEP);
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(0,0,235,0,TAU);ctx.fill();
+
+  ctx.globalAlpha=.48;
+  ctx.fillStyle="#ffffff";
+  ctx.beginPath();ctx.ellipse(-72,-118,108,55,-.58,0,TAU);ctx.fill();
+  ctx.globalAlpha=1;
+
+  
+    ctx.strokeStyle="#252229";ctx.lineWidth=19;ctx.lineCap="round";
+    ctx.beginPath();ctx.moveTo(-112,-8);ctx.quadraticCurveTo(-82,-40,-50,-8);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(50,-8);ctx.quadraticCurveTo(82,-40,112,-8);ctx.stroke();
+    ctx.fillStyle="#252229";ctx.beginPath();ctx.arc(0,60,14,0,TAU);ctx.fill();
+    ctx.fillStyle=ACCENT;ctx.font="700 54px system-ui";ctx.fillText("z",108,-92);
+    ctx.fillText("z",140,-132);
+  
+
+  const sweep=(p*TAU*2)%TAU;
+  ctx.save();ctx.globalAlpha=.12;ctx.translate(Math.cos(sweep)*70,Math.sin(sweep)*42);
+  ctx.fillStyle="#ffffff";ctx.beginPath();ctx.ellipse(0,-188,44,16,-.6,0,TAU);ctx.fill();ctx.restore();
+
+  ctx.restore();
+}
+function renderFrame(time,frame,fps,ctx,width,height){
+  ctx.fillStyle=BG;ctx.fillRect(0,0,width,height);
+  body(ctx,time,width,height);
+}
+</script>
+
+<script type="text/plain" id="sample-emoji-wink" data-title="Living Emoji — Wink" data-desc="Playful wink emoji with a compact modern silhouette." data-loop="1" data-loopdur="10" data-dur="10">
+// LIVING EMOJI — WINK
+const BG="#f3ebe5", PRIMARY="#ffc56f", DEEP="#dc8b36", ACCENT="#ff6f91";
+function rr(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  ctx.fill();
+}
+function eye(ctx,x,y,s){
+  ctx.fillStyle="#252229";
+  ctx.beginPath();ctx.ellipse(x,y,24*s,31*s,0,0,TAU);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.96)";
+  ctx.beginPath();ctx.arc(x-8*s,y-10*s,8*s,0,TAU);ctx.fill();
+}
+function body(ctx,t,w,h){
+  const p=motion.loopProgress;
+  const bob=Math.sin(p*TAU)*6;
+  const tilt=Math.sin(p*TAU)*0.025;
+  ctx.save();
+  ctx.translate(w*.5,h*.55+bob);
+  ctx.rotate(tilt);
+
+  ctx.fillStyle="rgba(0,0,0,.20)";
+  ctx.beginPath();ctx.ellipse(0,235,185,34,0,0,TAU);ctx.fill();
+
+  const g=ctx.createLinearGradient(-190,-220,190,250);
+  g.addColorStop(0,"#ffffff");
+  g.addColorStop(.10,PRIMARY);
+  g.addColorStop(.68,PRIMARY);
+  g.addColorStop(1,DEEP);
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(0,0,235,0,TAU);ctx.fill();
+
+  ctx.globalAlpha=.48;
+  ctx.fillStyle="#ffffff";
+  ctx.beginPath();ctx.ellipse(-72,-118,108,55,-.58,0,TAU);ctx.fill();
+  ctx.globalAlpha=1;
+
+  
+    eye(ctx,-82,-18,1);
+    ctx.strokeStyle="#252229";ctx.lineWidth=19;ctx.lineCap="round";
+    ctx.beginPath();ctx.moveTo(50,-12);ctx.quadraticCurveTo(78,8,108,-10);ctx.stroke();
+    ctx.fillStyle="#252229";ctx.beginPath();ctx.moveTo(-74,56);ctx.bezierCurveTo(-34,28,34,28,74,56);ctx.bezierCurveTo(48,108,-48,108,-74,56);ctx.closePath();ctx.fill();
+  
+
+  const sweep=(p*TAU*2)%TAU;
+  ctx.save();ctx.globalAlpha=.12;ctx.translate(Math.cos(sweep)*70,Math.sin(sweep)*42);
+  ctx.fillStyle="#ffffff";ctx.beginPath();ctx.ellipse(0,-188,44,16,-.6,0,TAU);ctx.fill();ctx.restore();
+
+  ctx.restore();
+}
+function renderFrame(time,frame,fps,ctx,width,height){
+  ctx.fillStyle=BG;ctx.fillRect(0,0,width,height);
+  body(ctx,time,width,height);
+}
+</script>
+
+<script type="text/plain" id="sample-emoji-fire" data-title="Living Emoji — Fire" data-desc="Soft-volume flame emoji with a living inner glow." data-loop="1" data-loopdur="10" data-dur="10">
+// LIVING EMOJI — FIRE
+const BG="#efebe5", PRIMARY="#ff9d45", DEEP="#e95f35", ACCENT="#ffe16a";
+function rr(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  ctx.fill();
+}
+function eye(ctx,x,y,s){
+  ctx.fillStyle="#252229";
+  ctx.beginPath();ctx.ellipse(x,y,24*s,31*s,0,0,TAU);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.96)";
+  ctx.beginPath();ctx.arc(x-8*s,y-10*s,8*s,0,TAU);ctx.fill();
+}
+function body(ctx,t,w,h){
+  const p=motion.loopProgress;
+  const bob=Math.sin(p*TAU)*6;
+  const tilt=Math.sin(p*TAU)*0.025;
+  ctx.save();
+  ctx.translate(w*.5,h*.55+bob);
+  ctx.rotate(tilt);
+
+  ctx.fillStyle="rgba(0,0,0,.20)";
+  ctx.beginPath();ctx.ellipse(0,235,185,34,0,0,TAU);ctx.fill();
+
+  const g=ctx.createLinearGradient(-190,-220,190,250);
+  g.addColorStop(0,"#ffffff");
+  g.addColorStop(.10,PRIMARY);
+  g.addColorStop(.68,PRIMARY);
+  g.addColorStop(1,DEEP);
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(0,0,235,0,TAU);ctx.fill();
+
+  ctx.globalAlpha=.48;
+  ctx.fillStyle="#ffffff";
+  ctx.beginPath();ctx.ellipse(-72,-118,108,55,-.58,0,TAU);ctx.fill();
+  ctx.globalAlpha=1;
+
+  
+    const pulse=1+Math.sin(p*TAU*2)*.035;
+    ctx.save();ctx.scale(pulse,pulse);
+    ctx.fillStyle=ACCENT;ctx.beginPath();ctx.moveTo(0,-180);ctx.bezierCurveTo(120,-84,120,10,36,90);ctx.bezierCurveTo(26,156,-82,168,-122,70);ctx.bezierCurveTo(-160,-28,-68,-78,0,-180);ctx.closePath();ctx.fill();
+    ctx.fillStyle="#fff3c2";ctx.beginPath();ctx.moveTo(12,-74);ctx.bezierCurveTo(66,-26,58,38,18,80);ctx.bezierCurveTo(-22,94,-54,54,-42,10);ctx.bezierCurveTo(-30,-26,-2,-46,12,-74);ctx.closePath();ctx.fill();
+    ctx.restore();
+  
+
+  const sweep=(p*TAU*2)%TAU;
+  ctx.save();ctx.globalAlpha=.12;ctx.translate(Math.cos(sweep)*70,Math.sin(sweep)*42);
+  ctx.fillStyle="#ffffff";ctx.beginPath();ctx.ellipse(0,-188,44,16,-.6,0,TAU);ctx.fill();ctx.restore();
+
+  ctx.restore();
+}
+function renderFrame(time,frame,fps,ctx,width,height){
+  ctx.fillStyle=BG;ctx.fillRect(0,0,width,height);
+  body(ctx,time,width,height);
+}
+</script>
+
+<script type="text/plain" id="sample-emoji-ghost" data-title="Living Emoji — Ghost" data-desc="Cute luminous ghost with subtle hovering motion." data-loop="1" data-loopdur="10" data-dur="10">
+// LIVING EMOJI — GHOST
+const BG="#e9edf0", PRIMARY="#bfeaff", DEEP="#78a6c2", ACCENT="#8b78ff";
+function rr(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  ctx.fill();
+}
+function eye(ctx,x,y,s){
+  ctx.fillStyle="#252229";
+  ctx.beginPath();ctx.ellipse(x,y,24*s,31*s,0,0,TAU);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.96)";
+  ctx.beginPath();ctx.arc(x-8*s,y-10*s,8*s,0,TAU);ctx.fill();
+}
+function body(ctx,t,w,h){
+  const p=motion.loopProgress;
+  const bob=Math.sin(p*TAU)*6;
+  const tilt=Math.sin(p*TAU)*0.025;
+  ctx.save();
+  ctx.translate(w*.5,h*.55+bob);
+  ctx.rotate(tilt);
+
+  ctx.fillStyle="rgba(0,0,0,.20)";
+  ctx.beginPath();ctx.ellipse(0,235,185,34,0,0,TAU);ctx.fill();
+
+  const g=ctx.createLinearGradient(-190,-220,190,250);
+  g.addColorStop(0,"#ffffff");
+  g.addColorStop(.10,PRIMARY);
+  g.addColorStop(.68,PRIMARY);
+  g.addColorStop(1,DEEP);
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(0,0,235,0,TAU);ctx.fill();
+
+  ctx.globalAlpha=.48;
+  ctx.fillStyle="#ffffff";
+  ctx.beginPath();ctx.ellipse(-72,-118,108,55,-.58,0,TAU);ctx.fill();
+  ctx.globalAlpha=1;
+
+  
+    ctx.fillStyle="#ffffff";ctx.beginPath();
+    ctx.moveTo(-146,148);ctx.lineTo(-146,-20);ctx.bezierCurveTo(-146,-160,146,-160,146,-20);
+    ctx.lineTo(146,148);ctx.lineTo(92,108);ctx.lineTo(44,150);ctx.lineTo(0,108);ctx.lineTo(-44,150);ctx.lineTo(-92,108);ctx.closePath();ctx.fill();
+    eye(ctx,-52,-8,.72);eye(ctx,52,-8,.72);
+    ctx.fillStyle=ACCENT;ctx.beginPath();ctx.arc(0,58,12,0,TAU);ctx.fill();
+  
+
+  const sweep=(p*TAU*2)%TAU;
+  ctx.save();ctx.globalAlpha=.12;ctx.translate(Math.cos(sweep)*70,Math.sin(sweep)*42);
+  ctx.fillStyle="#ffffff";ctx.beginPath();ctx.ellipse(0,-188,44,16,-.6,0,TAU);ctx.fill();ctx.restore();
+
+  ctx.restore();
+}
+function renderFrame(time,frame,fps,ctx,width,height){
+  ctx.fillStyle=BG;ctx.fillRect(0,0,width,height);
+  body(ctx,time,width,height);
+}
+</script>
+
+<script type="text/plain" id="sample-emoji-star" data-title="Living Emoji — Star" data-desc="Dimensional star emoji with a breathing glow." data-loop="1" data-loopdur="10" data-dur="10">
+// LIVING EMOJI — STAR
+const BG="#eee8db", PRIMARY="#ffe47b", DEEP="#e7ad35", ACCENT="#ff8d66";
+function rr(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  ctx.fill();
+}
+function eye(ctx,x,y,s){
+  ctx.fillStyle="#252229";
+  ctx.beginPath();ctx.ellipse(x,y,24*s,31*s,0,0,TAU);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.96)";
+  ctx.beginPath();ctx.arc(x-8*s,y-10*s,8*s,0,TAU);ctx.fill();
+}
+function body(ctx,t,w,h){
+  const p=motion.loopProgress;
+  const bob=Math.sin(p*TAU)*6;
+  const tilt=Math.sin(p*TAU)*0.025;
+  ctx.save();
+  ctx.translate(w*.5,h*.55+bob);
+  ctx.rotate(tilt);
+
+  ctx.fillStyle="rgba(0,0,0,.20)";
+  ctx.beginPath();ctx.ellipse(0,235,185,34,0,0,TAU);ctx.fill();
+
+  const g=ctx.createLinearGradient(-190,-220,190,250);
+  g.addColorStop(0,"#ffffff");
+  g.addColorStop(.10,PRIMARY);
+  g.addColorStop(.68,PRIMARY);
+  g.addColorStop(1,DEEP);
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(0,0,235,0,TAU);ctx.fill();
+
+  ctx.globalAlpha=.48;
+  ctx.fillStyle="#ffffff";
+  ctx.beginPath();ctx.ellipse(-72,-118,108,55,-.58,0,TAU);ctx.fill();
+  ctx.globalAlpha=1;
+
+  
+    const pulse=1+Math.sin(p*TAU)*.05;ctx.save();ctx.scale(pulse,pulse);
+    ctx.fillStyle="#fff3a6";const pts=[];for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2?72:172;pts.push([Math.cos(a)*r,Math.sin(a)*r]);}
+    ctx.beginPath();pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath();ctx.fill();
+    ctx.fillStyle="rgba(255,255,255,.75)";ctx.beginPath();ctx.ellipse(-44,-74,34,18,-.6,0,TAU);ctx.fill();ctx.restore();
+  
+
+  const sweep=(p*TAU*2)%TAU;
+  ctx.save();ctx.globalAlpha=.12;ctx.translate(Math.cos(sweep)*70,Math.sin(sweep)*42);
+  ctx.fillStyle="#ffffff";ctx.beginPath();ctx.ellipse(0,-188,44,16,-.6,0,TAU);ctx.fill();ctx.restore();
+
+  ctx.restore();
+}
+function renderFrame(time,frame,fps,ctx,width,height){
+  ctx.fillStyle=BG;ctx.fillRect(0,0,width,height);
+  body(ctx,time,width,height);
+}
+</script>
+
+<script type="text/plain" id="sample-emoji-robot" data-title="Living Emoji — Robot" data-desc="Rounded modern robot emoji with illuminated eyes and antenna." data-loop="1" data-loopdur="10" data-dur="10">
+// LIVING EMOJI — ROBOT
+const BG="#e8edf0", PRIMARY="#a9c4d8", DEEP="#647f98", ACCENT="#61e3ce";
+function rr(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  ctx.fill();
+}
+function eye(ctx,x,y,s){
+  ctx.fillStyle="#252229";
+  ctx.beginPath();ctx.ellipse(x,y,24*s,31*s,0,0,TAU);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.96)";
+  ctx.beginPath();ctx.arc(x-8*s,y-10*s,8*s,0,TAU);ctx.fill();
+}
+function body(ctx,t,w,h){
+  const p=motion.loopProgress;
+  const bob=Math.sin(p*TAU)*6;
+  const tilt=Math.sin(p*TAU)*0.025;
+  ctx.save();
+  ctx.translate(w*.5,h*.55+bob);
+  ctx.rotate(tilt);
+
+  ctx.fillStyle="rgba(0,0,0,.20)";
+  ctx.beginPath();ctx.ellipse(0,235,185,34,0,0,TAU);ctx.fill();
+
+  const g=ctx.createLinearGradient(-190,-220,190,250);
+  g.addColorStop(0,"#ffffff");
+  g.addColorStop(.10,PRIMARY);
+  g.addColorStop(.68,PRIMARY);
+  g.addColorStop(1,DEEP);
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(0,0,235,0,TAU);ctx.fill();
+
+  ctx.globalAlpha=.48;
+  ctx.fillStyle="#ffffff";
+  ctx.beginPath();ctx.ellipse(-72,-118,108,55,-.58,0,TAU);ctx.fill();
+  ctx.globalAlpha=1;
+
+  
+    ctx.fillStyle="#252229";rr(ctx,-116,-82,232,150,40);
+    ctx.fillStyle="#ffffff";ctx.globalAlpha=.92;rr(ctx,-72,-42,52,42,14);rr(ctx,20,-42,52,42,14);ctx.globalAlpha=1;
+    ctx.fillStyle=ACCENT;rr(ctx,-13,70,26,20,7);
+    ctx.strokeStyle=ACCENT;ctx.lineWidth=14;ctx.beginPath();ctx.moveTo(0,-82);ctx.lineTo(0,-122);ctx.stroke();
+    ctx.fillStyle=ACCENT;ctx.beginPath();ctx.arc(0,-134,10,0,TAU);ctx.fill();
+  
+
+  const sweep=(p*TAU*2)%TAU;
+  ctx.save();ctx.globalAlpha=.12;ctx.translate(Math.cos(sweep)*70,Math.sin(sweep)*42);
+  ctx.fillStyle="#ffffff";ctx.beginPath();ctx.ellipse(0,-188,44,16,-.6,0,TAU);ctx.fill();ctx.restore();
+
+  ctx.restore();
+}
+function renderFrame(time,frame,fps,ctx,width,height){
+  ctx.fillStyle=BG;ctx.fillRect(0,0,width,height);
+  body(ctx,time,width,height);
+}
+</script>
+
+<script type="text/plain" id="sample-emoji-cat" data-title="Living Emoji — Cat" data-desc="Friendly modern cat face with soft highlights." data-loop="1" data-loopdur="10" data-dur="10">
+// LIVING EMOJI — CAT
+const BG="#efece8", PRIMARY="#c8b0ff", DEEP="#8467c8", ACCENT="#ff9cb9";
+function rr(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  ctx.fill();
+}
+function eye(ctx,x,y,s){
+  ctx.fillStyle="#252229";
+  ctx.beginPath();ctx.ellipse(x,y,24*s,31*s,0,0,TAU);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.96)";
+  ctx.beginPath();ctx.arc(x-8*s,y-10*s,8*s,0,TAU);ctx.fill();
+}
+function body(ctx,t,w,h){
+  const p=motion.loopProgress;
+  const bob=Math.sin(p*TAU)*6;
+  const tilt=Math.sin(p*TAU)*0.025;
+  ctx.save();
+  ctx.translate(w*.5,h*.55+bob);
+  ctx.rotate(tilt);
+
+  ctx.fillStyle="rgba(0,0,0,.20)";
+  ctx.beginPath();ctx.ellipse(0,235,185,34,0,0,TAU);ctx.fill();
+
+  const g=ctx.createLinearGradient(-190,-220,190,250);
+  g.addColorStop(0,"#ffffff");
+  g.addColorStop(.10,PRIMARY);
+  g.addColorStop(.68,PRIMARY);
+  g.addColorStop(1,DEEP);
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(0,0,235,0,TAU);ctx.fill();
+
+  ctx.globalAlpha=.48;
+  ctx.fillStyle="#ffffff";
+  ctx.beginPath();ctx.ellipse(-72,-118,108,55,-.58,0,TAU);ctx.fill();
+  ctx.globalAlpha=1;
+
+  
+    eye(ctx,-78,-18,.95);eye(ctx,78,-18,.95);
+    ctx.fillStyle=ACCENT;ctx.beginPath();ctx.arc(0,62,13,0,TAU);ctx.fill();
+  
+
+  const sweep=(p*TAU*2)%TAU;
+  ctx.save();ctx.globalAlpha=.12;ctx.translate(Math.cos(sweep)*70,Math.sin(sweep)*42);
+  ctx.fillStyle="#ffffff";ctx.beginPath();ctx.ellipse(0,-188,44,16,-.6,0,TAU);ctx.fill();ctx.restore();
+
+  ctx.restore();
+}
+function renderFrame(time,frame,fps,ctx,width,height){
+  ctx.fillStyle=BG;ctx.fillRect(0,0,width,height);
+  body(ctx,time,width,height);
+}
+</script>
 </html>
