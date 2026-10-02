@@ -272,6 +272,13 @@ select.mini:focus{outline:none;border-color:#fff}
 .warnbox{border:1px solid var(--rule-hi);border-left-width:2px;border-left-color:#fff;padding:8px 10px;margin:8px 0;
   font-size:11px;color:var(--ink-2);background:#0e0e10;line-height:1.5}
 .warnbox b{color:#fff;font-family:var(--mono);font-size:10px;letter-spacing:.1em;display:block;margin-bottom:3px}
+.intel-card{border:1px solid var(--rule);background:#09090b;padding:9px 10px;margin-top:8px}
+.intel-title{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:#fff;text-transform:uppercase;margin-bottom:8px}
+.intel-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.intel-chip{font-family:var(--mono);font-size:9px;color:var(--ink-2);border:1px solid var(--rule);padding:3px 5px}
+.intel-keywords{max-height:240px;overflow:auto;margin-top:8px;border-top:1px solid var(--rule)}
+.intel-keywords div{padding:4px 0;border-bottom:1px solid #151518;font-family:var(--mono);font-size:9.5px;color:var(--ink-2)}
+.intel-keywords b{color:#fff;font-weight:500;margin-right:6px}
 .btn{display:block;width:100%;padding:9px;border:1px solid var(--rule-hi);font-family:var(--mono);font-size:11px;
   letter-spacing:.14em;color:var(--ink);margin:8px 0 0;transition:all var(--t-fast);position:relative;overflow:hidden}
 .btn:hover{border-color:#fff;color:#fff}
@@ -1607,6 +1614,12 @@ select.mini{
               <button class="btn" data-act="testMenu">Test render</button>
             </div>
             <div id="analysis"></div>
+          </div>
+          <div class="sec">
+            <h4>FRAME INTELLIGENCE</h4>
+            <button class="btn" data-act="identifyFrame" id="identifyFrameBtn">IDENTIFY CURRENT FRAME</button>
+            <div id="frameIntel"></div>
+            <p class="note">Visual analysis is heuristic: TRILYVA renders the exact frame, measures its pixels, then ranks stock-keyword phrases from the bundled 5M research corpus when available.</p>
           </div>
           <div class="sec">
             <h4>RENDER</h4>
@@ -6939,6 +6952,273 @@ function inspectFrame() {
   });
 }
 
+/* ---------------- frame intelligence ---------------- */
+var FrameIntel = {
+  cache: Object.create(null),
+  categoryOrder: [
+    'Abstract','Animals Wildlife','Arts','Backgrounds Textures','Beauty Fashion',
+    'Buildings Landmarks','Business Finance','Celebrities','Education','Food Drink',
+    'Healthcare Medical','Holidays','Industrial','Interiors','Miscellaneous','Nature',
+    'Objects','Parks Outdoor','People','Religion','Science','Signs Symbols',
+    'Sports Recreation','Technology','Transportation','Vintage'
+  ],
+  categoryTerms: {
+    'Abstract':['abstract','geometry','geometric','gradient','fractal','prism','particle','kaleidoscope','symmetry','vortex','fluid','wave','glow'],
+    'Animals Wildlife':['animal','wildlife','bird','cat','dog','horse','fish','butterfly','insect','mammal','reptile','panda','penguin','owl'],
+    'Arts':['art','artistic','painting','drawing','sculpture','canvas','brush','watercolor','sketch','gallery','museum','illustration'],
+    'Backgrounds Textures':['background','texture','pattern','wallpaper','backdrop','surface','seamless','grain','marble','fabric','paper','abstract'],
+    'Beauty Fashion':['fashion','beauty','clothing','makeup','cosmetic','jewelry','dress','model','portrait','skincare','perfume'],
+    'Buildings Landmarks':['building','architecture','landmark','skyscraper','tower','bridge','monument','house','office','hotel','city','skyline'],
+    'Business Finance':['business','finance','office','startup','investment','banking','money','currency','accounting','commerce','marketing'],
+    'Celebrities':['celebrity','actor','actress','singer','musician','performer','athlete','premiere','concert','entertainment','portrait'],
+    'Education':['education','school','classroom','student','teacher','learning','study','book','library','university','graduation'],
+    'Food Drink':['food','drink','meal','cooking','recipe','restaurant','fruit','vegetable','dessert','coffee','tea','bakery'],
+    'Healthcare Medical':['healthcare','medical','medicine','doctor','nurse','hospital','clinic','patient','laboratory','wellness','pharmacy'],
+    'Holidays':['holiday','christmas','halloween','easter','ramadan','diwali','wedding','birthday','festival','celebration','gift'],
+    'Industrial':['industrial','factory','manufacturing','construction','engineering','machine','worker','steel','warehouse','logistics'],
+    'Interiors':['interior','room','livingroom','bedroom','kitchen','bathroom','office','studio','furniture','decor','home'],
+    'Miscellaneous':['object','item','collection','assortment','utility','household','product','package','tool','container'],
+    'Nature':['nature','plant','flower','leaf','tree','forest','mountain','ocean','water','river','lake','garden','botanical','landscape'],
+    'Objects':['object','bottle','box','book','cup','glass','vase','clock','phone','camera','laptop','keyboard','tool','package'],
+    'Parks Outdoor':['park','outdoor','camping','hiking','trekking','picnic','gardening','playground','beach','trail','adventure'],
+    'People':['person','people','portrait','woman','man','child','family','group','worker','professional','face','hand','community'],
+    'Religion':['religion','spirituality','faith','prayer','worship','church','mosque','temple','synagogue','candle','cross','crescent'],
+    'Science':['science','laboratory','chemistry','biology','physics','astronomy','microscope','molecule','atom','dna','planet','research'],
+    'Signs Symbols':['sign','symbol','icon','logo','flag','arrow','badge','warning','direction','interface','emoji','emblem','pictogram'],
+    'Sports Recreation':['sport','fitness','running','cycling','swimming','soccer','football','basketball','tennis','yoga','gym','athlete'],
+    'Technology':['technology','computer','laptop','smartphone','software','code','programming','ai','robotics','network','database','server','circuit'],
+    'Transportation':['transportation','car','automobile','truck','bus','train','airplane','aircraft','boat','ship','bicycle','motorcycle','road'],
+    'Vintage':['vintage','retro','antique','classic','oldfashioned','sepia','nostalgia','heritage','historic','analog','film','grunge']
+  }
+};
+
+function intelClamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+function intelHsl(r,g,b){
+  r/=255;g/=255;b/=255;
+  var mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn,h=0,s=0,l=(mx+mn)/2;
+  if(d){
+    s=l>.5?d/(2-mx-mn):d/(mx+mn);
+    if(mx===r) h=(g-b)/d+(g<b?6:0);
+    else if(mx===g) h=(b-r)/d+2;
+    else h=(r-g)/d+4;
+    h/=6;
+  }
+  return [h,s,l];
+}
+function intelAnalyzePixels(data,w,h){
+  var n=w*h, sumR=0,sumG=0,sumB=0,opaque=0,alphaMass=0,edge=0,bright=0,satSum=0;
+  var bins=new Array(12).fill(0), occ=new Uint8Array(32*32), cx=0,cy=0,weight=0;
+  for(var y=0;y<h;y++){
+    for(var x=0;x<w;x++){
+      var i=(y*w+x)*4,r=data[i],g=data[i+1],b=data[i+2],a=data[i+3]/255;
+      if(a>.08){
+        opaque++; alphaMass+=a; cx+=x*a; cy+=y*a; weight+=a;
+        var hs=intelHsl(r,g,b); bins[Math.floor(hs[0]*12)%12]+=a;
+        satSum+=hs[1]; bright+=hs[2];
+      }
+      var gx=Math.min(w-1,x+1), gy=Math.min(h-1,y+1);
+      var j=(y*w+gx)*4,k=(gy*w+x)*4;
+      edge+=Math.abs(r-data[j])+Math.abs(g-data[j+1])+Math.abs(b-data[j+2]);
+      edge+=Math.abs(r-data[k])+Math.abs(g-data[k+1])+Math.abs(b-data[k+2]);
+      if(a>.20) occ[Math.min(31,Math.floor(x/w*32))+Math.min(31,Math.floor(y/h*32))*32]=1;
+    }
+  }
+  var components=0,seen=new Uint8Array(1024),q=new Int16Array(1024);
+  for(var p=0;p<1024;p++){
+    if(!occ[p]||seen[p])continue;
+    components++; var head=0,tail=0;q[tail++]=p;seen[p]=1;
+    while(head<tail){
+      var z=q[head++],zx=z%32,zy=(z/32)|0;
+      var nb=[z-1,z+1,z-32,z+32];
+      for(var ni=0;ni<4;ni++){var zz=nb[ni];if(zz<0||zz>=1024)continue;var nx=zz%32,ny=(zz/32)|0;if(Math.abs(nx-zx)+Math.abs(ny-zy)!==1)continue;if(occ[zz]&&!seen[zz]){seen[zz]=1;q[tail++]=zz;}}
+    }
+  }
+  var radial=0,samples=0;
+  var cxp=weight?cx/weight:w/2,cyp=weight?cy/weight:h/2;
+  for(var ry=1;ry<=12;ry++){
+    for(var k2=0;k2<16;k2++){
+      var ang=Math.PI*2*k2/16, x1=Math.round(cxp+Math.cos(ang)*ry*w/24), y1=Math.round(cyp+Math.sin(ang)*ry*h/24);
+      var x2=Math.round(cxp-Math.cos(ang)*ry*w/24), y2=Math.round(cyp-Math.sin(ang)*ry*h/24);
+      if(x1>=0&&x1<w&&y1>=0&&y1<h&&x2>=0&&x2<w&&y2>=0&&y2<h){
+        var a1=data[(y1*w+x1)*4+3],a2=data[(y2*w+x2)*4+3];
+        radial += 1-Math.abs(a1-a2)/255; samples++;
+      }
+    }
+  }
+  radial=samples?radial/samples:0;
+  var huePeaks=[];
+  for(var bi=0;bi<12;bi++) if(bins[bi] > n*.01) huePeaks.push(bi);
+  var green=(bins[3]+bins[4]+bins[5])/(Math.max(1,alphaMass)),
+      blue=(bins[7]+bins[8]+bins[9])/(Math.max(1,alphaMass)),
+      warm=(bins[0]+bins[1]+bins[11])/(Math.max(1,alphaMass)),
+      sat=satSum/Math.max(1,opaque), lum=bright/Math.max(1,opaque);
+  var edgeNorm=edge/(Math.max(1,n)*1530*2);
+  var transparency=1-opaque/n;
+  var rectLike=intelClamp(1-Math.abs(components-1)/10,0,1);
+  return {
+    transparency:transparency, edgeDensity:intelClamp(edgeNorm,0,1),
+    radialSymmetry:radial, components:components, saturation:intelClamp(sat,0,1),
+    luminance:intelClamp(lum,0,1), greenRatio:intelClamp(green,0,1),
+    blueRatio:intelClamp(blue,0,1), warmRatio:intelClamp(warm,0,1),
+    centered:intelClamp(1-Math.hypot((cxp/w-.5)*2,(cyp/h-.5)*2),0,1),
+    hueBins:huePeaks
+  };
+}
+function intelClassify(f){
+  var scores={};
+  FrameIntel.categoryOrder.forEach(function(c){scores[c]=0;});
+  scores['Abstract'] += f.radialSymmetry*5 + f.saturation*1.5 + (f.edgeDensity>.08?1:0) + (f.transparency>.15?1.5:0);
+  scores['Nature'] += f.greenRatio*4 + f.blueRatio*1.5 + f.centered*0.5;
+  scores['Animals Wildlife'] += f.warmRatio*1 + f.greenRatio*1.2 + (f.components>2?1:0);
+  scores['People'] += f.warmRatio*1.8 + f.centered*1.2 + (f.edgeDensity>.05?1:0);
+  scores['Technology'] += f.edgeDensity*5 + (f.saturation<.35?1.2:0) + (f.blueRatio*2);
+  scores['Buildings Landmarks'] += f.edgeDensity*4 + (f.saturation<.4?1:0) + (f.components<5?1:0);
+  scores['Backgrounds Textures'] += (f.edgeDensity<.055?3:0) + f.transparency*2 + (f.components>8?1:0);
+  scores['Objects'] += f.centered*2 + (f.components<=3?2:0) + f.edgeDensity*2;
+  scores['Arts'] += f.saturation*1.5 + f.edgeDensity*2;
+  scores['Science'] += f.edgeDensity*1.5 + f.blueRatio*1.5;
+  scores['Signs Symbols'] += f.centered*1.8 + f.edgeDensity*2 + (f.components<=4?1:0);
+  scores['Sports Recreation'] += f.edgeDensity*1.2 + f.warmRatio*0.8;
+  var best=FrameIntel.categoryOrder.slice().sort(function(a,b){return scores[b]-scores[a];});
+  var top=best[0], second=best[1];
+  var margin=scores[top]-scores[second];
+  var confidence=intelClamp(.42+margin/8+f.radialSymmetry*.2,0.3,.97);
+  var subject;
+  if(top==='Nature' && f.greenRatio>.3) subject='botanical / natural visual';
+  else if(top==='Technology' && f.edgeDensity>.12) subject='digital / technological graphic';
+  else if(top==='Buildings Landmarks' && f.edgeDensity>.14) subject='architectural / structural scene';
+  else if(top==='People' && f.warmRatio>.18) subject='portrait / human-centered visual';
+  else if(top==='Animals Wildlife') subject='animal / wildlife-like visual';
+  else if(top==='Objects') subject='isolated object / product-like visual';
+  else if(top==='Abstract') subject=f.radialSymmetry>.72?'radial geometric abstract':'abstract graphic';
+  else if(top==='Backgrounds Textures') subject='background / texture visual';
+  else subject=top.toLowerCase()+' visual';
+  return {category:top,runnerUp:second,confidence:confidence,subject:subject,scores:scores};
+}
+function intelHints(profile,f){
+  var arr=[];
+  arr.push(profile.subject);
+  arr.push(profile.category.toLowerCase());
+  if(f.radialSymmetry>.68) arr.push('symmetrical','radial','geometric');
+  if(f.transparency>.12) arr.push('transparent','translucent','isolated');
+  if(f.saturation>.58) arr.push('colorful','vibrant','multicolor');
+  if(f.edgeDensity>.12) arr.push('detailed','high contrast','graphic');
+  if(f.edgeDensity<.055) arr.push('soft','minimal','background');
+  if(f.greenRatio>.28) arr.push('green','botanical','organic');
+  if(f.blueRatio>.28) arr.push('blue','cool tones','luminous');
+  if(f.warmRatio>.28) arr.push('warm colors','golden','red');
+  if(f.centered>.76) arr.push('centered','isolated','composition');
+  return arr;
+}
+function intelKeywordCandidates(profile,hints){
+  var out=[],seen=Object.create(null);
+  var terms=(FrameIntel.categoryTerms[profile.category]||[]).concat(hints.map(function(x){return x.toLowerCase();}));
+  function add(q,score){
+    q=String(q||'').trim().replace(/\\s+/g,' ');
+    if(!q||q.length<3||seen[q])return;
+    seen[q]=1;out.push({q:q,score:score});
+  }
+  terms.forEach(function(t,i){ add(t,100-i); });
+  var pairs=[
+    ['abstract','geometric'],['translucent','gradient'],['digital','creative'],
+    ['nature','botanical'],['modern','minimal'],['luminous','glowing'],
+    ['isolated','copy space'],['vibrant','colorful'],['symmetrical','centered'],
+    ['professional','design'],['background','texture']
+  ];
+  pairs.forEach(function(p){ if(terms.indexOf(p[0])>=0||terms.indexOf(p[1])>=0) add(p[0]+' '+p[1],60); });
+  return out;
+}
+async function intelCorpusPhrases(profile,hints){
+  var catIndex=FrameIntel.categoryOrder.indexOf(profile.category);
+  if(catIndex<0) return [];
+  var start=catIndex*200000, end=start+199999;
+  var first=Math.floor(start/500000)+1,last=Math.floor(end/500000)+1;
+  var urls=[];
+  for(var si=first;si<=last;si++) urls.push('./keyword-library/keywords_'+('0'+si).slice(-2)+'.txt');
+  var want=hints.map(function(x){return x.toLowerCase();}).concat(FrameIntel.categoryTerms[profile.category]||[]);
+  var hits=[];
+  for(var ui=0;ui<urls.length;ui++){
+    try{
+      var resp=await fetch(urls[ui],{cache:'force-cache'});
+      if(!resp.ok) continue;
+      if(!resp.body) continue;
+      var reader=resp.body.getReader(),decoder=new TextDecoder(),buf='',lineNo=0;
+      while(true){
+        var chunk=await reader.read();
+        if(chunk.done){buf+=decoder.decode();} else buf+=decoder.decode(chunk.value,{stream:true});
+        var lines=buf.split(/\\r?\\n/); buf=lines.pop()||'';
+        for(var li=0;li<lines.length;li++){
+          var line=lines[li].trim(); lineNo++;
+          if(!line)continue;
+          var low=line.toLowerCase(),score=0;
+          want.forEach(function(term){ if(term && low.indexOf(term)>=0) score+= term.length>8?3:2; });
+          if(low.indexOf(profile.category.toLowerCase().split(' ')[0])>=0) score+=3;
+          if(score>0) hits.push({q:line,score:score+(1/(1+line.length/100))});
+        }
+        if(chunk.done) break;
+        if(hits.length>2400) break;
+      }
+      try{await reader.cancel();}catch(_){}
+    }catch(_){}
+  }
+  hits.sort(function(a,b){return b.score-a.score;});
+  var seen=Object.create(null),ded=[];
+  for(var i=0;i<hits.length&&ded.length<50;i++) if(!seen[hits[i].q]){seen[hits[i].q]=1;ded.push(hits[i]);}
+  return ded;
+}
+async function identifyFrame(){
+  var box=$('#frameIntel'),btn=$('#identifyFrameBtn');
+  if(!box||!S.comp)return;
+  btn.disabled=true; btn.textContent='ANALYZING FRAME…';
+  box.innerHTML='<div class="note">Rendering the exact current frame and reading its pixels…</div>';
+  try{
+    var ok=await withCompiled();
+    if(!ok) throw new Error('Animation does not compile.');
+    var c=S.comp,f=S.frame,w=256,h=Math.max(1,Math.round(256*c.height/c.width));
+    var r=await Engine.api.renderOne(f,w,h);
+    if(!r||!r.ok) throw new Error(r&&r.error?r.error.message:'Frame render failed.');
+    var cv=document.createElement('canvas');cv.width=w;cv.height=h;
+    var g=cv.getContext('2d',{willReadFrequently:true});
+    if(r.bitmap){g.drawImage(r.bitmap,0,0,w,h);r.bitmap.close();}else if(r.canvas)g.drawImage(r.canvas,0,0,w,h);else throw new Error('Renderer returned no pixels.');
+    var features=intelAnalyzePixels(g.getImageData(0,0,w,h).data,w,h);
+    var cls=intelClassify(features),hints=intelHints(cls,features);
+    var corpus=await intelCorpusPhrases(cls,hints);
+    var candidates=corpus.length?corpus:intelKeywordCandidates(cls,hints);
+    while(candidates.length<50){
+      var fallback=intelKeywordCandidates(cls,hints);
+      for(var k=0;k<fallback.length&&candidates.length<50;k++){
+        if(!candidates.some(function(x){return x.q===fallback[k].q;})) candidates.push(fallback[k]);
+      }
+      if(candidates.length>=50)break;
+      var extras=['stock','commercial','creative','visual','design','artwork','motion','animation','4k','high quality','copy space'];
+      extras.forEach(function(x){if(candidates.length<50&&!candidates.some(function(y){return y.q===x;}))candidates.push({q:x,score:5});});
+      break;
+    }
+    candidates=candidates.slice(0,50);
+    var html='<div class="intel-card"><div class="intel-title">'+esc(cls.subject)+'</div>';
+    html+='<dl class="kv"><dt>Category</dt><dd>'+esc(cls.category)+'</dd>';
+    html+='<dt>Confidence</dt><dd>'+Math.round(cls.confidence*100)+'%</dd>';
+    html+='<dt>Runner-up</dt><dd>'+esc(cls.runnerUp)+'</dd>';
+    html+='<dt>Transparency</dt><dd>'+Math.round(features.transparency*100)+'%</dd>';
+    html+='<dt>Edge density</dt><dd>'+features.edgeDensity.toFixed(3)+'</dd>';
+    html+='<dt>Radial symmetry</dt><dd>'+features.radialSymmetry.toFixed(3)+'</dd>';
+    html+='<dt>Objects/regions</dt><dd>'+features.components+'</dd>';
+    html+='</dl><div class="intel-title" style="margin-top:10px">VISUAL HINTS</div><div class="intel-chips">';
+    hints.forEach(function(h){html+='<span class="intel-chip">'+esc(h)+'</span>';});
+    html+='</div><div class="intel-title" style="margin-top:10px">50 STOCK KEYWORDS / PHRASES</div><div class="intel-keywords">';
+    candidates.forEach(function(k,i){html+='<div><b>'+String(i+1).padStart(2,'0')+'</b>'+esc(k.q)+'</div>';});
+    html+='</div></div>';
+    box.innerHTML=html;
+    S.frameIntel={frame:f,features:features,classification:cls,hints:hints,keywords:candidates.map(function(x){return x.q;}),source:corpus.length?'5M corpus':'heuristic fallback'};
+    $('#stMsg').textContent='identified frame '+f+' · '+cls.subject+' · '+(corpus.length?'5M keyword corpus':'fallback keyword set');
+  }catch(e){
+    box.innerHTML='<div class="warnbox"><b>IDENTIFIER FAILED</b>'+esc(String(e&&e.message||e))+'</div>';
+    $('#stMsg').textContent='frame intelligence failed';
+  }finally{
+    btn.disabled=false;btn.textContent='IDENTIFY CURRENT FRAME';
+  }
+}
+
 function toggleFullscreen() {
   var t = $('#panePreview');
   if (document.fullscreenElement) { document.exitFullscreen(); return; }
@@ -7232,6 +7512,7 @@ var ACTS = {
   startRender: function () { withCompiled().then(function (ok) { if (ok) startRender(buildJob()); }); },
   cancelRender: cancelRender,
   analyze: analyseJob,
+  identifyFrame: identifyFrame,
   analyzeLoop: analyseLoop,
   testMenu: testMenu,
   queueAdd: queueAdd,
