@@ -944,16 +944,11 @@ function adobeTitle(f){
   const flower=flowerDisplayName(f);
   return ('Prism '+flower+' flower vector illustration').replace(/\s+/g,' ').trim().slice(0,70).trim();
 }
-function adobeDescription(f){
-  const flower=flowerDisplayName(f);
-  return ('Colorful Prism-style '+flower.toLowerCase()+' flower vector illustration with luminous geometric petals, vibrant gradient color, and a clean ornamental botanical design for creative stock use.')
-    .replace(/\s+/g,' ').trim().slice(0,200).trim();
-}
 function flowerKeywords(f){
   const flower=flowerDisplayName(f).toLowerCase();
   const base=[
-    flower,'prism flower','flower','floral','botanical','petals','colorful','vibrant','ornamental','nature','flower illustration',
-    'vector','vector art','digital art','abstract','gradient','luminous','geometric','decorative','design','artwork','visual',
+    flower,'flower','floral','botanical','petals','colorful','vibrant','ornamental','nature','flower illustration',
+    'vector','vector art','digital art','abstract','gradient','luminous','geometric','decorative','design','artwork',
     'composition','glowing','color','shape','pattern','stylized','botanical art','floral design','digital illustration',
     'decorative art','abstract floral','nature design','creative background','prismatic','prismatic flower','modern',
     'contemporary','graphic','creative','translucent','colorful flower','botanical illustration','floral artwork',
@@ -961,16 +956,40 @@ function flowerKeywords(f){
   ];
   return [...new Set(base.map(x=>String(x).replace(/\s+/g,' ').trim()).filter(Boolean))].slice(0,50);
 }
+function sheetMetadataRow(filename,index,count){
+  const n=String(index+1).padStart(3,'0');
+  const title=('150 colorful prismatic flower vector icons sheet '+n).slice(0,70);
+  const keywords=[
+    'flower icons','flower','floral','botanical','vector','colorful',
+    'prismatic','flower collection','vector icons','floral design',
+    'botanical illustration','decorative','ornamental','digital art','abstract',
+    'gradient','geometric','colorful flowers','nature','petals','artwork',
+    'design','graphic','illustration','creative','modern','contemporary',
+    'decorative flowers','flower set','icon collection','vector art',
+    'digital illustration','botanical art','floral artwork','nature design',
+    'abstract floral','prismatic flower','flower elements','design elements',
+    'isolated','transparent','svg','stock vector','creative assets','ornamental design',
+    'flower graphics','botanical graphics','floral graphics','icon sheet','graphic resources'
+  ];
+  return [filename,title,[...new Set(keywords)].slice(0,50).join(', '),'14',''];
+}
 function metadataCsv(items=LIB.map((f,i)=>({f,i}))){
-  const h=['Filename','Title','Description','Keywords'];
+  const h=['Filename','Title','Keywords','Category','Releases'];
   const rows=[h];
   items.forEach(({f,i,filename})=>rows.push([
     filename||adobeFilename(f,i),
     adobeTitle(f),
-    adobeDescription(f),
-    flowerKeywords(f).join(', ')
+    flowerKeywords(f).join(', '),
+    '14',
+    ''
   ]));
   return rows.map(r=>r.map(csvEsc).join(',')).join('\r\n')+'\r\n';
+}
+function sheetMetadataCsv(rows){
+  return [
+    ['Filename','Title','Keywords','Category','Releases'],
+    ...rows
+  ].map(r=>r.map(csvEsc).join(',')).join('\r\n')+'\r\n';
 }
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2500)}
 async function pickFolder(){if(!window.showDirectoryPicker)throw new Error('Folder export requires Chrome or Edge with File System Access support.');return window.showDirectoryPicker({mode:'readwrite'})}
@@ -1320,6 +1339,7 @@ async function exportAllPrismOneSvg(){
     const tileW=W/cols;
     const fullTileH=H/rowsPerFull;
     const totalSheets=Math.ceil(FLOWERS.length/perSvg);
+    const sheetMetadata=[];
 
     for(let sheet=0;sheet<totalSheets;sheet++){
       const startIndex=sheet*perSvg;
@@ -1374,11 +1394,16 @@ async function exportAllPrismOneSvg(){
       const blob=new Blob([parts.join('')],{type:'image/svg+xml;charset=utf-8'});
       const first=String(startIndex+1).padStart(3,'0');
       const last=String(endIndex).padStart(3,'0');
-      downloadBlob(blob,'prism-flowers-'+first+'-'+last+'.svg');
+      const filename='prism-flowers-'+first+'-'+last+'.svg';
+      downloadBlob(blob,filename);
+      sheetMetadata.push(sheetMetadataRow(filename,sheet,count));
       await new Promise(r=>setTimeout(r,300));
     }
 
-    flash('Prism SVG export finished — '+totalSheets+' SVGs · '+FLOWERS.length+' flowers · 150 per SVG except the final '+(FLOWERS.length%perSvg||perSvg)+'.');
+    const csv=sheetMetadataCsv(sheetMetadata);
+    if(new TextEncoder().encode(csv).length>1000000)throw new Error('Adobe CSV exceeds the 1 MB upload limit.');
+    downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),'prism-flowers-adobe-stock-metadata.csv');
+    flash('Prism SVG export finished — '+totalSheets+' SVGs + Adobe CSV · '+FLOWERS.length+' flowers · 150 per SVG except the final '+(FLOWERS.length%perSvg||perSvg)+'.');
   }catch(e){
     setStatus('Prism SVG sheets failed: '+(e.message||e),'bad');
   }finally{
