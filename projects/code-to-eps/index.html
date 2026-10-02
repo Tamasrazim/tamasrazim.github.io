@@ -1545,6 +1545,7 @@ function drawLivingSymbol(ctx,g){
   }
 }
 function buildLivingGlyphScene(g){
+  const TAU=Math.PI*2;
   const s=new Scene(1000,1000),ctx=new RecorderCtx(s,1000,1000);
   ctx.translate(500,500);
   drawLivingBase(ctx,g);
