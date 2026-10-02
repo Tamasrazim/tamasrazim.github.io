@@ -51,7 +51,7 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
     <button class="btn" id="allSvgBtn">Export All SVG</button>
     <button class="btn" id="allPrismOneSvgBtn">Prism All → One SVG</button>
     <button class="btn" id="livingGlyphPreviewBtn">Preview Living Glyph</button>
-    <button class="btn" id="livingGlyphsBtn">Living Glyphs → 150 SVG</button>
+    <button class="btn" id="livingGlyphsBtn">Save Living Glyphs 150 SVG</button>
     <button class="btn" id="iconStockBtn">Stock Icons 10K</button>
     <button class="btn primary" id="allBtn">Export All EPS</button>
   </div>
@@ -1594,6 +1594,65 @@ function previewLivingGlyph(index=livingGlyphPreviewIndex){
   setStatus('Living Glyph preview — '+(g.index+1)+' / '+LIVING_GLYPHS.length+' · '+g.title,'good');
   wEl.value=oldW;hEl.value=oldH;
 }
+async function exportLivingGlyphsToFolder(){
+  const btn=$('#livingGlyphsBtn');
+  btn.disabled=true;
+  try{
+    if(!window.showDirectoryPicker)throw new Error('Folder export requires Chrome or Edge with File System Access support.');
+    const dir=await window.showDirectoryPicker({mode:'readwrite'});
+    const perSvg=150;
+    const totalSheets=Math.ceil(LIVING_GLYPHS.length/perSvg);
+    let saved=0;
+    for(let sheet=0;sheet<totalSheets;sheet++){
+      const start=sheet*perSvg,end=Math.min(start+perSvg,LIVING_GLYPHS.length),count=end-start;
+      const rows=Math.ceil(count/15),W=16000,H=9000,cols=15,tileW=W/cols,tileH=H/rows,artPad=70;
+      const parts=[
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">',
+        '<title>Living Glyphs '+String(sheet+1).padStart(3,'0')+' — '+count+' vector icons</title>',
+        '<desc>Original Living Glyph vector emoji-style graphic resource sheet.</desc>'
+      ];
+      for(let local=0;local<count;local++){
+        const index=start+local,g=LIVING_GLYPHS[index],scene=buildLivingGlyphScene(g),raw=sceneToSvg(scene),body=uniqueSvgIds(innerSvg(raw),'lg'+String(index+1).padStart(3,'0')),b=sceneBounds(scene,false);
+        if(!(b.w>0&&b.h>0))throw new Error('Living Glyph '+(index+1)+' has no vector bounds');
+        const scale=Math.min((tileW-artPad)/b.w,(tileH-artPad)/b.h);
+        const x=(local%cols)*tileW,y=Math.floor(local/cols)*tileH;
+        const drawX=tileW/2-(b.x+b.w/2)*scale,drawY=tileH/2-(b.y+b.h/2)*scale;
+        const id='lg'+String(index+1).padStart(3,'0');
+        parts.push('<g id="'+id+'" transform="translate('+psNum(x)+' '+psNum(y)+')">');
+        parts.push('<g id="'+id+'-artwork" transform="translate('+psNum(drawX)+' '+psNum(drawY)+') scale('+psNum(scale)+' '+psNum(scale)+')">');
+        parts.push(body,'</g></g>');
+      }
+      parts.push('</svg>');
+      const filename='living-glyphs-'+String(start+1).padStart(3,'0')+'-'+String(end).padStart(3,'0')+'.svg';
+      const fh=await dir.getFileHandle(filename,{create:true});
+      const fw=await fh.createWritable();
+      await fw.write(new Blob([parts.join('')],{type:'image/svg+xml;charset=utf-8'}));
+      await fw.close();
+      saved++;
+      setStatus('Living Glyphs saved — '+end+' / '+LIVING_GLYPHS.length+' · file '+saved+' / '+totalSheets);
+    }
+
+    const metadata=[
+      ['Filename','Title','Keywords','Category','Releases'],
+      ...Array.from({length:totalSheets},(_,sheet)=>{
+        const start=sheet*perSvg,end=Math.min(start+perSvg,LIVING_GLYPHS.length),count=end-start;
+        const filename='living-glyphs-'+String(start+1).padStart(3,'0')+'-'+String(end).padStart(3,'0')+'.svg';
+        return livingGlyphMetadataRow(filename,start,count);
+      })
+    ].map(row=>row.map(csvEsc).join(',')).join('\r\n')+'\r\n';
+    const mh=await dir.getFileHandle('living-glyphs-adobe-stock-metadata.csv',{create:true});
+    const mw=await mh.createWritable();
+    await mw.write(metadata);
+    await mw.close();
+
+    flash('Living Glyphs saved — '+LIVING_GLYPHS.length+' vectors · '+totalSheets+' SVG sheets + Adobe CSV.');
+  }catch(e){
+    setStatus('Living Glyphs folder export failed: '+(e.message||e),'bad');
+  }finally{
+    btn.disabled=false;
+  }
+}
 async function exportLivingGlyphs(){
   const btn=$('#livingGlyphsBtn');
   btn.disabled=true;
@@ -1693,7 +1752,7 @@ allBtn.onclick=async()=>{try{await exportAll()}catch(e){allBtn.disabled=false;se
 $('#allSvgBtn').onclick=async()=>{try{await exportAllSvg()}catch(e){$('#allSvgBtn').disabled=false;setStatus('Export All SVG failed: '+(e.message||e),'bad')}};
 $('#allPrismOneSvgBtn').onclick=()=>exportAllPrismOneSvg();
 $('#livingGlyphPreviewBtn').onclick=()=>previewLivingGlyph();
-$('#livingGlyphsBtn').onclick=()=>exportLivingGlyphs();
+$('#livingGlyphsBtn').onclick=()=>exportLivingGlyphsToFolder();
 metaBtn.onclick=exportMetadata;
 fillIconFamilies();
 $('#iconStockBtn').onclick=()=>{iconStockSection?.scrollIntoView({block:'center',behavior:'smooth'});loadIcon(iconItemAt(1));iconNumberEl?.focus()};
