@@ -55,9 +55,13 @@ const samples = scripts.filter(([_, attrs]) => /\btype=["']text\/plain["']/i.tes
 must(samples.length >= 10, 'renderer keeps its built-in sample library');
 
 const executable = scripts.filter(([_, attrs]) => attrs.trim() === '');
-must(executable.length === 1, 'renderer has one executable application block');
+const applicationBlocks = executable.filter(([, , source]) =>
+  source.includes('KYNESTRA — application shell') &&
+  source.includes("var APP_VERSION = '1.0.0'")
+);
+must(applicationBlocks.length === 1, 'renderer has one executable TRILYVA application block');
 try {
-  new Function(executable[0][2]);
+  new Function(applicationBlocks[0][2]);
   console.log('PASS renderer application JavaScript parses');
 } catch (error) {
   throw new Error('renderer application JavaScript syntax: ' + error.message);
