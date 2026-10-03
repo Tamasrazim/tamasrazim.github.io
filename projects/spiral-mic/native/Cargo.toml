@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Spiral Mic native real-time microphone effect software"
 authors = ["Tamasrazim"]
 edition = "2021"
-rust-version = "1.85"
+rust-version = "1.90"
 
 [lib]
 name = "spiral_mic_lib"
