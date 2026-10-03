@@ -1,0 +1,51 @@
+name: TRILYVA Library Index
+
+on:
+  push:
+    paths:
+      - "projects/code-motion/renderer/library/**"
+      - ".github/workflows/trilyva-library-index.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate library manifest
+        shell: bash
+        run: |
+          ROOT="projects/code-motion/renderer/library"
+          OUT="$ROOT/manifest.json"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("projects/code-motion/renderer/library")
+          modules = []
+          for p in sorted(root.glob("*/library.js")):
+              modules.append("./" + p.parent.name + "/library.js")
+
+          payload = {"version": 1, "libraries": modules}
+          Path(root / "manifest.json").write_text(
+              json.dumps(payload, indent=2) + "\n",
+              encoding="utf-8"
+          )
+          PY
+
+      - name: Commit manifest
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add projects/code-motion/renderer/library/manifest.json
+          if git diff --cached --quiet; then
+            echo "Manifest already current."
+            exit 0
+          fi
+          git commit -m "TRILYVA: update library manifest"
+          git push
