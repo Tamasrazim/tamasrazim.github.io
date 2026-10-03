@@ -1,0 +1,20 @@
+[package]
+name = "spiral-mic"
+version = "0.1.0"
+description = "Spiral Mic native real-time microphone effect software"
+authors = ["Tamasrazim"]
+edition = "2021"
+rust-version = "1.85"
+
+[lib]
+name = "spiral_mic_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.12" }
+
+[dependencies]
+tauri = { version = "2.12", features = [] }
+serde = { version = "1", features = ["derive"] }
+cpal = { version = "0.18.2", features = ["realtime"] }
+ringbuf = "0.5.2"
