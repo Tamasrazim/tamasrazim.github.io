@@ -38,7 +38,7 @@ impl Default for AudioParams {
         Self {
             rate_hz: Arc::new(atomic_f32(0.65)),
             depth_ms: Arc::new(atomic_f32(5.0)),
-            delay_ms: Arc::new(8.0_f32.to_bits().into()),
+            delay_ms: Arc::new(atomic_f32(8.0)),
             feedback: Arc::new(atomic_f32(0.22)),
             mix: Arc::new(atomic_f32(0.50)),
             reverb: Arc::new(atomic_f32(0.12)),
@@ -266,6 +266,14 @@ impl AudioEngine {
                 input_error,
                 input_meter.input_peak.clone(),
             )?,
+            SampleFormat::I24 => build_input::<cpal::I24>(
+                &input,
+                input_config,
+                input_channels,
+                producer,
+                input_error,
+                input_meter.input_peak.clone(),
+            )?,
             SampleFormat::I32 => build_input::<i32>(
                 &input,
                 input_config,
@@ -291,6 +299,14 @@ impl AudioEngine {
                 input_meter.input_peak.clone(),
             )?,
             SampleFormat::U16 => build_input::<u16>(
+                &input,
+                input_config,
+                input_channels,
+                producer,
+                input_error,
+                input_meter.input_peak.clone(),
+            )?,
+            SampleFormat::U24 => build_input::<cpal::U24>(
                 &input,
                 input_config,
                 input_channels,
@@ -363,6 +379,16 @@ impl AudioEngine {
                 output_meter,
                 output_error,
             )?,
+            SampleFormat::I24 => build_output::<cpal::I24>(
+                &output,
+                output_config,
+                output_channels,
+                consumer,
+                params.clone(),
+                sample_rate,
+                output_meter,
+                output_error,
+            )?,
             SampleFormat::I32 => build_output::<i32>(
                 &output,
                 output_config,
@@ -394,6 +420,16 @@ impl AudioEngine {
                 output_error,
             )?,
             SampleFormat::U16 => build_output::<u16>(
+                &output,
+                output_config,
+                output_channels,
+                consumer,
+                params.clone(),
+                sample_rate,
+                output_meter,
+                output_error,
+            )?,
+            SampleFormat::U24 => build_output::<cpal::U24>(
                 &output,
                 output_config,
                 output_channels,
