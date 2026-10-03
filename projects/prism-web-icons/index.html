@@ -20,7 +20,7 @@ main{display:grid;grid-template-columns:1fr 320px;min-height:calc(100vh - 180px)
 <body>
 <header>
  <div class="brand">
-  <div><div class="kicker">TRILYVA / Prism Library</div><div class="title">Prism Web Icons</div><div class="sub">100 original translucent geometric web & interface icons. Built for stock-vector workflows with editable SVG output and a single 10×10 sheet export.</div></div>
+  <div><div class="kicker">TRILYVA / Prism Library</div><div class="title">Prism Web Icons</div><div class="sub">100 original faceted crystal glass web & interface icons. Built for stock-vector workflows with editable SVG output and a single 10×10 sheet export.</div></div>
   <div class="kicker">100 VECTOR ICONS</div>
  </div>
  <div class="toolbar">
@@ -40,7 +40,7 @@ main{display:grid;grid-template-columns:1fr 320px;min-height:calc(100vh - 180px)
   <h3 id="active">No icon selected</h3>
   <div class="stat"><div class="metric"><b id="count">0</b><span>selected</span></div><div class="metric"><b>100</b><span>total icons</span></div></div>
   <label>Stock title</label><textarea id="metaTitle">Prism Web Icons — 100 Translucent Geometric Web Interface Icons</textarea>
-  <label>Description</label><textarea id="metaDesc">Original translucent geometric web interface icon collection with faceted prism styling, clean vector construction and editable individual symbols for websites, apps, dashboards and digital products.</textarea>
+  <label>Description</label><textarea id="metaDesc">Original faceted crystal glass web interface icon collection with faceted prism styling, clean vector construction and editable individual symbols for websites, apps, dashboards and digital products.</textarea>
   <label>Keywords</label><textarea id="keywords">web icons,interface icons,ui icons,vector icons,web interface,user interface,icon set,icon collection,prism,prismatic,translucent,geometric,geometric icons,abstract icons,digital interface,website,app,dashboard,technology,design,editable vector,svg,eps,illustration,graphic design,modern,contemporary,glass,faceted,crystal,luminous,gradient,colorful,clean,minimal,navigation,communication,commerce,software,application,digital,online,branding,creative,stock vector,template,interface design</textarea>
   <div class="note">EPS uses opaque vector fills and the same generated icon geometry; alpha is intentionally flattened for Illustrator/stock compatibility. SVG remains the master format.</div>
  </aside>
@@ -245,7 +245,7 @@ function epsFor(indices){
    return "";
  };
  let ps="%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 "+w+" "+h+"\n%%Creator: TRILYVA Prism Web Icons\n%%Title: Prism Web Icons\n%%Pages: 1\n%%LanguageLevel: 2\n%%EndComments\n1 setlinejoin 1 setlinecap\n";
- indices.forEach((idx,k)=>{const x=p+(k%cols)*cell+28,y=h-p-Math.floor(k/cols)*cell-cell+28;ps+="gsave\n"+x+" "+y+" translate\n0 64 translate\n1 -1 scale\n";const doc=new DOMParser().parseFromString("<svg xmlns='http://www.w3.org/2000/svg'>"+glyph(TYPE_MAP[ICONS[idx]],idx)+"</svg>","image/svg+xml");[...doc.documentElement.children].forEach(el=>ps+=elementPS(el));ps+="grestore\n";});
+ indices.forEach((idx,k)=>{const x=p+(k%cols)*cell+28,y=h-p-Math.floor(k/cols)*cell-cell+28;ps+="gsave\n"+x+" "+y+" translate\n0 64 translate\n1 -1 scale\n";const flatFill=COLORS[(idx+2)%COLORS.length],src=glyph(TYPE_MAP[ICONS[idx]],idx).replace(/fill="#fff"/g,'fill="'+flatFill+'"').replace(/stroke="#111"/g,'stroke="#334155"');const doc=new DOMParser().parseFromString("<svg xmlns='http://www.w3.org/2000/svg'>"+src+"</svg>","image/svg+xml");[...doc.documentElement.children].forEach(el=>ps+=elementPS(el));ps+="grestore\n";});
  ps+="showpage\n%%EOF\n";return ps;
 }document.getElementById("eps").onclick=()=>{ensureSelection();download("prism-web-icons-"+selected.size+".eps",epsFor([...selected]))};
 document.getElementById("csv").onclick=()=>{ensureSelection();const title=document.getElementById("metaTitle").value,desc=document.getElementById("metaDesc").value,k=document.getElementById("keywords").value;const rows=[["Filename","Description","Keywords","Categories","Illustration","Mature Content","Editorial"]];[...selected].forEach(i=>rows.push([slug("prism-web-icon-"+ICONS[i])+".svg",desc,k,"Icons;Web;Technology","No","No","No"]));const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");download("prism-web-icons-stock-metadata.csv",csv)};
