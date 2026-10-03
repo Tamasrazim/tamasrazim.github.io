@@ -1,7 +1,7 @@
 
 (function(){
 "use strict";
-var cfg=window.PRO_TOOL||{}, root=document.getElementById("app");
+var pathMatch=location.pathname.match(/projects\/([^\/]+)\/?$/), pathSlug=pathMatch?pathMatch[1]:""; var cfg=window.PRO_TOOL||((window.PRO_TOOL_MANIFEST||{})[pathSlug])||{}, root=document.getElementById("app");
 var name=cfg.name||"Browser Tool", kind=cfg.kind||infer(name), category=cfg.category||"Tool";
 document.title=name+" — Tamasrazim";
 
