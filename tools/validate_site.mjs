@@ -189,8 +189,8 @@ const sampleSet=[0,1,9,10,99,100,999,1000,4999,5000,9999];
 iconCtx.TAMAS_ICON_LIBRARY=iconLib;
 for(const idx of sampleSet){
   const item=iconLib.items[idx];
-  const fn=new Function('v','W','H',iconLib.codeFor(item)+'\nreturn renderFrame;');
-  const renderFrame=fn(fakeVec,4000,4000);
+  const fn=new Function('v','W','H','TAMAS_ICON_LIBRARY',iconLib.codeFor(item)+'\nreturn renderFrame;');
+  const renderFrame=fn(fakeVec,4000,4000,iconLib);
   renderFrame(0,0,60,fakeVec,4000,4000);
 }
 must(read('projects/code-to-eps/index.html').includes('./vector-icon-library.js'),'CODE-EPS loads canonical 10K icon library');
