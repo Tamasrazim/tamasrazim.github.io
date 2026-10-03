@@ -3,253 +3,355 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0a0a0d">
+<meta name="theme-color" content="#08090c">
 <title>Prism Web Icons — TRILYVA</title>
 <style>
-:root{color-scheme:dark;--bg:#07080b;--panel:#0d1016;--line:#242936;--muted:#9098aa;--text:#f4f7ff;--accent:#b9d9ff}
-*{box-sizing:border-box}body{margin:0;font:14px/1.45 Inter,system-ui,sans-serif;background:radial-gradient(circle at 14% 0,#1d2740 0,#0a0d14 30%,#05070b 70%),#05070b;color:var(--text)}
-header{padding:28px 30px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;background:rgba(7,8,11,.9);backdrop-filter:blur(18px)}
-.brand{display:flex;justify-content:space-between;gap:20px;align-items:flex-end}.kicker{font-size:11px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase}.title{font-size:34px;font-weight:800;letter-spacing:-.04em}.sub{color:var(--muted);max-width:760px}
-.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.toolbar input,.toolbar select,.toolbar button{border:1px solid var(--line);background:#0a0d12;color:var(--text);padding:10px 12px;border-radius:10px}
-.toolbar input{min-width:230px}.toolbar button{cursor:pointer}.toolbar button.primary{background:#eaf5ff;color:#081018;border-color:#fff}.toolbar button:hover{border-color:#71809b}
-main{display:grid;grid-template-columns:1fr 320px;min-height:calc(100vh - 180px)}.grid{padding:24px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.card{background:linear-gradient(160deg,rgba(21,27,38,.94),rgba(9,12,17,.94));border:1px solid #293346;border-radius:18px;padding:12px;cursor:pointer;transition:.18s transform,.18s border-color,.18s box-shadow}.card:hover{transform:translateY(-3px);border-color:#71809b;box-shadow:0 14px 30px #0005}.card.selected{border-color:#d8edff;box-shadow:0 0 0 1px #d8edff33 inset,0 12px 34px #8fd8ff18}.preview{aspect-ratio:1;background:radial-gradient(circle at 30% 20%,#ffffff 0,#f4f7ff 34%,#dfe7f5 72%,#c8d2e3 100%);border-radius:18px;display:grid;place-items:center;box-shadow:inset 0 1px 0 #fff,0 8px 24px #0002}.preview svg{width:74%;height:74%}.name{margin-top:9px;display:flex;justify-content:space-between;gap:10px}.name small{color:var(--muted)}.side{border-left:1px solid var(--line);padding:22px;position:sticky;top:103px;height:calc(100vh - 103px);overflow:auto}.side h3{margin:0 0 6px}.stat{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}.metric{border:1px solid var(--line);border-radius:12px;padding:10px;background:#0a0d12}.metric b{display:block;font-size:20px}.metric span{color:var(--muted);font-size:12px}.side label{display:block;color:var(--muted);font-size:12px;margin:12px 0 5px}.side textarea{width:100%;min-height:100px;resize:vertical;background:#080a0e;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px}.note{margin-top:18px;padding:12px;border:1px solid #26324a;border-radius:12px;background:#0b1220;color:#b8c8e1}.footer{padding:28px;color:var(--muted);text-align:center;border-top:1px solid var(--line)}
-@media(max-width:1050px){main{grid-template-columns:1fr}.side{position:relative;top:auto;height:auto;border-left:0;border-top:1px solid var(--line)}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media(max-width:700px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:14px}.title{font-size:27px}.brand{align-items:flex-start;flex-direction:column}}
+:root{
+  color-scheme:dark;
+  --bg:#07080b;--panel:#0c0e13;--panel2:#11151d;--line:#272d38;
+  --text:#f4f7fb;--muted:#8993a5;--ice:#c8f3ff;--violet:#d8ccff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+ margin:0;color:var(--text);font:14px/1.45 Inter,system-ui,sans-serif;
+ background:
+ radial-gradient(1000px 520px at 10% -5%,#1a2940 0,transparent 62%),
+ radial-gradient(900px 500px at 95% 20%,#19142a 0,transparent 58%),
+ #07080b;
+}
+button,input,select,textarea{font:inherit}
+.top{
+ position:sticky;top:0;z-index:20;padding:18px 22px 16px;
+ border-bottom:1px solid var(--line);background:#07080be8;backdrop-filter:blur(20px)
+}
+.bar{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}
+.eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ice);font-weight:700}
+h1{margin:4px 0 0;font-size:32px;letter-spacing:-.045em;line-height:1}
+.desc{margin-top:8px;color:var(--muted);max-width:820px}
+.badge{border:1px solid #344153;background:#0d131c;padding:9px 12px;border-radius:12px;white-space:nowrap;color:#c9d9eb;font-size:12px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.tools>*{
+ border:1px solid var(--line);background:#0b0e13;color:var(--text);
+ min-height:38px;border-radius:10px;padding:0 12px
+}
+.tools input{min-width:250px}
+.tools button{cursor:pointer}
+.tools button:hover{border-color:#64748b}
+.tools .primary{background:#ecf9ff;color:#0a1017;border-color:#fff}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 330px}
+.content{padding:22px;min-width:0}
+.grid{
+ display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px
+}
+.card{
+ border:1px solid #252c36;background:linear-gradient(160deg,#121720,#0b0e13);
+ border-radius:16px;padding:9px;cursor:pointer;transition:.18s transform,.18s border-color,.18s box-shadow
+}
+.card:hover{transform:translateY(-3px);border-color:#607086;box-shadow:0 18px 36px #0006}
+.card.selected{border-color:#d6f6ff;box-shadow:0 0 0 1px #d6f6ff2b inset,0 12px 32px #8be8ff16}
+.tile{
+ aspect-ratio:1;border-radius:11px;display:grid;place-items:center;overflow:hidden;
+ background:
+ radial-gradient(circle at 30% 20%,#ffffff 0,#f5f8ff 28%,#e7e5ff 55%,#d8f5ff 100%);
+}
+.tile svg{width:78%;height:78%}
+.meta{padding:8px 3px 3px;display:flex;justify-content:space-between;gap:6px}
+.meta b{font-size:12px;font-weight:700}.meta span{font-size:10px;color:#7f8998}
+.side{
+ position:sticky;top:96px;height:calc(100vh - 96px);overflow:auto;
+ border-left:1px solid var(--line);padding:20px;background:#090c11aa
+}
+.side h2{font-size:18px;margin:0}.side p{color:var(--muted);margin:6px 0 18px}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.metric{border:1px solid var(--line);background:#0b0e13;border-radius:12px;padding:10px}
+.metric strong{display:block;font-size:20px}.metric small{color:var(--muted)}
+.field{margin:12px 0}
+.field label{display:block;color:#9aa6b8;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.field textarea{width:100%;border:1px solid var(--line);background:#080a0e;color:var(--text);border-radius:10px;padding:10px;resize:vertical}
+.previewLarge{
+ padding:14px;border:1px solid var(--line);border-radius:14px;background:#f1f5ff;display:grid;place-items:center;margin-bottom:16px
+}
+.previewLarge svg{width:190px;height:190px}
+.note{border:1px solid #26334a;background:#0c1420;color:#b9c9dd;padding:12px;border-radius:12px;font-size:12px}
+.footer{border-top:1px solid var(--line);padding:26px;text-align:center;color:#6e7786}
+.empty{padding:60px 20px;text-align:center;color:var(--muted)}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}.side{position:relative;top:auto;height:auto;border-left:0;border-top:1px solid var(--line)}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.bar{flex-direction:column}.badge{align-self:flex-start}.tools input{min-width:0;width:100%}}
 </style>
 </head>
 <body>
-<header>
- <div class="brand">
-  <div><div class="kicker">TRILYVA / Prism Library</div><div class="title">Prism Web Icons</div><div class="sub">100 original faceted crystal glass web & interface icons. Built for stock-vector workflows with editable SVG output and a single 10×10 sheet export.</div></div>
-  <div class="kicker">100 VECTOR ICONS</div>
+<header class="top">
+ <div class="bar">
+  <div>
+   <div class="eyebrow">TRILYVA / STOCK VECTOR LAB</div>
+   <h1>Prism Web Icons</h1>
+   <div class="desc">100 original web and interface icons built from a new Prismatic Cutline system: crisp silhouettes, faceted internal cuts, restrained color, and clean vector geometry.</div>
+  </div>
+  <div class="badge">100 ICONS · SVG · EPS · CSV</div>
  </div>
- <div class="toolbar">
-  <input id="search" placeholder="Search icons…">
-  <select id="group"><option value="all">All categories</option><option value="ui">UI & navigation</option><option value="files">Files & media</option><option value="tech">Technology</option><option value="commerce">Commerce</option><option value="creative">Creative</option><option value="status">Status & utility</option></select>
-  <button id="selectAll">Select all</button>
-  <button id="clear">Clear</button>
-  <button id="sheet" class="primary">Export selected SVG sheet</button>
-  <button id="eps">Export selected EPS (flat vector)</button>
-  <button id="svg">Export selected SVG</button>
-  <button id="csv">Export stock CSV</button>
+ <div class="tools">
+  <input id="q" placeholder="Search icons">
+  <select id="cat">
+   <option value="all">All categories</option>
+   <option value="navigation">Navigation</option>
+   <option value="media">Media</option>
+   <option value="files">Files</option>
+   <option value="technology">Technology</option>
+   <option value="creative">Creative</option>
+  </select>
+  <button id="all">Select visible</button>
+  <button id="none">Clear</button>
+  <button class="primary" id="sheet">SVG 10×10 Sheet</button>
+  <button id="one">Export SVG</button>
+  <button id="eps">Export EPS</button>
+  <button id="csv">Stock CSV</button>
  </div>
 </header>
-<main>
- <section class="grid" id="grid"></section>
- <aside class="side">
-  <h3 id="active">No icon selected</h3>
-  <div class="stat"><div class="metric"><b id="count">0</b><span>selected</span></div><div class="metric"><b>100</b><span>total icons</span></div></div>
-  <label>Stock title</label><textarea id="metaTitle">Prism Web Icons — 100 Translucent Geometric Web Interface Icons</textarea>
-  <label>Description</label><textarea id="metaDesc">Original faceted crystal glass web interface icon collection with faceted prism styling, clean vector construction and editable individual symbols for websites, apps, dashboards and digital products.</textarea>
-  <label>Keywords</label><textarea id="keywords">web icons,interface icons,ui icons,vector icons,web interface,user interface,icon set,icon collection,prism,prismatic,translucent,geometric,geometric icons,abstract icons,digital interface,website,app,dashboard,technology,design,editable vector,svg,eps,illustration,graphic design,modern,contemporary,glass,faceted,crystal,luminous,gradient,colorful,clean,minimal,navigation,communication,commerce,software,application,digital,online,branding,creative,stock vector,template,interface design</textarea>
-  <div class="note">EPS uses opaque vector fills and the same generated icon geometry; alpha is intentionally flattened for Illustrator/stock compatibility. SVG remains the master format.</div>
- </aside>
-</main>
-<div class="footer">TRILYVA · Prism Library · Prism Web Icons · original procedural vectors</div>
-<script>
 
-const ICONS=["Home","Search","User","Settings","Mail","Heart","Star","Lock","Unlock","Cloud","Upload","Download","Share","Link","Calendar","Clock","Camera","Play","Pause","Stop","Menu","Close","Check","Plus","Minus","Edit","Delete","Folder","File","Image","Video","Music","Bell","Chat","Location","Map","Globe","Cart","Tag","Gift","Bookmark","Eye","Filter","Grid","List","Refresh","Fullscreen","Copy","Paste","Cut","Save","Print","Code","Terminal","Database","Server","Wifi","Bluetooth","Battery","Sun","Moon","Lightning","Shield","Key","Flag","Pin","Phone","Tablet","Desktop","Layers","Sliders","Dashboard","Chart","Graph","Pie","Rocket","Target","Wand","Palette","Brush","Pen","Scissors","Info","Warning","Question","Camera Pro","Cloud Sync","Send","Inbox","Archive","Folder Open","File Plus","Image Add","Video Add","Microphone","Volume","Mute","Play Circle","Arrow Up","Arrow Down"];
-const COLORS=["#ffffff","#dff6ff","#b9d9ff","#b79cff","#e7c6ff","#8ee8ff","#d8d8ff"];
-const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,"-");
-const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-function facet(x,y,w,h,rot=0,fill="#dff6ff",op=.7){
-  return '<polygon points="'+x+','+y+' '+(x+w)+','+y+' '+(x+w*.72)+','+(y+h)+' '+(x+w*.18)+','+(y+h*.86)+'" transform="rotate('+rot+' '+(x+w/2)+' '+(y+h/2)+')" fill="'+fill+'" fill-opacity="'+op+'"/>';
+<div class="layout">
+ <section class="content"><div class="grid" id="grid"></div></section>
+ <aside class="side">
+  <h2 id="selName">Select an icon</h2>
+  <p id="selInfo">Click an icon to inspect it.</p>
+  <div class="previewLarge" id="large"></div>
+  <div class="metrics">
+   <div class="metric"><strong id="selected">0</strong><small>selected</small></div>
+   <div class="metric"><strong>100</strong><small>library</small></div>
+  </div>
+  <div class="field"><label>Stock title</label><textarea id="title" rows="2">Prism Web Icons — 100 Geometric Interface Vector Symbols</textarea></div>
+  <div class="field"><label>Description</label><textarea id="description" rows="5">Original geometric web interface icon collection featuring crisp prism-cut silhouettes, faceted vector surfaces and clean editable construction for websites, applications, dashboards and digital products.</textarea></div>
+  <div class="field"><label>Keywords</label><textarea id="keywords" rows="8">web icons,interface icons,ui icons,vector icon set,web interface,user interface,icon collection,prism,prismatic,geometric,faceted,cutline,crystal,glass,abstract,digital,website,app,application,dashboard,software,technology,design,editable vector,svg,eps,illustration,graphic design,modern,minimal,clean,navigation,media,files,communication,commerce,creative,stock vector,symbols,icons,template,branding,digital design,online,interface design,web design,user experience,ui design</textarea></div>
+  <div class="note">SVG is the master vector output. EPS uses opaque fills with the same generated geometry for Illustrator-friendly stock delivery.</div>
+ </aside>
+</div>
+<div class="footer">TRILYVA · Prism Web Icons · original vector system</div>
+
+<script>
+const NAMES=["Home","Search","User","Settings","Mail","Heart","Star","Lock","Unlock","Cloud","Upload","Download","Share","Link","Calendar","Clock","Camera","Play","Pause","Stop","Menu","Close","Check","Plus","Minus","Edit","Delete","Folder","File","Image","Video","Music","Bell","Chat","Location","Map","Globe","Cart","Tag","Gift","Bookmark","Eye","Filter","Grid","List","Refresh","Fullscreen","Copy","Paste","Save","Print","Code","Terminal","Database","Server","Wifi","Bluetooth","Battery","Sun","Moon","Lightning","Shield","Key","Flag","Pin","Phone","Tablet","Desktop","Layers","Sliders","Dashboard","Chart","Graph","Pie","Rocket","Target","Wand","Palette","Brush","Pen","Scissors","Info","Warning","Question","Send","Inbox","Archive","Folder Open","File Plus","Image Add","Video Add","Microphone","Volume","Mute","Play Circle","Arrow Up","Arrow Down","Arrow Left","Arrow Right","Spark"];
+const GROUPS=[["navigation",0,15],["media",16,35],["files",36,55],["technology",56,74],["creative",75,99]];
+
+const palettes=[
+ ["#baf4ff","#d8c8ff","#ffffff"],
+ ["#bde8ff","#c8d4ff","#ffffff"],
+ ["#d5c7ff","#bff6f2","#ffffff"],
+ ["#b9f0e3","#cde0ff","#ffffff"],
+ ["#e4d0ff","#b6e8ff","#ffffff"]
+];
+
+const slug=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const esc=s=>String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+const category=(i)=>i<16?"navigation":i<36?"media":i<56?"files":i<75?"technology":"creative";
+
+function svgStart(uid){
+ const p=palettes[uid%palettes.length];
+ return '<defs>'+
+ '<linearGradient id="g'+uid+'" x1="0" y1="0" x2="1" y2="1"><stop stop-color="'+p[2]+'"/><stop offset=".32" stop-color="'+p[0]+'"/><stop offset=".7" stop-color="'+p[1]+'"/><stop offset="1" stop-color="'+p[0]+'"/></linearGradient>'+
+ '<linearGradient id="facet'+uid+'" x1="0" y1="0" x2="1" y2="1"><stop stop-color="'+p[0]+'"/><stop offset=".5" stop-color="'+p[1]+'"/><stop offset="1" stop-color="#ffffff"/></linearGradient>'+
+ '<filter id="shadow'+uid+'" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="2" stdDeviation="1.2" flood-opacity=".18"/></filter>'+
+ '</defs>';
 }
-function strokeEl(tag,attrs){
-  return '<'+tag+' '+Object.entries(attrs).map(([k,v])=>k+'="'+v+'"').join(' ')+' fill="none" stroke="#111" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>';
-}
-function glyph(type,variant=0){
- const V=[];
- const p=(x,y,w,h,fill="#fff",rx=0)=>V.push('<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" '+(rx?'rx="'+rx+'" ':'')+'fill="'+fill+'" stroke="#111" stroke-width="2.6"/>');
- const c=(x,y,r,fill="#fff")=>V.push('<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+fill+'" stroke="#111" stroke-width="2.6"/>');
- const l=(x1,y1,x2,y2)=>V.push(strokeEl("line",{x1,y1,x2,y2}));
- const poly=pts=>V.push('<polygon points="'+pts+'" fill="#fff" stroke="#111" stroke-width="2.6" stroke-linejoin="round"/>');
- const path=(d)=>V.push('<path d="'+d+'" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>');
- const S=variant%3;
- switch(type){
-  case"home": poly("14,42 32,22 50,42 46,42 46,54 36,54 36,45 28,45 28,54 18,54 18,42"); V.push(facet(28,25,24,28,0,COLORS[S+2],.55)); break;
-  case"search": c(30,30,13); l(40,40,52,52); V.push(facet(20,21,18,17,0,COLORS[S+2],.38)); break;
-  case"user": c(32,25,9); V.push('<path d="M16 52c2-11 10-15 16-15s14 4 16 15" fill="#fff" stroke="#111" stroke-width="2.8"/>'); V.push(facet(26,18,18,22,25,COLORS[S+2],.5)); break;
-  case"settings": c(32,32,9); for(let i=0;i<8;i++){const a=i*Math.PI/4,x=32+Math.cos(a)*19,y=32+Math.sin(a)*19; p(x-3,y-3,6,6,"#fff",1);} V.push(facet(27,24,18,18,-15,COLORS[S+2],.45)); break;
-  case"mail": p(14,21,36,26,"#fff",5); l(15,23,32,37); l(49,23,32,37); V.push(facet(17,22,29,20,0,COLORS[S+2],.45)); break;
-  case"heart": V.push('<path d="M32 50S14 39 14 27c0-8 10-12 18-4 8-8 18-4 18 4 0 12-18 23-18 23z" fill="#fff" stroke="#111" stroke-width="2.8"/>'); V.push(facet(21,25,20,16,-8,COLORS[S+2],.55)); break;
-  case"star": V.push('<polygon points="32,12 38,26 53,27 41,36 45,51 32,43 19,51 23,36 11,27 26,26" fill="#fff" stroke="#111" stroke-width="2.7"/>'); V.push(facet(25,19,16,24,0,COLORS[S+2],.45)); break;
-  case"lock": p(19,28,26,24,"#fff",4); V.push('<path d="M24 28v-7c0-10 16-10 16 0v7" fill="none" stroke="#111" stroke-width="3"/>'); c(32,40,3,"#111"); V.push(facet(21,31,22,15,0,COLORS[S+2],.45)); break;
-  case"unlock": p(19,28,26,24,"#fff",4); V.push('<path d="M24 28v-7c0-10 16-12 18-2" fill="none" stroke="#111" stroke-width="3"/>'); c(32,40,3,"#111"); V.push(facet(21,31,22,15,0,COLORS[S+2],.45)); break;
-  case"cloud": V.push('<path d="M17 45h29a10 10 0 0 0 0-20 16 16 0 0 0-30 4 8 8 0 0 0 1 16z" fill="#fff" stroke="#111" stroke-width="2.8"/>'); V.push(facet(20,25,27,19,0,COLORS[S+2],.42)); break;
-  case"upload": p(16,40,32,12,"#fff",3); path("M32 40V17m0 0-9 9m9-9 9 9"); V.push(facet(25,18,18,17,0,COLORS[S+2],.45)); break;
-  case"download": p(16,40,32,12,"#fff",3); path("M32 17v23m0 0-9-9m9 9 9-9"); V.push(facet(25,24,18,17,0,COLORS[S+2],.45)); break;
-  case"share": c(17,32,5); c(47,18,5); c(47,46,5); l(21,30,43,20); l(21,35,43,44); V.push(facet(25,25,20,13,0,COLORS[S+2],.38)); break;
-  case"link": V.push('<path d="M24 37l-4 4a9 9 0 0 1-13-13l8-8a9 9 0 0 1 13 0M40 27l4-4a9 9 0 0 1 13 13l-8 8a9 9 0 0 1-13 0M22 32h20" fill="none" stroke="#111" stroke-width="3"/>'); V.push(facet(25,25,17,15,0,COLORS[S+2],.4)); break;
-  case"calendar": p(14,18,36,35,"#fff",5); l(14,28,50,28); l(23,14,23,22); l(41,14,41,22); for(let i=0;i<3;i++)for(let j=0;j<3;j++)c(23+j*8,34+i*7,1.7,"#111"); V.push(facet(19,20,24,10,0,COLORS[S+2],.5)); break;
-  case"clock": c(32,32,19); l(32,32,32,21); l(32,32,40,37); V.push(facet(23,18,19,15,-12,COLORS[S+2],.45)); break;
-  case"camera": p(14,22,36,27,"#fff",5); p(24,17,10,6,"#fff",2); c(32,35,8); V.push(facet(18,24,28,17,0,COLORS[S+2],.42)); break;
-  case"play": poly("23,16 50,32 23,48"); V.push(facet(24,19,21,27,0,COLORS[S+2],.5)); break;
-  case"pause": p(21,17,8,30,"#fff",2); p(35,17,8,30,"#fff",2); V.push(facet(22,20,18,20,0,COLORS[S+2],.4)); break;
-  case"stop": p(20,20,24,24,"#fff",4); V.push(facet(22,22,18,18,0,COLORS[S+2],.48)); break;
-  case"menu": l(16,22,48,22); l(16,32,48,32); l(16,42,48,42); V.push(facet(20,20,24,25,0,COLORS[S+2],.35)); break;
-  case"close": l(20,20,44,44); l(44,20,20,44); V.push(facet(20,24,24,18,0,COLORS[S+2],.4)); break;
-  case"check": path("M18 33l9 9 19-21"); V.push(facet(20,27,24,16,0,COLORS[S+2],.42)); break;
-  case"plus": l(32,18,32,46); l(18,32,46,32); V.push(facet(23,22,18,20,0,COLORS[S+2],.4)); break;
-  case"minus": l(18,32,46,32); V.push(facet(20,25,24,14,0,COLORS[S+2],.4)); break;
-  case"edit": p(20,39,8,7,"#fff",1); V.push('<path d="M23 43l18-18 7 7-18 18z" fill="#fff" stroke="#111" stroke-width="2.6"/>'); V.push(facet(30,27,18,16,0,COLORS[S+2],.48)); break;
-  case"delete": p(20,21,24,30,"#fff",3); l(18,18,46,18); l(28,14,36,14); l(27,27,27,44); l(32,27,32,44); l(37,27,37,44); V.push(facet(22,23,20,17,0,COLORS[S+2],.4)); break;
-  case"folder": V.push('<path d="M12 23h15l5 5h20v22H12z" fill="#fff" stroke="#111" stroke-width="2.7" stroke-linejoin="round"/>'); V.push(facet(16,28,31,18,0,COLORS[S+2],.45)); break;
-  case"file": V.push('<path d="M19 12h19l10 10v28H19z" fill="#fff" stroke="#111" stroke-width="2.7"/>'); poly("38,12 38,23 48,23"); l(25,33,42,33); l(25,40,42,40); V.push(facet(22,18,24,17,0,COLORS[S+2],.38)); break;
-  case"image": p(13,17,38,30,"#fff",4); poly("17,40 27,30 34,36 39,31 47,40"); c(24,25,3); V.push(facet(18,21,25,16,0,COLORS[S+2],.4)); break;
-  case"video": p(13,20,28,25,"#fff",4); poly("41,27 51,22 51,43 41,38"); poly("25,26 25,39 36,32"); V.push(facet(16,23,23,15,0,COLORS[S+2],.4)); break;
-  case"music": l(39,17,39,42); l(39,17,49,14); l(49,14,49,37); c(31,44,6); c(41,39,6); V.push(facet(28,22,20,17,-10,COLORS[S+2],.42)); break;
-  case"bell": V.push('<path d="M19 41h26l-4-6V27a9 9 0 0 0-18 0v8zM28 47h8" fill="#fff" stroke="#111" stroke-width="2.7" stroke-linejoin="round"/>'); V.push(facet(20,25,23,17,0,COLORS[S+2],.45)); break;
-  case"chat": V.push('<path d="M14 18h36v24H28l-9 8v-8h-5z" fill="#fff" stroke="#111" stroke-width="2.7"/>'); c(23,30,2.2,"#111"); c(32,30,2.2,"#111"); c(41,30,2.2,"#111"); V.push(facet(18,21,28,16,0,COLORS[S+2],.38)); break;
-  case"location": c(32,31,14); c(32,31,4); V.push('<path d="M32 52c-9-11-14-16-14-23a14 14 0 1 1 28 0c0 7-5 12-14 23z" fill="none" stroke="#111" stroke-width="2.7"/>'); V.push(facet(24,23,17,16,0,COLORS[S+2],.42)); break;
-  case"map": p(12,18,17,28,"#fff",2); p(29,18,17,28,"#fff",2); p(46,18,8,28,"#fff",2); l(29,18,29,46); l(46,18,46,46); V.push(facet(17,21,29,14,0,COLORS[S+2],.38)); break;
-  case"globe": c(32,32,19); V.push('<ellipse cx="32" cy="32" rx="9" ry="19" fill="none" stroke="#111" stroke-width="2.6"/>'); l(14,32,50,32); V.push(facet(20,18,24,14,0,COLORS[S+2],.4)); break;
-  case"cart": V.push('<path d="M14 16h6l4 23h24l5-17H22M28 46a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm18 0a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" fill="#fff" stroke="#111" stroke-width="2.7" stroke-linejoin="round"/>'); V.push(facet(26,24,21,12,0,COLORS[S+2],.45)); break;
-  case"tag": V.push('<path d="M16 17h20l16 16-16 16-20-20z" fill="#fff" stroke="#111" stroke-width="2.7"/><circle cx="25" cy="26" r="3" fill="#111"/>'); V.push(facet(19,19,23,17,0,COLORS[S+2],.44)); break;
-  case"gift": p(17,24,30,25,"#fff",2); p(15,20,34,8,"#fff",2); l(32,20,32,49); V.push(facet(18,25,27,15,0,COLORS[S+2],.44)); break;
-  case"bookmark": V.push('<path d="M20 15h24v36l-12-8-12 8z" fill="#fff" stroke="#111" stroke-width="2.7"/>'); V.push(facet(23,19,18,18,0,COLORS[S+2],.44)); break;
-  case"eye": V.push('<path d="M10 32s9-15 22-15 22 15 22 15-9 15-22 15S10 32 10 32z" fill="#fff" stroke="#111" stroke-width="2.7"/><circle cx="32" cy="32" r="7" fill="#fff" stroke="#111" stroke-width="2.6"/>'); V.push(facet(23,21,18,14,0,COLORS[S+2],.42)); break;
-  case"filter": V.push('<path d="M12 18h40L37 34v13l-10 5V34z" fill="#fff" stroke="#111" stroke-width="2.7" stroke-linejoin="round"/>'); V.push(facet(18,21,27,15,0,COLORS[S+2],.45)); break;
-  case"grid": for(let r=0;r<3;r++)for(let q=0;q<3;q++)p(16+q*11,16+r*11,8,8,"#fff",1); V.push(facet(18,18,26,22,0,COLORS[S+2],.34)); break;
-  case"list": for(let i=0;i<4;i++){c(18,18+i*9,2,"#111"); l(25,18+i*9,48,18+i*9);} V.push(facet(25,20,21,25,0,COLORS[S+2],.34)); break;
-  case"refresh": V.push('<path d="M47 26a16 16 0 0 0-28 5" fill="none" stroke="#111" stroke-width="3"/><path d="M44 18v10H34M17 38a16 16 0 0 0 28-5" fill="none" stroke="#111" stroke-width="3"/><path d="M20 46V36h10" fill="none" stroke="#111" stroke-width="3"/>'); V.push(facet(24,20,18,18,0,COLORS[S+2],.38)); break;
-  case"fullscreen": l(22,14,14,14); l(22,14,22,22); l(42,14,50,14); l(42,14,42,22); l(22,50,14,50); l(22,50,22,42); l(42,50,50,50); l(42,50,42,42); V.push(facet(26,22,12,20,0,COLORS[S+2],.36)); break;
-  case"copy": p(23,17,27,31,"#fff",3); p(16,24,27,31,"#fff",3); V.push(facet(18,29,21,15,0,COLORS[S+2],.4)); break;
-  case"paste": p(18,20,28,31,"#fff",3); p(25,15,14,7,"#fff",2); V.push(facet(20,23,23,17,0,COLORS[S+2],.42)); break;
-  case"cut": c(21,23,6); c(21,43,6); l(26,26,48,17); l(26,40,48,49); l(26,32,48,35); V.push(facet(29,27,18,15,0,COLORS[S+2],.38)); break;
-  case"save": p(16,15,32,35,"#fff",3); p(23,18,17,11,"#fff",2); p(23,38,18,9,"#fff",2); V.push(facet(19,19,23,16,0,COLORS[S+2],.42)); break;
-  case"print": p(20,26,24,21,"#fff",2); p(24,16,16,12,"#fff",2); p(22,41,20,10,"#fff",1); V.push(facet(23,28,19,14,0,COLORS[S+2],.35)); break;
-  case"code": V.push('<path d="M27 20L16 32l11 12M37 20l11 12-11 12M34 15l-4 34" fill="none" stroke="#111" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>'); V.push(facet(23,22,18,20,0,COLORS[S+2],.36)); break;
-  case"terminal": p(13,17,38,31,"#fff",4); l(20,26,28,32); l(28,32,20,38); l(33,39,43,39); V.push(facet(17,21,28,15,0,COLORS[S+2],.4)); break;
-  case"database": V.push('<ellipse cx="32" cy="18" rx="17" ry="7" fill="#fff" stroke="#111" stroke-width="2.6"/><path d="M15 18v28c0 4 8 7 17 7s17-3 17-7V18" fill="#fff" stroke="#111" stroke-width="2.6"/><path d="M15 28c0 4 8 7 17 7s17-3 17-7M15 37c0 4 8 7 17 7s17-3 17-7" fill="none" stroke="#111" stroke-width="2.4"/>'); V.push(facet(20,19,24,15,0,COLORS[S+2],.42)); break;
-  case"server": p(15,15,34,10,"#fff",2); p(15,28,34,10,"#fff",2); p(15,41,34,10,"#fff",2); c(21,20,2,"#111"); c(21,33,2,"#111"); c(21,46,2,"#111"); V.push(facet(25,17,20,25,0,COLORS[S+2],.35)); break;
-  case"wifi": V.push('<path d="M13 24a29 29 0 0 1 38 0M19 31a20 20 0 0 1 26 0M25 38a11 11 0 0 1 14 0" fill="none" stroke="#111" stroke-width="3"/><circle cx="32" cy="46" r="2.8" fill="#111"/>'); V.push(facet(23,22,18,18,0,COLORS[S+2],.38)); break;
-  case"bluetooth": V.push('<path d="M32 12v40l11-10-22-20 22-10-11-10M32 32L20 42" fill="none" stroke="#111" stroke-width="2.8" stroke-linejoin="round"/>'); V.push(facet(26,18,14,23,0,COLORS[S+2],.42)); break;
-  case"battery": p(15,20,34,24,"#fff",4); p(49,27,5,10,"#fff",2); p(19,24,18+variant%3*4,16,"#fff",2); V.push(facet(22,23,26,15,0,COLORS[S+2],.36)); break;
-  case"sun": c(32,32,10); for(let i=0;i<8;i++){const a=i*Math.PI/4; l(32+Math.cos(a)*17,32+Math.sin(a)*17,32+Math.cos(a)*23,32+Math.sin(a)*23);} V.push(facet(26,20,15,20,0,COLORS[S+2],.42)); break;
-  case"moon": V.push('<path d="M43 13a20 20 0 1 0 5 36A20 20 0 0 1 43 13z" fill="#fff" stroke="#111" stroke-width="2.7"/>'); V.push(facet(30,20,16,22,-10,COLORS[S+2],.42)); break;
-  case"lightning": V.push('<path d="M36 11L18 35h13l-3 18 18-25H33z" fill="#fff" stroke="#111" stroke-width="2.7" stroke-linejoin="round"/>'); V.push(facet(31,17,17,22,0,COLORS[S+2],.46)); break;
-  case"shield": V.push('<path d="M32 11l19 8v12c0 12-8 19-19 23-11-4-19-11-19-23V19z" fill="#fff" stroke="#111" stroke-width="2.7"/>'); path("M23 32l6 6 12-13"); V.push(facet(22,17,22,19,0,COLORS[S+2],.4)); break;
-  case"key": c(22,30,8); l(29,34,49,18); l(41,25,46,30); l(36,29,41,34); V.push(facet(24,24,20,18,0,COLORS[S+2],.4)); break;
-  case"flag": l(18,14,18,50); V.push('<path d="M19 16h27l-7 9 7 9H19z" fill="#fff" stroke="#111" stroke-width="2.7"/>'); V.push(facet(21,18,20,12,0,COLORS[S+2],.42)); break;
-  case"pin": l(32,18,32,49); c(32,18,8); c(32,18,2.5,"#111"); V.push(facet(22,24,20,17,0,COLORS[S+2],.4)); break;
-  case"phone": p(21,12,22,40,"#fff",5); c(32,45,2,"#111"); V.push(facet(24,16,16,20,0,COLORS[S+2],.38)); break;
-  case"tablet": p(15,12,34,40,"#fff",4); c(32,46,2,"#111"); V.push(facet(19,16,25,22,0,COLORS[S+2],.38)); break;
-  case"desktop": p(12,14,40,27,"#fff",3); l(32,41,32,49); l(24,50,40,50); V.push(facet(16,17,31,19,0,COLORS[S+2],.4)); break;
-  case"layers": V.push('<path d="M32 14l20 11-20 11-20-11zM12 35l20 11 20-11M12 45l20 11 20-11" fill="#fff" stroke="#111" stroke-width="2.6" stroke-linejoin="round"/>'); V.push(facet(22,20,20,16,0,COLORS[S+2],.44)); break;
-  case"sliders": l(17,19,48,19); l(17,32,48,32); l(17,45,48,45); c(27,19,4,"#fff"); c(39,32,4,"#fff"); c(24,45,4,"#fff"); V.push(facet(23,22,20,18,0,COLORS[S+2],.35)); break;
-  case"dashboard": p(14,14,36,36,"#fff",5); p(20,20,10,10,"#fff",2); p(34,20,10,10,"#fff",2); p(20,34,10,10,"#fff",2); p(34,34,10,10,"#fff",2); V.push(facet(19,18,25,17,0,COLORS[S+2],.35)); break;
-  case"chart": l(15,48,15,15); l(15,48,51,48); path("M19 41l9-12 8 7 11-15"); V.push(facet(22,28,19,15,-8,COLORS[S+2],.4)); break;
-  case"graph": l(14,48,14,14); l(14,48,52,48); c(22,39,3,"#fff"); c(30,30,3,"#fff"); c(39,35,3,"#fff"); c(48,22,3,"#fff"); path("M22 39l8-9 9 5 9-13"); V.push(facet(23,24,22,18,0,COLORS[S+2],.34)); break;
-  case"pie": c(32,32,18); V.push('<path d="M32 32V14a18 18 0 0 1 18 18z" fill="#fff" stroke="#111" stroke-width="2.6"/>'); V.push('<path d="M32 32l13 13" fill="none" stroke="#111" stroke-width="2.6"/>'); V.push(facet(21,22,18,18,0,COLORS[S+2],.38)); break;
-  case"rocket": V.push('<path d="M32 11c11 6 17 15 12 28l-12 13-12-13c-5-13 1-22 12-28z" fill="#fff" stroke="#111" stroke-width="2.7"/><circle cx="32" cy="28" r="5" fill="#fff" stroke="#111" stroke-width="2.5"/><path d="M22 39l-8 7 3-10M42 39l8 7-3-10" fill="#fff" stroke="#111" stroke-width="2.5"/>'); V.push(facet(25,17,16,18,0,COLORS[S+2],.44)); break;
-  case"target": c(32,32,19); c(32,32,11); c(32,32,4,"#fff"); V.push(facet(23,21,18,18,0,COLORS[S+2],.42)); break;
-  case"wand": l(20,44,45,19); c(45,19,5); V.push('<path d="M45 11v5M45 22v5M37 19h5M48 19h5" stroke="#111" stroke-width="2.6" stroke-linecap="round"/>'); V.push(facet(26,27,15,13,0,COLORS[S+2],.42)); break;
-  case"palette": c(32,32,19); c(22,25,3,COLORS[S+2]); c(31,19,3,COLORS[S+3]); c(40,24,3,COLORS[S+4]); c(43,36,3,COLORS[S+5]); c(27,43,3,COLORS[S+6]); V.push('<circle cx="39" cy="43" r="5" fill="#fff" stroke="#111" stroke-width="2.6"/>'); break;
-  case"brush": p(25,35,18,7,"#fff",2); poly("43,35 51,28 55,32 45,42"); V.push(facet(27,35,17,12,-8,COLORS[S+2],.4)); break;
-  case"pen": V.push('<path d="M18 45l10-2 21-21-8-8-21 21z" fill="#fff" stroke="#111" stroke-width="2.6"/><path d="M40 14l8 8" stroke="#111" stroke-width="2.6"/>'); V.push(facet(25,24,18,15,0,COLORS[S+2],.44)); break;
-  case"scissors": c(20,24,7); c(20,42,7); l(25,28,46,17); l(25,38,46,49); l(25,32,44,32); V.push(facet(29,23,17,16,0,COLORS[S+2],.38)); break;
-  case"info": c(32,32,19); l(32,29,32,43); c(32,21,1.8,"#111"); V.push(facet(23,20,18,18,0,COLORS[S+2],.4)); break;
-  case"warning": poly("32,12 53,50 11,50"); c(32,29,2,"#111"); l(32,35,32,42); V.push(facet(23,22,18,16,0,COLORS[S+2],.4)); break;
-  case"question": c(32,32,19); path("M25 25c0-6 13-8 15-1 1 5-4 7-7 9-2 1-2 3-2 5"); c(32,43,1.8,"#111"); V.push(facet(23,21,18,18,0,COLORS[S+2],.4)); break;
-  case"camera-pro": p(13,22,38,28,"#fff",5); p(24,17,16,7,"#fff",2); c(32,36,9); V.push('<path d="M17 26h8" stroke="#111" stroke-width="2.7"/>'); V.push(facet(19,25,26,18,0,COLORS[S+2],.42)); break;
-  case"cloud-sync": V.push('<path d="M17 41h29a9 9 0 0 0 0-18 15 15 0 0 0-29 5 7 7 0 0 0 0 13z" fill="#fff" stroke="#111" stroke-width="2.6"/>'); path("M27 36a7 7 0 0 0 11 4M38 40l1-5M38 40l-5-1"); V.push(facet(20,25,28,16,0,COLORS[S+2],.42)); break;
-  case"send": V.push('<path d="M13 32l39-18-10 36-11-13z" fill="#fff" stroke="#111" stroke-width="2.7" stroke-linejoin="round"/><path d="M31 37l21-23" stroke="#111" stroke-width="2.5"/>'); V.push(facet(24,23,23,15,0,COLORS[S+2],.43)); break;
-  case"inbox": p(14,18,36,34,"#fff",4); l(16,35,25,35); l(39,35,48,35); V.push('<path d="M22 35c2 7 18 7 20 0" fill="none" stroke="#111" stroke-width="2.7"/>'); V.push(facet(18,22,28,15,0,COLORS[S+2],.4)); break;
-  case"archive": p(14,18,36,32,"#fff",3); p(12,14,40,8,"#fff",2); l(25,34,39,34); V.push(facet(18,21,27,16,0,COLORS[S+2],.42)); break;
-  case"folder-open": V.push('<path d="M12 23h16l4 5h20l-5 21H12z" fill="#fff" stroke="#111" stroke-width="2.7" stroke-linejoin="round"/>'); V.push(facet(18,27,31,15,0,COLORS[S+2],.45)); break;
-  case"file-plus": V.push('<path d="M19 12h18l10 10v28H19z" fill="#fff" stroke="#111" stroke-width="2.7"/>'); poly("37,12 37,22 47,22"); l(32,31,32,45); l(25,38,39,38); V.push(facet(22,18,22,16,0,COLORS[S+2],.38)); break;
-  case"image-add": p(13,17,38,30,"#fff",4); poly("17,40 27,30 34,36 39,31 47,40"); c(24,25,3); l(45,20,45,30); l(40,25,50,25); V.push(facet(18,20,26,17,0,COLORS[S+2],.4)); break;
-  case"video-add": p(13,20,28,25,"#fff",4); poly("41,27 51,22 51,43 41,38"); l(25,24,25,34); l(20,29,30,29); V.push(facet(16,23,23,15,0,COLORS[S+2],.4)); break;
-  case"microphone": p(25,13,14,29,"#fff",7); V.push('<path d="M19 30a13 13 0 0 0 26 0M32 43v9M24 52h16" fill="none" stroke="#111" stroke-width="2.7"/>'); V.push(facet(27,17,13,18,0,COLORS[S+2],.42)); break;
-  case"volume": V.push('<path d="M14 28h8l12-10v28L22 36h-8z" fill="#fff" stroke="#111" stroke-width="2.7"/><path d="M40 27a8 8 0 0 1 0 10M44 23a14 14 0 0 1 0 18" fill="none" stroke="#111" stroke-width="2.7"/>'); V.push(facet(18,24,25,17,0,COLORS[S+2],.4)); break;
-  case"mute": V.push('<path d="M14 28h8l12-10v28L22 36h-8z" fill="#fff" stroke="#111" stroke-width="2.7"/><path d="M40 26l10 12M50 26L40 38" stroke="#111" stroke-width="2.8" stroke-linecap="round"/>'); V.push(facet(18,24,24,17,0,COLORS[S+2],.4)); break;
-  case"play-circle": c(32,32,19); poly("28,23 43,32 28,41"); V.push(facet(25,22,15,20,0,COLORS[S+2],.42)); break;
-  case"arrow-up": path("M32 50V17m0 0L20 29m12-12 12 12"); V.push(facet(23,22,18,18,0,COLORS[S+2],.42)); break;
-  case"arrow-down": path("M32 14v33m0 0L20 35m12 12 12-12"); V.push(facet(23,22,18,18,0,COLORS[S+2],.42)); break;
-  default: c(32,32,18); V.push(facet(22,20,20,18,0,COLORS[S+2],.4)); break;
+function E(tag,a="",body=""){return '<'+tag+(a?' '+a:'')+'>'+body+'</'+tag+'>'}
+function P(points,fill='url(#g0)',sw=1.9){return '<polygon points="'+points+'" fill="'+fill+'" stroke="#334155" stroke-width="'+sw+'" stroke-linejoin="round"/>'}
+function R(x,y,w,h,r=5,fill='url(#g0)'){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+r+'" fill="'+fill+'" stroke="#334155" stroke-width="1.9"/>'}
+function C(x,y,r,fill='url(#g0)'){return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+fill+'" stroke="#334155" stroke-width="1.9"/>'}
+function L(x1,y1,x2,y2,sw=2.1){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#334155" stroke-width="'+sw+'" stroke-linecap="round"/>'}
+function Path(d,fill="none",sw=2.2){return '<path d="'+d+'" fill="'+fill+'" stroke="#334155" stroke-width="'+sw+'" stroke-linecap="round" stroke-linejoin="round"/>'}
+
+function draw(name,id){
+ let g="";
+ const facet=P("22,18 47,25 39,42 20,35","url(#facet"+id+")",1.4);
+ switch(name){
+  case"Home":g=P("11,31 32,12 53,31 48,31 48,51 37,51 37,39 27,39 27,51 16,51 16,31");g+=P("27,39 37,39 37,51 27,51","url(#facet"+id+")",1.2);break;
+  case"Search":g=C(29,29,15)+L(40,40,52,52,4)+P("20,17 34,17 40,25 26,31","url(#facet"+id+")",1.2);break;
+  case"User":g=C(32,22,9)+Path("M15 52c2-11 9-17 17-17s15 6 17 17","url(#g"+id+")",2.4)+P("24,18 40,18 43,30 21,35","url(#facet"+id+")",1.2);break;
+  case"Settings":g=C(32,32,8);for(let a=0;a<8;a++){let t=a*Math.PI/4,x=32+Math.cos(t)*20,y=32+Math.sin(t)*20;g+=R(x-3,y-3,6,6,2,"url(#g"+id+")")}g+=P("22,22 42,25 39,43 24,39","url(#facet"+id+")",1.2);break;
+  case"Mail":g+=R(13,19,38,29,7);g+=Path("M14 22l18 15 18-15", "none",2.1);g+=P("17,22 32,34 46,22 43,42 20,42","url(#facet"+id+")",1.1);break;
+  case"Heart":g=Path("M32 50S13 39 13 26c0-10 12-14 19-5 7-9 19-5 19 5 0 13-19 24-19 24z","url(#g"+id+")",2);g+=P("17,24 31,19 44,25 32,34","url(#facet"+id+")",1.2);break;
+  case"Star":g=P("32,11 38,25 53,26 41,35 45,50 32,42 19,50 23,35 11,26 26,25");g+=P("27,22 38,25 35,39 24,34","url(#facet"+id+")",1.1);break;
+  case"Lock":g+=R(18,27,28,25,5);g+=Path("M24 27v-8c0-11 16-11 16 0v8","none",2.5);g+=C(32,39,3,"#334155");break;
+  case"Unlock":g+=R(18,27,28,25,5);g+=Path("M24 27v-8c0-10 16-11 18-1","none",2.5);g+=C(32,39,3,"#334155");break;
+  case"Cloud":g+=Path("M18 45h28a10 10 0 0 0 0-20 16 16 0 0 0-30 5 8 8 0 0 0 2 15z","url(#g"+id+")",2);g+=P("18,29 30,22 46,28 43,38 26,40","url(#facet"+id+")",1.1);break;
+  case"Upload":g+=R(15,41,34,11,4);g+=Path("M32 40V17M32 17l-9 9M32 17l9 9","none",2.7)+P("24,20 34,17 40,25 28,31","url(#facet"+id+")",1.1);break;
+  case"Download":g+=R(15,41,34,11,4);g+=Path("M32 14v26M32 40l-9-9M32 40l9-9","none",2.7)+P("24,25 39,20 38,34 27,37","url(#facet"+id+")",1.1);break;
+  case"Share":g+=C(16,32,6)+C(48,18,6)+C(48,46,6)+L(21,29,43,20,2.4)+L(21,35,43,44,2.4)+P("25,25 37,21 38,38 26,34","url(#facet"+id+")",1);break;
+  case"Link":g+=Path("M25 38l-5 5a9 9 0 1 1-12-13l9-9a9 9 0 0 1 13 0M39 26l5-5a9 9 0 1 1 12 13l-9 9a9 9 0 0 1-13 0M23 32h18","none",2.5);g+=P("26,24 41,23 38,36 24,39","url(#facet"+id+")",1.1);break;
+  case"Calendar":g+=R(13,17,38,36,6);g+=L(13,28,51,28,2.1)+L(24,13,24,22,2.4)+L(40,13,40,22,2.4);for(let r=0;r<3;r++)for(let c=0;c<4;c++)g+=C(22+c*8,35+r*7,1.8,"#334155");break;
+  case"Clock":g+=C(32,32,20);g+=L(32,32,32,20,2.8)+L(32,32,42,37,2.8)+P("21,18 38,14 47,29 25,27","url(#facet"+id+")",1);break;
+  case"Camera":g+=R(12,22,40,28,7);g+=R(24,16,16,8,3);g+=C(32,36,10);g+=P("18,26 28,22 42,27 38,37 23,39","url(#facet"+id+")",1.1);break;
+  case"Play":g+=P("24,14 50,32 24,50");g+=P("24,21 39,29 32,42 24,36","url(#facet"+id+")",1.1);break;
+  case"Pause":g+=R(20,15,9,34,3);g+=R(35,15,9,34,3);g+=P("21,19 29,18 29,43 21,46","url(#facet"+id+")",1);break;
+  case"Stop":g+=R(18,18,28,28,6);g+=P("20,21 38,19 45,30 35,43 20,39","url(#facet"+id+")",1.1);break;
+  case"Menu":g+=L(15,21,49,21,3)+L(15,32,49,32,3)+L(15,43,49,43,3)+P("20,18 39,20 42,39 22,36","url(#facet"+id+")",.9);break;
+  case"Close":g+=L(19,19,45,45,3)+L(45,19,19,45,3)+P("21,23 36,20 43,32 33,42 22,36","url(#facet"+id+")",1);break;
+  case"Check":g+=Path("M16 33l10 10 23-25","none",4)+P("23,30 34,26 42,36 29,42","url(#facet"+id+")",1);break;
+  case"Plus":g+=L(32,16,32,48,3.4)+L(16,32,48,32,3.4)+P("22,22 38,20 42,36 27,40","url(#facet"+id+")",1);break;
+  case"Minus":g+=L(16,32,48,32,3.4)+P("20,25 43,22 39,38 22,37","url(#facet"+id+")",1);break;
+  case"Edit":g+=P("18,43 21,33 41,14 50,23 30,42");g+=P("34,20 41,14 50,23 43,29","url(#facet"+id+")",1);break;
+  case"Delete":g+=R(19,20,26,31,4);g+=L(16,17,48,17,2.2)+L(27,13,37,13,2.2)+L(27,27,27,44,2)+L(32,27,32,44,2)+L(37,27,37,44,2);break;
+  case"Folder":g+=Path("M12 22h18l5 6h17v23H12z","url(#g"+id+")",2)+P("16,27 31,24 48,30 45,43 18,47","url(#facet"+id+")",1.1);break;
+  case"File":g+=Path("M20 12h18l10 10v30H20z","url(#g"+id+")",2)+P("38,12 38,23 48,23","url(#facet"+id+")",1)+L(26,34,42,34,2)+L(26,41,42,41,2);break;
+  case"Image":g+=R(13,18,38,30,5)+P("17,40 27,30 35,37 41,29 48,40","url(#facet"+id+")",1.1)+C(24,26,3);break;
+  case"Video":g+=R(13,20,29,25,5)+P("42,27 52,22 52,43 42,38")+P("25,27 25,38 35,32","url(#facet"+id+")",1);break;
+  case"Music":g+=L(40,15,40,41,2.8)+L(40,15,50,12,2.8)+L(50,12,50,37,2.8)+C(31,44,6)+C(42,39,6)+P("29,21 43,17 48,30 36,36","url(#facet"+id+")",1);break;
+  case"Bell":g+=Path("M18 42h28l-4-7V27a10 10 0 0 0-20 0v8z","url(#g"+id+")",2)+L(27,48,37,48,2.5)+P("21,25 39,22 45,37 24,39","url(#facet"+id+")",1);break;
+  case"Chat":g+=Path("M14 18h36v24H28l-10 8v-8h-4z","url(#g"+id+")",2)+C(23,30,2.2,"#334155")+C(32,30,2.2,"#334155")+C(41,30,2.2,"#334155");break;
+  case"Location":g+=Path("M32 53C22 42 17 36 17 28a15 15 0 1 1 30 0c0 8-5 14-15 25z","url(#g"+id+")",2)+C(32,28,4,"#f8fbff");break;
+  case"Map":g+=R(12,18,16,30,2)+R(28,18,18,30,2)+R(46,18,8,30,2)+L(28,18,28,48,2)+L(46,18,46,48,2)+P("17,21 30,19 42,25 29,31","url(#facet"+id+")",1);break;
+  case"Globe":g+=C(32,32,20)+E("ellipse",'cx="32" cy="32" rx="9" ry="20",'<title>meridian</title>')+L(13,32,51,32,2)+P("20,18 38,15 48,27 28,30","url(#facet"+id+")",1);break;
+  case"Cart":g+=Path("M12 17h7l4 24h27l5-18H21M27 47a4 4 0 1 0 0 8 4 4 0 0 0 0-8m18 0a4 4 0 1 0 0 8 4 4 0 0 0 0-8","url(#g"+id+")",2)+P("25,25 47,23 44,36 28,38","url(#facet"+id+")",1);break;
+  case"Tag":g+=P("14,18 35,18 50,33 34,49 14,29");g+=C(24,26,3,"#334155")+P("18,20 34,19 45,31 31,40","url(#facet"+id+")",1);break;
+  case"Gift":g+=R(16,23,32,27,3)+R(14,18,36,9,3)+L(32,18,32,50,2.3)+P("17,24 31,21 42,26 37,39 22,37","url(#facet"+id+")",1);break;
+  case"Bookmark":g+=Path("M20 14h24v37l-12-8-12 8z","url(#g"+id+")",2)+P("23,17 38,15 43,27 24,30","url(#facet"+id+")",1);break;
+  case"Eye":g+=Path("M10 32s9-15 22-15 22 15 22 15-9 15-22 15S10 32 10 32z","url(#g"+id+")",2)+C(32,32,7,"#f8fbff")+C(32,32,2.5,"#334155");break;
+  case"Filter":g+=P("12,17 52,17 38,33 38,47 27,52 27,33");g+=P("18,20 45,19 36,29 23,31","url(#facet"+id+")",1);break;
+  case"Grid":for(let r=0;r<3;r++)for(let c=0;c<3;c++)g+=R(16+c*11,16+r*11,8,8,2);g+=P("20,17 38,20 43,39 25,38","url(#facet"+id+")",.9);break;
+  case"List":for(let i=0;i<4;i++){g+=C(18,19+i*10,2,"#334155")+L(25,19+i*10,49,19+i*10,2)}g+=P("26,21 43,20 46,46 28,43","url(#facet"+id+")",.9);break;
+  case"Refresh":g+=Path("M47 26a16 16 0 0 0-28 5M17 38a16 16 0 0 0 28-5","none",3)+P("39,17 48,19 47,28 40,25","url(#facet"+id+")",1)+P("16,36 24,38 23,47 16,44","url(#facet"+id+")",1);break;
+  case"Fullscreen":g+=L(14,24,14,14,2.7)+L(14,14,24,14,2.7)+L(40,14,50,14,2.7)+L(50,14,50,24,2.7)+L(14,40,14,50,2.7)+L(14,50,24,50,2.7)+L(40,50,50,50,2.7)+L(50,50,50,40,2.7)+P("24,23 40,20 44,39 27,42","url(#facet"+id+")",1);break;
+  case"Copy":g+=R(23,15,27,31,4)+R(15,24,27,31,4)+P("18,29 32,25 39,38 24,43","url(#facet"+id+")",1);break;
+  case"Paste":g+=R(18,20,28,31,4)+R(25,14,14,8,2)+P("22,24 40,21 44,38 24,43","url(#facet"+id+")",1);break;
+  case"Save":g+=R(16,15,32,35,4)+R(23,18,17,11,2)+R(23,38,18,9,2)+P("20,19 36,17 44,29 24,31","url(#facet"+id+")",1);break;
+  case"Print":g+=R(20,25,24,22,3)+R(24,16,16,12,2)+R(22,41,20,10,2)+P("22,27 40,25 41,37 23,39","url(#facet"+id+")",1);break;
+  case"Code":g+=Path("M26 19L15 32l11 13M38 19l11 13-11 13M35 14L29 50","none",2.6)+P("24,22 36,18 42,31 34,41 25,36","url(#facet"+id+")",1);break;
+  case"Terminal":g+=R(13,17,38,31,5)+Path("M20 27l8 6-8 6M33 40h11","none",2.8)+P("17,21 41,18 47,29 24,34","url(#facet"+id+")",1);break;
+  case"Database":g+=E("ellipse",'cx="32" cy="18" rx="17" ry="7",'')+Path("M15 18v28c0 5 8 8 17 8s17-3 17-8V18M15 28c0 5 8 8 17 8s17-3 17-8M15 38c0 5 8 8 17 8s17-3 17-8","url(#g"+id+")",2)+P("20,19 35,16 46,24 43,34 23,33","url(#facet"+id+")",1);break;
+  case"Server":g+=R(14,15,36,10,3)+R(14,28,36,10,3)+R(14,41,36,10,3);for(let y of [20,33,46])g+=C(21,y,2,"#334155");g+=P("26,17 45,17 48,27 27,28","url(#facet"+id+")",.9);break;
+  case"Wifi":g+=Path("M12 25a29 29 0 0 1 40 0M18 32a20 20 0 0 1 28 0M25 39a10 10 0 0 1 14 0","none",3)+C(32,48,2.8,"#334155")+P("22,22 38,19 46,29 29,32","url(#facet"+id+")",.9);break;
+  case"Bluetooth":g+=Path("M32 12v40l12-10-22-20 22-10-12-10M32 32L20 42","none",2.8)+P("24,18 38,17 42,29 30,32","url(#facet"+id+")",1);break;
+  case"Battery":g+=R(14,20,36,24,5)+R(50,27,5,10,2)+R(19,24,18+id%3*4,16,3,"url(#facet"+id+")");break;
+  case"Sun":g+=C(32,32,10);for(let i=0;i<8;i++){let a=i*Math.PI/4;g+=L(32+Math.cos(a)*17,32+Math.sin(a)*17,32+Math.cos(a)*23,32+Math.sin(a)*23,2.3)}g+=P("25,21 40,18 45,30 28,35","url(#facet"+id+")",1);break;
+  case"Moon":g+=Path("M43 13A20 20 0 1 0 47 49 20 20 0 0 1 43 13z","url(#g"+id+")",2)+P("30,20 44,17 46,31 33,36","url(#facet"+id+")",1);break;
+  case"Lightning":g+=P("37,10 17,36 30,36 27,54 48,25 35,25");g+=P("34,20 43,24 31,37 24,34","url(#facet"+id+")",1);break;
+  case"Shield":g+=Path("M32 11l20 8v13c0 12-9 20-20 23-11-3-20-11-20-23V19z","url(#g"+id+")",2)+Path("M23 32l6 6 12-13","none",2.8)+P("22,18 39,15 46,27 39,38 25,34","url(#facet"+id+")",1);break;
+  case"Key":g+=C(21,30,8)+L(28,34,50,18,2.8)+L(41,25,47,31,2.6)+L(35,30,41,36,2.6)+P("24,24 38,23 43,30 32,38","url(#facet"+id+")",1);break;
+  case"Flag":g+=L(18,13,18,51,2.5)+P("19,15 47,15 40,25 47,35 19,35")+P("21,18 39,18 35,26 22,30","url(#facet"+id+")",1);break;
+  case"Pin":g+=L(32,18,32,51,2.4)+C(32,18,9)+C(32,18,3,"#334155")+P("22,25 39,22 42,34 29,40","url(#facet"+id+")",1);break;
+  case"Phone":g+=R(20,11,24,42,6)+C(32,45,2.2,"#334155")+P("24,15 39,13 43,29 24,31","url(#facet"+id+")",1);break;
+  case"Tablet":g+=R(14,11,36,42,5)+C(32,46,2.2,"#334155")+P("19,15 40,13 45,31 21,34","url(#facet"+id+")",1);break;
+  case"Desktop":g+=R(11,14,42,28,4)+L(32,42,32,50,2.4)+L(24,51,40,51,2.4)+P("16,18 38,15 47,26 22,33","url(#facet"+id+")",1);break;
+  case"Layers":g+=P("32,12 52,23 32,34 12,23")+P("12,31 32,42 52,31")+P("12,40 32,52 52,40")+P("21,19 36,16 44,24 30,29","url(#facet"+id+")",1);break;
+  case"Sliders":g+=L(16,20,48,20,2.6)+L(16,32,48,32,2.6)+L(16,44,48,44,2.6)+C(27,20,4)+C(40,32,4)+C(24,44,4)+P("25,23 41,20 44,35 27,39","url(#facet"+id+")",.9);break;
+  case"Dashboard":g+=R(14,14,36,38,6)+R(20,20,10,10,2)+R(34,20,10,10,2)+R(20,34,10,10,2)+R(34,34,10,10,2)+P("19,18 38,17 45,29 26,33","url(#facet"+id+")",.8);break;
+  case"Chart":g+=L(15,49,15,15,2.2)+L(15,49,51,49,2.2)+Path("M19 41l9-12 8 8 11-16","none",3)+P("22,31 35,26 43,37 30,41","url(#facet"+id+")",1);break;
+  case"Graph":g+=L(14,49,14,14,2.2)+L(14,49,52,49,2.2)+C(21,39,3)+C(30,28,3)+C(40,34,3)+C(49,21,3)+Path("M21 39l9-11 10 6 9-13","none",2.5)+P("25,25 44,22 45,34 29,39","url(#facet"+id+")",.9);break;
+  case"Pie":g+=C(32,32,19)+P("32,32 32,13 50,32")+Path("M32 32l14 14","none",2)+P("22,21 39,17 44,28 28,34","url(#facet"+id+")",1);break;
+  case"Rocket":g+=Path("M32 11c11 6 17 15 12 28l-12 14-12-14c-5-13 1-22 12-28z","url(#g"+id+")",2)+C(32,28,5,"#f8fbff")+Path("M22 41l-8 7 3-10M42 41l8 7-3-10","url(#g"+id+")",2)+P("25,17 40,18 43,29 30,36","url(#facet"+id+")",1);break;
+  case"Target":g+=C(32,32,19)+C(32,32,11)+C(32,32,4,"#334155")+P("22,19 39,17 46,29 34,35 23,31","url(#facet"+id+")",1);break;
+  case"Wand":g+=L(20,44,45,19,4)+C(46,18,5)+L(46,9,46,15,2)+L(46,21,46,27,2)+L(37,18,43,18,2)+L(49,18,55,18,2)+P("24,29 37,24 40,34 28,39","url(#facet"+id+")",1);break;
+  case"Palette":g+=C(32,32,19)+C(21,25,3,palettes[id%5][0])+C(31,19,3,palettes[id%5][1])+C(41,24,3,palettes[id%5][2])+C(42,37,3,"#334155")+C(27,44,3,"#c9d4e7")+C(40,44,5,"#f4f7fb");break;
+  case"Brush":g+=R(23,36,20,7,2)+P("42,36 52,27 56,32 46,42")+P("26,37 40,34 43,44 27,46","url(#facet"+id+")",1);break;
+  case"Pen":g+=P("18,46 22,34 43,13 51,21 30,42")+P("40,16 47,13 53,19 46,26","url(#facet"+id+")",1)+L(24,33,33,42,2);break;
+  case"Scissors":g+=C(20,23,7)+C(20,43,7)+L(25,27,49,16,2.5)+L(25,39,49,50,2.5)+L(25,32,46,32,2.5)+P("28,23 43,20 45,34 31,38","url(#facet"+id+")",1);break;
+  case"Info":g+=C(32,32,19)+C(32,22,2.3,"#334155")+L(32,29,32,44,2.7)+P("23,19 39,17 45,30 29,35","url(#facet"+id+")",1);break;
+  case"Warning":g+=P("32,11 53,51 11,51")+C(32,30,2.2,"#334155")+L(32,36,32,43,2.4)+P("23,20 40,18 46,32 29,37","url(#facet"+id+")",1);break;
+  case"Question":g+=C(32,32,19)+Path("M25 25c0-8 14-10 16-2 1 6-5 8-8 10-2 2-2 4-2 7","none",2.5)+C(32,45,2.2,"#334155")+P("22,20 40,19 45,31 33,38 24,33","url(#facet"+id+")",1);break;
+  case"Send":g+=P("12,31 52,13 42,50 31,38")+L(31,38,52,13,2)+P("23,29 37,22 43,33 31,38","url(#facet"+id+")",1);break;
+  case"Inbox":g+=R(13,18,38,34,5)+Path("M16 36h10c2 6 10 8 14 0h10","none",2.3)+P("18,22 39,20 46,32 27,37","url(#facet"+id+")",1);break;
+  case"Archive":g+=R(14,20,36,30,4)+R(12,15,40,9,3)+L(25,35,39,35,2.2)+P("18,23 41,21 46,33 24,37","url(#facet"+id+")",1);break;
+  case"Folder Open":g+=Path("M12 23h17l4 6h20l-5 21H12z","url(#g"+id+")",2)+P("17,28 31,25 48,31 44,44 18,46","url(#facet"+id+")",1);break;
+  case"File Plus":g+=Path("M20 12h18l10 10v30H20z","url(#g"+id+")",2)+P("38,12 38,22 48,22","url(#facet"+id+")",1)+L(32,31,32,45,2.5)+L(25,38,39,38,2.5);break;
+  case"Image Add":g+=R(13,18,38,30,5)+P("17,40 27,30 34,37 41,29 48,40")+C(24,26,3)+L(46,20,46,30,2)+L(41,25,51,25,2);break;
+  case"Video Add":g+=R(13,20,29,25,5)+P("42,27 52,22 52,43 42,38")+L(25,23,25,34,2)+L(20,29,30,29,2)+P("16,22 36,20 39,31 22,36","url(#facet"+id+")",1);break;
+  case"Microphone":g+=R(25,12,14,30,7)+Path("M19 30a13 13 0 0 0 26 0M32 43v9M24 52h16","none",2.5)+P("27,15 38,13 42,29 27,33","url(#facet"+id+")",1);break;
+  case"Volume":g+=P("14,28 22,28 34,18 34,46 22,36 14,36")+Path("M40 27a8 8 0 0 1 0 10M44 23a14 14 0 0 1 0 18","none",2.6)+P("20,26 31,21 38,30 30,37 20,35","url(#facet"+id+")",1);break;
+  case"Mute":g+=P("14,28 22,28 34,18 34,46 22,36 14,36")+L(40,25,51,39,2.7)+L(51,25,40,39,2.7)+P("20,27 31,22 37,30 29,37 20,35","url(#facet"+id+")",1);break;
+  case"Play Circle":g+=C(32,32,19)+P("28,22 44,32 28,42")+P("25,23 37,20 43,30 31,37","url(#facet"+id+")",1);break;
+  case"Arrow Up":g+=Path("M32 50V14M32 14L19 27M32 14l13 13","none",3)+P("23,20 37,17 43,28 30,35","url(#facet"+id+")",1);break;
+  case"Arrow Down":g+=Path("M32 14v36M32 50L19 37M32 50l13-13","none",3)+P("22,29 36,25 43,39 29,42","url(#facet"+id+")",1);break;
+  case"Arrow Left":g+=Path("M50 32H14M14 32l13-13M14 32l13 13","none",3)+P("18,23 36,20 40,31 26,39","url(#facet"+id+")",1);break;
+  case"Arrow Right":g+=Path("M14 32h36M50 32L37 19M50 32L37 45","none",3)+P("24,22 42,25 44,38 29,40","url(#facet"+id+")",1);break;
+  case"Spark":g+=P("32,9 37,27 55,32 37,37 32,55 27,37 9,32 27,27");g+=P("31,18 37,28 43,32 35,36 29,29","url(#facet"+id+")",1);break;
+  default:g=facet;
  }
- return V.join("");
+ return '<g filter="url(#shadow'+id+')">'+g+'</g>';
 }
-const TYPE_MAP={};
-["Home","Search","User","Settings","Mail","Heart","Star","Lock","Unlock","Cloud","Upload","Download","Share","Link","Calendar","Clock","Camera","Play","Pause","Stop","Menu","Close","Check","Plus","Minus","Edit","Delete","Folder","File","Image","Video","Music","Bell","Chat","Location","Map","Globe","Cart","Tag","Gift","Bookmark","Eye","Filter","Grid","List","Refresh","Fullscreen","Copy","Paste","Cut","Save","Print","Code","Terminal","Database","Server","Wifi","Bluetooth","Battery","Sun","Moon","Lightning","Shield","Key","Flag","Pin","Phone","Tablet","Desktop","Layers","Sliders","Dashboard","Chart","Graph","Pie","Rocket","Target","Wand","Palette","Brush","Pen","Scissors","Info","Warning","Question","Camera Pro","Cloud Sync","Send","Inbox","Archive","Folder Open","File Plus","Image Add","Video Add","Microphone","Volume","Mute","Play Circle","Arrow Up","Arrow Down"
-].forEach(n=>TYPE_MAP[n]=n.toLowerCase().replace(/ /g,"-"));
-function prismify(g,i){
-  const grad='url(#crystal'+i+')';
-  return g
-    .replace(/fill="#fff"/g,'fill="'+grad+'"')
-    .replace(/stroke="#111"/g,'stroke="#334155"')
-    .replace(/stroke="#111"/g,'stroke="#334155"');
+
+function iconSVG(i,size=256,withBg=false){
+ const uid=i+1;
+ const body=draw(NAMES[i],uid);
+ const bg=withBg?'<rect width="256" height="256" rx="32" fill="#f4f7ff"/>':'';
+ return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 64 64">'+svgStart(uid)+bg+body+'</svg>';
 }
-function iconSvg(name,i=0,size=64,standalone=true){
- const g=prismify(glyph(TYPE_MAP[name]||"default",i),i);
- const defs='<defs>'+
-   '<linearGradient id="crystal'+i+'" x1="0" y1="0" x2="1" y2="1">'+
-   '<stop offset="0" stop-color="#ffffff"/>'+
-   '<stop offset=".24" stop-color="'+COLORS[(i+2)%COLORS.length]+'"/>'+
-   '<stop offset=".58" stop-color="'+COLORS[(i+4)%COLORS.length]+'"/>'+
-   '<stop offset="1" stop-color="'+COLORS[(i+6)%COLORS.length]+'"/>'+
-   '</linearGradient>'+
-   '<linearGradient id="edge'+i+'" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0f172a"/><stop offset=".5" stop-color="#64748b"/><stop offset="1" stop-color="#cbd5e1"/></linearGradient>'+
-   '</defs>';
- const out='<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 64 64">'+defs+'<g filter="url(#soft'+i+')">'+g+'</g></svg>';
- const full=out.replace('</defs>','<filter id="soft'+i+'" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="1.4" flood-opacity=".16"/></filter></defs>');
- return standalone?full:g;
+function tileSVG(i){
+ return iconSVG(i,160,false);
 }
-function sheetSvg(indices=ICONS.map((_,i)=>i),cell=180,cols=10){
- const rows=Math.ceil(indices.length/cols),pad=28,gap=18,w=cols*cell+pad*2,h=rows*cell+pad*2;
- const defs='<defs><linearGradient id="sheetBg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f9fbff"/><stop offset=".32" stop-color="#e9efff"/><stop offset=".68" stop-color="#ece7ff"/><stop offset="1" stop-color="#dff8ff"/></linearGradient></defs>';
- let s='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">'+defs+'<rect width="100%" height="100%" fill="white"/>';
- indices.forEach((idx,k)=>{const col=k%cols,row=Math.floor(k/cols),x=pad+col*cell,y=pad+row*cell; s+='<rect x="'+(x+gap/2)+'" y="'+(y+gap/2)+'" width="'+(cell-gap)+'" height="'+(cell-gap)+'" rx="22" fill="url(#sheetBg)" stroke="#d4d9e8"/>'; s+='<g transform="translate('+(x+(cell-64)/2)+','+(y+28)+') scale(1)">'+glyph(TYPE_MAP[ICONS[idx]],idx)+'</g>'; s+='<text x="'+(x+cell/2)+'" y="'+(y+cell-25)+'" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="600" fill="#202938">'+esc(ICONS[idx])+'</text>';});
+
+let visible=[...Array(NAMES.length).keys()];
+const selected=new Set();
+const grid=document.getElementById("grid");
+
+function render(){
+ grid.innerHTML="";
+ if(!visible.length){grid.innerHTML='<div class="empty">No matching icons.</div>';return}
+ visible.forEach(i=>{
+  const el=document.createElement("article");
+  el.className="card"+(selected.has(i)?" selected":"");
+  el.innerHTML='<div class="tile">'+tileSVG(i)+'</div><div class="meta"><b>'+esc(NAMES[i])+'</b><span>'+String(i+1).padStart(3,"0")+'</span></div>';
+  el.onclick=()=>{if(selected.has(i))selected.delete(i);else selected.add(i);updateSide(i);render()};
+  grid.appendChild(el);
+ });
+ document.getElementById("selected").textContent=selected.size;
+}
+function updateSide(i){
+ document.getElementById("selName").textContent=NAMES[i];
+ document.getElementById("selInfo").textContent=(category(i)+" · PWI-"+String(i+1).padStart(3,"0"));
+ document.getElementById("large").innerHTML=iconSVG(i,220,false);
+}
+function apply(){
+ const q=document.getElementById("q").value.trim().toLowerCase();
+ const cat=document.getElementById("cat").value;
+ visible=NAMES.map((n,i)=>({n,i})).filter(x=>(!q||x.n.toLowerCase().includes(q))&&(cat==="all"||category(x.i)===cat)).map(x=>x.i);
+ render();
+}
+function ensure(){if(!selected.size)visible.forEach(i=>selected.add(i));}
+function download(name,data,type="image/svg+xml"){
+ const blob=new Blob([data],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1200);
+}
+function sheetSVG(indices){
+ const cols=10,cell=180,pad=32,rows=Math.ceil(indices.length/cols),w=cols*cell+pad*2,h=rows*cell+pad*2;
+ let s='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'"><rect width="100%" height="100%" fill="#ffffff"/>';
+ indices.forEach((idx,k)=>{
+  const x=pad+(k%cols)*cell,y=pad+Math.floor(k/cols)*cell;
+  s+='<rect x="'+(x+9)+'" y="'+(y+9)+'" width="'+(cell-18)+'" height="'+(cell-18)+'" rx="24" fill="#f2f6ff" stroke="#d6deea"/>';
+  s+='<g transform="translate('+(x+10)+','+(y+8)+') scale(2.5)">'+draw(NAMES[idx],idx+1)+'</g>';
+  s+='<text x="'+(x+cell/2)+'" y="'+(y+cell-22)+'" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#202938">'+esc(NAMES[idx])+'</text>';
+ });
  return s+'</svg>';
 }
+function epsSVG(indices){
+ const cell=120,cols=10,pad=18,rows=Math.ceil(indices.length/cols),w=cols*cell+pad*2,h=rows*cell+pad*2;
+ let ps='%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 '+w+' '+h+'\n%%Creator: TRILYVA\n%%Title: Prism Web Icons\n%%LanguageLevel: 2\n%%Pages: 1\n%%EndComments\n1 setlinejoin 1 setlinecap\n';
+ const colors=["0.73 0.96 1","0.85 0.80 1","0.74 0.91 1","0.80 0.98 0.94","0.89 0.82 1"];
+ function hex(){return colors[indices.length%colors.length]+" setrgbcolor\n"}
+ indices.forEach((idx,k)=>{
+  const x=pad+(k%cols)*cell+60,y=h-pad-Math.floor(k/cols)*cell-60;
+  ps+='gsave '+x+' '+y+' translate 1.35 1.35 scale\n';
+  ps+=hex();
+  ps+='newpath 32 11 moveto 50 32 lineto 32 53 lineto 11 32 lineto closepath fill\n';
+  ps+='0.20 0.27 0.35 setrgbcolor 2 setlinewidth newpath 32 11 moveto 50 32 lineto 32 53 lineto 11 32 lineto closepath stroke\n';
+  ps+='grestore\n';
+ });
+ ps+='showpage\n%%EOF\n';
+ return ps;
+}
+function csv(){
+ const title=document.getElementById("title").value,desc=document.getElementById("description").value,kw=document.getElementById("keywords").value;
+ const rows=[["Filename","Description","Keywords","Categories","Illustration","Mature Content","Editorial"]];
+ [...selected].forEach(i=>rows.push(["prism-web-icon-"+slug(NAMES[i])+".svg",desc,kw,"Icons;Web;Technology","No","No","No"]));
+ return rows.map(r=>r.map(x=>'"'+String(x).replaceAll('"','""')+'"').join(",")).join("\n");
+}
+document.getElementById("q").oninput=apply;
+document.getElementById("cat").onchange=apply;
+document.getElementById("all").onclick=()=>{visible.forEach(i=>selected.add(i));render()};
+document.getElementById("none").onclick=()=>{selected.clear();render()};
+document.getElementById("sheet").onclick=()=>{ensure();download("prism-web-icons-"+selected.size+"-sheet.svg",sheetSVG([...selected]))};
+document.getElementById("one").onclick=()=>{ensure();const i=[...selected][0];download("prism-web-icon-"+slug(NAMES[i])+".svg",iconSVG(i,512,false))};
+document.getElementById("eps").onclick=()=>{ensure();download("prism-web-icons-"+selected.size+".eps",epsSVG([...selected]),"application/postscript")};
+document.getElementById("csv").onclick=()=>{ensure();download("prism-web-icons-stock-metadata.csv",csv(),"text/csv")};
 
-const CAT=n=>{const i=ICONS.indexOf(n);if(i<30)return"ui";if(i<50)return"files";if(i<70)return"tech";if(i<80)return"commerce";if(i<91)return"creative";return"status"};
-let visible=[...Array(ICONS.length).keys()],selected=new Set();
-const grid=document.getElementById("grid");
-function render(){grid.innerHTML="";visible.forEach(i=>{const n=ICONS[i],c=document.createElement("div");c.className="card"+(selected.has(i)?" selected":"");c.innerHTML='<div class="preview">'+iconSvg(n,i,128)+'</div><div class="name"><b>'+esc(n)+'</b><small>#'+String(i+1).padStart(3,"0")+'</small></div>';c.onclick=()=>{selected.has(i)?selected.delete(i):selected.add(i);render();};grid.appendChild(c);});document.getElementById("count").textContent=selected.size;document.getElementById("active").textContent=selected.size?ICONS[[...selected][selected.size-1]]:"No icon selected";}
-function apply(){const q=document.getElementById("search").value.toLowerCase(),g=document.getElementById("group").value;visible=ICONS.map((n,i)=>[n,i]).filter(([n,i])=>(!q||n.toLowerCase().includes(q))&&(g==="all"||CAT(n)===g)).map(x=>x[1]);render();}
-function ensureSelection(){if(!selected.size) visible.slice(0,100).forEach(i=>selected.add(i));}
-document.getElementById("search").oninput=apply;document.getElementById("group").onchange=apply;
-document.getElementById("selectAll").onclick=()=>{visible.forEach(i=>selected.add(i));render()};
-document.getElementById("clear").onclick=()=>{selected.clear();render()};
-document.getElementById("sheet").onclick=()=>{ensureSelection();download("prism-web-icons-"+selected.size+".svg",sheetSvg([...selected]))};
-document.getElementById("svg").onclick=()=>{ensureSelection();const i=[...selected][0],n=ICONS[i];download(slug("prism-web-icon-"+n)+".svg",iconSvg(n,i))};
-function epsFor(indices){
- const cell=120,cols=10,p=20,rows=Math.ceil(indices.length/cols),w=cols*cell+p*2,h=rows*cell+p*2;
- const n=v=>Number.parseFloat(v||0);
- const rgb=v=>{if(!v||v==="none")return null; if(v[0]==="#"){let z=v.slice(1);if(z.length===3)z=z.split("").map(x=>x+x).join("");return [parseInt(z.slice(0,2),16)/255,parseInt(z.slice(2,4),16)/255,parseInt(z.slice(4,6),16)/255]} return [0,0,0]};
- const color=v=>{const c=rgb(v);return c?c[0].toFixed(4)+" "+c[1].toFixed(4)+" "+c[2].toFixed(4)+" setrgbcolor\n":""};
- const paint=(el,fill,stroke,sw)=>{let z="";if(fill&&fill!=="none")z+=color(fill)+"fill\n";if(stroke&&stroke!=="none")z+=color(stroke)+(n(sw||3))+" setlinewidth stroke\n";return z};
- const points=p=>p.trim().split(/[ ,]+/).map(Number);
- const pathPS=d=>{
-   const t=(d.match(/[a-zA-Z]|-?(?:\d*\.\d+|\d+\.?)(?:e[-+]?\d+)?/g)||[]);let i=0,c="",x=0,y=0,sx=0,sy=0,o="newpath\n";
-   const N=()=>n(t[i++]); while(i<t.length){if(/[a-zA-Z]/.test(t[i]))c=t[i++];const r=c===c.toLowerCase();
-     if(c==="M"||c==="m"){x=r?x+N():N();y=r?y+N():N();sx=x;sy=y;o+=x+" "+(64-y)+" moveto\n";c=r?"l":"L";}
-     else if(c==="L"||c==="l"){x=r?x+N():N();y=r?y+N():N();o+=x+" "+(64-y)+" lineto\n";}
-     else if(c==="H"||c==="h"){x=r?x+N():N();o+=x+" "+(64-y)+" lineto\n";}
-     else if(c==="V"||c==="v"){y=r?y+N():N();o+=x+" "+(64-y)+" lineto\n";}
-     else if(c==="C"||c==="c"){const x1=r?x+N():N(),y1=r?y+N():N(),x2=r?x+N():N(),y2=r?y+N():N();x=r?x+N():N();y=r?y+N():N();o+=x1+" "+(64-y1)+" "+x2+" "+(64-y2)+" "+x+" "+(64-y)+" curveto\n";}
-     else if(c==="Z"||c==="z"){o+="closepath\n";x=sx;y=sy;}
-     else {while(i<t.length&&!/[a-zA-Z]/.test(t[i]))i++;}
-   } return o;
- };
- const elementPS=el=>{
-   const tag=el.tagName,fill=el.getAttribute("fill")||"none",stroke=el.getAttribute("stroke")||"none",sw=el.getAttribute("stroke-width")||"3";
-   if(tag==="polygon"){const a=points(el.getAttribute("points")||"");let o="newpath\n";for(let i=0;i<a.length;i+=2)o+=(i?"lineto ":"moveto ")+a[i]+" "+(64-a[i+1])+"\n";return o+"closepath\n"+paint(el,fill,stroke,sw)}
-   if(tag==="rect"){const x=n(el.getAttribute("x")),y=n(el.getAttribute("y")),w=n(el.getAttribute("width")),h=n(el.getAttribute("height"));return "newpath\n"+x+" "+(64-y)+" moveto\n"+(x+w)+" "+(64-y)+" lineto\n"+(x+w)+" "+(64-y-h)+" lineto\n"+x+" "+(64-y-h)+" lineto closepath\n"+paint(el,fill,stroke,sw)}
-   if(tag==="circle"){const x=n(el.getAttribute("cx")),y=64-n(el.getAttribute("cy")),r=n(el.getAttribute("r"));return "newpath\n"+x+" "+y+" "+r+" 0 360 arc closepath\n"+paint(el,fill,stroke,sw)}
-   if(tag==="ellipse"){const x=n(el.getAttribute("cx")),y=64-n(el.getAttribute("cy")),rx=n(el.getAttribute("rx")),ry=n(el.getAttribute("ry"));return "gsave\n"+x+" "+y+" translate\n1 "+((ry/rx)||1)+" scale\nnewpath\n0 0 "+rx+" 0 360 arc closepath\n"+paint(el,fill,stroke,sw)+"grestore\n"}
-   if(tag==="line"){return "newpath\n"+n(el.getAttribute("x1"))+" "+(64-n(el.getAttribute("y1")))+" moveto\n"+n(el.getAttribute("x2"))+" "+(64-n(el.getAttribute("y2")))+" lineto\n"+(stroke!=="none"?color(stroke)+n(sw)+" setlinewidth stroke\n":"")}
-   if(tag==="path"){return pathPS(el.getAttribute("d")||"")+paint(el,fill,stroke,sw)}
-   return "";
- };
- let ps="%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 "+w+" "+h+"\n%%Creator: TRILYVA Prism Web Icons\n%%Title: Prism Web Icons\n%%Pages: 1\n%%LanguageLevel: 2\n%%EndComments\n1 setlinejoin 1 setlinecap\n";
- indices.forEach((idx,k)=>{const x=p+(k%cols)*cell+28,y=h-p-Math.floor(k/cols)*cell-cell+28;ps+="gsave\n"+x+" "+y+" translate\n0 64 translate\n1 -1 scale\n";const flatFill=COLORS[(idx+2)%COLORS.length],src=glyph(TYPE_MAP[ICONS[idx]],idx).replace(/fill="#fff"/g,'fill="'+flatFill+'"').replace(/stroke="#111"/g,'stroke="#334155"');const doc=new DOMParser().parseFromString("<svg xmlns='http://www.w3.org/2000/svg'>"+src+"</svg>","image/svg+xml");[...doc.documentElement.children].forEach(el=>ps+=elementPS(el));ps+="grestore\n";});
- ps+="showpage\n%%EOF\n";return ps;
-}document.getElementById("eps").onclick=()=>{ensureSelection();download("prism-web-icons-"+selected.size+".eps",epsFor([...selected]))};
-document.getElementById("csv").onclick=()=>{ensureSelection();const title=document.getElementById("metaTitle").value,desc=document.getElementById("metaDesc").value,k=document.getElementById("keywords").value;const rows=[["Filename","Description","Keywords","Categories","Illustration","Mature Content","Editorial"]];[...selected].forEach(i=>rows.push([slug("prism-web-icon-"+ICONS[i])+".svg",desc,k,"Icons;Web;Technology","No","No","No"]));const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");download("prism-web-icons-stock-metadata.csv",csv)};
-function download(name,data){const b=new Blob([data],{type:"text/plain;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+updateSide(0);
 render();
 </script>
-</body></html>
+</body>
+</html>
