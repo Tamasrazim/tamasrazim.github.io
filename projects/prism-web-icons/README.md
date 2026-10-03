@@ -1,15 +1,20 @@
 # Prism Web Icons
 
-TRILYVA's original procedural web/interface icon library.
+A fresh TRILYVA stock-vector project built from scratch around the **Prismatic Cutline** visual system.
 
-- 100 vector icons
-- 10×10 sheet composition
-- transparent-background icon masters
-- one-click SVG sheet export
-- flat-vector EPS sheet export
-- stock metadata CSV export
-- no external libraries, CDNs, fonts, or runtime dependencies
+## Build
 
-Open `index.html` directly or through the GitHub Pages site:
+- 100 original web/interface icons
+- crisp geometric silhouettes with internal prism facets
+- SVG master output
+- 10×10 SVG sheet export
+- browser-generated EPS using the same icon geometry
+- stock metadata CSV
+- search, category filters, multi-selection and live preview
+- no external libraries, CDNs, fonts or backend
 
+Live:
 https://tamasrazim.github.io/projects/prism-web-icons/
+
+Library manifest:
+`../code-motion/renderer/library/prism-web-icons.json`
