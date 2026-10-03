@@ -29,7 +29,7 @@ main{display:grid;grid-template-columns:1fr 320px;min-height:calc(100vh - 180px)
   <button id="selectAll">Select all</button>
   <button id="clear">Clear</button>
   <button id="sheet" class="primary">Export selected SVG sheet</button>
-  <button id="eps">Export selected EPS</button>
+  <button id="eps">Export selected EPS (flat vector)</button>
   <button id="svg">Export selected SVG</button>
   <button id="csv">Export stock CSV</button>
  </div>
@@ -42,7 +42,7 @@ main{display:grid;grid-template-columns:1fr 320px;min-height:calc(100vh - 180px)
   <label>Stock title</label><textarea id="metaTitle">Prism Web Icons — 100 Translucent Geometric Web Interface Icons</textarea>
   <label>Description</label><textarea id="metaDesc">Original translucent geometric web interface icon collection with faceted prism styling, clean vector construction and editable individual symbols for websites, apps, dashboards and digital products.</textarea>
   <label>Keywords</label><textarea id="keywords">web icons,interface icons,ui icons,vector icons,web interface,user interface,icon set,icon collection,prism,prismatic,translucent,geometric,geometric icons,abstract icons,digital interface,website,app,dashboard,technology,design,editable vector,svg,eps,illustration,graphic design,modern,contemporary,glass,faceted,crystal,luminous,gradient,colorful,clean,minimal,navigation,communication,commerce,software,application,digital,online,branding,creative,stock vector,template,interface design</textarea>
-  <div class="note">EPS export is intentionally flat-vector: transparency is simulated with layered fills so the result remains editable and marketplace-safe.</div>
+  <div class="note">EPS uses opaque vector fills and the same generated icon geometry; alpha is intentionally flattened for Illustrator/stock compatibility. SVG remains the master format.</div>
  </aside>
 </main>
 <div class="footer">TRILYVA · Prism Library · Prism Web Icons · original procedural vectors</div>
@@ -199,8 +199,39 @@ document.getElementById("selectAll").onclick=()=>{visible.forEach(i=>selected.ad
 document.getElementById("clear").onclick=()=>{selected.clear();render()};
 document.getElementById("sheet").onclick=()=>{ensureSelection();download("prism-web-icons-"+selected.size+".svg",sheetSvg([...selected]))};
 document.getElementById("svg").onclick=()=>{ensureSelection();const i=[...selected][0],n=ICONS[i];download(slug("prism-web-icon-"+n)+".svg",iconSvg(n,i))};
-function epsFor(indices){const cell=120,cols=10,p=20,rows=Math.ceil(indices.length/cols),w=cols*cell+p*2,h=rows*cell+p*2;let ps='%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 '+w+' '+h+'\n%%Creator: TRILYVA Prism Web Icons\n%%Title: Prism Web Icons\n%%Pages: 1\n%%EndComments\n';ps+='1 setlinejoin 1 setlinecap 0.7 setgray\n';indices.forEach((idx,k)=>{const x=p+(k%cols)*cell+cell/2,y=h-p-Math.floor(k/cols)*cell-cell/2;ps+='gsave '+x+' '+y+' translate 1.35 1.35 scale\n';ps+='newpath 32 14 moveto 50 32 lineto 32 50 lineto 14 32 lineto closepath stroke\n';ps+='0 setgray newpath 22 32 moveto 32 22 lineto 42 32 lineto 32 42 lineto closepath stroke\n';ps+='grestore\n';});ps+='showpage\n';return ps}
-document.getElementById("eps").onclick=()=>{ensureSelection();download("prism-web-icons-"+selected.size+".eps",epsFor([...selected]))};
+function epsFor(indices){
+ const cell=120,cols=10,p=20,rows=Math.ceil(indices.length/cols),w=cols*cell+p*2,h=rows*cell+p*2;
+ const n=v=>Number.parseFloat(v||0);
+ const rgb=v=>{if(!v||v==="none")return null; if(v[0]==="#"){let z=v.slice(1);if(z.length===3)z=z.split("").map(x=>x+x).join("");return [parseInt(z.slice(0,2),16)/255,parseInt(z.slice(2,4),16)/255,parseInt(z.slice(4,6),16)/255]} return [0,0,0]};
+ const color=v=>{const c=rgb(v);return c?c[0].toFixed(4)+" "+c[1].toFixed(4)+" "+c[2].toFixed(4)+" setrgbcolor\n":""};
+ const paint=(el,fill,stroke,sw)=>{let z="";if(fill&&fill!=="none")z+=color(fill)+"fill\n";if(stroke&&stroke!=="none")z+=color(stroke)+(n(sw||3))+" setlinewidth stroke\n";return z};
+ const points=p=>p.trim().split(/[ ,]+/).map(Number);
+ const pathPS=d=>{
+   const t=(d.match(/[a-zA-Z]|-?(?:\d*\.\d+|\d+\.?)(?:e[-+]?\d+)?/g)||[]);let i=0,c="",x=0,y=0,sx=0,sy=0,o="newpath\n";
+   const N=()=>n(t[i++]); while(i<t.length){if(/[a-zA-Z]/.test(t[i]))c=t[i++];const r=c===c.toLowerCase();
+     if(c==="M"||c==="m"){x=r?x+N():N();y=r?y+N():N();sx=x;sy=y;o+=x+" "+(64-y)+" moveto\n";c=r?"l":"L";}
+     else if(c==="L"||c==="l"){x=r?x+N():N();y=r?y+N():N();o+=x+" "+(64-y)+" lineto\n";}
+     else if(c==="H"||c==="h"){x=r?x+N():N();o+=x+" "+(64-y)+" lineto\n";}
+     else if(c==="V"||c==="v"){y=r?y+N():N();o+=x+" "+(64-y)+" lineto\n";}
+     else if(c==="C"||c==="c"){const x1=r?x+N():N(),y1=r?y+N():N(),x2=r?x+N():N(),y2=r?y+N():N();x=r?x+N():N();y=r?y+N():N();o+=x1+" "+(64-y1)+" "+x2+" "+(64-y2)+" "+x+" "+(64-y)+" curveto\n";}
+     else if(c==="Z"||c==="z"){o+="closepath\n";x=sx;y=sy;}
+     else {while(i<t.length&&!/[a-zA-Z]/.test(t[i]))i++;}
+   } return o;
+ };
+ const elementPS=el=>{
+   const tag=el.tagName,fill=el.getAttribute("fill")||"none",stroke=el.getAttribute("stroke")||"none",sw=el.getAttribute("stroke-width")||"3";
+   if(tag==="polygon"){const a=points(el.getAttribute("points")||"");let o="newpath\n";for(let i=0;i<a.length;i+=2)o+=(i?"lineto ":"moveto ")+a[i]+" "+(64-a[i+1])+"\n";return o+"closepath\n"+paint(el,fill,stroke,sw)}
+   if(tag==="rect"){const x=n(el.getAttribute("x")),y=n(el.getAttribute("y")),w=n(el.getAttribute("width")),h=n(el.getAttribute("height"));return "newpath\n"+x+" "+(64-y)+" moveto\n"+(x+w)+" "+(64-y)+" lineto\n"+(x+w)+" "+(64-y-h)+" lineto\n"+x+" "+(64-y-h)+" lineto closepath\n"+paint(el,fill,stroke,sw)}
+   if(tag==="circle"){const x=n(el.getAttribute("cx")),y=64-n(el.getAttribute("cy")),r=n(el.getAttribute("r"));return "newpath\n"+x+" "+y+" "+r+" 0 360 arc closepath\n"+paint(el,fill,stroke,sw)}
+   if(tag==="ellipse"){const x=n(el.getAttribute("cx")),y=64-n(el.getAttribute("cy")),rx=n(el.getAttribute("rx")),ry=n(el.getAttribute("ry"));return "gsave\n"+x+" "+y+" translate\n1 "+((ry/rx)||1)+" scale\nnewpath\n0 0 "+rx+" 0 360 arc closepath\n"+paint(el,fill,stroke,sw)+"grestore\n"}
+   if(tag==="line"){return "newpath\n"+n(el.getAttribute("x1"))+" "+(64-n(el.getAttribute("y1")))+" moveto\n"+n(el.getAttribute("x2"))+" "+(64-n(el.getAttribute("y2")))+" lineto\n"+(stroke!=="none"?color(stroke)+n(sw)+" setlinewidth stroke\n":"")}
+   if(tag==="path"){return pathPS(el.getAttribute("d")||"")+paint(el,fill,stroke,sw)}
+   return "";
+ };
+ let ps="%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 "+w+" "+h+"\n%%Creator: TRILYVA Prism Web Icons\n%%Title: Prism Web Icons\n%%Pages: 1\n%%LanguageLevel: 2\n%%EndComments\n1 setlinejoin 1 setlinecap\n";
+ indices.forEach((idx,k)=>{const x=p+(k%cols)*cell+28,y=h-p-Math.floor(k/cols)*cell-cell+28;ps+="gsave\n"+x+" "+y+" translate\n0 64 translate\n1 -1 scale\n";const doc=new DOMParser().parseFromString("<svg xmlns='http://www.w3.org/2000/svg'>"+glyph(TYPE_MAP[ICONS[idx]],idx)+"</svg>","image/svg+xml");[...doc.documentElement.children].forEach(el=>ps+=elementPS(el));ps+="grestore\n";});
+ ps+="showpage\n%%EOF\n";return ps;
+}document.getElementById("eps").onclick=()=>{ensureSelection();download("prism-web-icons-"+selected.size+".eps",epsFor([...selected]))};
 document.getElementById("csv").onclick=()=>{ensureSelection();const title=document.getElementById("metaTitle").value,desc=document.getElementById("metaDesc").value,k=document.getElementById("keywords").value;const rows=[["Filename","Description","Keywords","Categories","Illustration","Mature Content","Editorial"]];[...selected].forEach(i=>rows.push([slug("prism-web-icon-"+ICONS[i])+".svg",desc,k,"Icons;Web;Technology","No","No","No"]));const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");download("prism-web-icons-stock-metadata.csv",csv)};
 function download(name,data){const b=new Blob([data],{type:"text/plain;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 render();
