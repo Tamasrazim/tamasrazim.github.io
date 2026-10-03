@@ -131,7 +131,7 @@ a{color:inherit;text-decoration:none}img{display:block;max-width:100%}button,inp
   <div class="shell">
     <div class="sectionHead reveal"><div><div class="eyebrow">01 / Product range</div><h2 class="title">Know what<br>you need.</h2></div><p class="lead">Search by product name or pack size. The catalogue stays deliberately simple so the information is easy to scan at a counter, on a phone or in front of a customer.</p></div>
     <div class="catalogTop reveal" style="--delay:1"><input class="search" id="search" type="search" autocomplete="off" placeholder="Search product or pack size…"><span class="count" id="catalogCount">Loading…</span></div>
-    <div class="products" id="products" aria-live="polite"></div>
+    <div class="products" id="productGrid" aria-live="polite"></div>
   </div>
 </section>
 
@@ -175,7 +175,7 @@ a{color:inherit;text-decoration:none}img{display:block;max-width:100%}button,inp
 (()=>{
   const data=Array.isArray(window.BNC_PRODUCTS)?window.BNC_PRODUCTS:[];
   const $=s=>document.querySelector(s);
-  const grid=$("#products"),search=$("#search"),count=$("#catalogCount");
+  const grid=$("#productGrid"),search=$("#search"),count=$("#catalogCount");
   const totalPacks=data.reduce((n,p)=>n+(Array.isArray(p.packs)?p.packs.length:0),0);
   $("#heroProducts").textContent=data.length;$("#heroPacks").textContent=totalPacks;
   $("#infoProducts").textContent=data.length+" products";$("#infoPacks").textContent=totalPacks+" pack formats";
