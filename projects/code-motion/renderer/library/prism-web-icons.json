@@ -2,7 +2,7 @@
   "name": "Prism Web Icons",
   "version": 1,
   "count": 100,
-  "description": "TRILYVA original procedural web and interface vector icon library.",
+  "description": "TRILYVA original faceted crystal glass web and interface vector icon library.",
   "icons": [
     {
       "id": "PWI-001",
@@ -1204,5 +1204,6 @@
       "stock": true,
       "filename": "prism-web-icon-arrow-down.svg"
     }
-  ]
+  ],
+  "style": "faceted-crystal-glass"
 }
