@@ -40,24 +40,24 @@ main{padding:48px 0 80px}.kicker{font-size:11px;color:var(--muted);letter-spacin
 </section></main>
 <script>
 const $=id=>document.getElementById(id);
-let ctx,stream,source,inputGain,low,high,delay,feedback,wet,dry,chorus,reverb,reverbGain,outGain,inAnalyser,outAnalyser,monitorOn=true;
+let ctx,stream,source,inputGain,low,high,delay,feedback,wet,dry,chorus,reverb,reverbGain,outGain,master,inAnalyser,outAnalyser,lfo,lfoDepth,monitorOn=true;
 let installPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('install').hidden=false});
 $('install').onclick=async()=>{if(installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('install').hidden=true}};
 function impulse(c,d=.8,decay=3){const n=Math.floor(c.sampleRate*d),b=c.createBuffer(2,n,c.sampleRate);for(let ch=0;ch<2;ch++){const x=b.getChannelData(ch);for(let i=0;i<n;i++)x[i]=(Math.random()*2-1)*Math.pow(1-i/n,decay)}return b}
 function connectGraph(){
- inputGain=ctx.createGain();low=ctx.createBiquadFilter();high=ctx.createBiquadFilter();delay=ctx.createDelay(.05);feedback=ctx.createGain();wet=ctx.createGain();dry=ctx.createGain();chorus=ctx.createDelay(.05);reverb=ctx.createConvolver();reverbGain=ctx.createGain();outGain=ctx.createGain();inAnalyser=ctx.createAnalyser();outAnalyser=ctx.createAnalyser();
- low.type='highpass';high.type='lowpass';chorus.delayTime.value=.012;delay.delayTime.value=.012;feedback.gain.value=.18;wet.gain.value=.42;dry.gain.value=.58;reverb.buffer=impulse(ctx);reverbGain.gain.value=.12;outGain.gain.value=1;
+ inputGain=ctx.createGain();low=ctx.createBiquadFilter();high=ctx.createBiquadFilter();delay=ctx.createDelay(.05);feedback=ctx.createGain();wet=ctx.createGain();dry=ctx.createGain();chorus=ctx.createDelay(.05);reverb=ctx.createConvolver();reverbGain=ctx.createGain();outGain=ctx.createGain();master=ctx.createGain();inAnalyser=ctx.createAnalyser();outAnalyser=ctx.createAnalyser();lfo=ctx.createOscillator();lfoDepth=ctx.createGain();
+ low.type='highpass';high.type='lowpass';chorus.delayTime.value=.012;delay.delayTime.value=.012;feedback.gain.value=.18;wet.gain.value=.42;dry.gain.value=.58;reverb.buffer=impulse(ctx);reverbGain.gain.value=.12;outGain.gain.value=1;master.gain.value=1;lfo.frequency.value=.65;lfoDepth.gain.value=.0035;
  source.connect(inAnalyser);source.connect(inputGain);inputGain.connect(low);low.connect(high);
- high.connect(dry);high.connect(delay);delay.connect(feedback);feedback.connect(delay);delay.connect(wet);wet.connect(chorus);chorus.connect(wet);wet.connect(reverb);reverb.connect(reverbGain);
- dry.connect(outGain);reverbGain.connect(outGain);outGain.connect(outAnalyser);outGain.connect(ctx.destination);
- const g=ctx.createGain();g.gain.value=.32;outGain.connect(g);g.connect(ctx.destination);
+ high.connect(dry);high.connect(delay);delay.connect(feedback);feedback.connect(delay);delay.connect(wet);wet.connect(chorus);chorus.connect(reverb);reverb.connect(reverbGain);
+ lfo.connect(lfoDepth);lfoDepth.connect(delay.delayTime);lfoDepth.connect(chorus.delayTime);lfo.start();
+ dry.connect(outGain);reverbGain.connect(outGain);outGain.connect(outAnalyser);outGain.connect(master);master.connect(ctx.destination);
  update();
 }
 function update(){
  if(!ctx)return;
  low.frequency.value=+$('low').value;high.frequency.value=+$('high').value;
- delay.delayTime.value=+$('depth').value/1000;feedback.gain.value=+$('fb').value;
+ delay.delayTime.value=+$('depth').value/1000;chorus.delayTime.value=(+$('depth').value/1000)*.65;feedback.gain.value=+$('fb').value;lfo.frequency.value=+$('rate').value;lfoDepth.gain.value=(+$('depth').value/1000);
  wet.gain.value=+$('mix').value;dry.gain.value=1-+$('mix').value;
  reverbGain.gain.value=+$('rev').value;outGain.gain.value=Math.pow(10,(+$('gain').value)/20);
  $('rateOut').textContent=+$('rate').value+' Hz';$('depthOut').textContent=+$('depth').value+' ms';$('fbOut').textContent=Math.round(+$('fb').value*100)+'%';$('mixOut').textContent=Math.round(+$('mix').value*100)+'%';
@@ -72,7 +72,7 @@ $('start').onclick=async()=>{
  }catch(e){$('state').innerHTML='<span class="danger">Microphone permission/device error</span>'}
 };
 $('stop').onclick=()=>{stream?.getTracks().forEach(t=>t.stop());ctx?.close();ctx=null;$('engine').textContent='OFFLINE';$('state').textContent='Stopped';$('start').disabled=false;$('stop').disabled=true};
-$('monitor').onclick=()=>{monitorOn=!monitorOn;if(ctx)ctx.destination.channelCount=monitorOn?2:0;$('monitor').textContent=monitorOn?'Mute monitoring':'Enable monitoring';$('state').textContent='Microphone live · monitoring '+(monitorOn?'ON':'OFF')};
+$('monitor').onclick=()=>{monitorOn=!monitorOn;if(ctx)master.gain.setTargetAtTime(monitorOn?1:0,ctx.currentTime,.01);$('monitor').textContent=monitorOn?'Mute monitoring':'Enable monitoring';$('state').textContent='Microphone live · monitoring '+(monitorOn?'ON':'OFF')};
 function meter(a,bar,label){if(!a)return;const x=new Uint8Array(a.fftSize);a.getByteTimeDomainData(x);let p=0;for(const v of x){const q=(v-128)/128;p=Math.max(p,q*q)}const rms=Math.sqrt(p),db=20*Math.log10(Math.max(rms,.00001)),pct=Math.min(100,Math.max(0,(db+60)/60*100));$(bar).style.width=pct+'%';$(label).textContent=db.toFixed(1)+' dB';}
 function tick(){meter(inAnalyser,'inMeter','inDb');meter(outAnalyser,'outMeter','outDb');requestAnimationFrame(tick)}tick();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
