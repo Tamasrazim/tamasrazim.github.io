@@ -1,3 +1,8 @@
+/* TRILYVA — WEB ICONS
+   Design pass: researched current outline/icon-system conventions.
+   Original geometry only; references were used for style/legibility study,
+   not traced or copied.
+*/
 function iconCode(id) {
   const f = {
     search: 'ctx.beginPath();ctx.arc(9,9,5,0,TAU);ctx.stroke();ctx.beginPath();ctx.moveTo(13,13);ctx.lineTo(18,18);ctx.stroke();',
@@ -18,8 +23,12 @@ function iconCode(id) {
     settings: 'ctx.beginPath();ctx.arc(10,10,3,0,TAU);ctx.stroke();ctx.beginPath();ctx.moveTo(10,2);ctx.lineTo(10,5);ctx.moveTo(10,15);ctx.lineTo(10,18);ctx.moveTo(2,10);ctx.lineTo(5,10);ctx.moveTo(15,10);ctx.lineTo(18,10);ctx.stroke();',
     info: 'ctx.beginPath();ctx.arc(10,10,7,0,TAU);ctx.stroke();ctx.beginPath();ctx.moveTo(10,9);ctx.lineTo(10,14);ctx.moveTo(10,6);ctx.lineTo(10,6.1);ctx.stroke();',
     warning: 'ctx.beginPath();ctx.moveTo(10,2);ctx.lineTo(18,17);ctx.lineTo(2,17);ctx.closePath();ctx.stroke();ctx.beginPath();ctx.moveTo(10,7);ctx.lineTo(10,12);ctx.stroke();',
-    user: 'ctx.beginPath();ctx.arc(10,6,3,0,TAU);ctx.stroke();ctx.beginPath();ctx.arc(10,18,7,Math.PI,0);ctx.stroke();'
+    user: 'ctx.beginPath();ctx.arc(10,6,3,0,TAU);ctx.stroke();ctx.beginPath();ctx.arc(10,18,7,Math.PI,0);ctx.stroke();',
+
+    /* Researched browser-window convention, redrawn as original geometry. */
+    "browser-window": 'ctx.beginPath();ctx.roundRect(2.5,3,15,14,3);ctx.stroke();ctx.beginPath();ctx.moveTo(2.8,7.2);ctx.lineTo(17.2,7.2);ctx.stroke();ctx.beginPath();ctx.arc(5,5.1,0.9,0,TAU);ctx.arc(7.8,5.1,0.9,0,TAU);ctx.arc(10.6,5.1,0.9,0,TAU);ctx.stroke();ctx.beginPath();ctx.roundRect(12.8,4.25,3.1,1.7,0.85);ctx.stroke();'
   };
+
   const body = f[id] || f.info;
   return [
     'function renderFrame(time, frame, fps, ctx, width, height, motion){',
@@ -29,14 +38,14 @@ function iconCode(id) {
     body,
     'ctx.restore();',
     '}'
-  ].join('\n');
+  ].join('\\n');
 }
 
 const defs = [
   ["search","Search"],["home","Home"],["menu","Menu"],["close","Close"],["plus","Plus"],["minus","Minus"],
   ["check","Check"],["arrow-right","Arrow right"],["arrow-left","Arrow left"],["download","Download"],
   ["upload","Upload"],["link","Link"],["copy","Copy"],["edit","Edit"],["trash","Delete"],["settings","Settings"],
-  ["info","Info"],["warning","Warning"],["user","User"]
+  ["info","Info"],["warning","Warning"],["user","User"],["browser-window","Browser window"]
 ];
 
 export default {
