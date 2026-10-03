@@ -197,8 +197,8 @@ impl AudioEngine {
         let input_supported = input.default_input_config().map_err(|e| e.to_string())?;
         let output_supported = output.default_output_config().map_err(|e| e.to_string())?;
 
-        let input_rate = input_supported.sample_rate().0;
-        let output_rate = output_supported.sample_rate().0;
+        let input_rate = input_supported.sample_rate();
+        let output_rate = output_supported.sample_rate();
         if input_rate != output_rate {
             return Err(format!(
                 "Input and output sample rates differ ({input_rate} Hz vs {output_rate} Hz). Choose devices using the same sample rate."
@@ -217,14 +217,9 @@ impl AudioEngine {
             let state = self.inner.lock().map_err(|_| "Audio state lock poisoned.")?;
             state.params.clone()
         };
-        let meter = {
+        let input_peak = {
             let state = self.inner.lock().map_err(|_| "Audio state lock poisoned.")?;
             state.meter.input_peak.clone()
-        };
-
-        let input_meter = {
-            let state = self.inner.lock().map_err(|_| "Audio state lock poisoned.")?;
-            state.meter.clone()
         };
 
         let input_config: StreamConfig = input_supported.clone().into();
@@ -240,7 +235,7 @@ impl AudioEngine {
                 input_channels,
                 producer,
                 input_error,
-                input_meter.input_peak.clone(),
+                input_peak.clone(),
             )?,
             SampleFormat::F64 => build_input::<f64>(
                 &input,
@@ -480,7 +475,6 @@ impl AudioEngine {
         };
         state.sample_rate = sample_rate;
 
-        let _ = meter;
         Ok(Self::status_locked(&state))
     }
 
@@ -528,7 +522,7 @@ fn build_input<T>(
     config: StreamConfig,
     channels: usize,
     mut producer: impl Producer<Item = f32> + Send + 'static,
-    error_fn: impl Fn(cpal::StreamError) + Send + 'static,
+    error_fn: impl Fn(cpal::Error) + Send + 'static,
     meter: Arc<AtomicU32>,
 ) -> Result<Stream, String>
 where
