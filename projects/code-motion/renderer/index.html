@@ -4650,98 +4650,106 @@ async function trilyvaLoadLibraryCode(title,code){
   return result||{ok:false};
 }
 function openTrilyvaLibrary(){
-  var registry=window.TRILYVA_LIBRARY;
   var body=document.createElement('div');
   body.style.cssText='display:flex;flex-direction:column;gap:9px;min-height:0;';
+  openModal('TRILYVA / LIBRARY',body,[{label:'Close',fn:closeModal}]);
 
+  var registry=window.TRILYVA_LIBRARY;
   if(!registry){
     body.innerHTML='<div class="empty">LIBRARY REGISTRY NOT READY</div>';
-    openModal('TRILYVA LIBRARY',body,[{label:'Close',fn:closeModal}]);
     return;
   }
 
-  var toolbar=document.createElement('div');
-  toolbar.style.cssText='display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;';
-  var tabs=document.createElement('div');
-  tabs.style.cssText='display:flex;gap:4px;flex-wrap:wrap;';
-  var search=document.createElement('input');
-  search.type='search'; search.placeholder='Search library…'; search.autocomplete='off';
-  search.style.cssText='width:100%;background:#09090b;border:1px solid var(--rule);padding:7px 8px;font:10px var(--mono);outline:none;';
-  toolbar.append(tabs,search);
-  body.appendChild(toolbar);
+  body.innerHTML='<div class="empty">LOADING LIBRARY INDEX…</div>';
+  registry.ready.then(function(){
+    var toolbar=document.createElement('div');
+    toolbar.style.cssText='display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;';
+    var tabs=document.createElement('div');
+    tabs.style.cssText='display:flex;gap:4px;flex-wrap:wrap;';
+    var search=document.createElement('input');
+    search.type='search'; search.placeholder='Search library…'; search.autocomplete='off';
+    search.style.cssText='width:100%;background:#09090b;border:1px solid var(--rule);padding:7px 8px;font:10px var(--mono);outline:none;';
+    toolbar.append(tabs,search);
 
-  var list=document.createElement('div');
-  list.className='list';
-  list.style.cssText='max-height:52vh;overflow:auto;';
-  body.appendChild(list);
+    var list=document.createElement('div');
+    list.className='list';
+    list.style.cssText='max-height:52vh;overflow:auto;';
 
-  var libs=registry.all();
-  var active=libs[0]||null;
-  var data=[];
-  var loaded=false;
+    body.replaceChildren(toolbar,list);
 
-  function setTabs(){
-    tabs.replaceChildren();
-    libs.forEach(function(lib){
-      var btn=document.createElement('button');
-      btn.type='button';
-      btn.textContent=lib.title;
-      btn.style.cssText='border:1px solid var(--rule);padding:6px 9px;background:'+(active===lib?'#fff':'#0a0a0c')+';color:'+(active===lib?'#000':'var(--mut)')+';font:9px var(--mono);letter-spacing:.08em;cursor:pointer;';
-      btn.title=lib.description||'';
-      btn.onclick=function(){active=lib;loaded=false;setTabs();loadActive();};
-      tabs.appendChild(btn);
-    });
-  }
+    var libs=registry.all();
+    var active=libs[0]||null;
+    var data=[];
+    var loaded=false;
 
-  function render(){
-    var q=search.value.trim().toLowerCase();
-    var items=data.map(function(x,i){return {x:x,i:i};}).filter(function(o){
-      var x=o.x||{};
-      var hay=String(x.title||'')+' '+String(x.id||'')+' '+String(x.category||x.cat||'');
-      return !q||hay.toLowerCase().indexOf(q)>=0;
-    });
-    if(!items.length){
-      list.innerHTML='<div class="empty">NO MATCHES</div>';
-      return;
+    function setTabs(){
+      tabs.replaceChildren();
+      libs.forEach(function(lib){
+        var btn=document.createElement('button');
+        btn.type='button';
+        btn.textContent=lib.title;
+        btn.style.cssText='border:1px solid var(--rule);padding:6px 9px;background:'+(active===lib?'#fff':'#0a0a0c')+';color:'+(active===lib?'#000':'var(--mut)')+';font:9px var(--mono);letter-spacing:.08em;cursor:pointer;';
+        btn.title=lib.description||'';
+        btn.onclick=function(){active=lib;loaded=false;setTabs();loadActive();};
+        tabs.appendChild(btn);
+      });
     }
-    var frag=document.createDocumentFragment();
-    items.forEach(function(o){
-      var x=o.x;
-      var it=document.createElement('div');
-      it.className='it';
-      it.tabIndex=0;
-      var text=document.createElement('div');
-      text.style.cssText='min-width:0;flex:1;';
-      text.innerHTML='<h5>'+trilyvaLibraryEscape(x.title||'Untitled')+'</h5><p>'+trilyvaLibraryEscape(x.id||('item-'+o.i))+'</p>';
-      var load=document.createElement('button');
-      load.className='x'; load.type='button'; load.textContent='LOAD';
-      function activate(){trilyvaLoadLibraryCode(x.title,x.code).catch(function(e){$('#stMsg').textContent='Library load failed · '+String(e.message||e);});}
-      it.onclick=function(ev){if(ev.target===load||load.contains(ev.target))return;activate();};
-      it.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();activate();}};
-      load.onclick=function(ev){ev.preventDefault();ev.stopPropagation();activate();};
-      it.append(text,load); frag.appendChild(it);
-    });
-    list.replaceChildren(frag);
-  }
 
-  async function loadActive(){
-    if(!active){list.innerHTML='<div class="empty">NO LIBRARIES REGISTERED</div>';return;}
-    list.innerHTML='<div class="empty">LOADING '+trilyvaLibraryEscape(active.title)+'…</div>';
-    search.value='';
-    try{
-      data=await active.load();
-      loaded=true;
-      render();
-    }catch(e){
-      loaded=false;
-      list.innerHTML='<div class="empty">LIBRARY LOAD FAILED<br><br>'+trilyvaLibraryEscape(e.message)+'</div>';
+    function render(){
+      var q=search.value.trim().toLowerCase();
+      var items=data.map(function(x,i){return {x:x,i:i};}).filter(function(o){
+        var x=o.x||{};
+        var hay=String(x.title||'')+' '+String(x.id||'')+' '+String(x.category||x.cat||'');
+        return !q||hay.toLowerCase().indexOf(q)>=0;
+      });
+      if(!items.length){
+        list.innerHTML='<div class="empty">NO MATCHES</div>';
+        return;
+      }
+      var frag=document.createDocumentFragment();
+      items.forEach(function(o){
+        var x=o.x;
+        var it=document.createElement('div');
+        it.className='it';
+        it.tabIndex=0;
+        var text=document.createElement('div');
+        text.style.cssText='min-width:0;flex:1;';
+        text.innerHTML='<h5>'+trilyvaLibraryEscape(x.title||'Untitled')+'</h5><p>'+trilyvaLibraryEscape(x.id||('item-'+o.i))+'</p>';
+        var load=document.createElement('button');
+        load.className='x'; load.type='button'; load.textContent='LOAD';
+        function activate(){trilyvaLoadLibraryCode(x.title,x.code).catch(function(e){$('#stMsg').textContent='Library load failed · '+String(e.message||e);});}
+        it.onclick=function(ev){if(ev.target===load||load.contains(ev.target))return;activate();};
+        it.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();activate();}};
+        load.onclick=function(ev){ev.preventDefault();ev.stopPropagation();activate();};
+        it.append(text,load);
+        frag.appendChild(it);
+      });
+      list.replaceChildren(frag);
     }
-  }
 
-  search.oninput=function(){if(loaded)render();};
-  setTabs();
-  openModal('TRILYVA / LIBRARY',body,[{label:'Close',fn:closeModal}]);
-  loadActive();
+    async function loadActive(){
+      if(!active){
+        list.innerHTML='<div class="empty">NO LIBRARIES REGISTERED</div>';
+        return;
+      }
+      list.innerHTML='<div class="empty">LOADING '+trilyvaLibraryEscape(active.title)+'…</div>';
+      search.value='';
+      try{
+        data=await active.load();
+        loaded=true;
+        render();
+      }catch(e){
+        loaded=false;
+        list.innerHTML='<div class="empty">LIBRARY LOAD FAILED<br><br>'+trilyvaLibraryEscape(e.message)+'</div>';
+      }
+    }
+
+    search.oninput=function(){if(loaded)render();};
+    setTabs();
+    loadActive();
+  }).catch(function(e){
+    body.innerHTML='<div class="empty">LIBRARY INDEX FAILED<br><br>'+trilyvaLibraryEscape(e.message)+'</div>';
+  });
 }
 
 /* ============================================================
