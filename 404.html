@@ -32,6 +32,14 @@ small{display:block;margin-top:30px;color:rgba(243,243,239,.36)}
 </style>
 </head>
 <body>
+<script>
+(() => {
+  const p = location.pathname.replace(/\\/+$/, '');
+  if (p === '/projects/spiral-mic') {
+    location.replace('/projects/spiral-mic/index.html');
+  }
+})();
+</script>
 <main>
 <div class="code">TAMASRAZIM / ROUTE ERROR</div>
 <h1>404</h1>
