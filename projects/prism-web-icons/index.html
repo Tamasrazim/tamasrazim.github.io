@@ -7,77 +7,87 @@
 <title>Prism Web Icons — TRILYVA</title>
 <style>
 :root{
-  color-scheme:dark;
-  --bg:#07080b;--panel:#0c0e13;--panel2:#11151d;--line:#272d38;
-  --text:#f4f7fb;--muted:#8993a5;--ice:#c8f3ff;--violet:#d8ccff;
+  color-scheme:light;
+  --ink:#111827;--muted:#687286;--line:#e2e6ed;--soft:#f5f7fa;
+  --blue:#b9eaff;--violet:#d7c8ff;--mint:#c8f5e8;--paper:#ffffff;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{background:#fff}
 body{
- margin:0;color:var(--text);font:14px/1.45 Inter,system-ui,sans-serif;
- background:
- radial-gradient(1000px 520px at 10% -5%,#1a2940 0,transparent 62%),
- radial-gradient(900px 500px at 95% 20%,#19142a 0,transparent 58%),
- #07080b;
+ margin:0;color:var(--ink);font:14px/1.45 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ background:#fff;
 }
 button,input,select,textarea{font:inherit}
 .top{
- position:sticky;top:0;z-index:20;padding:18px 22px 16px;
- border-bottom:1px solid var(--line);background:#07080be8;backdrop-filter:blur(20px)
+ position:sticky;top:0;z-index:20;
+ background:rgba(255,255,255,.94);backdrop-filter:blur(18px);
+ border-bottom:1px solid var(--line);padding:22px 26px 16px;
 }
-.bar{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}
-.eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ice);font-weight:700}
-h1{margin:4px 0 0;font-size:32px;letter-spacing:-.045em;line-height:1}
-.desc{margin-top:8px;color:var(--muted);max-width:820px}
-.badge{border:1px solid #344153;background:#0d131c;padding:9px 12px;border-radius:12px;white-space:nowrap;color:#c9d9eb;font-size:12px}
-.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.bar{display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+.eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#64748b;font-weight:800}
+h1{margin:3px 0 0;font-size:34px;line-height:1;letter-spacing:-.05em;font-weight:850}
+.desc{margin-top:9px;color:var(--muted);max-width:800px}
+.badge{
+ padding:9px 12px;border:1px solid var(--line);border-radius:999px;
+ color:#374151;background:#fff;font-size:11px;white-space:nowrap;font-weight:700
+}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
 .tools>*{
- border:1px solid var(--line);background:#0b0e13;color:var(--text);
- min-height:38px;border-radius:10px;padding:0 12px
+ min-height:39px;border:1px solid var(--line);background:#fff;color:var(--ink);
+ border-radius:10px;padding:0 12px
 }
-.tools input{min-width:250px}
+.tools input{min-width:260px;background:#fbfcfe}
+.tools input:focus,.tools select:focus{outline:2px solid #cfeeff;outline-offset:1px}
 .tools button{cursor:pointer}
-.tools button:hover{border-color:#64748b}
-.tools .primary{background:#ecf9ff;color:#0a1017;border-color:#fff}
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 330px}
-.content{padding:22px;min-width:0}
+.tools button:hover{border-color:#aeb8c7;background:#fafbfc}
+.tools .primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 320px}
+.content{padding:22px 24px 50px;min-width:0}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.sectionhead strong{font-size:12px;letter-spacing:.09em;text-transform:uppercase}
+.sectionhead span{color:var(--muted);font-size:12px}
 .grid{
- display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px
+ display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px
 }
 .card{
- border:1px solid #252c36;background:linear-gradient(160deg,#121720,#0b0e13);
- border-radius:16px;padding:9px;cursor:pointer;transition:.18s transform,.18s border-color,.18s box-shadow
+ border:1px solid var(--line);background:#fff;padding:10px;border-radius:14px;
+ cursor:pointer;transition:.16s transform,.16s box-shadow,.16s border-color
 }
-.card:hover{transform:translateY(-3px);border-color:#607086;box-shadow:0 18px 36px #0006}
-.card.selected{border-color:#d6f6ff;box-shadow:0 0 0 1px #d6f6ff2b inset,0 12px 32px #8be8ff16}
+.card:hover{transform:translateY(-2px);border-color:#c8d0dc;box-shadow:0 12px 28px #1f29370c}
+.card.selected{border-color:#8eb5cf;box-shadow:0 0 0 2px #d9f4ff,0 14px 30px #1f29370f}
 .tile{
- aspect-ratio:1;border-radius:11px;display:grid;place-items:center;overflow:hidden;
+ aspect-ratio:1;display:grid;place-items:center;border-radius:9px;overflow:hidden;
  background:
- radial-gradient(circle at 30% 20%,#ffffff 0,#f5f8ff 28%,#e7e5ff 55%,#d8f5ff 100%);
+ radial-gradient(circle at 20% 14%,#fff 0,#fff 25%,#f8fbff 48%,#f3f0ff 76%,#eefbfa 100%);
+ border:1px solid #edf0f4;
 }
-.tile svg{width:78%;height:78%}
-.meta{padding:8px 3px 3px;display:flex;justify-content:space-between;gap:6px}
-.meta b{font-size:12px;font-weight:700}.meta span{font-size:10px;color:#7f8998}
+.tile svg{width:76%;height:76%}
+.meta{display:flex;justify-content:space-between;gap:6px;padding:8px 2px 1px}
+.meta b{font-size:11px;font-weight:750}.meta span{font-size:10px;color:#97a0ad}
 .side{
- position:sticky;top:96px;height:calc(100vh - 96px);overflow:auto;
- border-left:1px solid var(--line);padding:20px;background:#090c11aa
+ position:sticky;top:94px;height:calc(100vh - 94px);overflow:auto;
+ border-left:1px solid var(--line);padding:22px;background:#fbfcfe
 }
-.side h2{font-size:18px;margin:0}.side p{color:var(--muted);margin:6px 0 18px}
-.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
-.metric{border:1px solid var(--line);background:#0b0e13;border-radius:12px;padding:10px}
-.metric strong{display:block;font-size:20px}.metric small{color:var(--muted)}
-.field{margin:12px 0}
-.field label{display:block;color:#9aa6b8;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
-.field textarea{width:100%;border:1px solid var(--line);background:#080a0e;color:var(--text);border-radius:10px;padding:10px;resize:vertical}
+.side h2{font-size:18px;margin:0;letter-spacing:-.02em}
+.side p{color:var(--muted);margin:5px 0 16px}
 .previewLarge{
- padding:14px;border:1px solid var(--line);border-radius:14px;background:#f1f5ff;display:grid;place-items:center;margin-bottom:16px
+ padding:18px;border:1px solid var(--line);border-radius:14px;background:#fff;
+ display:grid;place-items:center;margin-bottom:16px
 }
-.previewLarge svg{width:190px;height:190px}
-.note{border:1px solid #26334a;background:#0c1420;color:#b9c9dd;padding:12px;border-radius:12px;font-size:12px}
-.footer{border-top:1px solid var(--line);padding:26px;text-align:center;color:#6e7786}
-.empty{padding:60px 20px;text-align:center;color:var(--muted)}
+.previewLarge svg{width:205px;height:205px}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.metric{border:1px solid var(--line);background:#fff;border-radius:11px;padding:10px}
+.metric strong{display:block;font-size:20px;letter-spacing:-.03em}.metric small{color:var(--muted)}
+.field{margin:12px 0}.field label{display:block;color:#64748b;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.field textarea{width:100%;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;padding:10px;resize:vertical}
+.exportbox{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:14px 0}
+.exportbox button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px;cursor:pointer;font-weight:700;color:#334155}
+.exportbox button:first-child{grid-column:1/-1;background:var(--ink);color:#fff;border-color:var(--ink)}
+.note{border:1px solid #dfe8f0;background:#f7fbff;color:#526274;padding:11px;border-radius:10px;font-size:11px}
+.footer{border-top:1px solid var(--line);padding:28px;text-align:center;color:#8b94a3;font-size:12px}
+.empty{padding:70px 20px;text-align:center;color:var(--muted)}
 @media(max-width:1100px){.layout{grid-template-columns:1fr}.side{position:relative;top:auto;height:auto;border-left:0;border-top:1px solid var(--line)}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media(max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.bar{flex-direction:column}.badge{align-self:flex-start}.tools input{min-width:0;width:100%}}
+@media(max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.bar{align-items:flex-start;flex-direction:column}.tools input{min-width:0;width:100%}}
 </style>
 </head>
 <body>
@@ -86,9 +96,9 @@ h1{margin:4px 0 0;font-size:32px;letter-spacing:-.045em;line-height:1}
   <div>
    <div class="eyebrow">TRILYVA / STOCK VECTOR LAB</div>
    <h1>Prism Web Icons</h1>
-   <div class="desc">100 original web and interface icons built from a new Prismatic Cutline system: crisp silhouettes, faceted internal cuts, restrained color, and clean vector geometry.</div>
+   <div class="desc">A polished 100-icon stock collection with clean geometric silhouettes, subtle prism facets and consistent vector construction.</div>
   </div>
-  <div class="badge">100 ICONS · SVG · EPS · CSV</div>
+  <div class="badge">100 ORIGINAL VECTORS</div>
  </div>
  <div class="tools">
   <input id="q" placeholder="Search icons">
@@ -102,27 +112,35 @@ h1{margin:4px 0 0;font-size:32px;letter-spacing:-.045em;line-height:1}
   </select>
   <button id="all">Select visible</button>
   <button id="none">Clear</button>
-  <button class="primary" id="sheet">SVG 10×10 Sheet</button>
-  <button id="one">Export SVG</button>
-  <button id="eps">Export EPS</button>
+  <button class="primary" id="sheet">Clean 10×10 SVG</button>
+  <button id="catalog">Catalog Sheet</button>
+  <button id="one">Single SVG</button>
+  <button id="eps">EPS</button>
   <button id="csv">Stock CSV</button>
  </div>
 </header>
 
 <div class="layout">
- <section class="content"><div class="grid" id="grid"></div></section>
+ <section class="content">
+ <div class="sectionhead"><strong>Icon library</strong><span id="viewCount">100 icons</span></div>
+ <div class="grid" id="grid"></div>
+</section>
  <aside class="side">
-  <h2 id="selName">Select an icon</h2>
-  <p id="selInfo">Click an icon to inspect it.</p>
+  <h2 id="selName">Home</h2>
+  <p id="selInfo">navigation · PWI-001</p>
   <div class="previewLarge" id="large"></div>
   <div class="metrics">
    <div class="metric"><strong id="selected">0</strong><small>selected</small></div>
-   <div class="metric"><strong>100</strong><small>library</small></div>
+   <div class="metric"><strong id="viewed">100</strong><small>visible</small></div>
+  </div>
+  <div class="exportbox">
+   <button id="sideSheet">Export clean sheet</button>
+   <button id="sideSingle">SVG</button><button id="sideEPS">EPS</button>
   </div>
   <div class="field"><label>Stock title</label><textarea id="title" rows="2">Prism Web Icons — 100 Geometric Interface Vector Symbols</textarea></div>
-  <div class="field"><label>Description</label><textarea id="description" rows="5">Original geometric web interface icon collection featuring crisp prism-cut silhouettes, faceted vector surfaces and clean editable construction for websites, applications, dashboards and digital products.</textarea></div>
-  <div class="field"><label>Keywords</label><textarea id="keywords" rows="8">web icons,interface icons,ui icons,vector icon set,web interface,user interface,icon collection,prism,prismatic,geometric,faceted,cutline,crystal,glass,abstract,digital,website,app,application,dashboard,software,technology,design,editable vector,svg,eps,illustration,graphic design,modern,minimal,clean,navigation,media,files,communication,commerce,creative,stock vector,symbols,icons,template,branding,digital design,online,interface design,web design,user experience,ui design</textarea></div>
-  <div class="note">SVG is the master vector output. EPS uses opaque fills with the same generated geometry for Illustrator-friendly stock delivery.</div>
+  <div class="field"><label>Description</label><textarea id="description" rows="5">Original geometric web interface icon collection featuring clean silhouettes, subtle prism facets and consistent editable vector construction for websites, applications, dashboards and digital products.</textarea></div>
+  <div class="field"><label>Keywords</label><textarea id="keywords" rows="8">web icons,interface icons,ui icons,vector icon set,web interface,user interface,icon collection,prism,prismatic,geometric,faceted,crystal,abstract,digital,website,app,application,dashboard,software,technology,design,editable vector,svg,eps,illustration,graphic design,modern,minimal,clean,navigation,media,files,communication,commerce,creative,stock vector,symbols,icons,template,branding,digital design,online,interface design,web design,user experience,ui design</textarea></div>
+  <div class="note">SVG is the master. EPS is generated from the same icon geometry with opaque vector fills for reliable stock delivery.</div>
  </aside>
 </div>
 <div class="footer">TRILYVA · Prism Web Icons · original vector system</div>
@@ -132,11 +150,11 @@ const NAMES=["Home","Search","User","Settings","Mail","Heart","Star","Lock","Unl
 const GROUPS=[["navigation",0,15],["media",16,35],["files",36,55],["technology",56,74],["creative",75,99]];
 
 const palettes=[
- ["#baf4ff","#d8c8ff","#ffffff"],
- ["#bde8ff","#c8d4ff","#ffffff"],
- ["#d5c7ff","#bff6f2","#ffffff"],
- ["#b9f0e3","#cde0ff","#ffffff"],
- ["#e4d0ff","#b6e8ff","#ffffff"]
+ ["#b8e8ff","#c9c0ff","#ffffff"],
+ ["#c8e6ff","#d8cef8","#ffffff"],
+ ["#c8f1e5","#c8d8ff","#ffffff"],
+ ["#d7c7ff","#bfeaf7","#ffffff"],
+ ["#cbe8ff","#d6e8e1","#ffffff"]
 ];
 
 const slug=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
@@ -283,6 +301,8 @@ const grid=document.getElementById("grid");
 
 function render(){
  grid.innerHTML="";
+ document.getElementById("viewCount").textContent=visible.length+" icons";
+ document.getElementById("viewed").textContent=visible.length;
  if(!visible.length){grid.innerHTML='<div class="empty">No matching icons.</div>';return}
  visible.forEach(i=>{
   const el=document.createElement("article");
@@ -405,10 +425,25 @@ document.getElementById("q").oninput=apply;
 document.getElementById("cat").onchange=apply;
 document.getElementById("all").onclick=()=>{visible.forEach(i=>selected.add(i));render()};
 document.getElementById("none").onclick=()=>{selected.clear();render()};
-document.getElementById("sheet").onclick=()=>{ensure();download("prism-web-icons-"+selected.size+"-sheet.svg",sheetSVG([...selected]))};
+document.getElementById("sheet").onclick=()=>{ensure();download("prism-web-icons-"+selected.size+"-clean-sheet.svg",sheetSVG([...selected]))};
+function catalogSVG(indices){
+ const cols=10,cell=180,pad=32,rows=Math.ceil(indices.length/cols),w=cols*cell+pad*2,h=rows*cell+pad*2;
+ let s='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'"><rect width="100%" height="100%" fill="#ffffff"/>';
+ indices.forEach((idx,k)=>{
+  const x=pad+(k%cols)*cell,y=pad+Math.floor(k/cols)*cell;
+  s+='<rect x="'+(x+10)+'" y="'+(y+10)+'" width="'+(cell-20)+'" height="'+(cell-20)+'" rx="18" fill="#fbfcfe" stroke="#e2e6ed"/>';
+  s+='<g transform="translate('+(x+22)+','+(y+18)+') scale(2.15)">'+draw(NAMES[idx],idx+1)+'</g>';
+  s+='<text x="'+(x+cell/2)+'" y="'+(y+cell-25)+'" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="600" fill="#1f2937">'+esc(NAMES[idx])+'</text>';
+ });
+ return s+'</svg>';
+}
 document.getElementById("one").onclick=()=>{ensure();const i=[...selected][0];download("prism-web-icon-"+slug(NAMES[i])+".svg",iconSVG(i,512,false))};
 document.getElementById("eps").onclick=()=>{ensure();download("prism-web-icons-"+selected.size+".eps",epsSVG([...selected]),"application/postscript")};
 document.getElementById("csv").onclick=()=>{ensure();download("prism-web-icons-stock-metadata.csv",csv(),"text/csv")};
+document.getElementById("catalog").onclick=()=>{ensure();download("prism-web-icons-"+selected.size+"-catalog-sheet.svg",catalogSVG([...selected]))};
+document.getElementById("sideSheet").onclick=()=>{ensure();download("prism-web-icons-"+selected.size+"-clean-sheet.svg",sheetSVG([...selected]))};
+document.getElementById("sideSingle").onclick=()=>{ensure();const i=[...selected][0];download("prism-web-icon-"+slug(NAMES[i])+".svg",iconSVG(i,512,false))};
+document.getElementById("sideEPS").onclick=()=>{ensure();download("prism-web-icons-"+selected.size+".eps",epsSVG([...selected]),"application/postscript")};
 
 updateSide(0);
 render();
