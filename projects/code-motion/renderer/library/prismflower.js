@@ -1,5 +1,5 @@
 /* TRILYVA — Prism Flowers library */
-const PRISM_DATA_URL = "./prism-library.json";
+import prismData from "./prism-data.js";
 
 let cache = null;
 
@@ -9,18 +9,11 @@ export default {
   description: "Procedural translucent flower motion library.",
   async load() {
     if (cache) return cache;
-
-    const response = await fetch(PRISM_DATA_URL, { cache: "no-store" });
-    if (!response.ok) {
-      throw new Error("Prism library request failed: " + response.status);
-    }
-
-    const data = await response.json();
-    if (!Array.isArray(data)) {
+    if (!Array.isArray(prismData)) {
       throw new Error("Prism library dataset is invalid.");
     }
 
-    cache = data
+    cache = prismData
       .filter(item => item && item.title)
       .map(item => {
         const code = typeof item.code === "string"
