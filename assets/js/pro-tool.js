@@ -142,6 +142,50 @@ if(/gradient/i.test(name))return "linear-gradient(90deg, "+hex(a)+" 0%, "+hex(b)
 if(/alpha over/i.test(name))return "Composite preview: "+hex([a[0]*.5+b[0]*.5,a[1]*.5+b[1]*.5,a[2]*.5+b[2]*.5]);
 return "A RGB: "+a.join(", ")+"\\nA HSL: "+ha.map(function(v){return v.toFixed(2)}).join(", ")+"\\nB RGB: "+b.join(", ")+"\\nB HSL: "+hb.map(function(v){return v.toFixed(2)}).join(", ");
 }
+
+function geometryCalc(){
+var a=num("n1",10),b=num("n2",5),src=source(),v=parseValues(src);
+if(/triangle solver/i.test(name)){var c=num("n3",6),s=(a+b+c)/2;return "Area: "+Math.sqrt(Math.max(0,s*(s-a)*(s-b)*(s-c))).toFixed(6)+"\\nPerimeter: "+(a+b+c)}
+if(/rectangle solver/i.test(name))return "Area: "+(a*b)+"\\nPerimeter: "+(2*(a+b));
+if(/circle solver/i.test(name))return "Area: "+(Math.PI*a*a).toFixed(6)+"\\nCircumference: "+(2*Math.PI*a).toFixed(6);
+if(/polygon area/i.test(name)){var pts=v.length>=6?v:([0,a, b,0]);var area=0;for(var i=0;i<pts.length;i+=2){var j=(i+2)%pts.length;area+=pts[i]*pts[j+1]-pts[j]*pts[i+1]}return "Shoelace area: "+Math.abs(area/2).toFixed(6)}
+if(/dot product/i.test(name))return "Dot product: "+v.slice(0,3).reduce(function(s,x,i){return s+x*(v[i+3]||0)},0);
+if(/cross product/i.test(name)){var x=v.slice(0,3),y=v.slice(3,6);return "Cross: ["+(x[1]*y[2]-x[2]*y[1])+","+(x[2]*y[0]-x[0]*y[2])+","+(x[0]*y[1]-x[1]*y[0])+"]"}
+if(/vector normalize/i.test(name)){var q=v.slice(0,3),m=Math.hypot.apply(Math,q);return "Normalized: ["+q.map(function(x){return (x/m).toFixed(6)}).join(", ")+"]\\nMagnitude: "+m.toFixed(6)}
+if(/point distance/i.test(name)){var q=v.length>=4?v:[0,0,a,b];return "Distance: "+Math.hypot(q[2]-q[0],q[3]-q[1]).toFixed(6)}
+if(/linear interpolation/i.test(name))return "Lerp: "+(a+(b-a)*(num("n3",.5)));
+if(/clamp range/i.test(name)){var x=a,lo=Math.min(b,num("n3",0)),hi=Math.max(b,num("n3",0));return "Clamped: "+Math.min(hi,Math.max(lo,x))}
+if(/remap range/i.test(name)){var x=a,in0=b,in1=num("n3",20),out0=num("n4",0),out1=num("n4",1);return "Remapped: "+(out0+(x-in0)/(in1-in0)*(out1-out0))}
+return "A: "+a+"\\nB: "+b+"\\nInput values: "+v.length;
+}
+function advancedText(){
+var v=source(),words=v.trim().split(/\s+/).filter(Boolean);
+if(/font size scale|type scale|modular scale/i.test(name)){var base=num("n1",16),ratio=num("n2",1.25),n=num("n3",8);return Array.from({length:n},function(_,i){return i+"\\t"+(base*Math.pow(ratio,i)).toFixed(3)+"px"}).join("\\n")}
+if(/line height/i.test(name)){var fs=num("n1",16),ratio=num("n2",1.5);return "Line height: "+(fs*ratio).toFixed(3)+"px\\nUnitless: "+ratio}
+if(/letter spacing/i.test(name)){var fs=num("n1",16),pct=num("n2",-2);return "Letter spacing: "+(fs*pct/100).toFixed(3)+"px"}
+if(/text measure|reading width/i.test(name))return "Characters: "+v.length+"\\nWords: "+words.length+"\\nRecommended measure: 45–80 characters per line";
+if(/character width|column planner/i.test(name)){var width=num("n1",80);return "Target columns: "+Math.floor(width)+"\\nApprox line width: "+width+"ch"}
+if(/contrast pair|accessibility|focus|touch target|keyboard|heading|alternative text|link name|button name|motion reduction|reduced motion/i.test(name))return "Input reviewed locally.\\nChecklist mode:\\n✓ Text/content present\\n✓ Explicit labels recommended\\n✓ Keyboard/focus path should be testable\\n✓ Motion alternatives should exist where animation conveys meaning";
+if(/stock title/i.test(name))return "Title length: "+v.length+"\\nUnder 70 chars: "+(v.length<=70?"PASS":"FAIL");
+if(/stock description/i.test(name))return "Description length: "+v.length+"\\n150–200 chars: "+(v.length>=150&&v.length<=200?"PASS":"REVIEW");
+if(/keyword count|keyword uniqueness|duplicate keyword/i.test(name)){var k=v.split(/[,;\\n]+/).map(function(x){return x.trim().toLowerCase()}).filter(Boolean),u=Array.from(new Set(k));return "Keywords: "+k.length+"\\nUnique: "+u.length+"\\nDuplicates: "+(k.length-u.length)}
+if(/folder count|sequence gap/i.test(name)){var nums=v.match(/\d+/g)||[],a2=nums.map(Number).sort(function(a,b){return a-b}),g=[];for(var i=1;i<a2.length;i++)if(a2[i]!==a2[i-1]+1)g.push((a2[i-1]+1)+"→"+(a2[i]-1));return "Numeric entries: "+a2.length+"\\nGaps: "+(g.length?g.join(", "):"none")}
+if(/naming convention|version string|changelog|manifest|delivery notes|brief formatter|shot list|render notes/i.test(name))return v.trim().split(/\r?\n/).filter(Boolean).map(function(x,i){return String(i+1).padStart(3,"0")+"  "+x.trim()}).join("\\n");
+return "Characters: "+v.length+"\\nWords: "+words.length+"\\nLines: "+(v?v.split(/\r?\n/).length:0);
+}
+function httpResult(v){
+if(/status catalog/i.test(name))return "100 Continue\\n200 OK\\n201 Created\\n204 No Content\\n301 Moved Permanently\\n302 Found\\n304 Not Modified\\n400 Bad Request\\n401 Unauthorized\\n403 Forbidden\\n404 Not Found\\n409 Conflict\\n429 Too Many Requests\\n500 Internal Server Error\\n502 Bad Gateway\\n503 Service Unavailable";
+if(/method matrix/i.test(name))return "GET  safe/cacheable\\nHEAD safe/cacheable\\nPOST unsafe/non-idempotent\\nPUT idempotent\\nPATCH conditionally idempotent\\nDELETE idempotent\\nOPTIONS safe\\nTRACE diagnostic";
+if(/query string sorter|query string deduper|query string normalizer/i.test(name)){try{var u=new URL(v||"https://example.com/?b=2&a=1&a=3");var p=Array.from(u.searchParams.entries());if(/sorter/i.test(name))p.sort(function(a,b){return a[0].localeCompare(b[0])||a[1].localeCompare(b[1])});else if(/deduper/i.test(name))p=Array.from(new Set(p.map(function(x){return x[0]+"="+x[1]}))).map(function(x){return x.split("=")});else p=p.map(function(x){return[x[0].trim(),x[1].trim()]});u.search="";p.forEach(function(x){u.searchParams.append(x[0],x[1])});return u.toString()}catch(e){return"Invalid URL: "+e.message}}
+if(/url length/i.test(name)){var n=(v||"").length;return "URL length: "+n+"\\nCommon 2K-ish threshold: "+(n<=2048?"PASS":"REVIEW")}
+if(/content length/i.test(name))return "UTF-8 Content-Length: "+new TextEncoder().encode(v).length;
+if(/accept header/i.test(name))return "Accept: "+(v||"*/*");
+if(/accept-encoding/i.test(name))return "Accept-Encoding: "+(v||"gzip, deflate, br");
+if(/accept-language/i.test(name))return "Accept-Language: "+(v||"en-US,en;q=0.9");
+if(/request header builder/i.test(name))return "X-Request-ID: <uuid>\\nAccept: */*\\nCache-Control: no-cache";
+if(/response header builder/i.test(name))return "Content-Type: text/plain; charset=utf-8\\nCache-Control: public, max-age=3600";
+return v||"Paste HTTP/network input.";
+}
 function webResult(s){
 if(/robots/i.test(name))return"User-agent: *\\nAllow: /";
 if(/sitemap/i.test(name))return'<?xml version="1.0" encoding="UTF-8"?>\\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\\n  <url><loc>'+esc(s||"https://example.com/")+'</loc></url>\\n</urlset>';
@@ -173,10 +217,10 @@ else if(kind==="color"){var a=parseColor(document.getElementById("c1").value),b=
 else if(kind==="motion"){out.textContent=motionCalc(name);metrics([["Primary",num("n1",0)],["Secondary",num("n2",0)],["Samples",num("n3",0)]])}
 else if(kind==="video"){if(document.getElementById("file")&&document.getElementById("file").files.length){inspect().then(function(r){out.textContent=r.text;metrics(r.metrics);setState("Complete",true)});return}out.textContent=videoCalc();metrics([["Primary",num("n1",0)],["Secondary",num("n2",0)],["Multiplier",num("n4",1)]])}
 else if(kind==="audio"){if(document.getElementById("file")&&document.getElementById("file").files.length){inspect().then(function(r){out.textContent=r.text;metrics(r.metrics);setState("Complete",true)});return}out.textContent=audioCalc();metrics([["Primary",num("n1",0)],["Secondary",num("n2",0)],["Multiplier",num("n4",1)]])}
-else if(kind==="web"){out.textContent=webResult(v);metrics([["Characters",v.length],["Origin",location.origin]])}
+else if(kind==="web"){out.textContent=httpResult(v);metrics([["Characters",v.length],["Origin",location.origin]])}
 else if(kind==="image"){if(document.getElementById("file")&&document.getElementById("file").files.length){inspect().then(function(r){out.textContent=r.text;metrics(r.metrics);setState("Complete",true)});return}out.textContent="Choose an image file for local pixel inspection.";metrics([])}
 else if(kind==="files"){inspect().then(function(r){out.textContent=r.text;metrics(r.metrics);setState("Complete",true)});return}
-else{var words=v.trim().split(/\s+/).filter(Boolean);if(/keyword/i.test(name))out.textContent=Array.from(new Set(v.split(/[,;\n]+/).map(function(x){return x.trim().toLowerCase()}).filter(Boolean))).join(", ");else if(/sort|normalizer/i.test(name))out.textContent=v.split(/\r?\n/).sort(function(a,b){return a.localeCompare(b)}).join("\n");else if(/regex/i.test(name)){var parts=v.split(/\n---+\n/),pat=parts[0]||"",txt=parts[1]||"";try{var re=new RegExp(pat,"gm"),m0=txt.match(re)||[];out.textContent="Matches: "+m0.length+"\\n"+m0.join("\\n")}catch(e){out.textContent="Regex error: "+e.message}}else if(/count|meter|analyzer|profiler|audit/i.test(name))out.textContent="Characters: "+v.length+"\\nWords: "+words.length+"\\nLines: "+(v?v.split(/\r?\n/).length:0)+"\\nBytes: "+new TextEncoder().encode(v).length;else out.textContent=v;metrics([["Characters",v.length],["Words",words.length],["Lines",v?v.split(/\r?\n/).length:0]])}
+else{if(/triangle solver|rectangle solver|circle solver|polygon area|vector dot|vector cross|vector normalize|point distance|linear interpolation|clamp range|remap range/i.test(name)){out.textContent=geometryCalc();metrics([["Mode","Geometry"],["Primary",num("n1",0)],["Secondary",num("n2",0)]]);setState("Complete",true);return}var words=v.trim().split(/\s+/).filter(Boolean);if(/keyword/i.test(name))out.textContent=Array.from(new Set(v.split(/[,;\n]+/).map(function(x){return x.trim().toLowerCase()}).filter(Boolean))).join(", ");else if(/sort|normalizer/i.test(name))out.textContent=v.split(/\r?\n/).sort(function(a,b){return a.localeCompare(b)}).join("\n");else if(/regex/i.test(name)){var parts=v.split(/\n---+\n/),pat=parts[0]||"",txt=parts[1]||"";try{var re=new RegExp(pat,"gm"),m0=txt.match(re)||[];out.textContent="Matches: "+m0.length+"\\n"+m0.join("\\n")}catch(e){out.textContent="Regex error: "+e.message}}else if(/font size scale|type scale|modular scale|line height|letter spacing|text measure|reading width|character width|column planner|contrast pair|accessibility|focus|touch target|keyboard|heading|alternative text|link name|button name|motion reduction|reduced motion|stock title|stock description|keyword count|keyword uniqueness|duplicate keyword|folder count|sequence gap|naming convention|version string|changelog|delivery notes|brief formatter|shot list|render notes/i.test(name))out.textContent=advancedText();else if(/count|meter|analyzer|profiler|audit/i.test(name))out.textContent="Characters: "+v.length+"\\nWords: "+words.length+"\\nLines: "+(v?v.split(/\r?\n/).length:0)+"\\nBytes: "+new TextEncoder().encode(v).length;else out.textContent=v;metrics([["Characters",v.length],["Words",words.length],["Lines",v?v.split(/\r?\n/).length:0]])}
 setState("Complete",true);
 }catch(e){out.textContent="Error: "+e.message;metrics([]);setState("Error",false)}
 }
