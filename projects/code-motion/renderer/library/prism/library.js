@@ -1,4 +1,4 @@
-const URL = "../../library/prism-library.json";
+const URL = "../prism-library.json";
 
 let cache = null;
 
