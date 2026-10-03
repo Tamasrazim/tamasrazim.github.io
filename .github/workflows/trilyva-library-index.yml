@@ -28,7 +28,7 @@ jobs:
           root = Path("projects/code-motion/renderer/library")
           modules = []
           for p in sorted(root.glob("*/library.js")):
-              modules.append("./" + p.parent.name + "/library.js")
+              modules.append("./library/" + p.parent.name + "/library.js")
 
           payload = {"version": 1, "libraries": modules}
           Path(root / "manifest.json").write_text(
