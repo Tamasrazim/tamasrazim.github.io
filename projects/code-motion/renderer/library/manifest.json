@@ -2,7 +2,6 @@
   "version": 2,
   "libraries": [
     "./living-emojis.js",
-    "./prism-data.js",
     "./prismflower.js",
     "./web-icons.js"
   ]
