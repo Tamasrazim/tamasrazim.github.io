@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070707">
+<meta name="description" content="Live browser microphone processor with a spiral voice effect, monitoring, meters and local PWA support.">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>Spiral Mic — Tamasrazim</title>
+<style>
+:root{color-scheme:dark;--bg:#070707;--fg:#f4f4f4;--muted:#909090;--line:#242424;--panel:#101010;--accent:#fff}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}body{min-height:100vh}.shell{width:min(1240px,calc(100% - 32px));margin:auto}
+.top{border-bottom:1px solid var(--line);padding:18px 0}.topin{display:flex;justify-content:space-between;align-items:center;gap:20px}.brand{color:inherit;text-decoration:none;font-weight:900;letter-spacing:.08em}.brand span{color:var(--muted);font-weight:400}.nav{display:flex;gap:14px}.nav a{color:var(--muted);text-decoration:none}.nav a:hover{color:var(--fg)}
+main{padding:48px 0 80px}.kicker{font-size:11px;color:var(--muted);letter-spacing:.2em;text-transform:uppercase}.hero{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:30px}.hero h1{font:900 clamp(3rem,8vw,7rem)/.86 system-ui,sans-serif;letter-spacing:-.07em;margin:12px 0 0}.hero p{max-width:700px;color:var(--muted);margin:18px 0 0}.status{min-width:180px;border:1px solid var(--line);padding:14px;background:var(--panel)}.status b{display:block;font-size:22px;margin-top:3px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.panel{grid-column:span 12;background:var(--panel);border:1px solid var(--line);padding:20px}.half{grid-column:span 6}.panel h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 16px}.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.control{border:1px solid var(--line);padding:14px}.control label{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}.control output{color:var(--fg)}input[type=range]{width:100%;accent-color:#fff}button,select{font:inherit;background:#090909;color:var(--fg);border:1px solid #343434;border-radius:8px;padding:11px 13px;cursor:pointer}button:hover,select:hover{background:#171717}button.primary{background:#f4f4f4;color:#070707;border-color:#f4f4f4}.buttons{display:flex;flex-wrap:wrap;gap:10px}.meters{display:grid;grid-template-columns:1fr 1fr;gap:14px}.meter{height:14px;border:1px solid var(--line);background:#090909;overflow:hidden}.meter i{display:block;height:100%;width:0;background:#eee;transition:width .04s linear}.meter span{display:block;margin-top:7px;color:var(--muted);font-size:11px}.hint{color:var(--muted);font-size:12px}.chain{display:flex;flex-wrap:wrap;gap:8px}.chip{border:1px solid #333;padding:8px 10px}.danger{color:#ff9a9a}.good{color:#a7f3d0}
+@media(max-width:760px){.half{grid-column:span 12}.hero{display:block}.controls,.meters{grid-template-columns:1fr}.hero h1{font-size:clamp(3rem,18vw,5rem)}}
+</style>
+</head>
+<body>
+<header class="top"><div class="shell topin"><a class="brand" href="../../">TAMASRAZIM <span>/ AUDIO</span></a><nav class="nav"><a href="../">Projects</a><a href="./">Spiral Mic</a></nav></div></header>
+<main class="shell">
+<section class="hero"><div><div class="kicker">LIVE AUDIO / PWA / LOCAL-FIRST</div><h1>Spiral Mic</h1><p>Real-time microphone processing in the browser. Hear your own processed voice live while shaping a rotating, phasey spiral effect.</p></div><div class="status"><span class="hint">ENGINE</span><b id="engine">OFFLINE</b><span id="state" class="hint">Click Start microphone</span></div></section>
+<section class="grid">
+<div class="panel"><h2>Input / monitoring</h2><div class="buttons"><button id="start" class="primary">Start microphone</button><button id="stop" disabled>Stop</button><button id="monitor">Mute monitoring</button><button id="install" hidden>Install PWA</button></div><p class="hint">Your microphone stays in the browser. Monitoring sends the processed signal to your selected system output device when supported.</p></div>
+<div class="panel half"><h2>Spiral effect</h2><div class="controls">
+<div class="control"><label>Rate <output id="rateOut">0.65 Hz</output></label><input id="rate" type="range" min=".05" max="4" step=".01" value=".65"></div>
+<div class="control"><label>Depth <output id="depthOut">3.5 ms</output></label><input id="depth" type="range" min=".1" max="12" step=".1" value="3.5"></div>
+<div class="control"><label>Feedback <output id="fbOut">18%</output></label><input id="fb" type="range" min="0" max=".7" step=".01" value=".18"></div>
+<div class="control"><label>Mix <output id="mixOut">42%</output></label><input id="mix" type="range" min="0" max="1" step=".01" value=".42"></div>
+</div></div>
+<div class="panel half"><h2>Voice shaping</h2><div class="controls">
+<div class="control"><label>Low cut <output id="lowOut">80 Hz</output></label><input id="low" type="range" min="20" max="300" step="1" value="80"></div>
+<div class="control"><label>High cut <output id="highOut">14 kHz</output></label><input id="high" type="range" min="2000" max="20000" step="100" value="14000"></div>
+<div class="control"><label>Reverb <output id="revOut">12%</output></label><input id="rev" type="range" min="0" max=".6" step=".01" value=".12"></div>
+<div class="control"><label>Output <output id="gainOut">0 dB</output></label><input id="gain" type="range" min="-18" max="6" step=".5" value="0"></div>
+</div></div>
+<div class="panel"><h2>Signal chain</h2><div class="chain"><span class="chip">MIC INPUT</span><span>→</span><span class="chip">LOW CUT</span><span>→</span><span class="chip">SPIRAL DELAY</span><span>→</span><span class="chip">CHORUS / PHASE</span><span>→</span><span class="chip">REVERB</span><span>→</span><span class="chip">OUTPUT</span></div></div>
+<div class="panel"><h2>Live meters</h2><div class="meters"><div><div class="meter"><i id="inMeter"></i></div><span>INPUT <b id="inDb">—</b></span></div><div><div class="meter"><i id="outMeter"></i></div><span>OUTPUT <b id="outDb">—</b></span></div></div></div>
+<div class="panel"><h2>Notes</h2><p class="hint">For Discord/OBS, the browser cannot directly become a Windows system microphone. Route this page's output through a virtual audio device if you need other desktop apps to receive the processed signal.</p></div>
+</section></main>
+<script>
+const $=id=>document.getElementById(id);
+let ctx,stream,source,inputGain,low,high,delay,feedback,wet,dry,chorus,reverb,reverbGain,outGain,inAnalyser,outAnalyser,monitorOn=true;
+let installPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('install').hidden=false});
+$('install').onclick=async()=>{if(installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('install').hidden=true}};
+function impulse(c,d=.8,decay=3){const n=Math.floor(c.sampleRate*d),b=c.createBuffer(2,n,c.sampleRate);for(let ch=0;ch<2;ch++){const x=b.getChannelData(ch);for(let i=0;i<n;i++)x[i]=(Math.random()*2-1)*Math.pow(1-i/n,decay)}return b}
+function connectGraph(){
+ inputGain=ctx.createGain();low=ctx.createBiquadFilter();high=ctx.createBiquadFilter();delay=ctx.createDelay(.05);feedback=ctx.createGain();wet=ctx.createGain();dry=ctx.createGain();chorus=ctx.createDelay(.05);reverb=ctx.createConvolver();reverbGain=ctx.createGain();outGain=ctx.createGain();inAnalyser=ctx.createAnalyser();outAnalyser=ctx.createAnalyser();
+ low.type='highpass';high.type='lowpass';chorus.delayTime.value=.012;delay.delayTime.value=.012;feedback.gain.value=.18;wet.gain.value=.42;dry.gain.value=.58;reverb.buffer=impulse(ctx);reverbGain.gain.value=.12;outGain.gain.value=1;
+ source.connect(inAnalyser);source.connect(inputGain);inputGain.connect(low);low.connect(high);
+ high.connect(dry);high.connect(delay);delay.connect(feedback);feedback.connect(delay);delay.connect(wet);wet.connect(chorus);chorus.connect(wet);wet.connect(reverb);reverb.connect(reverbGain);
+ dry.connect(outGain);reverbGain.connect(outGain);outGain.connect(outAnalyser);outGain.connect(ctx.destination);
+ const g=ctx.createGain();g.gain.value=.32;outGain.connect(g);g.connect(ctx.destination);
+ update();
+}
+function update(){
+ if(!ctx)return;
+ low.frequency.value=+$('low').value;high.frequency.value=+$('high').value;
+ delay.delayTime.value=+$('depth').value/1000;feedback.gain.value=+$('fb').value;
+ wet.gain.value=+$('mix').value;dry.gain.value=1-+$('mix').value;
+ reverbGain.gain.value=+$('rev').value;outGain.gain.value=Math.pow(10,(+$('gain').value)/20);
+ $('rateOut').textContent=+$('rate').value+' Hz';$('depthOut').textContent=+$('depth').value+' ms';$('fbOut').textContent=Math.round(+$('fb').value*100)+'%';$('mixOut').textContent=Math.round(+$('mix').value*100)+'%';
+ $('lowOut').textContent=$('low').value+' Hz';$('highOut').textContent=(+$('high').value/1000)+' kHz';$('revOut').textContent=Math.round(+$('rev').value*100)+'%';$('gainOut').textContent=(+$('gain').value>0?'+':'')+$('gain').value+' dB';
+}
+['rate','depth','fb','mix','low','high','rev','gain'].forEach(id=>$(id).addEventListener('input',update));
+$('start').onclick=async()=>{
+ try{
+  stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+  ctx=new AudioContext();source=ctx.createMediaStreamSource(stream);connectGraph();await ctx.resume();
+  $('engine').textContent='RUNNING';$('state').textContent='Microphone live · monitoring '+(monitorOn?'ON':'OFF');$('start').disabled=true;$('stop').disabled=false;
+ }catch(e){$('state').innerHTML='<span class="danger">Microphone permission/device error</span>'}
+};
+$('stop').onclick=()=>{stream?.getTracks().forEach(t=>t.stop());ctx?.close();ctx=null;$('engine').textContent='OFFLINE';$('state').textContent='Stopped';$('start').disabled=false;$('stop').disabled=true};
+$('monitor').onclick=()=>{monitorOn=!monitorOn;if(ctx)ctx.destination.channelCount=monitorOn?2:0;$('monitor').textContent=monitorOn?'Mute monitoring':'Enable monitoring';$('state').textContent='Microphone live · monitoring '+(monitorOn?'ON':'OFF')};
+function meter(a,bar,label){if(!a)return;const x=new Uint8Array(a.fftSize);a.getByteTimeDomainData(x);let p=0;for(const v of x){const q=(v-128)/128;p=Math.max(p,q*q)}const rms=Math.sqrt(p),db=20*Math.log10(Math.max(rms,.00001)),pct=Math.min(100,Math.max(0,(db+60)/60*100));$(bar).style.width=pct+'%';$(label).textContent=db.toFixed(1)+' dB';}
+function tick(){meter(inAnalyser,'inMeter','inDb');meter(outAnalyser,'outMeter','outDb');requestAnimationFrame(tick)}tick();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body></html>
