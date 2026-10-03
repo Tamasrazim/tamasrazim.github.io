@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spiral Mic — Native</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header>
+  <div class="brand">TAMASRAZIM / SPIRAL MIC</div>
+  <div id="engineState" class="state">NATIVE ENGINE OFFLINE</div>
+</header>
+<main>
+  <section class="hero">
+    <div>
+      <div class="eyebrow">WINDOWS NATIVE / REAL-TIME DSP</div>
+      <h1>Spiral Mic</h1>
+      <p>Real microphone input → native DSP → selected output device. This is the desktop effect engine, not the browser demo.</p>
+    </div>
+    <button id="power" class="primary">START ENGINE</button>
+  </section>
+
+  <section class="card io">
+    <div>
+      <label>INPUT DEVICE</label>
+      <select id="input"></select>
+    </div>
+    <div>
+      <label>OUTPUT DEVICE</label>
+      <select id="output"></select>
+    </div>
+    <button id="refresh">REFRESH DEVICES</button>
+  </section>
+
+  <section class="grid">
+    <div class="card controls">
+      <div class="row"><label>SPIRAL RATE <output id="rateV"></output></label><input id="rate" type="range" min=".02" max="8" step=".01" value=".65"></div>
+      <div class="row"><label>DEPTH <output id="depthV"></output></label><input id="depth" type="range" min=".1" max="30" step=".1" value="5"></div>
+      <div class="row"><label>DELAY <output id="delayV"></output></label><input id="delay" type="range" min="1" max="35" step=".1" value="8"></div>
+      <div class="row"><label>FEEDBACK <output id="fbV"></output></label><input id="fb" type="range" min="0" max=".75" step=".01" value=".22"></div>
+      <div class="row"><label>MIX <output id="mixV"></output></label><input id="mix" type="range" min="0" max="1" step=".01" value=".5"></div>
+      <div class="row"><label>SPACE <output id="reverbV"></output></label><input id="reverb" type="range" min="0" max=".45" step=".01" value=".12"></div>
+      <div class="row"><label>OUTPUT <output id="outV"></output></label><input id="out" type="range" min="-24" max="6" step=".1" value="-3"></div>
+    </div>
+
+    <div class="card monitor">
+      <div class="biglabel">SIGNAL</div>
+      <div class="meter"><i id="inMeter"></i></div>
+      <small>INPUT</small>
+      <div class="meter"><i id="outMeter"></i></div>
+      <small>OUTPUT</small>
+      <div class="actions">
+        <button id="bypass">BYPASS EFFECT</button>
+        <button id="monitor">MUTE MONITORING</button>
+      </div>
+      <div id="readout" class="readout">Stopped</div>
+    </div>
+  </section>
+
+  <section class="card note">
+    <b>Native engine</b>
+    <span>Uses the Windows audio device path through CPAL/WASAPI. Keep monitoring off until the output device is correct.</span>
+  </section>
+</main>
+<script src="./app.js"></script>
+</body>
+</html>
