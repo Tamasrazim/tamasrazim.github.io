@@ -532,7 +532,7 @@ fn build_input<T>(
     meter: Arc<AtomicU32>,
 ) -> Result<Stream, String>
 where
-    T: SizedSample + FromSample<T> + Copy,
+    T: SizedSample + Copy,
     f32: FromSample<T>,
 {
     let stream = device
