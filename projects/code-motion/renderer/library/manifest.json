@@ -1,4 +1,8 @@
 {
   "version": 1,
-  "libraries": []
+  "libraries": [
+    "./library/living-emojis/library.js",
+    "./library/prism/library.js",
+    "./library/web-icons/library.js"
+  ]
 }

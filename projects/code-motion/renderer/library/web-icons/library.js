@@ -1,4 +1,3 @@
-/* TRILYVA Web Icons library module */
 function iconCode(id) {
   const f = {
     search: 'ctx.beginPath();ctx.arc(9,9,5,0,TAU);ctx.stroke();ctx.beginPath();ctx.moveTo(13,13);ctx.lineTo(18,18);ctx.stroke();',
@@ -40,5 +39,16 @@ const defs = [
   ["info","Info"],["warning","Warning"],["user","User"]
 ];
 
-
-window.TRILYVA_LIBRARY.register({id:"web-icons",title:"WEB ICONS",description:"Clean UI and web interface vector primitives.",async load(){return defs.map(([id,title])=>({id:"web-"+id,title,category:"web icon",code:iconCode(id)}));}});
+export default {
+  id: "web-icons",
+  title: "WEB ICONS",
+  description: "Clean UI and web interface vector primitives.",
+  async load() {
+    return defs.map(([id,title]) => ({
+      id: "web-" + id,
+      title,
+      category: "web icon",
+      code: iconCode(id)
+    }));
+  }
+};
