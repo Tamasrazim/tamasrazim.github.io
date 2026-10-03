@@ -4151,6 +4151,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
   ctx.stroke();
 }
 </script>
+<script type="module" src="./library.js"></script>
 <script>
 /* ============================================================
    Code -> Motion — application shell
@@ -4559,6 +4560,7 @@ function renderFrame(time,frame,fps,ctx,width,height){
 }
 `;
 function buildLivingSamples(){return LIVING_SPECS.map(function(s){var source=LIVING_SOURCE.replace("__SPEC__",JSON.stringify({cat:s.cat,v:s.v,flag:s.flag||null})).replace("__BG__",JSON.stringify(s.bg)).replace("__PRI__",JSON.stringify(s.pri)).replace("__DEEP__",JSON.stringify(s.deep)).replace("__ACC__",JSON.stringify(s.acc));return {title:"Living Emoji — "+s.title,desc:s.title+" · "+s.cat+" · "+LIVING_EMOJI_VERSION+" · 6-second seamless loop",code:source};});}
+window.TRILYVA_LEGACY_LIBRARY_BRIDGE={living:buildLivingSamples};
 function setStage(name){S.stage=name;$$('#strip .st[data-stage]').forEach(n=>{const st=n.dataset.stage; n.classList.toggle('on',st===name);n.classList.toggle('done',['PREVIEW','RENDER','SETTINGS','CONFIRM','RENDERING','COMPLETE'].includes(name)&&['CODE','PREVIEW','RENDER','SETTINGS','CONFIRM','RENDERING'].includes(st)&&st!==name);});$('#stripMsg').textContent=name;$('#statusText').textContent=name;}
 function markDirty(v){S.dirty=!!v;$('#dirtyStat').textContent=S.dirty?'modified':'saved';}
 function updateLineNumbers(){const lines=Math.max(1,$('#ta').value.split('\n').length),g=$('#gutter');g.innerHTML='';for(let i=1;i<=lines;i++){const d=document.createElement('div');d.textContent=i;g.appendChild(d);}$('#lineStat').textContent='1:'+lines;$('#charStat').textContent=$('#ta').value.length+' chars';}
@@ -4648,90 +4650,98 @@ async function trilyvaLoadLibraryCode(title,code){
   return result||{ok:false};
 }
 function openTrilyvaLibrary(){
-  const body=document.createElement('div');
-  body.style.cssText='display:flex;flex-direction:column;gap:9px;';
-  const toolbar=document.createElement('div');
-  toolbar.style.cssText='display:flex;gap:6px;align-items:center;';
-  const tabs=document.createElement('div');
-  tabs.style.cssText='display:flex;gap:4px;';
-  const search=document.createElement('input');
+  var registry=window.TRILYVA_LIBRARY;
+  var body=document.createElement('div');
+  body.style.cssText='display:flex;flex-direction:column;gap:9px;min-height:0;';
+
+  if(!registry){
+    body.innerHTML='<div class="empty">LIBRARY REGISTRY NOT READY</div>';
+    openModal('TRILYVA LIBRARY',body,[{label:'Close',fn:closeModal}]);
+    return;
+  }
+
+  var toolbar=document.createElement('div');
+  toolbar.style.cssText='display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;';
+  var tabs=document.createElement('div');
+  tabs.style.cssText='display:flex;gap:4px;flex-wrap:wrap;';
+  var search=document.createElement('input');
   search.type='search'; search.placeholder='Search library…'; search.autocomplete='off';
-  search.style.cssText='flex:1;background:#09090b;border:1px solid var(--rule);padding:7px 8px;font:10px var(--mono);outline:none;';
-  const count=document.createElement('span');
-  count.style.cssText='font:9px var(--mono);color:var(--mut);white-space:nowrap;';
-  toolbar.appendChild(tabs);toolbar.appendChild(search);toolbar.appendChild(count);body.appendChild(toolbar);
-  const list=document.createElement('div');
-  list.className='list';list.style.cssText='max-height:52vh;overflow:auto;';
+  search.style.cssText='width:100%;background:#09090b;border:1px solid var(--rule);padding:7px 8px;font:10px var(--mono);outline:none;';
+  toolbar.append(tabs,search);
+  body.appendChild(toolbar);
+
+  var list=document.createElement('div');
+  list.className='list';
+  list.style.cssText='max-height:52vh;overflow:auto;';
   body.appendChild(list);
 
-  let mode='prism',data=[],loaded=false;
-  const prismBtn=document.createElement('button'),emojiBtn=document.createElement('button');
-  [prismBtn,emojiBtn].forEach(b=>{b.style.cssText='border:1px solid var(--rule);padding:6px 9px;background:#0a0a0c;color:var(--mut);font:9px var(--mono);letter-spacing:.08em;cursor:pointer;';});
-  prismBtn.textContent='PRISM FLOWERS';emojiBtn.textContent='LIVING EMOJIS';
-  tabs.append(prismBtn,emojiBtn);
-  function setTabStyle(){
-    prismBtn.style.background=mode==='prism'?'#fff':'#0a0a0c';prismBtn.style.color=mode==='prism'?'#000':'var(--mut)';
-    emojiBtn.style.background=mode==='emoji'?'#fff':'#0a0a0c';emojiBtn.style.color=mode==='emoji'?'#000':'var(--mut)';
-  }
-  async function loadMode(next){
-    mode=next; setTabStyle(); search.value='';
-    list.innerHTML='<div class="empty">LOADING…</div>';
-    try{
-      data=mode==='prism'?await loadTrilyvaPrismLibrary():buildLivingSamples();
-      loaded=true; renderList();
-    }catch(e){loaded=false;list.innerHTML='<div class="empty">LIBRARY LOAD FAILED<br><br>'+trilyvaLibraryEscape(e.message)+'</div>';count.textContent='FAILED';}
-  }
-  function renderList(){
-    const q=search.value.trim().toLowerCase();
-    const items=data.map((x,i)=>({x,i})).filter(o=>{
-      const hay=String(o.x.title||'')+' '+String(o.x.id||'')+' '+String(o.x.cat||'');
-      return !q||hay.toLowerCase().includes(q);
+  var libs=registry.all();
+  var active=libs[0]||null;
+  var data=[];
+  var loaded=false;
+
+  function setTabs(){
+    tabs.replaceChildren();
+    libs.forEach(function(lib){
+      var btn=document.createElement('button');
+      btn.type='button';
+      btn.textContent=lib.title;
+      btn.style.cssText='border:1px solid var(--rule);padding:6px 9px;background:'+(active===lib?'#fff':'#0a0a0c')+';color:'+(active===lib?'#000':'var(--mut)')+';font:9px var(--mono);letter-spacing:.08em;cursor:pointer;';
+      btn.title=lib.description||'';
+      btn.onclick=function(){active=lib;loaded=false;setTabs();loadActive();};
+      tabs.appendChild(btn);
     });
-    count.textContent=items.length+' / '+data.length;
-    if(!items.length){list.innerHTML='<div class="empty">NO MATCHES</div>';return;}
-    const frag=document.createDocumentFragment();
-    items.forEach(({x,i})=>{
-      const it=document.createElement('div');
+  }
+
+  function render(){
+    var q=search.value.trim().toLowerCase();
+    var items=data.map(function(x,i){return {x:x,i:i};}).filter(function(o){
+      var x=o.x||{};
+      var hay=String(x.title||'')+' '+String(x.id||'')+' '+String(x.category||x.cat||'');
+      return !q||hay.toLowerCase().indexOf(q)>=0;
+    });
+    if(!items.length){
+      list.innerHTML='<div class="empty">NO MATCHES</div>';
+      return;
+    }
+    var frag=document.createDocumentFragment();
+    items.forEach(function(o){
+      var x=o.x;
+      var it=document.createElement('div');
       it.className='it';
       it.tabIndex=0;
-      it.setAttribute('role','button');
-      it.setAttribute('aria-label','Load '+String(x.title||'library item'));
-      const text=document.createElement('div');
+      var text=document.createElement('div');
       text.style.cssText='min-width:0;flex:1;';
-      text.innerHTML='<h5>'+trilyvaLibraryEscape(x.title)+'</h5><p>'+trilyvaLibraryEscape(x.id||((mode==='prism'?'prism':'emoji')+'-'+(i+1)))+'</p>';
-      const load=document.createElement('button');
-      load.className='x';
-      load.textContent='LOAD';
-      load.type='button';
-      const activate=()=>trilyvaLoadLibraryCode(x.title,x.code).catch(e=>{
-        $('#stMsg').textContent='Library load failed · '+String(e.message||e);
-      });
-      it.onclick=(ev)=>{
-        if(ev.target===load || load.contains(ev.target)) return;
-        ev.preventDefault();
-        activate();
-      };
-      it.onkeydown=(ev)=>{
-        if(ev.key==='Enter' || ev.key===' '){
-          ev.preventDefault();
-          activate();
-        }
-      };
-      load.onclick=(ev)=>{
-        ev.preventDefault();
-        ev.stopPropagation();
-        activate();
-      };
-      it.append(text,load);
-      frag.appendChild(it);
+      text.innerHTML='<h5>'+trilyvaLibraryEscape(x.title||'Untitled')+'</h5><p>'+trilyvaLibraryEscape(x.id||('item-'+o.i))+'</p>';
+      var load=document.createElement('button');
+      load.className='x'; load.type='button'; load.textContent='LOAD';
+      function activate(){trilyvaLoadLibraryCode(x.title,x.code).catch(function(e){$('#stMsg').textContent='Library load failed · '+String(e.message||e);});}
+      it.onclick=function(ev){if(ev.target===load||load.contains(ev.target))return;activate();};
+      it.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();activate();}};
+      load.onclick=function(ev){ev.preventDefault();ev.stopPropagation();activate();};
+      it.append(text,load); frag.appendChild(it);
     });
     list.replaceChildren(frag);
   }
-  prismBtn.onclick=()=>loadMode('prism');
-  emojiBtn.onclick=()=>loadMode('emoji');
-  search.oninput=()=>{if(loaded)renderList();};
-  openModal('TRILYVA LIBRARY',body,[{label:'Close',fn:closeModal}]);
-  loadMode('prism');
+
+  async function loadActive(){
+    if(!active){list.innerHTML='<div class="empty">NO LIBRARIES REGISTERED</div>';return;}
+    list.innerHTML='<div class="empty">LOADING '+trilyvaLibraryEscape(active.title)+'…</div>';
+    search.value='';
+    try{
+      data=await active.load();
+      loaded=true;
+      render();
+    }catch(e){
+      loaded=false;
+      list.innerHTML='<div class="empty">LIBRARY LOAD FAILED<br><br>'+trilyvaLibraryEscape(e.message)+'</div>';
+    }
+  }
+
+  search.oninput=function(){if(loaded)render();};
+  setTabs();
+  openModal('TRILYVA / LIBRARY',body,[{label:'Close',fn:closeModal}]);
+  loadActive();
 }
 
 /* ============================================================
