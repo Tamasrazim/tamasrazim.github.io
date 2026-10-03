@@ -1,4 +1,9 @@
 {
-  "version": 6,
-  "libraries": ["./living-emojis.js","./photorealistic-rose.js","./prismflower.js","./web-icons.js"]
+  "version": 5,
+  "libraries": [
+    "./living-emojis.js",
+    "./photorealistic-rose.js",
+    "./prismflower.js",
+    "./web-icons.js"
+  ]
 }
