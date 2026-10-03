@@ -198,7 +198,7 @@ function draw(name,id){
   case"Chat":g+=Path("M14 18h36v24H28l-10 8v-8h-4z","url(#g"+id+")",2)+C(23,30,2.2,"#334155")+C(32,30,2.2,"#334155")+C(41,30,2.2,"#334155");break;
   case"Location":g+=Path("M32 53C22 42 17 36 17 28a15 15 0 1 1 30 0c0 8-5 14-15 25z","url(#g"+id+")",2)+C(32,28,4,"#f8fbff");break;
   case"Map":g+=R(12,18,16,30,2)+R(28,18,18,30,2)+R(46,18,8,30,2)+L(28,18,28,48,2)+L(46,18,46,48,2)+P("17,21 30,19 42,25 29,31","url(#facet"+id+")",1);break;
-  case"Globe":g+=C(32,32,20)+E("ellipse",'cx="32" cy="32" rx="9" ry="20",'<title>meridian</title>')+L(13,32,51,32,2)+P("20,18 38,15 48,27 28,30","url(#facet"+id+")",1);break;
+  case"Globe":g+=C(32,32,20)+E("ellipse",'cx="32" cy="32" rx="9" ry="20" fill="none" stroke="#334155" stroke-width="1.9"','')+L(13,32,51,32,2)+P("20,18 38,15 48,27 28,30","url(#facet"+id+")",1);break;
   case"Cart":g+=Path("M12 17h7l4 24h27l5-18H21M27 47a4 4 0 1 0 0 8 4 4 0 0 0 0-8m18 0a4 4 0 1 0 0 8 4 4 0 0 0 0-8","url(#g"+id+")",2)+P("25,25 47,23 44,36 28,38","url(#facet"+id+")",1);break;
   case"Tag":g+=P("14,18 35,18 50,33 34,49 14,29");g+=C(24,26,3,"#334155")+P("18,20 34,19 45,31 31,40","url(#facet"+id+")",1);break;
   case"Gift":g+=R(16,23,32,27,3)+R(14,18,36,9,3)+L(32,18,32,50,2.3)+P("17,24 31,21 42,26 37,39 22,37","url(#facet"+id+")",1);break;
@@ -215,7 +215,7 @@ function draw(name,id){
   case"Print":g+=R(20,25,24,22,3)+R(24,16,16,12,2)+R(22,41,20,10,2)+P("22,27 40,25 41,37 23,39","url(#facet"+id+")",1);break;
   case"Code":g+=Path("M26 19L15 32l11 13M38 19l11 13-11 13M35 14L29 50","none",2.6)+P("24,22 36,18 42,31 34,41 25,36","url(#facet"+id+")",1);break;
   case"Terminal":g+=R(13,17,38,31,5)+Path("M20 27l8 6-8 6M33 40h11","none",2.8)+P("17,21 41,18 47,29 24,34","url(#facet"+id+")",1);break;
-  case"Database":g+=E("ellipse",'cx="32" cy="18" rx="17" ry="7",'')+Path("M15 18v28c0 5 8 8 17 8s17-3 17-8V18M15 28c0 5 8 8 17 8s17-3 17-8M15 38c0 5 8 8 17 8s17-3 17-8","url(#g"+id+")",2)+P("20,19 35,16 46,24 43,34 23,33","url(#facet"+id+")",1);break;
+  case"Database":g+='<ellipse cx="32" cy="18" rx="17" ry="7" fill="url(#g'+id+')" stroke="#334155" stroke-width="2"/>'+Path("M15 18v28c0 5 8 8 17 8s17-3 17-8V18M15 28c0 5 8 8 17 8s17-3 17-8M15 38c0 5 8 8 17 8s17-3 17-8","none",2)+P("20,19 35,16 46,24 43,34 23,33","url(#facet"+id+")",1);break;
   case"Server":g+=R(14,15,36,10,3)+R(14,28,36,10,3)+R(14,41,36,10,3);for(let y of [20,33,46])g+=C(21,y,2,"#334155");g+=P("26,17 45,17 48,27 27,28","url(#facet"+id+")",.9);break;
   case"Wifi":g+=Path("M12 25a29 29 0 0 1 40 0M18 32a20 20 0 0 1 28 0M25 39a10 10 0 0 1 14 0","none",3)+C(32,48,2.8,"#334155")+P("22,22 38,19 46,29 29,32","url(#facet"+id+")",.9);break;
   case"Bluetooth":g+=Path("M32 12v40l12-10-22-20 22-10-12-10M32 32L20 42","none",2.8)+P("24,18 38,17 42,29 30,32","url(#facet"+id+")",1);break;
@@ -321,18 +321,78 @@ function sheetSVG(indices){
 }
 function epsSVG(indices){
  const cell=120,cols=10,pad=18,rows=Math.ceil(indices.length/cols),w=cols*cell+pad*2,h=rows*cell+pad*2;
- let ps='%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 '+w+' '+h+'\n%%Creator: TRILYVA\n%%Title: Prism Web Icons\n%%LanguageLevel: 2\n%%Pages: 1\n%%EndComments\n1 setlinejoin 1 setlinecap\n';
- const colors=["0.73 0.96 1","0.85 0.80 1","0.74 0.91 1","0.80 0.98 0.94","0.89 0.82 1"];
- function hex(){return colors[indices.length%colors.length]+" setrgbcolor\n"}
+ const n=v=>Number.parseFloat(v||0);
+ const get=(el,k)=>el.getAttribute(k);
+ const rgb=v=>{
+   if(!v||v==="none")return null;
+   if(v.startsWith("#")){let z=v.slice(1);if(z.length===3)z=z.split("").map(c=>c+c).join("");return [parseInt(z.slice(0,2),16)/255,parseInt(z.slice(2,4),16)/255,parseInt(z.slice(4,6),16)/255]}
+   if(v.startsWith("url("))return [0.76,0.88,0.98];
+   return [0.22,0.27,0.35];
+ };
+ const col=v=>{const c=rgb(v);return c?c.map(x=>x.toFixed(4)).join(" ")+" setrgbcolor\n":""};
+ const paint=(fill,stroke,sw)=>{
+   let z="";
+   if(fill&&fill!=="none")z+=col(fill)+"fill\n";
+   if(stroke&&stroke!=="none")z+=col(stroke)+(n(sw||2))+" setlinewidth stroke\n";
+   return z;
+ };
+ const pts=v=>v.trim().split(/[ ,]+/).map(Number);
+ const pathPS=d=>{
+   const t=(d.match(/[a-zA-Z]|-?(?:\d*\.\d+|\d+\.?)(?:e[-+]?\d+)?/g)||[]);
+   let i=0,c="",x=0,y=0,sx=0,sy=0,o="newpath\n";
+   const N=()=>n(t[i++]);
+   while(i<t.length){
+     if(/[a-zA-Z]/.test(t[i]))c=t[i++];
+     const r=c===c.toLowerCase();
+     if(c==="M"||c==="m"){x=r?x+N():N();y=r?y+N():N();sx=x;sy=y;o+=x+" "+(64-y)+" moveto\n";c=r?"l":"L"}
+     else if(c==="L"||c==="l"){x=r?x+N():N();y=r?y+N():N();o+=x+" "+(64-y)+" lineto\n"}
+     else if(c==="H"||c==="h"){x=r?x+N():N();o+=x+" "+(64-y)+" lineto\n"}
+     else if(c==="V"||c==="v"){y=r?y+N():N();o+=x+" "+(64-y)+" lineto\n"}
+     else if(c==="C"||c==="c"){
+       const x1=r?x+N():N(),y1=r?y+N():N(),x2=r?x+N():N(),y2=r?y+N():N();
+       x=r?x+N():N();y=r?y+N():N();
+       o+=x1+" "+(64-y1)+" "+x2+" "+(64-y2)+" "+x+" "+(64-y)+" curveto\n";
+     }
+     else if(c==="Z"||c==="z"){o+="closepath\n";x=sx;y=sy}
+     else{while(i<t.length&&!/[a-zA-Z]/.test(t[i]))i++}
+   }
+   return o;
+ };
+ const one=el=>{
+   const tag=el.tagName,fill=get(el,"fill")||"none",stroke=get(el,"stroke")||"none",sw=get(el,"stroke-width")||"2";
+   if(tag==="polygon"){
+     const a=pts(get(el,"points")||""),z=[];
+     for(let i=0;i<a.length;i+=2)z.push((i?"lineto ":"moveto ")+a[i]+" "+(64-a[i+1]));
+     return "newpath\n"+z.join("\n")+" closepath\n"+paint(fill,stroke,sw);
+   }
+   if(tag==="rect"){
+     const x=n(get(el,"x")),y=n(get(el,"y")),w0=n(get(el,"width")),h0=n(get(el,"height"));
+     return "newpath\n"+x+" "+(64-y)+" moveto\n"+(x+w0)+" "+(64-y)+" lineto\n"+(x+w0)+" "+(64-y-h0)+" lineto\n"+x+" "+(64-y-h0)+" lineto closepath\n"+paint(fill,stroke,sw);
+   }
+   if(tag==="circle"){
+     const x=n(get(el,"cx")),y=64-n(get(el,"cy")),r=n(get(el,"r"));
+     return "newpath\n"+x+" "+y+" "+r+" 0 360 arc closepath\n"+paint(fill,stroke,sw);
+   }
+   if(tag==="ellipse"){
+     const x=n(get(el,"cx")),y=64-n(get(el,"cy")),rx=n(get(el,"rx")),ry=n(get(el,"ry"));
+     return "gsave\n"+x+" "+y+" translate\n1 "+((ry/rx)||1)+" scale\nnewpath\n0 0 "+rx+" 0 360 arc closepath\n"+paint(fill,stroke,sw)+"grestore\n";
+   }
+   if(tag==="line"){
+     return "newpath\n"+n(get(el,"x1"))+" "+(64-n(get(el,"y1")))+" moveto\n"+n(get(el,"x2"))+" "+(64-n(get(el,"y2")))+" lineto\n"+(stroke!=="none"?col(stroke)+n(sw)+" setlinewidth stroke\n":"");
+   }
+   if(tag==="path")return pathPS(get(el,"d")||"")+paint(fill,stroke,sw);
+   return "";
+ };
+ let ps="%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 "+w+" "+h+"\n%%Creator: TRILYVA\n%%Title: Prism Web Icons\n%%LanguageLevel: 2\n%%Pages: 1\n%%EndComments\n1 setlinejoin 1 setlinecap\n";
  indices.forEach((idx,k)=>{
-  const x=pad+(k%cols)*cell+60,y=h-pad-Math.floor(k/cols)*cell-60;
-  ps+='gsave '+x+' '+y+' translate 1.35 1.35 scale\n';
-  ps+=hex();
-  ps+='newpath 32 11 moveto 50 32 lineto 32 53 lineto 11 32 lineto closepath fill\n';
-  ps+='0.20 0.27 0.35 setrgbcolor 2 setlinewidth newpath 32 11 moveto 50 32 lineto 32 53 lineto 11 32 lineto closepath stroke\n';
-  ps+='grestore\n';
+   const x=pad+(k%cols)*cell+28,y=h-pad-Math.floor(k/cols)*cell-cell+28;
+   ps+="gsave\n"+x+" "+y+" translate\n0 64 translate\n1 -1 scale\n";
+   const source='<svg xmlns="http://www.w3.org/2000/svg">'+draw(NAMES[idx],idx+1)+"</svg>";
+   const doc=new DOMParser().parseFromString(source,"image/svg+xml");
+   [...doc.documentElement.children].forEach(el=>ps+=one(el));
+   ps+="grestore\n";
  });
- ps+='showpage\n%%EOF\n';
+ ps+="showpage\n%%EOF\n";
  return ps;
 }
 function csv(){
