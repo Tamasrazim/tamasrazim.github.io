@@ -4648,90 +4648,150 @@ async function trilyvaLoadLibraryCode(title,code){
   return result||{ok:false};
 }
 function buildWebIconSamples(){\n  const defs=[['search','Search'],['home','Home'],['menu','Menu'],['close','Close'],['plus','Plus'],['minus','Minus'],['check','Check'],['arrow-right','Arrow right'],['arrow-left','Arrow left'],['download','Download'],['upload','Upload'],['link','Link'],['copy','Copy'],['edit','Edit'],['trash','Delete'],['settings','Settings'],['info','Info'],['warning','Warning'],['lock','Lock'],['user','User'],['mail','Mail'],['calendar','Calendar'],['clock','Clock'],['play','Play'],['pause','Pause'],['stop','Stop'],['image','Image'],['video','Video'],['code','Code'],['terminal','Terminal'],['folder','Folder'],['file','File'],['star','Star'],['heart','Heart'],['eye','View'],['filter','Filter'],['grid','Grid'],['layers','Layers'],['globe','Globe'],['wifi','Wi-Fi'],['bolt','Fast'],['spark','Spark']];\n  const shapes={\n    search:'circle(10,10,5.8);line(14.5,14.5,18.5,18.5)',home:'poly(3,9,10,3,17,9);rect(5,9,10,9);line(8,18,8,13);line(12,18,12,13)',menu:'line(3,6,17,6);line(3,10,17,10);line(3,14,17,14)',close:'line(5,5,15,15);line(15,5,5,15)',plus:'line(10,3,10,17);line(3,10,17,10)',minus:'line(3,10,17,10)',check:'line(4,10,8,14);line(8,14,16,5)', 'arrow-right':'line(3,10,17,10);line(11,5,17,10);line(11,15,17,10)', 'arrow-left':'line(17,10,3,10);line(9,5,3,10);line(9,15,3,10)',download:'line(10,3,10,13);line(6,9,10,13);line(14,9,10,13);line(4,17,16,17)',upload:'line(10,17,10,7);line(6,11,10,7);line(14,11,10,7);line(4,3,16,3)',link:'circle(6,10,4);circle(14,10,4);line(8,10,12,10)',copy:'rect(6,6,9,9);rect(9,3,8,8)',edit:'poly(4,14,3,18,7,17,16,8,13,5);line(12,6,15,9)',trash:'line(4,6,16,6);rect(6,7,8,10);line(8,4,12,4)',settings:'circle(10,10,3);line(10,2,10,5);line(10,15,10,18);line(2,10,5,10);line(15,10,18,10)',info:'circle(10,10,7);line(10,9,10,14);circle(10,6,0.3)',warning:'poly(10,3,17,16,3,16);line(10,8,10,12);circle(10,14,0.3)',lock:'rect(4,8,12,9);line(7,8,7,6);line(7,6,13,6);line(13,6,13,8)',user:'circle(10,6,3);arc(10,17,6)',mail:'rect(3,5,14,10);line(3,6,10,11);line(17,6,10,11)',calendar:'rect(3,4,14,13);line(3,8,17,8);line(6,2,6,6);line(14,2,14,6)',clock:'circle(10,10,7);line(10,6,10,10);line(10,10,13,12)',play:'poly(7,4,16,10,7,16)',pause:'line(7,4,7,16);line(13,4,13,16)',stop:'rect(5,5,10,10)',image:'rect(3,4,14,12);circle(7,8,1);poly(4,14,8,10,11,13,13,11,17,15)',video:'rect(3,5,10,10);poly(13,9,17,6,17,14,13,11)',code:'line(7,5,2,10);line(2,10,7,15);line(13,5,18,10);line(18,10,13,15)',terminal:'rect(3,4,14,12);line(6,8,9,10);line(9,10,6,12);line(11,12,14,12)',folder:'poly(3,5,8,5,10,7,17,7,17,17,3,17)',file:'poly(5,2,12,2,16,6,16,18,5,18);line(12,2,12,6);line(12,6,16,6)',star:'poly(10,3,12,8,17,9,13,12,14,17,10,14,6,17,7,12,3,9,8,8)',heart:'poly(10,17,4,12,3,8,5,5,8,5,10,7,12,5,15,5,17,8,16,12)',eye:'poly(2,10,6,6,10,5,14,6,18,10,14,14,10,15,6,14);circle(10,10,2)',filter:'poly(3,4,17,4,12,10,12,16,8,18,8,10)',grid:'rect(3,3,5,5);rect(12,3,5,5);rect(3,12,5,5);rect(12,12,5,5)',layers:'poly(10,3,17,7,10,11,3,7);poly(3,11,10,15,17,11);poly(3,15,10,19,17,15)',globe:'circle(10,10,7);line(3,10,17,10);arc(10,10,7)',wifi:'arc(10,15,3);arc(10,15,6);arc(10,15,9);circle(10,17,0.3)',bolt:'poly(11,2,4,11,9,11,8,18,16,8,11,8)',spark:'poly(10,2,12,8,18,10,12,12,10,18,8,12,2,10,8,8)'};\n  function codeFor(key){return '/* '+key+' */';}\n  return defs.map(d=>({id:'web-'+d[0],title:d[1],cat:'web icon',code:codeFor(d[0]),svg:d[0]}));\n}\nfunction openTrilyvaLibrary(){
-  const body=document.createElement('div');
-  body.style.cssText='display:flex;flex-direction:column;gap:9px;';
-  const toolbar=document.createElement('div');
-  toolbar.style.cssText='display:flex;gap:6px;align-items:center;';
-  const tabs=document.createElement('div');
-  tabs.style.cssText='display:flex;gap:4px;';
-  const search=document.createElement('input');
-  search.type='search'; search.placeholder='Search library…'; search.autocomplete='off';
-  search.style.cssText='flex:1;background:#09090b;border:1px solid var(--rule);padding:7px 8px;font:10px var(--mono);outline:none;';
-  const count=document.createElement('span');
-  count.style.cssText='font:9px var(--mono);color:var(--mut);white-space:nowrap;';
-  toolbar.appendChild(tabs);toolbar.appendChild(search);toolbar.appendChild(count);body.appendChild(toolbar);
-  const list=document.createElement('div');
-  list.className='list';list.style.cssText='max-height:52vh;overflow:auto;';
-  body.appendChild(list);
+  var shell=document.createElement('div');
+  shell.style.cssText='display:flex;flex-direction:column;gap:12px;min-height:0;';
 
-  let mode='prism',data=[],loaded=false;
-  const prismBtn=document.createElement('button'),emojiBtn=document.createElement('button'),webBtn=document.createElement('button');
-  [prismBtn,emojiBtn,webBtn].forEach(b=>{b.style.cssText='border:1px solid var(--rule);padding:6px 9px;background:#0a0a0c;color:var(--mut);font:9px var(--mono);letter-spacing:.08em;cursor:pointer;';});
-  prismBtn.textContent='PRISM FLOWERS';emojiBtn.textContent='LIVING EMOJIS';webBtn.textContent='WEB ICONS';
-  tabs.append(prismBtn,emojiBtn,webBtn);
-  function setTabStyle(){
-    prismBtn.style.background=mode==='prism'?'#fff':'#0a0a0c';prismBtn.style.color=mode==='prism'?'#000':'var(--mut)';
-    emojiBtn.style.background=mode==='emoji'?'#fff':'#0a0a0c';emojiBtn.style.color=mode==='emoji'?'#000':'var(--mut)';webBtn.style.background=mode==='web'?'#fff':'#0a0a0c';webBtn.style.color=mode==='web'?'#000':'var(--mut)';
-  }
-  async function loadMode(next){
-    mode=next; setTabStyle(); search.value='';
-    list.innerHTML='<div class="empty">LOADING…</div>';
-    try{
-      data=mode==='prism'?await loadTrilyvaPrismLibrary():(mode==='emoji'?buildLivingSamples():buildWebIconSamples());
-      loaded=true; renderList();
-    }catch(e){loaded=false;list.innerHTML='<div class="empty">LIBRARY LOAD FAILED<br><br>'+trilyvaLibraryEscape(e.message)+'</div>';count.textContent='FAILED';}
-  }
-  function renderList(){
-    const q=search.value.trim().toLowerCase();
-    const items=data.map((x,i)=>({x,i})).filter(o=>{
-      const hay=String(o.x.title||'')+' '+String(o.x.id||'')+' '+String(o.x.cat||'');
-      return !q||hay.toLowerCase().includes(q);
+  var head=document.createElement('div');
+  head.style.cssText='display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:4px 0 10px;border-bottom:1px solid var(--rule);';
+  var intro=document.createElement('div');
+  intro.innerHTML='<div style="font:700 14px var(--mono);letter-spacing:.14em;color:#fff">LIBRARY / 03</div><div style="margin-top:4px;font:10px var(--mono);color:var(--mut)">Curated vectors for TRILYVA compositions</div>';
+  var status=document.createElement('div');
+  status.style.cssText='font:9px var(--mono);letter-spacing:.12em;color:var(--mut);text-align:right;';
+  head.append(intro,status); shell.appendChild(head);
+
+  var bar=document.createElement('div');
+  bar.style.cssText='display:grid;grid-template-columns:auto 1fr auto;gap:7px;align-items:center;';
+
+  var modes=document.createElement('div');
+  modes.style.cssText='display:flex;gap:3px;padding:3px;border:1px solid var(--rule);background:#08080a;';
+  var buttons={};
+  ['PRISM','EMOJI','WEB ICONS'].forEach(function(label,idx){
+    var k=idx===0?'prism':idx===1?'emoji':'web';
+    var bt=document.createElement('button');
+    bt.type='button'; bt.textContent=label; buttons[k]=bt;
+    bt.style.cssText='padding:7px 9px;border:0;background:transparent;color:var(--mut);font:9px var(--mono);letter-spacing:.12em;cursor:pointer;';
+    modes.appendChild(bt);
+  });
+
+  var search=document.createElement('input');
+  search.type='search'; search.placeholder='Search name, id, category…'; search.autocomplete='off';
+  search.style.cssText='width:100%;background:#08080a;border:1px solid var(--rule);padding:8px 10px;color:#fff;font:10px var(--mono);outline:none;';
+
+  var count=document.createElement('span');
+  count.style.cssText='font:9px var(--mono);letter-spacing:.08em;color:var(--mut);white-space:nowrap;text-align:right;';
+  bar.append(modes,search,count); shell.appendChild(bar);
+
+  var body=document.createElement('div');
+  body.style.cssText='display:grid;grid-template-columns:minmax(0,1.65fr) minmax(190px,.9fr);gap:10px;min-height:0;';
+
+  var list=document.createElement('div');
+  list.style.cssText='border:1px solid var(--rule);background:#08080a;max-height:56vh;overflow:auto;';
+  var aside=document.createElement('div');
+  aside.style.cssText='border:1px solid var(--rule);background:#09090b;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0;';
+
+  var previewLabel=document.createElement('div');
+  previewLabel.style.cssText='font:9px var(--mono);letter-spacing:.18em;color:var(--mut);';
+  previewLabel.textContent='SELECTED VECTOR';
+  var preview=document.createElement('div');
+  preview.style.cssText='aspect-ratio:1;background:linear-gradient(45deg,#121216 25%,transparent 25%) 0 0/16px 16px,linear-gradient(-45deg,#121216 25%,transparent 25%) 0 8px/16px 16px,linear-gradient(45deg,transparent 75%,#121216 75%) 8px -8px/16px 16px,linear-gradient(-45deg,transparent 75%,#121216 75%) -8px 0/16px 16px,#08080a;border:1px solid var(--rule);display:grid;place-items:center;overflow:hidden;';
+  var previewIcon=document.createElement('div');
+  previewIcon.style.cssText='font:700 38px var(--mono);color:#fff;letter-spacing:.02em;';
+  preview.appendChild(previewIcon);
+
+  var info=document.createElement('div');
+  info.style.cssText='border-top:1px solid var(--rule);padding-top:9px;';
+  var selectedTitle='Nothing selected';
+  var selectedItem=null;
+
+  var meta=document.createElement('div');
+  meta.style.cssText='display:grid;grid-template-columns:auto 1fr;gap:5px 10px;font:9.5px var(--mono);';
+  function metaRow(k,v){ var x=document.createElement('div'); x.style.color='var(--mut)'; x.textContent=k; var y=document.createElement('div'); y.style.cssText='text-align:right;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'; y.textContent=v; meta.append(x,y); }
+
+  var actions=document.createElement('div');
+  actions.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:auto;';
+  var loadBtn=document.createElement('button'), copyBtn=document.createElement('button');
+  [loadBtn,copyBtn].forEach(function(x){x.type='button';x.style.cssText='padding:8px;border:1px solid var(--rule-hi);background:#0b0b0d;color:#fff;font:9px var(--mono);letter-spacing:.12em;cursor:pointer;';});
+  loadBtn.textContent='LOAD'; copyBtn.textContent='COPY ID'; loadBtn.disabled=true; copyBtn.disabled=true;
+  actions.append(loadBtn,copyBtn);
+
+  aside.append(previewLabel,preview,info,actions); body.append(list,aside); shell.appendChild(body);
+
+  var data=[],mode='prism',loaded=false;
+  function activateTab(k){
+    mode=k;
+    Object.keys(buttons).forEach(function(x){
+      buttons[x].style.background=x===k?'#fff':'transparent';
+      buttons[x].style.color=x===k?'#000':'var(--mut)';
     });
+  }
+  function choose(x){
+    selectedItem=x; selectedTitle=String(x.title||'Untitled');
+    previewIcon.textContent=mode==='web' ? (selectedTitle.charAt(0)||'W') : (mode==='emoji'?'◈':'✦');
+    previewIcon.style.fontSize=mode==='web'?'34px':'42px';
+    info.innerHTML='';
+    meta.innerHTML='';
+    metaRow('NAME',selectedTitle);
+    metaRow('ID',String(x.id||'—'));
+    metaRow('TYPE',String(x.cat||mode));
+    metaRow('FORMAT',mode==='web'?'SVG / VECTOR':'TRILYVA SOURCE');
+    info.appendChild(meta);
+    loadBtn.disabled=!x.code;
+    copyBtn.disabled=!x.id;
+    loadBtn.style.opacity=x.code?'1':'.4';
+    copyBtn.style.opacity=x.id?'1':'.4;
+  }
+  function makeCard(x,i){
+    var card=document.createElement('button');
+    card.type='button';
+    card.style.cssText='width:100%;display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 10px;border:0;border-bottom:1px solid var(--rule);background:transparent;text-align:left;color:inherit;cursor:pointer;';
+    var thumb=document.createElement('div');
+    thumb.style.cssText='width:44px;height:44px;border:1px solid var(--rule);display:grid;place-items:center;background:#0b0b0d;font:16px var(--mono);color:#fff;';
+    thumb.textContent=mode==='web' ? String(x.title||'?').charAt(0) : mode==='emoji' ? '◈' : '✦';
+    var copy=document.createElement('div');
+    copy.style.cssText='min-width:0;';
+    copy.innerHTML='<div style="font:600 10px var(--mono);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+trilyvaLibraryEscape(x.title||'Untitled')+'</div><div style="margin-top:3px;font:9px var(--mono);color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+trilyvaLibraryEscape(x.id||'item-'+i)+'</div>';
+    var tag=document.createElement('span');
+    tag.style.cssText='font:8px var(--mono);letter-spacing:.1em;color:var(--mut);border:1px solid var(--rule);padding:3px 5px;';
+    tag.textContent=String(x.cat||mode).toUpperCase();
+    card.append(thumb,copy,tag);
+    card.addEventListener('click',function(){choose(x);});
+    return card;
+  }
+  function render(){
+    var q=search.value.trim().toLowerCase();
+    var items=data.filter(function(x){var h=(String(x.title||'')+' '+String(x.id||'')+' '+String(x.cat||'')).toLowerCase();return !q||h.indexOf(q)>=0;});
     count.textContent=items.length+' / '+data.length;
-    if(!items.length){list.innerHTML='<div class="empty">NO MATCHES</div>';return;}
-    const frag=document.createDocumentFragment();
-    items.forEach(({x,i})=>{
-      const it=document.createElement('div');
-      it.className='it';
-      it.tabIndex=0;
-      it.setAttribute('role','button');
-      it.setAttribute('aria-label','Load '+String(x.title||'library item'));
-      const text=document.createElement('div');
-      text.style.cssText='min-width:0;flex:1;';
-      text.innerHTML='<h5>'+trilyvaLibraryEscape(x.title)+'</h5><p>'+trilyvaLibraryEscape(x.id||((mode==='prism'?'prism':'emoji')+'-'+(i+1)))+'</p>';
-      const load=document.createElement('button');
-      load.className='x';
-      load.textContent='LOAD';
-      load.type='button';
-      const activate=()=>trilyvaLoadLibraryCode(x.title,x.code).catch(e=>{
-        $('#stMsg').textContent='Library load failed · '+String(e.message||e);
-      });
-      it.onclick=(ev)=>{
-        if(ev.target===load || load.contains(ev.target)) return;
-        ev.preventDefault();
-        activate();
-      };
-      it.onkeydown=(ev)=>{
-        if(ev.key==='Enter' || ev.key===' '){
-          ev.preventDefault();
-          activate();
-        }
-      };
-      load.onclick=(ev)=>{
-        ev.preventDefault();
-        ev.stopPropagation();
-        activate();
-      };
-      it.append(text,load);
-      frag.appendChild(it);
-    });
-    list.replaceChildren(frag);
+    status.textContent=mode==='web'?'VECTOR COLLECTION':'BUILT-IN COLLECTION';
+    list.replaceChildren();
+    if(!items.length){var e=document.createElement('div');e.style.cssText='padding:28px;text-align:center;font:10px var(--mono);color:var(--mut);letter-spacing:.12em;';e.textContent='NO MATCHES';list.appendChild(e);return;}
+    var frag=document.createDocumentFragment();
+    items.forEach(function(x,i){frag.appendChild(makeCard(x,i));});
+    list.appendChild(frag);
+    choose(items[0]);
   }
-  prismBtn.onclick=()=>loadMode('prism');
-  emojiBtn.onclick=()=>loadMode('emoji');webBtn.onclick=()=>loadMode('web');
-  search.oninput=()=>{if(loaded)renderList();};
-  openModal('TRILYVA LIBRARY',body,[{label:'Close',fn:closeModal}]);
-  loadMode('prism');
+  async function loadMode(k){
+    activateTab(k); search.value=''; loaded=false; list.innerHTML='<div style="padding:28px;text-align:center;font:10px var(--mono);color:var(--mut);letter-spacing:.12em">LOADING COLLECTION…</div>';
+    try{
+      data=k==='prism'?await loadTrilyvaPrismLibrary():(k==='emoji'?buildLivingSamples():buildWebIconSamples());
+      loaded=true; render();
+    }catch(e){
+      list.innerHTML='<div style="padding:28px;text-align:center;font:10px var(--mono);color:#fff">LIBRARY LOAD FAILED<br><span style="color:var(--mut)">'+trilyvaLibraryEscape(e.message)+'</span></div>';
+      count.textContent='FAILED'; status.textContent='ERROR';
+    }
+  }
+  function loadSelected(){
+    if(!selectedItem||!selectedItem.code)return;
+    trilyvaLoadLibraryCode(selectedItem.title,selectedItem.code).catch(function(e){$('#stMsg').textContent='Library load failed · '+String(e.message||e);});
+  }
+  loadBtn.onclick=loadSelected;
+  copyBtn.onclick=function(){if(selectedItem&&selectedItem.id)copyText(String(selectedItem.id),'library id copied');};
+  search.oninput=function(){if(loaded)render();};
+  buttons.prism.onclick=function(){loadMode('prism');};
+  buttons.emoji.onclick=function(){loadMode('emoji');};
+  buttons.web.onclick=function(){loadMode('web');};
+
+  openModal('TRILYVA / LIBRARY',shell,[{label:'Close',fn:closeModal}]);
+  loadMode('web');
 }
 
 /* ============================================================
