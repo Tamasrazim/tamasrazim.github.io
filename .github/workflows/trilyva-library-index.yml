@@ -28,7 +28,7 @@ jobs:
           modules = []
 
           for p in sorted(root.glob("*.js")):
-              if p.name == "library.js":
+              if p.name == "library.js" or p.name.endswith("-data.js"):
                   continue
               modules.append("./" + p.name)
 
