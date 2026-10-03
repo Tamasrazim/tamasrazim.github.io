@@ -11,7 +11,7 @@ name = "spiral_mic_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "2.12" }
+tauri-build = { version = "2.7.0" }
 
 [dependencies]
 tauri = { version = "2.12", features = [] }
