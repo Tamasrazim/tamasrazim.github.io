@@ -243,7 +243,7 @@ impl AudioEngine {
                 input_channels,
                 producer,
                 input_error,
-                input_meter.input_peak.clone(),
+                input_peak.clone(),
             )?,
             SampleFormat::I8 => build_input::<i8>(
                 &input,
@@ -251,7 +251,7 @@ impl AudioEngine {
                 input_channels,
                 producer,
                 input_error,
-                input_meter.input_peak.clone(),
+                input_peak.clone(),
             )?,
             SampleFormat::I16 => build_input::<i16>(
                 &input,
@@ -259,7 +259,7 @@ impl AudioEngine {
                 input_channels,
                 producer,
                 input_error,
-                input_meter.input_peak.clone(),
+                input_peak.clone(),
             )?,
             SampleFormat::I24 => build_input::<cpal::I24>(
                 &input,
@@ -267,7 +267,7 @@ impl AudioEngine {
                 input_channels,
                 producer,
                 input_error,
-                input_meter.input_peak.clone(),
+                input_peak.clone(),
             )?,
             SampleFormat::I32 => build_input::<i32>(
                 &input,
@@ -275,7 +275,7 @@ impl AudioEngine {
                 input_channels,
                 producer,
                 input_error,
-                input_meter.input_peak.clone(),
+                input_peak.clone(),
             )?,
             SampleFormat::I64 => build_input::<i64>(
                 &input,
@@ -283,7 +283,7 @@ impl AudioEngine {
                 input_channels,
                 producer,
                 input_error,
-                input_meter.input_peak.clone(),
+                input_peak.clone(),
             )?,
             SampleFormat::U8 => build_input::<u8>(
                 &input,
@@ -291,7 +291,7 @@ impl AudioEngine {
                 input_channels,
                 producer,
                 input_error,
-                input_meter.input_peak.clone(),
+                input_peak.clone(),
             )?,
             SampleFormat::U16 => build_input::<u16>(
                 &input,
@@ -299,7 +299,7 @@ impl AudioEngine {
                 input_channels,
                 producer,
                 input_error,
-                input_meter.input_peak.clone(),
+                input_peak.clone(),
             )?,
             SampleFormat::U24 => build_input::<cpal::U24>(
                 &input,
@@ -307,7 +307,7 @@ impl AudioEngine {
                 input_channels,
                 producer,
                 input_error,
-                input_meter.input_peak.clone(),
+                input_peak.clone(),
             )?,
             SampleFormat::U32 => build_input::<u32>(
                 &input,
@@ -315,7 +315,7 @@ impl AudioEngine {
                 input_channels,
                 producer,
                 input_error,
-                input_meter.input_peak.clone(),
+                input_peak.clone(),
             )?,
             SampleFormat::U64 => build_input::<u64>(
                 &input,
@@ -323,7 +323,7 @@ impl AudioEngine {
                 input_channels,
                 producer,
                 input_error,
-                input_meter.input_peak.clone(),
+                input_peak.clone(),
             )?,
             unsupported => return Err(format!("Unsupported input sample format: {unsupported:?}")),
         };
@@ -560,7 +560,7 @@ fn build_output<T>(
     params: AudioParams,
     sample_rate: u32,
     meter: Arc<AtomicU32>,
-    error_fn: impl Fn(cpal::StreamError) + Send + 'static,
+    error_fn: impl Fn(cpal::Error) + Send + 'static,
 ) -> Result<Stream, String>
 where
     T: SizedSample + FromSample<f32> + Copy,
