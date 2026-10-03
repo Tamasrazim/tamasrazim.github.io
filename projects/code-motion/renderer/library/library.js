@@ -2,7 +2,7 @@
  * One flat library directory. Add a module to ./library/, then list it in
  * manifest.json (the GitHub workflow also regenerates the manifest).
  */
-const MANIFEST_URL = "./manifest.json";
+const MANIFEST_URL = new URL("./manifest.json", import.meta.url);
 
 const items = [];
 
