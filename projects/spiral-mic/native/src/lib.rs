@@ -1,7 +1,7 @@
 mod audio;
 
 use audio::{AudioEngine, AudioStatus, DeviceList};
-use tauri::State;
+use tauri::{Manager, State};
 
 #[tauri::command]
 fn list_audio_devices() -> Result<DeviceList, String> {
