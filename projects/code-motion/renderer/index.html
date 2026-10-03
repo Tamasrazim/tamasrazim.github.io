@@ -4712,6 +4712,10 @@ function openTrilyvaLibrary(){
         var it=document.createElement('div');
         it.className='it';
         it.tabIndex=0;
+        it.setAttribute('role','button');
+        it.setAttribute('aria-label','Load '+String(x.title||'library item'));
+        it.style.cursor='pointer';
+        it.style.touchAction='manipulation';
         var text=document.createElement('div');
         text.style.cssText='min-width:0;flex:1;';
         text.innerHTML='<h5>'+trilyvaLibraryEscape(x.title||'Untitled')+'</h5><p>'+trilyvaLibraryEscape(x.id||('item-'+o.i))+'</p>';
@@ -4719,6 +4723,9 @@ function openTrilyvaLibrary(){
         load.className='x'; load.type='button'; load.textContent='LOAD';
         function activate(){trilyvaLoadLibraryCode(x.title,x.code).catch(function(e){$('#stMsg').textContent='Library load failed · '+String(e.message||e);});}
         it.onclick=function(ev){if(ev.target===load||load.contains(ev.target))return;activate();};
+        it.addEventListener('pointerup',function(ev){
+          if(ev.pointerType!=='mouse' && !(ev.target===load||load.contains(ev.target))) activate();
+        });
         it.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();activate();}};
         load.onclick=function(ev){ev.preventDefault();ev.stopPropagation();activate();};
         it.append(text,load);
