@@ -4,7 +4,7 @@
 var pathMatch=location.pathname.match(/projects\/([^\/]+)\/?$/), pathSlug=pathMatch?pathMatch[1]:"";
 var cfg=window.PRO_TOOL||((window.PRO_TOOL_MANIFEST||{})[pathSlug])||{};
 var root=document.getElementById("app"), name=cfg.name||"Browser Tool", kind=cfg.kind||infer(name), category=cfg.category||"Tool";
-document.title=name+" — Tamasrazim"; if("serviceWorker" in navigator){navigator.serviceWorker.register("../tool-sw.js",{scope:"../"}).catch(function(){})}
+document.title=name+" — Tamasrazim"; var ml=document.createElement("link"); ml.rel="manifest"; ml.href="../tool-suite.webmanifest"; document.head.appendChild(ml); if("serviceWorker" in navigator){navigator.serviceWorker.register("../tool-sw.js",{scope:"../"}).catch(function(){})}
 
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m]})}
 function slug(s){return String(s).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")}
