@@ -1,4 +1,4 @@
-const URL = "../prism-library.json";
+import prismData from "./data.js";
 
 let cache = null;
 
@@ -8,11 +8,8 @@ export default {
   description: "Procedural translucent flower motion library.",
   async load() {
     if (cache) return cache;
-    const response = await fetch(URL, { cache: "no-store" });
-    if (!response.ok) throw new Error("Prism library request failed: " + response.status);
-    const raw = await response.json();
-    if (!Array.isArray(raw)) throw new Error("Prism library payload is not an array.");
-    cache = raw
+    if (!Array.isArray(prismData)) throw new Error("Prism library dataset is invalid.");
+    cache = prismData
       .filter(item => item && item.title)
       .map(item => {
         const code = typeof item.code === "string"
