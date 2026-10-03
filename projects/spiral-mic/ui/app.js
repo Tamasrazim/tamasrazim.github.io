@@ -50,7 +50,7 @@ async function toggleEngine(){
       state.running=true;
       $("engineState").textContent="NATIVE ENGINE ONLINE";
       $("power").textContent="STOP ENGINE";
-      $("readout").textContent=result.sampleRate+" Hz · "+result.input+" → "+result.output;
+      $("readout").textContent=result.sample_rate+" Hz · "+result.input+" → "+result.output;
       await pushParams();
     }catch(e){ $("readout").textContent=String(e); }
   }else{
@@ -69,8 +69,8 @@ async function poll(){
       state.running=true;
       $("engineState").textContent="NATIVE ENGINE ONLINE";
       $("power").textContent="STOP ENGINE";
-      $("inMeter").style.width=Math.min(100,s.inputPeak*100)+"%";
-      $("outMeter").style.width=Math.min(100,s.outputPeak*100)+"%";
+      $("inMeter").style.width=Math.min(100,s.input_peak*100)+"%";
+      $("outMeter").style.width=Math.min(100,s.output_peak*100)+"%";
     }else{
       $("inMeter").style.width="0%";
       $("outMeter").style.width="0%";
