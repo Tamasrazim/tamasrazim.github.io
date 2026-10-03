@@ -29,8 +29,10 @@ window.TRILYVA_LIBRARY.ready = (async function () {
     throw new Error("Library manifest is invalid.");
   }
 
+  const version = encodeURIComponent(String(manifest.version || 1));
   for (const path of manifest.libraries) {
-    const mod = await import(path);
+    const separator = path.indexOf("?") >= 0 ? "&" : "?";
+    const mod = await import(path + separator + "v=" + version);
     const library = mod.default || mod.library || mod;
     window.TRILYVA_LIBRARY.register(library);
   }
