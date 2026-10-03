@@ -143,6 +143,33 @@ if(/alpha over/i.test(name))return "Composite preview: "+hex([a[0]*.5+b[0]*.5,a[
 return "A RGB: "+a.join(", ")+"\\nA HSL: "+ha.map(function(v){return v.toFixed(2)}).join(", ")+"\\nB RGB: "+b.join(", ")+"\\nB HSL: "+hb.map(function(v){return v.toFixed(2)}).join(", ");
 }
 
+
+async function suiteHealth(){
+var manifest=window.PRO_TOOL_MANIFEST||{},keys=Object.keys(manifest),sample=[];
+for(var i=0;i<keys.length&&sample.length<24;i+=Math.max(1,Math.floor(keys.length/24)))sample.push(keys[i]);
+var results=await Promise.all(sample.map(async function(s){
+try{var r=await fetch("../"+s+"/",{cache:"no-store"});var tx=await r.text();return {slug:s,status:r.status,ok:r.ok,runtime:/pro-tool\.js/.test(tx),manifest:/pro-tool-manifest\.js/.test(tx)}}catch(e){return {slug:s,status:0,ok:false,runtime:false,manifest:false,error:e.message}}
+}));
+var runtime=await fetch("../../assets/js/pro-tool.js",{cache:"no-store"}).then(function(r){return r.ok}).catch(function(){return false});
+var mf=await fetch("../../assets/js/pro-tool-manifest.js",{cache:"no-store"}).then(function(r){return r.ok}).catch(function(){return false});
+var sw=await fetch("../tool-sw.js",{cache:"no-store"}).then(function(r){return r.ok}).catch(function(){return false});
+var wm=await fetch("../tool-suite.webmanifest",{cache:"no-store"}).then(function(r){return r.ok}).catch(function(){return false});
+var bad=results.filter(function(x){return !x.ok||!x.runtime||!x.manifest});
+var lines=[
+"PRO TOOL SUITE HEALTH",
+"======================",
+"Catalog entries: "+keys.length,
+"Sampled routes: "+results.length,
+"Shared runtime: "+(runtime?"PASS":"FAIL"),
+"Manifest asset: "+(mf?"PASS":"FAIL"),
+"Offline worker: "+(sw?"PASS":"FAIL"),
+"Install manifest: "+(wm?"PASS":"FAIL"),
+"Sample route failures: "+bad.length,
+"",
+"Sample route results:"
+].concat(results.map(function(x){return (x.ok&&x.runtime&&x.manifest?"✓":"✕")+" "+x.slug+" ["+x.status+"]"}));
+return {text:lines.join("\\n"),metrics:[["Catalog",keys.length],["Sampled",results.length],["Failures",bad.length],["Runtime",runtime?"PASS":"FAIL"],["Offline worker",sw?"PASS":"FAIL"],["Install manifest",wm?"PASS":"FAIL"]]};
+}
 function geometryCalc(){
 var a=num("n1",10),b=num("n2",5),src=source(),v=parseValues(src);
 if(/triangle solver/i.test(name)){var c=num("n3",6),s=(a+b+c)/2;return "Area: "+Math.sqrt(Math.max(0,s*(s-a)*(s-b)*(s-c))).toFixed(6)+"\\nPerimeter: "+(a+b+c)}
@@ -208,7 +235,7 @@ function process(){
 var out=document.getElementById("out"),v=source();
 setState("Processing…",true);
 try{
-if(kind==="capability"){var rows=caps.slice();out.textContent=rows.map(function(x){return(x[1]?"✓":"✕")+"  "+x[0]}).join("\n");metrics([["APIs checked",rows.length],["Supported",rows.filter(function(x){return x[1]}).length],["Browser",navigator.userAgent],["Online",navigator.onLine?"yes":"no"]])}
+if(kind==="capability"){if(/tool suite health console|route integrity scan|manifest audit|shared runtime audit|offline asset audit|pwa registration test|service worker scope audit|manifest install audit/i.test(name)){suiteHealth().then(function(r){out.textContent=r.text;metrics(r.metrics);setState("Complete",true)}).catch(function(e){out.textContent="Health scan failed: "+e.message;setState("Error",false)});return}var rows=caps.slice();out.textContent=rows.map(function(x){return(x[1]?"✓":"✕")+"  "+x[0]}).join("\n");metrics([["APIs checked",rows.length],["Supported",rows.filter(function(x){return x[1]}).length],["Browser",navigator.userAgent],["Online",navigator.onLine?"yes":"no"]])}
 else if(kind==="json"){var x=jsonParse(v);if(/diff viewer|deep diff/i.test(name)){var parts=v.split(/\\n---+\\n/),a=jsonParse(parts[0]),b=jsonParse(parts[1]||"null");out.textContent=JSON.stringify(jsonDiff(a,b),null,2)}else if(/flatten|array flattener/i.test(name))out.textContent=JSON.stringify(flatten(x),null,2);else if(/sorter/i.test(name))out.textContent=JSON.stringify(deepSort(x),null,2);else if(/min/i.test(name))out.textContent=JSON.stringify(x);else if(/type table/i.test(name)){var keys=Object.keys(x||{});out.textContent=keys.map(function(k){return k+"\\t"+(x[k]===null?"null":Array.isArray(x[k])?"array":typeof x[k])}).join("\\n")}else if(/null|undefined audit/i.test(name)){var s0=JSON.stringify(x);out.textContent="Null values: "+((s0.match(/null/g)||[]).length)}else if(/precision/i.test(name)){out.textContent=JSON.stringify(x,null,2)}else out.textContent=JSON.stringify(x,null,2);metrics([["Root",Array.isArray(x)?"array":typeof x],["Bytes",bytes(new TextEncoder().encode(v).length)]])}
 else if(kind==="csv"){var rows=parseCSV(v),cols=rows.length?Math.max.apply(null,rows.map(function(r){return r.length})):0,st=csvStats(rows);if(/distinct count/i.test(name)||/cardinality/i.test(name))out.textContent=st.map(function(s){return s.column+"\\t"+s.unique}).join("\\n");else if(/missing/i.test(name)||/data quality/i.test(name))out.textContent=st.map(function(s){return s.column+"\\tMissing: "+s.missing+"\\tPresent: "+s.present}).join("\\n");else if(/numeric range/i.test(name)||/percentile|median|variance|standard deviation|numeric stats/i.test(name)){out.textContent=st.map(function(s,i){var a=rows.slice(1).map(function(r){return Number(r[i])}).filter(isFinite);if(!a.length)return s.column+"\\tNon-numeric";a.sort(function(x,y){return x-y});var mean=a.reduce(function(x,y){return x+y},0)/a.length;var variance=a.reduce(function(x,y){return x+(y-mean)*(y-mean)},0)/a.length;return s.column+"\\tmin="+a[0]+"\\tmedian="+percentile(a,.5)+"\\tmax="+a[a.length-1]+"\\tmean="+mean.toFixed(4)+"\\tstd="+Math.sqrt(variance).toFixed(4)}).join("\\n")}else out.textContent=JSON.stringify({rows:rows.length,columns:cols,headers:rows[0]||[],profile:st,sample:rows.slice(0,6)},null,2);metrics([["Rows",rows.length],["Columns",cols],["Delimiter",detect(v)]])}
 else if(kind==="hash"){var p=/crc32/i.test(name)?Promise.resolve(crc32(v)) : cryptoHash(v,/sha-384|sri/i.test(name)?"SHA-384":"SHA-256");p.then(function(h){out.textContent=h;metrics([["Bytes",bytes(new TextEncoder().encode(v).length)],["Algorithm",/crc32/i.test(name)?"CRC-32":/sha-384|sri/i.test(name)?"SHA-384":"SHA-256"]]);setState("Complete",true)});return}
