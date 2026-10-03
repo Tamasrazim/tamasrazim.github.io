@@ -2635,8 +2635,8 @@ function newProject(sampleId) {
   S.name = 'Untitled';
   S.meta = defaultMeta();
   S.results = S.results || [];
-  var src = srcOf(sampleId || 'sample-starter');
   var node = document.getElementById(sampleId || 'sample-starter');
+  var src = node.textContent;
   S.name = node.dataset.title || 'Untitled';
   S.meta.title = S.name;
   S.meta.composition = 'Comp 1';
