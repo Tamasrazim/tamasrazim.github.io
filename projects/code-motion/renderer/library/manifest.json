@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "libraries": [
+    "./prism/library.js",
+    "./living-emojis/library.js",
+    "./web-icons/library.js"
+  ]
+}
