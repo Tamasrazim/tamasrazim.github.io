@@ -4148,7 +4148,6 @@ function renderFrame(time, frame, fps, ctx, width, height) {
   ctx.stroke();
 }
 </script>
-<script type="module" src="./library/library.js"></script>
 <script>
 /* ============================================================
    Code -> Motion — application shell
@@ -4159,6 +4158,95 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 var SELF_SOURCE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
 var APP_VERSION = '1.1.0';
 var SOFTWARE = 'TRILYVA — Tamasrazim';
+
+var LIBRARY_PASSWORD_SHA256 = '3bd1f2466c65178aa8f4adee2365e1f722dfcc87ed1ca0f6eca472c6c3b5a4b8';
+var libraryModulePromise = null;
+
+function sha256Hex(text) {
+  if (!window.crypto || !window.crypto.subtle) return Promise.reject(new Error('Secure password verification is unavailable in this browser.'));
+  return window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(text))).then(function (buf) {
+    return Array.prototype.map.call(new Uint8Array(buf), function (b) {
+      return b.toString(16).padStart(2, '0');
+    }).join('');
+  });
+}
+
+function loadProtectedLibraryModule() {
+  if (window.TRILYVA_LIBRARY && window.TRILYVA_LIBRARY.ready) return window.TRILYVA_LIBRARY.ready;
+  if (!libraryModulePromise) {
+    libraryModulePromise = import('./library/library.js?v=' + encodeURIComponent(APP_VERSION))
+      .then(function () {
+        if (!window.TRILYVA_LIBRARY || !window.TRILYVA_LIBRARY.ready) {
+          throw new Error('Library registry did not initialize.');
+        }
+        return window.TRILYVA_LIBRARY.ready;
+      });
+  }
+  return libraryModulePromise;
+}
+
+function openLibraryPasswordGate() {
+  var body = document.createElement('div');
+  body.style.cssText = 'display:flex;flex-direction:column;gap:10px;min-height:0;';
+  body.innerHTML =
+    '<div class="warnbox"><b>LIBRARY ACCESS</b>Enter the access code to load the TRILYVA libraries. The code is required again after a new page load.</div>' +
+    '<label style="font:10px var(--mono);letter-spacing:.12em;color:var(--mut);">ACCESS CODE' +
+    '<input id="libraryPass" type="password" inputmode="numeric" autocomplete="off" spellcheck="false" style="display:block;width:100%;margin-top:7px;background:#09090b;border:1px solid var(--rule);padding:9px 10px;font:12px var(--mono);color:var(--ink);outline:none;" aria-label="Library access code">' +
+    '</label>' +
+    '<div id="libraryPassMsg" class="note">Library data is not requested until access is granted.</div>';
+
+  function status(msg) {
+    var n = body.querySelector('#libraryPassMsg');
+    if (n) n.textContent = msg;
+  }
+
+  function attempt() {
+    var input = body.querySelector('#libraryPass');
+    var value = input ? input.value : '';
+    if (!value) {
+      status('Enter the access code.');
+      if (input) input.focus();
+      return;
+    }
+    status('VERIFYING…');
+    var actions = body.closest('#modalBox').querySelector('#modalFoot');
+    Array.prototype.forEach.call(actions.querySelectorAll('button'), function (b) { b.disabled = true; });
+    sha256Hex(value).then(function (hash) {
+      if (hash !== LIBRARY_PASSWORD_SHA256) {
+        throw new Error('INCORRECT ACCESS CODE');
+      }
+      status('ACCESS GRANTED · LOADING LIBRARY INDEX…');
+      return loadProtectedLibraryModule();
+    }).then(function () {
+      closeModal();
+      openTrilyvaLibrary();
+    }).catch(function (err) {
+      Array.prototype.forEach.call(actions.querySelectorAll('button'), function (b) { b.disabled = false; });
+      status(String(err && err.message || err));
+      if (input) {
+        input.select();
+        input.focus();
+      }
+    });
+  }
+
+  openModal('TRILYVA / LIBRARY ACCESS', body, [
+    { label: 'Cancel', fn: closeModal },
+    { label: 'Unlock', solid: true, fn: attempt }
+  ]);
+
+  var input = body.querySelector('#libraryPass');
+  if (input) input.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Enter') {
+      ev.preventDefault();
+      attempt();
+    }
+  });
+}
+
+function openProtectedTrilyvaLibrary() {
+  openLibraryPasswordGate();
+}
 
 var $ = function (s, r) { return (r || document).querySelector(s); };
 var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
@@ -7577,7 +7665,7 @@ var ACTS = {
   open: openProjectDialog,
   save: function (ev) { saveProject(ev && ev.shiftKey ? 'as' : null); },
   samples: samplesDialog,
-  library: openTrilyvaLibrary,
+  library: openProtectedTrilyvaLibrary,
   run: function () { run(); },
   render: function () {
     showTab('p-render'); showMobile('rail');
