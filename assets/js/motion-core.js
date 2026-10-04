@@ -126,13 +126,13 @@ add('.hero-title','hero',1.35);
 add('.hero-kicker,.hero-alias,.hero-copy,.hero-actions','hero',.7);
 add('.about-copy','about',.48);
 add('.id-card','card',1.15);
-add('.project-card','card',1.05);
+/* Project cards stay static during pointer motion; CSS hover handles interaction. */
 add('.social-link','social',.8);
 add('.contact-panel','contact',.78);
 add('.renderer-mini','surface',.82);
 add('.brand,.header-contact,.button,.project-link,.copy','control',.5);
 
-qa('.hero-title,.section-title,.social-name,.project-body h3,.id-name,.id-alias,.email-link').forEach(function(el){
+qa('.hero-title,.section-title,.social-name,.id-name,.id-alias,.email-link').forEach(function(el){
   if(el.dataset.motionText)return;
   el.dataset.motionText='1';
   el.classList.add('motion-text');
