@@ -4174,13 +4174,40 @@ function sha256Hex(text) {
 function loadProtectedLibraryModule() {
   if (window.TRILYVA_LIBRARY && window.TRILYVA_LIBRARY.ready) return window.TRILYVA_LIBRARY.ready;
   if (!libraryModulePromise) {
-    libraryModulePromise = import('./library/library.js?v=' + encodeURIComponent(APP_VERSION))
-      .then(function () {
+    libraryModulePromise = new Promise(function (resolve, reject) {
+      var existing = document.querySelector('script[data-trilyva-library]');
+      if (existing) {
+        existing.addEventListener('load', waitForRegistry, { once: true });
+        existing.addEventListener('error', function () {
+          libraryModulePromise = null;
+          reject(new Error('Library module failed to load.'));
+        }, { once: true });
+        waitForRegistry();
+        return;
+      }
+
+      var script = document.createElement('script');
+      script.type = 'module';
+      script.src = './library/library.js?v=' + encodeURIComponent(APP_VERSION);
+      script.dataset.trilyvaLibrary = '1';
+      script.onload = waitForRegistry;
+      script.onerror = function () {
+        libraryModulePromise = null;
+        reject(new Error('Library module failed to load.'));
+      };
+      document.head.appendChild(script);
+
+      function waitForRegistry() {
         if (!window.TRILYVA_LIBRARY || !window.TRILYVA_LIBRARY.ready) {
-          throw new Error('Library registry did not initialize.');
+          setTimeout(waitForRegistry, 0);
+          return;
         }
-        return window.TRILYVA_LIBRARY.ready;
-      });
+        window.TRILYVA_LIBRARY.ready.then(resolve, function (err) {
+          libraryModulePromise = null;
+          reject(err);
+        });
+      }
+    });
   }
   return libraryModulePromise;
 }
