@@ -2,12 +2,6 @@
 
 Browser-first deterministic code-driven animation workspace.
 
-## Public TRILYVA
-
-Public entry: `https://tamasrazim.github.io/projects/trilyva/`.
-
-The public route uses a separate demo build and does not load the creator library directory.
-
 ## Canonical routes
 
 Project page:
@@ -16,7 +10,7 @@ Project page:
 
 Workspace:
 
-`https://tamasrazim.github.io/projects/code-motion/renderer/` (creator/internal workspace)
+`https://tamasrazim.github.io/projects/code-motion/renderer/`
 
 The workspace entry is:
 
