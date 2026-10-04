@@ -7682,6 +7682,35 @@ var DOCS = [
   '<p>Errors say what happened, where, why and what to do about it. A compile error points at a line; a runtime error names the frame and the time as well as the line, because the same code can be fine at frame 0 and divide by zero at frame 900. If the preview and the export disagree, the cause is almost always non-determinism — search your code for <code>Math.random</code>, <code>Date</code>, or a variable that accumulates between frames.</p>'
 ].join('');
 
+function trilyvaDocsSeen() {
+  try { return localStorage.getItem('trilyva.docs.seen') === '1'; } catch (_) { return false; }
+}
+
+function markTrilyvaDocsSeen() {
+  try { localStorage.setItem('trilyva.docs.seen', '1'); } catch (_) {}
+}
+
+function openFirstLoadDocs() {
+  var body = document.createElement('div');
+  body.className = 'doc';
+  body.innerHTML =
+    '<div class="verified"><b>TRILYVA QUICK START</b><span>READ THIS ONCE</span><span>DOCS</span></div>' +
+    '<p class="note">The full documentation is shown below. It is the same content as the DOCS panel, so this popup stays in sync with the built-in manual.</p>' +
+    DOCS;
+
+  openModal('TRILYVA / DOCS', body, [
+    { label: 'Open Docs Tab', fn: function () { closeModal(); showTab('p-docs'); } },
+    { label: 'Got it', solid: true, fn: closeModal }
+  ]);
+  markTrilyvaDocsSeen();
+}
+
+function maybeShowFirstLoadDocs() {
+  if (!trilyvaDocsSeen()) {
+    setTimeout(openFirstLoadDocs, 250);
+  }
+}
+
 /* ============================================================
    Actions
    ============================================================ */
@@ -7848,6 +7877,7 @@ function boot() {
   }).then(function () {
     refreshDiag();
     $('#stMsg').textContent = Engine.bootNote + ' Press Run after editing, or Render when you are ready.';
+    maybeShowFirstLoadDocs();
   }).catch(function (e) {
     $('#stDot').className = 'dot';
     $('#stEngine').textContent = 'engine failed';
