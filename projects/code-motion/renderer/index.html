@@ -7601,10 +7601,6 @@ var ACTS = {
   copyMeta: function () { copyText(JSON.stringify(metadataReceipt(), null, 2), 'metadata copied as JSON'); },
   exportProject: exportProject,
   importProject: function () { $('#filePick').click(); },
-  saveSelf: function () {
-    download(new Blob([SELF_SOURCE], { type: 'text/html' }), 'trilyva-tamasrazim.html');
-    $('#stMsg').textContent = 'downloaded the application as a single HTML file';
-  },
   recheck: function () { refreshDiag(); $('#stMsg').textContent = 're-checked capabilities'; },
   play: togglePlay,
   stepBack: function () { pause(); setFrame(S.frame - 1); },
