@@ -36,3 +36,18 @@ For browser testing, serve the repository through a local HTTP server rather tha
 - Website: https://tamasrazim.github.io/
 - GitHub: https://github.com/Tamasrazim
 - LinkedIn: https://www.linkedin.com/in/Tamasrazim/
+
+## Licensing
+
+This repository is **source-available, not open source**. Original Tamasrazim code,
+libraries, datasets, vectors, project files and creative content are proprietary.
+
+Do not copy, redistribute, mirror, republish, modify for redistribution, extract
+libraries/datasets for reuse, or incorporate original source or assets into another
+project without written permission.
+
+See [LICENSE](./LICENSE), [NOTICE.md](./NOTICE.md), and the project-specific notices
+in [LICENSES/](./LICENSES/).
+
+The canonical repository structure is documented in
+[docs/REPOSITORY-STRUCTURE.md](./docs/REPOSITORY-STRUCTURE.md).
