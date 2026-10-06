@@ -1,31 +1,29 @@
 #!/usr/bin/env python3
 """
-TRILYVA 1B keyword-stream generator.
+TRILYVA — 1,000,000,000 UNIQUE keyword-token generator.
 
-Generates a deterministic stream without loading the corpus into RAM or
-storing a multi-gigabyte text file in Git. Default output is stdout.
+Every emitted token is unique because it contains the absolute corpus index.
+The semantic prefix is selected deterministically from the keyword vocabulary;
+the zero-padded decimal index is the uniqueness key.
+
+The repository stores shard manifests, not the literal 1B corpus. A complete
+1B-entry text corpus would be many gigabytes and is not suitable for GitHub.
 
 Examples:
-  python tools/generate_1b_keywords.py --count 1000000 > KEYWORDS.txt
-  python tools/generate_1b_keywords.py --start 0 --count 1000000000 > KEYWORDS_1B.txt
-
-The second command intentionally creates a huge local file. It is NOT suitable
-for committing to GitHub; GitHub blocks regular files >100 MiB.
+  python tools/generate_1b_keywords.py --count 1000000 > KEYWORDS_0001.txt
+  python tools/generate_1b_keywords.py --shard 1 > KEYWORDS_0001.txt
+  python tools/generate_1b_keywords.py --start 999000000 --count 1000000 > KEYWORDS_1000.txt
 """
 
 from __future__ import annotations
-
 import argparse
-import hashlib
-import itertools
 import sys
 
-CATEGORIES = [
-    "abstract","animals","arts","backgrounds","beauty","business","education",
-    "food","healthcare","holidays","industrial","interiors","nature","objects",
-    "outdoor","people","religion","science","symbols","sports","technology",
-    "transportation","vintage","web","design",
-]
+CATEGORIES = """
+abstract animals arts background beauty business education food healthcare
+holidays industrial interiors nature objects outdoor people religion science
+symbols sports technology transportation vintage web design
+""".split()
 
 SUBJECTS = """
 animation artwork image graphic composition concept visual pattern texture
@@ -52,59 +50,51 @@ silky matte glossy crystalline sculptural fluid experimental playful serene
 CONTEXTS = """
 web website app application software interface ui ux dashboard mobile desktop
 online digital technology stock commercial marketing branding presentation
-publishing print packaging social media business corporate education portfolio
+publishing print packaging socialmedia business corporate education portfolio
 campaign template wallpaper poster content media communication professional
 creative artistic decorative seasonal festive travel lifestyle isolated centered
 transparent colorful vector svg eps illustration motion graphics animation
 """.split()
 
-TEMPLATES = (
-    "{category} {subject} {style}",
-    "{subject} {style} {context}",
-    "{category} {subject} {context}",
-    "{subject} {style} {context}",
-)
+STEMS = []
+for word in CATEGORIES + SUBJECTS + STYLES + CONTEXTS:
+    if word not in STEMS:
+        STEMS.append(word)
 
-def build_lexicon() -> list[str]:
-    words = []
-    for w in itertools.chain(CATEGORIES, SUBJECTS, STYLES, CONTEXTS):
-        if w not in words:
-            words.append(w)
-    return words
+TOTAL = 1_000_000_000
+SHARDS = 1_000
+SHARD_SIZE = 1_000_000
 
-def token(index: int, words: list[str], template: str) -> str:
-    # Deterministic selection; no random state and no giant in-memory corpus.
-    digest = hashlib.blake2s(index.to_bytes(8, "big"), digest_size=16).digest()
-    a = int.from_bytes(digest[0:4], "big")
-    b = int.from_bytes(digest[4:8], "big")
-    c = int.from_bytes(digest[8:12], "big")
-    d = int.from_bytes(digest[12:16], "big")
-    return template.format(
-        category=CATEGORIES[a % len(CATEGORIES)],
-        subject=words[b % len(words)],
-        style=STYLES[c % len(STYLES)],
-        context=CONTEXTS[d % len(CONTEXTS)],
-    )
+def unique_token(index: int) -> str:
+    """Return a globally unique synthetic keyword token for 0 <= index < 1B."""
+    if not 0 <= index < TOTAL:
+        raise ValueError("index outside 1B corpus")
+    stem = STEMS[index % len(STEMS)]
+    return f"{stem}{index:010d}"
+
+def emit(start: int, count: int) -> None:
+    end = start + count
+    if start < 0 or count < 0 or end > TOTAL:
+        raise SystemExit("requested range must stay inside 0..999,999,999")
+    out = sys.stdout
+    for index in range(start, end):
+        out.write(unique_token(index))
+        out.write("\n")
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Stream deterministic TRILYVA keyword phrases.")
-    ap.add_argument("--start", type=int, default=0)
+    ap = argparse.ArgumentParser()
+    group = ap.add_mutually_exclusive_group()
+    group.add_argument("--shard", type=int, help="1..1000; emits exactly 1,000,000 unique tokens")
+    group.add_argument("--start", type=int, help="absolute starting index")
     ap.add_argument("--count", type=int, default=1_000_000)
-    ap.add_argument("--sep", choices=["newline", "space"], default="newline")
     args = ap.parse_args()
 
-    if args.start < 0 or args.count < 0:
-        raise SystemExit("--start and --count must be >= 0")
-    if args.start + args.count > 1_000_000_000:
-        raise SystemExit("Requested range exceeds the 1,000,000,000-entry corpus")
-
-    words = build_lexicon()
-    templates = len(TEMPLATES)
-
-    out = sys.stdout
-    write_sep = "\n" if args.sep == "newline" else " "
-    for n in range(args.start, args.start + args.count):
-        out.write(token(n, words, TEMPLATES[n % templates]) + write_sep)
+    if args.shard is not None:
+        if not 1 <= args.shard <= SHARDS:
+            raise SystemExit("--shard must be 1..1000")
+        emit((args.shard - 1) * SHARD_SIZE, SHARD_SIZE)
+    else:
+        emit(args.start or 0, args.count)
 
 if __name__ == "__main__":
     main()
