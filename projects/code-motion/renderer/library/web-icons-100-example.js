@@ -40,7 +40,7 @@ function makeCode(icons){
     "    ctx.globalAlpha=.88+.08*pulse;ctx.strokeStyle=g;ctx.lineWidth=1.25/scale;ctx.stroke(ghost);",
     "    ctx.restore();",
     "    ctx.globalAlpha=.55+.15*pulse;",
-    "    ctx.fillStyle='hsl('+(rgb+100)+',90%,86%)';ctx.font=Math.max(8,Math.min(13,cellH*.095))+'px system-ui,sans-serif';
+    "    ctx.fillStyle='hsl('+(rgb+100)+',90%,86%)';ctx.font=Math.max(8,Math.min(13,cellH*.095))+'px system-ui,sans-serif';",
     "    ctx.textAlign='center';ctx.textBaseline='top';",
     "    ctx.fillText(icons[i].t,cx,cy+cellH*.34);",
     "  }",
