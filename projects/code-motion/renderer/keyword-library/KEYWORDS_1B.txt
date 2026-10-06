@@ -1,0 +1,25 @@
+TRILYVA KEYWORDS — 1 BILLION CAPACITY
+======================================
+
+Requested corpus size: 1,000,000,000 deterministic keyword phrases.
+
+The literal corpus is intentionally NOT committed to GitHub. GitHub blocks
+regular repository files above 100 MiB, enforces a 2 GB push limit, and
+recommends generated data be stored outside Git. A 1B-entry UTF-8 text corpus
+would exceed those practical repository limits by a very large margin.
+
+Generator:
+  tools/generate_1b_keywords.py
+
+Generate one million locally:
+  python tools/generate_1b_keywords.py --count 1000000 > KEYWORDS.txt
+
+Generate the full billion locally (very large):
+  python tools/generate_1b_keywords.py --count 1000000000 > KEYWORDS_1B.txt
+
+Generate in ranges for parallel/local processing:
+  python tools/generate_1b_keywords.py --start 0 --count 10000000
+  python tools/generate_1b_keywords.py --start 10000000 --count 10000000
+
+The generator is deterministic: the same start/count produces the same stream.
+It does not load the billion-entry corpus into memory.
