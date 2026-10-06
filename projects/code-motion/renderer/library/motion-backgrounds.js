@@ -36,7 +36,7 @@ SHAPES.PINWHEEL="for(var i=0;i<N;i++){var ang=i/N*TAU+a,r1=s*.05,r2=s*(.12+.28*(
 
 function makeCode(shape,motion,h1,h2,n,seed){
   var H='hsla('+h1+',78%,72%,.82)',H2='hsla('+h2+',76%,64%,.62)';
-  var body=SHAPES[shape].replace(/\bH\b/g,'H').replace(/\bH2\b/g,'H2').replace(/\bN\b/g,'N').replace(/\bs\b/g,'s').replace(/\ba\b/g,'a').replace(/\bcx\b/g,'cx').replace(/\bcy\b/g,'cy').replace(/\bdrift\b/g,'drift').replace(/\bpulse\b/g,'pulse');
+  var body=SHAPES[shape].replace(/\bH\b/g,JSON.stringify(H)).replace(/\bH2\b/g,JSON.stringify(H2));
   return 'function renderFrame(time, frame, fps, ctx, width, height){\n'+
     '  var p=(motion&&typeof motion.loopProgress==="number")?motion.loopProgress:0;var t=p*TAU,s=Math.min(width,height);\n'+
     '  ctx.fillStyle="#040406";ctx.fillRect(0,0,width,height);ctx.globalCompositeOperation="screen";\n'+
