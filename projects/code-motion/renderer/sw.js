@@ -1,4 +1,4 @@
-const CACHE = 'tamasrazim-trilyva-pwa-v44';
+const CACHE = 'tamasrazim-trilyva-pwa-v45';
 const CORE = [
   './',
   './index.html',
@@ -9,9 +9,7 @@ const CORE = [
   './library/prismflower.js',
   './library/photorealistic-rose.js',
   './library/living-emojis.js',
-  './library/web-icons.js',
   './library/motion-backgrounds.js',
-    "./library/web-icons-150-data.js",
   './library/prism-data.js',
   './library/prism-web-icons.json'
 ];
