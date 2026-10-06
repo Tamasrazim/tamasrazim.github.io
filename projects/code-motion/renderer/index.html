@@ -1626,7 +1626,7 @@ select.mini{
           </div>
           <div class="sec">
             <h4>RENDER</h4>
-            <button class="btn solid" data-act="startRender">Render every frame</button>
+            <div class="btn-row"><button class="btn solid" data-act="startRender">Render Current</button><button class="btn solid" data-act="renderAll">Render All</button></div>
             <div class="btn-row">
               <button class="btn" data-act="queueAdd">Add to queue</button>
               <button class="btn" data-act="cancelRender" id="cancelBtn" disabled>Cancel</button>
@@ -4156,7 +4156,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 'use strict';
 
 var SELF_SOURCE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-var APP_VERSION = '1.1.0';
+var APP_VERSION = '1.2.0';
 var SOFTWARE = 'TRILYVA — Tamasrazim';
 
 var LIBRARY_PASSWORD_SHA256 = '8825ae35e4685a47fcfb8a76ccfc42cf2037a78ada722c115856840b200d90f5';
@@ -4212,7 +4212,7 @@ function loadProtectedLibraryModule() {
   return libraryModulePromise;
 }
 
-function openLibraryPasswordGate() {
+function openLibraryPasswordGate(afterAccess) {
   var body = document.createElement('div');
   body.style.cssText = 'display:flex;flex-direction:column;gap:10px;min-height:0;';
   body.innerHTML =
@@ -4239,14 +4239,12 @@ function openLibraryPasswordGate() {
     var actions = body.closest('#modalBox').querySelector('#modalFoot');
     Array.prototype.forEach.call(actions.querySelectorAll('button'), function (b) { b.disabled = true; });
     sha256Hex(value).then(function (hash) {
-      if (hash !== LIBRARY_PASSWORD_SHA256) {
-        throw new Error('INCORRECT ACCESS CODE');
-      }
+      if (hash !== LIBRARY_PASSWORD_SHA256) throw new Error('INCORRECT ACCESS CODE');
       status('ACCESS GRANTED · LOADING LIBRARY INDEX…');
       return loadProtectedLibraryModule();
     }).then(function () {
       closeModal();
-      openTrilyvaLibrary();
+      (afterAccess || openTrilyvaLibrary)();
     }).catch(function (err) {
       Array.prototype.forEach.call(actions.querySelectorAll('button'), function (b) { b.disabled = false; });
       status(String(err && err.message || err));
@@ -4272,7 +4270,11 @@ function openLibraryPasswordGate() {
 }
 
 function openProtectedTrilyvaLibrary() {
-  openLibraryPasswordGate();
+  openLibraryPasswordGate(openTrilyvaLibrary);
+}
+
+function openProtectedTrilyvaRenderAll() {
+  openLibraryPasswordGate(openRenderAllLibrary);
 }
 
 var $ = function (s, r) { return (r || document).querySelector(s); };
@@ -4730,37 +4732,52 @@ async function loadTrilyvaPrismLibrary(){
   return trilyvaPrismCache;
 }
 function trilyvaLibraryEscape(v){return String(v??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
-async function trilyvaLoadLibraryCode(title,code){
-  const name=String(title||'untitled').trim()||'untitled';
-  const source=String(code||'').replace(/\r/g,'');
-  if(!source.trim()){
-    $('#stMsg').textContent='Library item has no executable render code.';
-    return {ok:false};
+async function trilyvaLoadLibraryCode(title, code, item, opts) {
+  opts = opts || {};
+  var name = String(title || 'untitled').trim() || 'untitled';
+  var source = String(code || '').replace(/\r/g, '');
+  if (!source.trim()) {
+    $('#stMsg').textContent = 'Library item has no executable render code.';
+    return { ok: false };
   }
-  S.name=name;
-  $('#projName').value=S.name;
-  if(!S.comp) S.comp=CORE.composition({});
-  S.meta=merge(defaultMeta(),S.meta||{});
-  S.meta.title=name;
-  S.meta.composition=S.meta.composition||'Comp 1';
-  S.frame=0;
-  S.compiled=false;
-  S.lastError=null;
+  S.name = name;
+  $('#projName').value = S.name;
+  if (!S.comp) S.comp = CORE.composition({});
+
+  var patch = {};
+  if (item) {
+    ['width','height','fps','duration','loopDuration','speed','background','seed'].forEach(function (k) {
+      if (item[k] !== undefined && item[k] !== null) patch[k] = item[k];
+    });
+    if (item.loop !== undefined) patch.loop = !!item.loop;
+    if (item.transparent !== undefined) patch.transparent = !!item.transparent;
+  }
+  S.comp = CORE.composition(merge(S.comp || {}, patch));
+
+  S.meta = merge(defaultMeta(), S.meta || {});
+  S.meta.title = name;
+  S.meta.composition = S.meta.composition || 'Comp 1';
+  if (item && item.description) S.meta.description = String(item.description);
+  S.frame = 0;
+  S.compiled = false;
+  S.lastError = null;
   edSetValue(source);
-  S.code=source;
+  S.code = source;
   syncMetaUI();
   syncFileName();
   markDirty(true);
-  const result=await run();
-  if(result&&result.ok){
-    closeModal();
-    $('#stMsg').textContent='Loaded library item · '+name;
+
+  var result = await run();
+  if (result && result.ok) {
+    if (!opts.keepModal) closeModal();
+    $('#stMsg').textContent = 'Loaded library item · ' + name;
     setStage('IDLE');
-  }else{
-    $('#stMsg').textContent='Library item failed to compile · '+name;
+  } else {
+    $('#stMsg').textContent = 'Library item failed to compile · ' + name;
   }
-  return result||{ok:false};
+  return result || { ok: false };
 }
+
 function openTrilyvaLibrary(){
   var body=document.createElement('div');
   body.style.cssText='display:flex;flex-direction:column;gap:9px;min-height:0;';
@@ -4833,7 +4850,7 @@ function openTrilyvaLibrary(){
         text.innerHTML='<h5>'+trilyvaLibraryEscape(x.title||'Untitled')+'</h5><p>'+trilyvaLibraryEscape(x.id||('item-'+o.i))+'</p>';
         var load=document.createElement('button');
         load.className='x'; load.type='button'; load.textContent='LOAD';
-        function activate(){trilyvaLoadLibraryCode(x.title,x.code).catch(function(e){$('#stMsg').textContent='Library load failed · '+String(e.message||e);});}
+        function activate(){trilyvaLoadLibraryCode(x.title,x.code,x).catch(function(e){$('#stMsg').textContent='Library load failed · '+String(e.message||e);});}
         it.onclick=function(ev){if(ev.target===load||load.contains(ev.target))return;activate();};
         it.addEventListener('pointerup',function(ev){
           if(ev.pointerType!=='mouse' && !(ev.target===load||load.contains(ev.target))) activate();
@@ -4869,6 +4886,285 @@ function openTrilyvaLibrary(){
   }).catch(function(e){
     body.innerHTML='<div class="empty">LIBRARY INDEX FAILED<br><br>'+trilyvaLibraryEscape(e.message)+'</div>';
   });
+}
+
+/* ============================================================
+   Render All — library batch renderer
+   ============================================================ */
+function openRenderAllLibrary() {
+  var body = document.createElement('div');
+  body.style.cssText = 'display:flex;flex-direction:column;gap:10px;min-height:0;';
+  openModal('TRILYVA / RENDER ALL · CHOOSE LIBRARY', body, [{ label: 'Close', fn: closeModal }]);
+
+  var registry = window.TRILYVA_LIBRARY;
+  if (!registry) {
+    body.innerHTML = '<div class="empty">LIBRARY REGISTRY NOT READY</div>';
+    return;
+  }
+
+  body.innerHTML = '<div class="empty">LOADING LIBRARY INDEX…</div>';
+  registry.ready.then(function () {
+    var libs = registry.all();
+    if (!libs.length) {
+      body.innerHTML = '<div class="empty">NO LIBRARIES REGISTERED</div>';
+      return;
+    }
+
+    var intro = document.createElement('div');
+    intro.className = 'note';
+    intro.textContent = 'Choose a library. TRILYVA will load every animation in it, render them one-by-one with the current output settings, verify each result, and package the completed files into one ZIP.';
+    var list = document.createElement('div');
+    list.className = 'list';
+    list.style.cssText = 'max-height:54vh;overflow:auto;';
+
+    libs.forEach(function (lib) {
+      var it = document.createElement('div');
+      it.className = 'it';
+      it.style.cursor = 'pointer';
+
+      var text = document.createElement('div');
+      text.style.cssText = 'min-width:0;flex:1;';
+      text.innerHTML = '<h5>' + trilyvaLibraryEscape(lib.title || lib.id) + '</h5><p>' +
+        trilyvaLibraryEscape(lib.description || 'TRILYVA library') + '</p>';
+
+      var choose = document.createElement('button');
+      choose.className = 'x';
+      choose.type = 'button';
+      choose.textContent = 'CHOOSE';
+
+      function pick() {
+        choose.disabled = true;
+        list.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
+        list.innerHTML = '<div class="empty">LOADING ' + trilyvaLibraryEscape(lib.title) + '…</div>';
+        Promise.resolve(lib.load()).then(function (items) {
+          var usable = (items || []).filter(function (x) { return x && x.code; });
+          if (!usable.length) throw new Error('This library contains no renderable animation entries.');
+          openRenderAllConfirm(lib, usable);
+        }).catch(function (e) {
+          list.innerHTML = '<div class="empty">LIBRARY LOAD FAILED<br><br>' + trilyvaLibraryEscape(e.message || e) + '</div>';
+        });
+      }
+
+      it.onclick = function (ev) {
+        if (ev.target === choose || choose.contains(ev.target)) return;
+        pick();
+      };
+      choose.onclick = function (ev) { ev.preventDefault(); ev.stopPropagation(); pick(); };
+      it.append(text, choose);
+      list.appendChild(it);
+    });
+
+    body.replaceChildren(intro, list);
+  }).catch(function (e) {
+    body.innerHTML = '<div class="empty">LIBRARY INDEX FAILED<br><br>' + trilyvaLibraryEscape(e.message || e) + '</div>';
+  });
+}
+
+function openRenderAllConfirm(lib, items) {
+  var body = document.createElement('div');
+  var twelve = items.filter(function (x) {
+    return Number(x.duration) === 12 && x.loop === true && Number(x.loopDuration) === 12;
+  }).length;
+  body.appendChild(elHTML(
+    '<div class="verified"><b>RENDER ALL</b><span>' + items.length + ' ITEMS</span><span>' + twelve + ' × 12 S LOOP</span><span>' +
+    esc(lib.title || lib.id) + '</span></div>' +
+    '<p class="note">Current output: <b>' + esc(S.exportFormat.toUpperCase()) + '</b> · ' +
+    S.comp.width + '×' + S.comp.height + ' · ' + S.comp.fps + ' fps. ' +
+    (S.exportFormat === 'dir' ? 'PNG·DIR is converted to PNG·ZIP for batch packaging.' : 'Each result is verified before it enters the batch ZIP.') +
+    '</p>' +
+    '<p class="note">The batch is sequential and can be cancelled between items. A partial batch keeps the completed files and writes a manifest describing what finished.</p>'
+  ));
+
+  openModal('TRILYVA / RENDER ALL · ' + (lib.title || lib.id), body, [
+    { label: 'Back', fn: function () { closeModal(); openRenderAllLibrary(); } },
+    { label: 'Render All', solid: true, fn: function () { closeModal(); renderAllLibrary(lib, items); } },
+    { label: 'Cancel', fn: closeModal }
+  ]);
+}
+
+async function renderAllLibrary(lib, items) {
+  if (S.rendering) return;
+  S.queueStop = false;
+
+  var batchFormat = S.exportFormat === 'dir' ? 'zip' : S.exportFormat;
+  var startedAt = new Date().toISOString();
+  var completed = [];
+  var failed = [];
+  var cancelled = false;
+
+  var body = document.createElement('div');
+  var head = document.createElement('div');
+  head.innerHTML = '<div class="verified"><b>RENDER ALL</b><span id="batchPos">0 / ' + items.length + '</span><span>' +
+    esc(lib.title || lib.id) + '</span></div>';
+  var status = document.createElement('div');
+  status.id = 'batchStatus';
+  status.className = 'note';
+  status.textContent = 'Preparing first animation…';
+  var bar = document.createElement('div');
+  bar.className = 'prog';
+  bar.innerHTML = '<i style="width:0%"></i>';
+  var log = document.createElement('div');
+  log.className = 'list';
+  log.style.cssText = 'max-height:40vh;overflow:auto;';
+  body.append(head, status, bar, log);
+
+  function addLine(textValue, good) {
+    var it = document.createElement('div');
+    it.className = 'it';
+    it.innerHTML = '<div style="flex:1"><h5>' + esc(textValue) + '</h5><p>' + (good ? 'VERIFIED' : 'FAILED / CANCELLED') + '</p></div>';
+    log.prepend(it);
+  }
+  function cancelBatch() {
+    S.queueStop = true;
+    if (S.rendering) Engine.api.cancel();
+    status.textContent = 'Cancellation requested…';
+  }
+
+  openModal('TRILYVA / RENDER ALL · RUNNING', body, [
+    { label: 'Cancel Batch', fn: cancelBatch }
+  ]);
+
+  for (var i = 0; i < items.length; i++) {
+    if (S.queueStop) { cancelled = true; break; }
+
+    var item = items[i];
+    var itemName = String(item.title || item.id || ('Item ' + (i + 1)));
+    $('#batchPos').textContent = i + ' / ' + items.length;
+    status.textContent = 'Loading ' + itemName + '…';
+    bar.querySelector('i').style.width = ((i / items.length) * 100).toFixed(2) + '%';
+
+    var loaded;
+    try {
+      loaded = await trilyvaLoadLibraryCode(itemName, item.code, item, { keepModal: true });
+    } catch (e) {
+      loaded = { ok: false, error: e };
+    }
+
+    if (!loaded || !loaded.ok) {
+      failed.push({ index: i, id: item.id, title: itemName, reason: loaded && loaded.error ? String(loaded.error.message || loaded.error) : 'compile failed' });
+      addLine(itemName, false);
+      continue;
+    }
+
+    if (S.queueStop) { cancelled = true; break; }
+
+    var job = buildJob({ exportFormat: batchFormat });
+    job.label = itemName;
+    job.metadata.title = itemName;
+    job.metadata.description = String(item.description || job.metadata.description || '');
+    job.fileName = slugify(itemName) + '_' + job.composition.width + 'x' + job.composition.height + '_' +
+      job.composition.fps + 'fps_12s' + (batchFormat === 'mp4' ? '.mp4' : batchFormat === 'webm' ? '.webm' : '.zip');
+
+    status.textContent = 'Rendering ' + itemName + ' · ' + job.composition.width + '×' + job.composition.height + ' · ' +
+      job.composition.fps + ' fps · 12 s';
+
+    var result;
+    try {
+      result = await startRender(job, { silent: true, batch: true });
+    } catch (e) {
+      result = { ok: false, error: e };
+    }
+
+    if (!result || !result.ok) {
+      if (result && result.cancelled) {
+        cancelled = true;
+        addLine(itemName, false);
+        break;
+      }
+      failed.push({
+        index: i, id: item.id, title: itemName,
+        reason: result && result.error ? String(result.error.message || result.error) : 'render failed'
+      });
+      addLine(itemName, false);
+      continue;
+    }
+
+    var blob = result.blob || null;
+    if (!blob) {
+      failed.push({ index: i, id: item.id, title: itemName, reason: 'render returned no downloadable blob' });
+      addLine(itemName, false);
+      continue;
+    }
+
+    completed.push({
+      index: i, id: item.id, title: itemName, fileName: job.fileName,
+      bytes: blob.size, verification: result.verify ? result.verify.status : 'UNKNOWN', blob: blob,
+      width: job.composition.width, height: job.composition.height, fps: job.composition.fps, duration: job.composition.duration
+    });
+    addLine(itemName, true);
+    status.textContent = 'Completed ' + (i + 1) + ' / ' + items.length + ' · ' + itemName;
+    bar.querySelector('i').style.width = (((i + 1) / items.length) * 100).toFixed(2) + '%';
+  }
+
+  var zip = null;
+  var zipError = null;
+  try {
+    zip = new ENC.ZipWriter();
+
+    var manifest = {
+      format: 'TRILYVA_RENDER_ALL_BATCH',
+      version: 1,
+      libraryId: lib.id,
+      libraryTitle: lib.title,
+      startedAt: startedAt,
+      finishedAt: new Date().toISOString(),
+      requestedItems: items.length,
+      completedItems: completed.length,
+      failedItems: failed.length,
+      cancelled: cancelled,
+      outputFormat: batchFormat,
+      composition: completed.length ? {
+        width: completed[0].width,
+        height: completed[0].height,
+        fps: completed[0].fps,
+        duration: completed[0].duration
+      } : null,
+      items: completed.map(function (x) {
+        return { index: x.index, id: x.id, title: x.title, fileName: x.fileName, bytes: x.bytes, verification: x.verification };
+      }),
+      failures: failed
+    };
+
+    zip.addBytes('BATCH-MANIFEST.json', ENC.utf8(JSON.stringify(manifest, null, 2)));
+    zip.addBytes('README.txt', ENC.utf8(
+      'TRILYVA — Render All\\r\\n' +
+      'Library: ' + lib.title + '\\r\\n' +
+      'Requested: ' + items.length + '\\r\\n' +
+      'Completed: ' + completed.length + '\\r\\n' +
+      'Failed: ' + failed.length + '\\r\\n' +
+      'Cancelled: ' + (cancelled ? 'yes' : 'no') + '\\r\\n' +
+      'Each completed media file was produced and verified by TRILYVA before being added to this archive.\\r\\n'
+    ));
+
+    for (var z = 0; z < completed.length; z++) {
+      var bytes = new Uint8Array(await completed[z].blob.arrayBuffer());
+      zip.add(completed[z].fileName, completed[z].blob, ENC.crc32Final(ENC.crc32(bytes)), bytes.length);
+      completed[z].blob = null;
+    }
+    zip = zip.finish();
+  } catch (e) {
+    zipError = String(e && e.message || e);
+  }
+
+  closeModal();
+
+  if (!zipError && zip) {
+    var batchName = slugify(lib.title || 'trilyva-render-all') + '_render-all.zip';
+    download(zip, batchName);
+    var summary = el('div');
+    summary.innerHTML = '<div class="verified"><b>BATCH COMPLETE</b><span>' + completed.length + ' VERIFIED</span><span>' +
+      failed.length + ' FAILED</span>' + (cancelled ? '<span>CANCELLED</span>' : '') + '</div>' +
+      '<p class="note">The completed batch ZIP was downloaded automatically as <code>' + esc(batchName) + '</code>.</p>' +
+      (failed.length ? '<p class="note">Failed entries are listed in <code>BATCH-MANIFEST.json</code>.</p>' : '');
+    openModal('TRILYVA / RENDER ALL · COMPLETE', summary, [
+      { label: 'Download ZIP again', solid: true, fn: function () { download(zip, batchName); } },
+      { label: 'Close', fn: closeModal }
+    ]);
+  } else {
+    var failBody = elHTML('<div class="warnbox"><b>BATCH PACKAGE FAILED</b>' + esc(zipError || 'Unknown packaging failure') +
+      '</div><p class="note">' + completed.length + ' individual result(s) finished before packaging. The archive could not be built.</p>');
+    openModal('TRILYVA / RENDER ALL · PACKAGE ERROR', failBody, [{ label: 'Close', fn: closeModal }]);
+  }
 }
 
 /* ============================================================
@@ -6257,7 +6553,7 @@ function startRenderNow(job, opts) {
   S.renderStart = Date.now();
   S.activeJob = job;
   $('#cancelBtn').disabled = false;
-  $$('[data-act=startRender], [data-act=queueRun]').forEach(function (b) { b.disabled = true; });
+  $('[data-act=startRender], [data-act=renderAll], [data-act=queueRun]').forEach(function (b) { b.disabled = true; });
   $('#stDot').className = 'dot busy';
   showTab('p-render');
   clearLog();
@@ -6310,7 +6606,7 @@ function finishRender(job, result, opts) {
   S.rendering = false;
   S.activeJob = null;
   $('#cancelBtn').disabled = true;
-  $$('[data-act=startRender], [data-act=queueRun]').forEach(function (b) { b.disabled = false; });
+  $('[data-act=startRender], [data-act=renderAll], [data-act=queueRun]').forEach(function (b) { b.disabled = false; });
   $('#stDot').className = 'dot ok';
   var prog = $('#rprog');
   prog.classList.remove('scan');
@@ -6372,8 +6668,7 @@ function finishRender(job, result, opts) {
     blob: result.blob || null, dir: !!result.dir,
     log: (S.logLines || []).slice()
   };
-  S.results.unshift(rec);
-  renderResults();
+  if (!opts.batch) { S.results.unshift(rec); renderResults(); }
   $('#stMsg').textContent = 'render complete — ' + v.status + ' · ' + fmtBytes(st.bytes);
   if (!opts.silent) showCompletion(rec);
   return result;
@@ -7727,6 +8022,7 @@ var ACTS = {
     showTab('p-render'); showMobile('rail');
     withCompiled().then(function (ok) { if (ok) analyseJob(); });
   },
+  renderAll: function () { openProtectedTrilyvaRenderAll(); },
   startRender: function () { withCompiled().then(function (ok) { if (ok) startRender(buildJob()); }); },
   cancelRender: cancelRender,
   analyze: analyseJob,
