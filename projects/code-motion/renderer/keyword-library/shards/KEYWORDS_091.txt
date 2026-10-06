@@ -1,0 +1,6 @@
+TRILYVA UNIQUE KEYWORD SHARD 091
+entries=10000000
+global_start=900000000
+global_end=909999999
+uniqueness=absolute decimal index suffix; no duplicate token is generated across shards
+generate=python tools/generate_1b_keywords.py --start 900000000 --count 10000000
