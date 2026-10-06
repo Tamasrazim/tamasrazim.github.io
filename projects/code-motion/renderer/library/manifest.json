@@ -1,11 +1,11 @@
 {
-  "version": 8,
+  "version": 6,
   "libraries": [
     "./living-emojis.js",
     "./motion-backgrounds.js",
     "./photorealistic-rose.js",
     "./prismflower.js",
-    "./web-icons.js",
-    "./web-icons-100-example.js"
+    "./web-icons-100-example.js",
+    "./web-icons.js"
   ]
 }
