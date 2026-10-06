@@ -5057,6 +5057,7 @@ var BatchVector = (function () {
   function svg(scene){
     var defs=[],gid=0,seen=new Map(),body=[];
     function paint(v){
+      if(v==null)return 'none';
       if(v instanceof Gradient){
         if(!seen.has(v)){seen.set(v,'grad-'+(++gid));defs.push(svgGradient(defs,v,seen.get(v)));}
         return 'url(#'+seen.get(v)+')';
@@ -5096,7 +5097,7 @@ var BatchVector = (function () {
       '%%DocumentProcessColors: RGB',
       '%%Pages: 1',
       '%%EndComments',
-      'gsave'
+      'gsave','0 0 0 setrgbcolor'
     ];
     /* EPS is opaque; flatten the visual colours against the same black canvas. */
     out.push('0 0 '+scene.W+' '+scene.H+' rectfill');
