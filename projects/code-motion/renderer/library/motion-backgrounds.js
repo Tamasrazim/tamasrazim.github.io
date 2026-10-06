@@ -38,7 +38,7 @@ function makeCode(shape,motion,h1,h2,n,seed){
   var H='hsla('+h1+',78%,72%,.82)',H2='hsla('+h2+',76%,64%,.62)';
   var body=SHAPES[shape].replace(/\bH\b/g,JSON.stringify(H)).replace(/\bH2\b/g,JSON.stringify(H2));
   return 'function renderFrame(time, frame, fps, ctx, width, height){\n'+
-    '  var p=(motion&&typeof motion.loopProgress==="number")?motion.loopProgress:0;var t=p*TAU,s=Math.min(width,height);\n'+
+    '  var loopFrames=Math.max(1,Math.round(fps*12));var p=((frame%loopFrames)+loopFrames)%loopFrames/loopFrames;var t=p*TAU,s=Math.min(width,height);\n'+
     '  ctx.fillStyle="#040406";ctx.fillRect(0,0,width,height);ctx.globalCompositeOperation="screen";\n'+
     '  '+motionVars(motion,seed)+'var N='+n+',cx=width*.5,cy=height*.5;\n'+
     '  '+body+'\n  ctx.globalCompositeOperation="source-over";\n}';
