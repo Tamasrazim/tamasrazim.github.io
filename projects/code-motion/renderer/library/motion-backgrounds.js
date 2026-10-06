@@ -1,10 +1,10 @@
 /* TRILYVA — MOTION BACKGROUNDS | 100 genuinely different 12-second loop designs */
 
 function motionVars(m,seed){
-  if(m==='ORBIT') return 'var a=t*(.6+'+(seed%7)*.055)+seed*.01,drift=Math.sin(t*1.7+seed)*s*.035,pulse=.92+.08*Math.sin(t*2+seed);';
+  if(m==='ORBIT') return 'var a=t*(.6+'+((seed%7)*.055).toFixed(3)+')+seed*.01,drift=Math.sin(t*1.7+seed)*s*.035,pulse=.92+.08*Math.sin(t*2+seed);';
   if(m==='BREATHE') return 'var a=t*.45+seed*.13,drift=Math.sin(t*.9+seed)*s*.055,pulse=.68+.32*(.5+.5*Math.sin(t*2+seed));';
   if(m==='SWEEP') return 'var a=t*.28+seed*.09,drift=Math.sin(t*1.25+seed)*s*.16,pulse=.82+.18*(.5+.5*Math.sin(t*3+seed));';
-  return 'var a=t*(.9+'+(seed%5)*.07)+seed*.07,drift=Math.cos(t*1.1+seed)*s*.045,pulse=.86+.14*(.5+.5*Math.sin(t*2.5+seed));';
+  return 'var a=t*(.9+'+((seed%5)*.07).toFixed(3)+')+seed*.07,drift=Math.cos(t*1.1+seed)*s*.045,pulse=.86+.14*(.5+.5*Math.sin(t*2.5+seed));';
 }
 
 var SHAPES={};
