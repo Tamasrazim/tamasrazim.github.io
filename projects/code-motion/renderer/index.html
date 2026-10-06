@@ -4889,281 +4889,473 @@ function openTrilyvaLibrary(){
 }
 
 /* ============================================================
-   Render All — library batch renderer
+   Render All — five-file asset batch
    ============================================================ */
-function openRenderAllLibrary() {
-  var body = document.createElement('div');
-  body.style.cssText = 'display:flex;flex-direction:column;gap:10px;min-height:0;';
-  openModal('TRILYVA / RENDER ALL · CHOOSE LIBRARY', body, [{ label: 'Close', fn: closeModal }]);
+var BatchVector = (function () {
+  'use strict';
 
-  var registry = window.TRILYVA_LIBRARY;
-  if (!registry) {
-    body.innerHTML = '<div class="empty">LIBRARY REGISTRY NOT READY</div>';
-    return;
+  var colorCanvas = document.createElement('canvas');
+  colorCanvas.width = colorCanvas.height = 1;
+  var colorCtx = colorCanvas.getContext('2d');
+
+  function clamp01(v){return Math.max(0,Math.min(1,Number(v)||0));}
+  function identity(){return [1,0,0,1,0,0];}
+  function mul(a,b){return[
+    a[0]*b[0]+a[2]*b[1],a[1]*b[0]+a[3]*b[1],
+    a[0]*b[2]+a[2]*b[3],a[1]*b[2]+a[3]*b[3],
+    a[0]*b[4]+a[2]*b[5]+a[4],a[1]*b[4]+a[3]*b[5]+a[5]
+  ];}
+  function apply(m,x,y){return[m[0]*x+m[2]*y+m[4],m[1]*x+m[3]*y+m[5]];}
+  function fmt(n){return Number(n).toFixed(3).replace(/\.000$/,'').replace(/(\.\d*?)0+$/,'$1');}
+  function escaped(s){return String(s).replace(/[&<>"]/g,function(c){return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':'&quot;';});}
+  function colorValue(v){
+    if(v && typeof v==='object' && v.kind) return v;
+    try{
+      colorCtx.fillStyle='#000';
+      colorCtx.fillStyle=String(v||'#000');
+      return colorCtx.fillStyle;
+    }catch(_){return '#000000';}
   }
-
-  body.innerHTML = '<div class="empty">LOADING LIBRARY INDEX…</div>';
-  registry.ready.then(function () {
-    var libs = registry.all();
-    if (!libs.length) {
-      body.innerHTML = '<div class="empty">NO LIBRARIES REGISTERED</div>';
-      return;
+  function rgb(v){
+    if(v && v.kind)return rgb(v.sample(.5));
+    var s=colorValue(v),m;
+    if(/^#[0-9a-f]{6}$/i.test(s))return{
+      r:parseInt(s.slice(1,3),16)/255,g:parseInt(s.slice(3,5),16)/255,b:parseInt(s.slice(5,7),16)/255,a:1
+    };
+    if(/^#[0-9a-f]{3}$/i.test(s))return{
+      r:parseInt(s[1]+s[1],16)/255,g:parseInt(s[2]+s[2],16)/255,b:parseInt(s[3]+s[3],16)/255,a:1
+    };
+    m=s.match(/^rgba?\(([^)]+)\)/i);
+    if(m){
+      var p=m[1].split(',').map(Number);
+      return{r:clamp01(p[0]/255),g:clamp01(p[1]/255),b:clamp01(p[2]/255),a:p.length>3?clamp01(p[3]):1};
     }
+    return{r:0,g:0,b:0,a:1};
+  }
+  function hex(v){var c=rgb(v);return '#'+[c.r,c.g,c.b].map(function(x){return Math.round(x*255).toString(16).padStart(2,'0');}).join('');}
+  function flatBlack(v,opacity){
+    var c=rgb(v),a=clamp01((c.a==null?1:c.a)*(opacity==null?1:opacity));
+    return{r:c.r*a,g:c.g*a,b:c.b*a};
+  }
 
-    var intro = document.createElement('div');
-    intro.className = 'note';
-    intro.textContent = 'Choose a library. TRILYVA will load every animation in it, render them one-by-one with the current output settings, verify each result, and package the completed files into one ZIP.';
-    var list = document.createElement('div');
-    list.className = 'list';
-    list.style.cssText = 'max-height:54vh;overflow:auto;';
-
-    libs.forEach(function (lib) {
-      var it = document.createElement('div');
-      it.className = 'it';
-      it.style.cursor = 'pointer';
-
-      var text = document.createElement('div');
-      text.style.cssText = 'min-width:0;flex:1;';
-      text.innerHTML = '<h5>' + trilyvaLibraryEscape(lib.title || lib.id) + '</h5><p>' +
-        trilyvaLibraryEscape(lib.description || 'TRILYVA library') + '</p>';
-
-      var choose = document.createElement('button');
-      choose.className = 'x';
-      choose.type = 'button';
-      choose.textContent = 'CHOOSE';
-
-      function pick() {
-        choose.disabled = true;
-        list.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
-        list.innerHTML = '<div class="empty">LOADING ' + trilyvaLibraryEscape(lib.title) + '…</div>';
-        Promise.resolve(lib.load()).then(function (items) {
-          var usable = (items || []).filter(function (x) { return x && x.code; });
-          if (!usable.length) throw new Error('This library contains no renderable animation entries.');
-          openRenderAllConfirm(lib, usable);
-        }).catch(function (e) {
-          list.innerHTML = '<div class="empty">LIBRARY LOAD FAILED<br><br>' + trilyvaLibraryEscape(e.message || e) + '</div>';
-        });
+  function Gradient(kind,args){
+    this.kind=kind;this.args=args;this.stops=[];
+  }
+  Gradient.prototype.addColorStop=function(o,c){this.stops.push({offset:clamp01(o),color:c});this.stops.sort(function(a,b){return a.offset-b.offset;});return this;};
+  Gradient.prototype.sample=function(t){
+    if(!this.stops.length)return{r:0,g:0,b:0,a:1};
+    var u=clamp01(t);
+    if(u<=this.stops[0].offset)return rgb(this.stops[0].color);
+    var last=this.stops[this.stops.length-1];
+    if(u>=last.offset)return rgb(last.color);
+    for(var i=1;i<this.stops.length;i++){
+      var a=this.stops[i-1],b=this.stops[i];
+      if(u<=b.offset){
+        var q=(u-a.offset)/Math.max(.000001,b.offset-a.offset),ca=rgb(a.color),cb=rgb(b.color);
+        return{r:ca.r+(cb.r-ca.r)*q,g:ca.g+(cb.g-ca.g)*q,b:ca.b+(cb.b-ca.b)*q,a:ca.a+(cb.a-ca.a)*q};
       }
+    }
+    return rgb(last.color);
+  };
 
-      it.onclick = function (ev) {
-        if (ev.target === choose || choose.contains(ev.target)) return;
-        pick();
-      };
-      choose.onclick = function (ev) { ev.preventDefault(); ev.stopPropagation(); pick(); };
-      it.append(text, choose);
-      list.appendChild(it);
+  function Scene(W,H){this.W=W;this.H=H;this.ops=[];}
+  function Recorder(scene,W,H){
+    this.s=scene;this.canvas={width:W,height:H};this.m=identity();this.stack=[];this.path=[];
+    this.fillStyle='#000';this.strokeStyle='#000';this.lineWidth=1;this.globalAlpha=1;
+    this.globalCompositeOperation='source-over';this.filter='none';
+  }
+  Recorder.prototype.save=function(){this.stack.push({m:this.m.slice(),fill:this.fillStyle,stroke:this.strokeStyle,width:this.lineWidth,alpha:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter});};
+  Recorder.prototype.restore=function(){var q=this.stack.pop();if(q){this.m=q.m;this.fillStyle=q.fill;this.strokeStyle=q.stroke;this.lineWidth=q.width;this.globalAlpha=q.alpha;this.globalCompositeOperation=q.comp;this.filter=q.filter;}};
+  Recorder.prototype.translate=function(x,y){this.m=mul(this.m,[1,0,0,1,+x||0,+y||0]);};
+  Recorder.prototype.rotate=function(a){var c=Math.cos(+a||0),s=Math.sin(+a||0);this.m=mul(this.m,[c,s,-s,c,0,0]);};
+  Recorder.prototype.scale=function(x,y){x=+x||0;y=y==null?x:+y||0;this.m=mul(this.m,[x,0,0,y,0,0]);};
+  Recorder.prototype.transform=function(a,b,c,d,e,f){this.m=mul(this.m,[+a||0,+b||0,+c||0,+d||0,+e||0,+f||0]);};
+  Recorder.prototype.setTransform=function(a,b,c,d,e,f){this.m=[+a||0,+b||0,+c||0,+d||0,+e||0,+f||0];};
+  Recorder.prototype.beginPath=function(){this.path=[];};
+  Recorder.prototype.moveTo=function(x,y){this.path.push(['M',+x||0,+y||0]);};
+  Recorder.prototype.lineTo=function(x,y){this.path.push(['L',+x||0,+y||0]);};
+  Recorder.prototype.bezierCurveTo=function(x1,y1,x2,y2,x3,y3){this.path.push(['C',+x1||0,+y1||0,+x2||0,+y2||0,+x3||0,+y3||0]);};
+  Recorder.prototype.quadraticCurveTo=function(x1,y1,x2,y2){
+    var last=null;
+    for(var i=this.path.length-1;i>=0;i--){if(this.path[i][0]!=='Z'){last=this.path[i];break;}}
+    var x0=last?last[last.length-2]:0,y0=last?last[last.length-1]:0;
+    this.bezierCurveTo(x0+(2/3)*(x1-x0),y0+(2/3)*(y1-y0),x2+(2/3)*(x1-x2),y2+(2/3)*(y1-y2),x2,y2);
+  };
+  Recorder.prototype.closePath=function(){this.path.push(['Z']);};
+  Recorder.prototype.arc=function(cx,cy,r,a0,a1,ccw){
+    var s=+a0||0,e=+a1||0;
+    if(!ccw){while(e<s)e+=Math.PI*2;if(e-s>Math.PI*2)e=s+Math.PI*2;}
+    else{while(e>s)e-=Math.PI*2;if(s-e>Math.PI*2)e=s-Math.PI*2;}
+    var steps=Math.max(8,Math.ceil(Math.abs(e-s)/(Math.PI/18)));
+    for(var i=0;i<=steps;i++){var a=s+(e-s)*i/steps,x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;if(i)this.lineTo(x,y);else this.moveTo(x,y);}
+  };
+  Recorder.prototype.ellipse=function(cx,cy,rx,ry,rot,a0,a1,ccw){
+    var s=+a0||0,e=a1==null?Math.PI*2:+a1;
+    if(!ccw){while(e<s)e+=Math.PI*2;if(e-s>Math.PI*2)e=s+Math.PI*2;}
+    else{while(e>s)e-=Math.PI*2;if(s-e>Math.PI*2)e=s-Math.PI*2;}
+    var rr=+rot||0,co=Math.cos(rr),si=Math.sin(rr),steps=Math.max(12,Math.ceil(Math.abs(e-s)/(Math.PI/24)));
+    for(var i=0;i<=steps;i++){
+      var a=s+(e-s)*i/steps,xx=Math.cos(a)*rx,yy=Math.sin(a)*ry;
+      var x=cx+xx*co-yy*si,y=cy+xx*si+yy*co;if(i)this.lineTo(x,y);else this.moveTo(x,y);
+    }
+  };
+  Recorder.prototype.roundRect=function(x,y,w,h,r){
+    r=Math.min(Math.abs(r||0),Math.abs(w)/2,Math.abs(h)/2);
+    this.beginPath();this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.lineTo(x+w,y+r);this.lineTo(x+w,y+h-r);this.lineTo(x+w-r,y+h);this.lineTo(x+r,y+h);this.lineTo(x,y+h-r);this.lineTo(x,y+r);this.closePath();
+  };
+  Recorder.prototype.createLinearGradient=function(a,b,c,d){return new Gradient('linear',[a,b,c,d]);};
+  Recorder.prototype.createRadialGradient=function(a,b,c,d,e,f){return new Gradient('radial',[a,b,c,d,e,f]);};
+  Recorder.prototype.clearRect=function(){/* transparent/no-op for still-vector capture */};
+  Recorder.prototype.fillRect=function(x,y,w,h){this.s.ops.push({t:'rect',x:+x||0,y:+y||0,w:+w||0,h:+h||0,fill:this.fillStyle,stroke:null,width:0,opacity:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter,m:this.m.slice()});};
+  Recorder.prototype.strokeRect=function(x,y,w,h){this.s.ops.push({t:'rect',x:+x||0,y:+y||0,w:+w||0,h:+h||0,fill:null,stroke:this.strokeStyle,width:+this.lineWidth||1,opacity:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter,m:this.m.slice()});};
+  Recorder.prototype.fill=function(){if(this.path.length)this.s.ops.push({t:'path',commands:this.path.slice(),fill:this.fillStyle,stroke:null,width:0,opacity:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter,m:this.m.slice()});};
+  Recorder.prototype.stroke=function(){if(this.path.length)this.s.ops.push({t:'path',commands:this.path.slice(),fill:null,stroke:this.strokeStyle,width:+this.lineWidth||1,opacity:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter,m:this.m.slice()});};
+
+  function sceneForCode(code,W,H,frame,time,loopProgress){
+    var scene=new Scene(W,H),ctx=new Recorder(scene,W,H);
+    var fn=new Function('time','frame','fps','ctx','width','height','motion','TAU',code+'\nif(typeof renderFrame==="function"){renderFrame(time,frame,fps,ctx,width,height,motion,TAU);}');
+    fn(time,frame,60,ctx,W,H,{loopProgress:loopProgress,scale:1},Math.PI*2);
+    return scene;
+  }
+  function stripBackground(code){
+    return String(code||'').replace(/ctx\.fillStyle="#040406";ctx\.fillRect\(0,0,width,height\);/g,'');
+  }
+
+  function commandsForOp(o){
+    if(o.t==='rect')return[['M',o.x,o.y],['L',o.x+o.w,o.y],['L',o.x+o.w,o.y+o.h],['L',o.x,o.y+o.h],['Z']];
+    return o.commands||[];
+  }
+  function transformCommands(cmds,m){
+    var out=[];
+    for(var i=0;i<cmds.length;i++){
+      var c=cmds[i];
+      if(c[0]==='M'||c[0]==='L'){var p=apply(m,c[1],c[2]);out.push([c[0],p[0],p[1]]);}
+      else if(c[0]==='C'){var p1=apply(m,c[1],c[2]),p2=apply(m,c[3],c[4]),p3=apply(m,c[5],c[6]);out.push(['C',p1[0],p1[1],p2[0],p2[1],p3[0],p3[1]]);}
+      else if(c[0]==='Z')out.push(['Z']);
+    }
+    return out;
+  }
+  function pathSvg(cmds){
+    return cmds.map(function(c){
+      if(c[0]==='M'||c[0]==='L')return c[0]+' '+fmt(c[1])+' '+fmt(c[2]);
+      if(c[0]==='C')return 'C '+c.slice(1).map(fmt).join(' ');
+      return 'Z';
+    }).join(' ');
+  }
+  function svgGradient(defs,g,id){
+    if(g.kind==='radial'){
+      var a=g.args;
+      var d='<radialGradient id="'+id+'" cx="'+fmt(a[3])+'" cy="'+fmt(a[4])+'" r="'+fmt(a[5])+'" fx="'+fmt(a[0])+'" fy="'+fmt(a[1])+'" gradientUnits="userSpaceOnUse">';
+      g.stops.forEach(function(s){var c=rgb(s.color);d+='<stop offset="'+fmt(s.offset*100)+'%" stop-color="'+hex(c)+'" stop-opacity="'+fmt(c.a)+'"/>';});
+      return d+'</radialGradient>';
+    }
+    var b=g.args;
+    var l='<linearGradient id="'+id+'" x1="'+fmt(b[0])+'" y1="'+fmt(b[1])+'" x2="'+fmt(b[2])+'" y2="'+fmt(b[3])+'" gradientUnits="userSpaceOnUse">';
+    g.stops.forEach(function(s2){var c2=rgb(s2.color);l+='<stop offset="'+fmt(s2.offset*100)+'%" stop-color="'+hex(c2)+'" stop-opacity="'+fmt(c2.a)+'"/>';});
+    return l+'</linearGradient>';
+  }
+  function svg(scene){
+    var defs=[],gid=0,seen=new Map(),body=[];
+    function paint(v){
+      if(v instanceof Gradient){
+        if(!seen.has(v)){seen.set(v,'grad-'+(++gid));defs.push(svgGradient(defs,v,seen.get(v)));}
+        return 'url(#'+seen.get(v)+')';
+      }
+      return hex(v);
+    }
+    scene.ops.forEach(function(o){
+      var m=o.m||identity(),cmds=transformCommands(commandsForOp(o),m);
+      if(!cmds.length)return;
+      var st='fill="'+paint(o.fill||null)+'" stroke="'+paint(o.stroke||null)+'" stroke-width="'+fmt(o.width||0)+'" opacity="'+fmt(o.opacity==null?1:o.opacity)+'"';
+      var extra=o.comp==='screen'?' style="mix-blend-mode:screen"':'';
+      if(o.t==='rect')body.push('<path d="'+pathSvg(cmds)+'" '+st+extra+'/>');
+      else body.push('<path d="'+pathSvg(cmds)+'" '+st+extra+'/>');
     });
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="'+scene.W+'" height="'+scene.H+'" viewBox="0 0 '+scene.W+' '+scene.H+'"><defs>'+
+      defs.join('')+'</defs>'+body.join('')+'</svg>';
+  }
 
-    body.replaceChildren(intro, list);
-  }).catch(function (e) {
-    body.innerHTML = '<div class="empty">LIBRARY INDEX FAILED<br><br>' + trilyvaLibraryEscape(e.message || e) + '</div>';
+  function eps(scene){
+    function psColor(v,opacity,background){
+      var c=flatBlack(v,opacity);
+      return fmt(c.r)+' '+fmt(c.g)+' '+fmt(c.b)+' setrgbcolor\n';
+    }
+    function psPath(cmds){
+      return cmds.map(function(c){
+        if(c[0]==='M'||c[0]==='L')return fmt(c[1])+' '+fmt(scene.H-c[2])+' '+(c[0]==='M'?'moveto':'lineto');
+        if(c[0]==='C')return c.slice(1).map(function(v,ix){return fmt(ix%2===0?v:scene.H-v);}).join(' ')+' curveto';
+        return 'closepath';
+      }).join('\n')+'\n';
+    }
+    var out=[
+      '%!PS-Adobe-3.0 EPSF-3.0',
+      '%%Creator: TRILYVA — Tamasrazim',
+      '%%Title: TRILYVA Vector Still',
+      '%%BoundingBox: 0 0 '+scene.W+' '+scene.H,
+      '%%HiResBoundingBox: 0 0 '+scene.W+' '+scene.H,
+      '%%DocumentProcessColors: RGB',
+      '%%Pages: 1',
+      '%%EndComments',
+      'gsave'
+    ];
+    /* EPS is opaque; flatten the visual colours against the same black canvas. */
+    out.push('0 0 '+scene.W+' '+scene.H+' rectfill');
+    out.push('0 0 0 setrgbcolor');
+    scene.ops.forEach(function(o){
+      var cmds=transformCommands(commandsForOp(o),o.m||identity());
+      if(!cmds.length)return;
+      if(o.fill){out.push(psColor(o.fill,o.opacity));out.push(psPath(cmds)+'fill');}
+      if(o.stroke){out.push(psColor(o.stroke,o.opacity));out.push(fmt(o.width||1)+' setlinewidth');out.push(psPath(cmds)+'stroke');}
+    });
+    out.push('grestore','showpage','%%EOF','');
+    return out.join('\n');
+  }
+
+  return {sceneForCode:sceneForCode,stripBackground:stripBackground,svg:svg,eps:eps};
+})();
+
+function trilyvaStockMetadata(item, stem, assets){
+  var baseKeywords=[
+    'motion background','abstract background','seamless loop','looping animation','animated background',
+    '12 second loop','procedural animation','procedural graphics','digital background','modern background',
+    'dark background','geometric motion','abstract motion','animated texture','visual backdrop',
+    'motion design','video background','creative background','digital art','graphic design',
+    'minimal background','luminous','glowing lines','dynamic pattern','smooth motion',
+    'flowing lines','geometric','abstract','technology','futuristic','contemporary','clean design',
+    'visual texture','moving background','loop animation','seamless animation','4K animation',
+    '60 fps','stock footage','design resource','presentation background','social media background','screen background'
+  ];
+  var titleWords=String(item.title||'').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  var keywords=[],seen={};
+  titleWords.concat(baseKeywords).forEach(function(k){
+    k=String(k).trim().replace(/\s+/g,' ');
+    if(k.length<2||seen[k])return;
+    seen[k]=1;keywords.push(k);
   });
+  keywords=keywords.slice(0,45);
+  while(keywords.length<45){var fill=['loop','animation','abstract visual','background design','digital wallpaper','motion graphic','creative asset','video backdrop'];for(var i=0;i<fill.length&&keywords.length<45;i++)if(!seen[fill[i]]){seen[fill[i]]=1;keywords.push(fill[i]);}}
+  var title=String(item.title||'Motion Background')+' — Seamless Motion';
+  if(title.length>70)title=title.slice(0,70);
+  var desc='Seamless 12-second procedural motion background with flowing geometric movement, luminous linework and a clean dark composition, created for video, design and digital projects.';
+  function csv(v){v=String(v==null?'':v);return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+  var row=[
+    stem+'.mp4',title,desc,keywords.join(','),
+    'Backgrounds/Textures', 'Yes','No','No'
+  ].map(csv).join(',');
+  return 'Filename,Title,Description,Keywords,Categories,Illustration,Mature Content,Editorial\r\n'+row+'\r\n';
 }
 
-function openRenderAllConfirm(lib, items) {
-  var body = document.createElement('div');
-  var twelve = items.filter(function (x) {
-    return Number(x.duration) === 12 && x.loop === true && Number(x.loopDuration) === 12;
-  }).length;
+async function renderTransparentStill(item){
+  var originalCode=S.code, originalComp=merge({},S.comp);
+  var tempComp=CORE.composition(merge(originalComp,{transparent:true,background:'#000000'}));
+  var stripped=BatchVector.stripBackground(originalCode);
+  var compiled=await Engine.api.compile(stripped,tempComp);
+  if(!compiled||!compiled.ok)throw new Error('Transparent PNG compile failed for '+item.title);
+  try{
+    var r=await Engine.api.renderOne(0,tempComp.width,tempComp.height);
+    if(!r||!r.ok)throw new Error((r&&r.error&&r.error.message)||'Transparent PNG render failed.');
+    var cv=document.createElement('canvas');cv.width=tempComp.width;cv.height=tempComp.height;
+    var g=cv.getContext('2d',{alpha:true});
+    if(r.bitmap){g.drawImage(r.bitmap,0,0);r.bitmap.close();}else if(r.canvas)g.drawImage(r.canvas,0,0);
+    return await new Promise(function(resolve,reject){cv.toBlob(function(b){b?resolve(b):reject(new Error('PNG encoding failed.'));},'image/png');});
+  }finally{
+    var restored=await Engine.api.compile(originalCode,originalComp);
+    if(!restored||!restored.ok)throw new Error('Failed to restore animation renderer after transparent PNG.');
+  }
+}
+
+function openRenderAllLibrary() {
+  var body=document.createElement('div');
+  body.style.cssText='display:flex;flex-direction:column;gap:9px;min-height:0;';
+  openModal('TRILYVA / RENDER ALL · CHOOSE LIBRARY',body,[{label:'Close',fn:closeModal}]);
+
+  var registry=window.TRILYVA_LIBRARY;
+  if(!registry){body.innerHTML='<div class="empty">LIBRARY REGISTRY NOT READY</div>';return;}
+  body.innerHTML='<div class="empty">LOADING LIBRARY INDEX…</div>';
+
+  registry.ready.then(function(){
+    var libs=registry.all();
+    if(!libs.length){body.innerHTML='<div class="empty">NO LIBRARIES REGISTERED</div>';return;}
+    var intro=el('div','note','Choose a library. Every animation will produce 5 assets: SVG, EPS, transparent PNG, full MP4 and one metadata CSV.');
+    var list=el('div','list');list.style.cssText='max-height:54vh;overflow:auto;';
+
+    libs.forEach(function(lib){
+      var it=el('div','it');it.style.cursor='pointer';
+      var textBox=document.createElement('div');textBox.style.cssText='min-width:0;flex:1;';
+      textBox.innerHTML='<h5>'+trilyvaLibraryEscape(lib.title||lib.id)+'</h5><p>'+trilyvaLibraryEscape(lib.description||'TRILYVA library')+'</p>';
+      var choose=el('button','x','CHOOSE');choose.type='button';
+
+      function pick(){
+        choose.disabled=true;list.querySelectorAll('button').forEach(function(b){b.disabled=true;});
+        list.innerHTML='<div class="empty">LOADING '+trilyvaLibraryEscape(lib.title)+'…</div>';
+        Promise.resolve(lib.load()).then(function(items){
+          var usable=(items||[]).filter(function(x){return x&&x.code;});
+          if(!usable.length)throw new Error('This library contains no renderable animation entries.');
+          openRenderAllConfirm(lib,usable);
+        }).catch(function(e){list.innerHTML='<div class="empty">LIBRARY LOAD FAILED<br><br>'+trilyvaLibraryEscape(e.message||e)+'</div>';});
+      }
+      it.onclick=function(ev){if(ev.target!==choose&&!choose.contains(ev.target))pick();};
+      choose.onclick=function(ev){ev.preventDefault();ev.stopPropagation();pick();};
+      it.append(textBox,choose);list.appendChild(it);
+    });
+    body.replaceChildren(intro,list);
+  }).catch(function(e){body.innerHTML='<div class="empty">LIBRARY INDEX FAILED<br><br>'+trilyvaLibraryEscape(e.message||e)+'</div>';});
+}
+
+function openRenderAllConfirm(lib,items){
+  var body=document.createElement('div');
+  var twelve=items.filter(function(x){return Number(x.duration)===12&&x.loop===true&&Number(x.loopDuration)===12;}).length;
   body.appendChild(elHTML(
-    '<div class="verified"><b>RENDER ALL</b><span>' + items.length + ' ITEMS</span><span>' + twelve + ' × 12 S LOOP</span><span>' +
-    esc(lib.title || lib.id) + '</span></div>' +
-    '<p class="note">Current output: <b>' + esc(S.exportFormat.toUpperCase()) + '</b> · ' +
-    S.comp.width + '×' + S.comp.height + ' · ' + S.comp.fps + ' fps. ' +
-    (S.exportFormat === 'dir' ? 'PNG·DIR is converted to PNG·ZIP for batch packaging.' : 'Each result is verified before it enters the batch ZIP.') +
-    '</p>' +
-    '<p class="note">The batch is sequential and can be cancelled between items. A partial batch keeps the completed files and writes a manifest describing what finished.</p>'
+    '<div class="verified"><b>RENDER ALL</b><span>'+items.length+' ITEMS</span><span>'+twelve+' × 12 S LOOP</span><span>5 OUTPUTS / ITEM</span></div>'+
+    '<p class="note">Each item produces <code>SVG</code>, <code>EPS</code>, <code>PNG</code> with transparent background, <code>MP4</code> for the full loop, and <code>metadata.csv</code>. SVG/EPS/PNG are frame 0 stills; MP4 is the complete 12-second animation.</p>'+
+    '<p class="note">Current MP4 settings: <b>'+esc(S.exportFormat.toUpperCase())+'</b> is ignored for the batch media target — Render All always writes MP4. Resolution: '+S.comp.width+'×'+S.comp.height+' · '+S.comp.fps+' fps.</p>'
   ));
-
-  openModal('TRILYVA / RENDER ALL · ' + (lib.title || lib.id), body, [
-    { label: 'Back', fn: function () { closeModal(); openRenderAllLibrary(); } },
-    { label: 'Render All', solid: true, fn: function () { closeModal(); renderAllLibrary(lib, items); } },
-    { label: 'Cancel', fn: closeModal }
+  openModal('TRILYVA / RENDER ALL · '+(lib.title||lib.id),body,[
+    {label:'Back',fn:function(){closeModal();openRenderAllLibrary();}},
+    {label:'Render All',solid:true,fn:function(){closeModal();renderAllLibrary(lib,items);}},
+    {label:'Cancel',fn:closeModal}
   ]);
 }
 
-async function renderAllLibrary(lib, items) {
-  if (S.rendering) return;
-  S.queueStop = false;
+async function renderAllLibrary(lib,items){
+  if(S.rendering)return;
+  S.queueStop=false;
 
-  var batchFormat = S.exportFormat === 'dir' ? 'zip' : S.exportFormat;
-  var startedAt = new Date().toISOString();
-  var completed = [];
-  var failed = [];
-  var cancelled = false;
+  var zip=new ENC.ZipWriter();
+  var startedAt=new Date().toISOString();
+  var completed=[],failed=[],cancelled=false;
+  var body=document.createElement('div');
+  var head=document.createElement('div');head.innerHTML='<div class="verified"><b>RENDER ALL</b><span id="batchPos">0 / '+items.length+'</span><span>5 FILES / ITEM</span><span>'+esc(lib.title||lib.id)+'</span></div>';
+  var status=el('div','note','Preparing first animation…');
+  var bar=el('div','prog');bar.innerHTML='<i style="width:0%"></i>';
+  var log=el('div','list');log.style.cssText='max-height:42vh;overflow:auto;';
+  body.append(head,status,bar,log);
 
-  var body = document.createElement('div');
-  var head = document.createElement('div');
-  head.innerHTML = '<div class="verified"><b>RENDER ALL</b><span id="batchPos">0 / ' + items.length + '</span><span>' +
-    esc(lib.title || lib.id) + '</span></div>';
-  var status = document.createElement('div');
-  status.id = 'batchStatus';
-  status.className = 'note';
-  status.textContent = 'Preparing first animation…';
-  var bar = document.createElement('div');
-  bar.className = 'prog';
-  bar.innerHTML = '<i style="width:0%"></i>';
-  var log = document.createElement('div');
-  log.className = 'list';
-  log.style.cssText = 'max-height:40vh;overflow:auto;';
-  body.append(head, status, bar, log);
-
-  function addLine(textValue, good) {
-    var it = document.createElement('div');
-    it.className = 'it';
-    it.innerHTML = '<div style="flex:1"><h5>' + esc(textValue) + '</h5><p>' + (good ? 'VERIFIED' : 'FAILED / CANCELLED') + '</p></div>';
-    log.prepend(it);
+  function addLine(title,good,note){
+    var it=el('div','it');it.innerHTML='<div style="flex:1"><h5>'+esc(title)+'</h5><p>'+esc(good?(note||'5/5 ASSETS CREATED & PACKAGED'):(note||'FAILED'))+'</p></div>';log.prepend(it);
   }
-  function cancelBatch() {
-    S.queueStop = true;
-    if (S.rendering) Engine.api.cancel();
-    status.textContent = 'Cancellation requested…';
-  }
+  function cancelBatch(){S.queueStop=true;if(S.rendering)Engine.api.cancel();status.textContent='Cancellation requested…';}
 
-  openModal('TRILYVA / RENDER ALL · RUNNING', body, [
-    { label: 'Cancel Batch', fn: cancelBatch }
-  ]);
+  openModal('TRILYVA / RENDER ALL · RUNNING',body,[{label:'Cancel Batch',fn:cancelBatch}]);
 
-  for (var i = 0; i < items.length; i++) {
-    if (S.queueStop) { cancelled = true; break; }
-
-    var item = items[i];
-    var itemName = String(item.title || item.id || ('Item ' + (i + 1)));
-    $('#batchPos').textContent = i + ' / ' + items.length;
-    status.textContent = 'Loading ' + itemName + '…';
-    bar.querySelector('i').style.width = ((i / items.length) * 100).toFixed(2) + '%';
+  for(var i=0;i<items.length;i++){
+    if(S.queueStop){cancelled=true;break;}
+    var item=items[i],itemName=String(item.title||item.id||('Item '+(i+1)));
+    $('#batchPos').textContent=i+' / '+items.length;
+    status.textContent='Preparing '+itemName+'…';
+    bar.querySelector('i').style.width=((i/items.length)*100).toFixed(2)+'%';
 
     var loaded;
-    try {
-      loaded = await trilyvaLoadLibraryCode(itemName, item.code, item, { keepModal: true });
-    } catch (e) {
-      loaded = { ok: false, error: e };
-    }
+    try{loaded=await trilyvaLoadLibraryCode(itemName,item.code,item,{keepModal:true});}
+    catch(e){loaded={ok:false,error:e};}
 
-    if (!loaded || !loaded.ok) {
-      failed.push({ index: i, id: item.id, title: itemName, reason: loaded && loaded.error ? String(loaded.error.message || loaded.error) : 'compile failed' });
-      addLine(itemName, false);
+    if(!loaded||!loaded.ok){
+      failed.push({index:i,id:item.id,title:itemName,stage:'compile',reason:loaded&&loaded.error?String(loaded.error.message||loaded.error):'compile failed'});
+      addLine(itemName,false,'compile failed');
       continue;
     }
 
-    if (S.queueStop) { cancelled = true; break; }
+    var stem=slugify(itemName);
+    if(!stem)stem='animation-'+String(i+1).padStart(3,'0');
+    var W=S.comp.width,H=S.comp.height,F=S.comp.fps;
+    var base=stem+'_'+W+'x'+H+'_'+F+'fps_12s';
+    var assets={};
 
-    var job = buildJob({ exportFormat: batchFormat });
-    job.label = itemName;
-    job.metadata.title = itemName;
-    job.metadata.description = String(item.description || job.metadata.description || '');
-    job.fileName = slugify(itemName) + '_' + job.composition.width + 'x' + job.composition.height + '_' +
-      job.composition.fps + 'fps_12s' + (batchFormat === 'mp4' ? '.mp4' : batchFormat === 'webm' ? '.webm' : '.zip');
+    try{
+      status.textContent='Building vector still · '+itemName+'…';
+      var vectorScene=BatchVector.sceneForCode(S.code,W,H,0,0,0);
+      assets.svg=BatchVector.svg(vectorScene);
+      assets.eps=BatchVector.eps(vectorScene);
 
-    status.textContent = 'Rendering ' + itemName + ' · ' + job.composition.width + '×' + job.composition.height + ' · ' +
-      job.composition.fps + ' fps · 12 s';
+      status.textContent='Rendering transparent PNG · '+itemName+'…';
+      assets.png=await renderTransparentStill(item);
 
-    var result;
-    try {
-      result = await startRender(job, { silent: true, batch: true });
-    } catch (e) {
-      result = { ok: false, error: e };
-    }
+      if(S.queueStop){cancelled=true;break;}
 
-    if (!result || !result.ok) {
-      if (result && result.cancelled) {
-        cancelled = true;
-        addLine(itemName, false);
-        break;
-      }
-      failed.push({
-        index: i, id: item.id, title: itemName,
-        reason: result && result.error ? String(result.error.message || result.error) : 'render failed'
+      var job=buildJob({exportFormat:'mp4',composition:merge(S.comp,{duration:12,loop:true,loopDuration:12})});
+      job.label=itemName;
+      job.metadata.title=itemName;
+      job.metadata.description=String(item.description||job.metadata.description||'');
+      job.fileName=base+'.mp4';
+      status.textContent='Rendering MP4 · '+itemName+' · '+W+'×'+H+' · '+F+' fps · 12 s';
+      var result=await startRender(job,{silent:true,batch:true});
+      if(!result||!result.ok)throw new Error(result&&result.error?String(result.error.message||result.error):'MP4 render failed.');
+      assets.mp4=result.blob;
+      var metadata=trilyvaStockMetadata(item,base,assets);
+      assets.metadata=metadata;
+
+      /* Package exactly five files inside one folder per animation. */
+      var dir=stem+'/';
+      var svgBytes=ENC.utf8(assets.svg),epsBytes=ENC.utf8(assets.eps),metaBytes=ENC.utf8(assets.metadata);
+      zip.addBytes(dir+base+'.svg',svgBytes);
+      zip.addBytes(dir+base+'.eps',epsBytes);
+      var pngBytes=new Uint8Array(await assets.png.arrayBuffer());
+      zip.add(dir+base+'_transparent.png',assets.png,ENC.crc32Final(ENC.crc32(pngBytes)),pngBytes.length);
+      var mp4Bytes=new Uint8Array(await assets.mp4.arrayBuffer());
+      zip.add(dir+base+'.mp4',assets.mp4,ENC.crc32Final(ENC.crc32(mp4Bytes)),mp4Bytes.length);
+      zip.addBytes(dir+'metadata.csv',metaBytes);
+
+      completed.push({
+        index:i,id:item.id,title:itemName,folder:stem,files:[
+          dir+base+'.svg',dir+base+'.eps',dir+base+'_transparent.png',dir+base+'.mp4',dir+'metadata.csv'
+        ],
+        bytes:{svg:svgBytes.length,eps:epsBytes.length,png:pngBytes.length,mp4:mp4Bytes.length,metadata:metaBytes.length},
+        verification:result.verify?result.verify.status:'UNKNOWN'
       });
-      addLine(itemName, false);
-      continue;
+      addLine(itemName,true,'5/5 ASSETS · SVG · EPS · PNG · MP4 · METADATA');
+      status.textContent='Completed '+(i+1)+' / '+items.length+' · '+itemName;
+    }catch(e){
+      failed.push({index:i,id:item.id,title:itemName,stage:'asset-batch',reason:String(e&&e.message||e)});
+      addLine(itemName,false,String(e&&e.message||e));
     }
 
-    var blob = result.blob || null;
-    if (!blob) {
-      failed.push({ index: i, id: item.id, title: itemName, reason: 'render returned no downloadable blob' });
-      addLine(itemName, false);
-      continue;
-    }
-
-    completed.push({
-      index: i, id: item.id, title: itemName, fileName: job.fileName,
-      bytes: blob.size, verification: result.verify ? result.verify.status : 'UNKNOWN', blob: blob,
-      width: job.composition.width, height: job.composition.height, fps: job.composition.fps, duration: job.composition.duration
-    });
-    addLine(itemName, true);
-    status.textContent = 'Completed ' + (i + 1) + ' / ' + items.length + ' · ' + itemName;
-    bar.querySelector('i').style.width = (((i + 1) / items.length) * 100).toFixed(2) + '%';
+    bar.querySelector('i').style.width=(((i+1)/items.length)*100).toFixed(2)+'%';
+    await new Promise(function(r){setTimeout(r,0);});
   }
 
-  var zip = null;
-  var zipError = null;
-  try {
-    zip = new ENC.ZipWriter();
+  var manifest={
+    format:'TRILYVA_RENDER_ALL_5_ASSETS',
+    version:2,
+    libraryId:lib.id,
+    libraryTitle:lib.title,
+    startedAt:startedAt,
+    finishedAt:new Date().toISOString(),
+    requestedItems:items.length,
+    completedItems:completed.length,
+    failedItems:failed.length,
+    cancelled:cancelled,
+    assetSet:['SVG still','EPS still','transparent PNG still','12-second MP4','metadata CSV'],
+    vectorStillFrame:0,
+    animations:{duration:12,fps:S.comp.fps},
+    resolution:{width:S.comp.width,height:S.comp.height},
+    completed:completed,
+    failures:failed
+  };
+  zip.addBytes('BATCH-MANIFEST.json',ENC.utf8(JSON.stringify(manifest,null,2)));
+  zip.addBytes('README.txt',ENC.utf8(
+    'TRILYVA — Render All / 5 assets per animation\r\n'+
+    'Library: '+lib.title+'\r\n'+
+    'Each animation folder contains: 1 SVG still, 1 EPS still, 1 transparent PNG still, 1 full 12-second MP4 and 1 metadata.csv.\r\n'+
+    'SVG / EPS / PNG represent frame 0. MP4 contains the complete loop.\r\n'+
+    'Completed: '+completed.length+'\r\nFailed: '+failed.length+'\r\nCancelled: '+(cancelled?'yes':'no')+'\r\n'
+  ));
 
-    var manifest = {
-      format: 'TRILYVA_RENDER_ALL_BATCH',
-      version: 1,
-      libraryId: lib.id,
-      libraryTitle: lib.title,
-      startedAt: startedAt,
-      finishedAt: new Date().toISOString(),
-      requestedItems: items.length,
-      completedItems: completed.length,
-      failedItems: failed.length,
-      cancelled: cancelled,
-      outputFormat: batchFormat,
-      composition: completed.length ? {
-        width: completed[0].width,
-        height: completed[0].height,
-        fps: completed[0].fps,
-        duration: completed[0].duration
-      } : null,
-      items: completed.map(function (x) {
-        return { index: x.index, id: x.id, title: x.title, fileName: x.fileName, bytes: x.bytes, verification: x.verification };
-      }),
-      failures: failed
-    };
-
-    zip.addBytes('BATCH-MANIFEST.json', ENC.utf8(JSON.stringify(manifest, null, 2)));
-    zip.addBytes('README.txt', ENC.utf8(
-      'TRILYVA — Render All\\r\\n' +
-      'Library: ' + lib.title + '\\r\\n' +
-      'Requested: ' + items.length + '\\r\\n' +
-      'Completed: ' + completed.length + '\\r\\n' +
-      'Failed: ' + failed.length + '\\r\\n' +
-      'Cancelled: ' + (cancelled ? 'yes' : 'no') + '\\r\\n' +
-      'Each completed media file was produced and verified by TRILYVA before being added to this archive.\\r\\n'
-    ));
-
-    for (var z = 0; z < completed.length; z++) {
-      var bytes = new Uint8Array(await completed[z].blob.arrayBuffer());
-      zip.add(completed[z].fileName, completed[z].blob, ENC.crc32Final(ENC.crc32(bytes)), bytes.length);
-      completed[z].blob = null;
-    }
-    zip = zip.finish();
-  } catch (e) {
-    zipError = String(e && e.message || e);
-  }
-
+  var zipBlob;
+  try{zipBlob=zip.finish();}catch(e){zipBlob=null;}
   closeModal();
 
-  if (!zipError && zip) {
-    var batchName = slugify(lib.title || 'trilyva-render-all') + '_render-all.zip';
-    download(zip, batchName);
-    var summary = el('div');
-    summary.innerHTML = '<div class="verified"><b>BATCH COMPLETE</b><span>' + completed.length + ' VERIFIED</span><span>' +
-      failed.length + ' FAILED</span>' + (cancelled ? '<span>CANCELLED</span>' : '') + '</div>' +
-      '<p class="note">The completed batch ZIP was downloaded automatically as <code>' + esc(batchName) + '</code>.</p>' +
-      (failed.length ? '<p class="note">Failed entries are listed in <code>BATCH-MANIFEST.json</code>.</p>' : '');
-    openModal('TRILYVA / RENDER ALL · COMPLETE', summary, [
-      { label: 'Download ZIP again', solid: true, fn: function () { download(zip, batchName); } },
-      { label: 'Close', fn: closeModal }
+  if(zipBlob){
+    var batchName=slugify(lib.title||'trilyva-render-all')+'_render-all_5-assets.zip';
+    download(zipBlob,batchName);
+    var summary=el('div');
+    summary.innerHTML='<div class="verified"><b>BATCH COMPLETE</b><span>'+completed.length+' × 5 ASSETS</span><span>'+failed.length+' FAILED</span>'+(cancelled?'<span>CANCELLED</span>':'')+'</div>'+
+      '<p class="note">Downloaded <code>'+esc(batchName)+'</code>. Each completed animation has exactly one SVG, EPS, transparent PNG, MP4 and metadata CSV.</p>';
+    openModal('TRILYVA / RENDER ALL · COMPLETE',summary,[
+      {label:'Download ZIP again',solid:true,fn:function(){download(zipBlob,batchName);}},
+      {label:'Close',fn:closeModal}
     ]);
-  } else {
-    var failBody = elHTML('<div class="warnbox"><b>BATCH PACKAGE FAILED</b>' + esc(zipError || 'Unknown packaging failure') +
-      '</div><p class="note">' + completed.length + ' individual result(s) finished before packaging. The archive could not be built.</p>');
-    openModal('TRILYVA / RENDER ALL · PACKAGE ERROR', failBody, [{ label: 'Close', fn: closeModal }]);
+  }else{
+    openModal('TRILYVA / RENDER ALL · PACKAGE ERROR',elHTML('<div class="warnbox"><b>BATCH PACKAGE FAILED</b>The ZIP could not be finalized.</div><p class="note">'+completed.length+' animation(s) completed before packaging.</p>'),[{label:'Close',fn:closeModal}]);
   }
 }
 
