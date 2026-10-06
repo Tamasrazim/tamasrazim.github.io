@@ -1,4 +1,4 @@
-const CACHE = 'tamasrazim-trilyva-pwa-v41';
+const CACHE = 'tamasrazim-trilyva-pwa-v42';
 const CORE = [
   './',
   './index.html',
