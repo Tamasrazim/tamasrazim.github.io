@@ -1,25 +1,49 @@
-TRILYVA KEYWORDS — 1 BILLION CAPACITY
-======================================
+TRILYVA KEYWORDS — 1 BILLION UNIQUE TOKENS
+============================================
 
-Requested corpus size: 1,000,000,000 deterministic keyword phrases.
+Corpus size: 1,000,000,000 globally unique keyword tokens.
 
-The literal corpus is intentionally NOT committed to GitHub. GitHub blocks
-regular repository files above 100 MiB, enforces a 2 GB push limit, and
-recommends generated data be stored outside Git. A 1B-entry UTF-8 text corpus
-would exceed those practical repository limits by a very large margin.
+LAYOUT
+------
+100 shard manifests are committed under:
+  keyword-library/shards/KEYWORDS_001.txt
+  ...
+  keyword-library/shards/KEYWORDS_100.txt
 
-Generator:
+Each shard represents exactly 10,000,000 entries.
+100 shards × 10,000,000 entries = 1,000,000,000 unique entries.
+
+UNIQUENESS
+----------
+Every generated token contains its absolute zero-padded 10-digit corpus index.
+Therefore index N can occur exactly once, and no token can collide across shards.
+
+Example:
+  abstract0000000000
+  prism0000000001
+  vector0000000002
+  ...
+  [absolute index makes each token unique]
+
+GENERATOR
+---------
   tools/generate_1b_keywords.py
 
-Generate one million locally:
-  python tools/generate_1b_keywords.py --count 1000000 > KEYWORDS.txt
+Generate shard 001:
+  python tools/generate_1b_keywords.py --start 0 --count 10000000 > KEYWORDS_001.txt
 
-Generate the full billion locally (very large):
-  python tools/generate_1b_keywords.py --count 1000000000 > KEYWORDS_1B.txt
+Generate shard 100:
+  python tools/generate_1b_keywords.py --start 990000000 --count 10000000 > KEYWORDS_100.txt
 
-Generate in ranges for parallel/local processing:
-  python tools/generate_1b_keywords.py --start 0 --count 10000000
-  python tools/generate_1b_keywords.py --start 10000000 --count 10000000
+Generate any 1,000,000-token sample:
+  python tools/generate_1b_keywords.py --count 1000000 > KEYWORDS_SAMPLE.txt
 
-The generator is deterministic: the same start/count produces the same stream.
-It does not load the billion-entry corpus into memory.
+IMPORTANT
+---------
+The literal 1B-entry text corpus is NOT committed to GitHub. The repository stores
+the deterministic generator and the 100 shard manifests because the full UTF-8
+corpus would be many gigabytes and is unsuitable for normal Git hosting.
+
+These are synthetic unique keyword tokens, not 1B distinct English dictionary words.
+The semantic prefix comes from TRILYVA's keyword vocabulary; the numeric suffix is
+the uniqueness mechanism.
