@@ -32,7 +32,7 @@ jobs:
                   continue
               modules.append("./" + p.name)
 
-          payload = {"version": 5, "libraries": modules}
+          payload = {"version": 6, "libraries": modules}
           (root / "manifest.json").write_text(
               json.dumps(payload, indent=2) + "\n",
               encoding="utf-8"
