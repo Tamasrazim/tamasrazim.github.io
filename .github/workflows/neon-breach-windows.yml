@@ -1,4 +1,4 @@
-name: NEON BREACH Windows Build
+name: NEON VAULT Windows Build
 
 on:
   push:
@@ -14,7 +14,6 @@ permissions:
 jobs:
   build-windows:
     runs-on: windows-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,20 +37,20 @@ jobs:
       - name: Package portable build
         shell: pwsh
         run: |
-          Compress-Archive -Path "projects/razim-fps/build/Release/razim_fps.exe" -DestinationPath "NEON-BREACH-Portable.zip" -Force
+          Compress-Archive -Path "projects/razim-fps/build/Release/neon_vault.exe" -DestinationPath "NEON-VAULT-Portable.zip" -Force
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: NEON-BREACH-Windows
+          name: NEON-VAULT-Windows
           path: |
-            projects/razim-fps/installer-output/NEON-BREACH-Setup.exe
-            NEON-BREACH-Portable.zip
+            projects/razim-fps/installer-output/NEON-VAULT-Setup.exe
+            NEON-VAULT-Portable.zip
 
       - name: Publish GitHub Release
         shell: pwsh
         env:
           GH_TOKEN: \${{ github.token }}
         run: |
-          $tag = "neon-breach-\${{ github.run_number }}"
-          gh release create $tag "projects/razim-fps/installer-output/NEON-BREACH-Setup.exe" "NEON-BREACH-Portable.zip" --title "NEON BREACH $tag" --generate-notes
+          $tag = "neon-vault-\${{ github.run_number }}"
+          gh release create $tag "projects/razim-fps/installer-output/NEON-VAULT-Setup.exe" "NEON-VAULT-Portable.zip" --title "NEON VAULT $tag" --generate-notes
