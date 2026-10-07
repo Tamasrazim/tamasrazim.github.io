@@ -32,6 +32,10 @@ button{cursor:pointer;border-color:transparent;background:#ededed;color:#050505;
 button.secondary{background:#161616;color:#fff;border-color:var(--line)}
 button:disabled{opacity:.45;cursor:not-allowed}
 .help{margin-top:10px;color:var(--muted);font-size:12px}
+.auth-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;margin-top:10px}
+.remember{display:flex;align-items:center;gap:7px;height:46px;padding:0 10px;color:var(--muted);font:11px ui-monospace,SFMono-Regular,Consolas,monospace;white-space:nowrap}
+.remember input{width:14px!important;height:14px!important;margin:0;padding:0;accent-color:var(--accent)}
+.auth-status{min-height:18px}
 .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
 .stat{min-height:108px;padding:14px 15px;border:1px solid var(--line);border-radius:15px;background:var(--panel2)}
 .stat .label{color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font:11px ui-monospace,monospace}
@@ -53,8 +57,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .history-top{display:flex;justify-content:space-between;gap:12px;font:12px ui-monospace,monospace}
 .history-meta{margin-top:3px;color:var(--muted);font-size:11px}
 footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
-@media(max-width:930px){.stats{grid-template-columns:repeat(2,1fr)}.controls{grid-template-columns:1fr 1fr}.controls button{grid-column:1/-1}.two{grid-template-columns:1fr}}
-@media(max-width:520px){main{padding:20px 12px 50px}.stats{grid-template-columns:1fr}.controls{grid-template-columns:1fr}.controls button{grid-column:auto}header{align-items:flex-start;flex-direction:column}.badge{align-self:flex-start}}
+@media(max-width:930px){.stats{grid-template-columns:repeat(2,1fr)}.controls{grid-template-columns:1fr 1fr}.controls button{grid-column:1/-1}.auth-row{grid-template-columns:1fr 1fr}.auth-row #token{grid-column:1/-1}.auth-status{grid-column:1/-1}.two{grid-template-columns:1fr}}
+@media(max-width:520px){main{padding:20px 12px 50px}.stats{grid-template-columns:1fr}.controls{grid-template-columns:1fr}.controls button{grid-column:auto}.auth-row{grid-template-columns:1fr}.auth-row #token{grid-column:auto}.remember{padding-left:0}.auth-status{grid-column:auto}header{align-items:flex-start;flex-direction:column}.badge{align-self:flex-start}}
 </style>
 <script type="application/ld+json">
 {
@@ -111,7 +115,13 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
     <input id="ratio" value="3.1" inputmode="decimal" aria-label="Characters per token">
     <button id="measure">MEASURE NOW</button>
   </div>
-  <div class="help">Fast mode uses repository byte sizes. The displayed token number is an estimate, not an official OpenAI billing/tokenizer count. A lower chars/token ratio produces a higher estimate.</div>
+  <div class="auth-row">
+    <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="GitHub token (optional — sent only to api.github.com)" aria-label="Optional GitHub token">
+    <label class="remember"><input id="rememberToken" type="checkbox"> remember for this browser session</label>
+    <button id="clearToken" class="secondary" type="button">FORGET TOKEN</button>
+  </div>
+  <div id="authStatus" class="help auth-status">Anonymous GitHub API · limited rate · add a token to avoid 403</div>
+  <div class="help">Fast mode uses repository byte sizes. The token number is an estimate, not an official OpenAI/Claude billing count. Add a GitHub token for a much higher API limit. The token is sent only to GitHub and is never committed here.</div>
 </section>
 
 <section class="panel">
@@ -179,10 +189,10 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
 (() => {
   const $ = id => document.getElementById(id);
   const BIN = /\.(png|jpe?g|gif|webp|avif|ico|pdf|xlsx?|xlsm|zip|7z|rar|tar|gz|woff2?|ttf|otf|eot|mp3|wav|ogg|mp4|webm|mov|mkv|exe|dll|so|dylib|bin|psd|ai|sketch)$/i;
-  const HISTORY_KEY = "tamasrazim-repo-token-meter:v1";
+  const HISTORY_KEY = "tamasrazim-repo-token-meter:v2";
+  const SESSION_TOKEN_KEY = "tamasrazim-repo-token-meter:session-token";
   const API = "https://api.github.com";
-  const REQUESTS = 1500;
-  const state = { running:false };
+  const state = { running:false, token:"", rate:{remaining:null,limit:null,reset:null} };
 
   function fmt(n){ return Number(n||0).toLocaleString("en-US"); }
   function bytes(n){
@@ -202,14 +212,53 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
     if(p.length < 2) throw new Error("Repository URL must look like https://github.com/owner/repo");
     return {owner:p[0], repo:p[1].replace(/\.git$/i,"")};
   }
+  function setRateFromResponse(r){
+    const remaining = Number(r.headers.get("X-RateLimit-Remaining"));
+    const limit = Number(r.headers.get("X-RateLimit-Limit"));
+    const reset = Number(r.headers.get("X-RateLimit-Reset"));
+    if(Number.isFinite(remaining)) state.rate.remaining = remaining;
+    if(Number.isFinite(limit)) state.rate.limit = limit;
+    if(Number.isFinite(reset)) state.rate.reset = reset;
+    if(state.rate.remaining !== null) set("rate",fmt(state.rate.remaining));
+  }
+
+  function resetNote(){
+    return state.rate.reset ? " Reset around " + new Date(state.rate.reset*1000).toLocaleTimeString() + "." : "";
+  }
+
   async function getJSON(url){
-    const r = await fetch(url,{headers:{"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"}});
+    if(state.rate.remaining !== null && state.rate.remaining < 1){
+      throw new Error("GitHub API rate limit is exhausted." + resetNote() + " Add an authenticated GitHub token or wait for reset.");
+    }
+    const headers = {"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};
+    const token = state.token.trim();
+    if(token) headers.Authorization = "Bearer " + token;
+    const r = await fetch(url,{headers});
+    setRateFromResponse(r);
     if(!r.ok){
-      let message = "GitHub API " + r.status;
-      try { const j = await r.json(); if(j.message) message += ": " + j.message; } catch {}
-      throw new Error(message);
+      let message = "";
+      try { const j = await r.json(); if(j.message) message = j.message; } catch {}
+      if(r.status === 401) throw new Error("GitHub API 401: token rejected. Check the token.");
+      if(r.status === 403 && /rate limit/i.test(message || "")){
+        throw new Error("GitHub API 403: rate limit exceeded." + resetNote() + (token ? " The authenticated token also reached its limit." : " Add a GitHub token to get the authenticated limit."));
+      }
+      if(r.status === 429) throw new Error("GitHub API 429: too many requests.");
+      throw new Error("GitHub API " + r.status + (message ? ": " + message : ""));
     }
     return r.json();
+  }
+
+  async function readRateLimit(){
+    try{
+      const j = await getJSON(API + "/rate_limit");
+      const core = j.resources?.core;
+      if(core){
+        state.rate.remaining = Number(core.remaining);
+        state.rate.limit = Number(core.limit);
+        state.rate.reset = Number(core.reset);
+        set("rate",fmt(core.remaining));
+      }
+    }catch{}
   }
   function set(id,value){ $(id).textContent = value; }
   function tokenEstimate(sourceBytes, ratio){
@@ -217,16 +266,9 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
     return {estimate, low:Math.round(estimate*.88), high:Math.round(estimate*1.12)};
   }
   async function allCommits(owner,repo,branch){
-    const first = await getJSON(API + "/repos/" + encodeURIComponent(owner) + "/" + encodeURIComponent(repo) + "/commits?sha=" + encodeURIComponent(branch) + "&per_page=100&page=1");
-    const all = [...first];
-    let page = 2;
-    while(first.length === 100 && page <= 10){
-      const more = await getJSON(API + "/repos/" + encodeURIComponent(owner) + "/" + encodeURIComponent(repo) + "/commits?sha=" + encodeURIComponent(branch) + "&per_page=100&page=" + page);
-      all.push(...more);
-      if(more.length < 100) break;
-      page++;
-    }
-    return {commits:all, capped:page>10};
+    const commits = await getJSON(API + "/repos/" + encodeURIComponent(owner) + "/" + encodeURIComponent(repo) +
+      "/commits?sha=" + encodeURIComponent(branch) + "&per_page=100&page=1");
+    return {commits,capped:commits.length===100};
   }
   async function compareHistory(owner,repo,firstSha,headSha){
     if(!firstSha || !headSha || firstSha === headSha) return {additions:0,deletions:0,commits:1};
@@ -260,11 +302,18 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
     $("measure").disabled = true;
     $("measure").textContent = "MEASURING…";
     try{
+      state.token = $("token").value.trim();
+      if($("rememberToken").checked && state.token) sessionStorage.setItem(SESSION_TOKEN_KEY,state.token);
+      else if(!state.token) sessionStorage.removeItem(SESSION_TOKEN_KEY);
+      $("authStatus").textContent = state.token ? "Authenticated GitHub API · higher rate · token stays local" : "Anonymous GitHub API · limited rate · add a token to avoid 403";
+      $("authStatus").className = state.token ? "help auth-status green" : "help auth-status";
+
       const {owner,repo} = repoParts($("repo").value.trim());
       const branch = $("branch").value.trim() || "main";
       const ratioRaw = Number($("ratio").value);
       const ratio = Number.isFinite(ratioRaw) && ratioRaw >= 1.5 && ratioRaw <= 8 ? ratioRaw : 3.1;
 
+      await readRateLimit();
       const tree = await getJSON(API + "/repos/" + encodeURIComponent(owner) + "/" + encodeURIComponent(repo) + "/git/trees/" + encodeURIComponent(branch) + "?recursive=1");
       if(tree.truncated) throw new Error("GitHub returned a truncated repository tree. This scanner cannot safely measure a truncated tree.");
 
@@ -345,6 +394,25 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
     localStorage.removeItem(HISTORY_KEY);
     renderHistory();
   });
+  $("clearToken").addEventListener("click",() => {
+    $("token").value = "";
+    $("rememberToken").checked = false;
+    state.token = "";
+    sessionStorage.removeItem(SESSION_TOKEN_KEY);
+    $("authStatus").textContent = "Anonymous GitHub API · limited rate · add a token to avoid 403";
+    $("authStatus").className = "help auth-status";
+  });
+  $("token").addEventListener("input",() => {
+    state.token = $("token").value.trim();
+    $("authStatus").textContent = state.token ? "Authenticated GitHub API · higher rate · token stays local" : "Anonymous GitHub API · limited rate · add a token to avoid 403";
+    $("authStatus").className = state.token ? "help auth-status green" : "help auth-status";
+  });
+  const savedToken = sessionStorage.getItem(SESSION_TOKEN_KEY) || "";
+  if(savedToken){
+    $("token").value = savedToken;
+    $("rememberToken").checked = true;
+    state.token = savedToken;
+  }
   renderHistory();
   measure();
 })();
