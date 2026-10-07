@@ -927,6 +927,11 @@ int main(){
             DrawCylinderWires(exit,1.65f,1.65f,.1f,40,RAYWHITE);
             if(pbrReady)EndShaderMode();
             EndMode3D();
+            EndTextureMode();
+            DrawTexturePro(sceneTarget.texture,
+                Rectangle{0,0,(float)sceneTarget.texture.width,-(float)sceneTarget.texture.height},
+                Rectangle{0,0,(float)GetScreenWidth(),(float)GetScreenHeight()},
+                Vector2{0,0},0,WHITE);
 
             int collected=0;for(const auto& c:crystals)if(c.collected)collected++;
             Color accent=ThemePrimary(level.theme);
@@ -965,11 +970,6 @@ int main(){
                 CenterText("ESC RESUME • R RESTART • S SETTINGS",355,22,SKYBLUE);
                 if(timeLeft<=0)CenterText("TIME EXPIRED — PRESS R",425,20,ORANGE);
             }
-            EndTextureMode();
-            DrawTexturePro(sceneTarget.texture,
-                Rectangle{0,0,(float)sceneTarget.texture.width,-(float)sceneTarget.texture.height},
-                Rectangle{0,0,(float)GetScreenWidth(),(float)GetScreenHeight()},
-                Vector2{0,0},0,WHITE);
         } else if(screen==Screen::COMPLETE){
             DrawRectangleGradientV(0,0,GetScreenWidth(),GetScreenHeight(),Color{14,34,40,255},Color{2,6,10,255});
             CenterText("VAULT MASTER",180,76,GREEN);CenterText("100 LEVELS COMPLETE",290,30,RAYWHITE);
