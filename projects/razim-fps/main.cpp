@@ -564,7 +564,7 @@ int main(int argc,char** argv){
             }
 
             if(n==1){
-                float half=arenaHalf;
+                float half=(n==1?30.0f:21.0f+level.tier*0.25f);
                 const float step=1.0f;
                 int minX=(int)std::ceil(-half+1),maxX=(int)std::floor(half-1);
                 int minZ=(int)std::ceil(-half+1),maxZ=(int)std::floor(half-1);
