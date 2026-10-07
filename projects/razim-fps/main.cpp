@@ -328,8 +328,8 @@ int main(){
         int sh=std::max(360,GetScreenHeight());
         int rw=std::max(640,(int)roundf(sw*(settings.renderScale/100.0f)));
         int rh=std::max(360,(int)roundf(sh*(settings.renderScale/100.0f)));
-        if(!IsRenderTextureReady(sceneTarget)||rw!=sceneTargetW||rh!=sceneTargetH){
-            if(IsRenderTextureReady(sceneTarget))UnloadRenderTexture(sceneTarget);
+        if(!sceneTarget.id != 0||rw!=sceneTargetW||rh!=sceneTargetH){
+            if(sceneTarget.id != 0)UnloadRenderTexture(sceneTarget);
             sceneTarget=LoadRenderTexture(rw,rh);
             sceneTargetW=rw;sceneTargetH=rh;
         }
@@ -726,7 +726,7 @@ int main(){
             for(auto& b:walls)if(b.moving)b.pos.x=b.base.x+sinf(now*(1+level.tier*.06f)+b.phase)*4;
             for(const auto& h:hazards){
                 Vector3 hp=h.pos;if(h.moving)hp.x+=sinf(now*1.3f+h.phase)*4.5f;
-                if(HitsBox(player,PLAYER_RADIUS+.05f,hp,h.size)){playerHealth=0;break;}
+                if(HitsBox(player,PLAYER_RADIUS+.05f,hp,h.size)){Respawn();break;}
             }
 
             if(level.puzzle==PuzzleType::TIMED_GATE)puzzleSolved=timedGate>0;
@@ -984,7 +984,7 @@ int main(){
     }
 
     SaveGame(save);
-    if(IsRenderTextureReady(sceneTarget))UnloadRenderTexture(sceneTarget);
+    if(sceneTarget.id != 0)UnloadRenderTexture(sceneTarget);
     if(pbrReady)UnloadShader(pbrShader);
     if(musicReady){
         StopAudioStream(musicStream);
