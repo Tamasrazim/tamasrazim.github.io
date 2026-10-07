@@ -1066,24 +1066,27 @@ int main(int argc,char** argv){
                 float wy=7.4f-row*0.92f;
                 float wz=-0.25f;
                 bool unlocked=n<=save.unlocked;
-                bool hovered=false;
-                Vector2 projected=GetWorldToScreen(V3(wx,wy,wz-0.25f),cam);
-                Rectangle hit{projected.x-25,projected.y-20,50,40};
-                hovered=CheckCollisionPointRec(GetMousePosition(),hit);
+                Rectangle hit=WorldHitRect(cam,V3(wx,wy,wz),V3(1.0f,0.62f,0.35f),3);
+                bool hovered=CheckCollisionPointRec(GetMousePosition(),hit);
                 Color accent=unlocked?ThemePrimary(i):Color{35,44,52,255};
                 Color body=unlocked?(hovered?Color{24,50,66,255}:Color{12,28,40,255}):Color{9,16,23,255};
                 DrawCube(V3(wx,wy,wz),1.0f,0.62f,0.35f,body);
                 DrawCubeWires(V3(wx,wy,wz),1.0f,0.62f,0.35f,accent);
-                Vector2 tp=GetWorldToScreen(V3(wx,wy,wz-0.22f),cam);
-                DrawText(TextFormat("%02d",n),(int)tp.x-10,(int)tp.y-11,18,unlocked?RAYWHITE:DARKGRAY);
-                DrawText(TextFormat("★%d",save.stars[n]),(int)tp.x-16,(int)tp.y+9,11,save.stars[n]?GOLD:Color{55,62,70,255});
             }
 
             Vector2 title=GetWorldToScreen(V3(0,8.4f,-1.15f),cam);
-            DrawText("FLOOR SELECT",(int)title.x-112,(int)title.y-22,34,RAYWHITE);
             Vector2 status=GetWorldToScreen(V3(0,7.9f,-1.15f),cam);
-            DrawText(TextFormat("%03d / %03d UNLOCKED",save.unlocked,LEVELS),(int)status.x-100,(int)status.y,14,LIGHTGRAY);
             EndMode3D();
+            for(int i=0;i<LEVELS;i++){
+                int n=i+1,col=i%10,row=i/10;
+                float wx=(col-4.5f)*1.25f;
+                float wy=7.4f-row*0.92f;
+                Vector2 tp=GetWorldToScreen(V3(wx,wy,-0.48f),cam);
+                DrawText(TextFormat("%02d",n),(int)tp.x-10,(int)tp.y-11,18,n<=save.unlocked?RAYWHITE:DARKGRAY);
+                DrawText(TextFormat("★%d",save.stars[n]),(int)tp.x-16,(int)tp.y+9,11,save.stars[n]?GOLD:Color{55,62,70,255});
+            }
+            DrawText("FLOOR SELECT",(int)title.x-112,(int)title.y-22,34,RAYWHITE);
+            DrawText(TextFormat("%03d / %03d UNLOCKED",save.unlocked,LEVELS),(int)status.x-100,(int)status.y,14,LIGHTGRAY);
         } else if(screen==Screen::SETTINGS){
             cam.position=V3(0,3.4f,11.5f);
             cam.target=V3(0,2.8f,0);
