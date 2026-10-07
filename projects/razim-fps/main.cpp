@@ -222,12 +222,16 @@ static int MemoryWanted(int level,int step,int length){
     return length?((level*31+step*17+step*step*7)%length):0;
 }
 static void WorldButton(Camera3D cam,Vector3 pos,Vector3 size,const char* label,bool hover,Color accent){
+    (void)cam;
+    (void)label;
     Color body=hover?Color{24,52,70,255}:Color{11,26,38,255};
     DrawCube(pos,size.x,size.y,size.z,body);
     DrawCubeWires(pos,size.x,size.y,size.z,hover?accent:Color{55,93,116,255});
+}
+static void WorldButtonLabel(Camera3D cam,Vector3 pos,const char* label,int size=22,Color c=RAYWHITE){
     Vector2 p=GetWorldToScreen(pos,cam);
-    int fs=22,w=MeasureText(label,fs);
-    DrawText(label,(int)(p.x-w*0.5f),(int)(p.y-fs*0.5f),fs,RAYWHITE);
+    int w=MeasureText(label,size);
+    DrawText(label,(int)(p.x-w*0.5f),(int)(p.y-size*0.5f),size,c);
 }
 static void WorldFrame(Camera3D cam,Vector3 pos,Vector3 size,Color c){
     DrawCube(pos,size.x,size.y,size.z,Color{7,16,25,235});
