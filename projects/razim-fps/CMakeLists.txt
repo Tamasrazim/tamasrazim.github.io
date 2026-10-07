@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(razim_fps LANGUAGES C CXX)
+project(neon_vault LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -18,11 +18,11 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(raylib)
 
-add_executable(razim_fps WIN32 main.cpp)
-target_link_libraries(razim_fps PRIVATE raylib)
+add_executable(neon_vault WIN32 main.cpp)
+target_link_libraries(neon_vault PRIVATE raylib)
 
 if (MSVC)
-    target_compile_options(razim_fps PRIVATE /W4 /permissive-)
+    target_compile_options(neon_vault PRIVATE /W4 /permissive-)
 else()
-    target_compile_options(razim_fps PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(neon_vault PRIVATE -Wall -Wextra -Wpedantic)
 endif()
