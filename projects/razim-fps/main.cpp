@@ -214,6 +214,18 @@ static void Button(Rectangle r,const char* label,bool hover,Color accent){
 static int MemoryWanted(int level,int step,int length){
     return length?((level*31+step*17+step*step*7)%length):0;
 }
+static void WorldButton(Camera3D cam,Vector3 pos,Vector3 size,const char* label,bool hover,Color accent){
+    Color body=hover?Color{24,52,70,255}:Color{11,26,38,255};
+    DrawCube(pos,size.x,size.y,size.z,body);
+    DrawCubeWires(pos,size.x,size.y,size.z,hover?accent:Color{55,93,116,255});
+    Vector2 p=GetWorldToScreen(pos,cam);
+    int fs=22,w=MeasureText(label,fs);
+    DrawText(label,(int)(p.x-w*0.5f),(int)(p.y-fs*0.5f),fs,RAYWHITE);
+}
+static void WorldFrame(Camera3D cam,Vector3 pos,Vector3 size,Color c){
+    DrawCube(pos,size.x,size.y,size.z,Color{7,16,25,235});
+    DrawCubeWires(pos,size.x,size.y,size.z,c);
+}
 
 int main(){
     SetConfigFlags(FLAG_MSAA_4X_HINT|FLAG_WINDOW_RESIZABLE|FLAG_VSYNC_HINT);
@@ -651,19 +663,32 @@ int main(){
         ClearBackground(Color{5,9,16,255});
 
         if(screen==Screen::MENU){
-            DrawRectangleGradientV(0,0,GetScreenWidth(),GetScreenHeight(),Color{10,24,40,255},Color{2,5,10,255});
-            DrawCircle(GetScreenWidth()/2,168,80,Color{15,50,78,255});
-            CrystalIcon({GetScreenWidth()/2.0f,168},44,SKYBLUE);
-            CenterText("NEON VAULT",244,74,RAYWHITE);
-            CenterText("100-LEVEL FIRST-PERSON PUZZLE ADVENTURE",326,20,LIGHTGRAY);
+            cam.position=V3(0,3.0f,10.5f);
+            cam.target=V3(0,1.7f,0);
+            cam.up=V3(0,1,0);
+            cam.fovy=58.0f;
+
+            BeginMode3D(cam);
+            DrawPlane(V3(0,0,0),Vector2{30,30},Color{7,14,22,255});
+            for(int i=-5;i<=5;i+=2)
+                DrawCylinder(V3((float)i,1.5f,-2.0f),0.35f,0.65f,3.0f,16,Color{12,29,43,255});
+            WorldFrame(cam,V3(0,2.9f,-0.5f),V3(8.8f,2.8f,0.45f),SKYBLUE);
+            DrawSphere(V3(0,4.05f,-0.8f),0.55f,Color{38,128,170,255});
+
             float x=GetScreenWidth()/2.0f-170;
             Rectangle a{x,370,340,58},b{x,442,340,58},c{x,514,340,58},d{x,586,340,58};
-            Button(a,"CONTINUE",CheckCollisionPointRec(GetMousePosition(),a),SKYBLUE);
-            Button(b,"LEVEL SELECT",CheckCollisionPointRec(GetMousePosition(),b),SKYBLUE);
-            Button(c,"SETTINGS",CheckCollisionPointRec(GetMousePosition(),c),SKYBLUE);
-            Button(d,"QUIT",CheckCollisionPointRec(GetMousePosition(),d),SKYBLUE);
-            CrystalIcon({x+27,399},10,SKYBLUE);SwitchIcon({x+27,471},11,true);ClockIcon({x+27,543},10,SKYBLUE);
-            DrawText(TextFormat("PROGRESS %03d / %03d",save.unlocked,LEVELS),x+78,670,18,LIGHTGRAY);
+            WorldButton(cam,V3(-3.0f,1.45f,0.0f),V3(4.6f,0.75f,0.42f),"CONTINUE",CheckCollisionPointRec(GetMousePosition(),a),SKYBLUE);
+            WorldButton(cam,V3(3.0f,1.45f,0.0f),V3(4.6f,0.75f,0.42f),"FLOOR SELECT",CheckCollisionPointRec(GetMousePosition(),b),SKYBLUE);
+            WorldButton(cam,V3(-3.0f,0.35f,0.0f),V3(4.6f,0.75f,0.42f),"SETTINGS",CheckCollisionPointRec(GetMousePosition(),c),SKYBLUE);
+            WorldButton(cam,V3(3.0f,0.35f,0.0f),V3(4.6f,0.75f,0.42f),"QUIT",CheckCollisionPointRec(GetMousePosition(),d),SKYBLUE);
+
+            Vector2 title=GetWorldToScreen(V3(0,2.9f,-0.82f),cam);
+            DrawText("NEON VAULT",(int)title.x-145,(int)title.y-28,58,RAYWHITE);
+            Vector2 sub=GetWorldToScreen(V3(0,2.2f,-0.82f),cam);
+            DrawText("100-FLOOR CRYSTAL EXPEDITION",(int)sub.x-165,(int)sub.y,16,LIGHTGRAY);
+            Vector2 progress=GetWorldToScreen(V3(0,-0.02f,0.0f),cam);
+            DrawText(TextFormat("PROGRESS %03d / %03d",save.unlocked,LEVELS),(int)progress.x-115,(int)progress.y,18,LIGHTGRAY);
+            EndMode3D();
         } else if(screen==Screen::LEVEL_SELECT){
             DrawRectangleGradientV(0,0,GetScreenWidth(),GetScreenHeight(),Color{7,14,24,255},Color{2,5,9,255});
             DrawText("FLOOR SELECT",42,38,34,RAYWHITE);
