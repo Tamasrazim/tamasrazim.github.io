@@ -1,0 +1,57 @@
+name: NEON BREACH Windows Build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "projects/razim-fps/**"
+      - ".github/workflows/neon-breach-windows.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure CMake
+        run: cmake -S projects/razim-fps -B projects/razim-fps/build -G "Visual Studio 17 2022" -A x64
+
+      - name: Build game
+        run: cmake --build projects/razim-fps/build --config Release --parallel
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup -y --no-progress
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force projects/razim-fps/installer-output | Out-Null
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "projects/razim-fps/installer.iss"
+
+      - name: Package portable build
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "projects/razim-fps/build/Release/razim_fps.exe" -DestinationPath "NEON-BREACH-Portable.zip" -Force
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: NEON-BREACH-Windows
+          path: |
+            projects/razim-fps/installer-output/NEON-BREACH-Setup.exe
+            NEON-BREACH-Portable.zip
+
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: \${{ github.token }}
+        run: |
+          $tag = "neon-breach-\${{ github.run_number }}"
+          gh release create $tag "projects/razim-fps/installer-output/NEON-BREACH-Setup.exe" "NEON-BREACH-Portable.zip" --title "NEON BREACH $tag" --generate-notes
