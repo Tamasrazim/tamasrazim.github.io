@@ -1027,8 +1027,11 @@ int main(int argc,char** argv){
             WorldFrame(cam,V3(0,2.9f,-0.5f),V3(8.8f,2.8f,0.45f),SKYBLUE);
             DrawSphere(V3(0,4.05f,-0.8f),0.55f,Color{38,128,170,255});
 
-            float x=GetScreenWidth()/2.0f-170;
-            Rectangle a{x,350,340,52},b{x,412,340,52},c{x,474,340,52},e{x,536,340,52},d{x,598,340,52};
+            Rectangle a=WorldHitRect(cam,V3(-3.0f,1.50f,0.0f),V3(4.6f,0.58f,0.42f),8);
+            Rectangle b=WorldHitRect(cam,V3(3.0f,1.50f,0.0f),V3(4.6f,0.58f,0.42f),8);
+            Rectangle c=WorldHitRect(cam,V3(-3.0f,0.65f,0.0f),V3(4.6f,0.58f,0.42f),8);
+            Rectangle e=WorldHitRect(cam,V3(3.0f,0.65f,0.0f),V3(4.6f,0.58f,0.42f),8);
+            Rectangle d=WorldHitRect(cam,V3(0.0f,-0.18f,0.0f),V3(4.6f,0.58f,0.42f),8);
             WorldButton(cam,V3(-3.0f,1.50f,0.0f),V3(4.6f,0.58f,0.42f),"CONTINUE",CheckCollisionPointRec(GetMousePosition(),a),SKYBLUE);
             WorldButton(cam,V3(3.0f,1.50f,0.0f),V3(4.6f,0.58f,0.42f),"FLOOR SELECT",CheckCollisionPointRec(GetMousePosition(),b),SKYBLUE);
             WorldButton(cam,V3(-3.0f,0.65f,0.0f),V3(4.6f,0.58f,0.42f),"SETTINGS",CheckCollisionPointRec(GetMousePosition(),c),SKYBLUE);
@@ -1036,12 +1039,17 @@ int main(int argc,char** argv){
             WorldButton(cam,V3(0.0f,-0.18f,0.0f),V3(4.6f,0.58f,0.42f),"QUIT",CheckCollisionPointRec(GetMousePosition(),d),SKYBLUE);
 
             Vector2 title=GetWorldToScreen(V3(0,2.9f,-0.82f),cam);
-            DrawText("NEON VAULT",(int)title.x-145,(int)title.y-28,58,RAYWHITE);
             Vector2 sub=GetWorldToScreen(V3(0,2.2f,-0.82f),cam);
-            DrawText("100-FLOOR CRYSTAL EXPEDITION",(int)sub.x-165,(int)sub.y,16,LIGHTGRAY);
             Vector2 progress=GetWorldToScreen(V3(0,-0.48f,0.0f),cam);
-            DrawText(TextFormat("PROGRESS %03d / %03d",save.unlocked,LEVELS),(int)progress.x-115,(int)progress.y,18,LIGHTGRAY);
             EndMode3D();
+            DrawText("NEON VAULT",(int)title.x-145,(int)title.y-28,58,RAYWHITE);
+            DrawText("100-FLOOR CRYSTAL EXPEDITION",(int)sub.x-165,(int)sub.y,16,LIGHTGRAY);
+            WorldButtonLabel(cam,V3(-3.0f,1.50f,-0.25f),"CONTINUE");
+            WorldButtonLabel(cam,V3(3.0f,1.50f,-0.25f),"FLOOR SELECT");
+            WorldButtonLabel(cam,V3(-3.0f,0.65f,-0.25f),"SETTINGS");
+            WorldButtonLabel(cam,V3(3.0f,0.65f,-0.25f),"CREDITS");
+            WorldButtonLabel(cam,V3(0.0f,-0.18f,-0.25f),"QUIT");
+            DrawText(TextFormat("PROGRESS %03d / %03d",save.unlocked,LEVELS),(int)progress.x-115,(int)progress.y,18,LIGHTGRAY);
         } else if(screen==Screen::LEVEL_SELECT){
             cam.position=V3(0,5.0f,17.0f);
             cam.target=V3(0,3.2f,0);
