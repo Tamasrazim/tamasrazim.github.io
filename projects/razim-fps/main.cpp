@@ -206,9 +206,10 @@ static Level BuildLevel(int id){
     for(int lane=0;lane<4;lane++){
         float z=-20+lane*13;
         float gap=-10+float((l.id*11+lane*7)%18);
-        float leftLen=gap+10,rightStart=gap+4;
-        if(leftLen>1)l.walls.push_back({V((-29+leftLen)*0.5f,1,z),V(leftLen,2,0.8f),1});
-        if(rightStart<28)l.walls.push_back({V((rightStart+29)*0.5f,1,z),V(29-rightStart,2,0.8f),1});
+        float leftEnd=gap-4,rightStart=gap+4;
+        float leftLen=leftEnd+29,rightLen=29-rightStart;
+        if(leftLen>1)l.walls.push_back({V((-29+leftEnd)*0.5f,1,z),V(leftLen,2,0.8f),1});
+        if(rightLen>1)l.walls.push_back({V((rightStart+29)*0.5f,1,z),V(rightLen,2,0.8f),1});
     }
 
     for(int i=0;i<8+l.tier*3;i++){
