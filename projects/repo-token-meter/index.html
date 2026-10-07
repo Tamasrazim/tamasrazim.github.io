@@ -265,6 +265,21 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
     const estimate = Math.max(0, Math.round(sourceBytes / ratio));
     return {estimate, low:Math.round(estimate*.88), high:Math.round(estimate*1.12)};
   }
+  async function fetchLocalManifest(owner,repo,branch){
+    if(location.origin !== "https://tamasrazim.github.io") return null;
+    if(owner.toLowerCase() !== "tamasrazim" || repo.toLowerCase() !== "tamasrazim.github.io" || branch !== "main") return null;
+    const url = "./repo-manifest.json?ts=" + Date.now();
+    const response = await fetch(url,{cache:"no-store"});
+    if(!response.ok) return null;
+    const payload = await response.json();
+    if(!Array.isArray(payload.files) || !payload.files.length) return null;
+    return {
+      tree:payload.files.map(x=>({type:"blob",path:x.path,size:Number(x.size)||0})),
+      sha:payload.head || "manifest",
+      source:"local-manifest"
+    };
+  }
+
   async function fetchArchive(owner,repo,branch){
     const urls = [
       "https://codeload.github.com/" + encodeURIComponent(owner) + "/" + encodeURIComponent(repo) + "/tar.gz/refs/heads/" + encodeURIComponent(branch),
@@ -389,12 +404,14 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
       const ratioRaw = Number($("ratio").value);
       const ratio = Number.isFinite(ratioRaw) && ratioRaw >= 1.5 && ratioRaw <= 8 ? ratioRaw : 3.1;
 
-      let scanned;
-      try{
-        scanned = await fetchArchive(owner,repo,branch);
-      }catch(archiveError){
-        if(!state.token.trim()) throw archiveError;
-        scanned = await fetchTreeFallback(owner,repo,branch);
+      let scanned = await fetchLocalManifest(owner,repo,branch);
+      if(!scanned){
+        try{
+          scanned = await fetchArchive(owner,repo,branch);
+        }catch(archiveError){
+          if(!state.token.trim()) throw archiveError;
+          scanned = await fetchTreeFallback(owner,repo,branch);
+        }
       }
       const blobs = scanned.tree.filter(x=>x.type==="blob");
       const source = blobs.filter(x=>!BIN.test(x.path));
@@ -412,7 +429,7 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
       set("binaryBytes",bytes(binaryBytes));
       set("binaryShare",totalBytes ? ((binaryBytes/totalBytes)*100).toFixed(1)+"%" : "0%");
       set("tokenRange",fmt(tok.low)+"–"+fmt(tok.high));
-      set("head","archive scan");
+      set("head",scanned.source==="local-manifest" ? "manifest" : scanned.source==="codeload" ? "archive scan" : "API scan");
       set("measuredAt",new Date().toLocaleString());
 
       const top = source.slice().sort((a,b)=>(b.size||0)-(a.size||0)).slice(0,20);
