@@ -971,7 +971,18 @@ int main(){
             Vector3 exit=V3(0,.05f,-arenaHalf+2.0f);
             DrawCylinder(exit,1.5f,1.5f,.08f,40,puzzleSolved?GREEN:Color{50,100,125,255});
             DrawCylinderWires(exit,1.65f,1.65f,.1f,40,RAYWHITE);
-            if(pbrReady)EndShaderMode();
+            if(screen==Screen::PAUSED){
+                if(pbrReady)EndShaderMode();
+                Vector3 fwd=ViewDirection(yaw,pitch);
+                Vector3 panel=Vector3Add(cam.position,Vector3Add(Vector3Scale(fwd,2.8f),V3(0,0.2f,0)));
+                DrawCube(panel,6.0f,2.5f,0.45f,Color{7,18,28,240});
+                DrawCubeWires(panel,6.15f,2.65f,0.55f,SKYBLUE);
+                Vector2 pp=GetWorldToScreen(Vector3Add(panel,V3(0,0.45f,0)),cam);
+                DrawText("PAUSED",(int)pp.x-60,(int)pp.y-30,34,RAYWHITE);
+                DrawText("ESC RESUME",(int)pp.x-75,(int)pp.y+10,16,SKYBLUE);
+                DrawText("R RESTART   S SETTINGS",(int)pp.x-110,(int)pp.y+34,14,LIGHTGRAY);
+                if(timeLeft<=0)DrawText("TIME EXPIRED — R TO RESTART",(int)pp.x-125,(int)pp.y+58,13,ORANGE);
+            }else if(pbrReady)EndShaderMode();
             EndMode3D();
             EndTextureMode();
             DrawTexturePro(sceneTarget.texture,
@@ -999,23 +1010,17 @@ int main(){
             else DrawCircle((int)cp.x,(int)cp.y,3,RAYWHITE);
 
             if(settings.performanceMonitor){
-                DrawRectangle(GetScreenWidth()-300,14,286,132,Color{0,0,0,125});
-                DrawText(TextFormat("FPS %d",GetFPS()),GetScreenWidth()-286,24,18,RAYWHITE);
-                DrawText(TextFormat("FRAME %.2f ms",GetFrameTime()*1000.0f),GetScreenWidth()-286,47,18,RAYWHITE);
-                DrawText(TextFormat("VISIBLE %d",visibleObjects),GetScreenWidth()-286,70,18,RAYWHITE);
-                DrawText(TextFormat("CULLED %d",culledObjects),GetScreenWidth()-286,93,18,RAYWHITE);
-                if(dedicatedVRAMMB)DrawText(TextFormat("VRAM %d MB",dedicatedVRAMMB),GetScreenWidth()-286,116,18,RAYWHITE);
-                else DrawText("VRAM N/A",GetScreenWidth()-286,116,18,GRAY);
-                DrawText(TextFormat("RENDER %dx%d",sceneTargetW,sceneTargetH),GetScreenWidth()-286,139,18,Color{170,190,205,255});
+                Vector3 fwd=ViewDirection(yaw,pitch);
+                Vector3 monitor=Vector3Add(cam.position,Vector3Add(Vector3Scale(fwd,2.1f),V3(0,0.75f,0.0f)));
+                Vector2 mp=GetWorldToScreen(monitor,cam);
+                DrawText(TextFormat("FPS %d",GetFPS()),(int)mp.x-92,(int)mp.y-42,14,RAYWHITE);
+                DrawText(TextFormat("FRAME %.2f ms",GetFrameTime()*1000.0f),(int)mp.x-92,(int)mp.y-22,14,RAYWHITE);
+                DrawText(TextFormat("VISIBLE %d  CULLED %d",visibleObjects,culledObjects),(int)mp.x-92,(int)mp.y-2,14,RAYWHITE);
+                DrawText(dedicatedVRAMMB?TextFormat("VRAM %d MB",dedicatedVRAMMB):"VRAM N/A",(int)mp.x-92,(int)mp.y+18,14,RAYWHITE);
+                DrawText(TextFormat("RENDER %dx%d",sceneTargetW,sceneTargetH),(int)mp.x-92,(int)mp.y+38,14,Color{170,190,205,255});
             }
             DrawText("ESC PAUSE • E INTERACT • R RESTART",34,GetScreenHeight()-24,14,GRAY);
             if(respawnFlash>0)DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{255,60,60,40});
-            if(screen==Screen::PAUSED){
-                DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{0,0,0,175});
-                CenterText("PAUSED",255,62,RAYWHITE);
-                CenterText("ESC RESUME • R RESTART • S SETTINGS",355,22,SKYBLUE);
-                if(timeLeft<=0)CenterText("TIME EXPIRED — PRESS R",425,20,ORANGE);
-            }
         } else if(screen==Screen::COMPLETE){
             cam.position=V3(0,3.5f,12.5f); cam.target=V3(0,2.6f,0); cam.up=V3(0,1,0); cam.fovy=58.0f;
             BeginMode3D(cam);
