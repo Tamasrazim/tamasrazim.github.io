@@ -6,6 +6,16 @@
 #pragma comment(lib, "dxgi.lib")
 #endif
 
+void EnsureWorkingDirectory(){
+    wchar_t buffer[32768]{};
+    DWORD n=GetModuleFileNameW(nullptr,buffer,32768);
+    if(n==0 || n>=32768)return;
+    while(n>0 && buffer[n-1]!=L'\\' && buffer[n-1]!=L'/')--n;
+    if(n==0)return;
+    buffer[n]=L'\0';
+    SetCurrentDirectoryW(buffer);
+}
+
 int QueryDedicatedVRAMMB(){
 #if defined(_WIN32)
     IDXGIFactory1* factory=nullptr;
