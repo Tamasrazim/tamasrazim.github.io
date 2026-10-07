@@ -1110,22 +1110,25 @@ int main(int argc,char** argv){
             for(int i=0;i<10;i++){
                 float wy=6.55f-i*0.61f;
                 float wx=-2.0f;
-                Vector2 pp=GetWorldToScreen(V3(wx,wy,-0.72f),cam);
-                Rectangle hit{pp.x-235,pp.y-18,470,36};
+                Rectangle hit=WorldHitRect(cam,V3(wx,wy,-0.55f),V3(6.2f,0.48f,0.32f),5);
                 bool hot=i==settingsSelected||CheckCollisionPointRec(GetMousePosition(),hit);
                 DrawCube(V3(wx,wy,-0.55f),6.2f,0.48f,0.32f,hot?Color{20,42,56,255}:Color{10,24,34,255});
                 DrawCubeWires(V3(wx,wy,-0.55f),6.2f,0.48f,0.32f,hot?SKYBLUE:Color{42,58,72,255});
-                Vector2 lp=GetWorldToScreen(V3(wx-2.35f,wy,-0.74f),cam);
-                Vector2 vp=GetWorldToScreen(V3(wx+1.6f,wy,-0.74f),cam);
-                DrawText(labels[i],(int)lp.x,(int)lp.y-10,16,RAYWHITE);
-                DrawText(vals[i].c_str(),(int)vp.x,(int)vp.y-10,16,SKYBLUE);
             }
 
             Vector2 title=GetWorldToScreen(V3(0,7.15f,-1.2f),cam);
-            DrawText("SETTINGS",(int)title.x-80,(int)title.y-22,34,RAYWHITE);
             Vector2 note=GetWorldToScreen(V3(0,0.25f,-0.8f),cam);
-            DrawText("CLICK A ROW • ARROWS CHANGE • ESC BACK • F11 DISPLAY",(int)note.x-205,(int)note.y,13,LIGHTGRAY);
             EndMode3D();
+            for(int i=0;i<10;i++){
+                float wy=6.55f-i*0.61f;
+                float wx=-2.0f;
+                Vector2 lp=GetWorldToScreen(V3(wx-2.35f,wy,-0.72f),cam);
+                Vector2 vp=GetWorldToScreen(V3(wx+1.6f,wy,-0.72f),cam);
+                DrawText(labels[i],(int)lp.x,(int)lp.y-10,16,RAYWHITE);
+                DrawText(vals[i].c_str(),(int)vp.x,(int)vp.y-10,16,SKYBLUE);
+            }
+            DrawText("SETTINGS",(int)title.x-80,(int)title.y-22,34,RAYWHITE);
+            DrawText("CLICK A ROW • ARROWS CHANGE • ESC BACK • F11 DISPLAY",(int)note.x-205,(int)note.y,13,LIGHTGRAY);
         } else if(screen==Screen::PLAYING||screen==Screen::PAUSED){
             EnsureSceneTarget();
             BeginTextureMode(sceneTarget);
