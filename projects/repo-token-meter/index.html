@@ -266,39 +266,68 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
     return {estimate, low:Math.round(estimate*.88), high:Math.round(estimate*1.12)};
   }
   async function fetchArchive(owner,repo,branch){
-    const url = "https://codeload.github.com/" + encodeURIComponent(owner) + "/" +
-      encodeURIComponent(repo) + "/tar.gz/refs/heads/" + encodeURIComponent(branch);
-    const response = await fetch(url, {cache:"no-store"});
-    if(!response.ok) throw new Error("GitHub archive download failed: HTTP " + response.status);
-    const compressed = new Uint8Array(await response.arrayBuffer());
-    if(!("DecompressionStream" in window)) throw new Error("This browser does not support streamed gzip decompression.");
-    const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip"));
-    const buffer = new Uint8Array(await new Response(stream).arrayBuffer());
+    const urls = [
+      "https://codeload.github.com/" + encodeURIComponent(owner) + "/" + encodeURIComponent(repo) + "/tar.gz/refs/heads/" + encodeURIComponent(branch),
+      "https://github.com/" + encodeURIComponent(owner) + "/" + encodeURIComponent(repo) + "/archive/refs/heads/" + encodeURIComponent(branch) + ".tar.gz"
+    ];
+    let lastError = "";
+    for(const url of urls){
+      try{
+        const response = await fetch(url,{cache:"no-store",redirect:"follow",mode:"cors"});
+        if(!response.ok) throw new Error("HTTP " + response.status);
+        const compressed = new Uint8Array(await response.arrayBuffer());
+        if(!("DecompressionStream" in window)) throw new Error("This browser does not support gzip decompression.");
+        const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip"));
+        const buffer = new Uint8Array(await new Response(stream).arrayBuffer());
 
-    const files = [];
-    let offset = 0;
-    while(offset + 512 <= buffer.length){
-      const header = buffer.subarray(offset, offset + 512);
-      let empty = true;
-      for(let i=0;i<512;i++){ if(header[i] !== 0){ empty=false; break; } }
-      if(empty) break;
+        const files = [];
+        let offset = 0;
+        while(offset + 512 <= buffer.length){
+          const header = buffer.subarray(offset,offset+512);
+          let empty=true;
+          for(let i=0;i<512;i++){ if(header[i]!==0){empty=false;break;} }
+          if(empty) break;
 
-      const nameBytes = header.subarray(0,100);
-      const prefixBytes = header.subarray(345,500);
-      const name = bytesToAscii(nameBytes);
-      const prefix = bytesToAscii(prefixBytes);
-      const fullPath = (prefix ? prefix + "/" : "") + name;
-      const sizeField = bytesToAscii(header.subarray(124,136)).replace(/\0/g,"").trim();
-      const size = parseInt(sizeField,8) || 0;
-      const typeFlag = header[156] || 0;
+          const name = bytesToAscii(header.subarray(0,100));
+          const prefix = bytesToAscii(header.subarray(345,500));
+          const fullPath = (prefix ? prefix + "/" : "") + name;
+          const size = parseInt(bytesToAscii(header.subarray(124,136)).replace(/\0/g,"").trim(),8) || 0;
+          const typeFlag = header[156] || 0;
 
-      if(typeFlag === 0 || typeFlag === 48){
-        files.push({type:"blob",path:fullPath.replace(/^[^/]+\//,""),size});
+          if(typeFlag===0 || typeFlag===48){
+            files.push({type:"blob",path:fullPath.replace(/^[^/]+\//,""),size});
+          }
+          offset += 512 + Math.ceil(size/512)*512;
+        }
+        if(!files.length) throw new Error("archive contained no files");
+        return {tree:files,sha:"archive",source:"codeload"};
+      }catch(e){
+        lastError = e?.message || String(e);
       }
-      offset += 512 + Math.ceil(size / 512) * 512;
     }
-    if(!files.length) throw new Error("GitHub returned an empty repository archive.");
-    return {tree:files, sha:"archive", source:"codeload"};
+    throw new Error("Full-repository archive download failed. " + lastError + " Enter a GitHub token and retry to use the authenticated Git tree fallback.");
+  }
+
+  async function fetchTreeFallback(owner,repo,branch){
+    const base = API + "/repos/" + encodeURIComponent(owner) + "/" + encodeURIComponent(repo);
+    const recursive = await getJSON(base + "/git/trees/" + encodeURIComponent(branch) + "?recursive=1");
+    if(!recursive.truncated) return {tree:recursive.tree||[],sha:recursive.sha||"",source:"api"};
+
+    const root = await getJSON(base + "/git/trees/" + encodeURIComponent(branch));
+    const queue = [...(root.tree||[])];
+    const files = [];
+    let guard = 0;
+    while(queue.length){
+      if(++guard > 10000) throw new Error("Repository tree is too large for the API fallback.");
+      const item = queue.shift();
+      if(item.type==="blob"){
+        files.push(item);
+      }else if(item.type==="tree"){
+        const detail = await getJSON(base + "/git/trees/" + encodeURIComponent(item.sha));
+        for(const child of detail.tree||[]) queue.push(child);
+      }
+    }
+    return {tree:files,sha:root.sha||"",source:"api"};
   }
 
   function bytesToAscii(bytes){
@@ -360,7 +389,13 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
       const ratioRaw = Number($("ratio").value);
       const ratio = Number.isFinite(ratioRaw) && ratioRaw >= 1.5 && ratioRaw <= 8 ? ratioRaw : 3.1;
 
-      const scanned = await fetchArchive(owner,repo,branch);
+      let scanned;
+      try{
+        scanned = await fetchArchive(owner,repo,branch);
+      }catch(archiveError){
+        if(!state.token.trim()) throw archiveError;
+        scanned = await fetchTreeFallback(owner,repo,branch);
+      }
       const blobs = scanned.tree.filter(x=>x.type==="blob");
       const source = blobs.filter(x=>!BIN.test(x.path));
       const binary = blobs.filter(x=>BIN.test(x.path));
