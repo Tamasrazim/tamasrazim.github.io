@@ -302,18 +302,27 @@ void main(){
 )GLSL";
 
 int main(int argc,char** argv){
-    SetConfigFlags(FLAG_MSAA_4X_HINT|FLAG_WINDOW_RESIZABLE|FLAG_VSYNC_HINT);
-    InitWindow(1440,900,"NEON VAULT");
-    SetExitKey(KEY_NULL);
-    SetTargetFPS(144);
+    bool validateMode=false;
+    for(int i=1;i<argc;i++)if(std::strcmp(argv[i],"--validate")==0)validateMode=true;
+
+    if(!validateMode){
+        SetConfigFlags(FLAG_MSAA_4X_HINT|FLAG_WINDOW_RESIZABLE|FLAG_VSYNC_HINT);
+        InitWindow(1440,900,"NEON VAULT");
+        SetExitKey(KEY_NULL);
+        SetTargetFPS(144);
+    }
 
     SaveData save=LoadGame();
     Settings& settings=save.settings;
     int dedicatedVRAMMB=QueryDedicatedVRAMMB();
     RenderTexture2D sceneTarget{};
     int sceneTargetW=0,sceneTargetH=0;
-    Shader pbrShader=LoadShaderFromMemory(PBR_VERTEX_SHADER,PBR_FRAGMENT_SHADER);
-    bool pbrReady=pbrShader.id>0;
+    Shader pbrShader{};
+    bool pbrReady=false;
+    if(!validateMode){
+        pbrShader=LoadShaderFromMemory(PBR_VERTEX_SHADER,PBR_FRAGMENT_SHADER);
+        pbrReady=pbrShader.id>0;
+    }
     int pbrViewPosLoc=-1,pbrLightPosLoc=-1,pbrLightColorLoc=-1,pbrAmbientLoc=-1,pbrRoughnessLoc=-1,pbrMetallicLoc=-1;
     if(pbrReady){
         pbrShader.locs[SHADER_LOC_MATRIX_MVP]=GetShaderLocation(pbrShader,"mvp");
@@ -354,7 +363,7 @@ int main(int argc,char** argv){
             SetWindowSize(1440,900);
         }
     };
-    if(settings.displayMode!=0)ApplyDisplayMode(settings.displayMode);
+    if(!validateMode && settings.displayMode!=0)ApplyDisplayMode(settings.displayMode);
 
     Screen screen=Screen::MENU;
     Screen settingsReturn=Screen::MENU;
@@ -389,21 +398,23 @@ int main(int argc,char** argv){
     std::vector<int16_t> musicBuffer(1470);
     Texture2D skyPhoto{};
     bool skyPhotoReady=false;
-    if(FileExists("assets/sky/tamanna.png")){
-        skyPhoto=LoadTexture("assets/sky/tamanna.png");
-        skyPhotoReady=skyPhoto.id>0;
-        if(skyPhotoReady)SetTextureFilter(skyPhoto,TEXTURE_FILTER_BILINEAR);
-    }
+    if(!validateMode){
+        if(FileExists("assets/sky/tamanna.png")){
+            skyPhoto=LoadTexture("assets/sky/tamanna.png");
+            skyPhotoReady=skyPhoto.id>0;
+            if(skyPhotoReady)SetTextureFilter(skyPhoto,TEXTURE_FILTER_BILINEAR);
+        }
 
-    InitAudioDevice();
-    musicReady=IsAudioDeviceReady();
-    if(musicReady){
-        musicStream=LoadAudioStream(44100,16,2);
-        if(IsAudioStreamValid(musicStream)){
-            SetAudioStreamVolume(musicStream,0.22f);
-            PlayAudioStream(musicStream);
-        }else{
-            musicReady=false;
+        InitAudioDevice();
+        musicReady=IsAudioDeviceReady();
+        if(musicReady){
+            musicStream=LoadAudioStream(44100,16,2);
+            if(IsAudioStreamValid(musicStream)){
+                SetAudioStreamVolume(musicStream,0.22f);
+                PlayAudioStream(musicStream);
+            }else{
+                musicReady=false;
+            }
         }
     }
 
@@ -531,8 +542,10 @@ int main(int argc,char** argv){
         }
 
         cam.fovy=settings.fov;
-        DisableCursor();
-        screen=Screen::PLAYING;
+        if(!validateMode){
+            DisableCursor();
+            screen=Screen::PLAYING;
+        }
     };
 
     auto StartLevel=[&](int n){levelNumber=std::clamp(n,1,LEVELS);GenerateLevel(levelNumber);};
@@ -601,9 +614,6 @@ int main(int argc,char** argv){
         return ok;
     };
 
-    bool validateMode=false;
-    for(int i=1;i<argc;i++)if(std::strcmp(argv[i],"--validate")==0)validateMode=true;
-
     auto FillMusic=[&](){
         if(!musicReady) return;
         constexpr int frames=735;
@@ -650,16 +660,18 @@ int main(int argc,char** argv){
 
     if(validateMode){
         bool ok=ValidateLevels();
-        if(sceneTarget.id!=0)UnloadRenderTexture(sceneTarget);
-        if(skyPhotoReady)UnloadTexture(skyPhoto);
-        if(pbrReady)UnloadShader(pbrShader);
-        if(musicReady){
-            StopAudioStream(musicStream);
-            UnloadAudioStream(musicStream);
+        if(!validateMode){
+            if(sceneTarget.id!=0)UnloadRenderTexture(sceneTarget);
+            if(skyPhotoReady)UnloadTexture(skyPhoto);
+            if(pbrReady)UnloadShader(pbrShader);
+            if(musicReady){
+                StopAudioStream(musicStream);
+                UnloadAudioStream(musicStream);
+            }
+            CloseAudioDevice();
+            EnableCursor();
+            CloseWindow();
         }
-        CloseAudioDevice();
-        EnableCursor();
-        CloseWindow();
         return ok?0:1;
     }
 
