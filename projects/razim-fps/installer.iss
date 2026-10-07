@@ -3,6 +3,7 @@
 #define AppVersion "2.0"
 #define AppPublisher "Tamasrazim"
 #define AppExeName "neon_vault.exe"
+#define UpdaterExeName "neon_vault_updater.exe"
 
 [Setup]
 AppId={{7D7B4D1A-3B65-4C23-B72A-91C4A9F3B7E2}
@@ -24,11 +25,13 @@ SetupIconFile=neon-vault.ico
 
 [Files]
 Source: "build\Release\neon_vault.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "build\Release\neon_vault_updater.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\NEON VAULT"; Filename: "{app}\{#AppExeName}"
-Name: "{commondesktop}\NEON VAULT"; Filename: "{app}\{#AppExeName}"
+Name: "{group}\NEON VAULT"; Filename: "{app}\{#UpdaterExeName}"
+Name: "{group}\NEON VAULT (Direct)"; Filename: "{app}\{#AppExeName}"
+Name: "{commondesktop}\NEON VAULT"; Filename: "{app}\{#UpdaterExeName}"
 
 [Run]
-Filename: "{app}\{#AppExeName}"; Description: "Launch NEON VAULT"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#UpdaterExeName}"; Description: "Launch NEON VAULT"; Flags: nowait postinstall skipifsilent
