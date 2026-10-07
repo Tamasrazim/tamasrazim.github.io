@@ -61,6 +61,8 @@ jobs:
 
       - name: Publish GitHub Release
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           $tag = "neon-vault-$env:GITHUB_RUN_NUMBER"
           gh release create $tag "projects/razim-fps/installer-output/NEON-VAULT-Setup.exe" "NEON-VAULT-Portable.zip" --title "NEON VAULT $tag" --generate-notes
