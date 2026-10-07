@@ -769,7 +769,7 @@ int main(int argc,char** argv){
             if(mouseCaptured&&screen==Screen::PLAYING)Crosshair(save.settings.crosshair,RAYWHITE);
 
             if(save.settings.performance){
-                Panel({GetScreenWidth()-220,24,196,92},Color{5,13,22,225},Color{42,63,82,255});
+                Panel({float(GetScreenWidth()-220),24.0f,196.0f,92.0f},Color{5,13,22,225},Color{42,63,82,255});
                 DrawText(TextFormat("FPS %d",GetFPS()),GetScreenWidth()-204,40,13,RAYWHITE);
                 DrawText(TextFormat("FRAME %.2f ms",GetFrameTime()*1000),GetScreenWidth()-204,60,13,RAYWHITE);
                 int v=QueryDedicatedVRAMMB();
