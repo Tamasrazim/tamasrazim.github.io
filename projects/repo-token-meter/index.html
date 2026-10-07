@@ -128,8 +128,9 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
   <div class="stats">
     <div class="stat"><div class="label">Files</div><div class="value" id="files">—</div><div class="note">entire tracked snapshot</div></div>
     <div class="stat"><div class="label">Source files</div><div class="value" id="sourceFiles">—</div><div class="note">text/code only</div></div>
-    <div class="stat"><div class="label">Source tokens</div><div class="value green" id="tokens">—</div><div class="note">estimated</div></div>
+    <div class="stat"><div class="label">Source tokens</div><div class="value green" id="tokens">—</div><div class="note">estimated text</div></div>
     <div class="stat"><div class="label">Repo size</div><div class="value" id="repoSize">—</div><div class="note">all tracked blobs</div></div>
+    <div class="stat"><div class="label">1B target</div><div class="value" id="targetGap">—</div><div class="note">tokens still needed</div></div>
     <div class="stat"><div class="label">API left</div><div class="value" id="rate">—</div><div class="note">GitHub REST requests</div></div>
   </div>
 </section>
@@ -156,6 +157,9 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
     <div class="row"><span>Lines added</span><strong id="lineAdds">—</strong></div>
     <div class="row"><span>Lines deleted</span><strong id="lineDels">—</strong></div>
     <div class="row"><span>Current source token footprint</span><strong id="growthTokens">—</strong></div>
+    <div class="row"><span>Binary-inclusive footprint</span><strong id="allBytes">—</strong></div>
+    <div class="row"><span>Approx. text bytes for 1B tokens</span><strong id="targetBytes">—</strong></div>
+    <div class="row"><span>Additional text bytes needed</span><strong id="targetBytesGap">—</strong></div>
   </div>
 </section>
 </div>
@@ -420,10 +424,19 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
       const binaryBytes = binary.reduce((n,x)=>n+(x.size||0),0);
       const totalBytes = sourceBytes + binaryBytes;
       const tok = tokenEstimate(sourceBytes,ratio);
+      const ONE_BILLION = 1000000000;
+      const allBytes = sourceBytes + binaryBytes;
+      const targetTextBytes = Math.round(ONE_BILLION * ratio);
+      const targetGapTokens = Math.max(0, ONE_BILLION - tok.estimate);
+      const targetGapBytes = Math.max(0, targetTextBytes - sourceBytes);
 
       set("files",fmt(blobs.length));
       set("sourceFiles",fmt(source.length));
       set("tokens",fmt(tok.estimate));
+      set("targetGap",fmt(targetGapTokens));
+      set("allBytes",bytes(allBytes));
+      set("targetBytes",bytes(targetTextBytes));
+      set("targetBytesGap",bytes(targetGapBytes));
       set("repoSize",bytes(totalBytes));
       set("sourceBytes",bytes(sourceBytes));
       set("binaryBytes",bytes(binaryBytes));
