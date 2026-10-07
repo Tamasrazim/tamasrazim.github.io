@@ -559,20 +559,27 @@ int main(){
 
         if(screen==Screen::MENU){
             EnableCursor();
-            Rectangle a{GetScreenWidth()/2.0f-170,370,340,58},b{GetScreenWidth()/2.0f-170,442,340,58},c{GetScreenWidth()/2.0f-170,514,340,58},d{GetScreenWidth()/2.0f-170,586,340,58};
+            Rectangle a{GetScreenWidth()/2.0f-170,350,340,52},b{GetScreenWidth()/2.0f-170,412,340,52},c{GetScreenWidth()/2.0f-170,474,340,52},e{GetScreenWidth()/2.0f-170,536,340,52},d{GetScreenWidth()/2.0f-170,598,340,52};
             if(IsKeyPressed(KEY_ENTER)||(CheckCollisionPointRec(GetMousePosition(),a)&&click))StartLevel(save.unlocked);
             else if(IsKeyPressed(KEY_L)||(CheckCollisionPointRec(GetMousePosition(),b)&&click))screen=Screen::LEVEL_SELECT;
             else if(IsKeyPressed(KEY_S)||(CheckCollisionPointRec(GetMousePosition(),c)&&click)){settingsReturn=Screen::MENU;screen=Screen::SETTINGS;}
+            else if(CheckCollisionPointRec(GetMousePosition(),e)&&click)screen=Screen::CREDITS;
             else if(IsKeyPressed(KEY_ESCAPE)||(CheckCollisionPointRec(GetMousePosition(),d)&&click))break;
         } else if(screen==Screen::LEVEL_SELECT){
             EnableCursor();
             if(IsKeyPressed(KEY_ESCAPE))screen=Screen::MENU;
-            int cell=62,startX=(GetScreenWidth()-620)/2,startY=155;
+            cam.position=V3(0,5.0f,17.0f);
+            cam.target=V3(0,3.2f,0);
+            cam.up=V3(0,1,0);
+            cam.fovy=58.0f;
             if(click){
                 Vector2 m=GetMousePosition();
                 for(int i=0;i<LEVELS;i++){
-                    int n=i+1,x=startX+(i%10)*cell,y=startY+(i/10)*cell;
-                    Rectangle r{(float)x+3,(float)y+3,56,56};
+                    int n=i+1,col=i%10,row=i/10;
+                    float wx=(col-4.5f)*1.25f;
+                    float wy=7.4f-row*0.92f;
+                    Vector2 p=GetWorldToScreen(V3(wx,wy,-0.5f),cam);
+                    Rectangle r{p.x-32,p.y-22,64,44};
                     if(n<=save.unlocked&&CheckCollisionPointRec(m,r)){StartLevel(n);break;}
                 }
             }
@@ -763,6 +770,9 @@ int main(){
             EnableCursor();
             if(IsKeyPressed(KEY_ENTER)||click)screen=Screen::LEVEL_SELECT;
             if(IsKeyPressed(KEY_ESCAPE))screen=Screen::MENU;
+        } else if(screen==Screen::CREDITS){
+            EnableCursor();
+            if(IsKeyPressed(KEY_ESCAPE)||click)screen=Screen::MENU;
         }
 
         BeginDrawing();
@@ -782,17 +792,18 @@ int main(){
             DrawSphere(V3(0,4.05f,-0.8f),0.55f,Color{38,128,170,255});
 
             float x=GetScreenWidth()/2.0f-170;
-            Rectangle a{x,370,340,58},b{x,442,340,58},c{x,514,340,58},d{x,586,340,58};
-            WorldButton(cam,V3(-3.0f,1.45f,0.0f),V3(4.6f,0.75f,0.42f),"CONTINUE",CheckCollisionPointRec(GetMousePosition(),a),SKYBLUE);
-            WorldButton(cam,V3(3.0f,1.45f,0.0f),V3(4.6f,0.75f,0.42f),"FLOOR SELECT",CheckCollisionPointRec(GetMousePosition(),b),SKYBLUE);
-            WorldButton(cam,V3(-3.0f,0.35f,0.0f),V3(4.6f,0.75f,0.42f),"SETTINGS",CheckCollisionPointRec(GetMousePosition(),c),SKYBLUE);
-            WorldButton(cam,V3(3.0f,0.35f,0.0f),V3(4.6f,0.75f,0.42f),"QUIT",CheckCollisionPointRec(GetMousePosition(),d),SKYBLUE);
+            Rectangle a{x,350,340,52},b{x,412,340,52},c{x,474,340,52},e{x,536,340,52},d{x,598,340,52};
+            WorldButton(cam,V3(-3.0f,1.50f,0.0f),V3(4.6f,0.58f,0.42f),"CONTINUE",CheckCollisionPointRec(GetMousePosition(),a),SKYBLUE);
+            WorldButton(cam,V3(3.0f,1.50f,0.0f),V3(4.6f,0.58f,0.42f),"FLOOR SELECT",CheckCollisionPointRec(GetMousePosition(),b),SKYBLUE);
+            WorldButton(cam,V3(-3.0f,0.65f,0.0f),V3(4.6f,0.58f,0.42f),"SETTINGS",CheckCollisionPointRec(GetMousePosition(),c),SKYBLUE);
+            WorldButton(cam,V3(3.0f,0.65f,0.0f),V3(4.6f,0.58f,0.42f),"CREDITS",CheckCollisionPointRec(GetMousePosition(),e),SKYBLUE);
+            WorldButton(cam,V3(0.0f,-0.18f,0.0f),V3(4.6f,0.58f,0.42f),"QUIT",CheckCollisionPointRec(GetMousePosition(),d),SKYBLUE);
 
             Vector2 title=GetWorldToScreen(V3(0,2.9f,-0.82f),cam);
             DrawText("NEON VAULT",(int)title.x-145,(int)title.y-28,58,RAYWHITE);
             Vector2 sub=GetWorldToScreen(V3(0,2.2f,-0.82f),cam);
             DrawText("100-FLOOR CRYSTAL EXPEDITION",(int)sub.x-165,(int)sub.y,16,LIGHTGRAY);
-            Vector2 progress=GetWorldToScreen(V3(0,-0.02f,0.0f),cam);
+            Vector2 progress=GetWorldToScreen(V3(0,-0.48f,0.0f),cam);
             DrawText(TextFormat("PROGRESS %03d / %03d",save.unlocked,LEVELS),(int)progress.x-115,(int)progress.y,18,LIGHTGRAY);
             EndMode3D();
         } else if(screen==Screen::LEVEL_SELECT){
@@ -971,13 +982,36 @@ int main(){
                 if(timeLeft<=0)CenterText("TIME EXPIRED — PRESS R",425,20,ORANGE);
             }
         } else if(screen==Screen::COMPLETE){
-            DrawRectangleGradientV(0,0,GetScreenWidth(),GetScreenHeight(),Color{14,34,40,255},Color{2,6,10,255});
-            CenterText("VAULT MASTER",180,76,GREEN);CenterText("100 LEVELS COMPLETE",290,30,RAYWHITE);
+            cam.position=V3(0,3.5f,12.5f); cam.target=V3(0,2.6f,0); cam.up=V3(0,1,0); cam.fovy=58.0f;
+            BeginMode3D(cam);
+            DrawPlane(V3(0,0,0),Vector2{28,28},Color{6,17,22,255});
+            WorldFrame(cam,V3(0,3.3f,-1.0f),V3(10.5f,6.5f,0.5f),GREEN);
+            Vector2 title=GetWorldToScreen(V3(0,5.1f,-1.25f),cam);
+            DrawText("VAULT MASTER",(int)title.x-135,(int)title.y-24,48,GREEN);
+            Vector2 sub=GetWorldToScreen(V3(0,4.2f,-1.25f),cam);
             int total=0;for(int i=1;i<=LEVELS;i++)total+=save.stars[i];
-            CenterText(TextFormat("TOTAL STARS  %d / %d",total,LEVELS*3),350,24,GOLD);
-            CrystalIcon({GetScreenWidth()/2.0f,475},62,SKYBLUE);
-            CenterText("ENTER / CLICK • LEVEL SELECT",610,22,SKYBLUE);
-            CenterText("ESC MAIN MENU",650,18,GRAY);
+            DrawText("100 FLOORS COMPLETE",(int)sub.x-135,(int)sub.y,22,RAYWHITE);
+            DrawText(TextFormat("TOTAL STARS  %d / %d",total,LEVELS*3),(int)sub.x-105,(int)sub.y+38,18,GOLD);
+            DrawText("ENTER / CLICK • FLOOR SELECT",(int)sub.x-125,(int)sub.y+82,15,SKYBLUE);
+            EndMode3D();
+        } else if(screen==Screen::CREDITS){
+            cam.position=V3(0,3.5f,12.5f); cam.target=V3(0,2.5f,0); cam.up=V3(0,1,0); cam.fovy=58.0f;
+            BeginMode3D(cam);
+            DrawPlane(V3(0,0,0),Vector2{28,28},Color{4,10,16,255});
+            WorldFrame(cam,V3(0,3.2f,-1.0f),V3(11.0f,7.0f,0.5f),SKYBLUE);
+            Vector2 t=GetWorldToScreen(V3(0,5.65f,-1.25f),cam);
+            DrawText("CREDITS",(int)t.x-78,(int)t.y-22,34,RAYWHITE);
+            Vector2 a2=GetWorldToScreen(V3(0,4.8f,-1.25f),cam);
+            Vector2 b2=GetWorldToScreen(V3(0,4.1f,-1.25f),cam);
+            Vector2 c2=GetWorldToScreen(V3(0,3.45f,-1.25f),cam);
+            Vector2 d2=GetWorldToScreen(V3(0,2.8f,-1.25f),cam);
+            DrawText("GAME DESIGN / PROGRAMMING",(int)a2.x-150,(int)a2.y,17,SKYBLUE);
+            DrawText("Tamasrazim",(int)b2.x-55,(int)b2.y,28,RAYWHITE);
+            DrawText("Native Windows 3D crystal adventure",(int)c2.x-150,(int)c2.y,16,LIGHTGRAY);
+            DrawText("PBR baseline • procedural chill audio • 100 floors",(int)d2.x-190,(int)d2.y,15,LIGHTGRAY);
+            Vector2 e2=GetWorldToScreen(V3(0,1.45f,-1.25f),cam);
+            DrawText("ESC / CLICK TO RETURN",(int)e2.x-95,(int)e2.y,14,GRAY);
+            EndMode3D();
         }
 
         EndDrawing();
