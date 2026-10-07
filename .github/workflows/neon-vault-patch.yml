@@ -1,0 +1,31 @@
+name: Patch NEON VAULT source
+on:
+  push:
+    branches: [neon-vault-next]
+    paths:
+      - "tools/neon-vault-upgrade.py"
+      - "projects/razim-fps/main.cpp"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply source upgrade
+        run: python tools/neon-vault-upgrade.py
+      - name: Commit generated source changes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add projects/razim-fps/main.cpp
+          if git diff --cached --quiet; then
+            echo "No source changes needed."
+            exit 0
+          fi
+          git commit -m "Apply NEON VAULT core gameplay/display upgrade"
+          git push
