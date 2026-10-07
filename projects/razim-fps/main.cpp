@@ -779,6 +779,10 @@ int main(int argc,char** argv){
 
         if(screen==Screen::MENU){
             EnableCursor();
+            cam.position=V3(0,3.0f,10.5f);
+            cam.target=V3(0,1.7f,0);
+            cam.up=V3(0,1,0);
+            cam.fovy=58.0f;
             Rectangle a=WorldHitRect(cam,V3(-3.0f,1.50f,0.0f),V3(4.6f,0.58f,0.42f),8);
             Rectangle b=WorldHitRect(cam,V3(3.0f,1.50f,0.0f),V3(4.6f,0.58f,0.42f),8);
             Rectangle c=WorldHitRect(cam,V3(-3.0f,0.65f,0.0f),V3(4.6f,0.58f,0.42f),8);
