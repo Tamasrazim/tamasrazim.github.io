@@ -26,7 +26,7 @@ h1{margin:0;font-size:clamp(32px,5vw,62px);letter-spacing:-.055em;line-height:.9
 .sub{margin-top:12px;color:var(--muted);max-width:700px}
 .badge{border:1px solid var(--line);border-radius:999px;padding:8px 11px;color:#d4d4d4;font:11px ui-monospace,monospace;white-space:nowrap}
 .panel{border:1px solid var(--line);background:linear-gradient(180deg,rgba(20,20,20,.96),rgba(10,10,10,.96));border-radius:20px;padding:18px;margin:14px 0;box-shadow:0 20px 65px rgba(0,0,0,.18)}
-.controls{display:grid;grid-template-columns:1fr 130px 150px auto;gap:10px}
+.controls{display:grid;grid-template-columns:minmax(0,1fr) 130px 150px 180px auto;gap:10px}
 input,button,select{height:46px;border:1px solid var(--line);border-radius:12px;background:#0a0a0a;color:var(--text);padding:0 13px;font:13px ui-monospace,SFMono-Regular,Consolas,monospace}
 button{cursor:pointer;border-color:transparent;background:#ededed;color:#050505;font-weight:800}
 button.secondary{background:#161616;color:#fff;border-color:var(--line)}
@@ -113,6 +113,10 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
     <input id="repo" value="https://github.com/Tamasrazim/tamasrazim.github.io" aria-label="GitHub repository URL">
     <input id="branch" value="main" aria-label="Branch" placeholder="branch">
     <input id="ratio" value="3.1" inputmode="decimal" aria-label="Characters per token">
+    <select id="tokenMode" aria-label="Token measurement mode">
+      <option value="text">TEXT TOKENS</option>
+      <option value="universal">UNIVERSAL TOKENS</option>
+    </select>
     <button id="measure">MEASURE NOW</button>
   </div>
   <div class="auth-row">
@@ -128,7 +132,7 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
   <div class="stats">
     <div class="stat"><div class="label">Files</div><div class="value" id="files">—</div><div class="note">entire tracked snapshot</div></div>
     <div class="stat"><div class="label">Source files</div><div class="value" id="sourceFiles">—</div><div class="note">text/code only</div></div>
-    <div class="stat"><div class="label">Source tokens</div><div class="value green" id="tokens">—</div><div class="note">estimated text</div></div>
+    <div class="stat"><div class="label">Token units</div><div class="value green" id="tokens">—</div><div class="note" id="tokenNote">text estimate</div></div>
     <div class="stat"><div class="label">Repo size</div><div class="value" id="repoSize">—</div><div class="note">all tracked blobs</div></div>
     <div class="stat"><div class="label">1B target</div><div class="value" id="targetGap">—</div><div class="note">tokens still needed</div></div>
     <div class="stat"><div class="label">API left</div><div class="value" id="rate">—</div><div class="note">GitHub REST requests</div></div>
@@ -265,10 +269,19 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
     }catch{}
   }
   function set(id,value){ $(id).textContent = value; }
-  function tokenEstimate(sourceBytes, ratio){
-    const estimate = Math.max(0, Math.round(sourceBytes / ratio));
-    return {estimate, low:Math.round(estimate*.88), high:Math.round(estimate*1.12)};
+  function tokenEstimate(sourceBytes,binaryBytes,ratio,mode){
+    const ONE_BILLION = 1000000000;
+    const totalBytes = sourceBytes + binaryBytes;
+    const estimate = mode === "universal" ? totalBytes : Math.round(sourceBytes / ratio);
+    return {
+      estimate:Math.max(0,estimate),
+      low:Math.max(0,Math.round(estimate*.88)),
+      high:Math.max(0,Math.round(estimate*1.12)),
+      method:mode === "universal" ? "1 unit = 1 tracked byte" : "text bytes / chars-per-token",
+      gap:Math.max(0,ONE_BILLION-estimate)
+    };
   }
+
   async function fetchLocalManifest(owner,repo,branch){
     if(location.origin !== "https://tamasrazim.github.io") return null;
     if(owner.toLowerCase() !== "tamasrazim" || repo.toLowerCase() !== "tamasrazim.github.io" || branch !== "main") return null;
@@ -407,6 +420,7 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
       const branch = $("branch").value.trim() || "main";
       const ratioRaw = Number($("ratio").value);
       const ratio = Number.isFinite(ratioRaw) && ratioRaw >= 1.5 && ratioRaw <= 8 ? ratioRaw : 3.1;
+      const mode = $("tokenMode")?.value || "text";
 
       let scanned = await fetchLocalManifest(owner,repo,branch);
       if(!scanned){
@@ -423,7 +437,7 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
       const sourceBytes = source.reduce((n,x)=>n+(x.size||0),0);
       const binaryBytes = binary.reduce((n,x)=>n+(x.size||0),0);
       const totalBytes = sourceBytes + binaryBytes;
-      const tok = tokenEstimate(sourceBytes,ratio);
+      const tok = tokenEstimate(sourceBytes,binaryBytes,ratio,mode);
       const ONE_BILLION = 1000000000;
       const allBytes = sourceBytes + binaryBytes;
       const targetTextBytes = Math.round(ONE_BILLION * ratio);
@@ -433,10 +447,12 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
       set("files",fmt(blobs.length));
       set("sourceFiles",fmt(source.length));
       set("tokens",fmt(tok.estimate));
+      if($("tokenNote")) $("tokenNote").textContent = tok.method;
       set("targetGap",fmt(targetGapTokens));
       set("allBytes",bytes(allBytes));
       set("targetBytes",bytes(targetTextBytes));
       set("targetBytesGap",bytes(targetGapBytes));
+      if($("tokenDefinition")) $("tokenDefinition").textContent = tok.method;
       set("repoSize",bytes(totalBytes));
       set("sourceBytes",bytes(sourceBytes));
       set("binaryBytes",bytes(binaryBytes));
