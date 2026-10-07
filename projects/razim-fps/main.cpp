@@ -395,12 +395,13 @@ int main(int argc,char** argv){
 
     auto SetGameplayCursorMode=[&](bool lock){
         if(validateMode) return;
-        if(lock==cursorLocked) return;
-        cursorLocked=lock;
         if(lock){
+            if(cursorLocked) return;
+            cursorLocked=true;
             SetMousePosition(GetScreenWidth()/2,GetScreenHeight()/2);
             DisableCursor();
         }else{
+            cursorLocked=false;
             EnableCursor();
         }
     };
