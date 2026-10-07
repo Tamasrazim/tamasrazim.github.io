@@ -13,12 +13,11 @@
 #include <queue>
 #include <string>
 #include <vector>
-#if defined(_WIN32)
-#define NOMINMAX
-#include <windows.h>
-#endif
 
 extern int QueryDedicatedVRAMMB();
+#if defined(_WIN32)
+extern void EnsureWorkingDirectory();
+#endif
 
 namespace {
 constexpr int LEVELS=100;
@@ -538,18 +537,6 @@ static void SetDisplayMode(Settings& s,int mode){
     }
 }
 
-#if defined(_WIN32)
-static void SetWorkingDirectoryToExecutable(){
-    wchar_t buffer[32768]{};
-    DWORD n=GetModuleFileNameW(nullptr,buffer,32768);
-    if(n>0 && n<32768){
-        while(n>0 && buffer[n-1]!=L'\\' && buffer[n-1]!=L'/')--n;
-        if(n>0)buffer[n]=L'\0';
-        if(n>0)SetCurrentDirectoryW(buffer);
-    }
-}
-#endif
-
 static bool ValidateAllLevels(){
     bool ok=true;
     constexpr int N=57;
@@ -593,7 +580,7 @@ static bool ValidateAllLevels(){
 int main(int argc,char** argv){
     if(argc>1&&std::strcmp(argv[1],"--validate")==0)return ValidateAllLevels()?0:1;
 #if defined(_WIN32)
-    SetWorkingDirectoryToExecutable();
+    EnsureWorkingDirectory();
 #endif
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE|FLAG_VSYNC_HINT);
