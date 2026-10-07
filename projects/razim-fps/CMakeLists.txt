@@ -17,7 +17,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(raylib)
 
 add_executable(neon_vault main.cpp neon-vault.rc)
-target_link_libraries(neon_vault PRIVATE raylib)
+target_link_libraries(neon_vault PRIVATE raylib dxgi)
 
 if(MSVC)
   target_compile_options(neon_vault PRIVATE /W4 /permissive-)
