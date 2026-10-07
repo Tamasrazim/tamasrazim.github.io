@@ -342,7 +342,7 @@ static void DrawIntro(float t){
     ClearBackground(Color{2,6,12,255});
     for(int y=0;y<h;y+=4){
         unsigned char c=(unsigned char)Clamp(7.0f+18.0f*(float(y)/float(std::max(1,h))),0.0f,255.0f);
-        DrawRectangle(0,y,w,4,Color{2,c/2,c,255});
+        DrawRectangle(0,y,w,4,Color{2,(unsigned char)(c/2),c,255});
     }
     for(int i=0;i<48;i++){
         float x=fmodf(float(i*97)+t*(12.0f+float(i%5)*4.0f),float(w+120))-60.0f;
