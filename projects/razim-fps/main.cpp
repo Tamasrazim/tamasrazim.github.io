@@ -233,6 +233,13 @@ static void WorldFrame(Camera3D cam,Vector3 pos,Vector3 size,Color c){
     DrawCube(pos,size.x,size.y,size.z,Color{7,16,25,235});
     DrawCubeWires(pos,size.x,size.y,size.z,c);
 }
+static Rectangle WorldHitRect(Camera3D cam,Vector3 pos,Vector3 size,float padding=6.0f){
+    Vector2 p0=GetWorldToScreen(V3(pos.x-size.x*0.5f,pos.y-size.y*0.5f,pos.z),cam);
+    Vector2 p1=GetWorldToScreen(V3(pos.x+size.x*0.5f,pos.y+size.y*0.5f,pos.z),cam);
+    float x=std::min(p0.x,p1.x),y=std::min(p0.y,p1.y);
+    float w=fabsf(p1.x-p0.x),h=fabsf(p1.y-p0.y);
+    return {x-padding,y-padding,w+padding*2.0f,h+padding*2.0f};
+}
 
 static const char* PBR_VERTEX_SHADER=R"GLSL(
 #version 330
@@ -600,6 +607,7 @@ int main(int argc,char** argv){
 
         cam.fovy=settings.fov;
         if(!validateMode){
+            SetMousePosition(GetScreenWidth()/2,GetScreenHeight()/2);
             DisableCursor();
             screen=Screen::PLAYING;
         }
@@ -771,7 +779,11 @@ int main(int argc,char** argv){
 
         if(screen==Screen::MENU){
             EnableCursor();
-            Rectangle a{GetScreenWidth()/2.0f-170,350,340,52},b{GetScreenWidth()/2.0f-170,412,340,52},c{GetScreenWidth()/2.0f-170,474,340,52},e{GetScreenWidth()/2.0f-170,536,340,52},d{GetScreenWidth()/2.0f-170,598,340,52};
+            Rectangle a=WorldHitRect(cam,V3(-3.0f,1.50f,0.0f),V3(4.6f,0.58f,0.42f),8);
+            Rectangle b=WorldHitRect(cam,V3(3.0f,1.50f,0.0f),V3(4.6f,0.58f,0.42f),8);
+            Rectangle c=WorldHitRect(cam,V3(-3.0f,0.65f,0.0f),V3(4.6f,0.58f,0.42f),8);
+            Rectangle e=WorldHitRect(cam,V3(3.0f,0.65f,0.0f),V3(4.6f,0.58f,0.42f),8);
+            Rectangle d=WorldHitRect(cam,V3(0.0f,-0.18f,0.0f),V3(4.6f,0.58f,0.42f),8);
             if(IsKeyPressed(KEY_ENTER)||(CheckCollisionPointRec(GetMousePosition(),a)&&click))StartLevel(save.unlocked);
             else if(IsKeyPressed(KEY_L)||(CheckCollisionPointRec(GetMousePosition(),b)&&click))screen=Screen::LEVEL_SELECT;
             else if(IsKeyPressed(KEY_S)||(CheckCollisionPointRec(GetMousePosition(),c)&&click)){settingsReturn=Screen::MENU;screen=Screen::SETTINGS;}
@@ -975,7 +987,11 @@ int main(int argc,char** argv){
             cam.fovy=sprintFov;
         } else if(screen==Screen::PAUSED){
             EnableCursor();
-            if(IsKeyPressed(KEY_ESCAPE)){screen=Screen::PLAYING;DisableCursor();}
+            if(IsKeyPressed(KEY_ESCAPE)){
+                SetMousePosition(GetScreenWidth()/2,GetScreenHeight()/2);
+                screen=Screen::PLAYING;
+                DisableCursor();
+            }
             else if(IsKeyPressed(KEY_R))StartLevel(level.number);
             else if(IsKeyPressed(KEY_S)){settingsReturn=Screen::PAUSED;screen=Screen::SETTINGS;}
         } else if(screen==Screen::COMPLETE){
