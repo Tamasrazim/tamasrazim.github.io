@@ -11,6 +11,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: neon-vault-windows
+  cancel-in-progress: true
+
 jobs:
   build-windows:
     runs-on: windows-latest
