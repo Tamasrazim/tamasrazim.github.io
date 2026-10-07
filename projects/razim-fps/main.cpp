@@ -755,7 +755,7 @@ int main(int argc,char** argv){
             EnableCursor();
             CloseWindow();
         }
-        return ok?0:1;
+        std::exit(ok?EXIT_SUCCESS:EXIT_FAILURE);
     }
 
     while(!WindowShouldClose()){
