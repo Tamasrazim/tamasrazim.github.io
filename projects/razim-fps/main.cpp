@@ -481,7 +481,8 @@ int main(int argc,char** argv){
             return V3(0.0f,preferred.y,std::min(arenaHalf-2.0f,2.0f));
         };
 
-        for(int i=0;i<level.obstacles;i++){
+        const int obstacleCount=(n==1?0:level.obstacles);
+        for(int i=0;i<obstacleCount;i++){
             bool placed=false;
             for(int attempt=0;attempt<80&&!placed;attempt++){
                 float x=rnd(-arenaHalf+2,arenaHalf-2),z=rnd(-arenaHalf+2,arenaHalf-2);
