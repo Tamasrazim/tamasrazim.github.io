@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure CMake
-        run: cmake -S projects/razim-fps -B projects/razim-fps/build -G "Visual Studio 18 2026" -A x64
+        run: cmake -S projects/razim-fps -B projects/razim-fps/build -G "Visual Studio 18 2026" -A x64 -DNEON_VAULT_BUILD=$env:GITHUB_RUN_NUMBER
 
       - name: Build game
         run: cmake --build projects/razim-fps/build --config Release --parallel
@@ -47,19 +47,28 @@ jobs:
       - name: Package portable build
         shell: pwsh
         run: |
-          Compress-Archive -Path "projects/razim-fps/build/Release/neon_vault.exe" -DestinationPath "NEON-VAULT-Portable.zip" -Force
+          Compress-Archive -Path @(
+            "projects/razim-fps/build/Release/neon_vault.exe",
+            "projects/razim-fps/build/Release/neon_vault_updater.exe",
+            "projects/razim-fps/assets"
+          ) -DestinationPath "NEON-VAULT-Portable.zip" -Force
 
       - name: Verify installer outputs
         shell: pwsh
         run: |
           $installer = "projects/razim-fps/installer-output/NEON-VAULT-Setup.exe"
           $portable = "NEON-VAULT-Portable.zip"
+          $updater = "projects/razim-fps/build/Release/neon_vault_updater.exe"
+          $game = "projects/razim-fps/build/Release/neon_vault.exe"
           if (!(Test-Path $installer)) { throw "Installer was not generated: $installer" }
           if (!(Test-Path $portable)) { throw "Portable package was not generated: $portable" }
+          if (!(Test-Path $updater)) { throw "Updater was not generated: $updater" }
+          if (!(Test-Path $game)) { throw "Game was not generated: $game" }
           if ((Get-Item $installer).Length -lt 100KB) { throw "Installer is suspiciously small." }
           if ((Get-Item $portable).Length -lt 10KB) { throw "Portable package is suspiciously small." }
           Write-Host "Installer: $((Get-Item $installer).Length) bytes"
           Write-Host "Portable:  $((Get-Item $portable).Length) bytes"
+          Write-Host "Updater:   $((Get-Item $updater).Length) bytes"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -68,6 +77,7 @@ jobs:
           path: |
             projects/razim-fps/installer-output/NEON-VAULT-Setup.exe
             NEON-VAULT-Portable.zip
+            projects/razim-fps/build/Release/neon_vault_updater.exe
 
       - name: Publish GitHub Release
         shell: pwsh
