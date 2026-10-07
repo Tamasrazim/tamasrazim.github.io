@@ -22,6 +22,7 @@ struct Settings {
     int crosshair = 0;
     int displayMode = 1; // 0 windowed, 1 borderless, 2 fullscreen
     bool performanceMonitor = false;
+    int renderScale = 100;
 };
 struct LevelConfig {
     int number=1, theme=0, tier=0;
@@ -121,6 +122,7 @@ static void SaveGame(const SaveData& d){
     o<<"crosshair "<<d.settings.crosshair<<"\n";
     o<<"displayMode "<<d.settings.displayMode<<"\n";
     o<<"performanceMonitor "<<(d.settings.performanceMonitor?1:0)<<"\n";
+    o<<"renderScale "<<d.settings.renderScale<<"\n";
     for(int i=1;i<=LEVELS;i++)o<<"star "<<i<<" "<<d.stars[i]<<"\n";
 }
 static SaveData LoadGame(){
@@ -137,6 +139,7 @@ static SaveData LoadGame(){
         else if(k=="crosshair")in>>d.settings.crosshair;
         else if(k=="displayMode")in>>d.settings.displayMode;
         else if(k=="performanceMonitor"){int v;in>>v;d.settings.performanceMonitor=v!=0;}
+        else if(k=="renderScale")in>>d.settings.renderScale;
         else if(k=="star"){int n=0,s=0;in>>n>>s;if(n>=1&&n<=LEVELS)d.stars[n]=std::clamp(s,0,3);}
     }
     d.unlocked=std::clamp(d.unlocked,1,LEVELS);
@@ -145,6 +148,7 @@ static SaveData LoadGame(){
     d.settings.uiScale=Clamp(d.settings.uiScale,0.85f,1.2f);
     d.settings.crosshair=std::clamp(d.settings.crosshair,0,2);
     d.settings.displayMode=std::clamp(d.settings.displayMode,0,2);
+    d.settings.renderScale=std::clamp(d.settings.renderScale,50,100);
     return d;
 }
 static bool BoxesOverlapXZ(Vector3 a,Vector3 as,Vector3 b,Vector3 bs,float padding=0.0f){
@@ -304,6 +308,8 @@ int main(){
     SaveData save=LoadGame();
     Settings& settings=save.settings;
     int dedicatedVRAMMB=QueryDedicatedVRAMMB();
+    RenderTexture2D sceneTarget{};
+    int sceneTargetW=0,sceneTargetH=0;
     Shader pbrShader=LoadShaderFromMemory(PBR_VERTEX_SHADER,PBR_FRAGMENT_SHADER);
     bool pbrReady=pbrShader.id>0;
     int pbrViewPosLoc=-1,pbrLightPosLoc=-1,pbrLightColorLoc=-1,pbrAmbientLoc=-1,pbrRoughnessLoc=-1,pbrMetallicLoc=-1;
@@ -317,6 +323,18 @@ int main(){
         pbrRoughnessLoc=GetShaderLocation(pbrShader,"roughnessValue");
         pbrMetallicLoc=GetShaderLocation(pbrShader,"metallicValue");
     }
+    auto EnsureSceneTarget=[&](){
+        int sw=std::max(640,GetScreenWidth());
+        int sh=std::max(360,GetScreenHeight());
+        int rw=std::max(640,(int)roundf(sw*(settings.renderScale/100.0f)));
+        int rh=std::max(360,(int)roundf(sh*(settings.renderScale/100.0f)));
+        if(!IsRenderTextureReady(sceneTarget)||rw!=sceneTargetW||rh!=sceneTargetH){
+            if(IsRenderTextureReady(sceneTarget))UnloadRenderTexture(sceneTarget);
+            sceneTarget=LoadRenderTexture(rw,rh);
+            sceneTargetW=rw;sceneTargetH=rh;
+        }
+    };
+
     auto ApplyDisplayMode=[&](int mode){
         settings.displayMode=std::clamp(mode,0,2);
         if(settings.displayMode==2){
@@ -561,11 +579,11 @@ int main(){
         } else if(screen==Screen::SETTINGS){
             EnableCursor();
             if(IsKeyPressed(KEY_ESCAPE)){SaveGame(save);screen=settingsReturn;}
-            if(IsKeyPressed(KEY_TAB)||IsKeyPressed(KEY_S))settingsSelected=(settingsSelected+1)%9;
-            if(IsKeyPressed(KEY_UP))settingsSelected=(settingsSelected+8)%9;
-            if(IsKeyPressed(KEY_DOWN))settingsSelected=(settingsSelected+1)%9;
+            if(IsKeyPressed(KEY_TAB)||IsKeyPressed(KEY_S))settingsSelected=(settingsSelected+1)%10;
+            if(IsKeyPressed(KEY_UP))settingsSelected=(settingsSelected+9)%10;
+            if(IsKeyPressed(KEY_DOWN))settingsSelected=(settingsSelected+1)%10;
             int hoverRow=-1;
-            for(int i=0;i<9;i++){
+            for(int i=0;i<10;i++){
                 Rectangle rr{60.0f,145.0f+i*64.0f,560.0f,54.0f};
                 if(CheckCollisionPointRec(GetMousePosition(),rr))hoverRow=i;
             }
@@ -581,6 +599,13 @@ int main(){
                 if(settingsSelected==6)settings.crosshair=(settings.crosshair+(dir>0?1:2))%3;
                 if(settingsSelected==7)ApplyDisplayMode((settings.displayMode+(dir>0?1:2))%3);
                 if(settingsSelected==8)settings.performanceMonitor=!settings.performanceMonitor;
+                if(settingsSelected==9){
+                    static const int scales[6]={50,67,75,85,92,100};
+                    int idx=0;
+                    for(int i=0;i<6;i++)if(scales[i]==settings.renderScale)idx=i;
+                    idx=std::clamp(idx+(dir>0?1:-1),0,5);
+                    settings.renderScale=scales[idx];
+                }
                 SaveGame(save);
             }
         } else if(screen==Screen::PLAYING){
@@ -814,18 +839,18 @@ int main(){
             DrawPlane(V3(0,0,0),Vector2{28,28},Color{5,11,18,255});
             WorldFrame(cam,V3(0,3.5f,-0.9f),V3(12.0f,7.2f,0.55f),Color{70,205,255,255});
 
-            const char* labels[9]={"Mouse sensitivity","Invert Y","Field of view","Hints","Screen shake","UI scale","Crosshair","Display mode","Performance monitor"};
+            const char* labels[10]={"Mouse sensitivity","Invert Y","Field of view","Hints","Screen shake","UI scale","Crosshair","Display mode","Performance monitor","Render scale"};
             const char* dm[3]={"WINDOWED","BORDERLESS","FULLSCREEN"};
             std::string vals[9]={
                 TextFormat("%.4f",settings.sensitivity),settings.invertY?"ON":"OFF",
                 TextFormat("%.0f",settings.fov),settings.hints?"ON":"OFF",
                 settings.shake?"ON":"OFF",TextFormat("%.2fx",settings.uiScale),
                 TextFormat("STYLE %d",settings.crosshair+1),dm[settings.displayMode],
-                settings.performanceMonitor?"ON":"OFF"
+                settings.performanceMonitor?"ON":"OFF",TextFormat("%d%%",settings.renderScale)
             };
 
             for(int i=0;i<9;i++){
-                float wy=6.25f-i*0.68f;
+                float wy=6.55f-i*0.61f;
                 float wx=-2.0f;
                 Vector2 pp=GetWorldToScreen(V3(wx,wy,-0.72f),cam);
                 Rectangle hit{pp.x-235,pp.y-18,470,36};
@@ -844,6 +869,9 @@ int main(){
             DrawText("CLICK A ROW • ARROWS CHANGE • ESC BACK • F11 DISPLAY",(int)note.x-205,(int)note.y,13,LIGHTGRAY);
             EndMode3D();
         } else if(screen==Screen::PLAYING||screen==Screen::PAUSED){
+            EnsureSceneTarget();
+            BeginTextureMode(sceneTarget);
+            ClearBackground(Color{5,9,16,255});
             BeginMode3D(cam);
             if(pbrReady){
                 Vector3 lightPos=V3(6.0f,11.0f,2.0f);
@@ -899,6 +927,7 @@ int main(){
             DrawCylinderWires(exit,1.65f,1.65f,.1f,40,RAYWHITE);
             if(pbrReady)EndShaderMode();
             EndMode3D();
+            if(pbrReady)EndShaderMode();
 
             int collected=0;for(const auto& c:crystals)if(c.collected)collected++;
             Color accent=ThemePrimary(level.theme);
@@ -927,6 +956,7 @@ int main(){
                 DrawText(TextFormat("CULLED %d",culledObjects),GetScreenWidth()-286,93,18,RAYWHITE);
                 if(dedicatedVRAMMB)DrawText(TextFormat("VRAM %d MB",dedicatedVRAMMB),GetScreenWidth()-286,116,18,RAYWHITE);
                 else DrawText("VRAM N/A",GetScreenWidth()-286,116,18,GRAY);
+                DrawText(TextFormat("RENDER %dx%d",sceneTargetW,sceneTargetH),GetScreenWidth()-286,139,18,Color{170,190,205,255});
             }
             DrawText("ESC PAUSE • E INTERACT • R RESTART",34,GetScreenHeight()-24,14,GRAY);
             if(respawnFlash>0)DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{255,60,60,40});
@@ -936,6 +966,11 @@ int main(){
                 CenterText("ESC RESUME • R RESTART • S SETTINGS",355,22,SKYBLUE);
                 if(timeLeft<=0)CenterText("TIME EXPIRED — PRESS R",425,20,ORANGE);
             }
+            EndTextureMode();
+            DrawTexturePro(sceneTarget.texture,
+                Rectangle{0,0,(float)sceneTarget.texture.width,-(float)sceneTarget.texture.height},
+                Rectangle{0,0,(float)GetScreenWidth(),(float)GetScreenHeight()},
+                Vector2{0,0},0,WHITE);
         } else if(screen==Screen::COMPLETE){
             DrawRectangleGradientV(0,0,GetScreenWidth(),GetScreenHeight(),Color{14,34,40,255},Color{2,6,10,255});
             CenterText("VAULT MASTER",180,76,GREEN);CenterText("100 LEVELS COMPLETE",290,30,RAYWHITE);
@@ -950,6 +985,7 @@ int main(){
     }
 
     SaveGame(save);
+    if(IsRenderTextureReady(sceneTarget))UnloadRenderTexture(sceneTarget);
     if(pbrReady)UnloadShader(pbrShader);
     if(musicReady){
         StopAudioStream(musicStream);
