@@ -9,7 +9,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-enum class Screen { MENU, LEVEL_SELECT, PLAYING, PAUSED, SETTINGS, COMPLETE };
+enum class Screen { MENU, LEVEL_SELECT, PLAYING, PAUSED, SETTINGS, COMPLETE, CREDITS };
 enum class PuzzleType { COLLECT, KEY_DOOR, SWITCH_GATE, PRESSURE_PLATE, MEMORY, TIMED_GATE, TELEPORT, SEQUENCE, MOVING_GATE, FINALE };
 
 struct Settings {
