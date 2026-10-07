@@ -810,8 +810,7 @@ int main(int argc,char** argv){
                     int n=i+1,col=i%10,row=i/10;
                     float wx=(col-4.5f)*1.25f;
                     float wy=7.4f-row*0.92f;
-                    Vector2 p=GetWorldToScreen(V3(wx,wy,-0.5f),cam);
-                    Rectangle r{p.x-32,p.y-22,64,44};
+                    Rectangle r=WorldHitRect(cam,V3(wx,wy,-0.25f),V3(1.0f,0.62f,0.35f),3);
                     if(n<=save.unlocked&&CheckCollisionPointRec(m,r)){StartLevel(n);break;}
                 }
             }
@@ -823,7 +822,8 @@ int main(int argc,char** argv){
             if(IsKeyPressed(KEY_DOWN))settingsSelected=(settingsSelected+1)%10;
             int hoverRow=-1;
             for(int i=0;i<10;i++){
-                Rectangle rr{60.0f,145.0f+i*64.0f,560.0f,54.0f};
+                float wy=6.55f-i*0.61f;
+                Rectangle rr=WorldHitRect(cam,V3(-2.0f,wy,-0.55f),V3(6.2f,0.48f,0.32f),5);
                 if(CheckCollisionPointRec(GetMousePosition(),rr))hoverRow=i;
             }
             if(click&&hoverRow>=0)settingsSelected=hoverRow;
