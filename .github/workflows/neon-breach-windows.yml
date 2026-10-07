@@ -6,6 +6,11 @@ on:
     paths:
       - "projects/razim-fps/**"
       - ".github/workflows/neon-breach-windows.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "projects/razim-fps/**"
+      - ".github/workflows/neon-breach-windows.yml"
   workflow_dispatch:
 
 permissions:
@@ -72,7 +77,8 @@ jobs:
           if (!(Test-Path $updater)) { throw "Updater was not generated: $updater" }
           if (!(Test-Path $game)) { throw "Game was not generated: $game" }
           if ((Get-Item $installer).Length -lt 100KB) { throw "Installer is suspiciously small." }
-          if ((Get-Item $portable).Length -lt 10KB) { throw "Portable package is suspiciously small." }
+          if ((Get-Item $portable).Length -lt 100KB) { throw "Portable package is suspiciously small." }
+          if (!(Test-Path "projects/razim-fps/assets/audio/neon-vault-theme.wav")) { throw "Final instrumental soundtrack is missing." }
           Write-Host "Installer: $((Get-Item $installer).Length) bytes"
           Write-Host "Portable:  $((Get-Item $portable).Length) bytes"
           Write-Host "Updater:   $((Get-Item $updater).Length) bytes"
@@ -87,6 +93,7 @@ jobs:
             projects/razim-fps/build/Release/neon_vault_updater.exe
 
       - name: Publish GitHub Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
