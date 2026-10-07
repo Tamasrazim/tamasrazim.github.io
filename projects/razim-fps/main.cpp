@@ -13,17 +13,16 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+#define DrawText Win32_DrawText
 #include <windows.h>
 #include <dxgi1_4.h>
 #pragma comment(lib,"dxgi.lib")
+#undef DrawText
 #ifdef min
 #undef min
 #endif
 #ifdef max
 #undef max
-#endif
-#ifdef DrawText
-#undef DrawText
 #endif
 #endif
 
@@ -281,17 +280,6 @@ int main(){
     };
     if(settings.displayMode!=0)ApplyDisplayMode(settings.displayMode);
 
-    InitAudioDevice();
-    musicReady=IsAudioDeviceReady();
-    if(musicReady){
-        musicStream=LoadAudioStream(44100,16,2);
-        if(IsAudioStreamReady(musicStream)){
-            SetAudioStreamVolume(musicStream,0.22f);
-            PlayAudioStream(musicStream);
-        }else{
-            musicReady=false;
-        }
-    }
     Screen screen=Screen::MENU;
     Screen settingsReturn=Screen::MENU;
     int settingsSelected=0,levelNumber=1;
@@ -327,6 +315,19 @@ int main(){
     bool musicReady=false;
     float musicTime=0.0f;
     std::vector<int16_t> musicBuffer(1470);
+
+    InitAudioDevice();
+    musicReady=IsAudioDeviceReady();
+    if(musicReady){
+        musicStream=LoadAudioStream(44100,16,2);
+        if(IsAudioStreamReady(musicStream)){
+            SetAudioStreamVolume(musicStream,0.22f);
+            PlayAudioStream(musicStream);
+        }else{
+            musicReady=false;
+        }
+    }
+
     bool keysSolved=false,switchesSolved=false,platesSolved=false,memorySolved=false,sequenceSolved=false,puzzleSolved=false;
 
     auto GenerateLevel=[&](int n){
