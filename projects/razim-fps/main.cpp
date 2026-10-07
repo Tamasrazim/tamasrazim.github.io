@@ -342,7 +342,7 @@ static void DrawIntro(float t){
     ClearBackground(Color{2,6,12,255});
     for(int y=0;y<h;y+=4){
         unsigned char c=(unsigned char)Clamp(7.0f+18.0f*(float(y)/float(std::max(1,h))),0.0f,255.0f);
-        DrawRectangle(0,y,w,4,Color{2,c/2,c,255});
+        DrawRectangle(0,y,w,4,Color{2,(unsigned char)(c/2),c,255});
     }
     for(int i=0;i<48;i++){
         float x=fmodf(float(i*97)+t*(12.0f+float(i%5)*4.0f),float(w+120))-60.0f;
@@ -409,8 +409,8 @@ static Assets LoadAssets(){
     a.crystal=Tex("assets/textures/crystal.bmp",Color{55,180,235,255});
     a.terminal=Tex("assets/textures/terminal.bmp",Color{50,180,155,255});
     a.sky=Tex("assets/textures/sky.bmp",Color{6,13,26,255});
-    if(FileExists("assets/audio/neon-vault-theme.ogg")){
-        a.theme=LoadMusicStream("assets/audio/neon-vault-theme.ogg");
+    if(FileExists("assets/audio/neon-vault-theme.wav")){
+        a.theme=LoadMusicStream("assets/audio/neon-vault-theme.wav");
         a.musicReady=IsMusicValid(a.theme);
         if(a.musicReady)a.theme.looping=true;
     }
@@ -540,16 +540,22 @@ int main(int argc,char** argv){
     int deaths=0;
     float scanTimer=0,bobPhase=0;
     bool grounded=true,mouseCaptured=false,quit=false;
+    Vector2 cursorRestore{720,450};
     int settingsRow=0;
     float introElapsed=0.0f;
 
     auto CaptureMouse=[&](bool capture){
         if(capture){
             if(!mouseCaptured){
+                cursorRestore=GetMousePosition();
                 SetMousePosition(GetScreenWidth()/2,GetScreenHeight()/2);
                 DisableCursor();
                 mouseCaptured=true;
             }
+        }else if(mouseCaptured){
+            mouseCaptured=false;
+            EnableCursor();
+            SetMousePosition((int)cursorRestore.x,(int)cursorRestore.y);
         }else{
             mouseCaptured=false;
             EnableCursor();
@@ -664,11 +670,11 @@ int main(int argc,char** argv){
             }
         }else if(screen==Screen::SETTINGS){
             if(IsKeyPressed(KEY_ESCAPE)){SaveGame(save);screen=returnScreen;}
-            if(IsKeyPressed(KEY_UP))settingsRow=(settingsRow+8)%9;
-            if(IsKeyPressed(KEY_DOWN))settingsRow=(settingsRow+1)%9;
+            if(IsKeyPressed(KEY_UP))settingsRow=(settingsRow+9)%10;
+            if(IsKeyPressed(KEY_DOWN))settingsRow=(settingsRow+1)%10;
             if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
                 int left=GetScreenWidth()/2-300;
-                for(int i=0;i<9;i++){
+                for(int i=0;i<10;i++){
                     Rectangle rr={float(left),165.0f+i*50.0f,600,42};
                     if(CheckCollisionPointRec(GetMousePosition(),rr))settingsRow=i;
                 }
@@ -682,10 +688,11 @@ int main(int argc,char** argv){
                     case 2:save.settings.fov=Clamp(save.settings.fov+dir*2,60,105);break;
                     case 3:save.settings.hints=!save.settings.hints;break;
                     case 4:save.settings.shake=!save.settings.shake;break;
-                    case 5:save.settings.music=Clamp(save.settings.music+dir*0.05f,0.0f,1.0f);break;
-                    case 6:save.settings.crosshair=(save.settings.crosshair+(dir>0?1:2))%3;break;
-                    case 7:SetDisplayMode(save.settings,(save.settings.displayMode+(dir>0?1:2))%3);break;
-                    case 8:save.settings.performance=!save.settings.performance;break;
+                    case 5:save.settings.sfx=Clamp(save.settings.sfx+dir*0.05f,0.0f,1.0f);break;
+                    case 6:save.settings.music=Clamp(save.settings.music+dir*0.05f,0.0f,1.0f);break;
+                    case 7:save.settings.crosshair=(save.settings.crosshair+(dir>0?1:2))%3;break;
+                    case 8:SetDisplayMode(save.settings,(save.settings.displayMode+(dir>0?1:2))%3);break;
+                    case 9:save.settings.performance=!save.settings.performance;break;
                 }
                 SaveGame(save);ClickSound();
             }
@@ -809,7 +816,13 @@ int main(int argc,char** argv){
                 CaptureMouse(false);
             }
 
-            if(level.objective!=Objective::SURVIVE&&timeLeft<=0){CaptureMouse(false);screen=Screen::PAUSED;}
+            if(level.objective!=Objective::SURVIVE&&timeLeft<=0){
+                timeLeft=0;
+                health=std::max(0.0f,health-25.0f);
+                SaveGame(save);
+                CaptureMouse(false);
+                screen=Screen::GAMEOVER;
+            }
             if(level.objective==Objective::SURVIVE&&timeLeft<=0){
                 if(level.id<LEVELS)save.unlocked=std::max(save.unlocked,level.id+1);
                 save.stars[level.id]=3;
@@ -853,7 +866,7 @@ int main(int argc,char** argv){
             ButtonDraw({GetScreenWidth()/2.0f-180,410,360,58},"SETTINGS",ThemeColor(2));
             ButtonDraw({GetScreenWidth()/2.0f-180,480,360,58},"CREDITS",ThemeColor(4));
             ButtonDraw({GetScreenWidth()/2.0f-180,550,360,58},"QUIT",Color{255,100,100,255});
-            DrawText("v3.1 • FULL-GAME RELEASE CANDIDATE",24,GetScreenHeight()-28,13,GRAY);
+            DrawText("v3.2 • FINAL RELEASE CANDIDATE",24,GetScreenHeight()-28,13,GRAY);
         }else if(screen==Screen::LEVELS){
             Center("FLOOR SELECT",65,42,RAYWHITE);
             Center(TextFormat("%03d / %03d UNLOCKED",save.unlocked,LEVELS),118,16,SKYBLUE);
@@ -871,13 +884,14 @@ int main(int argc,char** argv){
             Center("SETTINGS",55,40,RAYWHITE);
             Center("ARROWS / ENTER TO CHANGE • ESC TO SAVE AND BACK",105,14,GRAY);
             int left=GetScreenWidth()/2-300;
-            const char* labels[9]={"MOUSE SENSITIVITY","INVERT Y","FIELD OF VIEW","HINTS","SCREEN SHAKE","MUSIC VOLUME","CROSSHAIR","DISPLAY","PERFORMANCE"};
-            std::string values[9]={
+            const char* labels[10]={"MOUSE SENSITIVITY","INVERT Y","FIELD OF VIEW","HINTS","SCREEN SHAKE","SFX VOLUME","MUSIC VOLUME","CROSSHAIR","DISPLAY","PERFORMANCE"};
+            std::string values[10]={
                 TextFormat("%.4f",save.settings.sensitivity),
                 save.settings.invertY?"ON":"OFF",
                 TextFormat("%.0f",save.settings.fov),
                 save.settings.hints?"ON":"OFF",
                 save.settings.shake?"ON":"OFF",
+                TextFormat("%d%%",(int)(save.settings.sfx*100.0f)),
                 TextFormat("%d%%",(int)(save.settings.music*100.0f)),
                 TextFormat("STYLE %d",save.settings.crosshair+1),
                 save.settings.displayMode==0?"WINDOWED":(save.settings.displayMode==1?"BORDERLESS":"FULLSCREEN"),
@@ -1002,7 +1016,7 @@ int main(int argc,char** argv){
             ClearBackground(Color{20,6,10,255});
             Center("SYSTEM FAILURE",155,56,RED);
             Center(TextFormat("FLOOR %03d",level.id),230,22,RAYWHITE);
-            Center("Your failsafe limit was reached.",270,17,LIGHTGRAY);
+            Center("The vault timer expired.",270,17,LIGHTGRAY);
             ButtonDraw({GetScreenWidth()/2.0f-180,470,360,58},"RETRY FLOOR • R",ORANGE);
             ButtonDraw({GetScreenWidth()/2.0f-180,540,360,58},"MAIN MENU • ESC",Color{230,90,120,255});
         }else if(screen==Screen::COMPLETE){
