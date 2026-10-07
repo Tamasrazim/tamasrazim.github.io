@@ -545,7 +545,7 @@ int main(int argc,char** argv){
         return false;
     };
 
-    auto ExitOpen=[&](){return level.objective==Objective::SURVIVE||ObjectiveComplete();};
+    auto ExitOpen=[&](){return level.objective!=Objective::SURVIVE&&ObjectiveComplete();};
 
     auto Respawn=[&](){
         player=level.start;
