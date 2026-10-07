@@ -9,9 +9,21 @@
 #include <string>
 #include <vector>
 #if defined(_WIN32)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>
 #include <dxgi1_4.h>
 #pragma comment(lib,"dxgi.lib")
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#ifdef DrawText
+#undef DrawText
+#endif
 #endif
 
 enum class Screen { MENU, LEVEL_SELECT, PLAYING, PAUSED, SETTINGS, COMPLETE };
