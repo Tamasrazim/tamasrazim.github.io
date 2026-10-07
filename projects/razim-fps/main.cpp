@@ -10,6 +10,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <queue>
 #include <string>
 #include <vector>
 
@@ -21,8 +22,8 @@ constexpr float PLAYER_RADIUS=0.35f;
 constexpr float PLAYER_HEIGHT=1.8f;
 constexpr float TAU=6.28318530718f;
 
-enum class Screen{MENU,LEVELS,SETTINGS,CREDITS,PLAYING,PAUSED,COMPLETE};
-enum class Objective{COLLECT,SWITCHES,KEYCARD,MEMORY,SURVIVE};
+enum class Screen{MENU,LEVELS,SETTINGS,CREDITS,PLAYING,PAUSED,COMPLETE,GAMEOVER};
+enum class Objective{COLLECT,SWITCHES,KEYCARD,MEMORY,SURVIVE,COMBO};
 
 struct Settings{
     float sensitivity=0.0030f;
@@ -41,7 +42,7 @@ struct SaveData{
     Settings settings{};
 };
 struct Wall{Vector3 pos{};Vector3 size{};int material=0;};
-struct Pickup{Vector3 pos{};bool taken=false;int kind=0;};
+struct Pickup{Vector3 pos{};bool taken=false;int kind=0;int order=0;};
 struct SwitchNode{Vector3 pos{};bool active=false;};
 struct Door{Vector3 pos{};Vector3 size{1,2.5f,4};bool open=false;int link=-1;};
 struct Hazard{Vector3 pos{};Vector3 size{0.7f,0.6f,2};float phase=0;};
@@ -67,6 +68,7 @@ struct Level{
 
 struct Assets{
     Texture2D floor{},wall{},metal{},hazard{},crystal{},terminal{},sky{};
+    Model floorModel{},wallModel{},metalModel{},hazardModel{};
     Model drone{},terminalModel{};
     Sound pickup{},hit{},click{},complete{};
     bool droneReady=false;
@@ -82,6 +84,7 @@ static const char* ObjectiveName(Objective o){
         case Objective::KEYCARD:return"KEYCARD BREACH";
         case Objective::MEMORY:return"MEMORY SEQUENCE";
         case Objective::SURVIVE:return"SURVIVAL RUN";
+        case Objective::COMBO:return"VAULT SEQUENCE";
     }
     return"UNKNOWN";
 }
@@ -186,8 +189,18 @@ static Level BuildLevel(int id){
     l.id=std::clamp(id,1,LEVELS);
     l.tier=(l.id-1)/10;
     l.theme=(l.id-1)%10;
-    l.objective=Objective((l.id-1)%5);
+    l.objective=Objective((l.id-1)%6);
     l.title="SECTOR "+std::to_string(l.id);
+    if(l.id<=10)l.title="FIRST CONTACT";
+    else if(l.id<=20)l.title="REACTOR RING";
+    else if(l.id<=30)l.title="SPLIT GRID";
+    else if(l.id<=40)l.title="PRESSURE DECK";
+    else if(l.id<=50)l.title="ARCHIVE WING";
+    else if(l.id<=60)l.title="MIRROR LAB";
+    else if(l.id<=70)l.title="CONVEYOR VAULT";
+    else if(l.id<=80)l.title="BLACKOUT ZONE";
+    else if(l.id<=90)l.title="CORE APPROACH";
+    else l.title="THE INNER VAULT";
     l.required=3+l.tier+(l.id%3);
     l.timeLimit=240+l.tier*25;
     if(l.objective==Objective::SURVIVE)l.timeLimit+=60;
@@ -203,13 +216,24 @@ static Level BuildLevel(int id){
         return float(seed&0x00FFFFFFu)/float(0x00FFFFFFu);
     };
 
-    for(int lane=0;lane<4;lane++){
-        float z=-20+lane*13;
-        float gap=-10+float((l.id*11+lane*7)%18);
-        float leftEnd=gap-4,rightStart=gap+4;
-        float leftLen=leftEnd+29,rightLen=29-rightStart;
-        if(leftLen>1)l.walls.push_back({V((-29+leftEnd)*0.5f,1,z),V(leftLen,2,0.8f),1});
-        if(rightLen>1)l.walls.push_back({V((rightStart+29)*0.5f,1,z),V(rightLen,2,0.8f),1});
+    const int templateId=(l.id-1)%10;
+    for(int lane=0;lane<5;lane++){
+        float z=-24.0f+lane*12.0f;
+        float spine=3.2f+float((templateId+lane)%3);
+        float leftEnd=-spine,rightStart=spine;
+        float leftLen=leftEnd+28.0f,rightLen=28.0f-rightStart;
+        if(leftLen>1)l.walls.push_back({V((-28+leftEnd)*0.5f,1,z),V(leftLen,2,0.9f),1});
+        if(rightLen>1)l.walls.push_back({V((rightStart+28)*0.5f,1,z),V(rightLen,2,0.9f),1});
+        if(templateId%3==0&&lane<4){
+            float sideX=(lane%2==0)?-18.0f:18.0f;
+            l.walls.push_back({V(sideX,1,z+6),V(0.9f,2,9),1});
+        }else if(templateId%3==1&&lane%2==0){
+            l.walls.push_back({V(-17,1,z+6),V(12,2,0.9f),1});
+            l.walls.push_back({V(17,1,z-6),V(12,2,0.9f),1});
+        }else if(templateId%3==2){
+            l.walls.push_back({V(-19,1,z+6),V(8,2,0.9f),1});
+            l.walls.push_back({V(19,1,z-6),V(8,2,0.9f),1});
+        }
     }
 
     for(int i=0;i<8+l.tier*3;i++){
@@ -234,16 +258,25 @@ static Level BuildLevel(int id){
     }else if(l.objective==Objective::KEYCARD){
         l.required=1+l.tier/3;
         for(int i=0;i<l.required;i++){
-            Vector3 p=V(-14+i*10,0.75f,10-i*7);
+            Vector3 p=V(-18+(i%4)*12,0.75f,12-(i/4)*7);
             l.pickups.push_back({SafePoint(l,p,0.5f,70+i),false,1});
         }
         l.doors.push_back({V(0,1.25f,-8),V(1.2f,2.5f,7),false,0});
     }else if(l.objective==Objective::MEMORY){
         l.required=std::min(10,4+l.tier);
         for(int i=0;i<l.required;i++){
-            Vector3 p=V(-15+(i%5)*7.5f,0.2f,-3+(i/5)*8);
-            l.pickups.push_back({SafePoint(l,p,0.5f,100+i),false,2});
+            Vector3 p=V(-15+(i%5)*7.5f,0.55f,10-(i/5)*9);
+            p=SafePoint(l,p,0.5f,100+i);
+            l.pickups.push_back({p,false,2,i+1});
         }
+        l.doors.push_back({V(0,1.25f,-17),V(1.2f,2.5f,5),false,3});
+    }else if(l.objective==Objective::COMBO){
+        l.required=4;
+        for(int i=0;i<3;i++)l.pickups.push_back({SafePoint(l,V(-18+i*18,0.75f,16),false,0,0)});
+        for(int i=0;i<3;i++)l.switches.push_back({SafePoint(l,V(-18+i*18,0.75f,5),false});
+        l.pickups.push_back({SafePoint(l,V(0,0.75f,-1),false,1,0)});
+        for(int i=0;i<4;i++)l.pickups.push_back({SafePoint(l,V(-12+i*8,0.55f,-9),false,2,i+1});
+        l.doors.push_back({V(0,1.25f,-17),V(1.2f,2.5f,5),false,2});
     }
 
     for(int i=0;i<std::max(1,l.tier+(l.id%4));i++){
@@ -262,12 +295,18 @@ static Level BuildLevel(int id){
 
     if(l.id==100){
         l.title="THE VAULT CORE";
-        l.objective=Objective::SURVIVE;
-        l.required=30;
+        l.objective=Objective::COMBO;
+        l.required=4;
         l.timeLimit=420;
-        for(int i=0;i<8;i++)l.hazards.push_back({V(-18+i*5,0.45f,-4+(i%2)*8),V(0.9f,0.8f,3),float(i)});
-        for(int i=0;i<4;i++)l.switches.push_back({SafePoint(l,V(-18+i*12,0.8f,10),0.7f,220+i),false});
-        for(int i=0;i<5;i++)l.pickups.push_back({SafePoint(l,V(-18+i*9,0.75f,-18),0.5f,240+i),false,0});
+        l.switches.clear();
+        l.pickups.clear();
+        for(int i=0;i<4;i++)l.switches.push_back({SafePoint(l,V(-18+i*12,0.8f,14),0.7f,220+i),false});
+        for(int i=0;i<4;i++)l.pickups.push_back({SafePoint(l,V(-18+i*12,0.75f,4),0.5f,240+i),false,0});
+        l.pickups.push_back({SafePoint(l,V(0,0.75f,-5),0.5f,250),false,1});
+        for(int i=0;i<4;i++)l.pickups.push_back({SafePoint(l,V(-12+i*8,0.55f,-11),0.5f,260+i),false,2,i+1});
+        l.doors.clear();
+        l.doors.push_back({V(0,1.25f,-20),V(1.2f,2.5f,5),false,2});
+        for(int i=0;i<18;i++)l.hazards.push_back({V(-20+i*2.2f,0.45f,-2+(i%3)*5),V(0.9f,0.8f,3),float(i)});
     }
     return l;
 }
@@ -314,6 +353,12 @@ static Texture2D Tex(const char* file,Color fallback){
     return t;
 }
 
+static Model MakeTexturedCube(Texture2D tex){
+    Model m=LoadModelFromMesh(GenMeshCube(1,1,1));
+    if(m.materialCount>0)SetMaterialTexture(&m.materials[0],MATERIAL_MAP_DIFFUSE,tex);
+    return m;
+}
+
 static Assets LoadAssets(){
     Assets a;
     a.floor=Tex("assets/textures/floor.bmp",Color{30,39,50,255});
@@ -323,6 +368,10 @@ static Assets LoadAssets(){
     a.crystal=Tex("assets/textures/crystal.bmp",Color{55,180,235,255});
     a.terminal=Tex("assets/textures/terminal.bmp",Color{50,180,155,255});
     a.sky=Tex("assets/textures/sky.bmp",Color{6,13,26,255});
+    a.floorModel=MakeTexturedCube(a.floor);
+    a.wallModel=MakeTexturedCube(a.wall);
+    a.metalModel=MakeTexturedCube(a.metal);
+    a.hazardModel=MakeTexturedCube(a.hazard);
     if(FileExists("assets/models/drone.obj")){
         a.drone=LoadModel("assets/models/drone.obj");
         a.droneReady=a.drone.meshCount>0;
@@ -339,6 +388,10 @@ static Assets LoadAssets(){
 }
 
 static void UnloadAssets(Assets& a){
+    if(a.floorModel.materialCount)UnloadModel(a.floorModel);
+    if(a.wallModel.materialCount)UnloadModel(a.wallModel);
+    if(a.metalModel.materialCount)UnloadModel(a.metalModel);
+    if(a.hazardModel.materialCount)UnloadModel(a.hazardModel);
     if(a.floor.id)UnloadTexture(a.floor);
     if(a.wall.id)UnloadTexture(a.wall);
     if(a.metal.id)UnloadTexture(a.metal);
@@ -373,13 +426,38 @@ static void SetDisplayMode(Settings& s,int mode){
 
 static bool ValidateAllLevels(){
     bool ok=true;
+    constexpr int N=57;
+    auto blocked=[&](const Level& l,int gx,int gz){
+        float x=-28.0f+gx+0.5f,z=-28.0f+gz+0.5f;
+        Vector3 p=V(x,0.9f,z);
+        for(const auto& w:l.walls)if(HitsBox(p,0.30f,w.pos,w.size))return true;
+        return false;
+    };
     for(int id=1;id<=LEVELS;id++){
         Level l=BuildLevel(id);
         if(!ClearPoint(l,l.start,PLAYER_RADIUS)){std::printf("floor %d invalid start\n",id);ok=false;}
         for(const auto& p:l.pickups)if(!ClearPoint(l,p.pos,0.45f))ok=false;
-        for(const auto& s:l.switches)if(!ClearPoint(l,s.pos,0.65f))ok=false;
+        for(const auto& sw:l.switches)if(!ClearPoint(l,sw.pos,0.65f))ok=false;
         for(const auto& h:l.hazards)if(!ClearPoint(l,h.pos,0.5f))ok=false;
         for(const auto& d:l.drones)if(!ClearPoint(l,d.pos,0.8f))ok=false;
+        int sx=std::clamp(int(std::floor(l.start.x+28)),0,N-1);
+        int sz=std::clamp(int(std::floor(l.start.z+28)),0,N-1);
+        int ex=std::clamp(int(std::floor(l.exit.x+28)),0,N-1);
+        int ez=std::clamp(int(std::floor(l.exit.z+28)),0,N-1);
+        std::array<uint8_t,N*N> seen{};
+        std::queue<std::pair<int,int>> q;
+        q.push({sx,sz});seen[sz*N+sx]=1;
+        const int dirs[4][2]={{1,0},{-1,0},{0,1},{0,-1}};
+        while(!q.empty()){
+            auto [x,z]=q.front();q.pop();
+            for(const auto& dd:dirs){
+                int nx=x+dd[0],nz=z+dd[1];
+                if(nx<0||nz<0||nx>=N||nz>=N)continue;
+                if(seen[nz*N+nx]||blocked(l,nx,nz))continue;
+                seen[nz*N+nx]=1;q.push({nx,nz});
+            }
+        }
+        if(!seen[ez*N+ex]){std::printf("floor %d exit unreachable\n",id);ok=false;}
     }
     std::printf("NEON VAULT VALIDATION COMPLETE: %s\n",ok?"PASS":"FAIL");
     return ok;
@@ -407,6 +485,8 @@ int main(int argc,char** argv){
     float yaw=3.14159265359f,pitch=0,stamina=100,health=100,timeLeft=0;
     float levelStartTime=0,damageCooldown=0,hintTimer=0;
     int collected=0,switchesActive=0,memoryStep=0;
+    int deaths=0;
+    float scanTimer=0,bobPhase=0;
     bool grounded=true,mouseCaptured=false,quit=false;
     int settingsRow=0;
 
@@ -440,6 +520,9 @@ int main(int argc,char** argv){
         collected=0;
         switchesActive=0;
         memoryStep=0;
+        deaths=0;
+        scanTimer=0;
+        bobPhase=0;
         damageCooldown=0;
         hintTimer=4;
         grounded=true;
@@ -455,6 +538,10 @@ int main(int argc,char** argv){
             return keys>=level.required;
         }
         if(level.objective==Objective::MEMORY)return memoryStep>=level.required;
+        if(level.objective==Objective::COMBO){
+            int keys=0;for(const auto& p:level.pickups)if(p.kind==1&&p.taken)keys++;
+            return collected>=3&&switchesActive>=3&&keys>=1&&memoryStep>=4;
+        }
         return false;
     };
 
@@ -463,10 +550,17 @@ int main(int argc,char** argv){
     auto Respawn=[&](){
         player=level.start;
         velocity={};
-        health=std::max(1.0f,health-25);
+        health-=25;
+        deaths++;
         timeLeft=std::max(0.0f,timeLeft-5);
         damageCooldown=1.0f;
         if(assets.soundsReady){SetSoundVolume(assets.hit,save.settings.sfx);PlaySound(assets.hit);}
+        if(health<=0){
+            health=0;
+            screen=Screen::GAMEOVER;
+            SaveGame(save);
+            CaptureMouse(false);
+        }
     };
 
     while(!WindowShouldClose()&&!quit){
@@ -577,6 +671,10 @@ int main(int argc,char** argv){
             timeLeft-=dt;
             damageCooldown-=dt;
             hintTimer=std::max(0.0f,hintTimer-dt);
+            scanTimer=std::max(0.0f,scanTimer-dt);
+            if(Vector3Length(move)>0.01f)bobPhase+=dt*(sprint?14.0f:9.0f);
+            else bobPhase+=dt*2.0f;
+            if(IsKeyPressed(KEY_Q))scanTimer=1.5f;
 
             for(auto& h:level.hazards){
                 Vector3 hp=V(h.pos.x+sinf(float(GetTime())*1.8f+h.phase)*2.5f,h.pos.y,h.pos.z);
@@ -590,12 +688,33 @@ int main(int argc,char** argv){
             }
 
             if(IsKeyPressed(KEY_E)){
-                for(auto& s:level.switches)if(!s.active&&Vector3Distance(player,s.pos)<2.0f){s.active=true;switchesActive++;ClickSound();}
-                for(auto& p:level.pickups)if(!p.taken&&Vector3Distance(player,p.pos)<1.5f){
-                    p.taken=true;
-                    if(p.kind==0)collected++;
-                    else if(p.kind==2)memoryStep++;
-                    if(assets.soundsReady){SetSoundVolume(assets.pickup,save.settings.sfx);PlaySound(assets.pickup);}
+                float best=2.25f;int bestSwitch=-1,bestPickup=-1;
+                for(int i=0;i<int(level.switches.size());i++){
+                    if(level.switches[i].active)continue;
+                    float d=Vector3Distance(player,level.switches[i].pos);
+                    if(d<best){best=d;bestSwitch=i;bestPickup=-1;}
+                }
+                for(int i=0;i<int(level.pickups.size());i++){
+                    if(level.pickups[i].taken)continue;
+                    float d=Vector3Distance(player,level.pickups[i].pos);
+                    if(d<best){best=d;bestPickup=i;bestSwitch=-1;}
+                }
+                if(bestSwitch>=0){
+                    level.switches[bestSwitch].active=true;switchesActive++;ClickSound();
+                }else if(bestPickup>=0){
+                    auto& p=level.pickups[bestPickup];
+                    if(p.kind==2){
+                        if(p.order==memoryStep+1){
+                            p.taken=true;memoryStep++;
+                            if(assets.soundsReady){SetSoundVolume(assets.pickup,save.settings.sfx);PlaySound(assets.pickup);}
+                        }else{
+                            memoryStep=0;timeLeft=std::max(0.0f,timeLeft-8.0f);health=std::max(1.0f,health-10.0f);hintTimer=4.0f;
+                            if(assets.soundsReady){SetSoundVolume(assets.hit,save.settings.sfx);PlaySound(assets.hit);}
+                        }
+                    }else{
+                        p.taken=true;if(p.kind==0)collected++;
+                        if(assets.soundsReady){SetSoundVolume(assets.pickup,save.settings.sfx);PlaySound(assets.pickup);}
+                    }
                 }
             }
 
@@ -605,6 +724,8 @@ int main(int argc,char** argv){
                     int keys=0;for(const auto& p:level.pickups)if(p.kind==1&&p.taken)keys++;
                     d.open=keys>=level.required;
                 }else if(d.link==1)d.open=done;
+                else if(d.link==3)d.open=level.objective==Objective::MEMORY&&done;
+                else if(d.link==2)d.open=level.objective==Objective::COMBO&&done;
             }
 
             if(ExitOpen()&&Vector3Distance(player,level.exit)<2.5f){
@@ -638,6 +759,11 @@ int main(int argc,char** argv){
             else if(ButtonHit(b)){StartLevel(level.id);ClickSound();}
             else if(ButtonHit(c)){returnScreen=Screen::PAUSED;screen=Screen::SETTINGS;ClickSound();}
             else if(ButtonHit(d)){screen=Screen::MENU;ClickSound();}
+        }else if(screen==Screen::GAMEOVER){
+            if(IsKeyPressed(KEY_R))StartLevel(level.id);
+            if(IsKeyPressed(KEY_ESCAPE))screen=Screen::MENU;
+            if(ButtonHit({GetScreenWidth()/2.0f-180,470,360,58}))StartLevel(level.id);
+            if(ButtonHit({GetScreenWidth()/2.0f-180,540,360,58}))screen=Screen::MENU;
         }else if(screen==Screen::COMPLETE){
             if(IsKeyPressed(KEY_ENTER)||ButtonHit({GetScreenWidth()/2.0f-180,500,360,58}))screen=Screen::LEVELS;
         }
@@ -657,7 +783,7 @@ int main(int argc,char** argv){
             ButtonDraw({GetScreenWidth()/2.0f-180,410,360,58},"SETTINGS",ThemeColor(2));
             ButtonDraw({GetScreenWidth()/2.0f-180,480,360,58},"CREDITS",ThemeColor(4));
             ButtonDraw({GetScreenWidth()/2.0f-180,550,360,58},"QUIT",Color{255,100,100,255});
-            DrawText("v2.0 • REAL SHIPPED CONTENT BUILD",24,GetScreenHeight()-28,13,GRAY);
+            DrawText("v3.0 • FULL-GAME SYSTEM BUILD",24,GetScreenHeight()-28,13,GRAY);
         }else if(screen==Screen::LEVELS){
             Center("FLOOR SELECT",65,42,RAYWHITE);
             Center(TextFormat("%03d / %03d UNLOCKED",save.unlocked,LEVELS),118,16,SKYBLUE);
@@ -702,18 +828,19 @@ int main(int argc,char** argv){
             Center("CLICK OR ESC TO RETURN",520,14,GRAY);
         }else if(screen==Screen::PLAYING||screen==Screen::PAUSED){
             Camera3D cam{};
-            cam.position=Vector3Add(player,V(0,0.62f,0));
+            float bob=mouseCaptured?sinf(bobPhase)*0.025f:0.0f;
+            cam.position=Vector3Add(player,V(0,0.62f+bob,0));
             cam.target=Vector3Add(cam.position,V(sinf(yaw)*cosf(pitch),sinf(pitch),cosf(yaw)*cosf(pitch)));
             cam.up=V(0,1,0);
             cam.fovy=save.settings.fov;
             cam.projection=CAMERA_PERSPECTIVE;
 
             BeginMode3D(cam);
-            DrawCube(V(0,-0.05f,0),58,0.1f,58,Color{24,33,44,255});
+            DrawModelEx(assets.floorModel,V(0,-0.05f,0),V(0,1,0),0,V(58,0.1f,58),WHITE);
             DrawBillboard(cam,assets.sky,V(0,14,-36),34,Color{180,205,235,255});
             for(const auto& w:level.walls){
-                const Texture2D& t=w.material==2?assets.metal:assets.wall;
-                DrawCube(w.pos,w.size.x,w.size.y,w.size.z,w.material==2?Color{72,82,95,255}:Color{40,55,70,255});
+                Model& m=w.material==2?assets.metalModel:assets.wallModel;
+                DrawModelEx(m,w.pos,V(0,1,0),0,w.size,WHITE);
                 DrawCubeWires(w.pos,w.size.x,w.size.y,w.size.z,Color{72,105,128,255});
             }
             for(const auto& d:level.doors)if(!d.open){
@@ -722,20 +849,23 @@ int main(int argc,char** argv){
             }
             for(const auto& h:level.hazards){
                 Vector3 p=V(h.pos.x+sinf(float(GetTime())*1.8f+h.phase)*2.5f,h.pos.y,h.pos.z);
-                DrawCube(p,h.size.x,h.size.y,h.size.z,Color{165,42,48,255});
+                DrawModelEx(assets.hazardModel,p,V(0,1,0),0,h.size,WHITE);
                 DrawCubeWires(p,h.size.x,h.size.y,h.size.z,RED);
             }
             for(const auto& p:level.pickups)if(!p.taken){
-                float bob=0.20f*sinf(float(GetTime())*3+p.pos.x);
-                Vector3 q=V(p.pos.x,p.pos.y+bob,p.pos.z);
-                if(p.kind==0)DrawBillboard(cam,assets.crystal,q,0.85f,WHITE); else DrawSphere(q,p.kind==1?0.34f:0.28f,p.kind==1?GOLD:MAGENTA);
+                float pb=0.20f*sinf(float(GetTime())*3+p.pos.x);
+                Vector3 q=V(p.pos.x,p.pos.y+pb,p.pos.z);
+                if(p.kind==0)DrawBillboard(cam,assets.crystal,q,0.85f,WHITE);
+                else DrawSphere(q,p.kind==1?0.34f:0.28f,p.kind==1?GOLD:MAGENTA);
                 DrawSphereWires(q,0.37f,8,8,RAYWHITE);
+                if(scanTimer>0)DrawSphereWires(q,0.75f+0.25f*scanTimer,8,8,p.kind==0?SKYBLUE:(p.kind==1?GOLD:MAGENTA));
             }
-            for(const auto& s:level.switches){
-                Color c=s.active?GREEN:ThemeColor(level.theme);
-                if(assets.terminalModel.meshCount)DrawModelEx(assets.terminalModel,s.pos,V(0,1,0),0,V(0.9f,0.9f,0.9f),WHITE);
-                else DrawCube(s.pos,0.7f,1.0f,0.3f,Color{40,175,155,255});
-                DrawCubeWires(s.pos,0.72f,1.02f,0.32f,c);
+            for(const auto& sw:level.switches){
+                Color c=sw.active?GREEN:ThemeColor(level.theme);
+                if(assets.terminalModel.meshCount)DrawModelEx(assets.terminalModel,sw.pos,V(0,1,0),0,V(0.9f,0.9f,0.9f),WHITE);
+                else DrawCube(sw.pos,0.7f,1.0f,0.3f,Color{40,175,155,255});
+                DrawCubeWires(sw.pos,0.72f,1.02f,0.32f,c);
+                if(scanTimer>0&&!sw.active)DrawSphereWires(sw.pos,1.0f+0.5f*scanTimer,8,8,c);
             }
             for(const auto& dr:level.drones){
                 if(assets.droneReady)DrawModelEx(assets.drone,dr.pos,V(0,1,0),float(GetTime())*35,V(0.9f,0.9f,0.9f),WHITE);
@@ -757,7 +887,10 @@ int main(int argc,char** argv){
                 int keys=0;for(const auto& p:level.pickups)if(p.kind==1&&p.taken)keys++;
                 objective=TextFormat("KEYCARDS %d / %d",keys,level.required);
             }else if(level.objective==Objective::MEMORY)objective=TextFormat("MEMORY %d / %d",memoryStep,level.required);
-            else objective=TextFormat("SURVIVE %.0fs",std::max(0.0f,timeLeft));
+            else if(level.objective==Objective::COMBO){
+                int keys=0;for(const auto& p:level.pickups)if(p.kind==1&&p.taken)keys++;
+                objective=TextFormat("C%d/3 S%d/3 K%d/1 M%d/4",collected,switchesActive,keys,memoryStep);
+            }else objective=TextFormat("SURVIVE %.0fs",std::max(0.0f,timeLeft));
             DrawText(objective,42,91,14,RAYWHITE);
 
             DrawText(TextFormat("HP %03d",int(health)),24,GetScreenHeight()-82,16,health>50?GREEN:ORANGE);
@@ -765,7 +898,17 @@ int main(int argc,char** argv){
             DrawRectangle(24,GetScreenHeight()-58,int(180*health/100.0f),9,RED);
             DrawText(TextFormat("STAMINA %03d",int(stamina)),224,GetScreenHeight()-62,14,SKYBLUE);
             if(save.settings.hints&&!mouseCaptured&&screen==Screen::PLAYING)Center("CLICK TO CAPTURE MOUSE  •  ESC PAUSE",GetScreenHeight()/2+70,15,RAYWHITE);
-            if(save.settings.hints&&hintTimer>0)DrawText("WASD MOVE • SHIFT SPRINT • SPACE JUMP • E INTERACT",24,GetScreenHeight()-25,13,GRAY);
+            if(mouseCaptured&&screen==Screen::PLAYING){
+                float nearest=2.25f;
+                for(const auto& sw:level.switches)if(!sw.active)nearest=std::min(nearest,Vector3Distance(player,sw.pos));
+                for(const auto& p:level.pickups)if(!p.taken)nearest=std::min(nearest,Vector3Distance(player,p.pos));
+                for(const auto& d:level.doors)if(!d.open)nearest=std::min(nearest,Vector3Distance(player,d.pos));
+                if(nearest<2.25f)Center("E  INTERACT",GetScreenHeight()/2+35,15,SKYBLUE);
+            }
+            if(save.settings.hints&&hintTimer>0)DrawText("WASD MOVE • SHIFT SPRINT • SPACE JUMP • E INTERACT • Q SCAN",24,GetScreenHeight()-25,13,GRAY);
+            if(level.objective==Objective::MEMORY&&memoryStep<level.required&&save.settings.hints)
+                DrawText(TextFormat("NEXT MEMORY NODE  %d",memoryStep+1),24,GetScreenHeight()-44,13,MAGENTA);
+            if(deaths>0)DrawText(TextFormat("FAILSAFE RESETS  %d",deaths),GetScreenWidth()-190,GetScreenHeight()-28,13,GRAY);
             if(mouseCaptured&&screen==Screen::PLAYING)Crosshair(save.settings.crosshair,RAYWHITE);
 
             if(save.settings.performance){
@@ -784,6 +927,13 @@ int main(int argc,char** argv){
                 ButtonDraw({GetScreenWidth()/2.0f-180,470,360,58},"SETTINGS",ThemeColor(2));
                 ButtonDraw({GetScreenWidth()/2.0f-180,540,360,58},"MAIN MENU",Color{230,90,120,255});
             }
+        }else if(screen==Screen::GAMEOVER){
+            ClearBackground(Color{20,6,10,255});
+            Center("SYSTEM FAILURE",155,56,RED);
+            Center(TextFormat("FLOOR %03d",level.id),230,22,RAYWHITE);
+            Center("Your failsafe limit was reached.",270,17,LIGHTGRAY);
+            ButtonDraw({GetScreenWidth()/2.0f-180,470,360,58},"RETRY FLOOR • R",ORANGE);
+            ButtonDraw({GetScreenWidth()/2.0f-180,540,360,58},"MAIN MENU • ESC",Color{230,90,120,255});
         }else if(screen==Screen::COMPLETE){
             ClearBackground(Color{5,14,18,255});
             Center("VAULT MASTER",160,58,GREEN);
