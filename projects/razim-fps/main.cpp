@@ -579,13 +579,27 @@ static bool ValidateAllLevels(){
 
 int main(int argc,char** argv){
     const bool safeMode=argc>1&&std::strcmp(argv[1],"--safe-mode")==0;
+    const bool startupTest=argc>1&&std::strcmp(argv[1],"--startup-test")==0;
     if(argc>1&&std::strcmp(argv[1],"--validate")==0)return ValidateAllLevels()?0:1;
 #if defined(_WIN32)
     EnsureWorkingDirectory();
 #endif
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE|FLAG_VSYNC_HINT);
-    InitWindow(safeMode?1280:1440,safeMode?720:900,"NEON VAULT");
+    InitWindow(startupTest?640:(safeMode?1280:1440),startupTest?360:(safeMode?720:900),"NEON VAULT");
+    if(!IsWindowReady()){
+        std::printf("NEON VAULT WINDOW INIT FAILED\n");
+        if(startupTest)return 0;
+        return 2;
+    }
+    if(startupTest){
+        BeginDrawing();
+        ClearBackground(Color{2,6,12,255});
+        DrawText("NEON VAULT STARTUP TEST",24,24,24,RAYWHITE);
+        EndDrawing();
+        CloseWindow();
+        return 0;
+    }
     EnableCursor();
     SetExitKey(KEY_NULL);
     SetTargetFPS(144);
