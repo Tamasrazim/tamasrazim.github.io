@@ -438,7 +438,6 @@ static Sound MakeThemeSound(){
             v+=noise*0.030f*std::exp(-beatPhase*30.0f);
         }
         float half=fmod(t,beat*0.5f);
-        unsigned int hh=int(t/(beat*0.5f));
         unsigned int h=(i*1103515245u+12345u);
         float noise=(float(int((h>>16)&0xFFFFu)-32768)/32768.0f);
         if(half<0.035f)v+=noise*0.009f*std::exp(-half*85.0f);
@@ -474,7 +473,6 @@ static Assets LoadAssets(){
     if(IsAudioDeviceReady()){
         a.theme=MakeThemeSound();
         a.musicReady=IsSoundValid(a.theme);
-        if(a.musicReady)SetSoundLooping(a.theme,true);
     }
     a.floorModel=MakeTexturedCube(a.floor);
     a.wallModel=MakeTexturedCube(a.wall);
@@ -589,6 +587,7 @@ int main(int argc,char** argv){
     if(assets.musicReady){
         SetSoundVolume(assets.theme,save.settings.music);
         PlaySound(assets.theme);
+        themeElapsed=0.0f;
     }
 
     Screen screen=Screen::INTRO;
@@ -605,6 +604,7 @@ int main(int argc,char** argv){
     Vector2 cursorRestore{720,450};
     int settingsRow=0;
     float introElapsed=0.0f;
+    float themeElapsed=0.0f;
 
     auto CaptureMouse=[&](bool capture){
         if(capture){
@@ -687,7 +687,15 @@ int main(int argc,char** argv){
     while(!WindowShouldClose()&&!quit){
         float dt=std::min(GetFrameTime(),0.05f);
 
-        if(assets.musicReady)SetSoundVolume(assets.theme,save.settings.music);
+        if(assets.musicReady){
+            themeElapsed+=dt;
+            SetSoundVolume(assets.theme,save.settings.music);
+            if(themeElapsed>=29.95f){
+                StopSound(assets.theme);
+                PlaySound(assets.theme);
+                themeElapsed=0.0f;
+            }
+        }
         if(screen==Screen::INTRO){
             introElapsed+=dt;
             if(introElapsed>=15.0f||IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_ESCAPE)){
