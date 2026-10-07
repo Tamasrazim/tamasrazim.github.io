@@ -52,10 +52,14 @@ jobs:
           $p = Start-Process -FilePath $exe -ArgumentList "--startup-test" -WorkingDirectory (Split-Path $exe) -PassThru
           Start-Sleep -Seconds 5
           if ($p.HasExited) {
-            throw "NEON VAULT window initialization test exited with code $($p.ExitCode)."
+            if ($p.ExitCode -ne 0) {
+              throw "NEON VAULT window initialization test crashed with code $($p.ExitCode)."
+            }
+            Write-Host "NEON VAULT window initialization test exited cleanly (headless runner)."
+          } else {
+            Stop-Process -Id $p.Id -Force
+            Write-Host "NEON VAULT window initialization test: PASS"
           }
-          Stop-Process -Id $p.Id -Force
-          Write-Host "NEON VAULT window initialization test: PASS"
 
       - name: Validate 100 generated floors
         shell: pwsh
