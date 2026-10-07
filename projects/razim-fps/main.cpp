@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdlib>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -97,7 +98,7 @@ static LevelConfig MakeLevel(int n){
     return c;
 }
 static std::string SavePath(){
-    const char* a=GetEnv("LOCALAPPDATA");
+    const char* a=std::getenv("LOCALAPPDATA");
     if(a&&a[0]){
         std::string d=std::string(a)+"\\Tamasrazim";
         MakeDirectory(d.c_str());
@@ -179,7 +180,7 @@ static void StarIcon(Vector2 p,float r,Color c){
 }
 static void Button(Rectangle r,const char* label,bool hover,Color accent){
     DrawRectangleRounded(r,.18f,10,hover?Color{24,42,60,255}:Color{12,22,34,255});
-    DrawRectangleRoundedLines(r,.18f,10,2,hover?accent:Color{45,69,89,255});
+    DrawRectangleRoundedLines(r,.18f,10,hover?accent:Color{45,69,89,255});
     int fs=22,w=MeasureText(label,fs);
     DrawText(label,(int)(r.x+(r.width-w)/2),(int)(r.y+(r.height-fs)/2-1),fs,RAYWHITE);
 }
@@ -256,7 +257,7 @@ int main(){
         }
 
         for(int i=0;i<level.crystals;i++){
-            float a=(float)i/level.crystals*TAU+n*.37f;
+            float a=(float)i/level.crystals*(2.0f*PI)+n*.37f;
             float r=2.8f+(i%3)*2+level.tier*.25f;
             crystals.push_back({V3(cosf(a)*r,.85f,sinf(a)*r),false});
         }
@@ -301,7 +302,7 @@ int main(){
             Hazard h;
             h.pos=V3(rnd(-8,8),.35f,rnd(-7,7));
             h.size=V3(.5f+rnd(0,.55f),.7f,2.5f);
-            h.phase=rnd(0,TAU);h.moving=level.tier>=3;hazards.push_back(h);
+            h.phase=rnd(0,(2.0f*PI));h.moving=level.tier>=3;hazards.push_back(h);
         }
 
         cam.fovy=settings.fov;
@@ -528,7 +529,7 @@ int main(){
             for(int i=0;i<7;i++){
                 float y=145+i*76;Rectangle r{60,y,520,60};
                 DrawRectangleRounded(r,.18f,10,i==settingsSelected?Color{20,38,54,255}:Color{11,21,31,255});
-                DrawRectangleRoundedLines(r,.18f,10,2,i==settingsSelected?SKYBLUE:Color{42,58,72,255});
+                DrawRectangleRoundedLines(r,.18f,10,i==settingsSelected?SKYBLUE:Color{42,58,72,255});
                 DrawText(labels[i],84,(int)y+17,20,RAYWHITE);
                 DrawText(vals[i].c_str(),430,(int)y+17,20,SKYBLUE);
             }
@@ -552,14 +553,14 @@ int main(){
                 DrawCubeWires(d.pos,d.size.x,d.size.y,d.size.z,ORANGE);
             }
             for(const auto& c:crates){DrawCube(c.pos,c.size.x,c.size.y,c.size.z,Color{126,93,54,255});DrawCubeWires(c.pos,c.size.x,c.size.y,c.size.z,BEIGE);}
-            for(const auto& p:plates){DrawCylinder(p.pos,.6f,.08f,24,p.active?GREEN:Color{74,83,92,255});DrawCylinderWires(p.pos,.66f,.1f,24,p.active?GREEN:GRAY);}
+            for(const auto& p:plates){DrawCylinder(p.pos,.6f,.6f,.08f,24,p.active?GREEN:Color{74,83,92,255});DrawCylinderWires(p.pos,.66f,.66f,.1f,24,p.active?GREEN:GRAY);}
             for(const auto& s:switches){DrawCube(s.pos,.65f,.9f,.3f,s.active?GREEN:Color{100,40,45,255});DrawCubeWires(s.pos,.7f,.95f,.35f,RAYWHITE);}
-            for(const auto& k:keys)if(!k.collected){DrawCylinder(k.pos,.25f,.08f,16,KeyColor(k.color));DrawCylinderWires(k.pos,.28f,.09f,16,RAYWHITE);}
+            for(const auto& k:keys)if(!k.collected){DrawCylinder(k.pos,.25f,.25f,.08f,16,KeyColor(k.color));DrawCylinderWires(k.pos,.28f,.28f,.09f,16,RAYWHITE);}
             for(const auto& c:crystals)if(!c.collected){float bob=.16f*sinf((float)GetTime()*3+c.pos.x);Vector3 p=V3(c.pos.x,c.pos.y+bob,c.pos.z);DrawSphere(p,.28f,ThemePrimary(level.theme));DrawSphereWires(p,.37f,8,12,RAYWHITE);}
             for(const auto& p:pads){
                 Color pc=p.active?GREEN:ThemePrimary(level.theme);
                 if(memoryShowing&&p.id==MemoryWanted(level.number,memoryProgress,level.memoryLength))pc=WHITE;
-                DrawCylinder(p.pos,.72f,.08f,4,pc);DrawCylinderWires(p.pos,.80f,.1f,4,RAYWHITE);
+                DrawCylinder(p.pos,.72f,.72f,.08f,4,pc);DrawCylinderWires(p.pos,.80f,.80f,.1f,4,RAYWHITE);
             }
             for(const auto& h:hazards){
                 Vector3 p=h.pos;if(h.moving)p.x+=sinf((float)GetTime()*1.3f+h.phase)*4.5f;
@@ -577,7 +578,7 @@ int main(){
             ClockIcon({145,37},13,timeLeft<20?ORANGE:RAYWHITE);DrawText(TextFormat("%03.0f",timeLeft),165,23,24,timeLeft<20?ORANGE:RAYWHITE);
             DrawText(TextFormat("LEVEL %03d",level.number),GetScreenWidth()/2-65,22,24,accent);DrawText(PuzzleName(level.puzzle),GetScreenWidth()-170,26,16,GRAY);
             DrawRectangle(22,GetScreenHeight()-55,220,12,Color{17,25,33,255});DrawRectangle(22,GetScreenHeight()-55,(int)(220*stamina/100),12,SKYBLUE);DrawText("SPRINT",250,GetScreenHeight()-60,14,GRAY);
-            for(int i=0;i<3;i++)StarIcon({GetScreenWidth()-94+i*24,GetScreenHeight()-42},8,i<save.stars[level.number]?GOLD:Color{40,48,56,255});
+            for(int i=0;i<3;i++)StarIcon({(float)(GetScreenWidth()-94+i*24),(float)(GetScreenHeight()-42)},8,i<save.stars[level.number]?GOLD:Color{40,48,56,255});
 
             Vector2 cp={GetScreenWidth()/2.0f,GetScreenHeight()/2.0f};
             if(settings.crosshair==0){
