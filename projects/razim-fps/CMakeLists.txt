@@ -22,7 +22,7 @@ FetchContent_MakeAvailable(raylib)
 add_executable(neon_vault main.cpp platform_win.cpp neon-vault.rc)
 add_executable(neon_vault_updater updater.cpp)
 
-target_compile_definitions(neon_vault_updater PRIVATE NEON_VAULT_BUILD=\${NEON_VAULT_BUILD})
+target_compile_definitions(neon_vault_updater PRIVATE NEON_VAULT_BUILD=${NEON_VAULT_BUILD})
 target_link_libraries(neon_vault PRIVATE raylib dxgi)
 target_link_libraries(neon_vault_updater PRIVATE winhttp shell32)
 
@@ -35,7 +35,7 @@ else()
 endif()
 
 add_custom_command(TARGET neon_vault POST_BUILD
-  COMMAND \${CMAKE_COMMAND} -E copy_directory
-    "\${CMAKE_CURRENT_SOURCE_DIR}/assets"
-    "\$<TARGET_FILE_DIR:neon_vault>/assets"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+    "$<TARGET_FILE_DIR:neon_vault>/assets"
 )
