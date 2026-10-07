@@ -272,10 +272,10 @@ static Level BuildLevel(int id){
         l.doors.push_back({V(0,1.25f,-17),V(1.2f,2.5f,5),false,3});
     }else if(l.objective==Objective::COMBO){
         l.required=4;
-        for(int i=0;i<3;i++)l.pickups.push_back({SafePoint(l,V(-18+i*18,0.75f,16),false,0,0)});
-        for(int i=0;i<3;i++)l.switches.push_back({SafePoint(l,V(-18+i*18,0.75f,5),false});
-        l.pickups.push_back({SafePoint(l,V(0,0.75f,-1),false,1,0)});
-        for(int i=0;i<4;i++)l.pickups.push_back({SafePoint(l,V(-12+i*8,0.55f,-9),false,2,i+1});
+        for(int i=0;i<3;i++)l.pickups.push_back({SafePoint(l,V(-18+i*18,0.75f,16),0.5f,300+i),false,0});
+        for(int i=0;i<3;i++)l.switches.push_back({SafePoint(l,V(-18+i*18,0.75f,5),0.65f,320+i),false});
+        l.pickups.push_back({SafePoint(l,V(0,0.75f,-1),0.5f,340),false,1});
+        for(int i=0;i<4;i++)l.pickups.push_back({SafePoint(l,V(-12+i*8,0.55f,-9),0.5f,350+i),false,2,i+1});
         l.doors.push_back({V(0,1.25f,-17),V(1.2f,2.5f,5),false,2});
     }
 
