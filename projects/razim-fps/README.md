@@ -1,45 +1,44 @@
-# NEON VAULT
+# NEON VAULT 2.0
 
-A native 3D first-person exploration and collection game for Windows.
+Native Windows first-person 3D puzzle adventure with 100 progressively harder levels.
 
-## Game
+## 100 levels
 
-Explore a neon arena, collect all 20 crystals, then reach the exit pad before the 120-second timer ends.
+10 puzzle families are rotated through 100 deterministic rooms: collect, keys + doors, switches, pressure plates + pushable crates, memory, timed gates, teleport networks, numbered sequences, moving gates, and combined finale rooms. Difficulty increases every ten levels.
 
-Features:
+## Features
 
-- First-person mouse look
-- WASD movement
-- Shift sprint with stamina
-- Space jump
-- Moving gate obstacle
-- 20 collectible crystals
-- Countdown timer
-- Exit objective
-- Pause menu
-- Win / time-out screens
-- 144 FPS target
-- Resizable window
-- Native x64 Windows build
-- No external art or content pack required
+- 100 levels + level select
+- Three-star scoring + persistent unlocks
+- Normal mouse Y axis by default
+- Invert Y setting
+- Sensitivity + FOV controls
+- Hints, screen shake, UI scale and crosshair settings
+- Sprint + stamina + jump
+- Crystals, keys, doors, switches, crates and pressure plates
+- Memory, timed, teleport and sequence puzzles
+- Moving gates, hazards and checkpoints
+- Pause / restart / settings
+- Final 100-level completion screen
+- Vector HUD/menu icons
+- Custom Windows application icon
+- Native x64 installer + portable build
+- Save data in %LOCALAPPDATA%\Tamasrazim\NeonVault.cfg
 
 ## Controls
 
-WASD = move, mouse = look, Shift = sprint, Space = jump, Esc = pause/resume or quit, Enter = start/restart.
+WASD Move
+Mouse Look
+Shift Sprint
+Space Jump
+E Interact
+Esc Pause
+R Restart
+S Settings while paused
+Tab Next setting row
 
-## Build locally
+## Build
 
-Prerequisites: Windows 10/11 x64, Visual Studio 2022 with Desktop C++ workload, and CMake 3.21+.
+GitHub Actions builds the Windows executable with Visual Studio 2026 + CMake, creates the Inno Setup installer and portable ZIP, validates the outputs, uploads artifacts and publishes a GitHub Release.
 
-Run build.ps1 with PowerShell. CMake downloads raylib 5.5 during configuration and builds a static Windows executable.
-
-## Installer
-
-GitHub Actions builds a Windows installer and portable ZIP on every relevant push. The latest release is linked from the project page.
-
-## License
-
-The game source in this folder is released under the MIT license. raylib remains under its upstream license.
-
-
-Build status: Windows CI validates the native executable and installer before publishing.
+Source: MIT. raylib: upstream license.
