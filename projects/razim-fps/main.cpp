@@ -386,8 +386,8 @@ static void Crosshair(int style,Color c){
     }else DrawCircle(x,y,3,c);
 }
 
-static Texture2D Tex(const char* file,Color fallback){
-    if(FileExists(file)){
+static Texture2D Tex(const char* file,Color fallback,bool allowFile=true){
+    if(allowFile&&FileExists(file)){
         Texture2D t=LoadTexture(file);
         if(t.id){SetTextureFilter(t,TEXTURE_FILTER_BILINEAR);return t;}
     }
@@ -464,16 +464,16 @@ static Sound MakeThemeSound(){
     return out;
 }
 
-static Assets LoadAssets(){
+static Assets LoadAssets(bool safeMode){
     Assets a;
-    a.floor=Tex("assets/textures/floor.bmp",Color{30,39,50,255});
-    a.wall=Tex("assets/textures/wall.bmp",Color{45,58,72,255});
-    a.metal=Tex("assets/textures/metal.bmp",Color{72,82,95,255});
-    a.hazard=Tex("assets/textures/hazard.bmp",Color{165,42,48,255});
-    a.crystal=Tex("assets/textures/crystal.bmp",Color{55,180,235,255});
-    a.terminal=Tex("assets/textures/terminal.bmp",Color{50,180,155,255});
-    a.sky=Tex("assets/textures/sky.bmp",Color{6,13,26,255});
-    if(IsAudioDeviceReady()){
+    a.floor=Tex("assets/textures/floor.bmp",Color{30,39,50,255},!safeMode);
+    a.wall=Tex("assets/textures/wall.bmp",Color{45,58,72,255},!safeMode);
+    a.metal=Tex("assets/textures/metal.bmp",Color{72,82,95,255},!safeMode);
+    a.hazard=Tex("assets/textures/hazard.bmp",Color{165,42,48,255},!safeMode);
+    a.crystal=Tex("assets/textures/crystal.bmp",Color{55,180,235,255},!safeMode);
+    a.terminal=Tex("assets/textures/terminal.bmp",Color{50,180,155,255},!safeMode);
+    a.sky=Tex("assets/textures/sky.bmp",Color{6,13,26,255},!safeMode);
+    if(!safeMode&&IsAudioDeviceReady()){
         if(FileExists("assets/audio/neon-vault-theme.wav"))
             a.theme=LoadSound("assets/audio/neon-vault-theme.wav");
         if(!IsSoundValid(a.theme))
@@ -484,12 +484,12 @@ static Assets LoadAssets(){
     a.wallModel=MakeTexturedCube(a.wall);
     a.metalModel=MakeTexturedCube(a.metal);
     a.hazardModel=MakeTexturedCube(a.hazard);
-    if(FileExists("assets/models/drone.obj")){
+    if(!safeMode&&FileExists("assets/models/drone.obj")){
         a.drone=LoadModel("assets/models/drone.obj");
         a.droneReady=a.drone.meshCount>0;
     }
-    if(FileExists("assets/models/terminal.obj"))a.terminalModel=LoadModel("assets/models/terminal.obj");
-    if(IsAudioDeviceReady()){
+    if(!safeMode&&FileExists("assets/models/terminal.obj"))a.terminalModel=LoadModel("assets/models/terminal.obj");
+    if(!safeMode&&IsAudioDeviceReady()){
         a.pickup=LoadSound("assets/audio/pickup.wav");
         a.hit=LoadSound("assets/audio/hit.wav");
         a.click=LoadSound("assets/audio/click.wav");
@@ -578,23 +578,24 @@ static bool ValidateAllLevels(){
 }
 
 int main(int argc,char** argv){
+    const bool safeMode=argc>1&&std::strcmp(argv[1],"--safe-mode")==0;
     if(argc>1&&std::strcmp(argv[1],"--validate")==0)return ValidateAllLevels()?0:1;
 #if defined(_WIN32)
     EnsureWorkingDirectory();
 #endif
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE|FLAG_VSYNC_HINT);
-    InitWindow(1440,900,"NEON VAULT");
+    InitWindow(safeMode?1280:1440,safeMode?720:900,"NEON VAULT");
     EnableCursor();
     SetExitKey(KEY_NULL);
     SetTargetFPS(144);
-    InitAudioDevice();
+    if(!safeMode)InitAudioDevice();
 
     SaveData save=LoadGame();
-    if(save.settings.displayMode!=0)SetDisplayMode(save.settings,save.settings.displayMode);
-    Assets assets=LoadAssets();
+    if(!safeMode&&save.settings.displayMode!=0)SetDisplayMode(save.settings,save.settings.displayMode);
+    Assets assets=LoadAssets(safeMode);
     float themeElapsed=0.0f;
-    if(assets.musicReady){
+    if(!safeMode&&assets.musicReady){
         SetSoundVolume(assets.theme,save.settings.music);
         PlaySound(assets.theme);
         themeElapsed=0.0f;
@@ -696,7 +697,7 @@ int main(int argc,char** argv){
     while(!WindowShouldClose()&&!quit){
         float dt=std::min(GetFrameTime(),0.05f);
 
-        if(assets.musicReady){
+        if(!safeMode&&assets.musicReady){
             themeElapsed+=dt;
             SetSoundVolume(assets.theme,save.settings.music);
             if(themeElapsed>=29.95f){
@@ -931,7 +932,7 @@ int main(int argc,char** argv){
         if(screen==Screen::INTRO){
             DrawIntro(introElapsed);
         }else if(screen==Screen::MENU){
-            DrawTexturePro(assets.sky,{0,0,(float)assets.sky.width,(float)assets.sky.height},{0,0,(float)GetScreenWidth(),(float)GetScreenHeight()},{0,0},0,Color{120,145,180,255});
+            if(!safeMode&&assets.sky.id)DrawTexturePro(assets.sky,{0,0,(float)assets.sky.width,(float)assets.sky.height},{0,0,(float)GetScreenWidth(),(float)GetScreenHeight()},{0,0},0,Color{120,145,180,255});
             DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{1,6,12,180});
             Center("NEON VAULT",90,64,RAYWHITE);
             Center("100-FLOOR FIRST-PERSON PUZZLE EXPEDITION",166,18,LIGHTGRAY);
@@ -1109,7 +1110,7 @@ int main(int argc,char** argv){
 
     SaveGame(save);
     UnloadAssets(assets);
-    CloseAudioDevice();
+    if(IsAudioDeviceReady())CloseAudioDevice();
     EnableCursor();
     CloseWindow();
     return 0;
