@@ -841,7 +841,7 @@ int main(){
 
             const char* labels[10]={"Mouse sensitivity","Invert Y","Field of view","Hints","Screen shake","UI scale","Crosshair","Display mode","Performance monitor","Render scale"};
             const char* dm[3]={"WINDOWED","BORDERLESS","FULLSCREEN"};
-            std::string vals[9]={
+            std::string vals[10]={
                 TextFormat("%.4f",settings.sensitivity),settings.invertY?"ON":"OFF",
                 TextFormat("%.0f",settings.fov),settings.hints?"ON":"OFF",
                 settings.shake?"ON":"OFF",TextFormat("%.2fx",settings.uiScale),
@@ -849,7 +849,7 @@ int main(){
                 settings.performanceMonitor?"ON":"OFF",TextFormat("%d%%",settings.renderScale)
             };
 
-            for(int i=0;i<9;i++){
+            for(int i=0;i<10;i++){
                 float wy=6.55f-i*0.61f;
                 float wx=-2.0f;
                 Vector2 pp=GetWorldToScreen(V3(wx,wy,-0.72f),cam);
@@ -927,7 +927,6 @@ int main(){
             DrawCylinderWires(exit,1.65f,1.65f,.1f,40,RAYWHITE);
             if(pbrReady)EndShaderMode();
             EndMode3D();
-            if(pbrReady)EndShaderMode();
 
             int collected=0;for(const auto& c:crystals)if(c.collected)collected++;
             Color accent=ThemePrimary(level.theme);
