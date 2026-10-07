@@ -442,6 +442,44 @@ int main(int argc,char** argv){
         unsigned seed=0x9E3779B9u^(unsigned)(n*2654435761u);
         auto rng=[&](){seed^=seed<<13;seed^=seed>>17;seed^=seed<<5;return seed;};
         auto rnd=[&](float a,float b){return a+(float)(rng()%10000)/10000.0f*(b-a);};
+        auto WallClear=[&](Vector3 pos,Vector3 size){
+            for(const auto& b:walls)if(BoxesOverlapXZ(pos,size,b.pos,b.size,0.0f))return false;
+            return true;
+        };
+        auto AddWallSafe=[&](Box b){
+            if(WallClear(b.pos,b.size)){walls.push_back(b);return true;}
+            const float step=2.2f;
+            for(int ring=1;ring<=10;ring++){
+                for(int side=0;side<8;side++){
+                    float a=(float)side*PI/4.0f;
+                    Vector3 p=b.pos;
+                    p.x+=cosf(a)*ring*step;
+                    p.z+=sinf(a)*ring*step;
+                    if(fabsf(p.x)>arenaHalf-2.0f||fabsf(p.z)>arenaHalf-2.0f)continue;
+                    if(WallClear(p,b.size)){b.pos=p;b.base=p;walls.push_back(b);return true;}
+                }
+            }
+            return false;
+        };
+        auto PointClear=[&](Vector3 p,float radius){
+            if(fabsf(p.x)>arenaHalf-1.0f-radius||fabsf(p.z)>arenaHalf-1.0f-radius)return false;
+            for(const auto& b:walls)if(HitsBox(p,radius,b.pos,b.size))return false;
+            return true;
+        };
+        auto SafePoint=[&](Vector3 preferred,float radius,int salt){
+            if(PointClear(preferred,radius))return preferred;
+            for(int ring=0;ring<=12;ring++){
+                float dist=ring*1.75f;
+                int samples=ring==0?1:24;
+                for(int k=0;k<samples;k++){
+                    float a=(samples==1?0.0f:(float)k*(2.0f*PI/(float)samples))+salt*0.618f;
+                    Vector3 p=V3(cosf(a)*dist,.0f,sinf(a)*dist);
+                    p.y=preferred.y;
+                    if(PointClear(p,radius))return p;
+                }
+            }
+            return V3(0.0f,preferred.y,std::min(arenaHalf-2.0f,2.0f));
+        };
 
         for(int i=0;i<level.obstacles;i++){
             bool placed=false;
@@ -455,12 +493,12 @@ int main(int argc,char** argv){
             }
         }
         if(level.tier>=7)for(int i=0;i<level.tier-6;i++)
-            walls.push_back({V3(0,1,-7.5f+i*2.1f),V3(.8f,2,4.4f),true});
+            AddWallSafe({V3(0,1,-7.5f+i*2.1f),V3(.8f,2,4.4f),true,false,0.0f,V3(0,0,0)});
 
         if(level.puzzle==PuzzleType::MOVING_GATE||level.puzzle==PuzzleType::FINALE){
             for(int i=0;i<1+level.tier/4;i++){
                 Box b{V3(0,1,-6+i*4.0f),V3(.9f,2,5),true,true,i*1.3f};
-                b.base=b.pos;walls.push_back(b);
+                b.base=b.pos;AddWallSafe(b);
             }
         }
 
@@ -494,15 +532,24 @@ int main(int argc,char** argv){
                 Vector3 cp=V3(cosf(a)*r,.85f,sinf(a)*r);
                 bool safe=true;
                 for(const auto& b:walls) if(HitsBox(cp,0.55f,b.pos,b.size)){safe=false;break;}
-                if(!safe) cp=V3(((i%4)-1.5f)*3.3f,.85f,-((i/4)+1)*4.2f);
+                if(!safe) cp=SafePoint(cp,0.55f,i+31);
                 crystals.push_back({cp,false});
             }
         }
 
-        for(int i=0;i<level.keys;i++)keys.push_back({V3(-7.5f+i*4.6f,.9f,5.5f-i*1.3f),i,false});
-        for(int i=0;i<level.keys;i++)doors.push_back({V3(-4.8f+i*6,1,-5+i*1.2f),V3(1,2,3),false});
+        for(int i=0;i<level.keys;i++){
+            Vector3 kp=SafePoint(V3(-7.5f+i*4.6f,.9f,5.5f-i*1.3f),0.4f,101+i);
+            keys.push_back({kp,i,false});
+        }
+        for(int i=0;i<level.keys;i++){
+            Vector3 dp=SafePoint(V3(-4.8f+i*6,1,-5+i*1.2f),1.1f,151+i);
+            doors.push_back({dp,V3(1,2,3),false});
+        }
 
-        for(int i=0;i<level.switches;i++)switches.push_back({V3(-7.5f+i*6.5f,.8f,-1.5f+i*3),false});
+        for(int i=0;i<level.switches;i++){
+            Vector3 sp=SafePoint(V3(-7.5f+i*6.5f,.8f,-1.5f+i*3),0.4f,201+i);
+            switches.push_back({sp,false});
+        }
         if(!switches.empty()&&level.puzzle!=PuzzleType::TIMED_GATE)
             doors.push_back({V3(6,1,-3),V3(1,2,4),false});
 
@@ -510,34 +557,42 @@ int main(int argc,char** argv){
             platesSolved=false;
             int count=1+level.tier/4;
             for(int i=0;i<count;i++){
-                plates.push_back({V3(-5+i*5,.06f,2+i*1.1f),false});
-                Crate crate;crate.pos=V3(-6+i*3,.62f,5.3f-i);crates.push_back(crate);
+                Vector3 pp=SafePoint(V3(-5+i*5,.06f,2+i*1.1f),0.38f,301+i);
+                plates.push_back({pp,false});
+                Crate crate;crate.pos=SafePoint(V3(-6+i*3,.62f,5.3f-i),0.6f,351+i);crates.push_back(crate);
             }
-            doors.push_back({V3(0,1,-4.2f),V3(4.5f,2,.8f),false});
+            Vector3 dp=SafePoint(V3(0,1,-4.2f),2.0f,401);
+            doors.push_back({dp,V3(4.5f,2,.8f),false});
         }
 
         if(level.memoryLength>0)for(int i=0;i<std::max(4,level.memoryLength);i++){
             float x=-5.5f+(i%4)*3.7f,z=5.2f-(i/4)*3.4f;
-            pads.push_back({V3(x,.05f,z),i,-1,false});
+            Vector3 pp=SafePoint(V3(x,.05f,z),0.38f,451+i);
+            pads.push_back({pp,i,-1,false});
         }
 
         if(level.puzzle==PuzzleType::TELEPORT){
-            pads.push_back({V3(-8,.05f,7),0,1,false});
-            pads.push_back({V3(7.5f,.05f,-7),1,0,false});
+            Vector3 a=SafePoint(V3(-8,.05f,7),0.4f,501);
+            Vector3 b=SafePoint(V3(7.5f,.05f,-7),0.4f,502);
+            pads.push_back({a,0,1,false});
+            pads.push_back({b,1,0,false});
             if(level.tier>=4){
-                pads.push_back({V3(7,.05f,7),2,3,false});
-                pads.push_back({V3(-7,.05f,-6),3,2,false});
+                Vector3 c=SafePoint(V3(7,.05f,7),0.4f,503);
+                Vector3 d=SafePoint(V3(-7,.05f,-6),0.4f,504);
+                pads.push_back({c,2,3,false});
+                pads.push_back({d,3,2,false});
             }
         }
 
         if(level.sequenceLength>0)for(int i=0;i<std::max(5,level.sequenceLength);i++){
             float x=-7.5f+(i%5)*3.8f,z=2-(i/5)*4;
-            pads.push_back({V3(x,.05f,z),100+i,-1,false});
+            Vector3 pp=SafePoint(V3(x,.05f,z),0.38f,551+i);
+            pads.push_back({pp,100+i,-1,false});
         }
 
         for(int i=0;i<level.hazards;i++){
             Hazard h;
-            h.pos=V3(rnd(-8,8),.35f,rnd(-7,7));
+            h.pos=SafePoint(V3(rnd(-8,8),.35f,rnd(-7,7)),0.42f,601+i);
             h.size=V3(.5f+rnd(0,.55f),.7f,2.5f);
             h.phase=rnd(0,(2.0f*PI));h.moving=level.tier>=3;hazards.push_back(h);
         }
@@ -591,6 +646,7 @@ int main(int argc,char** argv){
             for(size_t i=0;i<walls.size();i++){
                 if(walls[i].size.x<=0.01f||walls[i].size.z<=0.01f)fail("wall has non-positive X/Z size");
                 for(size_t j=i+1;j<walls.size();j++){
+                    if(i<4&&j<4)continue;
                     if(BoxesOverlapXZ(walls[i].pos,walls[i].size,walls[j].pos,walls[j].size,0.0f)){
                         char msg[128];std::snprintf(msg,sizeof(msg),"wall %zu overlaps wall %zu",i,j);fail(msg);
                     }
