@@ -330,6 +330,7 @@ int main(){
         int rh=std::max(360,(int)roundf(sh*(settings.renderScale/100.0f)));
         if(!sceneTarget.id != 0||rw!=sceneTargetW||rh!=sceneTargetH){
             if(sceneTarget.id != 0)UnloadRenderTexture(sceneTarget);
+    if(skyPhotoReady)UnloadTexture(skyPhoto);
             sceneTarget=LoadRenderTexture(rw,rh);
             sceneTargetW=rw;sceneTargetH=rh;
         }
@@ -384,6 +385,13 @@ int main(){
     bool musicReady=false;
     float musicTime=0.0f;
     std::vector<int16_t> musicBuffer(1470);
+    Texture2D skyPhoto{};
+    bool skyPhotoReady=false;
+    if(FileExists("assets/sky/tamanna.png")){
+        skyPhoto=LoadTexture("assets/sky/tamanna.png");
+        skyPhotoReady=skyPhoto.id>0;
+        if(skyPhotoReady)SetTextureFilter(skyPhoto,TEXTURE_FILTER_BILINEAR);
+    }
 
     InitAudioDevice();
     musicReady=IsAudioDeviceReady();
@@ -908,6 +916,9 @@ int main(){
             BeginTextureMode(sceneTarget);
             ClearBackground(Color{5,9,16,255});
             BeginMode3D(cam);
+            if(skyPhotoReady){
+                DrawBillboard(cam,skyPhoto,V3(0,17.0f,-28.0f),18.0f,Color{255,255,255,245});
+            }
             if(pbrReady){
                 Vector3 lightPos=V3(6.0f,11.0f,2.0f);
                 Vector3 lightColor=V3(1.0f,0.92f,0.78f);
