@@ -1,7 +1,7 @@
 name: Patch NEON VAULT source
 on:
   push:
-    branches: [neon-vault-next]
+    branches: [main]
     paths:
       - "tools/neon-vault-upgrade.py"
       - "projects/razim-fps/main.cpp"
