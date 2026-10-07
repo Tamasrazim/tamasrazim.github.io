@@ -45,17 +45,17 @@ jobs:
       - name: Build game
         run: cmake --build projects/razim-fps/build --config Release --parallel
 
-      - name: Safe-mode startup smoke test
+      - name: Window initialization compatibility test
         shell: pwsh
         run: |
           $exe = Resolve-Path "projects/razim-fps/build/Release/neon_vault.exe"
-          $p = Start-Process -FilePath $exe -ArgumentList "--safe-mode" -WorkingDirectory (Split-Path $exe) -PassThru
+          $p = Start-Process -FilePath $exe -ArgumentList "--startup-test" -WorkingDirectory (Split-Path $exe) -PassThru
           Start-Sleep -Seconds 5
           if ($p.HasExited) {
-            throw "NEON VAULT safe-mode startup failed with code $($p.ExitCode)."
+            throw "NEON VAULT window initialization test exited with code $($p.ExitCode)."
           }
           Stop-Process -Id $p.Id -Force
-          Write-Host "Safe-mode startup smoke test: PASS"
+          Write-Host "NEON VAULT window initialization test: PASS"
 
       - name: Validate 100 generated floors
         shell: pwsh
