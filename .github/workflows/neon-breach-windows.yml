@@ -39,6 +39,18 @@ jobs:
         run: |
           Compress-Archive -Path "projects/razim-fps/build/Release/neon_vault.exe" -DestinationPath "NEON-VAULT-Portable.zip" -Force
 
+      - name: Verify installer outputs
+        shell: pwsh
+        run: |
+          $installer = "projects/razim-fps/installer-output/NEON-VAULT-Setup.exe"
+          $portable = "NEON-VAULT-Portable.zip"
+          if (!(Test-Path $installer)) { throw "Installer was not generated: $installer" }
+          if (!(Test-Path $portable)) { throw "Portable package was not generated: $portable" }
+          if ((Get-Item $installer).Length -lt 100KB) { throw "Installer is suspiciously small." }
+          if ((Get-Item $portable).Length -lt 10KB) { throw "Portable package is suspiciously small." }
+          Write-Host "Installer: $((Get-Item $installer).Length) bytes"
+          Write-Host "Portable:  $((Get-Item $portable).Length) bytes"
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
