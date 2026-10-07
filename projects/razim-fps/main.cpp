@@ -197,6 +197,7 @@ int main(){
     SaveData save=LoadGame();
     Settings& settings=save.settings;
     Screen screen=Screen::MENU;
+    Screen settingsReturn=Screen::MENU;
     int settingsSelected=0,levelNumber=1;
     LevelConfig level{};
     Camera3D cam{};
@@ -312,6 +313,16 @@ int main(){
 
     auto StartLevel=[&](int n){levelNumber=std::clamp(n,1,LEVELS);GenerateLevel(levelNumber);};
     auto Respawn=[&](){player=checkpoint;vy=0;grounded=true;timeLeft=std::max(0.0f,timeLeft-4);hitsTaken++;respawnFlash=.3f;};
+    auto CrateBlocked=[&](Vector3 pos,int skip,const Vector3& size){
+        float radius=std::max(size.x,size.z)*0.5f;
+        for(const auto& b:walls)if(b.solid&&HitsBox(pos,radius,b.pos,b.size))return true;
+        for(const auto& d:doors)if(!d.open&&HitsBox(pos,radius,d.pos,d.size))return true;
+        for(size_t i=0;i<crates.size();i++)if((int)i!=skip){
+            float other=std::max(crates[i].size.x,crates[i].size.z)*0.5f;
+            if(HitsBox(pos,radius+other*.65f,crates[i].pos,crates[i].size))return true;
+        }
+        return false;
+    };
 
     while(!WindowShouldClose()){
         float dt=std::min(GetFrameTime(),.05f);
@@ -322,7 +333,7 @@ int main(){
             Rectangle a{GetScreenWidth()/2.0f-170,370,340,58},b{GetScreenWidth()/2.0f-170,442,340,58},c{GetScreenWidth()/2.0f-170,514,340,58},d{GetScreenWidth()/2.0f-170,586,340,58};
             if(IsKeyPressed(KEY_ENTER)||(CheckCollisionPointRec(GetMousePosition(),a)&&click))StartLevel(save.unlocked);
             else if(IsKeyPressed(KEY_L)||(CheckCollisionPointRec(GetMousePosition(),b)&&click))screen=Screen::LEVEL_SELECT;
-            else if(IsKeyPressed(KEY_S)||(CheckCollisionPointRec(GetMousePosition(),c)&&click))screen=Screen::SETTINGS;
+            else if(IsKeyPressed(KEY_S)||(CheckCollisionPointRec(GetMousePosition(),c)&&click)){settingsReturn=Screen::MENU;screen=Screen::SETTINGS;}
             else if(IsKeyPressed(KEY_ESCAPE)||(CheckCollisionPointRec(GetMousePosition(),d)&&click))break;
         } else if(screen==Screen::LEVEL_SELECT){
             EnableCursor();
@@ -338,7 +349,7 @@ int main(){
             }
         } else if(screen==Screen::SETTINGS){
             EnableCursor();
-            if(IsKeyPressed(KEY_ESCAPE)){SaveGame(save);screen=Screen::MENU;}
+            if(IsKeyPressed(KEY_ESCAPE)){SaveGame(save);screen=settingsReturn;}
             if(IsKeyPressed(KEY_TAB)||IsKeyPressed(KEY_S))settingsSelected=(settingsSelected+1)%7;
             if(IsKeyPressed(KEY_UP))settingsSelected=(settingsSelected+6)%7;
             if(IsKeyPressed(KEY_DOWN))settingsSelected=(settingsSelected+1)%7;
@@ -355,6 +366,7 @@ int main(){
             }
         } else if(screen==Screen::PLAYING){
             if(IsKeyPressed(KEY_ESCAPE)){screen=Screen::PAUSED;EnableCursor();}
+            if(IsKeyPressed(KEY_R)){StartLevel(level.number);continue;}
             Vector2 md=GetMouseDelta();
             yaw-=md.x*settings.sensitivity;
             pitch+=(settings.invertY?md.y:-md.y)*settings.sensitivity;
@@ -390,15 +402,31 @@ int main(){
             if(Vector3LengthSqr(m)>.01f){
                 m=Vector3Normalize(m);
                 Vector3 step=Vector3Scale(m,speed*dt),next=Vector3Add(player,step);
-                bool blocked=false;
-                for(const auto& b:walls)if(HitsBox(next,PLAYER_RADIUS,b.pos,b.size)){blocked=true;break;}
-                for(const auto& d:doors)if(!d.open&&HitsBox(next,PLAYER_RADIUS,d.pos,d.size)){blocked=true;break;}
-                if(blocked)for(auto& c:crates)if(HitsBox(next,PLAYER_RADIUS+.15f,c.pos,c.size)){
-                    Vector3 cn=Vector3Add(c.pos,step);bool cb=false;
-                    for(const auto& b:walls)if(HitsBox(cn,.5f,b.pos,b.size)){cb=true;break;}
-                    if(!cb){c.pos=cn;blocked=false;break;}
+                bool worldBlocked=false;
+                for(const auto& b:walls)if(HitsBox(next,PLAYER_RADIUS,b.pos,b.size)){worldBlocked=true;break;}
+                if(!worldBlocked)for(const auto& d:doors)if(!d.open&&HitsBox(next,PLAYER_RADIUS,d.pos,d.size)){worldBlocked=true;break;}
+
+                int pushIndex=-1;
+                if(!worldBlocked){
+                    float nearest=1e9f;
+                    for(int i=0;i<(int)crates.size();i++){
+                        if(HitsBox(next,PLAYER_RADIUS+.15f,crates[i].pos,crates[i].size)){
+                            float dist=Vector3DistanceSqr(player,crates[i].pos);
+                            if(dist<nearest){nearest=dist;pushIndex=i;}
+                        }
+                    }
                 }
-                if(!blocked)player=next;
+
+                if(!worldBlocked&&pushIndex>=0){
+                    auto& crate=crates[pushIndex];
+                    Vector3 crateNext=Vector3Add(crate.pos,step);
+                    if(!CrateBlocked(crateNext,pushIndex,crate.size)){
+                        crate.pos=crateNext;
+                        player=next;
+                    }
+                } else if(!worldBlocked){
+                    player=next;
+                }
             }
 
             if(IsKeyPressed(KEY_SPACE)&&grounded){vy=6;grounded=false;}
@@ -476,7 +504,7 @@ int main(){
             EnableCursor();
             if(IsKeyPressed(KEY_ESCAPE)){screen=Screen::PLAYING;DisableCursor();}
             else if(IsKeyPressed(KEY_R))StartLevel(level.number);
-            else if(IsKeyPressed(KEY_S))screen=Screen::SETTINGS;
+            else if(IsKeyPressed(KEY_S)){settingsReturn=Screen::PAUSED;screen=Screen::SETTINGS;}
         } else if(screen==Screen::COMPLETE){
             EnableCursor();
             if(IsKeyPressed(KEY_ENTER)||click)screen=Screen::LEVEL_SELECT;
