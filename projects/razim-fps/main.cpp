@@ -594,7 +594,7 @@ int main(int argc,char** argv){
                     int cx=(int)std::round(c.pos.x),cz=(int)std::round(c.pos.z);
                     if(cx<minX||cx>maxX||cz<minZ||cz>maxZ||!seen[id(cx,cz)])ok=false;
                 }
-                int ex=(int)std::round(0.0f),ez=(int)std::round(-arenaHalf+2.0f);
+                int ex=0,ez=(int)std::round(-half+2.0f);
                 if(ex<minX||ex>maxX||ez<minZ||ez>maxZ||!seen[id(ex,ez)])ok=false;
             }
         }
