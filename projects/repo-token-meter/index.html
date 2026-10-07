@@ -498,7 +498,7 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
         set("rate",fmt(rate.resources?.core?.remaining ?? 0));
       }catch{ set("rate","—"); }
 
-      const item = {repo:owner+"/"+repo,branch,head:String(tree.sha||""),tokens:tok.estimate,files:blobs.length,time:new Date().toISOString()};
+      const item = {repo:owner+"/"+repo,branch,head:String(scanned.sha||""),tokens:tok.estimate,tokenMode:mode,files:blobs.length,time:new Date().toISOString()};
       saveHistory(item);
 
       document.title = fmt(tok.estimate) + " tokens · " + owner + "/" + repo;
