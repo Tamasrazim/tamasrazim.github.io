@@ -27,6 +27,7 @@ target_link_libraries(neon_vault PRIVATE raylib dxgi)
 target_link_libraries(neon_vault_updater PRIVATE winhttp shell32)
 
 if(MSVC)
+  target_compile_definitions(neon_vault PRIVATE _CRT_SECURE_NO_WARNINGS)
   target_compile_options(neon_vault PRIVATE /W4 /permissive-)
   target_link_options(neon_vault PRIVATE /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup)
   target_link_options(neon_vault_updater PRIVATE /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup)
