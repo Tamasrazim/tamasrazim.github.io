@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
 project(neon_vault LANGUAGES C CXX RC)
 
+set(NEON_VAULT_BUILD "0" CACHE STRING "Numeric build number used by the updater")
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
@@ -17,6 +19,12 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(raylib)
 
 add_executable(neon_vault main.cpp platform_win.cpp neon-vault.rc)
+add_executable(neon_vault_updater updater.cpp)
+target_compile_definitions(neon_vault_updater PRIVATE NEON_VAULT_BUILD=${NEON_VAULT_BUILD})
+target_link_libraries(neon_vault_updater PRIVATE winhttp shell32)
+if(MSVC)
+  target_link_options(neon_vault_updater PRIVATE /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup)
+endif()
 target_link_libraries(neon_vault PRIVATE raylib dxgi)
 
 if(MSVC)
