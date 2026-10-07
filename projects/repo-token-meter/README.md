@@ -14,7 +14,7 @@ https://tamasrazim.github.io/projects/repo-token-meter/
 - A ±12% estimate range.
 - Largest source files.
 - First/latest commit dates.
-- Commit comparison additions/deletions over the latest scanned history window.
+- Commit comparison additions/deletions for the latest 100-commit history window.
 - GitHub REST API remaining request count.
 - Local browser measurement history.
 
@@ -26,7 +26,7 @@ The token is entered in the browser and sent as an Authorization header only to 
 
 Use the smallest permissions necessary. For a public repository, read access is enough. For a private repository, the token needs read access to that repository.
 
-The scanner also avoids the old 1,000-commit pagination loop. It scans at most the latest 100 commits, reads GitHub rate-limit information before the scan, watches the remaining rate budget, and turns a 403 rate-limit response into a useful reset message instead of repeatedly retrying.
+The repository snapshot scan is separate from history analysis: it walks every tracked blob in the selected branch, including a directory-by-directory fallback when GitHub truncates its recursive tree response. Commit history analysis intentionally uses a latest-100 window so a full repository snapshot does not require hundreds or thousands of extra API calls. The meter reads GitHub rate-limit information before the scan, watches the remaining budget, and turns a 403 rate-limit response into a useful reset message instead of repeatedly retrying.
 
 ## Token meaning
 
