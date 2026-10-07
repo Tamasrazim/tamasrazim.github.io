@@ -9,23 +9,6 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#if defined(_WIN32)
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#define DrawText Win32_DrawText
-#include <windows.h>
-#include <dxgi1_4.h>
-#pragma comment(lib,"dxgi.lib")
-#undef DrawText
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-#endif
-
 enum class Screen { MENU, LEVEL_SELECT, PLAYING, PAUSED, SETTINGS, COMPLETE };
 enum class PuzzleType { COLLECT, KEY_DOOR, SWITCH_GATE, PRESSURE_PLATE, MEMORY, TIMED_GATE, TELEPORT, SEQUENCE, MOVING_GATE, FINALE };
 
@@ -188,26 +171,7 @@ static bool InCameraFrustum(const Camera3D& cam,Vector3 p,float radius){
     float pad=asinf(Clamp(radius/dist,0.0f,0.999f));
     return angle<=maxFov+pad;
 }
-static int QueryDedicatedVRAMMB(){
-#if defined(_WIN32)
-    IDXGIFactory1* factory=nullptr;
-    if(FAILED(CreateDXGIFactory1(__uuidof(IDXGIFactory1),(void**)&factory))) return 0;
-    SIZE_T best=0;
-    for(UINT i=0;;++i){
-        IDXGIAdapter1* adapter=nullptr;
-        if(factory->EnumAdapters1(i,&adapter)==DXGI_ERROR_NOT_FOUND) break;
-        DXGI_ADAPTER_DESC1 desc{};
-        adapter->GetDesc1(&desc);
-        if(!(desc.Flags&DXGI_ADAPTER_FLAG_SOFTWARE))
-            best=std::max(best,(SIZE_T)desc.DedicatedVideoMemory);
-        adapter->Release();
-    }
-    factory->Release();
-    return (int)(best/(1024*1024));
-#else
-    return 0;
-#endif
-}
+extern int QueryDedicatedVRAMMB();
 static Vector3 ViewDirection(float yaw,float pitch){
     float cp=cosf(pitch);
     return Vector3Normalize(V3(sinf(yaw)*cp,sinf(pitch),cosf(yaw)*cp));
