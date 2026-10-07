@@ -6,6 +6,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <cstdio>
 #include <cstring>
 #include <queue>
 #include <fstream>
@@ -559,21 +560,40 @@ int main(int argc,char** argv){
 
         for(int n=1;n<=LEVELS;n++){
             GenerateLevel(n);
-            if((int)crystals.size()!=level.crystals)ok=false;
-            if(insideSolid(player,PLAYER_RADIUS))ok=false;
+            bool floorOk=true;
+            auto fail=[&](const char* reason){
+                floorOk=false;
+                std::fprintf(stderr,"NEON VAULT VALIDATION: floor %d failed: %s\n",n,reason);
+            };
 
-            for(const auto& c:crystals)if(insideSolid(c.pos,0.45f))ok=false;
-            for(const auto& k:keys)if(insideSolid(k.pos,0.35f))ok=false;
-            for(const auto& sw:switches)if(insideSolid(sw.pos,0.35f))ok=false;
-            for(const auto& p:plates)if(insideSolid(p.pos,0.35f))ok=false;
-            for(const auto& p:pads)if(insideSolid(p.pos,0.35f))ok=false;
-            for(const auto& h:hazards)if(insideSolid(h.pos,0.35f))ok=false;
+            if((int)crystals.size()!=level.crystals)fail("crystal count");
+            if(insideSolid(player,PLAYER_RADIUS))fail("player start intersects wall");
+
+            for(size_t i=0;i<crystals.size();i++)if(insideSolid(crystals[i].pos,0.45f)){
+                char msg[96];std::snprintf(msg,sizeof(msg),"crystal %zu intersects wall",i);fail(msg);
+            }
+            for(size_t i=0;i<keys.size();i++)if(insideSolid(keys[i].pos,0.35f)){
+                char msg[96];std::snprintf(msg,sizeof(msg),"key %zu intersects wall",i);fail(msg);
+            }
+            for(size_t i=0;i<switches.size();i++)if(insideSolid(switches[i].pos,0.35f)){
+                char msg[96];std::snprintf(msg,sizeof(msg),"switch %zu intersects wall",i);fail(msg);
+            }
+            for(size_t i=0;i<plates.size();i++)if(insideSolid(plates[i].pos,0.35f)){
+                char msg[96];std::snprintf(msg,sizeof(msg),"plate %zu intersects wall",i);fail(msg);
+            }
+            for(size_t i=0;i<pads.size();i++)if(insideSolid(pads[i].pos,0.35f)){
+                char msg[96];std::snprintf(msg,sizeof(msg),"pad %zu intersects wall",i);fail(msg);
+            }
+            for(size_t i=0;i<hazards.size();i++)if(insideSolid(hazards[i].pos,0.35f)){
+                char msg[96];std::snprintf(msg,sizeof(msg),"hazard %zu intersects wall",i);fail(msg);
+            }
 
             for(size_t i=0;i<walls.size();i++){
-                if(walls[i].size.x<=0.01f||walls[i].size.z<=0.01f)ok=false;
+                if(walls[i].size.x<=0.01f||walls[i].size.z<=0.01f)fail("wall has non-positive X/Z size");
                 for(size_t j=i+1;j<walls.size();j++){
-                    if(BoxesOverlapXZ(walls[i].pos,walls[i].size,walls[j].pos,walls[j].size,0.0f))
-                        ok=false;
+                    if(BoxesOverlapXZ(walls[i].pos,walls[i].size,walls[j].pos,walls[j].size,0.0f)){
+                        char msg[128];std::snprintf(msg,sizeof(msg),"wall %zu overlaps wall %zu",i,j);fail(msg);
+                    }
                 }
             }
 
@@ -603,13 +623,16 @@ int main(int argc,char** argv){
                         }
                     }
                 }
-                for(const auto& c:crystals){
-                    int cx=(int)std::round(c.pos.x),cz=(int)std::round(c.pos.z);
-                    if(cx<minX||cx>maxX||cz<minZ||cz>maxZ||!seen[id(cx,cz)])ok=false;
+                for(size_t i=0;i<crystals.size();i++){
+                    int cx=(int)std::round(crystals[i].pos.x),cz=(int)std::round(crystals[i].pos.z);
+                    if(cx<minX||cx>maxX||cz<minZ||cz>maxZ||!seen[id(cx,cz)]){
+                        char msg[128];std::snprintf(msg,sizeof(msg),"floor 1 crystal %zu unreachable",i);fail(msg);
+                    }
                 }
                 int ex=0,ez=(int)std::round(-half+2.0f);
-                if(ex<minX||ex>maxX||ez<minZ||ez>maxZ||!seen[id(ex,ez)])ok=false;
+                if(ex<minX||ex>maxX||ez<minZ||ez>maxZ||!seen[id(ex,ez)])fail("floor 1 exit unreachable");
             }
+            if(!floorOk)ok=false;
         }
         return ok;
     };
