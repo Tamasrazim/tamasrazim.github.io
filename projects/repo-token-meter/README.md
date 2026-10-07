@@ -33,3 +33,5 @@ The repository snapshot scan is separate from history analysis: it walks every t
 GitHub does not expose an official "AI token usage" value for repository storage. The token number in this project is an estimate of the repository's text/code footprint, not a ChatGPT, Claude, or API billing counter.
 
 No backend is used and measurement history remains local to the browser.
+
+For `Tamasrazim/tamasrazim.github.io`, the Pages app also uses `repo-manifest.json`, generated from the repository's tracked-file list. This makes full-repository snapshot scanning work without browser CORS or GitHub REST quota. The accompanying GitHub Actions workflow refreshes the manifest after future changes.
