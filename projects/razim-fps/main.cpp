@@ -390,7 +390,23 @@ int main(int argc,char** argv){
     };
     if(!validateMode && settings.displayMode!=0)ApplyDisplayMode(settings.displayMode);
 
+    auto SetGameplayCursorMode=[&](bool lock){
+        if(validateMode) return;
+        if(lock==cursorLocked) return;
+        cursorLocked=lock;
+        if(lock){
+            SetMousePosition(GetScreenWidth()/2,GetScreenHeight()/2);
+            DisableCursor();
+        }else{
+            SetGameplayCursorMode(false);
+        }
+    };
+
+    // Start with a real OS cursor for all menus/settings.
+    EnableCursor();
+
     Screen screen=Screen::MENU;
+    bool cursorLocked=false;
     Screen settingsReturn=Screen::MENU;
     int settingsSelected=0,levelNumber=1;
     LevelConfig level{};
@@ -624,9 +640,8 @@ int main(int argc,char** argv){
 
         cam.fovy=settings.fov;
         if(!validateMode){
-            SetMousePosition(GetScreenWidth()/2,GetScreenHeight()/2);
-            DisableCursor();
             screen=Screen::PLAYING;
+            SetGameplayCursorMode(true);
         }
     };
 
@@ -784,6 +799,7 @@ int main(int argc,char** argv){
     }
 
     while(!WindowShouldClose()){
+        SetGameplayCursorMode(screen==Screen::PLAYING);
         float dt=std::min(GetFrameTime(),.05f);
         if(musicReady && IsAudioStreamProcessed(musicStream)) FillMusic();
         bool click=IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
@@ -861,7 +877,7 @@ int main(int argc,char** argv){
                 SaveGame(save);
             }
         } else if(screen==Screen::PLAYING){
-            if(IsKeyPressed(KEY_ESCAPE)){screen=Screen::PAUSED;EnableCursor();}
+            if(IsKeyPressed(KEY_ESCAPE)){screen=Screen::PAUSED;SetGameplayCursorMode(false);}
             if(IsKeyPressed(KEY_R)){StartLevel(level.number);continue;}
             Vector2 md=GetMouseDelta();
             yaw-=md.x*settings.sensitivity;
@@ -997,10 +1013,10 @@ int main(int argc,char** argv){
                 save.stars[level.number]=std::max(save.stars[level.number],stars);
                 if(level.number<LEVELS)save.unlocked=std::max(save.unlocked,level.number+1);
                 SaveGame(save);
-                if(level.number==LEVELS){screen=Screen::COMPLETE;EnableCursor();}
-                else{screen=Screen::LEVEL_SELECT;EnableCursor();}
+                if(level.number==LEVELS){screen=Screen::COMPLETE;SetGameplayCursorMode(false);}
+                else{screen=Screen::LEVEL_SELECT;SetGameplayCursorMode(false);}
             }
-            if(timeLeft<=0){timeLeft=0;screen=Screen::PAUSED;EnableCursor();}
+            if(timeLeft<=0){timeLeft=0;screen=Screen::PAUSED;SetGameplayCursorMode(false);}
 
             float sprintFov=settings.fov+(sprint?5.0f:0.0f);
             cam.position=Vector3Add(player,V3(0,.62f+cameraBob,0));
@@ -1009,9 +1025,8 @@ int main(int argc,char** argv){
         } else if(screen==Screen::PAUSED){
             EnableCursor();
             if(IsKeyPressed(KEY_ESCAPE)){
-                SetMousePosition(GetScreenWidth()/2,GetScreenHeight()/2);
                 screen=Screen::PLAYING;
-                DisableCursor();
+                SetGameplayCursorMode(true);
             }
             else if(IsKeyPressed(KEY_R))StartLevel(level.number);
             else if(IsKeyPressed(KEY_S)){settingsReturn=Screen::PAUSED;screen=Screen::SETTINGS;}
