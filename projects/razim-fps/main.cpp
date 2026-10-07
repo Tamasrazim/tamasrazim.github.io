@@ -402,7 +402,7 @@ int main(){
     auto GenerateLevel=[&](int n){
         level=MakeLevel(n);
         walls.clear();crystals.clear();keys.clear();switches.clear();doors.clear();crates.clear();plates.clear();pads.clear();hazards.clear();
-        float arenaHalf=21.0f+level.tier*0.25f;
+        float arenaHalf=(n==1?30.0f:21.0f+level.tier*0.25f);
         player=V3(0,1,arenaHalf-5);checkpoint=player;yaw=PI;pitch=0;vy=0;stamina=100;
         timeLeft=level.timeLimit;startTime=level.timeLimit;respawnFlash=0;teleportCooldown=0;timedGate=0;
         memoryProgress=0;sequenceProgress=0;hitsTaken=0;grounded=true;
@@ -441,15 +441,39 @@ int main(){
             }
         }
 
-        for(int i=0;i<level.crystals;i++){
-            float a=(float)i/level.crystals*(2.0f*PI)+n*.37f;
-            float r=4.5f+(i%5)*2.6f+level.tier*.35f;
-            r=std::min(r,arenaHalf-3.0f);
-            Vector3 cp=V3(cosf(a)*r,.85f,sinf(a)*r);
-            bool safe=true;
-            for(const auto& b:walls) if(HitsBox(cp,0.55f,b.pos,b.size)){safe=false;break;}
-            if(!safe) cp=V3(((i%4)-1.5f)*3.3f,.85f,-((i/4)+1)*4.2f);
-            crystals.push_back({cp,false});
+        if(n==1){
+            static const std::array<Vector3,8> route={
+                V3(-21.0f,.85f,24.0f),V3(20.0f,.85f,17.0f),
+                V3(-20.0f,.85f,9.0f),V3(20.0f,.85f,1.0f),
+                V3(-20.0f,.85f,-7.0f),V3(20.0f,.85f,-15.0f),
+                V3(-18.0f,.85f,-23.0f),V3(0.0f,.85f,-26.0f)
+            };
+            for(const auto& cp:route)crystals.push_back({cp,false});
+
+            const std::array<float,6> barrierZ={19.0f,11.0f,3.0f,-5.0f,-13.0f,-21.0f};
+            const std::array<float,6> gapX={-21.0f,21.0f,-21.0f,21.0f,-21.0f,21.0f};
+            for(int i=0;i<6;i++){
+                float z=barrierZ[i],gap=gapX[i];
+                float leftEnd=gap-3.5f;
+                float rightStart=gap+3.5f;
+                if(leftEnd>-arenaHalf+2.0f)
+                    walls.push_back({V3(((-arenaHalf+2.0f)+leftEnd)*0.5f,1,z),
+                                     V3(leftEnd-(-arenaHalf+2.0f),2.0f,0.9f),true});
+                if(rightStart<arenaHalf-2.0f)
+                    walls.push_back({V3((rightStart+(arenaHalf-2.0f))*0.5f,1,z),
+                                     V3((arenaHalf-2.0f)-rightStart,2.0f,0.9f),true});
+            }
+        }else{
+            for(int i=0;i<level.crystals;i++){
+                float a=(float)i/level.crystals*(2.0f*PI)+n*.37f;
+                float r=4.5f+(i%5)*2.6f+level.tier*.35f;
+                r=std::min(r,arenaHalf-3.0f);
+                Vector3 cp=V3(cosf(a)*r,.85f,sinf(a)*r);
+                bool safe=true;
+                for(const auto& b:walls) if(HitsBox(cp,0.55f,b.pos,b.size)){safe=false;break;}
+                if(!safe) cp=V3(((i%4)-1.5f)*3.3f,.85f,-((i/4)+1)*4.2f);
+                crystals.push_back({cp,false});
+            }
         }
 
         for(int i=0;i<level.keys;i++)keys.push_back({V3(-7.5f+i*4.6f,.9f,5.5f-i*1.3f),i,false});
@@ -745,7 +769,7 @@ int main(){
             else if(level.puzzle==PuzzleType::SEQUENCE)puzzleSolved=sequenceSolved;
             else puzzleSolved=keysSolved&&switchesSolved&&platesSolved&&memorySolved&&sequenceSolved;
 
-            Vector3 exit=V3(0,1,-9.4f);
+            Vector3 exit=V3(0,1,-arenaHalf+2.0f);
             if(puzzleSolved&&collected>=level.crystals&&Vector3Distance(player,exit)<1.7f){
                 float ratio=startTime>0?timeLeft/startTime:0;
                 int stars=(ratio>.55f&&hitsTaken<=1)?3:(ratio>.22f?2:1);
@@ -933,7 +957,7 @@ int main(){
                 visibleObjects++;
                 DrawCube(p,h.size.x,h.size.y,h.size.z,RED);DrawCubeWires(p,h.size.x,h.size.y,h.size.z,Color{255,120,120,255});
             }
-            Vector3 exit=V3(0,.05f,-9.4f);
+            Vector3 exit=V3(0,.05f,-arenaHalf+2.0f);
             DrawCylinder(exit,1.5f,1.5f,.08f,40,puzzleSolved?GREEN:Color{50,100,125,255});
             DrawCylinderWires(exit,1.65f,1.65f,.1f,40,RAYWHITE);
             if(pbrReady)EndShaderMode();
