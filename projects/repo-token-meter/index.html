@@ -121,7 +121,7 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
     <button id="clearToken" class="secondary" type="button">FORGET TOKEN</button>
   </div>
   <div id="authStatus" class="help auth-status">Anonymous GitHub API · limited rate · add a token to avoid 403</div>
-  <div class="help">The snapshot scanner counts the entire tracked repository. If GitHub truncates its recursive tree response, the meter automatically walks the tree directory-by-directory until every tracked blob is collected. Add a GitHub token for a much higher API limit. The token is sent only to GitHub and is never committed here.</div>
+  <div class="help">The snapshot scanner downloads the selected branch archive and counts the entire tracked repository locally in your browser. Full snapshot scanning does not consume GitHub REST API quota. API access is used only for the separate history section.</div>
 </section>
 
 <section class="panel">
@@ -265,27 +265,52 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
     const estimate = Math.max(0, Math.round(sourceBytes / ratio));
     return {estimate, low:Math.round(estimate*.88), high:Math.round(estimate*1.12)};
   }
-  async function fetchTree(owner,repo,branch){
-    const base = API + "/repos/" + encodeURIComponent(owner) + "/" + encodeURIComponent(repo);
-    const recursive = await getJSON(base + "/git/trees/" + encodeURIComponent(branch) + "?recursive=1");
-    if(!recursive.truncated){
-      return {tree:recursive.tree||[], sha:recursive.sha||"", truncated:false};
-    }
+  async function fetchArchive(owner,repo,branch){
+    const url = "https://codeload.github.com/" + encodeURIComponent(owner) + "/" +
+      encodeURIComponent(repo) + "/tar.gz/refs/heads/" + encodeURIComponent(branch);
+    const response = await fetch(url, {cache:"no-store"});
+    if(!response.ok) throw new Error("GitHub archive download failed: HTTP " + response.status);
+    const compressed = new Uint8Array(await response.arrayBuffer());
+    if(!("DecompressionStream" in window)) throw new Error("This browser does not support streamed gzip decompression.");
+    const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip"));
+    const buffer = new Uint8Array(await new Response(stream).arrayBuffer());
 
-    const root = await getJSON(base + "/git/trees/" + encodeURIComponent(branch));
-    const queue = [...(root.tree||[])];
     const files = [];
-    while(queue.length){
-      const item = queue.shift();
-      if(item.type === "blob"){
-        files.push(item);
-      }else if(item.type === "tree"){
-        const detail = await getJSON(base + "/git/trees/" + encodeURIComponent(item.sha));
-        for(const child of detail.tree||[]) queue.push(child);
+    let offset = 0;
+    while(offset + 512 <= buffer.length){
+      const header = buffer.subarray(offset, offset + 512);
+      let empty = true;
+      for(let i=0;i<512;i++){ if(header[i] !== 0){ empty=false; break; } }
+      if(empty) break;
+
+      const nameBytes = header.subarray(0,100);
+      const prefixBytes = header.subarray(345,500);
+      const name = bytesToAscii(nameBytes);
+      const prefix = bytesToAscii(prefixBytes);
+      const fullPath = (prefix ? prefix + "/" : "") + name;
+      const sizeField = bytesToAscii(header.subarray(124,136)).replace(/\0/g,"").trim();
+      const size = parseInt(sizeField,8) || 0;
+      const typeFlag = header[156] || 0;
+
+      if(typeFlag === 0 || typeFlag === 48){
+        files.push({type:"blob",path:fullPath.replace(/^[^/]+\//,""),size});
       }
+      offset += 512 + Math.ceil(size / 512) * 512;
     }
-    return {tree:files, sha:root.sha||"", truncated:true};
+    if(!files.length) throw new Error("GitHub returned an empty repository archive.");
+    return {tree:files, sha:"archive", source:"codeload"};
   }
+
+  function bytesToAscii(bytes){
+    let out="";
+    for(let i=0;i<bytes.length;i++){
+      const c=bytes[i];
+      if(c===0) break;
+      out += String.fromCharCode(c);
+    }
+    return out;
+  }
+
 
   async function allCommits(owner,repo,branch){
     const commits = await getJSON(API + "/repos/" + encodeURIComponent(owner) + "/" + encodeURIComponent(repo) +
@@ -335,8 +360,7 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
       const ratioRaw = Number($("ratio").value);
       const ratio = Number.isFinite(ratioRaw) && ratioRaw >= 1.5 && ratioRaw <= 8 ? ratioRaw : 3.1;
 
-      await readRateLimit();
-      const scanned = await fetchTree(owner,repo,branch);
+      const scanned = await fetchArchive(owner,repo,branch);
       const blobs = scanned.tree.filter(x=>x.type==="blob");
       const source = blobs.filter(x=>!BIN.test(x.path));
       const binary = blobs.filter(x=>BIN.test(x.path));
@@ -353,7 +377,7 @@ footer{padding-top:12px;color:#5f5f5f;font:11px ui-monospace,monospace}
       set("binaryBytes",bytes(binaryBytes));
       set("binaryShare",totalBytes ? ((binaryBytes/totalBytes)*100).toFixed(1)+"%" : "0%");
       set("tokenRange",fmt(tok.low)+"–"+fmt(tok.high));
-      set("head",String(scanned.sha||"").slice(0,12));
+      set("head","archive scan");
       set("measuredAt",new Date().toLocaleString());
 
       const top = source.slice().sort((a,b)=>(b.size||0)-(a.size||0)).slice(0,20);
