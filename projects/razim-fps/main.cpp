@@ -22,7 +22,7 @@ constexpr float PLAYER_RADIUS=0.35f;
 constexpr float PLAYER_HEIGHT=1.8f;
 constexpr float TAU=6.28318530718f;
 
-enum class Screen{MENU,LEVELS,SETTINGS,CREDITS,PLAYING,PAUSED,COMPLETE,GAMEOVER};
+enum class Screen{INTRO,MENU,LEVELS,SETTINGS,CREDITS,PLAYING,PAUSED,COMPLETE,GAMEOVER};
 enum class Objective{COLLECT,SWITCHES,KEYCARD,MEMORY,SURVIVE,COMBO};
 
 struct Settings{
@@ -32,6 +32,7 @@ struct Settings{
     bool hints=true;
     bool shake=true;
     float sfx=0.65f;
+    float music=0.55f;
     int crosshair=0;
     int displayMode=0;
     bool performance=false;
@@ -68,11 +69,13 @@ struct Level{
 
 struct Assets{
     Texture2D floor{},wall{},metal{},hazard{},crystal{},terminal{},sky{};
+    Music theme{};
     Model floorModel{},wallModel{},metalModel{},hazardModel{};
     Model drone{},terminalModel{};
     Sound pickup{},hit{},click{},complete{};
     bool droneReady=false;
     bool soundsReady=false;
+    bool musicReady=false;
 };
 
 static Vector3 V(float x,float y,float z){return{x,y,z};}
@@ -124,6 +127,7 @@ static SaveData LoadGame(){
         else if(k=="hints"){int v;in>>v;s.settings.hints=v!=0;}
         else if(k=="shake"){int v;in>>v;s.settings.shake=v!=0;}
         else if(k=="sfx")in>>s.settings.sfx;
+        else if(k=="music")in>>s.settings.music;
         else if(k=="crosshair")in>>s.settings.crosshair;
         else if(k=="displayMode")in>>s.settings.displayMode;
         else if(k=="performance"){int v;in>>v;s.settings.performance=v!=0;}
@@ -136,6 +140,7 @@ static SaveData LoadGame(){
     s.settings.sensitivity=Clamp(s.settings.sensitivity,0.0008f,0.008f);
     s.settings.fov=Clamp(s.settings.fov,60.0f,105.0f);
     s.settings.sfx=Clamp(s.settings.sfx,0.0f,1.0f);
+    s.settings.music=Clamp(s.settings.music,0.0f,1.0f);
     s.settings.crosshair=std::clamp(s.settings.crosshair,0,2);
     s.settings.displayMode=std::clamp(s.settings.displayMode,0,2);
     return s;
@@ -151,6 +156,7 @@ static void SaveGame(const SaveData& s){
     out<<"hints "<<(s.settings.hints?1:0)<<"\n";
     out<<"shake "<<(s.settings.shake?1:0)<<"\n";
     out<<"sfx "<<s.settings.sfx<<"\n";
+    out<<"music "<<s.settings.music<<"\n";
     out<<"crosshair "<<s.settings.crosshair<<"\n";
     out<<"displayMode "<<s.settings.displayMode<<"\n";
     out<<"performance "<<(s.settings.performance?1:0)<<"\n";
@@ -327,6 +333,41 @@ static void Center(const char* t,int y,int size,Color c){
     DrawText(t,(GetScreenWidth()-MeasureText(t,size))/2,y,size,c);
 }
 
+static void DrawIntro(float t){
+    const int w=GetScreenWidth(),h=GetScreenHeight();
+    float p=Clamp(t/15.0f,0.0f,1.0f);
+    float fadeIn=Clamp(t/1.5f,0.0f,1.0f);
+    float fadeOut=Clamp((15.0f-t)/2.0f,0.0f,1.0f);
+    float alpha=std::min(fadeIn,fadeOut);
+    ClearBackground(Color{2,6,12,255});
+    for(int y=0;y<h;y+=4){
+        unsigned char c=(unsigned char)Clamp(7.0f+18.0f*(float(y)/float(std::max(1,h))),0.0f,255.0f);
+        DrawRectangle(0,y,w,4,Color{2,c/2,c,255});
+    }
+    for(int i=0;i<48;i++){
+        float x=fmodf(float(i*97)+t*(12.0f+float(i%5)*4.0f),float(w+120))-60.0f;
+        float y=80.0f+fmodf(float(i*53)+sinf(t*0.7f+float(i)*0.73f)*65.0f,float(std::max(1,h-140)));
+        DrawCircle((int)x,(int)y,1.0f+float(i%3),Color{65,205,255,(unsigned char)(35+40*(i%4))});
+    }
+    int cx=w/2,cy=h/2;
+    float pulse=1.0f+0.035f*sinf(t*3.8f);
+    float ring=160.0f+80.0f*p+18.0f*sinf(t*2.3f);
+    DrawCircleLines(cx,cy,ring,Color{65,205,255,(unsigned char)(70*alpha)});
+    DrawCircleLines(cx,cy,ring*0.72f,Color{112,125,255,(unsigned char)(55*alpha)});
+    DrawCircleV({(float)cx,(float)cy},4.0f+3.0f*sinf(t*5.0f),Color{225,255,255,(unsigned char)(180*alpha)});
+    const char* eyebrow="TAMASRAZIM PRESENTS";
+    DrawText(eyebrow,cx-MeasureText(eyebrow,18)/2,cy-170,18,Color{150,200,220,(unsigned char)(190*alpha)});
+    const char* title="NEON VAULT";
+    int titleSize=(int)(58.0f*pulse);
+    DrawText(title,cx-MeasureText(title,titleSize)/2,cy-75,titleSize,Color{235,250,255,(unsigned char)(255*alpha)});
+    const char* sub="100-FLOOR FIRST-PERSON PUZZLE EXPEDITION";
+    DrawText(sub,cx-MeasureText(sub,17)/2,cy+5,17,Color{155,180,200,(unsigned char)(220*alpha)});
+    DrawRectangle(cx-250,cy+80,500,3,Color{25,42,56,255});
+    DrawRectangle(cx-250,cy+80,(int)(500.0f*p),3,Color{65,205,255,(unsigned char)(220*alpha)});
+    DrawText("INITIALIZING VAULT SYSTEMS",cx-150,cy+105,13,Color{125,155,175,(unsigned char)(200*alpha)});
+    DrawText("ENTER / ESC — SKIP INTRO",cx-105,h-55,12,Color{105,125,140,(unsigned char)(165*alpha)});
+}
+
 static void Panel(Rectangle r,Color fill,Color border){
     DrawRectangleRounded(r,0.08f,10,fill);
     DrawRectangleRoundedLines(r,0.08f,10,border);
@@ -368,6 +409,11 @@ static Assets LoadAssets(){
     a.crystal=Tex("assets/textures/crystal.bmp",Color{55,180,235,255});
     a.terminal=Tex("assets/textures/terminal.bmp",Color{50,180,155,255});
     a.sky=Tex("assets/textures/sky.bmp",Color{6,13,26,255});
+    if(FileExists("assets/audio/neon-vault-theme.ogg")){
+        a.theme=LoadMusicStream("assets/audio/neon-vault-theme.ogg");
+        a.musicReady=IsMusicValid(a.theme);
+        if(a.musicReady)a.theme.looping=true;
+    }
     a.floorModel=MakeTexturedCube(a.floor);
     a.wallModel=MakeTexturedCube(a.wall);
     a.metalModel=MakeTexturedCube(a.metal);
@@ -404,6 +450,7 @@ static void UnloadAssets(Assets& a){
     if(a.soundsReady){
         UnloadSound(a.pickup);UnloadSound(a.hit);UnloadSound(a.click);UnloadSound(a.complete);
     }
+    if(a.musicReady)UnloadMusicStream(a.theme);
 }
 
 static void SetDisplayMode(Settings& s,int mode){
@@ -469,6 +516,7 @@ int main(int argc,char** argv){
 
     SetConfigFlags(FLAG_MSAA_4X_HINT|FLAG_WINDOW_RESIZABLE|FLAG_VSYNC_HINT);
     InitWindow(1440,900,"NEON VAULT");
+    EnableCursor();
     SetExitKey(KEY_NULL);
     SetTargetFPS(144);
     InitAudioDevice();
@@ -476,8 +524,12 @@ int main(int argc,char** argv){
     SaveData save=LoadGame();
     if(save.settings.displayMode!=0)SetDisplayMode(save.settings,save.settings.displayMode);
     Assets assets=LoadAssets();
+    if(assets.musicReady){
+        SetMusicVolume(assets.theme,save.settings.music);
+        PlayMusicStream(assets.theme);
+    }
 
-    Screen screen=Screen::MENU;
+    Screen screen=Screen::INTRO;
     Screen returnScreen=Screen::MENU;
     Level level=BuildLevel(save.unlocked);
     Vector3 player=level.start;
@@ -489,6 +541,7 @@ int main(int argc,char** argv){
     float scanTimer=0,bobPhase=0;
     bool grounded=true,mouseCaptured=false,quit=false;
     int settingsRow=0;
+    float introElapsed=0.0f;
 
     auto CaptureMouse=[&](bool capture){
         if(capture){
@@ -566,6 +619,18 @@ int main(int argc,char** argv){
     while(!WindowShouldClose()&&!quit){
         float dt=std::min(GetFrameTime(),0.05f);
 
+        if(assets.musicReady){
+            SetMusicVolume(assets.theme,save.settings.music);
+            UpdateMusicStream(assets.theme);
+        }
+        if(screen==Screen::INTRO){
+            introElapsed+=dt;
+            if(introElapsed>=15.0f||IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_ESCAPE)){
+                introElapsed=15.0f;
+                screen=Screen::MENU;
+            }
+        }
+
         if(IsKeyPressed(KEY_F11)){
             SetDisplayMode(save.settings,IsWindowFullscreen()?1:2);
             SaveGame(save);
@@ -573,7 +638,9 @@ int main(int argc,char** argv){
 
         if(screen!=Screen::PLAYING)CaptureMouse(false);
 
-        if(screen==Screen::MENU){
+        if(screen==Screen::INTRO){
+            // Intro deliberately keeps the Windows cursor visible and free.
+        }else if(screen==Screen::MENU){
             Rectangle a={GetScreenWidth()/2.0f-180,270,360,58};
             Rectangle b={GetScreenWidth()/2.0f-180,340,360,58};
             Rectangle c={GetScreenWidth()/2.0f-180,410,360,58};
@@ -597,12 +664,12 @@ int main(int argc,char** argv){
             }
         }else if(screen==Screen::SETTINGS){
             if(IsKeyPressed(KEY_ESCAPE)){SaveGame(save);screen=returnScreen;}
-            if(IsKeyPressed(KEY_UP))settingsRow=(settingsRow+7)%8;
-            if(IsKeyPressed(KEY_DOWN))settingsRow=(settingsRow+1)%8;
+            if(IsKeyPressed(KEY_UP))settingsRow=(settingsRow+8)%9;
+            if(IsKeyPressed(KEY_DOWN))settingsRow=(settingsRow+1)%9;
             if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
                 int left=GetScreenWidth()/2-300;
-                for(int i=0;i<8;i++){
-                    Rectangle rr={float(left),170.0f+i*58.0f,600,46};
+                for(int i=0;i<9;i++){
+                    Rectangle rr={float(left),165.0f+i*50.0f,600,42};
                     if(CheckCollisionPointRec(GetMousePosition(),rr))settingsRow=i;
                 }
             }
@@ -615,9 +682,10 @@ int main(int argc,char** argv){
                     case 2:save.settings.fov=Clamp(save.settings.fov+dir*2,60,105);break;
                     case 3:save.settings.hints=!save.settings.hints;break;
                     case 4:save.settings.shake=!save.settings.shake;break;
-                    case 5:save.settings.crosshair=(save.settings.crosshair+(dir>0?1:2))%3;break;
-                    case 6:SetDisplayMode(save.settings,(save.settings.displayMode+(dir>0?1:2))%3);break;
-                    case 7:save.settings.performance=!save.settings.performance;break;
+                    case 5:save.settings.music=Clamp(save.settings.music+dir*0.05f,0.0f,1.0f);break;
+                    case 6:save.settings.crosshair=(save.settings.crosshair+(dir>0?1:2))%3;break;
+                    case 7:SetDisplayMode(save.settings,(save.settings.displayMode+(dir>0?1:2))%3);break;
+                    case 8:save.settings.performance=!save.settings.performance;break;
                 }
                 SaveGame(save);ClickSound();
             }
@@ -771,7 +839,9 @@ int main(int argc,char** argv){
         BeginDrawing();
         ClearBackground(Color{5,9,16,255});
 
-        if(screen==Screen::MENU){
+        if(screen==Screen::INTRO){
+            DrawIntro(introElapsed);
+        }else if(screen==Screen::MENU){
             DrawTexturePro(assets.sky,{0,0,(float)assets.sky.width,(float)assets.sky.height},{0,0,(float)GetScreenWidth(),(float)GetScreenHeight()},{0,0},0,Color{120,145,180,255});
             DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{1,6,12,180});
             Center("NEON VAULT",90,64,RAYWHITE);
@@ -783,7 +853,7 @@ int main(int argc,char** argv){
             ButtonDraw({GetScreenWidth()/2.0f-180,410,360,58},"SETTINGS",ThemeColor(2));
             ButtonDraw({GetScreenWidth()/2.0f-180,480,360,58},"CREDITS",ThemeColor(4));
             ButtonDraw({GetScreenWidth()/2.0f-180,550,360,58},"QUIT",Color{255,100,100,255});
-            DrawText("v3.0 • FULL-GAME SYSTEM BUILD",24,GetScreenHeight()-28,13,GRAY);
+            DrawText("v3.1 • FULL-GAME RELEASE CANDIDATE",24,GetScreenHeight()-28,13,GRAY);
         }else if(screen==Screen::LEVELS){
             Center("FLOOR SELECT",65,42,RAYWHITE);
             Center(TextFormat("%03d / %03d UNLOCKED",save.unlocked,LEVELS),118,16,SKYBLUE);
@@ -798,22 +868,23 @@ int main(int argc,char** argv){
             }
             DrawText("ESC • BACK",32,GetScreenHeight()-35,14,GRAY);
         }else if(screen==Screen::SETTINGS){
-            Center("SETTINGS",70,42,RAYWHITE);
-            Center("ARROWS / ENTER TO CHANGE • ESC TO SAVE AND BACK",115,14,GRAY);
+            Center("SETTINGS",55,40,RAYWHITE);
+            Center("ARROWS / ENTER TO CHANGE • ESC TO SAVE AND BACK",105,14,GRAY);
             int left=GetScreenWidth()/2-300;
-            const char* labels[8]={"MOUSE SENSITIVITY","INVERT Y","FIELD OF VIEW","HINTS","SCREEN SHAKE","CROSSHAIR","DISPLAY","PERFORMANCE"};
-            std::string values[8]={
+            const char* labels[9]={"MOUSE SENSITIVITY","INVERT Y","FIELD OF VIEW","HINTS","SCREEN SHAKE","MUSIC VOLUME","CROSSHAIR","DISPLAY","PERFORMANCE"};
+            std::string values[9]={
                 TextFormat("%.4f",save.settings.sensitivity),
                 save.settings.invertY?"ON":"OFF",
                 TextFormat("%.0f",save.settings.fov),
                 save.settings.hints?"ON":"OFF",
                 save.settings.shake?"ON":"OFF",
+                TextFormat("%d%%",(int)(save.settings.music*100.0f)),
                 TextFormat("STYLE %d",save.settings.crosshair+1),
                 save.settings.displayMode==0?"WINDOWED":(save.settings.displayMode==1?"BORDERLESS":"FULLSCREEN"),
                 save.settings.performance?"ON":"OFF"
             };
-            for(int i=0;i<8;i++){
-                Rectangle rr={float(left),170.0f+i*58.0f,600,46};
+            for(int i=0;i<9;i++){
+                Rectangle rr={float(left),165.0f+i*50.0f,600,42};
                 bool hot=i==settingsRow||CheckCollisionPointRec(GetMousePosition(),rr);
                 Panel(rr,hot?Color{20,42,58,255}:Color{11,22,32,255},hot?SKYBLUE:Color{48,64,78,255});
                 DrawText(labels[i],int(rr.x+18),int(rr.y+13),16,RAYWHITE);
