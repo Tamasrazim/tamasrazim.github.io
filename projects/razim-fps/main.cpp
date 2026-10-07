@@ -219,7 +219,7 @@ int main() {
         } else {
             BeginMode3D(camera);
 
-            DrawPlane(V3(0,0,0), V2(24,24), Color{15,23,34,255});
+            DrawPlane(V3(0,0,0), Vector2{24,24}, Color{15,23,34,255});
             for (int i=-12;i<=12;i++) {
                 DrawLine3D(V3((float)i,0.01f,-12), V3((float)i,0.01f,12), Color{25,44,57,160});
                 DrawLine3D(V3(-12,0.01f,(float)i), V3(12,0.01f,(float)i), Color{25,44,57,160});
