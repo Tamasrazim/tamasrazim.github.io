@@ -23,6 +23,7 @@ target_link_libraries(neon_vault PRIVATE raylib)
 
 if (MSVC)
     target_compile_options(neon_vault PRIVATE /W4 /permissive-)
+    target_link_options(neon_vault PRIVATE "/SUBSYSTEM:WINDOWS" "/ENTRY:mainCRTStartup")
 else()
     target_compile_options(neon_vault PRIVATE -Wall -Wextra -Wpedantic)
 endif()
