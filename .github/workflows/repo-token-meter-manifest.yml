@@ -1,0 +1,75 @@
+name: Repo Token Meter manifest
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "projects/repo-token-meter/repo-manifest.json"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build complete tracked-file manifest
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import subprocess
+
+          manifest_path = "projects/repo-token-meter/repo-manifest.json"
+          raw = subprocess.check_output(["git", "ls-files", "-z"])
+          files = []
+          for item in raw.split(b"\0"):
+              if not item:
+                  continue
+              path = item.decode("utf-8", "surrogateescape")
+              if path == manifest_path:
+                  continue
+              try:
+                  size = os.path.getsize(path)
+              except OSError:
+                  size = 0
+              files.append({"path": path, "size": size})
+
+          files.sort(key=lambda x: x["path"])
+          head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+
+          payload = {
+              "version": 1,
+              "repository": "Tamasrazim/tamasrazim.github.io",
+              "branch": "main",
+              "head": head,
+              "generatedAt": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
+              "files": files
+          }
+
+          os.makedirs(os.path.dirname(manifest_path), exist_ok=True)
+          with open(manifest_path, "w", encoding="utf-8") as fh:
+              json.dump(payload, fh, ensure_ascii=False, separators=(",", ":"))
+
+          print(f"Generated {len(files)} tracked-file entries.")
+          PY
+
+      - name: Commit manifest
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add projects/repo-token-meter/repo-manifest.json
+          if git diff --cached --quiet; then
+            echo "Manifest unchanged."
+            exit 0
+          fi
+          git commit -m "chore: update Repo Token Meter manifest"
+          git push
