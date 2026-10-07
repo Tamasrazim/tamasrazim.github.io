@@ -6,6 +6,8 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
+#include <queue>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -299,7 +301,7 @@ void main(){
 }
 )GLSL";
 
-int main(){
+int main(int argc,char** argv){
     SetConfigFlags(FLAG_MSAA_4X_HINT|FLAG_WINDOW_RESIZABLE|FLAG_VSYNC_HINT);
     InitWindow(1440,900,"NEON VAULT");
     SetExitKey(KEY_NULL);
@@ -534,6 +536,73 @@ int main(){
 
     auto StartLevel=[&](int n){levelNumber=std::clamp(n,1,LEVELS);GenerateLevel(levelNumber);};
 
+    auto ValidateLevels=[&](){
+        bool ok=true;
+        auto insideSolid=[&](Vector3 p,float radius){
+            for(const auto& b:walls)if(HitsBox(p,radius,b.pos,b.size))return true;
+            return false;
+        };
+
+        for(int n=1;n<=LEVELS;n++){
+            GenerateLevel(n);
+            if((int)crystals.size()!=level.crystals)ok=false;
+            if(insideSolid(player,PLAYER_RADIUS))ok=false;
+
+            for(const auto& c:crystals)if(insideSolid(c.pos,0.45f))ok=false;
+            for(const auto& k:keys)if(insideSolid(k.pos,0.35f))ok=false;
+            for(const auto& sw:switches)if(insideSolid(sw.pos,0.35f))ok=false;
+            for(const auto& p:plates)if(insideSolid(p.pos,0.35f))ok=false;
+            for(const auto& p:pads)if(insideSolid(p.pos,0.35f))ok=false;
+            for(const auto& h:hazards)if(insideSolid(h.pos,0.35f))ok=false;
+
+            for(size_t i=0;i<walls.size();i++){
+                if(walls[i].size.x<=0.01f||walls[i].size.z<=0.01f)ok=false;
+                for(size_t j=i+1;j<walls.size();j++){
+                    if(BoxesOverlapXZ(walls[i].pos,walls[i].size,walls[j].pos,walls[j].size,0.0f))
+                        ok=false;
+                }
+            }
+
+            if(n==1){
+                float half=arenaHalf;
+                const float step=1.0f;
+                int minX=(int)std::ceil(-half+1),maxX=(int)std::floor(half-1);
+                int minZ=(int)std::ceil(-half+1),maxZ=(int)std::floor(half-1);
+                int W=maxX-minX+1,H=maxZ-minZ+1;
+                std::vector<unsigned char> seen((size_t)W*(size_t)H,0);
+                auto id=[&](int x,int z){return (z-minZ)*W+(x-minX);};
+                auto walkable=[&](int x,int z){
+                    if(x<minX||x>maxX||z<minZ||z>maxZ)return false;
+                    return !insideSolid(V3((float)x,1.0f,(float)z),PLAYER_RADIUS*0.85f);
+                };
+                std::queue<std::pair<int,int>> q;
+                int sx=(int)std::round(player.x),sz=(int)std::round(player.z);
+                if(walkable(sx,sz)){seen[id(sx,sz)]=1;q.push({sx,sz});}
+                const int dx[4]={1,-1,0,0},dz[4]={0,0,1,-1};
+                while(!q.empty()){
+                    auto [cx,cz]=q.front();q.pop();
+                    for(int d=0;d<4;d++){
+                        int nx=cx+dx[d],nz=cz+dz[d];
+                        if(walkable(nx,nz)&&!seen[id(nx,nz)]){
+                            seen[id(nx,nz)]=1;
+                            q.push({nx,nz});
+                        }
+                    }
+                }
+                for(const auto& c:crystals){
+                    int cx=(int)std::round(c.pos.x),cz=(int)std::round(c.pos.z);
+                    if(cx<minX||cx>maxX||cz<minZ||cz>maxZ||!seen[id(cx,cz)])ok=false;
+                }
+                int ex=(int)std::round(0.0f),ez=(int)std::round(-arenaHalf+2.0f);
+                if(ex<minX||ex>maxX||ez<minZ||ez>maxZ||!seen[id(ex,ez)])ok=false;
+            }
+        }
+        return ok;
+    };
+
+    bool validateMode=false;
+    for(int i=1;i<argc;i++)if(std::strcmp(argv[i],"--validate")==0)validateMode=true;
+
     auto FillMusic=[&](){
         if(!musicReady) return;
         constexpr int frames=735;
@@ -577,6 +646,21 @@ int main(){
         }
         return false;
     };
+
+    if(validateMode){
+        bool ok=ValidateLevels();
+        if(sceneTarget.id!=0)UnloadRenderTexture(sceneTarget);
+        if(skyPhotoReady)UnloadTexture(skyPhoto);
+        if(pbrReady)UnloadShader(pbrShader);
+        if(musicReady){
+            StopAudioStream(musicStream);
+            UnloadAudioStream(musicStream);
+        }
+        CloseAudioDevice();
+        EnableCursor();
+        CloseWindow();
+        return ok?0:1;
+    }
 
     while(!WindowShouldClose()){
         float dt=std::min(GetFrameTime(),.05f);
