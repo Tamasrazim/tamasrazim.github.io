@@ -1195,11 +1195,6 @@ int main(int argc,char** argv){
                 Vector3 panel=Vector3Add(cam.position,Vector3Add(Vector3Scale(fwd,2.8f),V3(0,0.2f,0)));
                 DrawCube(panel,6.0f,2.5f,0.45f,Color{7,18,28,240});
                 DrawCubeWires(panel,6.15f,2.65f,0.55f,SKYBLUE);
-                Vector2 pp=GetWorldToScreen(Vector3Add(panel,V3(0,0.45f,0)),cam);
-                DrawText("PAUSED",(int)pp.x-60,(int)pp.y-30,34,RAYWHITE);
-                DrawText("ESC RESUME",(int)pp.x-75,(int)pp.y+10,16,SKYBLUE);
-                DrawText("R RESTART   S SETTINGS",(int)pp.x-110,(int)pp.y+34,14,LIGHTGRAY);
-                if(timeLeft<=0)DrawText("TIME EXPIRED — R TO RESTART",(int)pp.x-125,(int)pp.y+58,13,ORANGE);
             }else if(pbrReady)EndShaderMode();
             EndMode3D();
             EndTextureMode();
@@ -1207,6 +1202,17 @@ int main(int argc,char** argv){
                 Rectangle{0,0,(float)sceneTarget.texture.width,-(float)sceneTarget.texture.height},
                 Rectangle{0,0,(float)GetScreenWidth(),(float)GetScreenHeight()},
                 Vector2{0,0},0,WHITE);
+
+            if(screen==Screen::PAUSED){
+                DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{0,5,12,115});
+                Vector3 fwd=ViewDirection(yaw,pitch);
+                Vector3 panel=Vector3Add(cam.position,Vector3Add(Vector3Scale(fwd,2.8f),V3(0,0.2f,0)));
+                Vector2 pp=GetWorldToScreen(Vector3Add(panel,V3(0,0.45f,0)),cam);
+                DrawText("PAUSED",(int)pp.x-60,(int)pp.y-30,34,RAYWHITE);
+                DrawText("ESC RESUME",(int)pp.x-75,(int)pp.y+10,16,SKYBLUE);
+                DrawText("R RESTART   S SETTINGS",(int)pp.x-110,(int)pp.y+34,14,LIGHTGRAY);
+                if(timeLeft<=0)DrawText("TIME EXPIRED - R TO RESTART",(int)pp.x-125,(int)pp.y+58,13,ORANGE);
+            }
 
             int collected=0;for(const auto& c:crystals)if(c.collected)collected++;
             Color accent=ThemePrimary(level.theme);
@@ -1245,31 +1251,31 @@ int main(int argc,char** argv){
             DrawPlane(V3(0,0,0),Vector2{28,28},Color{6,17,22,255});
             WorldFrame(cam,V3(0,3.3f,-1.0f),V3(10.5f,6.5f,0.5f),GREEN);
             Vector2 title=GetWorldToScreen(V3(0,5.1f,-1.25f),cam);
-            DrawText("VAULT MASTER",(int)title.x-135,(int)title.y-24,48,GREEN);
             Vector2 sub=GetWorldToScreen(V3(0,4.2f,-1.25f),cam);
             int total=0;for(int i=1;i<=LEVELS;i++)total+=save.stars[i];
+            EndMode3D();
+            DrawText("VAULT MASTER",(int)title.x-135,(int)title.y-24,48,GREEN);
             DrawText("100 FLOORS COMPLETE",(int)sub.x-135,(int)sub.y,22,RAYWHITE);
             DrawText(TextFormat("TOTAL STARS  %d / %d",total,LEVELS*3),(int)sub.x-105,(int)sub.y+38,18,GOLD);
-            DrawText("ENTER / CLICK • FLOOR SELECT",(int)sub.x-125,(int)sub.y+82,15,SKYBLUE);
-            EndMode3D();
+            DrawText("ENTER / CLICK - FLOOR SELECT",(int)sub.x-125,(int)sub.y+82,15,SKYBLUE);
         } else if(screen==Screen::CREDITS){
             cam.position=V3(0,3.5f,12.5f); cam.target=V3(0,2.5f,0); cam.up=V3(0,1,0); cam.fovy=58.0f;
             BeginMode3D(cam);
             DrawPlane(V3(0,0,0),Vector2{28,28},Color{4,10,16,255});
             WorldFrame(cam,V3(0,3.2f,-1.0f),V3(11.0f,7.0f,0.5f),SKYBLUE);
             Vector2 t=GetWorldToScreen(V3(0,5.65f,-1.25f),cam);
-            DrawText("CREDITS",(int)t.x-78,(int)t.y-22,34,RAYWHITE);
             Vector2 a2=GetWorldToScreen(V3(0,4.8f,-1.25f),cam);
             Vector2 b2=GetWorldToScreen(V3(0,4.1f,-1.25f),cam);
             Vector2 c2=GetWorldToScreen(V3(0,3.45f,-1.25f),cam);
             Vector2 d2=GetWorldToScreen(V3(0,2.8f,-1.25f),cam);
+            Vector2 e2=GetWorldToScreen(V3(0,1.45f,-1.25f),cam);
+            EndMode3D();
+            DrawText("CREDITS",(int)t.x-78,(int)t.y-22,34,RAYWHITE);
             DrawText("GAME DESIGN / PROGRAMMING",(int)a2.x-150,(int)a2.y,17,SKYBLUE);
             DrawText("Tamasrazim",(int)b2.x-55,(int)b2.y,28,RAYWHITE);
             DrawText("Native Windows 3D crystal adventure",(int)c2.x-150,(int)c2.y,16,LIGHTGRAY);
-            DrawText("PBR baseline • procedural chill audio • 100 floors",(int)d2.x-190,(int)d2.y,15,LIGHTGRAY);
-            Vector2 e2=GetWorldToScreen(V3(0,1.45f,-1.25f),cam);
+            DrawText("PBR baseline - procedural chill audio - 100 floors",(int)d2.x-190,(int)d2.y,15,LIGHTGRAY);
             DrawText("ESC / CLICK TO RETURN",(int)e2.x-95,(int)e2.y,14,GRAY);
-            EndMode3D();
         }
 
         EndDrawing();
