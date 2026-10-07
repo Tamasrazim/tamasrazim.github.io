@@ -4,8 +4,6 @@ project(neon_vault LANGUAGES C CXX RC)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-set(CMAKE_WIN32_EXECUTABLE TRUE)
-
 include(FetchContent)
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
@@ -18,11 +16,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(raylib)
 
-add_executable(neon_vault WIN32 main.cpp neon-vault.rc)
+add_executable(neon_vault main.cpp neon-vault.rc)
 target_link_libraries(neon_vault PRIVATE raylib)
 
 if(MSVC)
   target_compile_options(neon_vault PRIVATE /W4 /permissive-)
+  target_link_options(neon_vault PRIVATE /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup)
 else()
   target_compile_options(neon_vault PRIVATE -Wall -Wextra -Wpedantic)
 endif()
