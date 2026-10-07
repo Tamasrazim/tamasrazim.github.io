@@ -812,7 +812,7 @@ int main(int argc,char** argv){
         }
 
         if(screen==Screen::MENU){
-            EnableCursor();
+            SetGameplayCursorMode(false);
             cam.position=V3(0,3.0f,10.5f);
             cam.target=V3(0,1.7f,0);
             cam.up=V3(0,1,0);
@@ -828,7 +828,7 @@ int main(int argc,char** argv){
             else if(CheckCollisionPointRec(GetMousePosition(),e)&&click)screen=Screen::CREDITS;
             else if(IsKeyPressed(KEY_ESCAPE)||(CheckCollisionPointRec(GetMousePosition(),d)&&click))break;
         } else if(screen==Screen::LEVEL_SELECT){
-            EnableCursor();
+            SetGameplayCursorMode(false);
             if(IsKeyPressed(KEY_ESCAPE))screen=Screen::MENU;
             cam.position=V3(0,5.0f,17.0f);
             cam.target=V3(0,3.2f,0);
@@ -845,7 +845,7 @@ int main(int argc,char** argv){
                 }
             }
         } else if(screen==Screen::SETTINGS){
-            EnableCursor();
+            SetGameplayCursorMode(false);
             if(IsKeyPressed(KEY_ESCAPE)){SaveGame(save);screen=settingsReturn;}
             if(IsKeyPressed(KEY_TAB)||IsKeyPressed(KEY_S))settingsSelected=(settingsSelected+1)%10;
             if(IsKeyPressed(KEY_UP))settingsSelected=(settingsSelected+9)%10;
@@ -1024,7 +1024,7 @@ int main(int argc,char** argv){
             cam.target=Vector3Add(cam.position,ViewDirection(yaw,pitch));
             cam.fovy=sprintFov;
         } else if(screen==Screen::PAUSED){
-            EnableCursor();
+            SetGameplayCursorMode(false);
             if(IsKeyPressed(KEY_ESCAPE)){
                 screen=Screen::PLAYING;
                 SetGameplayCursorMode(true);
@@ -1032,11 +1032,11 @@ int main(int argc,char** argv){
             else if(IsKeyPressed(KEY_R))StartLevel(level.number);
             else if(IsKeyPressed(KEY_S)){settingsReturn=Screen::PAUSED;screen=Screen::SETTINGS;}
         } else if(screen==Screen::COMPLETE){
-            EnableCursor();
+            SetGameplayCursorMode(false);
             if(IsKeyPressed(KEY_ENTER)||click)screen=Screen::LEVEL_SELECT;
             if(IsKeyPressed(KEY_ESCAPE))screen=Screen::MENU;
         } else if(screen==Screen::CREDITS){
-            EnableCursor();
+            SetGameplayCursorMode(false);
             if(IsKeyPressed(KEY_ESCAPE)||click)screen=Screen::MENU;
         }
 
