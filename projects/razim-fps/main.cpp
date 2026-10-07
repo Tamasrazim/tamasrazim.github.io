@@ -376,6 +376,7 @@ int main(int argc,char** argv){
     std::vector<Hazard>hazards;
 
     Vector3 player{},checkpoint{};
+    float currentArenaHalf=21.0f;
     float yaw=PI,pitch=0,vy=0,stamina=100,timeLeft=0,startTime=0;
     float respawnFlash=0,teleportCooldown=0,timedGate=0,memoryFlash=0;
     int memoryProgress=0,sequenceProgress=0,hitsTaken=0;
@@ -413,6 +414,7 @@ int main(int argc,char** argv){
         level=MakeLevel(n);
         walls.clear();crystals.clear();keys.clear();switches.clear();doors.clear();crates.clear();plates.clear();pads.clear();hazards.clear();
         float arenaHalf=(n==1?30.0f:21.0f+level.tier*0.25f);
+        currentArenaHalf=arenaHalf;
         player=V3(0,1,arenaHalf-5);checkpoint=player;yaw=PI;pitch=0;vy=0;stamina=100;
         timeLeft=level.timeLimit;startTime=level.timeLimit;respawnFlash=0;teleportCooldown=0;timedGate=0;
         memoryProgress=0;sequenceProgress=0;hitsTaken=0;grounded=true;
@@ -861,7 +863,7 @@ int main(int argc,char** argv){
             else if(level.puzzle==PuzzleType::SEQUENCE)puzzleSolved=sequenceSolved;
             else puzzleSolved=keysSolved&&switchesSolved&&platesSolved&&memorySolved&&sequenceSolved;
 
-            Vector3 exit=V3(0,1,-arenaHalf+2.0f);
+            Vector3 exit=V3(0,1,-currentArenaHalf+2.0f);
             if(puzzleSolved&&collected>=level.crystals&&Vector3Distance(player,exit)<1.7f){
                 float ratio=startTime>0?timeLeft/startTime:0;
                 int stars=(ratio>.55f&&hitsTaken<=1)?3:(ratio>.22f?2:1);
@@ -1052,7 +1054,7 @@ int main(int argc,char** argv){
                 visibleObjects++;
                 DrawCube(p,h.size.x,h.size.y,h.size.z,RED);DrawCubeWires(p,h.size.x,h.size.y,h.size.z,Color{255,120,120,255});
             }
-            Vector3 exit=V3(0,.05f,-arenaHalf+2.0f);
+            Vector3 exit=V3(0,.05f,-currentArenaHalf+2.0f);
             DrawCylinder(exit,1.5f,1.5f,.08f,40,puzzleSolved?GREEN:Color{50,100,125,255});
             DrawCylinderWires(exit,1.65f,1.65f,.1f,40,RAYWHITE);
             if(screen==Screen::PAUSED){
