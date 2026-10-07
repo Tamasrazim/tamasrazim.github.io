@@ -69,7 +69,7 @@ struct Level{
 
 struct Assets{
     Texture2D floor{},wall{},metal{},hazard{},crystal{},terminal{},sky{};
-    Music theme{};
+    Sound theme{};
     Model floorModel{},wallModel{},metalModel{},hazardModel{};
     Model drone{},terminalModel{};
     Sound pickup{},hit{},click{},complete{};
@@ -400,6 +400,68 @@ static Model MakeTexturedCube(Texture2D tex){
     return m;
 }
 
+static Sound MakeThemeSound(){
+    constexpr unsigned int sampleRate=22050;
+    constexpr unsigned int seconds=30;
+    constexpr unsigned int channels=2;
+    const unsigned int frames=sampleRate*seconds;
+    const size_t samples=size_t(frames)*channels;
+    short* data=(short*)std::malloc(samples*sizeof(short));
+    if(!data)return Sound{};
+    const float bpm=122.0f;
+    const float beat=60.0f/bpm;
+    const float roots[4]={73.4162f,58.2705f,43.6535f,65.4064f};
+    auto note=[&](float hz,float t,float amp,float env){
+        return std::sinf(TAU*hz*t)*amp*env;
+    };
+    for(unsigned int i=0;i<frames;i++){
+        float t=float(i)/float(sampleRate);
+        int bar=int(t/(beat*4.0f));
+        float root=roots[bar%4];
+        float phase=std::fmod(t,beat)/beat;
+        float v=0.0f;
+        v+=note(root,t,0.055f,1.0f);
+        v+=note(root*2.0f,t,0.022f,0.9f);
+        v+=note(root*3.0f,t,0.012f,0.8f);
+        v+=note(root*0.5f,t,0.070f,std::exp(-phase*5.5f));
+        int step=int(t/(beat*0.5f))%4;
+        float arp=root*2.0f*(step==0?1.0f:(step==1?1.1892071f:(step==2?1.4983071f:2.0f)));
+        float arpPhase=std::fmod(t,beat*0.5f)/(beat*0.5f);
+        v+=note(arp,t,0.018f,std::exp(-arpPhase*4.5f));
+        int beatIndex=int(t/beat);
+        float beatPhase=std::fmod(t,beat);
+        if(beatIndex%4==0||beatIndex%4==2)
+            v+=std::sinf(TAU*(78.0f-38.0f*beatPhase/0.16f)*beatPhase)*0.10f*std::exp(-beatPhase*24.0f);
+        else if(beatIndex%4==1||beatIndex%4==3){
+            unsigned int h=(i*747796405u+2891336453u);
+            float noise=(float(int((h>>16)&0xFFFFu)-32768)/32768.0f);
+            v+=noise*0.030f*std::exp(-beatPhase*30.0f);
+        }
+        float half=fmod(t,beat*0.5f);
+        unsigned int hh=int(t/(beat*0.5f));
+        unsigned int h=(i*1103515245u+12345u);
+        float noise=(float(int((h>>16)&0xFFFFu)-32768)/32768.0f);
+        if(half<0.035f)v+=noise*0.009f*std::exp(-half*85.0f);
+        float fadeIn=Clamp(t/1.5f,0.0f,1.0f);
+        float fadeOut=Clamp((float(seconds)-t)/1.5f,0.0f,1.0f);
+        v*=fadeIn*fadeOut;
+        float pan=0.10f*std::sinf(TAU*t/12.0f);
+        float left=Clamp(v*(0.97f-pan),-0.78f,0.78f);
+        float right=Clamp(v*(0.97f+pan),-0.78f,0.78f);
+        data[i*2]=(short)(left*32767.0f);
+        data[i*2+1]=(short)(right*32767.0f);
+    }
+    Wave wave{};
+    wave.frameCount=frames;
+    wave.sampleRate=sampleRate;
+    wave.sampleSize=16;
+    wave.channels=channels;
+    wave.data=data;
+    Sound out=LoadSoundFromWave(wave);
+    UnloadWave(wave);
+    return out;
+}
+
 static Assets LoadAssets(){
     Assets a;
     a.floor=Tex("assets/textures/floor.bmp",Color{30,39,50,255});
@@ -409,10 +471,10 @@ static Assets LoadAssets(){
     a.crystal=Tex("assets/textures/crystal.bmp",Color{55,180,235,255});
     a.terminal=Tex("assets/textures/terminal.bmp",Color{50,180,155,255});
     a.sky=Tex("assets/textures/sky.bmp",Color{6,13,26,255});
-    if(FileExists("assets/audio/neon-vault-theme.wav")){
-        a.theme=LoadMusicStream("assets/audio/neon-vault-theme.wav");
-        a.musicReady=IsMusicValid(a.theme);
-        if(a.musicReady)a.theme.looping=true;
+    if(IsAudioDeviceReady()){
+        a.theme=MakeThemeSound();
+        a.musicReady=IsSoundValid(a.theme);
+        if(a.musicReady)SetSoundLooping(a.theme,true);
     }
     a.floorModel=MakeTexturedCube(a.floor);
     a.wallModel=MakeTexturedCube(a.wall);
@@ -450,7 +512,7 @@ static void UnloadAssets(Assets& a){
     if(a.soundsReady){
         UnloadSound(a.pickup);UnloadSound(a.hit);UnloadSound(a.click);UnloadSound(a.complete);
     }
-    if(a.musicReady)UnloadMusicStream(a.theme);
+    if(a.musicReady)UnloadSound(a.theme);
 }
 
 static void SetDisplayMode(Settings& s,int mode){
@@ -525,8 +587,8 @@ int main(int argc,char** argv){
     if(save.settings.displayMode!=0)SetDisplayMode(save.settings,save.settings.displayMode);
     Assets assets=LoadAssets();
     if(assets.musicReady){
-        SetMusicVolume(assets.theme,save.settings.music);
-        PlayMusicStream(assets.theme);
+        SetSoundVolume(assets.theme,save.settings.music);
+        PlaySound(assets.theme);
     }
 
     Screen screen=Screen::INTRO;
@@ -625,10 +687,7 @@ int main(int argc,char** argv){
     while(!WindowShouldClose()&&!quit){
         float dt=std::min(GetFrameTime(),0.05f);
 
-        if(assets.musicReady){
-            SetMusicVolume(assets.theme,save.settings.music);
-            UpdateMusicStream(assets.theme);
-        }
+        if(assets.musicReady)SetSoundVolume(assets.theme,save.settings.music);
         if(screen==Screen::INTRO){
             introElapsed+=dt;
             if(introElapsed>=15.0f||IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_ESCAPE)){
@@ -909,7 +968,7 @@ int main(int argc,char** argv){
             Center("GAME DESIGN / PROGRAMMING",190,18,SKYBLUE);
             Center("Tamasrazim",225,30,RAYWHITE);
             Center("Native Windows x64 • Raylib • deterministic 100-floor system",285,16,LIGHTGRAY);
-            Center("Textures • models • sound effects • procedural environments",320,16,LIGHTGRAY);
+            Center("Textures • models • sound effects • original instrumental soundtrack",320,16,LIGHTGRAY);
             Center("CLICK OR ESC TO RETURN",520,14,GRAY);
         }else if(screen==Screen::PLAYING||screen==Screen::PAUSED){
             Camera3D cam{};
