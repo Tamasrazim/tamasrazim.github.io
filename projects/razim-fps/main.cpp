@@ -13,6 +13,10 @@
 #include <queue>
 #include <string>
 #include <vector>
+#if defined(_WIN32)
+#define NOMINMAX
+#include <windows.h>
+#endif
 
 extern int QueryDedicatedVRAMMB();
 
@@ -471,7 +475,10 @@ static Assets LoadAssets(){
     a.terminal=Tex("assets/textures/terminal.bmp",Color{50,180,155,255});
     a.sky=Tex("assets/textures/sky.bmp",Color{6,13,26,255});
     if(IsAudioDeviceReady()){
-        a.theme=MakeThemeSound();
+        if(FileExists("assets/audio/neon-vault-theme.wav"))
+            a.theme=LoadSound("assets/audio/neon-vault-theme.wav");
+        if(!IsSoundValid(a.theme))
+            a.theme=MakeThemeSound();
         a.musicReady=IsSoundValid(a.theme);
     }
     a.floorModel=MakeTexturedCube(a.floor);
@@ -531,6 +538,18 @@ static void SetDisplayMode(Settings& s,int mode){
     }
 }
 
+#if defined(_WIN32)
+static void SetWorkingDirectoryToExecutable(){
+    wchar_t buffer[32768]{};
+    DWORD n=GetModuleFileNameW(nullptr,buffer,32768);
+    if(n>0 && n<32768){
+        while(n>0 && buffer[n-1]!=L'\\' && buffer[n-1]!=L'/')--n;
+        if(n>0)buffer[n]=L'\0';
+        if(n>0)SetCurrentDirectoryW(buffer);
+    }
+}
+#endif
+
 static bool ValidateAllLevels(){
     bool ok=true;
     constexpr int N=57;
@@ -573,8 +592,11 @@ static bool ValidateAllLevels(){
 
 int main(int argc,char** argv){
     if(argc>1&&std::strcmp(argv[1],"--validate")==0)return ValidateAllLevels()?0:1;
+#if defined(_WIN32)
+    SetWorkingDirectoryToExecutable();
+#endif
 
-    SetConfigFlags(FLAG_MSAA_4X_HINT|FLAG_WINDOW_RESIZABLE|FLAG_VSYNC_HINT);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE|FLAG_VSYNC_HINT);
     InitWindow(1440,900,"NEON VAULT");
     EnableCursor();
     SetExitKey(KEY_NULL);
