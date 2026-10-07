@@ -330,9 +330,8 @@ int main(int argc,char** argv){
         int sh=std::max(360,GetScreenHeight());
         int rw=std::max(640,(int)roundf(sw*(settings.renderScale/100.0f)));
         int rh=std::max(360,(int)roundf(sh*(settings.renderScale/100.0f)));
-        if(!sceneTarget.id != 0||rw!=sceneTargetW||rh!=sceneTargetH){
+        if(sceneTarget.id == 0||rw!=sceneTargetW||rh!=sceneTargetH){
             if(sceneTarget.id != 0)UnloadRenderTexture(sceneTarget);
-    if(skyPhotoReady)UnloadTexture(skyPhoto);
             sceneTarget=LoadRenderTexture(rw,rh);
             sceneTargetW=rw;sceneTargetH=rh;
         }
