@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <fstream>
 #include <string>
@@ -278,6 +279,18 @@ int main(){
         }
     };
     if(settings.displayMode!=0)ApplyDisplayMode(settings.displayMode);
+
+    InitAudioDevice();
+    musicReady=IsAudioDeviceReady();
+    if(musicReady){
+        musicStream=LoadAudioStream(44100,16,2);
+        if(IsAudioStreamReady(musicStream)){
+            SetAudioStreamVolume(musicStream,0.22f);
+            PlayAudioStream(musicStream);
+        }else{
+            musicReady=false;
+        }
+    }
     Screen screen=Screen::MENU;
     Screen settingsReturn=Screen::MENU;
     int settingsSelected=0,levelNumber=1;
@@ -302,6 +315,12 @@ int main(){
     int memoryProgress=0,sequenceProgress=0,hitsTaken=0;
     bool grounded=true,memoryShowing=false;
     int visibleObjects=0,culledObjects=0;
+    float locomotionClock=0.0f;
+    float cameraBob=0.0f;
+    AudioStream musicStream{};
+    bool musicReady=false;
+    float musicTime=0.0f;
+    std::vector<int16_t> musicBuffer(1470);
     bool keysSolved=false,switchesSolved=false,platesSolved=false,memorySolved=false,sequenceSolved=false,puzzleSolved=false;
 
     auto GenerateLevel=[&](int n){
@@ -406,6 +425,39 @@ int main(){
     };
 
     auto StartLevel=[&](int n){levelNumber=std::clamp(n,1,LEVELS);GenerateLevel(levelNumber);};
+
+    auto FillMusic=[&](){
+        if(!musicReady) return;
+        constexpr int frames=735;
+        constexpr float sr=44100.0f;
+        static const float roots[8]={261.63f,196.00f,220.00f,174.61f,246.94f,196.00f,293.66f,220.00f};
+        static const float fifths[8]={392.00f,293.66f,329.63f,261.63f,369.99f,293.66f,440.00f,329.63f};
+        static const float thirds[8]={329.63f,246.94f,277.18f,207.65f,311.13f,246.94f,349.23f,277.18f};
+        for(int i=0;i<frames;i++){
+            float t=musicTime+(float)i/sr;
+            float bar=fmodf(t,300.0f);
+            int ci=(int)floorf(bar/37.5f)%8;
+            int ni=(ci+1)%8;
+            float local=fmodf(bar,37.5f)/37.5f;
+            float blend=std::clamp((local-0.78f)/0.22f,0.0f,1.0f);
+            auto mix=[&](float a,float b){return a+(b-a)*blend;};
+            float root=mix(roots[ci],roots[ni]);
+            float fifth=mix(fifths[ci],fifths[ni]);
+            float third=mix(thirds[ci],thirds[ni]);
+            float swell=0.55f+0.45f*sinf(2.0f*PI*t/18.0f);
+            float pulse=0.5f+0.5f*sinf(2.0f*PI*t/7.5f);
+            float pad=sinf(2.0f*PI*root*t)*0.10f+sinf(2.0f*PI*fifth*t)*0.045f+sinf(2.0f*PI*third*t)*0.035f;
+            float shimmer=sinf(2.0f*PI*(root*2.0f)*t)*0.018f*std::max(0.0f,pulse-0.35f);
+            float drone=sinf(2.0f*PI*(root*0.5f)*t)*0.055f;
+            float lfo=0.92f+0.08f*sinf(2.0f*PI*t/11.0f);
+            float sample=(pad+swell*drone+shimmer)*lfo;
+            sample=std::clamp(sample,-0.32f,0.32f);
+            musicBuffer[i*2]=(int16_t)(sample*30000.0f);
+            musicBuffer[i*2+1]=(int16_t)((sample*0.985f)*30000.0f);
+        }
+        UpdateAudioStream(musicStream,musicBuffer.data(),frames);
+        musicTime+=frames/sr;
+    };
     auto Respawn=[&](){player=checkpoint;vy=0;grounded=true;timeLeft=std::max(0.0f,timeLeft-4);hitsTaken++;respawnFlash=.3f;};
     auto CrateBlocked=[&](Vector3 pos,int skip,const Vector3& size){
         float radius=std::max(size.x,size.z)*0.5f;
@@ -420,6 +472,7 @@ int main(){
 
     while(!WindowShouldClose()){
         float dt=std::min(GetFrameTime(),.05f);
+        FillMusic();
         bool click=IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
         if(IsKeyPressed(KEY_F11)){
@@ -507,7 +560,8 @@ int main(){
             float speed=sprint?8.5f:5.0f;
             stamina=Clamp(stamina+(sprint?-32.0f:22.0f)*dt,0,100);
 
-            if(Vector3LengthSqr(m)>.01f){
+            bool movingNow=Vector3LengthSqr(m)>.01f;
+            if(movingNow){
                 m=Vector3Normalize(m);
                 Vector3 step=Vector3Scale(m,speed*dt),next=Vector3Add(player,step);
                 bool worldBlocked=false;
@@ -535,6 +589,14 @@ int main(){
                 } else if(!worldBlocked){
                     player=next;
                 }
+            }
+
+            if(movingNow){
+                locomotionClock += dt*(sprint?11.0f:7.0f);
+                float targetBob=(sprint?0.085f:0.045f)*sinf(locomotionClock)*sinf(locomotionClock*0.5f);
+                cameraBob += (targetBob-cameraBob)*std::min(1.0f,dt*12.0f);
+            }else{
+                cameraBob += (0.0f-cameraBob)*std::min(1.0f,dt*10.0f);
             }
 
             if(IsKeyPressed(KEY_SPACE)&&grounded){vy=6;grounded=false;}
@@ -605,9 +667,10 @@ int main(){
             }
             if(timeLeft<=0){timeLeft=0;screen=Screen::PAUSED;EnableCursor();}
 
-            cam.position=Vector3Add(player,V3(0,.62f,0));
+            float sprintFov=settings.fov+(sprint?5.0f:0.0f);
+            cam.position=Vector3Add(player,V3(0,.62f+cameraBob,0));
             cam.target=Vector3Add(cam.position,ViewDirection(yaw,pitch));
-            cam.fovy=settings.fov;
+            cam.fovy=sprintFov;
         } else if(screen==Screen::PAUSED){
             EnableCursor();
             if(IsKeyPressed(KEY_ESCAPE)){screen=Screen::PLAYING;DisableCursor();}
@@ -767,5 +830,13 @@ int main(){
         EndDrawing();
     }
 
-    SaveGame(save);EnableCursor();CloseWindow();return 0;
+    SaveGame(save);
+    if(musicReady){
+        StopAudioStream(musicStream);
+        UnloadAudioStream(musicStream);
+    }
+    CloseAudioDevice();
+    EnableCursor();
+    CloseWindow();
+    return 0;
 }
