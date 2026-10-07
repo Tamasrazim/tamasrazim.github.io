@@ -227,6 +227,74 @@ static void WorldFrame(Camera3D cam,Vector3 pos,Vector3 size,Color c){
     DrawCubeWires(pos,size.x,size.y,size.z,c);
 }
 
+static const char* PBR_VERTEX_SHADER=R"GLSL(
+#version 330
+in vec3 vertexPosition;
+in vec3 vertexNormal;
+in vec4 vertexColor;
+uniform mat4 mvp;
+uniform mat4 matModel;
+out vec3 fragWorldPos;
+out vec3 fragWorldNormal;
+out vec4 fragVertexColor;
+void main(){
+    vec4 world=matModel*vec4(vertexPosition,1.0);
+    fragWorldPos=world.xyz;
+    fragWorldNormal=normalize(mat3(transpose(inverse(matModel)))*vertexNormal);
+    fragVertexColor=vertexColor;
+    gl_Position=mvp*vec4(vertexPosition,1.0);
+}
+)GLSL";
+
+static const char* PBR_FRAGMENT_SHADER=R"GLSL(
+#version 330
+in vec3 fragWorldPos;
+in vec3 fragWorldNormal;
+in vec4 fragVertexColor;
+uniform vec3 viewPos;
+uniform vec3 lightPos;
+uniform vec3 lightColor;
+uniform vec3 ambientColor;
+uniform float roughnessValue;
+uniform float metallicValue;
+out vec4 finalColor;
+const float PI=3.14159265359;
+float DistributionGGX(vec3 N,vec3 H,float rough){
+    float a=rough*rough,a2=a*a;
+    float nh=max(dot(N,H),0.0),nh2=nh*nh;
+    float d=nh2*(a2-1.0)+1.0;
+    return a2/max(PI*d*d,0.0001);
+}
+float GeometrySchlickGGX(float nv,float rough){
+    float r=rough+1.0,k=(r*r)/8.0;
+    return nv/(nv*(1.0-k)+k);
+}
+float GeometrySmith(vec3 N,vec3 V,vec3 L,float rough){
+    return GeometrySchlickGGX(max(dot(N,V),0.0),rough)*
+           GeometrySchlickGGX(max(dot(N,L),0.0),rough);
+}
+vec3 FresnelSchlick(float ct,vec3 F0){
+    return F0+(1.0-F0)*pow(1.0-ct,5.0);
+}
+void main(){
+    vec3 albedo=max(fragVertexColor.rgb,vec3(0.01));
+    vec3 N=normalize(fragWorldNormal),V=normalize(viewPos-fragWorldPos);
+    vec3 L=normalize(lightPos-fragWorldPos),H=normalize(V+L);
+    float dist=max(length(lightPos-fragWorldPos),1.0);
+    vec3 radiance=lightColor/(dist*dist*0.025);
+    vec3 F0=mix(vec3(0.04),albedo,metallicValue);
+    vec3 F=FresnelSchlick(max(dot(H,V),0.0),F0);
+    float D=DistributionGGX(N,H,roughnessValue);
+    float G=GeometrySmith(N,V,L,roughnessValue);
+    vec3 spec=(D*G*F)/max(4.0*max(dot(N,V),0.0)*max(dot(N,L),0.0),0.001);
+    vec3 kd=(vec3(1.0)-F)*(1.0-metallicValue);
+    vec3 color=(kd*albedo/PI+spec)*radiance*max(dot(N,L),0.0)+ambientColor*albedo;
+    color=color/(color+vec3(1.0));
+    color=pow(color,vec3(1.0/2.2));
+    finalColor=vec4(color,fragVertexColor.a);
+}
+)GLSL";
+
 int main(){
     SetConfigFlags(FLAG_MSAA_4X_HINT|FLAG_WINDOW_RESIZABLE|FLAG_VSYNC_HINT);
     InitWindow(1440,900,"NEON VAULT");
@@ -236,6 +304,19 @@ int main(){
     SaveData save=LoadGame();
     Settings& settings=save.settings;
     int dedicatedVRAMMB=QueryDedicatedVRAMMB();
+    Shader pbrShader=LoadShaderFromMemory(PBR_VERTEX_SHADER,PBR_FRAGMENT_SHADER);
+    bool pbrReady=pbrShader.id>0;
+    int pbrViewPosLoc=-1,pbrLightPosLoc=-1,pbrLightColorLoc=-1,pbrAmbientLoc=-1,pbrRoughnessLoc=-1,pbrMetallicLoc=-1;
+    if(pbrReady){
+        pbrShader.locs[SHADER_LOC_MATRIX_MVP]=GetShaderLocation(pbrShader,"mvp");
+        pbrShader.locs[SHADER_LOC_MATRIX_MODEL]=GetShaderLocation(pbrShader,"matModel");
+        pbrViewPosLoc=GetShaderLocation(pbrShader,"viewPos");
+        pbrLightPosLoc=GetShaderLocation(pbrShader,"lightPos");
+        pbrLightColorLoc=GetShaderLocation(pbrShader,"lightColor");
+        pbrAmbientLoc=GetShaderLocation(pbrShader,"ambientColor");
+        pbrRoughnessLoc=GetShaderLocation(pbrShader,"roughnessValue");
+        pbrMetallicLoc=GetShaderLocation(pbrShader,"metallicValue");
+    }
     auto ApplyDisplayMode=[&](int mode){
         settings.displayMode=std::clamp(mode,0,2);
         if(settings.displayMode==2){
@@ -764,6 +845,19 @@ int main(){
             EndMode3D();
         } else if(screen==Screen::PLAYING||screen==Screen::PAUSED){
             BeginMode3D(cam);
+            if(pbrReady){
+                Vector3 lightPos=V3(6.0f,11.0f,2.0f);
+                Vector3 lightColor=V3(1.0f,0.92f,0.78f);
+                Vector3 ambient=V3(0.035f,0.045f,0.065f);
+                float roughness=0.62f,metallic=0.08f;
+                SetShaderValue(pbrShader,pbrViewPosLoc,&cam.position,SHADER_UNIFORM_VEC3);
+                SetShaderValue(pbrShader,pbrLightPosLoc,&lightPos,SHADER_UNIFORM_VEC3);
+                SetShaderValue(pbrShader,pbrLightColorLoc,&lightColor,SHADER_UNIFORM_VEC3);
+                SetShaderValue(pbrShader,pbrAmbientLoc,&ambient,SHADER_UNIFORM_VEC3);
+                SetShaderValue(pbrShader,pbrRoughnessLoc,&roughness,SHADER_UNIFORM_FLOAT);
+                SetShaderValue(pbrShader,pbrMetallicLoc,&metallic,SHADER_UNIFORM_FLOAT);
+                BeginShaderMode(pbrShader);
+            }
             DrawPlane(V3(0,0,0),Vector2{24,24},Color{15,23,34,255});
             for(int i=-12;i<=12;i++){
                 DrawLine3D(V3((float)i,.01f,-12),V3((float)i,.01f,12),Color{25,44,57,140});
@@ -803,6 +897,7 @@ int main(){
             Vector3 exit=V3(0,.05f,-9.4f);
             DrawCylinder(exit,1.5f,1.5f,.08f,40,puzzleSolved?GREEN:Color{50,100,125,255});
             DrawCylinderWires(exit,1.65f,1.65f,.1f,40,RAYWHITE);
+            if(pbrReady)EndShaderMode();
             EndMode3D();
 
             int collected=0;for(const auto& c:crystals)if(c.collected)collected++;
@@ -855,6 +950,7 @@ int main(){
     }
 
     SaveGame(save);
+    if(pbrReady)UnloadShader(pbrShader);
     if(musicReady){
         StopAudioStream(musicStream);
         UnloadAudioStream(musicStream);
