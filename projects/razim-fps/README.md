@@ -1,14 +1,16 @@
 # NEON VAULT 2.0
 
+> Native Windows 3D crystal-collection adventure: 100 floors, no map, intentional difficulty, and a 10+ minute target for Floor 1.
+
 Native Windows first-person 3D puzzle adventure with 100 progressively harder levels.
 
-## 100 levels
+## 100 floors
 
 10 puzzle families are rotated through 100 deterministic rooms: collect, keys + doors, switches, pressure plates + pushable crates, memory, timed gates, teleport networks, numbered sequences, moving gates, and combined finale rooms. Difficulty increases every ten levels.
 
 ## Features
 
-- 100 levels + level select
+- 100 floors + floor select
 - Three-star scoring + persistent unlocks
 - Normal mouse Y axis by default
 - Invert Y setting
@@ -21,7 +23,7 @@ Native Windows first-person 3D puzzle adventure with 100 progressively harder le
 - Pause / restart / settings
 - Final 100-level completion screen
 - Vector HUD/menu icons
-- Custom Windows application icon
+- Fullscreen / borderless windowed / windowed display modes\n- F11 fullscreen/borderless shortcut\n- Optional performance monitor (FPS, frame time, culling, dedicated VRAM)\n- Intentional obstacle placement guards against geometry overlap\n- Custom Windows application icon
 - Native x64 installer + portable build
 - Save data in %LOCALAPPDATA%\Tamasrazim\NeonVault.cfg
 
