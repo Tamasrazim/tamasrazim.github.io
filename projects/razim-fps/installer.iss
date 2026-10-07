@@ -1,6 +1,6 @@
 ; NEON VAULT Windows installer
 #define AppName "NEON VAULT"
-#define AppVersion "1.0"
+#define AppVersion "2.0"
 #define AppPublisher "Tamasrazim"
 #define AppExeName "neon_vault.exe"
 
@@ -20,6 +20,7 @@ PrivilegesRequired=admin
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64
 UninstallDisplayIcon={app}\{#AppExeName}
+SetupIconFile=neon-vault.ico
 
 [Files]
 Source: "build\Release\neon_vault.exe"; DestDir: "{app}"; Flags: ignoreversion
