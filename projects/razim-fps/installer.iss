@@ -5,7 +5,7 @@
 #define AppExeName "neon_vault.exe"
 
 [Setup]
-AppId={{7D7B4D1A-3B65-4C23-B72A-NEONVAULT001}
+AppId={{7D7B4D1A-3B65-4C23-B72A-91C4A9F3B7E2}
 AppName={#AppName}
 AppVersion={#AppVersion}
 AppPublisher={#AppPublisher}
