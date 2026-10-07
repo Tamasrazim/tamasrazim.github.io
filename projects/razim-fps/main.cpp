@@ -345,6 +345,13 @@ int main(int argc,char** argv){
         pbrAmbientLoc=GetShaderLocation(pbrShader,"ambientColor");
         pbrRoughnessLoc=GetShaderLocation(pbrShader,"roughnessValue");
         pbrMetallicLoc=GetShaderLocation(pbrShader,"metallicValue");
+        pbrReady=
+            pbrShader.locs[SHADER_LOC_MATRIX_MVP]>=0 &&
+            pbrShader.locs[SHADER_LOC_MATRIX_MODEL]>=0 &&
+            pbrViewPosLoc>=0 && pbrLightPosLoc>=0 &&
+            pbrLightColorLoc>=0 && pbrAmbientLoc>=0 &&
+            pbrRoughnessLoc>=0 && pbrMetallicLoc>=0;
+        if(!pbrReady && pbrShader.id!=0)UnloadShader(pbrShader);
     }
     auto EnsureSceneTarget=[&]()->bool{
         int sw=std::max(640,GetScreenWidth());
