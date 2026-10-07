@@ -45,6 +45,18 @@ jobs:
       - name: Build game
         run: cmake --build projects/razim-fps/build --config Release --parallel
 
+      - name: Startup smoke test
+        shell: pwsh
+        run: |
+          $exe = Resolve-Path "projects/razim-fps/build/Release/neon_vault.exe"
+          $p = Start-Process -FilePath $exe -WorkingDirectory (Split-Path $exe) -PassThru
+          Start-Sleep -Seconds 5
+          if ($p.HasExited) {
+            throw "NEON VAULT exited during startup smoke test with code $($p.ExitCode)."
+          }
+          Stop-Process -Id $p.Id -Force
+          Write-Host "Startup smoke test: PASS"
+
       - name: Validate 100 generated floors
         shell: pwsh
         run: |
