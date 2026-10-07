@@ -690,24 +690,49 @@ int main(){
             DrawText(TextFormat("PROGRESS %03d / %03d",save.unlocked,LEVELS),(int)progress.x-115,(int)progress.y,18,LIGHTGRAY);
             EndMode3D();
         } else if(screen==Screen::LEVEL_SELECT){
-            DrawRectangleGradientV(0,0,GetScreenWidth(),GetScreenHeight(),Color{7,14,24,255},Color{2,5,9,255});
-            DrawText("FLOOR SELECT",42,38,34,RAYWHITE);
-            DrawText(TextFormat("%03d / %03d UNLOCKED",save.unlocked,LEVELS),44,82,17,LIGHTGRAY);
-            DrawText("ESC BACK",GetScreenWidth()-120,50,15,GRAY);
-            int cell=62,startX=(GetScreenWidth()-620)/2,startY=155;
+            cam.position=V3(0,5.0f,17.0f);
+            cam.target=V3(0,3.2f,0);
+            cam.up=V3(0,1,0);
+            cam.fovy=58.0f;
+
+            BeginMode3D(cam);
+            DrawPlane(V3(0,0,0),Vector2{34,34},Color{5,12,20,255});
+            WorldFrame(cam,V3(0,4.2f,-0.8f),V3(13.5f,9.4f,0.5f),Color{70,205,255,255});
+
             for(int i=0;i<LEVELS;i++){
-                int n=i+1,x=startX+(i%10)*cell,y=startY+(i/10)*cell;
-                Rectangle r{(float)x+3,(float)y+3,56,56};bool u=n<=save.unlocked,h=CheckCollisionPointRec(GetMousePosition(),r);
-                DrawRectangleRounded(r,.18f,7,u?(h?Color{23,45,62,255}:Color{12,25,37,255}):Color{14,20,28,255});
-                DrawRectangleRoundedLines(r,.18f,7,u?ThemePrimary(i):Color{35,44,52,255});
-                DrawText(TextFormat("%02d",n),(int)r.x+14,(int)r.y+7,18,u?RAYWHITE:DARKGRAY);
-                for(int s=0;s<3;s++)StarIcon({r.x+16+s*12,r.y+43},5,s<save.stars[n]?GOLD:Color{45,52,60,255});
+                int n=i+1,col=i%10,row=i/10;
+                float wx=(col-4.5f)*1.25f;
+                float wy=7.4f-row*0.92f;
+                float wz=-0.25f;
+                bool unlocked=n<=save.unlocked;
+                bool hovered=false;
+                Vector2 projected=GetWorldToScreen(V3(wx,wy,wz-0.25f),cam);
+                Rectangle hit{projected.x-25,projected.y-20,50,40};
+                hovered=CheckCollisionPointRec(GetMousePosition(),hit);
+                Color accent=unlocked?ThemePrimary(i):Color{35,44,52,255};
+                Color body=unlocked?(hovered?Color{24,50,66,255}:Color{12,28,40,255}):Color{9,16,23,255};
+                DrawCube(V3(wx,wy,wz),1.0f,0.62f,0.35f,body);
+                DrawCubeWires(V3(wx,wy,wz),1.0f,0.62f,0.35f,accent);
+                Vector2 tp=GetWorldToScreen(V3(wx,wy,wz-0.22f),cam);
+                DrawText(TextFormat("%02d",n),(int)tp.x-10,(int)tp.y-11,18,unlocked?RAYWHITE:DARKGRAY);
+                DrawText(TextFormat("★%d",save.stars[n]),(int)tp.x-16,(int)tp.y+9,11,save.stars[n]?GOLD:Color{55,62,70,255});
             }
-            CenterText("Rows become harder. Columns rotate through the puzzle families.",810,16,GRAY);
+
+            Vector2 title=GetWorldToScreen(V3(0,8.4f,-1.15f),cam);
+            DrawText("FLOOR SELECT",(int)title.x-112,(int)title.y-22,34,RAYWHITE);
+            Vector2 status=GetWorldToScreen(V3(0,7.9f,-1.15f),cam);
+            DrawText(TextFormat("%03d / %03d UNLOCKED",save.unlocked,LEVELS),(int)status.x-100,(int)status.y,14,LIGHTGRAY);
+            EndMode3D();
         } else if(screen==Screen::SETTINGS){
-            DrawRectangleGradientV(0,0,GetScreenWidth(),GetScreenHeight(),Color{7,14,24,255},Color{2,5,9,255});
-            DrawText("SETTINGS",46,38,34,RAYWHITE);
-            DrawText("CLICK A ROW • ARROWS CHANGE • ESC SAVE + BACK • F11 DISPLAY",48,82,16,GRAY);
+            cam.position=V3(0,3.4f,11.5f);
+            cam.target=V3(0,2.8f,0);
+            cam.up=V3(0,1,0);
+            cam.fovy=58.0f;
+
+            BeginMode3D(cam);
+            DrawPlane(V3(0,0,0),Vector2{28,28},Color{5,11,18,255});
+            WorldFrame(cam,V3(0,3.5f,-0.9f),V3(12.0f,7.2f,0.55f),Color{70,205,255,255});
+
             const char* labels[9]={"Mouse sensitivity","Invert Y","Field of view","Hints","Screen shake","UI scale","Crosshair","Display mode","Performance monitor"};
             const char* dm[3]={"WINDOWED","BORDERLESS","FULLSCREEN"};
             std::string vals[9]={
@@ -717,17 +742,26 @@ int main(){
                 TextFormat("STYLE %d",settings.crosshair+1),dm[settings.displayMode],
                 settings.performanceMonitor?"ON":"OFF"
             };
+
             for(int i=0;i<9;i++){
-                float y=145+i*64;Rectangle r{60,y,560,54};
-                bool hot=i==settingsSelected||CheckCollisionPointRec(GetMousePosition(),r);
-                DrawRectangleRounded(r,.18f,10,hot?Color{20,38,54,255}:Color{11,21,31,255});
-                DrawRectangleRoundedLines(r,.18f,10,hot?SKYBLUE:Color{42,58,72,255});
-                DrawText(labels[i],84,(int)y+16,19,RAYWHITE);
-                DrawText(vals[i].c_str(),410,(int)y+16,18,SKYBLUE);
+                float wy=6.25f-i*0.68f;
+                float wx=-2.0f;
+                Vector2 pp=GetWorldToScreen(V3(wx,wy,-0.72f),cam);
+                Rectangle hit{pp.x-235,pp.y-18,470,36};
+                bool hot=i==settingsSelected||CheckCollisionPointRec(GetMousePosition(),hit);
+                DrawCube(V3(wx,wy,-0.55f),6.2f,0.48f,0.32f,hot?Color{20,42,56,255}:Color{10,24,34,255});
+                DrawCubeWires(V3(wx,wy,-0.55f),6.2f,0.48f,0.32f,hot?SKYBLUE:Color{42,58,72,255});
+                Vector2 lp=GetWorldToScreen(V3(wx-2.35f,wy,-0.74f),cam);
+                Vector2 vp=GetWorldToScreen(V3(wx+1.6f,wy,-0.74f),cam);
+                DrawText(labels[i],(int)lp.x,(int)lp.y-10,16,RAYWHITE);
+                DrawText(vals[i].c_str(),(int)vp.x,(int)vp.y-10,16,SKYBLUE);
             }
-            DrawText("Mouse up looks up by default.",650,190,18,LIGHTGRAY);
-            DrawText("Invert Y reverses the vertical axis.",650,220,18,LIGHTGRAY);
-            ClockIcon({790,335},44,SKYBLUE);SwitchIcon({790,470},50,settings.invertY);KeyIcon({790,605},55,ThemePrimary(levelNumber-1));
+
+            Vector2 title=GetWorldToScreen(V3(0,7.15f,-1.2f),cam);
+            DrawText("SETTINGS",(int)title.x-80,(int)title.y-22,34,RAYWHITE);
+            Vector2 note=GetWorldToScreen(V3(0,0.25f,-0.8f),cam);
+            DrawText("CLICK A ROW • ARROWS CHANGE • ESC BACK • F11 DISPLAY",(int)note.x-205,(int)note.y,13,LIGHTGRAY);
+            EndMode3D();
         } else if(screen==Screen::PLAYING||screen==Screen::PAUSED){
             BeginMode3D(cam);
             DrawPlane(V3(0,0,0),Vector2{24,24},Color{15,23,34,255});
