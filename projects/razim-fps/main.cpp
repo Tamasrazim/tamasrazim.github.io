@@ -346,7 +346,7 @@ int main(int argc,char** argv){
         pbrRoughnessLoc=GetShaderLocation(pbrShader,"roughnessValue");
         pbrMetallicLoc=GetShaderLocation(pbrShader,"metallicValue");
     }
-    auto EnsureSceneTarget=[&](){
+    auto EnsureSceneTarget=[&]()->bool{
         int sw=std::max(640,GetScreenWidth());
         int sh=std::max(360,GetScreenHeight());
         int rw=std::max(640,(int)roundf(sw*(settings.renderScale/100.0f)));
@@ -354,8 +354,14 @@ int main(int argc,char** argv){
         if(sceneTarget.id == 0||rw!=sceneTargetW||rh!=sceneTargetH){
             if(sceneTarget.id != 0)UnloadRenderTexture(sceneTarget);
             sceneTarget=LoadRenderTexture(rw,rh);
+            if(sceneTarget.id==0){
+                sceneTargetW=0;
+                sceneTargetH=0;
+                return false;
+            }
             sceneTargetW=rw;sceneTargetH=rh;
         }
+        return sceneTarget.id!=0;
     };
 
     auto ApplyDisplayMode=[&](int mode){
@@ -1130,8 +1136,8 @@ int main(int argc,char** argv){
             DrawText("SETTINGS",(int)title.x-80,(int)title.y-22,34,RAYWHITE);
             DrawText("CLICK A ROW • ARROWS CHANGE • ESC BACK • F11 DISPLAY",(int)note.x-205,(int)note.y,13,LIGHTGRAY);
         } else if(screen==Screen::PLAYING||screen==Screen::PAUSED){
-            EnsureSceneTarget();
-            BeginTextureMode(sceneTarget);
+            bool renderToTarget=EnsureSceneTarget();
+            if(renderToTarget)BeginTextureMode(sceneTarget);
             ClearBackground(Color{5,9,16,255});
             BeginMode3D(cam);
             if(skyPhotoReady){
@@ -1197,11 +1203,13 @@ int main(int argc,char** argv){
                 DrawCubeWires(panel,6.15f,2.65f,0.55f,SKYBLUE);
             }else if(pbrReady)EndShaderMode();
             EndMode3D();
-            EndTextureMode();
-            DrawTexturePro(sceneTarget.texture,
-                Rectangle{0,0,(float)sceneTarget.texture.width,-(float)sceneTarget.texture.height},
-                Rectangle{0,0,(float)GetScreenWidth(),(float)GetScreenHeight()},
-                Vector2{0,0},0,WHITE);
+            if(renderToTarget){
+                EndTextureMode();
+                DrawTexturePro(sceneTarget.texture,
+                    Rectangle{0,0,(float)sceneTarget.texture.width,-(float)sceneTarget.texture.height},
+                    Rectangle{0,0,(float)GetScreenWidth(),(float)GetScreenHeight()},
+                    Vector2{0,0},0,WHITE);
+            }
 
             if(screen==Screen::PAUSED){
                 DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{0,5,12,115});
