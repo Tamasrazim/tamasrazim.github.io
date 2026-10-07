@@ -619,7 +619,8 @@ int main(int argc,char** argv){
             bool floorOk=true;
             auto fail=[&](const char* reason){
                 floorOk=false;
-                std::fprintf(stderr,"NEON VAULT VALIDATION: floor %d failed: %s\n",n,reason);
+                std::printf("NEON VAULT VALIDATION: floor %d failed: %s\n",n,reason);
+                std::fflush(stdout);
             };
 
             if((int)crystals.size()!=level.crystals)fail("crystal count");
@@ -691,6 +692,8 @@ int main(int argc,char** argv){
             }
             if(!floorOk)ok=false;
         }
+        std::printf("NEON VAULT VALIDATION COMPLETE: %s\n",ok?"PASS":"FAIL");
+        std::fflush(stdout);
         return ok;
     };
 
