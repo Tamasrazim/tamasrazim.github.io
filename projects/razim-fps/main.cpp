@@ -510,7 +510,7 @@ int main(){
                 int n=i+1,x=startX+(i%10)*cell,y=startY+(i/10)*cell;
                 Rectangle r{(float)x+3,(float)y+3,56,56};bool u=n<=save.unlocked,h=CheckCollisionPointRec(GetMousePosition(),r);
                 DrawRectangleRounded(r,.18f,7,u?(h?Color{23,45,62,255}:Color{12,25,37,255}):Color{14,20,28,255});
-                DrawRectangleRoundedLines(r,.18f,7,2,u?ThemePrimary(i):Color{35,44,52,255});
+                DrawRectangleRoundedLines(r,.18f,7,u?ThemePrimary(i):Color{35,44,52,255});
                 DrawText(TextFormat("%02d",n),(int)r.x+14,(int)r.y+7,18,u?RAYWHITE:DARKGRAY);
                 for(int s=0;s<3;s++)StarIcon({r.x+16+s*12,r.y+43},5,s<save.stars[n]?GOLD:Color{45,52,60,255});
             }
@@ -567,8 +567,8 @@ int main(){
                 DrawCube(p,h.size.x,h.size.y,h.size.z,RED);DrawCubeWires(p,h.size.x,h.size.y,h.size.z,Color{255,120,120,255});
             }
             Vector3 exit=V3(0,.05f,-9.4f);
-            DrawCylinder(exit,1.5f,.08f,40,puzzleSolved?GREEN:Color{50,100,125,255});
-            DrawCylinderWires(exit,1.65f,.1f,40,RAYWHITE);
+            DrawCylinder(exit,1.5f,1.5f,.08f,40,puzzleSolved?GREEN:Color{50,100,125,255});
+            DrawCylinderWires(exit,1.65f,1.65f,.1f,40,RAYWHITE);
             EndMode3D();
 
             int collected=0;for(const auto& c:crystals)if(c.collected)collected++;
