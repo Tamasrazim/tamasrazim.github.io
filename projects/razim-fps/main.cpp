@@ -390,6 +390,9 @@ int main(int argc,char** argv){
     };
     if(!validateMode && settings.displayMode!=0)ApplyDisplayMode(settings.displayMode);
 
+    Screen screen=Screen::MENU;
+    bool cursorLocked=false;
+
     auto SetGameplayCursorMode=[&](bool lock){
         if(validateMode) return;
         if(lock==cursorLocked) return;
@@ -398,15 +401,13 @@ int main(int argc,char** argv){
             SetMousePosition(GetScreenWidth()/2,GetScreenHeight()/2);
             DisableCursor();
         }else{
-            SetGameplayCursorMode(false);
+            EnableCursor();
         }
     };
 
     // Start with a real OS cursor for all menus/settings.
     EnableCursor();
 
-    Screen screen=Screen::MENU;
-    bool cursorLocked=false;
     Screen settingsReturn=Screen::MENU;
     int settingsSelected=0,levelNumber=1;
     LevelConfig level{};
