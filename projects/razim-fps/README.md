@@ -31,6 +31,7 @@ WASD Move
 Mouse Look
 Shift Sprint
 Space Jump
+Walk into crates Push crates
 E Interact
 Esc Pause
 R Restart
