@@ -56,7 +56,6 @@ struct Crate { Vector3 pos{}; Vector3 size{1.1f,1.1f,1.1f}; };
 struct Plate { Vector3 pos{}; bool active=false; };
 struct Pad { Vector3 pos{}; int id=0, target=-1; bool active=false; };
 struct Hazard { Vector3 pos{}, size{}; float phase=0; bool moving=false; };
-struct Enemy { Vector3 pos{}; int hp=2; float radius=0.55f; float speed=1.15f; float attackCooldown=0; bool alive=true; };
 struct SaveData { int unlocked=1; std::array<int,101> stars{}; Settings settings{}; };
 
 static constexpr int LEVELS=100;
@@ -297,16 +296,11 @@ int main(){
     std::vector<Plate>plates;
     std::vector<Pad>pads;
     std::vector<Hazard>hazards;
-    std::vector<Enemy> enemies;
 
     Vector3 player{},checkpoint{};
     float yaw=PI,pitch=0,vy=0,stamina=100,timeLeft=0,startTime=0;
     float respawnFlash=0,teleportCooldown=0,timedGate=0,memoryFlash=0;
     int memoryProgress=0,sequenceProgress=0,hitsTaken=0;
-    int playerHealth=100;
-    int ammo=24;
-    float shotCooldown=0.0f;
-    float muzzleFlash=0.0f;
     bool grounded=true,memoryShowing=false;
     int visibleObjects=0,culledObjects=0;
     float locomotionClock=0.0f;
@@ -320,7 +314,7 @@ int main(){
     musicReady=IsAudioDeviceReady();
     if(musicReady){
         musicStream=LoadAudioStream(44100,16,2);
-        if(IsAudioStreamReady(musicStream)){
+        if(IsAudioStreamValid(musicStream)){
             SetAudioStreamVolume(musicStream,0.22f);
             PlayAudioStream(musicStream);
         }else{
@@ -332,15 +326,11 @@ int main(){
 
     auto GenerateLevel=[&](int n){
         level=MakeLevel(n);
-        walls.clear();crystals.clear();keys.clear();switches.clear();doors.clear();crates.clear();plates.clear();pads.clear();hazards.clear();enemies.clear();
+        walls.clear();crystals.clear();keys.clear();switches.clear();doors.clear();crates.clear();plates.clear();pads.clear();hazards.clear();
         float arenaHalf=21.0f+level.tier*0.25f;
         player=V3(0,1,arenaHalf-5);checkpoint=player;yaw=PI;pitch=0;vy=0;stamina=100;
         timeLeft=level.timeLimit;startTime=level.timeLimit;respawnFlash=0;teleportCooldown=0;timedGate=0;
         memoryProgress=0;sequenceProgress=0;hitsTaken=0;grounded=true;
-        playerHealth=100;
-        ammo=24+level.tier*2;
-        shotCooldown=0;
-        muzzleFlash=0;
         memoryShowing=level.memoryLength>0;memoryFlash=memoryShowing?1.5f:0;
         keysSolved=level.keys==0;switchesSolved=level.switches==0;
         platesSolved=!(level.puzzle==PuzzleType::PRESSURE_PLATE||level.puzzle==PuzzleType::FINALE);
@@ -423,21 +413,6 @@ int main(){
             pads.push_back({V3(x,.05f,z),100+i,-1,false});
         }
 
-        int enemyCount=(level.tier>=1?1+level.tier/2:0)+(level.puzzle==PuzzleType::FINALE?2:0);
-        for(int i=0;i<enemyCount;i++){
-            bool placed=false;
-            for(int attempt=0;attempt<100&&!placed;attempt++){
-                float ex=rnd(-arenaHalf+3,arenaHalf-3), ez=rnd(-arenaHalf+3,arenaHalf-3);
-                Vector3 ep=V3(ex,1,ez);
-                if(Vector3Distance(ep,player)<8.0f) continue;
-                bool blocked=false;
-                for(const auto& b:walls) if(HitsBox(ep,0.55f,b.pos,b.size)){blocked=true;break;}
-                if(blocked) continue;
-                Enemy e; e.pos=ep; e.hp=2+(level.tier>=6?1:0); e.speed=1.0f+level.tier*0.045f;
-                enemies.push_back(e); placed=true;
-            }
-        }
-
         for(int i=0;i<level.hazards;i++){
             Hazard h;
             h.pos=V3(rnd(-8,8),.35f,rnd(-7,7));
@@ -498,7 +473,7 @@ int main(){
 
     while(!WindowShouldClose()){
         float dt=std::min(GetFrameTime(),.05f);
-        FillMusic();
+        if(musicReady && IsAudioStreamProcessed(musicStream)) FillMusic();
         bool click=IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
         if(IsKeyPressed(KEY_F11)){
@@ -559,31 +534,6 @@ int main(){
             pitch+=(settings.invertY?md.y:-md.y)*settings.sensitivity;
             pitch=Clamp(pitch,-1.42f,1.42f);
 
-            if(click&&ammo>0&&shotCooldown<=0){
-                Ray ray{cam.position,ViewDirection(yaw,pitch)};
-                int bestIndex=-1;
-                float bestDistance=1e9f;
-                for(int i=0;i<(int)enemies.size();i++){
-                    if(!enemies[i].alive)continue;
-                    Vector3 to=Vector3Subtract(enemies[i].pos,ray.position);
-                    float along=Vector3DotProduct(to,ray.direction);
-                    if(along<=0)continue;
-                    Vector3 closest=Vector3Add(ray.position,Vector3Scale(ray.direction,along));
-                    float miss=Vector3Distance(closest,enemies[i].pos);
-                    if(miss<=enemies[i].radius && along<bestDistance){
-                        bestDistance=along;
-                        bestIndex=i;
-                    }
-                }
-                if(bestIndex>=0){
-                    enemies[bestIndex].hp--;
-                    if(enemies[bestIndex].hp<=0)enemies[bestIndex].alive=false;
-                }
-                ammo--;
-                shotCooldown=0.16f;
-                muzzleFlash=0.06f;
-            }
-
             if(IsKeyPressed(KEY_E)){
                 for(auto& s:switches)if(Vector3Distance(player,s.pos)<1.5f)s.active=!s.active;
                 if(level.puzzle==PuzzleType::TIMED_GATE&&!switches.empty()&&switches[0].active){timedGate=8;switches[0].active=false;}
@@ -598,8 +548,6 @@ int main(){
 
             if(teleportCooldown>0)teleportCooldown-=dt;
             if(timedGate>0)timedGate-=dt;
-            if(shotCooldown>0)shotCooldown-=dt;
-            if(muzzleFlash>0)muzzleFlash-=dt;
             if(respawnFlash>0)respawnFlash-=dt;
             if(memoryShowing){memoryFlash-=dt;if(memoryFlash<=0)memoryShowing=false;}
 
@@ -697,30 +645,6 @@ int main(){
             for(const auto& h:hazards){
                 Vector3 hp=h.pos;if(h.moving)hp.x+=sinf(now*1.3f+h.phase)*4.5f;
                 if(HitsBox(player,PLAYER_RADIUS+.05f,hp,h.size)){playerHealth=0;break;}
-            }
-
-            for(auto& e:enemies) if(e.alive){
-                Vector3 toPlayer=Vector3Subtract(player,e.pos);
-                float dist=Vector3Length(toPlayer);
-                if(dist>1.35f && dist<26.0f){
-                    Vector3 dir=Vector3Scale(toPlayer,1.0f/std::max(dist,0.001f));
-                    Vector3 next=Vector3Add(e.pos,Vector3Scale(dir,e.speed*dt));
-                    bool blocked=false;
-                    for(const auto& b:walls)if(HitsBox(next,e.radius,b.pos,b.size)){blocked=true;break;}
-                    if(!blocked)for(const auto& d:doors)if(!d.open&&HitsBox(next,e.radius,d.pos,d.size)){blocked=true;break;}
-                    if(!blocked)e.pos=next;
-                }
-                e.attackCooldown=std::max(0.0f,e.attackCooldown-dt);
-                if(dist<1.7f&&e.attackCooldown<=0.0f){
-                    playerHealth=std::max(0,playerHealth-12);
-                    e.attackCooldown=0.9f;
-                }
-            }
-
-            if(playerHealth<=0){
-                Respawn();
-                playerHealth=100;
-                ammo=24+level.tier*2;
             }
 
             if(level.puzzle==PuzzleType::TIMED_GATE)puzzleSolved=timedGate>0;
@@ -847,13 +771,6 @@ int main(){
                 if(memoryShowing&&p.id==MemoryWanted(level.number,memoryProgress,level.memoryLength))pc=WHITE;
                 DrawCylinder(p.pos,.72f,.72f,.08f,4,pc);DrawCylinderWires(p.pos,.80f,.80f,.1f,4,RAYWHITE);
             }
-            for(const auto& e:enemies) if(e.alive && InCameraFrustum(cam,e.pos,0.8f)){
-                visibleObjects++;
-                DrawCube(e.pos,1.0f,1.4f,1.0f,Color{130,42,48,255});
-                DrawCubeWires(e.pos,1.08f,1.48f,1.08f,Color{255,100,100,255});
-                DrawSphere(Vector3Add(e.pos,V3(0,0.48f,0)),0.22f,ORANGE);
-            }
-
             for(const auto& h:hazards){
                 Vector3 p=h.pos;if(h.moving)p.x+=sinf((float)GetTime()*1.3f+h.phase)*4.5f;
                 if(!InCameraFrustum(cam,p,1.8f)){culledObjects++;continue;}
@@ -893,10 +810,7 @@ int main(){
                 if(dedicatedVRAMMB)DrawText(TextFormat("VRAM %d MB",dedicatedVRAMMB),GetScreenWidth()-286,116,18,RAYWHITE);
                 else DrawText("VRAM N/A",GetScreenWidth()-286,116,18,GRAY);
             }
-            DrawText(TextFormat("HP %03d",playerHealth),34,GetScreenHeight()-60,16,playerHealth<35?RED:LIGHTGRAY);
-            DrawText(TextFormat("AMMO %02d",ammo),120,GetScreenHeight()-60,16,ammo==0?ORANGE:LIGHTGRAY);
-            if(muzzleFlash>0)DrawCircle(GetScreenWidth()/2,GetScreenHeight()/2,10,WHITE);
-            DrawText("ESC PAUSE • E INTERACT • R RESTART • LMB FIRE",34,GetScreenHeight()-24,14,GRAY);
+            DrawText("ESC PAUSE • E INTERACT • R RESTART",34,GetScreenHeight()-24,14,GRAY);
             if(respawnFlash>0)DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{255,60,60,40});
             if(screen==Screen::PAUSED){
                 DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{0,0,0,175});
