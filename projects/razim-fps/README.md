@@ -40,3 +40,6 @@ GitHub Actions builds a Windows installer and portable ZIP on every relevant pus
 ## License
 
 The game source in this folder is released under the MIT license. raylib remains under its upstream license.
+
+
+Build status: Windows CI validates the native executable and installer before publishing.
