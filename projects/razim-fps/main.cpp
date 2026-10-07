@@ -497,7 +497,7 @@ int main(int argc,char** argv){
                 Vector2 m=GetMousePosition();
                 for(int i=1;i<=LEVELS;i++){
                     int col=(i-1)%cols,row=(i-1)/cols;
-                    Rectangle r={float(startX+col*cellW+4),float(startY+row*cellH+4),74,44};
+                    Rectangle r={float(startX+col*cellW+4),float(startY+row*cellH+4),74.0f,44.0f};
                     if(i<=save.unlocked&&CheckCollisionPointRec(m,r)){StartLevel(i);ClickSound();break;}
                 }
             }
@@ -664,7 +664,7 @@ int main(int argc,char** argv){
             int cols=10,cellW=82,cellH=52,startX=(GetScreenWidth()-cols*cellW)/2,startY=175;
             for(int i=1;i<=LEVELS;i++){
                 int col=(i-1)%cols,row=(i-1)/cols;
-                Rectangle r={float(startX+col*cellW+4),float(startY+row*cellH+4),74,44};
+                Rectangle r={float(startX+col*cellW+4),float(startY+row*cellH+4),74.0f,44.0f};
                 bool unlocked=i<=save.unlocked,hover=CheckCollisionPointRec(GetMousePosition(),r);
                 Panel(r,unlocked?(hover?Color{20,44,59,255}:Color{10,22,33,255}):Color{8,12,17,255},unlocked?ThemeColor((i-1)%10):Color{32,38,45,255});
                 DrawText(TextFormat("%02d",i),int(r.x+24),int(r.y+7),18,unlocked?RAYWHITE:DARKGRAY);
@@ -709,32 +709,32 @@ int main(int argc,char** argv){
             cam.projection=CAMERA_PERSPECTIVE;
 
             BeginMode3D(cam);
-            DrawCubeTexture(assets.floor,V(0,-0.05f,0),58,0.1f,58,WHITE);
+            DrawCube(V(0,-0.05f,0),58,0.1f,58,Color{24,33,44,255});
             DrawBillboard(cam,assets.sky,V(0,14,-36),34,Color{180,205,235,255});
             for(const auto& w:level.walls){
                 const Texture2D& t=w.material==2?assets.metal:assets.wall;
-                DrawCubeTexture(t,w.pos,w.size.x,w.size.y,w.size.z,WHITE);
+                DrawCube(w.pos,w.size.x,w.size.y,w.size.z,w.material==2?Color{72,82,95,255}:Color{40,55,70,255});
                 DrawCubeWires(w.pos,w.size.x,w.size.y,w.size.z,Color{72,105,128,255});
             }
             for(const auto& d:level.doors)if(!d.open){
-                DrawCubeTexture(assets.metal,d.pos,d.size.x,d.size.y,d.size.z,WHITE);
+                DrawCube(d.pos,d.size.x,d.size.y,d.size.z,Color{76,82,91,255});
                 DrawCubeWires(d.pos,d.size.x,d.size.y,d.size.z,ORANGE);
             }
             for(const auto& h:level.hazards){
                 Vector3 p=V(h.pos.x+sinf(float(GetTime())*1.8f+h.phase)*2.5f,h.pos.y,h.pos.z);
-                DrawCubeTexture(assets.hazard,p,h.size.x,h.size.y,h.size.z,WHITE);
+                DrawCube(p,h.size.x,h.size.y,h.size.z,Color{165,42,48,255});
                 DrawCubeWires(p,h.size.x,h.size.y,h.size.z,RED);
             }
             for(const auto& p:level.pickups)if(!p.taken){
                 float bob=0.20f*sinf(float(GetTime())*3+p.pos.x);
                 Vector3 q=V(p.pos.x,p.pos.y+bob,p.pos.z);
-                DrawSphere(q,p.kind==1?0.34f:0.28f,p.kind==1?GOLD:(p.kind==2?MAGENTA:ThemeColor(level.theme)));
+                if(p.kind==0)DrawBillboard(cam,assets.crystal,q,0.85f,WHITE); else DrawSphere(q,p.kind==1?0.34f:0.28f,p.kind==1?GOLD:MAGENTA);
                 DrawSphereWires(q,0.37f,8,8,RAYWHITE);
             }
             for(const auto& s:level.switches){
                 Color c=s.active?GREEN:ThemeColor(level.theme);
                 if(assets.terminalModel.meshCount)DrawModelEx(assets.terminalModel,s.pos,V(0,1,0),0,V(0.9f,0.9f,0.9f),WHITE);
-                else DrawCubeTexture(assets.terminal,s.pos,0.7f,1.0f,0.3f,WHITE);
+                else DrawCube(s.pos,0.7f,1.0f,0.3f,Color{40,175,155,255});
                 DrawCubeWires(s.pos,0.72f,1.02f,0.32f,c);
             }
             for(const auto& dr:level.drones){
