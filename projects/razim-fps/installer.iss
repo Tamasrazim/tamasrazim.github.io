@@ -1,6 +1,6 @@
 ; NEON VAULT Windows installer
 #define AppName "NEON VAULT"
-#define AppVersion "3.2"
+#define AppVersion "3.3"
 #define AppPublisher "Tamasrazim"
 #define AppExeName "neon_vault.exe"
 #define UpdaterExeName "neon_vault_updater.exe"
