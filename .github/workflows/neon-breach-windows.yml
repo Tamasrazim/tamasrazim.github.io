@@ -28,6 +28,12 @@ jobs:
       - name: Build game
         run: cmake --build projects/razim-fps/build --config Release --parallel
 
+      - name: Validate 100 generated floors
+        shell: pwsh
+        run: |
+          & "projects/razim-fps/build/Release/neon_vault.exe" --validate
+          if ($LASTEXITCODE -ne 0) { throw "NEON VAULT geometry validation failed." }
+
       - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup -y --no-progress
