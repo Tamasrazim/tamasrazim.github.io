@@ -584,6 +584,7 @@ int main(int argc,char** argv){
     SaveData save=LoadGame();
     if(save.settings.displayMode!=0)SetDisplayMode(save.settings,save.settings.displayMode);
     Assets assets=LoadAssets();
+    float themeElapsed=0.0f;
     if(assets.musicReady){
         SetSoundVolume(assets.theme,save.settings.music);
         PlaySound(assets.theme);
@@ -604,7 +605,6 @@ int main(int argc,char** argv){
     Vector2 cursorRestore{720,450};
     int settingsRow=0;
     float introElapsed=0.0f;
-    float themeElapsed=0.0f;
 
     auto CaptureMouse=[&](bool capture){
         if(capture){
