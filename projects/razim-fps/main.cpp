@@ -267,13 +267,14 @@ void Box(Texture2D t,Vector3 p,Vector3 s,Color c){
     if(!t.id){DrawCube(p,s.x,s.y,s.z,c);return;}
     float hx=s.x*.5f,hy=s.y*.5f,hz=s.z*.5f;
     float x0=p.x-hx,x1=p.x+hx,y0=p.y-hy,y1=p.y+hy,z0=p.z-hz,z1=p.z+hz;
+    float ux=std::max(1.0f,s.x/2.2f),uy=std::max(1.0f,s.y/2.2f),uz=std::max(1.0f,s.z/2.2f);
     rlSetTexture(t.id);rlBegin(RL_QUADS);rlColor4ub(c.r,c.g,c.b,c.a);
-    rlNormal3f(0,0,1);rlTexCoord2f(0,0);rlVertex3f(x0,y0,z1);rlTexCoord2f(1,0);rlVertex3f(x1,y0,z1);rlTexCoord2f(1,1);rlVertex3f(x1,y1,z1);rlTexCoord2f(0,1);rlVertex3f(x0,y1,z1);
-    rlNormal3f(0,0,-1);rlTexCoord2f(0,0);rlVertex3f(x1,y0,z0);rlTexCoord2f(1,0);rlVertex3f(x0,y0,z0);rlTexCoord2f(1,1);rlVertex3f(x0,y1,z0);rlTexCoord2f(0,1);rlVertex3f(x1,y1,z0);
-    rlNormal3f(-1,0,0);rlTexCoord2f(0,0);rlVertex3f(x0,y0,z0);rlTexCoord2f(1,0);rlVertex3f(x0,y0,z1);rlTexCoord2f(1,1);rlVertex3f(x0,y1,z1);rlTexCoord2f(0,1);rlVertex3f(x0,y1,z0);
-    rlNormal3f(1,0,0);rlTexCoord2f(0,0);rlVertex3f(x1,y0,z1);rlTexCoord2f(1,0);rlVertex3f(x1,y0,z0);rlTexCoord2f(1,1);rlVertex3f(x1,y1,z0);rlTexCoord2f(0,1);rlVertex3f(x1,y1,z1);
-    rlNormal3f(0,1,0);rlTexCoord2f(0,0);rlVertex3f(x0,y1,z1);rlTexCoord2f(1,0);rlVertex3f(x1,y1,z1);rlTexCoord2f(1,1);rlVertex3f(x1,y1,z0);rlTexCoord2f(0,1);rlVertex3f(x0,y1,z0);
-    rlNormal3f(0,-1,0);rlTexCoord2f(0,0);rlVertex3f(x0,y0,z0);rlTexCoord2f(1,0);rlVertex3f(x1,y0,z0);rlTexCoord2f(1,1);rlVertex3f(x1,y0,z1);rlTexCoord2f(0,1);rlVertex3f(x0,y0,z1);
+    rlNormal3f(0,0,1);rlTexCoord2f(0,0);rlVertex3f(x0,y0,z1);rlTexCoord2f(ux,0);rlVertex3f(x1,y0,z1);rlTexCoord2f(ux,uy);rlVertex3f(x1,y1,z1);rlTexCoord2f(0,uy);rlVertex3f(x0,y1,z1);
+    rlNormal3f(0,0,-1);rlTexCoord2f(0,0);rlVertex3f(x1,y0,z0);rlTexCoord2f(uz,0);rlVertex3f(x0,y0,z0);rlTexCoord2f(uz,uy);rlVertex3f(x0,y1,z0);rlTexCoord2f(0,uy);rlVertex3f(x1,y1,z0);
+    rlNormal3f(-1,0,0);rlTexCoord2f(0,0);rlVertex3f(x0,y0,z0);rlTexCoord2f(uz,0);rlVertex3f(x0,y0,z1);rlTexCoord2f(uz,uy);rlVertex3f(x0,y1,z1);rlTexCoord2f(0,uy);rlVertex3f(x0,y1,z0);
+    rlNormal3f(1,0,0);rlTexCoord2f(0,0);rlVertex3f(x1,y0,z1);rlTexCoord2f(uz,0);rlVertex3f(x1,y0,z0);rlTexCoord2f(uz,uy);rlVertex3f(x1,y1,z0);rlTexCoord2f(0,uy);rlVertex3f(x1,y1,z1);
+    rlNormal3f(0,1,0);rlTexCoord2f(0,0);rlVertex3f(x0,y1,z1);rlTexCoord2f(ux,0);rlVertex3f(x1,y1,z1);rlTexCoord2f(ux,uz);rlVertex3f(x1,y1,z0);rlTexCoord2f(0,uz);rlVertex3f(x0,y1,z0);
+    rlNormal3f(0,-1,0);rlTexCoord2f(0,0);rlVertex3f(x0,y0,z0);rlTexCoord2f(ux,0);rlVertex3f(x1,y0,z0);rlTexCoord2f(ux,uz);rlVertex3f(x1,y0,z1);rlTexCoord2f(0,uz);rlVertex3f(x0,y0,z1);
     rlEnd();rlSetTexture(0);
 }
 void DrawBrokenPiece(Vector3 c,float r,int count,float time,Color color){
