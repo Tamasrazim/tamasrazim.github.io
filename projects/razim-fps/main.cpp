@@ -350,7 +350,7 @@ int main(int argc,char**argv){
     auto capture=[&](){if(captured)return;DisableCursor();captured=true;ignoreDelta=true;};
     auto release=[&](){if(!captured)return;captured=false;ignoreDelta=false;EnableCursor();SetMouseCursor(MOUSE_CURSOR_DEFAULT);};
     auto start=[&](int id){level=BuildLevel(id);Repair(level);player=level.start;vel={};yaw=3.14159265f;pitch=0;timeLeft=level.timeLimit;stamina=100;health=100;got=sw=mem=0;bob=scan=screenShake=damageCooldown=0;grounded=true;screen=Screen::PLAYING;capture();};
-    auto damage=[&](){health-=25;screenShake=1.0f;damageCooldown=0.65f;player=level.start;vel={};timeLeft=std::max(0.0f,timeLeft-4);if(health<=0){health=0;release();screen=Screen::GAMEOVER;}};
+    auto damage=[&](){health-=25;screenShake=1.0f;damageCooldown=0.65f;player=level.start;vel={};timeLeft=std::max(0.0f,timeLeft-4);if(IsSoundValid(assets.hit))PlaySound(assets.hit);if(health<=0){health=0;release();screen=Screen::GAMEOVER;}};
 
     while(!WindowShouldClose()){
         float dt=std::min(GetFrameTime(),.05f);
@@ -425,7 +425,7 @@ int main(int argc,char**argv){
             for(const auto&h:level.hazards){Vector3 q=V(h.base.x+sinf(float(GetTime())*h.speed+h.phase)*1.5f,h.base.y,h.base.z);if(damageCooldown<=0.0f&&Vector3Distance(player,q)<1.0f){damage();break;}}
             if(IsKeyPressed(KEY_E)){float best=2.25f;int type=-1,idx=-1;for(int i=0;i<(int)level.switches.size();i++)if(!level.switches[i].active&&Vector3Distance(player,level.switches[i].p)<best){best=Vector3Distance(player,level.switches[i].p);type=1;idx=i;}for(int i=0;i<(int)level.pickups.size();i++)if(!level.pickups[i].taken&&Vector3Distance(player,level.pickups[i].p)<best){best=Vector3Distance(player,level.pickups[i].p);type=2;idx=i;}
                 if(type==1){level.switches[idx].active=true;sw++;if(IsSoundValid(assets.click))PlaySound(assets.click);}
-                else if(type==2){auto&p=level.pickups[idx];if(p.kind==2){if(p.order==mem+1){p.taken=true;mem++;}else{mem=0;timeLeft=std::max(0.0f,timeLeft-6);health=std::max(1.0f,health-10);}}else{p.taken=true;if(p.kind==0)got++;}if(IsSoundValid(assets.pickup))PlaySound(assets.pickup);}
+                else if(type==2){auto&p=level.pickups[idx];if(p.kind==2){if(p.order==mem+1){p.taken=true;mem++;}else{mem=0;timeLeft=std::max(0.0f,timeLeft-6);health=std::max(1.0f,health-10);if(IsSoundValid(assets.hit))PlaySound(assets.hit);}}else{p.taken=true;if(p.kind==0)got++;}if(IsSoundValid(assets.pickup))PlaySound(assets.pickup);}
             }
             bool done=ObjectiveDone(level,got,sw,mem);
             if(done&&Vector3Distance(player,level.exit)<2.6f){int stars=timeLeft/level.timeLimit>.55f&&health>50?3:(timeLeft>0?2:1);save.stars[level.id]=std::max(save.stars[level.id],stars);if(level.id<LEVELS)save.unlocked=std::max(save.unlocked,level.id+1);SaveGame(save);release();screen=level.id==LEVELS?Screen::COMPLETE:Screen::LEVELS;}
