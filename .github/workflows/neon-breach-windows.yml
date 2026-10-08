@@ -32,13 +32,13 @@ jobs:
         run: |
           $src = Get-Content "projects/razim-fps/main.cpp" -Raw
           if ($src -notmatch 'Screen::INTRO') { throw "Intro screen missing." }
-          if ($src -notmatch 'Clamp\(t/7\.0f') { throw "15-second intro timeline missing." }
-          if ($src -notmatch 'MakeThemeSound') { throw "Original runtime soundtrack missing." }
+          if ($src -notmatch 'Ease\(t/4\.5f') { throw "4.5-second 3D intro timeline missing." }
+          if ($src -notmatch 'MakeBeatSound') { throw "Procedural beat layer missing." }
           if ($src -notmatch 'DisableCursor\(\)') { throw "Native FPS mouse capture routine missing." }
           if ($src -match 'SetMousePosition\(GetScreenWidth\(\)/2,GetScreenHeight\(\)/2\)') { throw "Cursor-warp FPS mouse path is still present." }
-          if ($src -notmatch 'if\(screen!=Screen::PLAYING\)EnsureUIMouse\(mouse\)') { throw "UI mouse separation missing." }
-          if ($src -notmatch 'static void ReleaseMouse') { throw "Gameplay mouse release missing." }
-          if ($src -notmatch 'DrawIntro3D') { throw "3D intro renderer missing." }
+          if ($src -notmatch 'capture=\[&\]\(\)') { throw "Native capture state missing." }
+          if ($src -notmatch 'release=\[&\]\(\)') { throw "Gameplay mouse release missing." }
+          if ($src -notmatch 'DrawBrokenPiece') { throw "Fractured-piece animation missing." }
           if ($src -notmatch 'BeginMode3D') { throw "3D rendering path missing." }
           if ($src -notmatch 'LEVELS=100') { throw "100-level constant missing." }
           Write-Host "Final-game static checks: PASS"
