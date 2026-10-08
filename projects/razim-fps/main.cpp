@@ -293,7 +293,7 @@ int main(int argc,char**argv){
     if(IsSoundValid(assets.beat)){SetSoundVolume(assets.beat,.22f);PlaySound(assets.beat);}
     Screen screen=Screen::INTRO;Screen settingsReturn=Screen::MENU;float intro=0;Level level=BuildLevel(1);Repair(level);
     Vector3 player=level.start,vel{};float yaw=3.14159265f,pitch=0,timeLeft=0,stamina=100,health=100,scan=0,bob=0;int got=0,sw=0,mem=0;bool grounded=true;
-    bool captured=false,ignoreDelta=false;int settingsRow=0;
+    bool captured=false,ignoreDelta=false;int settingsRow=0;float beatClock=4.0f;
 
     auto capture=[&](){if(captured)return;DisableCursor();captured=true;ignoreDelta=true;};
     auto release=[&](){if(!captured)return;captured=false;ignoreDelta=false;EnableCursor();SetMouseCursor(MOUSE_CURSOR_DEFAULT);};
