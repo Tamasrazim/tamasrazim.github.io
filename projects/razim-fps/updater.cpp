@@ -102,7 +102,7 @@ static int ReleaseBuild(const std::string& tag){
     catch(...){return 0;}
 }
 
-static bool LaunchGame(bool safeMode=false,unsigned long waitMs=0){
+static int LaunchGame(bool safeMode=false,unsigned long waitMs=0){
     std::wstring dir=GetExeDirectory();
     std::wstring exe=dir+L"\\neon_vault.exe";
     std::wstring cmd=L"\""+exe+L"\"";
@@ -111,18 +111,18 @@ static bool LaunchGame(bool safeMode=false,unsigned long waitMs=0){
     cmdline.push_back(L'\0');
     STARTUPINFOW si{};si.cb=sizeof(si);
     PROCESS_INFORMATION pi{};
-    if(!CreateProcessW(nullptr,cmdline.data(),nullptr,nullptr,FALSE,0,nullptr,dir.c_str(),&si,&pi))return false;
+    if(!CreateProcessW(nullptr,cmdline.data(),nullptr,nullptr,FALSE,0,nullptr,dir.c_str(),&si,&pi))return -1;
     if(waitMs){
         DWORD waited=WaitForSingleObject(pi.hProcess,waitMs);
         if(waited==WAIT_OBJECT_0){
             DWORD code=1;GetExitCodeProcess(pi.hProcess,&code);
             CloseHandle(pi.hThread);CloseHandle(pi.hProcess);
-            return code==0;
+            return code==0?0:static_cast<int>(code);
         }
     }
     CloseHandle(pi.hThread);
     CloseHandle(pi.hProcess);
-    return true;
+    return 1;
 }
 
 int main(){
@@ -158,6 +158,7 @@ int main(){
             }
         }
     }
-    if(LaunchGame(false,5000))return 0;
-    return LaunchGame(true,0)?0:1;
+    const int normal=LaunchGame(false,15000);
+    if(normal==0||normal==1)return 0;
+    return LaunchGame(true,0)>=0?0:1;
 }
