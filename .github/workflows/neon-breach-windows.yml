@@ -32,10 +32,13 @@ jobs:
         run: |
           $src = Get-Content "projects/razim-fps/main.cpp" -Raw
           if ($src -notmatch 'Screen::INTRO') { throw "Intro screen missing." }
-          if ($src -notmatch 'Clamp\(t/15\.0f') { throw "15-second intro timeline missing." }
+          if ($src -notmatch 'Clamp\(t/7\.0f') { throw "15-second intro timeline missing." }
           if ($src -notmatch 'MakeThemeSound') { throw "Original runtime soundtrack missing." }
           if ($src -notmatch 'SetMousePosition\(GetScreenWidth\(\)/2,GetScreenHeight\(\)/2\);\s*DisableCursor\(\)') { throw "Mouse capture routine missing." }
-          if ($src -notmatch 'if\(screen!=Screen::PLAYING\)CaptureMouse\(false\)') { throw "Mouse release guard missing." }
+          if ($src -notmatch 'if\(screen!=Screen::PLAYING\)EnsureUIMouse\(mouse\)') { throw "UI mouse separation missing." }
+          if ($src -notmatch 'static void ReleaseMouse') { throw "Gameplay mouse release missing." }
+          if ($src -notmatch 'DrawIntro3D') { throw "3D intro renderer missing." }
+          if ($src -notmatch 'BeginMode3D') { throw "3D rendering path missing." }
           if ($src -notmatch 'LEVELS=100') { throw "100-level constant missing." }
           Write-Host "Final-game static checks: PASS"
 
