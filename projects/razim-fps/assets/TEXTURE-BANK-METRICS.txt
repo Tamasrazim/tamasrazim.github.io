@@ -1,7 +1,7 @@
 NEON VAULT TEXTURE BANK — BUILD METRICS
 =======================================
 
-Runtime material count: 28
+Runtime material count: 30
 Texture + audio target: 25 MB+ shipped asset set
 Primary material format: BMP, 24-bit
 Texture addressing: repeat
@@ -11,16 +11,16 @@ Player radius: 0.34
 Eye offset: 0.62
 Validation grid: 58 x 58 cells
 Floor count: 100
-Material families: 28
-Current measured texture payload: 22,024,892 bytes
+Material families: 30
+Current measured generated material payload: 22,501,620 bytes
 Current measured audio payload: 2,934,400 bytes
-Current measured texture+audio payload: 24,959,292 bytes
+Current measured generated material + audio payload: 25,436,020 bytes (25.44 MB decimal; 24.26 MiB)
 
 Material mapping:
 vault_01..vault_10  = theme surfaces
 vault_11..vault_20  = structural/panel families
 vault_21..vault_25  = hazard/exit families
-vault_26..vault_28  = trim/light families
+vault_26..vault_30  = trim/light / shard families
 
 Gameplay calculations:
 collision clearance = player radius + generated obstacle clearance

@@ -11,7 +11,7 @@ NEON VAULT is a native Windows x64 first-person puzzle game with a deterministic
 - Main menu, pause/resume, settings, credits, completion and game-over states
 - Windowed, borderless and fullscreen display modes
 - Mouse sensitivity, Y inversion, FOV, hints, screen shake, crosshair and performance options
-- 28 dedicated 500×500 procedural material textures plus the original supporting texture set
+- 30 dedicated 500×500 procedural material textures plus the original supporting texture set
 - Original instrumental soundtrack plus a layered procedural beat track that loops independently
 - 4.5-second in-engine 3D intro with skip controls
 - Event-driven fractured-piece animation, interaction bursts, damage feedback and readable hazard motion
@@ -36,8 +36,8 @@ cmake --build projects/razim-fps/build --config Release --parallel
 projects/razim-fps/build/Release/neon_vault.exe --validate
 ```
 
-Validation checks all 100 generated floors for wall overlap, objective reachability and start-to-exit reachability. Generated levels are repaired before launch if decorative geometry creates an invalid pocket. Runtime asset audits also verify the 28-texture bank, WAV set, native mouse path and installer references.
+Validation checks all 100 generated floors for wall overlap, objective reachability and start-to-exit reachability. Generated levels are repaired before launch if decorative geometry creates an invalid pocket. Runtime asset audits also verify the 30-texture bank, WAV set, native mouse path and installer references.
 
 ## Asset budget
 
-The shipped game asset set is intentionally just over the 25 MB target: about 24,959,292 bytes before the native executable/updater are added, with the executable pushing the installed payload above 25 MB. Procedural source seeds remain in the repository but are not copied into the runtime package.
+The generated 30-material texture bank plus audio measures 25,436,020 bytes (25.44 MB decimal / 24.26 MiB) in the Windows asset audit, meeting the 25 MB decimal target before the supporting legacy textures, executable, and updater are counted. Procedural source seeds remain in the repository but are not copied into the runtime package.

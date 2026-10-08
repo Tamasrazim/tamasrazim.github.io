@@ -21,6 +21,12 @@ FetchContent_MakeAvailable(raylib)
 
 add_executable(neon_vault main.cpp platform_win.cpp neon-vault.rc)
 add_executable(neon_vault_updater updater.cpp)
+add_executable(neon_vault_texture_gen texture_gen2.cpp)
+add_custom_command(TARGET neon_vault_texture_gen POST_BUILD
+  COMMAND neon_vault_texture_gen "${CMAKE_CURRENT_SOURCE_DIR}/assets/textures"
+)
+add_dependencies(neon_vault neon_vault_texture_gen)
+
 
 target_compile_definitions(neon_vault_updater PRIVATE NEON_VAULT_BUILD=${NEON_VAULT_BUILD})
 target_link_libraries(neon_vault PRIVATE raylib dxgi)
