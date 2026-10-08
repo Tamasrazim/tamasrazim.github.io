@@ -34,7 +34,7 @@ Browser-based vector/EPS tooling.
 Browser-based SVG tooling.
 
 ### /projects/razim-fps/
-NEON VAULT, the native Windows 3D puzzle game and its release packaging.
+NEO, the native Windows 3D puzzle game and its release packaging.
 
 ### /projects/bncagrocare/
 BNC Agro Care customer-facing application and supporting business material.
