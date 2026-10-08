@@ -518,6 +518,12 @@ static Texture2D Tex(const char* file,Color fallback,bool allowFile=true){
     return t;
 }
 
+static Model MakeTexturedCube(Texture2D tex){
+    Model m=LoadModelFromMesh(GenMeshCube(1,1,1));
+    if(m.materialCount>0)SetMaterialTexture(&m.materials[0],MATERIAL_MAP_DIFFUSE,tex);
+    return m;
+}
+
 static void DrawTexturedBox(Texture2D tex,Vector3 p,Vector3 s,Color tint,float tile=2.5f){
     if(!tex.id){
         DrawCube(p,s.x,s.y,s.z,tint);
