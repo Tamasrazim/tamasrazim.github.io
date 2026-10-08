@@ -213,10 +213,12 @@ void UnloadAssets(Assets&a){for(auto&t:a.tex)if(t.id)UnloadTexture(t);if(IsSound
 bool Btn(Rectangle r){return CheckCollisionPointRec(GetMousePosition(),r)&&IsMouseButtonPressed(MOUSE_BUTTON_LEFT);}
 void BtnDraw(Rectangle r,const char*s,Color accent){
     bool h=CheckCollisionPointRec(GetMousePosition(),r);
+    bool down=h&&IsMouseButtonDown(MOUSE_BUTTON_LEFT);
     float pulse=h?0.035f*(0.5f+0.5f*sinf(float(GetTime())*8.0f)):0.0f;
-    Rectangle rr={r.x-r.width*pulse*0.5f,r.y-r.height*pulse*0.5f,r.width*(1.0f+pulse),r.height*(1.0f+pulse)};
-    DrawRectangleRounded(rr,.08f,8,h?Color{22,48,64,255}:Color{9,18,28,255});
-    DrawRectangleRoundedLines(rr,.08f,8,h?accent:Color{45,62,78,255});
+    float press=down?3.0f:0.0f;
+    Rectangle rr={r.x-r.width*pulse*0.5f,r.y-r.height*pulse*0.5f+press,r.width*(1.0f+pulse),r.height*(1.0f+pulse)};
+    DrawRectangleRounded(rr,.08f,8,down?Color{28,64,82,255}:(h?Color{22,48,64,255}:Color{9,18,28,255}));
+    DrawRectangleRoundedLines(rr,.08f,8,down?RAYWHITE:(h?accent:Color{45,62,78,255}));
     if(h)DrawRectangleRoundedLines({rr.x+2,rr.y+2,rr.width-4,rr.height-4},.08f,8,Color{accent.r,accent.g,accent.b,110});
     int fs=18;DrawText(s,int(rr.x+(rr.width-MeasureText(s,fs))*.5f),int(rr.y+(rr.height-fs)*0.5f),fs,RAYWHITE);
 }
@@ -236,21 +238,31 @@ void Box(Texture2D t,Vector3 p,Vector3 s,Color c){
     rlEnd();rlSetTexture(0);
 }
 void DrawBrokenPiece(Vector3 c,float r,int count,float time,Color color){
-    float fracture=0.78f+0.22f*sinf(time*1.6f);
-    float pulse=0.82f+0.18f*sinf(time*2.4f);
+    float fracture=0.76f+0.24f*sinf(time*1.4f);
+    float pulse=0.82f+0.18f*sinf(time*2.3f);
     for(int i=0;i<count;i++){
-        float a=TAU*float(i)/float(count)+time*(0.24f+0.055f*i);
-        float phase=time*1.8f+i*1.11f;
-        float crack=0.82f+0.24f*sinf(phase*1.7f);
-        float radial=r*(0.48f+0.42f*fracture)*(0.92f+0.06f*sinf(phase));
-        float lift=0.08f*sinf(time*2.7f+i*1.9f);
+        float a=TAU*float(i)/float(count)+time*(0.20f+0.045f*i);
+        float phase=time*1.85f+i*1.31f;
+        float crack=0.82f+0.22f*sinf(phase*1.65f);
+        float radial=r*(0.46f+0.46f*fracture)*(0.94f+0.05f*sinf(phase));
+        float lift=0.08f*sinf(time*2.9f+i*1.7f);
         Vector3 q=V(c.x+cosf(a)*radial,c.y+lift,c.z+sinf(a)*radial);
-        Vector3 dir=Vector3Normalize(V(cosf(a)*(0.30f+0.24f*sinf(phase)),0.62f+0.22f*cosf(phase),sinf(a)*(0.30f+0.24f*sinf(phase))));
-        Vector3 end=Vector3Add(q,Vector3Scale(dir,r*(0.34f+0.16f*crack)));
-        float thick=r*(0.085f+0.035f*(0.5f+0.5f*sinf(phase)));
-        DrawCylinderEx(q,end,thick,thick*0.16f,5,color);
-        DrawCylinderEx(q,end,thick*1.12f,thick*0.21f,5,RAYWHITE);
-        DrawSphere(q,thick*0.55f,Color{color.r,color.g,color.b,110});
+        Vector3 dir=Vector3Normalize(V(cosf(a)*(0.36f+0.22f*sinf(phase)),0.62f+0.25f*cosf(phase),sinf(a)*(0.36f+0.22f*sinf(phase))));
+        Vector3 tip=Vector3Add(q,Vector3Scale(dir,r*(0.38f+0.20f*crack)));
+        Vector3 tangent=Vector3Normalize(V(-dir.z,0.0f,dir.x));
+        Vector3 side=Vector3Normalize(Vector3CrossProduct(dir,tangent));
+        float w=r*(0.10f+0.035f*(0.5f+0.5f*sinf(phase)));
+        Vector3 v1=Vector3Add(q,Vector3Scale(tangent,w));
+        Vector3 v2=Vector3Add(q,Vector3Scale(tangent,-w));
+        Vector3 v3=Vector3Add(q,Vector3Scale(side,w*0.72f));
+        Color c1=color;
+        Color c2=Color{(unsigned char)std::min(255,int(color.r)+35),(unsigned char)std::min(255,int(color.g)+35),(unsigned char)std::min(255,int(color.b)+35),color.a};
+        rlBegin(RL_TRIANGLES);
+        rlColor4ub(c1.r,c1.g,c1.b,c1.a);rlVertex3f(v1.x,v1.y,v1.z);rlVertex3f(v2.x,v2.y,v2.z);rlVertex3f(tip.x,tip.y,tip.z);
+        rlColor4ub(c2.r,c2.g,c2.b,c2.a);rlVertex3f(v2.x,v2.y,v2.z);rlVertex3f(v3.x,v3.y,v3.z);rlVertex3f(tip.x,tip.y,tip.z);
+        rlColor4ub(c1.r,c1.g,c1.b,c1.a);rlVertex3f(v3.x,v3.y,v3.z);rlVertex3f(v1.x,v1.y,v1.z);rlVertex3f(tip.x,tip.y,tip.z);
+        rlEnd();
+        DrawSphere(q,w*0.45f,Color{color.r,color.g,color.b,110});
     }
     DrawSphere(c,r*0.075f*pulse,Color{235,255,255,165});
 }
