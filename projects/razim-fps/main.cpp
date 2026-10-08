@@ -280,7 +280,7 @@ void DrawBrokenPiece(Vector3 c,float r,int count,float time,Color color){
     DrawSphere(c,r*0.075f*pulse,Color{235,255,255,165});
 }
 void Burst(Vector3 center,Color color,int count,float impulse){
-    if((int)gParticles.size()>420)gParticles.erase(gParticles.begin(),gParticles.begin()+std::min<int>(120,gParticles.size()));
+    if((int)gParticles.size()>420)gParticles.erase(gParticles.begin(),gParticles.begin()+std::min<size_t>(120,gParticles.size()));
     for(int i=0;i<count;i++){
         float a=TAU*float(i)/float(std::max(1,count))+float(GetTime())*0.17f;
         float ring=0.35f+0.85f*(float((i*37)%100)/100.0f);
@@ -494,7 +494,7 @@ int main(int argc,char**argv){
             if(screen!=Screen::PLAYING)continue;
             if(IsKeyPressed(KEY_E)){float best=2.25f;int type=-1,idx=-1;for(int i=0;i<(int)level.switches.size();i++)if(!level.switches[i].active&&Vector3Distance(player,level.switches[i].p)<best){best=Vector3Distance(player,level.switches[i].p);type=1;idx=i;}for(int i=0;i<(int)level.pickups.size();i++)if(!level.pickups[i].taken&&Vector3Distance(player,level.pickups[i].p)<best){best=Vector3Distance(player,level.pickups[i].p);type=2;idx=i;}
                 if(type==1){level.switches[idx].active=true;sw++;Burst(level.switches[idx].p,Theme(level.theme),18,2.1f);if(IsSoundValid(assets.click))PlaySound(assets.click);}
-                else if(type==2){auto&p=level.pickups[idx];if(p.kind==2){if(p.order==mem+1){p.taken=true;p.burst=0.95f;Burst(p.p,MAGENTA,22,2.6f);mem++;}else{mem=0;timeLeft=std::max(0.0f,timeLeft-6);health=std::max(1.0f,health-10);if(IsSoundValid(assets.hit))PlaySound(assets.hit);}}else{p.taken=true;p.burst=0.95f;Burst(p.p,c2,22,2.6f);if(p.kind==0)got++;}if(IsSoundValid(assets.pickup))PlaySound(assets.pickup);}
+                else if(type==2){auto&p=level.pickups[idx];if(p.kind==2){if(p.order==mem+1){p.taken=true;p.burst=0.95f;Burst(p.p,MAGENTA,22,2.6f);mem++;}else{mem=0;timeLeft=std::max(0.0f,timeLeft-6);health=std::max(1.0f,health-10);if(IsSoundValid(assets.hit))PlaySound(assets.hit);}}else{p.taken=true;p.burst=0.95f;Color burstColor=p.kind==0?SKYBLUE:GOLD;Burst(p.p,burstColor,22,2.6f);if(p.kind==0)got++;}if(IsSoundValid(assets.pickup))PlaySound(assets.pickup);}
             }
             bool done=ObjectiveDone(level,got,sw,mem);
             if(screen==Screen::PLAYING&&done&&Vector3Distance(player,level.exit)<2.6f){int stars=timeLeft/level.timeLimit>.55f&&health>50?3:(timeLeft>0?2:1);save.stars[level.id]=std::max(save.stars[level.id],stars);if(level.id<LEVELS)save.unlocked=std::max(save.unlocked,level.id+1);SaveGame(save);release();screen=level.id==LEVELS?Screen::COMPLETE:Screen::LEVELS;}
