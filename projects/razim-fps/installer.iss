@@ -27,6 +27,7 @@ SetupIconFile=neon-vault.ico
 Source: "build\Release\neo.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "build\Release\neo_updater.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\..\assets\images\tamanna-constellation.jpeg"; DestDir: "{app}\assets\sky"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\NEO"; Filename: "{app}\{#UpdaterExeName}"
@@ -36,6 +37,3 @@ Name: "{commondesktop}\NEO"; Filename: "{app}\{#UpdaterExeName}"
 [Run]
 Filename: "{app}\{#UpdaterExeName}"; Description: "Launch NEO"; Flags: nowait postinstall skipifsilent
 
-; The constellation sky artwork is shared from the repository site asset set.
-[Files]
-Source: "..\..\assets\images\tamanna-constellation.jpeg"; DestDir: "{app}\assets\sky"; Flags: ignoreversion
