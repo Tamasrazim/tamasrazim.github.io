@@ -290,7 +290,14 @@ void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,flo
         float fz=float((seed>>8)%5200)/100.0f-26.0f;
         float fy=1.25f+float((seed>>16)%170)/100.0f+sinf(float(GetTime())*0.65f+i)*0.10f;
         float twinkle=0.055f+0.025f*sinf(float(GetTime())*2.2f+i*1.37f);
-        DrawSphere(V(fx,fy,fz),twinkle,Theme(l.theme));
+        float driftX=0.22f*sinf(float(GetTime())*0.55f+i*0.71f);
+        float driftZ=0.18f*cosf(float(GetTime())*0.47f+i*0.53f);
+        DrawSphere(V(fx+driftX,fy,fz+driftZ),twinkle,Theme(l.theme));
+    }
+    for(int i=0;i<8;i++){
+        float a=TAU*float(i)/8.0f+float(GetTime())*0.13f;
+        Vector3 q=V(cosf(a)*9.0f,2.3f+sinf(float(GetTime())*0.8f+i)*0.7f,-18.0f+sinf(a)*7.0f);
+        DrawBrokenPiece(q,0.28f,5,float(GetTime())*0.9f+i*0.4f,Theme((l.theme+i)%10));
     }
     for(int i=-4;i<=4;i++){
         float x=float(i)*6.0f;
@@ -352,11 +359,11 @@ int main(int argc,char**argv){
         if(screen==Screen::INTRO){intro+=dt;if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_ESCAPE)||intro>=4.5f)screen=Screen::MENU;}
         else if(screen==Screen::MENU){
             float x=GetScreenWidth()/2.0f-190;
-            if(Btn({x,235,380,54})){start(1);}
-            else if(Btn({x,301,380,54})){screen=Screen::LEVELS;}
-            else if(Btn({x,367,380,54})){settingsReturn=Screen::MENU;screen=Screen::SETTINGS;}
-            else if(Btn({x,433,380,54})){screen=Screen::CREDITS;}
-            else if(Btn({x,499,380,54})){break;}
+            if(Btn({x,235,380,54})){if(IsSoundValid(assets.click))PlaySound(assets.click);start(1);}
+            else if(Btn({x,301,380,54})){if(IsSoundValid(assets.click))PlaySound(assets.click);screen=Screen::LEVELS;}
+            else if(Btn({x,367,380,54})){if(IsSoundValid(assets.click))PlaySound(assets.click);settingsReturn=Screen::MENU;screen=Screen::SETTINGS;}
+            else if(Btn({x,433,380,54})){if(IsSoundValid(assets.click))PlaySound(assets.click);screen=Screen::CREDITS;}
+            else if(Btn({x,499,380,54})){if(IsSoundValid(assets.click))PlaySound(assets.click);break;}
         }else if(screen==Screen::LEVELS){
             Rectangle backRect{GetScreenWidth()/2.0f-170,GetScreenHeight()-78,340,48};
             if(IsKeyPressed(KEY_ESCAPE)||Btn(backRect))screen=Screen::MENU;int cols=10,cw=82,ch=55,sx=(GetScreenWidth()-cols*cw)/2,sy=145;
