@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include "raymath.h"
+#include "rlgl.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -168,7 +169,19 @@ bool Btn(Rectangle r){return CheckCollisionPointRec(GetMousePosition(),r)&&IsMou
 void BtnDraw(Rectangle r,const char*s,Color accent){bool h=CheckCollisionPointRec(GetMousePosition(),r);DrawRectangleRounded(r,.08f,8,h?Color{20,42,58,255}:Color{9,18,28,255});DrawRectangleRoundedLines(r,.08f,8,h?accent:Color{45,62,78,255});int fs=18;DrawText(s,int(r.x+(r.width-MeasureText(s,fs))*.5f),int(r.y+19),fs,RAYWHITE);}
 void Center(const char*s,int y,int fs,Color c){DrawText(s,(GetScreenWidth()-MeasureText(s,fs))/2,y,fs,c);}
 void Cross(int style){int x=GetScreenWidth()/2,y=GetScreenHeight()/2;if(style==0){DrawLine(x-9,y,x-3,y,RAYWHITE);DrawLine(x+3,y,x+9,y,RAYWHITE);DrawLine(x,y-9,x,y-3,RAYWHITE);DrawLine(x,y+3,x,y+9,RAYWHITE);}else if(style==1){DrawCircleLines(x,y,7,RAYWHITE);DrawCircle(x,y,2,RAYWHITE);}else DrawCircle(x,y,3,RAYWHITE);}
-void Box(Texture2D t,Vector3 p,Vector3 s,Color c){if(t.id)DrawCubeTexture(t,p,s.x,s.y,s.z,c);else DrawCube(p,s.x,s.y,s.z,c);}
+void Box(Texture2D t,Vector3 p,Vector3 s,Color c){
+    if(!t.id){DrawCube(p,s.x,s.y,s.z,c);return;}
+    float hx=s.x*.5f,hy=s.y*.5f,hz=s.z*.5f;
+    float x0=p.x-hx,x1=p.x+hx,y0=p.y-hy,y1=p.y+hy,z0=p.z-hz,z1=p.z+hz;
+    rlSetTexture(t.id);rlBegin(RL_QUADS);rlColor4ub(c.r,c.g,c.b,c.a);
+    rlNormal3f(0,0,1);rlTexCoord2f(0,0);rlVertex3f(x0,y0,z1);rlTexCoord2f(1,0);rlVertex3f(x1,y0,z1);rlTexCoord2f(1,1);rlVertex3f(x1,y1,z1);rlTexCoord2f(0,1);rlVertex3f(x0,y1,z1);
+    rlNormal3f(0,0,-1);rlTexCoord2f(0,0);rlVertex3f(x1,y0,z0);rlTexCoord2f(1,0);rlVertex3f(x0,y0,z0);rlTexCoord2f(1,1);rlVertex3f(x0,y1,z0);rlTexCoord2f(0,1);rlVertex3f(x1,y1,z0);
+    rlNormal3f(-1,0,0);rlTexCoord2f(0,0);rlVertex3f(x0,y0,z0);rlTexCoord2f(1,0);rlVertex3f(x0,y0,z1);rlTexCoord2f(1,1);rlVertex3f(x0,y1,z1);rlTexCoord2f(0,1);rlVertex3f(x0,y1,z0);
+    rlNormal3f(1,0,0);rlTexCoord2f(0,0);rlVertex3f(x1,y0,z1);rlTexCoord2f(1,0);rlVertex3f(x1,y0,z0);rlTexCoord2f(1,1);rlVertex3f(x1,y1,z0);rlTexCoord2f(0,1);rlVertex3f(x1,y1,z1);
+    rlNormal3f(0,1,0);rlTexCoord2f(0,0);rlVertex3f(x0,y1,z1);rlTexCoord2f(1,0);rlVertex3f(x1,y1,z1);rlTexCoord2f(1,1);rlVertex3f(x1,y1,z0);rlTexCoord2f(0,1);rlVertex3f(x0,y1,z0);
+    rlNormal3f(0,-1,0);rlTexCoord2f(0,0);rlVertex3f(x0,y0,z0);rlTexCoord2f(1,0);rlVertex3f(x1,y0,z0);rlTexCoord2f(1,1);rlVertex3f(x1,y0,z1);rlTexCoord2f(0,1);rlVertex3f(x0,y0,z1);
+    rlEnd();rlSetTexture(0);
+}
 bool ObjectiveDone(const Level&l,int got,int sw,int mem){if(l.objective==Objective::COLLECT)return got>=l.required;if(l.objective==Objective::SWITCHES)return sw>=l.required;if(l.objective==Objective::KEYCARD){int n=0;for(const auto&p:l.pickups)if(p.kind==1&&p.taken)n++;return n>=l.required;}if(l.objective==Objective::MEMORY)return mem>=l.required;if(l.objective==Objective::COMBO){int k=0;for(const auto&p:l.pickups)if(p.kind==1&&p.taken)k++;return got>=3&&sw>=3&&k>=1&&mem>=4;}return false;}
 void Intro(float t,const Assets&a){
     Camera3D c{V(0,2.3f,15-28*Ease(t/4.5f)),V(0,2.1f,-16),V(0,1,0),63,CAMERA_PERSPECTIVE};BeginMode3D(c);
