@@ -337,9 +337,13 @@ static bool ValidateLevel(const Level& l){
     for(const auto& p:l.drones)if(!clearStatic(p.pos,0.9f))return false;
     for(size_t i=0;i<l.pickups.size();i++)for(size_t j=i+1;j<l.pickups.size();j++)if(Distance2D(l.pickups[i].pos,l.pickups[j].pos)<1.0f)return false;
     for(size_t i=0;i<l.switches.size();i++)for(size_t j=i+1;j<l.switches.size();j++)if(Distance2D(l.switches[i].pos,l.switches[j].pos)<1.15f)return false;
+    for(size_t i=0;i<l.hazards.size();i++)for(size_t j=i+1;j<l.hazards.size();j++)if(Distance2D(l.hazards[i].pos,l.hazards[j].pos)<1.35f)return false;
+    for(size_t i=0;i<l.drones.size();i++)for(size_t j=i+1;j<l.drones.size();j++)if(Distance2D(l.drones[i].pos,l.drones[j].pos)<1.55f)return false;
     for(const auto& p:l.pickups)for(const auto& q:l.switches)if(Distance2D(p.pos,q.pos)<1.0f)return false;
     for(const auto& p:l.hazards)for(const auto& q:l.pickups)if(Distance2D(p.pos,q.pos)<1.0f)return false;
+    for(const auto& p:l.hazards)for(const auto& q:l.switches)if(Distance2D(p.pos,q.pos)<1.15f)return false;
     for(const auto& p:l.drones)for(const auto& q:l.pickups)if(Distance2D(p.pos,q.pos)<1.2f)return false;
+    for(const auto& p:l.drones)for(const auto& q:l.switches)if(Distance2D(p.pos,q.pos)<1.25f)return false;
 
     const int N=29;const float step=2.0f;
     auto cell=[](Vector3 p){int x=int(std::floor((p.x+28.0f)/2.0f));int z=int(std::floor((p.z+28.0f)/2.0f));return std::pair<int,int>{std::clamp(x,0,28),std::clamp(z,0,28)};};
@@ -365,8 +369,18 @@ static bool ValidateLevel(const Level& l){
     return true;
 }
 static bool ValidateAllLevels(){
-    for(int i=1;i<=LEVELS;i++)if(!ValidateLevel(BuildLevel(i))){std::printf("FLOOR %d INVALID\n",i);return false;}
-    std::printf("NEON VAULT VALIDATION COMPLETE: PASS\n");return true;
+    int minWalls=9999,maxWalls=0,minHazards=9999,maxHazards=0,totalPickups=0,totalSwitches=0,totalDrones=0;
+    for(int i=1;i<=LEVELS;i++){
+        Level l=BuildLevel(i);
+        if(!ValidateLevel(l)){std::printf("FLOOR %d INVALID\n",i);return false;}
+        minWalls=std::min(minWalls,int(l.walls.size()));maxWalls=std::max(maxWalls,int(l.walls.size()));
+        minHazards=std::min(minHazards,int(l.hazards.size()));maxHazards=std::max(maxHazards,int(l.hazards.size()));
+        totalPickups+=int(l.pickups.size());totalSwitches+=int(l.switches.size());totalDrones+=int(l.drones.size());
+    }
+    std::printf("NEON VAULT VALIDATION COMPLETE: PASS\\n");
+    std::printf("100 FLOORS | walls %d-%d | hazards %d-%d | pickups %d | switches %d | drones %d\\n",
+        minWalls,maxWalls,minHazards,maxHazards,totalPickups,totalSwitches,totalDrones);
+    return true;
 }
 
 static Texture2D Tex(const char* file,Color fallback,bool allowFile=true){
