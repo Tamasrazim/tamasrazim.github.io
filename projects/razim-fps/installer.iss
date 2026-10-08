@@ -37,3 +37,48 @@ Name: "{commondesktop}\NEO"; Filename: "{app}\{#UpdaterExeName}"
 [Run]
 Filename: "{app}\{#UpdaterExeName}"; Description: "Launch NEO"; Flags: nowait postinstall skipifsilent
 
+
+[Code]
+procedure InitializeWizard;
+begin
+  WizardForm.Caption := 'NEO // VAULT INSTALLER';
+  WizardForm.Color := $080E14;
+  WizardForm.Font.Color := clWhite;
+  WizardForm.WelcomeLabel1.Caption := 'NEO';
+  WizardForm.WelcomeLabel2.Caption := '100 floors. One vault. No shortcuts.';
+  WizardForm.NextButton.Caption := 'DEPLOY';
+  WizardForm.BackButton.Caption := 'BACK';
+  WizardForm.CancelButton.Caption := 'ABORT';
+  WizardForm.FinishedLabel.Caption := 'NEO is installed. Enter the vault from the Start Menu or desktop.';
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssInstall then
+    WizardForm.StatusLabel.Caption := 'DEPLOYING VAULT SYSTEMS...';
+  if CurStep = ssPostInstall then
+    WizardForm.StatusLabel.Caption := 'VAULT DEPLOYMENT COMPLETE.';
+end;
+
+function InitializeUninstall(): Boolean;
+begin
+  Result := MsgBox('NEO // UNINSTALL' + #13#10 + #13#10 +
+    'Remove the game and installed assets from this PC?',
+    mbConfirmation, MB_YESNO) = IDYES;
+end;
+
+procedure InitializeUninstallProgressForm;
+begin
+  UninstallProgressForm.Caption := 'NEO // UNINSTALLER';
+  UninstallProgressForm.Color := $080E14;
+  UninstallProgressForm.Font.Color := clWhite;
+  UninstallProgressForm.StatusLabel.Caption := 'DECOMMISSIONING VAULT SYSTEMS...';
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep = usUninstall then
+    UninstallProgressForm.StatusLabel.Caption := 'REMOVING NEO ASSETS...';
+  if CurUninstallStep = usPostUninstall then
+    UninstallProgressForm.StatusLabel.Caption := 'VAULT DECOMMISSIONED.';
+end;
