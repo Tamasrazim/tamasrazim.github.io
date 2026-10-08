@@ -20,7 +20,7 @@ extern void EnsureWorkingDirectory();
 
 namespace {
 constexpr int LEVELS=100;
-constexpr int TEXTURES=31;
+constexpr int TEXTURES=28;
 constexpr float WORLD=29.0f;
 constexpr float PLAYER_R=0.34f;
 constexpr float EYE_Y=1.52f;
@@ -50,6 +50,7 @@ struct Assets{
     std::array<Texture2D,TEXTURES> tex{};
     Sound music{},beat{},pickup{},hit{},click{},complete{};
 };
+Sound MakeBeatSound();
 
 Vector3 V(float x,float y,float z){return{x,y,z};}
 float Ease(float t){t=Clamp(t,0.0f,1.0f);return t*t*(3.0f-2.0f*t);}
@@ -208,16 +209,21 @@ void Box(Texture2D t,Vector3 p,Vector3 s,Color c){
     rlEnd();rlSetTexture(0);
 }
 void DrawBrokenPiece(Vector3 c,float r,int count,float time,Color color){
+    float pulse=0.86f+0.14f*sinf(time*1.9f);
     for(int i=0;i<count;i++){
-        float a=TAU*float(i)/float(count)+time*(0.7f+0.11f*i);
-        float rr=r*(1.0f+0.18f*sinf(time*1.7f+i));
-        Vector3 q=V(c.x+cosf(a)*rr,c.y+0.16f*sinf(time*2.1f+i),c.z+sinf(a)*rr);
-        float sx=r*(0.22f+0.08f*sinf(time*1.3f+i));
-        float sy=r*(0.40f+0.12f*cosf(time*1.1f+i));
-        float sz=r*(0.18f+0.07f*sinf(time*1.9f+i));
-        DrawCube(q,sx,sy,sz,color);
-        DrawCubeWires(q,sx*1.12f,sy*1.12f,sz*1.12f,RAYWHITE);
+        float a=TAU*float(i)/float(count)+time*(0.30f+0.045f*i);
+        float phase=time*1.5f+i*0.83f;
+        float radial=r*(0.55f+0.35f*sinf(phase));
+        float lift=0.10f*sinf(time*2.2f+i*1.7f);
+        Vector3 q=V(c.x+cosf(a)*radial,c.y+lift,c.z+sinf(a)*radial);
+        Vector3 dir=Vector3Normalize(V(cosf(a)*(0.35f+0.18f*sinf(phase)),0.75f+0.15f*cosf(phase),sinf(a)*(0.35f+0.18f*sinf(phase))));
+        Vector3 end=Vector3Add(q,Vector3Scale(dir,r*(0.38f+0.12f*sinf(phase*1.3f))));
+        float thick=r*(0.10f+0.025f*cosf(phase));
+        float tip=thick*0.18f;
+        DrawCylinderEx(q,end,thick,tip,5,color);
+        DrawCylinderEx(q,end,thick*1.08f,tip*1.5f,5,RAYWHITE);
     }
+    DrawSphere(c,r*0.08f* pulse,Color{235,255,255,170});
 }
 bool ObjectiveDone(const Level&l,int got,int sw,int mem){if(l.objective==Objective::COLLECT)return got>=l.required;if(l.objective==Objective::SWITCHES)return sw>=l.required;if(l.objective==Objective::KEYCARD){int n=0;for(const auto&p:l.pickups)if(p.kind==1&&p.taken)n++;return n>=l.required;}if(l.objective==Objective::MEMORY)return mem>=l.required;if(l.objective==Objective::COMBO){int k=0;for(const auto&p:l.pickups)if(p.kind==1&&p.taken)k++;return got>=3&&sw>=3&&k>=1&&mem>=4;}return false;}
 void Intro(float t,const Assets&a){
