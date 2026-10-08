@@ -380,7 +380,7 @@ static void DrawCinematicIntro(float t,const Assets& a){
         target=V(0,1.5f,-2.0f);
     }else if(t<10.5f){
         float u=EaseCubic((t-7.0f)/3.5f);
-        pos=V(-16.0f+32.0f*u,3.6f+sinRead?0:0,5.0f+sin(u*pi)*4.0f);
+        pos=V(-16.0f+32.0f*u,3.6f+1.2f*sinf(u*pi),5.0f+sin(u*pi)*4.0f);
         target=V(0,1.5f,-8.0f);
     }else{
         float u=EaseCubic((t-10.5f)/4.5f);
