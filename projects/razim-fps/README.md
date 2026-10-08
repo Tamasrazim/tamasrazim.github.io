@@ -18,14 +18,14 @@ NEON VAULT is a native Windows x64 first-person puzzle game built around a deter
 
 ## Mouse behavior
 
-The Windows cursor is never captured on startup, menus, settings, floor select, credits or pause.
+The Windows cursor stays free on the intro, menus, floor select, settings, credits and pause screens.
 
 1. Enter a floor.
-2. Click once to capture the mouse for FPS look.
+2. While PLAYING, the mouse is automatically captured for FPS look.
 3. Press ESC to release the cursor and pause.
-4. Click Resume to capture it again.
+4. Resume to return to PLAYING and capture the mouse again.
 
-The capture routine explicitly centers the cursor only at the moment FPS capture begins, which prevents the startup cursor from being stuck at the center of the screen.
+The capture routine centers the cursor only when gameplay capture begins. UI screens never reposition a free cursor.
 
 ## Build
 
