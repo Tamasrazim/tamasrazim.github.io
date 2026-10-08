@@ -13,8 +13,7 @@ The design goal is clarity without breaking public URLs. The repository contains
 | `/projects/code-motion/` | TRILYVA historical public route | Public / legacy-stable |
 | `/projects/code-to-eps/` | Vector/EPS product | Public / stable |
 | `/projects/code-to-svg/` | SVG product | Public / stable |
-| `/projects/neo/` | NEO public product route | Public / stable |
-| `/projects/razim-fps/` | NEO legacy source/build route | Public / compatibility |
+| `/projects/razim-fps/` | NEON VAULT | Public / stable |
 | `/projects/bncagrocare/` | BNC Agro Care | Public / stable |
 | `/projects/repo-token-meter/` | Repository measurement product | Public / stable |
 | `/asset-vault/` | Stock Asset Vault | Public / stable |
@@ -67,11 +66,8 @@ Keep its runtime and vector libraries inside the product boundary.
 ### `/projects/code-to-svg/`
 Dedicated browser SVG application.
 
-### `/projects/neo/`
-NEO public product route and release landing page.
-
 ### `/projects/razim-fps/`
-NEO native source/build tree kept as a compatibility path so existing links remain valid.
+NEON VAULT native Windows application.
 
 This is intentionally self-contained because it includes native build, installer and release resources.
 
