@@ -21,6 +21,9 @@ It contains 1,200+ individual project folders. Most projects expose an index.htm
 - networking and HTTP tools
 - storage, media and API experiments
 
+### Hardware and device tools
+- aula-f75-pro — F75 Pro Control Deck, WebHID diagnostics, local key-map design and RGB workspace
+
 ### Data and file tooling
 - CSV utilities
 - encoding and decoding
