@@ -73,7 +73,7 @@ struct Level{
 };
 struct Assets{
     Texture2D floor{},wall{},metal{},hazard{},crystal{},terminal{},sky{},skyPhoto{};
-    Sound theme{},pickup{},hit{},click{},complete{};
+    Sound theme{},pickup{},hit{},click{},complete{},beat{};
     Model terminalModel{},drone{};
     bool soundsReady=false,musicReady=false,terminalReady=false,droneReady=false;
 };
@@ -401,6 +401,26 @@ static void DrawCrystal3D(Vector3 c,float r,float h,float rot,Color body){
     rlEnd();
     DrawCylinderWires(c,r,r,h,sides,Color{215,255,255,180});
 }
+static Sound MakeBeatSound(){
+    constexpr unsigned int sampleRate=22050,seconds=1,channels=2;
+    const unsigned int frames=sampleRate*seconds;
+    short* data=(short*)std::malloc(size_t(frames)*channels*sizeof(short));
+    if(!data)return Sound{};
+    for(unsigned int i=0;i<frames;i++){
+        float t=float(i)/sampleRate;
+        float env=std::exp(-t*28.0f);
+        float f=72.0f+120.0f*std::exp(-t*42.0f);
+        float kick=0.24f*sinf(TAU*f*t)*env;
+        float hatEnv=std::exp(-t*55.0f);
+        uint32_t n=i*747796405u+2891336453u;n^=n>>16;n*=2246822519u;n^=n>>13;
+        float noise=(float(int(n&255u)-128)/128.0f)*0.045f*hatEnv;
+        float v=kick+noise;
+        data[i*2]=(short)(Clamp(v,-0.8f,0.8f)*32767);
+        data[i*2+1]=(short)(Clamp(v,-0.8f,0.8f)*32767);
+    }
+    Wave w{};w.frameCount=frames;w.sampleRate=sampleRate;w.sampleSize=16;w.channels=channels;w.data=data;
+    Sound out=LoadSoundFromWave(w);UnloadWave(w);return out;
+}
 static Sound MakeThemeSound(){
     constexpr unsigned int sampleRate=22050,seconds=24,channels=2;
     const unsigned int frames=sampleRate*seconds;short* data=(short*)std::malloc(size_t(frames)*channels*sizeof(short));
@@ -418,6 +438,47 @@ static Sound MakeThemeSound(){
     Wave w{};w.frameCount=frames;w.sampleRate=sampleRate;w.sampleSize=16;w.channels=channels;w.data=data;
     Sound out=LoadSoundFromWave(w);UnloadWave(w);return out;
 }
+static void DrawBrokenPieces(Vector3 c,float scale,float phase,Color color){
+    float t=float(GetTime());
+    for(int i=0;i<6;i++){
+        float a=phase+TAU*float(i)/6.0f+t*(0.55f+0.05f*i);
+        float r=scale*(0.42f+0.08f*sinf(t*1.7f+i));
+        Vector3 p=V(c.x+cosf(a)*r,
+                   c.y+0.06f*sinf(t*2.0f+i),
+                   c.z+sinf(a)*r);
+        float sx=scale*(0.14f+0.025f*(i%3));
+        float sy=scale*(0.24f+0.03f*((i+1)%3));
+        float sz=scale*(0.10f+0.02f*(i%2));
+        DrawCube(p,sx,sy,sz,color);
+        DrawCubeWires(p,sx*1.12f,sy*1.12f,sz*1.12f,Color{220,245,255,170});
+    }
+}
+static void ResolvePlayerSolids(const Level& l,Vector3& p){
+    for(int pass=0;pass<5;pass++){
+        bool moved=false;
+        for(const auto& w:l.walls){
+            if(!HitsBox(p,PLAYER_RADIUS,w.pos,w.size))continue;
+            float dx=p.x-w.pos.x,dz=p.z-w.pos.z;
+            float px=(w.size.x*0.5f+PLAYER_RADIUS)-fabsf(dx);
+            float pz=(w.size.z*0.5f+PLAYER_RADIUS)-fabsf(dz);
+            if(px<=0||pz<=0)continue;
+            if(px<pz)p.x+=(dx>=0.0f?px:-px);
+            else p.z+=(dz>=0.0f?pz:-pz);
+            moved=true;break;
+        }
+        if(!moved)for(const auto& d:l.doors){
+            if(d.open||!HitsBox(p,PLAYER_RADIUS,d.pos,d.size))continue;
+            float dx=p.x-d.pos.x,dz=p.z-d.pos.z;
+            float px=(d.size.x*0.5f+PLAYER_RADIUS)-fabsf(dx);
+            float pz=(d.size.z*0.5f+PLAYER_RADIUS)-fabsf(dz);
+            if(px<=0||pz<=0)continue;
+            if(px<pz)p.x+=(dx>=0.0f?px:-px);
+            else p.z+=(dz>=0.0f?pz:-pz);
+            moved=true;break;
+        }
+        if(!moved)break;
+    }
+}
 static Assets LoadAssets(bool safeMode){
     Assets a;
     a.floor=Tex("assets/textures/floor.bmp",Color{30,39,50,255},!safeMode);
@@ -434,6 +495,7 @@ static Assets LoadAssets(bool safeMode){
         a.musicReady=IsSoundValid(a.theme);
         a.pickup=LoadSound("assets/audio/pickup.wav");a.hit=LoadSound("assets/audio/hit.wav");
         a.click=LoadSound("assets/audio/click.wav");a.complete=LoadSound("assets/audio/complete.wav");
+        a.beat=MakeBeatSound();
         a.soundsReady=IsSoundValid(a.pickup)&&IsSoundValid(a.hit)&&IsSoundValid(a.click)&&IsSoundValid(a.complete);
     }
     if(!safeMode&&FileExists("assets/models/terminal.obj")){a.terminalModel=LoadModel("assets/models/terminal.obj");a.terminalReady=a.terminalModel.meshCount>0;}
@@ -445,6 +507,7 @@ static void UnloadAssets(Assets& a){
     if(a.hazard.id)UnloadTexture(a.hazard);if(a.crystal.id)UnloadTexture(a.crystal);if(a.terminal.id)UnloadTexture(a.terminal);if(a.sky.id)UnloadTexture(a.sky);if(a.skyPhoto.id)UnloadTexture(a.skyPhoto);
     if(a.terminalReady)UnloadModel(a.terminalModel);if(a.droneReady)UnloadModel(a.drone);
     if(a.soundsReady){UnloadSound(a.pickup);UnloadSound(a.hit);UnloadSound(a.click);UnloadSound(a.complete);}
+    if(IsSoundValid(a.beat))UnloadSound(a.beat);
     if(a.musicReady)UnloadSound(a.theme);
 }
 static void SetDisplayMode(Settings& s,int mode){
@@ -584,9 +647,11 @@ static void DrawWorld(const Level& l,const Assets& a,const Vector3& player,float
     }
     for(const auto& p:l.pickups)if(!p.taken){
         Vector3 q=V(p.pos.x,p.pos.y+0.18f*sinf(float(GetTime())*2.6f+p.pos.x),p.pos.z);
-        if(p.kind==0){DrawCrystal3D(q,0.34f,0.9f,float(GetTime())*0.9f,Color{80,220,255,255});DrawSphere(q,0.05f,Color{235,255,255,230});}
+        Color pc=p.kind==0?Color{80,220,255,255}:(p.kind==1?GOLD:MAGENTA);
+        if(p.kind==0){DrawCrystal3D(q,0.34f,0.9f,float(GetTime())*0.9f,pc);DrawSphere(q,0.05f,Color{235,255,255,230});}
         else{DrawSphere(q,p.kind==1?0.34f:0.28f,p.kind==1?GOLD:MAGENTA);DrawSphereWires(q,p.kind==1?0.4f:0.34f,8,8,RAYWHITE);}
-        if(scan>0)DrawSphereWires(q,0.8f+0.2f*scan,8,8,p.kind==0?SKYBLUE:(p.kind==1?GOLD:MAGENTA));
+        DrawBrokenPieces(q,p.kind==0?1.0f:0.82f,float(p.order)*0.35f,pc);
+        if(scan>0)DrawSphereWires(q,0.8f+0.2f*scan,8,8,pc);
     }
     for(const auto& sw:l.switches){
         Color c=sw.active?GREEN:ThemeColor(l.theme);
@@ -634,11 +699,13 @@ int main(int argc,char** argv){
     int collected=0,switchesActive=0,memoryStep=0,deaths=0,settingsRow=0;
     bool grounded=true,quit=false;
     Screen settingsReturn=Screen::MENU;
+    float beatClock=0.0f;
+    int beatStep=0;
 
     auto ClickSound=[&](){if(assets.soundsReady){SetSoundVolume(assets.click,save.settings.sfx);PlaySound(assets.click);}};
     auto StartLevel=[&](int id){
         level=BuildLevel(id);player=level.start;velocity={};yaw=3.14159265359f;pitch=0;stamina=100;health=100;
-        timeLeft=level.timeLimit;collected=switchesActive=memoryStep=deaths=0;bobPhase=scanTimer=0;hintTimer=4;grounded=true;
+        timeLeft=level.timeLimit;collected=switchesActive=memoryStep=deaths=0;bobPhase=scanTimer=0;hintTimer=4;grounded=true;beatClock=0.0f;beatStep=0;
         screen=Screen::PLAYING;CaptureMouse(mouse);
     };
     auto ResumeLevel=[&](){
@@ -652,6 +719,15 @@ int main(int argc,char** argv){
         if(!safeMode&&assets.musicReady&&screen!=Screen::INTRO&&!IsSoundPlaying(assets.theme)){
             SetSoundVolume(assets.theme,save.settings.music);
             PlaySound(assets.theme);
+        }
+        if(screen==Screen::PLAYING&&IsSoundValid(assets.beat)&&save.settings.music>0.01f){
+            beatClock-=dt;
+            if(beatClock<=0.0f){
+                beatClock+=0.5f;
+                beatStep=(beatStep+1)%8;
+                SetSoundVolume(assets.beat,save.settings.music*(beatStep%4==0?0.18f:0.10f));
+                PlaySound(assets.beat);
+            }
         }
         if(screen!=Screen::PLAYING)EnsureUIMouse(mouse);
         else if(IsWindowFocused()){if(!mouse.captured)CaptureMouse(mouse);}else EnsureUIMouse(mouse);
@@ -718,6 +794,7 @@ int main(int argc,char** argv){
                     case 9:save.settings.performance=!save.settings.performance;break;
                 }
             }
+            if(Button({float(left),655,600,50})){SaveGame(save);screen=settingsReturn;ClickSound();}
         }else if(screen==Screen::CREDITS){
             if(IsKeyPressed(KEY_ESCAPE)||IsMouseButtonPressed(MOUSE_BUTTON_LEFT))screen=Screen::MENU;
         }else if(screen==Screen::PLAYING){
@@ -790,6 +867,7 @@ int main(int argc,char** argv){
             }
             if(screen==Screen::PLAYING&&level.objective!=Objective::SURVIVE&&timeLeft<=0){ReleaseMouse(mouse);screen=Screen::GAMEOVER;}
             if(level.objective==Objective::SURVIVE&&timeLeft<=0){save.unlocked=std::max(save.unlocked,level.id+1);save.stars[level.id]=3;SaveGame(save);ReleaseMouse(mouse);screen=level.id==LEVELS?Screen::COMPLETE:Screen::LEVELS;}
+            ResolvePlayerSolids(level,player);
         }else if(screen==Screen::PAUSED){
             if(IsKeyPressed(KEY_ESCAPE)){ResumeLevel();}
             float cx=GetScreenWidth()/2.0f-190;
@@ -815,7 +893,19 @@ int main(int argc,char** argv){
             ClearBackground(Color{4,8,13,255});CenterText("SETTINGS",45,40,RAYWHITE);CenterText("ARROWS / ENTER TO CHANGE • ESC TO SAVE",94,14,GRAY);
             const char* labels[10]={"MOUSE SENSITIVITY","INVERT Y","FIELD OF VIEW","HINTS","SCREEN SHAKE","SFX VOLUME","MUSIC VOLUME","CROSSHAIR","DISPLAY","PERFORMANCE"};
             std::string values[10]={TextFormat("%.4f",save.settings.sensitivity),save.settings.invertY?"ON":"OFF",TextFormat("%.0f",save.settings.fov),save.settings.hints?"ON":"OFF",save.settings.shake?"ON":"OFF",TextFormat("%d%%",int(save.settings.sfx*100)),TextFormat("%d%%",int(save.settings.music*100)),TextFormat("STYLE %d",save.settings.crosshair+1),save.settings.displayMode==0?"WINDOWED":save.settings.displayMode==1?"BORDERLESS":"FULLSCREEN",save.settings.performance?"ON":"OFF"};
-            int left=GetScreenWidth()/2-300;for(int i=0;i<10;i++){Rectangle r={float(left),145+i*49,600,41};bool hot=i==settingsRow;DrawRectangleRounded(r,0.08f,10,hot?Color{20,42,58,255}:Color{11,22,32,255});DrawRectangleRoundedLines(r,0.08f,10,hot?SKYBLUE:Color{48,64,78,255});DrawText(labels[i],int(r.x+18),int(r.y+12),15,RAYWHITE);DrawText(values[i].c_str(),int(r.x+395),int(r.y+12),15,SKYBLUE);}
+            int left=GetScreenWidth()/2-300;
+            for(int i=0;i<10;i++){
+                Rectangle r={float(left),145+i*49,600,41};
+                bool hover=CheckCollisionPointRec(GetMousePosition(),r);
+                bool hot=i==settingsRow;
+                Color fill=hover?Color{27,52,68,255}:(hot?Color{20,42,58,255}:Color{11,22,32,255});
+                Color edge=hover?ThemeColor(i%10):(hot?SKYBLUE:Color{48,64,78,255});
+                DrawRectangleRounded(r,0.08f,10,fill);
+                DrawRectangleRoundedLines(r,0.08f,10,edge);
+                DrawText(labels[i],int(r.x+18),int(r.y+12),15,RAYWHITE);
+                DrawText(values[i].c_str(),int(r.x+395),int(r.y+12),15,SKYBLUE);
+            }
+            ButtonDraw({float(left),655,600,50},"BACK • SAVE",SKYBLUE);
         }else if(screen==Screen::CREDITS){
             ClearBackground(Color{4,8,13,255});CenterText("CREDITS",80,42,RAYWHITE);CenterText("GAME DESIGN / PROGRAMMING",180,18,SKYBLUE);CenterText("Tamasrazim",215,30,RAYWHITE);CenterText("Native Windows x64 • Raylib • deterministic 100-floor system",275,16,LIGHTGRAY);CenterText("Original instrumental soundtrack • procedural 3D cinematic",310,16,LIGHTGRAY);CenterText("CLICK OR ESC TO RETURN",500,14,GRAY);
         }else if(screen==Screen::PLAYING||screen==Screen::PAUSED){
