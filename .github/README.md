@@ -9,7 +9,7 @@ This directory contains repository automation only.
 - project-specific checks
 - asset and metadata validation
 - TRILYVA and KYNESTRA release automation
-- NEON VAULT Windows build and release
+- NEO Windows build and release
 - repository measurement and manifests
 
 Workflow files remain under workflows/ because GitHub Actions discovers them there.
