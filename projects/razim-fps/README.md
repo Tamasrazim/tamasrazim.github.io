@@ -1,6 +1,6 @@
-# NEON VAULT — final Windows game build
+# NEO — final Windows game build
 
-NEON VAULT is a native Windows x64 first-person puzzle game built around a deterministic 100-floor progression system.
+NEO is a native Windows x64 first-person puzzle game built around a deterministic 100-floor progression system.
 
 ## Game systems
 
@@ -37,7 +37,7 @@ cmake --build projects/razim-fps/build --config Release --parallel
 ## Validation
 
 ```
-projects/razim-fps/build/Release/neon_vault.exe --validate
+projects/razim-fps/build/Release/neo.exe --validate
 ```
 
 Validation checks all 100 generated floors for clear spawn/objective positions and start-to-exit reachability.
