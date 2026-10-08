@@ -653,11 +653,15 @@ int main(int argc,char** argv){
                 DisableCursor();
                 mouseCaptured=true;
             }
-        }else{
+        }else if(mouseCaptured){
             mouseCaptured=false;
             mouseSkipDelta=false;
             EnableCursor();
             SetMousePosition((int)cursorRestore.x,(int)cursorRestore.y);
+        }else{
+            mouseCaptured=false;
+            mouseSkipDelta=false;
+            EnableCursor();
         }
     };
 
@@ -925,7 +929,7 @@ int main(int argc,char** argv){
                 CaptureMouse(false);
             }
 
-            if(level.objective!=Objective::SURVIVE&&timeLeft<=0){
+            if(screen==Screen::PLAYING&&level.objective!=Objective::SURVIVE&&timeLeft<=0){
                 timeLeft=0;
                 health=std::max(0.0f,health-25.0f);
                 SaveGame(save);
@@ -1006,7 +1010,7 @@ int main(int argc,char** argv){
                 save.settings.displayMode==0?"WINDOWED":(save.settings.displayMode==1?"BORDERLESS":"FULLSCREEN"),
                 save.settings.performance?"ON":"OFF"
             };
-            for(int i=0;i<9;i++){
+            for(int i=0;i<10;i++){
                 Rectangle rr={float(left),165.0f+i*50.0f,600,42};
                 bool hot=i==settingsRow||CheckCollisionPointRec(GetMousePosition(),rr);
                 Panel(rr,hot?Color{20,42,58,255}:Color{11,22,32,255},hot?SKYBLUE:Color{48,64,78,255});
