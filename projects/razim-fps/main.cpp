@@ -205,7 +205,7 @@ bool Reachable(const Level& l,Vector3 target){
     std::queue<std::pair<int,int>>q;bool seen[N][N]{};q.push({sx,sz});seen[sx][sz]=true;const int dx[4]={1,-1,0,0},dz[4]={0,0,1,-1};
     while(!q.empty()){auto[x,z]=q.front();q.pop();if(x==gx&&z==gz)return true;for(int d=0;d<4;d++){int nx=x+dx[d],nz=z+dz[d];if(nx<0||nz<0||nx>=N||nz>=N||seen[nx][nz])continue;Vector3 p=V(-WORLD+nx+0.5f,0.9f,-WORLD+nz+0.5f);if(blocked(p))continue;seen[nx][nz]=true;q.push({nx,nz});}}return false;
 }
-bool FiniteVec(Vector3 p){return std::isfinite(p.x)&&std::isfinite(p.y)&&std::isfinite(p.z);}
+
 bool Valid(const Level& l){
     if(l.timeLimit<=0.0f||!FiniteVec(l.start)||!FiniteVec(l.exit))return false;
     if(fabsf(l.start.x)>WORLD||fabsf(l.start.z)>WORLD||fabsf(l.exit.x)>WORLD||fabsf(l.exit.z)>WORLD)return false;
