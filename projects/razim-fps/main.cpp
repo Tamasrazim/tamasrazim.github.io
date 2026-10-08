@@ -575,17 +575,19 @@ int main(int argc,char**argv){
                     if(CheckCollisionPointRec(mouse,rowRect)){
                         settingsRow=i;uiFocus=i;
                         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+                            const bool rightSide=mouse.x>rowRect.x+rowRect.width*0.58f;
+                            const int step=rightSide?1:-1;
                             switch(i){
-                                case 0:save.settings.sens=Clamp(save.settings.sens+0.0002f,.0007f,.006f);break;
+                                case 0:save.settings.sens=Clamp(save.settings.sens+step*0.0002f,.0007f,.006f);break;
                                 case 1:save.settings.invertY=!save.settings.invertY;break;
-                                case 2:save.settings.fov=Clamp(save.settings.fov+5,60,105);break;
+                                case 2:save.settings.fov=Clamp(save.settings.fov+step*5,60,105);break;
                                 case 3:save.settings.hints=!save.settings.hints;break;
                                 case 4:save.settings.shake=!save.settings.shake;break;
-                                case 5:save.settings.music=Clamp(save.settings.music+0.05f,0.0f,1.0f);ApplyAudioVolumes(assets,save.settings);break;
-                                case 6:save.settings.sfx=Clamp(save.settings.sfx+0.05f,0.0f,1.0f);break;
-                                case 7:save.settings.crosshair=(save.settings.crosshair+1)%3;break;
+                                case 5:save.settings.music=Clamp(save.settings.music+step*0.05f,0.0f,1.0f);ApplyAudioVolumes(assets,save.settings);break;
+                                case 6:save.settings.sfx=Clamp(save.settings.sfx+step*0.05f,0.0f,1.0f);break;
+                                case 7:save.settings.crosshair=(save.settings.crosshair+step+3)%3;break;
                                 case 8:save.settings.perf=!save.settings.perf;break;
-                                case 9:save.settings.display=(save.settings.display+1)%3;SetDisplay(save.settings.display);break;
+                                case 9:save.settings.display=(save.settings.display+step+3)%3;SetDisplay(save.settings.display);break;
                                 case 10:save=Save{};SaveGame(save);SetDisplay(0);ApplyAudioVolumes(assets,save.settings);settingsRow=0;uiFocus=0;break;
                             }
                             if(IsSoundValid(assets.click)){SetSoundVolume(assets.click,save.settings.sfx);PlaySound(assets.click);}
