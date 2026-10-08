@@ -343,10 +343,10 @@ static bool ValidateAllLevels(){
 static Texture2D Tex(const char* file,Color fallback,bool allowFile=true){
     if(allowFile&&FileExists(file)){
         Texture2D t=LoadTexture(file);
-        if(t.id){SetTextureFilter(t,TEXTURE_FILTER_BILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;}
+        if(t.id){GenTextureMipmaps(&t);SetTextureFilter(t,TEXTURE_FILTER_TRILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;}
     }
     Image im=GenImageColor(64,64,fallback);Texture2D t=LoadTextureFromImage(im);UnloadImage(im);
-    SetTextureFilter(t,TEXTURE_FILTER_BILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;
+    GenTextureMipmaps(&t);SetTextureFilter(t,TEXTURE_FILTER_TRILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;
 }
 static Model MakeTexturedCube(Texture2D tex){
     Model m=LoadModelFromMesh(GenMeshCube(1,1,1));
@@ -545,6 +545,7 @@ static void DrawWorld(const Level& l,const Assets& a,const Vector3& player,float
     Camera3D cam{};cam.position=Vector3Add(player,V(0,0.62f+bob,0));cam.target=Vector3Add(cam.position,V(sinf(yaw)*cosf(pitch),sinf(pitch),cosf(yaw)*cosf(pitch)));cam.up=V(0,1,0);cam.fovy=s.fov;cam.projection=CAMERA_PERSPECTIVE;
     BeginMode3D(cam);
     DrawTexturedBox(a.floor,V(0,-0.05f,0),V(58,0.1f,58),WHITE,2.1f);
+    DrawTexturedBox(a.wall,V(0,5.0f,0),V(58,0.1f,58),WHITE,2.8f);
     for(const auto& w:l.walls){
         Texture2D t=w.material==2?a.metal:a.wall;
         DrawTexturedBox(t,w.pos,w.size,WHITE,w.material==2?1.7f:2.4f);
@@ -690,6 +691,24 @@ int main(int argc,char** argv){
             if(IsKeyPressed(KEY_SPACE)&&grounded){velocity.y=6.8f;grounded=false;}
             velocity.y-=18*dt;player.y+=velocity.y*dt;
             if(player.y<=PLAYER_HEIGHT*0.5f){player.y=PLAYER_HEIGHT*0.5f;velocity.y=0;grounded=true;}
+            for(int pass=0;pass<6;pass++){
+                bool pushed=false;
+                for(const auto& w:level.walls){
+                    if(HitsBox(player,PLAYER_RADIUS,w.pos,w.size)){
+                        float dx=player.x-w.pos.x,dz=player.z-w.pos.z;
+                        if(fabsf(dx)>=fabsf(dz))player.x+=(dx>=0?0.16f:-0.16f);
+                        else player.z+=(dz>=0?0.16f:-0.16f);
+                        pushed=true;break;
+                    }
+                }
+                for(const auto& d:level.doors)if(!d.open&&HitsBox(player,PLAYER_RADIUS,d.pos,d.size)){
+                    float dx=player.x-d.pos.x,dz=player.z-d.pos.z;
+                    if(fabsf(dx)>=fabsf(dz))player.x+=(dx>=0?0.18f:-0.18f);
+                    else player.z+=(dz>=0?0.18f:-0.18f);
+                    pushed=true;break;
+                }
+                if(!pushed)break;
+            }
             timeLeft-=dt;hintTimer=std::max(0.0f,hintTimer-dt);scanTimer=std::max(0.0f,scanTimer-dt);if(IsKeyPressed(KEY_Q))scanTimer=1.5f;
             if(Vector3Length(move)>0.01f)bobPhase+=dt*(sprint?14.0f:9.0f);else bobPhase+=dt*2.0f;
             for(auto& h:level.hazards){
