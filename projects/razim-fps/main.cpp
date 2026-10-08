@@ -163,10 +163,31 @@ Assets LoadAssets(bool safe){
     for(int i=0;i<TEXTURES;i++){char p[128];std::snprintf(p,sizeof(p),"assets/textures/vault_%02d.bmp",i+1);a.tex[i]=LoadTex(p,Theme(i%10));}
     if(!safe&&IsAudioDeviceReady()){
         a.music=LoadSound("assets/audio/neon-vault-theme.wav");
-        a.beat=LoadSound("assets/audio/vault-beats.wav");
+        if(FileExists("assets/audio/vault-beats.wav"))a.beat=LoadSound("assets/audio/vault-beats.wav");
+        if(!IsSoundValid(a.beat))a.beat=MakeBeatSound();
         a.pickup=LoadSound("assets/audio/pickup.wav");a.hit=LoadSound("assets/audio/hit.wav");
         a.click=LoadSound("assets/audio/click.wav");a.complete=LoadSound("assets/audio/complete.wav");
     } return a;
+}
+Sound MakeBeatSound(){
+    constexpr unsigned int sr=22050,seconds=4,channels=1;
+    const unsigned int frames=sr*seconds;
+    short* data=(short*)std::malloc(size_t(frames)*sizeof(short));
+    if(!data)return Sound{};
+    for(unsigned int i=0;i<frames;i++){
+        float t=float(i)/float(sr),v=0.0f;
+        float kick=fmodf(t,0.5f);
+        if(kick<0.16f){float e=expf(-20.0f*kick);float f=72.0f-40.0f*(kick/0.16f);v+=0.70f*e*sinf(TAU*f*kick);}
+        float sn=fmodf(t,1.0f);
+        if(sn>=0.5f&&sn<0.62f){float q=sn-0.5f,e=expf(-32.0f*q);v+=0.16f*e*(sinf(TAU*2200.0f*q)+0.4f*sinf(TAU*3300.0f*q));}
+        float hat=fmodf(t,0.25f);
+        if(hat<0.038f){float e=expf(-65.0f*hat);v+=0.05f*e*sinf(TAU*5700.0f*hat);}
+        float bass=fmodf(t,1.0f);
+        if(bass<0.25f){float e=expf(-9.0f*bass);v+=0.05f*e*sinf(TAU*55.0f*bass);}
+        data[i]=(short)(Clamp(v,-0.9f,0.9f)*32767.0f);
+    }
+    Wave w{};w.frameCount=frames;w.sampleRate=sr;w.sampleSize=16;w.channels=channels;w.data=data;
+    Sound out=LoadSoundFromWave(w);UnloadWave(w);return out;
 }
 void UnloadAssets(Assets&a){for(auto&t:a.tex)if(t.id)UnloadTexture(t);if(IsSoundValid(a.music))UnloadSound(a.music);if(IsSoundValid(a.beat))UnloadSound(a.beat);if(IsSoundValid(a.pickup))UnloadSound(a.pickup);if(IsSoundValid(a.hit))UnloadSound(a.hit);if(IsSoundValid(a.click))UnloadSound(a.click);if(IsSoundValid(a.complete))UnloadSound(a.complete);}
 bool Btn(Rectangle r){return CheckCollisionPointRec(GetMousePosition(),r)&&IsMouseButtonPressed(MOUSE_BUTTON_LEFT);}
