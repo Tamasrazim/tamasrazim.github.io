@@ -9,13 +9,13 @@ $audio = @(Get-ChildItem (Join-Path $game "assets\audio") -Filter "*.wav" -File)
 if (!(Test-Path $source)) { throw "main.cpp is missing." }
 if (!(Test-Path $installer)) { throw "installer.iss is missing." }
 
-if ($textures.Count -ne 28) { throw "Expected 28 runtime textures, found $($textures.Count)." }
+if ($textures.Count -ne 30) { throw "Expected 30 runtime textures, found $($textures.Count)." }
 if ($audio.Count -lt 5) { throw "Expected at least 5 WAV assets, found $($audio.Count)." }
 
 $src = Get-Content $source -Raw
 $iss = Get-Content $installer -Raw
 
-if ($src -notmatch 'constexpr int TEXTURES=28') { throw "Runtime texture count is not 28." }
+if ($src -notmatch 'constexpr int TEXTURES=30') { throw "Runtime texture count is not 30." }
 if ($src -notmatch 'DisableCursor\(\)') { throw "Native mouse capture missing." }
 if ($src -match 'SetMousePosition\(') { throw "Cursor-warp input path detected." }
 if ($src -notmatch 'MakeBeatSound') { throw "Procedural beat layer missing." }
