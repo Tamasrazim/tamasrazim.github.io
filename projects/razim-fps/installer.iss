@@ -30,6 +30,7 @@ SetupIconFile=neon-vault.ico
 [Files]
 Source: "build\Release\neon_vault.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "build\Release\neon_vault_updater.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "neon-vault.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
