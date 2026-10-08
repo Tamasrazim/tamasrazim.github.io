@@ -195,7 +195,6 @@ begin
   UninstallProgressForm.Color := clBlack;
   UninstallProgressForm.StatusLabel.Font.Color := clAqua;
   UninstallProgressForm.StatusLabel.Caption := 'EVACUATING VAULT FILES...';
-  UninstallProgressForm.ProgressBar.Color := clAqua;
   UninstallProgressForm.PageNameLabel.Font.Color := clAqua;
   UninstallProgressForm.PageDescriptionLabel.Font.Color := clWhite;
   AddUninstallChrome;
