@@ -21,6 +21,7 @@ extern void EnsureWorkingDirectory();
 
 namespace {
 constexpr int LEVELS=100;
+constexpr int SAVE_VERSION=2;
 constexpr float PLAYER_RADIUS=0.35f;
 constexpr float PLAYER_HEIGHT=1.8f;
 constexpr float TAU=6.28318530718f;
@@ -41,9 +42,11 @@ struct Settings{
     bool performance=false;
 };
 struct SaveData{
+    int version=SAVE_VERSION;
     int unlocked=1;
     std::array<int,LEVELS+1> stars{};
     Settings settings{};
+    bool migrated=false;
 };
 struct Wall{Vector3 pos{};Vector3 size{};int material=0;};
 struct Pickup{Vector3 pos{};bool taken=false;int kind=0;int order=0;};
@@ -121,9 +124,11 @@ static SaveData LoadGame(){
     SaveData s;
     std::ifstream in(SavePath());
     if(!in)return s;
+    bool hasVersion=false;
     std::string k;
     while(in>>k){
-        if(k=="unlocked")in>>s.unlocked;
+        if(k=="version"){in>>s.version;hasVersion=true;}
+        else if(k=="unlocked")in>>s.unlocked;
         else if(k=="sensitivity")in>>s.settings.sensitivity;
         else if(k=="invertY"){int v;in>>v;s.settings.invertY=v!=0;}
         else if(k=="fov")in>>s.settings.fov;
@@ -139,6 +144,12 @@ static SaveData LoadGame(){
             if(id>=1&&id<=LEVELS)s.stars[id]=std::clamp(st,0,3);
         }
     }
+    if(!hasVersion||s.version!=SAVE_VERSION){
+        s.version=SAVE_VERSION;
+        s.unlocked=1;
+        s.stars.fill(0);
+        s.migrated=true;
+    }
     s.unlocked=std::clamp(s.unlocked,1,LEVELS);
     s.settings.sensitivity=Clamp(s.settings.sensitivity,0.0008f,0.008f);
     s.settings.fov=Clamp(s.settings.fov,60.0f,105.0f);
@@ -152,6 +163,7 @@ static SaveData LoadGame(){
 static void SaveGame(const SaveData& s){
     std::ofstream out(SavePath(),std::ios::trunc);
     if(!out)return;
+    out<<"version "<<SAVE_VERSION<<"\n";
     out<<"unlocked "<<s.unlocked<<"\n";
     out<<"sensitivity "<<s.settings.sensitivity<<"\n";
     out<<"invertY "<<(s.settings.invertY?1:0)<<"\n";
@@ -606,6 +618,7 @@ int main(int argc,char** argv){
     if(!safeMode)InitAudioDevice();
 
     SaveData save=LoadGame();
+    if(save.migrated)SaveGame(save);
     if(!safeMode&&save.settings.displayMode!=0)SetDisplayMode(save.settings,save.settings.displayMode);
     Assets assets=LoadAssets(safeMode);
     float themeElapsed=0.0f;
@@ -617,7 +630,7 @@ int main(int argc,char** argv){
 
     Screen screen=Screen::INTRO;
     Screen returnScreen=Screen::MENU;
-    Level level=BuildLevel(save.unlocked);
+    Level level=BuildLevel(1);
     Vector3 player=level.start;
     Vector3 velocity{};
     float yaw=3.14159265359f,pitch=0,stamina=100,health=100,timeLeft=0;
@@ -626,7 +639,7 @@ int main(int argc,char** argv){
     int deaths=0;
     float scanTimer=0,bobPhase=0;
     bool grounded=true,mouseCaptured=false,quit=false;
-    Vector2 cursorRestore{720,450};
+    Vector2 cursorRestore=GetMousePosition();
     int settingsRow=0;
     float introElapsed=0.0f;
 
@@ -791,13 +804,15 @@ int main(int argc,char** argv){
             if(IsKeyPressed(KEY_ESCAPE)||IsMouseButtonPressed(MOUSE_BUTTON_LEFT))screen=Screen::MENU;
         }else if(screen==Screen::PLAYING){
             if(IsKeyPressed(KEY_ESCAPE)){CaptureMouse(false);screen=Screen::PAUSED;}
-            if(!mouseCaptured&&IsMouseButtonPressed(MOUSE_BUTTON_LEFT))CaptureMouse(true);
+            if(mouseCaptured&&!IsWindowFocused())CaptureMouse(false);
+            if(!mouseCaptured&&IsWindowFocused()&&IsMouseButtonPressed(MOUSE_BUTTON_LEFT))CaptureMouse(true);
 
             if(mouseCaptured){
                 Vector2 md=GetMouseDelta();
                 yaw-=md.x*save.settings.sensitivity;
                 pitch+=(save.settings.invertY?md.y:-md.y)*save.settings.sensitivity;
                 pitch=Clamp(pitch,-1.48f,1.48f);
+                SetMousePosition(GetScreenWidth()/2,GetScreenHeight()/2);
             }
 
             Vector3 wish{};
@@ -957,7 +972,7 @@ int main(int argc,char** argv){
             ButtonDraw({GetScreenWidth()/2.0f-180,410,360,58},"SETTINGS",ThemeColor(2));
             ButtonDraw({GetScreenWidth()/2.0f-180,480,360,58},"CREDITS",ThemeColor(4));
             ButtonDraw({GetScreenWidth()/2.0f-180,550,360,58},"QUIT",Color{255,100,100,255});
-            DrawText("v3.2 • FINAL RELEASE CANDIDATE",24,GetScreenHeight()-28,13,GRAY);
+            DrawText("v3.3 • FINAL RELEASE",24,GetScreenHeight()-28,13,GRAY);
         }else if(screen==Screen::LEVELS){
             Center("FLOOR SELECT",65,42,RAYWHITE);
             Center(TextFormat("%03d / %03d UNLOCKED",save.unlocked,LEVELS),118,16,SKYBLUE);
