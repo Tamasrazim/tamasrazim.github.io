@@ -171,6 +171,8 @@ Level BuildLevel(int id){
     return l;
 }
 bool Reachable(const Level& l,Vector3 target){
+    if(!FiniteVec(target)||fabsf(target.x)>WORLD-PLAYER_R||fabsf(target.z)>WORLD-PLAYER_R)return false;
+    if(!FiniteVec(l.start)||fabsf(l.start.x)>WORLD-PLAYER_R||fabsf(l.start.z)>WORLD-PLAYER_R)return false;
     constexpr int N=58;auto cell=[](Vector3 p){return std::pair<int,int>{std::clamp(int(p.x+WORLD),0,N-1),std::clamp(int(p.z+WORLD),0,N-1)};};
     auto blocked=[&](Vector3 p){if(fabsf(p.x)>WORLD-PLAYER_R||fabsf(p.z)>WORLD-PLAYER_R)return true;for(const auto&w:l.walls)if(HitBox(p,PLAYER_R*1.1f,w.p,w.s))return true;return false;};
     auto [sx,sz]=cell(l.start);auto [gx,gz]=cell(target);if(blocked(V(-WORLD+sx+0.5f,0.9f,-WORLD+sz+0.5f))||blocked(V(-WORLD+gx+0.5f,0.9f,-WORLD+gz+0.5f)))return false;
@@ -192,7 +194,7 @@ bool Valid(const Level& l){
     }
     if(!Reachable(l,l.exit))return false;
     for(const auto&p:l.pickups){
-        if(!FiniteVec(p.p)||!Reachable(l,p.p)||Vector3Distance(p.p,l.start)<1.8f)return false;
+        if(!FiniteVec(p.p)||fabsf(p.p.x)>WORLD-PLAYER_R||fabsf(p.p.z)>WORLD-PLAYER_R||!Reachable(l,p.p)||Vector3Distance(p.p,l.start)<1.8f)return false;
     }
     for(const auto&p:l.switches){
         if(!FiniteVec(p.p)||!Reachable(l,p.p)||Vector3Distance(p.p,l.start)<1.8f)return false;
@@ -219,7 +221,7 @@ bool Valid(const Level& l){
     if(l.objective==Objective::COMBO&&(crystals<3||int(l.switches.size())<3||keys<1||memory<4))return false;
     for(int i=1;i<=memory;i++)if(!memoryOrder[size_t(i)])return false;
     for(const auto&h:l.hazards){
-        if(!FiniteVec(h.base)||!FiniteVec(h.p)||h.speed<=0.0f)return false;
+        if(!FiniteVec(h.base)||!FiniteVec(h.p)||fabsf(h.base.x)>WORLD-1.0f||fabsf(h.base.z)>WORLD-1.0f||h.speed<=0.0f)return false;
         if(Vector3Distance(h.base,l.start)<6.0f||Vector3Distance(h.base,l.exit)<5.0f)return false;
         for(const auto&p:l.pickups)if(Vector3Distance(h.base,p.p)<2.2f)return false;
         for(const auto&sw:l.switches)if(Vector3Distance(h.base,sw.p)<2.2f)return false;
