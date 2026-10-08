@@ -1,7 +1,7 @@
 NEON VAULT TEXTURE BANK — BUILD METRICS
 =======================================
 
-Runtime material count: 31
+Runtime material count: 28
 Texture target: 25 MB+ shipped asset set
 Primary material format: BMP, 24-bit
 Texture addressing: repeat
@@ -11,7 +11,7 @@ Player radius: 0.34
 Eye offset: 0.62
 Validation grid: 58 x 58 cells
 Floor count: 100
-Material families: 31
+Material families: 28
 
 Material mapping:
 vault_01..vault_10  = theme surfaces
