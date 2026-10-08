@@ -34,7 +34,8 @@ jobs:
           if ($src -notmatch 'Screen::INTRO') { throw "Intro screen missing." }
           if ($src -notmatch 'Clamp\(t/7\.0f') { throw "15-second intro timeline missing." }
           if ($src -notmatch 'MakeThemeSound') { throw "Original runtime soundtrack missing." }
-          if ($src -notmatch 'SetMousePosition\(GetScreenWidth\(\)/2,GetScreenHeight\(\)/2\);\s*DisableCursor\(\)') { throw "Mouse capture routine missing." }
+          if ($src -notmatch 'DisableCursor\(\)') { throw "Native FPS mouse capture routine missing." }
+          if ($src -match 'SetMousePosition\(GetScreenWidth\(\)/2,GetScreenHeight\(\)/2\)') { throw "Cursor-warp FPS mouse path is still present." }
           if ($src -notmatch 'if\(screen!=Screen::PLAYING\)EnsureUIMouse\(mouse\)') { throw "UI mouse separation missing." }
           if ($src -notmatch 'static void ReleaseMouse') { throw "Gameplay mouse release missing." }
           if ($src -notmatch 'DrawIntro3D') { throw "3D intro renderer missing." }
