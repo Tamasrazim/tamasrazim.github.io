@@ -72,7 +72,7 @@ struct Level{
     Vector3 exit{0,0.1f,-25};
 };
 struct Assets{
-    Texture2D floor{},wall{},metal{},hazard{},crystal{},terminal{},sky{};
+    Texture2D floor{},wall{},metal{},hazard{},crystal{},terminal{},sky{},skyPhoto{};
     Sound theme{},pickup{},hit{},click{},complete{};
     Model terminalModel{},drone{};
     bool soundsReady=false,musicReady=false,terminalReady=false,droneReady=false;
@@ -427,6 +427,7 @@ static Assets LoadAssets(bool safeMode){
     a.crystal=Tex("assets/textures/crystal.bmp",Color{55,180,235,255},!safeMode);
     a.terminal=Tex("assets/textures/terminal.bmp",Color{50,180,155,255},!safeMode);
     a.sky=Tex("assets/textures/sky.bmp",Color{5,10,18,255},!safeMode);
+    a.skyPhoto=Tex("assets/sky/tamanna-constellation.jpeg",Color{8,14,24,255},!safeMode);
     if(!safeMode&&IsAudioDeviceReady()){
         if(FileExists("assets/audio/neon-vault-theme.wav"))a.theme=LoadSound("assets/audio/neon-vault-theme.wav");
         if(!IsSoundValid(a.theme))a.theme=MakeThemeSound();
@@ -441,7 +442,7 @@ static Assets LoadAssets(bool safeMode){
 }
 static void UnloadAssets(Assets& a){
     if(a.floor.id)UnloadTexture(a.floor);if(a.wall.id)UnloadTexture(a.wall);if(a.metal.id)UnloadTexture(a.metal);
-    if(a.hazard.id)UnloadTexture(a.hazard);if(a.crystal.id)UnloadTexture(a.crystal);if(a.terminal.id)UnloadTexture(a.terminal);if(a.sky.id)UnloadTexture(a.sky);
+    if(a.hazard.id)UnloadTexture(a.hazard);if(a.crystal.id)UnloadTexture(a.crystal);if(a.terminal.id)UnloadTexture(a.terminal);if(a.sky.id)UnloadTexture(a.sky);if(a.skyPhoto.id)UnloadTexture(a.skyPhoto);
     if(a.terminalReady)UnloadModel(a.terminalModel);if(a.droneReady)UnloadModel(a.drone);
     if(a.soundsReady){UnloadSound(a.pickup);UnloadSound(a.hit);UnloadSound(a.click);UnloadSound(a.complete);}
     if(a.musicReady)UnloadSound(a.theme);
@@ -566,6 +567,7 @@ static bool ObjectiveComplete(const Level& l,int collected,int switchesActive,in
 static void DrawWorld(const Level& l,const Assets& a,const Vector3& player,float yaw,float pitch,float bob,const Settings& s,float scan){
     Camera3D cam{};cam.position=Vector3Add(player,V(0,0.62f+bob,0));cam.target=Vector3Add(cam.position,V(sinf(yaw)*cosf(pitch),sinf(pitch),cosf(yaw)*cosf(pitch)));cam.up=V(0,1,0);cam.fovy=s.fov;cam.projection=CAMERA_PERSPECTIVE;
     BeginMode3D(cam);
+    if(a.skyPhoto.id)DrawBillboard(cam,a.skyPhoto,V(0,11.0f,-24.5f),11.0f,Color{235,245,255,225});
     DrawTexturedBox(a.floor,V(0,-0.05f,0),V(58,0.1f,58),WHITE,2.1f);
     for(const auto& w:l.walls){
         Texture2D t=w.material==2?a.metal:a.wall;
