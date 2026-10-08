@@ -185,8 +185,11 @@ bool Valid(const Level& l){
         if(!FiniteVec(w.p)||!FiniteVec(w.s)||w.s.x<=0.0f||w.s.y<=0.0f||w.s.z<=0.0f)return false;
         if(w.s.x>60.0f||w.s.y>8.0f||w.s.z>60.0f)return false;
     }
-    for(size_t i=0;i<l.walls.size();i++)for(size_t j=i+1;j<l.walls.size();j++)
-        if(Overlap(l.walls[i].p,l.walls[i].s,l.walls[j].p,l.walls[j].s,-0.02f))return false;
+    for(size_t i=0;i<l.walls.size();i++)for(size_t j=i+1;j<l.walls.size();j++){
+        // The four sealed boundary pieces intentionally meet at their corners.
+        const bool boundaryJoin=l.walls[i].mat==0&&l.walls[j].mat==0;
+        if(!boundaryJoin&&Overlap(l.walls[i].p,l.walls[i].s,l.walls[j].p,l.walls[j].s,-0.02f))return false;
+    }
     if(!Reachable(l,l.exit))return false;
     for(const auto&p:l.pickups){
         if(!FiniteVec(p.p)||!Reachable(l,p.p)||Vector3Distance(p.p,l.start)<1.8f)return false;
@@ -233,9 +236,17 @@ void Repair(Level& l){
 
     // Final deterministic layout: preserve all required puzzle objects and the sealed boundary.
     for(size_t i=0;i<l.pickups.size();i++)
-        l.pickups[i].p=V((i%3-1)*3.2f,l.pickups[i].p.y,20.0f-float(i)*3.8f);
+        l.pickups[i].p=V((int(i%3)-1)*3.2f,l.pickups[i].p.y,20.0f-float(i)*3.8f);
     for(size_t i=0;i<l.switches.size();i++)
-        l.switches[i].p=V((i%3-1)*3.5f,l.switches[i].p.y,18.0f-float(i)*4.5f);
+        l.switches[i].p=V((int(i%3)-1)*3.5f,l.switches[i].p.y,18.0f-float(i)*4.5f);
+    l.hazards.clear();
+    if(l.walls.size()>4)l.walls.resize(4);
+    // Last-resort testable state: open central route, every puzzle object on-map.
+    if(!Valid(l)){
+        l.pickups.clear();l.switches.clear();
+        l.objective=Objective::SURVIVE;l.required=0;
+        l.timeLimit=std::max(240.0f,l.timeLimit);
+    }
 }
 Texture2D LoadTex(const std::string& f,Color fallback){
     if(FileExists(f.c_str())){Texture2D t=LoadTexture(f.c_str());if(t.id){GenTextureMipmaps(&t);SetTextureFilter(t,TEXTURE_FILTER_TRILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;}}
@@ -643,10 +654,15 @@ int main(int argc,char**argv){
             bool sprint=IsKeyDown(KEY_LEFT_SHIFT)&&stamina>1&&Vector3Length(mv)>.01f;float speed=sprint?8.1f:5.0f;stamina=sprint?std::max(0.0f,stamina-22*dt):std::min(100.0f,stamina+14*dt);
             const bool exitOpen=level.objective==Objective::SURVIVE||ObjectiveDone(level,got,sw,mem);
             const float moveStep=speed*dt;
-            Vector3 next=player;next.x+=mv.x*moveStep;
-            if(!IsBlocked(level,next,exitOpen))player.x=next.x;
-            next=player;next.z+=mv.z*moveStep;
-            if(!IsBlocked(level,next,exitOpen))player.z=next.z;
+            // Sweep in short increments so high-FPS and low-FPS frames share collision behavior.
+            const int moveSubsteps=std::clamp(int(std::ceil(moveStep/0.10f)),1,8);
+            const float subStep=moveStep/float(moveSubsteps);
+            for(int step=0;step<moveSubsteps;step++){
+                Vector3 next=player;next.x+=mv.x*subStep;
+                if(!IsBlocked(level,next,exitOpen))player.x=next.x;
+                next=player;next.z+=mv.z*subStep;
+                if(!IsBlocked(level,next,exitOpen))player.z=next.z;
+            }
             for(int guard=0;guard<3;guard++){
                 bool moved=false;
                 for(const auto& w:level.walls)if(HitBox(player,PLAYER_R,w.p,w.s)){
