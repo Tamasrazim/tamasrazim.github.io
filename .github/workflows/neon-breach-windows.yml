@@ -96,7 +96,7 @@ jobs:
           Compress-Archive -Path @(
             "projects/razim-fps/build/Release/neo.exe",
             "projects/razim-fps/build/Release/neo_updater.exe",
-            "projects/razim-fps/assets"
+            "projects/razim-fps/build/Release/assets"
           ) -DestinationPath "NEO-Portable.zip" -Force
 
       - name: Verify installer outputs
