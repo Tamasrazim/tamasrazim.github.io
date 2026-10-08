@@ -80,6 +80,14 @@ h1{font-size:clamp(48px,8vw,108px);line-height:.82;letter-spacing:-.075em;margin
 .kv strong{font-size:12px;word-break:break-word}
 .notice{padding:12px 14px;border:1px solid #37372e;border-radius:8px;background:#11110d;color:#c4c49b;margin-bottom:14px}
 .notice strong{color:#f2f2d0}
+.f75-reference{display:grid;grid-template-columns:minmax(260px,.9fr) 1.1fr;gap:16px;align-items:stretch}
+.f75-reference-photo{border:1px solid #262626;border-radius:10px;overflow:hidden;background:#050505}
+.f75-reference-photo img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}
+.f75-reference-cap{padding:8px 10px;border-top:1px solid #222;color:#666;font-size:9px;letter-spacing:.03em}
+.f75-reference-notes{display:flex;flex-direction:column;gap:10px;justify-content:center}
+.f75-reference-notes p{margin:0;color:#999;max-width:60ch}
+.f75-reference-notes .kv{margin:4px 0}
+@media(max-width:900px){.f75-reference{grid-template-columns:1fr}}
 footer{border-top:1px solid var(--line);padding:24px 0 36px;color:#666;display:flex;justify-content:space-between;gap:20px;font-size:10px}
 @media(max-width:900px){.hero,.grid2{grid-template-columns:1fr}.effectGrid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:680px){.shell{width:min(100% - 18px,1320px)}.topin{min-height:60px}.nav button{padding:6px 7px}.heroMain{padding:23px}.heroMain h1{font-size:64px}.keyboard{gap:4px;grid-auto-rows:minmax(36px,1fr)}.key{font-size:8px;padding:5px 2px}.row{grid-template-columns:1fr}}
@@ -156,6 +164,27 @@ footer{border-top:1px solid var(--line);padding:24px 0 36px;color:#666;display:f
         </div>
       </article>
     </div>
+    <article class="card panel" style="margin-top:14px">
+      <h2>HARDWARE REFERENCE</h2>
+      <div class="f75-reference">
+        <div class="f75-reference-photo">
+          <img src="../../aula-f75-pro-wireless-mechanical-keyboard-10-700x700.jpg.webp" alt="AULA F75 Pro wireless mechanical keyboard reference photo" loading="lazy">
+          <div class="f75-reference-cap">Repository reference asset · AULA F75 Pro · 700×700 source</div>
+        </div>
+        <div class="f75-reference-notes">
+          <div class="badge ok">reference linked</div>
+          <p>The physical photo is kept as a visual reference beside the live virtual matrix. The virtual layout remains interactive and independent from the source image.</p>
+          <div class="kv">
+            <div><small>Source</small><strong>repo root asset</strong></div>
+            <div><small>View</small><strong>photo + virtual matrix</strong></div>
+            <div><small>Input</small><strong>offline / WebHID</strong></div>
+            <div><small>Writes</small><strong>gated</strong></div>
+          </div>
+          <a class="btn" href="../../aula-f75-pro-wireless-mechanical-keyboard-10-700x700.jpg.webp" target="_blank" rel="noopener">Open original image</a>
+        </div>
+      </div>
+    </article>
+
     <article class="card panel" style="margin-top:14px">
       <h2>EVENT STREAM</h2>
       <div id="consoleA" class="console">F75 PRO CONTROL DECK ready.
