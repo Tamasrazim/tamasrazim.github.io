@@ -247,7 +247,15 @@ Sound MakeBeatSound(){
     Wave w{};w.frameCount=frames;w.sampleRate=sr;w.sampleSize=16;w.channels=channels;w.data=data;
     Sound out=LoadSoundFromWave(w);UnloadWave(w);return out;
 }
-void UnloadAssets(Assets&a){for(auto&t:a.tex)if(t.id)UnloadTexture(t);if(IsSoundValid(a.music))UnloadSound(a.music);if(IsSoundValid(a.beat))UnloadSound(a.beat);if(IsSoundValid(a.pickup))UnloadSound(a.pickup);if(IsSoundValid(a.hit))UnloadSound(a.hit);if(IsSoundValid(a.click))UnloadSound(a.click);if(IsSoundValid(a.complete))UnloadSound(a.complete);}
+
+void ApplyAudioVolumes(const Assets& a,const Settings& s){
+    if(IsSoundValid(a.music))SetSoundVolume(a.music,s.music);
+    if(IsSoundValid(a.beat))SetSoundVolume(a.beat,s.music*0.38f);
+    if(IsSoundValid(a.pickup))SetSoundVolume(a.pickup,s.sfx);
+    if(IsSoundValid(a.hit))SetSoundVolume(a.hit,s.sfx);
+    if(IsSoundValid(a.click))SetSoundVolume(a.click,s.sfx);
+    if(IsSoundValid(a.complete))SetSoundVolume(a.complete,s.sfx);
+}void UnloadAssets(Assets&a){for(auto&t:a.tex)if(t.id)UnloadTexture(t);if(IsSoundValid(a.music))UnloadSound(a.music);if(IsSoundValid(a.beat))UnloadSound(a.beat);if(IsSoundValid(a.pickup))UnloadSound(a.pickup);if(IsSoundValid(a.hit))UnloadSound(a.hit);if(IsSoundValid(a.click))UnloadSound(a.click);if(IsSoundValid(a.complete))UnloadSound(a.complete);}
 bool Btn(Rectangle r){return CheckCollisionPointRec(GetMousePosition(),r)&&IsMouseButtonPressed(MOUSE_BUTTON_LEFT);}
 void BtnDrawEx(Rectangle r,const char*s,Color accent,bool selected=false){
 
@@ -546,7 +554,7 @@ int main(int argc,char**argv){
                                 case 2:save.settings.fov=Clamp(save.settings.fov+5,60,105);break;
                                 case 3:save.settings.hints=!save.settings.hints;break;
                                 case 4:save.settings.shake=!save.settings.shake;break;
-                                case 5:save.settings.music=Clamp(save.settings.music+0.05f,0.0f,1.0f);SetSoundVolume(assets.music,save.settings.music);SetSoundVolume(assets.beat,save.settings.music*0.42f);break;
+                                case 5:save.settings.music=Clamp(save.settings.music+0.05f,0.0f,1.0f);ApplyAudioVolumes(assets,save.settings);break;
                                 case 6:save.settings.sfx=Clamp(save.settings.sfx+0.05f,0.0f,1.0f);break;
                                 case 7:save.settings.crosshair=(save.settings.crosshair+1)%3;break;
                                 case 8:save.settings.perf=!save.settings.perf;break;
