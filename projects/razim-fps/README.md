@@ -40,4 +40,4 @@ Validation checks all 100 generated floors for wall overlap, objective reachabil
 
 ## Asset budget
 
-The shipped game asset set is intentionally just over the 25 MB target: about 26,459,400 bytes before the native executable/updater are added, with the executable pushing the installed payload above 25 MB. Procedural source seeds remain in the repository but are not copied into the runtime package.
+The generated 30-material texture bank plus audio measures 25,436,020 bytes (25.44 MB decimal / 24.26 MiB) in the Windows asset audit, meeting the 25 MB decimal target before the supporting legacy textures, executable, and updater are counted. Procedural source seeds remain in the repository but are not copied into the runtime package.
