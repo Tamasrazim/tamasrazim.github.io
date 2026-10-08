@@ -52,6 +52,7 @@ struct Assets{
 };
 
 Vector3 V(float x,float y,float z){return{x,y,z};}
+float Ease(float t){t=Clamp(t,0.0f,1.0f);return t*t*(3.0f-2.0f*t);}
 Color Theme(int t){
     static const Color c[10]={{55,210,255,255},{110,130,255,255},{50,235,170,255},{255,190,70,255},{255,80,145,255},
                               {185,105,255,255},{65,235,230,255},{255,105,65,255},{135,225,90,255},{225,225,255,255}};
@@ -133,7 +134,7 @@ Level BuildLevel(int id){
             l.required=4;for(int i=0;i<3;i++)l.pickups.push_back({Safe(l,V((i-1)*2.6f,0.8f,zs[i]),0.5f,130+i),0,0,false});
             for(int i=0;i<3;i++)l.switches.push_back({Safe(l,V((i-1)*2.5f,0.9f,zs[i+3]),0.65f,150+i),false});
             l.pickups.push_back({Safe(l,V(0,0.8f,zs[6]),0.5f,170),1,0,false});
-            for(int i=0;i<4;i++)l.pickups.push_back({Safe(l,V((i%3-1)*2.5f,0.72f,zs[(i+3)%8]),0.5f,180+i),2,i+1,false});break;
+            std::array<Vector3,4> memPos={V(-2.8f,0.72f,-13),V(2.8f,0.72f,-13),V(-2.8f,0.72f,-19),V(2.8f,0.72f,-19)};for(int i=0;i<4;i++)l.pickups.push_back({Safe(l,memPos[i],0.5f,180+i),2,i+1,false});break;
         case Objective::SURVIVE:l.required=0;break;
     }
     int hz=std::max(2,1+l.tier/2);
@@ -202,6 +203,21 @@ void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,flo
     Camera3D c{};c.position=Vector3Add(player,V(0,0.62f+bob,0));c.target=Vector3Add(c.position,V(sinf(yaw)*cosf(pitch),sinf(pitch),cosf(yaw)*cosf(pitch)));c.up=V(0,1,0);c.fovy=s.fov;c.projection=CAMERA_PERSPECTIVE;BeginMode3D(c);
     Box(a.tex[l.theme%TEXTURES],V(0,-.05f,0),V(58,.1f,58),WHITE);
     for(size_t i=0;i<l.walls.size();i++){const auto&w=l.walls[i];Box(a.tex[(l.theme*3+int(i)+w.mat)%TEXTURES],w.p,w.s,WHITE);DrawCubeWires(w.p,w.s.x,w.s.y,w.s.z,Color{60,95,115,150});}
+    for(int i=-4;i<=4;i++){
+        float x=float(i)*6.0f;
+        Box(a.tex[26],V(x,2.9f,-27.9f),V(0.16f,5.6f,0.22f),WHITE);
+        Box(a.tex[26],V(x,2.9f,27.9f),V(0.16f,5.6f,0.22f),WHITE);
+    }
+    for(int i=-5;i<=5;i++){
+        float z=float(i)*4.8f;
+        Box(a.tex[27],V(-27.9f,0.22f,z),V(0.22f,0.12f,3.4f),WHITE);
+        Box(a.tex[27],V(27.9f,0.22f,z),V(0.22f,0.12f,3.4f),WHITE);
+    }
+    for(int i=0;i<4;i++){
+        float a0=TAU*i/4.0f+float(GetTime())*0.25f;
+        Vector3 p=V(l.exit.x+cosf(a0)*2.5f,0.28f,l.exit.z+sinf(a0)*2.5f);
+        DrawCylinder(p,0.10f,0.16f,0.22f,8,exitOpen?GREEN:Theme(l.theme));
+    }
     bool exitOpen=l.objective==Objective::SURVIVE||ObjectiveDone(l,got,sw,mem);
     if(!exitOpen){Box(a.tex[18],V(l.exit.x,1.25f,l.exit.z),V(1.6f,2.5f,5.5f),WHITE);DrawCubeWires(V(l.exit.x,1.25f,l.exit.z),1.65f,2.55f,5.55f,ORANGE);}
     else {DrawCylinder(l.exit,1.6f,1.6f,.18f,32,GREEN);DrawCylinderWires(l.exit,1.8f,1.8f,.22f,32,RAYWHITE);}
