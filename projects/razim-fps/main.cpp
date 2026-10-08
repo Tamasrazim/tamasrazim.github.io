@@ -590,7 +590,7 @@ int main(int argc,char** argv){
     Vector3 player=level.start,velocity{};
     float yaw=3.14159265359f,pitch=0,stamina=100,health=100,timeLeft=0,bobPhase=0,scanTimer=0,hintTimer=0,introElapsed=0;
     int collected=0,switchesActive=0,memoryStep=0,deaths=0,settingsRow=0;
-    bool grounded=true,quit=false;
+    bool grounded=true,quit=false;Screen settingsReturn=Screen::MENU;
 
     auto ClickSound=[&](){if(assets.soundsReady){SetSoundVolume(assets.click,save.settings.sfx);PlaySound(assets.click);}};
     auto StartLevel=[&](int id){
@@ -611,7 +611,7 @@ int main(int argc,char** argv){
         }else if(screen==Screen::MENU){
             if(Button({GetScreenWidth()/2.0f-190,235,380,56})){StartLevel(1);ClickSound();}
             else if(Button({GetScreenWidth()/2.0f-190,301,380,56})){screen=Screen::LEVELS;ClickSound();}
-            else if(Button({GetScreenWidth()/2.0f-190,367,380,56})){screen=Screen::SETTINGS;ClickSound();}
+            else if(Button({GetScreenWidth()/2.0f-190,367,380,56})){settingsReturn=Screen::MENU;screen=Screen::SETTINGS;ClickSound();}
             else if(Button({GetScreenWidth()/2.0f-190,433,380,56})){screen=Screen::CREDITS;ClickSound();}
             else if(Button({GetScreenWidth()/2.0f-190,499,380,56}))quit=true;
         }else if(screen==Screen::LEVELS){
@@ -716,8 +716,8 @@ int main(int argc,char** argv){
         }else if(screen==Screen::PAUSED){
             if(IsKeyPressed(KEY_ESCAPE)){screen=Screen::PLAYING;CaptureMouse(mouse);}
             float cx=GetScreenWidth()/2.0f-190;
-            if(Button({cx,330,380,56})){StartLevel(level.id);ClickSound();}
-            else if(Button({cx,396,380,56})){screen=Screen::SETTINGS;ClickSound();}
+            if(Button({cx,330,380,56})){screen=Screen::PLAYING;CaptureMouse(mouse);ClickSound();}
+            else if(Button({cx,396,380,56})){settingsReturn=Screen::PAUSED;screen=Screen::SETTINGS;ClickSound();}
             else if(Button({cx,462,380,56})){screen=Screen::MENU;ClickSound();}
         }else if(screen==Screen::GAMEOVER){
             if(IsKeyPressed(KEY_R)||Button({GetScreenWidth()/2.0f-190,465,380,56}))StartLevel(level.id);
