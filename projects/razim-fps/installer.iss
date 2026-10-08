@@ -1,6 +1,6 @@
 ; NEON VAULT — custom Windows installer / uninstaller
 #define AppName "NEON VAULT"
-#define AppVersion "5.0"
+#define AppVersion "5.1"
 #define AppPublisher "Tamasrazim"
 #define AppExeName "neon_vault.exe"
 #define UpdaterExeName "neon_vault_updater.exe"
@@ -122,7 +122,7 @@ begin
   VaultBuild.Parent := WizardForm;
   VaultBuild.Left := ScaleX(520);
   VaultBuild.Top := ScaleY(28);
-  VaultBuild.Caption := '25 MB+  /  32 MATERIAL CORE';
+  VaultBuild.Caption := '25 MB+  /  28 MATERIAL CORE';
   VaultBuild.Font.Name := 'Consolas';
   VaultBuild.Font.Size := 8;
   VaultBuild.Font.Style := [fsBold];
@@ -142,7 +142,7 @@ end;
 
 procedure InitializeWizard;
 begin
-  WizardForm.Caption := 'NEON VAULT  •  DEPLOYMENT CONSOLE  //  5.0';
+  WizardForm.Caption := 'NEON VAULT  •  DEPLOYMENT CONSOLE  //  5.1';
   WizardForm.Color := clBlack;
   WizardForm.CancelButton.Caption := 'ABORT';
   WizardForm.CancelButton.Font.Color := clRed;
