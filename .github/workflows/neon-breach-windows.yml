@@ -78,6 +78,11 @@ jobs:
             Write-Warning "Validator returned exit code $exitCode despite reporting PASS; continuing with the verified PASS marker."
           }
 
+      - name: Audit generated runtime assets and installer
+        shell: pwsh
+        run: |
+          & "projects/razim-fps/tools/neon-vault-audit.ps1"
+
       - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup -y --no-progress
@@ -94,7 +99,7 @@ jobs:
           Compress-Archive -Path @(
             "projects/razim-fps/build/Release/neon_vault.exe",
             "projects/razim-fps/build/Release/neon_vault_updater.exe",
-            "projects/razim-fps/assets"
+            "projects/razim-fps/build/Release/assets"
           ) -DestinationPath "NEON-VAULT-Portable.zip" -Force
 
       - name: Verify installer outputs
