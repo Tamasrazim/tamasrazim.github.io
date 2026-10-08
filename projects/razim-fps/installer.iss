@@ -1,6 +1,6 @@
 ; NEON VAULT — custom Windows installer / uninstaller
 #define AppName "NEON VAULT"
-#define AppVersion "4.2"
+#define AppVersion "4.3"
 #define AppPublisher "Tamasrazim"
 #define AppExeName "neon_vault.exe"
 #define UpdaterExeName "neon_vault_updater.exe"
@@ -79,7 +79,7 @@ begin
   VaultTag.Parent := WizardForm;
   VaultTag.Left := ScaleX(36);
   VaultTag.Top := ScaleY(58);
-  VaultTag.Caption := 'INSTALL  /  DEPLOY  /  ENTER THE VAULT';
+  VaultTag.Caption := 'INSTALL  /  DEPLOY  /  ENTER THE VAULT  /  STABILITY PASS';
   VaultTag.Font.Name := 'Consolas';
   VaultTag.Font.Size := 9;
   VaultTag.Font.Color := clSilver;
@@ -174,7 +174,7 @@ begin
   UnVaultTag.Parent := UninstallProgressForm;
   UnVaultTag.Left := ScaleX(32);
   UnVaultTag.Top := ScaleY(53);
-  UnVaultTag.Caption := 'VAULT EVACUATION  //  REMOVE GAME FILES';
+  UnVaultTag.Caption := 'VAULT EVACUATION  //  REMOVE GAME FILES  //  CLEAN EXIT';
   UnVaultTag.Font.Name := 'Consolas';
   UnVaultTag.Font.Size := 9;
   UnVaultTag.Font.Color := clSilver;
