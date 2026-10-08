@@ -110,7 +110,7 @@ jobs:
           if (!(Test-Path $game)) { throw "Game was not generated: $game" }
           if ((Get-Item $installer).Length -lt 100KB) { throw "Installer is suspiciously small." }
           if ((Get-Item $portable).Length -lt 100KB) { throw "Portable package is suspiciously small." }
-          if (!(Test-Path "projects/razim-fps/assets/audio/neo-theme.wav")) { throw "Final instrumental soundtrack is missing." }
+          if (!(Test-Path "projects/razim-fps/assets/audio/neon-vault-theme.wav")) { throw "Final instrumental soundtrack is missing." }
           Write-Host "Installer: $((Get-Item $installer).Length) bytes"
           Write-Host "Portable:  $((Get-Item $portable).Length) bytes"
           Write-Host "Updater:   $((Get-Item $updater).Length) bytes"
