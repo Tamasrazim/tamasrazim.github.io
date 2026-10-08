@@ -21,7 +21,7 @@
   panel.appendChild(box);
 
   const getMap = () => JSON.parse(localStorage.getItem("f75pro:mappings") || "{}");
-  const setMap = map => localStorage.setItem("f75pro:mappings", JSON.stringify(map));
+  const setMap = map => { localStorage.setItem("f75pro:mappings", JSON.stringify(map)); window.dispatchEvent(new Event("f75:mappings-changed")); };
   const selectedIndex = () => window.__f75Selected && Number.isInteger(window.__f75Selected.index) ? window.__f75Selected.index : null;
   const keyLabel = idx => { const e = keyboard.querySelector("[data-matrix=\"" + idx + "\"] .lab"); return e ? e.textContent : "Matrix #" + idx; };
   const status = msg => { box.querySelector("#f75EditorStatus").textContent = msg; };
