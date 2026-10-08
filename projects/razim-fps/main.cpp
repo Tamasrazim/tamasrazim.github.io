@@ -804,8 +804,14 @@ int main(int argc,char** argv){
             if(IsKeyPressed(KEY_ESCAPE)||IsMouseButtonPressed(MOUSE_BUTTON_LEFT))screen=Screen::MENU;
         }else if(screen==Screen::PLAYING){
             if(IsKeyPressed(KEY_ESCAPE)){CaptureMouse(false);screen=Screen::PAUSED;}
-            if(mouseCaptured&&!IsWindowFocused())CaptureMouse(false);
-            if(!mouseCaptured&&IsWindowFocused()&&IsMouseButtonPressed(MOUSE_BUTTON_LEFT))CaptureMouse(true);
+            if(!IsWindowFocused())CaptureMouse(false);
+
+            // Mouse is never captured automatically. Hold RMB to enter look mode.
+            if(IsWindowFocused()&&IsMouseButtonDown(MOUSE_BUTTON_RIGHT)){
+                if(!mouseCaptured)CaptureMouse(true);
+            }else if(mouseCaptured){
+                CaptureMouse(false);
+            }
 
             if(mouseCaptured){
                 Vector2 md=GetMouseDelta();
@@ -1091,7 +1097,7 @@ int main(int argc,char** argv){
             DrawRectangle(24,GetScreenHeight()-58,180,9,Color{18,24,32,255});
             DrawRectangle(24,GetScreenHeight()-58,int(180*health/100.0f),9,RED);
             DrawText(TextFormat("STAMINA %03d",int(stamina)),224,GetScreenHeight()-62,14,SKYBLUE);
-            if(save.settings.hints&&!mouseCaptured&&screen==Screen::PLAYING)Center("CLICK TO CAPTURE MOUSE  •  ESC PAUSE",GetScreenHeight()/2+70,15,RAYWHITE);
+            if(save.settings.hints&&!mouseCaptured&&screen==Screen::PLAYING)Center("HOLD RMB TO LOOK  •  ESC PAUSE",GetScreenHeight()/2+70,15,RAYWHITE);
             if(mouseCaptured&&screen==Screen::PLAYING){
                 float nearest=2.25f;
                 for(const auto& sw:level.switches)if(!sw.active)nearest=std::min(nearest,Vector3Distance(player,sw.pos));
