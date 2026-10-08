@@ -372,6 +372,8 @@ static float EaseCubic(float t){
     return t*t*(3.0f-2.0f*t);
 }
 
+static void DrawCrystal3D(Vector3 c,float radius,float height,float rotation,Color body);
+
 static void DrawCinematicIntro(float t,const Assets& a){
     const int w=GetScreenWidth(),h=GetScreenHeight();
     const float p=Clamp(t/15.0f,0.0f,1.0f);
