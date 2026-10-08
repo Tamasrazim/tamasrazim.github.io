@@ -46,7 +46,7 @@ It is organized as a static-first GitHub Pages repository with self-contained pu
 | `/projects/code-motion/batch/` | TRILYVA batch surface |
 | `/projects/code-to-eps/` | Browser vector/EPS tooling |
 | `/projects/code-to-svg/` | Browser SVG tooling |
-| `/projects/razim-fps/` | NEO |
+| `/projects/neo/` | NEO |
 | `/projects/bncagrocare/` | BNC Agro Care |
 | `/projects/repo-token-meter/` | Repository Token Meter |
 | `/asset-vault/` | Stock Asset Vault |
@@ -79,7 +79,9 @@ The repository is divided into clear zones rather than mixing everything togethe
 
 `/projects/code-to-svg/` — SVG tooling.
 
-`/projects/razim-fps/` — NEO native Windows game, installer and release packaging.
+`/projects/neo/` — NEO native Windows game landing page and release surface.
+
+`/projects/razim-fps/` — Legacy-compatible native source/build tree for NEO.
 
 `/projects/bncagrocare/` — BNC Agro Care application and supporting material.
 
@@ -117,9 +119,7 @@ The repository keeps its renderer, library, batch surface and related project ma
 
 Native Windows first-person puzzle game with 100 generated floors, settings, installer packaging, updater support and GitHub Actions release automation.
 
-Latest production release: **neon-vault-116**
-
-[Windows installer](https://github.com/Tamasrazim/tamasrazim.github.io/releases/download/neon-vault-116/NEON-VAULT-Setup.exe) · [Release page](https://github.com/Tamasrazim/tamasrazim.github.io/releases/tag/neon-vault-116)
+Windows releases are built and published by GitHub Actions under the NEO release naming.
 
 ### BNC Agro Care
 
