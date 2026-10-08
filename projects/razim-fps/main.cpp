@@ -554,6 +554,8 @@ static void DrawWorld(const Level& l,const Assets& a,const Vector3& player,float
     EndMode3D();
 }
 
+}
+
 int main(int argc,char** argv){
     const bool safeMode=argc>1&&std::strcmp(argv[1],"--safe-mode")==0;
     const bool startupTest=argc>1&&std::strcmp(argv[1],"--startup-test")==0;
