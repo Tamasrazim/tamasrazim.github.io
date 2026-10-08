@@ -1,6 +1,6 @@
 ; NEON VAULT Windows installer
 #define AppName "NEON VAULT"
-#define AppVersion "4.0"
+#define AppVersion "4.1"
 #define AppPublisher "Tamasrazim"
 #define AppExeName "neon_vault.exe"
 #define UpdaterExeName "neon_vault_updater.exe"
@@ -16,11 +16,15 @@ OutputDir=installer-output
 OutputBaseFilename=NEON-VAULT-Setup
 Compression=lzma2
 SolidCompression=yes
-WizardStyle=modern
+WizardStyle=modern dynamic dark polar includetitlebar hidebevels
+WizardBackColor=#03080D
+WizardBackColorDynamicDark=#02050A
+WizardSizePercent=115,115
 PrivilegesRequired=admin
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64
-UninstallDisplayIcon={app}\{#AppExeName}
+UninstallDisplayIcon={app}\neon-vault.ico
+UninstallDisplayName=NEON VAULT — Uninstall
 SetupIconFile=neon-vault.ico
 
 [Files]
@@ -35,3 +39,18 @@ Name: "{commondesktop}\NEON VAULT"; Filename: "{app}\{#UpdaterExeName}"
 
 [Run]
 Filename: "{app}\{#UpdaterExeName}"; Description: "Launch NEON VAULT"; Flags: nowait postinstall skipifsilent
+
+[Code]
+procedure InitializeWizard;
+begin
+  WizardForm.Caption := 'NEON VAULT • Installer';
+  WizardForm.NextButton.Caption := 'CONTINUE';
+  WizardForm.BackButton.Caption := 'BACK';
+  WizardForm.CancelButton.Caption := 'CANCEL';
+end;
+
+function InitializeUninstall(): Boolean;
+begin
+  UninstallProgressForm.Caption := 'NEON VAULT • Uninstaller';
+  Result := True;
+end;
