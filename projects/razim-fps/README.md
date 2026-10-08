@@ -12,7 +12,7 @@ NEO is a native Windows x64 first-person puzzle game built around a deterministi
 - Main menu, pause menu, settings, credits, completion screen and game-over state
 - Windowed, borderless and fullscreen display modes
 - Mouse sensitivity, Y inversion, FOV, hints, screen shake, SFX/music volume, crosshair and performance settings
-- Original 30-second looping instrumental soundtrack generated locally by the game at startup; no vocals
+- Original 24-second looping instrumental soundtrack generated locally by the game at startup; no vocals
 - Cinematic 15-second in-engine intro with deterministic 3D camera motion, procedural lighting accents and skip controls
 - Windows x64 installer, direct executable and updater
 
