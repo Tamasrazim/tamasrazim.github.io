@@ -406,7 +406,7 @@ static void DrawCinematicIntro(float t,const Assets& a){
     cam.projection=CAMERA_PERSPECTIVE;
 
     BeginMode3D(cam);
-    DrawPlane(V(0,-0.05f,0),V(58,58),Color{4,10,18,255});
+    DrawPlane(V(0,-0.05f,0),Vector2{58.0f,58.0f},Color{4,10,18,255});
     for(int i=-5;i<=5;i++){
         DrawCubeWires(V(float(i)*5.5f,0,float(-18)),52.0f,0.05f,0.05f,Color{40,95,120,120});
         DrawCubeWires(V(float(-18),0,float(i)*5.5f),0.05f,0.05f,52.0f,Color{40,95,120,120});
