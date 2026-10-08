@@ -379,6 +379,7 @@ int main(int argc,char**argv){
                                 case 7:save.settings.display=(save.settings.display+1)%3;SetDisplay(save.settings.display);break;
                                 case 8:save=Save{};SaveGame(save);SetDisplay(0);settingsRow=0;break;
                             }
+                            if(IsSoundValid(assets.click)){SetSoundVolume(assets.click,0.65f);PlaySound(assets.click);}
                         }
                     }
                 }
