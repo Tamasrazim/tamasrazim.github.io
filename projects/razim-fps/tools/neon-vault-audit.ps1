@@ -25,6 +25,12 @@ if ($src -notmatch 'IsMouseButtonPressed\(MOUSE_BUTTON_LEFT\)') { throw "Clickab
 if ($src -notmatch 'DrawBrokenPiece') { throw "Broken-piece animation path missing." }
 if ($src -notmatch 'float ux=std::max\(1.0f,s.x/2.2f\)') { throw "Dimension-aware material tiling missing." }
 if ($src -notmatch 'Vector3Distance\(h.base,l.start\)<6.0f') { throw "Hazard start-clearance validation missing." }
+if ($src -notmatch 'boundaryJoin') { throw "Intentional boundary-corner joins are not accounted for." }
+if ($src -match '\\(i%3-1\\)\\*3\\.[25]f') { throw "Unsigned size_t fallback coordinate underflow detected." }
+if ($src -notmatch 'int\\(i%3\\)-1') { throw "Signed fallback coordinate calculation missing." }
+if ($src -notmatch 'moveSubsteps') { throw "Swept movement collision protection missing." }
+if ($src -notmatch 'memoryOrder') { throw "Memory sequence validation missing." }
+if ($src -notmatch 'crystals<3\\|\\|int\\(l\\.switches\\.size\\(\\)\\)<3') { throw "Combo objective completeness validation missing." }
 if ($iss -notmatch 'SetupIconFile=neon-vault.ico') { throw "Custom setup icon missing." }
 if ($iss -notmatch 'UninstallDisplayIcon=\{app\}\\neon-vault.ico') { throw "Custom uninstall icon missing." }
 if ($iss -notmatch 'WizardForm.Caption') { throw "Custom installer branding missing." }
