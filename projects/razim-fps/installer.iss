@@ -122,7 +122,7 @@ begin
   VaultBuild.Parent := WizardForm;
   VaultBuild.Left := ScaleX(520);
   VaultBuild.Top := ScaleY(28);
-  VaultBuild.Caption := '25 MB+  /  28 MATERIAL CORE';
+  VaultBuild.Caption := '25 MB+  /  30 MATERIAL CORE';
   VaultBuild.Font.Name := 'Consolas';
   VaultBuild.Font.Size := 8;
   VaultBuild.Font.Style := [fsBold];
