@@ -132,11 +132,15 @@ Level BuildLevel(int id){
         case Objective::SWITCHES:l.required=std::min(7,3+l.tier/2);for(int i=0;i<l.required;i++)l.switches.push_back({Safe(l,V((i&1)?2.4f:-2.4f,0.9f,zs[i%8]),0.65f,40+i),false});break;
         case Objective::KEYCARD:l.required=1+l.tier/3;for(int i=0;i<l.required;i++)l.pickups.push_back({Safe(l,V((i%3-1)*1.7f,0.8f,zs[i%8]),0.5f,70+i),1,0,false});break;
         case Objective::MEMORY:l.required=std::min(9,4+l.tier);for(int i=0;i<l.required;i++)l.pickups.push_back({Safe(l,V((i%3-1)*2.5f,0.72f,zs[i%8]),0.5f,100+i),2,i+1,false});break;
-        case Objective::COMBO:
-            l.required=4;for(int i=0;i<3;i++)l.pickups.push_back({Safe(l,V((i-1)*2.6f,0.8f,zs[i]),0.5f,130+i),0,0,false});
+        case Objective::COMBO:{
+            l.required=4;
+            for(int i=0;i<3;i++)l.pickups.push_back({Safe(l,V((i-1)*2.6f,0.8f,zs[i]),0.5f,130+i),0,0,false});
             for(int i=0;i<3;i++)l.switches.push_back({Safe(l,V((i-1)*2.5f,0.9f,zs[i+3]),0.65f,150+i),false});
             l.pickups.push_back({Safe(l,V(0,0.8f,zs[6]),0.5f,170),1,0,false});
-            std::array<Vector3,4> memPos={V(-2.8f,0.72f,-13),V(2.8f,0.72f,-13),V(-2.8f,0.72f,-19),V(2.8f,0.72f,-19)};for(int i=0;i<4;i++)l.pickups.push_back({Safe(l,memPos[i],0.5f,180+i),2,i+1,false});break;
+            const std::array<Vector3,4> memPos={V(-2.8f,0.72f,-13),V(2.8f,0.72f,-13),V(-2.8f,0.72f,-19),V(2.8f,0.72f,-19)};
+            for(int i=0;i<4;i++)l.pickups.push_back({Safe(l,memPos[i],0.5f,180+i),2,i+1,false});
+            break;
+        }
         case Objective::SURVIVE:l.required=0;break;
     }
     int hz=std::max(2,1+l.tier/2);
