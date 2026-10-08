@@ -26,7 +26,7 @@ constexpr int SAVE_VERSION=3;
 constexpr float PLAYER_RADIUS=0.34f;
 constexpr float PLAYER_HEIGHT=1.8f;
 constexpr float TAU=6.28318530718f;
-constexpr float INTRO_DURATION=7.0f;
+constexpr float INTRO_DURATION=15.0f;
 constexpr float WORLD_HALF=29.0f;
 
 enum class Screen{INTRO,MENU,LEVELS,SETTINGS,CREDITS,PLAYING,PAUSED,COMPLETE,GAMEOVER};
@@ -490,16 +490,16 @@ static void Crosshair(int style){
 }
 
 static void DrawIntro3D(float t,const Assets& a){
-    float p=Clamp(t/7.0f,0,1);int w=GetScreenWidth(),h=GetScreenHeight();
+    float p=Clamp(t/INTRO_DURATION,0,1);int w=GetScreenWidth(),h=GetScreenHeight();
     Camera3D cam{};Vector3 pos{},target{};
-    if(t<2.4f){
-        float u=Ease(t/2.4f);pos=V(0,2.1f,14.0f-26.0f*u);target=V(0,2.0f,-10.0f);
-    }else if(t<4.7f){
-        float u=Ease((t-2.4f)/2.3f);float a0=0.7f+u*TAU*0.72f;float r=10.5f-1.5f*u;
+    if(t<5.0f){
+        float u=Ease(t/5.0f);pos=V(0,2.1f,14.0f-26.0f*u);target=V(0,2.0f,-10.0f);
+    }else if(t<10.0f){
+        float u=Ease((t-5.0f)/5.0f);float a0=0.7f+u*TAU*0.72f;float r=10.5f-1.5f*u;
         pos=V(cosf(a0)*r,4.0f+1.2f*sinf(u*3.14159f),-12.0f+sinf(a0)*r);
         target=V(0,2.0f,-12.0f);
     }else{
-        float u=Ease((t-4.7f)/2.3f);pos=V(0,3.0f,-2.0f-14.0f*u);target=V(0,2.2f,-15.0f);
+        float u=Ease((t-10.0f)/5.0f);pos=V(0,3.0f,-2.0f-14.0f*u);target=V(0,2.2f,-15.0f);
     }
     cam.position=pos;cam.target=target;cam.up=V(0,1,0);cam.fovy=62.0f-7.0f*p;cam.projection=CAMERA_PERSPECTIVE;
     BeginMode3D(cam);
