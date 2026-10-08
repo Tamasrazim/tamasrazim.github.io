@@ -79,7 +79,6 @@ begin
   VaultBrand.Font.Size := 23;
   VaultBrand.Font.Style := [fsBold];
   VaultBrand.Font.Color := clAqua;
-  VaultBrand.Transparent := True;
 
   VaultTag := TNewStaticText.Create(WizardForm);
   VaultTag.Parent := WizardForm;
@@ -89,7 +88,6 @@ begin
   VaultTag.Font.Name := 'Consolas';
   VaultTag.Font.Size := 9;
   VaultTag.Font.Color := clSilver;
-  VaultTag.Transparent := True;
 
   VaultLine := TBevel.Create(WizardForm);
   VaultLine.Parent := WizardForm;
@@ -107,7 +105,6 @@ begin
   VaultStatus.Font.Name := 'Consolas';
   VaultStatus.Font.Size := 8;
   VaultStatus.Font.Color := clAqua;
-  VaultStatus.Transparent := True;
 end;
 
 procedure StyleButtons;
@@ -174,7 +171,6 @@ begin
   UnVaultBrand.Font.Size := 22;
   UnVaultBrand.Font.Style := [fsBold];
   UnVaultBrand.Font.Color := clAqua;
-  UnVaultBrand.Transparent := True;
 
   UnVaultTag := TNewStaticText.Create(UninstallProgressForm);
   UnVaultTag.Parent := UninstallProgressForm;
@@ -184,7 +180,6 @@ begin
   UnVaultTag.Font.Name := 'Consolas';
   UnVaultTag.Font.Size := 9;
   UnVaultTag.Font.Color := clSilver;
-  UnVaultTag.Transparent := True;
 
   UnVaultLine := TBevel.Create(UninstallProgressForm);
   UnVaultLine.Parent := UninstallProgressForm;
