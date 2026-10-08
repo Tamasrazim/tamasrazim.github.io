@@ -152,8 +152,8 @@ bool Valid(const Level& l){
 }
 void Repair(Level& l){while(!Valid(l)&&l.walls.size()>4)l.walls.pop_back();}
 Texture2D LoadTex(const std::string& f,Color fallback){
-    if(FileExists(f.c_str())){Texture2D t=LoadTexture(f.c_str());if(t.id){SetTextureFilter(t,TEXTURE_FILTER_BILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;}}
-    Image im=GenImageColor(64,64,fallback);Texture2D t=LoadTextureFromImage(im);UnloadImage(im);return t;
+    if(FileExists(f.c_str())){Texture2D t=LoadTexture(f.c_str());if(t.id){GenTextureMipmaps(&t);SetTextureFilter(t,TEXTURE_FILTER_TRILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;}}
+    Image im=GenImageColor(64,64,fallback);Texture2D t=LoadTextureFromImage(im);UnloadImage(im);if(t.id){GenTextureMipmaps(&t);SetTextureFilter(t,TEXTURE_FILTER_TRILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);}return t;
 }
 Assets LoadAssets(bool safe){
     Assets a{};
