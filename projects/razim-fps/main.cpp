@@ -44,7 +44,7 @@ struct Level{
     std::vector<Pickup> pickups;
     std::vector<SwitchNode> switches;
     std::vector<Hazard> hazards;
-    Vector3 start{0,EYE_Y,24},exit{0,0.12f,-25};
+    Vector3 start{0,0.9f,24},exit{0,0.12f,-25};
 };
 struct Assets{
     std::array<Texture2D,TEXTURES> tex{};
@@ -137,7 +137,7 @@ Level BuildLevel(int id){
         case Objective::SURVIVE:l.required=0;break;
     }
     int hz=std::max(2,1+l.tier/2);
-    for(int i=0;i<hz;i++){int sg=(i&1)?1:-1;float x=sg*(10+rnd()*14),z=-16+rnd()*30;Vector3 p=Safe(l,V(x,0.55f,z),0.75f,300+i);if(Vector3Distance(p,l.start)<5.0f||Vector3Distance(p,l.exit)<3.5f)p=Safe(l,V(sideSign*15.0f,0.55f,0.0f),0.75f,900+i);l.hazards.push_back({p,p,rnd()*TAU,1.0f+0.04f*l.tier});}
+    for(int i=0;i<hz;i++){int sg=(i&1)?1:-1;float x=sg*(10+rnd()*14),z=-16+rnd()*30;Vector3 p=Safe(l,V(x,0.55f,z),0.75f,300+i);if(Vector3Distance(p,l.start)<5.0f||Vector3Distance(p,l.exit)<3.5f)p=Safe(l,V(((i&1)?1.0f:-1.0f)*15.0f,0.55f,0.0f),0.75f,900+i);l.hazards.push_back({p,p,rnd()*TAU,1.0f+0.04f*l.tier});}
     return l;
 }
 bool Reachable(const Level& l,Vector3 target){
