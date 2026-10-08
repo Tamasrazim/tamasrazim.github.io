@@ -1,4 +1,4 @@
-# NEON VAULT sky assets
+# NEO sky assets
 
 Optional asset: `assets/sky/tamanna.png`.
 
