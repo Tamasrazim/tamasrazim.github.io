@@ -12,8 +12,9 @@ NEON VAULT is a native Windows x64 first-person puzzle game with a deterministic
 - Windowed, borderless and fullscreen display modes
 - Mouse sensitivity, Y inversion, FOV, hints, screen shake, crosshair and performance options
 - 28 dedicated 500×500 procedural material textures plus the original supporting texture set
-- Original instrumental soundtrack plus a layered procedural beat track
+- Original instrumental soundtrack plus a layered procedural beat track that loops independently
 - 4.5-second in-engine 3D intro with skip controls
+- Event-driven fractured-piece animation, interaction bursts, damage feedback and readable hazard motion
 - Windows x64 installer, custom-branded uninstaller, direct executable and updater
 
 ## Mouse behavior
@@ -35,7 +36,7 @@ cmake --build projects/razim-fps/build --config Release --parallel
 projects/razim-fps/build/Release/neon_vault.exe --validate
 ```
 
-Validation checks all 100 generated floors for wall overlap, objective reachability and start-to-exit reachability. Generated levels are repaired before launch if decorative geometry creates an invalid pocket.
+Validation checks all 100 generated floors for wall overlap, objective reachability and start-to-exit reachability. Generated levels are repaired before launch if decorative geometry creates an invalid pocket. Runtime asset audits also verify the 28-texture bank, WAV set, native mouse path and installer references.
 
 ## Asset budget
 
