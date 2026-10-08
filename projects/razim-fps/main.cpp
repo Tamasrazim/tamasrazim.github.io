@@ -647,6 +647,10 @@ int main(int argc,char** argv){
 
     while(!WindowShouldClose()&&!quit){
         float dt=std::min(GetFrameTime(),0.05f);
+        if(!safeMode&&assets.musicReady&&screen!=Screen::INTRO&&!IsSoundPlaying(assets.theme)){
+            SetSoundVolume(assets.theme,save.settings.music);
+            PlaySound(assets.theme);
+        }
         if(screen!=Screen::PLAYING)EnsureUIMouse(mouse);
         else if(IsWindowFocused()){if(!mouse.captured)CaptureMouse(mouse);}else EnsureUIMouse(mouse);
 
@@ -688,7 +692,7 @@ int main(int argc,char** argv){
                             case 3:save.settings.hints=!save.settings.hints;break;
                             case 4:save.settings.shake=!save.settings.shake;break;
                             case 5:save.settings.sfx=Clamp(save.settings.sfx+dir*0.05f,0,1);break;
-                            case 6:save.settings.music=Clamp(save.settings.music+dir*0.05f,0,1);break;
+                            case 6:save.settings.music=Clamp(save.settings.music+dir*0.05f,0,1);if(assets.musicReady)SetSoundVolume(assets.theme,save.settings.music);break;
                             case 7:save.settings.crosshair=(save.settings.crosshair+dir+3)%3;break;
                             case 8:save.settings.displayMode=(save.settings.displayMode+dir+3)%3;SetDisplayMode(save.settings,save.settings.displayMode);break;
                             case 9:save.settings.performance=!save.settings.performance;break;
