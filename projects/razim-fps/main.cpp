@@ -20,7 +20,7 @@ extern void EnsureWorkingDirectory();
 
 namespace {
 constexpr int LEVELS=100;
-constexpr int TEXTURES=28;
+constexpr int TEXTURES=30;
 constexpr float WORLD=29.0f;
 constexpr float PLAYER_R=0.34f;
 constexpr float EYE_Y=1.52f;
