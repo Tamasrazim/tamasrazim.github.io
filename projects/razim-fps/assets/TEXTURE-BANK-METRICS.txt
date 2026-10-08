@@ -12,9 +12,9 @@ Eye offset: 0.62
 Validation grid: 58 x 58 cells
 Floor count: 100
 Material families: 30
-Current measured texture payload after build generation: approximately 23,525,000 bytes
+Current measured generated material payload: 22,501,620 bytes
 Current measured audio payload: 2,934,400 bytes
-Current measured texture+audio payload after build generation: approximately 26,459,400 bytes
+Current measured generated material + audio payload: 25,436,020 bytes (25.44 MB decimal; 24.26 MiB)
 
 Material mapping:
 vault_01..vault_10  = theme surfaces
