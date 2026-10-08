@@ -413,15 +413,23 @@ static void SetDisplayMode(Settings& s,int mode){
 }
 static void CaptureMouse(MouseState& m){
     if(m.captured)return;
-    SetMousePosition(GetScreenWidth()/2,GetScreenHeight()/2);DisableCursor();
-    m.captured=true;m.ignoreNextDelta=true;
+    DisableCursor();
+    m.captured=true;
+    m.ignoreNextDelta=true;
 }
 static void ReleaseMouse(MouseState& m){
-    m.captured=false;m.ignoreNextDelta=false;EnableCursor();SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+    if(!m.captured)return;
+    m.captured=false;
+    m.ignoreNextDelta=false;
+    EnableCursor();
+    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 }
 static void EnsureUIMouse(MouseState& m){
-    if(m.captured)m.captured=false;
-    m.ignoreNextDelta=false;EnableCursor();SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+    if(!m.captured)return;
+    m.captured=false;
+    m.ignoreNextDelta=false;
+    EnableCursor();
+    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 }
 static void CenterText(const char* s,int y,int size,Color c){DrawText(s,(GetScreenWidth()-MeasureText(s,size))/2,y,size,c);}
 static bool Button(Rectangle r){
