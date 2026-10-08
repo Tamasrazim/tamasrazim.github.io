@@ -334,6 +334,7 @@
     if (!input) return;
     S.color = input.value;
     setText("#wirelessColorOut", S.color.toUpperCase());
+    renderLedPreview();
   }
 
   function buildPerKeyFrames() {
@@ -355,12 +356,28 @@
     return frames;
   }
 
+  function renderLedPreview() {
+    const box = $("#wirelessLedPreview");
+    if (!box) return;
+    const [r,g,b] = rgbBytes(S.color);
+    const css = "rgb(" + r + "," + g + "," + b + ")";
+    box.innerHTML = "";
+    for (let i = 0; i < 126; i++) {
+      const s = document.createElement("span");
+      s.className = "on";
+      s.style.background = css;
+      s.style.boxShadow = "0 0 10px rgba(" + r + "," + g + "," + b + ",.45)";
+      box.appendChild(s);
+    }
+  }
+
   function fillPerKeySolid() {
     const [r,g,b] = rgbBytes(S.color);
     S.perKey.fill(0);
     S.perKey.fill(r, 0, 126);
     S.perKey.fill(g, 126, 252);
     S.perKey.fill(b, 252, 378);
+    renderLedPreview();
     setText("#wirelessPerKeyCount", "126 LEDs · solid " + S.color.toUpperCase());
     appendLog("prepared 126-LED solid table " + S.color.toUpperCase());
   }
@@ -381,14 +398,17 @@
 
       setStatus("WRITING CUSTOM RGB…", "live");
       const cfg = colorConfig.map(x => new Uint8Array(x));
-      const first = cfg[0];
-      first[1] = 0x04;
-      first[2] = 0x0A;
-      first[8] = 0x01;
-      first[14] = 0x00;
-      first[15] = 21;
-      first[17] = 0x01;
-      first[19] = checksum(first);
+      for (const f of cfg) {
+        f[1] = 0x04;
+        f[2] = 0x0A;
+        if (f[3] === 0) {
+          f[8] = 0x01;
+          f[14] = 0x00;
+          f[15] = 21;
+          f[17] = 0x01;
+        }
+        f[19] = checksum(f);
+      }
       for (const f of cfg) await sendFrame(f, true);
 
       const frames = buildPerKeyFrames();
