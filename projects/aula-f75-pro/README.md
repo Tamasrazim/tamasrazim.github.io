@@ -1,59 +1,61 @@
 # F75 PRO Control Deck
 
-An original browser-first control and diagnostics project for the AULA F75 Pro family.
+An original offline-first browser control and diagnostics workspace for the AULA F75 Pro family.
 
 Live route:
 https://tamasrazim.github.io/projects/aula-f75-pro/
 
-## Design
+## Rebuilt architecture
 
-This project takes the ideas that make modern keyboard configurators useful — device detection, protocol inspection, key mapping, RGB design, backups and diagnostics — and implements a separate UI and codebase.
+The project was rebuilt into one application core instead of layered enhancement scripts:
 
-It does not copy OpenAula source code, components or styling.
+- `index.html` — UI shell, layout and responsive styling.
+- `app.js` — virtual F75 matrix, live press view, WebHID connection/observation, keymap editor, RGB preview, diagnostics and exports.
+- `service-worker.js` — offline cache for the app and exact repository hardware-reference image.
+- `manifest.webmanifest` — install metadata.
+- `icon.svg` — project icon.
 
-The current build is deliberately conservative with persistent writes:
+## Key Lab
 
-- WebHID device discovery for the wired AULA family.
-- Safe identity and configuration probes.
-- Raw report inspection.
-- Local key-map designer with JSON export.
-- RGB design/preview workspace.
-- Session/config backup export.
-- Persistent RGB writes remain gated until the physical F75 Pro revision is verified.
+The Key Lab works without a connected keyboard and includes:
 
-## Browser
+- Live physical-key press display from normal browser keyboard events.
+- Held-key state and recent press history.
+- F75 physical matrix indexes and mapping badges.
+- Double-click virtual keys for simulated test input.
+- Single-key remapping.
+- Shortcut / combo construction.
+- Preset shortcuts.
+- Add, Edit, Delete, Reset selected and Reset all.
+- Win ↔ Alt local swap.
+- JSON import/export.
 
-Use a Chromium-family browser with WebHID support and connect the keyboard by USB-C.
+Mappings are stored locally in the browser and are not written to keyboard memory.
 
-The project is static and has no account, backend, CDN, framework runtime, or remote API dependency.
+## Hardware / WebHID
 
-## Hardware note
+The wired AULA family target uses the public VID/PID research reference of `0x258A / 0x010C`. The application can silently reconnect an already-authorized device or request a new WebHID connection.
 
-Public reverse-engineering work reports the wired F75-family identity as VID `0x258A` / PID `0x010C`, while other wireless transports use different device identities and protocols. The app therefore treats wired USB as the first-class configuration path instead of pretending all connection modes are interchangeable.
+WebHID input reports are observed as raw packets. Browser key events remain the authoritative visual keypress path instead of guessing custom firmware report bytes.
 
-## Sources / research
+Persistent hardware writes are deliberately gated in this rebuild.
 
-The implementation was informed by publicly available protocol research from not-ayan/openaula, free-soldier28/Aula-Manager, vndarkblue/aula-keybind, and veysiemrah/aula-rgb-controller.
+## Offline mode
 
-Those projects are references for protocol behavior and engineering ideas, not copied source.
+The whole workspace starts in a deterministic virtual-device mode. Identity/configuration probes can be exercised without hardware, and RGB design remains live offline.
 
-## Files
+## Hardware reference
 
-- `index.html` — application shell, WebHID transport, offline simulation and diagnostics
-- `virtual-enhancements.js` — F75 physical layout, live press view, RGB animation and mapping overlays
-- `advanced-remap.js` — add/edit/delete keymap editor, shortcuts, presets, import/export and reset controls
-- `service-worker.js` — local offline cache
-- `manifest.webmanifest` — install metadata
-- `icon.svg` — project icon
+The Deck displays the exact repository asset:
+
+`aula-f75-pro-wireless-mechanical-keyboard-10-700x700.jpg.webp`
+
+so the physical reference and virtual control surface are presented together.
+
+## Research
+
+The implementation uses public reverse-engineering material as engineering reference for device behavior and protocol investigation. It does not copy OpenAula source code, components or styling.
 
 ## Route
 
 `/projects/aula-f75-pro/`
-
-## Keymap editor
-
-The Key Lab includes an offline advanced editor with single-key selection, category filtering, usage search, shortcut/combo building, preset shortcuts, add/edit/delete mapping actions, selected-key reset, full reset, and local Win/Alt swapping. All edits are stored locally until a hardware write path is explicitly enabled.
-
-## Hardware reference asset
-
-The Deck also links the repository's F75 Pro reference image `aula-f75-pro-wireless-mechanical-keyboard-10-700x700.jpg.webp` so the physical reference and virtual matrix can be viewed together.
