@@ -292,29 +292,70 @@ static Level BuildLevel(int id){
     return l;
 }
 
-static bool ValidateLevel(const Level& l){
-    for(size_t i=0;i<l.walls.size();i++)for(size_t j=i+1;j<l.walls.size();j++){
-        if(Overlap2D(l.walls[i].pos,l.walls[i].size,l.walls[j].pos,l.walls[j].size,-0.02f))
-            return false;
-    }
+static bool GridReachable(const Level& l,Vector3 from,Vector3 to,bool blockDoors){
     const int N=29;const float step=2.0f;
     auto cell=[](Vector3 p){int x=int(std::floor((p.x+28.0f)/2.0f));int z=int(std::floor((p.z+28.0f)/2.0f));return std::pair<int,int>{std::clamp(x,0,28),std::clamp(z,0,28)};};
-    auto [sx,sz]=cell(l.start);auto [gx,gz]=cell(l.exit);
+    auto [sx,sz]=cell(from);auto [gx,gz]=cell(to);
     std::queue<std::pair<int,int>> q;bool seen[N][N]{};
     q.push({sx,sz});seen[sx][sz]=true;
     const int dx[4]={1,-1,0,0},dz[4]={0,0,1,-1};
     while(!q.empty()){
-        auto [x,z]=q.front();q.pop();if(x==gx&&z==gz)return true;
-        Vector3 p=V(-27.0f+x*step+1.0f,0.9f,-27.0f+z*step+1.0f);
+        auto [x,z]=q.front();q.pop();
+        if(x==gx&&z==gz)return true;
+        Vector3 a=V(-27.0f+x*step+1.0f,0.9f,-27.0f+z*step+1.0f);
         for(int d=0;d<4;d++){
-            int nx=x+dx[d],nz=z+dz[d];if(nx<0||nz<0||nx>=N||nz>=N||seen[nx][nz])continue;
-            Vector3 np=V(-27.0f+nx*step+1.0f,0.9f,-27.0f+nz*step+1.0f);
-            Vector3 mid=Vector3Scale(Vector3Add(p,np),0.5f);
-            bool blocked=false;for(const auto& w:l.walls)if(HitsBox(mid,0.25f,w.pos,w.size)){blocked=true;break;}
+            int nx=x+dx[d],nz=z+dz[d];
+            if(nx<0||nz<0||nx>=N||nz>=N||seen[nx][nz])continue;
+            Vector3 b=V(-27.0f+nx*step+1.0f,0.9f,-27.0f+nz*step+1.0f);
+            Vector3 mid=Vector3Scale(Vector3Add(a,b),0.5f);
+            bool blocked=false;
+            for(const auto& w:l.walls)if(HitsBox(mid,0.25f,w.pos,w.size)){blocked=true;break;}
+            if(!blocked&&blockDoors)for(const auto& d0:l.doors)if(!d0.open&&HitsBox(mid,0.25f,d0.pos,d0.size)){blocked=true;break;}
             if(!blocked){seen[nx][nz]=true;q.push({nx,nz});}
         }
     }
     return false;
+}
+static bool ValidateLevel(const Level& l){
+    for(size_t i=0;i<l.walls.size();i++)for(size_t j=i+1;j<l.walls.size();j++){
+        if(Overlap2D(l.walls[i].pos,l.walls[i].size,l.walls[j].pos,l.walls[j].size,-0.02f))return false;
+    }
+    if(!ClearPoint(l,l.start,PLAYER_RADIUS)||!ClearPoint(l,l.exit,0.4f))return false;
+
+    int crystals=0,keycards=0,memory=0;
+    for(const auto& p:l.pickups){
+        if(!ClearPoint(l,p.pos,0.5f))return false;
+        if(!GridReachable(l,l.start,p.pos,true))return false;
+        if(p.kind==0)crystals++;
+        else if(p.kind==1)keycards++;
+        else if(p.kind==2){
+            if(p.order<1||p.order>LEVELS)return false;
+            memory++;
+        }else return false;
+    }
+    for(const auto& s:l.switches){
+        if(!ClearPoint(l,s.pos,0.6f)||!GridReachable(l,l.start,s.pos,true))return false;
+    }
+    for(const auto& h:l.hazards)if(HitsBox(l.start,1.0f,h.base,h.size))return false;
+    for(const auto& d:l.drones)if(Vector3Distance(l.start,d.base)<1.6f)return false;
+
+    if(l.objective==Objective::COLLECT&&crystals<l.required)return false;
+    if(l.objective==Objective::SWITCHES&&(int)l.switches.size()<l.required)return false;
+    if(l.objective==Objective::KEYCARD&&keycards<l.required)return false;
+    if(l.objective==Objective::MEMORY){
+        if(memory<l.required)return false;
+        std::vector<bool> seenOrder(size_t(l.required)+1,false);
+        for(const auto& p:l.pickups)if(p.kind==2&&p.order<=l.required){
+            if(seenOrder[size_t(p.order)])return false;
+            seenOrder[size_t(p.order)]=true;
+        }
+        for(int n=1;n<=l.required;n++)if(!seenOrder[size_t(n)])return false;
+    }
+    if(l.objective==Objective::COMBO){
+        if(crystals<3||l.switches.size()<3||keycards<1||memory<4)return false;
+    }
+    if(l.objective!=Objective::SURVIVE&&!GridReachable(l,l.start,l.exit,false))return false;
+    return true;
 }
 static bool ValidateAllLevels(){
     for(int i=1;i<=LEVELS;i++)if(!ValidateLevel(BuildLevel(i))){std::printf("FLOOR %d INVALID\n",i);return false;}
