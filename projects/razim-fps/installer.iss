@@ -1,6 +1,6 @@
 ; NEON VAULT — custom Windows installer / uninstaller
 #define AppName "NEON VAULT"
-#define AppVersion "4.3"
+#define AppVersion "4.4"
 #define AppPublisher "Tamasrazim"
 #define AppExeName "neon_vault.exe"
 #define UpdaterExeName "neon_vault_updater.exe"
@@ -10,6 +10,9 @@ AppId={{7D7B4D1A-3B65-4C23-B72A-91C4A9F3B7E2}
 AppName={#AppName}
 AppVersion={#AppVersion}
 AppPublisher={#AppPublisher}
+AppVerName={#AppName} {#AppVersion}
+AppComments=Native Windows x64 100-floor puzzle game by Tamasrazim
+AppContact=https://tamasrazim.github.io
 DefaultDirName={autopf}\NeonVault
 DefaultGroupName=NEON VAULT
 OutputDir=installer-output
@@ -25,7 +28,11 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64
 UninstallDisplayIcon={app}\neon-vault.ico
 UninstallDisplayName=NEON VAULT — Uninstall
+UninstallDescription=Remove the NEON VAULT installation from this computer.
 SetupIconFile=neon-vault.ico
+Uninstallable=yes
+CloseApplications=yes
+RestartApplications=no
 
 [Files]
 Source: "build\Release\neon_vault.exe"; DestDir: "{app}"; Flags: ignoreversion
