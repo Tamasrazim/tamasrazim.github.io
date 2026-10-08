@@ -35,3 +35,7 @@ Name: "{commondesktop}\NEO"; Filename: "{app}\{#UpdaterExeName}"
 
 [Run]
 Filename: "{app}\{#UpdaterExeName}"; Description: "Launch NEO"; Flags: nowait postinstall skipifsilent
+
+; The constellation sky artwork is shared from the repository site asset set.
+[Files]
+Source: "..\..\assets\images\tamanna-constellation.jpeg"; DestDir: "{app}\assets\sky"; Flags: ignoreversion
