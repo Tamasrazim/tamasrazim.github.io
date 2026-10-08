@@ -149,7 +149,6 @@ begin
   WizardForm.WelcomeLabel2.Font.Color := clWhite;
   WizardForm.WelcomeLabel2.Caption := 'Native Windows x64  •  100 floors  •  fractured 3D motion  •  Tamasrazim';
   WizardForm.MainPanel.Color := clBlack;
-  WizardForm.InnerNotebook.Color := clBlack;
   StyleButtons;
   AddInstallChrome;
 end;
