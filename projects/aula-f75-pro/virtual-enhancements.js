@@ -102,12 +102,12 @@
     }
   }
 
-  const getState = () => window.__f75Rgb || {
-    color:"#6d8dff",
-    brightness:7,
-    speed:2,
-    effect:1
-  };
+  const getState = () => ({
+    color: document.querySelector("#rgbColor")?.value || "#6d8dff",
+    brightness: Number(document.querySelector("#brightness")?.value || 7),
+    speed: Number(document.querySelector("#speed")?.value || 2),
+    effect: Number(document.querySelector(".effect.selected")?.dataset.effect || 1)
+  });
 
   const animate = now => {
     if (!ledHost) return;
