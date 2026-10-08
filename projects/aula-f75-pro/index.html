@@ -527,6 +527,14 @@ Connect the keyboard over USB-C, then run Safe Probe.</div>
   }
 
   setText("#browserSupport","WebHID: "+("hid" in navigator?"available":"not available")+" · LIVE DEMO remains available even when WebHID is unavailable.");
+
+  // Silent reconnect: only use an already-authorized device. No permission prompt.
+  if ("hid" in navigator) {
+    navigator.hid.getDevices().then(list => {
+      const d = list.find(x => x.vendorId === VID && x.productId === PID);
+      if (d) return attach(d);
+    }).catch(() => {});
+  }
   setText("#vendor","0x258A"); setText("#product","0x010C"); setText("#productName","AULA F75 Pro · Virtual Device");
   renderRgb();
   addEventListener("beforeunload",()=>{if(device&&device.opened)device.close()});
