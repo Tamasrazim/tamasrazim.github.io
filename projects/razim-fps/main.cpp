@@ -124,7 +124,7 @@ Level BuildLevel(int id){
     Level l;l.id=std::clamp(id,1,LEVELS);l.tier=(l.id-1)/10;l.theme=(l.id-1)%10;l.objective=Objective((l.id-1)%6);
     const char* names[10]={"FIRST CONTACT","REACTOR RING","SPLIT GRID","PRESSURE DECK","ARCHIVE WING","MIRROR LAB","CONVEYOR VAULT","BLACKOUT ZONE","CORE APPROACH","THE INNER VAULT"};
     l.title=(l.id==100)?"THE VAULT CORE":names[l.tier];l.timeLimit=235+l.tier*24+(l.objective==Objective::SURVIVE?70:0);
-    l.walls={{V(0,1,-29),V(58,2,1),0},{V(0,1,29),V(58,2,1),0},{V(-29,1,0),V(1,2,58),0},{V(29,1,0),V(1,2,58),0}};
+    l.walls={{V(0,1,-29),V(57,2,1),0},{V(0,1,29),V(57,2,1),0},{V(-29,1,0),V(1,2,58),0},{V(29,1,0),V(1,2,58),0}};
     uint32_t seed=Mix(uint32_t(l.id)*0x9e3779b9u);auto rnd=[&](){seed^=seed<<13;seed^=seed>>17;seed^=seed<<5;return float(seed&0xffffffu)/16777215.0f;};
     int side=5+l.tier*2;
     for(int i=0;i<side;i++){
