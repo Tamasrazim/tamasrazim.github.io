@@ -176,8 +176,21 @@ bool Reachable(const Level& l,Vector3 target){
     while(!q.empty()){auto[x,z]=q.front();q.pop();if(x==gx&&z==gz)return true;for(int d=0;d<4;d++){int nx=x+dx[d],nz=z+dz[d];if(nx<0||nz<0||nx>=N||nz>=N||seen[nx][nz])continue;Vector3 p=V(-WORLD+nx+0.5f,0.9f,-WORLD+nz+0.5f);if(blocked(p))continue;seen[nx][nz]=true;q.push({nx,nz});}}return false;
 }
 bool Valid(const Level& l){
-    for(size_t i=0;i<l.walls.size();i++)for(size_t j=i+1;j<l.walls.size();j++)if(Overlap(l.walls[i].p,l.walls[i].s,l.walls[j].p,l.walls[j].s,-0.02f))return false;
-    if(!Reachable(l,l.exit))return false;for(const auto&p:l.pickups)if(!Reachable(l,p.p))return false;for(const auto&p:l.switches)if(!Reachable(l,p.p))return false;return true;
+    for(size_t i=0;i<l.walls.size();i++)for(size_t j=i+1;j<l.walls.size();j++)
+        if(Overlap(l.walls[i].p,l.walls[i].s,l.walls[j].p,l.walls[j].s,-0.02f))return false;
+    if(!Reachable(l,l.exit))return false;
+    for(const auto&p:l.pickups)if(!Reachable(l,p.p))return false;
+    for(const auto&p:l.switches)if(!Reachable(l,p.p))return false;
+    for(size_t i=0;i<l.pickups.size();i++)for(size_t j=i+1;j<l.pickups.size();j++)
+        if(Vector3Distance(l.pickups[i].p,l.pickups[j].p)<1.1f)return false;
+    for(size_t i=0;i<l.switches.size();i++)for(size_t j=i+1;j<l.switches.size();j++)
+        if(Vector3Distance(l.switches[i].p,l.switches[j].p)<1.2f)return false;
+    for(const auto&h:l.hazards){
+        if(Vector3Distance(h.base,l.start)<4.5f||Vector3Distance(h.base,l.exit)<4.0f)return false;
+        for(const auto&p:l.pickups)if(Vector3Distance(h.base,p.p)<2.2f)return false;
+        for(const auto&sw:l.switches)if(Vector3Distance(h.base,sw.p)<2.2f)return false;
+    }
+    return true;
 }
 void Repair(Level& l){while(!Valid(l)&&l.walls.size()>4)l.walls.pop_back();}
 Texture2D LoadTex(const std::string& f,Color fallback){
