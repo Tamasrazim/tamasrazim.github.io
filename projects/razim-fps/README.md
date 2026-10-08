@@ -12,9 +12,9 @@ NEON VAULT is a native Windows x64 first-person puzzle game with a deterministic
 - Windowed, borderless and fullscreen display modes
 - Mouse sensitivity, Y inversion, FOV, hints, screen shake, crosshair and performance options
 - 28 dedicated 500×500 procedural material textures plus the original supporting texture set
-- Original instrumental soundtrack shipped as a game asset
+- Original instrumental soundtrack plus a layered procedural beat track
 - 4.5-second in-engine 3D intro with skip controls
-- Windows x64 installer, direct executable and updater
+- Windows x64 installer, custom-branded uninstaller, direct executable and updater
 
 ## Mouse behavior
 
@@ -39,4 +39,4 @@ Validation checks all 100 generated floors for wall overlap, objective reachabil
 
 ## Asset budget
 
-The shipped game asset set is intentionally near the 25 MB target: roughly 25.0 million bytes before the native executable/updater are added. Procedural source seeds remain in the repository but are not copied into the runtime package.
+The shipped game asset set is intentionally just over the 25 MB target: about 24,959,292 bytes before the native executable/updater are added, with the executable pushing the installed payload above 25 MB. Procedural source seeds remain in the repository but are not copied into the runtime package.
