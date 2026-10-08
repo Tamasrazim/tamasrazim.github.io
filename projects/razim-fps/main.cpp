@@ -196,14 +196,17 @@ Sound MakeBeatSound(){
     if(!data)return Sound{};
     for(unsigned int i=0;i<frames;i++){
         float t=float(i)/float(sr),v=0.0f;
-        float kick=fmodf(t,0.5f);
-        if(kick<0.16f){float e=expf(-20.0f*kick);float f=72.0f-40.0f*(kick/0.16f);v+=0.70f*e*sinf(TAU*f*kick);}
+        int step=int(floorf(t*4.0f));
+        float beatPos=fmodf(t,0.25f);
+        float kickPhase=fmodf(t,0.5f);
+        bool kickOn=(step%8==0)||(step%8==3)||(step%8==4)||(step%8==6);
+        if(kickOn&&kickPhase<0.15f){float e=expf(-22.0f*kickPhase);float f=82.0f-48.0f*(kickPhase/0.15f);v+=0.66f*e*sinf(TAU*f*kickPhase);}
         float sn=fmodf(t,1.0f);
-        if(sn>=0.5f&&sn<0.62f){float q=sn-0.5f,e=expf(-32.0f*q);v+=0.16f*e*(sinf(TAU*2200.0f*q)+0.4f*sinf(TAU*3300.0f*q));}
-        float hat=fmodf(t,0.25f);
-        if(hat<0.038f){float e=expf(-65.0f*hat);v+=0.05f*e*sinf(TAU*5700.0f*hat);}
+        if((sn>=0.5f&&sn<0.61f)||(sn>=0.99f)){float q=(sn>=0.99f?sn-0.99f:sn-0.5f),e=expf(-34.0f*q);v+=0.13f*e*(sinf(TAU*2100.0f*q)+0.42f*sinf(TAU*3350.0f*q));}
+        if(beatPos<0.028f){float e=expf(-95.0f*beatPos);v+=0.038f*e*sinf(TAU*6200.0f*beatPos);}
+        float off=fmodf(t+0.125f,0.25f);if(off<0.022f){float e=expf(-110.0f*off);v+=0.022f*e*sinf(TAU*7600.0f*off);}
         float bass=fmodf(t,1.0f);
-        if(bass<0.25f){float e=expf(-9.0f*bass);v+=0.05f*e*sinf(TAU*55.0f*bass);}
+        if(bass<0.32f){float e=expf(-8.5f*bass);float note=(int(t)%2==0)?55.0f:61.735f;v+=0.045f*e*sinf(TAU*note*bass);}
         data[i]=(short)(Clamp(v,-0.9f,0.9f)*32767.0f);
     }
     Wave w{};w.frameCount=frames;w.sampleRate=sr;w.sampleSize=16;w.channels=channels;w.data=data;
@@ -335,7 +338,7 @@ void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,flo
     else {DrawCylinder(l.exit,1.6f,1.6f,.18f,32,GREEN);DrawCylinderWires(l.exit,1.8f,1.8f,.22f,32,RAYWHITE);}
     for(const auto&p:l.pickups)if(!p.taken){float t=float(GetTime());Vector3 q=V(p.p.x,p.p.y+.16f*sinf(t*2.7f+p.p.z),p.p.z);Color c2=p.kind==0?SKYBLUE:(p.kind==1?GOLD:MAGENTA);DrawBrokenPiece(q,p.kind==0?.42f:.34f,p.kind==0?7:5,t*1.25f,c2);if(scan>0)DrawSphereWires(q,.75f+scan*.2f,10,10,c2);}
     for(size_t i=0;i<l.switches.size();i++){const auto& sw=l.switches[i];Vector3 p=sw.p;Color c2=sw.active?GREEN:Theme(l.theme);float pulse=.84f+.16f*sinf(float(GetTime())*3.0f+float(i));DrawCube(p,.72f,1,.42f,sw.active?Color{25,75,50,255}:Color{28,48,58,255});Box(a.tex[(10+l.theme+i)%TEXTURES],V(p.x,p.y+.12f,p.z-.23f),V(.42f,.38f,.05f),WHITE);DrawCubeWires(p,.76f,1.04f,.46f,c2);DrawCylinderWires(V(p.x,p.y+0.62f,p.z),.22f*pulse,.22f*pulse,.05f,16,c2);}
-    for(const auto&h:l.hazards){float pulse=.90f+.15f*sinf(float(GetTime())*4+h.phase);Vector3 q=V(h.base.x+sinf(float(GetTime())*h.speed+h.phase)*1.5f,h.base.y,h.base.z);Vector3 hs=V(1.0f*pulse,.95f,2.2f*pulse);Box(a.tex[(20+l.theme)%TEXTURES],q,hs,WHITE);DrawCubeWires(q,hs.x*1.03f,hs.y*1.03f,hs.z*1.03f,RED);if(HitBox(player,PLAYER_R,q,V(1.0f,.95f,2.2f)))DrawSphere(q,.2f,Color{255,110,110,255});}
+    for(const auto&h:l.hazards){float pulse=.90f+.15f*sinf(float(GetTime())*4+h.phase);Vector3 q=V(h.base.x+sinf(float(GetTime())*h.speed+h.phase)*1.5f,h.base.y,h.base.z);Vector3 hs=V(1.0f*pulse,.95f,2.2f*pulse);Box(a.tex[(20+l.theme)%TEXTURES],q,hs,WHITE);DrawCubeWires(q,hs.x*1.03f,hs.y*1.03f,hs.z*1.03f,RED);if(HitBox(player,PLAYER_R,q,hs))DrawSphere(q,.2f,Color{255,110,110,255});}
     EndMode3D();
 }
 bool IsBlocked(const Level&l,Vector3 p,bool exitOpen){if(fabsf(p.x)>WORLD-PLAYER_R||fabsf(p.z)>WORLD-PLAYER_R)return true;for(const auto&w:l.walls)if(HitBox(p,PLAYER_R,w.p,w.s))return true;if(!exitOpen&&HitBox(p,PLAYER_R,V(l.exit.x,1.25f,l.exit.z),V(1.6f,2.5f,5.5f)))return true;return false;}
