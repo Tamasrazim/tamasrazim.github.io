@@ -24,6 +24,7 @@ $src = Get-Content $source -Raw
 $iss = Get-Content $installer -Raw
 
 if ($src -notmatch 'constexpr int TEXTURES=30') { throw "Runtime texture count is not 30." }
+if ($src -notmatch 'bool FiniteVec\(Vector3 p\)') { throw "Finite vector guard helper missing." }
 if ($src -notmatch 'DisableCursor\(\)') { throw "Native mouse capture missing." }
 if ($src -match 'SetMousePosition\(') { throw "Cursor-warp input path detected." }
 if ($src -notmatch 'MakeBeatSound') { throw "Procedural beat layer missing." }
