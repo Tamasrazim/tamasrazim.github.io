@@ -263,13 +263,19 @@ static Level BuildLevel(int id){
         }
     }
 
-    for(int i=0;i<8+l.tier*3;i++){
-        if(fabsf(-21+rnd()*42-24)<6){i--;continue;}
-        float x=-22+rnd()*44,z=-21+rnd()*42;
+    const int propCount=8+l.tier*3;
+    int placedProps=0,attempts=0;
+    while(placedProps<propCount&&attempts<propCount*40){
+        ++attempts;
+        float x=-22+rnd()*44;
+        float z=-21+rnd()*42;
+        if(fabsf(z-24.0f)<6.0f)continue;
         Vector3 sz=V(1.3f+rnd()*2.2f,1.2f+rnd()*1.5f,1.3f+rnd()*2.2f);
-        float clearance=0.5f*sqrtf(sz.x*sz.x+sz.z*sz.z)+0.15f;
-        Vector3 p=SafePoint(l,V(x,sz.y*0.5f,z),clearance,500+i);
+        float clearance=0.5f*sqrtf(sz.x*sz.x+sz.z*sz.z)+0.20f;
+        Vector3 p=SafePoint(l,V(x,sz.y*0.5f,z),clearance,500+attempts);
+        if(fabsf(p.z-24.0f)<5.5f)continue;
         l.walls.push_back({p,sz,2});
+        ++placedProps;
     }
 
     if(l.objective==Objective::COLLECT){
@@ -337,6 +343,7 @@ static Level BuildLevel(int id){
         l.doors.push_back({V(0,1.25f,-20),V(1.2f,2.5f,5),false,2});
         for(int i=0;i<18;i++)l.hazards.push_back({V(-20+i*2.2f,0.45f,-2+(i%3)*5),V(0.9f,0.8f,3),float(i)});
     }
+    RepairDoorOverlaps(l);
     return l;
 }
 
@@ -641,6 +648,27 @@ static void SetDisplayMode(Settings& s,int mode){
     }
 }
 
+static bool Overlap2D(Vector3 a,Vector3 as,Vector3 b,Vector3 bs,float margin=0.0f){
+    return fabsf(a.x-b.x)<(as.x+bs.x)*0.5f-margin &&
+           fabsf(a.z-b.z)<(as.z+bs.z)*0.5f-margin;
+}
+
+static void RepairDoorOverlaps(Level& l){
+    for(size_t i=0;i<l.walls.size();){
+        if(l.walls[i].material!=2){++i;continue;}
+        Wall w=l.walls[i];
+        bool bad=false;
+        for(const auto& d:l.doors){
+            if(!d.open&&Overlap2D(w.pos,w.size,d.pos,d.size,0.02f)){bad=true;break;}
+        }
+        if(!bad){++i;continue;}
+        l.walls.erase(l.walls.begin()+i);
+        float clearance=0.5f*sqrtf(w.size.x*w.size.x+w.size.z*w.size.z)+0.20f;
+        w.pos=SafePoint(l,w.pos,clearance,900+int(i));
+        l.walls.push_back(w);
+    }
+}
+
 static bool ValidateAllLevels(){
     bool ok=true;
     constexpr int N=57;
@@ -652,6 +680,14 @@ static bool ValidateAllLevels(){
     };
     for(int id=1;id<=LEVELS;id++){
         Level l=BuildLevel(id);
+        for(size_t i=0;i<l.walls.size();i++){
+            for(size_t j=i+1;j<l.walls.size();j++){
+                if(Overlap2D(l.walls[i].pos,l.walls[i].size,l.walls[j].pos,l.walls[j].size,0.02f)){
+                    std::printf("floor %d overlapping walls %zu/%zu\\n",id,i,j);
+                    ok=false;
+                }
+            }
+        }
         if(!ClearPoint(l,l.start,PLAYER_RADIUS)){std::printf("floor %d invalid start\n",id);ok=false;}
         for(const auto& p:l.pickups)if(!ClearPoint(l,p.pos,0.45f))ok=false;
         for(const auto& sw:l.switches)if(!ClearPoint(l,sw.pos,0.65f))ok=false;
