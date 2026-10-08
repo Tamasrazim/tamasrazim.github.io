@@ -435,7 +435,18 @@ void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,flo
     }
     Box(a.tex[24],V(l.exit.x,0.03f,l.exit.z),V(3.4f,0.04f,3.4f),Color{175,210,220,220});
     if(!exitOpen){Box(a.tex[18],V(l.exit.x,1.25f,l.exit.z),V(1.6f,2.5f,5.5f),WHITE);DrawCubeWires(V(l.exit.x,1.25f,l.exit.z),1.65f,2.55f,5.55f,ORANGE);}
-    else {DrawCylinder(l.exit,1.6f,1.6f,.18f,32,GREEN);DrawCylinderWires(l.exit,1.8f,1.8f,.22f,32,RAYWHITE);}
+    else {
+        DrawCylinder(l.exit,1.6f,1.6f,.18f,32,GREEN);DrawCylinderWires(l.exit,1.8f,1.8f,.22f,32,RAYWHITE);
+        float openAnim=0.5f+0.5f*sinf(float(GetTime())*5.0f);
+        for(int i=0;i<4;i++){
+            float a=TAU*float(i)/4.0f+float(GetTime())*0.10f;
+            float d=2.0f+0.7f*openAnim;
+            Vector3 p=V(l.exit.x+cosf(a)*d,1.15f+0.15f*sinf(float(GetTime())*4.0f+i),l.exit.z+sinf(a)*d);
+            Vector3 sz=V(0.16f,2.0f,1.05f);
+            DrawBrokenPiece(p,0.28f,4,float(GetTime())*1.8f+i*0.7f,Theme(l.theme));
+            Box(a.tex[18],p,sz,Color{150,175,185,150});
+        }
+    }
     for(const auto&p:l.pickups){
         float t=float(GetTime());Color c2=p.kind==0?SKYBLUE:(p.kind==1?GOLD:MAGENTA);
         if(!p.taken){
