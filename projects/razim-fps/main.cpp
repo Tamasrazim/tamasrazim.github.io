@@ -209,18 +209,32 @@ void Repair(Level& l){
     if(Valid(l))return;
     while(!Valid(l)&&l.walls.size()>4)l.walls.pop_back();
     if(Valid(l))return;
-    // Deterministic emergency layout: keep the sealed boundary only and relocate all interactables.
     if(l.walls.size()>4)l.walls.resize(4);
+
+    // Pass 1: deterministic safe corridor layout for every interactable.
     for(size_t i=0;i<l.pickups.size();i++){
         l.pickups[i].p=Safe(l,V((i%2)?-3.2f:3.2f,l.pickups[i].p.y,17.0f-float(i)*4.0f),0.5f,700+i);
+        l.pickups[i].taken=false;l.pickups[i].burst=0.0f;
     }
     for(size_t i=0;i<l.switches.size();i++){
         l.switches[i].p=Safe(l,V((i%2)?-3.4f:3.4f,l.switches[i].p.y,15.0f-float(i)*4.5f),0.65f,800+i);
+        l.switches[i].active=false;
     }
     for(size_t i=0;i<l.hazards.size();i++){
-        l.hazards[i].base=Safe(l,V((i%2)?14.0f:-14.0f,0.55f,-5.0f-float(i)*3.0f),0.75f,900+i);
+        l.hazards[i].base=Safe(l,V((i%2)?15.0f:-15.0f,0.55f,-4.0f-float(i)*4.0f),0.75f,900+i);
         l.hazards[i].p=l.hazards[i].base;
     }
+    if(Valid(l))return;
+
+    // Pass 2: remove every dynamic hazard that could still poison an otherwise-valid floor.
+    l.hazards.clear();
+    if(Valid(l))return;
+
+    // Final deterministic layout: preserve all required puzzle objects and the sealed boundary.
+    for(size_t i=0;i<l.pickups.size();i++)
+        l.pickups[i].p=V((i%3-1)*3.2f,l.pickups[i].p.y,20.0f-float(i)*3.8f);
+    for(size_t i=0;i<l.switches.size();i++)
+        l.switches[i].p=V((i%3-1)*3.5f,l.switches[i].p.y,18.0f-float(i)*4.5f);
 }
 Texture2D LoadTex(const std::string& f,Color fallback){
     if(FileExists(f.c_str())){Texture2D t=LoadTexture(f.c_str());if(t.id){GenTextureMipmaps(&t);SetTextureFilter(t,TEXTURE_FILTER_TRILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;}}
