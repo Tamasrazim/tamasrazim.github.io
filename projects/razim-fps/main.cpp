@@ -358,8 +358,18 @@ static bool ValidateLevel(const Level& l){
     if(l.objective!=Objective::SURVIVE&&!GridReachable(l,l.start,l.exit,false))return false;
     return true;
 }
+static void RepairLevel(Level& l){
+    while(!ValidateLevel(l)&&l.walls.size()>6)l.walls.pop_back();
+    if(!ValidateLevel(l)){
+        l.walls.erase(std::remove_if(l.walls.begin()+4,l.walls.end(),[&](const Wall&){return true;}),l.walls.end());
+    }
+}
 static bool ValidateAllLevels(){
-    for(int i=1;i<=LEVELS;i++)if(!ValidateLevel(BuildLevel(i))){std::printf("FLOOR %d INVALID\n",i);return false;}
+    for(int i=1;i<=LEVELS;i++){
+        Level l=BuildLevel(i);
+        RepairLevel(l);
+        if(!ValidateLevel(l)){std::printf("FLOOR %d INVALID\n",i);return false;}
+    }
     std::printf("NEO VALIDATION COMPLETE: PASS\n");return true;
 }
 
@@ -702,7 +712,7 @@ int main(int argc,char** argv){
     Assets assets=LoadAssets(safeMode);
     if(!safeMode&&assets.musicReady){SetSoundVolume(assets.theme,save.settings.music);PlaySound(assets.theme);}
     Screen screen=Screen::INTRO;
-    Level level=BuildLevel(1);
+    Level level=BuildLevel(1);RepairLevel(level);
     MouseState mouse{};
     Vector3 player=level.start,velocity{};
     float yaw=3.14159265359f,pitch=0,stamina=100,health=100,timeLeft=0,bobPhase=0,scanTimer=0,hintTimer=0,introElapsed=0;
@@ -714,7 +724,7 @@ int main(int argc,char** argv){
 
     auto ClickSound=[&](){if(assets.soundsReady){SetSoundVolume(assets.click,save.settings.sfx);PlaySound(assets.click);}};
     auto StartLevel=[&](int id){
-        level=BuildLevel(id);player=level.start;velocity={};yaw=3.14159265359f;pitch=0;stamina=100;health=100;
+        level=BuildLevel(id);RepairLevel(level);player=level.start;velocity={};yaw=3.14159265359f;pitch=0;stamina=100;health=100;
         timeLeft=level.timeLimit;collected=switchesActive=memoryStep=deaths=0;bobPhase=scanTimer=0;hintTimer=4;grounded=true;beatClock=0.0f;beatStep=0;
         screen=Screen::PLAYING;CaptureMouse(mouse);
     };
