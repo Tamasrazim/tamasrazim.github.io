@@ -211,6 +211,9 @@ static Vector3 SafePoint(const Level& l,Vector3 p,float radius,int salt){
     return V(0,p.y,24);
 }
 
+static bool Overlap2D(Vector3 a,Vector3 as,Vector3 b,Vector3 bs,float margin=0.0f);
+static void RepairDoorOverlaps(Level& l);
+
 static Level BuildLevel(int id){
     Level l;
     l.id=std::clamp(id,1,LEVELS);
