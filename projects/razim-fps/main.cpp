@@ -144,7 +144,22 @@ Level BuildLevel(int id){
         case Objective::SURVIVE:l.required=0;break;
     }
     int hz=std::max(2,1+l.tier/2);
-    for(int i=0;i<hz;i++){int sg=(i&1)?1:-1;float x=sg*(10+rnd()*14),z=-16+rnd()*30;Vector3 p=Safe(l,V(x,0.55f,z),0.75f,300+i);if(Vector3Distance(p,l.start)<5.0f||Vector3Distance(p,l.exit)<3.5f)p=Safe(l,V(((i&1)?1.0f:-1.0f)*15.0f,0.55f,0.0f),0.75f,900+i);l.hazards.push_back({p,p,rnd()*TAU,1.0f+0.04f*l.tier});}
+    for(int i=0;i<hz;i++){
+        Vector3 p{};
+        bool placed=false;
+        for(int attempt=0;attempt<48&&!placed;attempt++){
+            int sg=((i+attempt)&1)?1:-1;
+            float x=sg*(10+rnd()*14),z=-16+rnd()*30;
+            p=Safe(l,V(x,0.55f,z),0.75f,300+i*53+attempt);
+            bool bad=Vector3Distance(p,l.start)<5.0f||Vector3Distance(p,l.exit)<4.0f;
+            for(const auto& q:l.pickups)if(Vector3Distance(p,q.p)<2.4f)bad=true;
+            for(const auto& q:l.switches)if(Vector3Distance(p,q.p)<2.4f)bad=true;
+            for(const auto& q:l.hazards)if(Vector3Distance(p,q.base)<2.8f)bad=true;
+            if(!bad)placed=true;
+        }
+        if(!placed)p=V(((i&1)?1.0f:-1.0f)*15.0f,0.55f,0.0f);
+        l.hazards.push_back({p,p,rnd()*TAU,1.0f+0.04f*l.tier});
+    }
     return l;
 }
 bool Reachable(const Level& l,Vector3 target){
