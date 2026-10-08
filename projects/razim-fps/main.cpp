@@ -60,6 +60,7 @@ std::vector<Particle> gParticles;
 Sound MakeBeatSound();
 
 Vector3 V(float x,float y,float z){return{x,y,z};}
+bool FiniteVec(Vector3 p){return std::isfinite(p.x)&&std::isfinite(p.y)&&std::isfinite(p.z);}
 float Ease(float t){t=Clamp(t,0.0f,1.0f);return t*t*(3.0f-2.0f*t);}
 Color Theme(int t){
     static const Color c[10]={{55,210,255,255},{110,130,255,255},{50,235,170,255},{255,190,70,255},{255,80,145,255},
