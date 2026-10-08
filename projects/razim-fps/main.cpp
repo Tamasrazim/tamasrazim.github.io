@@ -48,7 +48,7 @@ struct Level{
 };
 struct Assets{
     std::array<Texture2D,TEXTURES> tex{};
-    Sound music{},pickup{},hit{},click{},complete{};
+    Sound music{},beat{},pickup{},hit{},click{},complete{};
 };
 
 Vector3 V(float x,float y,float z){return{x,y,z};}
@@ -162,11 +162,13 @@ Assets LoadAssets(bool safe){
     Assets a{};
     for(int i=0;i<TEXTURES;i++){char p[128];std::snprintf(p,sizeof(p),"assets/textures/vault_%02d.bmp",i+1);a.tex[i]=LoadTex(p,Theme(i%10));}
     if(!safe&&IsAudioDeviceReady()){
-        a.music=LoadSound("assets/audio/neon-vault-theme.wav");a.pickup=LoadSound("assets/audio/pickup.wav");a.hit=LoadSound("assets/audio/hit.wav");
+        a.music=LoadSound("assets/audio/neon-vault-theme.wav");
+        a.beat=LoadSound("assets/audio/vault-beats.wav");
+        a.pickup=LoadSound("assets/audio/pickup.wav");a.hit=LoadSound("assets/audio/hit.wav");
         a.click=LoadSound("assets/audio/click.wav");a.complete=LoadSound("assets/audio/complete.wav");
     } return a;
 }
-void UnloadAssets(Assets&a){for(auto&t:a.tex)if(t.id)UnloadTexture(t);if(IsSoundValid(a.music))UnloadSound(a.music);if(IsSoundValid(a.pickup))UnloadSound(a.pickup);if(IsSoundValid(a.hit))UnloadSound(a.hit);if(IsSoundValid(a.click))UnloadSound(a.click);if(IsSoundValid(a.complete))UnloadSound(a.complete);}
+void UnloadAssets(Assets&a){for(auto&t:a.tex)if(t.id)UnloadTexture(t);if(IsSoundValid(a.music))UnloadSound(a.music);if(IsSoundValid(a.beat))UnloadSound(a.beat);if(IsSoundValid(a.pickup))UnloadSound(a.pickup);if(IsSoundValid(a.hit))UnloadSound(a.hit);if(IsSoundValid(a.click))UnloadSound(a.click);if(IsSoundValid(a.complete))UnloadSound(a.complete);}
 bool Btn(Rectangle r){return CheckCollisionPointRec(GetMousePosition(),r)&&IsMouseButtonPressed(MOUSE_BUTTON_LEFT);}
 void BtnDraw(Rectangle r,const char*s,Color accent){bool h=CheckCollisionPointRec(GetMousePosition(),r);DrawRectangleRounded(r,.08f,8,h?Color{20,42,58,255}:Color{9,18,28,255});DrawRectangleRoundedLines(r,.08f,8,h?accent:Color{45,62,78,255});int fs=18;DrawText(s,int(r.x+(r.width-MeasureText(s,fs))*.5f),int(r.y+19),fs,RAYWHITE);}
 void Center(const char*s,int y,int fs,Color c){DrawText(s,(GetScreenWidth()-MeasureText(s,fs))/2,y,fs,c);}
@@ -183,6 +185,18 @@ void Box(Texture2D t,Vector3 p,Vector3 s,Color c){
     rlNormal3f(0,1,0);rlTexCoord2f(0,0);rlVertex3f(x0,y1,z1);rlTexCoord2f(1,0);rlVertex3f(x1,y1,z1);rlTexCoord2f(1,1);rlVertex3f(x1,y1,z0);rlTexCoord2f(0,1);rlVertex3f(x0,y1,z0);
     rlNormal3f(0,-1,0);rlTexCoord2f(0,0);rlVertex3f(x0,y0,z0);rlTexCoord2f(1,0);rlVertex3f(x1,y0,z0);rlTexCoord2f(1,1);rlVertex3f(x1,y0,z1);rlTexCoord2f(0,1);rlVertex3f(x0,y0,z1);
     rlEnd();rlSetTexture(0);
+}
+void DrawBrokenPiece(Vector3 c,float r,int count,float time,Color color){
+    for(int i=0;i<count;i++){
+        float a=TAU*float(i)/float(count)+time*(0.7f+0.11f*i);
+        float rr=r*(1.0f+0.18f*sinf(time*1.7f+i));
+        Vector3 q=V(c.x+cosf(a)*rr,c.y+0.16f*sinf(time*2.1f+i),c.z+sinf(a)*rr);
+        float sx=r*(0.22f+0.08f*sinf(time*1.3f+i));
+        float sy=r*(0.40f+0.12f*cosf(time*1.1f+i));
+        float sz=r*(0.18f+0.07f*sinf(time*1.9f+i));
+        DrawCube(q,sx,sy,sz,color);
+        DrawCubeWires(q,sx*1.12f,sy*1.12f,sz*1.12f,RAYWHITE);
+    }
 }
 bool ObjectiveDone(const Level&l,int got,int sw,int mem){if(l.objective==Objective::COLLECT)return got>=l.required;if(l.objective==Objective::SWITCHES)return sw>=l.required;if(l.objective==Objective::KEYCARD){int n=0;for(const auto&p:l.pickups)if(p.kind==1&&p.taken)n++;return n>=l.required;}if(l.objective==Objective::MEMORY)return mem>=l.required;if(l.objective==Objective::COMBO){int k=0;for(const auto&p:l.pickups)if(p.kind==1&&p.taken)k++;return got>=3&&sw>=3&&k>=1&&mem>=4;}return false;}
 void Intro(float t,const Assets&a){
@@ -224,7 +238,7 @@ void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,flo
     Box(a.tex[24],V(l.exit.x,0.03f,l.exit.z),V(3.4f,0.04f,3.4f),Color{175,210,220,220});
     if(!exitOpen){Box(a.tex[18],V(l.exit.x,1.25f,l.exit.z),V(1.6f,2.5f,5.5f),WHITE);DrawCubeWires(V(l.exit.x,1.25f,l.exit.z),1.65f,2.55f,5.55f,ORANGE);}
     else {DrawCylinder(l.exit,1.6f,1.6f,.18f,32,GREEN);DrawCylinderWires(l.exit,1.8f,1.8f,.22f,32,RAYWHITE);}
-    for(const auto&p:l.pickups)if(!p.taken){Vector3 q=V(p.p.x,p.p.y+.16f*sinf(float(GetTime())*2.7f+p.p.z),p.p.z);Color c2=p.kind==0?SKYBLUE:(p.kind==1?GOLD:MAGENTA);DrawSphere(q,p.kind==0?.34f:.30f,c2);DrawSphereWires(q,p.kind==0?.42f:.36f,10,10,RAYWHITE);if(scan>0)DrawSphereWires(q,.75f+scan*.2f,10,10,c2);}
+    for(const auto&p:l.pickups)if(!p.taken){float t=float(GetTime());Vector3 q=V(p.p.x,p.p.y+.16f*sinf(t*2.7f+p.p.z),p.p.z);Color c2=p.kind==0?SKYBLUE:(p.kind==1?GOLD:MAGENTA);DrawBrokenPiece(q,p.kind==0?.42f:.34f,p.kind==0?7:5,t*1.25f,c2);if(scan>0)DrawSphereWires(q,.75f+scan*.2f,10,10,c2);}
     for(size_t i=0;i<l.switches.size();i++){const auto& sw=l.switches[i];Vector3 p=sw.p;Color c2=sw.active?GREEN:Theme(l.theme);DrawCube(p,.72f,1,.42f,sw.active?Color{25,75,50,255}:Color{28,48,58,255});Box(a.tex[(10+l.theme+i)%TEXTURES],V(p.x,p.y+.12f,p.z-.23f),V(.42f,.38f,.05f),WHITE);DrawCubeWires(p,.76f,1.04f,.46f,c2);}
     for(const auto&h:l.hazards){float pulse=.9f+.15f*sinf(float(GetTime())*4+h.phase);Vector3 q=V(h.base.x+sinf(float(GetTime())*h.speed+h.phase)*1.5f,h.base.y,h.base.z);Box(a.tex[(20+l.theme)%TEXTURES],q,V(1.0f,.95f,2.2f),WHITE);DrawCubeWires(q,1.03f,.98f,2.24f,RED);if(HitBox(player,PLAYER_R,q,V(1.0f,.95f,2.2f)))DrawSphere(q,.2f,Color{255,110,110,255});(void)pulse;}
     EndMode3D();
@@ -245,6 +259,7 @@ int main(int argc,char**argv){
     if(test){BeginDrawing();ClearBackground(Color{3,8,13,255});DrawText("NEON VAULT STARTUP TEST",24,24,24,RAYWHITE);EndDrawing();CloseWindow();return 0;}
     if(!safe)InitAudioDevice();Save save=LoadSave();SaveGame(save);Assets assets=LoadAssets(safe);
     if(IsSoundValid(assets.music)){SetSoundVolume(assets.music,.35f);PlaySound(assets.music);}
+    if(IsSoundValid(assets.beat)){SetSoundVolume(assets.beat,.22f);PlaySound(assets.beat);}
     Screen screen=Screen::INTRO;Screen settingsReturn=Screen::MENU;float intro=0;Level level=BuildLevel(1);Repair(level);
     Vector3 player=level.start,vel{};float yaw=3.14159265f,pitch=0,timeLeft=0,stamina=100,health=100,scan=0,bob=0;int got=0,sw=0,mem=0;bool grounded=true;
     bool captured=false,ignoreDelta=false;int settingsRow=0;
@@ -256,6 +271,7 @@ int main(int argc,char**argv){
 
     while(!WindowShouldClose()){
         float dt=std::min(GetFrameTime(),.05f);
+        if(IsSoundValid(assets.beat)&&!IsSoundPlaying(assets.beat))PlaySound(assets.beat);
         if(screen!=Screen::PLAYING&&!captured)EnableCursor();else if(screen!=Screen::PLAYING&&captured)release();
         if(screen==Screen::INTRO){intro+=dt;if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_ESCAPE)||intro>=4.5f)screen=Screen::MENU;}
         else if(screen==Screen::MENU){
