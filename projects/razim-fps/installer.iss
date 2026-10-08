@@ -1,6 +1,6 @@
 ; NEON VAULT — custom Windows installer / uninstaller
 #define AppName "NEON VAULT"
-#define AppVersion "4.6"
+#define AppVersion "4.7"
 #define AppPublisher "Tamasrazim"
 #define AppExeName "neon_vault.exe"
 #define UpdaterExeName "neon_vault_updater.exe"
@@ -119,7 +119,7 @@ begin
   VaultBuild.Parent := WizardForm;
   VaultBuild.Left := ScaleX(520);
   VaultBuild.Top := ScaleY(28);
-  VaultBuild.Caption := '25 MB+  /  CORE BUILD';
+  VaultBuild.Caption := '25 MB+  /  FRACTURED CORE';
   VaultBuild.Font.Name := 'Consolas';
   VaultBuild.Font.Size := 8;
   VaultBuild.Font.Style := [fsBold];
@@ -131,7 +131,7 @@ procedure StyleButtons;
 begin
   WizardForm.NextButton.Caption := 'ENTER  ›';
   WizardForm.BackButton.Caption := '‹  BACK';
-  WizardForm.CancelButton.Caption := 'ABORT';
+  WizardForm.CancelButton.Caption := 'ABORT  ×';
   WizardForm.NextButton.Font.Color := clAqua;
   WizardForm.BackButton.Font.Color := clSilver;
   WizardForm.CancelButton.Font.Color := clRed;
@@ -139,11 +139,11 @@ end;
 
 procedure InitializeWizard;
 begin
-  WizardForm.Caption := 'NEON VAULT  •  INSTALL';
+  WizardForm.Caption := 'NEON VAULT  •  DEPLOYMENT CONSOLE';
   WizardForm.Color := clBlack;
   WizardForm.CancelButton.Caption := 'ABORT';
   WizardForm.CancelButton.Font.Color := clRed;
-  WizardForm.WelcomeLabel1.Caption := 'ENTER THE VAULT';
+  WizardForm.WelcomeLabel1.Caption := 'ENTER THE VAULT  //  INSTALLATION CONSOLE';
   WizardForm.WelcomeLabel1.Font.Color := clAqua;
   WizardForm.WelcomeLabel1.Font.Size := 24;
   WizardForm.WelcomeLabel2.Caption := 'Native Windows x64  •  100 deterministic floors  •  Tamasrazim';
