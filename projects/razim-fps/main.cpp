@@ -649,8 +649,8 @@ int main(int argc,char** argv){
             if(!mouseCaptured){
                 cursorRestore=GetMousePosition();
                 mouseSkipDelta=true;
-                DisableCursor();
                 SetMousePosition(GetScreenWidth()/2,GetScreenHeight()/2);
+                DisableCursor();
                 mouseCaptured=true;
             }
         }else{
