@@ -205,6 +205,9 @@ Sound MakeBeatSound(){
         if((sn>=0.5f&&sn<0.61f)||(sn>=0.99f)){float q=(sn>=0.99f?sn-0.99f:sn-0.5f),e=expf(-34.0f*q);v+=0.13f*e*(sinf(TAU*2100.0f*q)+0.42f*sinf(TAU*3350.0f*q));}
         if(beatPos<0.028f){float e=expf(-95.0f*beatPos);v+=0.038f*e*sinf(TAU*6200.0f*beatPos);}
         float off=fmodf(t+0.125f,0.25f);if(off<0.022f){float e=expf(-110.0f*off);v+=0.022f*e*sinf(TAU*7600.0f*off);}
+        int halfStep=int(floorf(t*8.0f));float tomPos=fmodf(t,0.5f);
+        if((halfStep%8==2)||(halfStep%8==7)){if(tomPos<0.16f){float e=expf(-20.0f*tomPos);float f=145.0f-70.0f*(tomPos/0.16f);v+=0.075f*e*sinf(TAU*f*tomPos);}}
+        float rimPos=fmodf(t+0.0625f,0.25f);if(rimPos<0.012f){float e=expf(-150.0f*rimPos);v+=0.018f*e*sinf(TAU*9200.0f*rimPos);}
         float bass=fmodf(t,1.0f);
         if(bass<0.32f){float e=expf(-8.5f*bass);float note=(int(t)%2==0)?55.0f:61.735f;v+=0.045f*e*sinf(TAU*note*bass);}
         data[i]=(short)(Clamp(v,-0.9f,0.9f)*32767.0f);
