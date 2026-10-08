@@ -495,8 +495,8 @@ int main(int argc,char**argv){
     SetConfigFlags(FLAG_WINDOW_RESIZABLE|FLAG_VSYNC_HINT);InitWindow(test?640:1440,test?360:900,"NEON VAULT");
     if(!IsWindowReady())return test?0:2;SetExitKey(KEY_NULL);SetTargetFPS(144);EnableCursor();
     if(test){BeginDrawing();ClearBackground(Color{3,8,13,255});DrawText("NEON VAULT STARTUP TEST",24,24,24,RAYWHITE);EndDrawing();CloseWindow();return 0;}
-    if(!safe)InitAudioDevice();Save save=LoadSave();SaveGame(save);Assets assets=LoadAssets(safe);
-    if(IsSoundValid(assets.music)){SetSoundVolume(assets.music,save.settings.music);PlaySound(assets.music);}
+    if(!safe)InitAudioDevice();Save save=LoadSave();SaveGame(save);Assets assets=LoadAssets(safe);ApplyAudioVolumes(assets,save.settings);
+    if(IsSoundValid(assets.music)){PlaySound(assets.music);}
     if(IsSoundValid(assets.beat)){SetSoundVolume(assets.beat,save.settings.music*0.38f);PlaySound(assets.beat);}
     Screen screen=Screen::INTRO;Screen settingsReturn=Screen::MENU;float intro=0;Level level=BuildLevel(1);Repair(level);
     Vector3 player=level.start,vel{};float yaw=3.14159265f,pitch=0,timeLeft=0,stamina=100,health=100,scan=0,bob=0,screenShake=0,damageCooldown=0,interactFlash=0;int got=0,sw=0,mem=0;bool grounded=true;
@@ -505,7 +505,7 @@ int main(int argc,char**argv){
     auto capture=[&](){if(captured)return;DisableCursor();captured=true;ignoreDelta=true;};
     auto release=[&](){if(!captured)return;captured=false;ignoreDelta=false;EnableCursor();SetMouseCursor(MOUSE_CURSOR_DEFAULT);};
     auto start=[&](int id){level=BuildLevel(id);Repair(level);player=level.start;vel={};yaw=3.14159265f;pitch=0;timeLeft=level.timeLimit;stamina=100;health=100;got=sw=mem=0;bob=scan=screenShake=damageCooldown=interactFlash=0;grounded=true;screen=Screen::PLAYING;capture();};
-    auto damage=[&](){Burst(player,Color{255,75,95,255},24,3.2f);health-=25;screenShake=1.0f;damageCooldown=0.65f;player=level.start;vel={};timeLeft=std::max(0.0f,timeLeft-4);if(IsSoundValid(assets.hit)){SetSoundVolume(assets.hit,save.settings.sfx);PlaySound(assets.hit);}if(health<=0){health=0;release();screen=Screen::GAMEOVER;}};
+    auto damage=[&](){Burst(player,Color{255,75,95,255},24,3.2f);health-=25;screenShake=1.0f;damageCooldown=0.65f;player=level.start;vel={};grounded=true;timeLeft=std::max(0.0f,timeLeft-4);if(IsSoundValid(assets.hit)){SetSoundVolume(assets.hit,save.settings.sfx);PlaySound(assets.hit);}if(health<=0){health=0;release();screen=Screen::GAMEOVER;}};
 
     while(!WindowShouldClose()){
         float dt=std::min(GetFrameTime(),.05f);
@@ -570,7 +570,7 @@ int main(int argc,char**argv){
                                 case 7:save.settings.crosshair=(save.settings.crosshair+1)%3;break;
                                 case 8:save.settings.perf=!save.settings.perf;break;
                                 case 9:save.settings.display=(save.settings.display+1)%3;SetDisplay(save.settings.display);break;
-                                case 10:save=Save{};SaveGame(save);SetDisplay(0);settingsRow=0;uiFocus=0;break;
+                                case 10:save=Save{};SaveGame(save);SetDisplay(0);ApplyAudioVolumes(assets,save.settings);settingsRow=0;uiFocus=0;break;
                             }
                             if(IsSoundValid(assets.click)){SetSoundVolume(assets.click,save.settings.sfx);PlaySound(assets.click);}
                         }
