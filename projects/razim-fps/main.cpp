@@ -73,6 +73,7 @@ struct Level{
 };
 struct Assets{
     Texture2D floor{},wall{},metal{},hazard{},crystal{},terminal{},sky{},skyPhoto{};
+    std::array<Texture2D,28> vault{};
     Sound theme{},pickup{},hit{},click{},complete{},beat{};
     Model terminalModel{},drone{};
     bool soundsReady=false,musicReady=false,terminalReady=false,droneReady=false;
@@ -489,6 +490,11 @@ static Assets LoadAssets(bool safeMode){
     a.terminal=Tex("assets/textures/terminal.bmp",Color{50,180,155,255},!safeMode);
     a.sky=Tex("assets/textures/sky.bmp",Color{5,10,18,255},!safeMode);
     a.skyPhoto=Tex("assets/sky/tamanna-constellation.jpeg",Color{8,14,24,255},!safeMode);
+    for(int i=0;i<28;i++){
+        char path[128];
+        std::snprintf(path,sizeof(path),"assets/textures/vault_%02d.bmp",i+1);
+        a.vault[i]=Tex(path,ThemeColor(i%10),!safeMode);
+    }
     if(!safeMode&&IsAudioDeviceReady()){
         if(FileExists("assets/audio/neon-vault-theme.wav"))a.theme=LoadSound("assets/audio/neon-vault-theme.wav");
         if(!IsSoundValid(a.theme))a.theme=MakeThemeSound();
@@ -505,6 +511,7 @@ static Assets LoadAssets(bool safeMode){
 static void UnloadAssets(Assets& a){
     if(a.floor.id)UnloadTexture(a.floor);if(a.wall.id)UnloadTexture(a.wall);if(a.metal.id)UnloadTexture(a.metal);
     if(a.hazard.id)UnloadTexture(a.hazard);if(a.crystal.id)UnloadTexture(a.crystal);if(a.terminal.id)UnloadTexture(a.terminal);if(a.sky.id)UnloadTexture(a.sky);if(a.skyPhoto.id)UnloadTexture(a.skyPhoto);
+    for(auto& t:a.vault)if(t.id)UnloadTexture(t);
     if(a.terminalReady)UnloadModel(a.terminalModel);if(a.droneReady)UnloadModel(a.drone);
     if(a.soundsReady){UnloadSound(a.pickup);UnloadSound(a.hit);UnloadSound(a.click);UnloadSound(a.complete);}
     if(IsSoundValid(a.beat))UnloadSound(a.beat);
@@ -630,9 +637,13 @@ static bool ObjectiveComplete(const Level& l,int collected,int switchesActive,in
 static void DrawWorld(const Level& l,const Assets& a,const Vector3& player,float yaw,float pitch,float bob,const Settings& s,float scan,int collected,int switchesActive,int memoryStep){
     Camera3D cam{};cam.position=Vector3Add(player,V(0,0.62f+bob,0));cam.target=Vector3Add(cam.position,V(sinf(yaw)*cosf(pitch),sinf(pitch),cosf(yaw)*cosf(pitch)));cam.up=V(0,1,0);cam.fovy=s.fov;cam.projection=CAMERA_PERSPECTIVE;
     BeginMode3D(cam);
-    DrawTexturedBox(a.floor,V(0,-0.05f,0),V(58,0.1f,58),WHITE,2.1f);
+    Texture2D floorTex=a.vault[(l.theme*2)%28].id?a.vault[(l.theme*2)%28]:a.floor;
+    DrawTexturedBox(floorTex,V(0,-0.05f,0),V(58,0.1f,58),WHITE,2.1f);
+    int wallIndex=0;
     for(const auto& w:l.walls){
-        Texture2D t=w.material==2?a.metal:a.wall;
+        Texture2D t=a.vault[(l.theme*3+wallIndex+w.material)%28];
+        if(!t.id)t=w.material==2?a.metal:a.wall;
+        wallIndex++;
         DrawTexturedBox(t,w.pos,w.size,WHITE,w.material==2?1.7f:2.4f);
         DrawCubeWires(w.pos,w.size.x,w.size.y,w.size.z,Color{65,96,115,170});
     }
