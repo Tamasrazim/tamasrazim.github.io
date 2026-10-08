@@ -38,6 +38,10 @@ if ($src -match '\(i%3-1\)\*3\.[25]f') { throw "Unsigned size_t fallback coordin
 if ($src -notmatch 'int\(i%3\)-1') { throw "Signed fallback coordinate calculation missing." }
 if ($src -notmatch 'moveSubsteps') { throw "Swept movement collision protection missing." }
 if ($src -notmatch 'memoryOrder') { throw "Memory sequence validation missing." }
+if ($src -notmatch 'if\(l\.id==100\)') { throw "Final floor override missing." }
+if ($src -notmatch 'l\.objective=Objective::COMBO') { throw "Final vault objective is not the combo challenge." }
+if ($src -notmatch 'for\(auto& q:level\.pickups\)if\(q\.kind==2\)\{q\.taken=false;q\.burst=0\.0f;\}') { throw "Memory-sequence retry does not restore fragments." }
+if ($src -notmatch '!Clear\(l,p,0\.75f\)') { throw "Hazards are not checked against solid geometry." }
 if ($src -notmatch 'crystals<3\|\|int\(l\.switches\.size\(\)\)<3') { throw "Combo objective completeness validation missing." }
 if ($iss -notmatch 'SetupIconFile=neon-vault.ico') { throw "Custom setup icon missing." }
 if ($iss -notmatch 'UninstallDisplayIcon=\{app\}\\neon-vault.ico') { throw "Custom uninstall icon missing." }
