@@ -32,7 +32,7 @@ It contains 1,200+ individual project folders. Most projects expose an index.htm
 
 ### Applications and products
 - bncagrocare
-- razim-fps
+- neo (legacy source/build tree remains under `razim-fps`)
 - repo-token-meter
 
 ## Project rule
