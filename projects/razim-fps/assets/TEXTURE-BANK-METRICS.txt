@@ -1,0 +1,37 @@
+NEON VAULT TEXTURE BANK — BUILD METRICS
+=======================================
+
+Runtime material count: 31
+Texture target: 25 MB+ shipped asset set
+Primary material format: BMP, 24-bit
+Texture addressing: repeat
+Texture filtering: trilinear + generated mipmaps
+World scale: 58 x 58 units
+Player radius: 0.34
+Eye offset: 0.62
+Validation grid: 58 x 58 cells
+Floor count: 100
+Material families: 31
+
+Material mapping:
+vault_01..vault_10  = theme surfaces
+vault_11..vault_20  = structural/panel families
+vault_21..vault_25  = hazard/exit families
+vault_26..vault_28  = trim/light families
+vault_29..vault_31  = supplemental fractured/technical families
+
+Gameplay calculations:
+collision clearance = player radius + generated obstacle clearance
+route validation = deterministic BFS from start to exit
+pickup validation = deterministic BFS from start to every pickup
+switch validation = deterministic BFS from start to every switch
+wall overlap validation = pairwise XZ bounds
+spawn repair = generated obstacle rollback until validation passes
+hazard spawn clearance = minimum start and exit distance guards
+movement = axis-separated collision resolution
+mouse = native disabled-cursor input, no pointer warp
+camera = eye-height offset + pitch clamp
+pickup animation = deterministic rotating fractured-piece field
+beat layer = deterministic procedural 4-second rhythm
+
+This manifest is part of the shipped asset bank and is copied with the game assets.
