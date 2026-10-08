@@ -211,7 +211,15 @@ Sound MakeBeatSound(){
 }
 void UnloadAssets(Assets&a){for(auto&t:a.tex)if(t.id)UnloadTexture(t);if(IsSoundValid(a.music))UnloadSound(a.music);if(IsSoundValid(a.beat))UnloadSound(a.beat);if(IsSoundValid(a.pickup))UnloadSound(a.pickup);if(IsSoundValid(a.hit))UnloadSound(a.hit);if(IsSoundValid(a.click))UnloadSound(a.click);if(IsSoundValid(a.complete))UnloadSound(a.complete);}
 bool Btn(Rectangle r){return CheckCollisionPointRec(GetMousePosition(),r)&&IsMouseButtonPressed(MOUSE_BUTTON_LEFT);}
-void BtnDraw(Rectangle r,const char*s,Color accent){bool h=CheckCollisionPointRec(GetMousePosition(),r);DrawRectangleRounded(r,.08f,8,h?Color{20,42,58,255}:Color{9,18,28,255});DrawRectangleRoundedLines(r,.08f,8,h?accent:Color{45,62,78,255});int fs=18;DrawText(s,int(r.x+(r.width-MeasureText(s,fs))*.5f),int(r.y+19),fs,RAYWHITE);}
+void BtnDraw(Rectangle r,const char*s,Color accent){
+    bool h=CheckCollisionPointRec(GetMousePosition(),r);
+    float pulse=h?0.035f*(0.5f+0.5f*sinf(float(GetTime())*8.0f)):0.0f;
+    Rectangle rr={r.x-r.width*pulse*0.5f,r.y-r.height*pulse*0.5f,r.width*(1.0f+pulse),r.height*(1.0f+pulse)};
+    DrawRectangleRounded(rr,.08f,8,h?Color{22,48,64,255}:Color{9,18,28,255});
+    DrawRectangleRoundedLines(rr,.08f,8,h?accent:Color{45,62,78,255});
+    if(h)DrawRectangleRoundedLines({rr.x+2,rr.y+2,rr.width-4,rr.height-4},.08f,8,Color{accent.r,accent.g,accent.b,110});
+    int fs=18;DrawText(s,int(rr.x+(rr.width-MeasureText(s,fs))*.5f),int(rr.y+(rr.height-fs)*0.5f),fs,RAYWHITE);
+}
 void Center(const char*s,int y,int fs,Color c){DrawText(s,(GetScreenWidth()-MeasureText(s,fs))/2,y,fs,c);}
 void Cross(int style){int x=GetScreenWidth()/2,y=GetScreenHeight()/2;if(style==0){DrawLine(x-9,y,x-3,y,RAYWHITE);DrawLine(x+3,y,x+9,y,RAYWHITE);DrawLine(x,y-9,x,y-3,RAYWHITE);DrawLine(x,y+3,x,y+9,RAYWHITE);}else if(style==1){DrawCircleLines(x,y,7,RAYWHITE);DrawCircle(x,y,2,RAYWHITE);}else DrawCircle(x,y,3,RAYWHITE);}
 void Box(Texture2D t,Vector3 p,Vector3 s,Color c){
@@ -228,21 +236,23 @@ void Box(Texture2D t,Vector3 p,Vector3 s,Color c){
     rlEnd();rlSetTexture(0);
 }
 void DrawBrokenPiece(Vector3 c,float r,int count,float time,Color color){
-    float pulse=0.86f+0.14f*sinf(time*1.9f);
+    float fracture=0.78f+0.22f*sinf(time*1.6f);
+    float pulse=0.82f+0.18f*sinf(time*2.4f);
     for(int i=0;i<count;i++){
-        float a=TAU*float(i)/float(count)+time*(0.30f+0.045f*i);
-        float phase=time*1.5f+i*0.83f;
-        float radial=r*(0.55f+0.35f*sinf(phase));
-        float lift=0.10f*sinf(time*2.2f+i*1.7f);
+        float a=TAU*float(i)/float(count)+time*(0.24f+0.055f*i);
+        float phase=time*1.8f+i*1.11f;
+        float crack=0.82f+0.24f*sinf(phase*1.7f);
+        float radial=r*(0.48f+0.42f*fracture)*(0.92f+0.06f*sinf(phase));
+        float lift=0.08f*sinf(time*2.7f+i*1.9f);
         Vector3 q=V(c.x+cosf(a)*radial,c.y+lift,c.z+sinf(a)*radial);
-        Vector3 dir=Vector3Normalize(V(cosf(a)*(0.35f+0.18f*sinf(phase)),0.75f+0.15f*cosf(phase),sinf(a)*(0.35f+0.18f*sinf(phase))));
-        Vector3 end=Vector3Add(q,Vector3Scale(dir,r*(0.38f+0.12f*sinf(phase*1.3f))));
-        float thick=r*(0.10f+0.025f*cosf(phase));
-        float tip=thick*0.18f;
-        DrawCylinderEx(q,end,thick,tip,5,color);
-        DrawCylinderEx(q,end,thick*1.08f,tip*1.5f,5,RAYWHITE);
+        Vector3 dir=Vector3Normalize(V(cosf(a)*(0.30f+0.24f*sinf(phase)),0.62f+0.22f*cosf(phase),sinf(a)*(0.30f+0.24f*sinf(phase))));
+        Vector3 end=Vector3Add(q,Vector3Scale(dir,r*(0.34f+0.16f*crack)));
+        float thick=r*(0.085f+0.035f*(0.5f+0.5f*sinf(phase)));
+        DrawCylinderEx(q,end,thick,thick*0.16f,5,color);
+        DrawCylinderEx(q,end,thick*1.12f,thick*0.21f,5,RAYWHITE);
+        DrawSphere(q,thick*0.55f,Color{color.r,color.g,color.b,110});
     }
-    DrawSphere(c,r*0.08f* pulse,Color{235,255,255,170});
+    DrawSphere(c,r*0.075f*pulse,Color{235,255,255,165});
 }
 bool ObjectiveDone(const Level&l,int got,int sw,int mem){if(l.objective==Objective::COLLECT)return got>=l.required;if(l.objective==Objective::SWITCHES)return sw>=l.required;if(l.objective==Objective::KEYCARD){int n=0;for(const auto&p:l.pickups)if(p.kind==1&&p.taken)n++;return n>=l.required;}if(l.objective==Objective::MEMORY)return mem>=l.required;if(l.objective==Objective::COMBO){int k=0;for(const auto&p:l.pickups)if(p.kind==1&&p.taken)k++;return got>=3&&sw>=3&&k>=1&&mem>=4;}return false;}
 void Intro(float t,const Assets&a){
