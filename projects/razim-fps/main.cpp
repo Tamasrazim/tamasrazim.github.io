@@ -254,7 +254,8 @@ void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,flo
     for(int i=-5;i<=5;i++){
         float z=float(i)*5.5f;
         Box(a.tex[27],V(0,0.025f,z),V(0.14f,0.035f,3.0f),WHITE);
-    }\n    for(int i=0;i<4;i++){
+    }
+    for(int i=0;i<4;i++){
         float a0=TAU*i/4.0f+float(GetTime())*0.25f;
         Vector3 p=V(l.exit.x+cosf(a0)*2.5f,0.28f,l.exit.z+sinf(a0)*2.5f);
         DrawCylinder(p,0.10f,0.16f,0.22f,8,exitOpen?GREEN:Theme(l.theme));
