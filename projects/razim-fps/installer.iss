@@ -41,8 +41,8 @@ Source: "assets\textures\*.bmp"; DestDir: "{app}\assets\textures"; Flags: ignore
 Source: "assets\audio\*.wav"; DestDir: "{app}\assets\audio"; Flags: ignoreversion
 
 [UninstallDelete]
-Type: files; Name: "{localappdata}\\Tamasrazim\\NeonVault.cfg"
-Type: dirifempty; Name: "{localappdata}\\Tamasrazim"
+Type: files; Name: "{localappdata}\Tamasrazim\NeonVault.cfg"
+Type: dirifempty; Name: "{localappdata}\Tamasrazim"
 
 [Icons]
 Name: "{group}\NEON VAULT"; Filename: "{app}\{#UpdaterExeName}"
