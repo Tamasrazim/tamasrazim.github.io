@@ -350,6 +350,8 @@ Connect the keyboard over USB-C, then run Safe Probe.</div>
   }
   async function attach(d){
     device=d;
+    window.__f75Device=device;
+    window.dispatchEvent(new CustomEvent("f75:device",{detail:device}));
     if(!device.opened)await device.open();
     $("#statusDot").classList.add("ok");setText("#statusText","Connected");
     setText("#usbId",""+device.vendorId.toString(16).padStart(4,"0")+":"+device.productId.toString(16).padStart(4,"0"));
@@ -361,6 +363,8 @@ Connect the keyboard over USB-C, then run Safe Probe.</div>
   }
   async function onDisconnect(){
     device=null;
+    window.__f75Device=null;
+    window.dispatchEvent(new CustomEvent("f75:device",{detail:null}));
     $("#statusDot").classList.add("ok");
     setText("#statusText","LIVE DEMO · no keyboard");
     setText("#usbId","258a:010c · simulated");
