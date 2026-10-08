@@ -12,8 +12,8 @@ NEON VAULT is a native Windows x64 first-person puzzle game built around a deter
 - Main menu, pause menu, settings, credits, completion screen and game-over state
 - Windowed, borderless and fullscreen display modes
 - Mouse sensitivity, Y inversion, FOV, hints, screen shake, SFX/music volume, crosshair and performance settings
-- Original 30-second looping instrumental soundtrack generated locally by the game at startup; no vocals
-- Cinematic 15-second in-engine intro with deterministic 3D camera motion, procedural lighting accents and skip controls
+- Original 24-second looping instrumental soundtrack with WAV asset fallback; no vocals
+- Seven-second in-engine 3D intro with connected vault geometry, deterministic camera motion and skip controls
 - Windows x64 installer, direct executable and updater
 
 ## Mouse behavior
@@ -25,7 +25,7 @@ The Windows cursor stays free on the intro, menus, floor select, settings, credi
 3. Press ESC to release the cursor and pause.
 4. Resume to return to PLAYING and capture the mouse again.
 
-The capture routine centers the cursor only when gameplay capture begins. UI screens never reposition a free cursor.
+The gameplay mouse uses native disabled-cursor input without manual cursor warping. UI screens keep the cursor free.
 
 ## Build
 
@@ -40,4 +40,8 @@ cmake --build projects/razim-fps/build --config Release --parallel
 projects/razim-fps/build/Release/neon_vault.exe --validate
 ```
 
-Validation checks all 100 generated floors for clear spawn/objective positions and start-to-exit reachability.
+Validation checks all 100 generated floors for non-overlapping entity placement, static collision clearance, objective reachability, start-to-exit reachability, and aggregate content counts.
+
+## Gameplay rebuild 142
+
+The current unreleased gameplay rebuild hardens frame clearing, procedural placement, memory-puzzle reset behavior, pause/resume state, objective-driven exit rendering, screen-shake feedback, and high-resolution industrial texture assets. The Windows CI/release pipeline is intentionally not triggered by this working branch.
