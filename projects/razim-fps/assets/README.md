@@ -1,5 +1,5 @@
 
-NEO shipped assets.
+NEON VAULT shipped assets.
 
 Textures: BMP
 Models: Wavefront OBJ

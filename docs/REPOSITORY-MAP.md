@@ -33,11 +33,8 @@ Browser-based vector/EPS tooling.
 ### /projects/code-to-svg/
 Browser-based SVG tooling.
 
-### /projects/neo/
-NEO, the native Windows 3D puzzle game public route.
-
 ### /projects/razim-fps/
-Legacy-compatible source/build tree for NEO.
+NEON VAULT, the native Windows 3D puzzle game and its release packaging.
 
 ### /projects/bncagrocare/
 BNC Agro Care customer-facing application and supporting business material.
