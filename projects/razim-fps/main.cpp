@@ -293,32 +293,50 @@ static Level BuildLevel(int id){
     return l;
 }
 
-static bool ValidateLevel(const Level& l){
-    for(size_t i=0;i<l.walls.size();i++)for(size_t j=i+1;j<l.walls.size();j++){
-        if(Overlap2D(l.walls[i].pos,l.walls[i].size,l.walls[j].pos,l.walls[j].size,-0.02f))
-            return false;
-    }
-    const int N=29;const float step=2.0f;
-    auto cell=[](Vector3 p){int x=int(std::floor((p.x+28.0f)/2.0f));int z=int(std::floor((p.z+28.0f)/2.0f));return std::pair<int,int>{std::clamp(x,0,28),std::clamp(z,0,28)};};
-    auto [sx,sz]=cell(l.start);auto [gx,gz]=cell(l.exit);
+static bool ReachablePoint(const Level& l,Vector3 target,bool ignoreDoors){
+    const int N=58;
+    auto cell=[](Vector3 p){
+        int x=int(std::floor(p.x+WORLD_HALF));
+        int z=int(std::floor(p.z+WORLD_HALF));
+        return std::pair<int,int>{std::clamp(x,0,N-1),std::clamp(z,0,N-1)};
+    };
+    auto blocked=[&](Vector3 p){
+        if(fabsf(p.x)>WORLD_HALF-PLAYER_RADIUS||fabsf(p.z)>WORLD_HALF-PLAYER_RADIUS)return true;
+        for(const auto& w:l.walls)if(HitsBox(p,PLAYER_RADIUS*1.08f,w.pos,w.size))return true;
+        if(!ignoreDoors)for(const auto& d:l.doors)if(!d.open&&HitsBox(p,PLAYER_RADIUS*1.08f,d.pos,d.size))return true;
+        return false;
+    };
+    auto [sx,sz]=cell(l.start);auto [gx,gz]=cell(target);
     std::queue<std::pair<int,int>> q;bool seen[N][N]{};
+    if(blocked(V(-WORLD_HALF+sx+0.5f,0.9f,-WORLD_HALF+sz+0.5f))||blocked(V(-WORLD_HALF+gx+0.5f,0.9f,-WORLD_HALF+gz+0.5f)))return false;
     q.push({sx,sz});seen[sx][sz]=true;
     const int dx[4]={1,-1,0,0},dz[4]={0,0,1,-1};
     while(!q.empty()){
         auto [x,z]=q.front();q.pop();if(x==gx&&z==gz)return true;
-        Vector3 p=V(-27.0f+x*step+1.0f,0.9f,-27.0f+z*step+1.0f);
         for(int d=0;d<4;d++){
-            int nx=x+dx[d],nz=z+dz[d];if(nx<0||nz<0||nx>=N||nz>=N||seen[nx][nz])continue;
-            Vector3 np=V(-27.0f+nx*step+1.0f,0.9f,-27.0f+nz*step+1.0f);
-            Vector3 mid=Vector3Scale(Vector3Add(p,np),0.5f);
-            bool blocked=false;for(const auto& w:l.walls)if(HitsBox(mid,0.25f,w.pos,w.size)){blocked=true;break;}
-            if(!blocked){seen[nx][nz]=true;q.push({nx,nz});}
+            int nx=x+dx[d],nz=z+dz[d];
+            if(nx<0||nz<0||nx>=N||nz>=N||seen[nx][nz])continue;
+            Vector3 np=V(-WORLD_HALF+nx+0.5f,0.9f,-WORLD_HALF+nz+0.5f);
+            if(blocked(np))continue;
+            seen[nx][nz]=true;q.push({nx,nz});
         }
     }
     return false;
 }
+static bool ValidateLevel(const Level& l){
+    for(size_t i=0;i<l.walls.size();i++)for(size_t j=i+1;j<l.walls.size();j++)
+        if(Overlap2D(l.walls[i].pos,l.walls[i].size,l.walls[j].pos,l.walls[j].size,-0.02f))return false;
+    if(!ReachablePoint(l,l.exit,true))return false;
+    for(const auto& p:l.pickups)if(!ReachablePoint(l,p.pos,false))return false;
+    for(const auto& sw:l.switches)if(!ReachablePoint(l,sw.pos,false))return false;
+    return true;
+}
+static void RepairLevel(Level& l){
+    while(!ValidateLevel(l)&&l.walls.size()>6)l.walls.pop_back();
+    if(!ValidateLevel(l))l.walls.resize(std::min<size_t>(4,l.walls.size()));
+}
 static bool ValidateAllLevels(){
-    for(int i=1;i<=LEVELS;i++)if(!ValidateLevel(BuildLevel(i))){std::printf("FLOOR %d INVALID\n",i);return false;}
+    for(int i=1;i<=LEVELS;i++){Level l=BuildLevel(i);RepairLevel(l);if(!ValidateLevel(l)){std::printf("FLOOR %d INVALID\n",i);return false;}}
     std::printf("NEON VAULT VALIDATION COMPLETE: PASS\n");return true;
 }
 
@@ -594,7 +612,7 @@ int main(int argc,char** argv){
 
     auto ClickSound=[&](){if(assets.soundsReady){SetSoundVolume(assets.click,save.settings.sfx);PlaySound(assets.click);}};
     auto StartLevel=[&](int id){
-        level=BuildLevel(id);player=level.start;velocity={};yaw=3.14159265359f;pitch=0;stamina=100;health=100;
+        level=BuildLevel(id);RepairLevel(level);player=level.start;velocity={};yaw=3.14159265359f;pitch=0;stamina=100;health=100;
         timeLeft=level.timeLimit;collected=switchesActive=memoryStep=deaths=0;bobPhase=scanTimer=0;hintTimer=4;grounded=true;
         screen=Screen::PLAYING;CaptureMouse(mouse);
     };
