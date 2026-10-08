@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-static void w16(unsigned char*p,unsigned v){p[0]=unsigned char(v);p[1]=unsigned char(v>>8);}
-static void w32(unsigned char*p,unsigned v){p[0]=unsigned char(v);p[1]=unsigned char(v>>8);p[2]=unsigned char(v>>16);p[3]=unsigned char(v>>24);}
+static void w16(unsigned char*p,unsigned v){p[0]=static_cast<unsigned char>(v);p[1]=static_cast<unsigned char>(v>>8);}
+static void w32(unsigned char*p,unsigned v){p[0]=static_cast<unsigned char>(v);p[1]=static_cast<unsigned char>(v>>8);p[2]=static_cast<unsigned char>(v>>16);p[3]=static_cast<unsigned char>(v>>24);}
 static unsigned h(unsigned x,unsigned y,unsigned s){unsigned n=x*374761393u+y*668265263u+s*2246822519u;n=(n^(n>>13))*1274126177u;n^=n>>16;return n;}
 int main(int argc,char**argv){
  const std::string out=argc>1?argv[1]:"assets/textures";const int W=500,H=500,row=1500,size=750054;
@@ -14,6 +14,6 @@ int main(int argc,char**argv){
   for(int y=0;y<H;y++)for(int x=0;x<W;x++){unsigned n=h(x>>2,y>>2,id);int r=pal[(id-1)%10][0]+int((n&255)*.08),g=pal[(id-1)%10][1]+int(((n>>8)&255)*.08),q=pal[(id-1)%10][2]+int(((n>>16)&255)*.08);bool line=0,hot=0;
    if(m==0)line=x%64<2||y%64<2,hot=x%128<3;else if(m==1)line=(x+y)%72<4,hot=(x+y)%144<4;else if(m==2)line=x%64<3||y%64<3,hot=x%128<3;else if(m==3)line=x%80<4||y%80<4,hot=x%160<3&&y%50<30;
    else if(m==4)line=((x/40+y/40)%2)==0,hot=x%100<3||y%100<3;else if(m==5)line=((x+y)/18)%2==0,hot=(x+y)%90<3;else if(m==6){double d=std::hypot(x-250,y-250);line=std::fmod(d,52)<3;hot=std::abs(d-150)<3;}else line=std::abs(x-250)<3||std::abs(y-250)<3,hot=x%100<3||y%100<3;
-   if(line)r+=38,g+=42,q+=50;if(hot)r+=55,g+=65,q+=75;r=std::min(255,r);g=std::min(255,g);q=std::min(255,q);size_t p=54+(H-1-y)*row+x*3;b[p]=unsigned char(q);b[p+1]=unsigned char(g);b[p+2]=unsigned char(r);}
+   if(line)r+=38,g+=42,q+=50;if(hot)r+=55,g+=65,q+=75;r=std::min(255,r);g=std::min(255,g);q=std::min(255,q);size_t p=54+(H-1-y)*row+x*3;b[p]=static_cast<unsigned char>(q);b[p+1]=static_cast<unsigned char>(g);b[p+2]=static_cast<unsigned char>(r);}
   char name[256];std::snprintf(name,sizeof(name),"%s/vault_%02d.bmp",out.c_str(),id);FILE*f=std::fopen(name,"wb");if(!f)return 2;std::fwrite(b.data(),1,b.size(),f);std::fclose(f);}
- std::puts("NEON VAULT texture bank: 28 textures generated.");return 0;}
+ std::puts("NEON VAULT texture bank: 30 textures generated.");return 0;}
