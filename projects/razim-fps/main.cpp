@@ -1,4 +1,3 @@
-// STABILITY TEST MARKER
 
 #include "raylib.h"
 #include "raymath.h"
@@ -76,7 +75,7 @@ struct Assets{
     Texture2D floor{},wall{},metal{},hazard{},crystal{},terminal{},sky{};
     Sound theme{},pickup{},hit{},click{},complete{};
     Model terminalModel{},drone{};
-    bool soundsReady=false,musicReady=false,terminalReady=false,droneReady=false,materialBankReady=false;std::array<Color,10> materialTints{};
+    bool soundsReady=false,musicReady=false,terminalReady=false,droneReady=false;
 };
 struct MouseState{
     bool captured=false;
@@ -293,60 +292,42 @@ static Level BuildLevel(int id){
     return l;
 }
 
-static bool ReachablePoint(const Level& l,Vector3 target,bool ignoreDoors){
-    const int N=58;
-    auto cell=[](Vector3 p){
-        int x=int(std::floor(p.x+WORLD_HALF));
-        int z=int(std::floor(p.z+WORLD_HALF));
-        return std::pair<int,int>{std::clamp(x,0,N-1),std::clamp(z,0,N-1)};
-    };
-    auto blocked=[&](Vector3 p){
-        if(fabsf(p.x)>WORLD_HALF-PLAYER_RADIUS||fabsf(p.z)>WORLD_HALF-PLAYER_RADIUS)return true;
-        for(const auto& w:l.walls)if(HitsBox(p,PLAYER_RADIUS*1.08f,w.pos,w.size))return true;
-        if(!ignoreDoors)for(const auto& d:l.doors)if(!d.open&&HitsBox(p,PLAYER_RADIUS*1.08f,d.pos,d.size))return true;
-        return false;
-    };
-    auto [sx,sz]=cell(l.start);auto [gx,gz]=cell(target);
+static bool ValidateLevel(const Level& l){
+    for(size_t i=0;i<l.walls.size();i++)for(size_t j=i+1;j<l.walls.size();j++){
+        if(Overlap2D(l.walls[i].pos,l.walls[i].size,l.walls[j].pos,l.walls[j].size,-0.02f))
+            return false;
+    }
+    const int N=29;const float step=2.0f;
+    auto cell=[](Vector3 p){int x=int(std::floor((p.x+28.0f)/2.0f));int z=int(std::floor((p.z+28.0f)/2.0f));return std::pair<int,int>{std::clamp(x,0,28),std::clamp(z,0,28)};};
+    auto [sx,sz]=cell(l.start);auto [gx,gz]=cell(l.exit);
     std::queue<std::pair<int,int>> q;bool seen[N][N]{};
-    if(blocked(V(-WORLD_HALF+sx+0.5f,0.9f,-WORLD_HALF+sz+0.5f))||blocked(V(-WORLD_HALF+gx+0.5f,0.9f,-WORLD_HALF+gz+0.5f)))return false;
     q.push({sx,sz});seen[sx][sz]=true;
     const int dx[4]={1,-1,0,0},dz[4]={0,0,1,-1};
     while(!q.empty()){
         auto [x,z]=q.front();q.pop();if(x==gx&&z==gz)return true;
+        Vector3 p=V(-27.0f+x*step+1.0f,0.9f,-27.0f+z*step+1.0f);
         for(int d=0;d<4;d++){
-            int nx=x+dx[d],nz=z+dz[d];
-            if(nx<0||nz<0||nx>=N||nz>=N||seen[nx][nz])continue;
-            Vector3 np=V(-WORLD_HALF+nx+0.5f,0.9f,-WORLD_HALF+nz+0.5f);
-            if(blocked(np))continue;
-            seen[nx][nz]=true;q.push({nx,nz});
+            int nx=x+dx[d],nz=z+dz[d];if(nx<0||nz<0||nx>=N||nz>=N||seen[nx][nz])continue;
+            Vector3 np=V(-27.0f+nx*step+1.0f,0.9f,-27.0f+nz*step+1.0f);
+            Vector3 mid=Vector3Scale(Vector3Add(p,np),0.5f);
+            bool blocked=false;for(const auto& w:l.walls)if(HitsBox(mid,0.25f,w.pos,w.size)){blocked=true;break;}
+            if(!blocked){seen[nx][nz]=true;q.push({nx,nz});}
         }
     }
     return false;
 }
-static bool ValidateLevel(const Level& l){
-    for(size_t i=0;i<l.walls.size();i++)for(size_t j=i+1;j<l.walls.size();j++)
-        if(Overlap2D(l.walls[i].pos,l.walls[i].size,l.walls[j].pos,l.walls[j].size,-0.02f))return false;
-    if(!ReachablePoint(l,l.exit,true))return false;
-    for(const auto& p:l.pickups)if(!ReachablePoint(l,p.pos,false))return false;
-    for(const auto& sw:l.switches)if(!ReachablePoint(l,sw.pos,false))return false;
-    return true;
-}
-static void RepairLevel(Level& l){
-    while(!ValidateLevel(l)&&l.walls.size()>6)l.walls.pop_back();
-    if(!ValidateLevel(l))l.walls.resize(std::min<size_t>(4,l.walls.size()));
-}
 static bool ValidateAllLevels(){
-    for(int i=1;i<=LEVELS;i++){Level l=BuildLevel(i);RepairLevel(l);if(!ValidateLevel(l)){std::printf("FLOOR %d INVALID\n",i);return false;}}
+    for(int i=1;i<=LEVELS;i++)if(!ValidateLevel(BuildLevel(i))){std::printf("FLOOR %d INVALID\n",i);return false;}
     std::printf("NEON VAULT VALIDATION COMPLETE: PASS\n");return true;
 }
 
 static Texture2D Tex(const char* file,Color fallback,bool allowFile=true){
     if(allowFile&&FileExists(file)){
         Texture2D t=LoadTexture(file);
-        if(t.id){GenTextureMipmaps(&t);SetTextureFilter(t,TEXTURE_FILTER_TRILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;}
+        if(t.id){SetTextureFilter(t,TEXTURE_FILTER_BILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;}
     }
     Image im=GenImageColor(64,64,fallback);Texture2D t=LoadTextureFromImage(im);UnloadImage(im);
-    GenTextureMipmaps(&t);SetTextureFilter(t,TEXTURE_FILTER_TRILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;
+    SetTextureFilter(t,TEXTURE_FILTER_BILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;
 }
 static Model MakeTexturedCube(Texture2D tex){
     Model m=LoadModelFromMesh(GenMeshCube(1,1,1));
@@ -396,14 +377,6 @@ static Sound MakeThemeSound(){
     Wave w{};w.frameCount=frames;w.sampleRate=sampleRate;w.sampleSize=16;w.channels=channels;w.data=data;
     Sound out=LoadSoundFromWave(w);UnloadWave(w);return out;
 }
-static Color ReadMaterialTint(const char* file,Color fallback){
-    if(!FileExists(file))return fallback;
-    std::ifstream in(file,std::ios::binary);
-    uint32_t h=2166136261u;char c=0;int n=0;
-    while(n<4096&&in.get(c)){h^=uint8_t(c);h*=16777619u;n++;}
-    if(n==0)return fallback;
-    return Color{uint8_t(145+(h&63)),uint8_t(155+((h>>8)&63)),uint8_t(165+((h>>16)&63)),255};
-}
 static Assets LoadAssets(bool safeMode){
     Assets a;
     a.floor=Tex("assets/textures/floor.bmp",Color{30,39,50,255},!safeMode);
@@ -412,7 +385,7 @@ static Assets LoadAssets(bool safeMode){
     a.hazard=Tex("assets/textures/hazard.bmp",Color{165,42,48,255},!safeMode);
     a.crystal=Tex("assets/textures/crystal.bmp",Color{55,180,235,255},!safeMode);
     a.terminal=Tex("assets/textures/terminal.bmp",Color{50,180,155,255},!safeMode);
-    a.sky=Tex("assets/textures/sky.bmp",Color{5,10,18,255},!safeMode);\n    if(!safeMode){for(int i=0;i<10;i++){std::string p="assets/procedural/vault-material-"+TextFormat("%02d",i+1)+".vtexseed";a.materialTints[i]=ReadMaterialTint(p.c_str(),Color{165,180,195,255});}a.materialBankReady=true;}
+    a.sky=Tex("assets/textures/sky.bmp",Color{5,10,18,255},!safeMode);
     if(!safeMode&&IsAudioDeviceReady()){
         if(FileExists("assets/audio/neon-vault-theme.wav"))a.theme=LoadSound("assets/audio/neon-vault-theme.wav");
         if(!IsSoundValid(a.theme))a.theme=MakeThemeSound();
@@ -549,15 +522,13 @@ static bool ObjectiveComplete(const Level& l,int collected,int switchesActive,in
     return false;
 }
 
-static void DrawWorld(const Level& l,const Assets& a,const Vector3& player,float yaw,float pitch,float bob,const Settings& s,float scan,int collected,int switchesActive,int memoryStep){
+static void DrawWorld(const Level& l,const Assets& a,const Vector3& player,float yaw,float pitch,float bob,const Settings& s,float scan){
     Camera3D cam{};cam.position=Vector3Add(player,V(0,0.62f+bob,0));cam.target=Vector3Add(cam.position,V(sinf(yaw)*cosf(pitch),sinf(pitch),cosf(yaw)*cosf(pitch)));cam.up=V(0,1,0);cam.fovy=s.fov;cam.projection=CAMERA_PERSPECTIVE;
     BeginMode3D(cam);
-    Color mat=a.materialBankReady?a.materialTints[l.theme]:WHITE;
-    DrawTexturedBox(a.floor,V(0,-0.05f,0),V(58,0.1f,58),mat,2.1f);
-    DrawTexturedBox(a.wall,V(0,5.0f,0),V(58,0.1f,58),Color{uint8_t(std::min(255,int(mat.r)+18)),uint8_t(std::min(255,int(mat.g)+18)),uint8_t(std::min(255,int(mat.b)+18)),255},2.8f);
+    DrawTexturedBox(a.floor,V(0,-0.05f,0),V(58,0.1f,58),WHITE,2.1f);
     for(const auto& w:l.walls){
         Texture2D t=w.material==2?a.metal:a.wall;
-        DrawTexturedBox(t,w.pos,w.size,w.material==2?Color{185,195,205,255}:mat,w.material==2?1.7f:2.4f);
+        DrawTexturedBox(t,w.pos,w.size,WHITE,w.material==2?1.7f:2.4f);
         DrawCubeWires(w.pos,w.size.x,w.size.y,w.size.z,Color{65,96,115,170});
     }
     for(const auto& d:l.doors)if(!d.open){
@@ -585,7 +556,7 @@ static void DrawWorld(const Level& l,const Assets& a,const Vector3& player,float
         else DrawSphere(d.pos,0.55f,Color{220,65,95,255});
         DrawSphereWires(d.pos,0.72f,8,8,Color{255,80,110,180});
     }
-    bool open=l.objective==Objective::SURVIVE||ObjectiveComplete(l,collected,switchesActive,memoryStep);
+    bool open=l.objective==Objective::SURVIVE||ObjectiveComplete(l,0,0,0);
     DrawCylinder(l.exit,1.5f,1.5f,0.14f,32,open?GREEN:Color{55,90,110,255});
     DrawCylinderWires(l.exit,1.7f,1.7f,0.18f,32,RAYWHITE);
     EndMode3D();
@@ -618,11 +589,11 @@ int main(int argc,char** argv){
     Vector3 player=level.start,velocity{};
     float yaw=3.14159265359f,pitch=0,stamina=100,health=100,timeLeft=0,bobPhase=0,scanTimer=0,hintTimer=0,introElapsed=0;
     int collected=0,switchesActive=0,memoryStep=0,deaths=0,settingsRow=0;
-    bool grounded=true,quit=false;Screen settingsReturn=Screen::MENU;
+    bool grounded=true,quit=false;
 
     auto ClickSound=[&](){if(assets.soundsReady){SetSoundVolume(assets.click,save.settings.sfx);PlaySound(assets.click);}};
     auto StartLevel=[&](int id){
-        level=BuildLevel(id);RepairLevel(level);player=level.start;velocity={};yaw=3.14159265359f;pitch=0;stamina=100;health=100;
+        level=BuildLevel(id);player=level.start;velocity={};yaw=3.14159265359f;pitch=0;stamina=100;health=100;
         timeLeft=level.timeLimit;collected=switchesActive=memoryStep=deaths=0;bobPhase=scanTimer=0;hintTimer=4;grounded=true;
         screen=Screen::PLAYING;CaptureMouse(mouse);
     };
@@ -639,7 +610,7 @@ int main(int argc,char** argv){
         }else if(screen==Screen::MENU){
             if(Button({GetScreenWidth()/2.0f-190,235,380,56})){StartLevel(1);ClickSound();}
             else if(Button({GetScreenWidth()/2.0f-190,301,380,56})){screen=Screen::LEVELS;ClickSound();}
-            else if(Button({GetScreenWidth()/2.0f-190,367,380,56})){settingsReturn=Screen::MENU;screen=Screen::SETTINGS;ClickSound();}
+            else if(Button({GetScreenWidth()/2.0f-190,367,380,56})){screen=Screen::SETTINGS;ClickSound();}
             else if(Button({GetScreenWidth()/2.0f-190,433,380,56})){screen=Screen::CREDITS;ClickSound();}
             else if(Button({GetScreenWidth()/2.0f-190,499,380,56}))quit=true;
         }else if(screen==Screen::LEVELS){
@@ -651,7 +622,7 @@ int main(int argc,char** argv){
                 if(i<=save.unlocked&&Button(r)){StartLevel(i);ClickSound();break;}
             }
         }else if(screen==Screen::SETTINGS){
-            if(IsKeyPressed(KEY_ESCAPE)){SaveGame(save);screen=settingsReturn;}
+            if(IsKeyPressed(KEY_ESCAPE)){SaveGame(save);screen=Screen::MENU;}
             if(IsKeyPressed(KEY_UP))settingsRow=(settingsRow+9)%10;
             if(IsKeyPressed(KEY_DOWN))settingsRow=(settingsRow+1)%10;
             if(IsKeyPressed(KEY_LEFT)||IsKeyPressed(KEY_RIGHT)||IsKeyPressed(KEY_ENTER)){
@@ -700,24 +671,6 @@ int main(int argc,char** argv){
             if(IsKeyPressed(KEY_SPACE)&&grounded){velocity.y=6.8f;grounded=false;}
             velocity.y-=18*dt;player.y+=velocity.y*dt;
             if(player.y<=PLAYER_HEIGHT*0.5f){player.y=PLAYER_HEIGHT*0.5f;velocity.y=0;grounded=true;}
-            for(int pass=0;pass<6;pass++){
-                bool pushed=false;
-                for(const auto& w:level.walls){
-                    if(HitsBox(player,PLAYER_RADIUS,w.pos,w.size)){
-                        float dx=player.x-w.pos.x,dz=player.z-w.pos.z;
-                        if(fabsf(dx)>=fabsf(dz))player.x+=(dx>=0?0.16f:-0.16f);
-                        else player.z+=(dz>=0?0.16f:-0.16f);
-                        pushed=true;break;
-                    }
-                }
-                for(const auto& d:level.doors)if(!d.open&&HitsBox(player,PLAYER_RADIUS,d.pos,d.size)){
-                    float dx=player.x-d.pos.x,dz=player.z-d.pos.z;
-                    if(fabsf(dx)>=fabsf(dz))player.x+=(dx>=0?0.18f:-0.18f);
-                    else player.z+=(dz>=0?0.18f:-0.18f);
-                    pushed=true;break;
-                }
-                if(!pushed)break;
-            }
             timeLeft-=dt;hintTimer=std::max(0.0f,hintTimer-dt);scanTimer=std::max(0.0f,scanTimer-dt);if(IsKeyPressed(KEY_Q))scanTimer=1.5f;
             if(Vector3Length(move)>0.01f)bobPhase+=dt*(sprint?14.0f:9.0f);else bobPhase+=dt*2.0f;
             for(auto& h:level.hazards){
@@ -760,10 +713,10 @@ int main(int argc,char** argv){
             if(screen==Screen::PLAYING&&level.objective!=Objective::SURVIVE&&timeLeft<=0){ReleaseMouse(mouse);screen=Screen::GAMEOVER;}
             if(level.objective==Objective::SURVIVE&&timeLeft<=0){save.unlocked=std::max(save.unlocked,level.id+1);save.stars[level.id]=3;SaveGame(save);ReleaseMouse(mouse);screen=level.id==LEVELS?Screen::COMPLETE:Screen::LEVELS;}
         }else if(screen==Screen::PAUSED){
-            if(IsKeyPressed(KEY_ESCAPE)){screen=Screen::PLAYING;CaptureMouse(mouse);}
+            if(IsKeyPressed(KEY_ESCAPE)){StartLevel(level.id);}
             float cx=GetScreenWidth()/2.0f-190;
-            if(Button({cx,330,380,56})){screen=Screen::PLAYING;CaptureMouse(mouse);ClickSound();}
-            else if(Button({cx,396,380,56})){settingsReturn=Screen::PAUSED;screen=Screen::SETTINGS;ClickSound();}
+            if(Button({cx,330,380,56})){StartLevel(level.id);ClickSound();}
+            else if(Button({cx,396,380,56})){screen=Screen::SETTINGS;ClickSound();}
             else if(Button({cx,462,380,56})){screen=Screen::MENU;ClickSound();}
         }else if(screen==Screen::GAMEOVER){
             if(IsKeyPressed(KEY_R)||Button({GetScreenWidth()/2.0f-190,465,380,56}))StartLevel(level.id);
@@ -789,7 +742,7 @@ int main(int argc,char** argv){
             ClearBackground(Color{4,8,13,255});CenterText("CREDITS",80,42,RAYWHITE);CenterText("GAME DESIGN / PROGRAMMING",180,18,SKYBLUE);CenterText("Tamasrazim",215,30,RAYWHITE);CenterText("Native Windows x64 • Raylib • deterministic 100-floor system",275,16,LIGHTGRAY);CenterText("Original instrumental soundtrack • procedural 3D cinematic",310,16,LIGHTGRAY);CenterText("CLICK OR ESC TO RETURN",500,14,GRAY);
         }else if(screen==Screen::PLAYING||screen==Screen::PAUSED){
             float bob=mouse.captured?sinf(bobPhase)*0.025f:0.0f;
-            DrawWorld(level,assets,player,yaw,pitch,bob,save.settings,scanTimer,collected,switchesActive,memoryStep);
+            DrawWorld(level,assets,player,yaw,pitch,bob,save.settings,scanTimer);
             DrawRectangle(24,24,392,108,Color{5,13,22,225});DrawText(TextFormat("FLOOR %03d • %s",level.id,level.title.c_str()),42,43,18,RAYWHITE);DrawText(ObjectiveName(level.objective),42,69,13,ThemeColor(level.theme));
             const char* obj="";int keys=0;for(const auto& p:level.pickups)if(p.kind==1&&p.taken)keys++;
             if(level.objective==Objective::COLLECT)obj=TextFormat("CRYSTALS %d / %d",collected,level.required);
