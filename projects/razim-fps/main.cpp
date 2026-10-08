@@ -26,7 +26,7 @@ constexpr int SAVE_VERSION=3;
 constexpr float PLAYER_RADIUS=0.34f;
 constexpr float PLAYER_HEIGHT=1.8f;
 constexpr float TAU=6.28318530718f;
-constexpr float INTRO_DURATION=15.0f;
+constexpr float INTRO_DURATION=7.0f;
 constexpr float WORLD_HALF=29.0f;
 
 enum class Screen{INTRO,MENU,LEVELS,SETTINGS,CREDITS,PLAYING,PAUSED,COMPLETE,GAMEOVER};
@@ -701,6 +701,7 @@ int main(int argc,char** argv){
 #endif
     SetConfigFlags(FLAG_WINDOW_RESIZABLE|FLAG_VSYNC_HINT);
     InitWindow(startupTest?640:1440,startupTest?360:900,"NEO");
+    if(!startupTest)SetWindowMinSize(1100,760);
     if(!IsWindowReady()){if(startupTest)return 0;return 2;}
     EnableCursor();SetMouseCursor(MOUSE_CURSOR_DEFAULT);SetExitKey(KEY_NULL);SetTargetFPS(144);
     if(startupTest){
@@ -808,7 +809,7 @@ int main(int argc,char** argv){
                     case 3:save.settings.hints=!save.settings.hints;break;
                     case 4:save.settings.shake=!save.settings.shake;break;
                     case 5:save.settings.sfx=Clamp(save.settings.sfx+dir*0.05f,0,1);break;
-                    case 6:save.settings.music=Clamp(save.settings.music+dir*0.05f,0,1);break;
+                    case 6:save.settings.music=Clamp(save.settings.music+dir*0.05f,0,1);if(assets.musicReady)SetSoundVolume(assets.theme,save.settings.music);break;
                     case 7:save.settings.crosshair=(save.settings.crosshair+dir+3)%3;break;
                     case 8:save.settings.displayMode=(save.settings.displayMode+dir+3)%3;SetDisplayMode(save.settings,save.settings.displayMode);break;
                     case 9:save.settings.performance=!save.settings.performance;break;
