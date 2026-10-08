@@ -321,7 +321,7 @@ void Intro(float t,const Assets&a){
 void Menu(const Save&s,const Assets&a){
     ClearBackground(Color{3,8,13,255});Camera3D c{V(0,3,10),V(0,2,-10),V(0,1,0),65,CAMERA_PERSPECTIVE};BeginMode3D(c);
     Box(a.tex[0],V(0,-.15f,-10),V(18,.3f,42),WHITE);for(int i=0;i<8;i++)Box(a.tex[26],V(0,.2f,6-i*4.5f),V(17,.08f,.12f),WHITE);EndMode3D();
-    DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{0,4,9,175});Center("NEON VAULT",68,62,RAYWHITE);Center("100-FLOOR FIRST-PERSON PUZZLE EXPEDITION",145,18,LIGHTGRAY);Center(TextFormat("PROGRESS %03d / %03d",s.unlocked,LEVELS),178,15,SKYBLUE);
+    DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{0,4,9,175});Center("NEON VAULT",68,62,RAYWHITE);Center("100-FLOOR FIRST-PERSON PUZZLE EXPEDITION",145,18,LIGHTGRAY);Center("STABILITY BUILD  •  25 MB+ ASSET BANK",204,12,GRAY);Center(TextFormat("PROGRESS %03d / %03d",s.unlocked,LEVELS),178,15,SKYBLUE);
     float x=GetScreenWidth()/2.0f-190;BtnDraw({x,235,380,54},"ENTER VAULT",SKYBLUE);BtnDraw({x,301,380,54},"FLOOR SELECT",Theme(1));BtnDraw({x,367,380,54},"SETTINGS",Theme(2));BtnDraw({x,433,380,54},"CREDITS",Theme(4));BtnDraw({x,499,380,54},"QUIT",RED);
 }
 void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,float bob,const Settings&s,float scan,int got,int sw,int mem,float shake){
@@ -421,6 +421,7 @@ int main(int argc,char**argv){
     while(!WindowShouldClose()){
         float dt=std::min(GetFrameTime(),.05f);
         UpdateParticles(dt);
+        if(IsSoundValid(assets.music)&&!IsSoundPlaying(assets.music))PlaySound(assets.music);
         if(IsSoundValid(assets.beat)&&!IsSoundPlaying(assets.beat))PlaySound(assets.beat);
         if(screen!=Screen::PLAYING&&!captured)EnableCursor();else if(screen!=Screen::PLAYING&&captured)release();
         if(screen==Screen::INTRO){intro+=dt;if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_ESCAPE)||intro>=4.5f)screen=Screen::MENU;}
