@@ -223,16 +223,30 @@ Sound MakeBeatSound(){
 }
 void UnloadAssets(Assets&a){for(auto&t:a.tex)if(t.id)UnloadTexture(t);if(IsSoundValid(a.music))UnloadSound(a.music);if(IsSoundValid(a.beat))UnloadSound(a.beat);if(IsSoundValid(a.pickup))UnloadSound(a.pickup);if(IsSoundValid(a.hit))UnloadSound(a.hit);if(IsSoundValid(a.click))UnloadSound(a.click);if(IsSoundValid(a.complete))UnloadSound(a.complete);}
 bool Btn(Rectangle r){return CheckCollisionPointRec(GetMousePosition(),r)&&IsMouseButtonPressed(MOUSE_BUTTON_LEFT);}
-void BtnDraw(Rectangle r,const char*s,Color accent){
+void BtnDrawEx(Rectangle r,const char*s,Color accent,bool selected=false){
+
     bool h=CheckCollisionPointRec(GetMousePosition(),r);
+    bool active=h||selected;
     bool down=h&&IsMouseButtonDown(MOUSE_BUTTON_LEFT);
-    float pulse=h?0.035f*(0.5f+0.5f*sinf(float(GetTime())*8.0f)):0.0f;
+    float pulse=active?0.035f*(0.5f+0.5f*sinf(float(GetTime())*8.0f)):0.0f;
     float press=down?3.0f:0.0f;
     Rectangle rr={r.x-r.width*pulse*0.5f,r.y-r.height*pulse*0.5f+press,r.width*(1.0f+pulse),r.height*(1.0f+pulse)};
-    DrawRectangleRounded(rr,.08f,8,down?Color{28,64,82,255}:(h?Color{22,48,64,255}:Color{9,18,28,255}));
-    DrawRectangleRoundedLines(rr,.08f,8,down?RAYWHITE:(h?accent:Color{45,62,78,255}));
-    if(h)DrawRectangleRoundedLines({rr.x+2,rr.y+2,rr.width-4,rr.height-4},.08f,8,Color{accent.r,accent.g,accent.b,110});
+    DrawRectangleRounded(rr,.08f,8,down?Color{28,64,82,255}:(active?Color{22,48,64,255}:Color{9,18,28,255}));
+    DrawRectangleRoundedLines(rr,.08f,8,down?RAYWHITE:(active?accent:Color{45,62,78,255}));
+    if(active)DrawRectangleRoundedLines({rr.x+2,rr.y+2,rr.width-4,rr.height-4},.08f,8,Color{accent.r,accent.g,accent.b,110});
+
     int fs=18;DrawText(s,int(rr.x+(rr.width-MeasureText(s,fs))*.5f),int(rr.y+(rr.height-fs)*0.5f),fs,RAYWHITE);
+}
+void BtnDraw(Rectangle r,const char*s,Color accent){BtnDrawEx(r,s,accent,false);}
+void UIVertical(int count,int&focus){
+    if(count<=0)return;
+    if(IsKeyPressed(KEY_UP))focus=(focus+count-1)%count;
+    if(IsKeyPressed(KEY_DOWN)||IsKeyPressed(KEY_TAB))focus=(focus+1)%count;
+    if(IsKeyPressed(KEY_HOME))focus=0;
+    if(IsKeyPressed(KEY_END))focus=count-1;
+}
+bool UIActivate(int focus,int index,Rectangle r){
+    return Btn(r)||(IsKeyPressed(KEY_ENTER)&&focus==index)||(IsKeyPressed(KEY_SPACE)&&focus==index);
 }
 void Center(const char*s,int y,int fs,Color c){DrawText(s,(GetScreenWidth()-MeasureText(s,fs))/2,y,fs,c);}
 void Cross(int style){int x=GetScreenWidth()/2,y=GetScreenHeight()/2;if(style==0){DrawLine(x-9,y,x-3,y,RAYWHITE);DrawLine(x+3,y,x+9,y,RAYWHITE);DrawLine(x,y-9,x,y-3,RAYWHITE);DrawLine(x,y+3,x,y+9,RAYWHITE);}else if(style==1){DrawCircleLines(x,y,7,RAYWHITE);DrawCircle(x,y,2,RAYWHITE);}else DrawCircle(x,y,3,RAYWHITE);}
@@ -318,11 +332,11 @@ void Intro(float t,const Assets&a){
     Center("TAMASRAZIM PRESENTS",70,16,Color{150,210,230,255});if(t>3.1f)Center("NEON VAULT",GetScreenHeight()/2-35,62,RAYWHITE);if(t>3.7f)Center("100 FLOORS. ZERO SHORTCUTS.",GetScreenHeight()/2+42,17,SKYBLUE);
     DrawText("ENTER / ESC — SKIP",GetScreenWidth()-185,GetScreenHeight()-30,12,GRAY);
 }
-void Menu(const Save&s,const Assets&a){
+void Menu(const Save&s,const Assets&a,int focus){
     ClearBackground(Color{3,8,13,255});Camera3D c{V(0,3,10),V(0,2,-10),V(0,1,0),65,CAMERA_PERSPECTIVE};BeginMode3D(c);
     Box(a.tex[0],V(0,-.15f,-10),V(18,.3f,42),WHITE);for(int i=0;i<8;i++)Box(a.tex[26],V(0,.2f,6-i*4.5f),V(17,.08f,.12f),WHITE);EndMode3D();
     DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{0,4,9,175});Center("NEON VAULT",68,62,RAYWHITE);Center("100-FLOOR FIRST-PERSON PUZZLE EXPEDITION",145,18,LIGHTGRAY);Center("STABILITY BUILD  •  25 MB+ ASSET BANK",204,12,GRAY);Center(TextFormat("PROGRESS %03d / %03d",s.unlocked,LEVELS),178,15,SKYBLUE);
-    float x=GetScreenWidth()/2.0f-190;BtnDraw({x,235,380,54},"ENTER VAULT",SKYBLUE);BtnDraw({x,301,380,54},"FLOOR SELECT",Theme(1));BtnDraw({x,367,380,54},"SETTINGS",Theme(2));BtnDraw({x,433,380,54},"CREDITS",Theme(4));BtnDraw({x,499,380,54},"QUIT",RED);
+    float x=GetScreenWidth()/2.0f-190;BtnDrawEx({x,235,380,54},"ENTER VAULT",SKYBLUE,focus==0);BtnDrawEx({x,301,380,54},"FLOOR SELECT",Theme(1),focus==1);BtnDrawEx({x,367,380,54},"SETTINGS",Theme(2),focus==2);BtnDrawEx({x,433,380,54},"CREDITS",Theme(4),focus==3);BtnDrawEx({x,499,380,54},"QUIT",RED,focus==4);
 }
 void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,float bob,const Settings&s,float scan,int got,int sw,int mem,float shake){
     const bool exitOpen=l.objective==Objective::SURVIVE||ObjectiveDone(l,got,sw,mem);
@@ -411,7 +425,7 @@ int main(int argc,char**argv){
     if(IsSoundValid(assets.beat)){SetSoundVolume(assets.beat,.22f);PlaySound(assets.beat);}
     Screen screen=Screen::INTRO;Screen settingsReturn=Screen::MENU;float intro=0;Level level=BuildLevel(1);Repair(level);
     Vector3 player=level.start,vel{};float yaw=3.14159265f,pitch=0,timeLeft=0,stamina=100,health=100,scan=0,bob=0,screenShake=0,damageCooldown=0,interactFlash=0;int got=0,sw=0,mem=0;bool grounded=true;
-    bool captured=false,ignoreDelta=false;int settingsRow=0;
+    bool captured=false,ignoreDelta=false;int settingsRow=0,uiFocus=0;
 
     auto capture=[&](){if(captured)return;DisableCursor();captured=true;ignoreDelta=true;};
     auto release=[&](){if(!captured)return;captured=false;ignoreDelta=false;EnableCursor();SetMouseCursor(MOUSE_CURSOR_DEFAULT);};
@@ -426,20 +440,43 @@ int main(int argc,char**argv){
         if(screen!=Screen::PLAYING&&!captured)EnableCursor();else if(screen!=Screen::PLAYING&&captured)release();
         if(screen==Screen::INTRO){intro+=dt;if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_ESCAPE)||intro>=4.5f)screen=Screen::MENU;}
         else if(screen==Screen::MENU){
+            uiFocus=std::clamp(uiFocus,0,4);UIVertical(5,uiFocus);
             float x=GetScreenWidth()/2.0f-190;
-            if(Btn({x,235,380,54})){if(IsSoundValid(assets.click))PlaySound(assets.click);start(1);}
-            else if(Btn({x,301,380,54})){if(IsSoundValid(assets.click))PlaySound(assets.click);screen=Screen::LEVELS;}
-            else if(Btn({x,367,380,54})){if(IsSoundValid(assets.click))PlaySound(assets.click);settingsReturn=Screen::MENU;screen=Screen::SETTINGS;}
-            else if(Btn({x,433,380,54})){if(IsSoundValid(assets.click))PlaySound(assets.click);screen=Screen::CREDITS;}
-            else if(Btn({x,499,380,54})){if(IsSoundValid(assets.click))PlaySound(assets.click);break;}
+            Rectangle r0{x,235,380,54},r1{x,301,380,54},r2{x,367,380,54},r3{x,433,380,54},r4{x,499,380,54};
+            if(CheckCollisionPointRec(GetMousePosition(),r0))uiFocus=0;
+            else if(CheckCollisionPointRec(GetMousePosition(),r1))uiFocus=1;
+            else if(CheckCollisionPointRec(GetMousePosition(),r2))uiFocus=2;
+            else if(CheckCollisionPointRec(GetMousePosition(),r3))uiFocus=3;
+            else if(CheckCollisionPointRec(GetMousePosition(),r4))uiFocus=4;
+            if(UIActivate(uiFocus,0,r0)){if(IsSoundValid(assets.click))PlaySound(assets.click);start(1);}
+            else if(UIActivate(uiFocus,1,r1)){if(IsSoundValid(assets.click))PlaySound(assets.click);screen=Screen::LEVELS;uiFocus=0;}
+            else if(UIActivate(uiFocus,2,r2)){if(IsSoundValid(assets.click))PlaySound(assets.click);settingsReturn=Screen::MENU;screen=Screen::SETTINGS;uiFocus=0;}
+            else if(UIActivate(uiFocus,3,r3)){if(IsSoundValid(assets.click))PlaySound(assets.click);screen=Screen::CREDITS;}
+            else if(UIActivate(uiFocus,4,r4)){if(IsSoundValid(assets.click))PlaySound(assets.click);break;}
         }else if(screen==Screen::LEVELS){
             Rectangle backRect{GetScreenWidth()/2.0f-170,GetScreenHeight()-78,340,48};
-            if(IsKeyPressed(KEY_ESCAPE)||Btn(backRect)){if(IsSoundValid(assets.click))PlaySound(assets.click);screen=Screen::MENU;}int cols=10,cw=82,ch=55,sx=(GetScreenWidth()-cols*cw)/2,sy=145;
-            for(int i=1;i<=LEVELS;i++){int col=(i-1)%cols,row=(i-1)/cols;Rectangle r{float(sx+col*cw+4),float(sy+row*ch+4),74,47};if(i<=save.unlocked&&Btn(r)){if(IsSoundValid(assets.click))PlaySound(assets.click);start(i);break;}}
+            int maxFloor=std::max(0,save.unlocked-1);
+            uiFocus=std::clamp(uiFocus,0,maxFloor+1);
+            if(IsKeyPressed(KEY_UP))uiFocus=std::max(0,uiFocus-10);
+            if(IsKeyPressed(KEY_DOWN))uiFocus=std::min(maxFloor,uiFocus+10);
+            if(IsKeyPressed(KEY_LEFT))uiFocus=std::max(0,uiFocus-1);
+            if(IsKeyPressed(KEY_RIGHT))uiFocus=std::min(maxFloor,uiFocus+1);
+            if(IsKeyPressed(KEY_HOME))uiFocus=0;
+            if(IsKeyPressed(KEY_END))uiFocus=maxFloor;
+            int cols=10,cw=82,ch=55,sx=(GetScreenWidth()-cols*cw)/2,sy=145;
+            for(int i=1;i<=LEVELS;i++){
+                int col=(i-1)%cols,row=(i-1)/cols;Rectangle r{float(sx+col*cw+4),float(sy+row*ch+4),74,47};
+                if(i<=save.unlocked&&CheckCollisionPointRec(GetMousePosition(),r))uiFocus=i-1;
+                BtnDrawEx(r,TextFormat("%02d",i),i<=save.unlocked?Theme((i-1)%10):Color{55,60,65,255},i<=save.unlocked&&(i-1)==uiFocus);
+                if(i<=save.unlocked&&Btn(r)){if(IsSoundValid(assets.click))PlaySound(assets.click);start(i);break;}
+            }
+            if(uiFocus<save.unlocked&&(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_SPACE))){if(IsSoundValid(assets.click))PlaySound(assets.click);start(uiFocus+1);}
+            if(CheckCollisionPointRec(GetMousePosition(),backRect))uiFocus=maxFloor+1;
+            if(IsKeyPressed(KEY_ESCAPE)||UIActivate(uiFocus,maxFloor+1,backRect)){if(IsSoundValid(assets.click))PlaySound(assets.click);screen=Screen::MENU;uiFocus=1;}
         }else if(screen==Screen::SETTINGS){
             Rectangle backRect{GetScreenWidth()/2.0f-170,GetScreenHeight()-78,340,48};
             if(IsKeyPressed(KEY_ESCAPE)||Btn(backRect)){SaveGame(save);screen=settingsReturn;}
-            if(IsKeyPressed(KEY_UP))settingsRow=(settingsRow+8)%9;if(IsKeyPressed(KEY_DOWN))settingsRow=(settingsRow+1)%9;
+            UIVertical(10,uiFocus);settingsRow=std::clamp(uiFocus,0,8);
             if(IsKeyPressed(KEY_LEFT)||IsKeyPressed(KEY_RIGHT)||IsKeyPressed(KEY_ENTER)){int d=IsKeyPressed(KEY_LEFT)?-1:1;switch(settingsRow){
                 case 0:save.settings.sens=Clamp(save.settings.sens+d*.0002f,.0007f,.006f);break;case 1:save.settings.invertY=!save.settings.invertY;break;
                 case 2:save.settings.fov=Clamp(save.settings.fov+d*5,60,105);break;case 3:save.settings.hints=!save.settings.hints;break;
@@ -451,7 +488,7 @@ int main(int argc,char**argv){
                 for(int i=0;i<9;i++){
                     Rectangle rowRect{GetScreenWidth()/2.0f-300,110+i*58,600,46};
                     if(CheckCollisionPointRec(mouse,rowRect)){
-                        settingsRow=i;
+                        settingsRow=i;uiFocus=i;
                         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
                             switch(i){
                                 case 0:save.settings.sens=Clamp(save.settings.sens+0.0002f,.0007f,.006f);break;
@@ -469,7 +506,7 @@ int main(int argc,char**argv){
                     }
                 }
             }
-        }else if(screen==Screen::CREDITS){if(IsKeyPressed(KEY_ESCAPE)||IsMouseButtonPressed(MOUSE_BUTTON_LEFT))screen=Screen::MENU;}
+        }else if(screen==Screen::CREDITS){if(IsKeyPressed(KEY_ESCAPE)||IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_SPACE)||IsMouseButtonPressed(MOUSE_BUTTON_LEFT))screen=Screen::MENU;}
         else if(screen==Screen::PLAYING){
             if(!IsWindowFocused()){if(captured)release();screen=Screen::PAUSED;continue;}
             if(IsKeyPressed(KEY_ESCAPE)){release();screen=Screen::PAUSED;}
@@ -502,19 +539,28 @@ int main(int argc,char**argv){
             if(screen==Screen::PLAYING&&level.objective!=Objective::SURVIVE&&timeLeft<=0){release();screen=Screen::GAMEOVER;}
             if(level.objective==Objective::SURVIVE&&timeLeft<=0){save.stars[level.id]=3;if(level.id<LEVELS)save.unlocked=std::max(save.unlocked,level.id+1);SaveGame(save);release();screen=level.id==LEVELS?Screen::COMPLETE:Screen::LEVELS;}
         }else if(screen==Screen::PAUSED){
+            uiFocus=std::clamp(uiFocus,0,2);UIVertical(3,uiFocus);
+            float x=GetScreenWidth()/2.0f-190;Rectangle r0{x,330,380,54},r1{x,396,380,54},r2{x,462,380,54};
+            if(CheckCollisionPointRec(GetMousePosition(),r0))uiFocus=0;else if(CheckCollisionPointRec(GetMousePosition(),r1))uiFocus=1;else if(CheckCollisionPointRec(GetMousePosition(),r2))uiFocus=2;
             if(IsKeyPressed(KEY_ESCAPE)){capture();screen=Screen::PLAYING;}
-            float x=GetScreenWidth()/2.0f-190;if(Btn({x,330,380,54})){capture();screen=Screen::PLAYING;}else if(Btn({x,396,380,54})){settingsReturn=Screen::PAUSED;screen=Screen::SETTINGS;}else if(Btn({x,462,380,54})){screen=Screen::MENU;}
+            else if(UIActivate(uiFocus,0,r0)){capture();screen=Screen::PLAYING;}
+            else if(UIActivate(uiFocus,1,r1)){settingsReturn=Screen::PAUSED;screen=Screen::SETTINGS;uiFocus=0;}
+            else if(UIActivate(uiFocus,2,r2)){screen=Screen::MENU;uiFocus=4;}
         }else if(screen==Screen::GAMEOVER){
-            float x=GetScreenWidth()/2.0f-190;if(IsKeyPressed(KEY_R)||Btn({x,465,380,54}))start(level.id);else if(IsKeyPressed(KEY_ESCAPE)||Btn({x,531,380,54}))screen=Screen::MENU;
-        }else if(screen==Screen::COMPLETE){if(IsKeyPressed(KEY_ENTER)||Btn({GetScreenWidth()/2.0f-190,490,380,54}))screen=Screen::LEVELS;}
+            uiFocus=std::clamp(uiFocus,0,1);UIVertical(2,uiFocus);
+            float x=GetScreenWidth()/2.0f-190;Rectangle r0{x,465,380,54},r1{x,531,380,54};
+            if(CheckCollisionPointRec(GetMousePosition(),r0))uiFocus=0;else if(CheckCollisionPointRec(GetMousePosition(),r1))uiFocus=1;
+            if(IsKeyPressed(KEY_R)||UIActivate(uiFocus,0,r0))start(level.id);
+            else if(IsKeyPressed(KEY_ESCAPE)||UIActivate(uiFocus,1,r1)){screen=Screen::MENU;uiFocus=4;}
+        }else if(screen==Screen::COMPLETE){uiFocus=0;if(UIActivate(uiFocus,0,{GetScreenWidth()/2.0f-190,490,380,54}))screen=Screen::LEVELS;}
         BeginDrawing();
         if(screen==Screen::INTRO){ClearBackground(Color{3,8,13,255});Intro(intro,assets);}
-        else if(screen==Screen::MENU)Menu(save,assets);
+        else if(screen==Screen::MENU)Menu(save,assets,uiFocus);
         else if(screen==Screen::LEVELS){ClearBackground(Color{4,8,13,255});Center("FLOOR SELECT",38,40,RAYWHITE);Center(TextFormat("UNLOCKED %03d / %03d",save.unlocked,LEVELS),88,15,SKYBLUE);int cols=10,cw=82,ch=55,sx=(GetScreenWidth()-cols*cw)/2,sy=130;for(int i=1;i<=LEVELS;i++){int col=(i-1)%cols,row=(i-1)/cols;Rectangle r{float(sx+col*cw+4),float(sy+row*ch+4),74,47};BtnDraw(r,TextFormat("%02d",i),i<=save.unlocked?Theme((i-1)%10):Color{55,60,65,255});if(i<=save.unlocked&&save.stars[i])DrawText(TextFormat("★%d",save.stars[i]),int(r.x+48),int(r.y+29),10,GOLD);}BtnDraw({GetScreenWidth()/2.0f-170,GetScreenHeight()-78,340,48},"BACK TO MENU",Color{80,145,180,255});}
         else if(screen==Screen::SETTINGS){ClearBackground(Color{4,8,13,255});Center("SETTINGS",38,40,RAYWHITE);Center("CLICK A ROW TO CHANGE  •  ARROWS / ENTER ALSO WORK",78,13,GRAY);const char*lab[9]={"MOUSE SENSITIVITY","INVERT Y","FIELD OF VIEW","HINTS","SCREEN SHAKE","CROSSHAIR","PERFORMANCE","DISPLAY","RESET SAVE"};std::string val[9]={TextFormat("%.4f",save.settings.sens),save.settings.invertY?"ON":"OFF",TextFormat("%.0f",save.settings.fov),save.settings.hints?"ON":"OFF",save.settings.shake?"ON":"OFF",TextFormat("STYLE %d",save.settings.crosshair+1),save.settings.perf?"ON":"OFF",save.settings.display==0?"WINDOWED":save.settings.display==1?"BORDERLESS":"FULLSCREEN","ENTER TO RESET"};for(int i=0;i<9;i++){Rectangle r{GetScreenWidth()/2.0f-300,110+i*58,600,46};bool hot=i==settingsRow||CheckCollisionPointRec(GetMousePosition(),r);DrawRectangleRounded(r,.08f,8,hot?Color{20,42,58,255}:Color{11,22,32,255});DrawRectangleRoundedLines(r,.08f,8,hot?SKYBLUE:Color{45,62,78,255});DrawText(lab[i],int(r.x+18),int(r.y+14),15,RAYWHITE);DrawText(val[i].c_str(),int(r.x+390),int(r.y+14),15,SKYBLUE);}BtnDraw({GetScreenWidth()/2.0f-170,GetScreenHeight()-78,340,48},"BACK",Color{80,145,180,255});}
         else if(screen==Screen::CREDITS){ClearBackground(Color{4,8,13,255});Center("CREDITS",70,44,RAYWHITE);Center("TAMASRAZIM",175,30,SKYBLUE);Center("NEON VAULT — NATIVE WINDOWS x64",225,17,LIGHTGRAY);Center("100 deterministic floors • procedural 3D • original instrumental",260,15,GRAY);Center("ESC / CLICK — BACK",500,14,GRAY);}
-        else if(screen==Screen::PLAYING||screen==Screen::PAUSED){ClearBackground(Color{3,8,13,255});World(level,assets,player,yaw,pitch,captured?sinf(bob)*.025f:0,save.settings,scan,got,sw,mem,screenShake);DrawRectangle(22,22,420,126,Color{4,13,21,225});DrawText(TextFormat("FLOOR %03d • %s",level.id,level.title.c_str()),38,40,18,RAYWHITE);DrawText(ObjName(level.objective),38,66,13,Theme(level.theme));DrawText(TextFormat("TIME %03d  HP %03d  STAM %03d",int(std::max(0.0f,timeLeft)),int(health),int(stamina)),38,91,14,RAYWHITE);int keyCount=0;for(const auto&x:level.pickups)if(x.kind==1&&x.taken)keyCount++;if(level.objective==Objective::COLLECT)DrawText(TextFormat("OBJECTIVE  CRYSTALS %d / %d",got,level.required),38,112,12,Theme(level.theme));else if(level.objective==Objective::SWITCHES)DrawText(TextFormat("OBJECTIVE  SWITCHES %d / %d",sw,level.required),38,112,12,Theme(level.theme));else if(level.objective==Objective::KEYCARD)DrawText(TextFormat("OBJECTIVE  KEYCARDS %d / %d",keyCount,level.required),38,112,12,Theme(level.theme));else if(level.objective==Objective::MEMORY)DrawText(TextFormat("OBJECTIVE  MEMORY %d / %d",mem,level.required),38,112,12,Theme(level.theme));else if(level.objective==Objective::COMBO)DrawText(TextFormat("OBJECTIVE  C%d/3 S%d/3 K%d/1 M%d/4",got,sw,keyCount,mem),38,112,12,Theme(level.theme));else DrawText("OBJECTIVE  SURVIVE",38,112,12,Theme(level.theme));if(captured&&save.settings.hints)Center("ESC — PAUSE / RELEASE MOUSE",GetScreenHeight()-28,12,GRAY);if(captured)Cross(save.settings.crosshair); if(interactFlash>0.0f)DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{80,210,255,(unsigned char)(30.0f*interactFlash)}); if(save.settings.hints&&captured){float nearest=2.25f;for(const auto&x:level.switches)if(!x.active)nearest=std::min(nearest,Vector3Distance(player,x.p));for(const auto&x:level.pickups)if(!x.taken)nearest=std::min(nearest,Vector3Distance(player,x.p));if(nearest<2.25f)Center("E — INTERACT",GetScreenHeight()/2+34,15,SKYBLUE);} if(save.settings.perf){DrawRectangle(GetScreenWidth()-220,22,198,90,Color{4,13,21,225});DrawText(TextFormat("FPS %d",GetFPS()),GetScreenWidth()-204,40,13,RAYWHITE);DrawText(TextFormat("FRAME %.2f ms",GetFrameTime()*1000),GetScreenWidth()-204,60,13,RAYWHITE);int vram=QueryDedicatedVRAMMB();DrawText(vram?TextFormat("VRAM %d MB",vram):"VRAM N/A",GetScreenWidth()-204,80,13,RAYWHITE);}if(screen==Screen::PAUSED){DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{0,5,10,170});Center("PAUSED",185,50,RAYWHITE);Center("FLOOR PROGRESS PRESERVED",236,16,LIGHTGRAY);BtnDraw({GetScreenWidth()/2.0f-190,330,380,54},"RESUME • CAPTURE MOUSE",SKYBLUE);BtnDraw({GetScreenWidth()/2.0f-190,396,380,54},"SETTINGS",Theme(2));BtnDraw({GetScreenWidth()/2.0f-190,462,380,54},"MAIN MENU",Color{230,90,120,255});}}
-        else if(screen==Screen::GAMEOVER){ClearBackground(Color{20,6,10,255});Center("SYSTEM FAILURE",160,56,RED);Center(TextFormat("FLOOR %03d",level.id),230,22,RAYWHITE);BtnDraw({GetScreenWidth()/2.0f-190,465,380,54},"RETRY FLOOR • R",ORANGE);BtnDraw({GetScreenWidth()/2.0f-190,531,380,54},"MAIN MENU • ESC",Color{230,90,120,255});}
+        else if(screen==Screen::PLAYING||screen==Screen::PAUSED){ClearBackground(Color{3,8,13,255});World(level,assets,player,yaw,pitch,captured?sinf(bob)*.025f:0,save.settings,scan,got,sw,mem,screenShake);DrawRectangle(22,22,420,126,Color{4,13,21,225});DrawText(TextFormat("FLOOR %03d • %s",level.id,level.title.c_str()),38,40,18,RAYWHITE);DrawText(ObjName(level.objective),38,66,13,Theme(level.theme));DrawText(TextFormat("TIME %03d  HP %03d  STAM %03d",int(std::max(0.0f,timeLeft)),int(health),int(stamina)),38,91,14,RAYWHITE);int keyCount=0;for(const auto&x:level.pickups)if(x.kind==1&&x.taken)keyCount++;if(level.objective==Objective::COLLECT)DrawText(TextFormat("OBJECTIVE  CRYSTALS %d / %d",got,level.required),38,112,12,Theme(level.theme));else if(level.objective==Objective::SWITCHES)DrawText(TextFormat("OBJECTIVE  SWITCHES %d / %d",sw,level.required),38,112,12,Theme(level.theme));else if(level.objective==Objective::KEYCARD)DrawText(TextFormat("OBJECTIVE  KEYCARDS %d / %d",keyCount,level.required),38,112,12,Theme(level.theme));else if(level.objective==Objective::MEMORY)DrawText(TextFormat("OBJECTIVE  MEMORY %d / %d",mem,level.required),38,112,12,Theme(level.theme));else if(level.objective==Objective::COMBO)DrawText(TextFormat("OBJECTIVE  C%d/3 S%d/3 K%d/1 M%d/4",got,sw,keyCount,mem),38,112,12,Theme(level.theme));else DrawText("OBJECTIVE  SURVIVE",38,112,12,Theme(level.theme));if(captured&&save.settings.hints)Center("ESC — PAUSE / RELEASE MOUSE",GetScreenHeight()-28,12,GRAY);if(captured)Cross(save.settings.crosshair); if(interactFlash>0.0f)DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{80,210,255,(unsigned char)(30.0f*interactFlash)}); if(save.settings.hints&&captured){float nearest=2.25f;for(const auto&x:level.switches)if(!x.active)nearest=std::min(nearest,Vector3Distance(player,x.p));for(const auto&x:level.pickups)if(!x.taken)nearest=std::min(nearest,Vector3Distance(player,x.p));if(nearest<2.25f)Center("E — INTERACT",GetScreenHeight()/2+34,15,SKYBLUE);} if(save.settings.perf){DrawRectangle(GetScreenWidth()-220,22,198,90,Color{4,13,21,225});DrawText(TextFormat("FPS %d",GetFPS()),GetScreenWidth()-204,40,13,RAYWHITE);DrawText(TextFormat("FRAME %.2f ms",GetFrameTime()*1000),GetScreenWidth()-204,60,13,RAYWHITE);int vram=QueryDedicatedVRAMMB();DrawText(vram?TextFormat("VRAM %d MB",vram):"VRAM N/A",GetScreenWidth()-204,80,13,RAYWHITE);}if(screen==Screen::PAUSED){DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{0,5,10,170});Center("PAUSED",185,50,RAYWHITE);Center("FLOOR PROGRESS PRESERVED",236,16,LIGHTGRAY);BtnDrawEx({GetScreenWidth()/2.0f-190,330,380,54},"RESUME • CAPTURE MOUSE",SKYBLUE,uiFocus==0);BtnDrawEx({GetScreenWidth()/2.0f-190,396,380,54},"SETTINGS",Theme(2),uiFocus==1);BtnDrawEx({GetScreenWidth()/2.0f-190,462,380,54},"MAIN MENU",Color{230,90,120,255},uiFocus==2);}}
+        else if(screen==Screen::GAMEOVER){ClearBackground(Color{20,6,10,255});Center("SYSTEM FAILURE",160,56,RED);Center(TextFormat("FLOOR %03d",level.id),230,22,RAYWHITE);BtnDrawEx({GetScreenWidth()/2.0f-190,465,380,54},"RETRY FLOOR • R",ORANGE,uiFocus==0);BtnDrawEx({GetScreenWidth()/2.0f-190,531,380,54},"MAIN MENU • ESC",Color{230,90,120,255},uiFocus==1);}
         else if(screen==Screen::COMPLETE){ClearBackground(Color{5,14,18,255});Center("VAULT MASTER",155,58,GREEN);Center("ALL 100 FLOORS COMPLETE",228,24,RAYWHITE);int total=0;for(int i=1;i<=LEVELS;i++)total+=save.stars[i];Center(TextFormat("TOTAL STARS %d / %d",total,LEVELS*3),268,18,GOLD);BtnDraw({GetScreenWidth()/2.0f-190,490,380,54},"RETURN TO FLOOR SELECT",GREEN);}
         EndDrawing();
     }
