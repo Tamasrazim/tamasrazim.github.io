@@ -18,7 +18,6 @@ vault_01..vault_10  = theme surfaces
 vault_11..vault_20  = structural/panel families
 vault_21..vault_25  = hazard/exit families
 vault_26..vault_28  = trim/light families
-vault_29..vault_31  = supplemental fractured/technical families
 
 Gameplay calculations:
 collision clearance = player radius + generated obstacle clearance
