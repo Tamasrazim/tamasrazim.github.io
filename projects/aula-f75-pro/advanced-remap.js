@@ -17,7 +17,7 @@
 
   const box = document.createElement("div");
   box.className = "f75-editor";
-  box.innerHTML = '<div class="f75-editor-head"><strong>ADVANCED KEYMAP EDITOR</strong><span id="f75MapCount">0 mapped</span></div><div class="f75-editor-tabs"><button data-mode="single" class="active">Single Key</button><button data-mode="combo">Shortcut / Combo</button><button data-mode="preset">Presets</button></div><div id="f75Single"><div class="f75-editor-tools"><div id="f75Cats"></div><input id="f75Search" placeholder="Search usage"></div><div id="f75UsageGrid"></div></div><div id="f75Combo" hidden><div class="f75-mods"><button data-mod="Ctrl">Ctrl</button><button data-mod="Shift">Shift</button><button data-mod="Alt">Alt</button><button data-mod="Win">Win</button></div><select id="f75ComboKey"></select><div id="f75ComboPreview">Shortcut: —</div></div><div id="f75Preset" hidden><div id="f75PresetGrid"></div></div><div class="f75-editor-actions"><button id="f75Add" class="main">Add / Apply</button><button id="f75Edit">Edit</button><button id="f75Delete" class="danger">Delete</button><button id="f75Reset">Reset selected</button><button id="f75ResetAll">Reset all</button><button id="f75Swap">Swap Win ↔ Alt</button></div><div id="f75EditorStatus">Select a key, then choose an output.</div>';
+  box.innerHTML = '<div class="f75-editor-head"><strong>ADVANCED KEYMAP EDITOR</strong><span id="f75MapCount">0 mapped</span></div><div class="f75-editor-tabs"><button data-mode="single" class="active">Single Key</button><button data-mode="combo">Shortcut / Combo</button><button data-mode="preset">Presets</button></div><div id="f75Single"><div class="f75-editor-tools"><div id="f75Cats"></div><input id="f75Search" placeholder="Search usage"></div><div id="f75UsageGrid"></div></div><div id="f75Combo" hidden><div class="f75-mods"><button data-mod="Ctrl">Ctrl</button><button data-mod="Shift">Shift</button><button data-mod="Alt">Alt</button><button data-mod="Win">Win</button></div><select id="f75ComboKey"></select><div id="f75ComboPreview">Shortcut: —</div></div><div id="f75Preset" hidden><div id="f75PresetGrid"></div></div><div class="f75-editor-actions"><button id="f75Add" class="main">Add / Apply</button><button id="f75Edit">Edit</button><button id="f75Delete" class="danger">Delete</button><button id="f75Reset">Reset selected</button><button id="f75ResetAll">Reset all</button><button id="f75Swap">Swap Win ↔ Alt</button><button id="f75Import">Import JSON</button><button id="f75Export">Export JSON</button></div><div id="f75EditorStatus">Select a key, then choose an output.</div>';
   panel.appendChild(box);
 
   const getMap = () => JSON.parse(localStorage.getItem("f75pro:mappings") || "{}");
@@ -63,9 +63,48 @@
   box.querySelector("#f75ResetAll").onclick=()=>{if(!confirm("Reset every local mapping?"))return;setMap({});count();status("All local mappings reset.");};
   box.querySelector("#f75Swap").onclick=()=>{const map=getMap();const a=map[11],b=map[17];map[11]=b===undefined?"Alt":b;map[17]=a===undefined?"Win":a;setMap(map);count();status("Local Win ↔ Alt mapping swapped.");};
 
+  const syncSelection = () => {
+    const idx = selectedIndex();
+    const map = getMap();
+    const value = idx === null ? "" : (map[idx] || "");
+    if (value && usages.some(u => u[0] === value)) {
+      selectedUsage = value;
+      renderUsages();
+    }
+    if (idx !== null) {
+      status(value ? "Current mapping: " + keyLabel(idx) + " (#" + idx + ") → " + value : "No local mapping for " + keyLabel(idx) + " (#" + idx + ").");
+      const main=document.querySelector("#outputSelect");
+      if(main && Array.from(main.options).some(o=>o.value===value)) main.value=value;
+    }
+    renderCombo();
+  };
+  window.addEventListener("f75:key-select", syncSelection);
+
+  const downloadJson = (name,data) => {
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),500);
+  };
+  box.querySelector("#f75Export").onclick=()=>downloadJson("f75-pro-keymap.json",{format:"f75-pro-control-deck/2",mappings:getMap()});
+  box.querySelector("#f75Import").onclick=()=>{
+    const input=document.createElement("input"); input.type="file"; input.accept=".json,application/json";
+    input.onchange=async()=>{
+      const file=input.files?.[0]; if(!file)return;
+      try{
+        const parsed=JSON.parse(await file.text());
+        const mappings=parsed && typeof parsed.mappings==="object" ? parsed.mappings : parsed;
+        if(!mappings || Array.isArray(mappings) || typeof mappings!=="object") throw new Error("Invalid mapping object");
+        const clean={};
+        Object.entries(mappings).forEach(([k,v])=>{const n=Number(k); if(Number.isInteger(n)&&n>=0&&n<=127&&typeof v==="string"&&v.trim()) clean[n]=v.trim();});
+        setMap(clean); count(); syncSelection(); status("Imported "+Object.keys(clean).length+" local mappings.");
+      }catch(err){status("Import failed: "+err.message);}
+    };
+    input.click();
+  };
+
   renderUsages(); renderCombo(); count();
 
   const style=document.createElement("style");
-  style.textContent=".f75-editor{margin-top:18px;padding-top:18px;border-top:1px solid #242424}.f75-editor-head{display:flex;justify-content:space-between;color:#eee;font:10px ui-monospace,monospace;letter-spacing:.08em}.f75-editor-head span{color:#d9ff57}.f75-editor-tabs,.f75-editor-actions,.f75-mods{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.f75-editor-tabs button,.f75-editor-actions button,.f75-mods button{border:1px solid #2c2c2c;background:#0d0d0d;color:#aaa;border-radius:6px;padding:7px 9px;cursor:pointer;font:9px ui-monospace,monospace}.f75-editor-tabs button.active,.f75-mods button.selected{background:#f3f3ef;color:#050505;border-color:#f3f3ef}.f75-editor-tools{display:flex;gap:7px;flex-wrap:wrap}.f75-editor-tools input,.f75-editor select{background:#090909;border:1px solid #303030;color:#eee;border-radius:6px;padding:8px;font:10px ui-monospace,monospace}.f75-editor-tools input{flex:1;min-width:160px}.f75-editor-tools>div{display:flex;gap:4px;flex-wrap:wrap}.f75-editor-tools>div button{background:#0d0d0d;border:1px solid #292929;color:#888;border-radius:6px;padding:6px 7px;font:8px ui-monospace,monospace}.f75-editor-tools>div button.active{background:#f3f3ef;color:#050505}.f75-editor-tools+div,.f75-editor #f75PresetGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:220px;overflow:auto;margin-top:9px}.f75-editor .usage,.f75-editor .preset{border:1px solid #242424;background:#0d0d0d;color:#c4c4be;border-radius:6px;padding:7px;text-align:left;cursor:pointer}.f75-editor .usage.selected,.f75-editor .preset.selected{border-color:#d9ff57;box-shadow:0 0 11px #d9ff5715}.f75-editor .usage b,.f75-editor .preset b{display:block;font:9px ui-monospace,monospace}.f75-editor .usage small,.f75-editor .preset small{display:block;color:#666;margin-top:2px;font:7px ui-monospace,monospace}.f75-editor .main{background:#f3f3ef;color:#050505;border-color:#f3f3ef}.f75-editor .danger{color:#ff9b9b;border-color:#4b2d2d}.f75-editor #f75EditorStatus,.f75-editor #f75ComboPreview{padding:8px;border:1px solid #232323;background:#070707;color:#777;border-radius:6px;font:9px ui-monospace,monospace}.f75-editor #f75ComboPreview{color:#bfe8f2;background:#071012;margin-top:8px}.f75-editor #f75Combo{padding:4px 0}@media(max-width:680px){.f75-editor-tools+div,.f75-editor #f75PresetGrid{grid-template-columns:repeat(3,1fr)}}";
+  style.textContent=".f75-editor{margin-top:18px;padding-top:18px;border-top:1px solid #242424}.f75-editor-head{display:flex;justify-content:space-between;color:#eee;font:10px ui-monospace,monospace;letter-spacing:.08em}.f75-editor-head span{color:#d9ff57}.f75-editor-tabs,.f75-editor-actions,.f75-mods{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.f75-editor-tabs button,.f75-editor-actions button,.f75-mods button{border:1px solid #2c2c2c;background:#0d0d0d;color:#aaa;border-radius:6px;padding:7px 9px;cursor:pointer;font:9px ui-monospace,monospace}.f75-editor-tabs button.active,.f75-mods button.selected{background:#f3f3ef;color:#050505;border-color:#f3f3ef}.f75-editor-tools{display:flex;gap:7px;flex-wrap:wrap}.f75-editor-tools input,.f75-editor select{background:#090909;border:1px solid #303030;color:#eee;border-radius:6px;padding:8px;font:10px ui-monospace,monospace}.f75-editor-tools input{flex:1;min-width:160px}.f75-editor-tools>div{display:flex;gap:4px;flex-wrap:wrap}.f75-editor-tools>div button{background:#0d0d0d;border:1px solid #292929;color:#888;border-radius:6px;padding:6px 7px;font:8px ui-monospace,monospace}.f75-editor-tools>div button.active{background:#f3f3ef;color:#050505}.f75-editor-tools+div,.f75-editor #f75PresetGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:220px;overflow:auto;margin-top:9px}.f75-editor .usage,.f75-editor .preset{border:1px solid #242424;background:#0d0d0d;color:#c4c4be;border-radius:6px;padding:7px;text-align:left;cursor:pointer}.f75-editor .usage.selected,.f75-editor .preset.selected{border-color:#d9ff57;box-shadow:0 0 11px #d9ff5715}.f75-editor .usage b,.f75-editor .preset b{display:block;font:9px ui-monospace,monospace}.f75-editor .usage small,.f75-editor .preset small{display:block;color:#666;margin-top:2px;font:7px ui-monospace,monospace}.f75-editor .main{background:#f3f3ef;color:#050505;border-color:#f3f3ef}.f75-editor .danger{color:#ff9b9b;border-color:#4b2d2d}.f75-editor-actions button{white-space:nowrap}.f75-editor #f75EditorStatus,.f75-editor #f75ComboPreview{padding:8px;border:1px solid #232323;background:#070707;color:#777;border-radius:6px;font:9px ui-monospace,monospace}.f75-editor #f75ComboPreview{color:#bfe8f2;background:#071012;margin-top:8px}.f75-editor #f75Combo{padding:4px 0}@media(max-width:680px){.f75-editor-tools+div,.f75-editor #f75PresetGrid{grid-template-columns:repeat(3,1fr)}}";
   document.head.appendChild(style);
 })();
