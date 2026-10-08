@@ -1,6 +1,6 @@
 ; NEON VAULT — custom Windows installer / uninstaller
 #define AppName "NEON VAULT"
-#define AppVersion "4.7"
+#define AppVersion "4.8"
 #define AppPublisher "Tamasrazim"
 #define AppExeName "neon_vault.exe"
 #define UpdaterExeName "neon_vault_updater.exe"
@@ -11,7 +11,7 @@ AppName={#AppName}
 AppVersion={#AppVersion}
 AppPublisher={#AppPublisher}
 AppVerName={#AppName} {#AppVersion}
-AppComments=Native Windows x64 100-floor puzzle game by Tamasrazim
+AppComments=Native Windows x64 100-floor puzzle game by Tamasrazim — fractured-core stability build
 AppContact=https://tamasrazim.github.io
 DefaultDirName={autopf}\NeonVault
 DefaultGroupName=NEON VAULT
@@ -28,6 +28,9 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64
 UninstallDisplayIcon={app}\neon-vault.ico
 UninstallDisplayName=NEON VAULT — Uninstall
+VersionInfoDescription=NEON VAULT native Windows x64 puzzle game
+VersionInfoProductName=NEON VAULT
+VersionInfoProductVersion={#AppVersion}.0
 SetupIconFile=neon-vault.ico
 Uninstallable=yes
 CloseApplications=yes
@@ -139,7 +142,7 @@ end;
 
 procedure InitializeWizard;
 begin
-  WizardForm.Caption := 'NEON VAULT  •  DEPLOYMENT CONSOLE';
+  WizardForm.Caption := 'NEON VAULT  •  DEPLOYMENT CONSOLE  //  4.8';
   WizardForm.Color := clBlack;
   WizardForm.CancelButton.Caption := 'ABORT';
   WizardForm.CancelButton.Font.Color := clRed;
@@ -232,7 +235,7 @@ end;
 
 function InitializeUninstall(): Boolean;
 begin
-  UninstallProgressForm.Caption := 'NEON VAULT  •  UNINSTALL';
+  UninstallProgressForm.Caption := 'NEON VAULT  •  UNINSTALL CONSOLE';
   UninstallProgressForm.Color := clBlack;
   UninstallProgressForm.StatusLabel.Font.Color := clAqua;
   UninstallProgressForm.StatusLabel.Caption := 'EVACUATING VAULT FILES...';
