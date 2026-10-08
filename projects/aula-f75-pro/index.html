@@ -3,549 +3,141 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#070707">
-<meta name="description" content="F75 PRO Control Deck — a browser-first AULA F75 Pro HID lab by Tamasrazim.">
+<meta name="theme-color" content="#060606">
+<meta name="description" content="F75 PRO Control Deck — offline-first AULA F75 Pro keyboard laboratory by Tamasrazim.">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <title>F75 PRO Control Deck — Tamasrazim</title>
 <style>
-:root{color-scheme:dark;--bg:#060606;--panel:#0b0b0b;--panel2:#101010;--ink:#f3f3ef;--muted:#8f8f8a;--line:#282828;--line2:#3a3a3a;--ok:#9cffb1;--warn:#ffd37d;--danger:#ff9292;--accent:#d9ff57;--ease:cubic-bezier(.2,.75,.2,1)}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:radial-gradient(circle at 70% -10%,#181818 0,#060606 43%);color:var(--ink);font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}
-button,input,select{font:inherit}
-button{color:inherit}
-a{color:inherit}
-.shell{width:min(1320px,calc(100% - 28px));margin:auto}
-.top{position:sticky;top:0;z-index:50;border-bottom:1px solid var(--line);background:rgba(6,6,6,.82);backdrop-filter:blur(16px)}
-.topin{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:18px}
-.brand{font-weight:900;letter-spacing:.12em;font-size:11px;text-decoration:none}
-.brand span{color:var(--muted);font-weight:500}
-.nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-.nav button{border:1px solid transparent;background:transparent;color:var(--muted);padding:8px 10px;border-radius:6px;cursor:pointer}
-.nav button:hover,.nav button.active{color:var(--ink);border-color:var(--line);background:#0c0c0c}
-main{padding:42px 0 90px}
-.hero{display:grid;grid-template-columns:1.4fr .9fr;gap:18px;align-items:stretch}
-.card{border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#0d0d0d,#080808);overflow:hidden}
-.heroMain{padding:34px;min-height:310px;display:flex;flex-direction:column;justify-content:space-between}
-.eyebrow{color:#7f7f79;font-size:10px;letter-spacing:.22em;text-transform:uppercase}
-h1{font-size:clamp(48px,8vw,108px);line-height:.82;letter-spacing:-.075em;margin:24px 0 0;max-width:850px}
-.lead{margin:24px 0 0;max-width:68ch;color:#9c9c96}
-.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:28px}
-.btn{border:1px solid #343434;background:#111;padding:11px 14px;border-radius:7px;cursor:pointer;transition:.25s var(--ease)}
-.btn:hover{transform:translateY(-2px);border-color:#5a5a5a}
-.btn.primary{background:var(--ink);color:#050505;border-color:var(--ink)}
-.btn.danger{border-color:#573535;color:#ffb2b2}
-.statusCard{padding:24px;display:flex;flex-direction:column;justify-content:space-between}
-.statusDot{width:11px;height:11px;border-radius:50%;background:#555;box-shadow:0 0 0 5px #151515}
-.statusDot.ok{background:var(--ok);box-shadow:0 0 20px #68ff8a66}
-.statusTitle{display:flex;align-items:center;gap:12px;font-weight:800}
-.metric{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:8px}
-.metric span:last-child{text-align:right;color:#d7d7d0}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:28px 0 14px}
-.tab{border:1px solid var(--line);background:#0a0a0a;color:#92928d;padding:9px 11px;border-radius:7px;cursor:pointer}
-.tab.active{color:var(--ink);border-color:#4a4a4a;background:#111}
-.view{display:none}
-.view.active{display:block}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.panel{padding:20px}
-.panel h2{font-size:15px;margin:0 0 14px;letter-spacing:.06em}
-.panel p{margin:6px 0;color:#9a9a94}
-.keyboardPanel{padding:18px}
-.keyboard{position:relative;display:grid;grid-template-columns:repeat(15,minmax(0,1fr));grid-auto-rows:minmax(44px,1fr);gap:6px}
-.key{border:1px solid #2d2d2d;background:linear-gradient(145deg,#161616,#0b0b0b);border-radius:8px;min-width:0;padding:8px 5px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#b8b8b2;font-size:10px;transition:.18s var(--ease);user-select:none}
-.key:hover{transform:translateY(-2px);border-color:#555;color:#fff}
-.key.selected{border-color:var(--accent);box-shadow:0 0 0 1px #d9ff5730,0 0 22px #d9ff5711;color:var(--accent)}
-.key.fn{color:#d0b8ff}.key.mod{color:#9fd7ff}.key.nav{color:#ffcc99}.key.knob{color:#ff9dd4}
-.key.w1{grid-column:span 1}.key.w2{grid-column:span 2}.key.w3{grid-column:span 3}.key.w4{grid-column:span 4}
-.preview{padding:18px;border-top:1px solid var(--line);margin-top:18px;display:flex;flex-direction:column;gap:12px}
-.previewStage{min-height:180px;border:1px solid #282828;border-radius:11px;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#1b1b1b 0,#080808 65%)}
-.glowKey{width:85px;height:60px;border-radius:10px;border:1px solid #555;background:#111;box-shadow:0 0 38px var(--rgb,#4b74ff66);display:grid;place-items:center}
-.field{display:grid;gap:7px;margin:12px 0}
-.field label{color:#777;font-size:10px;text-transform:uppercase;letter-spacing:.12em}
-.field input,.field select{width:100%;background:#090909;color:var(--ink);border:1px solid #303030;border-radius:7px;padding:10px}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.colorRow{display:grid;grid-template-columns:62px 1fr;gap:10px;align-items:center}
-.colorRow input[type=color]{width:62px;height:42px;padding:3px;background:#090909;border:1px solid #303030;border-radius:7px}
-.slider{width:100%}
-.effectGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.effect{border:1px solid #2b2b2b;background:#0b0b0b;border-radius:8px;padding:10px;cursor:pointer;color:#9b9b95}
-.effect.selected{border-color:#555;color:#fff;background:#121212}
-.console{background:#050505;border:1px solid #2b2b2b;border-radius:8px;padding:12px;min-height:220px;max-height:320px;overflow:auto;white-space:pre-wrap;font-size:11px;color:#9fa39a}
-.badge{display:inline-flex;padding:3px 7px;border:1px solid #333;border-radius:999px;color:#999;font-size:9px;text-transform:uppercase;letter-spacing:.1em}
-.badge.ok{color:var(--ok);border-color:#2a5632}.badge.warn{color:var(--warn);border-color:#5b4b2b}
-.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.kv>div{padding:10px;border:1px solid #252525;border-radius:8px;background:#090909}
-.kv small{display:block;color:#6f6f69;font-size:9px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
-.kv strong{font-size:12px;word-break:break-word}
-.notice{padding:12px 14px;border:1px solid #37372e;border-radius:8px;background:#11110d;color:#c4c49b;margin-bottom:14px}
-.notice strong{color:#f2f2d0}
-.f75-reference{display:grid;grid-template-columns:minmax(260px,.9fr) 1.1fr;gap:16px;align-items:stretch}
-.f75-reference-photo{border:1px solid #262626;border-radius:10px;overflow:hidden;background:#050505}
-.f75-reference-photo img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}
-.f75-reference-cap{padding:8px 10px;border-top:1px solid #222;color:#666;font-size:9px;letter-spacing:.03em}
-.f75-reference-notes{display:flex;flex-direction:column;gap:10px;justify-content:center}
-.f75-reference-notes p{margin:0;color:#999;max-width:60ch}
-.f75-reference-notes .kv{margin:4px 0}
-@media(max-width:900px){.f75-reference{grid-template-columns:1fr}}
-footer{border-top:1px solid var(--line);padding:24px 0 36px;color:#666;display:flex;justify-content:space-between;gap:20px;font-size:10px}
-@media(max-width:900px){.hero,.grid2{grid-template-columns:1fr}.effectGrid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:680px){.shell{width:min(100% - 18px,1320px)}.topin{min-height:60px}.nav button{padding:6px 7px}.heroMain{padding:23px}.heroMain h1{font-size:64px}.keyboard{gap:4px;grid-auto-rows:minmax(36px,1fr)}.key{font-size:8px;padding:5px 2px}.row{grid-template-columns:1fr}}
+:root{color-scheme:dark;--bg:#050505;--panel:#0b0b0b;--ink:#f4f4ef;--muted:#8f8f89;--dim:#5f5f59;--line:#262626;--line2:#383838;--accent:#d9ff57;--cyan:#7de9ff;--ok:#9cffb1;--warn:#ffd37d;--danger:#ff8f9a;--ease:cubic-bezier(.2,.75,.2,1)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 75% -8%,#202020 0,#0a0a0a 27%,#050505 60%);color:var(--ink);font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}button,input,select{font:inherit}button{color:inherit}a{color:inherit}.shell{width:min(1400px,calc(100% - 28px));margin:auto}
+.top{position:sticky;top:0;z-index:100;border-bottom:1px solid var(--line);background:#060606dd;backdrop-filter:blur(18px)}.topin{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{font-weight:900;letter-spacing:.14em;text-decoration:none;font-size:11px}.brand span{color:var(--muted);font-weight:500}.nav{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.nav button,.tab{border:1px solid transparent;background:transparent;color:var(--muted);padding:8px 10px;border-radius:7px;cursor:pointer;transition:.18s var(--ease)}.nav button:hover,.nav button.active,.tab:hover,.tab.active{color:var(--ink);border-color:var(--line2);background:#0d0d0d}
+main{padding:28px 0 90px}.hero{display:grid;grid-template-columns:1.35fr .8fr;gap:14px}.card{border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#0d0d0d,#080808);box-shadow:0 18px 60px #0006}.heroMain{padding:30px;min-height:305px;display:flex;flex-direction:column;justify-content:space-between}.eyebrow{color:#74746e;font-size:9px;letter-spacing:.22em;text-transform:uppercase}h1{font-size:clamp(52px,8vw,108px);line-height:.8;letter-spacing:-.08em;margin:22px 0 0}h2{font-size:15px;letter-spacing:.06em;margin:0 0 13px}.lead{max-width:72ch;color:#999;margin:20px 0 0}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
+.btn{border:1px solid #343434;background:#111;padding:10px 13px;border-radius:7px;cursor:pointer;transition:.18s var(--ease)}.btn:hover{border-color:#5a5a5a;transform:translateY(-1px)}.btn.primary{background:var(--ink);color:#050505;border-color:var(--ink);font-weight:800}.btn.danger{color:#ffadb4;border-color:#583238}
+.statusCard{padding:22px;display:flex;flex-direction:column;justify-content:space-between}.statusTitle{display:flex;align-items:center;gap:10px;font-weight:800}.statusDot{width:10px;height:10px;border-radius:50%;background:#555;box-shadow:0 0 0 5px #151515}.statusDot.live{background:var(--accent);box-shadow:0 0 20px #d9ff574d}.statusDot.ok{background:var(--ok);box-shadow:0 0 20px #68ff8a55}.metric{margin-top:11px;padding-top:11px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:8px}.metric span:last-child{text-align:right;color:#d8d8d2}
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:22px 0 12px}.view{display:none}.view.active{display:block}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.panel{padding:18px}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:7px}.kv>div{padding:9px;border:1px solid #232323;border-radius:8px;background:#090909}.kv small{display:block;color:#686862;text-transform:uppercase;font-size:8px;letter-spacing:.12em;margin-bottom:3px}.kv strong{font-size:11px;word-break:break-word}
+.badge{display:inline-flex;padding:3px 7px;border:1px solid #333;border-radius:999px;color:#8f8f89;font-size:8px;letter-spacing:.1em;text-transform:uppercase}.badge.live{color:var(--accent);border-color:#48570f}.badge.ok{color:var(--ok);border-color:#2a5632}.badge.warn{color:var(--warn);border-color:#5b4b2b}
+.notice{padding:11px 13px;border:1px solid #38382f;background:#11110d;color:#c7c7a0;border-radius:8px;margin:12px 0}.notice strong{color:#f1f1d0}.small{color:#6c6c66;font-size:8px}.console{background:#040404;border:1px solid #292929;border-radius:8px;padding:11px;min-height:180px;max-height:340px;overflow:auto;white-space:pre-wrap;color:#9da099;font-size:10px}
+.reference{display:grid;grid-template-columns:minmax(270px,.85fr) 1.15fr;gap:16px}.reference-photo{border:1px solid #2b2b2b;border-radius:10px;overflow:hidden;background:#030303}.reference-photo img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}.reference-cap{padding:8px 10px;border-top:1px solid #222;color:#62625c;font-size:8px}.reference-notes{display:flex;flex-direction:column;justify-content:center;gap:10px}.reference-notes p{margin:0;color:#92928c}
+.keystage{padding:17px}.keyhead{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}.keyboard{border:1px solid #202020;border-radius:11px;background:#060606;padding:10px;overflow:auto;box-shadow:inset 0 0 30px #000}.krow{display:flex;gap:5px;min-width:920px;margin-bottom:5px}.krow:last-child{margin-bottom:0}
+.key{position:relative;height:50px;flex:0 0 auto;border:1px solid #2b2b2b;border-radius:8px;background:linear-gradient(145deg,#181818,#0b0b0b);color:#c8c8c3;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:7px;cursor:pointer;user-select:none;transition:.13s var(--ease);font:10px ui-monospace,SFMono-Regular,Consolas,monospace}.key:hover{transform:translateY(-1px);border-color:#5a5a5a}.key.selected{border-color:var(--accent);box-shadow:0 0 0 1px #d9ff5730,0 0 24px #d9ff5711;color:#f4ffc9}.key.live{border-color:var(--cyan);box-shadow:0 0 25px #7de9ff2b,0 0 0 1px #7de9ff44;color:#dbf9ff}.key .lab{font-weight:900}.key .idx{font-size:7px;color:#565650}.key .map{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#d9ff57aa;font-size:7px}.key.knob{border-radius:50%;align-items:center;justify-content:center;color:#ff9bce}
+.livepanel{margin-bottom:12px;border:1px solid #252525;border-radius:10px;background:#080808;padding:12px}.livetop{display:flex;align-items:center;justify-content:space-between;gap:12px}.livetitle{font-size:10px;letter-spacing:.12em;font-weight:900}.livesource{color:#63635d;font-size:8px;margin-left:9px}.livedot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 13px var(--cyan);margin-right:7px}.livecurrent{margin-top:9px;min-height:74px;display:grid;place-items:center;text-align:center;border:1px solid #202020;border-radius:8px;background:#040404;padding:12px;font-size:21px;font-weight:900}.livemeta{text-align:center;margin-top:7px;color:#696962;font-size:8px;word-break:break-all}.livehistory{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}.chip{padding:4px 7px;border:1px solid #242424;background:#0c0c0c;border-radius:6px;color:#aaa;font-size:8px}
+.preview{margin-top:13px;padding-top:13px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px}.previewstage{min-height:155px;border:1px solid #282828;border-radius:10px;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#1a1a1a 0,#080808 67%)}.glowkey{width:88px;height:60px;border-radius:10px;border:1px solid #575757;background:#111;display:grid;place-items:center;box-shadow:0 0 42px var(--rgb,#6d8dff88)}
+.editor{margin-top:14px;padding-top:14px;border-top:1px solid #242424}.editorhead{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:10px;letter-spacing:.09em}.editorhead span{color:var(--accent)}.editortabs,.editoractions,.mods,.cats{display:flex;flex-wrap:wrap;gap:5px}.editortabs{margin:10px 0}.editortabs button,.editoractions button,.mods button,.cats button{border:1px solid #292929;background:#0d0d0d;color:#92928c;border-radius:6px;padding:7px 8px;cursor:pointer;font-size:8px}.editortabs button.active,.mods button.active,.cats button.active{color:#050505;background:var(--ink);border-color:var(--ink)}
+.tools{display:flex;gap:7px;flex-wrap:wrap}.tools>div{display:flex;gap:4px;flex-wrap:wrap}.tools input,.comboRow select{flex:1;min-width:160px;background:#080808;border:1px solid #303030;color:var(--ink);border-radius:6px;padding:8px}.usagegrid,.presetgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;max-height:215px;overflow:auto;margin-top:8px}.usage,.preset{border:1px solid #242424;background:#0d0d0d;color:#c5c5bf;border-radius:6px;padding:7px;text-align:left;cursor:pointer}.usage.selected,.preset.selected{border-color:var(--accent);box-shadow:0 0 10px #d9ff5712}.usage b,.preset b{display:block;font-size:9px}.usage small,.preset small{display:block;color:#65655f;font-size:7px;margin-top:2px}.comboRow{display:flex;gap:7px;flex-wrap:wrap}.combopreview{margin-top:8px;padding:8px;border:1px solid #24343a;background:#071012;color:#bdebf4;border-radius:6px;font-size:9px}.editoractions{margin-top:10px;padding-top:10px;border-top:1px solid #222}.editoractions .main{background:var(--ink);color:#050505;border-color:var(--ink);font-weight:800}.editoractions .danger{color:#ff9da7;border-color:#4d2d31}.editorstatus{margin-top:8px;padding:8px;border:1px solid #222;background:#060606;border-radius:6px;min-height:32px;color:#777;font-size:8px}
+.field{display:grid;gap:6px;margin:11px 0}.field label{color:#70706a;text-transform:uppercase;font-size:8px;letter-spacing:.12em}.field input,.field select{width:100%;background:#080808;color:var(--ink);border:1px solid #303030;border-radius:7px;padding:9px}.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.effectgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.effect{border:1px solid #2a2a2a;background:#0b0b0b;color:#92928c;border-radius:7px;padding:8px;cursor:pointer;text-align:left;font-size:9px}.effect.selected{color:var(--ink);border-color:#555;background:#111}.leds{display:grid;grid-template-columns:repeat(15,1fr);gap:5px;max-width:560px}.led{height:12px;border-radius:3px;background:#111}
+footer{border-top:1px solid var(--line);padding:22px 0 34px;color:#60605b;display:flex;justify-content:space-between;gap:16px;font-size:9px}
+@media(max-width:980px){.hero,.grid2,.reference{grid-template-columns:1fr}}@media(max-width:720px){.shell{width:min(100% - 16px,1400px)}.topin{min-height:58px}.nav button{padding:6px 7px}.heroMain{padding:22px}h1{font-size:65px}.row{grid-template-columns:1fr}.effectgrid{grid-template-columns:repeat(2,1fr)}.usagegrid,.presetgrid{grid-template-columns:repeat(3,1fr)}.livecurrent{font-size:17px}}
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="shell topin">
-    <a class="brand" href="../../">TAMASRAZIM <span>/ F75 PRO CONTROL DECK</span></a>
-    <nav class="nav">
-      <button class="navBtn active" data-view="dashboard">Deck</button>
-      <button class="navBtn" data-view="keys">Key Lab</button>
-      <button class="navBtn" data-view="rgb">RGB Lab</button>
-      <button class="navBtn" data-view="diagnostics">Diagnostics</button>
-    </nav>
-  </div>
-</header>
+<header class="top"><div class="shell topin">
+  <a class="brand" href="../../">TAMASRAZIM <span>/ F75 PRO CONTROL DECK</span></a>
+  <nav class="nav">
+    <button class="navBtn active" data-view="dashboard">Deck</button>
+    <button class="navBtn" data-view="keys">Key Lab</button>
+    <button class="navBtn" data-view="rgb">RGB Lab</button>
+    <button class="navBtn" data-view="diagnostics">Diagnostics</button>
+  </nav>
+</div></header>
 
 <main class="shell">
-  <section class="hero">
-    <article class="card heroMain">
-      <div>
-        <div class="eyebrow">browser-first / local USB / no account</div>
-        <h1>F75<br>PRO.</h1>
-        <p class="lead">An original control deck for the AULA F75 Pro family. It treats the keyboard as a device to inspect, snapshot, visualize and carefully configure — not as a black-box accessory.</p>
-      </div>
-      <div class="actions">
-        <button id="connectBtn" class="btn primary">Connect real keyboard</button>
-        <button id="disconnectBtn" class="btn">Disconnect</button>
-        <button id="backupBtn" class="btn">Export session</button>
-      </div>
-    </article>
-    <article class="card statusCard">
-      <div>
-        <div class="statusTitle"><span id="statusDot" class="statusDot ok"></span><span id="statusText">LIVE DEMO · no keyboard</span></div>
-        <div class="metric"><span>USB identity</span><span id="usbId">258a:010c · simulated</span></div>
-        <div class="metric"><span>transport</span><span id="transport">Offline simulation</span></div>
-        <div class="metric"><span>model probe</span><span id="modelId">AULA F75 Pro · virtual</span></div>
-      </div>
-      <div>
-        <span id="writeBadge" class="badge ok">live simulation</span>
-        <p style="font-size:10px;color:#6f6f69;margin-top:12px">The whole interface works without hardware. Offline actions update a simulated F75 Pro locally; real hardware writes stay separately gated.</p>
-      </div>
-    </article>
-  </section>
+<section class="hero">
+  <article class="card heroMain">
+    <div><div class="eyebrow">offline-first / local USB / no account</div><h1>F75<br>PRO.</h1><p class="lead">A rebuilt control deck for the AULA F75 Pro family. It is live before connection, then upgrades to WebHID observation when an authorized wired keyboard is available.</p></div>
+    <div class="actions"><button id="connectBtn" class="btn primary">Connect real keyboard</button><button id="disconnectBtn" class="btn">Disconnect</button><button id="backupBtn" class="btn">Export session</button></div>
+  </article>
+  <article class="card statusCard">
+    <div><div class="statusTitle"><span id="statusDot" class="statusDot live"></span><span id="statusText">LIVE DEMO · no keyboard</span></div>
+      <div class="metric"><span>USB identity</span><span id="usbId">258a:010c · simulated</span></div>
+      <div class="metric"><span>transport</span><span id="transport">Offline simulation</span></div>
+      <div class="metric"><span>device</span><span id="deviceName">AULA F75 Pro · virtual</span></div>
+    </div>
+    <div><span id="writeBadge" class="badge live">simulation</span><p class="small">Design and diagnostics work without hardware. Persistent hardware writes remain disabled in this rebuild.</p></div>
+  </article>
+</section>
 
-  <div class="tabs">
-    <button class="tab active" data-tab="dashboard">Device</button>
-    <button class="tab" data-tab="keys">Key Lab</button>
-    <button class="tab" data-tab="rgb">RGB Lab</button>
-    <button class="tab" data-tab="diagnostics">Diagnostics</button>
+<div class="tabs">
+  <button class="tab active" data-tab="dashboard">Device</button><button class="tab" data-tab="keys">Key Lab</button><button class="tab" data-tab="rgb">RGB Lab</button><button class="tab" data-tab="diagnostics">Diagnostics</button>
+</div>
+
+<section id="dashboard" class="view active">
+  <div class="grid2">
+    <article class="card panel"><h2>DEVICE SNAPSHOT</h2><div class="kv">
+      <div><small>Vendor</small><strong id="vendor">0x258A</strong></div><div><small>Product</small><strong id="product">0x010C</strong></div>
+      <div><small>Product name</small><strong id="productName">AULA F75 Pro · Virtual Device</strong></div><div><small>Mode</small><strong id="mode">offline live demo</strong></div>
+      <div><small>Feature report</small><strong>0x06</strong></div><div><small>Storage</small><strong>local browser state</strong></div>
+    </div></article>
+    <article class="card panel"><h2>SAFE PROBE</h2><div class="notice"><strong>Live without hardware.</strong> Offline probe responses are deterministic simulations. Connect the real keyboard only for WebHID traffic.</div>
+      <div class="actions"><button id="probeBtn" class="btn primary">Probe identity</button><button id="readConfigBtn" class="btn">Read config</button><button id="saveSnapshotBtn" class="btn">Save snapshot</button></div>
+    </article>
   </div>
 
-  <section id="dashboard" class="view active">
-    <div class="grid2">
-      <article class="card panel">
-        <h2>DEVICE SNAPSHOT</h2>
-        <div class="kv">
-          <div><small>Vendor</small><strong id="vendor">—</strong></div>
-          <div><small>Product</small><strong id="product">—</strong></div>
-          <div><small>Product name</small><strong id="productName">—</strong></div>
-          <div><small>Mode</small><strong id="mode">offline live demo</strong></div>
-          <div><small>Report</small><strong>Feature 0x06</strong></div>
-          <div><small>Local storage</small><strong>enabled</strong></div>
-        </div>
-      </article>
-      <article class="card panel">
-        <h2>SAFE PROBE</h2>
-        <div class="notice"><strong>Live without hardware.</strong> The probe and diagnostic panels have a deterministic virtual F75 Pro state by default. Connect a real keyboard only when you want to switch from simulation to WebHID.</div>
-        <div class="actions">
-          <button id="probeBtn" class="btn primary">Probe identity</button>
-          <button id="readConfigBtn" class="btn">Read config</button>
-          <button id="saveConfigBtn" class="btn">Save raw snapshot</button>
-        </div>
-      </article>
+  <article class="card panel" style="margin-top:14px"><h2>HARDWARE REFERENCE</h2><div class="reference">
+    <div class="reference-photo"><img src="../../aula-f75-pro-wireless-mechanical-keyboard-10-700x700.jpg.webp" alt="AULA F75 Pro wireless mechanical keyboard reference" loading="lazy"><div class="reference-cap">Repository reference asset · aula-f75-pro-wireless-mechanical-keyboard-10-700x700.jpg.webp</div></div>
+    <div class="reference-notes"><span class="badge ok">exact repository asset linked</span><p>The physical reference is shown beside the interactive control environment.</p>
+      <div class="kv"><div><small>Source</small><strong>repo root</strong></div><div><small>Virtual input</small><strong>offline + DOM</strong></div><div><small>Hardware</small><strong>WebHID wired</strong></div><div><small>Writes</small><strong>gated</strong></div></div>
+      <a class="btn" href="../../aula-f75-pro-wireless-mechanical-keyboard-10-700x700.jpg.webp" target="_blank" rel="noopener">Open source image</a>
     </div>
-    <article class="card panel" style="margin-top:14px">
-      <h2>HARDWARE REFERENCE</h2>
-      <div class="f75-reference">
-        <div class="f75-reference-photo">
-          <img src="../../aula-f75-pro-wireless-mechanical-keyboard-10-700x700.jpg.webp" alt="AULA F75 Pro wireless mechanical keyboard reference photo" loading="lazy">
-          <div class="f75-reference-cap">Repository reference asset · AULA F75 Pro · 700×700 source</div>
-        </div>
-        <div class="f75-reference-notes">
-          <div class="badge ok">reference linked</div>
-          <p>The physical photo is kept as a visual reference beside the live virtual matrix. The virtual layout remains interactive and independent from the source image.</p>
-          <div class="kv">
-            <div><small>Source</small><strong>repo root asset</strong></div>
-            <div><small>View</small><strong>photo + virtual matrix</strong></div>
-            <div><small>Input</small><strong>offline / WebHID</strong></div>
-            <div><small>Writes</small><strong>gated</strong></div>
-          </div>
-          <a class="btn" href="../../aula-f75-pro-wireless-mechanical-keyboard-10-700x700.jpg.webp" target="_blank" rel="noopener">Open original image</a>
-        </div>
+  </div></article>
+
+  <article class="card panel" style="margin-top:14px"><h2>EVENT STREAM</h2><div id="eventLog" class="console">F75 PRO CONTROL DECK rebuilt.
+Offline mode is active.
+Open Key Lab to test live input and mappings.</div></article>
+</section>
+
+<section id="keys" class="view">
+  <div class="grid2">
+    <article class="card keystage">
+      <div class="keyhead"><div><div class="eyebrow">physical matrix / live input</div><h2 style="margin-top:4px">KEY LAB</h2></div><div style="display:flex;gap:6px"><span id="selectedBadge" class="badge">no key</span><span id="mappedCount" class="badge live">0 mapped</span></div></div>
+      <div class="livepanel"><div class="livetop"><div><span class="livedot"></span><span class="livetitle">LIVE PRESS VIEW</span><span id="liveSource" class="livesource">OS keyboard events</span></div><span id="heldCount" class="badge">0 held</span></div>
+        <div id="liveCurrent" class="livecurrent">Press a key on your keyboard…</div><div id="liveMeta" class="livemeta">No keypress yet.</div><div id="liveHistory" class="livehistory"></div>
       </div>
+      <div id="keyboard" class="keyboard"></div>
+      <div class="preview"><div><span class="badge">selection</span> <strong id="selectedLabel">Select a key</strong></div><div class="previewstage"><div id="glowKey" class="glowkey">preview</div></div></div>
     </article>
 
-    <article class="card panel" style="margin-top:14px">
-      <h2>EVENT STREAM</h2>
-      <div id="consoleA" class="console">F75 PRO CONTROL DECK ready.
-Connect the keyboard over USB-C, then run Safe Probe.</div>
+    <article class="card panel">
+      <h2>KEYMAP EDITOR</h2><p class="small">Local browser state only. Add, edit and delete mappings without modifying the keyboard.</p>
+      <div class="editor">
+        <div class="editorhead"><strong>LOCAL KEYMAP</strong><span id="editorCount">0 mapped</span></div>
+        <div class="editortabs"><button class="active" data-mode="single">Single Key</button><button data-mode="combo">Shortcut / Combo</button><button data-mode="preset">Presets</button></div>
+        <div id="modeSingle"><div class="tools"><div id="catHost" class="cats"></div><input id="usageSearch" placeholder="Search usage / hex"></div><div id="usageGrid" class="usagegrid"></div></div>
+        <div id="modeCombo" hidden><div class="mods"><button data-mod="Ctrl">Ctrl</button><button data-mod="Shift">Shift</button><button data-mod="Alt">Alt</button><button data-mod="Win">Win</button></div><div class="comboRow"><select id="comboKey"></select></div><div id="comboPreview" class="combopreview">Shortcut: —</div></div>
+        <div id="modePreset" hidden><div id="presetGrid" class="presetgrid"></div></div>
+        <div class="editoractions"><button id="addMap" class="main">Add / Apply</button><button id="editMap">Edit</button><button id="deleteMap" class="danger">Delete</button><button id="resetSelected">Reset selected</button><button id="resetAll">Reset all</button><button id="swapWinAlt">Swap Win ↔ Alt</button><button id="importMap">Import JSON</button><button id="exportMap">Export JSON</button></div>
+        <div id="editorStatus" class="editorstatus">Select a physical key, then choose an output.</div>
+      </div>
+      <div class="notice"><strong>Safe tester.</strong> Double-clicking a virtual key flashes it as a simulated press. Physical typing updates the live view without changing mappings.</div>
     </article>
-  </section>
+  </div>
+</section>
 
-  <section id="keys" class="view">
-    <div class="grid2">
-      <article class="card keyboardPanel">
-        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px">
-          <div><div class="eyebrow">interactive matrix</div><h2 style="margin:5px 0 0">KEY LAB</h2></div>
-          <span id="selectedKeyBadge" class="badge">nothing selected</span>
-        </div>
-        <div id="keyboard" class="keyboard"></div>
-        <div class="preview">
-          <div><span class="badge">selection</span> <strong id="selectedLabel">Select a key</strong></div>
-          <div class="previewStage"><div id="glowKey" class="glowKey">preview</div></div>
-        </div>
-      </article>
-      <article class="card panel">
-        <h2>LOCAL REMAP DESIGNER</h2>
-        <p>This workspace builds a proposed mapping locally. The current device reader is kept separate so an unexpected firmware layout cannot silently overwrite your keyboard.</p>
-        <div class="field"><label>Selected key</label><input id="selectedKey" readonly placeholder="Pick a key from the matrix"></div>
-        <div class="field"><label>Output</label>
-          <select id="outputSelect">
-            <option value="">Unassigned</option>
-            <option value="esc">Esc</option><option value="tab">Tab</option><option value="caps">Caps Lock</option>
-            <option value="ctrl">Left Ctrl</option><option value="shift">Left Shift</option><option value="alt">Left Alt</option><option value="win">Left Win</option>
-            <option value="a">A</option><option value="b">B</option><option value="c">C</option><option value="d">D</option><option value="e">E</option><option value="f">F</option><option value="g">G</option><option value="h">H</option><option value="i">I</option><option value="j">J</option><option value="k">K</option><option value="l">L</option><option value="m">M</option><option value="n">N</option><option value="o">O</option><option value="p">P</option><option value="q">Q</option><option value="r">R</option><option value="s">S</option><option value="t">T</option><option value="u">U</option><option value="v">V</option><option value="w">W</option><option value="x">X</option><option value="y">Y</option><option value="z">Z</option>
-            <option value="f13">F13</option><option value="f14">F14</option><option value="f15">F15</option><option value="f16">F16</option>
-            <option value="media_play">Media Play/Pause</option><option value="media_next">Media Next</option><option value="media_prev">Media Previous</option>
-          </select>
-        </div>
-        <div class="actions">
-          <button id="stageMapBtn" class="btn primary">Stage mapping</button>
-          <button id="exportMapBtn" class="btn">Export mapping</button>
-          <button id="resetMapBtn" class="btn danger">Reset local map</button>
-        </div>
-        <div class="notice" style="margin-top:18px"><strong>Offline-first.</strong> Key-map staging and RGB preview are fully live without a keyboard. Real persistent hardware writes remain gated until the exact F75 Pro revision is verified.</div>
-        <div id="mapStatus" class="console" style="min-height:120px">No staged mappings.</div>
-      </article>
-    </div>
-  </section>
-
-  <section id="rgb" class="view">
-    <div class="grid2">
-      <article class="card panel">
-        <h2>RGB LAB</h2>
-        <p>Design the lighting state in the browser, then optionally send a simple wired static-color profile after a successful device snapshot.</p>
-        <div class="field colorRow"><input id="rgbColor" type="color" value="#6d8dff"><div><strong id="rgbHex">#6D8DFF</strong><p style="font-size:10px">primary color</p></div></div>
-        <div class="row">
-          <div class="field"><label>Brightness</label><input id="brightness" class="slider" type="range" min="0" max="9" value="7"><strong id="brightnessOut">7</strong></div>
-          <div class="field"><label>Speed</label><input id="speed" class="slider" type="range" min="0" max="4" value="2"><strong id="speedOut">2</strong></div>
-        </div>
-        <div class="field"><label>Effect</label><div id="effectGrid" class="effectGrid"></div></div>
-        <div class="actions">
-          <button id="previewRgbBtn" class="btn primary">Preview</button>
-          <button id="applyRgbBtn" class="btn">Apply static RGB</button>
-        </div>
-      </article>
-      <article class="card panel">
-        <h2>LIVE PREVIEW</h2>
-        <div id="rgbStage" class="previewStage" style="min-height:360px">
-          <div>
-            <div style="display:flex;gap:5px;flex-wrap:wrap;max-width:450px;justify-content:center" id="ledPreview"></div>
-            <p id="effectCaption" style="text-align:center;color:#777;margin-top:18px">static</p>
-          </div>
-        </div>
-      </article>
-    </div>
-  </section>
-
-  <section id="diagnostics" class="view">
-    <div class="grid2">
-      <article class="card panel">
-        <h2>RAW FEATURE REPORT</h2>
-        <div class="field"><label>Report ID</label><input id="reportId" value="0x06"></div>
-        <div class="field"><label>Command</label><select id="commandSelect"><option value="82">0x82 — identity probe</option><option value="84">0x84 — config read</option></select></div>
-        <div class="actions"><button id="rawReadBtn" class="btn primary">Send safe read</button></div>
-        <div id="consoleB" class="console" style="margin-top:14px">No diagnostic report yet.</div>
-      </article>
-      <article class="card panel">
-        <h2>CONFIG ANALYZER</h2>
-        <div class="kv">
-          <div><small>effect offset</small><strong>payload + 18</strong></div>
-          <div><small>custom flag</small><strong>payload + 17</strong></div>
-          <div><small>brightness table</small><strong>payload + 64</strong></div>
-          <div><small>speed nibble</small><strong>upper nibble</strong></div>
-        </div>
-        <div class="actions"><button id="decodeBtn" class="btn">Decode last config</button><button id="clearConsoleBtn" class="btn">Clear</button></div>
-        <div id="decoded" class="console" style="margin-top:14px">Nothing decoded.</div>
-      </article>
-    </div>
-    <article class="card panel" style="margin-top:14px">
-      <h2>DEVICE NOTES</h2>
-      <div class="notice">WebHID is supported by Chromium-family browsers. For this project, use wired USB first. Wireless and Bluetooth transports are intentionally treated as separate protocol targets rather than assumed to share the wired feature-report channel.</div>
-      <p id="browserSupport"></p>
+<section id="rgb" class="view">
+  <div class="grid2">
+    <article class="card panel"><h2>RGB LAB</h2><p class="small">Live lighting design that does not require the keyboard.</p>
+      <div class="field"><label>Primary color</label><div style="display:grid;grid-template-columns:62px 1fr;gap:9px;align-items:center"><input id="rgbColor" type="color" value="#6d8dff" style="width:62px;height:42px;padding:3px"><div><strong id="rgbHex">#6D8DFF</strong><div class="small">preview color</div></div></div></div>
+      <div class="row"><div class="field"><label>Brightness</label><input id="brightness" type="range" min="0" max="9" value="7"><strong id="brightnessOut">7</strong></div><div class="field"><label>Speed</label><input id="speed" type="range" min="0" max="4" value="2"><strong id="speedOut">2</strong></div></div>
+      <div class="field"><label>Effect</label><div id="effectGrid" class="effectgrid"></div></div>
+      <div class="actions"><button id="previewRgb" class="btn primary">Preview</button><button id="applyRgb" class="btn">Apply static RGB</button></div>
     </article>
-  </section>
+    <article class="card panel"><h2>LIVE RGB</h2><div id="rgbStage" class="previewstage" style="min-height:430px"><div style="width:100%"><div id="leds" class="leds" style="margin:auto"></div><p id="effectCaption" style="text-align:center;color:#70706a;margin-top:16px">Static · #6D8DFF</p></div></div></article>
+  </div>
+</section>
+
+<section id="diagnostics" class="view">
+  <div class="grid2">
+    <article class="card panel"><h2>RAW FEATURE REPORT</h2><div class="field"><label>Report ID</label><input id="reportId" value="0x06"></div><div class="field"><label>Command</label><select id="commandSelect"><option value="82">0x82 · safe identity probe</option><option value="84">0x84 · safe configuration probe</option></select></div><div class="actions"><button id="rawRead" class="btn primary">Send safe read</button><button id="decodeLast" class="btn">Decode</button></div><div id="rawConsole" class="console" style="margin-top:12px">No report captured yet.</div></article>
+    <article class="card panel"><h2>REPORT INSPECTOR</h2><div class="kv"><div><small>bytes</small><strong id="reportSize">—</strong></div><div><small>report id</small><strong id="reportOut">—</strong></div><div><small>transport</small><strong id="reportTransport">offline simulation</strong></div><div><small>last event</small><strong id="reportEvent">—</strong></div></div><div class="notice"><strong>Conservative hardware path.</strong> Reading and observation are separated from persistent modification.</div><div id="decoded" class="console">Nothing decoded.</div></article>
+  </div>
+  <article class="card panel" style="margin-top:14px"><h2>BROWSER / DEVICE NOTES</h2><p id="support" class="small"></p><div class="actions"><button id="clearLogs" class="btn">Clear logs</button><button id="clearAllLocal" class="btn danger">Clear all local state</button></div></article>
+</section>
 </main>
 
-<footer class="shell">
-  <span>F75 PRO Control Deck / Tamasrazim</span>
-  <span><a href="../../projects/">Project index</a> · <a href="https://github.com/not-ayan/openaula">OpenAula research reference</a></span>
-</footer>
-
-<script>
-(() => {
-  "use strict";
-  const VID=0x258A, PID=0x010C, REPORT_ID=0x06;
-  let device=null,lastRaw=null,lastConfig=null,selectedIndex=null;
-  const OFFLINE_DEMO=true;
-  const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-  const state={rgb:"#6d8dff",brightness:7,speed:2,effect:1,mappings:JSON.parse(localStorage.getItem("f75pro:mappings")||"{}")};
-
-  const log=(msg, target="#consoleA")=>{
-    const el=$(target); if(!el) return;
-    const stamp=new Date().toLocaleTimeString();
-    el.textContent += "\\n[" + stamp + "] " + msg;
-    el.scrollTop=el.scrollHeight;
-  };
-
-  const hex=(arr)=>[...arr].map(x=>x.toString(16).padStart(2,"0")).join(" ");
-  const u8=(n)=>new Uint8Array(n);
-  const setText=(sel,v)=>{const e=$(sel);if(e)e.textContent=v};
-
-  const keyRows=[
-    [
-      ["Esc",0,"fn",1],["1",7,"",1],["2",8,"",1],["3",9,"",1],["4",10,"",1],["5",11,"",1],["6",12,"",1],["7",13,"",1],["8",14,"",1],["9",15,"",1],["0",16,"",1],["-",17,"",1],["=",18,"",1],["Backspace",19,"mod",2],["Home",80,"nav",1]
-    ],
-    [
-      ["Tab",2,"mod",1],["Q",20,"",1],["W",21,"",1],["E",22,"",1],["R",23,"",1],["T",24,"",1],["Y",25,"",1],["U",26,"",1],["I",27,"",1],["O",28,"",1],["P",29,"",1],["[",30,"",1],["]",31,"",1],["\\\\",32,"",1],["PgUp",86,"nav",1]
-    ],
-    [
-      ["Caps",3,"mod",1],["A",33,"",1],["S",34,"",1],["D",35,"",1],["F",36,"",1],["G",37,"",1],["H",38,"",1],["J",39,"",1],["K",40,"",1],["L",41,"",1],[";",42,"",1],["'",43,"",1],["Enter",81,"nav",2],["PgDn",87,"nav",1]
-    ],
-    [
-      ["Shift",4,"mod",2],["Z",44,"",1],["X",45,"",1],["C",46,"",1],["V",47,"",1],["B",48,"",1],["N",49,"",1],["M",50,"",1],[",",51,"",1],[".",52,"",1],["/",53,"",1],["Shift",70,"mod",2],["Up",82,"nav",1],["Del",85,"nav",1]
-    ],
-    [
-      ["Ctrl",5,"mod",1],["Win",11,"mod",1],["Alt",17,"mod",1],["Space",35,"",6],["Alt",59,"mod",1],["Fn",53,"fn",1],["Ctrl",71,"mod",1],["Left",77,"nav",1],["Down",83,"nav",1],["Right",89,"nav",1]
-    ]
-  ];
-  const kb=$("#keyboard");
-  keyRows.forEach(row=>row.forEach(([label,index,cls,span])=>{
-    const b=document.createElement("button"); b.className="key "+cls+(span>1?" w"+Math.min(span,4):""); b.textContent=label; b.dataset.index=index;
-    b.addEventListener("click",()=>selectKey(index,label,b)); kb.appendChild(b);
-  }));
-  function selectKey(index,label,el){
-    selectedIndex=index; $$(".key.selected").forEach(x=>x.classList.remove("selected")); el.classList.add("selected");
-    setText("#selectedKeyBadge","index "+index); setText("#selectedLabel",label+" · matrix "+index); $("#selectedKey").value=label+" (#"+index+")";
-    $("#outputSelect").value=state.mappings[index]||"";
-    setText("#mapStatus","Selected "+label+" (#"+index+"). Current staged output: "+(state.mappings[index]||"unassigned"));
-  }
-
-  const effects=[
-    [0,"Off"],[1,"Static"],[2,"Breathing"],[3,"Wave"],[4,"Spectrum"],[5,"Ripple"],[6,"Reactive"],[7,"Starlight"],[8,"Rain"],[9,"Snake"],[10,"Marquee"],[11,"Aurora"],[12,"Laser"],[13,"Firework"],[14,"Gradient"],[15,"Rainbow Wave"],[16,"Prism"],[17,"Cycle"],[18,"Tidal"],[21,"Custom"]
-  ];
-  const effectGrid=$("#effectGrid");
-  effects.forEach(([id,name])=>{
-    const b=document.createElement("button"); b.className="effect"+(id===state.effect?" selected":""); b.textContent=id+" · "+name; b.dataset.effect=id;
-    b.onclick=()=>{state.effect=id;$$(".effect").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");renderRgb();}; effectGrid.appendChild(b);
-  });
-
-  function renderRgb(){
-    setText("#rgbHex",state.rgb.toUpperCase());
-    setText("#brightnessOut",state.brightness); setText("#speedOut",state.speed);
-    $("#effectCaption").textContent=(effects.find(x=>x[0]===state.effect)||[, "custom"])[1]+" · "+state.rgb.toUpperCase();
-    const stage=$("#rgbStage"), color=state.rgb;
-    stage.style.setProperty("--rgb",color+"99");
-    const led=$("#ledPreview");led.innerHTML="";
-    const n=75;
-    for(let i=0;i<n;i++){
-      const p=document.createElement("span"); p.style.width="20px";p.style.height="12px";p.style.borderRadius="3px";p.style.background=color;
-      p.style.opacity=String(Math.max(.15,state.brightness/9)*(0.45+0.55*((i%7)/6)));
-      p.style.boxShadow="0 0 12px "+color+"66";led.appendChild(p);
-    }
-  }
-  $("#rgbColor").addEventListener("input",e=>{state.rgb=e.target.value;renderRgb();});
-  $("#brightness").addEventListener("input",e=>{state.brightness=+e.target.value;renderRgb();});
-  $("#speed").addEventListener("input",e=>{state.speed=+e.target.value;renderRgb();});
-  $("#previewRgbBtn").onclick=renderRgb;
-
-  async function requestDevice(){
-    if(!("hid" in navigator)){alert("WebHID is unavailable in this browser.");return;}
-    try{
-      const list=await navigator.hid.requestDevice({filters:[{vendorId:VID,productId:PID}]});
-      if(!list.length)return;
-      await attach(list[0]);
-    }catch(e){log("connect failed: "+e.message)}
-  }
-  async function attach(d){
-    device=d;
-    window.__f75Device=device;
-    window.dispatchEvent(new CustomEvent("f75:device",{detail:device}));
-    if(!device.opened)await device.open();
-    $("#statusDot").classList.add("ok");setText("#statusText","Connected");
-    setText("#usbId",""+device.vendorId.toString(16).padStart(4,"0")+":"+device.productId.toString(16).padStart(4,"0"));
-    setText("#vendor","0x"+device.vendorId.toString(16).toUpperCase());setText("#product","0x"+device.productId.toString(16).toUpperCase());
-    setText("#productName",device.productName||"BY Tech / AULA family");
-    setText("#transport","WebHID / wired");
-    log("connected "+(device.productName||"AULA keyboard"));
-    navigator.hid.addEventListener("disconnect",onDisconnect,{once:true});
-  }
-  async function onDisconnect(){
-    device=null;
-    window.__f75Device=null;
-    window.dispatchEvent(new CustomEvent("f75:device",{detail:null}));
-    $("#statusDot").classList.add("ok");
-    setText("#statusText","LIVE DEMO · no keyboard");
-    setText("#usbId","258a:010c · simulated");
-    setText("#transport","Offline simulation");
-    setText("#modelId","AULA F75 Pro · virtual");
-    setText("#vendor","0x258A");
-    setText("#product","0x010C");
-    setText("#productName","AULA F75 Pro · Virtual Device");
-    log("real keyboard disconnected; returned to live simulation");
-  }
-  async function disconnect(){try{if(device&&device.opened)await device.close()}catch{}await onDisconnect();}
-
-  function buildProbe(cmd){
-    const a=u8(519);a[0]=cmd;a[1]=0;a[2]=0;a[3]=1;a[4]=0;a[5]=0;a[6]=cmd===0x84?0x80:0x00;return a;
-  }
-  function makeDemoReport(cmd){
-    const a=u8(519);
-    a[0]=REPORT_ID;a[1]=cmd;a[2]=1;a[3]=0;a[4]=1;a[5]=0;a[6]=128;
-    for(let i=7;i<519;i++)a[i]=(i*37+cmd*11)%256;
-    a[17]=0;
-    a[18]=state.effect;
-    a[26]=1;
-    a[36]=100;
-    for(let id=0;id<22;id++){const off=64+2*id;if(off+1<a.length){a[off]=state.brightness;a[off+1]=(state.speed&15)<<4;}}
-    return a;
-  }
-  async function transact(cmd){
-    if(!device){
-      if(!OFFLINE_DEMO)throw new Error("Connect a keyboard first.");
-      await new Promise(r=>setTimeout(r,70));
-      const bytes=makeDemoReport(cmd);
-      lastRaw=bytes;
-      log("offline simulation: generated deterministic "+bytes.length+"-byte response for 0x"+cmd.toString(16));
-      return bytes;
-    }
-    const req=buildProbe(cmd);
-    await device.sendFeatureReport(REPORT_ID,req);
-    await new Promise(r=>setTimeout(r,45));
-    const data=await device.receiveFeatureReport(REPORT_ID);
-    const bytes=new Uint8Array(data.buffer);
-    lastRaw=bytes;
-    return bytes;
-  }
-  async function probe(){
-    try{
-      const bytes=await transact(0x82);
-      setText("#modelId","reply "+bytes.length+" B");
-      log("identity reply: "+hex(bytes));
-      $("#consoleB").textContent="0x82 identity response\\n"+hex(bytes);
-    }catch(e){setText("#modelId","probe failed");log("probe failed: "+e.message)}
-  }
-  async function readConfig(){
-    try{
-      const bytes=await transact(0x84);
-      lastConfig=bytes;
-      setText("#modelId",$("#modelId").textContent==="not run"?"config read":"identity + config");
-      $("#consoleB").textContent="0x84 config response ("+bytes.length+" B)\\n"+hex(bytes);
-      log("config read: "+bytes.length+" bytes");
-      analyzeConfig();
-    }catch(e){log("config read failed: "+e.message)}
-  }
-
-  function analyzeConfig(){
-    if(!lastConfig){setText("#decoded","Nothing decoded.");return;}
-    const b=lastConfig;
-    const start=Math.max(0,b.length-128);
-    const payload=b.slice(start,start+128);
-    const effect=payload[18], custom=payload[17], side=payload[26], battery=payload[36];
-    const table=[];
-    for(let id=0;id<22;id++){const off=64+2*id;if(off+1<payload.length)table.push("effect "+id+": brightness="+payload[off]+" params=0x"+payload[off+1].toString(16).padStart(2,"0"))}
-    $("#decoded").textContent=
-      "payload start: "+start+"\\n"+
-      "effect: "+effect+"\\n"+
-      "custom flag: "+custom+"\\n"+
-      "side light: "+side+"\\n"+
-      "battery byte: "+battery+"\\n\\n"+table.join("\\n");
-  }
-
-  $("#connectBtn").onclick=requestDevice;
-  $("#disconnectBtn").onclick=disconnect;
-  $("#probeBtn").onclick=probe;
-  $("#readConfigBtn").onclick=readConfig;
-  $("#decodeBtn").onclick=analyzeConfig;
-  $("#clearConsoleBtn").onclick=()=>{$("#consoleB").textContent="Cleared.";};
-  $("#rawReadBtn").onclick=async()=>{const c=parseInt($("#commandSelect").value,16);try{const b=await transact(c);$("#consoleB").textContent="command 0x"+c.toString(16)+"\\n"+hex(b)}catch(e){$("#consoleB").textContent=e.message}};
-  $("#saveConfigBtn").onclick=()=>{
-    if(!lastRaw&&!lastConfig){alert("Run an identity or config probe first.");return;}
-    const payload={createdAt:new Date().toISOString(),device:device?{vendorId:device.vendorId,productId:device.productId,productName:device.productName}:null,raw:lastRaw?[...lastRaw]:null,config:lastConfig?[...lastConfig]:null};
-    download("f75-pro-session-"+Date.now()+".json",JSON.stringify(payload,null,2),"application/json");log("snapshot exported");
-  };
-  $("#backupBtn").onclick=()=>$("#saveConfigBtn").click();
-
-  $("#stageMapBtn").onclick=()=>{
-    if(selectedIndex===null){alert("Select a key first.");return;}
-    state.mappings[selectedIndex]=$("#outputSelect").value;
-    localStorage.setItem("f75pro:mappings",JSON.stringify(state.mappings));
-    setText("#mapStatus","Staged matrix "+selectedIndex+" → "+(state.mappings[selectedIndex]||"unassigned")+"\\nSaved locally in this browser.");
-  };
-  $("#exportMapBtn").onclick=()=>{
-    download("f75-pro-keymap.json",JSON.stringify({format:"f75-pro-control-deck/1",mappings:state.mappings},null,2),"application/json");
-  };
-  $("#resetMapBtn").onclick=()=>{
-    if(!confirm("Reset the local mapping design?"))return;
-    state.mappings={};localStorage.removeItem("f75pro:mappings");setText("#mapStatus","Local mapping cleared.");
-  };
-
-  $("#applyRgbBtn").onclick=async()=>{
-    if(!device){
-      localStorage.setItem("f75pro:demo-rgb",JSON.stringify({color:state.rgb,brightness:state.brightness,speed:state.speed,effect:state.effect}));
-      setText("#writeBadge","simulation write");
-      log("offline simulation: RGB state applied locally — no hardware connected.");
-      return;
-    }
-    if(!lastConfig){alert("Run Read config first so the tool has a backup.");return;}
-    const ok=confirm("This will send a persistent RGB configuration write to the connected keyboard. A raw config snapshot is already captured. Continue?");
-    if(!ok)return;
-    alert("Persistent hardware write remains gated until the exact F75 Pro revision is verified. No bytes were written.");
-    log("persistent RGB write remained locked; no bytes were written.");
-  };
-
-  function download(name,text,mime){
-    const blob=new Blob([text],{type:mime}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);
-  }
-
-  $$(".navBtn").forEach(b=>b.onclick=()=>showView(b.dataset.view));
-  $$(".tab").forEach(b=>b.onclick=()=>showView(b.dataset.tab));
-  function showView(id){
-    $$(".view").forEach(v=>v.classList.toggle("active",v.id===id));
-    $$(".tab").forEach(v=>v.classList.toggle("active",v.dataset.tab===id));
-    $$(".navBtn").forEach(v=>v.classList.toggle("active",v.dataset.view===id));
-  }
-
-  setText("#browserSupport","WebHID: "+("hid" in navigator?"available":"not available")+" · LIVE DEMO remains available even when WebHID is unavailable.");
-
-  // Silent reconnect: only use an already-authorized device. No permission prompt.
-  if ("hid" in navigator) {
-    navigator.hid.getDevices().then(list => {
-      const d = list.find(x => x.vendorId === VID && x.productId === PID);
-      if (d) return attach(d);
-    }).catch(() => {});
-  }
-  setText("#vendor","0x258A"); setText("#product","0x010C"); setText("#productName","AULA F75 Pro · Virtual Device");
-  renderRgb();
-  addEventListener("beforeunload",()=>{if(device&&device.opened)device.close()});
-})();
-</script>
-<script src="./virtual-enhancements.js"></script>
-<script src="./advanced-remap.js"></script>
-<script>
-if ("serviceWorker" in navigator) {
-  addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(() => {}));
-}
-</script>
+<footer class="shell"><span>F75 PRO Control Deck / Tamasrazim</span><span><a href="../../projects/">Project index</a> · local-first · WebHID optional</span></footer>
+<script src="./app.js"></script>
+<script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));</script>
 </body>
 </html>
