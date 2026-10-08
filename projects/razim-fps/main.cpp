@@ -640,6 +640,7 @@ int main(int argc,char** argv){
     float scanTimer=0,bobPhase=0;
     bool grounded=true,mouseCaptured=false,quit=false;
     Vector2 cursorRestore=GetMousePosition();
+    bool mouseSkipDelta=false;
     int settingsRow=0;
     float introElapsed=0.0f;
 
@@ -647,17 +648,16 @@ int main(int argc,char** argv){
         if(capture){
             if(!mouseCaptured){
                 cursorRestore=GetMousePosition();
-                SetMousePosition(GetScreenWidth()/2,GetScreenHeight()/2);
+                mouseSkipDelta=true;
                 DisableCursor();
+                SetMousePosition(GetScreenWidth()/2,GetScreenHeight()/2);
                 mouseCaptured=true;
             }
-        }else if(mouseCaptured){
-            mouseCaptured=false;
-            EnableCursor();
-            SetMousePosition((int)cursorRestore.x,(int)cursorRestore.y);
         }else{
             mouseCaptured=false;
+            mouseSkipDelta=false;
             EnableCursor();
+            SetMousePosition((int)cursorRestore.x,(int)cursorRestore.y);
         }
     };
 
@@ -809,10 +809,13 @@ int main(int argc,char** argv){
 
             if(mouseCaptured){
                 Vector2 md=GetMouseDelta();
+                if(mouseSkipDelta){
+                    md={0,0};
+                    mouseSkipDelta=false;
+                }
                 yaw-=md.x*save.settings.sensitivity;
                 pitch+=(save.settings.invertY?md.y:-md.y)*save.settings.sensitivity;
                 pitch=Clamp(pitch,-1.48f,1.48f);
-                SetMousePosition(GetScreenWidth()/2,GetScreenHeight()/2);
             }
 
             Vector3 wish{};
