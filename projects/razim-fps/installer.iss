@@ -1,6 +1,6 @@
 ; NEON VAULT — custom Windows installer / uninstaller
 #define AppName "NEON VAULT"
-#define AppVersion "4.1"
+#define AppVersion "4.2"
 #define AppPublisher "Tamasrazim"
 #define AppExeName "neon_vault.exe"
 #define UpdaterExeName "neon_vault_updater.exe"
@@ -51,6 +51,8 @@ var
   VaultStatus: TNewStaticText;
   UnVaultBrand: TNewStaticText;
   UnVaultTag: TNewStaticText;
+  UnVaultPanel: TBevel;
+  UnVaultLine: TBevel;
 
 procedure AddInstallChrome;
 begin
@@ -149,6 +151,14 @@ end;
 
 procedure AddUninstallChrome;
 begin
+  UnVaultPanel := TBevel.Create(UninstallProgressForm);
+  UnVaultPanel.Parent := UninstallProgressForm;
+  UnVaultPanel.Left := ScaleX(18);
+  UnVaultPanel.Top := ScaleY(16);
+  UnVaultPanel.Width := ScaleX(520);
+  UnVaultPanel.Height := ScaleY(78);
+  UnVaultPanel.Shape := bsBox;
+
   UnVaultBrand := TNewStaticText.Create(UninstallProgressForm);
   UnVaultBrand.Parent := UninstallProgressForm;
   UnVaultBrand.Left := ScaleX(30);
@@ -169,6 +179,14 @@ begin
   UnVaultTag.Font.Size := 9;
   UnVaultTag.Font.Color := clSilver;
   UnVaultTag.Transparent := True;
+
+  UnVaultLine := TBevel.Create(UninstallProgressForm);
+  UnVaultLine.Parent := UninstallProgressForm;
+  UnVaultLine.Left := ScaleX(32);
+  UnVaultLine.Top := ScaleY(75);
+  UnVaultLine.Width := ScaleX(490);
+  UnVaultLine.Height := ScaleY(1);
+  UnVaultLine.Shape := bsTopLine;
 end;
 
 function InitializeUninstall(): Boolean;
@@ -177,6 +195,7 @@ begin
   UninstallProgressForm.Color := clBlack;
   UninstallProgressForm.StatusLabel.Font.Color := clAqua;
   UninstallProgressForm.StatusLabel.Caption := 'EVACUATING VAULT FILES...';
+  UninstallProgressForm.ProgressBar.Color := clAqua;
   UninstallProgressForm.PageNameLabel.Font.Color := clAqua;
   UninstallProgressForm.PageDescriptionLabel.Font.Color := clWhite;
   AddUninstallChrome;
