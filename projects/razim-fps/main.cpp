@@ -651,7 +651,7 @@ static void SetDisplayMode(Settings& s,int mode){
     }
 }
 
-static bool Overlap2D(Vector3 a,Vector3 as,Vector3 b,Vector3 bs,float margin=0.0f){
+static bool Overlap2D(Vector3 a,Vector3 as,Vector3 b,Vector3 bs,float margin){
     return fabsf(a.x-b.x)<(as.x+bs.x)*0.5f-margin &&
            fabsf(a.z-b.z)<(as.z+bs.z)*0.5f-margin;
 }
