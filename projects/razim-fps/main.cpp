@@ -20,7 +20,7 @@ extern void EnsureWorkingDirectory();
 
 namespace {
 constexpr int LEVELS=100;
-constexpr int TEXTURES=32;
+constexpr int TEXTURES=28;
 constexpr float WORLD=29.0f;
 constexpr float PLAYER_R=0.34f;
 constexpr float EYE_Y=1.52f;
@@ -223,7 +223,7 @@ void Repair(Level& l){
     }
 }
 Texture2D LoadTex(const std::string& f,Color fallback){
-    if(FileExists(f.c_str())){Texture2D t=LoadTexture(f.c_str());if(t.id){SetTextureFilter(t,TEXTURE_FILTER_BILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;}}
+    if(FileExists(f.c_str())){Texture2D t=LoadTexture(f.c_str());if(t.id){GenTextureMipmaps(&t);SetTextureFilter(t,TEXTURE_FILTER_TRILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;}}
     Image im=GenImageColor(64,64,fallback);Texture2D t=LoadTextureFromImage(im);UnloadImage(im);if(t.id){SetTextureFilter(t,TEXTURE_FILTER_BILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);}return t;
 }
 Assets LoadAssets(bool safe){
