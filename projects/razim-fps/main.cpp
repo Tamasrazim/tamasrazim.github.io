@@ -1,3 +1,4 @@
+// STABILITY TEST MARKER
 
 #include "raylib.h"
 #include "raymath.h"
