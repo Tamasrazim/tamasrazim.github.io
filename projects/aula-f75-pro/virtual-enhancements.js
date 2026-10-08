@@ -117,55 +117,35 @@
     renderLive();
   });
 
-  const usageToMatrix = {
-    0x04:9,0x05:34,0x06:22,0x07:21,0x08:20,0x09:27,0x0a:33,0x0b:39,0x0c:50,0x0d:45,0x0e:51,0x0f:57,
-    0x10:46,0x11:40,0x12:56,0x13:62,0x14:8,0x15:26,0x16:15,0x17:32,0x18:44,0x19:28,0x1a:14,0x1b:16,0x1c:38,0x1d:10,
-    0x1e:7,0x1f:13,0x20:19,0x21:25,0x22:31,0x23:37,0x24:43,0x25:49,0x26:55,0x27:61,
-    0x28:81,0x29:0,0x2a:79,0x2b:2,0x2c:35,0x2d:67,0x2e:73,0x2f:68,0x30:74,0x31:80,0x33:63,0x34:69,0x35:1,0x36:52,0x37:58,0x38:64,
-    0x3a:12,0x3b:18,0x3c:24,0x3d:30,0x3e:36,0x3f:42,0x40:48,0x41:54,0x42:60,0x43:66,0x44:72,0x45:78,
-    0x46:84,0x4b:86,0x4c:85,0x4e:87,0x4f:89,0x50:77,0x51:83,0x52:82,
-    0xff:53
-  };
-  const modToMatrix = [5,4,17,11,71,70,59,undefined];
-
-  let hidAttached = null;
-  let hidHeld = new Set();
+  const hidReportState = { lastId: null, lastHex: "", packetCount: 0 };
 
   const consumeHidReport = event => {
     const data = new Uint8Array(event.data.buffer, event.data.byteOffset, event.data.byteLength);
     if (!data.length) return;
-    const next = new Set();
-    if (data.length >= 1) {
-      for (let bit = 0; bit < 8; bit++) if (data[0] & (1 << bit)) {
-        const idx = modToMatrix[bit];
-        if (idx !== undefined) next.add(idx);
-      }
-    }
-    const start = data.length >= 8 ? 2 : 0;
-    for (let i = start; i < Math.min(data.length, start + 6); i++) {
-      const usage = data[i];
-      const idx = usageToMatrix[usage];
-      if (idx !== undefined) next.add(idx);
-    }
 
-    for (const idx of next) {
-      if (!hidHeld.has(idx)) {
-        const key = keyboard.querySelector('[data-matrix="' + idx + '"]')?.querySelector(".lab")?.textContent || ("Matrix #" + idx);
-        liveHeld.add("HID#" + idx);
-        liveHistory.unshift(key);
-        if (liveHistory.length > 8) liveHistory.length = 8;
-        flash(idx, 280);
-        sourceEl.textContent = "WebHID input report";
-        currentEl.textContent = [...liveHeld].map(x => x.startsWith("HID#") ? x.replace("HID#","Matrix #") : human(x)).join(" + ");
-        metaEl.textContent = "report 0x" + Number(event.reportId).toString(16).padStart(2,"0") + " · " + [...data].map(x => x.toString(16).padStart(2,"0")).join(" ");
-      }
+    hidReportState.lastId = Number(event.reportId);
+    hidReportState.lastHex = [...data].map(x => x.toString(16).padStart(2,"0")).join(" ");
+    hidReportState.packetCount++;
+
+    // Keep hardware highlighting conservative: the OS key event path is the
+    // authoritative physical-key visualizer. WebHID reports are shown here as
+    // an observer because this keyboard's firmware report format is not the
+    // standard boot-keyboard report.
+    sourceEl.textContent = "WebHID input report + OS events";
+    metaEl.textContent =
+      "report 0x" + hidReportState.lastId.toString(16).padStart(2,"0") +
+      " · " + hidReportState.lastHex +
+      " · packet " + hidReportState.packetCount;
+
+    if (!liveHeld.size) {
+      currentEl.textContent = "HID activity detected";
+      setTimeout(() => {
+        if (!liveHeld.size) currentEl.textContent = "No keys held";
+      }, 260);
     }
-    for (const idx of hidHeld) if (!next.has(idx)) liveHeld.delete("HID#" + idx);
-    hidHeld = next;
-    heldEl.textContent = liveHeld.size + " held";
-    historyEl.innerHTML = liveHistory.map(x => '<span class="f75-live-chip">' + x + '</span>').join("");
   };
 
+  let hidAttached = null;
   const attachHidObserver = () => {
     const d = window.__f75Device;
     if (!d || d === hidAttached) return;
@@ -177,60 +157,6 @@
   };
   setInterval(attachHidObserver, 300);
   attachHidObserver();
-
-  const selected = (window.__f75Selected = {});
-  const flash = (index, duration = 150) => {
-    const el = keyboard.querySelector('[data-matrix="' + index + '"]');
-    if (!el) return;
-    el.classList.add("is-live");
-    clearTimeout(el.__t);
-    el.__t = setTimeout(() => el.classList.remove("is-live"), duration);
-  };
-
-  const select = (index, label, el) => {
-    document.querySelectorAll("#keyboard [data-matrix].selected").forEach(x => x.classList.remove("selected"));
-    el.classList.add("selected");
-    selected.index = index;
-    const badge = document.querySelector("#selectedKeyBadge");
-    const chosen = document.querySelector("#selectedLabel");
-    const input = document.querySelector("#selectedKey");
-    if (badge) badge.textContent = "index " + index;
-    if (chosen) chosen.textContent = label + " · matrix " + index;
-    if (input) input.value = label + " (#" + index + ")";
-  };
-
-  rows.forEach(row => {
-    const wrap = document.createElement("div");
-    wrap.className = "f75-enh-row";
-
-    row.forEach(item => {
-      const [label,index,width,kind] = item;
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "f75-enh-key " + (kind === "knob" ? "f75-enh-knob" : "");
-      b.style.width = (width * 50 + Math.max(0,width - 1) * 6) + "px";
-      b.dataset.matrix = String(index);
-      b.innerHTML = '<span class="lab"></span><span class="idx">#' + index + '</span>';
-      b.querySelector(".lab").textContent = label;
-      b.addEventListener("click", () => select(index,label,b));
-      wrap.appendChild(b);
-    });
-
-    keyboard.appendChild(wrap);
-  });
-
-  const codeMap = {
-    KeyA:9,KeyB:34,KeyC:22,KeyD:21,KeyE:20,KeyF:27,KeyG:33,KeyH:39,KeyI:50,KeyJ:45,
-    KeyK:51,KeyL:57,KeyM:46,KeyN:40,KeyO:56,KeyP:62,KeyQ:8,KeyR:26,KeyS:15,KeyT:32,
-    KeyU:44,KeyV:28,KeyW:14,KeyX:16,KeyY:38,KeyZ:10,
-    Digit1:7,Digit2:13,Digit3:19,Digit4:25,Digit5:31,Digit6:37,Digit7:43,Digit8:49,Digit9:55,Digit0:61,
-    Enter:81,Escape:0,Backspace:79,Tab:2,Space:35,Minus:67,Equal:73,BracketLeft:68,BracketRight:74,
-    Backslash:80,Semicolon:63,Quote:69,Comma:52,Period:58,Slash:64,CapsLock:3,
-    F1:12,F2:18,F3:24,F4:30,F5:36,F6:42,F7:48,F8:54,F9:60,F10:66,F11:72,F12:78,
-    PrintScreen:84,Delete:85,PageUp:86,PageDown:87,ArrowLeft:77,ArrowDown:83,ArrowUp:82,ArrowRight:89,
-    ShiftLeft:4,ControlLeft:5,AltLeft:17,MetaLeft:11,ShiftRight:70,ControlRight:71,AltRight:59
-  };
-
 
   const ledHost = document.querySelector("#ledPreview");
   if (ledHost) {
