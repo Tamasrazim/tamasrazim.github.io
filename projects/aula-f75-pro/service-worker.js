@@ -1,8 +1,9 @@
-const CACHE_NAME="f75-pro-control-deck-v3";
+const CACHE_NAME="f75-pro-control-deck-v4";
 const CORE=[
   "./",
   "./index.html",
   "./app.js",
+  "./wireless.js",
   "./manifest.webmanifest",
   "./icon.svg",
   "../../aula-f75-pro-wireless-mechanical-keyboard-10-700x700.jpg.webp"
