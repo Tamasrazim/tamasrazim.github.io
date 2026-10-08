@@ -35,7 +35,7 @@ $bytes = ($textures | Measure-Object Length -Sum).Sum + ($audio | Measure-Object
     RuntimeTextures = $textures.Count
     AudioAssets = $audio.Count
     AssetBytes = $bytes
-    AssetMBDecimal = [math]::Round($bytes / 1MB, 2)
-    TargetReached = ($bytes -ge 25MB)
+    AssetMBDecimal = [math]::Round($bytes / 1000000.0, 2)
+    TargetReached = ($bytes -ge 25000000)
     Status = "PASS"
 } | Format-Table -AutoSize
