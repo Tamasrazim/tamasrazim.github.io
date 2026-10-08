@@ -39,7 +39,10 @@ Those projects are references for protocol behavior and engineering ideas, not c
 
 ## Files
 
-- `index.html` — complete self-contained application
+- `index.html` — application shell, WebHID transport, offline simulation and diagnostics
+- `virtual-enhancements.js` — F75 physical layout, live press view, RGB animation and mapping overlays
+- `advanced-remap.js` — add/edit/delete keymap editor, shortcuts, presets, import/export and reset controls
+- `service-worker.js` — local offline cache
 - `manifest.webmanifest` — install metadata
 - `icon.svg` — project icon
 
@@ -50,3 +53,7 @@ Those projects are references for protocol behavior and engineering ideas, not c
 ## Keymap editor
 
 The Key Lab includes an offline advanced editor with single-key selection, category filtering, usage search, shortcut/combo building, preset shortcuts, add/edit/delete mapping actions, selected-key reset, full reset, and local Win/Alt swapping. All edits are stored locally until a hardware write path is explicitly enabled.
+
+## Hardware reference asset
+
+The Deck also links the repository's F75 Pro reference image `aula-f75-pro-wireless-mechanical-keyboard-10-700x700.jpg.webp` so the physical reference and virtual matrix can be viewed together.
