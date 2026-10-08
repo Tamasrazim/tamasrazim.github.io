@@ -26,7 +26,7 @@
     ".f75-enh-key{height:48px;flex:0 0 auto;border:1px solid #2d2d2d;background:linear-gradient(145deg,#171717,#0a0a0a);border-radius:8px;color:#c8c8c2;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;padding:7px;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;font:10px ui-monospace,SFMono-Regular,Consolas,monospace}" +
     ".f75-enh-key:hover{transform:translateY(-2px);border-color:#5d5d5d}" +
     ".f75-enh-key.is-live{border-color:#d9ff57;box-shadow:0 0 18px #d9ff5730;color:#efffc7}" +
-    ".f75-enh-key .lab{font-weight:800}.f75-enh-key .idx{font-size:7px;color:#575752}" +
+    ".f75-enh-key .lab{font-weight:800}.f75-enh-key .idx{font-size:7px;color:#575752}.f75-enh-key .map{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#d9ff57aa;font-size:7px}" +
     ".f75-enh-knob{border-radius:50%;align-items:center;justify-content:center;padding:0;color:#ff9dd4}" +
     ".f75-live-wrap{border:1px solid #2d2d2d;border-radius:11px;background:#080808;margin:0 0 14px;padding:14px}" +
     ".f75-live-head{display:flex;align-items:center;justify-content:space-between;gap:12px;font:10px ui-monospace,SFMono-Regular,Consolas,monospace;color:#777}" +
@@ -82,7 +82,10 @@
 
   const noteLive = (code, matrix, source) => {
     sourceEl.textContent = source;
-    metaEl.textContent = human(code) + (matrix == null ? "" : " · matrix #" + matrix);
+    const map = matrix == null ? "" : readMappings()[matrix];
+    metaEl.textContent = human(code) +
+      (matrix == null ? "" : " · matrix #" + matrix) +
+      (map ? " · mapped → " + map : "");
   };
 
   const markDown = (code, matrix, source) => {
@@ -157,6 +160,11 @@
   };
   setInterval(attachHidObserver, 300);
   attachHidObserver();
+
+  window.addEventListener("storage", e => {
+    if (e.key === "f75pro:mappings") updateMappingBadges();
+  });
+  window.addEventListener("f75:mappings-changed", updateMappingBadges);
 
   const ledHost = document.querySelector("#ledPreview");
   if (ledHost) {
