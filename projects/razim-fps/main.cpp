@@ -1,6 +1,7 @@
 
 #include "raylib.h"
 #include "raymath.h"
+#include "rlgl.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -427,11 +428,9 @@ static void DrawCinematicIntro(float t,const Assets& a){
         DrawSphere(q,0.06f+0.03f*(i%3),Color{100,225,255,170});
     }
     if(a.crystal.id){
-        float spin=t*35.0f;
         Vector3 cp=V(0,2.15f,-7.0f);
-        DrawCylinderEx(V(cp.x,cp.y-0.55f,cp.z),V(cp.x,cp.y,cp.z),0.36f,0.05f,6,Color{55,190,245,255});
-        DrawCylinderEx(V(cp.x,cp.y,cp.z),V(cp.x,cp.y+0.55f,cp.z),0.05f,0.36f,6,Color{165,245,255,255});
-        (void)spin;
+        DrawCrystal3D(cp,0.38f,1.10f,t*0.95f,Color{75,220,255,255});
+        DrawSphere(cp,0.055f,Color{230,255,255,235});
     }
     EndMode3D();
 
@@ -503,18 +502,100 @@ static void Crosshair(int style,Color c){
 static Texture2D Tex(const char* file,Color fallback,bool allowFile=true){
     if(allowFile&&FileExists(file)){
         Texture2D t=LoadTexture(file);
-        if(t.id){SetTextureFilter(t,TEXTURE_FILTER_BILINEAR);return t;}
+        if(t.id){
+            SetTextureFilter(t,TEXTURE_FILTER_BILINEAR);
+            SetTextureWrap(t,TEXTURE_WRAP_REPEAT);
+            return t;
+        }
     }
     Image im=GenImageColor(64,64,fallback);
     Texture2D t=LoadTextureFromImage(im);
     UnloadImage(im);
+    SetTextureFilter(t,TEXTURE_FILTER_BILINEAR);
+    SetTextureWrap(t,TEXTURE_WRAP_REPEAT);
     return t;
 }
 
-static Model MakeTexturedCube(Texture2D tex){
-    Model m=LoadModelFromMesh(GenMeshCube(1,1,1));
-    if(m.materialCount>0)SetMaterialTexture(&m.materials[0],MATERIAL_MAP_DIFFUSE,tex);
-    return m;
+static void DrawTexturedBox(Texture2D tex,Vector3 p,Vector3 s,Color tint,float tile=2.5f){
+    if(!tex.id){
+        DrawCube(p,s.x,s.y,s.z,tint);
+        return;
+    }
+    const float hx=s.x*0.5f,hy=s.y*0.5f,hz=s.z*0.5f;
+    const float ux=s.x/tile,uy=s.y/tile,uz=s.z/tile;
+    const float x0=p.x-hx,x1=p.x+hx,y0=p.y-hy,y1=p.y+hy,z0=p.z-hz,z1=p.z+hz;
+    rlSetTexture(tex.id);
+    rlBegin(RL_QUADS);
+    rlColor4ub(tint.r,tint.g,tint.b,tint.a);
+
+    rlNormal3f(0,0,1);
+    rlTexCoord2f(0,0); rlVertex3f(x0,y0,z1);
+    rlTexCoord2f(ux,0); rlVertex3f(x1,y0,z1);
+    rlTexCoord2f(ux,uy); rlVertex3f(x1,y1,z1);
+    rlTexCoord2f(0,uy); rlVertex3f(x0,y1,z1);
+
+    rlNormal3f(0,0,-1);
+    rlTexCoord2f(0,0); rlVertex3f(x1,y0,z0);
+    rlTexCoord2f(uz,0); rlVertex3f(x0,y0,z0);
+    rlTexCoord2f(uz,uy); rlVertex3f(x0,y1,z0);
+    rlTexCoord2f(0,uy); rlVertex3f(x1,y1,z0);
+
+    rlNormal3f(-1,0,0);
+    rlTexCoord2f(0,0); rlVertex3f(x0,y0,z0);
+    rlTexCoord2f(uz,0); rlVertex3f(x0,y0,z1);
+    rlTexCoord2f(uz,uy); rlVertex3f(x0,y1,z1);
+    rlTexCoord2f(0,uy); rlVertex3f(x0,y1,z0);
+
+    rlNormal3f(1,0,0);
+    rlTexCoord2f(0,0); rlVertex3f(x1,y0,z1);
+    rlTexCoord2f(uz,0); rlVertex3f(x1,y0,z0);
+    rlTexCoord2f(uz,uy); rlVertex3f(x1,y1,z0);
+    rlTexCoord2f(0,uy); rlVertex3f(x1,y1,z1);
+
+    rlNormal3f(0,1,0);
+    rlTexCoord2f(0,0); rlVertex3f(x0,y1,z1);
+    rlTexCoord2f(ux,0); rlVertex3f(x1,y1,z1);
+    rlTexCoord2f(ux,uz); rlVertex3f(x1,y1,z0);
+    rlTexCoord2f(0,uz); rlVertex3f(x0,y1,z0);
+
+    rlNormal3f(0,-1,0);
+    rlTexCoord2f(0,0); rlVertex3f(x0,y0,z0);
+    rlTexCoord2f(ux,0); rlVertex3f(x1,y0,z0);
+    rlTexCoord2f(ux,uz); rlVertex3f(x1,y0,z1);
+    rlTexCoord2f(0,uz); rlVertex3f(x0,y0,z1);
+
+    rlEnd();
+    rlSetTexture(0);
+}
+
+static void DrawCrystal3D(Vector3 c,float radius,float height,float rotation,Color body){
+    constexpr int sides=8;
+    const float half=height*0.5f;
+    const Color edge=Color{230,255,255,210};
+    rlBegin(RL_TRIANGLES);
+    for(int i=0;i<sides;i++){
+        const float a0=rotation+TAU*float(i)/float(sides);
+        const float a1=rotation+TAU*float(i+1)/float(sides);
+        const Vector3 p0=V(c.x+cosf(a0)*radius,c.y,c.z+sinf(a0)*radius);
+        const Vector3 p1=V(c.x+cosf(a1)*radius,c.y,c.z+sinf(a1)*radius);
+        rlColor4ub(body.r,body.g,body.b,body.a);
+        rlVertex3f(c.x,c.y+half,c.z); rlVertex3f(p0.x,p0.y,p0.z); rlVertex3f(p1.x,p1.y,p1.z);
+        rlColor4ub((unsigned char)std::min(255,int(body.r*0.72f)),(unsigned char)std::min(255,int(body.g*0.86f)),body.b,body.a);
+        rlVertex3f(c.x,c.y-half,c.z); rlVertex3f(p1.x,p1.y,p1.z); rlVertex3f(p0.x,p0.y,p0.z);
+    }
+    rlEnd();
+    rlBegin(RL_LINES);
+    rlColor4ub(edge.r,edge.g,edge.b,edge.a);
+    for(int i=0;i<sides;i++){
+        const float a0=rotation+TAU*float(i)/float(sides);
+        const float a1=rotation+TAU*float(i+1)/float(sides);
+        const Vector3 p0=V(c.x+cosf(a0)*radius,c.y,c.z+sinf(a0)*radius);
+        const Vector3 p1=V(c.x+cosf(a1)*radius,c.y,c.z+sinf(a1)*radius);
+        rlVertex3f(c.x,c.y+half,c.z); rlVertex3f(p0.x,p0.y,p0.z);
+        rlVertex3f(c.x,c.y-half,c.z); rlVertex3f(p0.x,p0.y,p0.z);
+        rlVertex3f(p0.x,p0.y,p0.z); rlVertex3f(p1.x,p1.y,p1.z);
+    }
+    rlEnd();
 }
 
 static Sound MakeThemeSound(){
@@ -1165,10 +1246,10 @@ int main(int argc,char** argv){
             cam.projection=CAMERA_PERSPECTIVE;
 
             BeginMode3D(cam);
-            DrawModelEx(assets.floorModel,V(0,-0.05f,0),V(0,1,0),0,V(58,0.1f,58),WHITE);
+            DrawTexturedBox(assets.floor,V(0,-0.05f,0),V(58,0.1f,58),WHITE,2.25f);
             for(const auto& w:level.walls){
-                Model& m=w.material==2?assets.metalModel:assets.wallModel;
-                DrawModelEx(m,w.pos,V(0,1,0),0,w.size,WHITE);
+                Texture2D tex=w.material==2?assets.metal:assets.wall;
+                DrawTexturedBox(tex,w.pos,w.size,WHITE,w.material==2?2.0f:2.5f);
                 DrawCubeWires(w.pos,w.size.x,w.size.y,w.size.z,Color{72,105,128,255});
             }
             for(const auto& d:level.doors)if(!d.open){
@@ -1177,20 +1258,17 @@ int main(int argc,char** argv){
             }
             for(const auto& h:level.hazards){
                 Vector3 p=V(h.pos.x+sinf(float(GetTime())*1.8f+h.phase)*2.5f,h.pos.y,h.pos.z);
-                DrawModelEx(assets.hazardModel,p,V(0,1,0),0,h.size,WHITE);
+                DrawTexturedBox(assets.hazard,p,h.size,WHITE,1.75f);
                 DrawCubeWires(p,h.size.x,h.size.y,h.size.z,RED);
             }
             for(const auto& p:level.pickups)if(!p.taken){
                 float pb=0.20f*sinf(float(GetTime())*3+p.pos.x);
                 Vector3 q=V(p.pos.x,p.pos.y+pb,p.pos.z);
                 if(p.kind==0){
-                    Color crystal=Color{80,220,255,255};
-                    DrawCylinderEx(V(q.x,q.y-0.42f,q.z),V(q.x,q.y,q.z),0.30f,0.07f,6,crystal);
-                    DrawCylinderEx(V(q.x,q.y,q.z),V(q.x,q.y+0.42f,q.z),0.07f,0.30f,6,Color{150,245,255,255});
-                    DrawSphere(q,0.08f,Color{225,255,255,230});
+                    DrawCrystal3D(q,0.34f,0.90f,float(GetTime())*0.95f,Color{80,220,255,255});
+                    DrawSphere(q,0.055f,Color{230,255,255,235});
                 }else DrawSphere(q,p.kind==1?0.34f:0.28f,p.kind==1?GOLD:MAGENTA);
-                if(p.kind==0)DrawCylinderWires(V(q.x,q.y,q.z),0.31f,0.31f,0.84f,6,Color{210,255,255,180});
-                else DrawSphereWires(q,0.37f,8,8,RAYWHITE);
+                if(p.kind!=0)DrawSphereWires(q,0.37f,8,8,RAYWHITE);
                 if(scanTimer>0)DrawSphereWires(q,0.75f+0.25f*scanTimer,8,8,p.kind==0?SKYBLUE:(p.kind==1?GOLD:MAGENTA));
             }
             for(const auto& sw:level.switches){
