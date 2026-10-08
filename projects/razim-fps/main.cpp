@@ -201,9 +201,10 @@ void Menu(const Save&s,const Assets&a){
     float x=GetScreenWidth()/2.0f-190;BtnDraw({x,235,380,54},"ENTER VAULT",SKYBLUE);BtnDraw({x,301,380,54},"FLOOR SELECT",Theme(1));BtnDraw({x,367,380,54},"SETTINGS",Theme(2));BtnDraw({x,433,380,54},"CREDITS",Theme(4));BtnDraw({x,499,380,54},"QUIT",RED);
 }
 void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,float bob,const Settings&s,float scan,int got,int sw,int mem){
+    const bool exitOpen=l.objective==Objective::SURVIVE||ObjectiveDone(l,got,sw,mem);
     Camera3D c{};c.position=Vector3Add(player,V(0,0.62f+bob,0));c.target=Vector3Add(c.position,V(sinf(yaw)*cosf(pitch),sinf(pitch),cosf(yaw)*cosf(pitch)));c.up=V(0,1,0);c.fovy=s.fov;c.projection=CAMERA_PERSPECTIVE;BeginMode3D(c);
     Box(a.tex[l.theme%TEXTURES],V(0,-.05f,0),V(58,.1f,58),WHITE);
-    Box(a.tex[30],V(0,5.8f,0),V(58,.12f,58),Color{42,52,62,255});
+    Box(a.tex[25],V(0,5.8f,0),V(58,.12f,58),Color{42,52,62,255});
     for(size_t i=0;i<l.walls.size();i++){const auto&w=l.walls[i];Box(a.tex[(l.theme*3+int(i)+w.mat)%TEXTURES],w.p,w.s,WHITE);DrawCubeWires(w.p,w.s.x,w.s.y,w.s.z,Color{60,95,115,150});}
     for(int i=-4;i<=4;i++){
         float x=float(i)*6.0f;
@@ -215,12 +216,12 @@ void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,flo
         Box(a.tex[27],V(-27.9f,0.22f,z),V(0.22f,0.12f,3.4f),WHITE);
         Box(a.tex[27],V(27.9f,0.22f,z),V(0.22f,0.12f,3.4f),WHITE);
     }
-    for(int i=-5;i<=5;i++){\n        float z=float(i)*5.5f;\n        Box(a.tex[28],V(0,0.025f,z),V(0.14f,0.035f,3.0f),WHITE);\n    }\n    for(int i=0;i<4;i++){
+    for(int i=-5;i<=5;i++){\n        float z=float(i)*5.5f;\n        Box(a.tex[27],V(0,0.025f,z),V(0.14f,0.035f,3.0f),WHITE);\n    }\n    for(int i=0;i<4;i++){
         float a0=TAU*i/4.0f+float(GetTime())*0.25f;
         Vector3 p=V(l.exit.x+cosf(a0)*2.5f,0.28f,l.exit.z+sinf(a0)*2.5f);
         DrawCylinder(p,0.10f,0.16f,0.22f,8,exitOpen?GREEN:Theme(l.theme));
     }
-    bool exitOpen=l.objective==Objective::SURVIVE||ObjectiveDone(l,got,sw,mem);\n    Box(a.tex[29],V(l.exit.x,0.03f,l.exit.z),V(3.4f,0.04f,3.4f),Color{175,210,220,220});
+    Box(a.tex[24],V(l.exit.x,0.03f,l.exit.z),V(3.4f,0.04f,3.4f),Color{175,210,220,220});
     if(!exitOpen){Box(a.tex[18],V(l.exit.x,1.25f,l.exit.z),V(1.6f,2.5f,5.5f),WHITE);DrawCubeWires(V(l.exit.x,1.25f,l.exit.z),1.65f,2.55f,5.55f,ORANGE);}
     else {DrawCylinder(l.exit,1.6f,1.6f,.18f,32,GREEN);DrawCylinderWires(l.exit,1.8f,1.8f,.22f,32,RAYWHITE);}
     for(const auto&p:l.pickups)if(!p.taken){Vector3 q=V(p.p.x,p.p.y+.16f*sinf(float(GetTime())*2.7f+p.p.z),p.p.z);Color c2=p.kind==0?SKYBLUE:(p.kind==1?GOLD:MAGENTA);DrawSphere(q,p.kind==0?.34f:.30f,c2);DrawSphereWires(q,p.kind==0?.42f:.36f,10,10,RAYWHITE);if(scan>0)DrawSphereWires(q,.75f+scan*.2f,10,10,c2);}
