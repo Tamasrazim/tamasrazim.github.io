@@ -16,7 +16,7 @@ OutputDir=installer-output
 OutputBaseFilename=NEON-VAULT-Setup
 Compression=lzma2
 SolidCompression=yes
-WizardStyle=modern dynamic dark polar includetitlebar hidebevels
+WizardStyle=modern dynamic polar includetitlebar hidebevels
 WizardBackColor=#03080D
 WizardBackColorDynamicDark=#02050A
 WizardSizePercent=115,115
@@ -47,6 +47,8 @@ begin
   WizardForm.NextButton.Caption := 'CONTINUE';
   WizardForm.BackButton.Caption := 'BACK';
   WizardForm.CancelButton.Caption := 'CANCEL';
+  WizardForm.WelcomeLabel1.Caption := 'ENTER THE VAULT';
+  WizardForm.WelcomeLabel2.Caption := 'NEON VAULT • Native Windows 3D puzzle expedition';
 end;
 
 function InitializeUninstall(): Boolean;
