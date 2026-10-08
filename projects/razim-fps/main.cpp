@@ -297,13 +297,25 @@ static Level BuildLevel(int id){
 
     if(l.id==100){
         l.title="THE VAULT CORE";l.objective=Objective::COMBO;l.timeLimit=420;l.required=4;
-        l.switches.clear();l.pickups.clear();l.doors.clear();
-        for(int i=0;i<4;i++)l.switches.push_back({V(-18+i*12,0.9f,13),false});
-        for(int i=0;i<4;i++)l.pickups.push_back({V(-18+i*12,0.8f,4),false,0,0});
-        l.pickups.push_back({V(0,0.8f,-4),false,1,0});
-        for(int i=0;i<4;i++)l.pickups.push_back({V(-12+i*8,0.65f,-11),false,2,i+1});
+        l.switches.clear();l.pickups.clear();l.doors.clear();l.hazards.clear();
+        for(int i=0;i<4;i++){
+            Vector3 p=SafePoint(l,V(-18+i*12,0.9f,13),0.8f,900+i);
+            l.switches.push_back({p,false});
+        }
+        for(int i=0;i<4;i++){
+            Vector3 p=SafePoint(l,V(-18+i*12,0.8f,4),0.55f,920+i);
+            l.pickups.push_back({p,false,0,0});
+        }
+        l.pickups.push_back({SafePoint(l,V(0,0.8f,-4),0.55f,930),false,1,0});
+        for(int i=0;i<4;i++){
+            Vector3 p=SafePoint(l,V(-12+i*8,0.65f,-11),0.55f,940+i);
+            l.pickups.push_back({p,false,2,i+1});
+        }
         l.doors.push_back({V(0,1.25f,-21),V(1.5f,2.5f,7),false,2});
-        for(int i=0;i<10;i++)l.hazards.push_back({V(-18+float(i)*4,0.45f,-1+(i%2)*5),V(-18+float(i)*4,0.45f,-1+(i%2)*5),V(0.9f,0.8f,2.6f),float(i)});
+        for(int i=0;i<10;i++){
+            Vector3 p=SafePoint(l,V(-18+float(i)*4,0.45f,-1+(i%2)*5),0.75f,960+i);
+            l.hazards.push_back({p,p,V(0.9f,0.8f,2.6f),float(i)});
+        }
     }
     return l;
 }
@@ -549,7 +561,7 @@ static void DrawMenu(const SaveData& save){
     ButtonDraw({cx,367,380,56},"SETTINGS",ThemeColor(2));
     ButtonDraw({cx,433,380,56},"CREDITS",ThemeColor(4));
     ButtonDraw({cx,499,380,56},"QUIT",Color{255,100,100,255});
-    DrawText("v4.0 REBUILD",24,GetScreenHeight()-28,13,GRAY);
+    DrawText("GAMEPLAY REBUILD 142",24,GetScreenHeight()-28,13,GRAY);
 }
 
 static bool ObjectiveComplete(const Level& l,int collected,int switchesActive,int memoryStep){
