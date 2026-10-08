@@ -28,7 +28,6 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64
 UninstallDisplayIcon={app}\neon-vault.ico
 UninstallDisplayName=NEON VAULT — Uninstall
-UninstallDescription=Remove the NEON VAULT installation from this computer.
 SetupIconFile=neon-vault.ico
 Uninstallable=yes
 CloseApplications=yes
