@@ -12,6 +12,14 @@ if (!(Test-Path $installer)) { throw "installer.iss is missing." }
 if ($textures.Count -ne 30) { throw "Expected 30 runtime textures, found $($textures.Count)." }
 if ($audio.Count -lt 5) { throw "Expected at least 5 WAV assets, found $($audio.Count)." }
 
+foreach ($texture in $textures) {
+    $bmp = [System.IO.File]::ReadAllBytes($texture.FullName)
+    if ($bmp.Length -ne 750054) { throw "Texture size invalid: $($texture.Name) ($($bmp.Length) bytes)." }
+    if ([System.Text.Encoding]::ASCII.GetString($bmp, 0, 2) -ne "BM") { throw "Texture is not a BMP: $($texture.Name)." }
+    if ([BitConverter]::ToInt32($bmp, 18) -ne 500 -or [BitConverter]::ToInt32($bmp, 22) -ne 500) { throw "Texture dimensions are not 500x500: $($texture.Name)." }
+    if ([BitConverter]::ToInt16($bmp, 28) -ne 24) { throw "Texture is not 24-bit RGB: $($texture.Name)." }
+}
+
 $src = Get-Content $source -Raw
 $iss = Get-Content $installer -Raw
 
@@ -37,6 +45,7 @@ if ($iss -notmatch 'WizardForm.Caption') { throw "Custom installer branding miss
 if ($iss -notmatch 'InitializeUninstall\(\)') { throw "Custom uninstaller branding missing." }
 
 $bytes = ($textures | Measure-Object Length -Sum).Sum + ($audio | Measure-Object Length -Sum).Sum
+if ($bytes -lt 25000000) { throw "Runtime asset bank is below the 25 MB target: $bytes bytes." }
 [pscustomobject]@{
     RuntimeTextures = $textures.Count
     AudioAssets = $audio.Count
