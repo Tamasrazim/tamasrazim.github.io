@@ -264,15 +264,15 @@ void Box(Texture2D t,Vector3 p,Vector3 s,Color c){
     rlEnd();rlSetTexture(0);
 }
 void DrawBrokenPiece(Vector3 c,float r,int count,float time,Color color){
-    float fracture=0.76f+0.24f*sinf(time*1.4f);
+    float fracture=0.72f+0.28f*(0.5f+0.5f*sinf(time*1.4f));
     float pulse=0.82f+0.18f*sinf(time*2.3f);
     for(int i=0;i<count;i++){
         float a=TAU*float(i)/float(count)+time*(0.20f+0.045f*i);
         float phase=time*1.85f+i*1.31f;
         float crack=0.82f+0.22f*sinf(phase*1.65f);
-        float shatter=0.52f+0.48f*fracture;
+        float shatter=0.34f+0.66f*fracture;
         float radial=r*(0.28f+0.68f*shatter)*(0.92f+0.08f*sinf(phase));
-        float lift=0.10f*sinf(time*2.9f+i*1.7f)+0.06f*sinf(time*5.2f+i*2.1f);
+        float lift=0.12f*sinf(time*2.9f+i*1.7f)+0.075f*sinf(time*5.2f+i*2.1f);
         Vector3 q=V(c.x+cosf(a)*radial,c.y+lift,c.z+sinf(a)*radial);
         Vector3 dir=Vector3Normalize(V(cosf(a)*(0.36f+0.22f*sinf(phase)),0.62f+0.25f*cosf(phase),sinf(a)*(0.36f+0.22f*sinf(phase))));
         Vector3 tip=Vector3Add(q,Vector3Scale(dir,r*(0.44f+0.30f*crack)));
@@ -291,7 +291,7 @@ void DrawBrokenPiece(Vector3 c,float r,int count,float time,Color color){
         rlEnd();
         DrawSphere(q,w*0.45f,Color{color.r,color.g,color.b,110});
     }
-    DrawSphere(c,r*0.075f*pulse,Color{235,255,255,165});
+    DrawSphere(c,r*0.055f*pulse,Color{235,255,255,135});
 }
 void Burst(Vector3 center,Color color,int count,float impulse){
     if((int)gParticles.size()>420)gParticles.erase(gParticles.begin(),gParticles.begin()+std::min<size_t>(120,gParticles.size()));
@@ -408,7 +408,24 @@ void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,flo
     EndMode3D();
 }
 bool IsBlocked(const Level&l,Vector3 p,bool exitOpen){if(fabsf(p.x)>WORLD-PLAYER_R||fabsf(p.z)>WORLD-PLAYER_R)return true;for(const auto&w:l.walls)if(HitBox(p,PLAYER_R,w.p,w.s))return true;if(!exitOpen&&HitBox(p,PLAYER_R,V(l.exit.x,1.25f,l.exit.z),V(1.6f,2.5f,5.5f)))return true;return false;}
-void SetDisplay(int mode){if(mode==2){if(!IsWindowFullscreen())ToggleFullscreen();}else if(mode==1){if(IsWindowFullscreen())ToggleFullscreen();SetWindowState(FLAG_WINDOW_UNDECORATED);int m=GetCurrentMonitor();SetWindowSize(GetMonitorWidth(m),GetMonitorHeight(m));SetWindowPosition(0,0);}else{if(IsWindowFullscreen())ToggleFullscreen();ClearWindowState(FLAG_WINDOW_UNDECORATED);SetWindowSize(1440,900);}}
+void SetDisplay(int mode){
+    mode=std::clamp(mode,0,2);
+    if(mode==2){
+        ClearWindowState(FLAG_WINDOW_UNDECORATED);
+        if(!IsWindowFullscreen())ToggleFullscreen();
+    }else if(mode==1){
+        if(IsWindowFullscreen())ToggleFullscreen();
+        SetWindowState(FLAG_WINDOW_UNDECORATED);
+        int m=GetCurrentMonitor();
+        SetWindowSize(GetMonitorWidth(m),GetMonitorHeight(m));
+        SetWindowPosition(0,0);
+    }else{
+        if(IsWindowFullscreen())ToggleFullscreen();
+        ClearWindowState(FLAG_WINDOW_UNDECORATED);
+        SetWindowSize(1440,900);
+        SetWindowPosition(0,0);
+    }
+}
 }
 
 int main(int argc,char**argv){
