@@ -1,6 +1,6 @@
 ; NEON VAULT — custom Windows installer / uninstaller
 #define AppName "NEON VAULT"
-#define AppVersion "4.5"
+#define AppVersion "4.6"
 #define AppPublisher "Tamasrazim"
 #define AppExeName "neon_vault.exe"
 #define UpdaterExeName "neon_vault_updater.exe"
@@ -39,6 +39,10 @@ Source: "build\Release\neon_vault_updater.exe"; DestDir: "{app}"; Flags: ignorev
 Source: "neon-vault.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "assets\textures\*.bmp"; DestDir: "{app}\assets\textures"; Flags: ignoreversion
 Source: "assets\audio\*.wav"; DestDir: "{app}\assets\audio"; Flags: ignoreversion
+
+[UninstallDelete]
+Type: files; Name: "{localappdata}\\Tamasrazim\\NeonVault.cfg"
+Type: dirifempty; Name: "{localappdata}\\Tamasrazim"
 
 [Icons]
 Name: "{group}\NEON VAULT"; Filename: "{app}\{#UpdaterExeName}"
@@ -137,6 +141,9 @@ procedure InitializeWizard;
 begin
   WizardForm.Caption := 'NEON VAULT  •  INSTALL';
   WizardForm.Color := clBlack;
+  WizardForm.Bevel.Visible := False;
+  WizardForm.CancelButton.Caption := 'ABORT';
+  WizardForm.CancelButton.Font.Color := clRed;
   WizardForm.WelcomeLabel1.Caption := 'ENTER THE VAULT';
   WizardForm.WelcomeLabel1.Font.Color := clAqua;
   WizardForm.WelcomeLabel1.Font.Size := 24;
@@ -233,6 +240,9 @@ begin
   UninstallProgressForm.PageNameLabel.Font.Color := clAqua;
   UninstallProgressForm.PageDescriptionLabel.Font.Color := clWhite;
   UninstallProgressForm.MainPanel.Color := clBlack;
+  UninstallProgressForm.Bevel.Visible := False;
+  UninstallProgressForm.CancelButton.Caption := 'ABORT';
+  UninstallProgressForm.CancelButton.Font.Color := clRed;
   UninstallProgressForm.StatusLabel.Caption := 'EVACUATING VAULT FILES...';
   AddUninstallChrome;
   Result := True;
