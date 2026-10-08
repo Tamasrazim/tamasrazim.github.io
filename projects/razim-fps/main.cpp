@@ -136,7 +136,7 @@ Level BuildLevel(int id){
         case Objective::SURVIVE:l.required=0;break;
     }
     int hz=std::max(2,1+l.tier/2);
-    for(int i=0;i<hz;i++){int sg=(i&1)?1:-1;float x=sg*(10+rnd()*14),z=-16+rnd()*30;Vector3 p=Safe(l,V(x,0.55f,z),0.75f,300+i);l.hazards.push_back({p,p,rnd()*TAU,1.0f+0.04f*l.tier});}
+    for(int i=0;i<hz;i++){int sg=(i&1)?1:-1;float x=sg*(10+rnd()*14),z=-16+rnd()*30;Vector3 p=Safe(l,V(x,0.55f,z),0.75f,300+i);if(Vector3Distance(p,l.start)<5.0f||Vector3Distance(p,l.exit)<3.5f)p=V(sideSign*15.0f,0.55f,0.0f);l.hazards.push_back({p,p,rnd()*TAU,1.0f+0.04f*l.tier});}
     return l;
 }
 bool Reachable(const Level& l,Vector3 target){
@@ -186,7 +186,7 @@ void Menu(const Save&s,const Assets&a){
     float x=GetScreenWidth()/2.0f-190;BtnDraw({x,235,380,54},"ENTER VAULT",SKYBLUE);BtnDraw({x,301,380,54},"FLOOR SELECT",Theme(1));BtnDraw({x,367,380,54},"SETTINGS",Theme(2));BtnDraw({x,433,380,54},"CREDITS",Theme(4));BtnDraw({x,499,380,54},"QUIT",RED);
 }
 void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,float bob,const Settings&s,float scan,int got,int sw,int mem){
-    Camera3D c{};c.position=Vector3Add(player,V(0,bob,0));c.target=Vector3Add(c.position,V(sinf(yaw)*cosf(pitch),sinf(pitch),cosf(yaw)*cosf(pitch)));c.up=V(0,1,0);c.fovy=s.fov;c.projection=CAMERA_PERSPECTIVE;BeginMode3D(c);
+    Camera3D c{};c.position=Vector3Add(player,V(0,0.62f+bob,0));c.target=Vector3Add(c.position,V(sinf(yaw)*cosf(pitch),sinf(pitch),cosf(yaw)*cosf(pitch)));c.up=V(0,1,0);c.fovy=s.fov;c.projection=CAMERA_PERSPECTIVE;BeginMode3D(c);
     Box(a.tex[l.theme%TEXTURES],V(0,-.05f,0),V(58,.1f,58),WHITE);
     for(size_t i=0;i<l.walls.size();i++){const auto&w=l.walls[i];Box(a.tex[(l.theme*3+int(i)+w.mat)%TEXTURES],w.p,w.s,WHITE);DrawCubeWires(w.p,w.s.x,w.s.y,w.s.z,Color{60,95,115,150});}
     bool exitOpen=l.objective==Objective::SURVIVE||ObjectiveDone(l,got,sw,mem);
