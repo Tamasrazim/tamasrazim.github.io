@@ -194,16 +194,25 @@ static bool ClearPoint(const Level& l,Vector3 p,float radius){
 
 static Vector3 SafePoint(const Level& l,Vector3 p,float radius,int salt){
     if(ClearPoint(l,p,radius))return p;
-    for(int ring=1;ring<18;ring++){
-        float r=ring*1.45f;
-        for(int i=0;i<24;i++){
-            float a=(float(i)/24.0f)*TAU+salt*0.371f;
+    for(int ring=1;ring<30;ring++){
+        float r=ring*1.15f;
+        for(int i=0;i<36;i++){
+            float a=(float(i)/36.0f)*TAU+salt*0.371f;
             Vector3 q=V(p.x+cosf(a)*r,p.y,p.z+sinf(a)*r);
             if(ClearPoint(l,q,radius))return q;
         }
     }
-    return V(0,p.y,12);
+    for(int z=0;z<57;z++){
+        for(int x=0;x<57;x++){
+            Vector3 q=V(-27.5f+x, p.y, -27.5f+z);
+            if(ClearPoint(l,q,radius))return q;
+        }
+    }
+    return V(0,p.y,24);
 }
+
+static bool Overlap2D(Vector3 a,Vector3 as,Vector3 b,Vector3 bs,float margin=0.0f);
+static void RepairDoorOverlaps(Level& l);
 
 static Level BuildLevel(int id){
     Level l;
@@ -257,11 +266,19 @@ static Level BuildLevel(int id){
         }
     }
 
-    for(int i=0;i<8+l.tier*3;i++){
-        float x=-22+rnd()*44,z=-21+rnd()*42;
-        if(fabsf(z-24)<6)continue;
+    const int propCount=8+l.tier*3;
+    int placedProps=0,attempts=0;
+    while(placedProps<propCount&&attempts<propCount*40){
+        ++attempts;
+        float x=-22+rnd()*44;
+        float z=-21+rnd()*42;
+        if(fabsf(z-24.0f)<6.0f)continue;
         Vector3 sz=V(1.3f+rnd()*2.2f,1.2f+rnd()*1.5f,1.3f+rnd()*2.2f);
-        l.walls.push_back({V(x,sz.y*0.5f,z),sz,2});
+        float clearance=0.5f*sqrtf(sz.x*sz.x+sz.z*sz.z)+0.20f;
+        Vector3 p=SafePoint(l,V(x,sz.y*0.5f,z),clearance,500+attempts);
+        if(fabsf(p.z-24.0f)<5.5f)continue;
+        l.walls.push_back({p,sz,2});
+        ++placedProps;
     }
 
     if(l.objective==Objective::COLLECT){
@@ -329,6 +346,7 @@ static Level BuildLevel(int id){
         l.doors.push_back({V(0,1.25f,-20),V(1.2f,2.5f,5),false,2});
         for(int i=0;i<18;i++)l.hazards.push_back({V(-20+i*2.2f,0.45f,-2+(i%3)*5),V(0.9f,0.8f,3),float(i)});
     }
+    RepairDoorOverlaps(l);
     return l;
 }
 
@@ -346,6 +364,90 @@ static void ButtonDraw(Rectangle r,const char* label,Color accent){
 
 static void Center(const char* t,int y,int size,Color c){
     DrawText(t,(GetScreenWidth()-MeasureText(t,size))/2,y,size,c);
+}
+
+static float EaseCubic(float t){
+    t=Clamp(t,0.0f,1.0f);
+    return t*t*(3.0f-2.0f*t);
+}
+
+static void DrawCinematicIntro(float t,const Assets& a){
+    const int w=GetScreenWidth(),h=GetScreenHeight();
+    const float p=Clamp(t/15.0f,0.0f,1.0f);
+    Camera3D cam{};
+    Vector3 pos{},target{};
+    const float pi=3.14159265359f;
+
+    if(t<3.5f){
+        float u=EaseCubic(t/3.5f);
+        float z=22.0f-42.0f*u;
+        pos=V(0,3.0f,z+2.0f);
+        target=V(0,2.0f,z-9.0f);
+    }else if(t<7.0f){
+        float u=EaseCubic((t-3.5f)/3.5f);
+        float a0=u*TAU*0.82f;
+        pos=V(cosf(a0)*15.0f,5.0f+sinf(u*pi)*2.0f,3.0f+sinf(a0)*15.0f);
+        target=V(0,1.5f,-2.0f);
+    }else if(t<10.5f){
+        float u=EaseCubic((t-7.0f)/3.5f);
+        pos=V(-16.0f+32.0f*u,3.6f+1.2f*sinf(u*pi),5.0f+sin(u*pi)*4.0f);
+        target=V(0,1.5f,-8.0f);
+    }else{
+        float u=EaseCubic((t-10.5f)/4.5f);
+        float a0=pi*0.55f*u;
+        float radius=18.0f-9.0f*u;
+        pos=V(cosf(a0)*radius,8.0f+4.0f*u, sinf(a0)*radius-4.0f);
+        target=V(0,1.2f,-6.0f);
+    }
+    cam.position=pos;
+    cam.target=target;
+    cam.up=V(0,1,0);
+    cam.fovy=55.0f-8.0f*p;
+    cam.projection=CAMERA_PERSPECTIVE;
+
+    BeginMode3D(cam);
+    DrawPlane(V(0,-0.05f,0),Vector2{58.0f,58.0f},Color{4,10,18,255});
+    for(int i=-5;i<=5;i++){
+        DrawCubeWires(V(float(i)*5.5f,0,float(-18)),52.0f,0.05f,0.05f,Color{40,95,120,120});
+        DrawCubeWires(V(float(-18),0,float(i)*5.5f),0.05f,0.05f,52.0f,Color{40,95,120,120});
+    }
+    for(int i=0;i<9;i++){
+        float ang=float(i)*TAU/9.0f+t*0.08f;
+        float r=10.0f;
+        Vector3 wp=V(cosf(ang)*r,1.0f+sinf(t*1.2f+i)*0.18f,sinf(ang)*r-5.0f);
+        DrawCube(wp,1.6f,2.0f,1.6f,Color{18,48,66,255});
+        DrawCubeWires(wp,1.7f,2.1f,1.7f,Color{55,150,190,180});
+    }
+    DrawCylinder(V(0,0,-7),3.0f,3.0f,0.15f,48,Color{20,80,105,255});
+    DrawCylinderWires(V(0,0,-7),3.2f,3.2f,0.22f,48,Color{80,215,255,220});
+    for(int i=0;i<32;i++){
+        float ang=float(i)*TAU/32.0f+t*(0.45f+0.02f*float(i%5));
+        float rad=4.5f+0.6f*sinf(t*1.4f+i);
+        Vector3 q=V(cosf(ang)*rad,1.0f+1.6f*sinf(t*1.1f+i*0.37f),-7.0f+sinf(ang)*rad);
+        DrawSphere(q,0.06f+0.03f*(i%3),Color{100,225,255,170});
+    }
+    if(a.crystal.id){
+        float spin=t*35.0f;
+        Vector3 cp=V(0,2.15f,-7.0f);
+        DrawCylinderEx(V(cp.x,cp.y-0.55f,cp.z),V(cp.x,cp.y,cp.z),0.36f,0.05f,6,Color{55,190,245,255});
+        DrawCylinderEx(V(cp.x,cp.y,cp.z),V(cp.x,cp.y+0.55f,cp.z),0.05f,0.36f,6,Color{165,245,255,255});
+        (void)spin;
+    }
+    EndMode3D();
+
+    DrawRectangle(0,0,w,h,Color{0,3,8,(unsigned char)(65+35*(1.0f-p))});
+    float titleAlpha=Clamp((t-9.0f)/1.8f,0.0f,1.0f);
+    float subAlpha=Clamp((t-11.0f)/1.2f,0.0f,1.0f);
+    float vignette=Clamp(0.25f+0.35f*sinf(t*0.7f),0.0f,1.0f);
+    DrawRectangle(0,0,w,5,Color{50,180,230,180});
+    DrawRectangle(0,h-5,w,5,Color{50,180,230,120});
+    DrawText("TAMASRAZIM PRESENTS",(w-MeasureText("TAMASRAZIM PRESENTS",18))/2,70,18,Color{170,215,235,(unsigned char)(180*titleAlpha)});
+    int titleSize=62+(int)(8.0f*sinf(t*2.2f));
+    DrawText("NEON VAULT",(w-MeasureText("NEON VAULT",titleSize))/2,h/2-20,titleSize,Color{240,252,255,(unsigned char)(255*titleAlpha)});
+    DrawText("A 100-FLOOR FIRST-PERSON PUZZLE EXPEDITION",(w-MeasureText("A 100-FLOOR FIRST-PERSON PUZZLE EXPEDITION",17))/2,h/2+50,17,Color{155,205,225,(unsigned char)(220*subAlpha)});
+    DrawText("ENTER / ESC — SKIP",(w-MeasureText("ENTER / ESC — SKIP",13))/2,h-54,13,Color{140,170,185,200});
+    DrawRectangle(0,0,w,(int)(h*0.16f),Color{0,0,0,(unsigned char)(120*vignette)});
+    DrawRectangle(0,(int)(h*0.84f),w,(int)(h*0.16f),Color{0,0,0,(unsigned char)(120*vignette)});
 }
 
 static void DrawIntro(float t){
@@ -549,6 +651,27 @@ static void SetDisplayMode(Settings& s,int mode){
     }
 }
 
+static bool Overlap2D(Vector3 a,Vector3 as,Vector3 b,Vector3 bs,float margin){
+    return fabsf(a.x-b.x)<(as.x+bs.x)*0.5f-margin &&
+           fabsf(a.z-b.z)<(as.z+bs.z)*0.5f-margin;
+}
+
+static void RepairDoorOverlaps(Level& l){
+    for(size_t i=0;i<l.walls.size();){
+        if(l.walls[i].material!=2){++i;continue;}
+        Wall w=l.walls[i];
+        bool bad=false;
+        for(const auto& d:l.doors){
+            if(!d.open&&Overlap2D(w.pos,w.size,d.pos,d.size,0.02f)){bad=true;break;}
+        }
+        if(!bad){++i;continue;}
+        l.walls.erase(l.walls.begin()+i);
+        float clearance=0.5f*sqrtf(w.size.x*w.size.x+w.size.z*w.size.z)+0.20f;
+        w.pos=SafePoint(l,w.pos,clearance,900+int(i));
+        l.walls.push_back(w);
+    }
+}
+
 static bool ValidateAllLevels(){
     bool ok=true;
     constexpr int N=57;
@@ -560,6 +683,14 @@ static bool ValidateAllLevels(){
     };
     for(int id=1;id<=LEVELS;id++){
         Level l=BuildLevel(id);
+        for(size_t i=0;i<l.walls.size();i++){
+            for(size_t j=i+1;j<l.walls.size();j++){
+                if(Overlap2D(l.walls[i].pos,l.walls[i].size,l.walls[j].pos,l.walls[j].size,0.02f)){
+                    std::printf("floor %d overlapping walls %zu/%zu\\n",id,i,j);
+                    ok=false;
+                }
+            }
+        }
         if(!ClearPoint(l,l.start,PLAYER_RADIUS)){std::printf("floor %d invalid start\n",id);ok=false;}
         for(const auto& p:l.pickups)if(!ClearPoint(l,p.pos,0.45f))ok=false;
         for(const auto& sw:l.switches)if(!ClearPoint(l,sw.pos,0.65f))ok=false;
@@ -830,7 +961,7 @@ int main(int argc,char** argv){
             if(Vector3Length(wish)>0.01f)wish=Vector3Normalize(wish);
 
             Vector3 fwd=V(sinf(yaw),0,cosf(yaw));
-            Vector3 right=V(fwd.z,0,-fwd.x);
+            Vector3 right=V(-fwd.z,0,fwd.x);
             Vector3 move=Vector3Add(Vector3Scale(right,wish.x),Vector3Scale(fwd,wish.z));
             if(Vector3Length(move)>0.01f)move=Vector3Normalize(move);
 
@@ -966,7 +1097,7 @@ int main(int argc,char** argv){
         ClearBackground(Color{5,9,16,255});
 
         if(screen==Screen::INTRO){
-            DrawIntro(introElapsed);
+            DrawCinematicIntro(introElapsed,assets);
         }else if(screen==Screen::MENU){
             if(!safeMode&&assets.sky.id)DrawTexturePro(assets.sky,{0,0,(float)assets.sky.width,(float)assets.sky.height},{0,0,(float)GetScreenWidth(),(float)GetScreenHeight()},{0,0},0,Color{120,145,180,255});
             DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{1,6,12,180});
@@ -1035,7 +1166,6 @@ int main(int argc,char** argv){
 
             BeginMode3D(cam);
             DrawModelEx(assets.floorModel,V(0,-0.05f,0),V(0,1,0),0,V(58,0.1f,58),WHITE);
-            DrawBillboard(cam,assets.sky,V(0,14,-36),34,Color{180,205,235,255});
             for(const auto& w:level.walls){
                 Model& m=w.material==2?assets.metalModel:assets.wallModel;
                 DrawModelEx(m,w.pos,V(0,1,0),0,w.size,WHITE);
@@ -1053,9 +1183,14 @@ int main(int argc,char** argv){
             for(const auto& p:level.pickups)if(!p.taken){
                 float pb=0.20f*sinf(float(GetTime())*3+p.pos.x);
                 Vector3 q=V(p.pos.x,p.pos.y+pb,p.pos.z);
-                if(p.kind==0)DrawBillboard(cam,assets.crystal,q,0.85f,WHITE);
-                else DrawSphere(q,p.kind==1?0.34f:0.28f,p.kind==1?GOLD:MAGENTA);
-                DrawSphereWires(q,0.37f,8,8,RAYWHITE);
+                if(p.kind==0){
+                    Color crystal=Color{80,220,255,255};
+                    DrawCylinderEx(V(q.x,q.y-0.42f,q.z),V(q.x,q.y,q.z),0.30f,0.07f,6,crystal);
+                    DrawCylinderEx(V(q.x,q.y,q.z),V(q.x,q.y+0.42f,q.z),0.07f,0.30f,6,Color{150,245,255,255});
+                    DrawSphere(q,0.08f,Color{225,255,255,230});
+                }else DrawSphere(q,p.kind==1?0.34f:0.28f,p.kind==1?GOLD:MAGENTA);
+                if(p.kind==0)DrawCylinderWires(V(q.x,q.y,q.z),0.31f,0.31f,0.84f,6,Color{210,255,255,180});
+                else DrawSphereWires(q,0.37f,8,8,RAYWHITE);
                 if(scanTimer>0)DrawSphereWires(q,0.75f+0.25f*scanTimer,8,8,p.kind==0?SKYBLUE:(p.kind==1?GOLD:MAGENTA));
             }
             for(const auto& sw:level.switches){
