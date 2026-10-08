@@ -107,21 +107,21 @@ footer{border-top:1px solid var(--line);padding:24px 0 36px;color:#666;display:f
         <p class="lead">An original control deck for the AULA F75 Pro family. It treats the keyboard as a device to inspect, snapshot, visualize and carefully configure — not as a black-box accessory.</p>
       </div>
       <div class="actions">
-        <button id="connectBtn" class="btn primary">Connect keyboard</button>
+        <button id="connectBtn" class="btn primary">Connect real keyboard</button>
         <button id="disconnectBtn" class="btn">Disconnect</button>
         <button id="backupBtn" class="btn">Export session</button>
       </div>
     </article>
     <article class="card statusCard">
       <div>
-        <div class="statusTitle"><span id="statusDot" class="statusDot"></span><span id="statusText">Not connected</span></div>
-        <div class="metric"><span>USB identity</span><span id="usbId">—</span></div>
-        <div class="metric"><span>transport</span><span id="transport">WebHID / idle</span></div>
-        <div class="metric"><span>model probe</span><span id="modelId">not run</span></div>
+        <div class="statusTitle"><span id="statusDot" class="statusDot ok"></span><span id="statusText">LIVE DEMO · no keyboard</span></div>
+        <div class="metric"><span>USB identity</span><span id="usbId">258a:010c · simulated</span></div>
+        <div class="metric"><span>transport</span><span id="transport">Offline simulation</span></div>
+        <div class="metric"><span>model probe</span><span id="modelId">AULA F75 Pro · virtual</span></div>
       </div>
       <div>
-        <span id="writeBadge" class="badge">read-only posture</span>
-        <p style="font-size:10px;color:#6f6f69;margin-top:12px">Writes are deliberately separated from diagnostics. Capture a good snapshot before changing persistent hardware state.</p>
+        <span id="writeBadge" class="badge ok">live simulation</span>
+        <p style="font-size:10px;color:#6f6f69;margin-top:12px">The whole interface works without hardware. Offline actions update a simulated F75 Pro locally; real hardware writes stay separately gated.</p>
       </div>
     </article>
   </section>
@@ -141,14 +141,14 @@ footer{border-top:1px solid var(--line);padding:24px 0 36px;color:#666;display:f
           <div><small>Vendor</small><strong id="vendor">—</strong></div>
           <div><small>Product</small><strong id="product">—</strong></div>
           <div><small>Product name</small><strong id="productName">—</strong></div>
-          <div><small>Mode</small><strong id="mode">wired USB required</strong></div>
+          <div><small>Mode</small><strong id="mode">offline live demo</strong></div>
           <div><small>Report</small><strong>Feature 0x06</strong></div>
           <div><small>Local storage</small><strong>enabled</strong></div>
         </div>
       </article>
       <article class="card panel">
         <h2>SAFE PROBE</h2>
-        <div class="notice"><strong>Read first.</strong> The probe asks the keyboard for identity/config data without intentionally changing the key map. This keeps an unknown F75 Pro revision observable before any persistent write.</div>
+        <div class="notice"><strong>Live without hardware.</strong> The probe and diagnostic panels have a deterministic virtual F75 Pro state by default. Connect a real keyboard only when you want to switch from simulation to WebHID.</div>
         <div class="actions">
           <button id="probeBtn" class="btn primary">Probe identity</button>
           <button id="readConfigBtn" class="btn">Read config</button>
@@ -195,7 +195,7 @@ Connect the keyboard over USB-C, then run Safe Probe.</div>
           <button id="exportMapBtn" class="btn">Export mapping</button>
           <button id="resetMapBtn" class="btn danger">Reset local map</button>
         </div>
-        <div class="notice" style="margin-top:18px"><strong>Hardware write:</strong> intentionally locked behind a verified protocol pass. The first release is an observability + local design layer rather than a blind flash utility.</div>
+        <div class="notice" style="margin-top:18px"><strong>Offline-first.</strong> Key-map staging and RGB preview are fully live without a keyboard. Real persistent hardware writes remain gated until the exact F75 Pro revision is verified.</div>
         <div id="mapStatus" class="console" style="min-height:120px">No staged mappings.</div>
       </article>
     </div>
@@ -268,6 +268,7 @@ Connect the keyboard over USB-C, then run Safe Probe.</div>
   "use strict";
   const VID=0x258A, PID=0x010C, REPORT_ID=0x06;
   let device=null,lastRaw=null,lastConfig=null,selectedIndex=null;
+  const OFFLINE_DEMO=true;
   const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
   const state={rgb:"#6d8dff",brightness:7,speed:2,effect:1,mappings:JSON.parse(localStorage.getItem("f75pro:mappings")||"{}")};
 
@@ -358,14 +359,43 @@ Connect the keyboard over USB-C, then run Safe Probe.</div>
     log("connected "+(device.productName||"AULA keyboard"));
     navigator.hid.addEventListener("disconnect",onDisconnect,{once:true});
   }
-  async function onDisconnect(){device=null;$("#statusDot").classList.remove("ok");setText("#statusText","Disconnected");setText("#transport","WebHID / idle");log("device disconnected");}
+  async function onDisconnect(){
+    device=null;
+    $("#statusDot").classList.add("ok");
+    setText("#statusText","LIVE DEMO · no keyboard");
+    setText("#usbId","258a:010c · simulated");
+    setText("#transport","Offline simulation");
+    setText("#modelId","AULA F75 Pro · virtual");
+    setText("#vendor","0x258A");
+    setText("#product","0x010C");
+    setText("#productName","AULA F75 Pro · Virtual Device");
+    log("real keyboard disconnected; returned to live simulation");
+  }
   async function disconnect(){try{if(device&&device.opened)await device.close()}catch{}await onDisconnect();}
 
   function buildProbe(cmd){
     const a=u8(519);a[0]=cmd;a[1]=0;a[2]=0;a[3]=1;a[4]=0;a[5]=0;a[6]=cmd===0x84?0x80:0x00;return a;
   }
+  function makeDemoReport(cmd){
+    const a=u8(519);
+    a[0]=REPORT_ID;a[1]=cmd;a[2]=1;a[3]=0;a[4]=1;a[5]=0;a[6]=128;
+    for(let i=7;i<519;i++)a[i]=(i*37+cmd*11)%256;
+    a[17]=0;
+    a[18]=state.effect;
+    a[26]=1;
+    a[36]=100;
+    for(let id=0;id<22;id++){const off=64+2*id;if(off+1<a.length){a[off]=state.brightness;a[off+1]=(state.speed&15)<<4;}}
+    return a;
+  }
   async function transact(cmd){
-    if(!device)throw new Error("Connect a keyboard first.");
+    if(!device){
+      if(!OFFLINE_DEMO)throw new Error("Connect a keyboard first.");
+      await new Promise(r=>setTimeout(r,70));
+      const bytes=makeDemoReport(cmd);
+      lastRaw=bytes;
+      log("offline simulation: generated deterministic "+bytes.length+"-byte response for 0x"+cmd.toString(16));
+      return bytes;
+    }
     const req=buildProbe(cmd);
     await device.sendFeatureReport(REPORT_ID,req);
     await new Promise(r=>setTimeout(r,45));
@@ -438,12 +468,17 @@ Connect the keyboard over USB-C, then run Safe Probe.</div>
   };
 
   $("#applyRgbBtn").onclick=async()=>{
-    if(!device){alert("Connect the keyboard first.");return;}
+    if(!device){
+      localStorage.setItem("f75pro:demo-rgb",JSON.stringify({color:state.rgb,brightness:state.brightness,speed:state.speed,effect:state.effect}));
+      setText("#writeBadge","simulation write");
+      log("offline simulation: RGB state applied locally — no hardware connected.");
+      return;
+    }
     if(!lastConfig){alert("Run Read config first so the tool has a backup.");return;}
     const ok=confirm("This will send a persistent RGB configuration write to the connected keyboard. A raw config snapshot is already captured. Continue?");
     if(!ok)return;
-    alert("The first build intentionally keeps persistent RGB writes gated. The protocol reader is live, but the exact F75 Pro revision should be verified against your physical board before enabling flash writes.");
-    log("persistent RGB write remained locked for safety; no bytes were written.");
+    alert("Persistent hardware write remains gated until the exact F75 Pro revision is verified. No bytes were written.");
+    log("persistent RGB write remained locked; no bytes were written.");
   };
 
   function download(name,text,mime){
@@ -458,7 +493,8 @@ Connect the keyboard over USB-C, then run Safe Probe.</div>
     $$(".navBtn").forEach(v=>v.classList.toggle("active",v.dataset.view===id));
   }
 
-  setText("#browserSupport","WebHID: "+("hid" in navigator?"available":"not available")+" · recommended: Chromium-based browser");
+  setText("#browserSupport","WebHID: "+("hid" in navigator?"available":"not available")+" · LIVE DEMO remains available even when WebHID is unavailable.");
+  setText("#vendor","0x258A"); setText("#product","0x010C"); setText("#productName","AULA F75 Pro · Virtual Device");
   renderRgb();
   addEventListener("beforeunload",()=>{if(device&&device.opened)device.close()});
 })();
