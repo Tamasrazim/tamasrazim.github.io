@@ -141,7 +141,6 @@ procedure InitializeWizard;
 begin
   WizardForm.Caption := 'NEON VAULT  •  INSTALL';
   WizardForm.Color := clBlack;
-  WizardForm.Bevel.Visible := False;
   WizardForm.CancelButton.Caption := 'ABORT';
   WizardForm.CancelButton.Font.Color := clRed;
   WizardForm.WelcomeLabel1.Caption := 'ENTER THE VAULT';
@@ -240,7 +239,6 @@ begin
   UninstallProgressForm.PageNameLabel.Font.Color := clAqua;
   UninstallProgressForm.PageDescriptionLabel.Font.Color := clWhite;
   UninstallProgressForm.MainPanel.Color := clBlack;
-  UninstallProgressForm.Bevel.Visible := False;
   UninstallProgressForm.CancelButton.Caption := 'ABORT';
   UninstallProgressForm.CancelButton.Font.Color := clRed;
   UninstallProgressForm.StatusLabel.Caption := 'EVACUATING VAULT FILES...';
