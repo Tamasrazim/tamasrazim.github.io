@@ -19,7 +19,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(raylib)
 
-add_executable(neon_vault main.cpp platform_win.cpp neon-vault.rc)
+add_executable(neon_vault neon_main.cpp platform_win.cpp neon-vault.rc)
 add_executable(neon_vault_updater updater.cpp)
 
 target_compile_definitions(neon_vault_updater PRIVATE NEON_VAULT_BUILD=${NEON_VAULT_BUILD})
