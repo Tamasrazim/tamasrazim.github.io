@@ -46,3 +46,7 @@ Those projects are references for protocol behavior and engineering ideas, not c
 ## Route
 
 `/projects/aula-f75-pro/`
+
+## Keymap editor
+
+The Key Lab includes an offline advanced editor with single-key selection, category filtering, usage search, shortcut/combo building, preset shortcuts, add/edit/delete mapping actions, selected-key reset, full reset, and local Win/Alt swapping. All edits are stored locally until a hardware write path is explicitly enabled.
