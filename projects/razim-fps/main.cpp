@@ -441,7 +441,7 @@ static void Crosshair(int style){
 }
 
 static void DrawIntro3D(float t,const Assets& a){
-    float p=Clamp(t/INTRO_DURATION,0,1);int w=GetScreenWidth(),h=GetScreenHeight();
+    float p=Clamp(t/7.0f,0,1);int w=GetScreenWidth(),h=GetScreenHeight();
     Camera3D cam{};Vector3 pos{},target{};
     if(t<2.4f){
         float u=Ease(t/2.4f);pos=V(0,2.1f,14.0f-26.0f*u);target=V(0,2.0f,-10.0f);
