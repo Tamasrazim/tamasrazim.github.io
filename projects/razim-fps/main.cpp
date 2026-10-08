@@ -259,6 +259,14 @@ void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,flo
     Box(a.tex[l.theme%TEXTURES],V(0,-.05f,0),V(58,.1f,58),WHITE);
     Box(a.tex[25],V(0,5.8f,0),V(58,.12f,58),Color{42,52,62,255});
     for(size_t i=0;i<l.walls.size();i++){const auto&w=l.walls[i];Box(a.tex[(l.theme*3+int(i)+w.mat)%TEXTURES],w.p,w.s,WHITE);DrawCubeWires(w.p,w.s.x,w.s.y,w.s.z,Color{60,95,115,150});}
+    for(int i=0;i<34;i++){
+        uint32_t seed=Mix(uint32_t(l.id*4099+i*977));
+        float fx=float(seed%5200)/100.0f-26.0f;
+        float fz=float((seed>>8)%5200)/100.0f-26.0f;
+        float fy=1.25f+float((seed>>16)%170)/100.0f+sinf(float(GetTime())*0.65f+i)*0.10f;
+        float twinkle=0.055f+0.025f*sinf(float(GetTime())*2.2f+i*1.37f);
+        DrawSphere(V(fx,fy,fz),twinkle,Theme(l.theme));
+    }
     for(int i=-4;i<=4;i++){
         float x=float(i)*6.0f;
         Box(a.tex[26],V(x,2.9f,-27.9f),V(0.16f,5.6f,0.22f),WHITE);
@@ -282,8 +290,8 @@ void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,flo
     if(!exitOpen){Box(a.tex[18],V(l.exit.x,1.25f,l.exit.z),V(1.6f,2.5f,5.5f),WHITE);DrawCubeWires(V(l.exit.x,1.25f,l.exit.z),1.65f,2.55f,5.55f,ORANGE);}
     else {DrawCylinder(l.exit,1.6f,1.6f,.18f,32,GREEN);DrawCylinderWires(l.exit,1.8f,1.8f,.22f,32,RAYWHITE);}
     for(const auto&p:l.pickups)if(!p.taken){float t=float(GetTime());Vector3 q=V(p.p.x,p.p.y+.16f*sinf(t*2.7f+p.p.z),p.p.z);Color c2=p.kind==0?SKYBLUE:(p.kind==1?GOLD:MAGENTA);DrawBrokenPiece(q,p.kind==0?.42f:.34f,p.kind==0?7:5,t*1.25f,c2);if(scan>0)DrawSphereWires(q,.75f+scan*.2f,10,10,c2);}
-    for(size_t i=0;i<l.switches.size();i++){const auto& sw=l.switches[i];Vector3 p=sw.p;Color c2=sw.active?GREEN:Theme(l.theme);DrawCube(p,.72f,1,.42f,sw.active?Color{25,75,50,255}:Color{28,48,58,255});Box(a.tex[(10+l.theme+i)%TEXTURES],V(p.x,p.y+.12f,p.z-.23f),V(.42f,.38f,.05f),WHITE);DrawCubeWires(p,.76f,1.04f,.46f,c2);}
-    for(const auto&h:l.hazards){float pulse=.9f+.15f*sinf(float(GetTime())*4+h.phase);Vector3 q=V(h.base.x+sinf(float(GetTime())*h.speed+h.phase)*1.5f,h.base.y,h.base.z);Box(a.tex[(20+l.theme)%TEXTURES],q,V(1.0f,.95f,2.2f),WHITE);DrawCubeWires(q,1.03f,.98f,2.24f,RED);if(HitBox(player,PLAYER_R,q,V(1.0f,.95f,2.2f)))DrawSphere(q,.2f,Color{255,110,110,255});(void)pulse;}
+    for(size_t i=0;i<l.switches.size();i++){const auto& sw=l.switches[i];Vector3 p=sw.p;Color c2=sw.active?GREEN:Theme(l.theme);float pulse=.84f+.16f*sinf(float(GetTime())*3.0f+float(i));DrawCube(p,.72f,1,.42f,sw.active?Color{25,75,50,255}:Color{28,48,58,255});Box(a.tex[(10+l.theme+i)%TEXTURES],V(p.x,p.y+.12f,p.z-.23f),V(.42f,.38f,.05f),WHITE);DrawCubeWires(p,.76f,1.04f,.46f,c2);DrawCylinderWires(V(p.x,p.y+0.62f,p.z),.22f*pulse,.22f*pulse,.05f,16,c2);}
+    for(const auto&h:l.hazards){float pulse=.90f+.15f*sinf(float(GetTime())*4+h.phase);Vector3 q=V(h.base.x+sinf(float(GetTime())*h.speed+h.phase)*1.5f,h.base.y,h.base.z);Vector3 hs=V(1.0f*pulse,.95f,2.2f*pulse);Box(a.tex[(20+l.theme)%TEXTURES],q,hs,WHITE);DrawCubeWires(q,hs.x*1.03f,hs.y*1.03f,hs.z*1.03f,RED);if(HitBox(player,PLAYER_R,q,V(1.0f,.95f,2.2f)))DrawSphere(q,.2f,Color{255,110,110,255});}
     EndMode3D();
 }
 bool IsBlocked(const Level&l,Vector3 p,bool exitOpen){if(fabsf(p.x)>WORLD-PLAYER_R||fabsf(p.z)>WORLD-PLAYER_R)return true;for(const auto&w:l.walls)if(HitBox(p,PLAYER_R,w.p,w.s))return true;if(!exitOpen&&HitBox(p,PLAYER_R,V(l.exit.x,1.25f,l.exit.z),V(1.6f,2.5f,5.5f)))return true;return false;}
