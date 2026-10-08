@@ -115,7 +115,8 @@ Vector3 Safe(const Level& l,Vector3 p,float r,int salt){
     if(Clear(l,p,r))return p;
     for(int n=1;n<24;n++)for(int i=0;i<32;i++){float a=TAU*i/32.0f+salt*0.17f;Vector3 q=V(p.x+cosf(a)*n,p.y,p.z+sinf(a)*n);if(Clear(l,q,r))return q;}
     for(int z=-24;z<=24;z+=2)for(int x=-24;x<=24;x+=2){Vector3 q=V(float(x),p.y,float(z));if(Clear(l,q,r)&&Vector3Distance(q,l.start)>4.0f)return q;}
-    return V(0,p.y,24);
+    for(int z=-28;z<=28;z+=2)for(int x=-28;x<=28;x+=2){Vector3 q=V(float(x),p.y,float(z));if(Clear(l,q,r))return q;}
+    return p;
 }
 uint32_t Mix(uint32_t x){x^=x>>16;x*=0x7feb352du;x^=x>>15;x*=0x846ca68bu;x^=x>>16;return x;}
 Level BuildLevel(int id){
@@ -157,7 +158,7 @@ Level BuildLevel(int id){
             int sg=((i+attempt)&1)?1:-1;
             float x=sg*(10+rnd()*14),z=-16+rnd()*30;
             p=Safe(l,V(x,0.55f,z),0.75f,300+i*53+attempt);
-            bool bad=Vector3Distance(p,l.start)<5.0f||Vector3Distance(p,l.exit)<4.0f;
+            bool bad=Vector3Distance(p,l.start)<6.0f||Vector3Distance(p,l.exit)<5.0f;
             for(const auto& q:l.pickups)if(Vector3Distance(p,q.p)<2.4f)bad=true;
             for(const auto& q:l.switches)if(Vector3Distance(p,q.p)<2.4f)bad=true;
             for(const auto& q:l.hazards)if(Vector3Distance(p,q.base)<2.8f)bad=true;
@@ -179,14 +180,14 @@ bool Valid(const Level& l){
     for(size_t i=0;i<l.walls.size();i++)for(size_t j=i+1;j<l.walls.size();j++)
         if(Overlap(l.walls[i].p,l.walls[i].s,l.walls[j].p,l.walls[j].s,-0.02f))return false;
     if(!Reachable(l,l.exit))return false;
-    for(const auto&p:l.pickups)if(!Reachable(l,p.p))return false;
-    for(const auto&p:l.switches)if(!Reachable(l,p.p))return false;
+    for(const auto&p:l.pickups){if(!Reachable(l,p.p))return false;if(Vector3Distance(p.p,l.start)<1.8f)return false;}
+    for(const auto&p:l.switches){if(!Reachable(l,p.p))return false;if(Vector3Distance(p.p,l.start)<1.8f)return false;}
     for(size_t i=0;i<l.pickups.size();i++)for(size_t j=i+1;j<l.pickups.size();j++)
         if(Vector3Distance(l.pickups[i].p,l.pickups[j].p)<1.1f)return false;
     for(size_t i=0;i<l.switches.size();i++)for(size_t j=i+1;j<l.switches.size();j++)
         if(Vector3Distance(l.switches[i].p,l.switches[j].p)<1.2f)return false;
     for(const auto&h:l.hazards){
-        if(Vector3Distance(h.base,l.start)<4.5f||Vector3Distance(h.base,l.exit)<4.0f)return false;
+        if(Vector3Distance(h.base,l.start)<6.0f||Vector3Distance(h.base,l.exit)<5.0f)return false;
         for(const auto&p:l.pickups)if(Vector3Distance(h.base,p.p)<2.2f)return false;
         for(const auto&sw:l.switches)if(Vector3Distance(h.base,sw.p)<2.2f)return false;
     }
