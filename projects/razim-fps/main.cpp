@@ -714,7 +714,7 @@ int main(int argc,char** argv){
             if(screen==Screen::PLAYING&&level.objective!=Objective::SURVIVE&&timeLeft<=0){ReleaseMouse(mouse);screen=Screen::GAMEOVER;}
             if(level.objective==Objective::SURVIVE&&timeLeft<=0){save.unlocked=std::max(save.unlocked,level.id+1);save.stars[level.id]=3;SaveGame(save);ReleaseMouse(mouse);screen=level.id==LEVELS?Screen::COMPLETE:Screen::LEVELS;}
         }else if(screen==Screen::PAUSED){
-            if(IsKeyPressed(KEY_ESCAPE)){StartLevel(level.id);}
+            if(IsKeyPressed(KEY_ESCAPE)){screen=Screen::PLAYING;CaptureMouse(mouse);}
             float cx=GetScreenWidth()/2.0f-190;
             if(Button({cx,330,380,56})){StartLevel(level.id);ClickSound();}
             else if(Button({cx,396,380,56})){screen=Screen::SETTINGS;ClickSound();}
