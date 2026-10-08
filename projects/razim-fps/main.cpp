@@ -50,6 +50,12 @@ struct Assets{
     std::array<Texture2D,TEXTURES> tex{};
     Sound music{},beat{},pickup{},hit{},click{},complete{};
 };
+struct Particle{
+    Vector3 p{},v{};
+    Color c{255,255,255,255};
+    float life=0,maxLife=0,size=0.05f;
+};
+std::vector<Particle> gParticles;
 Sound MakeBeatSound();
 
 Vector3 V(float x,float y,float z){return{x,y,z};}
@@ -273,6 +279,35 @@ void DrawBrokenPiece(Vector3 c,float r,int count,float time,Color color){
     }
     DrawSphere(c,r*0.075f*pulse,Color{235,255,255,165});
 }
+void Burst(Vector3 center,Color color,int count,float impulse){
+    if((int)gParticles.size()>420)gParticles.erase(gParticles.begin(),gParticles.begin()+std::min<int>(120,gParticles.size()));
+    for(int i=0;i<count;i++){
+        float a=TAU*float(i)/float(std::max(1,count))+float(GetTime())*0.17f;
+        float ring=0.35f+0.85f*(float((i*37)%100)/100.0f);
+        Vector3 dir=Vector3Normalize(V(cosf(a)*ring,0.32f+0.85f*(float((i*19)%100)/100.0f),sinf(a)*ring));
+        Particle p;
+        p.p=center;
+        p.v=Vector3Scale(dir,impulse*(0.55f+0.65f*float((i*23)%100)/100.0f));
+        p.c=Color{color.r,color.g,color.b,235};
+        p.life=p.maxLife=0.30f+0.48f*float((i*31)%100)/100.0f;
+        p.size=0.018f+0.035f*float((i*17)%100)/100.0f;
+        gParticles.push_back(p);
+    }
+}
+void UpdateParticles(float dt){
+    for(auto& p:gParticles){
+        p.v.y-=6.5f*dt;
+        p.p=Vector3Add(p.p,Vector3Scale(p.v,dt));
+        p.v=Vector3Scale(p.v,0.985f);
+        p.life-=dt;
+        float a=Clamp(p.life/std::max(0.01f,p.maxLife),0.0f,1.0f);
+        p.c.a=(unsigned char)(235.0f*a);
+    }
+    gParticles.erase(std::remove_if(gParticles.begin(),gParticles.end(),[](const Particle&p){return p.life<=0.0f;}),gParticles.end());
+}
+void DrawParticles(){
+    for(const auto& p:gParticles)DrawSphere(p.p,p.size,p.c);
+}
 bool ObjectiveDone(const Level&l,int got,int sw,int mem){if(l.objective==Objective::COLLECT)return got>=l.required;if(l.objective==Objective::SWITCHES)return sw>=l.required;if(l.objective==Objective::KEYCARD){int n=0;for(const auto&p:l.pickups)if(p.kind==1&&p.taken)n++;return n>=l.required;}if(l.objective==Objective::MEMORY)return mem>=l.required;if(l.objective==Objective::COMBO){int k=0;for(const auto&p:l.pickups)if(p.kind==1&&p.taken)k++;return got>=3&&sw>=3&&k>=1&&mem>=4;}return false;}
 void Intro(float t,const Assets&a){
     Camera3D c{V(0,2.3f,15-28*Ease(t/4.5f)),V(0,2.1f,-16),V(0,1,0),63,CAMERA_PERSPECTIVE};BeginMode3D(c);
@@ -354,6 +389,7 @@ void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,flo
     }
     for(size_t i=0;i<l.switches.size();i++){const auto& sw=l.switches[i];Vector3 p=sw.p;Color c2=sw.active?GREEN:Theme(l.theme);float pulse=.84f+.16f*sinf(float(GetTime())*3.0f+float(i));DrawCube(p,.72f,1,.42f,sw.active?Color{25,75,50,255}:Color{28,48,58,255});Box(a.tex[(10+l.theme+i)%TEXTURES],V(p.x,p.y+.12f,p.z-.23f),V(.42f,.38f,.05f),WHITE);DrawCubeWires(p,.76f,1.04f,.46f,c2);DrawCylinderWires(V(p.x,p.y+0.62f,p.z),.22f*pulse,.22f*pulse,.05f,16,c2);}
     for(const auto&h:l.hazards){float pulse=.90f+.15f*sinf(float(GetTime())*4+h.phase);Vector3 q=V(h.base.x+sinf(float(GetTime())*h.speed+h.phase)*1.5f,h.base.y,h.base.z);Vector3 hs=V(1.0f*pulse,.95f,2.2f*pulse);Box(a.tex[(20+l.theme)%TEXTURES],q,hs,WHITE);DrawCubeWires(q,hs.x*1.03f,hs.y*1.03f,hs.z*1.03f,RED);if(HitBox(player,PLAYER_R,q,hs))DrawSphere(q,.2f,Color{255,110,110,255});}
+    DrawParticles();
     EndMode3D();
 }
 bool IsBlocked(const Level&l,Vector3 p,bool exitOpen){if(fabsf(p.x)>WORLD-PLAYER_R||fabsf(p.z)>WORLD-PLAYER_R)return true;for(const auto&w:l.walls)if(HitBox(p,PLAYER_R,w.p,w.s))return true;if(!exitOpen&&HitBox(p,PLAYER_R,V(l.exit.x,1.25f,l.exit.z),V(1.6f,2.5f,5.5f)))return true;return false;}
@@ -380,10 +416,11 @@ int main(int argc,char**argv){
     auto capture=[&](){if(captured)return;DisableCursor();captured=true;ignoreDelta=true;};
     auto release=[&](){if(!captured)return;captured=false;ignoreDelta=false;EnableCursor();SetMouseCursor(MOUSE_CURSOR_DEFAULT);};
     auto start=[&](int id){level=BuildLevel(id);Repair(level);player=level.start;vel={};yaw=3.14159265f;pitch=0;timeLeft=level.timeLimit;stamina=100;health=100;got=sw=mem=0;bob=scan=screenShake=damageCooldown=0;grounded=true;screen=Screen::PLAYING;capture();};
-    auto damage=[&](){health-=25;screenShake=1.0f;damageCooldown=0.65f;player=level.start;vel={};timeLeft=std::max(0.0f,timeLeft-4);if(IsSoundValid(assets.hit))PlaySound(assets.hit);if(health<=0){health=0;release();screen=Screen::GAMEOVER;}};
+    auto damage=[&](){Burst(player,Color{255,75,95,255},24,3.2f);health-=25;screenShake=1.0f;damageCooldown=0.65f;player=level.start;vel={};timeLeft=std::max(0.0f,timeLeft-4);if(IsSoundValid(assets.hit))PlaySound(assets.hit);if(health<=0){health=0;release();screen=Screen::GAMEOVER;}};
 
     while(!WindowShouldClose()){
         float dt=std::min(GetFrameTime(),.05f);
+        UpdateParticles(dt);
         if(IsSoundValid(assets.beat)&&!IsSoundPlaying(assets.beat))PlaySound(assets.beat);
         if(screen!=Screen::PLAYING&&!captured)EnableCursor();else if(screen!=Screen::PLAYING&&captured)release();
         if(screen==Screen::INTRO){intro+=dt;if(IsKeyPressed(KEY_ENTER)||IsKeyPressed(KEY_ESCAPE)||intro>=4.5f)screen=Screen::MENU;}
@@ -435,6 +472,7 @@ int main(int argc,char**argv){
         else if(screen==Screen::PLAYING){
             if(!IsWindowFocused()){if(captured)release();screen=Screen::PAUSED;continue;}
             if(IsKeyPressed(KEY_ESCAPE)){release();screen=Screen::PAUSED;}
+            if(screen!=Screen::PLAYING)continue;
             if(IsWindowFocused()&&!captured)capture();
             if(screen==Screen::PLAYING&&captured){Vector2 md=GetMouseDelta();if(ignoreDelta){md={0,0};ignoreDelta=false;}yaw-=md.x*save.settings.sens;pitch+=(save.settings.invertY?md.y:-md.y)*save.settings.sens;pitch=Clamp(pitch,-1.48f,1.48f);}
             Vector3 wish{};if(IsKeyDown(KEY_W))wish.z+=1;if(IsKeyDown(KEY_S))wish.z-=1;if(IsKeyDown(KEY_A))wish.x-=1;if(IsKeyDown(KEY_D))wish.x+=1;if(Vector3Length(wish)>.01f)wish=Vector3Normalize(wish);
@@ -455,8 +493,8 @@ int main(int argc,char**argv){
             for(const auto&h:level.hazards){Vector3 q=V(h.base.x+sinf(float(GetTime())*h.speed+h.phase)*1.5f,h.base.y,h.base.z);if(damageCooldown<=0.0f&&Vector3Distance(player,q)<1.0f){damage();break;}}
             if(screen!=Screen::PLAYING)continue;
             if(IsKeyPressed(KEY_E)){float best=2.25f;int type=-1,idx=-1;for(int i=0;i<(int)level.switches.size();i++)if(!level.switches[i].active&&Vector3Distance(player,level.switches[i].p)<best){best=Vector3Distance(player,level.switches[i].p);type=1;idx=i;}for(int i=0;i<(int)level.pickups.size();i++)if(!level.pickups[i].taken&&Vector3Distance(player,level.pickups[i].p)<best){best=Vector3Distance(player,level.pickups[i].p);type=2;idx=i;}
-                if(type==1){level.switches[idx].active=true;sw++;if(IsSoundValid(assets.click))PlaySound(assets.click);}
-                else if(type==2){auto&p=level.pickups[idx];if(p.kind==2){if(p.order==mem+1){p.taken=true;p.burst=0.95f;mem++;}else{mem=0;timeLeft=std::max(0.0f,timeLeft-6);health=std::max(1.0f,health-10);if(IsSoundValid(assets.hit))PlaySound(assets.hit);}}else{p.taken=true;p.burst=0.95f;if(p.kind==0)got++;}if(IsSoundValid(assets.pickup))PlaySound(assets.pickup);}
+                if(type==1){level.switches[idx].active=true;sw++;Burst(level.switches[idx].p,Theme(level.theme),18,2.1f);if(IsSoundValid(assets.click))PlaySound(assets.click);}
+                else if(type==2){auto&p=level.pickups[idx];if(p.kind==2){if(p.order==mem+1){p.taken=true;p.burst=0.95f;Burst(p.p,MAGENTA,22,2.6f);mem++;}else{mem=0;timeLeft=std::max(0.0f,timeLeft-6);health=std::max(1.0f,health-10);if(IsSoundValid(assets.hit))PlaySound(assets.hit);}}else{p.taken=true;p.burst=0.95f;Burst(p.p,c2,22,2.6f);if(p.kind==0)got++;}if(IsSoundValid(assets.pickup))PlaySound(assets.pickup);}
             }
             bool done=ObjectiveDone(level,got,sw,mem);
             if(screen==Screen::PLAYING&&done&&Vector3Distance(player,level.exit)<2.6f){int stars=timeLeft/level.timeLimit>.55f&&health>50?3:(timeLeft>0?2:1);save.stars[level.id]=std::max(save.stars[level.id],stars);if(level.id<LEVELS)save.unlocked=std::max(save.unlocked,level.id+1);SaveGame(save);release();screen=level.id==LEVELS?Screen::COMPLETE:Screen::LEVELS;}
