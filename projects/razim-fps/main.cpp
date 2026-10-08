@@ -328,6 +328,7 @@ void Intro(float t,const Assets&a){
     Box(a.tex[0],V(0,-.15f,-6),V(12,.3f,44),WHITE);Box(a.tex[1],V(-6,2.5f,-6),V(.35f,5,44),WHITE);Box(a.tex[1],V(6,2.5f,-6),V(.35f,5,44),WHITE);
     for(int i=0;i<8;i++){float z=12-i*4.8f;Box(a.tex[26],V(0,0.25f,z),V(11,.08f,.18f),WHITE);Box(a.tex[27],V(0,4.7f,z),V(11,.08f,.18f),WHITE);}
     DrawCylinder(V(0,2.2f,-20),4.2f,4.2f,.5f,40,Color{8,20,28,255});DrawCylinderWires(V(0,2.2f,-20),4.5f,4.5f,.65f,40,Theme(0));
+    for(int i=0;i<10;i++){float a=TAU*float(i)/10.0f+t*0.42f;Vector3 q=V(cosf(a)*(1.35f+0.18f*sinf(t*1.7f+i)),2.9f+0.18f*sinf(t*2.1f+i),-20+sinf(a)*(1.35f+0.18f*cosf(t*1.3f+i)));DrawBrokenPiece(q,0.18f+0.02f*sinf(t*2.0f+i),4,t*1.9f+i*0.37f,Theme(i));}
     DrawSphere(V(0,3.2f,-20),.8f,Color{50,205,255,255});DrawSphereWires(V(0,3.2f,-20),1.0f,12,12,RAYWHITE);EndMode3D();
     Center("TAMASRAZIM PRESENTS",70,16,Color{150,210,230,255});if(t>3.1f)Center("NEON VAULT",GetScreenHeight()/2-35,62,RAYWHITE);if(t>3.7f)Center("100 FLOORS. ZERO SHORTCUTS.",GetScreenHeight()/2+42,17,SKYBLUE);
     DrawText("ENTER / ESC — SKIP",GetScreenWidth()-185,GetScreenHeight()-30,12,GRAY);
