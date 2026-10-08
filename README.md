@@ -24,7 +24,7 @@ It is organized as a static-first GitHub Pages repository with self-contained pu
 | --- | --- |
 | Website | Main personal site and identity surface |
 | Projects | 1,200+ individually routed browser projects |
-| Flagship apps | TRILYVA, CODE→EPS, CODE→SVG, NEON VAULT, BNC Agro Care and related products |
+| Flagship apps | TRILYVA, CODE→EPS, CODE→SVG, NEO, BNC Agro Care and related products |
 | Asset Vault | Stock and creative asset workspace |
 | KYNESTRA | Architecture, modules, desktop and format work |
 | Tools | Repository validators, generators and engineering utilities |
@@ -46,7 +46,7 @@ It is organized as a static-first GitHub Pages repository with self-contained pu
 | `/projects/code-motion/batch/` | TRILYVA batch surface |
 | `/projects/code-to-eps/` | Browser vector/EPS tooling |
 | `/projects/code-to-svg/` | Browser SVG tooling |
-| `/projects/razim-fps/` | NEON VAULT |
+| `/projects/razim-fps/` | NEO |
 | `/projects/bncagrocare/` | BNC Agro Care |
 | `/projects/repo-token-meter/` | Repository Token Meter |
 | `/asset-vault/` | Stock Asset Vault |
@@ -79,7 +79,7 @@ The repository is divided into clear zones rather than mixing everything togethe
 
 `/projects/code-to-svg/` — SVG tooling.
 
-`/projects/razim-fps/` — NEON VAULT native Windows game, installer and release packaging.
+`/projects/razim-fps/` — NEO native Windows game, installer and release packaging.
 
 `/projects/bncagrocare/` — BNC Agro Care application and supporting material.
 
@@ -113,7 +113,7 @@ TRILYVA is the browser-based code-to-motion rendering workspace. The historical 
 
 The repository keeps its renderer, library, batch surface and related project material together.
 
-### NEON VAULT
+### NEO
 
 Native Windows first-person puzzle game with 100 generated floors, settings, installer packaging, updater support and GitHub Actions release automation.
 
