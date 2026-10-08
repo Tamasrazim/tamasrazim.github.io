@@ -201,6 +201,23 @@ bool Valid(const Level& l){
         if(Vector3Distance(l.pickups[i].p,l.pickups[j].p)<1.1f)return false;
     for(size_t i=0;i<l.switches.size();i++)for(size_t j=i+1;j<l.switches.size();j++)
         if(Vector3Distance(l.switches[i].p,l.switches[j].p)<1.2f)return false;
+    int crystals=0,keys=0,memory=0;
+    std::array<bool,16> memoryOrder{};
+    for(const auto&p:l.pickups){
+        if(p.kind==0)crystals++;
+        else if(p.kind==1)keys++;
+        else if(p.kind==2){
+            memory++;
+            if(p.order<1||p.order>=int(memoryOrder.size())||memoryOrder[size_t(p.order)])return false;
+            memoryOrder[size_t(p.order)]=true;
+        }
+    }
+    if(l.objective==Objective::COLLECT&&crystals<l.required)return false;
+    if(l.objective==Objective::SWITCHES&&int(l.switches.size())<l.required)return false;
+    if(l.objective==Objective::KEYCARD&&keys<l.required)return false;
+    if(l.objective==Objective::MEMORY&&memory<l.required)return false;
+    if(l.objective==Objective::COMBO&&(crystals<3||int(l.switches.size())<3||keys<1||memory<4))return false;
+    for(int i=1;i<=memory;i++)if(!memoryOrder[size_t(i)])return false;
     for(const auto&h:l.hazards){
         if(!FiniteVec(h.base)||!FiniteVec(h.p)||h.speed<=0.0f)return false;
         if(Vector3Distance(h.base,l.start)<6.0f||Vector3Distance(h.base,l.exit)<5.0f)return false;
@@ -241,12 +258,8 @@ void Repair(Level& l){
         l.switches[i].p=V((int(i%3)-1)*3.5f,l.switches[i].p.y,18.0f-float(i)*4.5f);
     l.hazards.clear();
     if(l.walls.size()>4)l.walls.resize(4);
-    // Last-resort testable state: open central route, every puzzle object on-map.
-    if(!Valid(l)){
-        l.pickups.clear();l.switches.clear();
-        l.objective=Objective::SURVIVE;l.required=0;
-        l.timeLimit=std::max(240.0f,l.timeLimit);
-    }
+    // Never silently replace a failed puzzle with a different objective.
+    // The deterministic validator will report any remaining layout failure.
 }
 Texture2D LoadTex(const std::string& f,Color fallback){
     if(FileExists(f.c_str())){Texture2D t=LoadTexture(f.c_str());if(t.id){GenTextureMipmaps(&t);SetTextureFilter(t,TEXTURE_FILTER_TRILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;}}
