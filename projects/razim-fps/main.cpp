@@ -349,6 +349,16 @@ void UpdateParticles(float dt){
 void DrawParticles(){
     for(const auto& p:gParticles)DrawSphere(p.p,p.size,p.c);
 }
+void DrawFractureHalo(Vector3 c,float r,Color color,float time){
+    float pulse=0.50f+0.50f*sinf(time*6.0f);
+    for(int i=0;i<6;i++){
+        float a=TAU*float(i)/6.0f+time*0.32f;
+        float rr=r*(1.20f+0.22f*pulse);
+        Vector3 p0=V(c.x+cosf(a)*r*0.75f,c.y+0.02f*sinf(time+i),c.z+sinf(a)*r*0.75f);
+        Vector3 p1=V(c.x+cosf(a)*rr,c.y+0.08f+0.03f*sinf(time*2.0f+i),c.z+sinf(a)*rr);
+        DrawLine3D(p0,p1,Color{color.r,color.g,color.b,(unsigned char)(95+70*pulse)});
+    }
+}
 bool ObjectiveDone(const Level&l,int got,int sw,int mem){if(l.objective==Objective::COLLECT)return got>=l.required;if(l.objective==Objective::SWITCHES)return sw>=l.required;if(l.objective==Objective::KEYCARD){int n=0;for(const auto&p:l.pickups)if(p.kind==1&&p.taken)n++;return n>=l.required;}if(l.objective==Objective::MEMORY)return mem>=l.required;if(l.objective==Objective::COMBO){int k=0;for(const auto&p:l.pickups)if(p.kind==1&&p.taken)k++;return got>=3&&sw>=3&&k>=1&&mem>=4;}return false;}
 void Intro(float t,const Assets&a){
     Camera3D c{V(0,2.3f,15-28*Ease(t/4.5f)),V(0,2.1f,-16),V(0,1,0),63,CAMERA_PERSPECTIVE};BeginMode3D(c);
@@ -358,7 +368,7 @@ void Intro(float t,const Assets&a){
     for(int i=0;i<10;i++){float a=TAU*float(i)/10.0f+t*0.42f;Vector3 q=V(cosf(a)*(1.35f+0.18f*sinf(t*1.7f+i)),2.9f+0.18f*sinf(t*2.1f+i),-20+sinf(a)*(1.35f+0.18f*cosf(t*1.3f+i)));DrawBrokenPiece(q,0.18f+0.02f*sinf(t*2.0f+i),4,t*1.9f+i*0.37f,Theme(i));}
     DrawSphere(V(0,3.2f,-20),.8f,Color{50,205,255,255});DrawSphereWires(V(0,3.2f,-20),1.0f,12,12,RAYWHITE);EndMode3D();
     Center("TAMASRAZIM PRESENTS",70,16,Color{150,210,230,255});if(t>3.1f)Center("NEON VAULT",GetScreenHeight()/2-35,62,RAYWHITE);if(t>3.7f)Center("100 FLOORS. ZERO SHORTCUTS.",GetScreenHeight()/2+42,17,SKYBLUE);
-    DrawText("ENTER / ESC — SKIP",GetScreenWidth()-185,GetScreenHeight()-30,12,GRAY);
+    DrawText("ENTER / ESC — SKIP",GetScreenWidth()-185,GetScreenHeight()-30,12,GRAY);DrawText("FRACTURED CORE // 01",24,GetScreenHeight()-30,12,Color{90,150,170,220});
 }
 void Menu(const Save&s,const Assets&a,int focus){
     ClearBackground(Color{3,8,13,255});Camera3D c{V(0,3,10),V(0,2,-10),V(0,1,0),65,CAMERA_PERSPECTIVE};BeginMode3D(c);
@@ -380,6 +390,7 @@ void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,flo
     Box(a.tex[l.theme%TEXTURES],V(0,-.05f,0),V(58,.1f,58),WHITE);
     Box(a.tex[25],V(0,5.8f,0),V(58,.12f,58),Color{42,52,62,255});
     for(size_t i=0;i<l.walls.size();i++){const auto&w=l.walls[i];Box(a.tex[(l.theme*3+int(i)+w.mat)%TEXTURES],w.p,w.s,WHITE);DrawCubeWires(w.p,w.s.x,w.s.y,w.s.z,Color{60,95,115,150});}
+    for(size_t i=0;i<l.walls.size()&&i<18;i++){const auto&w=l.walls[i];if(w.mat!=0){float t=float(GetTime())*0.75f+float(i);DrawFractureHalo(V(w.p.x,w.p.y+0.55f,w.p.z),std::min(w.s.x,w.s.z)*0.42f,Theme(l.theme),t);}}
     for(int i=0;i<34;i++){
         uint32_t seed=Mix(uint32_t(l.id*4099+i*977));
         float fx=float(seed%5200)/100.0f-26.0f;
@@ -467,7 +478,7 @@ int main(int argc,char**argv){
     if(test){BeginDrawing();ClearBackground(Color{3,8,13,255});DrawText("NEON VAULT STARTUP TEST",24,24,24,RAYWHITE);EndDrawing();CloseWindow();return 0;}
     if(!safe)InitAudioDevice();Save save=LoadSave();SaveGame(save);Assets assets=LoadAssets(safe);
     if(IsSoundValid(assets.music)){SetSoundVolume(assets.music,save.settings.music);PlaySound(assets.music);}
-    if(IsSoundValid(assets.beat)){SetSoundVolume(assets.beat,save.settings.music*0.42f);PlaySound(assets.beat);}
+    if(IsSoundValid(assets.beat)){SetSoundVolume(assets.beat,save.settings.music*0.38f);PlaySound(assets.beat);}
     Screen screen=Screen::INTRO;Screen settingsReturn=Screen::MENU;float intro=0;Level level=BuildLevel(1);Repair(level);
     Vector3 player=level.start,vel{};float yaw=3.14159265f,pitch=0,timeLeft=0,stamina=100,health=100,scan=0,bob=0,screenShake=0,damageCooldown=0,interactFlash=0;int got=0,sw=0,mem=0;bool grounded=true;
     bool captured=false,ignoreDelta=false;int settingsRow=0,uiFocus=0;
@@ -542,7 +553,7 @@ int main(int argc,char**argv){
                                 case 9:save.settings.display=(save.settings.display+1)%3;SetDisplay(save.settings.display);break;
                                 case 10:save=Save{};SaveGame(save);SetDisplay(0);settingsRow=0;uiFocus=0;break;
                             }
-                            if(IsSoundValid(assets.click)){SetSoundVolume(assets.click,0.65f);PlaySound(assets.click);}
+                            if(IsSoundValid(assets.click)){SetSoundVolume(assets.click,save.settings.sfx);PlaySound(assets.click);}
                         }
                     }
                 }
