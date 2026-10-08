@@ -207,8 +207,8 @@ bool Valid(const Level& l){
 }
 void Repair(Level& l){while(!Valid(l)&&l.walls.size()>4)l.walls.pop_back();}
 Texture2D LoadTex(const std::string& f,Color fallback){
-    if(FileExists(f.c_str())){Texture2D t=LoadTexture(f.c_str());if(t.id){GenTextureMipmaps(&t);SetTextureFilter(t,TEXTURE_FILTER_TRILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;}}
-    Image im=GenImageColor(64,64,fallback);Texture2D t=LoadTextureFromImage(im);UnloadImage(im);if(t.id){GenTextureMipmaps(&t);SetTextureFilter(t,TEXTURE_FILTER_TRILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);}return t;
+    if(FileExists(f.c_str())){Texture2D t=LoadTexture(f.c_str());if(t.id){SetTextureFilter(t,TEXTURE_FILTER_BILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;}}
+    Image im=GenImageColor(64,64,fallback);Texture2D t=LoadTextureFromImage(im);UnloadImage(im);if(t.id){SetTextureFilter(t,TEXTURE_FILTER_BILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);}return t;
 }
 Assets LoadAssets(bool safe){
     Assets a{};
@@ -602,6 +602,9 @@ int main(int argc,char**argv){
             if(screen!=Screen::PLAYING)continue;
             if(IsWindowFocused()&&!captured)capture();
             if(screen==Screen::PLAYING&&captured){Vector2 md=GetMouseDelta();if(ignoreDelta){md={0,0};ignoreDelta=false;}yaw-=md.x*save.settings.sens;pitch+=(save.settings.invertY?md.y:-md.y)*save.settings.sens;pitch=Clamp(pitch,-1.48f,1.48f);}
+            if(!FiniteVec(player)||player.y<0.15f||player.y>6.5f||fabsf(player.x)>WORLD-0.1f||fabsf(player.z)>WORLD-0.1f){
+                player=level.start;vel={};grounded=true;damageCooldown=0.35f;screenShake=0.0f;
+            }
             Vector3 wish{};if(IsKeyDown(KEY_W))wish.z+=1;if(IsKeyDown(KEY_S))wish.z-=1;if(IsKeyDown(KEY_A))wish.x-=1;if(IsKeyDown(KEY_D))wish.x+=1;if(Vector3Length(wish)>.01f)wish=Vector3Normalize(wish);
             Vector3 f=V(sinf(yaw),0,cosf(yaw)),r=V(-f.z,0,f.x);Vector3 mv=Vector3Add(Vector3Scale(r,wish.x),Vector3Scale(f,wish.z));if(Vector3Length(mv)>.01f)mv=Vector3Normalize(mv);
             bool sprint=IsKeyDown(KEY_LEFT_SHIFT)&&stamina>1&&Vector3Length(mv)>.01f;float speed=sprint?8.1f:5.0f;stamina=sprint?std::max(0.0f,stamina-22*dt):std::min(100.0f,stamina+14*dt);
@@ -616,7 +619,10 @@ int main(int argc,char**argv){
                 if(!moved)break;
             }
             if(IsKeyPressed(KEY_SPACE)&&grounded){vel.y=6.7f;grounded=false;}vel.y-=18*dt;player.y+=vel.y*dt;if(player.y<=.9f){player.y=.9f;vel.y=0;grounded=true;}
-            for(auto& p:level.pickups)if(p.burst>0.0f)p.burst=std::max(0.0f,p.burst-dt);interactFlash=std::max(0.0f,interactFlash-dt*4.0f);timeLeft-=dt;scan=std::max(0.0f,scan-dt);screenShake=std::max(0.0f,screenShake-dt*4.5f);damageCooldown=std::max(0.0f,damageCooldown-dt);if(IsKeyPressed(KEY_Q))scan=1.4f;if(Vector3Length(mv)>.01f)bob+=dt*(sprint?13:9);else bob+=dt*2;
+            for(auto& p:level.pickups)if(p.burst>0.0f)p.burst=std::max(0.0f,p.burst-dt);
+            interactFlash=std::max(0.0f,interactFlash-dt*4.0f);
+            timeLeft-=dt;
+            if(!std::isfinite(timeLeft))timeLeft=0.0f;scan=std::max(0.0f,scan-dt);screenShake=std::max(0.0f,screenShake-dt*4.5f);damageCooldown=std::max(0.0f,damageCooldown-dt);if(IsKeyPressed(KEY_Q))scan=1.4f;if(Vector3Length(mv)>.01f)bob+=dt*(sprint?13:9);else bob+=dt*2;
             for(const auto&h:level.hazards){Vector3 q=V(h.base.x+sinf(float(GetTime())*h.speed+h.phase)*1.5f,h.base.y,h.base.z);if(damageCooldown<=0.0f&&Vector3Distance(player,q)<1.0f){damage();break;}}
             if(screen!=Screen::PLAYING)continue;
             if(IsKeyPressed(KEY_E)){float best=2.25f;int type=-1,idx=-1;for(int i=0;i<(int)level.switches.size();i++)if(!level.switches[i].active&&Vector3Distance(player,level.switches[i].p)<best){best=Vector3Distance(player,level.switches[i].p);type=1;idx=i;}for(int i=0;i<(int)level.pickups.size();i++)if(!level.pickups[i].taken&&Vector3Distance(player,level.pickups[i].p)<best){best=Vector3Distance(player,level.pickups[i].p);type=2;idx=i;}
