@@ -197,7 +197,7 @@ void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,flo
     for(const auto&h:l.hazards){float pulse=.9f+.15f*sinf(float(GetTime())*4+h.phase);Vector3 q=V(h.base.x+sinf(float(GetTime())*h.speed+h.phase)*1.5f,h.base.y,h.base.z);Box(a.tex[(20+l.theme)%TEXTURES],q,V(1.0f,.95f,2.2f),WHITE);DrawCubeWires(q,1.03f,.98f,2.24f,RED);if(HitBox(player,PLAYER_R,q,V(1.0f,.95f,2.2f)))DrawSphere(q,.2f,Color{255,110,110,255});(void)pulse;}
     EndMode3D();
 }
-bool IsBlocked(const Level&l,Vector3 p){if(fabsf(p.x)>WORLD-PLAYER_R||fabsf(p.z)>WORLD-PLAYER_R)return true;for(const auto&w:l.walls)if(HitBox(p,PLAYER_R,w.p,w.s))return true;return false;}
+bool IsBlocked(const Level&l,Vector3 p,bool exitOpen){if(fabsf(p.x)>WORLD-PLAYER_R||fabsf(p.z)>WORLD-PLAYER_R)return true;for(const auto&w:l.walls)if(HitBox(p,PLAYER_R,w.p,w.s))return true;if(!exitOpen&&HitBox(p,PLAYER_R,V(l.exit.x,1.25f,l.exit.z),V(1.6f,2.5f,5.5f)))return true;return false;}
 void SetDisplay(int mode){if(mode==2){if(!IsWindowFullscreen())ToggleFullscreen();}else if(mode==1){if(IsWindowFullscreen())ToggleFullscreen();SetWindowState(FLAG_WINDOW_UNDECORATED);int m=GetCurrentMonitor();SetWindowSize(GetMonitorWidth(m),GetMonitorHeight(m));SetWindowPosition(0,0);}else{if(IsWindowFullscreen())ToggleFullscreen();ClearWindowState(FLAG_WINDOW_UNDECORATED);SetWindowSize(1440,900);}}
 }
 
@@ -254,7 +254,7 @@ int main(int argc,char**argv){
             Vector3 wish{};if(IsKeyDown(KEY_W))wish.z+=1;if(IsKeyDown(KEY_S))wish.z-=1;if(IsKeyDown(KEY_A))wish.x-=1;if(IsKeyDown(KEY_D))wish.x+=1;if(Vector3Length(wish)>.01f)wish=Vector3Normalize(wish);
             Vector3 f=V(sinf(yaw),0,cosf(yaw)),r=V(-f.z,0,f.x);Vector3 mv=Vector3Add(Vector3Scale(r,wish.x),Vector3Scale(f,wish.z));if(Vector3Length(mv)>.01f)mv=Vector3Normalize(mv);
             bool sprint=IsKeyDown(KEY_LEFT_SHIFT)&&stamina>1&&Vector3Length(mv)>.01f;float speed=sprint?8.1f:5.0f;stamina=sprint?std::max(0.0f,stamina-22*dt):std::min(100.0f,stamina+14*dt);
-            for(int i=0;i<2;i++){Vector3 n=player;n.x+=mv.x*speed*dt/2.0f;if(!IsBlocked(level,n))player.x=n.x;n=player;n.z+=mv.z*speed*dt/2.0f;if(!IsBlocked(level,n))player.z=n.z;}
+            for(int i=0;i<2;i++){Vector3 n=player;n.x+=mv.x*speed*dt/2.0f;if(!IsBlocked(level,n,level.objective==Objective::SURVIVE||ObjectiveDone(level,got,sw,mem)))player.x=n.x;n=player;n.z+=mv.z*speed*dt/2.0f;if(!IsBlocked(level,n,level.objective==Objective::SURVIVE||ObjectiveDone(level,got,sw,mem)))player.z=n.z;}
             for(int guard=0;guard<3;guard++){
                 bool moved=false;
                 for(const auto& w:level.walls)if(HitBox(player,PLAYER_R,w.p,w.s)){
