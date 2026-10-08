@@ -19,7 +19,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(raylib)
 
-add_executable(neon_vault neon_main_v4.cpp platform_win.cpp neon-vault.rc)
+add_executable(neon_vault main.cpp platform_win.cpp neon-vault.rc)
 add_executable(neon_vault_updater updater.cpp)
 
 target_compile_definitions(neon_vault_updater PRIVATE NEON_VAULT_BUILD=${NEON_VAULT_BUILD})
@@ -36,7 +36,12 @@ else()
 endif()
 
 add_custom_command(TARGET neon_vault POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:neon_vault>/assets/textures"
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${CMAKE_CURRENT_SOURCE_DIR}/assets"
-    "$<TARGET_FILE_DIR:neon_vault>/assets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/assets/textures"
+    "$<TARGET_FILE_DIR:neon_vault>/assets/textures"
+  COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:neon_vault>/assets/audio"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_CURRENT_SOURCE_DIR}/assets/audio"
+    "$<TARGET_FILE_DIR:neon_vault>/assets/audio"
 )
