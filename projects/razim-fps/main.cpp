@@ -33,7 +33,7 @@ struct Settings{float sens=0.0026f;bool invertY=false;float fov=74;bool hints=tr
 struct Save{int version=4;int unlocked=1;std::array<int,LEVELS+1> stars{};Settings settings{};};
 struct SwitchNode{Vector3 p{};bool active=false;};
 struct Wall{Vector3 p{},s{};int mat=0;};
-struct Pickup{Vector3 p{};int kind=0;int order=0;bool taken=false;};
+struct Pickup{Vector3 p{};int kind=0;int order=0;bool taken=false;float burst=0.0f;};
 struct Hazard{Vector3 p{},base{};float phase=0;float speed=1;};
 struct Level{
     int id=1,tier=0,theme=0,required=1;
@@ -336,7 +336,18 @@ void World(const Level&l,const Assets&a,Vector3 player,float yaw,float pitch,flo
     Box(a.tex[24],V(l.exit.x,0.03f,l.exit.z),V(3.4f,0.04f,3.4f),Color{175,210,220,220});
     if(!exitOpen){Box(a.tex[18],V(l.exit.x,1.25f,l.exit.z),V(1.6f,2.5f,5.5f),WHITE);DrawCubeWires(V(l.exit.x,1.25f,l.exit.z),1.65f,2.55f,5.55f,ORANGE);}
     else {DrawCylinder(l.exit,1.6f,1.6f,.18f,32,GREEN);DrawCylinderWires(l.exit,1.8f,1.8f,.22f,32,RAYWHITE);}
-    for(const auto&p:l.pickups)if(!p.taken){float t=float(GetTime());Vector3 q=V(p.p.x,p.p.y+.16f*sinf(t*2.7f+p.p.z),p.p.z);Color c2=p.kind==0?SKYBLUE:(p.kind==1?GOLD:MAGENTA);DrawBrokenPiece(q,p.kind==0?.42f:.34f,p.kind==0?7:5,t*1.25f,c2);if(scan>0)DrawSphereWires(q,.75f+scan*.2f,10,10,c2);}
+    for(const auto&p:l.pickups){
+        float t=float(GetTime());Color c2=p.kind==0?SKYBLUE:(p.kind==1?GOLD:MAGENTA);
+        if(!p.taken){
+            Vector3 q=V(p.p.x,p.p.y+.16f*sinf(t*2.7f+p.p.z),p.p.z);
+            DrawBrokenPiece(q,p.kind==0?.42f:.34f,p.kind==0?7:5,t*1.25f,c2);
+            if(scan>0)DrawSphereWires(q,.75f+scan*.2f,10,10,c2);
+        }else if(p.burst>0.0f){
+            float phase=1.0f-p.burst;
+            Vector3 q=V(p.p.x,p.p.y,p.p.z);
+            DrawBrokenPiece(q,.30f+.22f*phase,p.kind==0?8:6,t*1.8f+phase*3.0f,c2);
+        }
+    }
     for(size_t i=0;i<l.switches.size();i++){const auto& sw=l.switches[i];Vector3 p=sw.p;Color c2=sw.active?GREEN:Theme(l.theme);float pulse=.84f+.16f*sinf(float(GetTime())*3.0f+float(i));DrawCube(p,.72f,1,.42f,sw.active?Color{25,75,50,255}:Color{28,48,58,255});Box(a.tex[(10+l.theme+i)%TEXTURES],V(p.x,p.y+.12f,p.z-.23f),V(.42f,.38f,.05f),WHITE);DrawCubeWires(p,.76f,1.04f,.46f,c2);DrawCylinderWires(V(p.x,p.y+0.62f,p.z),.22f*pulse,.22f*pulse,.05f,16,c2);}
     for(const auto&h:l.hazards){float pulse=.90f+.15f*sinf(float(GetTime())*4+h.phase);Vector3 q=V(h.base.x+sinf(float(GetTime())*h.speed+h.phase)*1.5f,h.base.y,h.base.z);Vector3 hs=V(1.0f*pulse,.95f,2.2f*pulse);Box(a.tex[(20+l.theme)%TEXTURES],q,hs,WHITE);DrawCubeWires(q,hs.x*1.03f,hs.y*1.03f,hs.z*1.03f,RED);if(HitBox(player,PLAYER_R,q,hs))DrawSphere(q,.2f,Color{255,110,110,255});}
     EndMode3D();
@@ -436,12 +447,12 @@ int main(int argc,char**argv){
                 if(!moved)break;
             }
             if(IsKeyPressed(KEY_SPACE)&&grounded){vel.y=6.7f;grounded=false;}vel.y-=18*dt;player.y+=vel.y*dt;if(player.y<=.9f){player.y=.9f;vel.y=0;grounded=true;}
-            timeLeft-=dt;scan=std::max(0.0f,scan-dt);screenShake=std::max(0.0f,screenShake-dt*4.5f);damageCooldown=std::max(0.0f,damageCooldown-dt);if(IsKeyPressed(KEY_Q))scan=1.4f;if(Vector3Length(mv)>.01f)bob+=dt*(sprint?13:9);else bob+=dt*2;
+            for(auto& p:level.pickups)if(p.burst>0.0f)p.burst=std::max(0.0f,p.burst-dt);timeLeft-=dt;scan=std::max(0.0f,scan-dt);screenShake=std::max(0.0f,screenShake-dt*4.5f);damageCooldown=std::max(0.0f,damageCooldown-dt);if(IsKeyPressed(KEY_Q))scan=1.4f;if(Vector3Length(mv)>.01f)bob+=dt*(sprint?13:9);else bob+=dt*2;
             for(const auto&h:level.hazards){Vector3 q=V(h.base.x+sinf(float(GetTime())*h.speed+h.phase)*1.5f,h.base.y,h.base.z);if(damageCooldown<=0.0f&&Vector3Distance(player,q)<1.0f){damage();break;}}
             if(screen!=Screen::PLAYING)continue;
             if(IsKeyPressed(KEY_E)){float best=2.25f;int type=-1,idx=-1;for(int i=0;i<(int)level.switches.size();i++)if(!level.switches[i].active&&Vector3Distance(player,level.switches[i].p)<best){best=Vector3Distance(player,level.switches[i].p);type=1;idx=i;}for(int i=0;i<(int)level.pickups.size();i++)if(!level.pickups[i].taken&&Vector3Distance(player,level.pickups[i].p)<best){best=Vector3Distance(player,level.pickups[i].p);type=2;idx=i;}
                 if(type==1){level.switches[idx].active=true;sw++;if(IsSoundValid(assets.click))PlaySound(assets.click);}
-                else if(type==2){auto&p=level.pickups[idx];if(p.kind==2){if(p.order==mem+1){p.taken=true;mem++;}else{mem=0;timeLeft=std::max(0.0f,timeLeft-6);health=std::max(1.0f,health-10);if(IsSoundValid(assets.hit))PlaySound(assets.hit);}}else{p.taken=true;if(p.kind==0)got++;}if(IsSoundValid(assets.pickup))PlaySound(assets.pickup);}
+                else if(type==2){auto&p=level.pickups[idx];if(p.kind==2){if(p.order==mem+1){p.taken=true;p.burst=0.95f;mem++;}else{mem=0;timeLeft=std::max(0.0f,timeLeft-6);health=std::max(1.0f,health-10);if(IsSoundValid(assets.hit))PlaySound(assets.hit);}}else{p.taken=true;p.burst=0.95f;if(p.kind==0)got++;}if(IsSoundValid(assets.pickup))PlaySound(assets.pickup);}
             }
             bool done=ObjectiveDone(level,got,sw,mem);
             if(screen==Screen::PLAYING&&done&&Vector3Distance(player,level.exit)<2.6f){int stars=timeLeft/level.timeLimit>.55f&&health>50?3:(timeLeft>0?2:1);save.stars[level.id]=std::max(save.stars[level.id],stars);if(level.id<LEVELS)save.unlocked=std::max(save.unlocked,level.id+1);SaveGame(save);release();screen=level.id==LEVELS?Screen::COMPLETE:Screen::LEVELS;}
