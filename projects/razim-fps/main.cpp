@@ -523,7 +523,7 @@ static bool ObjectiveComplete(const Level& l,int collected,int switchesActive,in
     return false;
 }
 
-static void DrawWorld(const Level& l,const Assets& a,const Vector3& player,float yaw,float pitch,float bob,const Settings& s,float scan){
+static void DrawWorld(const Level& l,const Assets& a,const Vector3& player,float yaw,float pitch,float bob,const Settings& s,float scan,int collected,int switchesActive,int memoryStep){
     Camera3D cam{};cam.position=Vector3Add(player,V(0,0.62f+bob,0));cam.target=Vector3Add(cam.position,V(sinf(yaw)*cosf(pitch),sinf(pitch),cosf(yaw)*cosf(pitch)));cam.up=V(0,1,0);cam.fovy=s.fov;cam.projection=CAMERA_PERSPECTIVE;
     BeginMode3D(cam);
     DrawTexturedBox(a.floor,V(0,-0.05f,0),V(58,0.1f,58),WHITE,2.1f);
@@ -557,7 +557,7 @@ static void DrawWorld(const Level& l,const Assets& a,const Vector3& player,float
         else DrawSphere(d.pos,0.55f,Color{220,65,95,255});
         DrawSphereWires(d.pos,0.72f,8,8,Color{255,80,110,180});
     }
-    bool open=l.objective==Objective::SURVIVE||ObjectiveComplete(l,0,0,0);
+    bool open=l.objective==Objective::SURVIVE||ObjectiveComplete(l,collected,switchesActive,memoryStep);
     DrawCylinder(l.exit,1.5f,1.5f,0.14f,32,open?GREEN:Color{55,90,110,255});
     DrawCylinderWires(l.exit,1.7f,1.7f,0.18f,32,RAYWHITE);
     EndMode3D();
@@ -623,7 +623,7 @@ int main(int argc,char** argv){
                 if(i<=save.unlocked&&Button(r)){StartLevel(i);ClickSound();break;}
             }
         }else if(screen==Screen::SETTINGS){
-            if(IsKeyPressed(KEY_ESCAPE)){SaveGame(save);screen=Screen::MENU;}
+            if(IsKeyPressed(KEY_ESCAPE)){SaveGame(save);screen=settingsReturn;}
             if(IsKeyPressed(KEY_UP))settingsRow=(settingsRow+9)%10;
             if(IsKeyPressed(KEY_DOWN))settingsRow=(settingsRow+1)%10;
             if(IsKeyPressed(KEY_LEFT)||IsKeyPressed(KEY_RIGHT)||IsKeyPressed(KEY_ENTER)){
@@ -743,7 +743,7 @@ int main(int argc,char** argv){
             ClearBackground(Color{4,8,13,255});CenterText("CREDITS",80,42,RAYWHITE);CenterText("GAME DESIGN / PROGRAMMING",180,18,SKYBLUE);CenterText("Tamasrazim",215,30,RAYWHITE);CenterText("Native Windows x64 • Raylib • deterministic 100-floor system",275,16,LIGHTGRAY);CenterText("Original instrumental soundtrack • procedural 3D cinematic",310,16,LIGHTGRAY);CenterText("CLICK OR ESC TO RETURN",500,14,GRAY);
         }else if(screen==Screen::PLAYING||screen==Screen::PAUSED){
             float bob=mouse.captured?sinf(bobPhase)*0.025f:0.0f;
-            DrawWorld(level,assets,player,yaw,pitch,bob,save.settings,scanTimer);
+            DrawWorld(level,assets,player,yaw,pitch,bob,save.settings,scanTimer,collected,switchesActive,memoryStep);
             DrawRectangle(24,24,392,108,Color{5,13,22,225});DrawText(TextFormat("FLOOR %03d • %s",level.id,level.title.c_str()),42,43,18,RAYWHITE);DrawText(ObjectiveName(level.objective),42,69,13,ThemeColor(level.theme));
             const char* obj="";int keys=0;for(const auto& p:level.pickups)if(p.kind==1&&p.taken)keys++;
             if(level.objective==Objective::COLLECT)obj=TextFormat("CRYSTALS %d / %d",collected,level.required);
