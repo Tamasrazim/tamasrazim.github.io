@@ -631,12 +631,17 @@ int main(int argc,char** argv){
     float yaw=3.14159265359f,pitch=0,stamina=100,health=100,timeLeft=0,bobPhase=0,scanTimer=0,hintTimer=0,introElapsed=0;
     int collected=0,switchesActive=0,memoryStep=0,deaths=0,settingsRow=0;
     bool grounded=true,quit=false;
+    Screen settingsReturn=Screen::MENU;
 
     auto ClickSound=[&](){if(assets.soundsReady){SetSoundVolume(assets.click,save.settings.sfx);PlaySound(assets.click);}};
     auto StartLevel=[&](int id){
         level=BuildLevel(id);player=level.start;velocity={};yaw=3.14159265359f;pitch=0;stamina=100;health=100;
         timeLeft=level.timeLimit;collected=switchesActive=memoryStep=deaths=0;bobPhase=scanTimer=0;hintTimer=4;grounded=true;
         screen=Screen::PLAYING;CaptureMouse(mouse);
+    };
+    auto ResumeLevel=[&](){
+        screen=Screen::PLAYING;
+        CaptureMouse(mouse);
     };
     auto Respawn=[&](){player=level.start;velocity={};health-=25;deaths++;timeLeft=std::max(0.0f,timeLeft-5);if(health<=0){health=0;screen=Screen::GAMEOVER;SaveGame(save);ReleaseMouse(mouse);}};
 
@@ -663,9 +668,35 @@ int main(int argc,char** argv){
                 if(i<=save.unlocked&&Button(r)){StartLevel(i);ClickSound();break;}
             }
         }else if(screen==Screen::SETTINGS){
-            if(IsKeyPressed(KEY_ESCAPE)){SaveGame(save);screen=Screen::MENU;}
+            if(IsKeyPressed(KEY_ESCAPE)){SaveGame(save);screen=settingsReturn;}
             if(IsKeyPressed(KEY_UP))settingsRow=(settingsRow+9)%10;
             if(IsKeyPressed(KEY_DOWN))settingsRow=(settingsRow+1)%10;
+            if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+                int left=GetScreenWidth()/2-300;
+                for(int i=0;i<10;i++){
+                    Rectangle r={float(left),145+i*49,600,41};
+                    if(CheckCollisionPointRec(GetMousePosition(),r)){
+                        settingsRow=i;
+                        bool rightSide=GetMousePosition().x>r.x+r.width*0.72f;
+                        bool leftSide=GetMousePosition().x<r.x+r.width*0.28f;
+                        int dir=rightSide?1:(leftSide?-1:0);
+                        if(dir==0)dir=1;
+                        switch(settingsRow){
+                            case 0:save.settings.sensitivity=Clamp(save.settings.sensitivity+dir*0.0002f,0.0008f,0.008f);break;
+                            case 1:save.settings.invertY=!save.settings.invertY;break;
+                            case 2:save.settings.fov=Clamp(save.settings.fov+dir*5,60,105);break;
+                            case 3:save.settings.hints=!save.settings.hints;break;
+                            case 4:save.settings.shake=!save.settings.shake;break;
+                            case 5:save.settings.sfx=Clamp(save.settings.sfx+dir*0.05f,0,1);break;
+                            case 6:save.settings.music=Clamp(save.settings.music+dir*0.05f,0,1);break;
+                            case 7:save.settings.crosshair=(save.settings.crosshair+dir+3)%3;break;
+                            case 8:save.settings.displayMode=(save.settings.displayMode+dir+3)%3;SetDisplayMode(save.settings,save.settings.displayMode);break;
+                            case 9:save.settings.performance=!save.settings.performance;break;
+                        }
+                        break;
+                    }
+                }
+            }
             if(IsKeyPressed(KEY_LEFT)||IsKeyPressed(KEY_RIGHT)||IsKeyPressed(KEY_ENTER)){
                 int dir=(IsKeyPressed(KEY_LEFT)?-1:1);
                 switch(settingsRow){
@@ -754,10 +785,10 @@ int main(int argc,char** argv){
             if(screen==Screen::PLAYING&&level.objective!=Objective::SURVIVE&&timeLeft<=0){ReleaseMouse(mouse);screen=Screen::GAMEOVER;}
             if(level.objective==Objective::SURVIVE&&timeLeft<=0){save.unlocked=std::max(save.unlocked,level.id+1);save.stars[level.id]=3;SaveGame(save);ReleaseMouse(mouse);screen=level.id==LEVELS?Screen::COMPLETE:Screen::LEVELS;}
         }else if(screen==Screen::PAUSED){
-            if(IsKeyPressed(KEY_ESCAPE)){StartLevel(level.id);}
+            if(IsKeyPressed(KEY_ESCAPE)){ResumeLevel();}
             float cx=GetScreenWidth()/2.0f-190;
-            if(Button({cx,330,380,56})){StartLevel(level.id);ClickSound();}
-            else if(Button({cx,396,380,56})){screen=Screen::SETTINGS;ClickSound();}
+            if(Button({cx,330,380,56})){ResumeLevel();ClickSound();}
+            else if(Button({cx,396,380,56})){settingsReturn=Screen::PAUSED;screen=Screen::SETTINGS;ClickSound();}
             else if(Button({cx,462,380,56})){screen=Screen::MENU;ClickSound();}
         }else if(screen==Screen::GAMEOVER){
             if(IsKeyPressed(KEY_R)||Button({GetScreenWidth()/2.0f-190,465,380,56}))StartLevel(level.id);
