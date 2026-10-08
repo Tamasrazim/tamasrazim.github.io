@@ -381,8 +381,8 @@ int main(int argc,char**argv){
             else if(Btn({x,499,380,54})){if(IsSoundValid(assets.click))PlaySound(assets.click);break;}
         }else if(screen==Screen::LEVELS){
             Rectangle backRect{GetScreenWidth()/2.0f-170,GetScreenHeight()-78,340,48};
-            if(IsKeyPressed(KEY_ESCAPE)||Btn(backRect))screen=Screen::MENU;int cols=10,cw=82,ch=55,sx=(GetScreenWidth()-cols*cw)/2,sy=145;
-            for(int i=1;i<=LEVELS;i++){int col=(i-1)%cols,row=(i-1)/cols;Rectangle r{float(sx+col*cw+4),float(sy+row*ch+4),74,47};if(i<=save.unlocked&&Btn(r)){start(i);break;}}
+            if(IsKeyPressed(KEY_ESCAPE)||Btn(backRect)){if(IsSoundValid(assets.click))PlaySound(assets.click);screen=Screen::MENU;}int cols=10,cw=82,ch=55,sx=(GetScreenWidth()-cols*cw)/2,sy=145;
+            for(int i=1;i<=LEVELS;i++){int col=(i-1)%cols,row=(i-1)/cols;Rectangle r{float(sx+col*cw+4),float(sy+row*ch+4),74,47};if(i<=save.unlocked&&Btn(r)){if(IsSoundValid(assets.click))PlaySound(assets.click);start(i);break;}}
         }else if(screen==Screen::SETTINGS){
             Rectangle backRect{GetScreenWidth()/2.0f-170,GetScreenHeight()-78,340,48};
             if(IsKeyPressed(KEY_ESCAPE)||Btn(backRect)){SaveGame(save);screen=settingsReturn;}
@@ -418,7 +418,7 @@ int main(int argc,char**argv){
             }
         }else if(screen==Screen::CREDITS){if(IsKeyPressed(KEY_ESCAPE)||IsMouseButtonPressed(MOUSE_BUTTON_LEFT))screen=Screen::MENU;}
         else if(screen==Screen::PLAYING){
-            if(!IsWindowFocused()){if(captured)release();screen=Screen::PAUSED;}
+            if(!IsWindowFocused()){if(captured)release();screen=Screen::PAUSED;continue;}
             if(IsKeyPressed(KEY_ESCAPE)){release();screen=Screen::PAUSED;}
             if(IsWindowFocused()&&!captured)capture();
             if(screen==Screen::PLAYING&&captured){Vector2 md=GetMouseDelta();if(ignoreDelta){md={0,0};ignoreDelta=false;}yaw-=md.x*save.settings.sens;pitch+=(save.settings.invertY?md.y:-md.y)*save.settings.sens;pitch=Clamp(pitch,-1.48f,1.48f);}
@@ -438,12 +438,13 @@ int main(int argc,char**argv){
             if(IsKeyPressed(KEY_SPACE)&&grounded){vel.y=6.7f;grounded=false;}vel.y-=18*dt;player.y+=vel.y*dt;if(player.y<=.9f){player.y=.9f;vel.y=0;grounded=true;}
             timeLeft-=dt;scan=std::max(0.0f,scan-dt);screenShake=std::max(0.0f,screenShake-dt*4.5f);damageCooldown=std::max(0.0f,damageCooldown-dt);if(IsKeyPressed(KEY_Q))scan=1.4f;if(Vector3Length(mv)>.01f)bob+=dt*(sprint?13:9);else bob+=dt*2;
             for(const auto&h:level.hazards){Vector3 q=V(h.base.x+sinf(float(GetTime())*h.speed+h.phase)*1.5f,h.base.y,h.base.z);if(damageCooldown<=0.0f&&Vector3Distance(player,q)<1.0f){damage();break;}}
+            if(screen!=Screen::PLAYING)continue;
             if(IsKeyPressed(KEY_E)){float best=2.25f;int type=-1,idx=-1;for(int i=0;i<(int)level.switches.size();i++)if(!level.switches[i].active&&Vector3Distance(player,level.switches[i].p)<best){best=Vector3Distance(player,level.switches[i].p);type=1;idx=i;}for(int i=0;i<(int)level.pickups.size();i++)if(!level.pickups[i].taken&&Vector3Distance(player,level.pickups[i].p)<best){best=Vector3Distance(player,level.pickups[i].p);type=2;idx=i;}
                 if(type==1){level.switches[idx].active=true;sw++;if(IsSoundValid(assets.click))PlaySound(assets.click);}
                 else if(type==2){auto&p=level.pickups[idx];if(p.kind==2){if(p.order==mem+1){p.taken=true;mem++;}else{mem=0;timeLeft=std::max(0.0f,timeLeft-6);health=std::max(1.0f,health-10);if(IsSoundValid(assets.hit))PlaySound(assets.hit);}}else{p.taken=true;if(p.kind==0)got++;}if(IsSoundValid(assets.pickup))PlaySound(assets.pickup);}
             }
             bool done=ObjectiveDone(level,got,sw,mem);
-            if(done&&Vector3Distance(player,level.exit)<2.6f){int stars=timeLeft/level.timeLimit>.55f&&health>50?3:(timeLeft>0?2:1);save.stars[level.id]=std::max(save.stars[level.id],stars);if(level.id<LEVELS)save.unlocked=std::max(save.unlocked,level.id+1);SaveGame(save);release();screen=level.id==LEVELS?Screen::COMPLETE:Screen::LEVELS;}
+            if(screen==Screen::PLAYING&&done&&Vector3Distance(player,level.exit)<2.6f){int stars=timeLeft/level.timeLimit>.55f&&health>50?3:(timeLeft>0?2:1);save.stars[level.id]=std::max(save.stars[level.id],stars);if(level.id<LEVELS)save.unlocked=std::max(save.unlocked,level.id+1);SaveGame(save);release();screen=level.id==LEVELS?Screen::COMPLETE:Screen::LEVELS;}
             if(screen==Screen::PLAYING&&level.objective!=Objective::SURVIVE&&timeLeft<=0){release();screen=Screen::GAMEOVER;}
             if(level.objective==Objective::SURVIVE&&timeLeft<=0){save.stars[level.id]=3;if(level.id<LEVELS)save.unlocked=std::max(save.unlocked,level.id+1);SaveGame(save);release();screen=level.id==LEVELS?Screen::COMPLETE:Screen::LEVELS;}
         }else if(screen==Screen::PAUSED){
