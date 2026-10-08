@@ -151,6 +151,21 @@ Level BuildLevel(int id){
         }
         case Objective::SURVIVE:l.required=0;break;
     }
+    if(l.id==100){
+        l.title="THE VAULT CORE";
+        l.objective=Objective::COMBO;
+        l.required=4;
+        l.timeLimit=420.0f;
+        l.pickups.clear();
+        l.switches.clear();
+        for(int i=0;i<4;i++)
+            l.pickups.push_back({V(-4.5f+3.0f*i,0.8f,14.0f),0,0,false});
+        for(int i=0;i<4;i++)
+            l.switches.push_back({V(-4.5f+3.0f*i,0.9f,5.0f),false});
+        l.pickups.push_back({V(0.0f,0.8f,-4.0f),1,0,false});
+        const std::array<Vector3,4> coreMemory={V(-3.2f,0.72f,-12.0f),V(3.2f,0.72f,-12.0f),V(-3.2f,0.72f,-18.0f),V(3.2f,0.72f,-18.0f)};
+        for(int i=0;i<4;i++)l.pickups.push_back({coreMemory[i],2,i+1,false});
+    }
     int hz=std::max(2,1+l.tier/2);
     for(int i=0;i<hz;i++){
         Vector3 p{};
@@ -159,13 +174,23 @@ Level BuildLevel(int id){
             int sg=((i+attempt)&1)?1:-1;
             float x=sg*(10+rnd()*14),z=-16+rnd()*30;
             p=Safe(l,V(x,0.55f,z),0.75f,300+i*53+attempt);
-            bool bad=Vector3Distance(p,l.start)<6.0f||Vector3Distance(p,l.exit)<5.0f;
+            bool bad=!Clear(l,p,0.75f)||Vector3Distance(p,l.start)<6.0f||Vector3Distance(p,l.exit)<5.0f;
             for(const auto& q:l.pickups)if(Vector3Distance(p,q.p)<2.4f)bad=true;
             for(const auto& q:l.switches)if(Vector3Distance(p,q.p)<2.4f)bad=true;
             for(const auto& q:l.hazards)if(Vector3Distance(p,q.base)<2.8f)bad=true;
             if(!bad)placed=true;
         }
-        if(!placed)p=V(((i&1)?1.0f:-1.0f)*15.0f,0.55f,0.0f);
+        if(!placed){
+            for(int side=0;side<2&&!placed;side++)for(int z=-20;z<=20&&!placed;z+=4){
+                Vector3 candidate=V(side==0?-20.0f:20.0f,0.55f,float(z));
+                bool bad=!Clear(l,candidate,0.75f)||Vector3Distance(candidate,l.start)<6.0f||Vector3Distance(candidate,l.exit)<5.0f;
+                for(const auto& q:l.pickups)if(Vector3Distance(candidate,q.p)<2.4f)bad=true;
+                for(const auto& q:l.switches)if(Vector3Distance(candidate,q.p)<2.4f)bad=true;
+                for(const auto& q:l.hazards)if(Vector3Distance(candidate,q.base)<2.8f)bad=true;
+                if(!bad){p=candidate;placed=true;}
+            }
+        }
+        if(!placed)continue;
         l.hazards.push_back({p,p,rnd()*TAU,1.0f+0.04f*l.tier});
     }
     return l;
@@ -696,7 +721,12 @@ int main(int argc,char**argv){
             if(screen!=Screen::PLAYING)continue;
             if(IsKeyPressed(KEY_E)){float best=2.25f;int type=-1,idx=-1;for(int i=0;i<(int)level.switches.size();i++)if(!level.switches[i].active&&Vector3Distance(player,level.switches[i].p)<best){best=Vector3Distance(player,level.switches[i].p);type=1;idx=i;}for(int i=0;i<(int)level.pickups.size();i++)if(!level.pickups[i].taken&&Vector3Distance(player,level.pickups[i].p)<best){best=Vector3Distance(player,level.pickups[i].p);type=2;idx=i;}
                 if(type==1){level.switches[idx].active=true;sw++;interactFlash=1.0f;Burst(level.switches[idx].p,Theme(level.theme),18,2.1f);if(IsSoundValid(assets.click))PlaySound(assets.click);}
-                else if(type==2){auto&p=level.pickups[idx];if(p.kind==2){if(p.order==mem+1){p.taken=true;p.burst=0.95f;interactFlash=1.0f;Burst(p.p,MAGENTA,22,2.6f);mem++;}else{mem=0;timeLeft=std::max(0.0f,timeLeft-6);health=std::max(1.0f,health-10);if(IsSoundValid(assets.hit))PlaySound(assets.hit);}}else{p.taken=true;p.burst=0.95f;interactFlash=1.0f;Color burstColor=p.kind==0?SKYBLUE:GOLD;Burst(p.p,burstColor,22,2.6f);if(p.kind==0)got++;}if(IsSoundValid(assets.pickup)){SetSoundVolume(assets.pickup,save.settings.sfx);PlaySound(assets.pickup);}}
+                else if(type==2){auto&p=level.pickups[idx];if(p.kind==2){if(p.order==mem+1){p.taken=true;p.burst=0.95f;interactFlash=1.0f;Burst(p.p,MAGENTA,22,2.6f);mem++;}else{
+                    for(auto& q:level.pickups)if(q.kind==2){q.taken=false;q.burst=0.0f;}
+                    mem=0;timeLeft=std::max(0.0f,timeLeft-6);health=std::max(1.0f,health-10);
+                    Burst(p.p,MAGENTA,16,1.8f);
+                    if(IsSoundValid(assets.hit)){SetSoundVolume(assets.hit,save.settings.sfx);PlaySound(assets.hit);}
+                }}else{p.taken=true;p.burst=0.95f;interactFlash=1.0f;Color burstColor=p.kind==0?SKYBLUE:GOLD;Burst(p.p,burstColor,22,2.6f);if(p.kind==0)got++;}if(IsSoundValid(assets.pickup)){SetSoundVolume(assets.pickup,save.settings.sfx);PlaySound(assets.pickup);}}
             }
             bool done=ObjectiveDone(level,got,sw,mem);
             if(screen==Screen::PLAYING&&done&&Vector3Distance(player,level.exit)<2.6f){int stars=timeLeft/level.timeLimit>.55f&&health>50?3:(timeLeft>0?2:1);save.stars[level.id]=std::max(save.stars[level.id],stars);if(level.id<LEVELS)save.unlocked=std::max(save.unlocked,level.id+1);SaveGame(save);release();screen=level.id==LEVELS?Screen::COMPLETE:Screen::LEVELS;}
