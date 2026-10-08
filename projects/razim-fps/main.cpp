@@ -76,7 +76,7 @@ struct Assets{
     Texture2D floor{},wall{},metal{},hazard{},crystal{},terminal{},sky{};
     Sound theme{},pickup{},hit{},click{},complete{};
     Model terminalModel{},drone{};
-    bool soundsReady=false,musicReady=false,terminalReady=false,droneReady=false;
+    bool soundsReady=false,musicReady=false,terminalReady=false,droneReady=false,materialBankReady=false;std::array<Color,10> materialTints{};
 };
 struct MouseState{
     bool captured=false;
@@ -396,6 +396,14 @@ static Sound MakeThemeSound(){
     Wave w{};w.frameCount=frames;w.sampleRate=sampleRate;w.sampleSize=16;w.channels=channels;w.data=data;
     Sound out=LoadSoundFromWave(w);UnloadWave(w);return out;
 }
+static Color ReadMaterialTint(const char* file,Color fallback){
+    if(!FileExists(file))return fallback;
+    std::ifstream in(file,std::ios::binary);
+    uint32_t h=2166136261u;char c=0;int n=0;
+    while(n<4096&&in.get(c)){h^=uint8_t(c);h*=16777619u;n++;}
+    if(n==0)return fallback;
+    return Color{uint8_t(145+(h&63)),uint8_t(155+((h>>8)&63)),uint8_t(165+((h>>16)&63)),255};
+}
 static Assets LoadAssets(bool safeMode){
     Assets a;
     a.floor=Tex("assets/textures/floor.bmp",Color{30,39,50,255},!safeMode);
@@ -404,7 +412,7 @@ static Assets LoadAssets(bool safeMode){
     a.hazard=Tex("assets/textures/hazard.bmp",Color{165,42,48,255},!safeMode);
     a.crystal=Tex("assets/textures/crystal.bmp",Color{55,180,235,255},!safeMode);
     a.terminal=Tex("assets/textures/terminal.bmp",Color{50,180,155,255},!safeMode);
-    a.sky=Tex("assets/textures/sky.bmp",Color{5,10,18,255},!safeMode);
+    a.sky=Tex("assets/textures/sky.bmp",Color{5,10,18,255},!safeMode);\n    if(!safeMode){for(int i=0;i<10;i++){std::string p="assets/procedural/vault-material-"+TextFormat("%02d",i+1)+".vtexseed";a.materialTints[i]=ReadMaterialTint(p.c_str(),Color{165,180,195,255});}a.materialBankReady=true;}
     if(!safeMode&&IsAudioDeviceReady()){
         if(FileExists("assets/audio/neon-vault-theme.wav"))a.theme=LoadSound("assets/audio/neon-vault-theme.wav");
         if(!IsSoundValid(a.theme))a.theme=MakeThemeSound();
@@ -544,11 +552,12 @@ static bool ObjectiveComplete(const Level& l,int collected,int switchesActive,in
 static void DrawWorld(const Level& l,const Assets& a,const Vector3& player,float yaw,float pitch,float bob,const Settings& s,float scan,int collected,int switchesActive,int memoryStep){
     Camera3D cam{};cam.position=Vector3Add(player,V(0,0.62f+bob,0));cam.target=Vector3Add(cam.position,V(sinf(yaw)*cosf(pitch),sinf(pitch),cosf(yaw)*cosf(pitch)));cam.up=V(0,1,0);cam.fovy=s.fov;cam.projection=CAMERA_PERSPECTIVE;
     BeginMode3D(cam);
-    DrawTexturedBox(a.floor,V(0,-0.05f,0),V(58,0.1f,58),WHITE,2.1f);
-    DrawTexturedBox(a.wall,V(0,5.0f,0),V(58,0.1f,58),WHITE,2.8f);
+    Color mat=a.materialBankReady?a.materialTints[l.theme]:WHITE;
+    DrawTexturedBox(a.floor,V(0,-0.05f,0),V(58,0.1f,58),mat,2.1f);
+    DrawTexturedBox(a.wall,V(0,5.0f,0),V(58,0.1f,58),Color{uint8_t(std::min(255,int(mat.r)+18)),uint8_t(std::min(255,int(mat.g)+18)),uint8_t(std::min(255,int(mat.b)+18)),255},2.8f);
     for(const auto& w:l.walls){
         Texture2D t=w.material==2?a.metal:a.wall;
-        DrawTexturedBox(t,w.pos,w.size,WHITE,w.material==2?1.7f:2.4f);
+        DrawTexturedBox(t,w.pos,w.size,w.material==2?Color{185,195,205,255}:mat,w.material==2?1.7f:2.4f);
         DrawCubeWires(w.pos,w.size.x,w.size.y,w.size.z,Color{65,96,115,170});
     }
     for(const auto& d:l.doors)if(!d.open){
