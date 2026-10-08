@@ -27,7 +27,7 @@ main{padding:28px 0 90px}.hero{display:grid;grid-template-columns:1.35fr .8fr;ga
 .preview{margin-top:13px;padding-top:13px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px}.previewstage{min-height:155px;border:1px solid #282828;border-radius:10px;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#1a1a1a 0,#080808 67%)}.glowkey{width:88px;height:60px;border-radius:10px;border:1px solid #575757;background:#111;display:grid;place-items:center;box-shadow:0 0 42px var(--rgb,#6d8dff88)}
 .editor{margin-top:14px;padding-top:14px;border-top:1px solid #242424}.editorhead{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:10px;letter-spacing:.09em}.editorhead span{color:var(--accent)}.editortabs,.editoractions,.mods,.cats{display:flex;flex-wrap:wrap;gap:5px}.editortabs{margin:10px 0}.editortabs button,.editoractions button,.mods button,.cats button{border:1px solid #292929;background:#0d0d0d;color:#92928c;border-radius:6px;padding:7px 8px;cursor:pointer;font-size:8px}.editortabs button.active,.mods button.active,.cats button.active{color:#050505;background:var(--ink);border-color:var(--ink)}
 .tools{display:flex;gap:7px;flex-wrap:wrap}.tools>div{display:flex;gap:4px;flex-wrap:wrap}.tools input,.comboRow select{flex:1;min-width:160px;background:#080808;border:1px solid #303030;color:var(--ink);border-radius:6px;padding:8px}.usagegrid,.presetgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;max-height:215px;overflow:auto;margin-top:8px}.usage,.preset{border:1px solid #242424;background:#0d0d0d;color:#c5c5bf;border-radius:6px;padding:7px;text-align:left;cursor:pointer}.usage.selected,.preset.selected{border-color:var(--accent);box-shadow:0 0 10px #d9ff5712}.usage b,.preset b{display:block;font-size:9px}.usage small,.preset small{display:block;color:#65655f;font-size:7px;margin-top:2px}.comboRow{display:flex;gap:7px;flex-wrap:wrap}.combopreview{margin-top:8px;padding:8px;border:1px solid #24343a;background:#071012;color:#bdebf4;border-radius:6px;font-size:9px}.editoractions{margin-top:10px;padding-top:10px;border-top:1px solid #222}.editoractions .main{background:var(--ink);color:#050505;border-color:var(--ink);font-weight:800}.editoractions .danger{color:#ff9da7;border-color:#4d2d31}.editorstatus{margin-top:8px;padding:8px;border:1px solid #222;background:#060606;border-radius:6px;min-height:32px;color:#777;font-size:8px}
-.field{display:grid;gap:6px;margin:11px 0}.field label{color:#70706a;text-transform:uppercase;font-size:8px;letter-spacing:.12em}.field input,.field select{width:100%;background:#080808;color:var(--ink);border:1px solid #303030;border-radius:7px;padding:9px}.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.effectgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.effect{border:1px solid #2a2a2a;background:#0b0b0b;color:#92928c;border-radius:7px;padding:8px;cursor:pointer;text-align:left;font-size:9px}.effect.selected{color:var(--ink);border-color:#555;background:#111}.leds{display:grid;grid-template-columns:repeat(15,1fr);gap:5px;max-width:560px}.led{height:12px;border-radius:3px;background:#111}
+.field{display:grid;gap:6px;margin:11px 0}.field label{color:#70706a;text-transform:uppercase;font-size:8px;letter-spacing:.12em}.field input,.field select{width:100%;background:#080808;color:var(--ink);border:1px solid #303030;border-radius:7px;padding:9px}.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.effectgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.effect{border:1px solid #2a2a2a;background:#0b0b0b;color:#92928c;border-radius:7px;padding:8px;cursor:pointer;text-align:left;font-size:9px}.effect.selected{color:var(--ink);border-color:#555;background:#111}.wirelessgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.wirelessgrid .kv{grid-template-columns:1fr 1fr}.wireless-actions{display:flex;gap:7px;flex-wrap:wrap}.packet-tools{display:grid;grid-template-columns:1fr 1fr;gap:8px}.packet-tools input,.packet-tools select{width:100%;background:#080808;color:var(--ink);border:1px solid #303030;border-radius:7px;padding:9px}.wireless-console{background:#040404;border:1px solid #292929;border-radius:8px;padding:11px;min-height:150px;max-height:300px;overflow:auto;white-space:pre-wrap;color:#8fdff0;font-size:9px}.led-preview{display:grid;grid-template-columns:repeat(18,1fr);gap:3px;margin-top:10px}.led-preview span{height:11px;border-radius:2px;background:#111;box-shadow:0 0 8px #000}.led-preview span.on{background:#6d8dff;box-shadow:0 0 12px #6d8dff88}.leds{display:grid;grid-template-columns:repeat(15,1fr);gap:5px;max-width:560px}.led{height:12px;border-radius:3px;background:#111}
 footer{border-top:1px solid var(--line);padding:22px 0 34px;color:#60605b;display:flex;justify-content:space-between;gap:16px;font-size:9px}
 @media(max-width:980px){.hero,.grid2,.reference{grid-template-columns:1fr}}@media(max-width:720px){.shell{width:min(100% - 16px,1400px)}.topin{min-height:58px}.nav button{padding:6px 7px}.heroMain{padding:22px}h1{font-size:65px}.row{grid-template-columns:1fr}.effectgrid{grid-template-columns:repeat(2,1fr)}.usagegrid,.presetgrid{grid-template-columns:repeat(3,1fr)}.livecurrent{font-size:17px}}
 </style>
@@ -38,7 +38,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;color:#60605b;displa
   <nav class="nav">
     <button class="navBtn active" data-view="dashboard">Deck</button>
     <button class="navBtn" data-view="keys">Key Lab</button>
-    <button class="navBtn" data-view="rgb">RGB Lab</button>
+    <button class="navBtn" data-view="rgb">RGB Lab</button><button class="navBtn" data-view="wireless">2.4G / BT</button>
     <button class="navBtn" data-view="diagnostics">Diagnostics</button>
   </nav>
 </div></header>
@@ -60,7 +60,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;color:#60605b;displa
 </section>
 
 <div class="tabs">
-  <button class="tab active" data-tab="dashboard">Device</button><button class="tab" data-tab="keys">Key Lab</button><button class="tab" data-tab="rgb">RGB Lab</button><button class="tab" data-tab="diagnostics">Diagnostics</button>
+  <button class="tab active" data-tab="dashboard">Device</button><button class="tab" data-tab="keys">Key Lab</button><button class="tab" data-tab="rgb">RGB Lab</button><button class="tab" data-tab="wireless">2.4G / BT</button><button class="tab" data-tab="diagnostics">Diagnostics</button>
 </div>
 
 <section id="dashboard" class="view active">
@@ -127,7 +127,65 @@ Open Key Lab to test live input and mappings.</div></article>
   </div>
 </section>
 
-<section id="diagnostics" class="view">
+
+<section id="wireless" class="view">
+  <div class="grid2">
+    <article class="card panel">
+      <div class="livetop"><div><div class="eyebrow">receiver protocol / HID output</div><h2 style="margin-top:4px">2.4G WIRELESS LAB</h2></div><span id="wirelessBadge" class="badge live">simulation</span></div>
+      <div class="notice"><strong>Field-tested receiver path.</strong> The 2.4G receiver uses VID/PID <code>3554:FA09</code>, Report ID <code>0x13</code>, and 20-byte framed reports. Read mode is safe; custom RGB streaming is a persistent device write.</div>
+      <div class="kv">
+        <div><small>status</small><strong id="wirelessStatus">2.4G receiver offline</strong></div>
+        <div><small>receiver</small><strong id="wirelessId">3554:fa09</strong></div>
+        <div><small>product</small><strong id="wirelessProduct">AULA 2.4G Wireless Receiver</strong></div>
+        <div><small>transport</small><strong id="wirelessTransport">Offline simulation</strong></div>
+        <div><small>latency</small><strong id="wirelessLatency">—</strong></div>
+        <div><small>packets</small><strong id="wirelessPacketCount">—</strong></div>
+      </div>
+      <div class="actions">
+        <button id="wirelessConnectBtn" class="btn primary">Connect 2.4G receiver</button>
+        <button id="wirelessDisconnectBtn" class="btn">Disconnect</button>
+        <button id="wirelessReadBtn" class="btn">Read receiver config</button>
+      </div>
+      <div class="field"><label>Protocol collection map</label><div id="wirelessCollections" class="wirelessgrid"></div></div>
+      <div class="field"><label>Last packet</label><div id="wirelessPacketLog" class="wireless-console">No 0x13 traffic captured yet.</div></div>
+    </article>
+
+    <article class="card panel">
+      <h2>2.4G RGB STREAM</h2>
+      <p class="small">Builds the public 126-LED F75/F87 planar table. The receiver accepts 3 RGB planes × 9 chunks × 14 LEDs plus a trailer.</p>
+      <div class="packet-tools">
+        <div class="field"><label>Target effect</label><select id="wirelessEffect"><option value="0" >0 · off</option><option value="1" >1 · static</option><option value="2" >2 · breathing</option><option value="3" selected>3 · wave</option><option value="4" >4 · spectrum</option><option value="5" >5 · ripple</option><option value="6" >6 · reactive</option><option value="7" >7 · starlight</option><option value="8" >8 · rain</option><option value="9" >9 · snake</option><option value="10" >10 · marquee</option><option value="11" >11 · aurora</option><option value="12" >12 · laser</option><option value="13" >13 · firework</option><option value="14" >14 · gradient</option><option value="15" >15 · rainbow_wave</option><option value="16" >16 · prism</option><option value="17" >17 · cycle</option><option value="18" >18 · tidal</option><option value="21" >21 · custom</option></select></div>
+        <div class="field"><label>Custom color</label><div style="display:grid;grid-template-columns:62px 1fr;gap:9px;align-items:center"><input id="wirelessColor" type="color" value="#6d8dff" style="width:62px;height:42px;padding:3px"><strong id="wirelessColorOut">#6D8DFF</strong></div></div>
+      </div>
+      <div class="notice"><strong>Sequence:</strong> read 10 config fragments → switch to custom mode → send 28 per-key frames → save. The actual write button is intentionally explicit.</div>
+      <div class="led-preview" id="wirelessLedPreview"></div>
+      <div class="actions"><button id="wirelessPrepareBtn" class="btn">Prepare 126-LED solid</button><button id="wirelessSendBtn" class="btn primary">Send custom RGB</button></div>
+      <div class="field"><label>Decoded receiver config</label><div id="wirelessDecoded" class="wireless-console">Read config to populate this panel.</div></div>
+      <div class="field"><label>Stream status</label><strong id="wirelessPerKeyCount">126 LEDs · not prepared</strong><span id="wirelessSequences" class="small">sequence —</span></div>
+    </article>
+  </div>
+
+  <div class="grid2" style="margin-top:14px">
+    <article class="card panel">
+      <h2>BLUETOOTH HID</h2>
+      <div class="notice"><strong>Browser boundary.</strong> F75 Bluetooth exposes HID identity <code>3554:FA08</code> in field-tested reports, but its HID interfaces expose no feature-report transport. This lab monitors authorized HID presence; it does not pretend WebHID can send vendor RGB commands over Bluetooth.</div>
+      <div class="kv">
+        <div><small>PID</small><strong>0xFA08</strong></div>
+        <div><small>mode</small><strong id="btStatus">not authorized to WebHID</strong></div>
+        <div><small>known names</small><strong>AULA-F75 3.0 KB / 5.0 KB</strong></div>
+        <div><small>device count</small><strong id="deviceCount">—</strong></div>
+      </div>
+      <div class="actions"><span id="btBadge" class="badge warn">BT observation only</span></div>
+    </article>
+    <article class="card panel">
+      <h2>UPSTREAM REFERENCE</h2>
+      <p class="small">The implementation is based on the MIT-licensed <code>free-soldier28/Aula-Manager</code> protocol research and its field-tested 2.4G receiver notes. The upstream license is preserved in the project vendor snapshot.</p>
+      <div class="notice"><strong>Protocol checksum:</strong> byte 19 = sum(bytes 0..18) &amp; 0xFF. Every sent fragment is expected to be echoed before advancing.</div>
+      <div class="actions"><a class="btn" href="https://github.com/free-soldier28/Aula-Manager" target="_blank" rel="noopener">Open upstream</a></div>
+    </article>
+  </div>
+</section>
+\n<section id="diagnostics" class="view">
   <div class="grid2">
     <article class="card panel"><h2>RAW FEATURE REPORT</h2><div class="field"><label>Report ID</label><input id="reportId" value="0x06"></div><div class="field"><label>Command</label><select id="commandSelect"><option value="82">0x82 · safe identity probe</option><option value="84">0x84 · safe configuration probe</option></select></div><div class="actions"><button id="rawRead" class="btn primary">Send safe read</button><button id="decodeLast" class="btn">Decode</button></div><div id="rawConsole" class="console" style="margin-top:12px">No report captured yet.</div></article>
     <article class="card panel"><h2>REPORT INSPECTOR</h2><div class="kv"><div><small>bytes</small><strong id="reportSize">—</strong></div><div><small>report id</small><strong id="reportOut">—</strong></div><div><small>transport</small><strong id="reportTransport">offline simulation</strong></div><div><small>last event</small><strong id="reportEvent">—</strong></div></div><div class="notice"><strong>Conservative hardware path.</strong> Reading and observation are separated from persistent modification.</div><div id="decoded" class="console">Nothing decoded.</div></article>
@@ -137,7 +195,7 @@ Open Key Lab to test live input and mappings.</div></article>
 </main>
 
 <footer class="shell"><span>F75 PRO Control Deck / Tamasrazim</span><span><a href="../../projects/">Project index</a> · local-first · WebHID optional</span></footer>
-<script src="./app.js"></script>
+<script src="./app.js"></script><script src="./wireless.js"></script>
 <script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));</script>
 </body>
 </html>
