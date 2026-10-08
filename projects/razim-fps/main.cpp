@@ -205,7 +205,23 @@ bool Valid(const Level& l){
     }
     return true;
 }
-void Repair(Level& l){while(!Valid(l)&&l.walls.size()>4)l.walls.pop_back();}
+void Repair(Level& l){
+    if(Valid(l))return;
+    while(!Valid(l)&&l.walls.size()>4)l.walls.pop_back();
+    if(Valid(l))return;
+    // Deterministic emergency layout: keep the sealed boundary only and relocate all interactables.
+    if(l.walls.size()>4)l.walls.resize(4);
+    for(size_t i=0;i<l.pickups.size();i++){
+        l.pickups[i].p=Safe(l,V((i%2)?-3.2f:3.2f,l.pickups[i].p.y,17.0f-float(i)*4.0f),0.5f,700+i);
+    }
+    for(size_t i=0;i<l.switches.size();i++){
+        l.switches[i].p=Safe(l,V((i%2)?-3.4f:3.4f,l.switches[i].p.y,15.0f-float(i)*4.5f),0.65f,800+i);
+    }
+    for(size_t i=0;i<l.hazards.size();i++){
+        l.hazards[i].base=Safe(l,V((i%2)?14.0f:-14.0f,0.55f,-5.0f-float(i)*3.0f),0.75f,900+i);
+        l.hazards[i].p=l.hazards[i].base;
+    }
+}
 Texture2D LoadTex(const std::string& f,Color fallback){
     if(FileExists(f.c_str())){Texture2D t=LoadTexture(f.c_str());if(t.id){SetTextureFilter(t,TEXTURE_FILTER_BILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;}}
     Image im=GenImageColor(64,64,fallback);Texture2D t=LoadTextureFromImage(im);UnloadImage(im);if(t.id){SetTextureFilter(t,TEXTURE_FILTER_BILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);}return t;
@@ -608,7 +624,12 @@ int main(int argc,char**argv){
             Vector3 wish{};if(IsKeyDown(KEY_W))wish.z+=1;if(IsKeyDown(KEY_S))wish.z-=1;if(IsKeyDown(KEY_A))wish.x-=1;if(IsKeyDown(KEY_D))wish.x+=1;if(Vector3Length(wish)>.01f)wish=Vector3Normalize(wish);
             Vector3 f=V(sinf(yaw),0,cosf(yaw)),r=V(-f.z,0,f.x);Vector3 mv=Vector3Add(Vector3Scale(r,wish.x),Vector3Scale(f,wish.z));if(Vector3Length(mv)>.01f)mv=Vector3Normalize(mv);
             bool sprint=IsKeyDown(KEY_LEFT_SHIFT)&&stamina>1&&Vector3Length(mv)>.01f;float speed=sprint?8.1f:5.0f;stamina=sprint?std::max(0.0f,stamina-22*dt):std::min(100.0f,stamina+14*dt);
-            for(int i=0;i<2;i++){Vector3 n=player;n.x+=mv.x*speed*dt/2.0f;if(!IsBlocked(level,n,level.objective==Objective::SURVIVE||ObjectiveDone(level,got,sw,mem)))player.x=n.x;n=player;n.z+=mv.z*speed*dt/2.0f;if(!IsBlocked(level,n,level.objective==Objective::SURVIVE||ObjectiveDone(level,got,sw,mem)))player.z=n.z;}
+            const bool exitOpen=level.objective==Objective::SURVIVE||ObjectiveDone(level,got,sw,mem);
+            const float moveStep=speed*dt;
+            Vector3 next=player;next.x+=mv.x*moveStep;
+            if(!IsBlocked(level,next,exitOpen))player.x=next.x;
+            next=player;next.z+=mv.z*moveStep;
+            if(!IsBlocked(level,next,exitOpen))player.z=next.z;
             for(int guard=0;guard<3;guard++){
                 bool moved=false;
                 for(const auto& w:level.walls)if(HitBox(player,PLAYER_R,w.p,w.s)){
