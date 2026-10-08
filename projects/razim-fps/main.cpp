@@ -109,10 +109,10 @@ static std::string SavePath(){
     if(base&&*base){
         std::filesystem::path p=std::filesystem::path(base)/"Tamasrazim";
         std::error_code ec;std::filesystem::create_directories(p,ec);
-        return (p/"NeonVault.cfg").string();
+        return (p/"Neo.cfg").string();
     }
 #endif
-    return "NeonVault.cfg";
+    return "Neo.cfg";
 }
 static SaveData LoadGame(){
     SaveData s;std::ifstream in(SavePath());if(!in)return s;
@@ -318,7 +318,7 @@ static bool ValidateLevel(const Level& l){
 }
 static bool ValidateAllLevels(){
     for(int i=1;i<=LEVELS;i++)if(!ValidateLevel(BuildLevel(i))){std::printf("FLOOR %d INVALID\n",i);return false;}
-    std::printf("NEON VAULT VALIDATION COMPLETE: PASS\n");return true;
+    std::printf("NEO VALIDATION COMPLETE: PASS\n");return true;
 }
 
 static Texture2D Tex(const char* file,Color fallback,bool allowFile=true){
@@ -488,7 +488,7 @@ static void DrawIntro3D(float t,const Assets& a){
     DrawRectangle(0,0,w,h,Color{0,3,8,(unsigned char)(70*(1-p))});
     float title=Clamp((t-4.9f)/0.9f,0,1),sub=Clamp((t-5.5f)/0.7f,0,1);
     CenterText("TAMASRAZIM PRESENTS",70,17,Color{150,200,220,(unsigned char)(190*title)});
-    CenterText("NEON VAULT",h/2-35,64,Color{240,252,255,(unsigned char)(255*title)});
+    CenterText("NEO",h/2-35,64,Color{240,252,255,(unsigned char)(255*title)});
     CenterText("100 FLOORS. ONE VAULT. ZERO SHORTCUTS.",h/2+42,17,Color{155,205,225,(unsigned char)(220*sub)});
     DrawText("ENTER / ESC — SKIP",w-190,h-34,12,Color{125,150,165,220});
 }
@@ -501,7 +501,7 @@ static void DrawMenu(const SaveData& save){
     for(int i=0;i<8;i++){float z=6-i*4.5f;DrawCube(V(0,0.1f,z),17,0.1f,0.12f,Color{30,86,105,255});}
     EndMode3D();
     DrawRectangle(0,0,GetScreenWidth(),GetScreenHeight(),Color{0,4,9,150});
-    CenterText("NEON VAULT",72,64,RAYWHITE);
+    CenterText("NEO",72,64,RAYWHITE);
     CenterText("100-FLOOR FIRST-PERSON PUZZLE EXPEDITION",148,18,LIGHTGRAY);
     CenterText(TextFormat("PROGRESS  %03d / %03d",save.unlocked,LEVELS),180,15,SKYBLUE);
     float cx=GetScreenWidth()/2.0f-190;
@@ -572,11 +572,11 @@ int main(int argc,char** argv){
     EnsureWorkingDirectory();
 #endif
     SetConfigFlags(FLAG_WINDOW_RESIZABLE|FLAG_VSYNC_HINT);
-    InitWindow(startupTest?640:1440,startupTest?360:900,"NEON VAULT");
+    InitWindow(startupTest?640:1440,startupTest?360:900,"NEO");
     if(!IsWindowReady()){if(startupTest)return 0;return 2;}
     EnableCursor();SetMouseCursor(MOUSE_CURSOR_DEFAULT);SetExitKey(KEY_NULL);SetTargetFPS(144);
     if(startupTest){
-        BeginDrawing();ClearBackground(Color{3,8,13,255});DrawText("NEON VAULT STARTUP TEST",24,24,24,RAYWHITE);EndDrawing();CloseWindow();return 0;
+        BeginDrawing();ClearBackground(Color{3,8,13,255});DrawText("NEO STARTUP TEST",24,24,24,RAYWHITE);EndDrawing();CloseWindow();return 0;
     }
     if(!safeMode)InitAudioDevice();
     SaveData save=LoadGame();if(save.migrated)SaveGame(save);
