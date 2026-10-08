@@ -24,7 +24,7 @@ if ($src -notmatch 'screen==Screen::SETTINGS') { throw "Settings state missing."
 if ($src -notmatch 'IsMouseButtonPressed\(MOUSE_BUTTON_LEFT\)') { throw "Clickable UI input missing." }
 if ($src -notmatch 'DrawBrokenPiece') { throw "Broken-piece animation path missing." }
 if ($src -notmatch 'float ux=std::max\(1.0f,s.x/2.2f\)') { throw "Dimension-aware material tiling missing." }
-if ($src -notmatch 'Vector3Distance\(h.base,l.start\)<4.5f') { throw "Hazard start-clearance validation missing." }
+if ($src -notmatch 'Vector3Distance\(h.base,l.start\)<6.0f') { throw "Hazard start-clearance validation missing." }
 if ($iss -notmatch 'SetupIconFile=neon-vault.ico') { throw "Custom setup icon missing." }
 if ($iss -notmatch 'UninstallDisplayIcon=\{app\}\\neon-vault.ico') { throw "Custom uninstall icon missing." }
 if ($iss -notmatch 'WizardForm.Caption') { throw "Custom installer branding missing." }
