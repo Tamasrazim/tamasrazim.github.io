@@ -5,8 +5,48 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#070707">
 <meta name="description" content="Live browser microphone processor with a spiral voice effect, monitoring, meters and local PWA support.">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/spiral-mic/">
 <link rel="manifest" href="./manifest.webmanifest">
 <title>Spiral Mic — Tamasrazim</title>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://tamasrazim.github.io/projects/spiral-mic/#app",
+      "name": "Spiral Mic",
+      "url": "https://tamasrazim.github.io/projects/spiral-mic/",
+      "description": "Live browser microphone processor with a spiral voice effect, monitoring, meters and local PWA support.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Web Browser",
+      "creator": {
+        "@id": "https://tamasrazim.github.io/#person"
+      },
+      "isPartOf": {
+        "@id": "https://tamasrazim.github.io/#website"
+      },
+      "subjectOf": {
+        "@id": "https://tamasrazim.github.io/projects/spiral-mic/#native-source"
+      }
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "@id": "https://tamasrazim.github.io/projects/spiral-mic/#native-source",
+      "name": "Spiral Mic native companion source",
+      "description": "Rust-based native audio companion source code held in the Spiral Mic project directory; it is source code rather than a claimed separate release.",
+      "codeRepository": "https://github.com/Tamasrazim/tamasrazim.github.io/tree/main/projects/spiral-mic/native",
+      "programmingLanguage": "Rust",
+      "creator": {
+        "@id": "https://tamasrazim.github.io/#person"
+      },
+      "isPartOf": {
+        "@id": "https://tamasrazim.github.io/projects/spiral-mic/#app"
+      }
+    }
+  ]
+}
+</script>
 <style>
 :root{color-scheme:dark;--bg:#070707;--fg:#f4f4f4;--muted:#909090;--line:#242424;--panel:#101010;--accent:#fff}
 *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}body{min-height:100vh}.shell{width:min(1240px,calc(100% - 32px));margin:auto}
