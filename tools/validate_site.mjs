@@ -134,8 +134,8 @@ must(!site.includes('PRO_TOOL_MANIFEST'),'homepage omits the generated micro-too
 for(const ref of ['href="/projects/code-motion/renderer/"','href="/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"'])must(site.includes(ref),'homepage exposes '+ref);
 must(!site.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!site.includes('Source files ↗')&&!site.includes('SVG source ↗')&&!site.includes('EPS source ↗'),'homepage omits direct source links');
 must(site.includes('href="/projects/tunrun/"')&&!site.includes('href="https://github.com/Tamasrazim/TUNRUN"'),'homepage links to TUNRUN project page');
-must(site.includes('I make browser tools, experiment with procedural motion, and build TUNRUN in C++.')&&!site.includes('This page links to the project pages and source code.'),'homepage introduction uses first-person copy');
-must(site.includes('TUNRUN, a C++ game in development'),'homepage describes TUNRUN status clearly');
+must(site.includes('I build browser tools and experiment with procedural motion. I figure things out by building, testing, and improving them.')&&!site.includes('build TUNRUN in C++'),'homepage introduction uses first-person copy without naming a single project');
+must(!site.includes('work on TUNRUN, a C++ game')&&!site.includes('TUNRUN, a C++ game in development'),'homepage metadata and About copy stay focused on the person');
 must(!site.includes('tamasrazim.dev'),'homepage does not claim a .dev domain');
 must(!site.includes('ProfessionalService')&&!site.includes('13650456762875223511'),'homepage schema avoids unsupported business-profile claims');
 must(siteCss.includes('prefers-reduced-motion:reduce'),'redesign respects reduced-motion preferences');
