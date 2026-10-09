@@ -1,189 +1,54 @@
-# ROBIUL RUMMAN RAZIM — TAMASRAZIM
+# Robiul Rumman Razim — Tamasrazim
 
-<p align="center">
-  <a href="https://tamasrazim.github.io/">Website</a>
-  ·
-  <a href="https://tamasrazim.github.io/projects/">Projects</a>
-  ·
-  <a href="https://github.com/Tamasrazim">GitHub</a>
-  ·
-  <a href="https://www.linkedin.com/in/Tamasrazim/">LinkedIn</a>
-</p>
+[Website](https://tamasrazim.github.io/) · [Selected projects](https://tamasrazim.github.io/projects/) · [GitHub](https://github.com/Tamasrazim)
 
----
+## What this repository contains
 
-## What this repository is
+This repository deploys my personal website and a curated set of real project pages on GitHub Pages. It also contains code, assets, product work, engineering checks, documentation, and release workflows behind those projects.
 
-This repository is the public home of Tamasrazim: a personal website, a large collection of browser tools, creative and rendering projects, experiments, product work, and several flagship applications.
+The former mass-generated one-page utility collection has been removed so the site and repository focus on projects I maintain and can explain.
 
-It is organized as a static-first GitHub Pages repository with self-contained public projects and a separate engineering and documentation layer.
+## Public project pages
 
-### Current shape
-
-| Area | Role |
+| Project | Public page |
 | --- | --- |
-| Website | Main personal site and identity surface |
-| Projects | 1,200+ individually routed browser projects |
-| Flagship apps | TRILYVA, CODE→EPS, CODE→SVG, NEON VAULT, BNC Agro Care and related products |
-| Asset Vault | Stock and creative asset workspace |
-| KYNESTRA | Architecture, modules, desktop and format work |
-| Tools | Repository validators, generators and engineering utilities |
-| Scripts | Small maintenance helpers |
-| .github | CI/CD and GitHub automation |
-| Docs | Repository architecture and policy |
-| Licenses | Ownership and third-party notices |
-
----
-
-## Public routes
-
-| Route | Purpose |
-| --- | --- |
-| `/` | Main Tamasrazim personal website |
-| `/projects/` | Public project collection |
-| `/projects/code-motion/` | Legacy public route for the TRILYVA renderer family |
-| `/projects/code-motion/renderer/` | TRILYVA renderer workspace |
-| `/projects/code-motion/batch/` | TRILYVA batch surface |
-| `/projects/code-to-eps/` | Browser vector/EPS tooling |
-| `/projects/code-to-svg/` | Browser SVG tooling |
-| `/projects/razim-fps/` | NEON VAULT |
-| `/projects/bncagrocare/` | BNC Agro Care |
-| `/projects/repo-token-meter/` | Repository Token Meter |
-| `/asset-vault/` | Stock Asset Vault |
-| `/KYNESTRA/` | KYNESTRA architecture/product workspace |
-| `/renderer/` | Legacy/public renderer compatibility surface |
-
----
-
-## Repository architecture
-
-The repository is divided into clear zones rather than mixing everything together.
-
-### Public runtime
-
-`/` — Main website and GitHub Pages entry files.
-
-`/assets/` — Site-wide images, brand material, styles and browser runtime assets.
-
-`/projects/` — The public collection of self-contained applications and experiments.
-
-`/asset-vault/` — Standalone Stock Asset Vault application.
-
-`/renderer/` — Legacy/public renderer surface kept for route compatibility.
-
-### Flagship products
-
-`/projects/code-motion/` — TRILYVA public surface. The URL is intentionally preserved because the historical route is already public.
-
-`/projects/code-to-eps/` — Vector/EPS tooling.
-
-`/projects/code-to-svg/` — SVG tooling.
-
-`/projects/razim-fps/` — NEON VAULT native Windows game, installer and release packaging.
-
-`/projects/bncagrocare/` — BNC Agro Care application and supporting material.
-
-`/KYNESTRA/` — KYNESTRA Core architecture, desktop work, modules, format definitions and releases.
-
-### Engineering
-
-`/.github/` — GitHub Actions and repository automation.
-
-`/tools/` — Reusable validators, generators, contracts and maintenance tooling.
-
-`/scripts/` — Small repository-level helper scripts.
-
-### Documentation and ownership
-
-`/docs/` — Repository documentation and architecture notes.
-
-`/LICENSES/` — Project-specific proprietary and third-party notices.
-
-Root governance files remain at root: `LICENSE`, `NOTICE.md`, `SECURITY.md`, `CONTRIBUTING.md`.
-
-The complete folder map is in [docs/REPOSITORY-STRUCTURE.md](./docs/REPOSITORY-STRUCTURE.md) and [docs/REPOSITORY-MAP.md](./docs/REPOSITORY-MAP.md).
-
----
-
-## Flagship projects
-
-### TRILYVA
-
-TRILYVA is the browser-based code-to-motion rendering workspace. The historical public URL remains `/projects/code-motion/renderer/`.
-
-The repository keeps its renderer, library, batch surface and related project material together.
-
-### NEON VAULT
-
-Native Windows first-person puzzle game with 100 generated floors, settings, installer packaging, updater support and GitHub Actions release automation.
-
-Latest production release: **neon-vault-116**
-
-[Windows installer](https://github.com/Tamasrazim/tamasrazim.github.io/releases/download/neon-vault-116/NEON-VAULT-Setup.exe) · [Release page](https://github.com/Tamasrazim/tamasrazim.github.io/releases/tag/neon-vault-116)
-
-### BNC Agro Care
-
-Customer-facing application plus supporting reference, invoice and business files.
-
-### KYNESTRA
-
-A larger product architecture containing Core contracts, modules, desktop/Tauri work, format specifications, documentation and releases.
-
----
-
-## Development model
-
-This repository is designed around stable public routes.
-
-Individual public projects normally keep their implementation, manifests, icons, service workers and project documentation inside their own folder.
-
-Shared engineering code belongs in `/tools/` or `/scripts/`.
-
-GitHub Actions belong in `/.github/workflows/`.
-
-Documentation belongs in `/docs/`.
-
-For browser testing, serve the repository through a local HTTP server rather than opening files directly with `file://`.
-
----
-
-## Organization rules
-
-1. Do not break public URLs just to make the tree look prettier.
-2. Keep projects self-contained.
-3. Keep shared tooling out of `/projects/`.
-4. Keep documentation out of runtime folders unless it documents that specific project.
-5. Keep licensing and ownership notices explicit.
-6. Give flagship products their own visible boundary.
-7. Use redirects or migrations before renaming public project folders.
-
-This is why the repository has a deliberate mix of public runtime paths, engineering folders, product workspaces and documentation instead of one giant reorganized tree.
-
----
-
-## Licensing
-
-This repository is **source-available, not open source**. Original Tamasrazim code, libraries, datasets, vectors, project files and creative content are proprietary.
-
-Do not copy, redistribute, mirror, republish, modify for redistribution, extract libraries or datasets for reuse, or incorporate original source or assets into another project without written permission.
-
-See [LICENSE](./LICENSE), [NOTICE.md](./NOTICE.md), and [LICENSES/](./LICENSES/).
-
----
-
-## Documentation
-
-- [Repository documentation](./docs/)
-- [Repository structure](./docs/REPOSITORY-STRUCTURE.md)
-- [Repository map](./docs/REPOSITORY-MAP.md)
-- [Licensing](./docs/LICENSING.md)
-- [Contributing](./CONTRIBUTING.md)
-- [Security](./SECURITY.md)
-
----
-
-## Social
-
-- Website: https://tamasrazim.github.io/
-- GitHub: https://github.com/Tamasrazim
-- LinkedIn: https://www.linkedin.com/in/Tamasrazim/
+| TRILYVA motion workspace | [Open workspace](https://tamasrazim.github.io/projects/code-motion/renderer/) |
+| NEON VAULT native Windows game | [Game page](https://tamasrazim.github.io/projects/razim-fps/) |
+| TUNRUN C++ game in development | [Project page](https://tamasrazim.github.io/projects/tunrun/) |
+| CODE → SVG | [SVG workspace](https://tamasrazim.github.io/projects/code-to-svg/) |
+| CODE → EPS | [EPS workspace](https://tamasrazim.github.io/projects/code-to-eps/) |
+| Format Forge | [Browser workspace](https://tamasrazim.github.io/projects/format-forge/) |
+| Stock Asset Vault | [Asset workspace](https://tamasrazim.github.io/asset-vault/) |
+| KYNESTRA | [Project page](https://tamasrazim.github.io/KYNESTRA/download.html) |
+| BNC AgroCare | [Business project](https://tamasrazim.github.io/projects/bncagrocare/) |
+| Repo Token Meter | [Browser tool](https://tamasrazim.github.io/projects/repo-token-meter/) |
+| MailScope | [Browser tool](https://tamasrazim.github.io/projects/mail-scope/) |
+| Spiral Mic | [Audio experiment](https://tamasrazim.github.io/projects/spiral-mic/) |
+| Prism Web Icons | [Vector workspace](https://tamasrazim.github.io/projects/prism-web-icons/) |
+
+## Repository layout
+
+- Root: personal website, not-found page, sitemap, verification, governance, and deployment support files.
+- assets: shared site styles, scripts, images, and branding; the original identity-card implementation remains in its existing styles and markup.
+- projects: curated browser tools, game pages, vector workspaces, and business applications.
+- asset-vault: standalone stock-asset workspace.
+- KYNESTRA: product architecture, modules, desktop work, formats, and release material.
+- renderer: legacy route kept for compatibility.
+- tools and scripts: validators, engineering utilities, and maintenance.
+- docs: repository architecture and policy.
+- LICENSES: project-specific licensing and third-party notices.
+- .github/workflows: CI, deployment, application checks, and native release automation.
+
+## Structure rules
+
+1. Keep the personal introduction about me, not about one particular project.
+2. Keep the identity-card markup and original artwork intact.
+3. Give each featured project a working project page; do not send visitors directly to source folders.
+4. Distinguish browser tools, native games, and unfinished projects.
+5. Preserve stable public paths for retained work.
+6. Keep shared assets and scripts outside individual product folders unless a product owns the asset.
+7. Run the site validation workflow before treating a structural change as complete.
+
+## Validation
+
+The site validator checks important routes and local references, duplicate HTML IDs, the original identity-card markup, JSON-LD, shared JavaScript parsing, key application pages, and the CODE→EPS icon library.

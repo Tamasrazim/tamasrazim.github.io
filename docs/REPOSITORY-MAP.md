@@ -1,96 +1,38 @@
 # Repository Map
 
-## 1. Public website layer
+## Public website
 
-### /
-The main Tamasrazim personal website and GitHub Pages entry point.
+- `/` — personal home page.
+- `/projects/` — curated project directory with search and category filters.
+- `/assets/` — shared site styles, scripts, images, and branding.
+- `/asset-vault/` — Stock Asset Vault application.
+- `/renderer/` — legacy renderer route retained for compatibility.
 
-### /assets/
-Site-wide design assets, styles, browser-side runtime helpers, brand material and images.
+## Maintained projects
 
-### /projects/
-The public project collection. This currently contains 1,200+ individual project folders ranging from calculators and diagnostics to full applications.
+- `/projects/code-motion/` and `/projects/code-motion/renderer/` — TRILYVA's established public route.
+- `/projects/code-to-svg/` — browser SVG workspace.
+- `/projects/code-to-eps/` — browser vector/EPS workspace.
+- `/projects/razim-fps/` — NEON VAULT native Windows game page.
+- `/projects/tunrun/` — TUNRUN game project page.
+- `/projects/format-forge/` — browser file workspace.
+- `/projects/mail-scope/` — email and DNS inspection workspace.
+- `/projects/repo-token-meter/` — repository analysis tool.
+- `/projects/spiral-mic/` — microphone/audio experiment.
+- `/projects/prism-web-icons/` — vector icon workspace.
+- `/projects/bncagrocare/` — agriculture catalogue and invoice workflow.
+- `/KYNESTRA/` — architecture, desktop work, modules, formats, and release material.
 
-### /asset-vault/
-The standalone Stock Asset Vault application.
+## Engineering and automation
 
-### /renderer/
-A legacy/public renderer surface retained for route compatibility.
+- `/.github/workflows/` — CI, site validation, deployment, and release workflows.
+- `/tools/` — validators and engineering utilities.
+- `/scripts/` — maintenance and repository scripts.
+- `/docs/` — repository architecture and policy.
+- `/LICENSES/` — project-specific licensing and third-party notices.
 
-## 2. Flagship products
+## Root support files
 
-### /projects/code-motion/
-The legacy public route for the TRILYVA renderer family.
+Root keeps index.html, 404.html, .nojekyll, robots.txt, sitemap.xml, Google verification, og-image.jpg, governance documents, and legacy files with a known purpose.
 
-Important public surfaces:
-- /projects/code-motion/
-- /projects/code-motion/renderer/
-- /projects/code-motion/batch/
-
-### /projects/code-to-eps/
-Browser-based vector/EPS tooling.
-
-### /projects/code-to-svg/
-Browser-based SVG tooling.
-
-### /projects/razim-fps/
-NEON VAULT, the native Windows 3D puzzle game and its release packaging.
-
-### /projects/bncagrocare/
-BNC Agro Care customer-facing application and supporting business material.
-
-### /KYNESTRA/
-The larger KYNESTRA architecture, desktop shell, modules, format specifications and release material.
-
-### /projects/repo-token-meter/
-Repository measurement and token/size analysis project.
-
-## 3. Engineering and automation
-
-### /.github/
-GitHub Actions, repository automation and CI/CD definitions.
-
-### /tools/
-Validation utilities, generators, contract checks and maintenance tooling.
-
-### /scripts/
-Small repository-level helper scripts.
-
-These folders intentionally remain outside the public project collection because they support development rather than define public routes.
-
-## 4. Documentation and policy
-
-### /docs/
-Repository architecture and policy documentation.
-
-### /LICENSES/
-Project-specific proprietary notices, third-party notices and website-content terms.
-
-Root-level governance files remain at the repository root where GitHub and common tooling expect them:
-- LICENSE
-- NOTICE.md
-- SECURITY.md
-- CONTRIBUTING.md
-
-## 5. Root-level public/support files
-
-The following remain at root because they participate directly in the website or GitHub Pages deployment:
-- index.html
-- 404.html
-- .nojekyll
-- robots.txt
-- sitemap.xml
-- google30d1c6b4ff08817e.html
-- og-image.jpg
-
-Legacy prototype/export files are retained for history and compatibility instead of being mixed into the documentation tree.
-
-## 6. Organization principles
-
-1. Public URLs are stable.
-2. Projects stay self-contained.
-3. Shared tooling stays shared.
-4. Documentation is separate from runtime code.
-5. Licensing is explicit.
-6. Flagship products get clear boundaries.
-7. Structural cleanup must not break the public site.
+The former generated micro-tool collection has been removed rather than presented as a 1,200-project portfolio.

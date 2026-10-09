@@ -65,7 +65,14 @@ const htmlFiles=[
   'projects/bncagrocare/index.html',
   'projects/bncagrocare/invoice/index.html',
   'projects/repo-token-meter/index.html',
-  'projects/code-to-eps/index.html'
+  'projects/code-to-eps/index.html',
+  'projects/code-to-svg/index.html',
+  'projects/format-forge/index.html',
+  'projects/mail-scope/index.html',
+  'projects/tunrun/index.html',
+  'projects/razim-fps/index.html',
+  'projects/spiral-mic/index.html',
+  'projects/prism-web-icons/index.html'
 ];
 for(const file of htmlFiles) must(exists(file),file+' exists');
 for(const file of htmlFiles) checkLocalRefs(file);
@@ -119,7 +126,9 @@ for(const file of [
 const site=read('index.html');
 const siteJs=read('assets/js/site-redesign.js');
 const siteCss=read('assets/css/site-redesign.css');
+const siteV3Css=read('assets/css/site-v3.css');
 must(site.includes('class="home-v2"'),'homepage uses redesigned visual system');
+must(site.includes('site-v3.css?v=')&&siteV3Css.includes('.v3-hero'),'homepage loads the rebuilt v3 design system');
 must(site.includes('class="id-card tilt reveal"'),'homepage preserves original ID-card markup');
 must(site.includes('id="secretReveal"')&&site.includes('id="secretNode"'),'homepage retains the hidden footer story');
 must(site.includes('site-redesign.js?v=')&&site.includes('site-redesign.css?v='),'homepage loads redesign assets');
@@ -128,8 +137,8 @@ must(schemaStart>=0&&schemaEnd>schemaStart,'homepage contains JSON-LD schema');
 const rootSchema=JSON.parse(site.slice(schemaStart+schemaOpen.length,schemaEnd));
 must(rootSchema['@context']==='https://schema.org'&&Array.isArray(rootSchema['@graph']),'homepage schema graph parses');
 must(rootSchema['@graph'].some(n=>n['@type']==='Person'&&n['@id']==='https://tamasrazim.github.io/#person'),'schema identifies person');
-must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length===6,'schema includes six featured software applications');
-must((site.match(/class="v2-project-card v2-reveal"/g)||[]).length===9,'homepage has nine featured project cards');
+must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length===8,'schema includes eight featured software applications');
+must((site.match(/class="v3-project-card v2-project-card v2-reveal v3-reveal"/g)||[]).length===12,'homepage has twelve curated project cards');
 must(!site.includes('PRO_TOOL_MANIFEST'),'homepage omits the generated micro-tool catalogue');
 for(const ref of ['href="/projects/code-motion/renderer/"','href="/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"'])must(site.includes(ref),'homepage exposes '+ref);
 must(!site.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!site.includes('Source files ↗')&&!site.includes('SVG source ↗')&&!site.includes('EPS source ↗'),'homepage omits direct source links');
@@ -138,18 +147,19 @@ must(site.includes('I build browser tools and experiment with procedural motion.
 must(!site.includes('work on TUNRUN, a C++ game')&&!site.includes('TUNRUN, a C++ game in development'),'homepage metadata and About copy stay focused on the person');
 must(!site.includes('tamasrazim.dev'),'homepage does not claim a .dev domain');
 must(!site.includes('ProfessionalService')&&!site.includes('13650456762875223511'),'homepage schema avoids unsupported business-profile claims');
-must(siteCss.includes('prefers-reduced-motion:reduce'),'redesign respects reduced-motion preferences');
+must(siteCss.includes('prefers-reduced-motion:reduce')&&siteV3Css.includes('prefers-reduced-motion:reduce'),'redesign respects reduced-motion preferences');
 must(siteJs.includes('1000/60'),'background animation is capped at 60 FPS');
 const hub=read('projects/index.html');
 must(hub.includes('<title>Projects — Tamasrazim</title>'),'project directory uses simple title');
 must(!hub.includes('PRO_TOOL_MANIFEST')&&!hub.includes('tool-suite-health-console/'),'project directory omits generated catalogue');
-must((hub.match(/class="pi-card"/g)||[]).length===9,'project directory has nine selected cards');
+must((hub.match(/class="pi-card v3-index-card"/g)||[]).length===12,'project directory has twelve curated cards');
 must(hub.includes('type="application/ld+json"'),'project directory exposes CollectionPage schema');
 for(const ref of ['href="/projects/code-motion/renderer/"','href="/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"'])must(hub.includes(ref),'project directory exposes '+ref);
 must(!hub.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!hub.includes('Source files ↗')&&!hub.includes('SVG source ↗')&&!hub.includes('EPS source ↗'),'project directory omits direct source links');
 must(hub.includes('href="/projects/tunrun/"')&&!hub.includes('href="https://github.com/Tamasrazim/TUNRUN"'),'project directory links to TUNRUN project page');
 const tunrunPage=read('projects/tunrun/index.html');
 must(tunrunPage.includes("I'm building TUNRUN as a native C++20 tunnel-runner.")&&tunrunPage.includes("It isn't a playable browser build or a release download."),'TUNRUN project page states its development status honestly');
+must(read('projects/razim-fps/index.html').includes('NEON VAULT is my native Windows x64 first-person puzzle game'),'NEON VAULT has a dedicated project page');
 must(!hub.includes('href="../renderer/"'),'project directory has no retired renderer link');
 
 const iconLibrarySource=read('projects/code-to-eps/vector-icon-library.js');
