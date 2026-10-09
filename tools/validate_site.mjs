@@ -132,9 +132,10 @@ must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length==
 must((site.match(/class="v2-project-card v2-reveal"/g)||[]).length===9,'homepage has nine featured project cards');
 must(!site.includes('PRO_TOOL_MANIFEST'),'homepage omits the generated micro-tool catalogue');
 for(const ref of ['href="/projects/code-motion/renderer/"','href="/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"'])must(site.includes(ref),'homepage exposes '+ref);
-must(site.includes('href="https://github.com/Tamasrazim/tamasrazim.github.io/tree/main/projects/code-motion"'),'homepage links to TRILYVA source files');
-must(site.includes('href="https://github.com/Tamasrazim/tamasrazim.github.io/tree/main/projects/code-to-eps"'),'homepage links to EPS exporter source files');
-must(site.includes('tunnel-runner prototype'),'homepage describes TUNRUN as a prototype');
+must(!site.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!site.includes('Source files ↗')&&!site.includes('SVG source ↗')&&!site.includes('EPS source ↗'),'homepage omits direct source links');
+must(site.includes('href="/projects/tunrun/"')&&!site.includes('href="https://github.com/Tamasrazim/TUNRUN"'),'homepage links to TUNRUN project page');
+must(site.includes('I make browser tools, experiment with procedural motion, and build TUNRUN in C++.')&&!site.includes('This page links to the project pages and source code.'),'homepage introduction uses first-person copy');
+must(site.includes('TUNRUN, a C++ game in development'),'homepage describes TUNRUN status clearly');
 must(!site.includes('tamasrazim.dev'),'homepage does not claim a .dev domain');
 must(!site.includes('ProfessionalService')&&!site.includes('13650456762875223511'),'homepage schema avoids unsupported business-profile claims');
 must(siteCss.includes('prefers-reduced-motion:reduce'),'redesign respects reduced-motion preferences');
@@ -145,9 +146,10 @@ must(!hub.includes('PRO_TOOL_MANIFEST')&&!hub.includes('tool-suite-health-consol
 must((hub.match(/class="pi-card"/g)||[]).length===9,'project directory has nine selected cards');
 must(hub.includes('type="application/ld+json"'),'project directory exposes CollectionPage schema');
 for(const ref of ['href="/projects/code-motion/renderer/"','href="/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"'])must(hub.includes(ref),'project directory exposes '+ref);
-must(hub.includes('href="https://github.com/Tamasrazim/tamasrazim.github.io/tree/main/projects/code-motion"'),'project directory links to TRILYVA source files');
-must(hub.includes('href="https://github.com/Tamasrazim/tamasrazim.github.io/tree/main/projects/code-to-eps"'),'project directory links to EPS exporter source files');
-must(hub.includes('href="https://github.com/Tamasrazim/TUNRUN"'),'project directory links to TUNRUN source repository');
+must(!hub.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!hub.includes('Source files ↗')&&!hub.includes('SVG source ↗')&&!hub.includes('EPS source ↗'),'project directory omits direct source links');
+must(hub.includes('href="/projects/tunrun/"')&&!hub.includes('href="https://github.com/Tamasrazim/TUNRUN"'),'project directory links to TUNRUN project page');
+const tunrunPage=read('projects/tunrun/index.html');
+must(tunrunPage.includes("I'm building TUNRUN as a native C++20 tunnel-runner.")&&tunrunPage.includes("It isn't a playable browser build or a release download."),'TUNRUN project page states its development status honestly');
 must(!hub.includes('href="../renderer/"'),'project directory has no retired renderer link');
 
 const iconLibrarySource=read('projects/code-to-eps/vector-icon-library.js');
