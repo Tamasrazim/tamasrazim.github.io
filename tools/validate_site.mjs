@@ -150,7 +150,7 @@ must(!site.includes('BOGURA')&&!site.includes('BANGLADESH'),'homepage omits unwa
 must((site.match(/class="v3-project-card v2-project-card v2-reveal v3-reveal"/g)||[]).length===12,'homepage has twelve curated project cards');
 must(!site.includes('PRO_TOOL_MANIFEST'),'homepage omits the generated micro-tool catalogue');
 for(const ref of ['href="/projects/code-motion/renderer/"','href="/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"'])must(site.includes(ref),'homepage exposes '+ref);
-const visibleHomeMarkup=site.replace(/<script type="application\\/ld\\+json">[\\s\\S]*?<\\/script>/gi,'');
+const visibleHomeMarkup=schemaStart>=0&&schemaEnd>schemaStart?site.slice(0,schemaStart)+site.slice(schemaEnd+'</script>'.length):site;
 must(!visibleHomeMarkup.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!visibleHomeMarkup.includes('Source files ↗')&&!visibleHomeMarkup.includes('SVG source ↗')&&!visibleHomeMarkup.includes('EPS source ↗'),'homepage omits direct source links in visible markup');
 must(site.includes('href="/projects/tunrun/"')&&!site.includes('href="https://github.com/Tamasrazim/TUNRUN"'),'homepage links to TUNRUN project page');
 must(site.includes('I build software, games, and creative tools, from native Windows applications to browser workspaces and procedural motion.')&&!site.includes('build TUNRUN in C++'),'homepage introduction describes the broader software work without naming one project');
