@@ -209,7 +209,7 @@ must(!neoDownloadPage.includes('/projects/razim-fps/')&&!neoDownloadPage.include
 must(read('projects/kynestra/index.html').includes('alpha foundation')&&read('projects/kynestra/index.html').includes('Download KYNESTRA'),'KYNESTRA has a dedicated project overview page');
 must(read('projects/kynestra/download/index.html').includes('releases/latest/download/KYNESTRA-setup.exe')&&!read('projects/kynestra/download/index.html').includes('download.html'),'KYNESTRA has a clean download route and installer link');
 must(read('KYNESTRA/download.html').includes('location.replace("/projects/kynestra/download/")'),'legacy KYNESTRA download URL redirects');
-must(read('projects/asset-vault/index.html').includes('href="/projects/asset-vault/"'),'Stock Asset Vault project page links to its workspace');
+must(read('projects/asset-vault/index.html').includes('href="/asset-vault/"'),'Stock Asset Vault project page links to its workspace');
 must(read('projects/bncagrocare/index.html').includes('href="/projects/bncagrocare/catalog/"')&&read('projects/bncagrocare/index.html').includes('href="/projects/bncagrocare/invoice/"'),'BNC Agro Care project page links to catalogue and invoice workspaces');
 for(const slug of ['format-forge','mail-scope','repo-token-meter','spiral-mic','prism-web-icons','code-to-svg','code-to-eps']) must(read('projects/'+slug+'/index.html').includes('/workspace/'),'project overview links to its separate workspace: '+slug);
 must(read('projects/razim-fps/index.html').includes('location.replace("/projects/neo/")'),'old game URL redirects to the canonical NEO page');
