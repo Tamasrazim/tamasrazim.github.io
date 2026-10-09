@@ -33,7 +33,10 @@ const manifest=JSON.parse(read(root+'/invoice/manifest.webmanifest'));
 must(manifest.start_url==='./','invoice PWA start_url is relative');
 must(Array.isArray(manifest.icons)&&manifest.icons.length>0,'invoice PWA has icons');
 
-const site=read(root+'/index.html');
+const overview=read(root+'/index.html');
+must(overview.includes('href="/projects/bncagrocare/catalog/"')&&overview.includes('href="/projects/bncagrocare/invoice/"'),'BNC project page links to both functional workspaces');
+must(fs.existsSync(root+'/catalog/index.html'),'customer catalogue workspace exists');
+const site=read(root+'/catalog/index.html');
 must(site.includes('FB_IMG_1789811611633.jpg'),'cover image is present');
 must(site.includes('aspect-ratio:16/9'),'cover presentation keeps the wide ratio');
 must(!site.includes('Invoice Studio'),'customer website has no Studio branding');

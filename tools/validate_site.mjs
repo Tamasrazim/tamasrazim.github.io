@@ -168,7 +168,7 @@ must(rootPerson.subjectOf.every(ref=>knownSchemaIds.has(ref['@id'])),'person sch
 must(!site.includes('BOGURA')&&!site.includes('BANGLADESH'),'homepage omits unwanted location text');
 must((site.match(/class="v3-project-card v2-project-card v2-reveal v3-reveal"/g)||[]).length===12,'homepage has twelve curated project cards');
 must(!site.includes('PRO_TOOL_MANIFEST'),'homepage omits the generated micro-tool catalogue');
-for(const ref of ['href="/projects/trilyva/"','href="/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"'])must(site.includes(ref),'homepage exposes '+ref);
+for(const ref of ['href="/projects/trilyva/"','href="/projects/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"'])must(site.includes(ref),'homepage exposes '+ref);
 must(!site.includes('href="/projects/code-motion/renderer/">Open workspace'),'homepage does not send the TRILYVA card straight to the renderer');
 const visibleHomeMarkup=schemaStart>=0&&schemaEnd>schemaStart?site.slice(0,schemaStart)+site.slice(schemaEnd+'</script>'.length):site;
 must(!visibleHomeMarkup.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!visibleHomeMarkup.includes('Source files ↗')&&!visibleHomeMarkup.includes('SVG source ↗')&&!visibleHomeMarkup.includes('EPS source ↗'),'homepage omits direct source links in visible markup');
@@ -190,7 +190,7 @@ const hubSchema=JSON.parse(hub.slice(hubSchemaStart+hubSchemaOpen.length,hubSche
 const hubItems=hubSchema.mainEntity&&hubSchema.mainEntity.itemListElement||[];
 must(hubSchema['@type']==='CollectionPage'&&hubItems.length===12,'project directory schema describes twelve curated projects');
 must(hubItems.every(item=>knownSchemaIds.has(item.item&&item.item['@id'])),'project directory items reference defined project entities');
-for(const ref of ['href="/projects/trilyva/"','href="/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"'])must(hub.includes(ref),'project directory exposes '+ref);
+for(const ref of ['href="/projects/trilyva/"','href="/projects/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"'])must(hub.includes(ref),'project directory exposes '+ref);
 must(!hub.includes('href="/projects/code-motion/renderer/">Open workspace'),'project directory links to the TRILYVA overview first');
 must(!hub.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!hub.includes('Source files ↗')&&!hub.includes('SVG source ↗')&&!hub.includes('EPS source ↗'),'project directory omits direct source links');
 must(hub.includes('href="/projects/tunrun/"')&&!hub.includes('href="https://github.com/Tamasrazim/TUNRUN"'),'project directory links to TUNRUN project page');
@@ -209,7 +209,7 @@ must(!neoDownloadPage.includes('/projects/razim-fps/')&&!neoDownloadPage.include
 must(read('projects/kynestra/index.html').includes('alpha foundation')&&read('projects/kynestra/index.html').includes('Download KYNESTRA'),'KYNESTRA has a dedicated project overview page');
 must(read('projects/kynestra/download/index.html').includes('releases/latest/download/KYNESTRA-setup.exe')&&!read('projects/kynestra/download/index.html').includes('download.html'),'KYNESTRA has a clean download route and installer link');
 must(read('KYNESTRA/download.html').includes('location.replace("/projects/kynestra/download/")'),'legacy KYNESTRA download URL redirects');
-must(read('projects/asset-vault/index.html').includes('href="/asset-vault/"'),'Stock Asset Vault project page links to its workspace');
+must(read('projects/asset-vault/index.html').includes('href="/projects/asset-vault/"'),'Stock Asset Vault project page links to its workspace');
 must(read('projects/bncagrocare/index.html').includes('href="/projects/bncagrocare/catalog/"')&&read('projects/bncagrocare/index.html').includes('href="/projects/bncagrocare/invoice/"'),'BNC Agro Care project page links to catalogue and invoice workspaces');
 for(const slug of ['format-forge','mail-scope','repo-token-meter','spiral-mic','prism-web-icons','code-to-svg','code-to-eps']) must(read('projects/'+slug+'/index.html').includes('/workspace/'),'project overview links to its separate workspace: '+slug);
 must(read('projects/razim-fps/index.html').includes('location.replace("/projects/neo/")'),'old game URL redirects to the canonical NEO page');
@@ -217,7 +217,7 @@ must(read('projects/razim-fps/download.html').includes('location.replace("/proje
 must(!hub.includes('href="../renderer/"'),'project directory has no retired renderer link');
 
 const iconLibrarySource=read('projects/code-to-eps/workspace/vector-icon-library.js');
-execFileSync(process.execPath,['--check',path.join(ROOT,'projects/code-to-eps/vector-icon-library.js')]);
+execFileSync(process.execPath,['--check',path.join(ROOT,'projects/code-to-eps/workspace/vector-icon-library.js')]);
 const iconCtx={window:{}};
 vm.runInNewContext(iconLibrarySource,iconCtx,{filename:'vector-icon-library.js'});
 const iconLib=iconCtx.window.TAMAS_ICON_LIBRARY;
@@ -251,9 +251,9 @@ for(const idx of sampleSet){
   renderFrame(0,0,60,fakeVec,4000,4000);
 }
 must(read('projects/code-to-eps/workspace/index.html').includes('./vector-icon-library.js'),'CODE-EPS loads canonical 10K icon library');
-must(read('projects/code-to-eps/index.html').includes('id="iconFamily"'),'CODE-EPS exposes stock icon family selector');
-must(read('projects/code-to-eps/index.html').includes('id="allIconEpsBtn"'),'CODE-EPS exposes 10K icon EPS batch export');
-must(read('projects/code-to-eps/index.html').includes('id="allIconSvgBtn"'),'CODE-EPS exposes 10K icon SVG batch export');
-must(read('projects/code-to-eps/index.html').includes('const batchSize=50'),'CODE-EPS icon batch exporter uses groups of 50');
+must(read('projects/code-to-eps/workspace/index.html').includes('id="iconFamily"'),'CODE-EPS exposes stock icon family selector');
+must(read('projects/code-to-eps/workspace/index.html').includes('id="allIconEpsBtn"'),'CODE-EPS exposes 10K icon EPS batch export');
+must(read('projects/code-to-eps/workspace/index.html').includes('id="allIconSvgBtn"'),'CODE-EPS exposes 10K icon SVG batch export');
+must(read('projects/code-to-eps/workspace/index.html').includes('const batchSize=50'),'CODE-EPS icon batch exporter uses groups of 50');
 
 console.log('Global site validation complete.');

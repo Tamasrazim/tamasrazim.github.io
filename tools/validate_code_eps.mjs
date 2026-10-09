@@ -4,7 +4,7 @@ import vm from 'node:vm';
 const read=p=>fs.readFileSync(p,'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error(msg);console.log('PASS',msg)};
 
-const libSrc=read('projects/code-to-eps/vector-icon-library.js');
+const libSrc=read('projects/code-to-eps/workspace/vector-icon-library.js');
 new Function(libSrc);
 const ctx={window:{}};
 vm.runInNewContext(libSrc,ctx,{filename:'vector-icon-library.js'});
@@ -36,7 +36,7 @@ const fake=new Proxy({},{
 });
 for(const item of lib.items) lib.render(fake,4000,4000,item);
 
-const html=read('projects/code-to-eps/index.html');
+const html=read('projects/code-to-eps/workspace/index.html');
 must(html.includes('./vector-icon-library.js'),'CODE→EPS loads icon library');
 must(html.includes('id="iconFamily"'),'icon family selector present');
 must(html.includes('id="loadIcon"'),'icon loader present');
