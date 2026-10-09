@@ -143,6 +143,7 @@ must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length==
 must(rootSchema['@graph'].some(n=>n['@type']==='SoftwareApplication'&&n.name==='KYNESTRA'&&/Windows/.test(n.operatingSystem)),'schema identifies KYNESTRA as Windows desktop software');
 must(rootSchema['@graph'].some(n=>n['@type']==='VideoGame'&&n.name==='NEON VAULT')&&rootSchema['@graph'].some(n=>n['@type']==='VideoGame'&&n.name==='TUNRUN'),'schema identifies native game projects separately');
 must(rootSchema['@graph'].some(n=>n['@type']==='SoftwareSourceCode'&&n.name==='Spiral Mic native companion source'),'schema distinguishes native source code from the browser audio app');
+must(rootSchema['@graph'].some(n=>n['@type']==='Organization'&&n['@id']==='https://tamasrazim.github.io/projects/bncagrocare/#organization'),'schema defines the BNC AgroCare organization referenced by its project page');
 const knownSchemaIds=new Set(rootSchema['@graph'].map(n=>n['@id']));
 const rootPerson=rootSchema['@graph'].find(n=>n['@type']==='Person');
 must(rootPerson.subjectOf.every(ref=>knownSchemaIds.has(ref['@id'])),'person schema references defined project entities');
