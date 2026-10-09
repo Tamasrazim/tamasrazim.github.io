@@ -115,49 +115,30 @@ for(const file of [
 }
 
 const site=read('index.html');
-const axis=read('assets/js/horizontal-mode.js');
-const siteJs=read('assets/js/site.js');
-
-must(site.includes('id="axisScroller" class="axis-scroller"'),'homepage has dedicated horizontal axis container');
-must(site.includes('horizontal-mode.js?v='),'homepage loads horizontal axis controller');
-must(!/<div class="band" aria-hidden="true">/.test(site),'homepage has no marquee bands');
-must(/<footer class="site-footer">/.test(site),'homepage has the footer at the end of the axis');
-must(!axis.includes('scheduleSnap'),'horizontal controller has no legacy snap handler');
-must(!axis.includes('wheelTarget'),'horizontal controller has no legacy wheel target');
-must((axis.match(/function cancelWheel\(/g)||[]).length===1,'horizontal controller has one wheel cancel routine');
-must(!siteJs.includes('document.body.scrollTo'),'site focus routing uses the dedicated axis container');
-must(axis.includes('function getScrollablePanel'),'horizontal controller supports vertical section panels');
-must(axis.includes('function canConsumeVertical'),'horizontal controller detects available vertical travel');
-must(axis.includes('panel.scrollTop=Math.max'),'horizontal controller applies vertical panel scrolling');
-const motion=read('assets/js/motion-core.js');
-const axisCss=read('assets/css/horizontal-mode.css');
-
-must(motion.includes('Nested vertical panels are independent scroll containers'),'motion core tracks nested vertical panels');
-must(motion.includes('panel.addEventListener(\'scroll\''),'motion core invalidates nested panel bounds');
-must(!/main#content > section,\s*\nmain#content > \.band\{\s*\n\s*contain:layout paint/.test(axisCss),'homepage sections are not paint-contained');
-
-
-for(const ref of [
-  'href="projects/code-motion/"',
-  'href="asset-vault/"',
-  'href="projects/bncagrocare/"',
-  'href="projects/bncagrocare/invoice/"',
-  'href="projects/repo-token-meter/"',
-  'href="projects/"'
-]) must(site.includes(ref),'homepage exposes '+ref);
-for(const stale of ['Personal Web','Technical Experiments','Gaming & Media']) must(!site.includes('<h3>'+stale+'</h3>'),'homepage has no placeholder project card: '+stale);
-
+const siteJs=read('assets/js/site-redesign.js');
+const siteCss=read('assets/css/site-redesign.css');
+must(site.includes('class="home-v2"'),'homepage uses redesigned visual system');
+must(site.includes('class="id-card tilt reveal"'),'homepage preserves original ID-card markup');
+must(site.includes('id="secretReveal"')&&site.includes('id="secretNode"'),'homepage retains the hidden footer story');
+must(site.includes('site-redesign.js?v=')&&site.includes('site-redesign.css?v='),'homepage loads redesign assets');
+const schemaOpen='<script type="application/ld+json">',schemaStart=site.indexOf(schemaOpen),schemaEnd=site.indexOf('</script>',schemaStart);
+must(schemaStart>=0&&schemaEnd>schemaStart,'homepage contains JSON-LD schema');
+const rootSchema=JSON.parse(site.slice(schemaStart+schemaOpen.length,schemaEnd));
+must(rootSchema['@context']==='https://schema.org'&&Array.isArray(rootSchema['@graph']),'homepage schema graph parses');
+must(rootSchema['@graph'].some(n=>n['@type']==='Person'&&n['@id']==='https://tamasrazim.github.io/#person'),'schema identifies person');
+must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length===6,'schema includes six featured software applications');
+must((site.match(/class="v2-project-card v2-reveal"/g)||[]).length===9,'homepage has nine featured project cards');
+must(!site.includes('PRO_TOOL_MANIFEST'),'homepage omits the generated micro-tool catalogue');
+for(const ref of ['href="projects/code-motion/"','href="asset-vault/"','href="projects/bncagrocare/"','href="projects/bncagrocare/invoice/"','href="projects/repo-token-meter/"','href="projects/"'])must(site.includes(ref),'homepage exposes '+ref);
+must(siteCss.includes('prefers-reduced-motion:reduce'),'redesign respects reduced-motion preferences');
+must(siteJs.includes('1000/60'),'background animation is capped at 60 FPS');
 const hub=read('projects/index.html');
-for(const ref of [
-  'href="./code-motion/"',
-  'href="../asset-vault/"',
-  'href="./bncagrocare/"',
-  'href="./bncagrocare/invoice/"',
-  'href="./repo-token-meter/"'
-]) must(hub.includes(ref),'project index exposes '+ref);
-
-must(!site.includes('href="renderer/"'),'homepage has no retired renderer link');
-must(!hub.includes('href="../renderer/"'),'project hub has no retired renderer link');
+must(hub.includes('Selected Projects — Tamasrazim'),'project directory uses curated title');
+must(!hub.includes('PRO_TOOL_MANIFEST')&&!hub.includes('tool-suite-health-console/'),'project directory omits generated catalogue');
+must((hub.match(/class="pi-card"/g)||[]).length===9,'project directory has nine selected cards');
+must(hub.includes('type="application/ld+json"'),'project directory exposes CollectionPage schema');
+for(const ref of ['href="./code-motion/"','href="../asset-vault/"','href="./bncagrocare/"','href="./bncagrocare/invoice/"','href="./repo-token-meter/"'])must(hub.includes(ref),'project directory exposes '+ref);
+must(!hub.includes('href="../renderer/"'),'project directory has no retired renderer link');
 
 const iconLibrarySource=read('projects/code-to-eps/vector-icon-library.js');
 execFileSync(process.execPath,['--check',path.join(ROOT,'projects/code-to-eps/vector-icon-library.js')]);
