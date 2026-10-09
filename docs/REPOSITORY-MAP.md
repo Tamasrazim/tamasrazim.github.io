@@ -10,7 +10,9 @@
 
 ## Maintained projects
 
-- `/projects/code-motion/` and `/projects/code-motion/renderer/` — TRILYVA's established public route.
+- `/projects/trilyva/` — TRILYVA project overview and official entry point.
+- `/projects/code-motion/` — legacy URL with a branded redirect to the TRILYVA overview.
+- `/projects/code-motion/renderer/` — the actual TRILYVA editing/rendering workspace.
 - `/projects/code-to-svg/` — browser SVG workspace.
 - `/projects/code-to-eps/` — browser vector/EPS workspace.
 - `/projects/razim-fps/` — NEON VAULT native Windows game page.

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#050505"><meta name="color-scheme" content="dark">
+<meta name="author" content="Robiul Rumman Razim"><meta name="robots" content="index,follow,max-image-preview:large">
+<title>TRILYVA — Procedural Animation Workspace | Tamasrazim</title>
+<meta name="description" content="TRILYVA is a deterministic browser-based animation workspace for procedural motion, frame-exact previews, video export experiments and batch creative workflows.">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/trilyva/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Tamasrazim"><meta property="og:title" content="TRILYVA — Procedural Animation Workspace">
+<meta property="og:description" content="Explore TRILYVA's project design, deterministic frame model, render capabilities and the actual workspace.">
+<meta property="og:url" content="https://tamasrazim.github.io/projects/trilyva/"><meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site-v3.css?v=20261010-3">
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://tamasrazim.github.io/projects/trilyva/#page",
+  "url": "https://tamasrazim.github.io/projects/trilyva/",
+  "name": "TRILYVA — Project Overview",
+  "description": "Project overview for TRILYVA, a browser-based deterministic procedural animation and rendering workspace.",
+  "isPartOf": {
+    "@id": "https://tamasrazim.github.io/#website"
+  },
+  "mainEntity": {
+    "@id": "https://tamasrazim.github.io/#trilyva"
+  },
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://tamasrazim.github.io/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Projects",
+        "item": "https://tamasrazim.github.io/projects/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "TRILYVA",
+        "item": "https://tamasrazim.github.io/projects/trilyva/"
+      }
+    ]
+  }
+}</script>
+<style>
+.tri-wrap{width:min(1120px,calc(100% - clamp(32px,7.2vw,112px)));margin-inline:auto}
+.tri-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:74px;border-bottom:1px solid rgba(241,241,237,.14)}
+.tri-navlinks{display:flex;gap:18px;flex-wrap:wrap;font:9px var(--v3-mono);color:var(--v3-muted)}
+.tri-navlinks a:hover{color:var(--v3-ink)}
+.tri-hero{padding:clamp(60px,9vw,115px) 0 46px;border-bottom:1px solid rgba(241,241,237,.14)}
+.tri-hero-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(290px,.9fr);gap:48px;align-items:center}
+.tri-kicker{font:10px var(--v3-mono);letter-spacing:.16em;color:var(--v3-muted);text-transform:uppercase}
+.tri-title{font:700 clamp(52px,10vw,116px)/.91 var(--v3-display);letter-spacing:-.09em;margin:26px 0}
+.tri-title span{color:#8b8b85}
+.tri-lead{font-size:clamp(18px,2.2vw,24px);line-height:1.65;max-width:650px}
+.tri-p{font-size:13px;color:var(--v3-muted);line-height:1.9;max-width:650px}
+.tri-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:26px}
+.tri-art{position:relative;min-height:400px;aspect-ratio:1;border:1px solid rgba(241,241,237,.14);overflow:hidden;background:radial-gradient(circle at center,rgba(255,255,255,.12),transparent 38%),#070707}
+.tri-art svg{width:100%;height:100%;position:absolute;inset:0}
+.tri-orbit{transform-origin:350px 350px;animation:tri-spin 32s linear infinite}
+.tri-orbit.reverse{animation-direction:reverse;animation-duration:48s}
+.tri-dash{stroke-dasharray:2 9;animation:tri-dash 9s linear infinite}
+.tri-art-meta{position:absolute;left:14px;right:14px;display:flex;justify-content:space-between;gap:8px;font:8px var(--v3-mono);letter-spacing:.1em;color:#999}
+.tri-art-meta.top{top:13px}.tri-art-meta.bottom{bottom:13px}
+@keyframes tri-spin{to{transform:rotate(360deg)}}
+@keyframes tri-dash{to{stroke-dashoffset:-110}}
+.tri-section{padding:clamp(55px,8vw,90px) 0;border-bottom:1px solid rgba(241,241,237,.14)}
+.tri-head{display:flex;justify-content:space-between;align-items:end;gap:22px;margin-bottom:28px}
+.tri-head h2{font:600 clamp(30px,5vw,48px)/1.1 var(--v3-display);letter-spacing:-.065em;margin:0}
+.tri-head p{max-width:550px;font-size:12px;line-height:1.9;color:var(--v3-muted)}
+.tri-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tri-card{border:1px solid rgba(241,241,237,.14);padding:20px;background:linear-gradient(145deg,#ffffff06,transparent 55%),#080808}
+.tri-card span{font:9px var(--v3-mono);color:#aaa;letter-spacing:.12em}
+.tri-card h3{font:500 15px/1.45 var(--v3-display);margin:13px 0 10px}
+.tri-card p{margin:0;font-size:12px;line-height:1.85;color:var(--v3-muted)}
+.tri-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:24px}
+.tri-fact{border-top:1px solid rgba(241,241,237,.17);padding:13px 3px}
+.tri-fact b{display:block;font:600 clamp(16px,2vw,24px) var(--v3-display)}
+.tri-fact small{display:block;margin-top:7px;color:var(--v3-muted);font:8px var(--v3-mono);letter-spacing:.08em;text-transform:uppercase}
+.tri-footer{border-top:1px solid rgba(241,241,237,.14);padding:24px 0;display:flex;justify-content:space-between;gap:16px;color:var(--v3-muted);font:9px var(--v3-mono)}
+@media(max-width:850px){.tri-hero-grid{grid-template-columns:1fr}.tri-art{max-width:620px;width:100%;margin-inline:auto}.tri-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.tri-wrap{width:calc(100% - 32px)}.tri-nav{align-items:flex-start;flex-direction:column;padding:17px 0}.tri-navlinks{gap:12px}.tri-grid{grid-template-columns:1fr}.tri-head{align-items:flex-start;flex-direction:column}.tri-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.tri-footer{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){.tri-orbit,.tri-dash{animation:none!important}}
+</style>
+</head>
+<body class="project-detail-v3">
+<header class="tri-wrap tri-nav"><a class="v3-brand" href="/"><span class="v3-brand-mark" aria-hidden="true">T</span><span>tamasrazim</span></a><nav class="tri-navlinks" aria-label="TRILYVA project navigation"><a href="#overview">Overview</a><a href="#capabilities">Capabilities</a><a href="#model">Frame model</a><a href="#limits">Status</a></nav><a class="v3-header-contact" href="/projects/">All projects ↗</a></header>
+<main>
+<section class="tri-wrap tri-hero" id="overview"><div class="tri-hero-grid"><div><p class="tri-kicker">CREATIVE SOFTWARE / BROWSER RUNTIME</p><h1 class="tri-title">TRILYVA<span>.</span></h1>
+<p class="tri-lead">A deterministic workspace for building procedural motion and turning explicit frames into visual output.</p>
+<p class="tri-p">The project overview lives here on the main site. The actual editor/renderer is a separate destination, so visitors can understand the project before launching the workspace.</p>
+<div class="tri-actions"><a class="v3-button primary" href="/projects/code-motion/renderer/">Open TRILYVA workspace <span aria-hidden="true">↗</span></a><a class="v3-button secondary" href="https://github.com/Tamasrazim/tamasrazim.github.io/tree/main/projects/code-motion/renderer/">Inspect renderer source <span aria-hidden="true">↗</span></a></div>
+<div class="tri-facts"><div class="tri-fact"><b>Frame-first</b><small>Deterministic timing</small></div><div class="tri-fact"><b>Browser</b><small>No install required</small></div><div class="tri-fact"><b>Local</b><small>Client-side workflow</small></div><div class="tri-fact"><b>Native?</b><small>Web application today</small></div></div>
+</div>
+<div class="tri-art" aria-label="Procedural orbit artwork representing deterministic motion"><svg viewBox="0 0 700 700" role="presentation" focusable="false">
+<defs><radialGradient id="triGlow"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
+<circle cx="350" cy="350" r="270" fill="url(#triGlow)"/>
+<g class="tri-orbit"><ellipse cx="350" cy="350" rx="278" ry="104" fill="none" stroke="#fff" stroke-opacity=".56"/><ellipse cx="350" cy="350" rx="240" ry="165" fill="none" stroke="#fff" stroke-opacity=".23"/><ellipse cx="350" cy="350" rx="298" ry="195" fill="none" stroke="#fff" stroke-opacity=".14" stroke-dasharray="2 10"/><path d="M65 350 C156 134 260 106 350 132 S570 210 630 350 S445 577 350 586 S126 515 65 350Z" fill="none" stroke="#fff" stroke-opacity=".22"/></g>
+<g class="tri-orbit reverse"><ellipse cx="350" cy="350" rx="160" ry="278" fill="none" stroke="#fff" stroke-opacity=".34"/><ellipse cx="350" cy="350" rx="210" ry="70" fill="none" stroke="#fff" stroke-opacity=".3"/><path class="tri-dash" d="M350 45 C472 180 537 249 505 350 S450 548 350 652 S168 474 194 350 S250 152 350 45Z" fill="none" stroke="#fff" stroke-opacity=".62"/></g>
+<circle cx="350" cy="350" r="70" fill="none" stroke="#fff" stroke-opacity=".44"/><circle cx="350" cy="350" r="45" fill="none" stroke="#fff" stroke-opacity=".2" stroke-dasharray="2 6"/><path d="M350 250V450M250 350H450" stroke="#fff" stroke-opacity=".18"/><circle cx="350" cy="350" r="4" fill="#fff"/>
+</svg><div class="tri-art-meta top"><span>TRILYVA / MOTION SYSTEM</span><span>FIELD 001</span></div><div class="tri-art-meta bottom"><span>FRAME → TIME</span><span>PROCEDURAL / 360°</span></div></div></div></section>
+
+<section class="tri-wrap tri-section" id="capabilities"><div class="tri-head"><h2>Workspace capabilities</h2><p>The renderer uses browser capabilities and actual supported export paths. The list describes the workspace architecture; support depends on the current browser and chosen configuration.</p></div>
+<div class="tri-grid">
+<article class="tri-card"><span>01 / CODE</span><h3>Write procedural motion</h3><p>Create motion through code and reusable procedural logic rather than relying only on a timeline of hand-placed elements.</p></article>
+<article class="tri-card"><span>02 / PREVIEW</span><h3>Explicit frame clock</h3><p>Preview and export are separate. The export clock derives from frame index and FPS, so slow rendering does not silently skip requested frames.</p></article>
+<article class="tri-card"><span>03 / RENDER</span><h3>Browser capability checks</h3><p>Before rendering, the workspace probes available codec/resolution/FPS combinations and avoids pretending unsupported settings work.</p></article>
+<article class="tri-card"><span>04 / VIDEO</span><h3>MP4 and WebM paths</h3><p>The media stack separates encoding from container output, with browser-based H.264/AVC and VP8/VP9 paths when supported.</p></article>
+<article class="tri-card"><span>05 / VECTOR</span><h3>Creative export workflows</h3><p>The larger TRILYVA project family includes vector-oriented and stock-asset tooling alongside procedural animation workflows.</p></article>
+<article class="tri-card"><span>06 / INSTALL</span><h3>Browser-first delivery</h3><p>Open the workspace directly in a supported browser. Export formats are conditional on browser features; the project does not claim every codec/device combination will work.</p></article>
+</div></section>
+
+<section class="tri-wrap tri-section" id="model"><div class="tri-head"><h2>Frame model</h2><p>The key distinction is between how fast the preview plays and which frames are requested for an export.</p></div>
+<div class="tri-grid">
+<article class="tri-card"><span>TIMEBASE</span><h3>time = frame / fps</h3><p>The output clock is derived from a specific frame index and requested frame rate, so a render can take longer without changing the target time of a frame.</p></article>
+<article class="tri-card"><span>SEPARATION</span><h3>Preview ≠ export</h3><p>Interactive playback can prioritise responsiveness while offline rendering still iterates across requested frames deterministically.</p></article>
+<article class="tri-card"><span>VALIDATION</span><h3>Honest capability checks</h3><p>Resolution and frame rate must be checked against browser/device encoder support before the app enables the export route.</p></article>
+</div></section>
+
+<section class="tri-wrap tri-section" id="limits"><div class="tri-head"><h2>Project status</h2><p>TRILYVA is a real browser workspace and project family, but output support is constrained by browser capabilities and the current renderer implementation.</p></div>
+<div class="tri-grid">
+<article class="tri-card"><span>AVAILABLE</span><h3>Open the workspace</h3><p>The renderer is maintained at its established URL. This overview is the project entry point and the button above is the direct route to the app.</p></article>
+<article class="tri-card"><span>CAPABILITY-DEPENDENT</span><h3>Codec / output support</h3><p>MP4/WebM, codec, resolution and frame rate depend on the selected configuration and browser support. Unsupported configurations must remain unavailable.</p></article>
+<article class="tri-card"><span>PROJECT FAMILY</span><h3>Separate creative tools</h3><p>Related vector and stock-asset tools have their own pages. TRILYVA's overview explains the workspace rather than implying every related export path is validated in one renderer.</p></article>
+</div>
+<div class="tun-callout">The workspace and project page are separate by design: visit this overview for project details, or launch the renderer when you are ready to work.</div>
+</section>
+</main>
+<footer class="tri-wrap tri-footer"><span>Robiul Rumman Razim — Tamasrazim / TRILYVA</span><span><a href="/projects/">PROJECT DIRECTORY ↑</a> · <a href="/">MAIN SITE ↑</a></span></footer>
+</body></html>

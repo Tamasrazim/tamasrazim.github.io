@@ -1,16 +1,319 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#050505"><meta name="color-scheme" content="dark"><meta name="author" content="Robiul Rumman Razim"><meta name="robots" content="index,follow,max-image-preview:large"><title>TUNRUN — Tamasrazim</title><meta name="description" content="TUNRUN is a native C++20 tunnel-runner game in development by Robiul Rumman Razim (Tamasrazim)."><link rel="canonical" href="https://tamasrazim.github.io/projects/tunrun/"><meta property="og:type" content="website"><meta property="og:site_name" content="Tamasrazim"><meta property="og:title" content="TUNRUN — Tamasrazim"><meta property="og:description" content="A native C++20 tunnel-runner game in development."><meta property="og:url" content="https://tamasrazim.github.io/projects/tunrun/"><meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/assets/css/site-v3.css?v=20261010-3"><script type="application/ld+json">{
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505"><meta name="color-scheme" content="dark"><meta name="author" content="Robiul Rumman Razim">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<title>TUNRUN — Native Procedural Tunnel-Flight Game | Tamasrazim</title>
+<meta name="description" content="TUNRUN is a native Windows C++20 procedural 3D tunnel-flight game prototype, with seeded geometry, gates, moving mines, rewards, eight ships, scoring and local save recovery.">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/tunrun/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Tamasrazim">
+<meta property="og:title" content="TUNRUN — Native Procedural Tunnel-Flight Game">
+<meta property="og:description" content="Explore the current TUNRUN prototype, gameplay systems, eight-ship hangar, deterministic generation, rewards, progression, controls and roadmap.">
+<meta property="og:url" content="https://tamasrazim.github.io/projects/tunrun/"><meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site-v3.css?v=20261010-3">
+<style>
+.tun-page{--tun-border:rgba(241,241,237,.14);--tun-panel:#090909}
+.tun-page a{ text-decoration:none }
+.tun-wrap{width:min(1180px,calc(100% - clamp(32px,7.2vw,112px)));margin-inline:auto}
+.tun-topnav{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:74px;border-bottom:1px solid var(--tun-border)}
+.tun-navlinks{display:flex;gap:16px;flex-wrap:wrap;font:9px var(--v3-mono);color:var(--v3-muted)}
+.tun-navlinks a:hover{color:var(--v3-ink)}
+.tun-hero{padding:clamp(54px,8vw,105px) 0 38px;border-bottom:1px solid var(--tun-border)}
+.tun-hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(310px,.95fr);gap:clamp(24px,5vw,70px);align-items:center}
+.tun-eyebrow{font:10px var(--v3-mono);letter-spacing:.17em;text-transform:uppercase;color:var(--v3-muted)}
+.tun-hero h1{font:700 clamp(54px,10vw,118px)/.91 var(--v3-display);letter-spacing:-.09em;margin:25px 0}
+.tun-hero h1 span{color:#84847f}
+.tun-lead{font-size:clamp(18px,2.1vw,23px);line-height:1.65;letter-spacing:-.025em;max-width:680px}
+.tun-sub{color:var(--v3-muted);font-size:13px;line-height:1.9;max-width:660px}
+.tun-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:25px}
+.tun-status-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:27px}
+.tun-pill{display:inline-flex;border:1px solid var(--tun-border);padding:8px 10px;font:9px var(--v3-mono);letter-spacing:.06em;color:#ddd}
+.tun-pill.live{border-color:rgba(220,220,210,.42)}
+.tun-visual{position:relative;min-height:420px;aspect-ratio:1/1;border:1px solid var(--tun-border);overflow:hidden;background:radial-gradient(circle at 50% 48%,rgba(255,255,255,.11),transparent 40%),linear-gradient(#080808,#050505)}
+.tun-visual:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 49.8%,rgba(255,255,255,.11) 50%,transparent 50.2%),linear-gradient(transparent 49.8%,rgba(255,255,255,.08) 50%,transparent 50.2%);background-size:38px 38px;mask-image:radial-gradient(circle,#000,transparent 74%);opacity:.5}
+.tun-tunnel{position:absolute;inset:-10%;display:grid;place-items:center;perspective:700px}
+.tun-ring{position:absolute;left:50%;top:50%;width:var(--w);height:var(--h);border:1px solid rgba(240,240,235,var(--alpha));transform:translate(-50%,-50%) rotate(var(--rot)) rotateX(61deg) translateZ(var(--z));border-radius:8%;animation:tun-ring-drift var(--dur) linear infinite}
+.tun-ring:nth-child(odd){border-radius:50%}
+.tun-ring:nth-child(3n){border-style:dashed}
+.tun-ship{position:absolute;left:50%;top:52%;width:78px;height:112px;transform:translate(-50%,-50%);filter:drop-shadow(0 0 18px rgba(255,255,255,.18))}
+.tun-ship:before{content:"";position:absolute;left:50%;top:0;transform:translateX(-50%);width:0;height:0;border-left:29px solid transparent;border-right:29px solid transparent;border-bottom:77px solid rgba(238,238,233,.78)}
+.tun-ship:after{content:"";position:absolute;left:50%;top:23px;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:42px solid #050505}
+.tun-ship-core{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);width:18px;height:28px;border:1px solid #fff;background:linear-gradient(#fff4,transparent)}
+.tun-crosshair{position:absolute;left:50%;top:52%;width:130px;height:130px;transform:translate(-50%,-50%);border:1px solid rgba(255,255,255,.15);border-radius:50%}
+.tun-crosshair:before,.tun-crosshair:after{content:"";position:absolute;background:rgba(255,255,255,.22)}
+.tun-crosshair:before{left:50%;top:-18px;bottom:-18px;width:1px}.tun-crosshair:after{top:50%;left:-18px;right:-18px;height:1px}
+.tun-hazard{position:absolute;width:17px;height:17px;right:20%;top:30%;border:1px solid #eaeae3;border-radius:50%;box-shadow:0 0 17px #fff4;animation:tun-hazard-pulse 2.4s ease-in-out infinite}
+.tun-visual-label{position:absolute;z-index:3;left:15px;right:15px;top:14px;display:flex;justify-content:space-between;gap:10px;font:8px var(--v3-mono);letter-spacing:.12em;color:#aaa}
+.tun-visual-footer{position:absolute;z-index:3;left:15px;right:15px;bottom:14px;display:flex;justify-content:space-between;gap:10px;font:8px var(--v3-mono);color:#888}
+@keyframes tun-ring-drift{0%{margin-top:-4%;opacity:.45}50%{opacity:1}100%{margin-top:4%;opacity:.45}}
+@keyframes tun-hazard-pulse{0%,100%{transform:scale(.8);opacity:.55}50%{transform:scale(1.22);opacity:1}}
+.tun-section{padding:clamp(58px,8vw,95px) 0;border-bottom:1px solid var(--tun-border)}
+.tun-section-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:30px}
+.tun-section h2{font:600 clamp(30px,5vw,52px)/1.1 var(--v3-display);letter-spacing:-.07em;margin:0}
+.tun-section-intro{max-width:570px;color:var(--v3-muted);font-size:13px;line-height:1.9}
+.tun-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tun-card{min-width:0;border:1px solid var(--tun-border);background:linear-gradient(150deg,rgba(255,255,255,.025),transparent 60%),var(--tun-panel);padding:20px;position:relative}
+.tun-card-wide{grid-column:span 2}
+.tun-card-label{font:9px var(--v3-mono);color:#aaa;letter-spacing:.14em;text-transform:uppercase;margin-bottom:16px}
+.tun-card h3{font:500 16px/1.5 var(--v3-display);margin:0 0 10px}
+.tun-card p,.tun-card li{font-size:12px;line-height:1.85;color:var(--v3-muted)}
+.tun-card ul{margin:9px 0 0;padding-left:18px}
+.tun-statrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:28px}
+.tun-stat{border-top:1px solid var(--tun-border);padding:13px 4px}
+.tun-stat strong{display:block;font:600 clamp(18px,2vw,27px) var(--v3-display);letter-spacing:-.06em}
+.tun-stat span{display:block;margin-top:8px;color:var(--v3-muted);font:8px var(--v3-mono);letter-spacing:.08em;text-transform:uppercase}
+.tun-tagrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.tun-tag{padding:5px 7px;border:1px solid var(--tun-border);font:8px var(--v3-mono);color:#ccc}
+.tun-status{display:inline-flex;padding:5px 7px;border:1px solid var(--tun-border);font:8px var(--v3-mono);letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+.tun-status.impl{border-color:rgba(225,225,215,.45);color:#f1f1ec}
+.tun-status.partial{border-style:dashed;color:#ccc}
+.tun-status.plan{color:#777}
+.tun-table-wrap{width:100%;overflow-x:auto;border:1px solid var(--tun-border)}
+.tun-table{width:100%;border-collapse:collapse;min-width:760px}
+.tun-table th,.tun-table td{padding:12px 14px;text-align:left;border-bottom:1px solid rgba(255,255,255,.09);font-size:11px;line-height:1.6}
+.tun-table th{font:9px var(--v3-mono);letter-spacing:.1em;color:#bbb;background:#0b0b0b;text-transform:uppercase}
+.tun-table td{color:var(--v3-muted)}
+.tun-table td strong{color:#f0f0ec;font-weight:500}
+.tun-mode-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.tun-mode{padding:14px;border:1px solid var(--tun-border);display:flex;justify-content:space-between;align-items:start;gap:15px}
+.tun-mode h3{margin:0;font:500 12px var(--v3-display)}
+.tun-mode p{margin:8px 0 0;color:var(--v3-muted);font-size:11px;line-height:1.7}
+.tun-timeline{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.tun-docs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tun-doc{padding:13px;border:1px solid var(--tun-border);background:#080808;display:flex;justify-content:space-between;gap:8px;font:9px var(--v3-mono);color:#ddd}
+.tun-doc:hover{border-color:#888}
+.tun-callout{border-left:2px solid #ddd;padding:5px 0 5px 16px;color:var(--v3-muted);font-size:12px;line-height:1.9;margin-top:22px}
+.tun-footer{border-top:1px solid var(--tun-border);padding:26px 0;color:var(--v3-muted);font:9px var(--v3-mono);display:flex;justify-content:space-between;gap:16px}
+@media(max-width:900px){.tun-hero-grid{grid-template-columns:1fr}.tun-visual{min-height:340px;max-width:680px;width:100%;margin-inline:auto}.tun-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.tun-card-wide{grid-column:span 2}.tun-docs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.tun-wrap{width:calc(100% - 32px)}.tun-topnav{align-items:flex-start;padding:18px 0;flex-direction:column}.tun-navlinks{gap:12px}.tun-hero{padding-top:54px}.tun-visual{min-height:290px}.tun-section-head{align-items:flex-start;flex-direction:column}.tun-grid,.tun-mode-grid,.tun-timeline{grid-template-columns:1fr}.tun-card-wide{grid-column:span 1}.tun-statrow{grid-template-columns:repeat(2,minmax(0,1fr))}.tun-docs{grid-template-columns:1fr}.tun-footer{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){.tun-ring,.tun-hazard{animation:none!important}.tun-ring{margin-top:0}}
+</style>
+<script type="application/ld+json">
+{
   "@context": "https://schema.org",
   "@type": "VideoGame",
   "@id": "https://tamasrazim.github.io/projects/tunrun/#game",
   "name": "TUNRUN",
   "url": "https://tamasrazim.github.io/projects/tunrun/",
-  "gamePlatform": "Windows",
-  "genre": "Tunnel runner",
+  "description": "Native Windows x64 procedural 3D tunnel-flight game in development, built with C++20, CMake and raylib 5.5. The current prototype includes seeded tunnel geometry, deterministic aperture gates and moving mines, pickups, score combos, eight ship profiles, fixed-step flight, a Seed Lab, and versioned local profile recovery.",
+  "gamePlatform": "Windows x64",
+  "genre": [
+    "Procedural tunnel runner",
+    "3D arcade flight",
+    "Spacecraft action"
+  ],
   "programmingLanguage": "C++20",
-  "description": "Native C++20 tunnel-runner game in development.",
+  "applicationCategory": "GameApplication",
   "creator": {
     "@id": "https://tamasrazim.github.io/#person"
+  },
+  "softwareRequirements": "Windows x64; C++20 toolchain for source builds",
+  "featureList": [
+    "Seeded 64-bit tunnel geometry with canonical hashes",
+    "Four deterministic aperture gate families",
+    "Deterministic moving mines with swept contact checks",
+    "Aether Shard and Singularity Core collectibles",
+    "Gate accuracy scoring, clean passes and combo multipliers",
+    "Fixed-step 120 Hz lateral and vertical flight simulation",
+    "Energy boost and timed dash",
+    "Eight ship handling profiles and wireframe previews",
+    "FPP/TPP presentation toggle",
+    "Keyboard, mouse and gamepad input pathways",
+    "Seed Lab generation hashes and validation diagnostics",
+    "Local profile schema v3, checksum and backup recovery"
+  ],
+  "sameAs": "https://github.com/Tamasrazim/TUNRUN",
+  "mainEntityOfPage": {
+    "@id": "https://tamasrazim.github.io/projects/tunrun/#page"
   }
-}</script></head>
-<body class="project-detail-v3"><header class="v3-detail-header"><div class="v3-detail-header-inner v3-detail-shell"><a class="v3-brand" href="/"><span class="v3-brand-mark" aria-hidden="true">T</span><span>tamasrazim</span></a><a class="v3-header-contact" href="/projects/">All projects ↗</a></div></header>
-<main class="v3-detail-shell"><section class="v3-detail-hero"><p class="v3-kicker">PROJECT / IN DEVELOPMENT</p><h1>TUNRUN<span class="v3-name-period">.</span></h1><p class="v3-detail-lead">I'm building TUNRUN as a native C++20 tunnel-runner.</p><p class="detail-secondary">I want each run to be procedural, with controls that feel right on keyboard, mouse, and gamepad. This page documents the direction, not a finished release.</p><div class="v3-detail-meta"><span>C++20</span><span>Native game</span><span>In development</span></div><div class="v3-detail-actions"><a class="v3-button secondary" href="/projects/">Explore other projects <span aria-hidden="true">↗</span></a><a class="v3-button secondary" href="/">Main site <span aria-hidden="true">↗</span></a></div></section><section class="v3-detail-grid" aria-label="TUNRUN details"><article class="v3-detail-panel"><h2>Planned gameplay</h2><ul><li>Procedurally generated runs and replayable routes</li><li>Keyboard, mouse, and gamepad interactions across menus and gameplay</li><li>Different ships with distinct handling or play styles</li></ul></article><article class="v3-detail-panel"><h2>Progression goals</h2><ul><li>Local save data for progress and unlocks</li><li>Run pickups and rarer upgrade resources</li><li>Testing, balancing, and reliable input behaviour before calling the game finished</li></ul></article></section><p class="v3-detail-note">Local saves, unlockable ships, and a progression system are goals for the project, not a claim that every feature is already implemented. It isn't a playable browser build or a release download.</p></main><footer class="v3-detail-shell v3-detail-footer"><span>Robiul Rumman Razim — Tamasrazim</span><a href="/">Main site ↑</a></footer></body></html>
+}
+</script>
+</head>
+<body class="project-detail-v3 tun-page">
+<header class="tun-wrap tun-topnav">
+<a class="v3-brand" href="/"><span class="v3-brand-mark" aria-hidden="true">T</span><span>tamasrazim</span></a>
+<nav class="tun-navlinks" aria-label="TUNRUN project navigation">
+<a href="#features">Features</a><a href="#ships">Ships</a><a href="#controls">Controls</a><a href="#progression">Progression</a><a href="#status">Roadmap</a><a href="#documentation">Docs</a>
+</nav>
+<a class="v3-header-contact" href="/projects/">All projects ↗</a>
+</header>
+<main>
+<section class="tun-wrap tun-hero">
+<div class="tun-hero-grid">
+<div>
+<p class="tun-eyebrow">NATIVE GAME / WINDOWS X64 / C++20</p>
+<h1>TUNRUN<span>.</span></h1>
+<p class="tun-lead">A seed-driven 3D tunnel-flight game about reading the course, controlling your spacecraft, and surviving an environment that is generated instead of memorised.</p>
+<p class="tun-sub">TUNRUN is being built as a native Windows game—not a browser demo. The current source contains a playable-system prototype and several real deterministic game systems. It is still in development, and this page separates what exists now from what remains on the roadmap.</p>
+<div class="tun-actions"><a class="v3-button primary" href="https://github.com/Tamasrazim/TUNRUN">View source repository <span aria-hidden="true">↗</span></a><a class="v3-button secondary" href="https://github.com/Tamasrazim/TUNRUN/blob/main/README.md">Full README <span aria-hidden="true">↗</span></a><a class="v3-button secondary" href="https://github.com/Tamasrazim/TUNRUN/actions">Build / test status <span aria-hidden="true">↗</span></a></div>
+<div class="tun-status-row"><span class="tun-pill live">PROTOTYPE IMPLEMENTED</span><span class="tun-pill">NOT A FINISHED RELEASE</span><span class="tun-pill">OFFLINE-FIRST DESIGN</span></div>
+<div class="tun-statrow"><div class="tun-stat"><strong>08</strong><span>Ship profiles</span></div><div class="tun-stat"><strong>04</strong><span>Gate families</span></div><div class="tun-stat"><strong>120 Hz</strong><span>Flight simulation</span></div><div class="tun-stat"><strong>v3</strong><span>Save profile</span></div></div>
+</div>
+<div class="tun-visual" aria-label="Abstract procedural tunnel visual">
+<div class="tun-visual-label"><span>TUNRUN / COURSE PREVIEW</span><span>SEED STREAM / ACTIVE</span></div>
+<div class="tun-tunnel">
+<div class="tun-ring" style="--w:82%;--h:82%;--alpha:.17;--rot:-12deg;--z:0px;--dur:14s"></div>
+<div class="tun-ring" style="--w:70%;--h:72%;--alpha:.2;--rot:17deg;--z:-22px;--dur:12s"></div>
+<div class="tun-ring" style="--w:58%;--h:62%;--alpha:.26;--rot:-24deg;--z:-44px;--dur:10s"></div>
+<div class="tun-ring" style="--w:46%;--h:49%;--alpha:.33;--rot:10deg;--z:-66px;--dur:8s"></div>
+<div class="tun-ring" style="--w:34%;--h:36%;--alpha:.4;--rot:-18deg;--z:-88px;--dur:6s"></div>
+<div class="tun-ring" style="--w:23%;--h:25%;--alpha:.55;--rot:26deg;--z:-110px;--dur:4s"></div>
+</div><div class="tun-crosshair"></div><div class="tun-ship"><i class="tun-ship-core"></i></div><div class="tun-hazard"></div>
+<div class="tun-visual-footer"><span>PROCEDURAL GEOMETRY</span><span>ILLUSTRATIVE / NOT A GAMEPLAY SCREEN</span></div>
+</div>
+</div>
+</section>
+
+<section class="tun-wrap tun-section" id="overview">
+<div class="tun-section-head"><div><p class="tun-eyebrow">00 / PROJECT AT A GLANCE</p><h2>Build status, without the hype.</h2></div><p class="tun-section-intro">The systems below are grouped by their current implementation state. A design specification or roadmap item is not treated as an implemented feature.</p></div>
+<div class="tun-grid">
+<article class="tun-card"><div class="tun-card-label">01 / PLATFORM</div><h3>Native Windows x64</h3><p>The target is a native Windows executable. The project uses C++20, CMake and raylib 5.5 pinned to an immutable upstream revision.</p><div class="tun-tagrow"><span class="tun-tag">C++20</span><span class="tun-tag">CMake</span><span class="tun-tag">raylib 5.5</span></div></article>
+<article class="tun-card"><div class="tun-card-label">02 / GAME FEEL</div><h3>Forward flight, not lane swapping</h3><p>Forward progress is automatic by default. The player steers laterally and vertically relative to the generated course, managing boost energy, precision steering and dash timing.</p><div class="tun-tagrow"><span class="tun-tag">3D flight</span><span class="tun-tag">Fixed step</span></div></article>
+<article class="tun-card"><div class="tun-card-label">03 / DETERMINISM</div><h3>Seeds you can reproduce</h3><p>The course, gate, mine and reward systems use separate seed-derived channels and canonical hashes. A saved root seed and run serial support course reproduction.</p><div class="tun-tagrow"><span class="tun-tag">64-bit root seed</span><span class="tun-tag">Versioned generators</span></div></article>
+<article class="tun-card"><div class="tun-card-label">04 / CURRENT LIMITS</div><h3>Prototype, with known gaps</h3><p>There is no completed campaign, full AI race system, ghost racing system, broad streaming architecture, final production art/audio, installer, updater, or finished release.</p><div class="tun-tagrow"><span class="tun-tag">Still evolving</span><span class="tun-tag">No download yet</span></div></article>
+</div>
+</section>
+
+<section class="tun-wrap tun-section" id="features">
+<div class="tun-section-head"><div><p class="tun-eyebrow">01 / IMPLEMENTED SYSTEMS</p><h2>The prototype features.</h2></div><p class="tun-section-intro">These describe systems present in the current project source and documentation, not promises that the final balance or hardware acceptance is complete.</p></div>
+<div class="tun-grid">
+<article class="tun-card"><div class="tun-card-label">01.1 / PROCEDURAL COURSE</div><h3>Seeded tunnel geometry</h3><span class="tun-status impl">Implemented baseline</span><p>Stateless 64-bit hash streams derive centerline control offsets, bounded tunnel radii and twist from the root seed, node index and parameter channel. Catmull–Rom interpolation smooths the course between control points spaced 18 normalised course units apart. The renderer and tunnel-wall check sample the same course source.</p><p>Canonical course hashes and parameter-range validation are exposed in Seed Lab. Current geometry is a forward-aligned lateral/vertical path; stable tangent-aligned 3D frames, advanced taper/flare transitions and broad cross-section variety remain unfinished.</p></article>
+<article class="tun-card"><div class="tun-card-label">01.2 / GATES</div><h3>Four generated aperture gates</h3><span class="tun-status impl">Implemented baseline</span><p>Generator v2 makes Standard, Precision, Offset and Wide gate families from seed-derived parameters. Family-specific aperture and offset envelopes are validated, with independent obstacle hashes and distinct visual cues.</p><p>Validation includes an all-ship adjacent-gate kinematic screen and a fixed-step route probe that follows one concrete trajectory through consecutive gates. It is a tested witness path—not an exhaustive proof that every possible state is recoverable.</p></article>
+<article class="tun-card"><div class="tun-card-label">01.3 / MOVING HAZARDS</div><h3>Deterministic mine field</h3><span class="tun-status impl">Implemented baseline</span><p>Moving wireframe mines use seed-derived baseline positions, horizontal and vertical oscillation, speed, phase and collision radius. Hazard motion is reproducible from the seed and run clock. A HUD cue reports distance to the next mine.</p><p>Contact uses a swept relative 3D closest-approach test transformed into course-relative coordinates. The current validator checks parameter bounds and separation from gate reaction windows. More hazard families and hardware-verified reaction timing remain planned.</p></article>
+<article class="tun-card"><div class="tun-card-label">01.4 / PICKUPS</div><h3>Two deterministic resources</h3><span class="tun-status impl">Implemented baseline</span><p>Aether Shards begin at distance 20 and repeat every 24 distance units. Each pickup yields a seed-determined 4–8 shards. Every eighth pickup is a Singularity Core worth one core.</p><p>Pickups use swept forward-plane crossing and the sampled course-relative frame shared by the tunnel renderer. Rewards are capped, currency arithmetic saturates safely, and a missed pickup cannot be collected by flying backward through it.</p></article>
+<article class="tun-card"><div class="tun-card-label">01.5 / SCORING</div><h3>Precision gates and combo chains</h3><span class="tun-status impl">Implemented baseline</span><p>Each gate family has its own base score: Standard 100, Precision 180, Offset 140 and Wide 80. Accuracy adds up to 100 points; a clean pass adds 75 more. Clean means at least 70% of the safe aperture accuracy value.</p><p>Combos increase the multiplier by 0.1× per existing combo level, capped at 5×. Invalid/non-finite crossings are rejected, scores saturate at a safe cap, and current career-best score and combo persist in profile v3.</p></article>
+<article class="tun-card"><div class="tun-card-label">01.6 / DASH</div><h3>Short energy dash</h3><span class="tun-status impl">Implemented baseline</span><p>The dash is edge-triggered for 0.24 seconds, costs 28 energy and has a 1.20-second cooldown. It adds a 19-unit/s forward burst, or 24 units/s while also boosting. Dash cannot activate while precision mode is held.</p><p>The 120 Hz fixed-step simulation advances dash timing so render frame rate does not decide its duration. Visual dash streaks and HUD cooldown cues are specified as feedback.</p></article>
+<article class="tun-card"><div class="tun-card-label">01.7 / FLIGHT</div><h3>Fixed-step steering and collision</h3><span class="tun-status impl">Prototype system</span><p>Lateral and vertical flight updates use a fixed 120 Hz simulation, bounded steering and acceleration, boost energy and precision mode. The tunnel wall check uses the seeded course sampler; a retry path is present.</p><p>Flight tuning, stable tangent-aligned frames, broader obstacle collision validation and multi-machine acceptance remain in progress.</p></article>
+<article class="tun-card"><div class="tun-card-label">01.8 / SEED LAB</div><h3>Inspect and reproduce runs</h3><span class="tun-status impl">Implemented baseline</span><p>The Seed Lab can report course, gate, mine and reward hashes with validation summaries, selected-ship route-probe outcomes, minimum gate clearance and simulation steps. Gate/mine crash reports include the deterministic obstacle index and distance to aid reproduction.</p><p>Text seed input accepts 1–64 letters, digits, spaces, underscores or hyphens; normalises text before hashing, and supports literal hexadecimal seed values. The chosen root seed is saved before a run starts.</p></article>
+<article class="tun-card"><div class="tun-card-label">01.9 / LOCAL PROFILE</div><h3>Save, migrate and recover</h3><span class="tun-status impl">Implemented baseline</span><p>Profile v3 has 18 fields, bounded parsing up to 64 KiB, strict key/type/range checks and an FNV-1a checksum for accidental-corruption detection. Valid v1 and v2 profiles are migrated through version-specific validation.</p><p>Writes use a same-directory temporary file and atomic replacement, retain a backup, and offer explicit recovery while preserving corrupt copies. The Windows save directory is marked Hidden where supported; that is convenience, not encryption.</p></article>
+</div>
+</section>
+
+<section class="tun-wrap tun-section" id="ships">
+<div class="tun-section-head"><div><p class="tun-eyebrow">02 / HANGAR</p><h2>Eight ships. Real trade-offs.</h2></div><p class="tun-section-intro">The source catalogue drives each ship's handling and resource price. Multipliers below are the current source-catalogue values, not final balance promises.</p></div>
+<div class="tun-table-wrap"><table class="tun-table"><thead><tr><th>Ship</th><th>Role</th><th>Unlock cost</th><th>Speed ×</th><th>Acceleration ×</th><th>Boost drain ×</th><th>Energy recovery ×</th><th>Status</th></tr></thead><tbody>
+<tr><td><strong>DRIFTWING</strong></td><td>Balanced starter</td><td>Free / unlocked</td><td>1.00</td><td>1.05</td><td>1.00</td><td>1.00</td><td>Starter</td></tr>
+<tr><td><strong>WRAITH</strong></td><td>Agile interceptor</td><td>80 Aether Shards</td><td>1.12</td><td>1.05</td><td>1.15</td><td>0.90</td><td>Catalogued</td></tr>
+<tr><td><strong>BULWARK</strong></td><td>Heavy / efficient boost</td><td>150 Aether Shards</td><td>0.84</td><td>0.95</td><td>0.75</td><td>1.25</td><td>Catalogued</td></tr>
+<tr><td><strong>MANTA</strong></td><td>Responsive / stable</td><td>250 Aether Shards</td><td>0.96</td><td>1.28</td><td>1.00</td><td>0.95</td><td>Catalogued</td></tr>
+<tr><td><strong>COMET</strong></td><td>Fast racer</td><td>380 Aether Shards</td><td>1.25</td><td>0.90</td><td>1.35</td><td>0.75</td><td>Catalogued</td></tr>
+<tr><td><strong>SPECTRE</strong></td><td>Energy specialist</td><td>2 Singularity Cores</td><td>1.04</td><td>1.08</td><td>0.80</td><td>1.10</td><td>Catalogued</td></tr>
+<tr><td><strong>VORTEX</strong></td><td>Precision craft</td><td>4 Singularity Cores</td><td>1.12</td><td>1.20</td><td>1.05</td><td>0.90</td><td>Catalogued</td></tr>
+<tr><td><strong>OBSIDIAN</strong></td><td>Prototype / specialist</td><td>8 Singularity Cores</td><td>0.94</td><td>0.98</td><td>0.65</td><td>1.35</td><td>Catalogued</td></tr>
+</tbody></table></div>
+<div class="tun-grid" style="margin-top:10px">
+<article class="tun-card tun-card-wide"><div class="tun-card-label">VISUALS / HANDLING</div><h3>Not just recolours</h3><p>The prototype renders eight distinct procedural third-person wireframe ship silhouettes and matching 2D hangar previews. Each ship is driven by one central catalogue entry with speed, acceleration, boost-drain and energy-recovery multipliers. Production meshes, materials, final cockpit anchors and full collision-proxy matching are still future work.</p></article>
+<article class="tun-card"><div class="tun-card-label">ECONOMY RULES</div><h3>Local, play-earned unlocks</h3><p>No real-money purchase system is planned. A purchase validates ship id and wallet balance, changes the candidate profile, and must be rolled back if persistence fails. These are local progression values, not online anti-cheat security.</p></article>
+</div>
+</section>
+
+<section class="tun-wrap tun-section" id="controls">
+<div class="tun-section-head"><div><p class="tun-eyebrow">03 / INPUT</p><h2>Keyboard. Mouse. Gamepad.</h2></div><p class="tun-section-intro">The project treats UI input and gameplay input as separate contexts, with the goal that menus stay operable without mouse-lock side effects.</p></div>
+<div class="tun-table-wrap"><table class="tun-table"><thead><tr><th>Action</th><th>Keyboard</th><th>Mouse</th><th>Gamepad</th><th>Notes</th></tr></thead><tbody>
+<tr><td><strong>Steer X / Y</strong></td><td>WASD / arrows</td><td>Relative movement when mouse flight is enabled</td><td>Left stick</td><td>Mouse steering uses relative deltas; no repeated cursor recentering.</td></tr>
+<tr><td><strong>Boost</strong></td><td>Left Shift</td><td>Not bound by default in the current prototype spec</td><td>Right trigger</td><td>Trigger uses an analogue threshold.</td></tr>
+<tr><td><strong>Energy dash</strong></td><td>Space</td><td>Optional configurable right-button binding</td><td>A / Cross</td><td>Edge-triggered; holding the control does not auto-repeat.</td></tr>
+<tr><td><strong>Precision / brake</strong></td><td>Left Ctrl</td><td>Not bound by default</td><td>Left trigger</td><td>Dash is unavailable while precision mode is held.</td></tr>
+<tr><td><strong>Switch camera</strong></td><td>V</td><td>Configurable secondary button</td><td>Y / Triangle</td><td>FPP/TPP is a presentation change, not a physics reset.</td></tr>
+<tr><td><strong>Pause</strong></td><td>Esc</td><td>In-run pause button</td><td>Menu / Start</td><td>Pause/focus loss should release gameplay capture and clear held inputs.</td></tr>
+<tr><td><strong>Confirm / interact</strong></td><td>Enter / E</td><td>Left click</td><td>A / Cross</td><td>UI actions should be edge-triggered and debounced.</td></tr>
+<tr><td><strong>Back / cancel</strong></td><td>Esc / Backspace</td><td>Right click inside UI context</td><td>B / Circle</td><td>Dialogs must block clicks behind them.</td></tr>
+<tr><td><strong>Menu navigation</strong></td><td>Arrows / Tab</td><td>Pointer / click</td><td>D-pad / left stick</td><td>Focus must remain visible and stable when switching devices.</td></tr>
+<tr><td><strong>Mouse sensitivity</strong></td><td>Left / right arrows on row</td><td>Click settings row</td><td>D-pad / stick</td><td>Setting persists in local profile.</td></tr>
+</tbody></table></div>
+<div class="tun-callout">The native Windows Raw Input path is designed around relative mouse deltas and client-area capture only during mouse-flight. The system cursor should never be warped to the center every frame. Hardware/DPI/fullscreen acceptance and full mouse remapping remain part of the remaining QA work.</div>
+</section>
+
+<section class="tun-wrap tun-section" id="progression">
+<div class="tun-section-head"><div><p class="tun-eyebrow">04 / RUN LOOP / PROGRESSION</p><h2>From seed to result.</h2></div><p class="tun-section-intro">The implemented systems already connect reproducible generation, flight, scoring, pickups and local records. Campaign breadth and several advanced modes remain design targets.</p></div>
+<div class="tun-timeline">
+<article class="tun-card"><div class="tun-card-label">01 / PREPARE</div><h3>Choose and seed</h3><p>Choose a ship, use a random or literal seed, inspect deterministic hashes in Seed Lab, and persist the root seed before the run begins.</p></article>
+<article class="tun-card"><div class="tun-card-label">02 / FLY</div><h3>Read the tunnel</h3><p>Steer through curved, twisted and changing-radius course samples, pass aperture gates, avoid moving mines, manage boost and collect rewards.</p></article>
+<article class="tun-card"><div class="tun-card-label">03 / SCORE</div><h3>Play clean</h3><p>Gate accuracy, clean-pass bonuses and combo multipliers reward precision. Pickup totals and score records are updated at run end under capped arithmetic.</p></article>
+<article class="tun-card"><div class="tun-card-label">04 / RECOVER</div><h3>Keep the profile</h3><p>The local profile saves settings, ship unlocks, currencies, run/crash totals, best distance, career-best score/combo, seed and run serial.</p></article>
+<article class="tun-card"><div class="tun-card-label">05 / REPEAT</div><h3>Reproduce a failure</h3><p>Repeat the same seed to replay deterministic course/hazard rules. Crash diagnostics show gate or mine index and distance to aid debugging.</p></article>
+<article class="tun-card"><div class="tun-card-label">06 / EXPAND</div><h3>Future game modes</h3><p>Campaign progression, mode-specific records, AI rivals and ghost playback are not presented as completed just because their design is documented.</p></article>
+</div>
+<div class="tun-section-head" style="margin-top:48px"><div><p class="tun-eyebrow">DESIGNED MODES / NOT ALL PLAYABLE</p><h2>Mode roadmap.</h2></div><p class="tun-section-intro">The menu/shell and core run prototype are ahead of full mode implementation. These named modes are the intended direction, not a claim that each is finished.</p></div>
+<div class="tun-mode-grid">
+<article class="tun-mode"><div><h3>Campaign</h3><p>Structured stages and objectives. A 100-stage target is proposed across difficulty tiers.</p></div><span class="tun-status plan">Planned</span></article>
+<article class="tun-mode"><div><h3>Endless</h3><p>Continuous generated course, distance survival and long-session performance.</p></div><span class="tun-status partial">Design target</span></article>
+<article class="tun-mode"><div><h3>Seed Challenge</h3><p>Replay/share a known seed with a recorded generator version and ruleset.</p></div><span class="tun-status partial">Seed core exists</span></article>
+<article class="tun-mode"><div><h3>Daily Run</h3><p>One common seed/ruleset per day, with competitive retry/reward rules still to define.</p></div><span class="tun-status plan">Planned</span></article>
+<article class="tun-mode"><div><h3>Practice</h3><p>Lower-speed learning and optional restart near difficult generated sections.</p></div><span class="tun-status plan">Planned</span></article>
+<article class="tun-mode"><div><h3>Rival Run</h3><p>Local AI pilots racing on the same generated course while obeying collision limits.</p></div><span class="tun-status plan">AI not implemented</span></article>
+<article class="tun-mode"><div><h3>Ghost Race</h3><p>Non-physical saved run recordings with seed, generator, physics and ship metadata.</p></div><span class="tun-status plan">Planned</span></article>
+<article class="tun-mode"><div><h3>Seed Lab</h3><p>Inspect hashes, parameter validation, ship-specific route-probe results and failure indices.</p></div><span class="tun-status impl">Prototype tool</span></article>
+</div>
+</section>
+
+<section class="tun-wrap tun-section" id="save">
+<div class="tun-section-head"><div><p class="tun-eyebrow">05 / LOCAL DATA / RELIABILITY</p><h2>Progress that survives.</h2></div><p class="tun-section-intro">The current save implementation focuses on preventing accidental data loss; it is not encryption and not an anti-cheat boundary.</p></div>
+<div class="tun-grid">
+<article class="tun-card"><div class="tun-card-label">PROFILE FORMAT</div><h3>Strict schema v3</h3><p>Exactly 18 fields. The parser rejects duplicate, missing or unexpected keys, validates data types and numeric ranges, rejects non-finite values and caps input at 64 KiB.</p></article>
+<article class="tun-card"><div class="tun-card-label">INTEGRITY</div><h3>FNV-1a checksum</h3><p>Detects accidental profile corruption. It is not cryptographic signing, encryption, tamper resistance, or a trustworthy anti-cheat mechanism.</p></article>
+<article class="tun-card"><div class="tun-card-label">MIGRATION</div><h3>v1 / v2 → v3</h3><p>Older profile versions are validated against their own schema/checksum rules before migration. A good pre-migration copy is retained.</p></article>
+<article class="tun-card"><div class="tun-card-label">ATOMIC WRITE</div><h3>Temporary file + backup</h3><p>Writes flush a same-directory temporary file before replacing the primary. The backup can recover a corrupt primary; damaged copies are preserved with a corruption suffix when both fail.</p></article>
+<article class="tun-card"><div class="tun-card-label">LOCAL PATH</div><h3>Per-user Windows storage</h3><p><code>%LOCALAPPDATA%\Tamasrazim\TUNRUN\profile.json</code> plus <code>profile.bak</code>. Hidden attributes are applied where supported as a convenience only.</p></article>
+<article class="tun-card"><div class="tun-card-label">NOT IN SCHEMA V3</div><h3>Known persistence gaps</h3><p>Campaign checkpoints, achievements, ghosts, full input bindings, timestamps and mode-specific records remain future migrations—not fields that the current profile already saves.</p></article>
+</div>
+</section>
+
+<section class="tun-wrap tun-section" id="art-audio">
+<div class="tun-section-head"><div><p class="tun-eyebrow">06 / ART / AUDIO / COMFORT</p><h2>Visual direction and remaining polish.</h2></div><p class="tun-section-intro">The established art direction is restrained, high-contrast tunnel geometry and legible hazards; the project has not reached final asset production.</p></div>
+<div class="tun-grid">
+<article class="tun-card"><div class="tun-card-label">ART DIRECTION</div><h3>Graphite, silver, signal white</h3><p>Forward perspective, expanding spatial frames, clean silhouettes and luminous edge cues. Course geometry should feel composed from procedural rules—not random piles of primitive shapes.</p></article>
+<article class="tun-card"><div class="tun-card-label">CURRENT ART</div><h3>Wireframe prototype ships</h3><p>Eight procedural third-person silhouettes and matching 2D hangar previews are rendered in raylib. These are prototype visualisations, not final production meshes/materials.</p></article>
+<article class="tun-card"><div class="tun-card-label">AUDIO PLAN</div><h3>Engine, hazards, rewards</h3><p>Planned sound families include propulsion, boost/dash, tunnel ambience, warning cues, collision, pickup, menu and results feedback. Final sound assets/mix are unfinished.</p></article>
+<article class="tun-card"><div class="tun-card-label">ACCESSIBILITY</div><h3>Control and motion comfort</h3><p>Settings/targets include mouse sensitivity and inversion, gamepad dead-zone/response, FOV, camera distance, audio and graphics settings, reduced motion and screen-shake controls. Full tested accessibility remains unfinished.</p></article>
+</div>
+</section>
+
+<section class="tun-wrap tun-section" id="status">
+<div class="tun-section-head"><div><p class="tun-eyebrow">07 / REMAINING WORK</p><h2>What has not shipped yet.</h2></div><p class="tun-section-intro">The roadmap advances only when code, tests and real Windows acceptance support it. A screen existing does not by itself mean the feature is finished.</p></div>
+<div class="tun-grid">
+<article class="tun-card tun-card-wide"><div class="tun-card-label">GENERATION AND FAIRNESS</div><h3>Broader procedural proof</h3><ul><li>Stable tangent-aligned 3D tunnel frames and more varied cross-sections/transitions.</li><li>Multi-state reachable-state graph instead of relying on one witness trajectory.</li><li>More dynamic hazard families and route-dependent rewards.</li><li>Asynchronous streaming and bounded-memory endless runs.</li><li>Hardware-verified reaction/warning distances and collision/render agreement.</li></ul></article>
+<article class="tun-card"><div class="tun-card-label">CONTENT</div><h3>Full game modes</h3><ul><li>Campaign checkpoints, stage completion and difficulty tiers.</li><li>Endless, practice and daily rules/records.</li><li>AI pilots, environmental drones and event entities.</li><li>Local ghost recording and compatible-version playback.</li></ul></article>
+<article class="tun-card"><div class="tun-card-label">PRODUCTION</div><h3>Release quality</h3><ul><li>Final production ship models, materials and sound design.</li><li>Complete input remapping and Windows DPI/fullscreen mouse QA.</li><li>Performance profiling on long runs and multiple hardware configurations.</li><li>Verified installer and portable package, checksums and clean-machine install tests.</li></ul></article>
+</div>
+<div class="tun-callout">TUNRUN is not yet advertised as a finished game or a release download. Its release artifacts are planned as a Windows installer and portable package after the build, test, input, persistence, asset-license and clean-machine acceptance gates pass.</div>
+</section>
+
+<section class="tun-wrap tun-section" id="technical">
+<div class="tun-section-head"><div><p class="tun-eyebrow">08 / BUILD / TEST / PRIVACY</p><h2>Technical and engineering notes.</h2></div><p class="tun-section-intro">TUNRUN is offline-first by design. Ordinary gameplay should not require accounts, telemetry, ads, remote services, elevated privileges or downloaded executable content.</p></div>
+<div class="tun-grid">
+<article class="tun-card"><div class="tun-card-label">BUILD</div><h3>Windows x64 / CMake</h3><p>Toolchain: Visual Studio 2022 / MSVC, CMake 3.21+, C++20 and pinned raylib 5.5. Run the repository's Windows workflow as the source of truth for build/test status.</p><p><code>cmake --preset windows-dev</code><br><code>cmake --build --preset windows-dev</code><br><code>ctest --preset windows-dev</code></p></article>
+<article class="tun-card"><div class="tun-card-label">AUTOMATED QA</div><h3>Deterministic regression tests</h3><p>Source tests cover input state, profile validation/migration, economy transactions, seeded geometry/gates/mines/rewards, scores and swept-contact edge cases. The documented regression suite includes multi-seed batches and ship-specific gate probes; these do not replace full hardware testing.</p></article>
+<article class="tun-card"><div class="tun-card-label">SECURITY</div><h3>Bounded, local data</h3><p>Save parsing has strict size/type/range limits. Corruption is handled with backup/recovery, local saves remain under the current Windows user profile, and the project does not claim hidden files are secure. No account or online multiplayer system is planned for the first release.</p></article>
+</div>
+</section>
+
+<section class="tun-wrap tun-section" id="documentation">
+<div class="tun-section-head"><div><p class="tun-eyebrow">09 / DEEP DIVE</p><h2>Project documentation.</h2></div><p class="tun-section-intro">The page is the overview. These source documents contain implementation notes, precise contracts, test criteria and deferred requirements.</p></div>
+<div class="tun-docs">
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/README.md">README / Feature summary ↗</a>
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/docs/GAME-DESIGN.md">Game design ↗</a>
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/docs/FLIGHT-AND-CAMERA.md">Flight and camera ↗</a>
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/docs/UI-SPECIFICATION.md">UI specification ↗</a>
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/docs/INPUT-AND-SAVE.md">Input and save ↗</a>
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/docs/SAVE-SCHEMA.md">Save schema ↗</a>
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/docs/ECONOMY-AND-SHIPS.md">Ships and economy ↗</a>
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/docs/PROCEDURAL-GENERATION.md">Procedural generation ↗</a>
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/docs/PROCEDURAL-HAZARDS.md">Moving hazards ↗</a>
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/docs/PROCEDURAL-REWARDS.md">Rewards ↗</a>
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/docs/BOT-AI.md">Bot / ghost AI design ↗</a>
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/docs/ART-AND-AUDIO.md">Art and audio ↗</a>
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/docs/TECHNICAL-ARCHITECTURE.md">Architecture ↗</a>
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/docs/QA-AND-ACCEPTANCE.md">QA and acceptance ↗</a>
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/docs/ROADMAP.md">Roadmap ↗</a>
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/docs/SECURITY-AND-PRIVACY.md">Security and privacy ↗</a>
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/docs/BUILD-AND-RELEASE.md">Build and release ↗</a>
+<a class="tun-doc" href="https://github.com/Tamasrazim/TUNRUN/blob/main/THIRD-PARTY-NOTICES.md">Third-party notices ↗</a>
+</div>
+</section>
+</main>
+<footer class="tun-wrap tun-footer"><span>Robiul Rumman Razim — Tamasrazim / TUNRUN</span><span><a href="https://github.com/Tamasrazim/TUNRUN">SOURCE ↗</a> &nbsp; · &nbsp; <a href="/projects/">PROJECT DIRECTORY ↑</a> &nbsp; · &nbsp; <a href="/">MAIN SITE ↑</a></span></footer>
+</body></html>

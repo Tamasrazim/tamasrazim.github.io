@@ -61,6 +61,7 @@ function checkInlineScripts(file){
 const htmlFiles=[
   'index.html',
   'projects/index.html',
+  'projects/trilyva/index.html',
   'asset-vault/index.html',
   'projects/code-motion/index.html',
   'projects/code-motion/renderer/index.html',
@@ -139,7 +140,9 @@ must(schemaStart>=0&&schemaEnd>schemaStart,'homepage contains JSON-LD schema');
 const rootSchema=JSON.parse(site.slice(schemaStart+schemaOpen.length,schemaEnd));
 must(rootSchema['@context']==='https://schema.org'&&Array.isArray(rootSchema['@graph']),'homepage schema graph parses');
 must(rootSchema['@graph'].some(n=>n['@type']==='Person'&&n['@id']==='https://tamasrazim.github.io/#person'),'schema identifies person');
-must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length===11,'schema distinguishes eleven desktop and browser software applications');
+must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length===12,'schema distinguishes twelve desktop and browser software applications');
+must(rootSchema['@graph'].some(n=>n['@id']==='https://tamasrazim.github.io/projects/code-motion/renderer/#application'&&n.name==='TRILYVA Renderer'),'schema identifies renderer as a separate tool route');
+must(rootSchema['@graph'].some(n=>n['@id']==='https://tamasrazim.github.io/#trilyva'&&n.url==='https://tamasrazim.github.io/projects/trilyva/'),'TRILYVA schema points to the project overview, not the renderer');
 must(rootSchema['@graph'].some(n=>n['@type']==='SoftwareApplication'&&n.name==='KYNESTRA'&&/Windows/.test(n.operatingSystem)),'schema identifies KYNESTRA as Windows desktop software');
 must(rootSchema['@graph'].some(n=>n['@type']==='VideoGame'&&n.name==='NEON VAULT')&&rootSchema['@graph'].some(n=>n['@type']==='VideoGame'&&n.name==='TUNRUN'),'schema identifies native game projects separately');
 must(rootSchema['@graph'].some(n=>n['@type']==='SoftwareSourceCode'&&n.name==='Spiral Mic native companion source'),'schema distinguishes native source code from the browser audio app');
@@ -150,7 +153,8 @@ must(rootPerson.subjectOf.every(ref=>knownSchemaIds.has(ref['@id'])),'person sch
 must(!site.includes('BOGURA')&&!site.includes('BANGLADESH'),'homepage omits unwanted location text');
 must((site.match(/class="v3-project-card v2-project-card v2-reveal v3-reveal"/g)||[]).length===12,'homepage has twelve curated project cards');
 must(!site.includes('PRO_TOOL_MANIFEST'),'homepage omits the generated micro-tool catalogue');
-for(const ref of ['href="/projects/code-motion/renderer/"','href="/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"'])must(site.includes(ref),'homepage exposes '+ref);
+for(const ref of ['href="/projects/trilyva/"','href="/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"'])must(site.includes(ref),'homepage exposes '+ref);
+must(!site.includes('href="/projects/code-motion/renderer/">Open workspace'),'homepage does not send the TRILYVA card straight to the renderer');
 const visibleHomeMarkup=schemaStart>=0&&schemaEnd>schemaStart?site.slice(0,schemaStart)+site.slice(schemaEnd+'</script>'.length):site;
 must(!visibleHomeMarkup.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!visibleHomeMarkup.includes('Source files ↗')&&!visibleHomeMarkup.includes('SVG source ↗')&&!visibleHomeMarkup.includes('EPS source ↗'),'homepage omits direct source links in visible markup');
 must(site.includes('href="/projects/tunrun/"')&&!site.includes('href="https://github.com/Tamasrazim/TUNRUN"'),'homepage links to TUNRUN project page');
@@ -171,11 +175,15 @@ const hubSchema=JSON.parse(hub.slice(hubSchemaStart+hubSchemaOpen.length,hubSche
 const hubItems=hubSchema.mainEntity&&hubSchema.mainEntity.itemListElement||[];
 must(hubSchema['@type']==='CollectionPage'&&hubItems.length===12,'project directory schema describes twelve curated projects');
 must(hubItems.every(item=>knownSchemaIds.has(item.item&&item.item['@id'])),'project directory items reference defined project entities');
-for(const ref of ['href="/projects/code-motion/renderer/"','href="/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"'])must(hub.includes(ref),'project directory exposes '+ref);
+for(const ref of ['href="/projects/trilyva/"','href="/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"'])must(hub.includes(ref),'project directory exposes '+ref);
+must(!hub.includes('href="/projects/code-motion/renderer/">Open workspace'),'project directory links to the TRILYVA overview first');
 must(!hub.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!hub.includes('Source files ↗')&&!hub.includes('SVG source ↗')&&!hub.includes('EPS source ↗'),'project directory omits direct source links');
 must(hub.includes('href="/projects/tunrun/"')&&!hub.includes('href="https://github.com/Tamasrazim/TUNRUN"'),'project directory links to TUNRUN project page');
 const tunrunPage=read('projects/tunrun/index.html');
-must(tunrunPage.includes("I'm building TUNRUN as a native C++20 tunnel-runner.")&&tunrunPage.includes("It isn't a playable browser build or a release download."),'TUNRUN project page states its development status honestly');
+must(tunrunPage.includes("TUNRUN")&&tunrunPage.includes("Four generated aperture gates")&&tunrunPage.includes("Aether Shards")&&tunrunPage.includes("Singularity Cores")&&tunrunPage.includes("profile v3")&&tunrunPage.includes("Rival Run"),'TUNRUN page documents implemented systems, resources, persistence and future modes');
+const trilyvaPage=read('projects/trilyva/index.html');
+must(trilyvaPage.includes('Open TRILYVA workspace')&&trilyvaPage.includes('deterministic'),'TRILYVA project page describes the frame model and links to the renderer');
+must(read('projects/code-motion/index.html').includes('location.replace(target)'),'legacy TRILYVA URL performs a clean replace redirect');
 must(read('projects/razim-fps/index.html').includes('NEON VAULT is my native Windows x64 first-person puzzle game'),'NEON VAULT has a dedicated project page');
 must(!hub.includes('href="../renderer/"'),'project directory has no retired renderer link');
 

@@ -108,8 +108,8 @@
       "@type": "SoftwareApplication",
       "@id": "https://tamasrazim.github.io/#trilyva",
       "name": "TRILYVA",
-      "url": "https://tamasrazim.github.io/projects/code-motion/renderer/",
-      "description": "Browser-based procedural animation workspace for frame timing and export experiments. Available export formats depend on browser capabilities.",
+      "url": "https://tamasrazim.github.io/projects/trilyva/",
+      "description": "A deterministic browser-based animation workspace for writing procedural motion, previewing frames, and testing browser-supported video exports.",
       "applicationCategory": "MultimediaApplication",
       "operatingSystem": "Web Browser",
       "isAccessibleForFree": true,
@@ -118,7 +118,18 @@
       },
       "isPartOf": {
         "@id": "https://tamasrazim.github.io/#website"
-      }
+      },
+      "mainEntityOfPage": {
+        "@id": "https://tamasrazim.github.io/projects/trilyva/#page"
+      },
+      "featureList": [
+        "Frame-index-driven deterministic animation",
+        "Live procedural preview and code editing",
+        "Configurable output duration, resolution, and frame rate",
+        "Browser capability checks for available encoders and containers",
+        "Local MP4 and WebM rendering paths",
+        "Batch and vector-oriented motion workflows"
+      ]
     },
     {
       "@type": "VideoGame",
@@ -390,6 +401,21 @@
       "name": "BNC AgroCare",
       "url": "https://tamasrazim.github.io/projects/bncagrocare/",
       "description": "Agriculture and crop-care business focused on agricultural and crop-care products."
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://tamasrazim.github.io/projects/code-motion/renderer/#application",
+      "name": "TRILYVA Renderer",
+      "url": "https://tamasrazim.github.io/projects/code-motion/renderer/",
+      "description": "The TRILYVA workspace for editing procedural animations, previewing frames, and running browser-capability-checked renders.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Web Browser",
+      "isPartOf": {
+        "@id": "https://tamasrazim.github.io/#trilyva"
+      },
+      "creator": {
+        "@id": "https://tamasrazim.github.io/#person"
+      }
     }
   ]
 }
@@ -418,9 +444,9 @@
 <section class="v3-section v3-shell" id="work" aria-labelledby="workTitle"><div class="v3-section-top"><span class="v3-kicker">01 / SELECTED WORK</span><span class="v3-section-index">BROWSER / NATIVE / CREATIVE</span></div>
 <div class="v3-work-heading"><h2 class="v3-section-title v2-reveal v3-reveal" id="workTitle">Things I've<br><em>been building.</em></h2><p class="v3-work-intro v2-reveal v3-reveal">A curated set of real projects, tools, and experiments. Each card leads to its project page; unfinished work is labelled as such.</p></div>
 <div class="v3-project-grid"><article class="v3-project-card v2-project-card v2-reveal v3-reveal" data-kind="motion">
-<div class="v3-project-card-top"><span>01 / CREATIVE</span><span class="v3-status">BROWSER WORKSPACE</span></div><div class="v3-card-art v3-art-motion" aria-hidden="true"><span>01</span><i></i><b></b></div>
+<div class="v3-project-card-top"><span>01 / CREATIVE</span><span class="v3-status">PROJECT / WORKSPACE</span></div><div class="v3-card-art v3-art-motion" aria-hidden="true"><span>01</span><i></i><b></b></div>
 <h3>TRILYVA</h3><p>A browser-based motion workspace for procedural animation, frame timing, and export experiments.</p><div class="v3-tags"><span>Procedural motion</span><span>Browser</span></div>
-<div class="v3-card-links"><a class="v3-project-link" href="/projects/code-motion/renderer/">Open workspace <span aria-hidden="true">↗</span></a></div></article>
+<div class="v3-card-links"><a class="v3-project-link" href="/projects/trilyva/">Explore project <span aria-hidden="true">↗</span></a></div></article>
 <article class="v3-project-card v2-project-card v2-reveal v3-reveal" data-kind="game">
 <div class="v3-project-card-top"><span>02 / NATIVE</span><span class="v3-status">NATIVE GAME</span></div><div class="v3-card-art v3-art-game" aria-hidden="true"><span>02</span><i></i><b></b></div>
 <h3>NEON VAULT</h3><p>A native Windows first-person puzzle game built around 100 deterministic floors and persistent progression.</p><div class="v3-tags"><span>Windows x64</span><span>Puzzle game</span></div>

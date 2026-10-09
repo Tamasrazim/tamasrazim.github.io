@@ -12,9 +12,9 @@ The former mass-generated one-page utility collection has been removed so the si
 
 | Project | Public page |
 | --- | --- |
-| TRILYVA motion workspace | [Open workspace](https://tamasrazim.github.io/projects/code-motion/renderer/) |
+| TRILYVA motion workspace | [Project overview](https://tamasrazim.github.io/projects/trilyva/) · [Open workspace](https://tamasrazim.github.io/projects/code-motion/renderer/) |
 | NEON VAULT native Windows game | [Game page](https://tamasrazim.github.io/projects/razim-fps/) |
-| TUNRUN C++ game in development | [Project page](https://tamasrazim.github.io/projects/tunrun/) |
+| TUNRUN C++ game in development | [Detailed project page](https://tamasrazim.github.io/projects/tunrun/) |
 | CODE → SVG | [SVG workspace](https://tamasrazim.github.io/projects/code-to-svg/) |
 | CODE → EPS | [EPS workspace](https://tamasrazim.github.io/projects/code-to-eps/) |
 | Format Forge | [Browser workspace](https://tamasrazim.github.io/projects/format-forge/) |

@@ -20,8 +20,9 @@ This is the maintained architecture for the Tamasrazim GitHub Pages repository. 
 
 ## Retained public project paths
 
-- `/projects/code-motion/` — historical route for TRILYVA.
-- `/projects/code-motion/renderer/` — main TRILYVA renderer.
+- `/projects/trilyva/` — canonical TRILYVA project overview linked from the homepage and project directory.
+- `/projects/code-motion/` — legacy TRILYVA route with a branded redirect to the overview.
+- `/projects/code-motion/renderer/` — the actual TRILYVA editor and renderer.
 - `/projects/code-to-svg/` and `/projects/code-to-eps/` — vector workspaces.
 - `/projects/razim-fps/` — NEON VAULT project information and release link.
 - `/projects/tunrun/` — TUNRUN project information.
