@@ -24,7 +24,8 @@ This is the maintained architecture for the Tamasrazim GitHub Pages repository. 
 - `/projects/code-motion/` — legacy TRILYVA route with a branded redirect to the overview.
 - `/projects/code-motion/renderer/` — the actual TRILYVA editor and renderer.
 - `/projects/code-to-svg/` and `/projects/code-to-eps/` — vector workspaces.
-- `/projects/razim-fps/` — NEON VAULT project information and release link.
+- `/projects/neo/` — NEO project information and release entry point.
+- `/projects/neo/download/` — clean canonical download page.
 - `/projects/tunrun/` — TUNRUN project information.
 - `/projects/format-forge/` — browser file workflow.
 - `/projects/mail-scope/` — browser email/DNS workspace.

@@ -11,8 +11,8 @@
 #pragma comment(lib, "winhttp.lib")
 #pragma comment(lib, "shell32.lib")
 
-#ifndef NEON_VAULT_BUILD
-#define NEON_VAULT_BUILD 0
+#ifndef NEO_BUILD
+#define NEO_BUILD 0
 #endif
 
 static std::wstring GetExeDirectory(){
@@ -33,7 +33,7 @@ static std::wstring Widen(const std::string& s){
 }
 
 static bool HttpGet(const std::wstring& host,const std::wstring& path,std::vector<unsigned char>& out){
-    HINTERNET session=WinHttpOpen(L"NEON-VAULT-Updater/1.0",
+    HINTERNET session=WinHttpOpen(L"NEO-Updater/1.0",
         WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,WINHTTP_NO_PROXY_NAME,WINHTTP_NO_PROXY_BYPASS,0);
     if(!session) return false;
     HINTERNET connect=WinHttpConnect(session,host.c_str(),INTERNET_DEFAULT_HTTPS_PORT,0);
@@ -41,7 +41,7 @@ static bool HttpGet(const std::wstring& host,const std::wstring& path,std::vecto
     HINTERNET request=WinHttpOpenRequest(connect,L"GET",path.c_str(),nullptr,
         WINHTTP_NO_REFERER,WINHTTP_DEFAULT_ACCEPT_TYPES,WINHTTP_FLAG_SECURE);
     if(!request){WinHttpCloseHandle(connect);WinHttpCloseHandle(session);return false;}
-    WinHttpAddRequestHeaders(request,L"Accept: application/vnd.github+json\r\nUser-Agent: NEON-VAULT-Updater\r\n",-1,WINHTTP_ADDREQ_FLAG_ADD);
+    WinHttpAddRequestHeaders(request,L"Accept: application/vnd.github+json\r\nUser-Agent: NEO-Updater\r\n",-1,WINHTTP_ADDREQ_FLAG_ADD);
     bool ok=WinHttpSendRequest(request,WINHTTP_NO_ADDITIONAL_HEADERS,0,nullptr,0,0,0) &&
             WinHttpReceiveResponse(request,nullptr);
     if(ok){
@@ -96,7 +96,7 @@ static std::string JsonStringValue(const std::string& json,const std::string& ke
 }
 
 static int ReleaseBuild(const std::string& tag){
-    const std::string prefix="neon-vault-";
+    const std::string prefix="neo-";
     if(tag.rfind(prefix,0)!=0)return 0;
     try{return std::max(0,std::stoi(tag.substr(prefix.size())));}
     catch(...){return 0;}
@@ -104,7 +104,7 @@ static int ReleaseBuild(const std::string& tag){
 
 static int LaunchGame(bool safeMode=false,unsigned long waitMs=0){
     std::wstring dir=GetExeDirectory();
-    std::wstring exe=dir+L"\\neon_vault.exe";
+    std::wstring exe=dir+L"\\neo.exe";
     std::wstring cmd=L"\""+exe+L"\"";
     if(safeMode)cmd+=L" --safe-mode";
     std::vector<wchar_t> cmdline(cmd.begin(),cmd.end());
@@ -131,8 +131,8 @@ int main(){
         std::string json(api.begin(),api.end());
         std::string tag=JsonStringValue(json,"tag_name");
         int latest=ReleaseBuild(tag);
-        if(latest>NEON_VAULT_BUILD){
-            size_t asset=json.find("\"name\":\"NEON-VAULT-Setup.exe\"");
+        if(latest>NEO_BUILD){
+            size_t asset=json.find("\"name\":\"NEO-Setup.exe\"");
             if(asset!=std::string::npos){
                 std::string url=JsonStringValue(json,"browser_download_url",asset);
                 const std::string prefix="https://github.com/Tamasrazim/tamasrazim.github.io/releases/download/";
@@ -143,7 +143,7 @@ int main(){
                         std::wstring path=Widen("/"+tail);
                         wchar_t temp[MAX_PATH]{};
                         GetTempPathW(MAX_PATH,temp);
-                        std::wstring installer=std::wstring(temp)+L"NEON-VAULT-Setup-update.exe";
+                        std::wstring installer=std::wstring(temp)+L"NEO-Setup-update.exe";
                         if(HttpDownload(L"github.com",path,installer)){
                             SHELLEXECUTEINFOW sei{sizeof(sei)};
                             sei.lpVerb=L"open";

@@ -1,6 +1,6 @@
-# NEON VAULT — stability rebuild
+# NEO — stability rebuild
 
-NEON VAULT is a native Windows x64 first-person puzzle game with a deterministic 100-floor progression system.
+NEO is a native Windows x64 first-person puzzle game with a deterministic 100-floor progression system.
 
 ## Game systems
 
@@ -33,7 +33,7 @@ cmake --build projects/razim-fps/build --config Release --parallel
 ## Validation
 
 ```
-projects/razim-fps/build/Release/neon_vault.exe --validate
+projects/razim-fps/build/Release/neo.exe --validate
 ```
 
 Validation checks all 100 generated floors for wall overlap, objective reachability and start-to-exit reachability. Generated levels are repaired before launch if decorative geometry creates an invalid pocket. Runtime asset audits also verify the 30-texture bank, WAV set, native mouse path and installer references.

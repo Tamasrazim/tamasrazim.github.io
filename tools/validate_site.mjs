@@ -75,6 +75,8 @@ const htmlFiles=[
   'projects/tunrun/index.html',
   'projects/razim-fps/index.html',
   'projects/razim-fps/download.html',
+  'projects/neo/index.html',
+  'projects/neo/download/index.html',
   'projects/spiral-mic/index.html',
   'projects/prism-web-icons/index.html'
 ];
@@ -145,7 +147,7 @@ must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length==
 must(rootSchema['@graph'].some(n=>n['@id']==='https://tamasrazim.github.io/projects/code-motion/renderer/#application'&&n.name==='TRILYVA Renderer'),'schema identifies renderer as a separate tool route');
 must(rootSchema['@graph'].some(n=>n['@id']==='https://tamasrazim.github.io/#trilyva'&&n.url==='https://tamasrazim.github.io/projects/trilyva/'),'TRILYVA schema points to the project overview, not the renderer');
 must(rootSchema['@graph'].some(n=>n['@type']==='SoftwareApplication'&&n.name==='KYNESTRA'&&/Windows/.test(n.operatingSystem)),'schema identifies KYNESTRA as Windows desktop software');
-must(rootSchema['@graph'].some(n=>n['@type']==='VideoGame'&&n.name==='NEON VAULT')&&rootSchema['@graph'].some(n=>n['@type']==='VideoGame'&&n.name==='TUNRUN'),'schema identifies native game projects separately');
+must(rootSchema['@graph'].some(n=>n['@type']==='VideoGame'&&n.name==='NEO')&&rootSchema['@graph'].some(n=>n['@type']==='VideoGame'&&n.name==='TUNRUN'),'schema identifies native game projects separately');
 must(rootSchema['@graph'].some(n=>n['@type']==='SoftwareSourceCode'&&n.name==='Spiral Mic native companion source'),'schema distinguishes native source code from the browser audio app');
 must(rootSchema['@graph'].some(n=>n['@type']==='Organization'&&n['@id']==='https://tamasrazim.github.io/projects/bncagrocare/#organization'),'schema defines the BNC AgroCare organization referenced by its project page');
 const knownSchemaIds=new Set(rootSchema['@graph'].map(n=>n['@id']));
@@ -185,11 +187,15 @@ must(tunrunPage.includes("TUNRUN")&&tunrunPage.includes("Four generated aperture
 const trilyvaPage=read('projects/trilyva/index.html');
 must(trilyvaPage.includes('Open TRILYVA workspace')&&trilyvaPage.includes('deterministic'),'TRILYVA project page describes the frame model and links to the renderer');
 must(read('projects/code-motion/index.html').includes('location.replace(target)'),'legacy TRILYVA URL performs a clean replace redirect');
-must(read('projects/razim-fps/index.html').includes('NEON VAULT is my native Windows x64 first-person puzzle game'),'NEON VAULT has a dedicated project page');
-const neonDownloadPage=read('projects/razim-fps/download.html');
-must(neonDownloadPage.includes('releases/latest/download/NEON-VAULT-Setup.exe')&&neonDownloadPage.includes('releases/latest/download/NEON-VAULT-Portable.zip'),'NEON VAULT download page links to the latest installer and portable package');
-must(neonDownloadPage.includes('Download NEON VAULT Setup')&&neonDownloadPage.includes('Portable ZIP')&&neonDownloadPage.includes('Windows x64'),'NEON VAULT download page has clear professional download actions and platform details');
-must(read('projects/razim-fps/index.html').includes('href="/projects/razim-fps/download.html">Download NEON VAULT'),'NEON VAULT project page routes to its dedicated download page');
+const neoPage=read('projects/neo/index.html');
+must(neoPage.includes('"name": "NEO"')&&neoPage.includes('NEO is my native Windows x64 first-person puzzle game'),'NEO has its own canonical project page and branding');
+must(neoPage.includes('href="/projects/neo/download/">Download NEO'),'NEO project page links to the clean download route');
+const neoDownloadPage=read('projects/neo/download/index.html');
+must(neoDownloadPage.includes('releases/latest/download/NEO-Setup.exe')&&neoDownloadPage.includes('releases/latest/download/NEO-Portable.zip'),'NEO download page links to the latest installer and portable package');
+must(neoDownloadPage.includes('Download NEO Setup')&&neoDownloadPage.includes('Portable ZIP')&&neoDownloadPage.includes('Windows x64'),'NEO download page has clear professional download actions and platform details');
+must(!neoDownloadPage.includes('/projects/razim-fps/')&&!neoDownloadPage.includes('download.html'),'canonical NEO download page hides the old implementation path and .html extension');
+must(read('projects/razim-fps/index.html').includes('location.replace("/projects/neo/")'),'old game URL redirects to the canonical NEO page');
+must(read('projects/razim-fps/download.html').includes('location.replace("/projects/neo/download/")'),'old download.html URL redirects to the clean NEO download route');
 must(!hub.includes('href="../renderer/"'),'project directory has no retired renderer link');
 
 const iconLibrarySource=read('projects/code-to-eps/vector-icon-library.js');

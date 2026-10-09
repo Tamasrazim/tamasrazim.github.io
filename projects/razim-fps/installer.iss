@@ -1,9 +1,9 @@
-; NEON VAULT — custom Windows installer / uninstaller
-#define AppName "NEON VAULT"
+; NEO — custom Windows installer / uninstaller
+#define AppName "NEO"
 #define AppVersion "5.1"
 #define AppPublisher "Tamasrazim"
-#define AppExeName "neon_vault.exe"
-#define UpdaterExeName "neon_vault_updater.exe"
+#define AppExeName "neo.exe"
+#define UpdaterExeName "neo_updater.exe"
 
 [Setup]
 AppId={{7D7B4D1A-3B65-4C23-B72A-91C4A9F3B7E2}
@@ -13,10 +13,10 @@ AppPublisher={#AppPublisher}
 AppVerName={#AppName} {#AppVersion}
 AppComments=Native Windows x64 100-floor puzzle game by Tamasrazim — fractured-core stability build
 AppContact=https://tamasrazim.github.io
-DefaultDirName={autopf}\NeonVault
-DefaultGroupName=NEON VAULT
+DefaultDirName={autopf}\NEO
+DefaultGroupName=NEO
 OutputDir=installer-output
-OutputBaseFilename=NEON-VAULT-Setup
+OutputBaseFilename=NEO-Setup
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern dynamic polar includetitlebar hidebevels
@@ -27,9 +27,9 @@ PrivilegesRequired=admin
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64
 UninstallDisplayIcon={app}\neon-vault.ico
-UninstallDisplayName=NEON VAULT — Uninstall
-VersionInfoDescription=NEON VAULT native Windows x64 puzzle game
-VersionInfoProductName=NEON VAULT
+UninstallDisplayName=NEO — Uninstall
+VersionInfoDescription=NEO native Windows x64 puzzle game
+VersionInfoProductName=NEO
 VersionInfoProductVersion={#AppVersion}.0
 SetupIconFile=neon-vault.ico
 Uninstallable=yes
@@ -37,8 +37,8 @@ CloseApplications=yes
 RestartApplications=no
 
 [Files]
-Source: "build\Release\neon_vault.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "build\Release\neon_vault_updater.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "build\Release\neo.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "build\Release\neo_updater.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "neon-vault.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "assets\textures\*.bmp"; DestDir: "{app}\assets\textures"; Flags: ignoreversion
 Source: "assets\audio\*.wav"; DestDir: "{app}\assets\audio"; Flags: ignoreversion
@@ -48,12 +48,12 @@ Type: files; Name: "{localappdata}\Tamasrazim\NeonVault.cfg"
 Type: dirifempty; Name: "{localappdata}\Tamasrazim"
 
 [Icons]
-Name: "{group}\NEON VAULT"; Filename: "{app}\{#UpdaterExeName}"
-Name: "{group}\NEON VAULT (Direct)"; Filename: "{app}\{#AppExeName}"
-Name: "{commondesktop}\NEON VAULT"; Filename: "{app}\{#UpdaterExeName}"
+Name: "{group}\NEO"; Filename: "{app}\{#UpdaterExeName}"
+Name: "{group}\NEO (Direct)"; Filename: "{app}\{#AppExeName}"
+Name: "{commondesktop}\NEO"; Filename: "{app}\{#UpdaterExeName}"
 
 [Run]
-Filename: "{app}\{#UpdaterExeName}"; Description: "LAUNCH NEON VAULT"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#UpdaterExeName}"; Description: "LAUNCH NEO"; Flags: nowait postinstall skipifsilent
 
 [Code]
 var
@@ -83,7 +83,7 @@ begin
   VaultBrand.Parent := WizardForm;
   VaultBrand.Left := ScaleX(34);
   VaultBrand.Top := ScaleY(28);
-  VaultBrand.Caption := 'NEON VAULT';
+  VaultBrand.Caption := 'NEO';
   VaultBrand.Font.Name := 'Segoe UI';
   VaultBrand.Font.Size := 23;
   VaultBrand.Font.Style := [fsBold];
@@ -138,7 +138,7 @@ end;
 
 procedure InitializeWizard;
 begin
-  WizardForm.Caption := 'NEON VAULT  •  DEPLOYMENT CONSOLE  //  5.1';
+  WizardForm.Caption := 'NEO  •  DEPLOYMENT CONSOLE  //  5.1';
   WizardForm.Color := clBlack;
   WizardForm.CancelButton.Caption := 'ABORT';
   WizardForm.CancelButton.Font.Color := clRed;
@@ -173,8 +173,8 @@ end;
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   case CurStep of
-    ssInstall: WizardForm.Caption := 'NEON VAULT  •  DEPLOYING';
-    ssPostInstall: WizardForm.Caption := 'NEON VAULT  •  READY';
+    ssInstall: WizardForm.Caption := 'NEO  •  DEPLOYING';
+    ssPostInstall: WizardForm.Caption := 'NEO  •  READY';
   end;
 end;
 
@@ -192,7 +192,7 @@ begin
   UnVaultBrand.Parent := UninstallProgressForm;
   UnVaultBrand.Left := ScaleX(30);
   UnVaultBrand.Top := ScaleY(24);
-  UnVaultBrand.Caption := 'NEON VAULT';
+  UnVaultBrand.Caption := 'NEO';
   UnVaultBrand.Font.Name := 'Segoe UI';
   UnVaultBrand.Font.Size := 22;
   UnVaultBrand.Font.Style := [fsBold];
@@ -227,7 +227,7 @@ end;
 
 function InitializeUninstall(): Boolean;
 begin
-  UninstallProgressForm.Caption := 'NEON VAULT  •  UNINSTALL CONSOLE';
+  UninstallProgressForm.Caption := 'NEO  •  UNINSTALL CONSOLE';
   UninstallProgressForm.Color := clBlack;
   UninstallProgressForm.StatusLabel.Font.Color := clAqua;
   UninstallProgressForm.StatusLabel.Caption := 'EVACUATING VAULT FILES...';
@@ -246,13 +246,13 @@ begin
   case CurUninstallStep of
     usUninstall:
       begin
-        UninstallProgressForm.Caption := 'NEON VAULT  •  PURGING';
+        UninstallProgressForm.Caption := 'NEO  •  PURGING';
         UninstallProgressForm.StatusLabel.Caption := 'PURGING GAME INSTALLATION...';
         if Assigned(UnVaultStatus) then UnVaultStatus.Caption := 'VAULT CHANNEL  //  PURGING';
       end;
     usPostUninstall:
       begin
-        UninstallProgressForm.Caption := 'NEON VAULT  •  COMPLETE';
+        UninstallProgressForm.Caption := 'NEO  •  COMPLETE';
         UninstallProgressForm.StatusLabel.Caption := 'VAULT EVACUATED  //  COMPLETE';
         if Assigned(UnVaultStatus) then UnVaultStatus.Caption := 'VAULT CHANNEL  //  COMPLETE';
       end;

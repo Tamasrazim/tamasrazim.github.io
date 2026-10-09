@@ -15,7 +15,8 @@
 - `/projects/code-motion/renderer/` — the actual TRILYVA editing/rendering workspace.
 - `/projects/code-to-svg/` — browser SVG workspace.
 - `/projects/code-to-eps/` — browser vector/EPS workspace.
-- `/projects/razim-fps/` — NEON VAULT native Windows game page.
+- `/projects/neo/` — NEO native Windows game page.
+- `/projects/neo/download/` — canonical NEO download page.
 - `/projects/tunrun/` — TUNRUN game project page.
 - `/projects/format-forge/` — browser file workspace.
 - `/projects/mail-scope/` — email and DNS inspection workspace.

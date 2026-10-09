@@ -1,4 +1,4 @@
-name: NEON VAULT Windows Build
+name: NEO Windows Build
 
 on:
   push:
@@ -17,7 +17,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: neon-vault-windows
+  group: neo-windows
   cancel-in-progress: true
 
 jobs:
@@ -44,7 +44,7 @@ jobs:
           Write-Host "Final-game static checks: PASS"
 
       - name: Configure CMake
-        run: cmake -S projects/razim-fps -B projects/razim-fps/build -G "Visual Studio 18 2026" -A x64 -DNEON_VAULT_BUILD=${{ github.run_number }}
+        run: cmake -S projects/razim-fps -B projects/razim-fps/build -G "Visual Studio 18 2026" -A x64 -DNEO_BUILD=${{ github.run_number }}
 
       - name: Build game
         run: cmake --build projects/razim-fps/build --config Release --parallel
@@ -52,27 +52,27 @@ jobs:
       - name: Window initialization compatibility test
         shell: pwsh
         run: |
-          $exe = Resolve-Path "projects/razim-fps/build/Release/neon_vault.exe"
+          $exe = Resolve-Path "projects/razim-fps/build/Release/neo.exe"
           $p = Start-Process -FilePath $exe -ArgumentList "--startup-test" -WorkingDirectory (Split-Path $exe) -PassThru
           Start-Sleep -Seconds 5
           if ($p.HasExited) {
             if ($p.ExitCode -ne 0) {
-              throw "NEON VAULT window initialization test crashed with code $($p.ExitCode)."
+              throw "NEO window initialization test crashed with code $($p.ExitCode)."
             }
-            Write-Host "NEON VAULT window initialization test exited cleanly (headless runner)."
+            Write-Host "NEO window initialization test exited cleanly (headless runner)."
           } else {
             Stop-Process -Id $p.Id -Force
-            Write-Host "NEON VAULT window initialization test: PASS"
+            Write-Host "NEO window initialization test: PASS"
           }
 
       - name: Validate 100 generated floors
         shell: pwsh
         run: |
-          $output = & "projects/razim-fps/build/Release/neon_vault.exe" --validate 2>&1
+          $output = & "projects/razim-fps/build/Release/neo.exe" --validate 2>&1
           $exitCode = $LASTEXITCODE
           $output | ForEach-Object { Write-Host $_ }
-          if ($output -notmatch "NEON VAULT VALIDATION COMPLETE: PASS") {
-            throw "NEON VAULT geometry validation did not report PASS."
+          if ($output -notmatch "NEO VALIDATION COMPLETE: PASS") {
+            throw "NEO geometry validation did not report PASS."
           }
           if ($exitCode -ne 0) {
             Write-Warning "Validator returned exit code $exitCode despite reporting PASS; continuing with the verified PASS marker."
@@ -81,7 +81,7 @@ jobs:
       - name: Audit generated runtime assets and installer
         shell: pwsh
         run: |
-          & "projects/razim-fps/tools/neon-vault-audit.ps1"
+          & "projects/razim-fps/tools/neo-audit.ps1"
 
       - name: Install Inno Setup
         shell: pwsh
@@ -97,25 +97,25 @@ jobs:
         shell: pwsh
         run: |
           Compress-Archive -Path @(
-            "projects/razim-fps/build/Release/neon_vault.exe",
-            "projects/razim-fps/build/Release/neon_vault_updater.exe",
+            "projects/razim-fps/build/Release/neo.exe",
+            "projects/razim-fps/build/Release/neo_updater.exe",
             "projects/razim-fps/build/Release/assets"
-          ) -DestinationPath "NEON-VAULT-Portable.zip" -Force
+          ) -DestinationPath "NEO-Portable.zip" -Force
 
       - name: Verify installer outputs
         shell: pwsh
         run: |
-          $installer = "projects/razim-fps/installer-output/NEON-VAULT-Setup.exe"
-          $portable = "NEON-VAULT-Portable.zip"
-          $updater = "projects/razim-fps/build/Release/neon_vault_updater.exe"
-          $game = "projects/razim-fps/build/Release/neon_vault.exe"
+          $installer = "projects/razim-fps/installer-output/NEO-Setup.exe"
+          $portable = "NEO-Portable.zip"
+          $updater = "projects/razim-fps/build/Release/neo_updater.exe"
+          $game = "projects/razim-fps/build/Release/neo.exe"
           if (!(Test-Path $installer)) { throw "Installer was not generated: $installer" }
           if (!(Test-Path $portable)) { throw "Portable package was not generated: $portable" }
           if (!(Test-Path $updater)) { throw "Updater was not generated: $updater" }
           if (!(Test-Path $game)) { throw "Game was not generated: $game" }
           if ((Get-Item $installer).Length -lt 100KB) { throw "Installer is suspiciously small." }
           if ((Get-Item $portable).Length -lt 100KB) { throw "Portable package is suspiciously small." }
-          if (!(Test-Path "projects/razim-fps/assets/audio/neon-vault-theme.wav")) { throw "Final instrumental soundtrack is missing." }
+          if (!(Test-Path "projects/razim-fps/assets/audio/neo-theme.wav")) { throw "Final instrumental soundtrack is missing." }
           Write-Host "Installer: $((Get-Item $installer).Length) bytes"
           Write-Host "Portable:  $((Get-Item $portable).Length) bytes"
           Write-Host "Updater:   $((Get-Item $updater).Length) bytes"
@@ -123,11 +123,11 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: NEON-VAULT-Windows
+          name: NEO-Windows
           path: |
-            projects/razim-fps/installer-output/NEON-VAULT-Setup.exe
-            NEON-VAULT-Portable.zip
-            projects/razim-fps/build/Release/neon_vault_updater.exe
+            projects/razim-fps/installer-output/NEO-Setup.exe
+            NEO-Portable.zip
+            projects/razim-fps/build/Release/neo_updater.exe
 
       - name: Publish GitHub Release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -135,5 +135,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = "neon-vault-$env:GITHUB_RUN_NUMBER"
-          gh release create $tag "projects/razim-fps/installer-output/NEON-VAULT-Setup.exe" "NEON-VAULT-Portable.zip" --title "NEON VAULT $tag" --generate-notes
+          $tag = "neo-$env:GITHUB_RUN_NUMBER"
+          gh release create $tag "projects/razim-fps/installer-output/NEO-Setup.exe" "NEO-Portable.zip" --title "NEO $tag" --generate-notes
