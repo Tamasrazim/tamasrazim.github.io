@@ -19,9 +19,11 @@ function checkLocalRefs(file){
     const ref=m[1];
     if(!ref||ref.startsWith('#')||/^(?:https?:|mailto:|tel:|data:|blob:|javascript:)/i.test(ref)) continue;
     const clean=stripRef(ref);
-    if(!clean||clean.startsWith('/')) continue;
-    let target=path.resolve(ROOT,path.dirname(file),clean);
-    if(clean.endsWith('/')) target=path.join(target,'index.html');
+    if(!clean) continue;
+    let target=clean.startsWith('/')
+      ? path.resolve(ROOT,clean.replace(/^\/+/,'' ))
+      : path.resolve(ROOT,path.dirname(file),clean);
+    if(clean==='/'||clean.endsWith('/')) target=path.join(target,'index.html');
     must(fs.existsSync(target),file+' → '+ref+' resolves');
   }
   // DOM ids belong to actual markup, not JavaScript strings/comments.
@@ -129,15 +131,21 @@ must(rootSchema['@graph'].some(n=>n['@type']==='Person'&&n['@id']==='https://tam
 must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length===6,'schema includes six featured software applications');
 must((site.match(/class="v2-project-card v2-reveal"/g)||[]).length===9,'homepage has nine featured project cards');
 must(!site.includes('PRO_TOOL_MANIFEST'),'homepage omits the generated micro-tool catalogue');
-for(const ref of ['href="projects/code-motion/"','href="asset-vault/"','href="projects/bncagrocare/"','href="projects/bncagrocare/invoice/"','href="projects/repo-token-meter/"','href="projects/"'])must(site.includes(ref),'homepage exposes '+ref);
+for(const ref of ['href="/projects/code-motion/renderer/"','href="/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/"'])must(site.includes(ref),'homepage exposes '+ref);
+must(site.includes('href="https://github.com/Tamasrazim/tamasrazim.github.io/tree/main/projects/code-motion"'),'homepage links to TRILYVA source files');
+must(site.includes('tunnel-runner prototype'),'homepage describes TUNRUN as a prototype');
+must(!site.includes('tamasrazim.dev'),'homepage does not claim a .dev domain');
+must(!site.includes('ProfessionalService')&&!site.includes('13650456762875223511'),'homepage schema avoids unsupported business-profile claims');
 must(siteCss.includes('prefers-reduced-motion:reduce'),'redesign respects reduced-motion preferences');
 must(siteJs.includes('1000/60'),'background animation is capped at 60 FPS');
 const hub=read('projects/index.html');
-must(hub.includes('Selected Projects — Tamasrazim'),'project directory uses curated title');
+must(hub.includes('<title>Projects — Tamasrazim</title>'),'project directory uses simple title');
 must(!hub.includes('PRO_TOOL_MANIFEST')&&!hub.includes('tool-suite-health-console/'),'project directory omits generated catalogue');
 must((hub.match(/class="pi-card"/g)||[]).length===9,'project directory has nine selected cards');
 must(hub.includes('type="application/ld+json"'),'project directory exposes CollectionPage schema');
-for(const ref of ['href="./code-motion/"','href="../asset-vault/"','href="./bncagrocare/"','href="./bncagrocare/invoice/"','href="./repo-token-meter/"'])must(hub.includes(ref),'project directory exposes '+ref);
+for(const ref of ['href="/projects/code-motion/renderer/"','href="/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/"'])must(hub.includes(ref),'project directory exposes '+ref);
+must(hub.includes('href="https://github.com/Tamasrazim/tamasrazim.github.io/tree/main/projects/code-motion"'),'project directory links to TRILYVA source files');
+must(hub.includes('href="https://github.com/Tamasrazim/TUNRUN"'),'project directory links to TUNRUN source repository');
 must(!hub.includes('href="../renderer/"'),'project directory has no retired renderer link');
 
 const iconLibrarySource=read('projects/code-to-eps/vector-icon-library.js');
