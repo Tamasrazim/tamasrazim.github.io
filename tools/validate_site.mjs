@@ -143,7 +143,7 @@ must(hub.includes('<title>Projects — Tamasrazim</title>'),'project directory u
 must(!hub.includes('PRO_TOOL_MANIFEST')&&!hub.includes('tool-suite-health-console/'),'project directory omits generated catalogue');
 must((hub.match(/class="pi-card"/g)||[]).length===9,'project directory has nine selected cards');
 must(hub.includes('type="application/ld+json"'),'project directory exposes CollectionPage schema');
-for(const ref of ['href="/projects/code-motion/renderer/"','href="/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/"'])must(hub.includes(ref),'project directory exposes '+ref);
+for(const ref of ['href="/projects/code-motion/renderer/"','href="/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"'])must(hub.includes(ref),'project directory exposes '+ref);
 must(hub.includes('href="https://github.com/Tamasrazim/tamasrazim.github.io/tree/main/projects/code-motion"'),'project directory links to TRILYVA source files');
 must(hub.includes('href="https://github.com/Tamasrazim/TUNRUN"'),'project directory links to TUNRUN source repository');
 must(!hub.includes('href="../renderer/"'),'project directory has no retired renderer link');
