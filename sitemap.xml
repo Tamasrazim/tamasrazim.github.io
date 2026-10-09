@@ -2,22 +2,32 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://tamasrazim.github.io/</loc><lastmod>2026-10-10</lastmod></url>
   <url><loc>https://tamasrazim.github.io/projects/</loc><lastmod>2026-10-10</lastmod></url>
-  <url><loc>https://tamasrazim.github.io/KYNESTRA/download.html</loc></url>
+  <url><loc>https://tamasrazim.github.io/projects/kynestra/</loc><lastmod>2026-10-10</lastmod></url>
+  <url><loc>https://tamasrazim.github.io/projects/kynestra/download/</loc><lastmod>2026-10-10</lastmod></url>
   <url><loc>https://tamasrazim.github.io/asset-vault/</loc></url>
+  <url><loc>https://tamasrazim.github.io/projects/asset-vault/</loc><lastmod>2026-10-10</lastmod></url>
   <url><loc>https://tamasrazim.github.io/renderer/</loc></url>
   <url><loc>https://tamasrazim.github.io/projects/trilyva/</loc><lastmod>2026-10-10</lastmod></url>
   <url><loc>https://tamasrazim.github.io/projects/code-motion/renderer/</loc></url>
   <url><loc>https://tamasrazim.github.io/projects/code-motion/batch/</loc></url>
   <url><loc>https://tamasrazim.github.io/projects/code-to-svg/</loc></url>
+  <url><loc>https://tamasrazim.github.io/projects/code-to-svg/workspace/</loc></url>
   <url><loc>https://tamasrazim.github.io/projects/code-to-eps/</loc></url>
+  <url><loc>https://tamasrazim.github.io/projects/code-to-eps/workspace/</loc></url>
   <url><loc>https://tamasrazim.github.io/projects/neo/</loc><lastmod>2026-10-10</lastmod></url>
   <url><loc>https://tamasrazim.github.io/projects/neo/download/</loc><lastmod>2026-10-10</lastmod></url>
   <url><loc>https://tamasrazim.github.io/projects/tunrun/</loc><lastmod>2026-10-10</lastmod></url>
   <url><loc>https://tamasrazim.github.io/projects/format-forge/</loc></url>
+  <url><loc>https://tamasrazim.github.io/projects/format-forge/workspace/</loc></url>
   <url><loc>https://tamasrazim.github.io/projects/mail-scope/</loc></url>
+  <url><loc>https://tamasrazim.github.io/projects/mail-scope/workspace/</loc></url>
   <url><loc>https://tamasrazim.github.io/projects/repo-token-meter/</loc></url>
+  <url><loc>https://tamasrazim.github.io/projects/repo-token-meter/workspace/</loc></url>
   <url><loc>https://tamasrazim.github.io/projects/spiral-mic/</loc></url>
+  <url><loc>https://tamasrazim.github.io/projects/spiral-mic/workspace/</loc></url>
   <url><loc>https://tamasrazim.github.io/projects/prism-web-icons/</loc></url>
+  <url><loc>https://tamasrazim.github.io/projects/prism-web-icons/workspace/</loc></url>
   <url><loc>https://tamasrazim.github.io/projects/bncagrocare/</loc></url>
+  <url><loc>https://tamasrazim.github.io/projects/bncagrocare/catalog/</loc></url>
   <url><loc>https://tamasrazim.github.io/projects/bncagrocare/invoice/</loc></url>
 </urlset>

@@ -61,31 +61,43 @@ function checkInlineScripts(file){
 const htmlFiles=[
   'index.html',
   'projects/index.html',
+  'KYNESTRA/download.html',
+  'projects/kynestra/index.html',
+  'projects/kynestra/download/index.html',
+  'projects/asset-vault/index.html',
   'projects/trilyva/index.html',
   'asset-vault/index.html',
   'projects/code-motion/index.html',
   'projects/code-motion/renderer/index.html',
   'projects/bncagrocare/index.html',
+  'projects/bncagrocare/catalog/index.html',
   'projects/bncagrocare/invoice/index.html',
   'projects/repo-token-meter/index.html',
+  'projects/repo-token-meter/workspace/index.html',
   'projects/code-to-eps/index.html',
+  'projects/code-to-eps/workspace/index.html',
   'projects/code-to-svg/index.html',
+  'projects/code-to-svg/workspace/index.html',
   'projects/format-forge/index.html',
+  'projects/format-forge/workspace/index.html',
   'projects/mail-scope/index.html',
+  'projects/mail-scope/workspace/index.html',
   'projects/tunrun/index.html',
   'projects/razim-fps/index.html',
   'projects/razim-fps/download.html',
   'projects/neo/index.html',
   'projects/neo/download/index.html',
   'projects/spiral-mic/index.html',
-  'projects/prism-web-icons/index.html'
+  'projects/spiral-mic/workspace/index.html',
+  'projects/prism-web-icons/index.html',
+  'projects/prism-web-icons/workspace/index.html'
 ];
 for(const file of htmlFiles) must(exists(file),file+' exists');
 for(const file of htmlFiles) checkLocalRefs(file);
 
-checkInlineScripts('projects/code-to-eps/index.html');
+checkInlineScripts('projects/code-to-eps/workspace/index.html');
 
-const codeEps=read('projects/code-to-eps/index.html');
+const codeEps=read('projects/code-to-eps/workspace/index.html');
 must(codeEps.includes('id="allSvgBtn"'),'CODE-EPS exposes Export All SVG');
 must(codeEps.includes('async function exportAllSvg()'),'CODE-EPS has the SVG batch exporter');
 must(codeEps.includes('const batchSize=50;'),'CODE-EPS batches exports in groups of 50');
@@ -194,11 +206,17 @@ const neoDownloadPage=read('projects/neo/download/index.html');
 must(neoDownloadPage.includes('releases/latest/download/NEO-Setup.exe')&&neoDownloadPage.includes('releases/latest/download/NEO-Portable.zip'),'NEO download page links to the latest installer and portable package');
 must(neoDownloadPage.includes('Download NEO Setup')&&neoDownloadPage.includes('Portable ZIP')&&neoDownloadPage.includes('Windows x64'),'NEO download page has clear professional download actions and platform details');
 must(!neoDownloadPage.includes('/projects/razim-fps/')&&!neoDownloadPage.includes('download.html'),'canonical NEO download page hides the old implementation path and .html extension');
+must(read('projects/kynestra/index.html').includes('alpha foundation')&&read('projects/kynestra/index.html').includes('Download KYNESTRA'),'KYNESTRA has a dedicated project overview page');
+must(read('projects/kynestra/download/index.html').includes('releases/latest/download/KYNESTRA-setup.exe')&&!read('projects/kynestra/download/index.html').includes('download.html'),'KYNESTRA has a clean download route and installer link');
+must(read('KYNESTRA/download.html').includes('location.replace("/projects/kynestra/download/")'),'legacy KYNESTRA download URL redirects');
+must(read('projects/asset-vault/index.html').includes('href="/asset-vault/"'),'Stock Asset Vault project page links to its workspace');
+must(read('projects/bncagrocare/index.html').includes('href="/projects/bncagrocare/catalog/"')&&read('projects/bncagrocare/index.html').includes('href="/projects/bncagrocare/invoice/"'),'BNC Agro Care project page links to catalogue and invoice workspaces');
+for(const slug of ['format-forge','mail-scope','repo-token-meter','spiral-mic','prism-web-icons','code-to-svg','code-to-eps']) must(read('projects/'+slug+'/index.html').includes('/workspace/'),'project overview links to its separate workspace: '+slug);
 must(read('projects/razim-fps/index.html').includes('location.replace("/projects/neo/")'),'old game URL redirects to the canonical NEO page');
 must(read('projects/razim-fps/download.html').includes('location.replace("/projects/neo/download/")'),'old download.html URL redirects to the clean NEO download route');
 must(!hub.includes('href="../renderer/"'),'project directory has no retired renderer link');
 
-const iconLibrarySource=read('projects/code-to-eps/vector-icon-library.js');
+const iconLibrarySource=read('projects/code-to-eps/workspace/vector-icon-library.js');
 execFileSync(process.execPath,['--check',path.join(ROOT,'projects/code-to-eps/vector-icon-library.js')]);
 const iconCtx={window:{}};
 vm.runInNewContext(iconLibrarySource,iconCtx,{filename:'vector-icon-library.js'});
@@ -232,7 +250,7 @@ for(const idx of sampleSet){
   const renderFrame=fn(fakeVec,4000,4000,iconLib);
   renderFrame(0,0,60,fakeVec,4000,4000);
 }
-must(read('projects/code-to-eps/index.html').includes('./vector-icon-library.js'),'CODE-EPS loads canonical 10K icon library');
+must(read('projects/code-to-eps/workspace/index.html').includes('./vector-icon-library.js'),'CODE-EPS loads canonical 10K icon library');
 must(read('projects/code-to-eps/index.html').includes('id="iconFamily"'),'CODE-EPS exposes stock icon family selector');
 must(read('projects/code-to-eps/index.html').includes('id="allIconEpsBtn"'),'CODE-EPS exposes 10K icon EPS batch export');
 must(read('projects/code-to-eps/index.html').includes('id="allIconSvgBtn"'),'CODE-EPS exposes 10K icon SVG batch export');

@@ -1,0 +1,9 @@
+{
+  "name": "CODE→EPS — Tamasrazim",
+  "short_name": "CODE→EPS",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "description": "JavaScript-driven editable vector artwork and EPS export."
+}

@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="description" content="Code to SVG and Adobe-friendly EPS — a browser-first procedural vector workspace by Tamasrazim.">
+<link rel="manifest" href="./code-to-svg.webmanifest">
+<title>Code → SVG / EPS — Tamasrazim</title>
+<link rel="canonical" href="https://tamasrazim.github.io/projects/code-to-svg/workspace/">
+<style>
+:root{color-scheme:dark;--bg:#050505;--panel:#0b0b0b;--ink:#f2f2ee;--muted:#888;--line:#292929;--soft:#151515;--ok:#b7ffcf;--bad:#ffb7b7}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}button,textarea,input,select{font:inherit}button{cursor:pointer;color:inherit}.shell{width:min(1400px,calc(100% - 32px));margin:auto}
+header{position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line);background:#050505e8;backdrop-filter:blur(18px)}.head{min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{color:#fff;text-decoration:none;font:800 11px/1 ui-monospace,monospace;letter-spacing:.14em}.brand span{color:#707070}.head nav{display:flex;gap:18px;font:10px ui-monospace,monospace}.head nav a{color:#888;text-decoration:none}.head nav a:hover{color:#fff}
+.hero{padding:70px 0 34px}.kicker{font:10px ui-monospace,monospace;letter-spacing:.15em;color:#777;text-transform:uppercase}.hero h1{margin:12px 0 12px;font-size:clamp(42px,7vw,86px);line-height:.96;letter-spacing:-.05em}.hero h1 em{font-style:normal;color:#767676}.lead{max-width:780px;color:#aaa;font-size:17px}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.badge{border:1px solid var(--line);padding:7px 10px;border-radius:999px;font:10px ui-monospace,monospace;color:#aaa}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}.panel{border:1px solid var(--line);background:linear-gradient(180deg,#0b0b0b,#080808);border-radius:18px;overflow:hidden;min-width:0}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid var(--line);font:10px ui-monospace,monospace;color:#888}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid #333;background:#101010;border-radius:9px;padding:8px 11px;font-size:11px}.btn:hover{background:#171717}.btn.primary{background:#f2f2ee;color:#050505;border-color:#f2f2ee}.btn.primary:hover{background:#fff}
+.editor{width:100%;min-height:580px;resize:vertical;border:0;outline:0;background:#060606;color:#eee;padding:18px;font:13px/1.6 "JetBrains Mono",ui-monospace,monospace;tab-size:2}.preview-wrap{padding:14px}.preview{display:grid;place-items:center;min-height:580px;border:1px solid var(--line);border-radius:14px;background:#101010;overflow:auto}.preview iframe{width:100%;height:580px;border:0;background:#fff}.status{padding:10px 14px;border-top:1px solid var(--line);font:10px ui-monospace,monospace;color:#777;white-space:pre-wrap}.status.ok{color:var(--ok)}.status.bad{color:var(--bad)}
+.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px;border-top:1px solid var(--line)}.field{display:grid;gap:6px}.field label{font:9px ui-monospace,monospace;color:#777;text-transform:uppercase;letter-spacing:.08em}.field input,.field select{width:100%;background:#0d0d0d;border:1px solid var(--line);color:#eee;border-radius:8px;padding:9px}
+.notes{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0 70px}.note{border:1px solid var(--line);border-radius:14px;padding:16px;background:#090909}.note b{display:block;margin-bottom:5px}.note p{margin:0;color:#999;font-size:13px}.note.warn{border-color:#443434}.small{color:#777;font-size:11px;margin-top:8px}
+@media(max-width:900px){.workspace{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.notes{grid-template-columns:1fr}}
+@media(max-width:560px){.shell{width:min(100% - 20px,1400px)}.head nav{display:none}.hero{padding-top:46px}.hero h1{font-size:48px}.controls{grid-template-columns:1fr}.editor{min-height:460px}.preview{min-height:460px}.preview iframe{height:460px}}
+</style>
+<script type="application/ld+json">
+{
+ "@context":"https://schema.org",
+ "@type":"SoftwareApplication",
+ "@id":"https://tamasrazim.github.io/projects/code-to-svg/workspace/#application",
+ "name":"Code → SVG / EPS",
+ "url":"https://tamasrazim.github.io/projects/code-to-svg/workspace/",
+ "description":"A browser-first procedural vector workspace that turns JavaScript-generated SVG into editable SVG and Adobe-friendly EPS exports.",
+ "applicationCategory":"DesignApplication",
+ "creator":{"@type":"Person","@id":"https://tamasrazim.github.io/#person","name":"Robiul Rumman Razim"},
+ "author":{"@type":"Person","@id":"https://tamasrazim.github.io/#person","name":"Robiul Rumman Razim"},
+ "operatingSystem":"Web Browser",
+ "keywords":["JavaScript","SVG","EPS","Vector Graphics","Procedural Design","Adobe Stock"],
+ "featureList":["JavaScript to SVG","SVG preview","SVG export","EPS export","Vector validation"],
+ "offers":{"@type":"Offer","price":"0","priceCurrency":"USD","url":"https://tamasrazim.github.io/projects/code-to-svg/workspace/"}
+}
+</script>
+</head>
+<body>
+<header><div class="shell head"><a class="brand" href="/">TAMASRAZIM <span>/ CODE → SVG</span></a><nav><a href="/projects/">Projects</a><a href="/#work">Main site</a></nav></div></header>
+<main class="shell">
+<section class="hero">
+<div class="kicker">PROJECT 06 / PROCEDURAL VECTOR</div>
+<h1>Code <em>→ SVG / EPS.</em></h1>
+<p class="lead">A local browser workspace for generating real vector artwork from JavaScript, previewing it instantly, exporting SVG, and producing a clean PostScript EPS for Adobe workflows.</p>
+<div class="badges"><span class="badge">JavaScript</span><span class="badge">SVG</span><span class="badge">EPS</span><span class="badge">Adobe-ready</span><span class="badge">Local-first</span></div>
+</section>
+
+<section class="workspace">
+<div class="panel">
+<div class="panel-head"><span>CODE</span><div class="actions"><button class="btn" id="reset">Reset example</button><button class="btn primary" id="run">Run</button></div></div>
+<textarea class="editor" id="code" spellcheck="false"></textarea>
+<div class="controls">
+<div class="field"><label>Width</label><input id="width" type="number" min="1" value="1200"></div>
+<div class="field"><label>Height</label><input id="height" type="number" min="1" value="1200"></div>
+<div class="field"><label>Background</label><input id="background" type="text" value=""></div>
+<div class="field"><label>EPS page</label><select id="epsPage"><option value="art">Use artboard</option><option value="a4">A4 portrait</option><option value="a4l">A4 landscape</option></select></div>
+</div>
+<div class="status" id="status">Ready.</div>
+</div>
+
+<div class="panel">
+<div class="panel-head"><span>PREVIEW</span><div class="actions"><button class="btn" id="copySvg">Copy SVG</button><button class="btn" id="downloadSvg">Export SVG</button><button class="btn primary" id="downloadEps">Export EPS</button></div></div>
+<div class="preview"><iframe id="preview" title="SVG preview" sandbox=""></iframe></div>
+<div class="status" id="epsStatus">EPS export supports vector paths, primitives, transforms, solid fills and strokes. Unsupported SVG features are reported before export.</div>
+</div>
+</section>
+
+<section class="notes">
+<article class="note"><b>How the code works</b><p>Your code must return a complete <code>&lt;svg&gt;...&lt;/svg&gt;</code> string. No canvas is involved in the export path, so SVG remains vector data.</p><div class="small">The preview is isolated in a sandboxed frame.</div></article>
+<article class="note warn"><b>EPS limitations</b><p>EPS is generated as real PostScript. Gradients, filters, foreignObject content and live text are reported because they need special handling or outlining to preserve exact appearance.</p><div class="small">For Adobe Stock, prefer path-based artwork and avoid effects that require rasterization.</div></article>
+</section>
+</main>
+<script>
+const EXAMPLE = `const W = 1200, H = 1200;
+const parts = [];
+
+for (let i = 0; i < 24; i++) {
+  const a = (i / 24) * Math.PI * 2;
+  const x = W / 2 + Math.cos(a) * 250;
+  const y = H / 2 + Math.sin(a) * 250;
+  parts.push('<rect x="' + (x - 90) + '" y="' + (y - 26) + '" width="180" height="52" transform="rotate(' + (i * 15) + ' ' + x + ' ' + y + ')" fill="hsl(' + (i * 15) + ',85%,60%)"/>');
+}
+
+parts.push('<circle cx="600" cy="600" r="120" fill="#111"/>');
+
+return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '">' + parts.join('') + '</svg>';
+`;
+
+const codeEl=document.getElementById('code');
+const preview=document.getElementById('preview');
+const statusEl=document.getElementById('status');
+const epsStatus=document.getElementById('epsStatus');
+let currentSvg='';
+
+function esc(v){return String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function setStatus(msg,ok){statusEl.textContent=msg;statusEl.className='status '+(ok?'ok':'bad');}
+function normalizeSvg(svg,w,h,bg){
+  const doc=new DOMParser().parseFromString(String(svg),'image/svg+xml');
+  const root=doc.documentElement;
+  if(root.nodeName.toLowerCase()!=='svg' || doc.querySelector('parsererror')) throw new Error('Code did not return a valid SVG.');
+  if(!root.getAttribute('xmlns'))root.setAttribute('xmlns','http://www.w3.org/2000/svg');
+  if(!root.getAttribute('viewBox'))root.setAttribute('viewBox','0 0 '+w+' '+h);
+  if(!root.getAttribute('width'))root.setAttribute('width',String(w));
+  if(!root.getAttribute('height'))root.setAttribute('height',String(h));
+  if(bg){const bgRect=doc.createElementNS('http://www.w3.org/2000/svg','rect');bgRect.setAttribute('width','100%');bgRect.setAttribute('height','100%');bgRect.setAttribute('fill',bg);root.insertBefore(bgRect,root.firstChild);}
+  return new XMLSerializer().serializeToString(root);
+}
+function run(){
+  try{
+    const w=Number(document.getElementById('width').value)||1200;
+    const h=Number(document.getElementById('height').value)||1200;
+    const bg=document.getElementById('background').value.trim();
+    const fn=new Function('__W','__H',`
+      const __width=__W,__height=__H;
+      return (function(){
+        const W=__width,H=__height;
+        return (function(){
+          ${codeEl.value}
+        })();
+      })();
+    `);
+    const result=fn(w,h);
+    currentSvg=normalizeSvg(result,w,h,bg);
+    preview.srcdoc=currentSvg;
+    setStatus('SVG generated: '+currentSvg.length.toLocaleString()+' characters.',true);
+    validateEps(currentSvg);
+  }catch(err){currentSvg='';setStatus('Run failed: '+(err.message||err),false);epsStatus.textContent='EPS unavailable until a valid SVG is generated.';epsStatus.className='status bad';}
+}
+function downloadBlob(blob,name){
+  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+async function copySvg(){if(!currentSvg)run();if(!currentSvg)return;try{await navigator.clipboard.writeText(currentSvg);setStatus('SVG copied to clipboard.',true);}catch(err){setStatus('Clipboard unavailable: '+(err.message||err),false);}}
+function downloadSvg(){if(!currentSvg)run();if(currentSvg)downloadBlob(new Blob([currentSvg],{type:'image/svg+xml;charset=utf-8'}),'code-to-svg.svg');}
+
+function parseNum(v,d=0){const n=parseFloat(v);return Number.isFinite(n)?n:d;}
+function colorToRgb(value){
+  if(!value || value==='none' || /^url\(/i.test(value)) return null;
+  value=value.trim().toLowerCase();
+  const names={black:'#000000',white:'#ffffff',red:'#ff0000',green:'#008000',blue:'#0000ff',yellow:'#ffff00',gray:'#808080',grey:'#808080'};
+  value=names[value]||value;
+  let m=value.match(/^#([0-9a-f]{3})$/i);if(m)value='#'+m[1].split('').map(x=>x+x).join('');
+  m=value.match(/^#([0-9a-f]{6})$/i);if(m)return[m[1].slice(0,2),m[1].slice(2,4),m[1].slice(4,6)].map(x=>parseInt(x,16)/255);
+  m=value.match(/^rgba?\(([^)]+)\)$/i);if(m){const p=m[1].split(',').map(x=>x.trim());const rgb=p.slice(0,3).map(x=>x.endsWith('%')?parseFloat(x)*2.55:parseFloat(x));if(rgb.every(Number.isFinite))return rgb.map(x=>Math.max(0,Math.min(255,x))/255);}
+  m=value.match(/^hsla?\(([^)]+)\)$/i);if(m){const p=m[1].split(',').map(x=>x.trim());const hh=(parseFloat(p[0])%360+360)%360/360,ss=Math.max(0,Math.min(100,parseFloat(p[1])))/100,ll=Math.max(0,Math.min(100,parseFloat(p[2])))/100;const k=n=>(n+hh*12)%12,a=ss*Math.min(ll,1-ll),f=n=>ll-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));return [f(0),f(8),f(4)];}
+  return null;
+}
+function parseStyle(el,parent){
+  const out=Object.assign({},parent);
+  const style=(el.getAttribute('style')||'').split(';');
+  for(const item of style){const i=item.indexOf(':');if(i>0)out[item.slice(0,i).trim()]=item.slice(i+1).trim();}
+  for(const k of ['fill','stroke','stroke-width','fill-opacity','stroke-opacity','display','visibility']) if(el.hasAttribute(k)) out[k]=el.getAttribute(k);
+  if(!out.fill)out.fill='none';
+  if(!out.stroke)out.stroke='none';
+  if(!out['stroke-width'])out['stroke-width']='1';
+  if(out['fill-opacity'] && out['fill-opacity']!=='1') out.__opacityWarning=true;
+  if(out['stroke-opacity'] && out['stroke-opacity']!=='1') out.__opacityWarning=true;
+  return out;
+}
+function matrixMultiply(a,b){return[a[0]*b[0]+a[2]*b[1],a[1]*b[0]+a[3]*b[1],a[0]*b[2]+a[2]*b[3],a[1]*b[2]+a[3]*b[3],a[0]*b[4]+a[2]*b[5]+a[4],a[1]*b[4]+a[3]*b[5]+a[5]];}
+function transformMatrix(s){let m=[1,0,0,1,0,0];for(const part of (s||'').matchAll(/([a-zA-Z]+)\(([^)]*)\)/g)){const op=part[1].toLowerCase(),n=part[2].trim().split(/[ ,]+/).filter(Boolean).map(Number);let q=[1,0,0,1,0,0];if(op==='translate')q=[1,0,0,1,n[0]||0,n[1]||0];else if(op==='scale')q=[n[0]??1,0,0,n[1]??n[0]??1,0,0];else if(op==='rotate'){const a=(n[0]||0)*Math.PI/180,c=Math.cos(a),ss=Math.sin(a);q=[c,ss,-ss,c,0,0];if(n.length>2){const t1=[1,0,0,1,n[1],n[2]],t2=[1,0,0,1,-n[1],-n[2]];q=matrixMultiply(matrixMultiply(t1,q),t2);}}else if(op==='matrix'&&n.length>=6)q=n.slice(0,6);m=matrixMultiply(m,q);}return m;}
+function pathTokens(d){return d.match(/[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?/g)||[];}
+function pathToPs(d){
+  const t=pathTokens(d);let i=0,cmd='',x=0,y=0,sx=0,sy=0,px=0,py=0,out=[];
+  function num(){return parseFloat(t[i++]);}
+  function emit(v){out.push(v);}
+  while(i<t.length){if(/[a-zA-Z]/.test(t[i]))cmd=t[i++];const rel=cmd===cmd.toLowerCase(),c=cmd.toUpperCase();
+    if(c==='M'||c==='L'){const xx=num(),yy=num();const nx=rel?x+xx:xx,ny=rel?y+yy:yy;emit(nx.toFixed(3)+' '+ny.toFixed(3)+' '+(c==='M'?'moveto':'lineto'));x=nx;y=ny;if(c==='M'){sx=x;sy=y;cmd=rel?'l':'L';}}
+    else if(c==='H'){const xx=num(),nx=rel?x+xx:xx;emit(nx.toFixed(3)+' '+y.toFixed(3)+' lineto');x=nx;}
+    else if(c==='V'){const yy=num(),ny=rel?y+yy:yy;emit(x.toFixed(3)+' '+ny.toFixed(3)+' lineto');y=ny;}
+    else if(c==='C'){for(let k=0;k<1;k++){const x1=num(),y1=num(),x2=num(),y2=num(),xx=num(),yy=num(),nx=rel?x+xx:xx,ny=rel?y+yy:yy,a=rel?x+x1:x1,b=rel?y+y1:y1,cx=rel?x+x2:x2,dy=rel?y+y2:y2;emit(a.toFixed(3)+' '+b.toFixed(3)+' '+cx.toFixed(3)+' '+dy.toFixed(3)+' '+nx.toFixed(3)+' '+ny.toFixed(3)+' curveto');x=nx;y=ny;px=cx;py=dy;}}
+    else if(c==='S'){const x2=num(),y2=num(),xx=num(),yy=num(),nx=rel?x+xx:xx,ny=rel?y+yy:yy;const a=2*x-px,b=2*y-py,cx=rel?x+x2:x2,dy=rel?y+y2:y2;emit(a.toFixed(3)+' '+b.toFixed(3)+' '+cx.toFixed(3)+' '+dy.toFixed(3)+' '+nx.toFixed(3)+' '+ny.toFixed(3)+' curveto');x=nx;y=ny;px=cx;py=dy;}
+    else if(c==='Q'||c==='T'){let qx,qy,nx,ny;if(c==='Q'){qx=num();qy=num();const xx=num(),yy=num();qx=rel?qx+x:qx;qy=rel?qy+y:qy;nx=rel?x+xx:xx;ny=rel?y+yy:yy;}else{qx=2*x-px;qy=2*y-py;const xx=num(),yy=num();nx=rel?x+xx:xx;ny=rel?y+yy:yy;}const c1x=x+(2/3)*(qx-x),c1y=y+(2/3)*(qy-y),c2x=nx+(2/3)*(qx-nx),c2y=ny+(2/3)*(qy-ny);emit(c1x.toFixed(3)+' '+c1y.toFixed(3)+' '+c2x.toFixed(3)+' '+c2y.toFixed(3)+' '+nx.toFixed(3)+' '+ny.toFixed(3)+' curveto');x=nx;y=ny;px=qx;py=qy;}
+    else if(c==='Z'){emit('closepath');x=sx;y=sy;}
+    else {throw new Error('EPS path exporter does not support SVG command '+c+' yet.');}
+  }
+  return out.join('\n');
+}
+function elemToPs(el, inherited, warnings, depth=0){
+  const tag=el.tagName.toLowerCase();const st=parseStyle(el,inherited);if(st.__opacityWarning)warnings.add('Transparency/opacity is not preserved in EPS; use opaque fills and strokes for exact output.');if(st.display==='none'||st.visibility==='hidden')return '';
+  let local=transformMatrix(el.getAttribute('transform')),inner='';const fill=colorToRgb(st.fill),stroke=colorToRgb(st.stroke);
+  if(st.fill && /^url\(/i.test(st.fill))warnings.add('Gradient/pattern fill was not preserved; use solid fills for exact EPS vectors.');
+  if(st.stroke && /^url\(/i.test(st.stroke))warnings.add('Gradient/pattern stroke was not preserved.');
+  if(tag==='g'||tag==='svg'){for(const ch of el.children)inner+=elemToPs(ch,st,warnings,depth+1);return local.some((v,j)=>v!==[1,0,0,1,0,0][j])?'gsave\n['+local.join(' ')+'] concat\n'+inner+'grestore\n':inner;}
+  let geometry='';
+  const n=v=>parseNum(v);
+  if(tag==='rect'){const x=n(el.getAttribute('x')),y=n(el.getAttribute('y')),w=n(el.getAttribute('width')),h=n(el.getAttribute('height'));if(el.getAttribute('rx'))warnings.add('Rounded rectangle corners are approximated as square corners in EPS.');geometry=x+' '+y+' moveto\n'+(x+w)+' '+y+' lineto\n'+(x+w)+' '+(y+h)+' lineto\n'+x+' '+(y+h)+' lineto\nclosepath\n';}
+  else if(tag==='circle'){const cx=n(el.getAttribute('cx')),cy=n(el.getAttribute('cy')),r=n(el.getAttribute('r'));geometry=circlePs(cx,cy,r);}
+  else if(tag==='ellipse'){const cx=n(el.getAttribute('cx')),cy=n(el.getAttribute('cy')),rx=n(el.getAttribute('rx')),ry=n(el.getAttribute('ry'));geometry='gsave\n'+cx+' '+cy+' translate\n'+rx+' '+ry+' scale\n0 0 1 0 360 arc\ngrestore\n';}
+  else if(tag==='line'){geometry=n(el.getAttribute('x1'))+' '+n(el.getAttribute('y1'))+' moveto\n'+n(el.getAttribute('x2'))+' '+n(el.getAttribute('y2'))+' lineto\n';}
+  else if(tag==='polyline'||tag==='polygon'){const pts=(el.getAttribute('points')||'').trim().split(/[ ,]+/).map(Number);if(pts.length>=4){geometry=pts[0]+' '+pts[1]+' moveto\n';for(let j=2;j+1<pts.length;j+=2)geometry+=pts[j]+' '+pts[j+1]+' lineto\n';if(tag==='polygon')geometry+='closepath\n';}}
+  else if(tag==='path'){geometry=pathToPs(el.getAttribute('d')||'');}
+  else if(tag==='text'||tag==='tspan'){warnings.add('Text is not outlined in EPS; convert text to paths before stock submission.');return '';}
+  else if(tag==='defs'||tag==='title'||tag==='desc')return '';
+  else {warnings.add('Skipped unsupported SVG element: '+tag);return '';}
+  if(!geometry)return '';
+  let ps='gsave\n'+localMatrixPs(local);
+  if(fill){ps+=fill[0]+' '+fill[1]+' '+fill[2]+' setrgbcolor\n'+geometry+'fill\n';}
+  if(stroke){ps+=stroke[0]+' '+stroke[1]+' '+stroke[2]+' setrgbcolor\n'+n(st['stroke-width'])+' setlinewidth\n'+geometry+'stroke\n';}
+  ps+='grestore\n';return ps;
+}
+function localMatrixPs(m){return m.some((v,j)=>v!==[1,0,0,1,0,0][j])?'['+m.join(' ')+'] concat\n':'';}
+function circlePs(cx,cy,r){return cx+' '+cy+' '+r+' 0 360 arc\n';}
+function svgToEps(svg,w,h,page){
+  const doc=new DOMParser().parseFromString(svg,'image/svg+xml');const root=doc.documentElement;const warnings=new Set();
+  let pw=w,ph=h;if(page==='a4'){pw=595;ph=842;}else if(page==='a4l'){pw=842;ph=595;}
+  const vb=(root.getAttribute('viewBox')||('0 0 '+w+' '+h)).trim().split(/[ ,]+/).map(Number),vx=vb[0]||0,vy=vb[1]||0,vw=vb[2]||w,vh=vb[3]||h;
+  const sx=pw/vw,sy=ph/vh,scale=Math.min(sx,sy),ox=(pw-vw*scale)/2-vx*scale,oy=(ph-vh*scale)/2-vy*scale;
+  const body=elemToPs(root,{},warnings);
+  let ps='%!PS-Adobe-3.0 EPSF-3.0\n%%Creator: Tamasrazim Code → SVG / EPS\n%%Title: Code to SVG / EPS\n%%BoundingBox: 0 0 '+Math.ceil(pw)+' '+Math.ceil(ph)+'\n%%Pages: 1\n%%EndComments\n';
+  ps+='gsave\n'+ox.toFixed(4)+' '+(oy+vh*scale).toFixed(4)+' translate\n'+scale.toFixed(8)+' '+(-scale).toFixed(8)+' scale\n'+body+'grestore\nshowpage\n%%EOF\n';
+  return {text:ps,w:pw,h:ph,warnings:[...warnings]};
+}
+function validateEps(svg){
+  try{
+    const w=Number(document.getElementById('width').value)||1200,h=Number(document.getElementById('height').value)||1200;
+    const r=svgToEps(svg,w,h,document.getElementById('epsPage').value);
+    if(r.warnings.length){epsStatus.textContent='EPS ready with notes:\n• '+r.warnings.join('\n• ');epsStatus.className='status';}
+    else{epsStatus.textContent='EPS ready — vector primitives/path data detected with no exporter warnings.';epsStatus.className='status ok';}
+  }catch(err){epsStatus.textContent='EPS validation failed: '+(err.message||err);epsStatus.className='status bad';}
+}
+function downloadEps(){
+  if(!currentSvg)run();if(!currentSvg)return;
+  try{
+    const w=Number(document.getElementById('width').value)||1200,h=Number(document.getElementById('height').value)||1200;
+    const r=svgToEps(currentSvg,w,h,document.getElementById('epsPage').value);
+    downloadBlob(new Blob([r.text],{type:'application/postscript'}),'code-to-svg.eps');
+    epsStatus.textContent='EPS exported'+(r.warnings.length?' with notes:\n• '+r.warnings.join('\n• '):'.');
+    epsStatus.className='status '+(r.warnings.length?'':'ok');
+  }catch(err){epsStatus.textContent='EPS export failed: '+(err.message||err);epsStatus.className='status bad';}
+}
+document.getElementById('reset').onclick=()=>{codeEl.value=EXAMPLE;run();};
+document.getElementById('run').onclick=run;
+document.getElementById('copySvg').onclick=copySvg;
+document.getElementById('downloadSvg').onclick=downloadSvg;
+document.getElementById('downloadEps').onclick=downloadEps;
+codeEl.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();run();}});
+codeEl.value=EXAMPLE;
+run();
+</script>
+</body>
+</html>

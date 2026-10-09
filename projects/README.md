@@ -22,3 +22,7 @@ Shared repository tools belong in the tools or scripts directories, not among pr
 ## URL rule
 
 Established routes for retained projects are public URLs. The former generated one-page utility routes have been removed; the project directory now links only to maintained projects.
+
+## Project pages and workspaces
+
+Featured project routes are information pages first. Browser applications and exports live under their dedicated `workspace/` routes where applicable. KYNESTRA uses `/projects/kynestra/` for the overview and `/projects/kynestra/download/` for its Windows installer. Stock Asset Vault's overview is under `/projects/asset-vault/`; its working app remains under `/asset-vault/`. BNC AgroCare's project page links to the catalogue and separate invoice workspace.

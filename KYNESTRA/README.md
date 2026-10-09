@@ -40,7 +40,7 @@ All KYNESTRA implementation lives under /KYNESTRA/. Existing production website 
 
 ## Windows installer
 
-Download page: https://tamasrazim.github.io/KYNESTRA/download.html
+Download page: https://tamasrazim.github.io/projects/kynestra/download/
 
 The release workflow publishes a native Windows NSIS installer as `KYNESTRA-setup.exe` whenever a `kynestra-v*` version tag is released.
 

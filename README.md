@@ -15,16 +15,16 @@ The former mass-generated one-page utility collection has been removed so the si
 | TRILYVA motion workspace | [Project overview](https://tamasrazim.github.io/projects/trilyva/) · [Open workspace](https://tamasrazim.github.io/projects/code-motion/renderer/) |
 | NEO native Windows game | [Game page](https://tamasrazim.github.io/projects/neo/) · [Downloads](https://tamasrazim.github.io/projects/neo/download/) |
 | TUNRUN C++ game in development | [Detailed project page](https://tamasrazim.github.io/projects/tunrun/) |
-| CODE → SVG | [SVG workspace](https://tamasrazim.github.io/projects/code-to-svg/) |
-| CODE → EPS | [EPS workspace](https://tamasrazim.github.io/projects/code-to-eps/) |
-| Format Forge | [Browser workspace](https://tamasrazim.github.io/projects/format-forge/) |
-| Stock Asset Vault | [Asset workspace](https://tamasrazim.github.io/asset-vault/) |
-| KYNESTRA | [Project page](https://tamasrazim.github.io/KYNESTRA/download.html) |
+| CODE → SVG | [Project page](https://tamasrazim.github.io/projects/code-to-svg/) · [Open workspace](https://tamasrazim.github.io/projects/code-to-svg/workspace/) |
+| CODE → EPS | [Project page](https://tamasrazim.github.io/projects/code-to-eps/) · [Open workspace](https://tamasrazim.github.io/projects/code-to-eps/workspace/) |
+| Format Forge | [Project page](https://tamasrazim.github.io/projects/format-forge/) · [Open workspace](https://tamasrazim.github.io/projects/format-forge/workspace/) |
+| Stock Asset Vault | [Project page](https://tamasrazim.github.io/projects/asset-vault/) · [Open workspace](https://tamasrazim.github.io/asset-vault/) |
+| KYNESTRA | [Project page](https://tamasrazim.github.io/projects/kynestra/) · [Downloads](https://tamasrazim.github.io/projects/kynestra/download/) |
 | BNC AgroCare | [Business project](https://tamasrazim.github.io/projects/bncagrocare/) |
-| Repo Token Meter | [Browser tool](https://tamasrazim.github.io/projects/repo-token-meter/) |
-| MailScope | [Browser tool](https://tamasrazim.github.io/projects/mail-scope/) |
-| Spiral Mic | [Audio experiment](https://tamasrazim.github.io/projects/spiral-mic/) |
-| Prism Web Icons | [Vector workspace](https://tamasrazim.github.io/projects/prism-web-icons/) |
+| Repo Token Meter | [Project page](https://tamasrazim.github.io/projects/repo-token-meter/) · [Open workspace](https://tamasrazim.github.io/projects/repo-token-meter/workspace/) |
+| MailScope | [Project page](https://tamasrazim.github.io/projects/mail-scope/) · [Open workspace](https://tamasrazim.github.io/projects/mail-scope/workspace/) |
+| Spiral Mic | [Project page](https://tamasrazim.github.io/projects/spiral-mic/) · [Open workspace](https://tamasrazim.github.io/projects/spiral-mic/workspace/) |
+| Prism Web Icons | [Project page](https://tamasrazim.github.io/projects/prism-web-icons/) · [Open workspace](https://tamasrazim.github.io/projects/prism-web-icons/workspace/) |
 
 ## Repository layout
 

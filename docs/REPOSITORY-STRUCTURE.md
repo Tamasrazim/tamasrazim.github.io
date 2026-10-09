@@ -23,16 +23,25 @@ This is the maintained architecture for the Tamasrazim GitHub Pages repository. 
 - `/projects/trilyva/` — canonical TRILYVA project overview linked from the homepage and project directory.
 - `/projects/code-motion/` — legacy TRILYVA route with a branded redirect to the overview.
 - `/projects/code-motion/renderer/` — the actual TRILYVA editor and renderer.
-- `/projects/code-to-svg/` and `/projects/code-to-eps/` — vector workspaces.
+- `/projects/code-to-svg/` and `/projects/code-to-eps/` — vector project overview pages.
+- Their `/workspace/` routes hold the interactive applications.
 - `/projects/neo/` — NEO project information and release entry point.
 - `/projects/neo/download/` — clean canonical download page.
 - `/projects/tunrun/` — TUNRUN project information.
-- `/projects/format-forge/` — browser file workflow.
-- `/projects/mail-scope/` — browser email/DNS workspace.
-- `/projects/repo-token-meter/` — repository analysis tool.
-- `/projects/spiral-mic/` — audio experiment.
-- `/projects/prism-web-icons/` — icon design workspace.
-- `/projects/bncagrocare/` — business catalogue and invoice workflow.
+- `/projects/format-forge/` — Format Forge project overview.
+- `/projects/format-forge/workspace/` — browser file workflow.
+- `/projects/mail-scope/` — MailScope project overview.
+- `/projects/mail-scope/workspace/` — browser email/DNS workspace.
+- `/projects/repo-token-meter/` — Repo Token Meter project overview.
+- `/projects/repo-token-meter/workspace/` — repository analysis tool.
+- `/projects/spiral-mic/` — Spiral Mic project overview.
+- `/projects/spiral-mic/workspace/` — browser audio experiment.
+- `/projects/prism-web-icons/` — Prism Web Icons project overview.
+- `/projects/prism-web-icons/workspace/` — icon design workspace.
+- `/projects/bncagrocare/` — BNC AgroCare project overview.
+- `/projects/bncagrocare/catalog/` — catalogue workspace.
+- `/projects/bncagrocare/invoice/` — invoice workspace.
+- `/projects/asset-vault/` — Stock Asset Vault project overview.
 - `/asset-vault/` — stock asset workspace.
 - `/KYNESTRA/download.html` — KYNESTRA project information.
 
