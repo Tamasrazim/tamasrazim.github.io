@@ -74,6 +74,7 @@ const htmlFiles=[
   'projects/mail-scope/index.html',
   'projects/tunrun/index.html',
   'projects/razim-fps/index.html',
+  'projects/razim-fps/download.html',
   'projects/spiral-mic/index.html',
   'projects/prism-web-icons/index.html'
 ];
@@ -185,6 +186,10 @@ const trilyvaPage=read('projects/trilyva/index.html');
 must(trilyvaPage.includes('Open TRILYVA workspace')&&trilyvaPage.includes('deterministic'),'TRILYVA project page describes the frame model and links to the renderer');
 must(read('projects/code-motion/index.html').includes('location.replace(target)'),'legacy TRILYVA URL performs a clean replace redirect');
 must(read('projects/razim-fps/index.html').includes('NEON VAULT is my native Windows x64 first-person puzzle game'),'NEON VAULT has a dedicated project page');
+const neonDownloadPage=read('projects/razim-fps/download.html');
+must(neonDownloadPage.includes('releases/latest/download/NEON-VAULT-Setup.exe')&&neonDownloadPage.includes('releases/latest/download/NEON-VAULT-Portable.zip'),'NEON VAULT download page links to the latest installer and portable package');
+must(neonDownloadPage.includes('Download NEON VAULT Setup')&&neonDownloadPage.includes('Portable ZIP')&&neonDownloadPage.includes('Windows x64'),'NEON VAULT download page has clear professional download actions and platform details');
+must(read('projects/razim-fps/index.html').includes('href="/projects/razim-fps/download.html">Download NEON VAULT'),'NEON VAULT project page routes to its dedicated download page');
 must(!hub.includes('href="../renderer/"'),'project directory has no retired renderer link');
 
 const iconLibrarySource=read('projects/code-to-eps/vector-icon-library.js');
