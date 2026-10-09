@@ -41,13 +41,15 @@ function checkScript(file){
 }
 function checkInlineScripts(file){
   const html=read(file);
-  const matches=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
+  const matches=[...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/gi)]
+    .filter(m=>! /\btype\s*=\s*["']application\/ld\+json["']/i.test(m[1]))
+    .map(m=>m[2]);
   must(matches.length>0,file+' contains an inline script');
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'code-eps-'));
   try{
-    matches.forEach((m,i)=>{
+    matches.forEach((code,i)=>{
       const temp=path.join(dir,'inline-'+i+'.mjs');
-      fs.writeFileSync(temp,m[1],'utf8');
+      fs.writeFileSync(temp,code,'utf8');
       execFileSync(process.execPath,['--check',temp],{stdio:'inherit'});
     });
     console.log('PASS',file+' inline JavaScript parses');
