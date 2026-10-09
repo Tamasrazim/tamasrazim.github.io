@@ -60,6 +60,7 @@ std::vector<Particle> gParticles;
 Sound MakeBeatSound();
 
 Vector3 V(float x,float y,float z){return{x,y,z};}
+bool FiniteVec(Vector3 p){return std::isfinite(p.x)&&std::isfinite(p.y)&&std::isfinite(p.z);}
 float Ease(float t){t=Clamp(t,0.0f,1.0f);return t*t*(3.0f-2.0f*t);}
 Color Theme(int t){
     static const Color c[10]={{55,210,255,255},{110,130,255,255},{50,235,170,255},{255,190,70,255},{255,80,145,255},
@@ -151,6 +152,21 @@ Level BuildLevel(int id){
         }
         case Objective::SURVIVE:l.required=0;break;
     }
+    if(l.id==100){
+        l.title="THE VAULT CORE";
+        l.objective=Objective::COMBO;
+        l.required=4;
+        l.timeLimit=420.0f;
+        l.pickups.clear();
+        l.switches.clear();
+        for(int i=0;i<4;i++)
+            l.pickups.push_back({V(-4.5f+3.0f*i,0.8f,14.0f),0,0,false});
+        for(int i=0;i<4;i++)
+            l.switches.push_back({V(-4.5f+3.0f*i,0.9f,5.0f),false});
+        l.pickups.push_back({V(0.0f,0.8f,-4.0f),1,0,false});
+        const std::array<Vector3,4> coreMemory={V(-3.2f,0.72f,-12.0f),V(3.2f,0.72f,-12.0f),V(-3.2f,0.72f,-18.0f),V(3.2f,0.72f,-18.0f)};
+        for(int i=0;i<4;i++)l.pickups.push_back({coreMemory[i],2,i+1,false});
+    }
     int hz=std::max(2,1+l.tier/2);
     for(int i=0;i<hz;i++){
         Vector3 p{};
@@ -159,25 +175,37 @@ Level BuildLevel(int id){
             int sg=((i+attempt)&1)?1:-1;
             float x=sg*(10+rnd()*14),z=-16+rnd()*30;
             p=Safe(l,V(x,0.55f,z),0.75f,300+i*53+attempt);
-            bool bad=Vector3Distance(p,l.start)<6.0f||Vector3Distance(p,l.exit)<5.0f;
+            bool bad=!Clear(l,p,0.75f)||Vector3Distance(p,l.start)<6.0f||Vector3Distance(p,l.exit)<5.0f;
             for(const auto& q:l.pickups)if(Vector3Distance(p,q.p)<2.4f)bad=true;
             for(const auto& q:l.switches)if(Vector3Distance(p,q.p)<2.4f)bad=true;
             for(const auto& q:l.hazards)if(Vector3Distance(p,q.base)<2.8f)bad=true;
             if(!bad)placed=true;
         }
-        if(!placed)p=V(((i&1)?1.0f:-1.0f)*15.0f,0.55f,0.0f);
+        if(!placed){
+            for(int side=0;side<2&&!placed;side++)for(int z=-20;z<=20&&!placed;z+=4){
+                Vector3 candidate=V(side==0?-20.0f:20.0f,0.55f,float(z));
+                bool bad=!Clear(l,candidate,0.75f)||Vector3Distance(candidate,l.start)<6.0f||Vector3Distance(candidate,l.exit)<5.0f;
+                for(const auto& q:l.pickups)if(Vector3Distance(candidate,q.p)<2.4f)bad=true;
+                for(const auto& q:l.switches)if(Vector3Distance(candidate,q.p)<2.4f)bad=true;
+                for(const auto& q:l.hazards)if(Vector3Distance(candidate,q.base)<2.8f)bad=true;
+                if(!bad){p=candidate;placed=true;}
+            }
+        }
+        if(!placed)continue;
         l.hazards.push_back({p,p,rnd()*TAU,1.0f+0.04f*l.tier});
     }
     return l;
 }
 bool Reachable(const Level& l,Vector3 target){
+    if(!FiniteVec(target)||fabsf(target.x)>WORLD-PLAYER_R||fabsf(target.z)>WORLD-PLAYER_R)return false;
+    if(!FiniteVec(l.start)||fabsf(l.start.x)>WORLD-PLAYER_R||fabsf(l.start.z)>WORLD-PLAYER_R)return false;
     constexpr int N=58;auto cell=[](Vector3 p){return std::pair<int,int>{std::clamp(int(p.x+WORLD),0,N-1),std::clamp(int(p.z+WORLD),0,N-1)};};
     auto blocked=[&](Vector3 p){if(fabsf(p.x)>WORLD-PLAYER_R||fabsf(p.z)>WORLD-PLAYER_R)return true;for(const auto&w:l.walls)if(HitBox(p,PLAYER_R*1.1f,w.p,w.s))return true;return false;};
     auto [sx,sz]=cell(l.start);auto [gx,gz]=cell(target);if(blocked(V(-WORLD+sx+0.5f,0.9f,-WORLD+sz+0.5f))||blocked(V(-WORLD+gx+0.5f,0.9f,-WORLD+gz+0.5f)))return false;
     std::queue<std::pair<int,int>>q;bool seen[N][N]{};q.push({sx,sz});seen[sx][sz]=true;const int dx[4]={1,-1,0,0},dz[4]={0,0,1,-1};
     while(!q.empty()){auto[x,z]=q.front();q.pop();if(x==gx&&z==gz)return true;for(int d=0;d<4;d++){int nx=x+dx[d],nz=z+dz[d];if(nx<0||nz<0||nx>=N||nz>=N||seen[nx][nz])continue;Vector3 p=V(-WORLD+nx+0.5f,0.9f,-WORLD+nz+0.5f);if(blocked(p))continue;seen[nx][nz]=true;q.push({nx,nz});}}return false;
 }
-bool FiniteVec(Vector3 p){return std::isfinite(p.x)&&std::isfinite(p.y)&&std::isfinite(p.z);}
+
 bool Valid(const Level& l){
     if(l.timeLimit<=0.0f||!FiniteVec(l.start)||!FiniteVec(l.exit))return false;
     if(fabsf(l.start.x)>WORLD||fabsf(l.start.z)>WORLD||fabsf(l.exit.x)>WORLD||fabsf(l.exit.z)>WORLD)return false;
@@ -185,11 +213,14 @@ bool Valid(const Level& l){
         if(!FiniteVec(w.p)||!FiniteVec(w.s)||w.s.x<=0.0f||w.s.y<=0.0f||w.s.z<=0.0f)return false;
         if(w.s.x>60.0f||w.s.y>8.0f||w.s.z>60.0f)return false;
     }
-    for(size_t i=0;i<l.walls.size();i++)for(size_t j=i+1;j<l.walls.size();j++)
-        if(Overlap(l.walls[i].p,l.walls[i].s,l.walls[j].p,l.walls[j].s,-0.02f))return false;
+    for(size_t i=0;i<l.walls.size();i++)for(size_t j=i+1;j<l.walls.size();j++){
+        // The four sealed boundary pieces intentionally meet at their corners.
+        const bool boundaryJoin=l.walls[i].mat==0&&l.walls[j].mat==0;
+        if(!boundaryJoin&&Overlap(l.walls[i].p,l.walls[i].s,l.walls[j].p,l.walls[j].s,-0.02f))return false;
+    }
     if(!Reachable(l,l.exit))return false;
     for(const auto&p:l.pickups){
-        if(!FiniteVec(p.p)||!Reachable(l,p.p)||Vector3Distance(p.p,l.start)<1.8f)return false;
+        if(!FiniteVec(p.p)||fabsf(p.p.x)>WORLD-PLAYER_R||fabsf(p.p.z)>WORLD-PLAYER_R||!Reachable(l,p.p)||Vector3Distance(p.p,l.start)<1.8f)return false;
     }
     for(const auto&p:l.switches){
         if(!FiniteVec(p.p)||!Reachable(l,p.p)||Vector3Distance(p.p,l.start)<1.8f)return false;
@@ -198,8 +229,25 @@ bool Valid(const Level& l){
         if(Vector3Distance(l.pickups[i].p,l.pickups[j].p)<1.1f)return false;
     for(size_t i=0;i<l.switches.size();i++)for(size_t j=i+1;j<l.switches.size();j++)
         if(Vector3Distance(l.switches[i].p,l.switches[j].p)<1.2f)return false;
+    int crystals=0,keys=0,memory=0;
+    std::array<bool,16> memoryOrder{};
+    for(const auto&p:l.pickups){
+        if(p.kind==0)crystals++;
+        else if(p.kind==1)keys++;
+        else if(p.kind==2){
+            memory++;
+            if(p.order<1||p.order>=int(memoryOrder.size())||memoryOrder[size_t(p.order)])return false;
+            memoryOrder[size_t(p.order)]=true;
+        }
+    }
+    if(l.objective==Objective::COLLECT&&crystals<l.required)return false;
+    if(l.objective==Objective::SWITCHES&&int(l.switches.size())<l.required)return false;
+    if(l.objective==Objective::KEYCARD&&keys<l.required)return false;
+    if(l.objective==Objective::MEMORY&&memory<l.required)return false;
+    if(l.objective==Objective::COMBO&&(crystals<3||int(l.switches.size())<3||keys<1||memory<4))return false;
+    for(int i=1;i<=memory;i++)if(!memoryOrder[size_t(i)])return false;
     for(const auto&h:l.hazards){
-        if(!FiniteVec(h.base)||!FiniteVec(h.p)||h.speed<=0.0f)return false;
+        if(!FiniteVec(h.base)||!FiniteVec(h.p)||fabsf(h.base.x)>WORLD-1.0f||fabsf(h.base.z)>WORLD-1.0f||h.speed<=0.0f)return false;
         if(Vector3Distance(h.base,l.start)<6.0f||Vector3Distance(h.base,l.exit)<5.0f)return false;
         for(const auto&p:l.pickups)if(Vector3Distance(h.base,p.p)<2.2f)return false;
         for(const auto&sw:l.switches)if(Vector3Distance(h.base,sw.p)<2.2f)return false;
@@ -233,9 +281,13 @@ void Repair(Level& l){
 
     // Final deterministic layout: preserve all required puzzle objects and the sealed boundary.
     for(size_t i=0;i<l.pickups.size();i++)
-        l.pickups[i].p=V((i%3-1)*3.2f,l.pickups[i].p.y,20.0f-float(i)*3.8f);
+        l.pickups[i].p=V((int(i%3)-1)*3.2f,l.pickups[i].p.y,20.0f-float(i)*3.8f);
     for(size_t i=0;i<l.switches.size();i++)
-        l.switches[i].p=V((i%3-1)*3.5f,l.switches[i].p.y,18.0f-float(i)*4.5f);
+        l.switches[i].p=V((int(i%3)-1)*3.5f,l.switches[i].p.y,18.0f-float(i)*4.5f);
+    l.hazards.clear();
+    if(l.walls.size()>4)l.walls.resize(4);
+    // Never silently replace a failed puzzle with a different objective.
+    // The deterministic validator will report any remaining layout failure.
 }
 Texture2D LoadTex(const std::string& f,Color fallback){
     if(FileExists(f.c_str())){Texture2D t=LoadTexture(f.c_str());if(t.id){GenTextureMipmaps(&t);SetTextureFilter(t,TEXTURE_FILTER_TRILINEAR);SetTextureWrap(t,TEXTURE_WRAP_REPEAT);return t;}}
@@ -643,10 +695,15 @@ int main(int argc,char**argv){
             bool sprint=IsKeyDown(KEY_LEFT_SHIFT)&&stamina>1&&Vector3Length(mv)>.01f;float speed=sprint?8.1f:5.0f;stamina=sprint?std::max(0.0f,stamina-22*dt):std::min(100.0f,stamina+14*dt);
             const bool exitOpen=level.objective==Objective::SURVIVE||ObjectiveDone(level,got,sw,mem);
             const float moveStep=speed*dt;
-            Vector3 next=player;next.x+=mv.x*moveStep;
-            if(!IsBlocked(level,next,exitOpen))player.x=next.x;
-            next=player;next.z+=mv.z*moveStep;
-            if(!IsBlocked(level,next,exitOpen))player.z=next.z;
+            // Sweep in short increments so high-FPS and low-FPS frames share collision behavior.
+            const int moveSubsteps=std::clamp(int(std::ceil(moveStep/0.10f)),1,8);
+            const float subStep=moveStep/float(moveSubsteps);
+            for(int step=0;step<moveSubsteps;step++){
+                Vector3 next=player;next.x+=mv.x*subStep;
+                if(!IsBlocked(level,next,exitOpen))player.x=next.x;
+                next=player;next.z+=mv.z*subStep;
+                if(!IsBlocked(level,next,exitOpen))player.z=next.z;
+            }
             for(int guard=0;guard<3;guard++){
                 bool moved=false;
                 for(const auto& w:level.walls)if(HitBox(player,PLAYER_R,w.p,w.s)){
@@ -665,7 +722,12 @@ int main(int argc,char**argv){
             if(screen!=Screen::PLAYING)continue;
             if(IsKeyPressed(KEY_E)){float best=2.25f;int type=-1,idx=-1;for(int i=0;i<(int)level.switches.size();i++)if(!level.switches[i].active&&Vector3Distance(player,level.switches[i].p)<best){best=Vector3Distance(player,level.switches[i].p);type=1;idx=i;}for(int i=0;i<(int)level.pickups.size();i++)if(!level.pickups[i].taken&&Vector3Distance(player,level.pickups[i].p)<best){best=Vector3Distance(player,level.pickups[i].p);type=2;idx=i;}
                 if(type==1){level.switches[idx].active=true;sw++;interactFlash=1.0f;Burst(level.switches[idx].p,Theme(level.theme),18,2.1f);if(IsSoundValid(assets.click))PlaySound(assets.click);}
-                else if(type==2){auto&p=level.pickups[idx];if(p.kind==2){if(p.order==mem+1){p.taken=true;p.burst=0.95f;interactFlash=1.0f;Burst(p.p,MAGENTA,22,2.6f);mem++;}else{mem=0;timeLeft=std::max(0.0f,timeLeft-6);health=std::max(1.0f,health-10);if(IsSoundValid(assets.hit))PlaySound(assets.hit);}}else{p.taken=true;p.burst=0.95f;interactFlash=1.0f;Color burstColor=p.kind==0?SKYBLUE:GOLD;Burst(p.p,burstColor,22,2.6f);if(p.kind==0)got++;}if(IsSoundValid(assets.pickup)){SetSoundVolume(assets.pickup,save.settings.sfx);PlaySound(assets.pickup);}}
+                else if(type==2){auto&p=level.pickups[idx];if(p.kind==2){if(p.order==mem+1){p.taken=true;p.burst=0.95f;interactFlash=1.0f;Burst(p.p,MAGENTA,22,2.6f);mem++;}else{
+                    for(auto& q:level.pickups)if(q.kind==2){q.taken=false;q.burst=0.0f;}
+                    mem=0;timeLeft=std::max(0.0f,timeLeft-6);health=std::max(1.0f,health-10);
+                    Burst(p.p,MAGENTA,16,1.8f);
+                    if(IsSoundValid(assets.hit)){SetSoundVolume(assets.hit,save.settings.sfx);PlaySound(assets.hit);}
+                }}else{p.taken=true;p.burst=0.95f;interactFlash=1.0f;Color burstColor=p.kind==0?SKYBLUE:GOLD;Burst(p.p,burstColor,22,2.6f);if(p.kind==0)got++;}if(IsSoundValid(assets.pickup)){SetSoundVolume(assets.pickup,save.settings.sfx);PlaySound(assets.pickup);}}
             }
             bool done=ObjectiveDone(level,got,sw,mem);
             if(screen==Screen::PLAYING&&done&&Vector3Distance(player,level.exit)<2.6f){int stars=timeLeft/level.timeLimit>.55f&&health>50?3:(timeLeft>0?2:1);save.stars[level.id]=std::max(save.stars[level.id],stars);if(level.id<LEVELS)save.unlocked=std::max(save.unlocked,level.id+1);SaveGame(save);release();screen=level.id==LEVELS?Screen::COMPLETE:Screen::LEVELS;}

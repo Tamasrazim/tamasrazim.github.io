@@ -2,8 +2,8 @@ NEON VAULT TEXTURE BANK — BUILD METRICS
 =======================================
 
 Runtime material count: 30
-Texture + audio target: 25 MB+ shipped asset set
-Primary material format: BMP, 24-bit
+Texture + audio target: 25 MB+ raw shipped asset set
+Primary material format: BMP, 24-bit RGB, 500 x 500
 Texture addressing: repeat
 Texture filtering: trilinear + generated mipmaps
 World scale: 58 x 58 units
@@ -12,28 +12,29 @@ Eye offset: 0.62
 Validation grid: 58 x 58 cells
 Floor count: 100
 Material families: 30
-Current measured generated material payload: 22,501,620 bytes
-Current measured audio payload: 2,934,400 bytes
-Current measured generated material + audio payload: 25,436,020 bytes (25.44 MB decimal; 24.26 MiB)
+
+Measured generated material payload: 22,501,620 bytes
+Measured WAV payload: 2,934,400 bytes
+Measured material + audio payload: 25,436,020 bytes (25.44 MB decimal; 24.26 MiB)
 
 Material mapping:
-vault_01..vault_10  = theme surfaces
-vault_11..vault_20  = structural/panel families
-vault_21..vault_25  = hazard/exit families
-vault_26..vault_30  = trim/light / shard families
+vault_01..vault_10 = theme surfaces
+vault_11..vault_20 = structural/panel families
+vault_21..vault_25 = hazard/exit families
+vault_26..vault_30 = trim/light/shard families
 
 Gameplay calculations:
-collision clearance = player radius + generated obstacle clearance
-route validation = deterministic BFS from start to exit
-pickup validation = deterministic BFS from start to every pickup
-switch validation = deterministic BFS from start to every switch
-wall overlap validation = pairwise XZ bounds
-spawn repair = generated obstacle rollback until validation passes
-hazard spawn clearance = minimum start and exit distance guards
-movement = axis-separated collision resolution
-mouse = native disabled-cursor input, no pointer warp
-camera = eye-height offset + pitch clamp
-pickup animation = deterministic rotating fractured-piece field
-beat layer = deterministic procedural 4-second rhythm
+- 58 x 58 deterministic BFS grid for start-to-exit and object reachability
+- finite-value and in-bounds guards run before grid-cell conversion
+- intentional outer-shell corner joins are excluded from internal wall-overlap failures
+- objective inventory counts are checked against each floor's actual objective
+- memory fragment order is unique and contiguous; failed inputs restore the fragments
+- Floor 100 is a combo challenge: four crystals, four switches, one keycard and four ordered fragments
+- moving collision uses short axis-separated substeps to reduce tunnelling
+- hazard spawns reject walls, interactables, start/exit safety zones and other hazards
+- repair uses signed fallback coordinates and preserves the assigned objective
+- mouse uses native disabled-cursor input with no pointer warp
+- pickups and switches produce fractured-piece/particle feedback
+- 4-second procedural beat layer loops separately from the original soundtrack
 
-This manifest is part of the shipped asset bank and is copied with the game assets.
+This is a source metrics manifest. The build copies the runtime textures and audio into the install/portable assets folder; this text file is tracked for development and verification.
