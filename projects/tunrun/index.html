@@ -142,9 +142,9 @@
     "Fixed-step 120 Hz lateral and vertical flight simulation",
     "Energy boost and timed dash",
     "Eight ship handling profiles and solid low-poly 3D spacecraft models",
-    "FPP mouse-look and third-person orbit focused on the spacecraft, with smooth mode transitions and tunnel/throat clearance",
+    "FPP mouse-look and third-person orbit focused on the spacecraft, with smooth mode transitions and camera-eye cross-section clamping",
     "Keyboard, mouse and gamepad input pathways",
-    "Camera look rays are checked against tunnel walls and throats, while obstructed third-person eyes pull inward toward the ship",
+    "Camera look rays are checked against tunnel walls and throats; transition eyes are reprojected inside the sampled cross-section and obstructed third-person eyes pull inward toward the ship",
     "Seed Lab generation hashes and validation diagnostics",
     "Local profile schema v3, checksum and backup recovery"
   ],
@@ -276,7 +276,7 @@
 <tr><td><strong>Menu navigation</strong></td><td>Arrows / Tab</td><td>Pointer / click</td><td>D-pad / left stick</td><td>Focus must remain visible and stable when switching devices.</td></tr>
 <tr><td><strong>Mouse sensitivity</strong></td><td>Left / right arrows on row</td><td>Click settings row</td><td>D-pad / stick</td><td>Setting persists in local profile.</td></tr>
 </tbody></table></div>
-<div class="tun-callout">The native Windows Raw Input path captures relative mouse deltas only during gameplay when mouse camera is enabled. Mouse look never steers the craft; in TPP it smoothly orbits the eye around the ship while keeping the ship as the focus. Switching FPP/TPP blends the eye and focus over time instead of snapping. Each candidate view and the mixed line of sight are checked against the tunnel and throat, so transitions do not cut through a curved wall. The longer narrow S-bend hides the far tunnel through narrow apertures, and depth fog fades the remaining distant detail. Hardware/DPI/fullscreen acceptance remains part of the remaining QA work.</div>
+<div class="tun-callout">The native Windows Raw Input path captures relative mouse deltas only during gameplay when mouse camera is enabled. Mouse look never steers the craft; in TPP it smoothly orbits the eye around the ship while keeping the ship as the focus. Switching FPP/TPP blends the eye and focus over time instead of snapping. Each candidate view and the mixed line of sight are checked against the tunnel and throat, and the intermediate camera eye is reprojected into its actual sampled cross-section so the blend cannot cut across a tight bend. The longer narrow S-bend hides the far tunnel through narrow apertures, and depth fog fades the remaining distant detail. Hardware/DPI/fullscreen acceptance remains part of the remaining QA work.</div>
 </section>
 
 <section class="tun-wrap tun-section" id="progression">
