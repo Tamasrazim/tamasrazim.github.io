@@ -284,10 +284,10 @@
       startField();
     }
 
-    // Keep the custom cursor mouse-only; do not bind visual cursor movement to touch input.
+    // Keep the custom cursor mouse-only while allowing pointer preferences to change at runtime.
     var cursorDot = q('#cursorDot');
     var cursorRing = q('#cursorRing');
-    if (fine && !reduce) {
+    if (cursorDot || cursorRing) {
       w.addEventListener('pointermove', function (event) {
         if (!fine || reduce) return;
         [cursorDot, cursorRing].forEach(function (element) {
