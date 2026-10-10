@@ -1,0 +1,347 @@
+/* Project identities: each detail page has its own visual language.
+   Shared structure is intentional; shared appearance is not. */
+html:has(body[data-project="asset-vault"]){background:#f0f1e7}
+html:has(body[data-project="code-to-svg"]){background:#f3f1ff}
+html:has(body[data-project="trilyva"]){background:#f4f1e8}
+html:has(body[data-project="bncagrocare"]){background:#f2f3df}
+body.pp-page[data-project]{
+  color:var(--pp-text)!important;
+  background:
+    radial-gradient(ellipse at 85% 2%,var(--pp-glow-a,transparent),transparent 34rem),
+    radial-gradient(ellipse at 4% 72%,var(--pp-glow-b,transparent),transparent 30rem),
+    var(--pp-bg)!important;
+}
+body.pp-page[data-project] .pp-brand-mark{transition:transform .3s ease,background .3s ease}
+body.pp-page[data-project] .pp-brand:hover .pp-brand-mark{transform:rotate(-8deg) scale(1.04)}
+body.pp-page[data-project] .pp-kicker{color:var(--pp-aqua)}
+body.pp-page[data-project] .pp-dot{background:var(--pp-aqua);box-shadow:0 0 14px color-mix(in srgb,var(--pp-aqua) 40%,transparent)}
+body.pp-page[data-project] .pp-button.primary{background:var(--pp-aqua);color:var(--pp-bg);box-shadow:none}
+body.pp-page[data-project] .pp-button.secondary{border-color:var(--pp-line);background:var(--pp-panel);color:var(--pp-text)}
+body.pp-page[data-project] .pp-button.secondary:hover{border-color:var(--pp-aqua)}
+body.pp-page[data-project] .pp-card{background:var(--pp-panel);border-color:var(--pp-line);border-radius:var(--pp-card-radius,0)}
+body.pp-page[data-project] .pp-card-top{color:var(--pp-aqua)}
+body.pp-page[data-project] .pp-art{border-color:var(--pp-line);background:var(--pp-art-bg);box-shadow:var(--pp-art-shadow,none)}
+body.pp-page[data-project] .pp-art-core{border-color:var(--pp-aqua);color:var(--pp-aqua);background:var(--pp-core-bg);box-shadow:var(--pp-core-shadow,none)}
+body.pp-page[data-project] .pp-art-core span{color:inherit}
+body.pp-page[data-project] .pp-section-head h2{color:var(--pp-text)}
+body.pp-page[data-project] .pp-bottom{border-color:var(--pp-line);background:var(--pp-panel);border-radius:var(--pp-card-radius,0)}
+body.pp-page[data-project] .pp-text-link{color:var(--pp-aqua)}
+body.pp-page[data-project] .pp-footer{border-color:var(--pp-line);color:var(--pp-muted)}
+body.pp-page[data-project] .pp-footer a{color:var(--pp-aqua)}
+body.pp-page[data-project] .pp-tags span{border-color:var(--pp-line);color:var(--pp-text);border-radius:var(--pp-tag-radius,0)}
+
+/* Stock Asset Vault — light editorial catalogue, sage ink and stacked inventory cards. */
+body.pp-page[data-project="asset-vault"]{
+  --pp-bg:#f0f1e7;--pp-panel:#e6e9db;--pp-line:rgba(28,53,37,.2);--pp-text:#1b3024;--pp-muted:#58685b;
+  --pp-aqua:#385c42;--pp-violet:#d8dfc9;--pp-glow-a:rgba(174,194,150,.32);--pp-glow-b:rgba(213,220,196,.46);
+  --pp-art-bg:repeating-linear-gradient(0deg,transparent 0 29px,rgba(39,77,49,.11) 30px),repeating-linear-gradient(90deg,transparent 0 29px,rgba(39,77,49,.11) 30px),#e0e5d4;
+  --pp-core-bg:#385c42;--pp-core-shadow:10px 10px 0 rgba(56,92,66,.14);--pp-sans:Arial,sans-serif;--pp-tag-radius:0
+}
+body.pp-page[data-project="asset-vault"] .pp-header{border-bottom:2px solid #294731}
+body.pp-page[data-project="asset-vault"] .pp-brand-mark{border-radius:0;background:#294731;color:#f0f1e7}
+body.pp-page[data-project="asset-vault"] .pp-hero{grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);padding-block:clamp(58px,8vw,100px)}
+body.pp-page[data-project="asset-vault"] .pp-hero h1{font:700 clamp(46px,7vw,83px)/.98 Georgia,serif;letter-spacing:-.065em}
+body.pp-page[data-project="asset-vault"] .pp-art{border-radius:0;min-height:355px}
+body.pp-page[data-project="asset-vault"] .pp-art-core{border-radius:4px;transform:rotate(45deg);color:#f0f1e7}
+body.pp-page[data-project="asset-vault"] .pp-art-core span{transform:rotate(-45deg)}
+body.pp-page[data-project="asset-vault"] .pp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+body.pp-page[data-project="asset-vault"] .pp-card{border-width:0 0 1px;padding:24px 4px;background:transparent}
+body.pp-page[data-project="asset-vault"] .pp-card h3{font:600 20px/1.25 Georgia,serif}
+body.pp-page[data-project="asset-vault"] .pp-button{border-radius:0}
+
+/* BNC AgroCare — warm botanical business system, not a generic tech landing page. */
+body.pp-page[data-project="bncagrocare"]{
+  --pp-bg:#f2f3df;--pp-panel:#e4e9ca;--pp-line:rgba(29,71,39,.2);--pp-text:#193a25;--pp-muted:#526951;
+  --pp-aqua:#327342;--pp-violet:#bbd87f;--pp-glow-a:rgba(155,194,84,.3);--pp-glow-b:rgba(206,219,153,.34);
+  --pp-art-bg:radial-gradient(circle at 50% 40%,#f9f6c8 0 9%,transparent 9.5%),radial-gradient(ellipse at 50% 100%,#9bbd70,transparent 58%),linear-gradient(145deg,#dce9b7,#f4f1d8);
+  --pp-core-bg:linear-gradient(145deg,#f9f6c8,#c9e090);--pp-core-shadow:0 18px 55px rgba(56,112,44,.18);--pp-card-radius:20px;--pp-tag-radius:999px
+}
+body.pp-page[data-project="bncagrocare"] .pp-shell{width:min(1200px,calc(100% - 40px))}
+body.pp-page[data-project="bncagrocare"] .pp-header{border-bottom:1px solid rgba(29,71,39,.2)}
+body.pp-page[data-project="bncagrocare"] .pp-brand-mark{border-radius:50% 50% 8px 50%;background:#327342;color:#fff}
+body.pp-page[data-project="bncagrocare"] .pp-hero{padding:clamp(24px,4vw,48px);margin-top:38px;border:1px solid var(--pp-line);border-radius:32px 8px 32px 8px;background:rgba(255,255,255,.28)}
+body.pp-page[data-project="bncagrocare"] .pp-hero h1{font-size:clamp(44px,7vw,82px);letter-spacing:-.07em}
+body.pp-page[data-project="bncagrocare"] .pp-art{border:0;border-radius:50% 50% 10px 10px;min-height:330px}
+body.pp-page[data-project="bncagrocare"] .pp-art-core{width:148px;height:148px;border-radius:50%;transform:none}
+body.pp-page[data-project="bncagrocare"] .pp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+body.pp-page[data-project="bncagrocare"] .pp-card{padding:24px;border-radius:4px 24px 4px 24px}
+body.pp-page[data-project="bncagrocare"] .pp-button{border-radius:999px}
+body.pp-page[data-project="bncagrocare"] .pp-bottom{border-radius:5px 24px 5px 24px}
+
+/* CODE → SVG — bright vector artboard, cobalt marks and asymmetrical gallery layout. */
+body.pp-page[data-project="code-to-svg"]{
+  --pp-bg:#f3f1ff;--pp-panel:#e8e4ff;--pp-line:rgba(44,40,98,.19);--pp-text:#211f43;--pp-muted:#605d7f;
+  --pp-aqua:#4e42df;--pp-violet:#c9c2ff;--pp-glow-a:rgba(136,126,255,.26);--pp-glow-b:rgba(184,176,255,.22);
+  --pp-art-bg:linear-gradient(135deg,#fff 0 48%,#e6e2ff 48% 49%,#fff 49%),#fff;--pp-core-bg:#4e42df;--pp-core-shadow:12px 12px 0 #cbc5ff
+}
+body.pp-page[data-project="code-to-svg"] .pp-shell{width:min(1220px,calc(100% - 44px))}
+body.pp-page[data-project="code-to-svg"] .pp-header{border-bottom:1px solid #c7c1f1}
+body.pp-page[data-project="code-to-svg"] .pp-brand-mark{border-radius:50%;background:#4e42df;color:white}
+body.pp-page[data-project="code-to-svg"] .pp-hero{grid-template-columns:minmax(300px,.92fr) minmax(0,1.08fr);gap:clamp(28px,5vw,70px)}
+body.pp-page[data-project="code-to-svg"] .pp-hero>div:first-child{grid-column:2;grid-row:1}
+body.pp-page[data-project="code-to-svg"] .pp-art{grid-column:1;grid-row:1;order:-1;min-height:390px;border-radius:5px;background-color:#fff;box-shadow:10px 10px 0 #d9d3ff}
+body.pp-page[data-project="code-to-svg"] .pp-art-core{border-radius:50%;transform:none}
+body.pp-page[data-project="code-to-svg"] .pp-art-core span{font-weight:900}
+body.pp-page[data-project="code-to-svg"] .pp-hero h1{font-weight:900;letter-spacing:-.09em}
+body.pp-page[data-project="code-to-svg"] .pp-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+body.pp-page[data-project="code-to-svg"] .pp-card{border-radius:4px;padding:20px 17px;background:#fff}
+body.pp-page[data-project="code-to-svg"] .pp-button{border-radius:4px}
+
+/* CODE → EPS — print-room identity: ink, warm paper, copper foil and typographic contrast. */
+body.pp-page[data-project="code-to-eps"]{
+  --pp-bg:#17110e;--pp-panel:#211813;--pp-line:rgba(255,190,134,.22);--pp-text:#fff1e5;--pp-muted:#c2a99a;
+  --pp-aqua:#ff9a62;--pp-violet:#8c4d39;--pp-glow-a:rgba(181,81,36,.2);--pp-glow-b:rgba(112,63,43,.12);
+  --pp-art-bg:repeating-linear-gradient(135deg,rgba(255,170,111,.035) 0 1px,transparent 1px 12px),#211713;
+  --pp-core-bg:#2c1d16;--pp-core-shadow:inset 0 0 0 7px rgba(255,154,98,.08),0 0 0 1px rgba(255,154,98,.2)
+}
+body.pp-page[data-project="code-to-eps"] .pp-brand-mark{border-radius:0;background:#ff9a62;color:#17110e}
+body.pp-page[data-project="code-to-eps"] .pp-hero{grid-template-columns:minmax(0,1fr) minmax(260px,.65fr);align-items:start}
+body.pp-page[data-project="code-to-eps"] .pp-hero h1{font:700 clamp(48px,7.4vw,88px)/.95 Georgia,serif;letter-spacing:-.065em}
+body.pp-page[data-project="code-to-eps"] .pp-art{min-height:310px;aspect-ratio:auto;border-radius:2px;align-self:center}
+body.pp-page[data-project="code-to-eps"] .pp-art-core{width:120px;height:120px;border-radius:0;transform:rotate(45deg)}
+body.pp-page[data-project="code-to-eps"] .pp-art-core span{transform:rotate(-45deg);font-family:Georgia,serif}
+body.pp-page[data-project="code-to-eps"] .pp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--pp-line);border:1px solid var(--pp-line)}
+body.pp-page[data-project="code-to-eps"] .pp-card{border:0;border-radius:0;padding:25px;background:#211813}
+body.pp-page[data-project="code-to-eps"] .pp-button{border-radius:0;text-transform:uppercase;letter-spacing:.04em}
+
+/* Format Forge — industrial conversion bench: signal yellow, graphite, hard edges. */
+body.pp-page[data-project="format-forge"]{
+  --pp-bg:#11120d;--pp-panel:#1b1d14;--pp-line:rgba(241,229,121,.24);--pp-text:#f3f2dc;--pp-muted:#b5b59c;
+  --pp-aqua:#e9e35b;--pp-violet:#8e8c42;--pp-glow-a:rgba(209,204,59,.15);--pp-glow-b:rgba(125,122,41,.1);
+  --pp-art-bg:repeating-linear-gradient(0deg,transparent 0 23px,rgba(233,227,91,.12) 24px),repeating-linear-gradient(90deg,transparent 0 23px,rgba(233,227,91,.12) 24px),#191b12;
+  --pp-core-bg:#e9e35b;--pp-core-shadow:8px 8px 0 #525127
+}
+body.pp-page[data-project="format-forge"] .pp-brand-mark{border-radius:2px;background:#e9e35b;color:#11120d}
+body.pp-page[data-project="format-forge"] .pp-hero{grid-template-columns:minmax(0,1.08fr) minmax(260px,.92fr)}
+body.pp-page[data-project="format-forge"] .pp-hero h1{font:900 clamp(44px,7.5vw,86px)/.94 system-ui,sans-serif;letter-spacing:-.09em;text-transform:uppercase}
+body.pp-page[data-project="format-forge"] .pp-art{border-radius:0;transform:skewY(-1deg);border:1px solid #e9e35b}
+body.pp-page[data-project="format-forge"] .pp-art-core{border-radius:0;transform:rotate(45deg);color:#11120d}
+body.pp-page[data-project="format-forge"] .pp-art-core span{transform:rotate(-45deg)}
+body.pp-page[data-project="format-forge"] .pp-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:1px solid var(--pp-line)}
+body.pp-page[data-project="format-forge"] .pp-card{border-width:0 1px 1px 0;border-radius:0;padding:24px 18px}
+body.pp-page[data-project="format-forge"] .pp-button{border-radius:0;font-weight:800;text-transform:uppercase}
+
+/* KYNESTRA — modular desktop system: indigo glass, rounded modules, layered depth. */
+body.pp-page[data-project="kynestra"]{
+  --pp-bg:#080b1b;--pp-panel:rgba(22,26,55,.8);--pp-line:rgba(161,153,255,.22);--pp-text:#f1f0ff;--pp-muted:#a3a4c5;
+  --pp-aqua:#aaa2ff;--pp-violet:#5de8dc;--pp-glow-a:rgba(91,86,210,.24);--pp-glow-b:rgba(38,159,157,.1);
+  --pp-art-bg:radial-gradient(circle at 50% 40%,rgba(170,162,255,.14),transparent 50%),linear-gradient(145deg,#131735,#090c1b);
+  --pp-core-bg:linear-gradient(145deg,rgba(170,162,255,.25),rgba(93,232,220,.07));--pp-core-shadow:0 0 0 15px rgba(170,162,255,.035),0 22px 60px rgba(0,0,0,.35);
+  --pp-card-radius:18px;--pp-tag-radius:7px
+}
+body.pp-page[data-project="kynestra"] .pp-brand-mark{border-radius:10px;background:linear-gradient(145deg,#aaa2ff,#5de8dc);color:#090c1b;box-shadow:0 0 28px rgba(170,162,255,.2)}
+body.pp-page[data-project="kynestra"] .pp-hero{padding-top:clamp(64px,9vw,105px)}
+body.pp-page[data-project="kynestra"] .pp-hero h1{font-size:clamp(46px,7vw,80px)}
+body.pp-page[data-project="kynestra"] .pp-art{border-radius:28px;min-height:360px}
+body.pp-page[data-project="kynestra"] .pp-art-core{border-radius:24px;width:150px;height:150px}
+body.pp-page[data-project="kynestra"] .pp-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+body.pp-page[data-project="kynestra"] .pp-card{padding:23px}
+body.pp-page[data-project="kynestra"] .pp-button{border-radius:12px}
+
+/* MailScope — evidence console: midnight blue, lime status indicators and monospaced structure. */
+body.pp-page[data-project="mail-scope"]{
+  --pp-bg:#070f17;--pp-panel:#0a1922;--pp-line:rgba(172,255,123,.2);--pp-text:#eaf5f0;--pp-muted:#91aaa5;
+  --pp-aqua:#adff7b;--pp-violet:#3dcbb4;--pp-glow-a:rgba(34,178,138,.17);--pp-glow-b:rgba(30,90,133,.14);
+  --pp-art-bg:linear-gradient(0deg,transparent 24px,rgba(173,255,123,.08) 25px),linear-gradient(90deg,transparent 24px,rgba(173,255,123,.08) 25px),#08141d;
+  --pp-core-bg:#10231d;--pp-core-shadow:inset 0 0 0 1px rgba(173,255,123,.24);--pp-card-radius:2px;--pp-tag-radius:2px;
+  --pp-sans:"JetBrains Mono",ui-monospace,monospace
+}
+body.pp-page[data-project="mail-scope"] .pp-header{border-bottom:1px dashed var(--pp-line)}
+body.pp-page[data-project="mail-scope"] .pp-brand-mark{border-radius:2px;color:#adff7b;background:#10231d}
+body.pp-page[data-project="mail-scope"] .pp-hero{grid-template-columns:minmax(0,.85fr) minmax(300px,1.15fr)}
+body.pp-page[data-project="mail-scope"] .pp-hero h1{font:650 clamp(42px,6vw,72px)/1.02 "JetBrains Mono",monospace;letter-spacing:-.09em}
+body.pp-page[data-project="mail-scope"] .pp-art{min-height:390px;border-radius:2px;border-style:dashed}
+body.pp-page[data-project="mail-scope"] .pp-art-core{width:168px;height:115px;border-radius:3px;transform:rotate(-6deg)}
+body.pp-page[data-project="mail-scope"] .pp-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+body.pp-page[data-project="mail-scope"] .pp-card{padding:20px 15px;border-radius:0;background:linear-gradient(180deg,rgba(173,255,123,.035),transparent),var(--pp-panel)}
+body.pp-page[data-project="mail-scope"] .pp-card h3{font:600 14px/1.5 "JetBrains Mono",monospace}
+body.pp-page[data-project="mail-scope"] .pp-button{border-radius:2px;font-family:"JetBrains Mono",monospace}
+
+/* Prism Web Icons — bold icon lab with violet light, electric lime and tile-based geometry. */
+body.pp-page[data-project="prism-web-icons"]{
+  --pp-bg:#110b20;--pp-panel:#1d1230;--pp-line:rgba(224,181,255,.22);--pp-text:#f9f1ff;--pp-muted:#b9a7ca;
+  --pp-aqua:#d9ff69;--pp-violet:#bd78ff;--pp-glow-a:rgba(170,72,255,.23);--pp-glow-b:rgba(72,228,219,.1);
+  --pp-art-bg:radial-gradient(circle at 50% 50%,rgba(215,255,105,.14),transparent 30%),linear-gradient(135deg,#26143b,#100a1c);
+  --pp-core-bg:linear-gradient(135deg,#d9ff69,#b2f9e8);--pp-core-shadow:0 0 55px rgba(217,255,105,.12);--pp-card-radius:5px
+}
+body.pp-page[data-project="prism-web-icons"] .pp-brand-mark{border-radius:4px;background:#d9ff69;color:#110b20}
+body.pp-page[data-project="prism-web-icons"] .pp-hero{grid-template-columns:minmax(0,.9fr) minmax(300px,1.1fr)}
+body.pp-page[data-project="prism-web-icons"] .pp-art{min-height:395px;border-radius:5px;background-image:linear-gradient(45deg,transparent 49.5%,rgba(224,181,255,.15) 50%,transparent 50.5%),var(--pp-art-bg)}
+body.pp-page[data-project="prism-web-icons"] .pp-art-core{width:128px;height:128px;transform:rotate(45deg);border-radius:20px}
+body.pp-page[data-project="prism-web-icons"] .pp-art-core span{transform:rotate(-45deg);color:#221135}
+body.pp-page[data-project="prism-web-icons"] .pp-art:before{content:"";position:absolute;left:13%;top:18%;width:35px;height:35px;border:1px solid #d9ff69;transform:rotate(45deg);box-shadow:74px 160px 0 -1px #bd78ff,136px -9px 0 -1px #d9ff69}
+body.pp-page[data-project="prism-web-icons"] .pp-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+body.pp-page[data-project="prism-web-icons"] .pp-card{padding:21px 17px}
+
+/* Repo Token Meter — terminal telemetry. Single wide scan panel, metric rows and console typography. */
+body.pp-page[data-project="repo-token-meter"]{
+  --pp-bg:#050b08;--pp-panel:#07140e;--pp-line:rgba(91,255,156,.23);--pp-text:#dfffe9;--pp-muted:#8cbaa0;
+  --pp-aqua:#5bff9c;--pp-violet:#00bf78;--pp-glow-a:rgba(37,255,128,.12);--pp-glow-b:rgba(0,109,69,.12);
+  --pp-art-bg:repeating-linear-gradient(0deg,transparent 0 22px,rgba(91,255,156,.1) 23px),#06130c;
+  --pp-core-bg:#07170e;--pp-core-shadow:0 0 0 1px rgba(91,255,156,.5),0 0 28px rgba(91,255,156,.08);--pp-card-radius:0;--pp-tag-radius:2px;
+  --pp-sans:"JetBrains Mono",ui-monospace,monospace
+}
+body.pp-page[data-project="repo-token-meter"] .pp-header{border-bottom:1px solid #5bff9c}
+body.pp-page[data-project="repo-token-meter"] .pp-brand-mark{border-radius:0;background:#5bff9c;color:#050b08}
+body.pp-page[data-project="repo-token-meter"] .pp-main{padding-top:22px}
+body.pp-page[data-project="repo-token-meter"] .pp-hero{display:block;padding:30px 0 44px}
+body.pp-page[data-project="repo-token-meter"] .pp-hero h1{font:700 clamp(38px,7vw,76px)/1.08 "JetBrains Mono",monospace;letter-spacing:-.1em}
+body.pp-page[data-project="repo-token-meter"] .pp-art{min-height:180px;aspect-ratio:auto;margin-top:34px;border-radius:0}
+body.pp-page[data-project="repo-token-meter"] .pp-art-core{width:105px;height:105px;border-radius:0;transform:rotate(45deg)}
+body.pp-page[data-project="repo-token-meter"] .pp-art-core span{transform:rotate(-45deg)}
+body.pp-page[data-project="repo-token-meter"] .pp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--pp-line);border:1px solid var(--pp-line)}
+body.pp-page[data-project="repo-token-meter"] .pp-card{border:0;border-radius:0;padding:24px;background:#07140e}
+body.pp-page[data-project="repo-token-meter"] .pp-card-top{font-family:"JetBrains Mono",monospace}
+body.pp-page[data-project="repo-token-meter"] .pp-bottom{border-radius:0}
+
+/* Spiral Mic — immersive audio space, soft violet light and circular instrumentation. */
+body.pp-page[data-project="spiral-mic"]{
+  --pp-bg:#10091c;--pp-panel:#1b102c;--pp-line:rgba(209,176,255,.22);--pp-text:#f8f1ff;--pp-muted:#b7a4ca;
+  --pp-aqua:#df9bff;--pp-violet:#7a75ff;--pp-glow-a:rgba(139,74,230,.23);--pp-glow-b:rgba(48,110,240,.12);
+  --pp-art-bg:radial-gradient(circle at center,rgba(181,113,255,.26),transparent 24%),radial-gradient(circle at 50% 50%,transparent 35%,rgba(139,96,255,.12) 36%,transparent 37%),#11091d;
+  --pp-core-bg:radial-gradient(circle,#241039,#10091c);--pp-core-shadow:0 0 0 16px rgba(139,96,255,.06),0 0 0 38px rgba(139,96,255,.035),0 0 48px rgba(201,135,255,.18);--pp-card-radius:17px
+}
+body.pp-page[data-project="spiral-mic"] .pp-brand-mark{border-radius:50%;background:#df9bff;color:#10091c}
+body.pp-page[data-project="spiral-mic"] .pp-hero{grid-template-columns:minmax(260px,.9fr) minmax(0,1.1fr)}
+body.pp-page[data-project="spiral-mic"] .pp-art{order:-1;min-height:410px;border-radius:50% 50% 16px 16px}
+body.pp-page[data-project="spiral-mic"] .pp-art-core{border-radius:50%;transform:none;width:136px;height:136px}
+body.pp-page[data-project="spiral-mic"] .pp-art:before{content:"";position:absolute;inset:12%;border:1px solid rgba(223,155,255,.24);border-radius:50%;box-shadow:0 0 0 16px rgba(223,155,255,.035),0 0 0 34px rgba(122,117,255,.03)}
+body.pp-page[data-project="spiral-mic"] .pp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+body.pp-page[data-project="spiral-mic"] .pp-card{padding:23px;border-radius:17px}
+body.pp-page[data-project="spiral-mic"] .pp-button{border-radius:999px}
+
+/* NEO — red-lit puzzle-game identity; compact game HUD, hard grid and outlined title. */
+body.project-detail-v3[data-project="neo"]{
+  --v3-bg:#09090b;--v3-ink:#f4f0ed;--v3-muted:#b1a7a3;--v3-dim:#847b77;--v3-line:rgba(255,91,65,.3);--v3-soft:rgba(255,91,65,.14);
+  background:radial-gradient(ellipse at 90% 14%,rgba(255,66,42,.13),transparent 33rem),linear-gradient(90deg,transparent 49.9%,rgba(255,91,65,.035) 50%,transparent 50.1%),var(--v3-bg)!important;
+}
+body.project-detail-v3[data-project="neo"] .v3-detail-header{border-bottom:1px solid rgba(255,91,65,.28)}
+body.project-detail-v3[data-project="neo"] .v3-brand-mark{border-radius:0;border-color:#ff654f;color:#ff654f}
+body.project-detail-v3[data-project="neo"] .v3-detail-hero{max-width:none;border-left:2px solid #ff654f;padding:clamp(44px,7vw,88px) clamp(24px,5vw,58px);margin-top:28px;background:linear-gradient(110deg,rgba(255,91,65,.08),transparent 65%),repeating-linear-gradient(0deg,transparent 0 52px,rgba(255,255,255,.025) 53px)}
+body.project-detail-v3[data-project="neo"] .v3-detail-hero h1{font:900 clamp(72px,15vw,168px)/.82 system-ui,sans-serif;letter-spacing:-.12em;text-shadow:0 0 45px rgba(255,91,65,.12)}
+body.project-detail-v3[data-project="neo"] .v3-name-period{color:#ff654f}
+body.project-detail-v3[data-project="neo"] .v3-detail-lead{max-width:710px;font-size:clamp(20px,2.6vw,30px)}
+body.project-detail-v3[data-project="neo"] .v3-detail-meta span{border:1px solid rgba(255,91,65,.25);padding:8px 10px}
+body.project-detail-v3[data-project="neo"] .v3-button.primary{background:#ff654f;color:#09090b!important;border-color:#ff654f}
+body.project-detail-v3[data-project="neo"] .v3-detail-panel{border-color:rgba(255,91,65,.22);background:linear-gradient(145deg,rgba(255,91,65,.045),transparent 70%),#0d0d10}
+body.project-detail-v3[data-project="neo"] .v3-detail-panel h2{color:#ff8a78}
+body.project-detail-v3[data-project="neo"] .v3-detail-note{border-left-color:#ff654f}
+
+/* TRILYVA — bright motion-design studio: ivory canvas, blue/cyan orbit and editorial spacing. */
+body.project-detail-v3[data-project="trilyva"]{
+  --v3-bg:#f4f1e8;--v3-ink:#171a26;--v3-muted:#5d6271;--v3-dim:#7f8490;--v3-line:rgba(31,39,81,.26);--v3-soft:rgba(31,39,81,.12);
+  background:radial-gradient(ellipse at 84% 12%,rgba(105,129,255,.12),transparent 30rem),var(--v3-bg)!important;
+}
+body.project-detail-v3[data-project="trilyva"] .tri-nav{border-bottom-color:rgba(31,39,81,.2)}
+body.project-detail-v3[data-project="trilyva"] .v3-brand-mark{border-color:#3547d8;color:#3547d8;border-radius:8px}
+body.project-detail-v3[data-project="trilyva"] .tri-navlinks{color:#5d6271}
+body.project-detail-v3[data-project="trilyva"] .tri-navlinks a:hover{color:#3547d8}
+body.project-detail-v3[data-project="trilyva"] .v3-header-contact{border-color:rgba(53,71,216,.3);color:#3547d8}
+body.project-detail-v3[data-project="trilyva"] .tri-hero{border-bottom-color:rgba(31,39,81,.18)}
+body.project-detail-v3[data-project="trilyva"] .tri-kicker{color:#565fc1}
+body.project-detail-v3[data-project="trilyva"] .tri-title{font-weight:800;color:#171a26}
+body.project-detail-v3[data-project="trilyva"] .tri-title span{color:#4e42df}
+body.project-detail-v3[data-project="trilyva"] .tri-lead{max-width:620px;font-size:clamp(19px,2.4vw,27px);letter-spacing:-.035em}
+body.project-detail-v3[data-project="trilyva"] .tri-p{color:#5d6271}
+body.project-detail-v3[data-project="trilyva"] .tri-art{border-color:rgba(53,71,216,.22);border-radius:50%;min-height:0;aspect-ratio:1;background:radial-gradient(circle at 50% 50%,#dce2ff,#eceffd 56%,#f4f1e8 75%);box-shadow:0 22px 70px rgba(74,83,174,.12)}
+body.project-detail-v3[data-project="trilyva"] .tri-art svg{filter:invert(1) sepia(.45) saturate(4) hue-rotate(190deg)}
+body.project-detail-v3[data-project="trilyva"] .tri-art-meta{color:#555e91}
+body.project-detail-v3[data-project="trilyva"] .tri-art-meta span:last-child{color:#3547d8}
+body.project-detail-v3[data-project="trilyva"] .v3-button.primary{background:#3547d8;color:#fff!important;border-color:#3547d8}
+body.project-detail-v3[data-project="trilyva"] .v3-button.secondary{border-color:rgba(53,71,216,.3);color:#262b4a}
+body.project-detail-v3[data-project="trilyva"] .tri-section{border-bottom-color:rgba(31,39,81,.18)}
+body.project-detail-v3[data-project="trilyva"] .tri-head h2{color:#171a26}
+body.project-detail-v3[data-project="trilyva"] .tri-head p{color:#5d6271}
+body.project-detail-v3[data-project="trilyva"] .tri-card{border-color:rgba(53,71,216,.19);background:linear-gradient(145deg,#fff,rgba(231,234,255,.65));border-radius:12px;padding:24px}
+body.project-detail-v3[data-project="trilyva"] .tri-card span{color:#4e42df}
+body.project-detail-v3[data-project="trilyva"] .tri-card h3{color:#171a26}
+body.project-detail-v3[data-project="trilyva"] .tri-card p{color:#5d6271}
+body.project-detail-v3[data-project="trilyva"] .tri-fact{border-top-color:rgba(53,71,216,.22)}
+body.project-detail-v3[data-project="trilyva"] .tri-fact b{color:#171a26}
+body.project-detail-v3[data-project="trilyva"] .tri-fact small{color:#5d6271}
+body.project-detail-v3[data-project="trilyva"] .tri-footer{border-top-color:rgba(53,71,216,.2);color:#5d6271}
+
+/* TUNRUN — midnight flight HUD with cyan tunnel rings and amber hazard telemetry. */
+body.project-detail-v3[data-project="tunrun"]{
+  --v3-bg:#030915;--v3-ink:#eef8ff;--v3-muted:#9ab0c6;--v3-dim:#607890;--v3-line:rgba(64,224,255,.32);--v3-soft:rgba(64,224,255,.14);
+  background:radial-gradient(ellipse at 80% 4%,rgba(0,162,255,.17),transparent 33rem),radial-gradient(ellipse at 12% 48%,rgba(0,238,200,.06),transparent 28rem),var(--v3-bg)!important;
+}
+body.project-detail-v3[data-project="tunrun"] .tun-page{--tun-border:rgba(64,224,255,.24);--tun-panel:#071323}
+body.project-detail-v3[data-project="tunrun"] .tun-topnav{border-bottom-color:rgba(64,224,255,.22)}
+body.project-detail-v3[data-project="tunrun"] .v3-brand-mark{border-color:#40e0ff;color:#40e0ff;border-radius:5px}
+body.project-detail-v3[data-project="tunrun"] .tun-navlinks{color:#91b4c8}
+body.project-detail-v3[data-project="tunrun"] .tun-navlinks a:hover{color:#40e0ff}
+body.project-detail-v3[data-project="tunrun"] .v3-header-contact{border-color:rgba(64,224,255,.28);color:#40e0ff}
+body.project-detail-v3[data-project="tunrun"] .tun-hero{border-bottom-color:rgba(64,224,255,.2)}
+body.project-detail-v3[data-project="tunrun"] .tun-eyebrow{color:#47dff5}
+body.project-detail-v3[data-project="tunrun"] .tun-hero h1{font:800 clamp(60px,10.5vw,126px)/.88 var(--v3-display);letter-spacing:-.1em;text-shadow:0 0 40px rgba(0,204,255,.12)}
+body.project-detail-v3[data-project="tunrun"] .tun-hero h1 span{color:#40e0ff}
+body.project-detail-v3[data-project="tunrun"] .tun-pill{border-color:rgba(64,224,255,.24);background:rgba(0,125,180,.06);color:#c4f4ff}
+body.project-detail-v3[data-project="tunrun"] .tun-pill.live{border-color:#ffb54d;color:#ffca70}
+body.project-detail-v3[data-project="tunrun"] .tun-visual{border-color:rgba(64,224,255,.42);background:radial-gradient(circle at 50% 45%,rgba(0,195,255,.14),transparent 42%),linear-gradient(#061323,#020711);box-shadow:inset 0 0 55px rgba(0,166,255,.09),0 20px 75px rgba(0,0,0,.3)}
+body.project-detail-v3[data-project="tunrun"] .tun-visual:before{background-size:32px 32px;opacity:.8;background-image:linear-gradient(90deg,transparent 49.8%,rgba(64,224,255,.14) 50%,transparent 50.2%),linear-gradient(transparent 49.8%,rgba(64,224,255,.12) 50%,transparent 50.2%)}
+body.project-detail-v3[data-project="tunrun"] .tun-ring{border-color:rgba(64,224,255,var(--alpha))!important;box-shadow:0 0 18px rgba(0,197,255,.08);border-width:1.5px}
+body.project-detail-v3[data-project="tunrun"] .tun-ring:nth-child(3n){border-color:rgba(255,181,77,var(--alpha))!important}
+body.project-detail-v3[data-project="tunrun"] .tun-ship:before{border-bottom-color:#eaf8ff;filter:drop-shadow(0 0 13px rgba(64,224,255,.42))}
+body.project-detail-v3[data-project="tunrun"] .tun-ship:after{border-bottom-color:#061323}
+body.project-detail-v3[data-project="tunrun"] .tun-ship-core{border-color:#ffb54d;background:linear-gradient(#ffb54d55,transparent)}
+body.project-detail-v3[data-project="tunrun"] .tun-crosshair{border-color:rgba(64,224,255,.32)}
+body.project-detail-v3[data-project="tunrun"] .tun-crosshair:before,body.project-detail-v3[data-project="tunrun"] .tun-crosshair:after{background:rgba(64,224,255,.38)}
+body.project-detail-v3[data-project="tunrun"] .tun-hazard{border-color:#ffb54d;background:rgba(255,181,77,.1);box-shadow:0 0 18px #ffb54d55}
+body.project-detail-v3[data-project="tunrun"] .tun-visual-label{color:#9beeff}
+body.project-detail-v3[data-project="tunrun"] .tun-visual-footer{color:#7296b5}
+body.project-detail-v3[data-project="tunrun"] .tun-section{border-bottom-color:rgba(64,224,255,.18)}
+body.project-detail-v3[data-project="tunrun"] .tun-section h2{color:#eef8ff}
+body.project-detail-v3[data-project="tunrun"] .tun-section-intro{color:#9ab0c6}
+body.project-detail-v3[data-project="tunrun"] .tun-card{border-color:rgba(64,224,255,.19);background:linear-gradient(135deg,rgba(0,166,255,.055),transparent 62%),#071323}
+body.project-detail-v3[data-project="tunrun"] .tun-card-label{color:#54e3ff}
+body.project-detail-v3[data-project="tunrun"] .tun-card h3{font-weight:600}
+body.project-detail-v3[data-project="tunrun"] .tun-stat{border-top-color:rgba(64,224,255,.24)}
+body.project-detail-v3[data-project="tunrun"] .tun-stat strong{color:#40e0ff}
+body.project-detail-v3[data-project="tunrun"] .tun-stat span{color:#8fb3c8}
+body.project-detail-v3[data-project="tunrun"] .tun-tag{border-color:rgba(64,224,255,.22);color:#a9d6e6}
+body.project-detail-v3[data-project="tunrun"] .tun-status.impl{border-color:#40e0ff;color:#40e0ff}
+body.project-detail-v3[data-project="tunrun"] .tun-status.partial{border-color:#ffb54d;color:#ffca70}
+body.project-detail-v3[data-project="tunrun"] .tun-doc{border-color:rgba(64,224,255,.2);background:#06101d;color:#bfefff}
+body.project-detail-v3[data-project="tunrun"] .tun-doc:hover{border-color:#40e0ff}
+body.project-detail-v3[data-project="tunrun"] .tun-callout{border-left-color:#ffb54d}
+body.project-detail-v3[data-project="tunrun"] .tun-footer{border-top-color:rgba(64,224,255,.22);color:#7c9db7}
+
+/* Layout safety: preserve each identity on tablet and phone. */
+@media(max-width:790px){
+  body.pp-page[data-project="asset-vault"] .pp-hero,
+  body.pp-page[data-project="bncagrocare"] .pp-hero,
+  body.pp-page[data-project="code-to-eps"] .pp-hero,
+  body.pp-page[data-project="format-forge"] .pp-hero,
+  body.pp-page[data-project="kynestra"] .pp-hero,
+  body.pp-page[data-project="mail-scope"] .pp-hero,
+  body.pp-page[data-project="prism-web-icons"] .pp-hero,
+  body.pp-page[data-project="spiral-mic"] .pp-hero{grid-template-columns:1fr}
+  body.pp-page[data-project="code-to-svg"] .pp-hero{grid-template-columns:1fr}
+  body.pp-page[data-project="code-to-svg"] .pp-hero>div:first-child,
+  body.pp-page[data-project="code-to-svg"] .pp-art{grid-column:auto;grid-row:auto}
+  body.pp-page[data-project="code-to-svg"] .pp-art{order:-1}
+  body.pp-page[data-project="mail-scope"] .pp-grid,
+  body.pp-page[data-project="format-forge"] .pp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body.pp-page[data-project="spiral-mic"] .pp-art{width:min(100%,420px);justify-self:center}
+}
+@media(max-width:520px){
+  body.pp-page[data-project="asset-vault"] .pp-grid,
+  body.pp-page[data-project="bncagrocare"] .pp-grid,
+  body.pp-page[data-project="code-to-eps"] .pp-grid,
+  body.pp-page[data-project="code-to-svg"] .pp-grid,
+  body.pp-page[data-project="format-forge"] .pp-grid,
+  body.pp-page[data-project="kynestra"] .pp-grid,
+  body.pp-page[data-project="mail-scope"] .pp-grid,
+  body.pp-page[data-project="prism-web-icons"] .pp-grid,
+  body.pp-page[data-project="repo-token-meter"] .pp-grid,
+  body.pp-page[data-project="spiral-mic"] .pp-grid{grid-template-columns:1fr}
+  body.pp-page[data-project="asset-vault"] .pp-hero{padding-block:42px}
+  body.pp-page[data-project="bncagrocare"] .pp-hero{padding:20px;margin-top:18px}
+  body.pp-page[data-project="code-to-svg"] .pp-art{min-height:260px}
+  body.pp-page[data-project="spiral-mic"] .pp-art{min-height:310px}
+}
+@media(prefers-reduced-motion:reduce){
+  body.pp-page[data-project] .pp-brand-mark{transition:none}
+  body.pp-page[data-project] .pp-brand:hover .pp-brand-mark{transform:none}
+}
