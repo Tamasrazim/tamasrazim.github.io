@@ -142,7 +142,7 @@
     "Fixed-step 120 Hz lateral and vertical flight simulation",
     "Energy boost and timed dash",
     "Eight ship handling profiles and solid low-poly 3D spacecraft models",
-    "FPP mouse-look and third-person orbit focused on the spacecraft, with tunnel/throat clearance and camera pull-in when occluded",
+    "FPP mouse-look and third-person orbit focused on the spacecraft, with smooth mode transitions and tunnel/throat clearance",
     "Keyboard, mouse and gamepad input pathways",
     "Camera look rays are checked against tunnel walls and throats, while obstructed third-person eyes pull inward toward the ship",
     "Seed Lab generation hashes and validation diagnostics",
@@ -269,14 +269,14 @@
 <tr><td><strong>Boost</strong></td><td>Left Shift</td><td>Not bound by default in the current prototype spec</td><td>Right trigger</td><td>Trigger uses an analogue threshold.</td></tr>
 <tr><td><strong>Energy dash</strong></td><td>Space</td><td>Optional configurable right-button binding</td><td>A / Cross</td><td>Edge-triggered; holding the control does not auto-repeat.</td></tr>
 <tr><td><strong>Precision flight</strong></td><td>Left Ctrl</td><td>Not bound</td><td>Left trigger</td><td>Dash is unavailable while precision mode is held.</td></tr>
-<tr><td><strong>Switch camera</strong></td><td>V</td><td>Configurable secondary button</td><td>Y / Triangle</td><td>FPP/TPP is a presentation change, not a physics reset.</td></tr>
+<tr><td><strong>Switch camera</strong></td><td>V</td><td>Configurable secondary button</td><td>Y / Triangle</td><td>FPP/TPP blends over a short transition; the seed, momentum and collision state are preserved.</td></tr>
 <tr><td><strong>Pause</strong></td><td>Esc</td><td>In-run pause button</td><td>Menu / Start</td><td>Pause/focus loss should release gameplay capture and clear held inputs.</td></tr>
 <tr><td><strong>Confirm / interact</strong></td><td>Enter / Space</td><td>Left click</td><td>A / Cross</td><td>In the hangar, keyboard focus clearly selects buy/equip or Back.</td></tr>
 <tr><td><strong>Back / cancel</strong></td><td>Esc / Backspace</td><td>Right click inside UI context</td><td>B / Circle</td><td>Dialogs must block clicks behind them.</td></tr>
 <tr><td><strong>Menu navigation</strong></td><td>Arrows / Tab</td><td>Pointer / click</td><td>D-pad / left stick</td><td>Focus must remain visible and stable when switching devices.</td></tr>
 <tr><td><strong>Mouse sensitivity</strong></td><td>Left / right arrows on row</td><td>Click settings row</td><td>D-pad / stick</td><td>Setting persists in local profile.</td></tr>
 </tbody></table></div>
-<div class="tun-callout">The native Windows Raw Input path captures relative mouse deltas only during gameplay when mouse camera is enabled. Mouse look never steers the craft; in TPP it smoothly orbits the eye around the ship while keeping the ship as the focus. If a wall or throat blocks line of sight, the camera pulls closer along the last clear part of the view ray instead of pointing at the obstruction. The longer narrow S-bend itself hides the far tunnel through narrow apertures, and depth fog fades the remaining distant detail. Hardware/DPI/fullscreen acceptance remains part of the remaining QA work.</div>
+<div class="tun-callout">The native Windows Raw Input path captures relative mouse deltas only during gameplay when mouse camera is enabled. Mouse look never steers the craft; in TPP it smoothly orbits the eye around the ship while keeping the ship as the focus. Switching FPP/TPP blends the eye and focus over time instead of snapping. Each candidate view and the mixed line of sight are checked against the tunnel and throat, so transitions do not cut through a curved wall. The longer narrow S-bend hides the far tunnel through narrow apertures, and depth fog fades the remaining distant detail. Hardware/DPI/fullscreen acceptance remains part of the remaining QA work.</div>
 </section>
 
 <section class="tun-wrap tun-section" id="progression">
