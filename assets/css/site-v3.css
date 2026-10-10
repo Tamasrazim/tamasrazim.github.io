@@ -90,7 +90,7 @@ body.home-v2 .site-footer{position:relative;z-index:2;background:#050505;border-
 @media (max-width: 680px) {
   body.home-v2 .v3-about .v2-card-holder {
     position: relative;
-    left: -9px;
+    left: -11px;
   }
 
   body.home-v2 .v3-about .id-bottom {
