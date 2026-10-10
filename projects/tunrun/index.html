@@ -91,6 +91,27 @@
 @media(max-width:900px){.tun-hero-grid{grid-template-columns:1fr}.tun-visual{min-height:340px;max-width:680px;width:100%;margin-inline:auto}.tun-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.tun-card-wide{grid-column:span 2}.tun-docs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.tun-wrap{width:calc(100% - 32px)}.tun-topnav{align-items:flex-start;padding:18px 0;flex-direction:column}.tun-navlinks{gap:12px}.tun-hero{padding-top:54px}.tun-visual{min-height:290px}.tun-section-head{align-items:flex-start;flex-direction:column}.tun-grid,.tun-mode-grid,.tun-timeline{grid-template-columns:1fr}.tun-card-wide{grid-column:span 1}.tun-statrow{grid-template-columns:repeat(2,minmax(0,1fr))}.tun-docs{grid-template-columns:1fr}.tun-footer{flex-direction:column}}
 @media(prefers-reduced-motion:reduce){.tun-ring,.tun-hazard{animation:none!important}.tun-ring{margin-top:0}}
+
+.tun-roadmap{margin:0 0 30px;padding:21px;border:1px solid var(--tun-border);background:linear-gradient(140deg,rgba(255,255,255,.035),rgba(255,255,255,.008))}
+.tun-roadmap-top{display:flex;justify-content:space-between;align-items:flex-start;gap:18px}
+.tun-roadmap-top .tun-eyebrow{margin:0 0 8px}
+.tun-roadmap-top strong{font:500 12px/1.7 var(--v3-mono);color:#e9f0ef;text-align:right}
+.tun-roadmap-track,.tun-roadmap-index{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px}
+.tun-roadmap-track{margin-top:18px}
+.tun-roadmap-segment{height:17px;border:1px solid #303b45;background:#141a20}
+.tun-roadmap-segment.complete{background:#eff6f8;border-color:#eff6f8}
+.tun-roadmap-segment.active{background:#174542;border-color:#69e6d7;box-shadow:inset 0 -3px 0 rgba(105,230,215,.17)}
+.tun-roadmap-index{margin-top:6px;color:#8e9ba4;font:8px var(--v3-mono);text-align:center}
+.tun-roadmap-legend{display:flex;flex-wrap:wrap;gap:15px;margin-top:15px;color:#c1cbd0;font:9px var(--v3-mono);letter-spacing:.04em}
+.tun-roadmap-legend span{display:inline-flex;align-items:center;gap:7px}
+.tun-roadmap-key{width:8px;height:8px;display:inline-block;border:1px solid #303b45;background:#141a20}
+.tun-roadmap-key.complete{background:#eff6f8;border-color:#eff6f8}
+.tun-roadmap-key.active{background:#174542;border-color:#69e6d7}
+.tun-roadmap-note{color:var(--v3-muted);font-size:11px;line-height:1.8;margin:12px 0 0;max-width:890px}
+.tun-roadmap-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.tun-ci-badge{display:inline-flex;align-items:center;padding:4px 7px;border:1px solid var(--tun-border);background:#080808}
+.tun-ci-badge img{display:block;height:18px;width:auto;max-width:100%}
+@media(max-width:620px){.tun-roadmap{padding:15px}.tun-roadmap-top{flex-direction:column;gap:6px}.tun-roadmap-top strong{text-align:left}.tun-roadmap-track,.tun-roadmap-index{gap:3px}.tun-roadmap-segment{height:13px}.tun-roadmap-legend{gap:10px;font-size:8px}.tun-ci-badge img{height:16px}}
 </style>
 <script type="application/ld+json">
 {
@@ -170,6 +191,30 @@
 
 <section class="tun-wrap tun-section" id="overview">
 <div class="tun-section-head"><div><p class="tun-eyebrow">00 / PROJECT AT A GLANCE</p><h2>Build status, without the hype.</h2></div><p class="tun-section-intro">The systems below are grouped by their current implementation state. A design specification or roadmap item is not treated as an implemented feature.</p></div>
+<div class="tun-roadmap" id="roadmap-progress" aria-labelledby="tun-roadmap-title">
+<div class="tun-roadmap-top"><div><p class="tun-eyebrow" id="tun-roadmap-title">ROADMAP / LIVE SNAPSHOT</p><p class="tun-roadmap-note" style="margin-top:0">Milestone state from the implementation roadmap</p></div><strong>1 complete · 5 active · 4 planned</strong></div>
+<div class="tun-roadmap-track" role="list" aria-label="TUNRUN milestone states">
+<span class="tun-roadmap-segment complete" role="listitem" aria-label="M0 specification baseline: complete" title="M0 — Complete"></span>
+<span class="tun-roadmap-segment active" role="listitem" aria-label="M1 application shell and input: in progress" title="M1 — In progress"></span>
+<span class="tun-roadmap-segment active" role="listitem" aria-label="M2 flight and camera: in progress" title="M2 — In progress"></span>
+<span class="tun-roadmap-segment active" role="listitem" aria-label="M3 procedural geometry: in progress" title="M3 — In progress"></span>
+<span class="tun-roadmap-segment active" role="listitem" aria-label="M4 obstacles and validation: in progress" title="M4 — In progress"></span>
+<span class="tun-roadmap-segment active" role="listitem" aria-label="M5 save, resources and hangar: in progress" title="M5 — In progress"></span>
+<span class="tun-roadmap-segment" role="listitem" aria-label="M6 gameplay and AI: planned" title="M6 — Planned"></span>
+<span class="tun-roadmap-segment" role="listitem" aria-label="M7 progression and content: planned" title="M7 — Planned"></span>
+<span class="tun-roadmap-segment" role="listitem" aria-label="M8 polish and accessibility: planned" title="M8 — Planned"></span>
+<span class="tun-roadmap-segment" role="listitem" aria-label="M9 release candidate: planned" title="M9 — Planned"></span>
+</div>
+<div class="tun-roadmap-index" aria-hidden="true"><span>M0</span><span>M1</span><span>M2</span><span>M3</span><span>M4</span><span>M5</span><span>M6</span><span>M7</span><span>M8</span><span>M9</span></div>
+<div class="tun-roadmap-legend" aria-label="Status legend"><span><i class="tun-roadmap-key complete"></i> COMPLETE</span><span><i class="tun-roadmap-key active"></i> IN PROGRESS</span><span><i class="tun-roadmap-key"></i> PLANNED</span></div>
+<p class="tun-roadmap-note">This is a milestone-state bar, not a guessed feature-completion percentage. M1–M5 stay active until their build, test and acceptance requirements are satisfied; manual Windows input/camera checks remain necessary.</p>
+<div class="tun-roadmap-actions" aria-label="Live CI checks">
+<a class="tun-ci-badge" href="https://github.com/Tamasrazim/TUNRUN/actions/workflows/windows-build.yml" aria-label="Windows build and unit-test workflow status"><img loading="lazy" src="https://github.com/Tamasrazim/TUNRUN/actions/workflows/windows-build.yml/badge.svg" alt="Windows build and tests"></a>
+<a class="tun-ci-badge" href="https://github.com/Tamasrazim/TUNRUN/actions/workflows/repo-checks.yml" aria-label="Repository integrity workflow status"><img loading="lazy" src="https://github.com/Tamasrazim/TUNRUN/actions/workflows/repo-checks.yml/badge.svg" alt="Repository integrity"></a>
+<a class="tun-ci-badge" href="https://github.com/Tamasrazim/TUNRUN/actions/workflows/secrets-scan.yml" aria-label="Secret scan workflow status"><img loading="lazy" src="https://github.com/Tamasrazim/TUNRUN/actions/workflows/secrets-scan.yml/badge.svg" alt="Secret scan"></a>
+<a class="tun-ci-badge" href="https://github.com/Tamasrazim/TUNRUN/actions" style="font:9px var(--v3-mono);align-items:center">ALL WORKFLOW RUNS ↗</a>
+</div>
+</div>
 <div class="tun-grid">
 <article class="tun-card"><div class="tun-card-label">01 / PLATFORM</div><h3>Native Windows x64</h3><p>The target is a native Windows executable. The project uses C++20, CMake and raylib 5.5 pinned to an immutable upstream revision.</p><div class="tun-tagrow"><span class="tun-tag">C++20</span><span class="tun-tag">CMake</span><span class="tun-tag">raylib 5.5</span></div></article>
 <article class="tun-card"><div class="tun-card-label">02 / GAME FEEL</div><h3>Forward flight, not lane swapping</h3><p>Forward progress is automatic by default. The player steers laterally and vertically relative to the generated course, managing boost energy, precision steering and dash timing.</p><div class="tun-tagrow"><span class="tun-tag">3D flight</span><span class="tun-tag">Fixed step</span></div></article>
