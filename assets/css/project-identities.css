@@ -350,3 +350,84 @@ body.project-detail-v3[data-project="tunrun"] .tun-footer{border-top-color:rgba(
   body.pp-page[data-project] .pp-brand-mark{transition:none}
   body.pp-page[data-project] .pp-brand:hover .pp-brand-mark{transform:none}
 }
+
+
+/* Replace the shared orbital placeholder with product-specific artwork language. */
+body.pp-page[data-project="asset-vault"] .pp-art:before{
+  width:70%;height:62%;aspect-ratio:auto;border-radius:3px;border:1px solid rgba(42,84,51,.55);
+  transform:rotate(-8deg);box-shadow:12px 12px 0 rgba(56,92,66,.12);animation:none
+}
+body.pp-page[data-project="asset-vault"] .pp-art:after{
+  width:55%;height:43%;aspect-ratio:auto;border-radius:3px;border:1px dashed rgba(42,84,51,.45);
+  transform:rotate(8deg);box-shadow:none;animation:none
+}
+body.pp-page[data-project="bncagrocare"] .pp-art:before,
+body.pp-page[data-project="bncagrocare"] .pp-art:after{
+  width:43%;height:64%;aspect-ratio:auto;border-radius:90% 0 90% 0;border-color:rgba(50,115,66,.48);
+  box-shadow:none;animation:none
+}
+body.pp-page[data-project="bncagrocare"] .pp-art:before{transform:rotate(35deg) translateX(-22%)}
+body.pp-page[data-project="bncagrocare"] .pp-art:after{transform:rotate(125deg) translateX(-22%);border-style:solid}
+body.pp-page[data-project="code-to-svg"] .pp-art:before{
+  width:72%;height:62%;aspect-ratio:auto;border-radius:0;border:1px solid rgba(78,66,223,.42);
+  transform:none;box-shadow:10px 10px 0 rgba(78,66,223,.08);animation:none
+}
+body.pp-page[data-project="code-to-svg"] .pp-art:after{
+  width:48%;height:40%;aspect-ratio:auto;border-radius:0;border:1px dashed rgba(78,66,223,.45);
+  transform:rotate(45deg);box-shadow:none;animation:none
+}
+body.pp-page[data-project="code-to-eps"] .pp-art:before{
+  width:70%;height:64%;aspect-ratio:auto;border-radius:0;border-style:solid;border-color:rgba(255,154,98,.5);
+  transform:none;box-shadow:none;animation:none
+}
+body.pp-page[data-project="code-to-eps"] .pp-art:after{
+  width:42%;height:42%;aspect-ratio:auto;border-radius:0;border-style:dashed;border-color:rgba(255,154,98,.5);
+  transform:rotate(45deg);box-shadow:none;animation:none
+}
+body.pp-page[data-project="format-forge"] .pp-art:before{
+  width:62%;height:62%;aspect-ratio:auto;border-radius:0;border-color:#e9e35b;
+  transform:rotate(45deg);box-shadow:9px 9px 0 rgba(233,227,91,.1);animation:none
+}
+body.pp-page[data-project="format-forge"] .pp-art:after{
+  width:42%;height:42%;aspect-ratio:auto;border-radius:0;border-style:dashed;border-color:#e9e35b;
+  transform:rotate(45deg);box-shadow:none;animation:none
+}
+body.pp-page[data-project="kynestra"] .pp-art:before{
+  width:72%;aspect-ratio:1;border-radius:30px;border-color:rgba(170,162,255,.3);
+  transform:rotate(24deg);box-shadow:0 0 0 18px rgba(170,162,255,.025);animation:none
+}
+body.pp-page[data-project="kynestra"] .pp-art:after{
+  width:52%;aspect-ratio:1;border-radius:24px;border-style:dashed;border-color:rgba(93,232,220,.3);
+  transform:rotate(-24deg);box-shadow:none;animation:none
+}
+body.pp-page[data-project="mail-scope"] .pp-art:before{
+  width:80%;height:68%;aspect-ratio:auto;border-radius:2px;border-style:dashed;border-color:rgba(173,255,123,.45);
+  transform:none;box-shadow:none;animation:none
+}
+body.pp-page[data-project="mail-scope"] .pp-art:after{
+  width:62%;height:42%;aspect-ratio:auto;border-radius:2px;border-style:solid;border-color:rgba(173,255,123,.27);
+  transform:none;box-shadow:none;animation:none
+}
+body.pp-page[data-project="prism-web-icons"] .pp-art:before{
+  border-radius:3px;box-shadow:74px 160px 0 -1px #bd78ff,136px -9px 0 -1px #d9ff69
+}
+body.pp-page[data-project="prism-web-icons"] .pp-art:after{
+  width:32%;aspect-ratio:1;border-radius:3px;border-style:dashed;border-color:rgba(217,255,105,.45);
+  transform:rotate(45deg);box-shadow:none;animation:none
+}
+body.pp-page[data-project="repo-token-meter"] .pp-art:before{
+  width:85%;height:2px;aspect-ratio:auto;border:0;border-radius:0;background:#5bff9c;
+  transform:none;box-shadow:0 22px 0 rgba(91,255,156,.65),0 44px 0 rgba(91,255,156,.36),0 66px 0 rgba(91,255,156,.18);animation:none
+}
+body.pp-page[data-project="repo-token-meter"] .pp-art:after{
+  width:2px;height:72%;aspect-ratio:auto;border:0;border-radius:0;background:rgba(91,255,156,.55);
+  transform:translateX(70px);box-shadow:22px 0 0 rgba(91,255,156,.25),44px 0 0 rgba(91,255,156,.15);animation:none
+}
+body.pp-page[data-project="spiral-mic"] .pp-art:before{
+  width:70%;height:70%;aspect-ratio:auto;border-radius:50%;border-color:rgba(223,155,255,.26);
+  transform:none;box-shadow:0 0 0 14px rgba(139,96,255,.035),0 0 0 28px rgba(139,96,255,.025);animation:none
+}
+body.pp-page[data-project="spiral-mic"] .pp-art:after{
+  width:48%;aspect-ratio:1;border-radius:50%;border-style:dashed;border-color:rgba(122,117,255,.55);
+  transform:rotate(24deg);box-shadow:none;animation:pp-orbit 32s linear infinite
+}
