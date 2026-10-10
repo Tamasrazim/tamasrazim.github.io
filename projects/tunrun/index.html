@@ -141,7 +141,7 @@
     "Gate accuracy scoring, clean passes and combo multipliers",
     "Fixed-step 120 Hz lateral and vertical flight simulation",
     "Energy boost and timed dash",
-    "Eight ship handling profiles and wireframe previews",
+    "Eight ship handling profiles and solid low-poly 3D spacecraft models",
     "FPP/TPP cameras whose view targets follow ship yaw/pitch while staying inside the tunnel",
     "Keyboard, mouse and gamepad input pathways",
     "Seed Lab generation hashes and validation diagnostics",
@@ -226,7 +226,7 @@
 <section class="tun-wrap tun-section" id="features">
 <div class="tun-section-head"><div><p class="tun-eyebrow">01 / IMPLEMENTED SYSTEMS</p><h2>The prototype features.</h2></div><p class="tun-section-intro">These describe systems present in the current project source and documentation, not promises that the final balance or hardware acceptance is complete.</p></div>
 <div class="tun-grid">
-<article class="tun-card"><div class="tun-card-label">01.1 / PROCEDURAL COURSE</div><h3>Seeded tunnel geometry</h3><span class="tun-status impl">Implemented baseline</span><p>Stateless 64-bit hash streams derive centerline control offsets, bounded tunnel radii and twist from the root seed, node index and parameter channel. Catmull–Rom interpolation smooths the course between control points spaced 18 normalised course units apart. The renderer and tunnel-wall check sample the same course source.</p><p>Canonical course hashes and parameter-range validation are exposed in Seed Lab. Current geometry is a forward-aligned lateral/vertical path; stable tangent-aligned 3D frames, advanced taper/flare transitions and broad cross-section variety remain unfinished.</p></article>
+<article class="tun-card"><div class="tun-card-label">01.1 / PROCEDURAL COURSE</div><h3>Seeded tunnel geometry</h3><span class="tun-status impl">Implemented baseline</span><p>Stateless 64-bit hash streams derive centerline control offsets, bounded tunnel radii and twist from the root seed, node index and parameter channel. Catmull–Rom interpolation smooths the course between control points spaced 18 normalised course units apart. The renderer and tunnel-wall check sample the same course source. Six animated inner-wall filaments follow the generated centerline and twist. Gate bulkheads now fill the surface outside the aperture, so the next section is visible through the actual opening rather than through the gate frame.</p><p>Canonical course hashes and parameter-range validation are exposed in Seed Lab. Current geometry is a forward-aligned lateral/vertical path; stable tangent-aligned 3D frames, advanced taper/flare transitions and broad cross-section variety remain unfinished.</p></article>
 <article class="tun-card"><div class="tun-card-label">01.2 / GATES</div><h3>Four generated aperture gates</h3><span class="tun-status impl">Implemented baseline</span><p>Generator v2 makes Standard, Precision, Offset and Wide gate families from seed-derived parameters. Family-specific aperture and offset envelopes are validated, with independent obstacle hashes and distinct visual cues.</p><p>Validation includes an all-ship adjacent-gate kinematic screen and a fixed-step route probe that follows one concrete trajectory through consecutive gates. It is a tested witness path—not an exhaustive proof that every possible state is recoverable.</p></article>
 <article class="tun-card"><div class="tun-card-label">01.3 / MOVING HAZARDS</div><h3>Deterministic mine field</h3><span class="tun-status impl">Implemented baseline</span><p>Moving 3D mines use seed-derived baseline positions, horizontal and vertical oscillation, speed, phase and collision radius. Hazard motion is reproducible from the seed and run clock. Four seed-selected visual families—Orbital, Prism, Rotor and Cross—have distinct silhouette/color treatments, and the HUD names the next family. These are cosmetic variants of the same mine physics.</p><p>Contact uses a swept relative 3D closest-approach test transformed into course-relative coordinates. The current validator checks parameter bounds and separation from gate reaction windows. Additional physical hazard behaviours and hardware-verified reaction timing remain planned.</p></article>
 <article class="tun-card"><div class="tun-card-label">01.4 / PICKUPS</div><h3>Two deterministic resources</h3><span class="tun-status impl">Implemented baseline</span><p>Aether Shards begin at distance 20 and repeat every 24 distance units. Each pickup yields a seed-determined 4–8 shards. Every eighth pickup is a Singularity Core worth one core.</p><p>Pickups use swept forward-plane crossing and the sampled course-relative frame shared by the tunnel renderer. Rewards are capped, currency arithmetic saturates safely, and a missed pickup cannot be collected by flying backward through it.</p></article>
@@ -242,16 +242,16 @@
 <div class="tun-section-head"><div><p class="tun-eyebrow">02 / HANGAR</p><h2>Eight ships. Real trade-offs.</h2></div><p class="tun-section-intro">The source catalogue drives each ship's handling and resource price. Multipliers below are the current source-catalogue values, not final balance promises.</p></div>
 <div class="tun-table-wrap"><table class="tun-table"><thead><tr><th>Ship</th><th>Role</th><th>Unlock cost</th><th>Speed ×</th><th>Acceleration ×</th><th>Boost drain ×</th><th>Energy recovery ×</th><th>Status</th></tr></thead><tbody>
 <tr><td><strong>DRIFTWING</strong></td><td>Balanced starter</td><td>Free / unlocked</td><td>1.00</td><td>1.05</td><td>1.00</td><td>1.00</td><td>Starter</td></tr>
-<tr><td><strong>WRAITH</strong></td><td>Agile interceptor</td><td>80 Aether Shards</td><td>1.12</td><td>1.05</td><td>1.15</td><td>0.90</td><td>Catalogued</td></tr>
-<tr><td><strong>BULWARK</strong></td><td>Heavy / efficient boost</td><td>150 Aether Shards</td><td>0.84</td><td>0.95</td><td>0.75</td><td>1.25</td><td>Catalogued</td></tr>
-<tr><td><strong>MANTA</strong></td><td>Responsive / stable</td><td>250 Aether Shards</td><td>0.96</td><td>1.28</td><td>1.00</td><td>0.95</td><td>Catalogued</td></tr>
-<tr><td><strong>COMET</strong></td><td>Fast racer</td><td>380 Aether Shards</td><td>1.25</td><td>0.90</td><td>1.35</td><td>0.75</td><td>Catalogued</td></tr>
+<tr><td><strong>WRAITH</strong></td><td>Agile interceptor</td><td>8,000 Aether Shards</td><td>1.12</td><td>1.05</td><td>1.15</td><td>0.90</td><td>Catalogued</td></tr>
+<tr><td><strong>BULWARK</strong></td><td>Heavy / efficient boost</td><td>15,000 Aether Shards</td><td>0.84</td><td>0.95</td><td>0.75</td><td>1.25</td><td>Catalogued</td></tr>
+<tr><td><strong>MANTA</strong></td><td>Responsive / stable</td><td>25,000 Aether Shards</td><td>0.96</td><td>1.28</td><td>1.00</td><td>0.95</td><td>Catalogued</td></tr>
+<tr><td><strong>COMET</strong></td><td>Fast racer</td><td>38,000 Aether Shards</td><td>1.25</td><td>0.90</td><td>1.35</td><td>0.75</td><td>Catalogued</td></tr>
 <tr><td><strong>SPECTRE</strong></td><td>Energy specialist</td><td>2 Singularity Cores</td><td>1.04</td><td>1.08</td><td>0.80</td><td>1.10</td><td>Catalogued</td></tr>
 <tr><td><strong>VORTEX</strong></td><td>Precision craft</td><td>4 Singularity Cores</td><td>1.12</td><td>1.20</td><td>1.05</td><td>0.90</td><td>Catalogued</td></tr>
 <tr><td><strong>OBSIDIAN</strong></td><td>Prototype / specialist</td><td>8 Singularity Cores</td><td>0.94</td><td>0.98</td><td>0.65</td><td>1.35</td><td>Catalogued</td></tr>
 </tbody></table></div>
 <div class="tun-grid" style="margin-top:10px">
-<article class="tun-card tun-card-wide"><div class="tun-card-label">VISUALS / HANDLING</div><h3>Not just recolours</h3><p>The prototype renders eight distinct procedural third-person wireframe ship silhouettes and matching 2D hangar previews. Each ship is driven by one central catalogue entry with speed, acceleration, boost-drain and energy-recovery multipliers. Production meshes, materials, final cockpit anchors and full collision-proxy matching are still future work.</p></article>
+<article class="tun-card tun-card-wide"><div class="tun-card-label">VISUALS / HANDLING</div><h3>Not just recolours</h3><p>The prototype renders eight low-poly 3D spacecraft with ship-specific filled wing panels, canopy glass and glowing engine bells in the hangar turntable and third-person view. A central catalogue drives speed, acceleration, boost-drain and energy-recovery multipliers. Artist-authored production meshes/materials and full collision-proxy matching remain future work.</p></article>
 <article class="tun-card"><div class="tun-card-label">ECONOMY RULES</div><h3>Local, play-earned unlocks</h3><p>No real-money purchase system is planned. A purchase validates ship id and wallet balance, changes the candidate profile, and must be rolled back if persistence fails. These are local progression values, not online anti-cheat security.</p></article>
 </div>
 </section>
@@ -259,18 +259,22 @@
 <section class="tun-wrap tun-section" id="controls">
 <div class="tun-section-head"><div><p class="tun-eyebrow">03 / INPUT</p><h2>Keyboard. Mouse. Gamepad.</h2></div><p class="tun-section-intro">The project treats UI input and gameplay input as separate contexts, with the goal that menus stay operable without mouse-lock side effects.</p></div>
 <div class="tun-table-wrap"><table class="tun-table"><thead><tr><th>Action</th><th>Keyboard</th><th>Mouse</th><th>Gamepad</th><th>Notes</th></tr></thead><tbody>
-<tr><td><strong>Steer X / Y</strong></td><td>WASD / arrows</td><td>Relative movement when mouse flight is enabled</td><td>Left stick</td><td>Mouse steering uses relative deltas; no repeated cursor recentering.</td></tr>
+<tr><td><strong>Accelerate / brake</strong></td><td>W / S</td><td>Not bound</td><td>Left trigger is precision; stick does not control speed</td><td>W raises speed above cruise; S brakes toward a lower speed. Releasing both returns toward cruise.</td></tr>
+<tr><td><strong>Lateral steering</strong></td><td>A / D</td><td>Not bound</td><td>Left stick</td><td>Left/right movement is separate from camera look.</td></tr>
+<tr><td><strong>Camera look</strong></td><td>Not bound</td><td>Relative mouse movement</td><td>Right stick</td><td>Mouse look moves the camera only; it does not steer the spacecraft.</td></tr>
+<tr><td><strong>Ship rotation</strong></td><td>Arrow keys</td><td>Camera look only</td><td>Right stick</td><td>Rotation and mouse-look are separate control paths.</td></tr>
+<tr><td><strong>Barrel roll</strong></td><td>Q / E</td><td>Not bound</td><td>Right stick roll not bound separately</td><td>Roll is a ship attitude control.</td></tr>
 <tr><td><strong>Boost</strong></td><td>Left Shift</td><td>Not bound by default in the current prototype spec</td><td>Right trigger</td><td>Trigger uses an analogue threshold.</td></tr>
 <tr><td><strong>Energy dash</strong></td><td>Space</td><td>Optional configurable right-button binding</td><td>A / Cross</td><td>Edge-triggered; holding the control does not auto-repeat.</td></tr>
-<tr><td><strong>Precision / brake</strong></td><td>Left Ctrl</td><td>Not bound by default</td><td>Left trigger</td><td>Dash is unavailable while precision mode is held.</td></tr>
+<tr><td><strong>Precision flight</strong></td><td>Left Ctrl</td><td>Not bound</td><td>Left trigger</td><td>Dash is unavailable while precision mode is held.</td></tr>
 <tr><td><strong>Switch camera</strong></td><td>V</td><td>Configurable secondary button</td><td>Y / Triangle</td><td>FPP/TPP is a presentation change, not a physics reset.</td></tr>
 <tr><td><strong>Pause</strong></td><td>Esc</td><td>In-run pause button</td><td>Menu / Start</td><td>Pause/focus loss should release gameplay capture and clear held inputs.</td></tr>
-<tr><td><strong>Confirm / interact</strong></td><td>Enter / E</td><td>Left click</td><td>A / Cross</td><td>UI actions should be edge-triggered and debounced.</td></tr>
+<tr><td><strong>Confirm / interact</strong></td><td>Enter / Space</td><td>Left click</td><td>A / Cross</td><td>In the hangar, keyboard focus clearly selects buy/equip or Back.</td></tr>
 <tr><td><strong>Back / cancel</strong></td><td>Esc / Backspace</td><td>Right click inside UI context</td><td>B / Circle</td><td>Dialogs must block clicks behind them.</td></tr>
 <tr><td><strong>Menu navigation</strong></td><td>Arrows / Tab</td><td>Pointer / click</td><td>D-pad / left stick</td><td>Focus must remain visible and stable when switching devices.</td></tr>
 <tr><td><strong>Mouse sensitivity</strong></td><td>Left / right arrows on row</td><td>Click settings row</td><td>D-pad / stick</td><td>Setting persists in local profile.</td></tr>
 </tbody></table></div>
-<div class="tun-callout">The native Windows Raw Input path is designed around relative mouse deltas and client-area capture only during mouse-flight. The system cursor should never be warped to the center every frame. Hardware/DPI/fullscreen acceptance and full mouse remapping remain part of the remaining QA work.</div>
+<div class="tun-callout">The native Windows Raw Input path captures relative mouse deltas only during gameplay when mouse camera is enabled. Mouse look changes camera direction without affecting the craft trajectory; the system cursor is never repeatedly warped to the center. Hardware/DPI/fullscreen acceptance remains part of the remaining QA work.</div>
 </section>
 
 <section class="tun-wrap tun-section" id="progression">
