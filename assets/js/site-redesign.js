@@ -9,7 +9,7 @@
   var qa = function (selector, root) {
     return Array.prototype.slice.call((root || d).querySelectorAll(selector));
   };
-  var frameInterval = 1000 / 60;
+  var frameInterval = 1000/60;
 
   if (d.body.classList.contains('home-v2')) {
     d.documentElement.classList.add('home-v2-motion');
