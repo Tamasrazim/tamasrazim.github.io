@@ -178,7 +178,19 @@ must(!site.includes('work on TUNRUN, a C++ game')&&!site.includes('TUNRUN, a C++
 must(!site.includes('tamasrazim.dev'),'homepage does not claim a .dev domain');
 must(!site.includes('ProfessionalService')&&!site.includes('13650456762875223511'),'homepage schema avoids unsupported business-profile claims');
 must(siteCss.includes('prefers-reduced-motion:reduce')&&siteV3Css.includes('prefers-reduced-motion:reduce'),'redesign respects reduced-motion preferences');
+
 must(siteJs.includes('1000/60'),'background animation is capped at 60 FPS');
+must(siteJs.includes("event.key === 'Escape'")&&siteJs.includes("setMenuOpen(false, true)"),'mobile navigation closes on Escape and returns focus');
+must(siteJs.includes("menu.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation')"),'mobile navigation label tracks its expanded state');
+must(siteJs.includes("d.addEventListener('pointerdown'")&&siteJs.includes("nav.contains(event.target) || menu.contains(event.target)"),'mobile navigation closes on outside pointer input without toggling on the menu itself');
+must(siteJs.includes("w.innerWidth > 680"),'mobile navigation closes when returning to desktop width');
+must(siteJs.includes('function scheduleProgress()')&&siteJs.includes('w.requestAnimationFrame(updateProgress)'),'scroll progress writes are coalesced with requestAnimationFrame');
+must(siteJs.includes('60000 - (now.getSeconds() * 1000) - now.getMilliseconds()'),'minute-resolution clock is scheduled on minute boundaries');
+must(siteJs.includes("d.addEventListener('visibilitychange', syncVisibility)")&&siteJs.includes('function stopOrbit()')&&siteJs.includes('function stopField()'),'decorative animation loops pause while the document is hidden');
+must(siteJs.includes("reduceQuery.addEventListener('change', onMotionPreferenceChange)"),'runtime reduced-motion changes are handled');
+must(siteJs.includes('custom cursor mouse-only')&&siteJs.includes('if (!fine || reduce) return;'),'custom cursor effects respect pointer type and reduced-motion settings');
+must(siteJs.includes("event.key !== 'Escape'")&&siteJs.includes('updateFilterButtons(active)'),'project search Escape key clears search and resets filters');
+must(siteV3Css.includes('left: -11px;')&&siteV3Css.includes('flex-direction: column;')&&siteV3Css.includes('align-items: flex-end;'),'mobile ID card retains its 11px left nudge and stacked Active/code status');
 const hub=read('projects/index.html');
 must(hub.includes('<title>Projects — Tamasrazim</title>'),'project directory uses simple title');
 must(!hub.includes('PRO_TOOL_MANIFEST')&&!hub.includes('tool-suite-health-console/'),'project directory omits generated catalogue');
