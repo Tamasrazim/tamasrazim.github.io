@@ -54,6 +54,28 @@ body.licence-page a{color:inherit}
 .lic-file{display:inline-flex;align-items:center;gap:12px;margin-top:4px;padding:10px 12px;border:1px solid var(--lic-line);text-decoration:none;font:10px/1.6 var(--lic-mono);transition:background .2s,color .2s,border-color .2s}
 .lic-file:hover,.lic-file:focus-visible{background:var(--lic-ink);color:var(--lic-bg)!important;border-color:var(--lic-ink);outline:none}
 .lic-file span{font-size:17px}
+
+.lic-fulltext{padding:clamp(22px,4vw,42px);margin-top:12px;border:1px solid var(--lic-line);background:linear-gradient(145deg,rgba(255,255,255,.025),transparent 60%),var(--lic-panel)}
+.lic-fulltext h3{font:600 clamp(20px,3vw,30px)/1.25 var(--lic-display);letter-spacing:-.045em;margin:8px 0 22px}
+.lic-fulltext h4{font:600 13px/1.6 var(--lic-mono);letter-spacing:.035em;margin:27px 0 7px;color:#f1f1ed}
+.lic-fulltext p,.lic-fulltext li{color:#bebdb6;font-size:13px;line-height:1.9}
+.lic-fulltext p{margin:10px 0}
+.lic-fulltext ul{padding-left:22px;margin:8px 0 18px}
+.lic-fulltext li{padding:3px 0 3px 4px}
+.lic-fulltext strong{color:#f1f1ed}
+.lic-fulltext a{color:#f1f1ed;text-decoration-thickness:1px;text-underline-offset:3px}
+.lic-fulltext a:hover{opacity:.72}
+.lic-faq{display:grid;gap:8px}
+.lic-faq details{border:1px solid var(--lic-line);background:var(--lic-panel)}
+.lic-faq summary{display:flex;align-items:center;justify-content:space-between;gap:20px;cursor:pointer;list-style:none;padding:19px 22px;font:600 13px/1.65 var(--lic-display)}
+.lic-faq summary::-webkit-details-marker{display:none}
+.lic-faq summary::after{content:"+";font:400 22px/1 var(--lic-mono);color:var(--lic-muted);flex:0 0 auto}
+.lic-faq details[open] summary::after{content:"−"}
+.lic-faq details[open] summary{border-bottom:1px solid var(--lic-line)}
+.lic-faq details p{color:var(--lic-muted);padding:3px 22px 18px;margin:12px 0 0;font-size:13px;line-height:1.9;max-width:900px}
+.lic-faq details a{color:var(--lic-ink);text-underline-offset:3px}
+@media(max-width:480px){.lic-fulltext{padding:20px 17px}.lic-faq summary{padding:17px;font-size:12px}.lic-faq details p{padding-inline:17px}}
+
 .lic-terms{display:grid;grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr);gap:clamp(28px,7vw,88px);align-items:start}
 .lic-terms-copy{max-width:570px;color:var(--lic-muted);font-size:13px;line-height:1.9}
 .lic-terms-copy p{margin:0 0 16px}
@@ -88,16 +110,92 @@ body.licence-page a{color:inherit}
   <p class="lic-note">Default rule: original work in this repository is proprietary and all rights are reserved, unless a specific file or directory explicitly states otherwise. Public access is not the same as permission to reuse.</p>
 </section>
 
-<section class="lic-shell lic-section" aria-labelledby="licence-documents">
-  <div class="lic-section-head"><h2 id="licence-documents">Read the actual terms.</h2><p>These documents are the controlling notices. This page is a navigational summary, not a replacement for the full text.</p></div>
-  <div class="lic-grid">
-    <article class="lic-card"><div class="lic-card-top"><span>00 / DEFAULT</span><span>Repository-wide</span></div><h3>Proprietary Software &amp; Content Licence</h3><p>Applies to original repository content unless a file or directory states otherwise. Covers source code, project files, documentation, original graphics, vector assets, datasets, generated libraries, templates and related original material.</p><a class="lic-file" href="https://github.com/Tamasrazim/tamasrazim.github.io/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">Read repository licence <span aria-hidden="true">↗</span></a></article>
-    <article class="lic-card"><div class="lic-card-top"><span>01 / CREATIVE SOFTWARE</span><span>TRILYVA</span></div><h3>TRILYVA Proprietary Licence</h3><p>Specific notice for the TRILYVA renderer, editor logic, procedural libraries, datasets, icons, vector definitions, templates and related original assets.</p><a class="lic-file" href="https://github.com/Tamasrazim/tamasrazim.github.io/blob/main/LICENSES/TRILYVA-PROPRIETARY.md" target="_blank" rel="noopener noreferrer">Read TRILYVA terms <span aria-hidden="true">↗</span></a></article>
-    <article class="lic-card"><div class="lic-card-top"><span>02 / DESKTOP SOFTWARE</span><span>KYNESTRA</span></div><h3>KYNESTRA Proprietary Licence</h3><p>Specific notice for KYNESTRA's architecture, Core, modules, project-package formats, desktop shell, database schemas, render pipelines and related documentation.</p><a class="lic-file" href="https://github.com/Tamasrazim/tamasrazim.github.io/blob/main/LICENSES/KYNESTRA-PROPRIETARY.md" target="_blank" rel="noopener noreferrer">Read KYNESTRA terms <span aria-hidden="true">↗</span></a></article>
-    <article class="lic-card"><div class="lic-card-top"><span>03 / WEBSITE &amp; ARTWORK</span><span>CREATIVE CONTENT</span></div><h3>Website &amp; Creative Content Rights</h3><p>Explains the default rights for original page layouts, copy, visual identity, diagrams, graphics, vector artwork and project presentation material.</p><a class="lic-file" href="https://github.com/Tamasrazim/tamasrazim.github.io/blob/main/LICENSES/WEBSITE-CONTENT.md" target="_blank" rel="noopener noreferrer">Read content terms <span aria-hidden="true">↗</span></a></article>
-    <article class="lic-card"><div class="lic-card-top"><span>04 / EXTERNAL MATERIAL</span><span>THIRD-PARTY</span></div><h3>Third-Party Notices</h3><p>Third-party software, services, fonts, libraries, browser APIs, logos, trademarks and other externally owned material are not relicensed by my proprietary notices.</p><a class="lic-file" href="https://github.com/Tamasrazim/tamasrazim.github.io/blob/main/LICENSES/THIRD-PARTY-NOTICES.md" target="_blank" rel="noopener noreferrer">Read third-party notice <span aria-hidden="true">↗</span></a></article>
-    <article class="lic-card"><div class="lic-card-top"><span>05 / INDEX</span><span>DOCUMENTATION</span></div><h3>Licensing directory</h3><p>Browse the repository's licensing documents and notices together. A project-specific written agreement may add permission for a defined use.</p><a class="lic-file" href="https://github.com/Tamasrazim/tamasrazim.github.io/tree/main/LICENSES" target="_blank" rel="noopener noreferrer">Open all notices <span aria-hidden="true">↗</span></a></article>
-  </div>
+<section class="lic-shell lic-section" aria-labelledby="licence-text">
+  <div class="lic-section-head"><h2 id="licence-text">The licence text.</h2><p>The terms are published here in full, so you do not need to leave this website to read them. Read the default terms and any project-specific notice that applies.</p></div>
+
+  <article class="lic-fulltext" id="general-licence">
+    <p class="lic-index">00 / DEFAULT TERMS · VERSION 1.0 · 2026-10-05</p>
+    <h3>Tamasrazim Proprietary Software and Content Licence</h3>
+    <p><strong>Copyright © 2026 Robiul Rumman Razim, known online as Tamasrazim. All rights reserved.</strong></p>
+
+    <h4>1. Ownership</h4>
+    <p>The source code, application code, documentation, original graphics, vector assets, datasets, generated libraries, templates, project files, and other original material published with Tamasrazim are proprietary works owned by Robiul Rumman Razim (Tamasrazim), unless a file or directory states otherwise.</p>
+
+    <h4>2. Limited permission</h4>
+    <p>You may view publicly accessible material and use published website experiences through their normal browser functionality. This limited permission does not grant a general licence to reuse, copy, modify, republish, redistribute, or incorporate the original work elsewhere.</p>
+
+    <h4>3. Uses that require prior written permission</h4>
+    <p>Without prior written permission from the copyright owner, you may not:</p>
+    <ul>
+      <li>copy, reproduce, republish, mirror, or redistribute this repository or substantial portions of its contents;</li>
+      <li>copy, extract, reuse, adapt, modify, translate, or create derivative works from the original source code;</li>
+      <li>incorporate original code or assets into another product, website, library, template, service, dataset, or commercial work;</li>
+      <li>sell, sublicense, rent, lease, or provide the original source code or assets to another party;</li>
+      <li>remove, alter, or obscure copyright, attribution, licence, or proprietary notices; or</li>
+      <li>present the original work or a derivative as your own work.</li>
+    </ul>
+
+    <h4>4. No open-source or public-domain grant</h4>
+    <p>This material is not released under MIT, Apache-2.0, GPL, BSD, CC0, or another open-source or public-domain licence unless a specific file or directory expressly says otherwise. Public visibility of source code does not, by itself, grant permission to reuse it.</p>
+
+    <h4>5. Third-party material</h4>
+    <p>Third-party software, fonts, libraries, services, trademarks, and other externally owned material remain governed by their own applicable licences and terms. This licence does not relicense third-party material.</p>
+
+    <h4>6. Hosting-platform terms</h4>
+    <p>This licence does not attempt to restrict permissions that the hosting platform's terms of service require for hosting, displaying, indexing, backing up, or providing public-repository and forking functionality.</p>
+
+    <h4>7. Exceptions and separate permission</h4>
+    <p>A separate written permission, contract, or licence granted by Robiul Rumman Razim may provide additional rights for a specified project, file, or use. Permission must be interpreted within its stated scope and does not automatically apply to other material.</p>
+
+    <h4>8. No warranty</h4>
+    <p>Original material is provided as published, without warranties or guarantees to the maximum extent permitted by applicable law.</p>
+
+    <h4>9. Licensing contact</h4>
+    <p>Send licensing requests to <a href="mailto:tamasrazim.public@gmail.com?subject=Licensing%20request">tamasrazim.public@gmail.com</a>. Describe the exact work, intended use, distribution plans, and whether the use is commercial.</p>
+  </article>
+
+  <article class="lic-fulltext" id="trilyva-licence">
+    <p class="lic-index">01 / PROJECT-SPECIFIC NOTICE</p>
+    <h3>TRILYVA Proprietary Licence</h3>
+    <p><strong>Copyright © 2026 Robiul Rumman Razim (Tamasrazim). All rights reserved.</strong></p>
+    <p>TRILYVA source code, renderer logic, editor logic, procedural libraries, datasets, icons, vector definitions, templates, sample systems, metadata logic, and related original assets are proprietary.</p>
+    <p>TRILYVA material is provided for viewing and normal browser use of the published application only. Without separate written permission, you may not:</p>
+    <ul>
+      <li>copy or redistribute the source;</li>
+      <li>publish mirrors or repackaged copies;</li>
+      <li>modify and publish derivative versions;</li>
+      <li>extract libraries, datasets, icon packs, or code for reuse elsewhere;</li>
+      <li>embed substantial TRILYVA source or assets into another product or service; or</li>
+      <li>remove proprietary notices.</li>
+    </ul>
+    <p>The general Tamasrazim Proprietary Software and Content Licence also applies unless a narrower file-level notice says otherwise. Third-party material remains under its own terms.</p>
+  </article>
+
+  <article class="lic-fulltext" id="kynestra-licence">
+    <p class="lic-index">02 / PROJECT-SPECIFIC NOTICE</p>
+    <h3>KYNESTRA Proprietary Licence</h3>
+    <p><strong>Copyright © 2026 Robiul Rumman Razim (Tamasrazim). All rights reserved.</strong></p>
+    <p>KYNESTRA architecture, Core, Forge, TRILYVA integration, Stock Vault logic, project-package formats, module contracts, desktop shell code, database schemas, render pipelines, internal APIs, and associated original documentation are proprietary.</p>
+    <p>No permission is granted to copy, redistribute, mirror, publish, modify, sublicense, or create derivative products from KYNESTRA material outside the rights expressly provided by the hosting platform's service terms or a separate written licence.</p>
+    <p>Third-party components remain under their own licences. The general Tamasrazim Proprietary Software and Content Licence applies unless a specific file states a different licence.</p>
+  </article>
+
+  <article class="lic-fulltext" id="website-content-licence">
+    <p class="lic-index">03 / WEBSITE AND CREATIVE WORK</p>
+    <h3>Website and Creative Content Rights</h3>
+    <p><strong>Copyright © 2026 Robiul Rumman Razim (Tamasrazim). All rights reserved.</strong></p>
+    <p>This notice covers original visual identity, page layouts, copy, diagrams, original graphics, original vector artwork, project presentation material, and other creative content published with the Tamasrazim website unless another licence is explicitly stated.</p>
+    <p>No permission is granted to reproduce, republish, mirror, sell, or present this original creative content as another site's or product's content without written permission.</p>
+    <p>Third-party logos, trademarks, photographs, fonts, libraries, and other externally owned material are excluded and remain subject to their owners' terms.</p>
+  </article>
+
+  <article class="lic-fulltext" id="third-party-notice">
+    <p class="lic-index">04 / EXTERNAL MATERIAL</p>
+    <h3>Third-Party Notices</h3>
+    <p>This website and its projects may contain or reference third-party software, services, fonts, browser APIs, libraries, trademarks, and other externally owned material.</p>
+    <p>Those materials are not relicensed by the Tamasrazim proprietary licence. Their respective copyright owners and licence terms continue to apply.</p>
+    <p>Before redistributing any specific dependency, font, icon, logo, or external asset, identify the material and review the licence or terms that apply to it. Original Tamasrazim code and original creative assets remain proprietary unless an explicit file-level licence says otherwise.</p>
+  </article>
 </section>
 
 <section class="lic-shell lic-section" aria-labelledby="licence-meanings">
@@ -113,10 +211,26 @@ body.licence-page a{color:inherit}
   </div>
 </section>
 
+<section class="lic-shell lic-section" aria-labelledby="licence-faq-title">
+  <div class="lic-section-head"><h2 id="licence-faq-title">Frequently asked questions.</h2><p>Plain-language answers to common questions about using original Tamasrazim work. The full terms above take precedence over this summary.</p></div>
+  <div class="lic-faq">
+    <details><summary>Can I use your code because it is publicly visible?</summary><p>No. Public visibility lets you view the material; it does not automatically give you permission to copy, adapt, redistribute, or incorporate it into your own project. The limited permission is described in the general licence above.</p></details>
+    <details><summary>Is your work open source?</summary><p>Not by default. Original Tamasrazim software and content are proprietary unless a specific file or project clearly states a different licence. A public repository is not, by itself, an open-source licence.</p></details>
+    <details><summary>Can I copy your design, animations, vectors, icons, or videos?</summary><p>Do not reproduce, republish, sell, or present original creative assets as your own without written permission, unless a specific asset carries a separate licence that allows your intended use. Third-party material is governed by its own terms.</p></details>
+    <details><summary>Can I use a project or asset commercially?</summary><p>Commercial reuse of original code or assets is not granted by default. Contact me with the work you want to use and the intended commercial context to request written permission. Approval must explicitly cover that use.</p></details>
+    <details><summary>Can I modify the source and publish my own version?</summary><p>Not under the default terms. Copying, adapting, publishing modified versions, or distributing derivatives of original source requires prior written permission, unless an applicable file-level licence explicitly allows it.</p></details>
+    <details><summary>What about output I create with TRILYVA or another tool?</summary><p>This page does not claim ownership of every output a user makes. Rights can depend on the original inputs, third-party material, the tool's project-specific terms, and any contract or marketplace rules. You remain responsible for checking that you have rights to the material you use and distribute.</p></details>
+    <details><summary>Can I use the website normally or try a browser tool?</summary><p>Yes. Visiting the public website and using published browser experiences through their normal interface is allowed. That is different from extracting their source, libraries, templates, or assets for reuse elsewhere.</p></details>
+    <details><summary>Do I have to credit Tamasrazim?</summary><p>Attribution alone does not substitute for permission when permission is required. If a separate licence or written approval allows you to use specific material, follow the attribution and notice conditions in that permission.</p></details>
+    <details><summary>Are fonts, libraries, logos, or other external assets covered by your licence?</summary><p>No. Third-party material is excluded from my proprietary licence and remains subject to the owner's licence or terms. A page displaying an external item does not mean I own or can relicense that item.</p></details>
+    <details><summary>How do I request permission or a separate licence?</summary><p>Email <a href="mailto:tamasrazim.public@gmail.com?subject=Licensing%20request">tamasrazim.public@gmail.com</a> with the project or file, the use you have in mind, where it will appear, who will receive it, and whether it is commercial. Wait for explicit written approval before relying on a permission that is not already granted.</p></details>
+  </div>
+</section>
+
 <section class="lic-shell lic-section" aria-labelledby="licence-contact">
   <div class="lic-contact"><div><h2 id="licence-contact">Need permission for a use?</h2><p>Send the project or file name, your intended use, where it will appear, and whether the use is commercial. Written permission can specify the scope of the licence.</p></div><a class="lic-file" href="mailto:tamasrazim.public@gmail.com?subject=Licensing%20request">Request permission <span aria-hidden="true">↗</span></a></div>
 </section>
 </main>
-<footer class="lic-shell lic-footer"><span>© 2026 Robiul Rumman Razim — Tamasrazim</span><span><a href="/">MAIN SITE</a> · <a href="/projects/">PROJECTS</a> · <a href="https://github.com/Tamasrazim/tamasrazim.github.io/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">REPOSITORY LICENCE ↗</a></span></footer>
+<footer class="lic-shell lic-footer"><span>© 2026 Robiul Rumman Razim — Tamasrazim</span><span><a href="/">MAIN SITE</a> · <a href="/projects/">PROJECTS</a> · <a href="/elsewere/">ELSEWHERE</a></span></footer>
 </body>
 </html>
