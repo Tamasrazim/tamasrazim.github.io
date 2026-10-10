@@ -86,10 +86,16 @@ body.home-v2 .site-footer{position:relative;z-index:2;background:#050505;border-
 @media(max-width:680px){.v3-kinetic-stage{width:96vw;right:-38%;top:38%;opacity:.3}.v3-kinetic-readout{display:none}.v3-kinetic-coordinates{right:13%;top:20%;font-size:6px}.v3-project-card.v2-project-card,.v3-index-card{transform:none!important;transition:border-color .25s,background .25s}}
 @media(prefers-reduced-motion:reduce){.v3-kinetic-stage{transition:none;transform:none!important}.v3-project-card.v2-project-card,.v3-index-card{transform:none!important}.v3-project-card.v2-project-card::before,.v3-index-card::before{animation:none!important}.v3-card-art i,.v3-card-art b{transition:none}}
 
-/* Tiny mobile-only correction: nudge the existing identity card slightly left. */
+/* Tiny mobile-only correction: align the identity card and stack Active above its code. */
 @media (max-width: 680px) {
   body.home-v2 .v3-about .v2-card-holder {
     position: relative;
-    left: -6px;
+    left: -9px;
+  }
+
+  body.home-v2 .v3-about .id-bottom {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
   }
 }
