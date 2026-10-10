@@ -1,0 +1,16 @@
+/* Site-wide monochrome treatment.
+   A neutral saturation blend removes hue from HTML, CSS, SVG, canvas, video,
+   workspace previews and images without changing component layouts or geometry. */
+html::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:2147483647;
+  pointer-events:none;
+  background:#808080;
+  mix-blend-mode:saturation;
+}
+dialog,[popover]{filter:grayscale(1)!important}
+@supports not (mix-blend-mode:saturation){
+  html{filter:grayscale(1)!important}
+}
