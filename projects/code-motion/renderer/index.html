@@ -7467,41 +7467,51 @@ function exportProject() {
   download(new Blob([data], { type: 'application/json' }), slugify(S.name) + '.tmotion');
   $('#stMsg').textContent = 'exported ' + slugify(S.name) + '.tmotion';
 }
-function importProject(file) {
-  var fr = new FileReader();
-  fr.onload = function () {
-    var d;
-    try { d = JSON.parse(fr.result); }
-    catch (e) {
-      openModal('IMPORT FAILED', elHTML('<div class="warnbox"><b>WHAT · the file is not valid JSON</b>WHY · ' + esc(e.message) +
-        '\nHOW TO FIX · a .tmotion file is plain JSON; re-export it from the project that created it.</div>'), [{ label: 'Close', fn: closeModal }]);
-      return;
-    }
-    if (!d || d.format !== 'tmotion') {
-      openModal('IMPORT FAILED', elHTML('<div class="warnbox"><b>WHAT · not a TRILYVA project</b>WHY · the file has no <code>"format": "tmotion"</code> marker.' +
-        '\nHOW TO FIX · open a file exported by this application. Adobe project files are a different, proprietary format and are not read here.</div>'), [{ label: 'Close', fn: closeModal }]);
-      return;
-    }
-    var c = d.composition || {};
-    loadProjectRecord({
-      id: null,
-      name: (d.project && d.project.name) || 'Imported',
-      version: (d.project && d.project.version) || 1,
-      created: (d.project && d.project.created) || new Date().toISOString(),
-      modified: new Date().toISOString(),
-      code: (d.source && d.source.code) || '',
-      meta: d.metadata || defaultMeta(),
-      comp: merge(c, {
-        loop: d.loop ? !!d.loop.enabled : false,
-        loopDuration: d.loop ? d.loop.duration : c.duration,
-        speed: d.timeRemap ? d.timeRemap.rate : 1,
-        reverse: d.timeRemap ? !!d.timeRemap.reverse : false
-      }),
-      exportPrefs: d.exportPrefs || {}
-    });
-    S.id = null;
+function importProjectText(raw, markClean, sourceName) {
+  var d;
+  try { d = JSON.parse(String(raw)); }
+  catch (e) {
+    openModal('IMPORT FAILED', elHTML('<div class="warnbox"><b>WHAT · the file is not valid JSON</b>WHY · ' + esc(e.message) +
+      '\nHOW TO FIX · a .tmotion file is plain JSON; re-export it from the project that created it.</div>'), [{ label: 'Close', fn: closeModal }]);
+    return false;
+  }
+  if (!d || d.format !== 'tmotion') {
+    openModal('IMPORT FAILED', elHTML('<div class="warnbox"><b>WHAT · not a TRILYVA project</b>WHY · the file has no <code>"format": "tmotion"</code> marker.' +
+      '\nHOW TO FIX · open a file exported by this application. Adobe project files are a different, proprietary format and are not read here.</div>'), [{ label: 'Close', fn: closeModal }]);
+    return false;
+  }
+  var comp = d.composition || {};
+  loadProjectRecord({
+    id: null,
+    name: (d.project && d.project.name) || 'Imported',
+    version: (d.project && d.project.version) || 1,
+    created: (d.project && d.project.created) || new Date().toISOString(),
+    modified: new Date().toISOString(),
+    code: (d.source && d.source.code) || '',
+    meta: d.metadata || defaultMeta(),
+    comp: merge(comp, {
+      loop: d.loop ? !!d.loop.enabled : false,
+      loopDuration: d.loop ? d.loop.duration : comp.duration,
+      speed: d.timeRemap ? d.timeRemap.rate : 1,
+      reverse: d.timeRemap ? !!d.timeRemap.reverse : false
+    }),
+    exportPrefs: d.exportPrefs || {}
+  });
+  S.id = null;
+  if (markClean) {
+    markDirty(false);
+    $('#stMsg').textContent = 'opened "' + esc(sourceName || S.name) + '" from a native project file';
+  } else {
     $('#stMsg').textContent = 'imported "' + S.name + '" — save it to keep it in this browser';
     markDirty(true);
+  }
+  return true;
+}
+function importProject(file) {
+  var fr = new FileReader();
+  fr.onload = function () { importProjectText(fr.result, false, file && file.name); };
+  fr.onerror = function () {
+    openModal('IMPORT FAILED', elHTML('<div class="warnbox"><b>WHAT · the file could not be read</b>HOW TO FIX · check that the file is accessible, then try again.</div>'), [{ label: 'Close', fn: closeModal }]);
   };
   fr.readAsText(file);
 }
@@ -8333,6 +8343,53 @@ function initDispatch() {
   window.addEventListener('beforeunload', function (ev) {
     if (S.rendering) { ev.preventDefault(); ev.returnValue = ''; return ''; }
     if (S.dirty) { ev.preventDefault(); ev.returnValue = ''; return ''; }
+  });
+}
+
+/* Native desktop integration contract. The web edition never needs file-system privileges. */
+if (window.__TAURI__ && window.__TAURI__.core && typeof window.__TAURI__.core.invoke === 'function') {
+  window.TRILYVA_NATIVE_PROJECT_API = Object.freeze({
+    currentName: function () { return S.name || 'Untitled'; },
+    isDirty: function () { return !!S.dirty; },
+    exportProjectJson: function () { return JSON.stringify(toTmotion(), null, 2); },
+    markNativeSaved: function (fileName) {
+      S.id = null;
+      markDirty(false);
+      $('#stMsg').textContent = 'saved native project file "' + esc(fileName || (S.name + '.tmotion')) + '"';
+    },
+    openStoredProjectManager: function () { openProjectDialog(); },
+    importProjectText: function (text, fileName, onAccepted, saveBeforeImport) {
+      function loadSelected(resolve) {
+        if (!importProjectText(text, true, fileName)) { resolve(false); return; }
+        Promise.resolve().then(function () {
+          return typeof onAccepted === 'function' ? onAccepted() : true;
+        }).then(function () {
+          resolve(true);
+        }).catch(function (error) {
+          $('#stMsg').textContent = 'The project was loaded, but its file binding failed: ' + String(error && error.message || error);
+          resolve(false);
+        });
+      }
+      if (!S.dirty) {
+        return new Promise(function (resolve) { loadSelected(resolve); });
+      }
+      return new Promise(function (resolve) {
+        var body = elHTML('<p class="note">The current project contains unsaved changes. Save it to a native .tmotion file before opening the selected project, discard those changes, or cancel.</p>');
+        openModal('OPEN NATIVE PROJECT', body, [
+          { label: 'Save first', solid: true, fn: function () {
+            closeModal();
+            Promise.resolve().then(function () {
+              return typeof saveBeforeImport === 'function' ? saveBeforeImport() : false;
+            }).then(function (saved) {
+              if (saved) loadSelected(resolve);
+              else resolve(false);
+            }).catch(function () { resolve(false); });
+          }},
+          { label: 'Discard changes', fn: function () { closeModal(); loadSelected(resolve); }},
+          { label: 'Cancel', fn: function () { closeModal(); resolve(false); }}
+        ]);
+      });
+    }
   });
 }
 
