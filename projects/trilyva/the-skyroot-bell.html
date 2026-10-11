@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#080a13">
-<meta name="description" content="The Skyroot Bell — an original ten-minute fantasy cartoon, drawn frame by frame with JavaScript vectors in TRILYVA.">
-<title>The Skyroot Bell — TRILYVA</title>
+<meta name="description" content="The Last Star Train — a ten-minute original fantasy cartoon made with 2D vectors, layered perspective sets and cinematic camera cuts in TRILYVA.">
+<title>The Last Star Train — TRILYVA</title>
 <style>
 :root{color-scheme:dark;--bg:#07080d;--panel:#10131e;--line:#2b3040;--ink:#f7f4eb;--muted:#a3a8b9;--gold:#efd39a;--blue:#b8c9ff}
 *{box-sizing:border-box}
@@ -48,7 +48,7 @@ input[type=range]{width:100%;accent-color:#f1d79e;cursor:pointer;margin:3px 0}
 .card{padding:22px;border:1px solid var(--line);background:rgba(15,18,29,.83)}
 .card h2{font:11px ui-monospace,Consolas,monospace;letter-spacing:.14em;margin:0 0 12px;color:var(--gold)}
 .card p{margin:0;color:#b8bdca;line-height:1.85;font-size:12px}
-.beats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:15px}
+.beats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:15px}
 .beat{border-left:2px solid #69799f;padding:8px 11px;background:#141927;color:#aeb5c9;font-size:11px}
 .beat b{display:block;color:#f2e4c4;font:10px ui-monospace,Consolas,monospace;margin-bottom:3px}
 footer{border-top:1px solid var(--line);padding:19px 0 27px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:#8e95a8;font:9px ui-monospace,Consolas,monospace;letter-spacing:.09em}
@@ -65,13 +65,13 @@ footer{border-top:1px solid var(--line);padding:19px 0 27px;display:flex;justify
   </nav>
 </header>
 <main>
-  <div class="kicker">A TEN-MINUTE FANTASY CARTOON · JAVASCRIPT VECTOR ANIMATION</div>
-  <h1>The Skyroot Bell</h1>
-  <p class="intro">When the golden bell that lights the floating world of Lumenreach disappears, young fox gardener Eira and her lantern-moth Pip follow its echo across singing rivers, whispering woods and drifting islands. The bell's new keeper, a lonely little cloud-dragon, has made a wrong choice for a very understandable reason. Getting the light back will take more than a chase: it will take three small notes, an apology, and a village willing to share.</p>
+  <div class="kicker">AN ORIGINAL TEN-MINUTE CARTOON · 2D ART / PSEUDO-3D SETS</div>
+  <h1>The Last Star Train</h1>
+  <p class="intro">On her first night as a signal keeper, young fox Eira joins the Starfall Express, a little sky train that carries star-lanterns between floating towns. When a storm knocks out the route lights, Eira, her lantern-moth Pip and the dragon pilot Nix must find the way home across a marsh boardwalk, a shifting forest, an ice viaduct, a crowded sky market, a windmill canyon and a tunnel with a vanishing-point track. Each place teaches them a different way to read the route. The final rail ends at a gulf, so the crew must build a path of light together.</p>
   <div class="film-meta">
-    <span class="pill">10:00 TOTAL RUNTIME</span><span class="pill">4K UHD · 3840 × 2160</span><span class="pill">60 FPS TARGET</span><span class="pill">126 DIRECTED SHOTS</span><span class="pill">MP4 / WEBM EXPORT</span><span class="pill">DETERMINISTIC FRAMES</span><span class="pill">ORIGINAL VECTOR ART</span>
+    <span class="pill">10:00 TOTAL RUNTIME</span><span class="pill">4K UHD · 3840 × 2160</span><span class="pill">60 FPS TARGET</span><span class="pill">115 DIRECTED SHOTS</span><span class="pill">MP4 / WEBM EXPORT</span><span class="pill">DETERMINISTIC FRAMES</span><span class="pill">ORIGINAL VECTOR ART</span>
   </div>
-  <div class="stage"><canvas id="film" width="3840" height="2160" aria-label="The Skyroot Bell animated fantasy film rendered at 4K UHD"></canvas></div>
+  <div class="stage"><canvas id="film" width="3840" height="2160" aria-label="The Last Star Train animated fantasy film rendered at 4K UHD"></canvas></div>
   <section class="controls" aria-label="Film controls">
     <div class="row top">
       <div class="actions">
@@ -93,22 +93,23 @@ footer{border-top:1px solid var(--line);padding:19px 0 27px;display:flex;justify
   <div class="story-grid">
     <section class="card">
       <h2>THE STORY, FROM FIRST LIGHT TO LAST</h2>
-      <p>Eira starts out wanting to prove she can ring the Skyroot Bell on her own. Along the way, she helps a pebble-sprite and faces the whispers in a dark wood. She discovers that Nix has taken the bell to brighten Cloudrest, a place the lantern-lit village has forgotten to notice. Eira does not excuse his choice; she offers a better way to fix the harm. Nix returns the bell, the villagers bring their own lights, and the three notes help the Skyroot grow a bridge to every home.</p>
+      <p>Eira thinks a good signal keeper should already know every route. The blackout proves otherwise. At Mosswater she learns not to trust a reflection; in Whisperwood the safest route appears only from above; on the ice viaduct the crew must call turns together. The sky market tests their timing, the engine room combines all three clues, and the observatory reveals the hidden tunnel. When the rails finally end over Moonfall Gap, none of them can cross alone. Their linked lanterns become a temporary track, bringing the Express safely to First-Light Harbor at sunrise.</p>
       <div class="beats">
-        <div class="beat"><b>00:00 — 01:36</b>Festival, missing bell, and the first rescue.</div>
-        <div class="beat"><b>02:30 — 04:23</b>Whisperwood, crystal cliffs, and a sky-market chase.</div>
-        <div class="beat"><b>05:20 — 08:46</b>Cloudrest, a shared light, and the journey home.</div>
+        <div class="beat"><b>00:00 — 02:30</b>Nimbus Terminal, blackout storm, and the marsh crossing.</div>
+        <div class="beat"><b>02:30 — 05:20</b>Shifting forest, ice viaduct, and sky-market chase.</div>
+        <div class="beat"><b>05:20 — 08:10</b>Engine repair, windmill canyon, and the star-map observatory.</div>
+        <div class="beat"><b>08:10 — 10:00</b>Storm tunnel, missing bridge, and First-Light Harbor.</div>
       </div>
     </section>
     <section class="card">
       <h2>HOW THIS CARTOON IS BUILT</h2>
-      <p>The ten-minute timeline is edited as 126 directed camera setups: establishing views, close-ups, reaction cuts, the flying chase, landing beats and the final ceremony. Characters, clouds, lanterns, props, highlights and shadows are drawn with Canvas paths and gradients. Story-timed effects build the brook rescue, Whisperwood echoes, crystal flight trails, sky-market chase, shared seed and the bell’s spreading song. Dialogue cues also drive small mouth and expression changes. Each frame is deterministic, so seeking and export do not depend on playback history.</p>
-      <p style="margin-top:12px">The film is a visual cartoon with timed on-screen dialogue and narration. This build does not include a pre-recorded voice or music track; the scene and cue data live in the JavaScript source.</p>
+      <p>The film combines hand-drawn 2D characters with layered faux-3D perspective: a side-on railway platform, a boardwalk above real water, a winding forest corridor, a deep ice viaduct, a multi-level market, a gear-filled interior, an open canyon, a circular overhead star chart and a vanishing-point tunnel. The train tracks, floor planes and walkable decks are painted before the characters, so the performers sit on the scene instead of hovering over it. Its 115 authored camera setups include wide shots, close reactions, moving chase views and overhead map imagery. Every frame is deterministic for repeatable scrubbing.</p>
+      <p style="margin-top:12px">The film includes timed on-screen dialogue and narration cues, but no recorded voice or music track. It is drawn by JavaScript Canvas rather than a pre-rendered video file; use EXPORT 4K VIDEO to capture playback in a browser-supported MP4 or WebM format.</p>
     </section>
   </div>
 </main>
-<footer><span>ROBIUL RUMMAN RAZIM — TAMASRAZIM / TRILYVA</span><span>THE SKYROOT BELL · ORIGINAL SOFTWARE-DRAWN CARTOON</span><a href="/projects/trilyva/">BACK TO TRILYVA ↑</a></footer>
-<script src="../code-motion/renderer/the-skyroot-bell.js?v=20261012-4"></script>
+<footer><span>ROBIUL RUMMAN RAZIM — TAMASRAZIM / TRILYVA</span><span>THE LAST STAR TRAIN · ORIGINAL SOFTWARE-DRAWN CARTOON</span><a href="/projects/trilyva/">BACK TO TRILYVA ↑</a></footer>
+<script src="../code-motion/renderer/the-skyroot-bell.js?v=20261012-5"></script>
 <script>
 (function(){
   "use strict";
@@ -123,7 +124,7 @@ footer{border-top:1px solid var(--line);padding:19px 0 27px;display:flex;justify
   const story = window.TRILYVA_SKYROOT_STORY;
   if (!story || typeof story.renderFrame !== "function") {
     status.textContent = "FILM SCRIPT FAILED TO LOAD · RELOAD THIS PAGE";
-    throw new Error("The Skyroot Bell renderer did not register.");
+    throw new Error("The Last Star Train renderer did not register.");
   }
   let time = 0, playing = false, wallStart = 0, filmStart = 0, raf = 0, lastDraw = -1;
   let recording = false, recorder = null, recordingStream = null, recordingChunks = [], recordingMime = "", exportCompleted = false;
