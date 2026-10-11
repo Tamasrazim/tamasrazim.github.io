@@ -1,0 +1,13 @@
+[package]
+name = "trilyva_native"
+version = "0.1.0"
+description = "Experimental native desktop shell for TRILYVA"
+authors = ["Robiul Rumman Razim (Tamasrazim)"]
+edition = "2021"
+publish = false
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
