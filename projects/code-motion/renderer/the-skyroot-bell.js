@@ -465,13 +465,35 @@ function skySkiff(ctx, x, y, s, t, tilt) {
   }
   ctx.restore();
 }
+function skyVoicePulse(role, t) {
+  let cueIndex = -1;
+  for (let i = 0; i < SKYROOT_CUES.length; i++) {
+    if (SKYROOT_CUES[i][0] <= t) cueIndex = i;
+    else break;
+  }
+  if (cueIndex < 0 || SKYROOT_CUES[cueIndex][1] !== role) return 0;
+  const cue = SKYROOT_CUES[cueIndex];
+  const next = SKYROOT_CUES[cueIndex + 1];
+  const duration = Math.min(4.7, (next ? next[0] : SKYROOT_DURATION) - cue[0]);
+  const age = t - cue[0];
+  if (age < 0 || age > duration || duration <= 0.1) return 0;
+  const inFade = skyEase(0, 0.12, age);
+  const outFade = 1 - skyEase(duration - 0.22, duration, age);
+  // This is animated mouth timing for the written dialogue cues, not audio.
+  return inFade * outFade * (0.18 + 0.82 * Math.abs(Math.sin(age * 11.3 + 0.2)));
+}
+
 function skyFox(ctx, x, y, s, t, mood, action) {
   mood = mood || "happy"; action = action || "idle";
   const walk = action === "walk" || action === "run" || action === "climb";
   const stride = walk ? Math.sin(t * (action === "run" ? 9.4 : 5.6)) : Math.sin(t * 2.1) * .12;
   const bounce = walk ? Math.abs(Math.sin(t * 5.6)) * (action === "run" ? 9 : 4) : Math.sin(t * 2.4) * 2.6;
   const blink = Math.sin(t * 0.73 + 1.2) > .985;
-  ctx.save(); ctx.translate(x,y+bounce); ctx.scale(s,s);
+  const talk = skyVoicePulse("EIRA", t);
+  const headTilt = (action === "reach" ? -0.075 : mood === "worried" ? 0.055 : mood === "sad" ? -0.07 : action === "ring" ? -0.035 : 0) + Math.sin(t * 1.35) * 0.018;
+  const glanceX = action === "reach" ? 2.4 : mood === "worried" ? Math.sin(t * 1.7) * 1.3 : action === "ring" ? 1.2 : Math.sin(t * 0.9) * 0.7;
+  const stretch = action === "run" ? 1 + Math.abs(Math.sin(t * 9.4)) * 0.018 : 1 + Math.sin(t * 2.4) * 0.006;
+  ctx.save(); ctx.translate(x,y+bounce); ctx.scale(s * stretch, s / stretch);
   // A separate soft shadow anchors the little character to the ground.
   skyEllipse(ctx,0,1,74,13,"rgba(30,52,65,0.22)",null);
   // Tail is drawn first and keeps the same cream tip in every shot.
@@ -492,7 +514,8 @@ function skyFox(ctx, x, y, s, t, mood, action) {
   ctx.beginPath(); ctx.moveTo(-32,-103); ctx.quadraticCurveTo(-55,-86,-46+(action==="reach"?-12:0),-63+Math.sin(t*4)*3); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(31,-103); ctx.quadraticCurveTo(49,-88,47+(action==="ring"?14:0),-71+Math.sin(t*4+1)*3); ctx.stroke();
   skyEllipse(ctx,-46,-62,12,11,"#f7d8b9",null); skyEllipse(ctx,47+(action==="ring"?14:0),-71,12,11,"#f7d8b9",null);
-  // Head and ear silhouette.
+  // Head and ear silhouette: a tiny head turn makes close-ups feel performed.
+  ctx.save(); ctx.translate(0,-145); ctx.rotate(headTilt); ctx.translate(0,145);
   skyPath(ctx,[[-47,-142],[-63,-208],[-20,-177],[0,-180],[26,-179],[61,-211],[54,-141]],"#b9625e","#874650",3);
   skyPath(ctx,[[-52,-177],[-54,-197],[-34,-182]],"#f6c0a6",null,0);
   skyPath(ctx,[[34,-181],[55,-198],[49,-174]],"#f6c0a6",null,0);
@@ -502,10 +525,10 @@ function skyFox(ctx, x, y, s, t, mood, action) {
   skyEllipse(ctx,0,-121,33,22,"#ffe7d2",null);
   skyEllipse(ctx,0,-133,6.5,4.8,"#684653",null);
   const eyeH = blink ? 2 : (mood === "sad" ? 16 : 19);
-  skyEllipse(ctx,-22,-151,8,eyeH,"#4a3c4b",null);
-  skyEllipse(ctx,22,-151,8,eyeH,"#4a3c4b",null);
+  skyEllipse(ctx,-22 + glanceX,-151,8,eyeH,"#4a3c4b",null);
+  skyEllipse(ctx,22 + glanceX,-151,8,eyeH,"#4a3c4b",null);
   if (!blink) {
-    skyEllipse(ctx,-24,-158,2.9,4.2,"#ffffff",null); skyEllipse(ctx,20,-158,2.9,4.2,"#ffffff",null);
+    skyEllipse(ctx,-24 + glanceX,-158,2.9,4.2,"#ffffff",null); skyEllipse(ctx,20 + glanceX,-158,2.9,4.2,"#ffffff",null);
   }
   ctx.strokeStyle="#874650"; ctx.lineWidth=3.4; ctx.lineCap="round";
   ctx.beginPath();
@@ -518,6 +541,11 @@ function skyFox(ctx, x, y, s, t, mood, action) {
   else if (mood==="worried") { ctx.moveTo(-8,-110);ctx.quadraticCurveTo(0,-105,8,-110); }
   else { ctx.moveTo(-15,-112);ctx.quadraticCurveTo(0,-100,15,-112); }
   ctx.stroke();
+  if (talk > 0.24) {
+    skyEllipse(ctx,0,-108,5.2 + talk * 3.2,2.8 + talk * 5.4,"#704654",null);
+    skyEllipse(ctx,0,-104,3.2,1.7 + talk * 1.4,"#f0a4a0",null);
+  }
+  ctx.restore();
   // Teal scarf and the little satchel are signature props.
   skyRound(ctx,-32,-99,65,17,8,"#60bdb7","#3b868b",2);
   ctx.save(); ctx.translate(22,-89); ctx.rotate(-.17 + Math.sin(t*3)*.04);
@@ -533,6 +561,7 @@ function skyFox(ctx, x, y, s, t, mood, action) {
   ctx.restore();
 }
 function skyMoth(ctx, x, y, s, t, glow) {
+  const talk = skyVoicePulse("PIP", t);
   ctx.save(); ctx.translate(x,y+Math.sin(t*2.7)*9); ctx.scale(s,s);
   const flap=Math.sin(t*8)*.16;
   skyGlow(ctx,0,0,110,"rgba(255,226,154,0.48)",glow==null?.28:glow);
@@ -551,6 +580,7 @@ function skyMoth(ctx, x, y, s, t, glow) {
   skyEllipse(ctx,-10,-8,5,8,"#243d55",null);skyEllipse(ctx,10,-8,5,8,"#243d55",null);
   skyEllipse(ctx,-12,-12,2.2,3,"#fff",null);skyEllipse(ctx,8,-12,2.2,3,"#fff",null);
   ctx.strokeStyle="#4e8291";ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(-5,9);ctx.quadraticCurveTo(0,13,5,9);ctx.stroke();
+  if (talk > 0.24) skyEllipse(ctx,0,11,2.5 + talk * 2.2,1.8 + talk * 2.6,"#3d6478",null);
   skyRound(ctx,-11,20,22,22,7,"#f3c96d","#9f825c",2);
   skyGlow(ctx,0,31,27,"rgba(255,231,139,0.5)",0.32);
   for(let i=0;i<5;i++){
@@ -560,7 +590,9 @@ function skyMoth(ctx, x, y, s, t, glow) {
   ctx.restore();
 }
 function skyDragon(ctx, x, y, s, t, mood, flying) {
+  const talk = skyVoicePulse("NIX", t);
   ctx.save();ctx.translate(x,y+Math.sin(t*2.8)*5);ctx.scale(s,s);
+  ctx.rotate(Math.sin(t * 1.65) * (flying ? 0.026 : 0.012));
   const wing=Math.sin(t*8.5)*.22;
   // Tail and wings are behind the body, always attached at the same shoulder.
   ctx.strokeStyle="#6977bd";ctx.lineWidth=20;ctx.lineCap="round";
@@ -577,6 +609,13 @@ function skyDragon(ctx, x, y, s, t, mood, flying) {
   skyEllipse(ctx,1,-105,47,40,skyGradient(ctx,-37,-143,40,-68,[[0,"#a4b0eb"],[.6,"#7e8ed1"],[1,"#6372b7"]]),"#4e5d9d",3);
   skyPath(ctx,[[-25,-130],[-31,-157],[-10,-137]],"#f2b0ad","#94647f",2);
   skyPath(ctx,[[15,-135],[34,-154],[34,-127]],"#f2b0ad","#94647f",2);
+  ctx.strokeStyle = mood === "worried" ? "#4d5b98" : "#53609a";
+  ctx.lineWidth = 3.2;
+  ctx.beginPath();
+  if (mood === "worried") { ctx.moveTo(-25,-124); ctx.lineTo(-11,-128); ctx.moveTo(9,-128); ctx.lineTo(25,-124); }
+  else if (mood === "sad") { ctx.moveTo(-25,-126); ctx.lineTo(-11,-122); ctx.moveTo(9,-122); ctx.lineTo(25,-126); }
+  else { ctx.moveTo(-25,-127); ctx.lineTo(-11,-125); ctx.moveTo(9,-125); ctx.lineTo(25,-127); }
+  ctx.stroke();
   skyEllipse(ctx,-15,-112,7,10,"#25374f",null);skyEllipse(ctx,17,-112,7,10,"#25374f",null);
   skyEllipse(ctx,-17,-116,2.5,3.5,"#fff",null);skyEllipse(ctx,15,-116,2.5,3.5,"#fff",null);
   skyEllipse(ctx,0,-91,20,13,"#dce0f5",null);
@@ -585,6 +624,10 @@ function skyDragon(ctx, x, y, s, t, mood, flying) {
   if(mood==="sad"){ctx.moveTo(-7,-84);ctx.quadraticCurveTo(0,-89,7,-84);}
   else if(mood==="worried"){ctx.moveTo(-8,-86);ctx.quadraticCurveTo(0,-83,8,-86);}
   else{ctx.moveTo(-8,-86);ctx.quadraticCurveTo(0,-78,8,-86);}ctx.stroke();
+  if (talk > 0.24) {
+    skyEllipse(ctx,0,-82,4.2 + talk * 2.4,1.8 + talk * 4.4,"#505081",null);
+    skyEllipse(ctx,0,-79,2.5,1.5 + talk,"#e9a6b3",null);
+  }
   // Coral scarf, stitched bell strap and small cloud badge.
   skyRound(ctx,-28,-68,56,14,7,"#efa1a5","#a35f83",2);
   skyPath(ctx,[[16,-62],[45,-54],[43,-28],[21,-37]],"#ed9c9f","#a35f83",2);
@@ -594,20 +637,24 @@ function skyDragon(ctx, x, y, s, t, mood, flying) {
   ctx.restore();
 }
 function skyPebble(ctx, x, y, s, t, smile) {
+  const talk = skyVoicePulse("PEBBLE", t);
   ctx.save();ctx.translate(x,y+Math.sin(t*2)*3);ctx.scale(s,s);
   skyEllipse(ctx,0,0,45,31,skyGradient(ctx,-37,-27,41,34,[[0,"#c9d1cb"],[.6,"#98a7ab"],[1,"#6d8290"]]),"#627989",3);
   for(let i=0;i<7;i++)skyEllipse(ctx,Math.cos(i*2.4)*29,-8+Math.sin(i*2.4)*16,4,3,"#e9e6d2",null);
   skyEllipse(ctx,-13,-4,4,6,"#2b4559",null);skyEllipse(ctx,13,-4,4,6,"#2b4559",null);
   ctx.strokeStyle="#4b6470";ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(-8,8);ctx.quadraticCurveTo(0,smile?15:4,8,8);ctx.stroke();
+  if (talk > 0.24) skyEllipse(ctx,0,9,3.4 + talk * 2,2 + talk * 2.5,"#536974",null);
   ctx.restore();
 }
 function skyOwl(ctx, x, y, s, t) {
+  const talk = skyVoicePulse("OWL", t);
   ctx.save();ctx.translate(x,y+Math.sin(t*1.4)*3);ctx.scale(s,s);
   skyPath(ctx,[[-52,-25],[-62,-65],[-30,-52],[-12,-63],[20,-58],[43,-71],[49,-25]],"#90759c","#5f597e",3);
   skyEllipse(ctx,0,-28,48,55,skyGradient(ctx,-35,-78,34,20,[[0,"#c5a8bc"],[.6,"#957da7"],[1,"#74688f"]]),"#625a82",3);
   skyEllipse(ctx,-17,-39,15,17,"#fff1cb",null);skyEllipse(ctx,17,-39,15,17,"#fff1cb",null);
   skyEllipse(ctx,-17,-39,6,7,"#29354d",null);skyEllipse(ctx,17,-39,6,7,"#29354d",null);
   skyPath(ctx,[[-6,-24],[6,-24],[0,-13]],"#ecb56f",null,0);
+  if (talk > 0.24) skyEllipse(ctx,0,-18,3.5 + talk * 2.0,1.4 + talk * 2.8,"#70536f",null);
   ctx.strokeStyle="#7b638e";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-27,12);ctx.lineTo(-37,23);ctx.moveTo(28,12);ctx.lineTo(37,22);ctx.stroke();
   ctx.restore();
 }
@@ -1003,10 +1050,17 @@ function skyDirectorCamera(t) {
   const p = index > 0 && moveDuration > 0
     ? skyEase(current[0], current[0] + moveDuration, t)
     : 1;
+  const zoom = skyMix(previous[3], current[3], p);
+  const rawX = skyMix(previous[1], current[1], p);
+  const rawY = skyMix(previous[2], current[2], p);
+  // Never expose the unpainted canvas beyond a scene edge during close-ups.
+  // The focal subject can sit toward a third; the framing still stays covered.
+  const halfViewW = 960 / zoom;
+  const halfViewH = 540 / zoom;
   return {
-    x: skyMix(previous[1], current[1], p),
-    y: skyMix(previous[2], current[2], p),
-    zoom: skyMix(previous[3], current[3], p),
+    x: skyClamp(rawX, halfViewW, 1920 - halfViewW),
+    y: skyClamp(rawY, halfViewH, 1080 - halfViewH),
+    zoom,
     shot: index,
     shotTime: current[0]
   };
