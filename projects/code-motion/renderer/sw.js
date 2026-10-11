@@ -1,9 +1,10 @@
-const CACHE = 'tamasrazim-trilyva-pwa-v48';
+const CACHE = 'tamasrazim-trilyva-pwa-v49';
 const CORE = [
   './',
   './index.html',
   './media-stack.js',
   './voice-studio.js',
+  './movie-finalizer.js',
   './manifest.webmanifest',
   './library/library.js',
   './library/manifest.json',
