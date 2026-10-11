@@ -923,12 +923,388 @@ function skyFilmGrade(ctx,t){
   const bars=0.5+0.5*Math.sin(Math.PI*skyEase(0,10,t));
   ctx.fillStyle="rgba(8,11,24,"+(0.10+0.05*bars)+")";ctx.fillRect(0,0,1920,25);ctx.fillRect(0,1055,1920,25);
 }
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+   CINEMATIC DIRECTOR
+   The film is edited as a sequence of shots, not one static composition per
+   chapter. Each key is: [story time, focus X, focus Y, lens zoom, move seconds].
+   Zero-length moves are hard cuts; longer moves are motivated camera moves.
+   The camera is deterministic, so frame export and timeline scrubbing agree.
+   ────────────────────────────────────────────────────────────────────────── */
+const SKYROOT_SHOT_CUTS = [
+  [0,960,540,1.00,0], [4,1120,650,1.12,1.0], [9,610,845,1.42,0.18],
+  [14,660,780,1.38,0.55], [20,1110,525,1.22,0.35], [26,725,850,1.40,0.2],
+  [32,585,850,1.46,0.2], [38,1050,600,1.18,0.8], [43,1090,520,1.42,0.3],
+
+  [46,990,550,1.02,0], [50,1064,505,1.82,0.22], [55,805,900,1.48,0.3],
+  [60,885,775,1.48,0.25], [65,1064,505,1.60,0.2], [70,990,650,1.19,0.8],
+  [76,1080,450,1.34,0.3], [82,850,805,1.44,0.2], [89,1030,590,1.27,0.7],
+  [94,930,600,1.02,0.4],
+
+  [96,965,540,1.00,0], [100,1215,790,1.40,0.2], [105,820,900,1.46,0.25],
+  [110,1250,805,1.70,0.2], [115,1058,706,1.62,0.3], [120,1280,740,1.55,0.25],
+  [125,980,865,1.36,0.2], [131,1240,790,1.48,0.6], [137,1250,800,1.66,0.2],
+  [143,820,885,1.32,0.6], [148,960,560,1.02,0.4],
+
+  [150,960,545,1.00,0], [155,990,850,1.42,0.3], [160,1180,650,1.28,0.7],
+  [165,970,850,1.48,0.2], [170,880,780,1.38,0.5], [175,810,650,1.35,0.25],
+  [180,660,650,1.36,0.2], [185,790,770,1.56,0.3], [190,805,840,1.56,0.2],
+  [196,920,720,1.24,0.75], [201,1295,700,1.55,0.2], [204,990,550,1.0,0.5],
+
+  [206,960,540,1.00,0], [211,1440,510,1.47,0.3], [216,1510,515,1.75,0.18],
+  [221,800,850,1.35,0.25], [226,1420,500,1.46,0.2], [231,1410,420,1.48,0.4],
+  [237,1070,730,1.34,0.35], [243,1290,640,1.29,0.7], [249,1000,820,1.30,0.3],
+  [255,1480,525,1.34,0.4], [260,1000,540,1.0,0.7],
+
+  [263,960,540,1.00,0], [267,1460,540,1.25,0.9], [272,610,860,1.40,0.2],
+  [277,1550,505,1.42,0.2], [282,1290,820,1.45,0.25], [287,1660,530,1.35,0.25],
+  [292,1050,700,1.28,0.2], [297,1410,620,1.33,0.65], [302,1030,820,1.30,0.3],
+  [307,1640,530,1.38,0.25], [312,1110,760,1.30,0.6], [317,970,550,1.0,0.6],
+
+  [320,960,540,1.00,0], [324,1020,700,1.43,0.25], [329,850,600,1.55,0.2],
+  [334,850,660,1.50,0.25], [339,1230,860,1.30,0.6], [344,1110,850,1.45,0.2],
+  [350,850,620,1.54,0.25], [355,955,650,1.53,0.2], [360,1430,610,1.36,0.6],
+  [366,1200,750,1.45,0.2], [370,960,550,1.02,0.6],
+
+  [372,960,540,1.00,0], [376,850,630,1.42,0.2], [381,1110,850,1.36,0.3],
+  [386,1090,850,1.44,0.2], [391,1480,600,1.25,0.65], [396,830,610,1.50,0.2],
+  [401,1115,840,1.43,0.2], [406,900,775,1.28,0.6], [411,925,650,1.48,0.25],
+  [416,925,650,1.80,0.2], [421,925,650,1.95,0.45], [426,850,680,1.47,0.2],
+  [431,880,850,1.42,0.2], [437,960,550,1.0,0.7], [443,1060,650,1.20,0.5],
+
+  [447,960,540,1.00,0], [451,1450,500,1.35,0.25], [456,1145,565,1.52,0.2],
+  [461,1250,540,1.22,0.6], [466,1110,710,1.28,0.4], [471,1510,500,1.28,0.6],
+  [476,970,730,1.32,0.2], [481,850,850,1.42,0.2], [486,980,600,1.12,0.6],
+
+  [490,960,540,1.00,0], [494,1010,600,1.43,0.2], [499,1110,745,1.46,0.25],
+  [504,1025,495,1.48,0.2], [509,620,850,1.18,0.65], [514,1300,780,1.22,0.45],
+  [519,980,780,1.30,0.2], [523,960,550,1.00,0.6],
+
+  [526,960,540,1.00,0], [530,1025,495,1.48,0.2], [535,870,840,1.44,0.25],
+  [540,1025,495,1.63,0.2], [545,1040,500,1.55,0.2], [550,1025,495,1.35,0.35],
+  [555,970,700,1.28,0.4], [560,970,650,1.32,0.25], [565,1050,580,1.26,0.5],
+  [569,960,540,1.0,0.65],
+
+  [572,960,540,1.00,0], [575,560,590,1.20,0.5], [579,1150,650,1.30,0.2],
+  [583,1190,790,1.43,0.2], [587,1005,760,1.50,0.25], [591,1060,800,1.34,0.2],
+  [594,970,560,1.13,0.8], [597,960,540,1.00,0.5]
+];
+
+function skyDirectorCamera(t) {
+  let index = 0;
+  for (let i = 1; i < SKYROOT_SHOT_CUTS.length; i++) {
+    if (SKYROOT_SHOT_CUTS[i][0] <= t) index = i;
+    else break;
+  }
+  const current = SKYROOT_SHOT_CUTS[index];
+  const previous = SKYROOT_SHOT_CUTS[Math.max(0, index - 1)];
+  const moveDuration = current[4] || 0;
+  const p = index > 0 && moveDuration > 0
+    ? skyEase(current[0], current[0] + moveDuration, t)
+    : 1;
+  return {
+    x: skyMix(previous[1], current[1], p),
+    y: skyMix(previous[2], current[2], p),
+    zoom: skyMix(previous[3], current[3], p),
+    shot: index,
+    shotTime: current[0]
+  };
+}
+
+function skyDirectorShake(t) {
+  let power = 0;
+  const beats = [
+    [106,112,0.9,2.4], [118,124,0.9,2.1],
+    [222,258,0.85,2.6], [277,316,0.86,4.0],
+    [320,326,0.8,5.0], [548,570,0.8,2.2]
+  ];
+  for (let i = 0; i < beats.length; i++) {
+    const b = beats[i];
+    const edge = skyEase(b[0], b[0] + 0.8, t) * (1 - skyEase(b[1] - 1.0, b[1], t));
+    power = Math.max(power, edge * b[3] * (0.65 + 0.35 * Math.sin(t * b[2] * 12)));
+  }
+  return power;
+}
+
+/* The following effects belong to the action in each sequence. They are tied
+   to story time rather than random particles, so they remain coherent when
+   the viewer scrubs or exports a single frame. */
+function skyCineLine(ctx, x1, y1, cx, cy, x2, y2, color, width, alpha) {
+  ctx.save();
+  ctx.globalAlpha = skyClamp(alpha, 0, 1);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.quadraticCurveTo(cx, cy, x2, y2);
+  ctx.stroke();
+  ctx.restore();
+}
+function skyCineEllipse(ctx, x, y, rx, ry, color, width, alpha, rotation) {
+  ctx.save();
+  ctx.globalAlpha = skyClamp(alpha, 0, 1);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.beginPath();
+  ctx.ellipse(x, y, Math.max(0.1, rx), Math.max(0.1, ry), rotation || 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+}
+function skyCineBurst(ctx, x, y, radius, count, t, palette, alpha) {
+  for (let i = 0; i < count; i++) {
+    const angle = i * 2.399963 + t * (0.22 + (i % 3) * 0.08);
+    const r = radius * (0.52 + skyHash(i + 177) * 0.48);
+    const px = x + Math.cos(angle) * r;
+    const py = y + Math.sin(angle) * r * 0.72;
+    const size = 1.5 + skyHash(i + 29) * 3.8;
+    skyGlow(ctx, px, py, size * 7, palette[i % palette.length], alpha * 0.45);
+    skyStar(ctx, px, py, size, "#fff4d3", alpha * (0.55 + 0.45 * Math.sin(t * 3 + i)));
+  }
+}
+function skyCineWaterRescue(ctx, t) {
+  const active = skyEase(99, 105, t) * (1 - skyEase(128, 134, t));
+  if (active <= 0) return;
+  const rescue = skyEase(108, 124, t);
+  ctx.save();
+  for (let i = 0; i < 7; i++) {
+    const phase = (t * 48 + i * 41) % 270;
+    const r = 22 + phase;
+    skyCineEllipse(ctx, 1246 - rescue * 38, 827 + Math.sin(t * 2 + i) * 5,
+      r, r * 0.29, i % 2 ? "#d5fff2" : "#a6e8ef", 1.5 + (i % 3) * 0.45,
+      active * Math.max(0, 0.18 * (1 - phase / 285)), -0.08);
+  }
+  for (let i = 0; i < 17; i++) {
+    const launch = (t * 1.5 + i * 0.37) % 1;
+    const x = 1040 + skyHash(i + 3) * 300 + Math.sin(t * 6 + i) * 12;
+    const y = 812 - launch * (28 + skyHash(i + 19) * 110);
+    skyGlow(ctx, x, y, 7 + launch * 6, "rgba(188,249,240,0.32)", active * 0.3);
+    skyEllipse(ctx, x, y, 1.8 + launch, 2.8 + launch * 1.8, "#e5fff4", null, 0);
+  }
+  const strain = skyEase(104, 113, t) * (1 - skyEase(118, 126, t));
+  if (strain > 0.01) {
+    skyCineLine(ctx, 1050, 726, 1175, 685 + Math.sin(t * 3) * 9, 1330, 780,
+      "#f6ddbc", 4, strain * 0.72);
+    skyCineLine(ctx, 1060, 716, 1175, 676 + Math.sin(t * 3) * 9, 1336, 770,
+      "#fff1d6", 1.5, strain * 0.9);
+  }
+  if (t > 124 && t < 137) skyCineBurst(ctx, 1240, 800, 105, 16, t,
+    ["rgba(190,250,246,0.45)","rgba(222,238,255,0.45)"], skyEase(124,128,t) * (1-skyEase(133,137,t)));
+  ctx.restore();
+}
+function skyCineWhisperwood(ctx, t) {
+  const fear = skyEase(162, 173, t) * (1 - skyEase(190, 200, t));
+  if (fear <= 0.01) return;
+  const beat = 0.5 + 0.5 * Math.sin(t * 2.3);
+  ctx.save();
+  for (let i = 0; i < 5; i++) {
+    const radius = 45 + i * 53 + (t * 11) % 34;
+    skyCineEllipse(ctx, 810, 665, radius, radius * 0.58, "#c8d3ff", 1.4,
+      fear * (0.10 + 0.05 * beat) * (1 - i * 0.11), -0.12);
+  }
+  for (let i = 0; i < 10; i++) {
+    const x = 590 + i * 46 + Math.sin(t * 1.1 + i) * 8;
+    const y = 690 + (i % 3) * 28 + Math.sin(t * 2.2 + i) * 12;
+    skyCineLine(ctx, x, y, x + 16, y - 22 - beat * 8, x + 34, y,
+      "#b9c7f8", 2, fear * 0.24);
+  }
+  if (t > 188 && t < 202) skyCineBurst(ctx, 835, 720, 165, 11, t,
+    ["rgba(255,233,181,0.32)","rgba(216,224,255,0.35)"],
+    skyEase(188,194,t) * (1 - skyEase(198,202,t)));
+  ctx.restore();
+}
+function skyCineCrystalFlight(ctx, t) {
+  const flight = skyEase(208, 218, t) * (1 - skyEase(253, 263, t));
+  if (flight <= 0) return;
+  const chase = skyEase(219, 247, t);
+  ctx.save();
+  for (let i = 0; i < 20; i++) {
+    const lane = i / 19;
+    const phase = (t * (48 + lane * 52) + i * 101) % 700;
+    const x = 1800 - phase;
+    const y = 170 + lane * 620 + Math.sin(t * 1.8 + i) * 15;
+    const length = 18 + skyHash(i + 69) * 60;
+    skyCineLine(ctx, x, y, x - length * 0.52, y - 7,
+      x - length, y - 12, "#e8f4ff", 1.2 + lane, flight * 0.22);
+  }
+  for (let i = 0; i < 11; i++) {
+    const a = i * 2.399 + t * 0.6;
+    const r = 20 + ((t * 32 + i * 43) % 190);
+    const x = skyMix(1500, 1370, chase) + Math.cos(a) * r;
+    const y = skyMix(490, 440, chase) + Math.sin(a) * r * 0.55;
+    skyGlow(ctx, x, y, 9 + (i % 3) * 3, "rgba(204,229,255,0.38)", flight * 0.42);
+    skyStar(ctx, x, y, 2.2 + (i % 3), "#fff5d9", flight * 0.72);
+  }
+  if (t > 217 && t < 257) {
+    const bellPulse = 0.4 + 0.6 * Math.abs(Math.sin(t * 4.3));
+    skyGlow(ctx, 1514, 514, 80 + bellPulse * 35, "rgba(255,222,139,0.5)", flight * 0.36);
+    skyCineLine(ctx, 1435, 510, 1470, 474, 1505, 488,
+      "#fff1c2", 2.5, flight * bellPulse * 0.7);
+  }
+  ctx.restore();
+}
+function skyCineMarketChase(ctx, t) {
+  const active = skyEase(276, 283, t) * (1 - skyEase(313, 320, t));
+  if (active <= 0) return;
+  const p = skyEase(265, 317, t);
+  const dragonX = skyMix(1510, 1745, p);
+  const dragonY = skyMix(472, 535, p);
+  const foxX = skyMix(390, 1280, p);
+  const foxY = skyMix(926, 840, skyEase(282, 302, t));
+  ctx.save();
+  // Painted movement smears are kept behind the actual character poses.
+  for (let i = 0; i < 8; i++) {
+    const lag = (i + 1) * (14 + p * 8);
+    const alpha = active * (0.13 - i * 0.012);
+    skyCineLine(ctx, dragonX - lag, dragonY + 15 + i * 3,
+      dragonX - lag - 35, dragonY + 42 + i * 4,
+      dragonX - lag - 72, dragonY + 35 + i * 3,
+      i % 2 ? "#c2d9ff" : "#ffe1b3", 2.2 + (i % 3) * 0.8, alpha);
+    skyCineLine(ctx, foxX - lag * 1.8, foxY - 15,
+      foxX - lag * 2.1 - 28, foxY + 7 + i * 2,
+      foxX - lag * 2.3 - 54, foxY - 4,
+      i % 2 ? "#f5b4a0" : "#f7d7bd", 2.5, alpha * 0.72);
+  }
+  // The streamer pass gives the middle of the chase a foreground wipe.
+  const ribbonPhase = (t - 277) / 36;
+  for (let i = 0; i < 7; i++) {
+    const startX = ((i * 287 + ribbonPhase * 560) % 2200) - 150;
+    const y = 310 + i * 78 + Math.sin(t * 3 + i) * 16;
+    const color = ["#f5d2a0","#c4d8ff","#f5bbd4","#bde5df"][i % 4];
+    skyCineLine(ctx, startX, y, startX + 38, y - 25 - Math.sin(t + i) * 9,
+      startX + 94, y + 4, color, 3.1, active * 0.54);
+  }
+  const nearMiss = skyEase(306, 309, t) * (1 - skyEase(312, 316, t));
+  if (nearMiss > 0.01) {
+    for (let i = 0; i < 10; i++) {
+      const angle = i * 0.52 - 1.8;
+      skyCineLine(ctx, 1350, 530, 1350 + Math.cos(angle) * 45,
+        530 + Math.sin(angle) * 42, 1350 + Math.cos(angle) * 94,
+        530 + Math.sin(angle) * 78, "#fff0c9", 2, nearMiss * 0.72);
+    }
+  }
+  ctx.restore();
+}
+function skyCineCloudLanding(ctx, t) {
+  const impact = skyEase(319.5, 322.5, t) * (1 - skyEase(326.5, 330, t));
+  if (impact <= 0.01) return;
+  const radius = 42 + skyEase(320, 327, t) * 240;
+  ctx.save();
+  skyCineEllipse(ctx, 1000, 753, radius, radius * 0.24, "#f4f3ff", 5, impact * 0.34, -0.04);
+  skyCineEllipse(ctx, 1000, 753, radius * 0.72, radius * 0.2, "#c8d9ff", 2.2, impact * 0.48, -0.04);
+  for (let i = 0; i < 24; i++) {
+    const angle = i * 2.399;
+    const travel = skyEase(320, 327, t) * (35 + skyHash(i + 80) * 135);
+    const x = 1000 + Math.cos(angle) * travel;
+    const y = 710 + Math.sin(angle) * travel * 0.42 - skyEase(320,324,t) * (i % 4) * 7;
+    skyGlow(ctx, x, y, 9, "rgba(225,236,255,0.32)", impact * 0.6);
+    skyStar(ctx, x, y, 2.2 + (i % 3), "#fffdf4", impact * 0.7);
+  }
+  ctx.restore();
+}
+function skyCineSharedSeed(ctx, t) {
+  const bloom = skyEase(411, 419, t) * (1 - skyEase(440, 447, t));
+  if (bloom <= 0.01) return;
+  const p = skyEase(416, 430, t);
+  ctx.save();
+  skyGlow(ctx, 925, 650, 45 + p * 100, "rgba(255,221,135,0.48)", bloom * 0.82);
+  for (let i = 0; i < 32; i++) {
+    const phase = t * (0.7 + (i % 5) * 0.12) + i * 2.399;
+    const radius = 13 + p * 156 + skyHash(i + 17) * 21;
+    const x = 925 + Math.cos(phase) * radius;
+    const y = 650 + Math.sin(phase) * radius * 0.57;
+    const size = 1.4 + skyHash(i + 40) * 2.7;
+    skyGlow(ctx, x, y, size * 7, "rgba(255,224,151,0.32)", bloom * 0.7);
+    skyStar(ctx, x, y, size, i % 3 ? "#fff2c4" : "#d8fff1",
+      bloom * (0.5 + 0.5 * Math.sin(t * 3 + i)));
+  }
+  for (let i = 0; i < 9; i++) {
+    const a = i * Math.PI * 2 / 9;
+    const r = 38 + p * 70;
+    skyCineLine(ctx, 925 + Math.cos(a) * r * 0.5, 650 + Math.sin(a) * r * 0.3,
+      925 + Math.cos(a) * r, 650 + Math.sin(a) * r * 0.5,
+      925 + Math.cos(a) * r * 1.34, 650 + Math.sin(a) * r * 0.68,
+      "#fff0bd", 1.6, bloom * 0.62);
+  }
+  ctx.restore();
+}
+function skyCineHomewardWind(ctx, t) {
+  const active = skyEase(452, 461, t) * (1 - skyEase(482, 490, t));
+  if (active <= 0.01) return;
+  ctx.save();
+  for (let i = 0; i < 24; i++) {
+    const speed = 28 + skyHash(i + 11) * 75;
+    const x = 1950 - ((t * speed + i * 119) % 2200);
+    const y = 220 + skyHash(i + 3) * 650 + Math.sin(t * 2 + i) * 13;
+    const len = 20 + skyHash(i + 51) * 70;
+    skyCineLine(ctx, x, y, x - len * 0.42, y - 3,
+      x - len, y - 9, "#c4ddff", 1.4 + skyHash(i + 90), active * 0.24);
+  }
+  const bellX = skyMix(1518,1150,skyEase(447,489,t));
+  const bellY = skyMix(470,570,skyEase(447,489,t));
+  for (let i = 0; i < 9; i++) {
+    const a = i * 2.399 + t * 0.45;
+    const r = 12 + ((t * 23 + i * 41) % 130);
+    skyStar(ctx, bellX + Math.cos(a) * r, bellY + Math.sin(a) * r * 0.5,
+      2.0 + (i % 3), "#fff0bd", active * 0.62);
+  }
+  ctx.restore();
+}
+function skyCineBellAwakening(ctx, t) {
+  const ring = skyEase(545, 555, t) * (1 - skyEase(568, 575, t));
+  if (ring <= 0.01) return;
+  ctx.save();
+  for (let i = 0; i < 6; i++) {
+    const phase = ((t - 548) * (68 + i * 7) + i * 61) % 600;
+    const alpha = ring * Math.max(0, 0.34 * (1 - phase / 650));
+    skyCineEllipse(ctx, 1025, 495, 30 + phase, 18 + phase * 0.34,
+      i % 2 ? "#e9d5ff" : "#fff0b5", 1.5 + (i % 3) * 0.4, alpha, -0.08);
+  }
+  const p = skyEase(550, 568, t);
+  for (let i = 0; i < 9; i++) {
+    const x = 610 + i * 93;
+    const top = 785 - p * (42 + (i % 4) * 24);
+    skyCineLine(ctx, x, 950, x + Math.sin(t + i) * 34, top + 65,
+      970 + (x - 970) * 0.3, 610 - p * (i % 3) * 20,
+      i % 2 ? "#a6e3d8" : "#ffdfa0", 2.3 + p * 2.2, p * 0.26);
+  }
+  if (t > 556) skyCineBurst(ctx, 970, 500, 460, 48, t,
+    ["rgba(255,220,145,0.38)","rgba(170,224,231,0.38)","rgba(211,190,255,0.36)"],
+    skyEase(556,564,t) * (1 - skyEase(569,574,t)));
+  ctx.restore();
+}
+function skyDrawCinematicAction(ctx, t) {
+  skyCineWaterRescue(ctx, t);
+  skyCineWhisperwood(ctx, t);
+  skyCineCrystalFlight(ctx, t);
+  skyCineMarketChase(ctx, t);
+  skyCineCloudLanding(ctx, t);
+  skyCineSharedSeed(ctx, t);
+  skyCineHomewardWind(ctx, t);
+  skyCineBellAwakening(ctx, t);
+}
+
+
 function renderFrame(time, frame, fps, ctx, width, height, motion) {
   const t = skyClamp(Number.isFinite(time) ? time : (frame || 0) / Math.max(1, fps || SKYROOT_FPS), 0, SKYROOT_DURATION);
   const scale = Math.min(width / 1920, height / 1080);
   const ox = (width - 1920 * scale) / 2, oy = (height - 1080 * scale) / 2;
-  ctx.save(); ctx.fillStyle = "#111b35"; ctx.fillRect(0, 0, width, height);
-  ctx.translate(ox, oy); ctx.scale(scale, scale);
+  ctx.save();
+  ctx.fillStyle = "#111b35";
+  ctx.fillRect(0, 0, width, height);
+  ctx.translate(ox, oy);
+  ctx.scale(scale, scale);
+
+  // The animated stage has its own virtual camera. Subtitles and grading stay
+  // screen-locked below it, like a finished edit rather than part of the set.
+  const camera = skyDirectorCamera(t);
+  const shake = skyDirectorShake(t);
+  ctx.save();
+  ctx.translate(960 + Math.sin(t * 31.7) * shake, 540 + Math.cos(t * 26.3) * shake * 0.58);
+  ctx.scale(camera.zoom, camera.zoom);
+  ctx.translate(-camera.x, -camera.y);
+
   if (t < 46) skyDrawOpening(ctx,t);
   else if (t < 96) skyDrawMissing(ctx,t);
   else if (t < 150) skyDrawBrookScene(ctx,t);
@@ -941,13 +1317,24 @@ function renderFrame(time, frame, fps, ctx, width, height, motion) {
   else if (t < 526) skyDrawGathering(ctx,t);
   else if (t < 572) skyDrawAwakening(ctx,t);
   else skyDrawFestival(ctx,t);
-  // Gentle fades make each location change feel like a deliberate edit.
+
+  // Story-specific effects are layered over the action, not randomly over the
+  // whole runtime: rescue splashes, whisper echoes, flight trails, a landing,
+  // the shared glow-seed, homeward wind and the bell's expanding song.
+  skyDrawCinematicAction(ctx,t);
+  ctx.restore();
+
+  // Scene changes fade the entire composition while camera cuts continue
+  // inside every chapter; the subtitle layer remains legible during close-ups.
   let fade = 0;
   for (let i = 1; i < SKYROOT_SCENES.length - 1; i++) {
     const d = Math.abs(t - SKYROOT_SCENES[i]);
-    if (d < 1.15) fade = Math.max(fade, 0.94 * (1 - d / 1.15));
+    if (d < 0.72) fade = Math.max(fade, 0.96 * (1 - d / 0.72));
   }
-  if (fade > 0.01) { ctx.fillStyle = "rgba(8,12,29," + fade.toFixed(3) + ")"; ctx.fillRect(0,0,1920,1080); }
+  if (fade > 0.01) {
+    ctx.fillStyle = "rgba(8,12,29," + fade.toFixed(3) + ")";
+    ctx.fillRect(0,0,1920,1080);
+  }
   skyFilmGrade(ctx,t);
   skyCaption(ctx,t);
   ctx.restore();
