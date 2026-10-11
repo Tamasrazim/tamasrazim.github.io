@@ -935,12 +935,13 @@ function starDrawMarsh(ctx,t){
   ctx.restore();
  }
 
- starTrain(ctx,360,829,.61,t,0,true);
+ const trainX=360+740*skyEase(129,149,t);
+ starTrain(ctx,trainX,829,.61,t,0,true);
  let foxX;
  if(t<108) foxX=560+20*(t-96);
  else if(t<128) foxX=800;
- else foxX=800+22*skyClamp(t-128,0,15);
- const foxAction=t<108?"run":t<128?"reach":t<143?"walk":"idle";
+ else foxX=800+22*skyClamp(t-128,0,21);
+ const foxAction=t<108?"run":t<128?"reach":t<148?"walk":"idle";
  skyFox(ctx,foxX,836,.98,t,t<108?"worried":t<128?"determined":"happy",foxAction);
  skyMoth(ctx,foxX+78,678,.58,t,.45);
  skyPebble(ctx,1385,836,.72,t,t>128);
