@@ -94,11 +94,11 @@
 <body class="project-detail-v3" data-project="trilyva">
 <header class="tri-wrap tri-nav"><a class="v3-brand" href="/"><span class="v3-brand-mark" aria-hidden="true">T</span><span>tamasrazim</span></a><nav class="tri-navlinks" aria-label="TRILYVA project navigation"><a href="#overview">Overview</a><a href="#capabilities">Capabilities</a><a href="#model">Frame model</a><a href="#limits">Status</a></nav><a class="v3-header-contact" href="/projects/">All projects ↗</a></header>
 <main>
-<section class="tri-wrap tri-hero" id="overview"><div class="tri-hero-grid"><div><p class="tri-kicker">CREATIVE SOFTWARE / BROWSER RUNTIME</p><h1 class="tri-title">TRILYVA<span>.</span></h1>
+<section class="tri-wrap tri-hero" id="overview"><div class="tri-hero-grid"><div><p class="tri-kicker">CREATIVE SOFTWARE / BROWSER + NATIVE SHELL</p><h1 class="tri-title">TRILYVA<span>.</span></h1>
 <p class="tri-lead">A deterministic workspace for building procedural motion and turning explicit frames into visual output.</p>
-<p class="tri-p">The project overview lives here on the main site. The actual editor/renderer is a separate destination, so visitors can understand the project before launching the workspace.</p>
+<p class="tri-p">The project overview lives here on the main site. The editor/renderer remains a separate destination. An experimental Tauri desktop edition now reuses that renderer and is being checked on Windows, macOS, and Linux; the browser edition remains the no-install entry point.</p>
 <div class="tri-actions"><a class="v3-button primary" href="/projects/code-motion/renderer/">Open TRILYVA workspace <span aria-hidden="true">↗</span></a><a class="v3-button secondary" href="https://github.com/Tamasrazim/tamasrazim.github.io/tree/main/projects/code-motion/renderer/">Inspect renderer source <span aria-hidden="true">↗</span></a></div>
-<div class="tri-facts"><div class="tri-fact"><b>Frame-first</b><small>Deterministic timing</small></div><div class="tri-fact"><b>Browser</b><small>No install required</small></div><div class="tri-fact"><b>Local</b><small>Client-side workflow</small></div><div class="tri-fact"><b>Native?</b><small>Web application today</small></div></div>
+<div class="tri-facts"><div class="tri-fact"><b>Frame-first</b><small>Deterministic timing</small></div><div class="tri-fact"><b>Browser</b><small>No install required</small></div><div class="tri-fact"><b>Local</b><small>Client-side workflow</small></div><div class="tri-fact"><b>Native shell</b><small>Experimental · CI builds</small></div></div>
 </div>
 <div class="tri-art" aria-label="Procedural orbit artwork representing deterministic motion"><svg viewBox="0 0 700 700" role="presentation" focusable="false">
 <defs><radialGradient id="triGlow"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
@@ -118,6 +118,7 @@
 <article class="tri-card"><span>06 / MOVIE</span><h3>Local Movie Finalizer</h3><p>Combine a rendered video or stock clip with a WAV or other browser-decodable audio file into one MP4 when the browser supports a compatible recorder, otherwise WebM in automatic mode. Finalization uses real-time browser media capture and re-encodes the source; it is not a lossless muxer.</p></article>
 <article class="tri-card"><span>07 / VECTOR</span><h3>Creative export workflows</h3><p>The larger TRILYVA project family includes vector-oriented and stock-asset tooling alongside procedural animation workflows.</p></article>
 <article class="tri-card"><span>08 / INSTALL</span><h3>Browser-first delivery</h3><p>Open the workspace directly in a supported browser. Export formats are conditional on browser features; the project does not claim every codec/device combination will work.</p></article>
+<article class="tri-card"><span>09 / DESKTOP</span><h3>Cross-platform native shell</h3><p>The experimental Tauri edition packages the same renderer for Windows, macOS, and Linux. It is not a signed public release yet. An optional neural voice adapter can connect to VoiceStudio installed and started locally; models and their weights are not bundled.</p></article>
 </div></section>
 
 <section class="tri-wrap tri-section" id="model"><div class="tri-head"><h2>Frame model</h2><p>The key distinction is between how fast the preview plays and which frames are requested for an export.</p></div>
@@ -132,6 +133,7 @@
 <article class="tri-card"><span>AVAILABLE</span><h3>Open the workspace</h3><p>The renderer is maintained at its established URL. This overview is the project entry point and the button above is the direct route to the app.</p></article>
 <article class="tri-card"><span>CAPABILITY-DEPENDENT</span><h3>Codec / output support</h3><p>MP4/WebM, codec, resolution and frame rate depend on the selected configuration and browser support. Unsupported configurations must remain unavailable.</p></article>
 <article class="tri-card"><span>PROJECT FAMILY</span><h3>Separate creative tools</h3><p>Related vector and stock-asset tools have their own pages. TRILYVA's overview explains the workspace rather than implying every related export path is validated in one renderer.</p></article>
+<article class="tri-card"><span>EXPERIMENTAL DESKTOP</span><h3>Native package testing</h3><p>Windows, macOS, and Linux build jobs package the native shell separately. Installers, code signing, automated updates, native codec coverage, and long-render stability remain unverified until build and desktop smoke tests pass.</p></article>
 </div>
 <div class="tun-callout">The workspace and project page are separate by design: visit this overview for project details, or launch the renderer when you are ready to work.</div>
 </section>

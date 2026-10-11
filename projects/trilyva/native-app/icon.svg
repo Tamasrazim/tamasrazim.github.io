@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="TRILYVA">
+  <rect width="1024" height="1024" rx="188" fill="#080808"/>
+  <path d="M178 208H846V330H573V816H451V330H178Z" fill="#F3F3EF"/>
+  <path d="M178 180H846" fill="none" stroke="#777772" stroke-width="8" stroke-linecap="square"/>
+  <path d="M219 370V779" fill="none" stroke="#777772" stroke-opacity=".6" stroke-width="5"/>
+  <circle cx="785" cy="782" r="17" fill="#F3F3EF"/>
+</svg>
