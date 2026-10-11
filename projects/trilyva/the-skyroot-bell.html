@@ -69,9 +69,9 @@ footer{border-top:1px solid var(--line);padding:19px 0 27px;display:flex;justify
   <h1>The Skyroot Bell</h1>
   <p class="intro">When the golden bell that lights the floating world of Lumenreach disappears, young fox gardener Eira and her lantern-moth Pip follow its echo across singing rivers, whispering woods and drifting islands. The bell's new keeper, a lonely little cloud-dragon, has made a wrong choice for a very understandable reason. Getting the light back will take more than a chase: it will take three small notes, an apology, and a village willing to share.</p>
   <div class="film-meta">
-    <span class="pill">10:00 TOTAL RUNTIME</span><span class="pill">16:9 · 1920 × 1080</span><span class="pill">DETERMINISTIC FRAMES</span><span class="pill">ORIGINAL VECTOR ART</span>
+    <span class="pill">10:00 TOTAL RUNTIME</span><span class="pill">4K UHD · 3840 × 2160</span><span class="pill">60 FPS TARGET</span><span class="pill">DETERMINISTIC FRAMES</span><span class="pill">ORIGINAL VECTOR ART</span>
   </div>
-  <div class="stage"><canvas id="film" width="1920" height="1080" aria-label="The Skyroot Bell animated fantasy film"></canvas></div>
+  <div class="stage"><canvas id="film" width="3840" height="2160" aria-label="The Skyroot Bell animated fantasy film rendered at 4K UHD"></canvas></div>
   <section class="controls" aria-label="Film controls">
     <div class="row top">
       <div class="actions">
@@ -83,7 +83,7 @@ footer{border-top:1px solid var(--line);padding:19px 0 27px;display:flex;justify
       </div>
       <div class="time" id="clock">00:00 / 10:00</div>
     </div>
-    <input id="scrub" type="range" min="0" max="600" step="0.033333" value="0" aria-label="Film timeline">
+    <input id="scrub" type="range" min="0" max="600" step="0.016666667" value="0" aria-label="Film timeline">
     <div class="timeline-ends"><span>OPENING</span><span>FRAME-ACCURATE SCRUBBING</span><span>ENDING · 10:00</span></div>
     <div class="chapters" id="chapters" aria-label="Story chapters"></div>
     <div class="note" id="status">READY · 30 FPS TARGET · NO EXTERNAL ASSETS</div>
@@ -139,7 +139,7 @@ footer{border-top:1px solid var(--line);padding:19px 0 27px;display:flex;justify
       lastDraw = frame;
       scrub.value = String(time);
       clock.textContent = timeCode(time) + " / 10:00";
-      status.textContent = (playing ? "PLAYING" : "READY") + " · " + String(frame).padStart(5,"0") + " / 18000 FRAMES AT 30 FPS · " + (story.chapters.find(c => c.time <= time && (!story.chapters.find(d => d.time > c.time) || time < story.chapters.find(d => d.time > c.time).time)) || story.chapters[0]).title;
+      status.textContent = (playing ? "PLAYING" : "READY") + " · " + String(Math.min(frame + 1, 36000)).padStart(5,"0") + " / 36000 FRAMES AT 60 FPS · " + (story.chapters.find(c => c.time <= time && (!story.chapters.find(d => d.time > c.time) || time < story.chapters.find(d => d.time > c.time).time)) || story.chapters[0]).title;
       updateChapter();
     } catch (error) {
       pause();
