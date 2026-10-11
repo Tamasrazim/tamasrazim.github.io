@@ -11,7 +11,7 @@ use std::{
     sync::{atomic::{AtomicU64, Ordering}, Mutex},
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, State};
 use tauri_plugin_dialog::DialogExt;
 
 const VOICESTUDIO_BASE: &str = "http://127.0.0.1:3900";
