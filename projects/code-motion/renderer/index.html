@@ -8872,10 +8872,17 @@ function filmAuri(ctx,x,y,s,t,mood,pose){
  ctx.restore();
  // Large mechanical heart ring, on the breast at the same registered position in every shot.
  ctx.save();ctx.translate(x,y-29*s);ctx.scale(s,s);
- const core=ctx.createRadialGradient(-5,-4,1,0,0,18);core.addColorStop(0,"#d8ffff");core.addColorStop(.25,"#73dff0");core.addColorStop(.63,"#238dae");core.addColorStop(1,"#123d61");
- ctx.fillStyle=core;ctx.beginPath();ctx.arc(1,0,11,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#e1b55c";ctx.lineWidth=4;ctx.beginPath();ctx.arc(1,0,15,.15,Math.PI*1.88);ctx.stroke();
- for(let i=0;i<8;i++){const a=i*Math.PI/4;filmLine(ctx,Math.cos(a)*16,Math.sin(a)*16,Math.cos(a)*20,Math.sin(a)*20,"#f8d98c",2.5);}
- filmGlow(ctx,1,0,33,"rgba(75,223,246,"+(mood==="powered"?.30:.12)+")");ctx.restore();
+ if(mood==="missing"){
+  const cavity=ctx.createRadialGradient(-3,-4,1,0,0,16);cavity.addColorStop(0,"#55402d");cavity.addColorStop(.55,"#292a2b");cavity.addColorStop(1,"#111b24");
+  ctx.fillStyle=cavity;ctx.beginPath();ctx.arc(1,0,11,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle="#d9a85a";ctx.lineWidth=4;ctx.beginPath();ctx.arc(1,0,15,.35,Math.PI*1.22);ctx.stroke();
+  filmGlow(ctx,1,0,24,"rgba(75,223,246,.035)");
+ }else{
+  const core=ctx.createRadialGradient(-5,-4,1,0,0,18);core.addColorStop(0,"#d8ffff");core.addColorStop(.25,"#73dff0");core.addColorStop(.63,"#238dae");core.addColorStop(1,"#123d61");
+  ctx.fillStyle=core;ctx.beginPath();ctx.arc(1,0,11,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#e1b55c";ctx.lineWidth=4;ctx.beginPath();ctx.arc(1,0,15,.15,Math.PI*1.88);ctx.stroke();
+  for(let i=0;i<8;i++){const a=i*Math.PI/4;filmLine(ctx,Math.cos(a)*16,Math.sin(a)*16,Math.cos(a)*20,Math.sin(a)*20,"#f8d98c",2.5);}
+  filmGlow(ctx,1,0,33,"rgba(75,223,246,"+(mood==="powered"?.34:.12)+")");
+ }ctx.restore();
 }
 function filmTalking(speaker,t){
  for(let i=0;i<FILM_CUES.length;i++){
@@ -8940,7 +8947,7 @@ function renderFrame(time,frame,fps,ctx,width,height){
   if(scene===0){
    filmWorkshop(ctx,t,0);filmShopProps(ctx,t);
    filmNiko(ctx,650,975,1.34,t,t<36?"happy":"worried",t<17?"reach":t<35?"repair":"reach");
-   filmAuri(ctx,1005,753,1.06,t,t>20&&t<48?"worried":t>34&&t<54?"powered":"calm",t<16?"perch":t<35?"droop":"perch");
+   filmAuri(ctx,1005,753,1.06,t,t<24?"weak":"missing",t<16?"perch":t<35?"droop":"perch");
    // A small, unmistakable gap at the heart port motivates the entire story.
    if(t>23&&t<54){ctx.save();ctx.translate(1005,753);ctx.scale(1.06,1.06);ctx.strokeStyle="#6d4c29";ctx.lineWidth=3;ctx.beginPath();ctx.arc(1,-29,15,.15,Math.PI*1.88);ctx.stroke();filmGlow(ctx,1,-29,30,"rgba(71,207,234,.16)");ctx.restore();}
    if(t>31){const p=filmEase(33,45,t);filmSpring(ctx,filmMix(1140,1700,p),filmMix(680,860,p),.63,t,t*3.5,false);}
@@ -8950,14 +8957,14 @@ function renderFrame(time,frame,fps,ctx,width,height){
    const p=filmEase(54,90,t),sx=filmMix(470,1430,p),sy=846-Math.sin(t*8)*15;
    filmSpringTrail(ctx,t);filmSpring(ctx,sx,sy,.77,t,(t-54)*4.6,false);
    filmNiko(ctx,filmMix(450,1095,filmEase(54,88,t)),974,1.25,t,t<70?"surprised":"focused","run");
-   filmAuri(ctx,filmMix(735,1290,filmEase(54,89,t)),filmMix(635,550,filmEase(54,89,t)),.91,t,"calm","fly");
+   filmAuri(ctx,filmMix(735,1290,filmEase(54,89,t)),filmMix(635,550,filmEase(54,89,t)),.91,t,"missing","fly");
    if(t>69&&t<85){ctx.save();ctx.globalAlpha=filmEase(69,72,t)*(1-filmEase(82,85,t));ctx.font="900 48px ui-rounded,system-ui,sans-serif";ctx.textAlign="center";ctx.fillStyle="#fff3c0";ctx.fillText("CLINK-CLINK!",955,365);ctx.restore();}
   }else if(scene===2){
    const sky=ctx.createLinearGradient(0,0,0,1080);sky.addColorStop(0,"#73c5e9");sky.addColorStop(1,"#f4d39b");ctx.fillStyle=sky;ctx.fillRect(0,0,1920,1080);
    filmCloud(ctx,370,160,.8);filmCloud(ctx,820,204,.7);filmStreetProps(ctx,t,false);
    filmTowerOutside(ctx,1360,1010,1.35,t,false);
    const p=filmEase(90,124,t);filmSpring(ctx,filmMix(1180,1320,p),filmMix(892,882,p),.65,t,t*5,false);
-   filmNiko(ctx,filmMix(790,910,p),975,1.22,t,"worried","run");filmAuri(ctx,filmMix(1050,1085,p),690,.88,t,"calm","fly");
+   filmNiko(ctx,filmMix(790,910,p),975,1.22,t,"worried","run");filmAuri(ctx,filmMix(1050,1085,p),690,.88,t,"missing","fly");
    if(t>99&&t<118){ctx.save();ctx.globalAlpha=filmEase(99,102,t)*(1-filmEase(115,118,t));filmRound(ctx,1170,725,210,76,16);ctx.fillStyle="rgba(255,248,225,.9)";ctx.fill();ctx.textAlign="center";ctx.font="800 17px ui-monospace,monospace";ctx.fillStyle="#67472e";ctx.fillText("CLOCK STOPPED",1275,764);ctx.restore();}
   }else if(scene===3){
    filmTowerInterior(ctx,t,0,false);filmGearWindow(ctx,t);
@@ -8965,14 +8972,14 @@ function renderFrame(time,frame,fps,ctx,width,height){
    filmGear(ctx,1328,512,68,t,t*.14,["#795638","#d7a354","#ffe4a2","#6c4a2d"]);
    filmSpring(ctx,1365,545,.55,t,Math.sin(t*1.8)*.1,true);
    const p=filmEase(124,174,t);filmNiko(ctx,filmMix(715,810,p),filmMix(969,845,filmEase(128,164,t)),1.2,t,t<165?"focused":"worried","climb");
-   filmAuri(ctx,filmMix(1000,1355,filmEase(126,154,t)),filmMix(580,475,filmEase(126,158,t)),.88,t,t>145?"worried":"calm","fly");
+   filmAuri(ctx,filmMix(1000,1355,filmEase(126,154,t)),filmMix(580,475,filmEase(126,158,t)),.88,t,t>145?"worried":"missing","fly");
    filmLine(ctx,828,910,858,860,"#dcbd86",7);filmLine(ctx,858,860,884,825,"#dcbd86",7);
   }else if(scene===4){
    filmTowerInterior(ctx,t,1,false);filmGearWindow(ctx,t);
    // The spring stays on the ledge; Auri's right wing droops only in this beat.
    filmSpring(ctx,1335,650,.56,t,.12,true);
    filmNiko(ctx,975,958,1.25,t,t<196?"worried":"focused","repair");
-   filmAuri(ctx,1115,729,.91,t,t<204?"worried":"calm",t<199?"droop":"repair");
+   filmAuri(ctx,1115,729,.91,t,t<204?"worried":"missing",t<199?"droop":"repair");
    filmGear(ctx,1370,520,87,t,t*.2,["#674b37","#b8894c","#f1d49a","#6b4b30"]);
    for(let i=0;i<48;i++){const x=(filmHash(i+801)*940+t*(95+filmHash(i+901)*45))%1000+470,y=(filmHash(i+1001)*620+t*(90+filmHash(i+1101)*35))%660;filmLine(ctx,x,y,x-8,y+20,"rgba(213,237,249,.36)",1.7);}
    if(t>194&&t<212){ctx.save();ctx.globalAlpha=filmEase(194,198,t)*(1-filmEase(208,212,t));filmRound(ctx,1250,790,340,54,15);ctx.fillStyle="rgba(255,249,230,.93)";ctx.fill();ctx.textAlign="center";ctx.fillStyle="#60472f";ctx.font="700 17px ui-monospace,monospace";ctx.fillText("HINGE REPAIRED",1420,822);ctx.restore();}
@@ -8983,14 +8990,14 @@ function renderFrame(time,frame,fps,ctx,width,height){
    filmGear(ctx,1340,520,210,t*.05+filmEase(242,258,t)*1.4,0,["#69503c","#c99350","#f2d69c","#65452f"]);
    filmGear(ctx,1525,741,137,t*.05-filmEase(242,258,t)*1.9,0,["#4e443b","#ad8b55","#f5ddb1","#574637"]);
    filmNiko(ctx,690,973,1.25,t,"happy","reach");
-   filmAuri(ctx,1045,797,1.02,t,t>241?"powered":"focused",t<236?"repair":"fly");
+   filmAuri(ctx,1045,797,1.02,t,t>=245?"powered":"missing",t<236?"repair":"fly");
    filmSpring(ctx,filmMix(1330,1049,p),filmMix(562,764,p),filmMix(.57,.6,p),t,filmMix(.1,0,p),t<247);
    if(t>238){const q=filmEase(238,252,t);filmGlow(ctx,1047,768,150,"rgba(84,225,243,"+(.3*q)+")");}
    if(t>250){const q=filmEase(250,260,t);ctx.save();ctx.globalAlpha=q;filmSunbeam(ctx,1100,360,800,q);ctx.restore();}
   }else{
    filmDawnVillage(ctx,t);filmSunbeam(ctx,1430,410,850,filmEase(260,286,t)*.9);
    filmNiko(ctx,filmMix(735,805,filmEase(260,277,t)),973,1.23,t,"happy",t<282?"wave":"reach");
-   filmAuri(ctx,filmMix(1070,1100,filmEase(260,278,t)),770,1.02,t,t>268?"powered":"calm","fly");
+   filmAuri(ctx,filmMix(1070,1100,filmEase(260,278,t)),770,1.02,t,"powered","fly");
    for(let i=0;i<16;i++){const x=(filmHash(i+1200)*1950+t*(25+filmHash(i+1300)*15))%1950,y=180+filmHash(i+1400)*520;ctx.fillStyle="rgba(255,245,194,"+(.18+filmHash(i+1500)*.2)+")";ctx.beginPath();ctx.arc(x,y,1.5+filmHash(i+1600)*1.4,0,Math.PI*2);ctx.fill();}
    if(t>277&&t<295){ctx.save();ctx.globalAlpha=filmEase(277,283,t)*(1-filmEase(291,295,t));filmRound(ctx,605,168,710,72,24);ctx.fillStyle="rgba(255,247,219,.94)";ctx.fill();ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="900 28px ui-rounded,system-ui,sans-serif";ctx.fillStyle="#73502e";ctx.fillText("THE CLOCK SINGS AGAIN",960,205);ctx.restore();}
    // The clock hand and bell hammer move on the payoff, not earlier.
