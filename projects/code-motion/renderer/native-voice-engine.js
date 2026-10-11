@@ -64,16 +64,9 @@
       '<div class="tvs-native-head"><strong>OPTIONAL / NEURAL VOICE ENGINE</strong><span class="tvs-native-badge">DESKTOP ONLY</span></div>',
       '<p class="tvs-native-copy">Use a VoiceStudio instance that you have installed and started yourself. TRILYVA connects only to 127.0.0.1:3900; it does not upload text, download models, or call a cloud service. The local engine and model must already be installed.</p>',
       '<div class="tvs-native-controls">',
-      '  <div class="tvs-native-field"><label for="tvsNativeModel">Speech engine</label><select id="tvsNativeModel">',
-      '    <option value="tts-1" selected>Active VoiceStudio engine</option>',
-      '    <option value="omnivoice">OmniVoice</option>',
-      '    <option value="voxcpm2">VoxCPM2</option>',
-      '    <option value="cosyvoice">CosyVoice</option>',
-      '    <option value="mlx-audio">MLX Audio</option>',
-      '    <option value="kittentts">KittenTTS</option>',
-      '    <option value="moss-tts-nano">MOSS TTS Nano</option>',
-      '  </select></div>',
+      '  <div class="tvs-native-field"><label for="tvsNativeModel">Installed speech engine / model</label><select id="tvsNativeModel"><option value="tts-1">tts-1 · active engine</option></select></div>',
       '  <button type="button" class="tvs-btn" id="tvsNativeProbe">Check connection</button>',
+      '  <button type="button" class="tvs-btn" id="tvsNativeLoadModels" disabled>Load models</button>',
       '  <button type="button" class="tvs-btn" id="tvsNativeLoadVoices" disabled>Load voices</button>',
       '</div>',
       '<div class="tvs-native-voices">',
@@ -89,6 +82,7 @@
 
     status.insertAdjacentElement('beforebegin', panel);
     el('tvsNativeProbe').addEventListener('click', probe);
+    el('tvsNativeLoadModels').addEventListener('click', loadModels);
     el('tvsNativeLoadVoices').addEventListener('click', loadVoices);
     el('tvsNativeBuild').addEventListener('click', build);
     el('tvsNativeSrt').addEventListener('click', function () {
@@ -126,10 +120,12 @@
       var result = await invoke('voicestudio_probe');
       online = !!(result && result.online);
       setState(result && result.message ? result.message : (online ? 'VoiceStudio is ready.' : 'VoiceStudio was not found.'), online ? 'good' : 'bad');
+      el('tvsNativeLoadModels').disabled = !online;
       el('tvsNativeLoadVoices').disabled = !online;
       el('tvsNativeBuild').disabled = !online;
     } catch (error) {
       online = false;
+      el('tvsNativeLoadModels').disabled = true;
       el('tvsNativeLoadVoices').disabled = true;
       el('tvsNativeBuild').disabled = true;
       setState('Native connector failed: ' + String(error && error.message || error), 'bad');
@@ -165,6 +161,45 @@
       seen[id] = true;
       return { id: id, label: label.slice(0, 140) || id };
     }).filter(Boolean);
+  }
+
+  async function loadModels() {
+    var button = el('tvsNativeLoadModels');
+    button.disabled = true;
+    setState('Loading the installed model list from VoiceStudio…');
+    try {
+      var payload = await invoke('voicestudio_models');
+      var items = Array.isArray(payload) ? payload :
+        (payload && Array.isArray(payload.data) ? payload.data :
+        (payload && Array.isArray(payload.models) ? payload.models : []));
+      var seen = Object.create(null), models = [];
+      items.slice(0, 500).forEach(function (item) {
+        var id = typeof item === 'string' ? item : (item && (item.id || item.name || item.model));
+        if (id == null) return;
+        id = String(id).trim();
+        if (!id || id.length > 100 || !/^[A-Za-z0-9._-]+$/.test(id) || seen[id]) return;
+        seen[id] = true;
+        models.push({ id: id, label: id });
+      });
+      if (!models.length) {
+        setState('The endpoint returned no recognisable model IDs. The tts-1 active-engine alias remains selected.', 'bad');
+        return;
+      }
+      var select = el('tvsNativeModel'), previous = select.value;
+      select.innerHTML = '';
+      models.forEach(function (model) {
+        var option = document.createElement('option');
+        option.value = model.id;
+        option.textContent = model.label;
+        select.appendChild(option);
+      });
+      if (models.some(function (model) { return model.id === previous; })) select.value = previous;
+      setState('Loaded ' + models.length + ' model IDs reported by the running VoiceStudio instance.', 'good');
+    } catch (error) {
+      setState('Could not load models: ' + String(error && error.message || error), 'bad');
+    } finally {
+      button.disabled = !online;
+    }
   }
 
   async function loadVoices() {
@@ -479,6 +514,7 @@
       working = false;
       button.disabled = !online;
       checkButton.disabled = false;
+      el('tvsNativeLoadModels').disabled = !online;
       voicesButton.disabled = !online;
       localButton.disabled = false;
       localSrtButton.disabled = succeeded ? true : !localSrtWasEnabled;
