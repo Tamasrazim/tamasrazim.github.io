@@ -83,6 +83,7 @@ const htmlFiles=[
   'projects/mail-scope/index.html',
   'projects/mail-scope/workspace/index.html',
   'projects/tunrun/index.html',
+  'projects/webedyts/index.html',
   'projects/razim-fps/index.html',
   'projects/razim-fps/download.html',
   'projects/neo/index.html',
@@ -155,7 +156,7 @@ must(schemaStart>=0&&schemaEnd>schemaStart,'homepage contains JSON-LD schema');
 const rootSchema=JSON.parse(site.slice(schemaStart+schemaOpen.length,schemaEnd));
 must(rootSchema['@context']==='https://schema.org'&&Array.isArray(rootSchema['@graph']),'homepage schema graph parses');
 must(rootSchema['@graph'].some(n=>n['@type']==='Person'&&n['@id']==='https://tamasrazim.github.io/#person'),'schema identifies person');
-must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length===12,'schema distinguishes twelve desktop and browser software applications');
+must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length===13,'schema distinguishes thirteen desktop and browser software applications');
 must(rootSchema['@graph'].some(n=>n['@id']==='https://tamasrazim.github.io/projects/code-motion/renderer/#application'&&n.name==='TRILYVA Renderer'),'schema identifies renderer as a separate tool route');
 must(rootSchema['@graph'].some(n=>n['@id']==='https://tamasrazim.github.io/#trilyva'&&n.url==='https://tamasrazim.github.io/projects/trilyva/'),'TRILYVA schema points to the project overview, not the renderer');
 must(rootSchema['@graph'].some(n=>n['@type']==='SoftwareApplication'&&n.name==='KYNESTRA'&&/Windows/.test(n.operatingSystem)),'schema identifies KYNESTRA as Windows desktop software');
@@ -166,9 +167,9 @@ const knownSchemaIds=new Set(rootSchema['@graph'].map(n=>n['@id']));
 const rootPerson=rootSchema['@graph'].find(n=>n['@type']==='Person');
 must(rootPerson.subjectOf.every(ref=>knownSchemaIds.has(ref['@id'])),'person schema references defined project entities');
 must(!site.includes('BOGURA')&&!site.includes('BANGLADESH'),'homepage omits unwanted location text');
-must((site.match(/class="v3-project-card v2-project-card v2-reveal v3-reveal"/g)||[]).length===12,'homepage has twelve curated project cards');
+must((site.match(/class="v3-project-card v2-project-card v2-reveal v3-reveal"/g)||[]).length===13,'homepage has thirteen curated project cards');
 must(!site.includes('PRO_TOOL_MANIFEST'),'homepage omits the generated micro-tool catalogue');
-for(const ref of ['href="/projects/trilyva/"','href="/projects/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"'])must(site.includes(ref),'homepage exposes '+ref);
+for(const ref of ['href="/projects/trilyva/"','href="/projects/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"','href="/projects/webedyts/"'])must(site.includes(ref),'homepage exposes '+ref);
 must(!site.includes('href="/projects/code-motion/renderer/">Open workspace'),'homepage does not send the TRILYVA card straight to the renderer');
 const visibleHomeMarkup=schemaStart>=0&&schemaEnd>schemaStart?site.slice(0,schemaStart)+site.slice(schemaEnd+'</script>'.length):site;
 must(!visibleHomeMarkup.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!visibleHomeMarkup.includes('Source files ↗')&&!visibleHomeMarkup.includes('SVG source ↗')&&!visibleHomeMarkup.includes('EPS source ↗'),'homepage omits direct source links in visible markup');
@@ -194,15 +195,15 @@ must(siteV3Css.includes('left: -11px;')&&siteV3Css.includes('flex-direction: col
 const hub=read('projects/index.html');
 must(hub.includes('<title>Projects — Tamasrazim</title>'),'project directory uses simple title');
 must(!hub.includes('PRO_TOOL_MANIFEST')&&!hub.includes('tool-suite-health-console/'),'project directory omits generated catalogue');
-must((hub.match(/class="pi-card v3-index-card"/g)||[]).length===12,'project directory has twelve curated cards');
+must((hub.match(/class="pi-card v3-index-card"/g)||[]).length===13,'project directory has thirteen curated cards');
 must(hub.includes('type="application/ld+json"'),'project directory exposes CollectionPage schema');
 const hubSchemaOpen='<script type="application/ld+json">',hubSchemaStart=hub.indexOf(hubSchemaOpen),hubSchemaEnd=hub.indexOf('</script>',hubSchemaStart);
 must(hubSchemaStart>=0&&hubSchemaEnd>hubSchemaStart,'project directory schema script is bounded');
 const hubSchema=JSON.parse(hub.slice(hubSchemaStart+hubSchemaOpen.length,hubSchemaEnd));
 const hubItems=hubSchema.mainEntity&&hubSchema.mainEntity.itemListElement||[];
-must(hubSchema['@type']==='CollectionPage'&&hubItems.length===12,'project directory schema describes twelve curated projects');
+must(hubSchema['@type']==='CollectionPage'&&hubItems.length===13,'project directory schema describes thirteen curated projects');
 must(hubItems.every(item=>knownSchemaIds.has(item.item&&item.item['@id'])),'project directory items reference defined project entities');
-for(const ref of ['href="/projects/trilyva/"','href="/projects/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"'])must(hub.includes(ref),'project directory exposes '+ref);
+for(const ref of ['href="/projects/trilyva/"','href="/projects/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"','href="/projects/webedyts/"'])must(hub.includes(ref),'project directory exposes '+ref);
 must(!hub.includes('href="/projects/code-motion/renderer/">Open workspace'),'project directory links to the TRILYVA overview first');
 must(!hub.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!hub.includes('Source files ↗')&&!hub.includes('SVG source ↗')&&!hub.includes('EPS source ↗'),'project directory omits direct source links');
 must(hub.includes('href="/projects/tunrun/"')&&!hub.includes('href="https://github.com/Tamasrazim/TUNRUN"'),'project directory links to TUNRUN project page');
@@ -227,6 +228,12 @@ for(const slug of ['format-forge','mail-scope','repo-token-meter','spiral-mic','
 must(read('projects/razim-fps/index.html').includes('location.replace("/projects/neo/")'),'old game URL redirects to the canonical NEO page');
 must(read('projects/razim-fps/download.html').includes('location.replace("/projects/neo/download/")'),'old download.html URL redirects to the clean NEO download route');
 must(!hub.includes('href="../renderer/"'),'project directory has no retired renderer link');
+
+
+const webedytsPage=read('projects/webedyts/index.html');
+must(webedytsPage.includes('WEBEDYTS')&&webedytsPage.includes('No fake download button.'),'WEBEDYTS has a dedicated pre-release product page');
+must(webedytsPage.includes('Downloads are intentionally withheld')&&!webedytsPage.includes('releases/latest/download/WEBEDYTS'),'WEBEDYTS does not advertise unpublished release assets');
+must(webedytsPage.includes('not a screenshot')&&webedytsPage.includes('current editor source'),'WEBEDYTS labels conceptual UI art and editor-source status honestly');
 
 const iconLibrarySource=read('projects/code-to-eps/workspace/vector-icon-library.js');
 execFileSync(process.execPath,['--check',path.join(ROOT,'projects/code-to-eps/workspace/vector-icon-library.js')]);
