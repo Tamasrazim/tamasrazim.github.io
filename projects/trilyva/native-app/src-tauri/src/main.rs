@@ -77,6 +77,34 @@ async fn voicestudio_probe() -> VoiceStudioProbe {
 }
 
 #[tauri::command]
+async fn voicestudio_models() -> Result<Value, String> {
+    let client = local_client(Duration::from_secs(12))?;
+    let response = client
+        .get(format!("{VOICESTUDIO_BASE}/v1/models"))
+        .send()
+        .await
+        .map_err(|_| "Cannot reach VoiceStudio's local model-list endpoint. Check that the app is running.".to_string())?;
+
+    if !response.status().is_success() {
+        return Err(read_api_error(response).await);
+    }
+    if response.content_length().is_some_and(|length| length > MAX_VOICE_LIST_BYTES as u64) {
+        return Err("VoiceStudio returned an unexpectedly large model list.".to_string());
+    }
+
+    let bytes = response
+        .bytes()
+        .await
+        .map_err(|error| format!("Could not read the local model list: {error}"))?;
+    if bytes.len() > MAX_VOICE_LIST_BYTES {
+        return Err("VoiceStudio returned an unexpectedly large model list.".to_string());
+    }
+
+    serde_json::from_slice::<Value>(&bytes)
+        .map_err(|error| format!("VoiceStudio returned invalid model-list JSON: {error}"))
+}
+
+#[tauri::command]
 async fn voicestudio_voices() -> Result<Value, String> {
     let client = local_client(Duration::from_secs(12))?;
     let response = client
@@ -196,6 +224,7 @@ fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             voicestudio_probe,
+            voicestudio_models,
             voicestudio_voices,
             voicestudio_synthesize
         ])
