@@ -55,6 +55,15 @@ jobs:
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Validate native bridge JavaScript
+        run: node --check projects/code-motion/renderer/native-voice-engine.js
+
+      - name: Validate native manifests
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('projects/trilyva/native-app/package.json', 'utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('projects/trilyva/native-app/src-tauri/tauri.conf.json', 'utf8'))"
+          node -e "const fs=require('fs'),path=require('path');const base='projects/trilyva/native-app/src-tauri';const cfg=JSON.parse(fs.readFileSync(path.join(base,'tauri.conf.json'),'utf8'));const web=path.resolve(base,cfg.build.frontendDist);if(!fs.existsSync(path.join(web,'index.html')))throw new Error('Tauri frontendDist does not contain index.html');if(!fs.existsSync(path.join(web,'native-voice-engine.js')))throw new Error('Native voice bridge is missing from the packaged renderer');console.log('Frontend bundle path OK:',web)"
+
       - name: Install desktop dependencies
         working-directory: projects/trilyva/native-app
         run: npm install
