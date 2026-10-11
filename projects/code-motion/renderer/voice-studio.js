@@ -7,47 +7,45 @@
 var SR=22050, FILM=300, TAU=Math.PI*2, audio=null, lastBlob=null, lastSrt='', busy=false;
 var VOICES={
   NARRATOR:{label:'Narrator',f0:118,formant:.97,bright:.96,gain:.78,pan:0,rate:1.02},
-  PIP:{label:'Pip the fox',f0:202,formant:1.12,bright:1.16,gain:.91,pan:-.12,rate:1.08},
-  OLLIE:{label:'Ollie the bird',f0:246,formant:1.24,bright:1.24,gain:.82,pan:.18,rate:1.15},
-  TUCK:{label:'Tuck the turtle',f0:136,formant:.96,bright:.92,gain:.88,pan:.10,rate:.93}
+  NIKO:{label:'Niko the red panda',f0:190,formant:1.10,bright:1.12,gain:.90,pan:-.10,rate:1.05},
+  AURI:{label:'Auri the clockwork bird',f0:242,formant:1.23,bright:1.24,gain:.82,pan:.14,rate:1.12},
+  KEEPER:{label:'The clockkeeper',f0:128,formant:.96,bright:.91,gain:.86,pan:.08,rate:.95}
 };
 var DEFAULT_SCRIPT=[
-'00:01 | NARRATOR | On a sunny morning in Cloverfield Meadow, Pip promised his friends the biggest pancake breakfast ever.',
-'00:08 | PIP | One giant pancake, coming right up!',
-'00:16 | OLLIE | I\'ll be the official blueberry inspector!',
-'00:25 | TUCK | And I will keep the syrup perfectly safe.',
-'00:34 | NARRATOR | Pip flipped the pancake high above the pan. It spun like a golden flying saucer.',
-'00:42 | PIP | That is much higher than I planned!',
-'00:51 | NARRATOR | It landed on the counter, bounced off a cushion, and rolled straight toward the open door.',
-'01:01 | OLLIE | It\'s rolling for the back door! After it!',
-'01:10 | NARRATOR | Out across the sunny meadow went the giant pancake, tumbling faster and faster.',
-'01:19 | PIP | Catch it before it reaches the creek!',
-'01:28 | TUCK | Don\'t chase in a straight line. Cut across the little bridge!',
-'01:37 | NARRATOR | The pancake bounced onto the dry log and wobbled above the bubbling water.',
-'01:46 | OLLIE | Left! No, my other left!',
-'01:55 | PIP | A pancake has never been this much work!',
-'02:04 | NARRATOR | At the blueberry patch, the pancake rolled into a soft bush and wore a crown of berries.',
-'02:13 | OLLIE | I can see it! It\'s wearing blueberries!',
-'02:22 | PIP | Let\'s tilt the branch, not tug the pancake.',
-'02:31 | NARRATOR | The branch lifted. The pancake slid onto Tuck\'s broad shell and bounced gently away.',
-'02:40 | TUCK | My shell has never smelled so delicious.',
-'02:49 | NARRATOR | Near the old windmill, the three friends stopped to make a proper catching plan.',
-'02:58 | PIP | We need something wide, soft, and easy to hold.',
-'03:07 | NARRATOR | Ollie fluttered in front of the pancake while Pip and Tuck stretched out a picnic cloth.',
-'03:16 | OLLIE | Look over here, you gorgeous golden disc!',
-'03:25 | PIP | On three, lift the cloth. One, two...',
-'03:34 | NARRATOR | The pancake bounced once, twice, then floated right toward their soft little net.',
-'03:43 | TUCK | Ready, steady, softly...',
-'03:52 | NARRATOR | Plop! They caught it and slid it onto Pip\'s waiting serving pan.',
-'04:01 | PIP | Caught! Still fluffy, still warm, and still enormous!',
-'04:10 | NARRATOR | The friends carried their prize back to the kitchen table, taking turns with the pan.',
-'04:18 | OLLIE | Breakfast is best when everybody gets a piece.',
-'04:27 | PIP | One very big pancake, coming right up... for all of us!',
-'04:36 | NARRATOR | They added berries, a little syrup, and a tower of smaller pancakes beside the giant one.',
-'04:46 | TUCK | I kept the syrup safe. Not even one taste!',
-'04:52 | PIP | Let\'s eat while it\'s warm!',
-'04:57 | NARRATOR | And in Cloverfield Meadow, the best breakfast was the one they made and shared together.'
-].join('\\n');
+'00:01 | NARRATOR | In a little workshop beside the town clock, Niko the red panda was building something special.',
+'00:08 | NIKO | One final turn... and you will sing.',
+'00:16 | AURI | Oh! I can chirp. Is that my whole song?',
+'00:24 | NARRATOR | Auri was a tiny clockwork bird, made with brass feathers and a bright little heart. But her heart-spring was missing.',
+'00:34 | NIKO | Your spring must have slipped away. We will find it before the morning bells.',
+'00:43 | NARRATOR | A loose brass coil bounced off the workbench, rolled past the open door, and spun into the street.',
+'00:52 | AURI | There it goes! Follow that little glint!',
+'01:01 | NARRATOR | The spring danced between flower pots and market carts, turning end over end on the cobblestones.',
+'01:10 | NIKO | Stay close, Auri. The town is waking up, and we must watch the road.',
+'01:20 | AURI | I can see it! It rolled straight toward the clock tower!',
+'01:28 | NARRATOR | At the town square, the great clock had stopped. The missing spring had slipped through a service hatch.',
+'01:37 | NIKO | The whole clock is waiting on one little spring.',
+'01:47 | AURI | Then let us help it tick again.',
+'01:56 | NARRATOR | Inside, giant brass gears stood silent above a winding staircase. The spring was caught high behind the upper wheel.',
+'02:06 | NIKO | I will climb the service steps. Can you reach that upper gear?',
+'02:16 | AURI | Wings ready. Heart... a little nervous.',
+'02:26 | NARRATOR | A gust rushed through the tower window. The loose gear shuddered, and the spring slipped deeper into the mechanism.',
+'02:36 | AURI | I found it! But it is wedged behind the turning wheel!',
+'02:46 | NIKO | I will hold the brake. Wait for my signal.',
+'02:56 | NARRATOR | The wheel jolted. Auri’s wing caught on a bent pin, and she tumbled onto the safe stone ledge.',
+'03:06 | AURI | My wing is stuck. I cannot keep myself steady!',
+'03:16 | NIKO | Land beside me. We fix the wing first, then finish together.',
+'03:26 | NARRATOR | Niko straightened the hinge with a tiny brass tool and replaced the pin with a spare from his pocket.',
+'03:36 | AURI | The wing is working. And I know how we can free the spring.',
+'03:46 | NIKO | I will wind your heart. When it clicks, fly between the spokes and lift the spring out.',
+'03:56 | AURI | Ready... ready... now!',
+'04:06 | NARRATOR | The little bird slipped through the gear spokes. The spring popped free, clicked into her heart, and began to turn.',
+'04:16 | KEEPER | Listen! The clock is moving again! Morning is almost here!',
+'04:24 | NARRATOR | One gear turned another. The great hands swept forward, and golden dawn poured through the clock face.',
+'04:32 | AURI | Niko, listen. That is my song!',
+'04:41 | NIKO | And the first bell belongs to you.',
+'04:50 | NARRATOR | Auri sang over the town square as the clock rang out, clear and bright.',
+'04:57 | NARRATOR | From that morning on, the town kept time with a little music, and no one built alone.'
+].join('\n');
 var VOWELS={
  AA:[730,1090,2440],AE:[660,1720,2410],AH:[600,1170,2450],AO:[570,840,2410],
  EH:[530,1840,2480],ER:[490,1350,1690],IH:[390,1990,2550],IY:[270,2290,3010],
@@ -151,6 +149,39 @@ Object.assign(DICT,{
   taste:['T','EY','S','T'],warm:['W','AO','R','M'],shared:['SH','EH','R','D'],together:['T','AH','G','EH','DH','ER'],
   open:['OW','P','AH','N'],cushions:['K','UH','SH','AH','N','Z'],enough:['IH','N','AH','F']
 });
+Object.assign(DICT,{
+  niko:['N','IY','K','OW'],auri:['AO','R','IY'],clockwork:['K','L','AA','K','W','ER','K'],
+  clocktower:['K','L','AA','K','T','AW','ER'],clockkeeper:['K','L','AA','K','K','IY','P','ER'],
+  redpanda:['R','EH','D','P','AE','N','D','AH'],panda:['P','AE','N','D','AH'],clockworkbird:['K','L','AA','K','W','ER','K','B','ER','D'],
+  workshop:['W','ER','K','SH','AA','P'],building:['B','IH','L','D','IH','NG'],special:['S','P','EH','SH','AH','L'],
+  sing:['S','IH','NG'],chirp:['CH','ER','P'],brass:['B','R','AE','S'],feathers:['F','EH','DH','ER','Z'],
+  heart:['HH','AA','R','T'],spring:['S','P','R','IH','NG'],missing:['M','IH','S','IH','NG'],
+  bells:['B','EH','L','Z'],loose:['L','UW','S'],coil:['K','OY','L'],bounced:['B','AW','N','S','T'],
+  rolled:['R','OW','L','D'],street:['S','T','R','IY','T'],glint:['G','L','IH','N','T'],
+  danced:['D','AE','N','S','T'],flower:['F','L','AW','ER'],pots:['P','AA','T','S'],market:['M','AA','R','K','IH','T'],
+  carts:['K','AA','R','T','S'],turning:['T','ER','N','IH','NG'],cobblestones:['K','AA','B','AH','L','S','T','OW','N','Z'],
+  town:['T','AW','N'],waking:['W','EY','K','IH','NG'],road:['R','OW','D'],tower:['T','AW','ER'],
+  slipped:['S','L','IH','P','T'],service:['S','ER','V','IH','S'],hatch:['HH','AE','CH'],
+  waiting:['W','EY','T','IH','NG'],tick:['T','IH','K'],again:['AH','G','EH','N'],
+  inside:['IH','N','S','AY','D'],giant:['JH','AY','AH','N','T'],gears:['G','IH','R','Z'],
+  silent:['S','AY','L','AH','N','T'],winding:['W','AY','N','D','IH','NG'],staircase:['S','T','EH','R','K','EY','S'],
+  caught:['K','AO','T'],upper:['AH','P','ER'],wheel:['W','IY','L'],climb:['K','L','AY','M'],
+  steps:['S','T','EH','P','S'],reach:['R','IY','CH'],wings:['W','IH','NG','Z'],nervous:['N','ER','V','AH','S'],
+  gust:['G','AH','S','T'],rushed:['R','AH','SH','T'],window:['W','IH','N','D','OW'],shuddered:['SH','AH','D','ER','D'],
+  deeper:['D','IY','P','ER'],mechanism:['M','EH','K','AH','N','IH','Z','AH','M'],found:['F','AW','N','D'],
+  wedged:['W','EH','JH','D'],brake:['B','R','EY','K'],signal:['S','IH','G','N','AH','L'],jolted:['JH','OW','L','T','IH','D'],
+  bent:['B','EH','N','T'],pin:['P','IH','N'],tumbled:['T','AH','M','B','AH','L','D'],ledge:['L','EH','JH'],
+  stuck:['S','T','AH','K'],steady:['S','T','EH','D','IY'],land:['L','AE','N','D'],fix:['F','IH','K','S'],
+  together:['T','AH','G','EH','DH','ER'],straightened:['S','T','R','EY','T','AH','N','D'],hinge:['HH','IH','N','JH'],
+  replaced:['R','IH','P','L','EY','S','T'],spare:['S','P','EH','R'],pocket:['P','AA','K','IH','T'],working:['W','ER','K','IH','NG'],
+  free:['F','R','IY'],wind:['W','AY','N','D'],clicks:['K','L','IH','K','S'],fly:['F','L','AY'],between:['B','IH','T','W','IY','N'],
+  spokes:['S','P','OW','K','S'],lift:['L','IH','F','T'],popped:['P','AA','P','T'],clicked:['K','L','IH','K','T'],
+  began:['B','IH','G','AE','N'],moving:['M','UW','V','IH','NG'],morning:['M','AO','R','N','IH','NG'],almost:['AO','L','M','OW','S','T'],
+  another:['AH','N','AH','DH','ER'],hands:['HH','AE','N','D','Z'],swept:['S','W','EH','P','T'],forward:['F','AO','R','W','ER','D'],
+  golden:['G','OW','L','D','AH','N'],dawn:['D','AO','N'],poured:['P','AO','R','D'],listen:['L','IH','S','AH','N'],
+  song:['S','AO','NG'],belongs:['B','IH','L','AO','NG','Z'],clear:['K','L','IH','R'],bright:['B','R','AY','T'],
+  alone:['AH','L','OW','N'],music:['M','Y','UW','Z','IH','K']
+});
 var escapeHtml=function(s){return String(s).replace(/[&<>"]/g,function(ch){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]);});};
 function seconds(v){var p=String(v).trim().split(':');if(p.length===2)return Math.max(0,(+p[0]||0)*60+(+p[1]||0));if(p.length===3)return Math.max(0,(+p[0]||0)*3600+(+p[1]||0)*60+(+p[2]||0));var n=Number(v);return Number.isFinite(n)?Math.max(0,n):NaN;}
 function clock(t){t=Math.max(0,t||0);return String(Math.floor(t/60)).padStart(2,'0')+':'+String(Math.floor(t%60)).padStart(2,'0');}
@@ -161,7 +192,7 @@ function parseScript(raw){
     var p=s.split('|');if(p.length<3){errors.push('Line '+(i+1)+': use MM:SS | SPEAKER | dialogue.');return;}
     var start=seconds(p.shift()),speaker=String(p.shift()).trim().toUpperCase(),text=p.join('|').trim();
     if(!Number.isFinite(start)||start>=FILM){errors.push('Line '+(i+1)+': time must be between 00:00 and 04:59.');return;}
-    if(!VOICES[speaker]){errors.push('Line '+(i+1)+': unknown speaker. Use NARRATOR, PIP, OLLIE, or TUCK.');return;}
+    if(!VOICES[speaker]){errors.push('Line '+(i+1)+': unknown speaker. Use NARRATOR, NIKO, AURI, or KEEPER.');return;}
     if(!text){errors.push('Line '+(i+1)+': dialogue is empty.');return;}
     rows.push({start:start,speaker:speaker,text:text,sourceLine:i+1});
   });
@@ -285,7 +316,7 @@ function init(){
 <section class="tvs-window"><header class="tvs-head"><div><strong>TRILYVA / VOICE STUDIO</strong><br><small>LOCAL SPEECH SYNTHESIS · NO CLOUD · NO EXTERNAL RUNTIME</small></div><div class="tvs-spacer"></div><button class="tvs-x" id="tvsClose" aria-label="Close">×</button></header>
 <div class="tvs-subhead"><span>ENGINE <b>FORMANT-01</b></span><span>OUTPUT <b>PCM WAV · 16-BIT</b></span><span>FILM <b>05:00</b></span><span>NETWORK <b>NOT USED</b></span></div>
 <div class="tvs-grid"><aside class="tvs-sidebar">
-<div class="tvs-control"><label class="tvs-label" for="tvsSpeaker">Preview character</label><select id="tvsSpeaker"><option value="NARRATOR">Narrator — warm storyteller</option><option value="PIP">Pip the fox — bright and curious</option><option value="OLLIE">Ollie the bird — high and quick</option><option value="TUCK">Tuck the turtle — warm and steady</option></select></div>
+<div class="tvs-control"><label class="tvs-label" for="tvsSpeaker">Preview character</label><select id="tvsSpeaker"><option value="NARRATOR">Narrator — warm storyteller</option><option value="NIKO">Niko the red panda — warm and curious</option><option value="AURI">Auri the clockwork bird — bright and quick</option><option value="KEEPER">The clockkeeper — calm and steady</option></select></div>
 <div class="tvs-control"><label class="tvs-label" for="tvsRate">Speech rate</label><div class="tvs-range"><input id="tvsRate" type="range" min=".75" max="1.5" value="1" step=".05"><span class="tvs-number" id="tvsRateValue">1.00×</span></div></div>
 <div class="tvs-control"><label class="tvs-label" for="tvsPitch">Pitch</label><div class="tvs-range"><input id="tvsPitch" type="range" min=".75" max="1.45" value="1" step=".05"><span class="tvs-number" id="tvsPitchValue">1.00×</span></div></div>
 <div class="tvs-control"><label class="tvs-label" for="tvsWarmth">Vocal warmth</label><div class="tvs-range"><input id="tvsWarmth" type="range" min=".75" max="1.3" value="1" step=".05"><span class="tvs-number" id="tvsWarmthValue">1.00×</span></div></div>
@@ -293,10 +324,10 @@ function init(){
 <div class="tvs-divider"></div><p class="tvs-note">FORMANT-01 is an original, dependency-free speech synthesizer. It exports locally and needs no account, but its voices sound synthetic rather than like neural human performances.</p>
 </aside>
 <main class="tvs-content"><div class="tvs-kpi"><div><b id="tvsLineCount">35</b><span>DIALOGUE CUES</span></div><div><b>300 s</b><span>TIMELINE LENGTH</span></div><div><b>22.05 kHz</b><span>LOCAL AUDIO</span></div></div>
-<div><label class="tvs-label" for="tvsScript">Film dialogue script · MM:SS | SPEAKER | text</label><textarea id="tvsScript" class="tvs-script" spellcheck="false"></textarea><p class="tvs-note">Edit dialogue, speaker, or timecode. Speakers: NARRATOR, PIP, OLLIE, TUCK. A cue can be placed anywhere from 00:00 to 04:59.</p></div>
+<div><label class="tvs-label" for="tvsScript">Film dialogue script · MM:SS | SPEAKER | text</label><textarea id="tvsScript" class="tvs-script" spellcheck="false"></textarea><p class="tvs-note">Edit dialogue, speaker, or timecode. Speakers: NARRATOR, NIKO, AURI, KEEPER. A cue can be placed anywhere from 00:00 to 04:59.</p></div>
 <div><label class="tvs-label" for="tvsPreviewText">Voice audition</label><textarea id="tvsPreviewText" class="tvs-previewtext" spellcheck="false">We can do this together. One light can guide everyone home.</textarea><div class="tvs-buttons" style="margin-top:8px"><button class="tvs-btn" id="tvsPreview">Preview voice</button><button class="tvs-btn" id="tvsStop">Stop preview</button><button class="tvs-btn" id="tvsDefault">Restore film script</button><button class="tvs-btn" id="tvsSave">Export script JSON</button><button class="tvs-btn" id="tvsImportBtn">Import script JSON</button><input id="tvsImport" type="file" accept=".json,application/json" hidden></div></div>
 <div class="tvs-status" id="tvsStatus" role="status" aria-live="polite">Ready. Dialogue stays on this device.</div><div class="tvs-bar"><i id="tvsProgress"></i></div>
-<div class="tvs-buttons"><button class="tvs-btn primary" id="tvsBuild">Build full 05:00 WAV</button><button class="tvs-btn" id="tvsSrt" disabled>Export subtitles SRT</button><a class="tvs-btn" id="tvsDownload" hidden download="pip-and-the-runaway-pancake-voice-track.wav">Download WAV</a></div></main></div>
+<div class="tvs-buttons"><button class="tvs-btn primary" id="tvsBuild">Build full 05:00 WAV</button><button class="tvs-btn" id="tvsSrt" disabled>Export subtitles SRT</button><a class="tvs-btn" id="tvsDownload" hidden download="niko-and-the-clockwork-bird-voice-track.wav">Download WAV</a></div></main></div>
 <footer class="tvs-foot"><span class="tvs-note">The output is a synchronized 05:00 WAV with synthetic voices and optional original procedural soundscape. No network requests are made.</span><button class="tvs-btn" id="tvsCloseBottom">Close</button></footer></section>`;
  document.body.appendChild(o);o.querySelector('#tvsScript').value=DEFAULT_SCRIPT;
  o.querySelector('#tvsClose').addEventListener('click',close);o.querySelector('#tvsCloseBottom').addEventListener('click',close);
