@@ -12,42 +12,42 @@ var VOICES={
   TUCK:{label:'Tuck the turtle',f0:136,formant:.96,bright:.92,gain:.88,pan:.10,rate:.93}
 };
 var DEFAULT_SCRIPT=[
-'00:01 | NARRATOR | In Cloverfield Meadow, Pip was making a kite for the Spring Sky Day.',
-'00:08 | PIP | This sky needs something colourful!',
-'00:16 | OLLIE | A tail of ribbons! Every colour can dance.',
-'00:25 | NARRATOR | They folded, tied and tested a little rainbow kite, bright as a box of crayons.',
-'00:35 | PIP | Ready, steady, up you go!',
-'00:43 | NARRATOR | The kite caught a wiggly wind. Then came one big WOOOOSH, and it danced right out of Pip’s paws.',
-'00:52 | PIP | My kite! Wait, little rainbow!',
-'00:59 | OLLIE | I can fly ahead, but I cannot pull it down alone.',
-'01:08 | NARRATOR | Across the meadow, the kite fluttered to a willow branch above the bubbling brook.',
-'01:17 | TUCK | We can solve it together. Slow feet, clever ideas.',
-'01:26 | PIP | I’ll hold the branch, Ollie will guide, and Tuck can steady the log.',
-'01:37 | NARRATOR | They crossed the little brook on a broad, dry log, one friend at a time.',
-'01:46 | OLLIE | Left a little! Now just a tiny bit right!',
-'01:55 | NARRATOR | A breezy gust lifted the kite again, carrying it to the flower path.',
-'02:04 | PIP | Oh! Another snag? This time, we’ll be gentle.',
-'02:13 | NARRATOR | The silky string looped around a thorny rose stem. Tugging would tear the kite.',
-'02:22 | TUCK | I’ll hold the stem still. Pip, lift the ribbon; Ollie, take the loose end.',
-'02:31 | PIP | Easy does it... a little up... and we’re free!',
-'02:40 | NARRATOR | The friends repaired the bent tail with petals, leaves, and their spare ribbons.',
-'02:49 | NARRATOR | Then the sky turned silver. A soft rain pattered through the meadow.',
-'02:58 | PIP | Our kite is getting damp. Let’s find a warm, dry place.',
-'03:07 | NARRATOR | Beneath the old willow, the friends folded the kite safely while raindrops danced on the leaves.',
-'03:16 | OLLIE | Plip, plop, plip! The rain is making a rhythm.',
-'03:25 | PIP | We can make something beautiful while we wait.',
-'03:34 | NARRATOR | Together they patched a tiny tear, smoothed each corner, and tied the last loose ribbon.',
-'03:43 | TUCK | A good plan takes patience... and friends who hold things steady.',
-'03:52 | NARRATOR | The rain passed. Sunlight peeked through the clouds, and a rainbow stretched over Cloverfield.',
-'04:01 | PIP | Look! The sky made a rainbow of its own!',
-'04:10 | OLLIE | Our kite can join it!',
-'04:18 | NARRATOR | They returned to the hill where the breeze was gentle, not wild.',
-'04:27 | PIP | This time, everyone holds a piece of the string.',
-'04:36 | NARRATOR | One, two, three—up rose the rainbow kite, bright against the morning sky.',
-'04:46 | TUCK | Teamwork looks wonderful from down here!',
-'04:52 | PIP | And it’s even better when everyone gets to fly.',
-'04:57 | NARRATOR | In Cloverfield Meadow, every colour had a friend, and every friend had a place in the sky.'
-].join('\n');
+'00:01 | NARRATOR | On a sunny morning in Cloverfield Meadow, Pip promised his friends the biggest pancake breakfast ever.',
+'00:08 | PIP | One giant pancake, coming right up!',
+'00:16 | OLLIE | I\'ll be the official blueberry inspector!',
+'00:25 | TUCK | And I will keep the syrup perfectly safe.',
+'00:34 | NARRATOR | Pip flipped the pancake high above the pan. It spun like a golden flying saucer.',
+'00:42 | PIP | That is much higher than I planned!',
+'00:51 | NARRATOR | It landed on the counter, bounced off a cushion, and rolled straight toward the open door.',
+'01:01 | OLLIE | It\'s rolling for the back door! After it!',
+'01:10 | NARRATOR | Out across the sunny meadow went the giant pancake, tumbling faster and faster.',
+'01:19 | PIP | Catch it before it reaches the creek!',
+'01:28 | TUCK | Don\'t chase in a straight line. Cut across the little bridge!',
+'01:37 | NARRATOR | The pancake bounced onto the dry log and wobbled above the bubbling water.',
+'01:46 | OLLIE | Left! No, my other left!',
+'01:55 | PIP | A pancake has never been this much work!',
+'02:04 | NARRATOR | At the blueberry patch, the pancake rolled into a soft bush and wore a crown of berries.',
+'02:13 | OLLIE | I can see it! It\'s wearing blueberries!',
+'02:22 | PIP | Let\'s tilt the branch, not tug the pancake.',
+'02:31 | NARRATOR | The branch lifted. The pancake slid onto Tuck\'s broad shell and bounced gently away.',
+'02:40 | TUCK | My shell has never smelled so delicious.',
+'02:49 | NARRATOR | Near the old windmill, the three friends stopped to make a proper catching plan.',
+'02:58 | PIP | We need something wide, soft, and easy to hold.',
+'03:07 | NARRATOR | Ollie fluttered in front of the pancake while Pip and Tuck stretched out a picnic cloth.',
+'03:16 | OLLIE | Look over here, you gorgeous golden disc!',
+'03:25 | PIP | On three, lift the cloth. One, two...',
+'03:34 | NARRATOR | The pancake bounced once, twice, then floated right toward their soft little net.',
+'03:43 | TUCK | Ready, steady, softly...',
+'03:52 | NARRATOR | Plop! They caught it and slid it onto Pip\'s waiting serving pan.',
+'04:01 | PIP | Caught! Still fluffy, still warm, and still enormous!',
+'04:10 | NARRATOR | The friends carried their prize back to the kitchen table, taking turns with the pan.',
+'04:18 | OLLIE | Breakfast is best when everybody gets a piece.',
+'04:27 | PIP | One very big pancake, coming right up... for all of us!',
+'04:36 | NARRATOR | They added berries, a little syrup, and a tower of smaller pancakes beside the giant one.',
+'04:46 | TUCK | I kept the syrup safe. Not even one taste!',
+'04:52 | PIP | Let\'s eat while it\'s warm!',
+'04:57 | NARRATOR | And in Cloverfield Meadow, the best breakfast was the one they made and shared together.'
+].join('\\n');
 var VOWELS={
  AA:[730,1090,2440],AE:[660,1720,2410],AH:[600,1170,2450],AO:[570,840,2410],
  EH:[530,1840,2480],ER:[490,1350,1690],IH:[390,1990,2550],IY:[270,2290,3010],
@@ -124,6 +124,32 @@ Object.assign(DICT,{
   stretched:['S','T','R','EH','CH','T'],returned:['R','IH','T','ER','N','D'],hill:['HH','IH','L'],breeze:['B','R','IY','Z'],
   holds:['HH','OW','L','D','Z'],piece:['P','IY','S'],morning:['M','AO','R','N','IH','NG'],hurray:['HH','UH','R','EY'],
   teamwork:['T','IY','M','W','ER','K'],wonderful:['W','AH','N','D','ER','F','AH','L'],place:['P','L','EY','S'],friend:['F','R','EH','N','D'],friends:['F','R','EH','N','D','Z']
+});
+Object.assign(DICT,{
+  pancake:['P','AE','N','K','EY','K'],pancakes:['P','AE','N','K','EY','K','S'],
+  sunny:['S','AH','N','IY'],morning:['M','AO','R','N','IH','NG'],promised:['P','R','AA','M','IH','S','T'],
+  biggest:['B','IH','G','AH','S','T'],breakfast:['B','R','EH','K','F','AH','S','T'],giant:['JH','AY','AH','N','T'],
+  coming:['K','AH','M','IH','NG'],official:['AH','F','IH','SH','AH','L'],blueberry:['B','L','UW','B','EH','R','IY'],
+  blueberries:['B','L','UW','B','EH','R','IY','Z'],inspector:['IH','N','S','P','EH','K','T','ER'],syrup:['S','IH','R','AH','P'],
+  perfectly:['P','ER','F','EH','K','T','L','IY'],safe:['S','EY','F'],flipped:['F','L','IH','P','T'],
+  flying:['F','L','AY','IH','NG'],saucer:['S','AO','S','ER'],planned:['P','L','AE','N','D'],
+  landed:['L','AE','N','D','IH','D'],counter:['K','AW','N','T','ER'],bounced:['B','AW','N','S','T'],
+  cushion:['K','UH','SH','AH','N'],rolled:['R','OW','L','D'],straight:['S','T','R','EY','T'],door:['D','AO','R'],
+  tumbling:['T','AH','M','B','AH','L','IH','NG'],faster:['F','AE','S','T','ER'],creek:['K','R','IY','K'],
+  reaches:['R','IY','CH','IH','Z'],bridge:['B','R','IH','JH'],log:['L','AO','G'],wobbled:['W','AA','B','AH','L','D'],
+  bubbling:['B','AH','B','AH','L','IH','NG'],other:['AH','DH','ER'],patch:['P','AE','CH'],wearing:['W','EH','R','IH','NG'],
+  crown:['K','R','AW','N'],berries:['B','EH','R','IY','Z'],tilt:['T','IH','L','T'],branch:['B','R','AE','N','CH'],
+  tug:['T','AH','G'],shell:['SH','EH','L'],smelled:['S','M','EH','L','D'],delicious:['D','IH','L','IH','SH','AH','S'],
+  windmill:['W','IH','N','D','M','IH','L'],catching:['K','AE','CH','IH','NG'],plan:['P','L','AE','N'],
+  something:['S','AH','M','TH','IH','NG'],wide:['W','AY','D'],soft:['S','AO','F','T'],easy:['IY','Z','IY'],
+  hold:['HH','OW','L','D'],fluttered:['F','L','AH','T','ER','D'],stretched:['S','T','R','EH','CH','T'],
+  gorgeous:['G','AO','R','JH','AH','S'],golden:['G','OW','L','D','AH','N'],disc:['D','IH','S','K'],
+  ready:['R','EH','D','IY'],steady:['S','T','EH','D','IY'],softly:['S','AO','F','T','L','IY'],
+  floated:['F','L','OW','T','IH','D'],net:['N','EH','T'],plop:['P','L','AA','P'],caught:['K','AO','T'],
+  slid:['S','L','IH','D'],waiting:['W','EY','T','IH','NG'],serving:['S','ER','V','IH','NG'],enormous:['IH','N','AO','R','M','AH','S'],
+  prize:['P','R','AY','Z'],taking:['T','EY','K','IH','NG'],turns:['T','ER','N','Z'],piece:['P','IY','S'],
+  taste:['T','EY','S','T'],warm:['W','AO','R','M'],shared:['SH','EH','R','D'],together:['T','AH','G','EH','DH','ER'],
+  open:['OW','P','AH','N'],cushions:['K','UH','SH','AH','N','Z'],enough:['IH','N','AH','F']
 });
 var escapeHtml=function(s){return String(s).replace(/[&<>"]/g,function(ch){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]);});};
 function seconds(v){var p=String(v).trim().split(':');if(p.length===2)return Math.max(0,(+p[0]||0)*60+(+p[1]||0));if(p.length===3)return Math.max(0,(+p[0]||0)*3600+(+p[1]||0)*60+(+p[2]||0));var n=Number(v);return Number.isFinite(n)?Math.max(0,n):NaN;}
@@ -270,7 +296,7 @@ function init(){
 <div><label class="tvs-label" for="tvsScript">Film dialogue script · MM:SS | SPEAKER | text</label><textarea id="tvsScript" class="tvs-script" spellcheck="false"></textarea><p class="tvs-note">Edit dialogue, speaker, or timecode. Speakers: NARRATOR, PIP, OLLIE, TUCK. A cue can be placed anywhere from 00:00 to 04:59.</p></div>
 <div><label class="tvs-label" for="tvsPreviewText">Voice audition</label><textarea id="tvsPreviewText" class="tvs-previewtext" spellcheck="false">We can do this together. One light can guide everyone home.</textarea><div class="tvs-buttons" style="margin-top:8px"><button class="tvs-btn" id="tvsPreview">Preview voice</button><button class="tvs-btn" id="tvsStop">Stop preview</button><button class="tvs-btn" id="tvsDefault">Restore film script</button><button class="tvs-btn" id="tvsSave">Export script JSON</button><button class="tvs-btn" id="tvsImportBtn">Import script JSON</button><input id="tvsImport" type="file" accept=".json,application/json" hidden></div></div>
 <div class="tvs-status" id="tvsStatus" role="status" aria-live="polite">Ready. Dialogue stays on this device.</div><div class="tvs-bar"><i id="tvsProgress"></i></div>
-<div class="tvs-buttons"><button class="tvs-btn primary" id="tvsBuild">Build full 05:00 WAV</button><button class="tvs-btn" id="tvsSrt" disabled>Export subtitles SRT</button><a class="tvs-btn" id="tvsDownload" hidden download="pip-and-the-rainbow-kite-voice-track.wav">Download WAV</a></div></main></div>
+<div class="tvs-buttons"><button class="tvs-btn primary" id="tvsBuild">Build full 05:00 WAV</button><button class="tvs-btn" id="tvsSrt" disabled>Export subtitles SRT</button><a class="tvs-btn" id="tvsDownload" hidden download="pip-and-the-runaway-pancake-voice-track.wav">Download WAV</a></div></main></div>
 <footer class="tvs-foot"><span class="tvs-note">The output is a synchronized 05:00 WAV with synthetic voices and optional original procedural soundscape. No network requests are made.</span><button class="tvs-btn" id="tvsCloseBottom">Close</button></footer></section>`;
  document.body.appendChild(o);o.querySelector('#tvsScript').value=DEFAULT_SCRIPT;
  o.querySelector('#tvsClose').addEventListener('click',close);o.querySelector('#tvsCloseBottom').addEventListener('click',close);
@@ -281,9 +307,9 @@ function init(){
  o.querySelector('#tvsPreview').addEventListener('click',preview);
  o.querySelector('#tvsStop').addEventListener('click',stopAudio);
  o.querySelector('#tvsBuild').addEventListener('click',build);
- o.querySelector('#tvsSrt').addEventListener('click',function(){if(lastSrt)download(new Blob([lastSrt],{type:'text/plain;charset=utf-8'}),'pip-and-the-rainbow-kite.en.srt');});
+ o.querySelector('#tvsSrt').addEventListener('click',function(){if(lastSrt)download(new Blob([lastSrt],{type:'text/plain;charset=utf-8'}),'pip-and-the-runaway-pancake.en.srt');});
  o.querySelector('#tvsDefault').addEventListener('click',function(){if(busy)return;o.querySelector('#tvsScript').value=DEFAULT_SCRIPT;countCues();});
- o.querySelector('#tvsSave').addEventListener('click',function(){var raw=o.querySelector('#tvsScript').value,p=parseScript(raw);download(new Blob([JSON.stringify({format:'TRILYVA_DIALOGUE_1',durationSeconds:FILM,script:raw,parsedLines:p.rows.length},null,2)],{type:'application/json'}),'pip-and-the-rainbow-kite-dialogue.json');setStatus(p.errors.length?p.errors.join(' '):'Dialogue JSON exported: '+p.rows.length+' cues.',p.errors.length?'warn':'green');});
+ o.querySelector('#tvsSave').addEventListener('click',function(){var raw=o.querySelector('#tvsScript').value,p=parseScript(raw);download(new Blob([JSON.stringify({format:'TRILYVA_DIALOGUE_1',durationSeconds:FILM,script:raw,parsedLines:p.rows.length},null,2)],{type:'application/json'}),'pip-and-the-runaway-pancake-dialogue.json');setStatus(p.errors.length?p.errors.join(' '):'Dialogue JSON exported: '+p.rows.length+' cues.',p.errors.length?'warn':'green');});
  o.querySelector('#tvsImportBtn').addEventListener('click',function(){o.querySelector('#tvsImport').click();});
  o.querySelector('#tvsImport').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f)return;var reader=new FileReader();reader.onload=function(){try{var d=JSON.parse(String(reader.result)),src=typeof d==='string'?d:d.script;if(typeof src!=='string')throw new Error('JSON file has no script field.');o.querySelector('#tvsScript').value=src;countCues();setStatus('Local dialogue script imported.','green');}catch(e){setStatus('Import failed: '+e.message,'error');}};reader.readAsText(f);this.value='';});
  countCues();
@@ -349,7 +375,7 @@ function build(){
   setStatus('Writing stereo PCM samples to WAV…');bar.style.width='92%';await new Promise(function(resolve){setTimeout(resolve,0);});
   var blob=wav(left,right);lastBlob=blob;lastSrt=makeSrt(compiled);try{window.dispatchEvent(new CustomEvent('trilyva:voice-track-ready',{detail:{blob:blob,durationSeconds:FILM,sampleRate:SR}}));}catch(_){}
   if(dl.dataset.url)try{URL.revokeObjectURL(dl.dataset.url);}catch(e){}
-  var url=URL.createObjectURL(blob);dl.dataset.url=url;dl.href=url;dl.download='pip-and-the-rainbow-kite-voice-track.wav';dl.hidden=false;srt.disabled=false;bar.style.width='100%';
+  var url=URL.createObjectURL(blob);dl.dataset.url=url;dl.href=url;dl.download='pip-and-the-runaway-pancake-voice-track.wav';dl.hidden=false;srt.disabled=false;bar.style.width='100%';
   setStatus('READY · 05:00 WAV · '+(blob.size/1048576).toFixed(1)+' MB · '+compiled.length+' cues · '+(o.querySelector('#tvsAmbience').checked?'original score and atmosphere included':'dialogue only')+'.','green');
  }catch(e){console.error('TRILYVA Voice Studio',e);setStatus('Render failed: '+String(e&&e.message||e),'error');}
  finally{busy=false;btn.disabled=false;}
