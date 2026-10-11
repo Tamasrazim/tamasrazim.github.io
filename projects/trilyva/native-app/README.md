@@ -36,7 +36,7 @@ Linux builds need WebKitGTK 4.1 and the native package/build dependencies listed
 
 1. **Keep one renderer.** The bundled UI is read from `projects/code-motion/renderer/`; no copy of the large renderer is maintained in this folder.
 2. **Keep the browser release working.** The existing web app remains available at `/projects/code-motion/renderer/` and remains the easiest no-install path.
-3. **Native capabilities stay off by default.** This initial shell exposes no arbitrary process execution, file-system, updater, or shell commands to the page.
+3. **Native capabilities are narrow.** The shell exposes no process execution, shell commands, updater endpoints, or arbitrary-path filesystem API. The project adapter uses a system file picker and limits read/write access to validated `.tmotion` project files (20 MiB maximum).
 4. **Voice providers are adapters, not copied applications.** The native build includes a first-party bridge to a separately installed VoiceStudio service. TRILYVA does not bundle VoiceStudio source or model weights.
 5. **Keep the local connector narrow.** The bridge is hard-coded to `127.0.0.1:3900`, checks service availability, reads voice-profile metadata, and calls only `POST /v1/audio/speech`. It never exposes VoiceStudio admin or settings routes, follows HTTP redirects, or accepts a remote host.
 6. **No model is assumed stock-cleared.** Exact engine, model, and weight licenses must be reviewed before promoting generated output for paid stock distribution.
