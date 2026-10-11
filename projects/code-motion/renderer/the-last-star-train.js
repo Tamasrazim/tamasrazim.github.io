@@ -2,10 +2,10 @@
    4K UHD output target (3840×2160), 60 fps, deterministic vector frame rendering.
    Every frame is derived from time; scrubbing and export produce the same pose. */
 
-const SKYROOT_DURATION = 600;
-const SKYROOT_FPS = 60;
-const SKYROOT_SIZE = { width: 1920, height: 1080 };
-const SKYROOT_CHAPTERS = [
+const STARTRAIN_DURATION = 600;
+const STARTRAIN_FPS = 60;
+const STARTRAIN_SIZE = { width: 1920, height: 1080 };
+const STARTRAIN_CHAPTERS = [
  {time:0,title:"NIMBUS TERMINAL",note:"Eira joins the Starfall Express for its first night route."},
  {time:46,title:"THE BLACKOUT STORM",note:"A storm extinguishes the skyway signals and scatters the route stars."},
  {time:96,title:"MOSSWATER BOARDWALK",note:"The crew rescues a stranded marsh keeper and learns to follow the reeds."},
@@ -20,7 +20,7 @@ const SKYROOT_CHAPTERS = [
  {time:572,title:"FIRST-LIGHT HARBOR",note:"The Starfall Express returns as the whole harbor becomes a living constellation."}
 ];
 
-const SKYROOT_CUES = [
+const STARTRAIN_CUES = [
  [2,"NARRATOR","Every night, the Starfall Express carried little star-lanterns from Nimbus Terminal to the towns floating above the clouds."],
  [8,"EIRA","First night as signal keeper. I know every lamp on the route!"],
  [15,"PIP","And I know every dark corner. My lantern is ready."],
@@ -86,7 +86,7 @@ const SKYROOT_CUES = [
  [596,"NARRATOR","As the first sun rose, the whole harbor blinked like a constellation, and the Starfall Express sounded its little welcome whistle."]
 ];
 
-const SKYROOT_SCENES = [0,46,96,150,206,263,320,372,447,490,526,572,600];
+const STARTRAIN_SCENES = [0,46,96,150,206,263,320,372,447,490,526,572,600];
 
 function skyClamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 function skyMix(a, b, p) { return a + (b - a) * skyClamp(p, 0, 1); }
@@ -468,14 +468,14 @@ function skySkiff(ctx, x, y, s, t, tilt) {
 }
 function skyVoicePulse(role, t) {
   let cueIndex = -1;
-  for (let i = 0; i < SKYROOT_CUES.length; i++) {
-    if (SKYROOT_CUES[i][0] <= t) cueIndex = i;
+  for (let i = 0; i < STARTRAIN_CUES.length; i++) {
+    if (STARTRAIN_CUES[i][0] <= t) cueIndex = i;
     else break;
   }
-  if (cueIndex < 0 || SKYROOT_CUES[cueIndex][1] !== role) return 0;
-  const cue = SKYROOT_CUES[cueIndex];
-  const next = SKYROOT_CUES[cueIndex + 1];
-  const duration = Math.min(4.7, (next ? next[0] : SKYROOT_DURATION) - cue[0]);
+  if (cueIndex < 0 || STARTRAIN_CUES[cueIndex][1] !== role) return 0;
+  const cue = STARTRAIN_CUES[cueIndex];
+  const next = STARTRAIN_CUES[cueIndex + 1];
+  const duration = Math.min(4.7, (next ? next[0] : STARTRAIN_DURATION) - cue[0]);
   const age = t - cue[0];
   if (age < 0 || age > duration || duration <= 0.1) return 0;
   const inFade = skyEase(0, 0.12, age);
@@ -660,8 +660,8 @@ function skyOwl(ctx, x, y, s, t) {
   ctx.restore();
 }
 function skyCaption(ctx,t){
- let cue=SKYROOT_CUES[0];for(let i=0;i<SKYROOT_CUES.length;i++){if(SKYROOT_CUES[i][0]<=t)cue=SKYROOT_CUES[i];else break;}
- const next=SKYROOT_CUES.find(c=>c[0]>cue[0]),fadeIn=skyEase(cue[0],cue[0]+.28,t),fadeOut=next?1-skyEase(next[0]-.25,next[0],t):1,alpha=fadeIn*fadeOut;
+ let cue=STARTRAIN_CUES[0];for(let i=0;i<STARTRAIN_CUES.length;i++){if(STARTRAIN_CUES[i][0]<=t)cue=STARTRAIN_CUES[i];else break;}
+ const next=STARTRAIN_CUES.find(c=>c[0]>cue[0]),fadeIn=skyEase(cue[0],cue[0]+.28,t),fadeOut=next?1-skyEase(next[0]-.25,next[0],t):1,alpha=fadeIn*fadeOut;
  if(alpha<=.005)return;ctx.save();ctx.globalAlpha=alpha;
  // Reserved upper safe area keeps dialogue away from faces, feet, tracks and props.
  ctx.fillStyle="rgba(13,24,45,.80)";skyRound(ctx,42,30,1060,108,16,ctx.fillStyle,"rgba(224,237,244,.32)",1.5);
@@ -722,7 +722,7 @@ function skyFilmGrade(ctx,t){
    Zero-length moves are hard cuts; longer moves are motivated camera moves.
    The camera is deterministic, so frame export and timeline scrubbing agree.
    ────────────────────────────────────────────────────────────────────────── */
-const SKYROOT_SHOT_CUTS = (() => {
+const STARTRAIN_SHOT_CUTS = (() => {
  const segments=[
  {start:0,shots:[[0,960,540,1,0],[4,650,625,1.2,.55],[8,430,760,1.34,.22],[13,600,590,1.28,.35],[18,1170,560,1.12,.65],[23,520,680,1.3,.25],[29,930,810,1.18,.5],[35,1210,620,1.23,.25],[40,810,680,1.12,.5],[44,960,540,1,.3]]},
  {start:46,shots:[[0,960,540,1,0],[4,1500,560,1.45,.25],[9,780,820,1.25,.2],[14,430,820,1.35,.2],[19,1300,550,1.25,.25],[24,1500,390,1.35,.25],[29,890,670,1.24,.35],[34,430,800,1.26,.2],[39,1160,640,1.25,.35],[44,960,540,1,.4]]},
@@ -742,12 +742,12 @@ const SKYROOT_SHOT_CUTS = (() => {
 
 function skyDirectorCamera(t) {
   let index = 0;
-  for (let i = 1; i < SKYROOT_SHOT_CUTS.length; i++) {
-    if (SKYROOT_SHOT_CUTS[i][0] <= t) index = i;
+  for (let i = 1; i < STARTRAIN_SHOT_CUTS.length; i++) {
+    if (STARTRAIN_SHOT_CUTS[i][0] <= t) index = i;
     else break;
   }
-  const current = SKYROOT_SHOT_CUTS[index];
-  const previous = SKYROOT_SHOT_CUTS[Math.max(0, index - 1)];
+  const current = STARTRAIN_SHOT_CUTS[index];
+  const previous = STARTRAIN_SHOT_CUTS[Math.max(0, index - 1)];
   const moveDuration = current[4] || 0;
   const p = index > 0 && moveDuration > 0
     ? skyEase(current[0], current[0] + moveDuration, t)
@@ -931,7 +931,7 @@ function starDrawSceneAction(ctx,t){
 }
 
 function renderFrame(time, frame, fps, ctx, width, height, motion) {
- const t=skyClamp(Number.isFinite(time)?time:(frame||0)/Math.max(1,fps||SKYROOT_FPS),0,SKYROOT_DURATION);
+ const t=skyClamp(Number.isFinite(time)?time:(frame||0)/Math.max(1,fps||STARTRAIN_FPS),0,STARTRAIN_DURATION);
  const scale=Math.min(width/1920,height/1080),ox=(width-1920*scale)/2,oy=(height-1080*scale)/2;
  ctx.save();ctx.fillStyle="#111b35";ctx.fillRect(0,0,width,height);ctx.translate(ox,oy);ctx.scale(scale,scale);
  const camera=skyDirectorCamera(t),shake=skyDirectorShake(t);
@@ -949,19 +949,19 @@ function renderFrame(time, frame, fps, ctx, width, height, motion) {
  else if(t<572)starDrawMoonfallGap(ctx,t);
  else starDrawFirstLightHarbor(ctx,t);
  starDrawSceneAction(ctx,t);ctx.restore();
- let fade=0;for(let i=1;i<SKYROOT_SCENES.length-1;i++){const d=Math.abs(t-SKYROOT_SCENES[i]);if(d<.68)fade=Math.max(fade,.9*(1-d/.68));}
+ let fade=0;for(let i=1;i<STARTRAIN_SCENES.length-1;i++){const d=Math.abs(t-STARTRAIN_SCENES[i]);if(d<.68)fade=Math.max(fade,.9*(1-d/.68));}
  if(fade>.01){ctx.fillStyle="rgba(8,12,29,"+fade.toFixed(3)+")";ctx.fillRect(0,0,1920,1080);}
  skyFilmGrade(ctx,t);skyCaption(ctx,t);ctx.restore();
 }
-if (typeof window !== "undefined" && !window.TRILYVA_SKYROOT_STORY) {
-  window.TRILYVA_SKYROOT_STORY = {
+if (typeof window !== "undefined" && !window.TRILYVA_STARTRAIN_STORY) {
+  window.TRILYVA_STARTRAIN_STORY = {
     title: "The Last Star Train",
-    duration: SKYROOT_DURATION,
-    fps: SKYROOT_FPS,
+    duration: STARTRAIN_DURATION,
+    fps: STARTRAIN_FPS,
     width: 3840,
     height: 2160,
-    chapters: SKYROOT_CHAPTERS,
-    cues: SKYROOT_CUES,
+    chapters: STARTRAIN_CHAPTERS,
+    cues: STARTRAIN_CUES,
     renderFrame: renderFrame
   };
 }
