@@ -12,19 +12,19 @@ export default {
   async load() {
     const response = await fetch(SKYROOT_SOURCE_URL, { cache: "no-store" });
     if (!response.ok) {
-      throw new Error("The Skyroot Bell source could not be loaded: " + response.status);
+      throw new Error("The Last Star Train source could not be loaded: " + response.status);
     }
 
     const code = await response.text();
     if (!code.includes("function renderFrame") || !code.includes("SKYROOT_DURATION = 600")) {
-      throw new Error("The Skyroot Bell source is incomplete or does not match the expected renderer.");
+      throw new Error("The Last Star Train source is incomplete or does not match the expected renderer.");
     }
 
     return [{
-      id: "the-skyroot-bell",
-      title: "The Skyroot Bell — 10-Minute Fantasy Cartoon",
+      id: "the-last-star-train",
+      title: "The Last Star Train — 10-Minute Animated Cartoon",
       category: "story film",
-      description: "A complete 600-second 4K UHD / 60 fps fantasy cartoon directed across 126 authored camera setups. Eira the fox, Pip the lantern-moth and Nix the cloud-dragon cross a singing brook, whispering wood, crystal ridge and floating market. Includes story-timed action layers, reaction close-ups, dialogue-cued mouth animation, deterministic frames and an MP4/WebM capture player.",
+      description: "A complete 600-second 4K UHD / 60 fps original cartoon with 115 directed shots, hand-drawn 2D characters, layered faux-3D environments, a sky railway, marsh boardwalk, shifting forest, ice viaduct, multi-level market, engine room, windmill canyon, overhead star map, perspective tunnel and a light-built bridge. Deterministic animation with timed dialogue cues and browser video export.",
       code: code,
       width: 3840,
       height: 2160,
