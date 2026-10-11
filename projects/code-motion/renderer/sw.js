@@ -1,12 +1,12 @@
-const CACHE = 'tamasrazim-trilyva-pwa-v61';
+const CACHE = 'tamasrazim-trilyva-pwa-v62';
 const CORE = [
   './',
   './index.html',
   './media-stack.js',
   './voice-studio.js',
   './movie-finalizer.js',
-  './pip-and-the-rainbow-kite.js',
-  '../../trilyva/pip-and-the-rainbow-kite.html',
+  './pip-and-the-runaway-pancake.js',
+  '../../trilyva/pip-and-the-runaway-pancake.html',
   './manifest.webmanifest',
   './library/library.js',
   './library/manifest.json',
