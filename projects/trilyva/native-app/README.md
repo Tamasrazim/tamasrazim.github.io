@@ -37,14 +37,14 @@ Linux builds need WebKitGTK 4.1 and the native package/build dependencies listed
 1. **Keep one renderer.** The bundled UI is read from `projects/code-motion/renderer/`; no copy of the large renderer is maintained in this folder.
 2. **Keep the browser release working.** The existing web app remains available at `/projects/code-motion/renderer/` and remains the easiest no-install path.
 3. **Native capabilities stay off by default.** This initial shell exposes no arbitrary process execution, file-system, updater, or shell commands to the page.
-4. **Voice providers are adapters, not copied applications.** VoiceStudio is a separate optional local service for early integration tests. TRILYVA will not bundle VoiceStudio source or model weights as part of this scaffold.
-5. **Use narrow local speech calls only.** A future native adapter may call only VoiceStudio's documented loopback speech endpoints after explicit user selection. It must not expose admin routes, weaken VoiceStudio's browser-origin guard, or allow a remote host to be silently selected.
+4. **Voice providers are adapters, not copied applications.** The native build includes a first-party bridge to a separately installed VoiceStudio service. TRILYVA does not bundle VoiceStudio source or model weights.
+5. **Keep the local connector narrow.** The bridge is hard-coded to `127.0.0.1:3900`, checks service availability, reads voice-profile metadata, and calls only `POST /v1/audio/speech`. It never exposes VoiceStudio admin or settings routes, follows HTTP redirects, or accepts a remote host.
 6. **No model is assumed stock-cleared.** Exact engine, model, and weight licenses must be reviewed before promoting generated output for paid stock distribution.
-7. **No release promises yet.** Signing, updater, project-file association, crash recovery, accessibility, offline installation, GPU paths, and large-media regression tests are not complete.
+7. **No release promises yet.** Signing, updater, project-file association, crash recovery, accessibility, offline installation, GPU paths, native runtime tests, and large-media regression tests are not complete.
 
 ## Known caveats
 
-- The native shell is a packaging foundation, not a rewrite of rendering internals.
+- The native shell is a packaging foundation, not a rewrite of rendering internals. The desktop-only Neural Voice panel synthesizes each dialogue cue through the optional local VoiceStudio API, mixes cues into a five-minute PCM WAV, creates matching SRT subtitles, and passes the WAV to Finish Movie.
 - Browser encoding APIs and WebView media codecs vary by operating system. MP4/WebM availability, frame accuracy, large-resolution limits, and memory use must be tested on each target.
 - A desktop window alone does not provide a native codec stack or guarantee 8K/60 fps. Those paths need capability probes and platform-specific tests.
 - VoiceStudio's local AI models are not embedded here. Intel Arc acceleration and commercial-use rights are not assumed.
