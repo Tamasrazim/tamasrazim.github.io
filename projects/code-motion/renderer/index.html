@@ -8727,7 +8727,8 @@ function renderFrame(time,frame,fps,ctx,width,height){
   function paintScene(scene,alpha){
     ctx.save();ctx.globalAlpha*=alpha;
     const travel=scene===1?filmEase(36,82,t):scene===2?filmEase(82,124,t):scene===3?filmEase(124,170,t):scene===6?filmEase(249,276,t):0;
-    const zoom=1.015+.012*Math.sin(t*.25+scene*.7),panX=(scene===1?filmMix(-18,70,travel):scene===2?filmMix(30,-15,travel):scene===3?filmMix(10,-20,travel):scene===6?filmMix(-12,16,travel):0)+Math.sin(t*.33+scene)*4;
+    const storyZoom=scene===3?filmEase(133,145,t)*(1-filmEase(153,161,t))*.065:scene===4?filmEase(202,214,t)*.045:0;
+    const zoom=1.015+.012*Math.sin(t*.25+scene*.7)+storyZoom,panX=(scene===1?filmMix(-18,70,travel):scene===2?filmMix(30,-15,travel):scene===3?filmMix(10,-20,travel):scene===6?filmMix(-12,16,travel):0)+Math.sin(t*.33+scene)*4;
     const panY=Math.sin(t*.24+scene)*3+storm*Math.sin(t*17)*1.4;
     ctx.translate(960,540);ctx.scale(zoom,zoom);ctx.translate(-960+panX,-540+panY);
     if(scene===0){
@@ -8744,20 +8745,21 @@ function renderFrame(time,frame,fps,ctx,width,height){
       filmMeadow(ctx,t,.04);filmTree(ctx,1625,718,1.42,true,t);
       // Wind reads through grass lean, ribbon tails and a moving kite arc.
       for(let i=0;i<36;i++){const x=(i*61+t*150)%2020-50,y=500+(i%7)*43;filmLine(ctx,x,y,x+38,y-5,"rgba(255,255,255,.45)",2);}
-      const p=filmEase(36,82,t),kx=filmMix(980,1492,p),ky=filmMix(445,370,p)+Math.sin(t*4.1)*22;
-      filmKite(ctx,kx,ky,filmMix(.72,.88,p),t,-.55+Math.sin(t*2.5)*.09,true);
+      const p=filmEase(36,82,t),kx=filmMix(1262,1492,p),ky=filmMix(545,370,p)+Math.sin((t-36)*4.1)*12;
+      filmKite(ctx,kx,ky,filmMix(.66,.88,p),t,-.63+Math.sin((t-36)*2.5)*.09,true);
       filmString(ctx,kx-4,ky+155,filmMix(827,1360,p),filmMix(823,690,p),t);
-      filmFox(ctx,filmMix(770,1125,p),870,1.12,t,t>42?"surprised":"happy","run");
-      filmBird(ctx,filmMix(1010,1408,p),filmMix(616,482,p),.86,t,"fly");
+      filmFox(ctx,filmMix(770,875,p),870,1.12,t,t>42?"surprised":"happy","run");
+      filmBird(ctx,filmMix(1025,1408,p),filmMix(765,482,p),.86,t,"fly");
+      if(t>73)filmTurtle(ctx,filmMix(340,620,filmEase(73,82,t)),935,filmMix(.76,1.1,filmEase(73,82,t)),t,"wave");
       if(t>49&&t<68){ctx.save();ctx.globalAlpha=filmEase(49,53,t)*(1-filmEase(64,68,t));ctx.fillStyle="#fff6bf";ctx.font="1000 67px ui-rounded,system-ui,sans-serif";ctx.textAlign="center";ctx.fillText("WOOOOSH!",1000,340);ctx.restore();}
     }else if(scene===2){
       filmCreek(ctx,t,0);filmTree(ctx,1480,715,1.55,true,t);
       // Kite catches on a low, reachable willow branch across the brook.
       filmLine(ctx,1314,467,1557,420,"#85522f",13);filmLine(ctx,1335,463,1548,430,"#b77942",5);
-      const kx=1464+Math.sin(t*1.4)*5,ky=421+Math.sin(t*2.3)*4;
+      const drift=filmEase(113,124,t),kx=filmMix(1464,1350,drift)+Math.sin(t*1.4)*5,ky=filmMix(421,410,drift)+Math.sin(t*2.3)*4;
       filmKite(ctx,kx,ky,.72,t,.55,true);
-      filmFox(ctx,filmMix(780,1050,filmEase(86,110,t)),899,1.05,t,t<97?"worried":"focused","reach");
-      filmBird(ctx,filmMix(1000,1370,filmEase(88,108,t)),filmMix(575,480,filmEase(88,108,t)),.8,t,"fly");
+      filmFox(ctx,filmMix(875,1050,filmEase(82,110,t)),899,1.05,t,t<97?"worried":"focused","reach");
+      filmBird(ctx,filmMix(1408,1370,filmEase(82,108,t)),filmMix(482,480,filmEase(82,108,t)),.8,t,"fly");
       filmTurtle(ctx,620,900,1.1,t,t>94?"wave":"walk");
       if(t>92&&t<112){filmString(ctx,1030,818,1450,515,t);}
       // A small orange dragonfly skims the creek between the stepping stones.
@@ -8765,9 +8767,9 @@ function renderFrame(time,frame,fps,ctx,width,height){
     }else if(scene===3){
       filmBriar(ctx,t);
       filmKite(ctx,1430,424,.74,t,.66,true);
-      filmFox(ctx,790,900,1.06,t,t<139?"worried":"focused","reach");
-      filmBird(ctx,1260,590,.78,t,"fly");
-      filmTurtle(ctx,1030,918,.98,t,"wave");
+      filmFox(ctx,filmMix(1050,790,filmEase(124,145,t)),900,1.06,t,t<139?"worried":"focused","reach");
+      filmBird(ctx,filmMix(1370,1260,filmEase(124,145,t)),filmMix(480,590,filmEase(124,145,t)),.78,t,"fly");
+      filmTurtle(ctx,filmMix(620,1030,filmEase(124,145,t)),918,.98,t,"wave");
       // Pip lifts a leafy stem; Ollie eases the string free. No tearing or yanking.
       ctx.strokeStyle="#8e5c39";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(1370,486);ctx.quadraticCurveTo(1330,435,1370,385);ctx.stroke();
       if(t>139){const p=filmEase(142,155,t);filmLine(ctx,1335,440,1310-p*35,390-p*45,"#3ea65b",9);}
@@ -8776,11 +8778,12 @@ function renderFrame(time,frame,fps,ctx,width,height){
     }else if(scene===4){
       filmStormShelter(ctx,t);
       filmFox(ctx,790,904,1.05,t,t<180?"worried":"happy","wave");
-      filmBird(ctx,1000,834,.86,t,"perch");filmTurtle(ctx,1177,920,.92,t,"wave");
+      filmBird(ctx,filmMix(1260,1000,filmEase(170,185,t)),filmMix(590,834,filmEase(170,185,t)),.86,t,"perch");filmTurtle(ctx,filmMix(1030,1177,filmEase(170,180,t)),920,.92,t,"wave");
       // Kite is folded into a broad leaf wrap and kept off the wet grass.
       ctx.fillStyle="#3c9a58";ctx.beginPath();ctx.ellipse(1360,890,108,34,-.08,0,Math.PI*2);ctx.fill();
-      filmKite(ctx,1360,825,.35,t,.1,false);
+      const fold=filmEase(170,182,t);filmKite(ctx,filmMix(1230,1360,fold),filmMix(430,825,fold),filmMix(.74,.35,fold),t,filmMix(.3,.1,fold),false);
       for(let i=0;i<8;i++){const px=1300+i*18,py=927+Math.sin(t*4+i)*3;ctx.fillStyle=["#f34f60","#ff9e43","#ffe35b","#55cf80","#55cdee","#9380f6"][i%6];filmRound(ctx,px,py,22,8,4);ctx.fill();}
+      if(t>204){const repair=filmEase(204,215,t);ctx.save();ctx.globalAlpha=repair;ctx.strokeStyle="#b77942";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(1338,792);ctx.lineTo(1382,852);ctx.moveTo(1382,792);ctx.lineTo(1338,852);ctx.stroke();for(let i=0;i<4;i++){ctx.fillStyle=["#f34f60","#ff9e43","#55cf80","#9380f6"][i];filmRound(ctx,1328+i*17,824,17,7,3);ctx.fill();}filmGlow(ctx,1360,824,74,"rgba(255,236,158,.22)");ctx.restore();}
       filmPuddle(ctx,640,1025,95,t);filmPuddle(ctx,1110,1033,72,t);
       if(t>193){ctx.save();ctx.globalAlpha=filmEase(193,200,t);ctx.fillStyle="rgba(255,225,111,.28)";ctx.beginPath();ctx.ellipse(1000,810,280,150,0,0,Math.PI*2);ctx.fill();ctx.restore();}
     }else if(scene===5){
@@ -8788,13 +8791,13 @@ function renderFrame(time,frame,fps,ctx,width,height){
       filmRainbow(ctx,t,filmEase(222,238,t));
       filmFox(ctx,750,900,1.08,t,"happy","wave");filmBird(ctx,1010,770,.82,t,"perch");filmTurtle(ctx,1185,930,.93,t,"wave");
       // The patched kite has a clearly visible flower medallion and new petal tail bows.
-      filmKite(ctx,1330,585,.62,t,-.24,true);
+      const repair=filmEase(216,235,t);filmKite(ctx,1330,filmMix(825,585,repair),filmMix(.35,.62,repair),t,filmMix(.1,-.24,repair),true);
       for(let i=0;i<9;i++)filmFlower(ctx,950+i*39,882+Math.sin(i)*7,.42,["#ff8aa6","#ffdf71","#93dc83","#8d9af5"][i%4],t+i);
       if(t>230){ctx.globalAlpha=filmEase(230,246,t);filmGlow(ctx,1450,510,260,"rgba(255,241,168,.55)");ctx.globalAlpha=1;}
     }else{
       filmMeadow(ctx,t,0);filmRainbow(ctx,t,filmEase(232,259,t));
       // Wide finale staging: all friends hold the same thread and look toward their kite.
-      const lift=filmEase(260,280,t),kx=filmMix(1250,1060,lift),ky=filmMix(460,235,lift)+Math.sin(t*3)*8;
+      const lift=filmEase(260,280,t),kx=filmMix(1330,1060,lift),ky=filmMix(585,235,lift)+Math.sin((t-249)*3)*8;
       filmKite(ctx,kx,ky,.84,t,-.28+Math.sin(t*2)*.035,true);
       filmString(ctx,kx-6,ky+175,filmMix(762,725,lift),760,t);
       filmFox(ctx,filmMix(760,715,lift),900,1.05,t,"happy","wave");
