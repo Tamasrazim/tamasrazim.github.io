@@ -109,10 +109,10 @@ function checkFilm(film) {
   scriptReferenceResolves(film.page, film.script);
 
   must(pageMarkup.includes('<canvas'), film.name + ' page provides a canvas stage');
-  const canvasTag = pageMarkup.match(/<canvas\\b[^>]*>/i);
+  const canvasTag = pageMarkup.match(/<canvas\b[^>]*>/i);
   must(Boolean(canvasTag), film.name + ' has a measurable canvas element');
-  const canvasWidth = canvasTag ? Number((canvasTag[0].match(/\\bwidth=["'](\\d+)["']/i) || [])[1]) : 0;
-  const canvasHeight = canvasTag ? Number((canvasTag[0].match(/\\bheight=["'](\\d+)["']/i) || [])[1]) : 0;
+  const canvasWidth = canvasTag ? Number((canvasTag[0].match(/\bwidth=["'](\d+)["']/i) || [])[1]) : 0;
+  const canvasHeight = canvasTag ? Number((canvasTag[0].match(/\bheight=["'](\d+)["']/i) || [])[1]) : 0;
   must(
     canvasWidth === film.expectedCanvasWidth && canvasHeight === film.expectedCanvasHeight,
     film.name + ' canvas is ' + canvasWidth + ' × ' + canvasHeight,
