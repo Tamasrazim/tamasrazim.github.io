@@ -912,10 +912,11 @@ function starDrawMarsh(ctx,t){
  const repair=skyEase(116,128,t);
  ctx.save();
  ctx.translate(-145*(1-repair),0);
+ // The plank top matches the neighbouring deck surface; its thickness is drawn below.
  ctx.fillStyle="#72575e";ctx.beginPath();
- ctx.moveTo(880,837);ctx.lineTo(1130,842);ctx.lineTo(1245,914);ctx.lineTo(995,906);ctx.closePath();ctx.fill();
+ ctx.moveTo(880,855);ctx.lineTo(1130,860);ctx.lineTo(1245,932);ctx.lineTo(995,924);ctx.closePath();ctx.fill();
  ctx.fillStyle="#c29b79";ctx.beginPath();
- ctx.moveTo(880,819);ctx.lineTo(1130,824);ctx.lineTo(1245,896);ctx.lineTo(995,888);ctx.closePath();ctx.fill();
+ ctx.moveTo(880,837);ctx.lineTo(1130,842);ctx.lineTo(1245,914);ctx.lineTo(995,906);ctx.closePath();ctx.fill();
  ctx.strokeStyle="rgba(95,65,67,.7)";ctx.lineWidth=3;
  for(let i=1;i<6;i++){
   const p=i/6;
@@ -1105,7 +1106,7 @@ function starDrawMoonfallGap(ctx,t){
   return 740-(x-1330)*30/590;
  }
  const trainX=575+850*skyEase(552,571,t);
- const trainY=gapGroundY(trainX)-8;
+ const trainY=gapGroundY(trainX)-1;
  const foxX=320+1080*skyEase(536,571,t);
  const foxY=gapGroundY(foxX)-3;
  const foxAction=t<548?"reach":t<568?"run":"happy";
