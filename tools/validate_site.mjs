@@ -231,9 +231,9 @@ must(!hub.includes('href="../renderer/"'),'project directory has no retired rend
 
 
 const webedytsPage=read('projects/webedyts/index.html');
-must(webedytsPage.includes('WEBEDYTS')&&webedytsPage.includes('No fake download button.'),'WEBEDYTS has a dedicated pre-release product page');
-must(webedytsPage.includes('Downloads are intentionally withheld')&&!webedytsPage.includes('releases/latest/download/WEBEDYTS'),'WEBEDYTS does not advertise unpublished release assets');
-must(webedytsPage.includes('not a screenshot')&&webedytsPage.includes('current editor source'),'WEBEDYTS labels conceptual UI art and editor-source status honestly');
+must(webedytsPage.includes('WEBEDYTS')&&webedytsPage.includes('I\'m not publishing a download yet.'),'WEBEDYTS has a dedicated pre-release product page');
+must(webedytsPage.includes('Downloads are not available yet.')&&!webedytsPage.includes('releases/latest/download/WEBEDYTS'),'WEBEDYTS does not advertise unpublished release assets');
+must(webedytsPage.includes('not a screenshot')&&webedytsPage.includes('current editor source')&&webedytsPage.includes('w-select-pass')&&webedytsPage.includes('w-cursor-flow'),'WEBEDYTS labels conceptual UI art and editor-source status honestly');
 
 const iconLibrarySource=read('projects/code-to-eps/workspace/vector-icon-library.js');
 execFileSync(process.execPath,['--check',path.join(ROOT,'projects/code-to-eps/workspace/vector-icon-library.js')]);
