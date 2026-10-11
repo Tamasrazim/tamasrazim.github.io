@@ -1096,16 +1096,17 @@ function starDrawMoonfallGap(ctx,t){
 
  // Eira and the train travel over the same ground route, never across empty air.
  function gapGroundY(x){
+  // This is the deck surface. Rail tops sit 12 px above it; actor shadows sit on it.
   if(x<740) return 760+20*x/740;
-  if(x<840) return 780+(x-740)*.34;
-  if(x<1230){const p=(x-840)/390;return 825-36*p+Math.sin(p*Math.PI)*8;}
-  if(x<1330) return 789-(x-1230)*.5;
-  return 739-(x-1330)*30/590;
+  if(x<840) return 780+46*(x-740)/100;
+  if(x<1230){const p=(x-840)/390;return 826-36*p+Math.sin(p*Math.PI)*8;}
+  if(x<1330) return 790-(x-1230)*.5;
+  return 740-(x-1330)*30/590;
  }
  const trainX=575+850*skyEase(552,571,t);
- const trainY=gapGroundY(trainX)+8;
+ const trainY=gapGroundY(trainX)-8;
  const foxX=320+1080*skyEase(536,571,t);
- const foxY=gapGroundY(foxX);
+ const foxY=gapGroundY(foxX)-3;
  const foxAction=t<548?"reach":t<568?"run":"happy";
  starTrain(ctx,trainX,trainY,.62,t,0,t>550);
  skyFox(ctx,foxX,foxY,.83,t,t<548?"determined":"happy",foxAction);
