@@ -207,10 +207,11 @@ fn native_project_save(
     content: String,
     suggested_name: String,
     save_as: bool,
+    export_copy: bool,
 ) -> Result<Option<String>, String> {
     validate_tmotion(&content)?;
 
-    let existing = if save_as {
+    let existing = if save_as || export_copy {
         None
     } else {
         state
@@ -242,11 +243,13 @@ fn native_project_save(
         .map_err(|error| format!("Could not save the project file: {error}"))?;
 
     let name = basename(&path);
-    let mut current = state
-        .current_path
-        .lock()
-        .map_err(|_| "The native project session is unavailable.".to_string())?;
-    *current = Some(path);
+    if !export_copy {
+        let mut current = state
+            .current_path
+            .lock()
+            .map_err(|_| "The native project session is unavailable.".to_string())?;
+        *current = Some(path);
+    }
     Ok(Some(name))
 }
 
