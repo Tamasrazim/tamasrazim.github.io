@@ -291,6 +291,7 @@
     if (!startBtn) return;
     var ready = !!videoBlob && !!videoEl && videoEl.readyState >= 2 &&
       Number.isFinite(videoEl.duration) && videoEl.duration > 0 &&
+      (!audioBlob || (audioEl && audioEl.readyState >= 2 && Number.isFinite(audioEl.duration))) &&
       supportsCapture() && !!chooseMime(!!audioBlob);
     startBtn.disabled = working || !ready;
     cancelBtn.disabled = !working;
