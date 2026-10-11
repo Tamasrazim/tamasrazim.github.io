@@ -11,6 +11,7 @@
   var overlay, videoInput, audioInput, videoEl, audioEl, startBtn, cancelBtn;
   var statusEl, progressEl, qualityEl, keepAudioEl, videoInfo, audioInfo;
   var recorder = null, chunks = [], working = false, cancelled = false, recordingError = '';
+  var formatEl = null;
   var videoBlob = null, audioBlob = null, audioLabel = '', videoLabel = '';
   var videoUrl = '', audioUrl = '', outputUrl = '';
   var sourceVideoStream = null, sourceAudioStream = null, mixedStream = null;
@@ -34,11 +35,15 @@
     if (n < 1024 * 1024) return (n / 1024).toFixed(0) + ' KB';
     return (n / 1024 / 1024).toFixed(1) + ' MB';
   }
-  function chooseMime(hasAudio) {
+  function chooseMime(hasAudio, preference) {
     if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) return '';
-    var candidates = hasAudio
+    var mp4 = hasAudio
+      ? ['video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4;codecs=avc1.64003E,mp4a.40.2', 'video/mp4']
+      : ['video/mp4;codecs=avc1', 'video/mp4;codecs=avc1.64003E', 'video/mp4'];
+    var webm = hasAudio
       ? ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']
       : ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+    var candidates = preference === 'mp4' ? mp4 : preference === 'webm' ? webm : mp4.concat(webm);
     for (var i = 0; i < candidates.length; i++) {
       try { if (MediaRecorder.isTypeSupported(candidates[i])) return candidates[i]; } catch (_) {}
     }
@@ -93,7 +98,7 @@
   }
   function updateButtons() {
     var ready = !!videoBlob && !!videoEl && Number.isFinite(videoEl.duration) &&
-      videoEl.duration > 0 && supportsCapture() && !!chooseMime(!!audioBlob);
+      videoEl.duration > 0 && supportsCapture() && !!chooseMime(!!audioBlob, formatEl ? formatEl.value : 'auto');
     if (startBtn) startBtn.disabled = working || !ready;
     if (cancelBtn) cancelBtn.disabled = !working;
   }
@@ -155,12 +160,13 @@
     overlay.setAttribute('aria-label', 'TRILYVA Finish Movie');
     overlay.innerHTML = [
       '<section class="tmf-window">',
-      '<header class="tmf-head"><div><strong>TRILYVA / FINISH MOVIE</strong><br><small>LOCAL ASSEMBLY · VIDEO + AUDIO → WEBM</small></div><div class="tmf-spacer"></div><button class="tmf-x" id="tmfClose" aria-label="Close">×</button></header>',
+      '<header class="tmf-head"><div><strong>TRILYVA / FINISH MOVIE</strong><br><small>LOCAL ASSEMBLY · VIDEO + AUDIO → MP4 / WEBM</small></div><div class="tmf-spacer"></div><button class="tmf-x" id="tmfClose" aria-label="Close">×</button></header>',
       '<div class="tmf-body">',
       '<section class="tmf-card"><label class="tmf-label" for="tmfVideoFile">01 / Rendered video or stock clip</label><input id="tmfVideoFile" type="file" accept="video/*,.mp4,.webm,.mov,.m4v"><div class="tmf-meta" id="tmfVideoInfo">No video selected.</div><p class="tmf-note">Choose the video exported from TRILYVA. Common browser-decodable MP4 and WebM sources are supported. The source video duration determines the final length.</p></section>',
       '<section class="tmf-card"><label class="tmf-label" for="tmfAudioFile">02 / Dialogue, music, or soundtrack (optional)</label><input id="tmfAudioFile" type="file" accept="audio/*,.wav,.mp3,.m4a,.ogg,.webm"><div class="tmf-meta" id="tmfAudioInfo">No audio selected — video-only output.</div><div class="tmf-actions" style="padding:10px 0 0"><button class="tmf-btn" id="tmfUseGenerated" disabled>Use generated Voice Studio WAV</button><button class="tmf-btn" id="tmfClearAudio">Video only</button></div><p class="tmf-note">Use the generated five-minute dialogue/soundtrack WAV or import any local audio track. Audio begins at 00:00; if it is shorter than the video, the remainder is silent.</p></section>',
-      '<section class="tmf-card"><label class="tmf-label" for="tmfQuality">03 / WebM encoding quality</label><select id="tmfQuality"><option value="8">Standard · 8 Mbps</option><option value="16" selected>High · 16 Mbps</option><option value="28">Very high · 28 Mbps</option><option value="45">4K / high motion · 45 Mbps</option><option value="65">Maximum · 65 Mbps</option></select><div class="tmf-meta">Output: WebM video; Opus audio when a soundtrack is selected.</div><p class="tmf-note">Available bitrate and resolution are bounded by the browser, source file, and hardware encoder. This finalizer preserves the decoded source dimensions; it does not upscale the clip.</p></section>',
-      '<section class="tmf-card"><label class="tmf-label">04 / Render method</label><div class="tmf-meta">Real-time media capture</div><p class="tmf-note">The browser plays the source video at normal speed while recording its video stream and the selected audio. A five-minute source therefore takes about five minutes to finalize. Keep this tab open while recording.</p><p class="tmf-note">This is fully local but re-encodes the video. For lossless stock delivery, keep your original render and use a separate validated muxing workflow where available.</p></section>',
+      '<section class="tmf-card"><label class="tmf-label" for="tmfFormat">03 / Delivery format</label><select id="tmfFormat"><option value="auto" selected>Automatic - MP4 where supported</option><option value="mp4">MP4 only - H.264 / AAC where available</option><option value="webm">WebM only - VP9 / Opus where available</option></select><div class="tmf-meta">Browser codec support decides which formats can be recorded.</div><p class="tmf-note">For stock delivery, choose the container and codec required by the target marketplace. Automatic prefers MP4 and falls back to WebM when necessary.</p></section>',
+      '<section class="tmf-card"><label class="tmf-label" for="tmfQuality">04 / Video bitrate</label><select id="tmfQuality"><option value="8">Standard · 8 Mbps</option><option value="16" selected>High · 16 Mbps</option><option value="28">Very high · 28 Mbps</option><option value="45">4K / high motion · 45 Mbps</option><option value="65">Maximum · 65 Mbps</option></select><div class="tmf-meta">Automatic mode prefers MP4 when this browser supports it.</div><p class="tmf-note">Available bitrate and resolution are bounded by the browser, source file, and hardware encoder. This finalizer preserves the decoded source dimensions; it does not upscale the clip.</p></section>',
+      '<section class="tmf-card"><label class="tmf-label">05 / Render method</label><div class="tmf-meta">Real-time media capture</div><p class="tmf-note">The browser plays the source video at normal speed while recording its video stream and the selected audio. A five-minute source therefore takes about five minutes to finalize. Keep this tab open while recording.</p><p class="tmf-note">This is fully local but re-encodes the video. For lossless stock delivery, keep your original render and use a separate validated muxing workflow where available.</p></section>',
       '</div>',
       '<div class="tmf-actions"><button class="tmf-btn primary" id="tmfStart" disabled>Create finished movie</button><button class="tmf-btn" id="tmfCancel" disabled>Cancel render</button></div>',
       '<div class="tmf-status" id="tmfStatus" role="status" aria-live="polite">Choose a video. Audio is optional. No files are uploaded.</div><div class="tmf-progress"><i id="tmfProgress"></i></div>',
@@ -179,6 +185,8 @@
     statusEl = $('tmfStatus');
     progressEl = $('tmfProgress');
     qualityEl = $('tmfQuality');
+    formatEl = $('tmfFormat');
+    formatEl.addEventListener('change', updateButtons);
     keepAudioEl = $('tmfUseGenerated');
     videoInfo = $('tmfVideoInfo');
     audioInfo = $('tmfAudioInfo');
@@ -304,7 +312,7 @@
       setStatus('This browser lacks the required media capture API. Use an up-to-date Chromium-based browser.', 'error');
       return;
     }
-    var mime = chooseMime(!!audioBlob);
+    var mime = chooseMime(!!audioBlob, formatEl ? formatEl.value : 'auto');
     if (!mime) {
       setStatus('No compatible WebM MediaRecorder codec is available in this browser.', 'error');
       return;
@@ -447,7 +455,8 @@
     }
     setProgress(1);
     var base = (videoLabel || 'trilyva-movie').replace(/\.[^.]+$/, '').replace(/[^a-z0-9_-]+/gi, '-').replace(/^-+|-+$/g, '') || 'trilyva-movie';
-    triggerDownload(blob, base + '-finished.webm');
+    var extension = /^video\/mp4/i.test(recordedMime) ? 'mp4' : 'webm';
+    triggerDownload(blob, base + '-finished.' + extension);
     setStatus('MOVIE READY · ' + formatBytes(blob.size) + ' · ' + recordedMime + ' · ' +
       humanTime(videoEl.duration) + ' · ' + (audioBlob ? ('audio: ' + audioLabel) : 'video only') +
       '. The source file is unchanged.', 'green');
