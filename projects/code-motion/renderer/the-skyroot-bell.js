@@ -170,9 +170,11 @@ function skyBackground(ctx, t, theme) {
     const B = b.match(/[0-9a-f]{2}/gi).map(v => parseInt(v, 16));
     return "rgb(" + A.map((v, i) => Math.round(skyMix(v, B[i], q))).join(",") + ")";
   };
-  const top = mixColor(p[0][0], p[1][0], f * 0.22);
-  const mid = mixColor(p[0][1], p[1][1], f * 0.22);
-  const low = mixColor(p[0][2], p[1][2], f * 0.22);
+  // p is indexed by vertical color stop: [variant A, variant B].
+  // Blend matching sky stops; each pair contains exactly two color strings.
+  const top = mixColor(p[0][0], p[0][1], f * 0.22);
+  const mid = mixColor(p[1][0], p[1][1], f * 0.22);
+  const low = mixColor(p[2][0], p[2][1], f * 0.22);
   ctx.fillStyle = skyGradient(ctx, 0, 0, 0, 1080, [[0, top], [0.53, mid], [1, low]]);
   ctx.fillRect(0, 0, 1920, 1080);
   const sunX = theme === "wood" || theme === "night" || theme === "dusk" ? 1515 : 1560;
