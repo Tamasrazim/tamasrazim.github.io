@@ -4461,25 +4461,51 @@ function workerEngine() {
 }
 
 function bootEngine() {
+  var nativeDesktop = !!(window.__TAURI__ && window.__TAURI__.core &&
+    typeof window.__TAURI__.core.invoke === 'function');
   buildLocal();
+
+  /*
+   * Native desktop exposes a narrow, user-invoked IPC bridge for project files
+   * and local speech. The renderer evaluates user-authored animation code in a
+   * dedicated Worker so that code cannot reach the Tauri window bridge.
+   * Never fall back to evaluating user code in the privileged WebView.
+   */
   var wantWorker = (typeof Worker !== 'undefined') && (typeof OffscreenCanvas !== 'undefined') &&
     (typeof OffscreenCanvas.prototype.transferToImageBitmap === 'function');
+
   if (!wantWorker) {
+    if (nativeDesktop) {
+      return Promise.reject(new Error(
+        'TRILYVA Native requires a Web Worker and OffscreenCanvas for isolated animation execution. ' +
+        'This WebView does not provide both features, so the renderer has stopped rather than running project code beside native file and speech commands.'
+      ));
+    }
     Engine.api = mainEngine(); Engine.mode = 'main';
     Engine.bootNote = (typeof OffscreenCanvas === 'undefined') ? 'OffscreenCanvas is missing, so rendering runs on the main thread.' : 'Workers are unavailable, so rendering runs on the main thread.';
     return Promise.resolve();
   }
-  return new Promise(function (resolve) {
+
+  return new Promise(function (resolve, reject) {
     var e;
     try { e = workerEngine(); } catch (err) {
+      if (nativeDesktop) {
+        reject(new Error('TRILYVA Native could not start its isolated animation Worker: ' + (err.message || err)));
+        return;
+      }
       Engine.api = mainEngine(); Engine.mode = 'main';
       Engine.bootNote = 'The worker could not start (' + err.message + '), so rendering runs on the main thread.';
-      return resolve();
+      resolve();
+      return;
     }
     var settled = false;
     var to = setTimeout(function () {
       if (settled) return; settled = true;
       try { e.raw.terminate(); } catch (x) { }
+      if (nativeDesktop) {
+        reject(new Error('TRILYVA Native did not receive a reply from its isolated animation Worker within 4 seconds. No main-thread fallback was started.'));
+        return;
+      }
       Engine.api = mainEngine(); Engine.mode = 'main';
       Engine.bootNote = 'The worker did not answer within 4 s, so rendering runs on the main thread.';
       resolve();
@@ -4491,6 +4517,11 @@ function bootEngine() {
       resolve();
     }).catch(function (err) {
       if (settled) return; settled = true; clearTimeout(to);
+      try { e.raw.terminate(); } catch (x) { }
+      if (nativeDesktop) {
+        reject(new Error('TRILYVA Native could not initialize the isolated animation Worker: ' + (err.message || err) + '. Main-thread fallback is disabled in native mode.'));
+        return;
+      }
       Engine.api = mainEngine(); Engine.mode = 'main';
       Engine.bootNote = 'The worker failed (' + (err.message || err) + '), so rendering runs on the main thread.';
       resolve();
