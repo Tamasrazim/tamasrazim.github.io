@@ -219,7 +219,7 @@ const neoDownloadPage=read('projects/neo/download/index.html');
 must(neoDownloadPage.includes('releases/latest/download/NEO-Setup.exe')&&neoDownloadPage.includes('releases/latest/download/NEO-Portable.zip'),'NEO download page links to the latest installer and portable package');
 must(neoDownloadPage.includes('Download NEO Setup')&&neoDownloadPage.includes('Portable ZIP')&&neoDownloadPage.includes('Windows x64'),'NEO download page has clear professional download actions and platform details');
 must(!neoDownloadPage.includes('/projects/razim-fps/')&&!neoDownloadPage.includes('download.html'),'canonical NEO download page hides the old implementation path and .html extension');
-must(read('projects/kynestra/index.html').includes('alpha foundation')&&read('projects/kynestra/index.html').includes('Download KYNESTRA'),'KYNESTRA has a dedicated project overview page');
+must(read('projects/kynestra/index.html').includes('NATIVE SOFTWARE / WINDOWS X64 / ALPHA')&&read('projects/kynestra/index.html').includes('Download KYNESTRA'),'KYNESTRA has a dedicated project overview page');
 must(read('projects/kynestra/download/index.html').includes('releases/latest/download/KYNESTRA-setup.exe')&&!read('projects/kynestra/download/index.html').includes('download.html'),'KYNESTRA has a clean download route and installer link');
 must(read('KYNESTRA/download.html').includes('location.replace("/projects/kynestra/download/")'),'legacy KYNESTRA download URL redirects');
 must(read('projects/asset-vault/index.html').includes('href="/asset-vault/"'),'Stock Asset Vault project page links to its workspace');
