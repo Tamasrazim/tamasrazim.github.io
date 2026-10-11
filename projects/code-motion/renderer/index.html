@@ -8626,9 +8626,8 @@ function filmFox(ctx,x,y,s,t,mood,pose){
   ctx.strokeStyle="#8a433d";ctx.lineWidth=2.5;ctx.beginPath();
   if(mood==="surprised")ctx.ellipse(18,-89,5,7,0,0,Math.PI*2);else ctx.arc(15,-94,10,.2,Math.PI-.2);
   ctx.stroke();
-  ctx.restore();
-  // Small paw pads are visible when Pip reaches up.
-  if(reach||wave){ctx.fillStyle="#ffe7be";ctx.beginPath();ctx.arc(x+(wave?39:-52)*s,y-120*s,5*s,0,Math.PI*2);ctx.fill();}
+  // Small paw pads are drawn in Pip's local coordinate system.
+  if(reach||wave){ctx.fillStyle="#ffe7be";ctx.beginPath();ctx.arc(wave?39:-52,-120,5,0,Math.PI*2);ctx.fill();}
   ctx.restore();
 }
 function filmBird(ctx,x,y,s,t,pose){
