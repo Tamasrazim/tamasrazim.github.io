@@ -281,9 +281,9 @@ function init(){
  o.querySelector('#tvsPreview').addEventListener('click',preview);
  o.querySelector('#tvsStop').addEventListener('click',stopAudio);
  o.querySelector('#tvsBuild').addEventListener('click',build);
- o.querySelector('#tvsSrt').addEventListener('click',function(){if(lastSrt)download(new Blob([lastSrt],{type:'text/plain;charset=utf-8'}),'nori-and-the-last-light.en.srt');});
+ o.querySelector('#tvsSrt').addEventListener('click',function(){if(lastSrt)download(new Blob([lastSrt],{type:'text/plain;charset=utf-8'}),'pip-and-the-rainbow-kite.en.srt');});
  o.querySelector('#tvsDefault').addEventListener('click',function(){if(busy)return;o.querySelector('#tvsScript').value=DEFAULT_SCRIPT;countCues();});
- o.querySelector('#tvsSave').addEventListener('click',function(){var raw=o.querySelector('#tvsScript').value,p=parseScript(raw);download(new Blob([JSON.stringify({format:'TRILYVA_DIALOGUE_1',durationSeconds:FILM,script:raw,parsedLines:p.rows.length},null,2)],{type:'application/json'}),'nori-and-the-last-light-dialogue.json');setStatus(p.errors.length?p.errors.join(' '):'Dialogue JSON exported: '+p.rows.length+' cues.',p.errors.length?'warn':'green');});
+ o.querySelector('#tvsSave').addEventListener('click',function(){var raw=o.querySelector('#tvsScript').value,p=parseScript(raw);download(new Blob([JSON.stringify({format:'TRILYVA_DIALOGUE_1',durationSeconds:FILM,script:raw,parsedLines:p.rows.length},null,2)],{type:'application/json'}),'pip-and-the-rainbow-kite-dialogue.json');setStatus(p.errors.length?p.errors.join(' '):'Dialogue JSON exported: '+p.rows.length+' cues.',p.errors.length?'warn':'green');});
  o.querySelector('#tvsImportBtn').addEventListener('click',function(){o.querySelector('#tvsImport').click();});
  o.querySelector('#tvsImport').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f)return;var reader=new FileReader();reader.onload=function(){try{var d=JSON.parse(String(reader.result)),src=typeof d==='string'?d:d.script;if(typeof src!=='string')throw new Error('JSON file has no script field.');o.querySelector('#tvsScript').value=src;countCues();setStatus('Local dialogue script imported.','green');}catch(e){setStatus('Import failed: '+e.message,'error');}};reader.readAsText(f);this.value='';});
  countCues();
@@ -349,7 +349,7 @@ function build(){
   setStatus('Writing stereo PCM samples to WAV…');bar.style.width='92%';await new Promise(function(resolve){setTimeout(resolve,0);});
   var blob=wav(left,right);lastBlob=blob;lastSrt=makeSrt(compiled);try{window.dispatchEvent(new CustomEvent('trilyva:voice-track-ready',{detail:{blob:blob,durationSeconds:FILM,sampleRate:SR}}));}catch(_){}
   if(dl.dataset.url)try{URL.revokeObjectURL(dl.dataset.url);}catch(e){}
-  var url=URL.createObjectURL(blob);dl.dataset.url=url;dl.href=url;dl.download='nori-and-the-last-light-voice-track.wav';dl.hidden=false;srt.disabled=false;bar.style.width='100%';
+  var url=URL.createObjectURL(blob);dl.dataset.url=url;dl.href=url;dl.download='pip-and-the-rainbow-kite-voice-track.wav';dl.hidden=false;srt.disabled=false;bar.style.width='100%';
   setStatus('READY · 05:00 WAV · '+(blob.size/1048576).toFixed(1)+' MB · '+compiled.length+' cues · '+(o.querySelector('#tvsAmbience').checked?'original score and atmosphere included':'dialogue only')+'.','green');
  }catch(e){console.error('TRILYVA Voice Studio',e);setStatus('Render failed: '+String(e&&e.message||e),'error');}
  finally{busy=false;btn.disabled=false;}
