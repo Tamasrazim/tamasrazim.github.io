@@ -1,4 +1,4 @@
-const CACHE = 'tamasrazim-trilyva-pwa-v70';
+const CACHE = 'tamasrazim-trilyva-pwa-v71';
 const CORE = [
   './',
   './index.html',
@@ -6,7 +6,9 @@ const CORE = [
   './voice-studio.js',
   './movie-finalizer.js',
   './niko-and-the-clockwork-bird.js',
+  './the-skyroot-bell.js',
   '../../trilyva/niko-and-the-clockwork-bird.html',
+  '../../trilyva/the-skyroot-bell.html',
   './manifest.webmanifest',
   './library/library.js',
   './library/manifest.json',
@@ -15,6 +17,7 @@ const CORE = [
   './library/living-emojis.js',
   './library/motion-backgrounds.js',
   './library/green-screen-overlays.js',
+  './library/story-films.js',
   './library/prism-data.js',
   './library/prism-web-icons.json'
 ];
