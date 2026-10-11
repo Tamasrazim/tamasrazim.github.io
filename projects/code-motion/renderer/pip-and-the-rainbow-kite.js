@@ -205,8 +205,9 @@ function filmFox(ctx,x,y,s,t,mood,pose){
   ctx.fillStyle="rgba(255,131,135,.45)";ctx.beginPath();ctx.ellipse(-28,-102,7,4,0,0,Math.PI*2);ctx.fill();
   ctx.fillStyle="#fff0d2";ctx.beginPath();ctx.ellipse(23,-103,12,8,.15,0,Math.PI*2);ctx.fill();ctx.fillStyle="#84433b";ctx.beginPath();ctx.ellipse(31,-104,4,3,0,0,Math.PI*2);ctx.fill();
   ctx.strokeStyle="#8a433d";ctx.lineWidth=2.5;ctx.beginPath();
-  if(mood==="surprised")ctx.ellipse(18,-89,5,7,0,0,Math.PI*2);else ctx.arc(15,-94,10,.2,Math.PI-.2);
-  ctx.stroke();
+  if(mood==="surprised"){ctx.ellipse(18,-89,5,7,0,0,Math.PI*2);ctx.stroke();}
+  else if(filmTalking("PIP",t)){ctx.fillStyle="#813b3c";ctx.beginPath();ctx.ellipse(15,-93,6,4.5+Math.abs(Math.sin(t*17))*2.7,.05,0,Math.PI*2);ctx.fill();ctx.fillStyle="#f58f95";ctx.beginPath();ctx.ellipse(16,-90,3.2,1.8,0,0,Math.PI*2);ctx.fill();}
+  else{ctx.arc(15,-94,10,.2,Math.PI-.2);ctx.stroke();}
   // Small paw pads are drawn in Pip's local coordinate system.
   if(reach||wave){ctx.fillStyle="#ffe7be";ctx.beginPath();ctx.arc(wave?39:-52,-120,5,0,Math.PI*2);ctx.fill();}
   ctx.restore();
@@ -222,6 +223,7 @@ function filmBird(ctx,x,y,s,t,pose){
   ctx.save();ctx.translate(-22,-31);ctx.rotate(pose==="fly"?flap*.9:Math.sin(t*2)*.12);ctx.fillStyle="#35c3e6";ctx.beginPath();ctx.ellipse(-3,0,17,10,-.2,0,Math.PI*2);ctx.fill();ctx.restore();
   ctx.fillStyle="#fff";ctx.beginPath();ctx.ellipse(7,-59,7.5,9,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#243c55";ctx.beginPath();ctx.arc(9,-58,4.3,0,Math.PI*2);ctx.fill();ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(8,-61,1.5,0,Math.PI*2);ctx.fill();
   ctx.fillStyle="#ffad43";ctx.beginPath();ctx.moveTo(23,-52);ctx.lineTo(43,-45);ctx.lineTo(24,-39);ctx.closePath();ctx.fill();
+  if(filmTalking("OLLIE",t)){ctx.fillStyle="#e98731";ctx.beginPath();ctx.moveTo(24,-46);ctx.lineTo(41,-44);ctx.lineTo(24,-42);ctx.closePath();ctx.fill();}
   ctx.strokeStyle="#d18c3c";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(25,-25);ctx.lineTo(25,-12);ctx.moveTo(10,-12);ctx.lineTo(27,-12);ctx.moveTo(38,-25);ctx.lineTo(39,-12);ctx.stroke();
   ctx.strokeStyle="#7a5a5b";ctx.lineWidth=1.7;ctx.beginPath();ctx.moveTo(11,-43);ctx.quadraticCurveTo(16,-38,21,-43);ctx.stroke();
   ctx.restore();
@@ -236,7 +238,8 @@ function filmTurtle(ctx,x,y,s,t,pose){
   ctx.fillStyle="#fff";ctx.beginPath();ctx.ellipse(60,-45,5.5,7,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#233e36";ctx.beginPath();ctx.arc(62,-44,2.5,0,Math.PI*2);ctx.fill();
   ctx.fillStyle="#489c58";ctx.beginPath();ctx.ellipse(12,-1,14,7,.12,0,Math.PI*2);ctx.ellipse(-22,-1,14,7,-.12,0,Math.PI*2);ctx.fill();
   ctx.fillStyle="#447b49";ctx.beginPath();ctx.ellipse(71,-31,4,3,0,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle="#337b4c";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(59,-26);ctx.quadraticCurveTo(65,-22,71,-27);ctx.stroke();
+  if(filmTalking("TUCK",t)){ctx.fillStyle="#276c43";ctx.beginPath();ctx.ellipse(66,-26,5,3+Math.abs(Math.sin(t*12))*2,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#f29d9a";ctx.beginPath();ctx.ellipse(66,-24,2.5,1.1,0,0,Math.PI*2);ctx.fill();}
+  else{ctx.strokeStyle="#337b4c";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(59,-26);ctx.quadraticCurveTo(65,-22,71,-27);ctx.stroke();}
   if(pose==="wave"){ctx.strokeStyle="#69b95e";ctx.lineWidth=8;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(26,-46);ctx.quadraticCurveTo(38,-63,42+Math.sin(t*7)*4,-73);ctx.stroke();}
   ctx.restore();
 }
@@ -272,6 +275,16 @@ function filmRibbon(ctx,x,y,s,t){
 function filmPuddle(ctx,x,y,w,t){
   const g=ctx.createRadialGradient(x,y,1,x,y,w);g.addColorStop(0,"rgba(205,247,255,.7)");g.addColorStop(1,"rgba(66,165,196,.08)");ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(x,y,w,w*.18,0,0,Math.PI*2);ctx.fill();
   for(let i=0;i<3;i++){const r=((t*.6+i*.33)%1)*w*.8;ctx.strokeStyle="rgba(234,252,255,"+((1-r/w)*.35)+")";ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(x,y,r,r*.1,0,0,Math.PI*2);ctx.stroke();}
+}
+function filmTalking(speaker,t){
+  for(let i=0;i<FILM_CUES.length;i++){
+    const cue=FILM_CUES[i];if(cue[1]!==speaker||t<cue[0])continue;
+    const next=i+1<FILM_CUES.length?FILM_CUES[i+1][0]:FILM_DURATION;
+    const words=cue[2].replace(/[^A-Za-z\s']/g,"").trim().split(/\s+/).length;
+    const duration=Math.min(Math.max(.5,next-cue[0]-.25),Math.max(.72,words/2.65));
+    if(t<cue[0]+duration)return true;
+  }
+  return false;
 }
 function filmCaption(ctx,t,chapter){
   ctx.save();ctx.globalAlpha=.92;
