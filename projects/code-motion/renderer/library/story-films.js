@@ -24,7 +24,7 @@ export default {
       id: "the-skyroot-bell",
       title: "The Skyroot Bell — 10-Minute Fantasy Cartoon",
       category: "story film",
-      description: "A complete 600-second 4K UHD / 60 fps fantasy story: Eira the young fox and Pip the lantern-moth follow the missing Skyroot Bell, meet Nix the lonely cloud-dragon, and help a floating village learn to share its light. Original vector characters, layered scenery, chapter transitions and timed dialogue.",
+      description: "A complete 600-second 4K UHD / 60 fps fantasy cartoon directed across 126 authored camera setups. Eira the fox, Pip the lantern-moth and Nix the cloud-dragon cross a singing brook, whispering wood, crystal ridge and floating market. Includes story-timed action layers, reaction close-ups, dialogue-cued mouth animation, deterministic frames and an MP4/WebM capture player.",
       code: code,
       width: 3840,
       height: 2160,
