@@ -860,7 +860,7 @@ function starDrawNimbusTerminal(ctx,t){
  starSky(ctx,t,"#62a9e2","#c7e9f7","#f8d9b9");for(let i=0;i<5;i++){const x=150+i*390;skyCloud(ctx,x,200+(i%3)*92,.7+(i%2)*.22,"#f7fcff",t,i*2);skyCloud(ctx,x+160,355+(i%2)*66,.5,"#e5f2ff",t,i+4);}
  ctx.fillStyle="#3b5677";ctx.beginPath();ctx.moveTo(130,825);ctx.lineTo(130,425);ctx.quadraticCurveTo(130,300,265,300);ctx.quadraticCurveTo(400,300,400,425);ctx.lineTo(400,825);ctx.closePath();ctx.fill();ctx.fillStyle="#d3e4e8";ctx.beginPath();ctx.moveTo(160,820);ctx.lineTo(160,434);ctx.quadraticCurveTo(160,337,265,337);ctx.quadraticCurveTo(370,337,370,434);ctx.lineTo(370,820);ctx.closePath();ctx.fill();skyRound(ctx,188,480,154,112,14,"#233d61","#e7d0a6",4);ctx.textAlign="center";ctx.fillStyle="#f7e5b7";ctx.font="800 20px ui-monospace,monospace";ctx.fillText("NIMBUS",265,525);ctx.fillText("TERMINAL",265,554);
  ctx.fillStyle="#8395a8";ctx.fillRect(0,817,1920,263);ctx.fillStyle="#b7c2ca";ctx.fillRect(0,817,1920,16);for(let i=0;i<28;i++){ctx.strokeStyle=i%2?"#627a91":"#d3d3cb";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(i*73,836);ctx.lineTo(i*73-24,1060);ctx.stroke();}
- starTrack(ctx,805,t,false,"#c2d7db");starTrain(ctx,820,809,.82,t,.005,true);skyFox(ctx,475,812,1,t,"happy",t<34?"walk":"reach");skyMoth(ctx,552,638,.62,t,.46);skyDragon(ctx,1244,810,.87,t,"happy",false);starSignal(ctx,1537,817,.83,t,true,"#ffe5a4");
+ starTrack(ctx,805,t,false,"#c2d7db");starTrain(ctx,820,809,.82,t,.005,true);skyFox(ctx,475,814,1,t,"happy",t<34?"walk":"reach");skyMoth(ctx,552,638,.62,t,.46);skyDragon(ctx,1244,810,.87,t,"happy",false);starSignal(ctx,1537,817,.83,t,true,"#ffe5a4");
  
 }
 function starDrawBlackout(ctx,t){
