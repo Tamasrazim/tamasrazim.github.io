@@ -8519,9 +8519,10 @@ function film3DRotate(p,ax,ay,az){
   return [x,y,z];
 }
 function film3DDraw(ctx,parts,x,y,scale){
-  const faces=[],D=1700;
+  const faces=[],D=1700,pitch=.18,cp=Math.cos(pitch),sp=Math.sin(pitch);
   const lx=-.43,ly=-.55,lz=.72,ll=Math.hypot(lx,ly,lz),L=[lx/ll,ly/ll,lz/ll];
-  const hx=L[0],hy=L[1],hz=L[2]+1,hl=Math.hypot(hx,hy,hz),H=[hx/hl,hy/hl,hz/hl];
+  // A slightly elevated camera reveals the top planes of heads, shells and wings.
+  const view=[0,-sp,cp],hx=L[0]+view[0],hy=L[1]+view[1],hz=L[2]+view[2],hl=Math.hypot(hx,hy,hz),H=[hx/hl,hy/hl,hz/hl];
   for(const part of parts){
     const geo=film3DGeometry(part.segments,part.rings),points=new Array(geo.vertices.length);
     for(let i=0;i<geo.vertices.length;i++){
@@ -8529,7 +8530,7 @@ function film3DDraw(ctx,parts,x,y,scale){
       let p=film3DRotate([v[0]*part.rx,v[1]*part.ry,v[2]*part.rz],part.rotX,part.rotY,part.rotZ);
       p=[p[0]*scale,p[1]*scale,(p[2]+part.z)*scale];
       const perspective=D/(D-p[2]);
-      points[i]={x:x+part.x*scale+p[0]*perspective,y:y+part.y*scale+p[1]*perspective,z:p[2],world:[p[0],p[1],p[2]]};
+      points[i]={x:x+part.x*scale+p[0]*perspective,y:y+part.y*scale+(p[1]*cp+p[2]*sp)*perspective,z:p[2],world:[p[0],p[1],p[2]]};
     }
     const base=film3DColor(part.color);
     for(const tri of geo.triangles){
@@ -8539,7 +8540,7 @@ function film3DDraw(ctx,parts,x,y,scale){
       let nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;
       const nl=Math.hypot(nx,ny,nz)||1;nx/=nl;ny/=nl;nz/=nl;
       // The scene camera looks from positive Z; discard hidden back faces.
-      if(nz<=.015)continue;
+      if(nz*cp-ny*sp<=.015)continue;
       const diffuse=Math.max(0,nx*L[0]+ny*L[1]+nz*L[2]);
       const spec=Math.pow(Math.max(0,nx*H[0]+ny*H[1]+nz*H[2]),20)*.16;
       const intensity=.43+.6*diffuse+spec;
