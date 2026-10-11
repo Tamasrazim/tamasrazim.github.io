@@ -16,7 +16,7 @@ export default {
     }
 
     const code = await response.text();
-    if (!code.includes("function renderFrame") || !code.includes("SKYROOT_DURATION = 600")) {
+    if (!code.includes("function renderFrame") || !code.includes("STARTRAIN_DURATION = 600")) {
       throw new Error("The Last Star Train source is incomplete or does not match the expected renderer.");
     }
 
