@@ -8557,6 +8557,21 @@ function nllCave(ctx,t,amount){
 function nllTrails(ctx,t,amount,cx,cy){
   if(amount<=0)return;ctx.save();ctx.globalCompositeOperation="lighter";for(let i=0;i<8;i++){const phase=t*.8+i*Math.PI/4;ctx.beginPath();for(let k=0;k<=64;k++){const p=k/64,a=phase+p*Math.PI*4,r=20+p*205,x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r*.56;k?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.strokeStyle="rgba(255,210,115,"+(amount*.12)+")";ctx.lineWidth=2+amount*1.4;ctx.stroke();}ctx.restore();
 }
+function nllCaveApproach(ctx,t){
+  const g=ctx.createLinearGradient(0,0,0,1080);
+  g.addColorStop(0,"#081422");g.addColorStop(.55,"#102130");g.addColorStop(1,"#02060d");
+  ctx.fillStyle=g;ctx.fillRect(0,0,1920,1080);
+  ctx.fillStyle="#111d2b";ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(480,0);ctx.lineTo(565,190);ctx.lineTo(465,355);ctx.lineTo(555,535);ctx.lineTo(420,740);ctx.lineTo(555,1080);ctx.lineTo(0,1080);ctx.closePath();ctx.fill();
+  ctx.fillStyle="#172537";ctx.beginPath();ctx.moveTo(1920,0);ctx.lineTo(1420,0);ctx.lineTo(1320,175);ctx.lineTo(1435,340);ctx.lineTo(1325,520);ctx.lineTo(1450,730);ctx.lineTo(1320,1080);ctx.lineTo(1920,1080);ctx.closePath();ctx.fill();
+  for(let i=0;i<10;i++){const y=100+i*88;nllLine(ctx,60+(i%3)*40,y,420+(i%4)*20,y+Math.sin(i)*20,"rgba(117,154,177,.16)",2);nllLine(ctx,1480-(i%3)*31,y+22,1840-(i%4)*20,y-7,"rgba(117,154,177,.14)",2);}
+  ctx.fillStyle="#283541";ctx.beginPath();ctx.moveTo(670,1080);ctx.bezierCurveTo(790,900,955,835,1040,730);ctx.bezierCurveTo(1110,655,1120,600,1120,535);ctx.lineTo(1310,535);ctx.bezierCurveTo(1310,720,1250,840,1155,920);ctx.bezierCurveTo(1055,1000,990,1040,970,1080);ctx.closePath();ctx.fill();
+  ctx.strokeStyle="rgba(141,179,188,.25)";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(705,1080);ctx.bezierCurveTo(810,914,955,850,1060,745);ctx.bezierCurveTo(1130,670,1150,608,1145,550);ctx.stroke();
+  ctx.fillStyle="#03060c";ctx.beginPath();ctx.moveTo(1090,540);ctx.bezierCurveTo(1040,410,1070,245,1185,190);ctx.bezierCurveTo(1315,115,1450,245,1450,540);ctx.closePath();ctx.fill();
+  ctx.strokeStyle="rgba(94,139,158,.44)";ctx.lineWidth=12;ctx.beginPath();ctx.moveTo(1090,540);ctx.bezierCurveTo(1040,410,1070,245,1185,190);ctx.bezierCurveTo(1315,115,1450,245,1450,540);ctx.stroke();
+  const glow=ctx.createRadialGradient(1260,390,4,1260,390,255);glow.addColorStop(0,"rgba(255,217,133,.28)");glow.addColorStop(1,"rgba(255,217,133,0)");ctx.fillStyle=glow;ctx.fillRect(1000,150,520,500);
+  ctx.fillStyle="#302d29";ctx.beginPath();ctx.ellipse(1262,365,68,91,.04,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#a89c7d";ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(1262,365,59,82,.04,0,Math.PI*2);ctx.stroke();ctx.fillStyle="rgba(251,223,159,.4)";ctx.beginPath();ctx.ellipse(1262,365,49,72,0,0,Math.PI*2);ctx.fill();
+  nllFireflies(ctx,t,nllEase(197,215,t)*.55,1170,450);
+}
 function nllOverlay(ctx,t,chapter){
   ctx.save();ctx.globalAlpha=.76;ctx.fillStyle="#edf0ef";ctx.font="500 16px ui-monospace, Consolas, monospace";ctx.textAlign="left";ctx.textBaseline="top";ctx.fillText(chapter.toUpperCase(),74,55);ctx.textAlign="right";ctx.fillStyle="rgba(241,241,237,.72)";ctx.fillText("TRILYVA SHORT FILM  /  "+String(Math.floor(t/60)).padStart(2,"0")+":"+String(Math.floor(t%60)).padStart(2,"0"),1846,55);nllLine(ctx,74,88,1846,88,"rgba(240,240,230,.18)",1);ctx.restore();
   let cue=null,next=300;for(let i=0;i<STORY_CUES.length;i++){if(t>=STORY_CUES[i][0]){cue=STORY_CUES[i];next=i+1<STORY_CUES.length?STORY_CUES[i+1][0]:300;}else break;}if(!cue)return;
@@ -8567,11 +8582,11 @@ function renderFrame(time,frame,fps,ctx,width,height){
   const t=nllClamp(Number.isFinite(time)?time:frame/Math.max(1,fps),0,STORY_DURATION),scale=Math.min(width/1920,height/1080),ox=(width-1920*scale)/2,oy=(height-1080*scale)/2;
   const storm=nllEase(52,71,t)*(1-nllEase(236,265,t)),dawn=nllEase(272,300,t);ctx.save();ctx.fillStyle="#020309";ctx.fillRect(0,0,width,height);ctx.translate(ox,oy);ctx.scale(scale,scale);
   const chapter=t<52?"THE LIGHTHOUSE":t<98?"THE STORM":t<137?"THE JOURNEY":t<180?"THE FIREFLIES":t<197?"THE BROKEN BRIDGE":t<217?"THE CAVE":t<245?"THE LAST LIGHT":t<282?"THE WAY HOME":"A NEW DAWN";
-  let x=1290,y=730,mood="calm";if(t<52){x=1325;y=746;mood="happy";}else if(t<95){x=1300;y=746;mood="scared";}else if(t<137){x=nllMix(1290,1020,nllEase(98,137,t));y=750;mood="scared";}else if(t<180){x=nllMix(970,1040,nllEase(150,180,t));y=800;mood=t<159?"scared":"calm";}else if(t<197){x=nllMix(410,750,nllEase(180,197,t));y=610;mood="scared";}else if(t<217){x=nllMix(740,850,nllEase(197,217,t));y=790;}else if(t<245){x=760;y=800;mood="happy";}else if(t<282){x=nllMix(1050,1325,nllEase(246,282,t));y=746;mood="happy";}else{x=nllMix(1320,1120,nllEase(282,300,t));y=750;mood="happy";}
+  let x=1290,y=730,mood="calm";if(t<52){x=1325;y=746;mood="happy";}else if(t<95){x=1300;y=746;mood="scared";}else if(t<137){x=nllMix(1290,1020,nllEase(98,137,t));y=750;mood="scared";}else if(t<180){x=nllMix(970,1040,nllEase(150,180,t));y=800;mood=t<159?"scared":"calm";}else if(t<197){x=nllMix(410,750,nllEase(180,197,t));y=610;mood="scared";}else if(t<217){x=nllMix(740,850,nllEase(197,217,t));y=790;}else if(t<245){x=760;y=800;mood="happy";}else if(t<255){x=nllMix(1100,1435,nllEase(245,255,t));y=nllMix(746,410,nllEase(245,255,t));mood="happy";}else if(t<282){x=1435;y=385;mood="happy";}else if(t<294){x=nllMix(1435,1330,nllEase(282,294,t));y=nllMix(385,746,nllEase(282,294,t));mood="happy";}else{x=1330;y=746;mood="happy";}
   if(t<137||t>=245){
     nllSky(ctx,t,storm,dawn);nllSea(ctx,t,storm,dawn);nllLand(ctx);for(let i=0;i<8;i++)nllHouse(ctx,60+i*116,698+(i%3)*12,96,125+(i%3)*14,t>=282,t);
     for(let i=0;i<7;i++){const px=800+i*55,py=752+Math.sin(i*.6)*20;ctx.fillStyle="#302d2b";ctx.fillRect(px,py,8,55);ctx.fillStyle="#ffd99b";ctx.beginPath();ctx.arc(px+4,py,5,0,Math.PI*2);ctx.fill();}
-    ctx.fillStyle="#26303a";ctx.beginPath();ctx.moveTo(670,805);ctx.lineTo(1215,826);ctx.lineTo(1270,857);ctx.lineTo(705,838);ctx.closePath();ctx.fill();nllLighthouse(ctx,t,t<70||(t>=235&&t<300),storm);
+    ctx.fillStyle="#26303a";ctx.beginPath();ctx.moveTo(670,805);ctx.lineTo(1215,826);ctx.lineTo(1270,857);ctx.lineTo(705,838);ctx.closePath();ctx.fill();nllLighthouse(ctx,t,t<70||t>=255,storm);
     if(t<137)nllBoat(ctx,t<95?nllMix(600,680,t/95):nllMix(680,760,(t-95)/42),691,1.1,t,storm);else nllBoat(ctx,nllMix(790,710,(t-245)/37),695,1.03,t,storm);
     nllFox(ctx,x,y,1.05,t,mood);if(t>=120&&t<160){ctx.strokeStyle="#b5cce1";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x-4,y-25);ctx.bezierCurveTo(x-28,y-12,x-20,y+3,x+2,y-1);ctx.stroke();}
     if(t>=245&&t<282)nllFireflies(ctx,t,nllEase(245,260,t)*(1-nllEase(278,282,t)),1270,435);
@@ -8579,13 +8594,13 @@ function renderFrame(time,frame,fps,ctx,width,height){
     nllForest(ctx,t);ctx.fillStyle="rgba(77,142,170,.26)";ctx.beginPath();ctx.ellipse(1310,520,410,85,0,0,Math.PI*2);ctx.fill();for(let i=0;i<10;i++)nllLine(ctx,970+i*45,520+Math.sin(i)*9,1040+i*40,526+Math.sin(i*2)*12,"rgba(176,203,210,.32)",2);
     ctx.fillStyle="#111f2d";ctx.fillRect(1515,270,42,300);ctx.beginPath();ctx.moveTo(1500,290);ctx.lineTo(1536,235);ctx.lineTo(1573,290);ctx.closePath();ctx.fill();nllFireflies(ctx,t,nllEase(158,178,t),1075,570);nllFox(ctx,x,y,1.15,t,mood);
     if(t>163)nllTrails(ctx,t,.7,1080,590);for(let i=0;i<26;i++){const px=90+i*68,py=1000-nllHash(i+50)*65;ctx.strokeStyle="#324a48";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(px,py);ctx.quadraticCurveTo(px+Math.sin(t*2+i)*15,py-56,px+Math.sin(t*1.7+i)*23,py-100-nllHash(i+10)*25);ctx.stroke();}
-  }else if(t<197){nllBridge(ctx,t);nllFireflies(ctx,t,.8,780,480);nllFox(ctx,x,y,1.02,t,mood);}
-  else if(t<217){nllBridge(ctx,t);ctx.fillStyle="#050812";ctx.beginPath();ctx.ellipse(1420,744,240,270,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle="rgba(131,177,193,.3)";ctx.lineWidth=12;ctx.beginPath();ctx.ellipse(1420,744,240,270,0,0,Math.PI*2);ctx.stroke();nllFireflies(ctx,t,.86,1000,560);nllFox(ctx,x,y,1.02,t,mood);}
+  }else if(t<197){nllBridge(ctx,t);nllFireflies(ctx,t,.8,780,480);y=501;nllFox(ctx,x,y,1.02,t,mood);}
+  else if(t<217){nllCaveApproach(ctx,t);x=nllMix(790,1040,nllEase(197,217,t));y=nllMix(795,760,nllEase(197,217,t));nllFireflies(ctx,t,nllEase(204,216,t)*.8,1060,545);nllFox(ctx,x,y,1.0,t,mood);}
   else if(t<245){nllCave(ctx,t,nllEase(216,237,t));const a=nllEase(216,240,t);nllFireflies(ctx,t,a,980,420);nllTrails(ctx,t,a,980,420);nllFox(ctx,x,y,1.08,t,mood);ctx.save();ctx.globalAlpha=nllEase(232,244,t)*.42;const g=ctx.createLinearGradient(1080,400,1920,260);g.addColorStop(0,"rgba(255,224,147,.65)");g.addColorStop(1,"rgba(255,220,139,0)");ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(1065,365);ctx.lineTo(1920,170);ctx.lineTo(1920,365);ctx.lineTo(1065,443);ctx.closePath();ctx.fill();ctx.restore();}
   if(t>=52&&t<250){const flash=Math.pow(Math.max(0,Math.sin((t-54)*2.17)),38)*nllEase(53,57,t)*(1-nllEase(248,250,t));if(flash>.01){ctx.fillStyle="rgba(207,228,250,"+(flash*.54)+")";ctx.fillRect(0,0,1920,1080);ctx.strokeStyle="rgba(245,249,255,"+flash+")";ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(320,120);ctx.lineTo(380,240);ctx.lineTo(330,310);ctx.lineTo(440,445);ctx.stroke();}}
   if(t>=235&&t<272){const p=nllEase(235,252,t)*(1-nllEase(266,272,t));ctx.save();ctx.globalAlpha=p*.55;ctx.strokeStyle="#ffe7a0";ctx.lineWidth=4;ctx.beginPath();for(let i=0;i<=100;i++){const u=i/100,px=760+u*760,py=470+Math.sin(u*10*Math.PI+t*.5)*72+(u-.5)*(u-.5)*105;i?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.stroke();ctx.restore();}
   if(t>=290){ctx.save();ctx.globalAlpha=nllEase(290,294,t)*.8;ctx.fillStyle="rgba(4,9,17,.72)";nllRound(ctx,390,210,1140,360,18);ctx.fill();ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#fff0c6";ctx.font="700 52px ui-sans-serif, system-ui, sans-serif";ctx.fillText("NORI AND THE LAST LIGHT",960,340);ctx.fillStyle="#c3d7e1";ctx.font="500 22px ui-monospace, Consolas, monospace";ctx.fillText("A STORY ABOUT SHARING YOUR LIGHT",960,407);ctx.fillStyle="#efcc83";ctx.fillRect(790,455,260,2);ctx.restore();}
-  nllOverlay(ctx,t,chapter);ctx.restore();
+  const marks=[137,180,197,217,245];let cutFade=0;for(let i=0;i<marks.length;i++){const d=Math.abs(t-marks[i]);if(d<1.25)cutFade=Math.max(cutFade,.2*(1-d/1.25));}if(cutFade>0){ctx.fillStyle="rgba(1,4,9,"+cutFade+")";ctx.fillRect(0,0,1920,1080);}nllOverlay(ctx,t,chapter);ctx.restore();
 }
 </script>
 </body>
