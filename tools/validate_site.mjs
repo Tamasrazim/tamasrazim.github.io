@@ -66,6 +66,8 @@ const htmlFiles=[
   'projects/kynestra/download/index.html',
   'projects/asset-vault/index.html',
   'projects/trilyva/index.html',
+  'projects/trilyva/the-last-star-train.html',
+  'projects/trilyva/niko-and-the-clockwork-bird.html',
   'asset-vault/index.html',
   'projects/code-motion/index.html',
   'projects/code-motion/renderer/index.html',
