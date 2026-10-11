@@ -40,7 +40,8 @@ Linux builds need WebKitGTK 4.1 and the native package/build dependencies listed
 4. **Voice providers are adapters, not copied applications.** The native build includes a first-party bridge to a separately installed VoiceStudio service. TRILYVA does not bundle VoiceStudio source or model weights.
 5. **Keep the local connector narrow.** The bridge is hard-coded to `127.0.0.1:3900`, checks service availability, reads voice-profile metadata, and calls only `POST /v1/audio/speech`. It never exposes VoiceStudio admin or settings routes, follows HTTP redirects, or accepts a remote host.
 6. **No model is assumed stock-cleared.** Exact engine, model, and weight licenses must be reviewed before promoting generated output for paid stock distribution.
-7. **No release promises yet.** Signing, updater, project-file association, crash recovery, accessibility, offline installation, GPU paths, native runtime tests, and large-media regression tests are not complete.
+7. **Isolated animation execution is required in native mode.** Native mode must run user-supplied animation source in a Web Worker with OffscreenCanvas. If the worker cannot start, times out, or fails its handshake, the native renderer now stops instead of falling back to evaluating project code in the privileged WebView that owns native commands. The browser-only edition keeps its existing main-thread fallback.
+8. **No release promises yet.** Signing, updater, crash recovery, accessibility, offline installation, GPU paths, native runtime tests, and large-media regression tests are not complete.
 
 ## Known caveats
 
