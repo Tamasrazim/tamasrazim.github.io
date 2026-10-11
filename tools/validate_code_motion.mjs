@@ -74,7 +74,7 @@ try {
   throw new Error('renderer application JavaScript syntax: ' + error.message);
 }
 
-must(project.includes('./renderer/'), 'project page points to canonical workspace');
+must(project.includes('https://tamasrazim.github.io/projects/trilyva/') && project.includes('target="/projects/trilyva/"'), 'legacy Code Motion route redirects to the official TRILYVA page');
 must(!project.includes('Mediabunny'), 'project page has no stale Mediabunny claim');
 must(!media.includes('Mediabunny'), 'media descriptor has no stale Mediabunny dependency');
 must(media.includes("containers: ['mp4', 'webm']"), 'media descriptor exposes current containers');
