@@ -866,7 +866,30 @@ function skyDrawAwakening(ctx,t){
 }
 function skyDrawFestival(ctx,t){
   skyBackground(ctx,t,"night");skyGround(ctx,t,"#4e6d7d","#214257");
-  skyVillage(ctx,t,true,false);skyTree(ctx,1130,1090,1.13,t,true,false);skyVines(ctx,795,t,true);
+  skyVillage(ctx,t,true,false);
+  // A new light-root bridge finally joins the distant cloud homes to Lumenreach.
+  const bridge=skyEase(550,572,t);
+  if(bridge>0){
+    ctx.save();ctx.globalAlpha=bridge;
+    ctx.lineCap="round";
+    ctx.strokeStyle="rgba(20,33,68,0.48)";ctx.lineWidth=31;
+    ctx.beginPath();ctx.moveTo(1128,628);ctx.bezierCurveTo(1280,525,1478,559,1648,470);ctx.stroke();
+    const bridgeGlow=ctx.createLinearGradient(1128,628,1648,470);
+    bridgeGlow.addColorStop(0,"#f6dc9e");bridgeGlow.addColorStop(.48,"#bce9e6");bridgeGlow.addColorStop(1,"#d6c9ff");
+    ctx.strokeStyle=bridgeGlow;ctx.lineWidth=21;ctx.beginPath();ctx.moveTo(1128,628);ctx.bezierCurveTo(1280,525,1478,559,1648,470);ctx.stroke();
+    ctx.strokeStyle="rgba(255,251,225,0.88)";ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(1133,620);ctx.bezierCurveTo(1280,519,1474,551,1644,465);ctx.stroke();
+    skyFloatingIsland(ctx,1694,489,.49,t,"#a6ddc0");
+    skyHouse(ctx,1692,459,.31,t,true,"#d3d6f1");
+    skyLantern(ctx,1718,405,.43,"#ffe1a1",t,71);
+    for(let i=0;i<9;i++){
+      const p=i/8,x=1135+p*505,y=620-p*150+Math.sin(p*Math.PI)*35;
+      skyGlow(ctx,x,y,30,"rgba(255,226,158,0.42)",bridge*.34);
+      skyStar(ctx,x,y,3.2,"#fff0bf",.7);
+    }
+    ctx.restore();
+  }
+  skyTree(ctx,1130,1090,1.13,t,true,false);skyVines(ctx,795,t,true);
   for(let i=0;i<30;i++){
     const x=44+i*65,y=210+(i%6)*77+Math.sin(t*1.2+i)*10;
     skyLantern(ctx,x,y,.49+(i%3)*.07,["#f6d690","#afdfed","#e7bad6","#d5d3ff"][i%4],t,i+60);
