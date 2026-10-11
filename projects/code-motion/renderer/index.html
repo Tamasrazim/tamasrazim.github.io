@@ -8124,6 +8124,11 @@ var DOCS = [
   '<h5>TIME REMAPPING</h5>',
   '<p>Rate and reverse are part of the time model, not playback tricks. At 0.25× the exporter still writes every frame at the full frame rate; it simply evaluates your code at a quarter of the time. Frame 0 and the last frame are shown in the Loop · Time panel so you can see exactly what will be sampled.</p>',
 
+  '<h5>CARTOON AND STOCK PRODUCTION</h5>',
+  '<p><b>Cartoon:</b> render the animation visuals first. Open <b>Voice Studio</b> to edit timed dialogue, audition the four procedural character voices, and build a local five-minute WAV plus an SRT subtitle file. Then open <b>Finish Movie</b>, select the rendered video, choose <b>Use generated Voice Studio WAV</b>, and create one finished movie.</p>',
+  '<p><b>Stock clip:</b> render a seamless loop or choose a local stock video in <b>Finish Movie</b>. Audio is optional, so the finalizer can make a video-only delivery or combine a selected soundtrack. Automatic delivery prefers MP4 when this browser supports a compatible recorder and otherwise uses WebM. Check the target marketplace specifications before submission.</p>',
+  '<p><b>Important:</b> the main TRILYVA frame exporter is deterministic. Finish Movie is a separate real-time recorder that captures the source video while it plays, then re-encodes it. A five-minute clip takes about five minutes to finish, and real-time capture can drop frames under load. Keep the original render for quality-critical or lossless delivery.</p>',
+
   '<h5>EXPORT — WHAT IS REAL</h5>',
   '<table><tr><th>Format</th><th>Status</th></tr>',
   '<tr><td>MP4 (H.264 / AVC)</td><td>Real. Frames go to the browser\'s WebCodecs H.264 encoder one at a time, and the ISO-BMFF container is written here \u2014 ftyp, mdat and a moov whose sample tables are built from the encoder\'s own output. The avcC record is copied verbatim from the encoder, so the sample description cannot disagree with the samples.</td></tr>',
@@ -8132,7 +8137,7 @@ var DOCS = [
   '<tr><td>PNG sequence → folder</td><td>Real where the File System Access API exists. Frames are written straight to disk, so size is limited only by the drive.</td></tr>',
   '<tr><td>GIF</td><td>Not available. A real GIF needs quantisation and dithering that would change your pixels without telling you.</td></tr>',
   '<tr><td>Transparent WebM or MP4</td><td>Not available. Neither muxer writes an alpha plane, so a transparent composition must be exported as PNG.</td></tr>',
-  '<tr><td>MediaRecorder capture</td><td>Present in the browser, deliberately unused. It records wall-clock time and drops or repeats frames under load.</td></tr>',
+  '<tr><td>MediaRecorder capture</td><td>Used only by Finish Movie to combine an already-rendered local video with audio in real time. It is separate from the deterministic frame exporter and may drop frames under load.</td></tr>',
   '</table>',
 
   '<h5>THE MP4 PATH</h5>',
