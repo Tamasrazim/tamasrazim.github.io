@@ -678,7 +678,7 @@ function skyDrawOpening(ctx, t) {
     ctx.strokeStyle="#9a7b9a";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x,y-76);ctx.lineTo(x,y+20);ctx.stroke();
     skyPath(ctx,[[x,y-74],[x+58,y-57],[x,y-36]],["#f5b9bc","#bed9ff","#f4dc9e"][i%3],"#f9e9d1",1.5);
   }
-  skyFox(ctx,skyMix(435,725,skyEase(2,40,t)),960,1.05,t,"happy","walk");
+  skyFox(ctx,skyMix(435,725,skyEase(2,40,t)),960,1.05,t,t<38?"happy":"determined",t<35?"walk":t<41?"reach":"idle");
   skyMoth(ctx,650+Math.sin(t*1.4)*21,785,0.7,t,.4);
   if(t>24&&t<46){
     for(let i=0;i<10;i++)skyStar(ctx,1050+Math.cos(i*2.4)*i*17,390+Math.sin(i*2.4)*i*11,4,"#fff1ac",.8);
@@ -698,7 +698,7 @@ function skyDrawMissing(ctx,t){
     const x=150+i*95,y=500+Math.sin(i*1.3)*85;
     skyLantern(ctx,x,y,.42, "#b6c0da",t,i);
   }
-  skyFox(ctx,760,975,1.03,t,"worried","idle");skyMoth(ctx,885,774,.7,t,.2);
+  skyFox(ctx,skyMix(760,815,skyEase(64,75,t)),975,1.03,t,t<64?"worried":"determined",t<64?"idle":t<74?"run":"walk");skyMoth(ctx,885+Math.sin(t*1.7)*18,774,.7,t,.2);
   for(let i=0;i<15;i++){const x=900+i*40,y=650+Math.sin(t*1.3+i)*90;skyGlow(ctx,x,y,32,"rgba(197,218,255,0.3)",.12);skyStar(ctx,x,y,3,"#dceaff",.4+.4*Math.sin(t+i));}
 }
 function skyDrawBrookScene(ctx,t){
@@ -711,7 +711,7 @@ function skyDrawBrookScene(ctx,t){
   ctx.beginPath();ctx.moveTo(1065,730);ctx.quadraticCurveTo(1230-branchMove*140,680,1370-branchMove*260,791);ctx.stroke();
   ctx.strokeStyle="#d7ac8e";ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(1072,724);ctx.quadraticCurveTo(1230-branchMove*140,680,1370-branchMove*260,791);ctx.stroke();
   skyPebble(ctx,1250-branchMove*42,807,0.85,t,t>128);
-  skyFox(ctx,skyMix(510,965,skyEase(98,130,t)),960,1.02,t,t>110&&t<130?"worried":"happy",t<126?"walk":"reach");
+  skyFox(ctx,skyMix(510,965,skyEase(98,130,t)),960,1.02,t,t>110&&t<124?"worried":"happy",t<104?"walk":t<126?"reach":t<136?"idle":"walk");
   skyMoth(ctx,1065+Math.sin(t*1.5)*30,690,.68,t,.38);
   if(t>130){for(let i=0;i<8;i++)skyStar(ctx,1170+Math.cos(i*2.4)*i*17,760+Math.sin(i*2.4)*i*8,3.2,"#e2fbff",.65);}
   skyParticles(ctx,t,36,{x:0,y:140,w:1920,h:740},"rgba(222,255,242,ALPHA)");
@@ -736,7 +736,7 @@ function skyDrawWoodScene(ctx,t){
     skyEllipse(ctx,shadowX-18,587,5,7,"#d7dffb",null);skyEllipse(ctx,shadowX+19,587,5,7,"#d7dffb",null);
     ctx.restore();
   }
-  skyFox(ctx,skyMix(990,785,skyEase(153,188,t)),968,1.0,t,t>166&&t<194?"worried":"happy","walk");
+  skyFox(ctx,skyMix(990,785,skyEase(153,188,t)),968,1.0,t,t>166&&t<192?"worried":"determined",t>166&&t<192?"idle":"walk");
   skyMoth(ctx,skyMix(1100,885,skyEase(153,188,t)),760,.73,t,.48);
   skyOwl(ctx,1295,703,.92,t);
   if(t>188){for(let i=0;i<5;i++)skyStar(ctx,1260+i*17,646+i*5,3,"#ffedb7",.8);}
@@ -753,7 +753,7 @@ function skyDrawRidgeScene(ctx,t){
     skyBell(ctx,1514,514,.55,t,.46);
     for(let i=0;i<14;i++)skyStar(ctx,1470+Math.cos(i*2.1)*i*13,489+Math.sin(i*2.1)*i*8,2.8,"#fff2bd",.8);
   }
-  skyFox(ctx,skyMix(580,1160,skyEase(209,250,t)),970,.9,t,"determined","run");
+  skyFox(ctx,skyMix(580,1160,skyEase(209,250,t)),970,.9,t,"determined",t<218?"run":t<233?"reach":"run");
   skyMoth(ctx,skyMix(725,1290,skyEase(210,250,t)),780,.62,t,.4);
 }
 function skyDrawMarketScene(ctx,t){
@@ -763,7 +763,7 @@ function skyDrawMarketScene(ctx,t){
   skySkiff(ctx,skyMix(1450,1680,p),skyMix(460,535,p),.83,t,Math.sin(t*2)*.055);
   skyDragon(ctx,skyMix(1510,1745,p),skyMix(472,535,p),.82,t,"worried",true);
   skyBell(ctx,skyMix(1450,1683,p),skyMix(482,545,p),.44,t,.36);
-  skyFox(ctx,skyMix(390,1280,p),skyMix(926,840,skyEase(282,302,t)),.9,t,t>282&&t<302?"worried":"determined","run");
+  skyFox(ctx,skyMix(390,1280,p),skyMix(926,840,skyEase(282,302,t)),.9,t,t>282&&t<307?"worried":"determined",t<306?"run":t<312?"reach":"run");
   skyMoth(ctx,skyMix(535,1310,p),skyMix(730,685,skyEase(282,302,t)),.63,t,.36);
   // Ribbon streamers pass in front briefly, helping the chase feel fast without blur.
   for(let i=0;i<10;i++){
@@ -776,8 +776,8 @@ function skyDrawMarketScene(ctx,t){
 function skyDrawCloudHomeScene(ctx,t,lights){
   skyCloudHome(ctx,t,lights);
   skySkiff(ctx,skyMix(1030,875,skyEase(322,347,t)),skyMix(610,630,skyEase(322,347,t)),.65,t,.04);
-  skyDragon(ctx,skyMix(1000,820,skyEase(329,350,t)),skyMix(579,621,skyEase(329,350,t)),.94,t,t<393?"worried":"sad",false);
-  skyFox(ctx,skyMix(1240,1115,skyEase(337,353,t)),941,.82,t,t>370&&t<405?"worried":"happy",t<344?"walk":"idle");
+  skyDragon(ctx,skyMix(1000,820,skyEase(329,350,t)),skyMix(579,621,skyEase(329,350,t)),.94,t,t<393?"worried":t<428?"sad":"happy",false);
+  skyFox(ctx,skyMix(1240,1115,skyEase(337,353,t)),941,.82,t,t<370?"happy":t<405?"worried":t<428?"sad":"happy",t<344?"walk":t<405?"idle":t<438?"reach":"idle");
   skyMoth(ctx,skyMix(1350,1195,skyEase(337,353,t)),767,.62,t,.34);
   if(t>=416){
     skyLantern(ctx,925,650,.73,"#ffe1a1",t,3);
@@ -797,7 +797,7 @@ function skyDrawReturn(ctx,t){
   skySkiff(ctx,skyMix(1520,1100,skyEase(447,489,t)),skyMix(420,545,skyEase(447,489,t)),.71,t,.02);
   skyDragon(ctx,skyMix(1518,1150,skyEase(447,489,t)),skyMix(410,515,skyEase(447,489,t)),.79,t,"happy",true);
   skyBell(ctx,skyMix(1518,1150,skyEase(447,489,t)),skyMix(470,570,skyEase(447,489,t)),.45,t,.36);
-  skyFox(ctx,skyMix(480,835,skyEase(447,489,t)),972,.94,t,"determined","walk");
+  skyFox(ctx,skyMix(480,835,skyEase(447,489,t)),972,.94,t,"determined",t<476?"walk":t<486?"run":"reach");
   skyMoth(ctx,skyMix(610,940,skyEase(447,489,t)),745,.64,t,.33);
   if(t>488){
     for(let i=0;i<16;i++){
@@ -825,7 +825,7 @@ function skyDrawGathering(ctx,t){
     skyBell(ctx,1025,495,.76,t,.18);
     ctx.restore();
   }
-  skyFox(ctx,skyMix(775,842,skyEase(479,505,t)),1000,.98,t,t<499?"determined":"happy","walk");
+  skyFox(ctx,skyMix(775,842,skyEase(479,505,t)),1000,.98,t,t<499?"determined":"happy",t<499?"run":t<507?"reach":"idle");
   skyMoth(ctx,skyMix(930,975,skyEase(479,505,t)),786,.68,t,.42);
   // Villagers place their own lights around the tree, instead of waiting for a single saviour.
   for(let i=0;i<13;i++){
@@ -855,7 +855,7 @@ function skyDrawAwakening(ctx,t){
   const ringPower=skyEase(544,565,t);
   skyBell(ctx,1025,495,1.04,t,ringPower*.65);
   skyRingNotes(ctx,1025,493,t,ringPower);
-  skyFox(ctx,skyMix(725,865,skyEase(525,550,t)),1000,1.0,t,t<540?"determined":"happy",t<546?"walk":"ring");
+  skyFox(ctx,skyMix(725,865,skyEase(525,550,t)),1000,1.0,t,t<540?"determined":"happy",t<535?"walk":t<545?"reach":t<546?"idle":"ring");
   skyMoth(ctx,skyMix(835,985,skyEase(525,550,t)),789,.71,t,.5);
   skyDragon(ctx,skyMix(1225,1124,skyEase(525,551,t)),skyMix(840,771,skyEase(525,551,t)),.8,t,"happy",false);
   if(t>550){
