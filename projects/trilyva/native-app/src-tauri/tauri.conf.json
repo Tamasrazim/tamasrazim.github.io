@@ -7,7 +7,7 @@
     "frontendDist": "../../../code-motion/renderer"
   },
   "app": {
-    "withGlobalTauri": false,
+    "withGlobalTauri": true,
     "windows": [
       {
         "label": "main",
