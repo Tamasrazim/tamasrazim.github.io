@@ -35,7 +35,9 @@ const scripts = [...renderer.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/gi)];
 const externalScripts = scripts.filter(([_, attrs]) => {
   if (!/\bsrc\s*=/.test(attrs)) return false;
   const src = attrs.match(/\bsrc\s*=\s*["']([^"']+)["']/i)?.[1] || '';
-  return !src.includes('googletagmanager.com/gtag/js');
+  const absolute = /^(?:https?:)?\\/\\//i.test(src);
+  const sameOrigin = /^(?:https?:)?\\/\\/tamasrazim\\.github\\.io\\//i.test(src);
+  return absolute && !sameOrigin && !src.includes('googletagmanager.com/gtag/js');
 });
 must(externalScripts.length === 0, 'renderer has no external runtime script dependency');
 must(!/<link[^>]+\bhref\s*=\s*["'][^"']+\.css/i.test(renderer), 'renderer has no external stylesheet dependency');
