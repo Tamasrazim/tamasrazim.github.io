@@ -5,7 +5,7 @@ const CORE = [
   './media-stack.js',
   './voice-studio.js',
   './movie-finalizer.js',
-  '../../trilyva/native-app/native-voice-engine.js',
+  './native-voice-engine.js',
   './manifest.webmanifest',
   './library/library.js',
   './library/manifest.json',
