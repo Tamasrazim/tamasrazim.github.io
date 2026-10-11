@@ -220,6 +220,7 @@ function filmBird(ctx,x,y,s,t,pose){
   ctx.fillStyle="#fff";ctx.beginPath();ctx.ellipse(7,-59,7.5,9,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#243c55";ctx.beginPath();ctx.arc(9,-58,4.3,0,Math.PI*2);ctx.fill();ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(8,-61,1.5,0,Math.PI*2);ctx.fill();
   ctx.fillStyle="#ffad43";ctx.beginPath();ctx.moveTo(23,-52);ctx.lineTo(43,-45);ctx.lineTo(24,-39);ctx.closePath();ctx.fill();
   if(filmTalking("OLLIE",t)){ctx.fillStyle="#e98731";ctx.beginPath();ctx.moveTo(24,-46);ctx.lineTo(41,-44);ctx.lineTo(24,-42);ctx.closePath();ctx.fill();}
+  if(filmTalking("OLLIE",t)){ctx.fillStyle="#e98731";ctx.beginPath();ctx.moveTo(24,-46);ctx.lineTo(41,-44);ctx.lineTo(24,-42);ctx.closePath();ctx.fill();}
   ctx.strokeStyle="#d18c3c";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(25,-25);ctx.lineTo(25,-12);ctx.moveTo(10,-12);ctx.lineTo(27,-12);ctx.moveTo(38,-25);ctx.lineTo(39,-12);ctx.stroke();
   ctx.strokeStyle="#7a5a5b";ctx.lineWidth=1.7;ctx.beginPath();ctx.moveTo(11,-43);ctx.quadraticCurveTo(16,-38,21,-43);ctx.stroke();
   ctx.restore();
@@ -235,7 +236,7 @@ function filmTurtle(ctx,x,y,s,t,pose){
   ctx.fillStyle="#489c58";ctx.beginPath();ctx.ellipse(12,-1,14,7,.12,0,Math.PI*2);ctx.ellipse(-22,-1,14,7,-.12,0,Math.PI*2);ctx.fill();
   ctx.fillStyle="#447b49";ctx.beginPath();ctx.ellipse(71,-31,4,3,0,0,Math.PI*2);ctx.fill();
   if(filmTalking("TUCK",t)){ctx.fillStyle="#276c43";ctx.beginPath();ctx.ellipse(66,-26,5,3+Math.abs(Math.sin(t*12))*2,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#f29d9a";ctx.beginPath();ctx.ellipse(66,-24,2.5,1.1,0,0,Math.PI*2);ctx.fill();}
-  else{ctx.strokeStyle="#337b4c";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(59,-26);ctx.quadraticCurveTo(65,-22,71,-27);ctx.stroke();}
+  else{if(filmTalking("TUCK",t)){ctx.fillStyle="#276c43";ctx.beginPath();ctx.ellipse(66,-26,5,3+Math.abs(Math.sin(t*12))*2,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#f29d9a";ctx.beginPath();ctx.ellipse(66,-24,2.5,1.1,0,0,Math.PI*2);ctx.fill();}else{ctx.strokeStyle="#337b4c";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(59,-26);ctx.quadraticCurveTo(65,-22,71,-27);ctx.stroke();}}
   if(pose==="wave"){ctx.strokeStyle="#69b95e";ctx.lineWidth=8;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(26,-46);ctx.quadraticCurveTo(38,-63,42+Math.sin(t*7)*4,-73);ctx.stroke();}
   ctx.restore();
 }
@@ -279,88 +280,20 @@ function filmPancakeStack(ctx,x,y,s,t){
   ctx.strokeStyle="#b36b33";ctx.lineWidth=4;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(15,-125);ctx.bezierCurveTo(5,-109,24,-100,11,-89);ctx.bezierCurveTo(2,-83,15,-78,9,-71);ctx.stroke();
   ctx.restore();
 }
-function filmMillGlade(ctx,t){
-  filmMeadow(ctx,t,0);
-  // Friendly red windmill, with visibly rotating sails; the prop gives this scene a new silhouette.
-  ctx.fillStyle="#f3d5a3";ctx.beginPath();ctx.moveTo(1460,470);ctx.lineTo(1715,470);ctx.lineTo(1750,880);ctx.lineTo(1420,880);ctx.closePath();ctx.fill();ctx.strokeStyle="#bd8254";ctx.lineWidth=8;ctx.stroke();
-  ctx.fillStyle="#d85c4f";ctx.beginPath();ctx.moveTo(1398,481);ctx.lineTo(1586,333);ctx.lineTo(1770,481);ctx.closePath();ctx.fill();ctx.strokeStyle="#a84643";ctx.lineWidth=8;ctx.stroke();
-  ctx.fillStyle="#fbe4a9";filmRound(ctx,1510,595,140,120,9);ctx.fill();ctx.strokeStyle="#ba7b4e";ctx.lineWidth=6;ctx.stroke();
-  ctx.strokeStyle="#ae7849";ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(1558,595);ctx.lineTo(1558,715);ctx.moveTo(1510,652);ctx.lineTo(1650,652);ctx.stroke();
-  ctx.save();ctx.translate(1588,465);ctx.rotate(t*.18);for(let i=0;i<4;i++){ctx.save();ctx.rotate(i*Math.PI/2);ctx.fillStyle="#fff1d0";filmRound(ctx,-13,-156,26,146,10);ctx.fill();ctx.strokeStyle="#cf5c4c";ctx.lineWidth=4;ctx.stroke();ctx.fillStyle="#df6654";ctx.fillRect(-9,-150,18,105);ctx.restore();}ctx.fillStyle="#f4c54f";ctx.beginPath();ctx.arc(0,0,22,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#ba6c45";ctx.lineWidth=4;ctx.stroke();ctx.restore();
-  for(let i=0;i<13;i++){const x=200+i*96,y=760+Math.sin(i*1.2)*28;ctx.fillStyle=i%2?"#4eac5c":"#58b962";ctx.beginPath();ctx.ellipse(x,y,45,18,0,0,Math.PI*2);ctx.fill();}
-  filmPuddle(ctx,910,1010,77,t); // A drying puddle from the irrigation wheel adds a small reflective detail.
-}
-function filmBerryPatch(ctx,t){
-  filmMeadow(ctx,t,0);
-  // Neat pick-your-own blueberry hedge, with soft leaves and an orchard fence.
-  for(let i=0;i<7;i++){const x=970+i*120;ctx.fillStyle="#c08b55";ctx.fillRect(x,620,16,260);ctx.fillStyle="#dfb77d";ctx.fillRect(x-8,620,32,18);}
-  filmLine(ctx,965,690,1740,690,"#d9b17b",13);filmLine(ctx,965,774,1740,774,"#c69360",13);
-  for(let i=0;i<18;i++){const x=1040+i*39,y=700+Math.sin(i*1.7)*42,s=.75+filmHash(i+27)*.36;ctx.fillStyle=i%2?"#268e4c":"#3ca655";ctx.beginPath();ctx.ellipse(x,y,52*s,35*s,Math.sin(i)*.15,0,Math.PI*2);ctx.fill();ctx.fillStyle=i%2?"#5fbe60":"#73ce6a";ctx.beginPath();ctx.ellipse(x-9,y-14,29*s,16*s,-.3,0,Math.PI*2);ctx.fill();
-    for(let j=0;j<5;j++){const bx=x-22+(j%3)*20,by=y-4+Math.floor(j/3)*15;ctx.fillStyle=["#364d96","#4968b5","#263d7a"][j%3];ctx.beginPath();ctx.arc(bx,by,7*s,0,Math.PI*2);ctx.fill();ctx.fillStyle="rgba(255,255,255,.36)";ctx.beginPath();ctx.arc(bx-2*s,by-2*s,2*s,0,Math.PI*2);ctx.fill();}
-  }
-  // A low basket and clean stepping stones make the route and rescue plan readable.
-  const basket=ctx.createLinearGradient(0,875,0,972);basket.addColorStop(0,"#e9bb72");basket.addColorStop(1,"#b87947");ctx.fillStyle=basket;ctx.beginPath();ctx.moveTo(1510,880);ctx.lineTo(1685,880);ctx.lineTo(1660,972);ctx.lineTo(1535,972);ctx.closePath();ctx.fill();ctx.strokeStyle="#94613c";ctx.lineWidth=5;ctx.stroke();ctx.strokeStyle="#f2d097";ctx.lineWidth=4;for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(1525+i*30,893);ctx.lineTo(1544+i*24,956);ctx.stroke();}
-  for(let i=0;i<7;i++){ctx.fillStyle="#638e91";ctx.beginPath();ctx.ellipse(620+i*75,810+Math.sin(i)*12,34,12,0,0,Math.PI*2);ctx.fill();}
-}
+
+
 function filmCatchCloth(ctx,t){
   ctx.save();const flutter=Math.sin(t*5)*12;ctx.fillStyle="#fff0d2";ctx.beginPath();ctx.moveTo(780,680);ctx.quadraticCurveTo(960,650+flutter,1100,675);ctx.quadraticCurveTo(1270,704+flutter,1410,674);ctx.lineTo(1390,772);ctx.quadraticCurveTo(1200,802-flutter,1040,778);ctx.quadraticCurveTo(900,760,800,780);ctx.closePath();ctx.fill();
   ctx.strokeStyle="#f6b85f";ctx.lineWidth=8;ctx.stroke();
   for(let i=0;i<7;i++){ctx.strokeStyle=i%2?"rgba(240,119,139,.23)":"rgba(93,179,189,.25)";ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(810+i*85,692);ctx.lineTo(826+i*82,772);ctx.stroke();}
   ctx.restore();
 }
-function filmPan(ctx,x,y,s,t,withPancake){
-  ctx.save();ctx.translate(x,y);ctx.scale(s,s);
-  ctx.strokeStyle="#686e78";ctx.lineCap="round";ctx.lineWidth=19;ctx.beginPath();ctx.moveTo(20,7);ctx.lineTo(108,32);ctx.stroke();ctx.strokeStyle="#363f4e";ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(28,7);ctx.lineTo(100,28);ctx.stroke();
-  ctx.fillStyle="#575e69";ctx.beginPath();ctx.ellipse(0,0,91,28,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#aebbc6";ctx.beginPath();ctx.ellipse(0,-3,87,25,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#464c57";ctx.beginPath();ctx.ellipse(0,-7,79,21,0,0,Math.PI*2);ctx.fill();
-  if(withPancake)filmPancake(ctx,0,-26,.82,t,t*.7,true);
-  ctx.restore();
-}
-function filmPicnicTable(ctx,t){
-  ctx.fillStyle="#b7784a";filmRound(ctx,660,755,690,42,9);ctx.fill();ctx.fillStyle="#e9b575";filmRound(ctx,665,748,680,24,8);ctx.fill();
-  ctx.fillStyle="#a86942";filmRound(ctx,710,788,33,196,6);ctx.fill();filmRound(ctx,1266,788,33,196,6);ctx.fill();
-  for(let i=0;i<5;i++){ctx.strokeStyle="rgba(255,235,186,.26)";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(690+i*132,753);ctx.lineTo(690+i*132,773);ctx.stroke();}
-  // Gingham tablecloth hangs in soft, rounded folds.
-  ctx.fillStyle="#fff1d3";ctx.beginPath();ctx.moveTo(680,773);ctx.lineTo(1333,773);ctx.lineTo(1314,860);ctx.quadraticCurveTo(1294,873,1274,856);ctx.lineTo(1184,853);ctx.quadraticCurveTo(1162,872,1141,854);ctx.lineTo(1040,852);ctx.quadraticCurveTo(1020,870,999,853);ctx.lineTo(900,854);ctx.quadraticCurveTo(881,873,859,853);ctx.lineTo(697,852);ctx.closePath();ctx.fill();
-  const cols=["#ed778e","#ffc05b","#72c98c","#7cbce9"];for(let i=0;i<5;i++){ctx.fillStyle=cols[i%cols.length];ctx.globalAlpha=.17;ctx.fillRect(698+i*128,774,103,76);ctx.globalAlpha=1;}
-}
-function filmPancakeStack(ctx,x,y,s,t){
-  ctx.save();ctx.translate(x,y);ctx.scale(s,s);
-  ctx.fillStyle="#fff6dc";ctx.beginPath();ctx.ellipse(0,0,100,26,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#e4c9a1";ctx.lineWidth=4;ctx.stroke();
-  for(let i=0;i<5;i++){const yy=-16-i*21,xx=Math.sin(i*3+t*.3)*4;ctx.fillStyle=i%2?"#d88737":"#e5a14a";ctx.beginPath();ctx.ellipse(xx,yy,83-i*2,21,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#b96d32";ctx.lineWidth=3;ctx.stroke();ctx.fillStyle="rgba(255,224,149,.58)";ctx.beginPath();ctx.ellipse(xx-18,yy-8,32,6,-.2,Math.PI*1.1,Math.PI*1.8);ctx.strokeStyle="rgba(255,228,156,.66)";ctx.lineWidth=3;ctx.stroke();for(let j=0;j<3;j++){ctx.fillStyle="#3c65a2";ctx.beginPath();ctx.arc(xx+(j-1)*35,yy-3,4.8,0,Math.PI*2);ctx.fill();}}
-  ctx.fillStyle="#f5cb37";filmRound(ctx,-20,-125,40,22,4);ctx.fill();ctx.strokeStyle="#fff0a3";ctx.lineWidth=2;filmLine(ctx,-13,-119,13,-119,"#fff0a3",2);
-  ctx.strokeStyle="#b36b33";ctx.lineWidth=4;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(15,-125);ctx.bezierCurveTo(5,-109,24,-100,11,-89);ctx.bezierCurveTo(2,-83,15,-78,9,-71);ctx.stroke();
-  ctx.restore();
-}
-function filmMillGlade(ctx,t){
-  filmMeadow(ctx,t,0);
-  // Friendly red windmill, with visibly rotating sails; the prop gives this scene a new silhouette.
-  ctx.fillStyle="#f3d5a3";ctx.beginPath();ctx.moveTo(1460,470);ctx.lineTo(1715,470);ctx.lineTo(1750,880);ctx.lineTo(1420,880);ctx.closePath();ctx.fill();ctx.strokeStyle="#bd8254";ctx.lineWidth=8;ctx.stroke();
-  ctx.fillStyle="#d85c4f";ctx.beginPath();ctx.moveTo(1398,481);ctx.lineTo(1586,333);ctx.lineTo(1770,481);ctx.closePath();ctx.fill();ctx.strokeStyle="#a84643";ctx.lineWidth=8;ctx.stroke();
-  ctx.fillStyle="#fbe4a9";filmRound(ctx,1510,595,140,120,9);ctx.fill();ctx.strokeStyle="#ba7b4e";ctx.lineWidth=6;ctx.stroke();
-  ctx.strokeStyle="#ae7849";ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(1558,595);ctx.lineTo(1558,715);ctx.moveTo(1510,652);ctx.lineTo(1650,652);ctx.stroke();
-  ctx.save();ctx.translate(1588,465);ctx.rotate(t*.18);for(let i=0;i<4;i++){ctx.save();ctx.rotate(i*Math.PI/2);ctx.fillStyle="#fff1d0";filmRound(ctx,-13,-156,26,146,10);ctx.fill();ctx.strokeStyle="#cf5c4c";ctx.lineWidth=4;ctx.stroke();ctx.fillStyle="#df6654";ctx.fillRect(-9,-150,18,105);ctx.restore();}ctx.fillStyle="#f4c54f";ctx.beginPath();ctx.arc(0,0,22,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#ba6c45";ctx.lineWidth=4;ctx.stroke();ctx.restore();
-  for(let i=0;i<13;i++){const x=200+i*96,y=760+Math.sin(i*1.2)*28;ctx.fillStyle=i%2?"#4eac5c":"#58b962";ctx.beginPath();ctx.ellipse(x,y,45,18,0,0,Math.PI*2);ctx.fill();}
-  filmPuddle(ctx,910,1010,77,t); // A drying puddle from the irrigation wheel adds a small reflective detail.
-}
-function filmBerryPatch(ctx,t){
-  filmMeadow(ctx,t,0);
-  // Neat pick-your-own blueberry hedge, with soft leaves and an orchard fence.
-  for(let i=0;i<7;i++){const x=970+i*120;ctx.fillStyle="#c08b55";ctx.fillRect(x,620,16,260);ctx.fillStyle="#dfb77d";ctx.fillRect(x-8,620,32,18);}
-  filmLine(ctx,965,690,1740,690,"#d9b17b",13);filmLine(ctx,965,774,1740,774,"#c69360",13);
-  for(let i=0;i<18;i++){const x=1040+i*39,y=700+Math.sin(i*1.7)*42,s=.75+filmHash(i+27)*.36;ctx.fillStyle=i%2?"#268e4c":"#3ca655";ctx.beginPath();ctx.ellipse(x,y,52*s,35*s,Math.sin(i)*.15,0,Math.PI*2);ctx.fill();ctx.fillStyle=i%2?"#5fbe60":"#73ce6a";ctx.beginPath();ctx.ellipse(x-9,y-14,29*s,16*s,-.3,0,Math.PI*2);ctx.fill();
-    for(let j=0;j<5;j++){const bx=x-22+(j%3)*20,by=y-4+Math.floor(j/3)*15;ctx.fillStyle=["#364d96","#4968b5","#263d7a"][j%3];ctx.beginPath();ctx.arc(bx,by,7*s,0,Math.PI*2);ctx.fill();ctx.fillStyle="rgba(255,255,255,.36)";ctx.beginPath();ctx.arc(bx-2*s,by-2*s,2*s,0,Math.PI*2);ctx.fill();}
-  }
-  // A low basket and clean stepping stones make the route and rescue plan readable.
-  const basket=ctx.createLinearGradient(0,875,0,972);basket.addColorStop(0,"#e9bb72");basket.addColorStop(1,"#b87947");ctx.fillStyle=basket;ctx.beginPath();ctx.moveTo(1510,880);ctx.lineTo(1685,880);ctx.lineTo(1660,972);ctx.lineTo(1535,972);ctx.closePath();ctx.fill();ctx.strokeStyle="#94613c";ctx.lineWidth=5;ctx.stroke();ctx.strokeStyle="#f2d097";ctx.lineWidth=4;for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(1525+i*30,893);ctx.lineTo(1544+i*24,956);ctx.stroke();}
-  for(let i=0;i<7;i++){ctx.fillStyle="#638e91";ctx.beginPath();ctx.ellipse(620+i*75,810+Math.sin(i)*12,34,12,0,0,Math.PI*2);ctx.fill();}
-}
-function filmCatchCloth(ctx,t){
-  ctx.save();const flutter=Math.sin(t*5)*12;ctx.fillStyle="#fff0d2";ctx.beginPath();ctx.moveTo(780,680);ctx.quadraticCurveTo(960,650+flutter,1100,675);ctx.quadraticCurveTo(1270,704+flutter,1410,674);ctx.lineTo(1390,772);ctx.quadraticCurveTo(1200,802-flutter,1040,778);ctx.quadraticCurveTo(900,760,800,780);ctx.closePath();ctx.fill();
-  ctx.strokeStyle="#f6b85f";ctx.lineWidth=8;ctx.stroke();
-  for(let i=0;i<7;i++){ctx.strokeStyle=i%2?"rgba(240,119,139,.23)":"rgba(93,179,189,.25)";ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(810+i*85,692);ctx.lineTo(826+i*82,772);ctx.stroke();}
-  ctx.restore();
-}
+
+
+
+
+
+
 function filmString(ctx,x1,y1,x2,y2,t){
   ctx.strokeStyle="rgba(74,81,101,.75)";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x1,y1);ctx.bezierCurveTo(x1+(x2-x1)*.3,y1+20+Math.sin(t*2)*8,x1+(x2-x1)*.7,y2-30,x2,y2);ctx.stroke();
 }
@@ -394,6 +327,34 @@ function filmCaption(ctx,t,chapter){
   const g=ctx.createLinearGradient(0,855,0,1080);g.addColorStop(0,"rgba(17,36,34,0)");g.addColorStop(.32,"rgba(21,45,42,.72)");g.addColorStop(1,"rgba(13,30,28,.86)");ctx.fillStyle=g;ctx.fillRect(0,850,1920,230);
   ctx.fillStyle="#ffe680";ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="800 19px ui-rounded,system-ui,sans-serif";ctx.fillText(cue[1],960,918);
   ctx.fillStyle="#fffdf5";ctx.font="600 29px ui-rounded,system-ui,sans-serif";const words=cue[2].split(/\s+/),lines=[];let line="";for(const word of words){const test=line?line+" "+word:word;if(ctx.measureText(test).width>1500&&line){lines.push(line);line=word;}else line=test;}if(line)lines.push(line);const shown=lines.slice(0,2);shown.forEach((z,i)=>ctx.fillText(z,960,967+i*38));ctx.restore();
+}
+function filmKitchen(ctx,t){
+  const wall=ctx.createLinearGradient(0,0,0,820);wall.addColorStop(0,"#fff0cf");wall.addColorStop(1,"#efc28b");ctx.fillStyle=wall;ctx.fillRect(0,0,1920,1080);
+  // Cream tiles, painted cupboards and warm timber trim.
+  ctx.fillStyle="#f6d9ac";ctx.fillRect(0,490,1920,210);
+  for(let row=0;row<4;row++)for(let col=0;col<16;col++){ctx.strokeStyle="rgba(184,123,78,.23)";ctx.lineWidth=2;filmRound(ctx,col*122+8,row*49+500,109,38,5);ctx.stroke();}
+  // Window view establishes the same meadow as the chase outside.
+  ctx.fillStyle="#a85d3b";filmRound(ctx,108,77,500,386,19);ctx.fill();
+  const sky=ctx.createLinearGradient(0,95,0,450);sky.addColorStop(0,"#71d1ff");sky.addColorStop(1,"#dbf5bb");ctx.fillStyle=sky;filmRound(ctx,126,95,464,350,10);ctx.fill();
+  ctx.fillStyle="#9bdb87";ctx.beginPath();ctx.moveTo(126,324);ctx.quadraticCurveTo(260,265,383,326);ctx.quadraticCurveTo(495,278,590,331);ctx.lineTo(590,445);ctx.lineTo(126,445);ctx.closePath();ctx.fill();
+  ctx.fillStyle="#5abc65";ctx.beginPath();ctx.moveTo(126,373);ctx.quadraticCurveTo(280,342,400,382);ctx.quadraticCurveTo(480,359,590,388);ctx.lineTo(590,445);ctx.lineTo(126,445);ctx.closePath();ctx.fill();
+  ctx.fillStyle="#ffcf4e";ctx.beginPath();ctx.arc(490,158,39,0,Math.PI*2);ctx.fill();filmCloud(ctx,272,167,.58,"#fff",0);
+  ctx.fillStyle="#fff1d2";ctx.fillRect(352,95,14,350);ctx.fillRect(126,260,464,13);
+  ctx.fillStyle="#f59c94";ctx.beginPath();ctx.moveTo(93,69);ctx.quadraticCurveTo(157,155,126,310);ctx.lineTo(115,432);ctx.lineTo(92,433);ctx.lineTo(96,271);ctx.quadraticCurveTo(119,151,76,90);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(617,69);ctx.quadraticCurveTo(555,151,585,310);ctx.lineTo(604,432);ctx.lineTo(627,433);ctx.lineTo(619,271);ctx.quadraticCurveTo(595,151,636,90);ctx.closePath();ctx.fill();
+  for(let i=0;i<3;i++){const x=1230+i*210;const cab=ctx.createLinearGradient(x,0,x+190,0);cab.addColorStop(0,"#d9905f");cab.addColorStop(.5,"#f6c287");cab.addColorStop(1,"#c87f51");ctx.fillStyle=cab;filmRound(ctx,x,102,185,247,11);ctx.fill();ctx.strokeStyle="#b56e46";ctx.lineWidth=5;filmRound(ctx,x+8,110,169,231,7);ctx.stroke();ctx.fillStyle="#ffe2ae";filmRound(ctx,x+18,120,149,210,5);ctx.fill();ctx.fillStyle="#9e5c3e";ctx.beginPath();ctx.arc(x+151,223,5,0,Math.PI*2);ctx.fill();}
+  const fridge=ctx.createLinearGradient(35,0,268,0);fridge.addColorStop(0,"#cce2dc");fridge.addColorStop(.5,"#fff");fridge.addColorStop(1,"#bed5d0");ctx.fillStyle=fridge;filmRound(ctx,35,468,224,336,16);ctx.fill();ctx.strokeStyle="#a5c4ba";ctx.lineWidth=5;filmRound(ctx,35,468,224,336,16);ctx.stroke();ctx.beginPath();ctx.moveTo(50,620);ctx.lineTo(244,620);ctx.stroke();ctx.strokeStyle="#a5bfb7";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(222,528);ctx.lineTo(222,585);ctx.stroke();
+  ctx.fillStyle="#ffe96e";filmRound(ctx,81,511,96,80,6);ctx.fill();ctx.strokeStyle="#ee6e86";ctx.lineWidth=5;ctx.beginPath();ctx.arc(128,543,21,0,Math.PI*2);ctx.stroke();filmLine(ctx,113,562,104,580,"#55bce0",5);filmLine(ctx,143,562,152,580,"#55bce0",5);
+  for(let i=0;i<5;i++){ctx.fillStyle=["#ee7288","#5fc6e2","#f5ca44","#86cd75","#9e8ef4"][i];ctx.beginPath();ctx.arc(73+i*34,680+(i%2)*8,8,0,Math.PI*2);ctx.fill();}
+  ctx.fillStyle="#b77549";ctx.fillRect(940,621,980,26);ctx.fillStyle="#f3c48d";ctx.fillRect(940,647,980,30);ctx.fillStyle="#c27f50";filmRound(ctx,1014,674,850,132,12);ctx.fill();ctx.fillStyle="#a86543";ctx.fillRect(1044,695,792,103);
+  for(let i=0;i<4;i++){ctx.fillStyle="#f0b677";ctx.beginPath();ctx.arc(1227+i*92,682,17,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#aa6547";ctx.lineWidth=4;ctx.beginPath();ctx.arc(1227+i*92,682,8,0,Math.PI*2);ctx.stroke();}
+  ctx.fillStyle="#fff0c9";filmRound(ctx,1004,557,110,66,9);ctx.fill();ctx.fillStyle="#dac28f";ctx.beginPath();ctx.ellipse(1058,577,43,13,0,0,Math.PI*2);ctx.fill();
+  const bowl=ctx.createLinearGradient(0,565,0,656);bowl.addColorStop(0,"#8de2e9");bowl.addColorStop(1,"#288fad");ctx.fillStyle=bowl;ctx.beginPath();ctx.moveTo(1510,575);ctx.quadraticCurveTo(1520,646,1581,649);ctx.quadraticCurveTo(1651,647,1664,575);ctx.closePath();ctx.fill();ctx.strokeStyle="#e4faf7";ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(1586,576,77,18,0,0,Math.PI*2);ctx.stroke();ctx.fillStyle="#f4c85c";ctx.beginPath();ctx.ellipse(1586,575,68,12,0,0,Math.PI*2);ctx.fill();
+  for(let i=0;i<8;i++){ctx.fillStyle="#375b98";ctx.beginPath();ctx.arc(1540+(i*37)%95,564+(i%3)*3,5,0,Math.PI*2);ctx.fill();}
+  ctx.fillStyle=filmGrad(ctx,0,800,0,1080,[[0,"#e0b579"],[1,"#a66b48"]]);ctx.fillRect(0,805,1920,275);
+  for(let i=0;i<12;i++){ctx.strokeStyle="rgba(112,64,42,.19)";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,830+i*22);ctx.lineTo(1920,830+i*22);ctx.stroke();}
+  for(let i=0;i<7;i++){ctx.strokeStyle="rgba(112,64,42,.14)";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(i*290+40,805);ctx.lineTo(i*290+40,1080);ctx.stroke();}
+  const sunbeam=ctx.createLinearGradient(220,350,900,970);sunbeam.addColorStop(0,"rgba(255,249,190,.23)");sunbeam.addColorStop(1,"rgba(255,249,190,0)");ctx.fillStyle=sunbeam;ctx.beginPath();ctx.moveTo(200,450);ctx.lineTo(600,450);ctx.lineTo(1100,1080);ctx.lineTo(560,1080);ctx.closePath();ctx.fill();
 }
 function renderFrame(time,frame,fps,ctx,width,height){
   const t=filmClamp(Number.isFinite(time)?time:frame/Math.max(1,fps),0,FILM_DURATION);
@@ -464,7 +425,7 @@ function renderFrame(time,frame,fps,ctx,width,height){
       const p=filmEase(216,234,t),px=filmMix(1400,1100,p),py=filmMix(610,665,p)+Math.sin(t*4)*10*(1-p);
       filmPancake(ctx,px,py,.67,t,t*4.1,true);
       filmPan(ctx,1185,728,.78,t,false);
-      if(t>230){const q=filmEase(230,239,t);ctx.save();ctx.globalAlpha=q;filmPan(ctx,1185,728,.78,t,true);ctx.restore();}
+      if(t>230){const q=filmEase(230,239,t);ctx.save();ctx.globalAlpha=q;filmPancake(ctx,1185,708,.64,t,t*.7,true);ctx.restore();}
       filmFox(ctx,filmMix(760,705,filmEase(216,248,t)),936,1.04,t,"happy","reach");
       filmBird(ctx,filmMix(1410,1080,filmEase(216,242,t)),filmMix(490,720,filmEase(216,242,t)),.79,t,"fly");
       filmTurtle(ctx,filmMix(1370,1255,filmEase(216,245,t)),948,.93,t,"wave");
