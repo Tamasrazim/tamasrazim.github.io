@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "TRILYVA",
+  "version": "0.1.0",
+  "identifier": "com.tamasrazim.trilyva",
+  "build": {
+    "frontendDist": "../../../code-motion/renderer"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "label": "main",
+        "title": "TRILYVA",
+        "width": 1440,
+        "height": 900,
+        "minWidth": 960,
+        "minHeight": 640,
+        "resizable": true,
+        "fullscreen": false,
+        "center": true
+      }
+    ]
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "GraphicsAndDesign",
+    "shortDescription": "Procedural animation and rendering workspace",
+    "longDescription": "TRILYVA is a frame-first workspace for building procedural motion and preparing visual output.",
+    "copyright": "Copyright (c) 2026 Robiul Rumman Razim (Tamasrazim). All rights reserved."
+  }
+}
