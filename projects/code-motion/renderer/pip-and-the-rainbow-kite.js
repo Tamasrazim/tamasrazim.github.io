@@ -308,7 +308,8 @@ function renderFrame(time,frame,fps,ctx,width,height){
   function paintScene(scene,alpha){
     ctx.save();ctx.globalAlpha*=alpha;
     const travel=scene===1?filmEase(36,82,t):scene===2?filmEase(82,124,t):scene===3?filmEase(124,170,t):scene===6?filmEase(249,276,t):0;
-    const zoom=1.015+.012*Math.sin(t*.25+scene*.7),panX=(scene===1?filmMix(-18,70,travel):scene===2?filmMix(30,-15,travel):scene===3?filmMix(10,-20,travel):scene===6?filmMix(-12,16,travel):0)+Math.sin(t*.33+scene)*4;
+    const storyZoom=scene===3?filmEase(133,145,t)*(1-filmEase(153,161,t))*.065:scene===4?filmEase(202,214,t)*.045:0;
+    const zoom=1.015+.012*Math.sin(t*.25+scene*.7)+storyZoom,panX=(scene===1?filmMix(-18,70,travel):scene===2?filmMix(30,-15,travel):scene===3?filmMix(10,-20,travel):scene===6?filmMix(-12,16,travel):0)+Math.sin(t*.33+scene)*4;
     const panY=Math.sin(t*.24+scene)*3+storm*Math.sin(t*17)*1.4;
     ctx.translate(960,540);ctx.scale(zoom,zoom);ctx.translate(-960+panX,-540+panY);
     if(scene===0){
@@ -330,12 +331,13 @@ function renderFrame(time,frame,fps,ctx,width,height){
       filmString(ctx,kx-4,ky+155,filmMix(827,1360,p),filmMix(823,690,p),t);
       filmFox(ctx,filmMix(770,875,p),870,1.12,t,t>42?"surprised":"happy","run");
       filmBird(ctx,filmMix(1025,1408,p),filmMix(765,482,p),.86,t,"fly");
+      if(t>73)filmTurtle(ctx,filmMix(340,620,filmEase(73,82,t)),935,filmMix(.76,1.1,filmEase(73,82,t)),t,"wave");
       if(t>49&&t<68){ctx.save();ctx.globalAlpha=filmEase(49,53,t)*(1-filmEase(64,68,t));ctx.fillStyle="#fff6bf";ctx.font="1000 67px ui-rounded,system-ui,sans-serif";ctx.textAlign="center";ctx.fillText("WOOOOSH!",1000,340);ctx.restore();}
     }else if(scene===2){
       filmCreek(ctx,t,0);filmTree(ctx,1480,715,1.55,true,t);
       // Kite catches on a low, reachable willow branch across the brook.
       filmLine(ctx,1314,467,1557,420,"#85522f",13);filmLine(ctx,1335,463,1548,430,"#b77942",5);
-      const kx=1464+Math.sin(t*1.4)*5,ky=421+Math.sin(t*2.3)*4;
+      const drift=filmEase(113,124,t),kx=filmMix(1464,1350,drift)+Math.sin(t*1.4)*5,ky=filmMix(421,410,drift)+Math.sin(t*2.3)*4;
       filmKite(ctx,kx,ky,.72,t,.55,true);
       filmFox(ctx,filmMix(875,1050,filmEase(82,110,t)),899,1.05,t,t<97?"worried":"focused","reach");
       filmBird(ctx,filmMix(1408,1370,filmEase(82,108,t)),filmMix(482,480,filmEase(82,108,t)),.8,t,"fly");
@@ -362,6 +364,7 @@ function renderFrame(time,frame,fps,ctx,width,height){
       ctx.fillStyle="#3c9a58";ctx.beginPath();ctx.ellipse(1360,890,108,34,-.08,0,Math.PI*2);ctx.fill();
       const fold=filmEase(170,182,t);filmKite(ctx,filmMix(1230,1360,fold),filmMix(430,825,fold),filmMix(.74,.35,fold),t,filmMix(.3,.1,fold),false);
       for(let i=0;i<8;i++){const px=1300+i*18,py=927+Math.sin(t*4+i)*3;ctx.fillStyle=["#f34f60","#ff9e43","#ffe35b","#55cf80","#55cdee","#9380f6"][i%6];filmRound(ctx,px,py,22,8,4);ctx.fill();}
+      if(t>204){const repair=filmEase(204,215,t);ctx.save();ctx.globalAlpha=repair;ctx.strokeStyle="#b77942";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(1338,792);ctx.lineTo(1382,852);ctx.moveTo(1382,792);ctx.lineTo(1338,852);ctx.stroke();for(let i=0;i<4;i++){ctx.fillStyle=["#f34f60","#ff9e43","#55cf80","#9380f6"][i];filmRound(ctx,1328+i*17,824,17,7,3);ctx.fill();}filmGlow(ctx,1360,824,74,"rgba(255,236,158,.22)");ctx.restore();}
       filmPuddle(ctx,640,1025,95,t);filmPuddle(ctx,1110,1033,72,t);
       if(t>193){ctx.save();ctx.globalAlpha=filmEase(193,200,t);ctx.fillStyle="rgba(255,225,111,.28)";ctx.beginPath();ctx.ellipse(1000,810,280,150,0,0,Math.PI*2);ctx.fill();ctx.restore();}
     }else if(scene===5){
