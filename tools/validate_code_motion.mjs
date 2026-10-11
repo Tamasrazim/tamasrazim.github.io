@@ -40,7 +40,12 @@ const externalScripts = scripts.filter(([_, attrs]) => {
   return absolute && !sameOrigin && !src.includes('googletagmanager.com/gtag/js');
 });
 must(externalScripts.length === 0, 'renderer has no external runtime script dependency');
-must(!/<link[^>]+\bhref\s*=\s*["'][^"']+\.css/i.test(renderer), 'renderer has no external stylesheet dependency');
+const stylesheetLinks = [...renderer.matchAll(/<link[^>]+\\bhref\\s*=\\s*["']([^"']+\\.css(?:\\?[^"']*)?)["'][^>]*>/gi)];
+const externalStylesheets = stylesheetLinks.filter(([, href]) =>
+  /^(?:https?:)?\\/\\//i.test(href) &&
+  !/^(?:https?:)?\\/\\/tamasrazim\\.github\\.io\\//i.test(href)
+);
+must(externalStylesheets.length === 0, 'renderer has no external stylesheet dependency');
 
 const jsSources = scripts.filter(([_, attrs]) => /\btype=["']text\/js-source["']/i.test(attrs));
 must(jsSources.length === 4, 'renderer has four source blocks');
