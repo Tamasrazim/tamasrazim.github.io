@@ -213,7 +213,7 @@ const trilyvaPage=read('projects/trilyva/index.html');
 must(trilyvaPage.includes('Open TRILYVA workspace')&&trilyvaPage.includes('deterministic'),'TRILYVA project page describes the frame model and links to the renderer');
 must(read('projects/code-motion/index.html').includes('location.replace(target)'),'legacy TRILYVA URL performs a clean replace redirect');
 const neoPage=read('projects/neo/index.html');
-must(neoPage.includes('"name": "NEO"')&&neoPage.includes('NEO is my native Windows x64 first-person puzzle game'),'NEO has its own canonical project page and branding');
+must(neoPage.includes('"name": "NEO"')&&neoPage.includes('100 deterministic floors'),'NEO has its own canonical project page and branding');
 must(neoPage.includes('href="/projects/neo/download/">Download NEO'),'NEO project page links to the clean download route');
 const neoDownloadPage=read('projects/neo/download/index.html');
 must(neoDownloadPage.includes('releases/latest/download/NEO-Setup.exe')&&neoDownloadPage.includes('releases/latest/download/NEO-Portable.zip'),'NEO download page links to the latest installer and portable package');
