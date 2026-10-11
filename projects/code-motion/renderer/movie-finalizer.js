@@ -119,6 +119,7 @@
     style.id = 'trilyvaMovieFinalizerCss';
     style.textContent = [
       '#trilyvaMovieFinalizerBtn{border:1px solid #45454d;padding:7px 10px!important;color:#f5f5f5!important;white-space:nowrap}',
+      '@media(max-width:560px){.hdr-acts #trilyvaMovieFinalizerBtn{display:block!important;flex:0 0 auto;padding:0 9px!important;font-size:9px!important;letter-spacing:0}}',
       '.tmf-overlay{position:fixed;inset:0;z-index:12010;background:rgba(0,0,0,.86);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:20px;color:#eee}',
       '.tmf-overlay.open{display:flex}.tmf-window{width:min(950px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#09090b;border:1px solid #34343b;box-shadow:0 25px 100px #000;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}',
       '.tmf-head{display:flex;align-items:center;gap:14px;padding:17px 20px;border-bottom:1px solid #29292e}.tmf-head strong{font:600 14px/1.2 ui-sans-serif,system-ui;letter-spacing:.12em}.tmf-head small{color:#8a8a94;font-size:10px;letter-spacing:.1em}.tmf-spacer{flex:1}.tmf-x{width:33px;height:33px;border:1px solid #38383f;color:#eee;font-size:20px}',
