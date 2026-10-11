@@ -392,6 +392,10 @@
 
   async function build() {
     if (working || !online) return;
+    if (el('tvsBuild').disabled) {
+      setState('The built-in voice renderer is busy. Wait for it to finish before starting the neural engine.', 'bad');
+      return;
+    }
     var parsed = parseScript(el('tvsScript').value);
     if (parsed.errors.length) {
       setState('Fix the dialogue script first: ' + parsed.errors.slice(0, 4).join(' '), 'bad');
@@ -410,6 +414,8 @@
     var srtButton = el('tvsNativeSrt');
     var localButton = el('tvsBuild');
     var localSrtButton = el('tvsSrt');
+    var localSrtWasEnabled = !localSrtButton.disabled;
+    var succeeded = false;
     var total = Math.round(SR * FILM_SECONDS);
     var model = el('tvsNativeModel').value || 'tts-1';
     var initialSpeed = Number(el('tvsRate').value) || 1;
@@ -454,6 +460,7 @@
       outputLink.hidden = false;
       srtButton.disabled = false;
       localSrtButton.disabled = true;
+      succeeded = true;
       try {
         window.dispatchEvent(new CustomEvent('trilyva:voice-track-ready', {
           detail: { blob: blob, durationSeconds: FILM_SECONDS, sampleRate: SR, engine: model }
@@ -474,7 +481,7 @@
       checkButton.disabled = false;
       voicesButton.disabled = !online;
       localButton.disabled = false;
-      localSrtButton.disabled = !latestSrt;
+      localSrtButton.disabled = succeeded ? true : !localSrtWasEnabled;
       if (context && context.state === 'running') {
         try { await context.suspend(); } catch (_) {}
       }
