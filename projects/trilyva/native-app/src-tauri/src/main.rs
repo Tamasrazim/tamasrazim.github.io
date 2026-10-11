@@ -121,7 +121,7 @@ fn ensure_tmotion_extension(path: &mut PathBuf) {
 }
 
 #[tauri::command]
-fn native_project_open(
+async fn native_project_open(
     app: AppHandle,
     state: State<'_, NativeProjectSession>,
 ) -> Result<Option<NativeProjectFile>, String> {
@@ -201,7 +201,7 @@ fn native_project_accept_open(
 }
 
 #[tauri::command]
-fn native_project_save(
+async fn native_project_save(
     app: AppHandle,
     state: State<'_, NativeProjectSession>,
     content: String,
