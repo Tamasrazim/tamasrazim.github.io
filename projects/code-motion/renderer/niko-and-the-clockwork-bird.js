@@ -522,7 +522,7 @@ function renderFrame(time,frame,fps,ctx,width,height){
    filmNiko(ctx,650,975,1.34,t,t<36?"happy":"worried",t<17?"reach":t<35?"repair":"reach");
    filmAuri(ctx,1005,753,1.06,t,t>20&&t<48?"worried":t>34&&t<54?"powered":"calm",t<16?"perch":t<35?"droop":"perch");
    // A small, unmistakable gap at the heart port motivates the entire story.
-   if(t>23&&t<54){ctx.save();ctx.translate(1005,753);ctx.scale(1.06,1.06);ctx.strokeStyle="#6d4c29";ctx.lineWidth=3;ctx.beginPath();ctx.arc(1,-29,15,.15,Math.PI*1.88);ctx.stroke();filmGlow(ctx,1006,724,30,"rgba(71,207,234,.16)");ctx.restore();}
+   if(t>23&&t<54){ctx.save();ctx.translate(1005,753);ctx.scale(1.06,1.06);ctx.strokeStyle="#6d4c29";ctx.lineWidth=3;ctx.beginPath();ctx.arc(1,-29,15,.15,Math.PI*1.88);ctx.stroke();filmGlow(ctx,1,-29,30,"rgba(71,207,234,.16)");ctx.restore();}
    if(t>31){const p=filmEase(33,45,t);filmSpring(ctx,filmMix(1140,1700,p),filmMix(680,860,p),.63,t,t*3.5,false);}
    for(let i=0;i<15;i++){const x=(i*139+t*4)%1850,y=180+filmHash(i+20)*460;ctx.fillStyle="rgba(255,231,176,"+(.1+filmHash(i+40)*.12)+")";ctx.beginPath();ctx.arc(x,y,1.6,0,Math.PI*2);ctx.fill();}
   }else if(scene===1){
