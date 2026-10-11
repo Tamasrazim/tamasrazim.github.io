@@ -63,8 +63,8 @@ must(samples.length >= 10, 'renderer keeps its built-in sample library');
 
 const executable = scripts.filter(([_, attrs]) => attrs.trim() === '');
 const applicationBlocks = executable.filter(([, , source]) =>
-  source.includes('KYNESTRA — application shell') &&
-  source.includes("var APP_VERSION = '1.0.0'")
+  source.includes('Code -> Motion — application shell') &&
+  source.includes("var APP_VERSION = '1.2.0'")
 );
 must(applicationBlocks.length === 1, 'renderer has one executable TRILYVA application block');
 try {
