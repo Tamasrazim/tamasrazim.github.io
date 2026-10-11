@@ -14,8 +14,8 @@ const SKYROOT_CHAPTERS = [
   { time: 263, title: "THE SKY MARKET",     note: "A playful chase across floating islands." },
   { time: 320, title: "CLOUDREST",           note: "The missing bell has a reason for leaving." },
   { time: 372, title: "A LIGHT TO SHARE",    note: "A small kindness changes the plan." },
-  { time: 425, title: "THE WAY BACK",        note: "The friends return before the final lantern fades." },
-  { time: 476, title: "THREE NOTES",         note: "The village helps the Skyroot remember its song." },
+  { time: 447, title: "THE WAY BACK",        note: "The friends return before the final lantern fades." },
+  { time: 490, title: "THREE NOTES",         note: "The village helps the Skyroot remember its song." },
   { time: 526, title: "THE SKYROOT WAKES",   note: "A new bridge of light reaches every home." },
   { time: 572, title: "LANTERN NIGHT",       note: "No one has to watch the lights from far away." }
 ];
@@ -85,7 +85,7 @@ const SKYROOT_CUES = [
  [596, "NARRATOR", "And on that Lantern Night, no one watched the lights from far away. Every home belonged to the glow."]
 ];
 
-const SKYROOT_SCENES = [0,46,96,150,206,263,320,372,425,476,526,572,600];
+const SKYROOT_SCENES = [0,46,96,150,206,263,320,372,447,490,526,572,600];
 
 function skyClamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 function skyMix(a, b, p) { return a + (b - a) * skyClamp(p, 0, 1); }
@@ -428,8 +428,9 @@ function skyCloudHome(ctx, t, lights) {
   skyPath(ctx, [[0,802],[260,733],[430,771],[636,704],[840,751],[1030,701],[1223,755],[1460,703],[1650,754],[1920,703],[1920,1080],[0,1080]], "#7b88b7", "#646e9e", 3);
   for (let i = 0; i < 5; i++) {
     const x = 140 + i * 370, y = 810 + (i % 2) * 24;
-    skyHouse(ctx, x, y, 0.77, t, !!lights, ["#bfc9e8","#d8c7e8","#bcd8df"][i%3]);
-    if (lights) skyLantern(ctx,x+88,y-148,.5,"#f7c98f",t,i+20);
+    const homeLit = !!lights && t >= 416 && (i === 2 || t >= 438);
+    skyHouse(ctx, x, y, 0.77, t, homeLit, ["#bfc9e8","#d8c7e8","#bcd8df"][i%3]);
+    if (homeLit) skyLantern(ctx,x+88,y-148,.5,"#f7c98f",t,i+20);
   }
   if (!lights) {
     for (let i = 0; i < 8; i++) {
@@ -789,11 +790,11 @@ function skyDrawReturn(ctx,t){
     const x=90+i*94,y=670+(i%5)*34;
     skyLantern(ctx,x,y,.45,["#f1d4a3","#c4dbff","#edc6d9"][i%3],t,i);
   }
-  skySkiff(ctx,skyMix(1520,1100,skyEase(429,471,t)),skyMix(420,545,skyEase(429,471,t)),.71,t,.02);
-  skyDragon(ctx,skyMix(1518,1150,skyEase(429,471,t)),skyMix(410,515,skyEase(429,471,t)),.79,t,"happy",true);
-  skyBell(ctx,skyMix(1518,1150,skyEase(429,471,t)),skyMix(470,570,skyEase(429,471,t)),.45,t,.36);
-  skyFox(ctx,skyMix(480,835,skyEase(428,471,t)),972,.94,t,"determined","walk");
-  skyMoth(ctx,skyMix(610,940,skyEase(428,471,t)),745,.64,t,.33);
+  skySkiff(ctx,skyMix(1520,1100,skyEase(447,489,t)),skyMix(420,545,skyEase(447,489,t)),.71,t,.02);
+  skyDragon(ctx,skyMix(1518,1150,skyEase(447,489,t)),skyMix(410,515,skyEase(447,489,t)),.79,t,"happy",true);
+  skyBell(ctx,skyMix(1518,1150,skyEase(447,489,t)),skyMix(470,570,skyEase(447,489,t)),.45,t,.36);
+  skyFox(ctx,skyMix(480,835,skyEase(447,489,t)),972,.94,t,"determined","walk");
+  skyMoth(ctx,skyMix(610,940,skyEase(447,489,t)),745,.64,t,.33);
   if(t>488){
     for(let i=0;i<16;i++){
       const x=150+i*104,y=690+(i%4)*41;
@@ -908,8 +909,8 @@ function renderFrame(time, frame, fps, ctx, width, height, motion) {
   else if (t < 263) skyDrawRidgeScene(ctx,t);
   else if (t < 320) skyDrawMarketScene(ctx,t);
   else if (t < 372) skyDrawCloudHomeScene(ctx,t,false);
-  else if (t < 425) skyDrawCloudHomeScene(ctx,t,true);
-  else if (t < 476) skyDrawReturn(ctx,t);
+  else if (t < 447) skyDrawCloudHomeScene(ctx,t,true);
+  else if (t < 490) skyDrawReturn(ctx,t);
   else if (t < 526) skyDrawGathering(ctx,t);
   else if (t < 572) skyDrawAwakening(ctx,t);
   else skyDrawFestival(ctx,t);
@@ -923,16 +924,4 @@ function renderFrame(time, frame, fps, ctx, width, height, motion) {
   skyFilmGrade(ctx,t);
   skyCaption(ctx,t);
   ctx.restore();
-}
-if (typeof window !== "undefined") {
-  window.TRILYVA_SKYROOT_STORY = {
-    title: "The Skyroot Bell",
-    duration: SKYROOT_DURATION,
-    fps: SKYROOT_FPS,
-    width: 1920,
-    height: 1080,
-    chapters: SKYROOT_CHAPTERS,
-    cues: SKYROOT_CUES,
-    renderFrame: renderFrame
-  };
 }
