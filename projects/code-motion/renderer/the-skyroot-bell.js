@@ -266,10 +266,12 @@ function skyTree(ctx, x, groundY, s, t, awake, focus) {
   for (let i = 0; i < 6; i++) {
     ctx.beginPath(); ctx.moveTo(-48 + i * 18, -25); ctx.bezierCurveTo(-20 + i * 8, -118, -47 + i * 15, -218, 4 + i * 8, -334 - i * 13); ctx.stroke();
   }
+  // Each leaf stores x, y, radii, a shaded edge color, and a lighter highlight.
+  // Keep both gradient colors explicit; CanvasGradient rejects an undefined stop.
   const leaves = [
-    [-138,-421,145,106,"#458a82"],[-32,-510,148,122,"#67aa88"],[93,-473,151,114,"#79b891"],
-    [174,-393,117,91,"#4c9684"],[-165,-342,116,88,"#71ae8c"],[7,-395,173,124,"#8bc59a"],
-    [68,-573,102,83,"#9cd19f"],[-84,-570,107,83,"#77bd91"],[197,-475,83,68,"#5b9d85"]
+    [-138,-421,145,106,"#458a82","#8fcbb0"],[-32,-510,148,122,"#67aa88","#a4d7aa"],[93,-473,151,114,"#79b891","#b9e1ac"],
+    [174,-393,117,91,"#4c9684","#91cda8"],[-165,-342,116,88,"#71ae8c","#b2dbaa"],[7,-395,173,124,"#8bc59a","#c6e8ae"],
+    [68,-573,102,83,"#9cd19f","#d4edb8"],[-84,-570,107,83,"#77bd91","#b7e3ad"],[197,-475,83,68,"#5b9d85","#9cd2a9"]
   ];
   for (let i = 0; i < leaves.length; i++) {
     const q = leaves[i], drift = Math.sin(t * 0.7 + i * 1.7) * 4;
