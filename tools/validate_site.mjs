@@ -191,7 +191,7 @@ must(siteJs.includes("d.addEventListener('visibilitychange', syncVisibility)")&&
 must(siteJs.includes("reduceQuery.addEventListener('change', onMotionPreferenceChange)"),'runtime reduced-motion changes are handled');
 must(siteJs.includes('custom cursor mouse-only')&&siteJs.includes('if (!fine || reduce) return;'),'custom cursor effects respect pointer type and reduced-motion settings');
 must(siteJs.includes("event.key !== 'Escape'")&&siteJs.includes('updateFilterButtons(active)'),'project search Escape key clears search and resets filters');
-must(siteV3Css.includes('left: -11px;')&&siteV3Css.includes('flex-direction: column;')&&siteV3Css.includes('align-items: flex-end;'),'mobile ID card retains its 11px left nudge and stacked Active/code status');
+must(siteV3Css.includes('left: -17px;')&&siteV3Css.includes('flex-direction: column;')&&siteV3Css.includes('align-items: flex-end;'),'mobile ID card retains its 17px left nudge and stacked Active/code status');
 const hub=read('projects/index.html');
 must(hub.includes('<title>Projects — Tamasrazim</title>'),'project directory uses simple title');
 must(!hub.includes('PRO_TOOL_MANIFEST')&&!hub.includes('tool-suite-health-console/'),'project directory omits generated catalogue');
