@@ -102,54 +102,6 @@ var DICT={
  pale:['P','EY','L'],trembled:['T','R','EH','M','B','AH','L','D'],fingers:['F','IH','NG','ER','Z']
 };
 Object.assign(DICT,{
-  pip:['P','IH','P'],ollie:['AA','L','IY'],tuck:['T','AH','K'],cloverfield:['K','L','OW','V','ER','F','IY','L','D'],
-  rainbow:['R','EY','N','B','OW'],kite:['K','AY','T'],meadow:['M','EH','D','OW'],spring:['S','P','R','IH','NG'],
-  colourful:['K','AH','L','ER','F','AH','L'],colourfuls:['K','AH','L','ER','F','AH','L','Z'],colour:['K','AH','L','ER'],
-  ribbons:['R','IH','B','AH','N','Z'],dance:['D','AE','N','S'],folded:['F','OW','L','D','IH','D'],tied:['T','AY','D'],
-  tested:['T','EH','S','T','IH','D'],crayons:['K','R','EY','AA','N','Z'],ready:['R','EH','D','IY'],steady:['S','T','EH','D','IY'],
-  wiggly:['W','IH','G','L','IY'],woooosh:['W','UH','SH'],paws:['P','AO','Z'],fluttered:['F','L','AH','T','ER','D'],
-  willow:['W','IH','L','OW'],branch:['B','R','AE','N','CH'],bubbling:['B','AH','B','AH','L','IH','NG'],brook:['B','R','UH','K'],
-  solve:['S','AA','L','V'],clever:['K','L','EH','V','ER'],crossed:['K','R','AO','S','T'],broad:['B','R','AO','D'],
-  log:['L','AO','G'],left:['L','EH','F','T'],tiny:['T','AY','N','IY'],breezy:['B','R','IY','Z','IY'],
-  snag:['S','N','AE','G'],gentle:['JH','EH','N','T','AH','L'],silky:['S','IH','L','K','IY'],string:['S','T','R','IH','NG'],
-  looped:['L','UW','P','T'],thorny:['TH','AO','R','N','IY'],rose:['R','OW','Z'],stem:['S','T','EH','M'],
-  tugging:['T','AH','G','IH','NG'],tear:['T','EH','R'],ribbon:['R','IH','B','AH','N'],loose:['L','UW','S'],
-  petals:['P','EH','T','AH','L','Z'],leaves:['L','IY','V','Z'],silver:['S','IH','L','V','ER'],pattered:['P','AE','T','ER','D'],
-  damp:['D','AE','M','P'],beneath:['B','IH','N','IY','TH'],raindrops:['R','EY','N','D','R','AA','P','S'],
-  plip:['P','L','IH','P'],plop:['P','L','AA','P'],rhythm:['R','IH','DH','AH','M'],beautiful:['B','Y','UW','T','AH','F','AH','L'],
-  patched:['P','AE','CH','T'],smoothed:['S','M','UW','DH','D'],corner:['K','AO','R','N','ER'],corners:['K','AO','R','N','ER','Z'],
-  patience:['P','EY','SH','AH','N','S'],passed:['P','AE','S','T'],sunlight:['S','AH','N','L','AY','T'],peeked:['P','IY','K','T'],
-  stretched:['S','T','R','EH','CH','T'],returned:['R','IH','T','ER','N','D'],hill:['HH','IH','L'],breeze:['B','R','IY','Z'],
-  holds:['HH','OW','L','D','Z'],piece:['P','IY','S'],morning:['M','AO','R','N','IH','NG'],hurray:['HH','UH','R','EY'],
-  teamwork:['T','IY','M','W','ER','K'],wonderful:['W','AH','N','D','ER','F','AH','L'],place:['P','L','EY','S'],friend:['F','R','EH','N','D'],friends:['F','R','EH','N','D','Z']
-});
-Object.assign(DICT,{
-  pancake:['P','AE','N','K','EY','K'],pancakes:['P','AE','N','K','EY','K','S'],
-  sunny:['S','AH','N','IY'],morning:['M','AO','R','N','IH','NG'],promised:['P','R','AA','M','IH','S','T'],
-  biggest:['B','IH','G','AH','S','T'],breakfast:['B','R','EH','K','F','AH','S','T'],giant:['JH','AY','AH','N','T'],
-  coming:['K','AH','M','IH','NG'],official:['AH','F','IH','SH','AH','L'],blueberry:['B','L','UW','B','EH','R','IY'],
-  blueberries:['B','L','UW','B','EH','R','IY','Z'],inspector:['IH','N','S','P','EH','K','T','ER'],syrup:['S','IH','R','AH','P'],
-  perfectly:['P','ER','F','EH','K','T','L','IY'],safe:['S','EY','F'],flipped:['F','L','IH','P','T'],
-  flying:['F','L','AY','IH','NG'],saucer:['S','AO','S','ER'],planned:['P','L','AE','N','D'],
-  landed:['L','AE','N','D','IH','D'],counter:['K','AW','N','T','ER'],bounced:['B','AW','N','S','T'],
-  cushion:['K','UH','SH','AH','N'],rolled:['R','OW','L','D'],straight:['S','T','R','EY','T'],door:['D','AO','R'],
-  tumbling:['T','AH','M','B','AH','L','IH','NG'],faster:['F','AE','S','T','ER'],creek:['K','R','IY','K'],
-  reaches:['R','IY','CH','IH','Z'],bridge:['B','R','IH','JH'],log:['L','AO','G'],wobbled:['W','AA','B','AH','L','D'],
-  bubbling:['B','AH','B','AH','L','IH','NG'],other:['AH','DH','ER'],patch:['P','AE','CH'],wearing:['W','EH','R','IH','NG'],
-  crown:['K','R','AW','N'],berries:['B','EH','R','IY','Z'],tilt:['T','IH','L','T'],branch:['B','R','AE','N','CH'],
-  tug:['T','AH','G'],shell:['SH','EH','L'],smelled:['S','M','EH','L','D'],delicious:['D','IH','L','IH','SH','AH','S'],
-  windmill:['W','IH','N','D','M','IH','L'],catching:['K','AE','CH','IH','NG'],plan:['P','L','AE','N'],
-  something:['S','AH','M','TH','IH','NG'],wide:['W','AY','D'],soft:['S','AO','F','T'],easy:['IY','Z','IY'],
-  hold:['HH','OW','L','D'],fluttered:['F','L','AH','T','ER','D'],stretched:['S','T','R','EH','CH','T'],
-  gorgeous:['G','AO','R','JH','AH','S'],golden:['G','OW','L','D','AH','N'],disc:['D','IH','S','K'],
-  ready:['R','EH','D','IY'],steady:['S','T','EH','D','IY'],softly:['S','AO','F','T','L','IY'],
-  floated:['F','L','OW','T','IH','D'],net:['N','EH','T'],plop:['P','L','AA','P'],caught:['K','AO','T'],
-  slid:['S','L','IH','D'],waiting:['W','EY','T','IH','NG'],serving:['S','ER','V','IH','NG'],enormous:['IH','N','AO','R','M','AH','S'],
-  prize:['P','R','AY','Z'],taking:['T','EY','K','IH','NG'],turns:['T','ER','N','Z'],piece:['P','IY','S'],
-  taste:['T','EY','S','T'],warm:['W','AO','R','M'],shared:['SH','EH','R','D'],together:['T','AH','G','EH','DH','ER'],
-  open:['OW','P','AH','N'],cushions:['K','UH','SH','AH','N','Z'],enough:['IH','N','AH','F']
-});
-Object.assign(DICT,{
   niko:['N','IY','K','OW'],auri:['AO','R','IY'],clockwork:['K','L','AA','K','W','ER','K'],
   clocktower:['K','L','AA','K','T','AW','ER'],clockkeeper:['K','L','AA','K','K','IY','P','ER'],
   redpanda:['R','EH','D','P','AE','N','D','AH'],panda:['P','AE','N','D','AH'],clockworkbird:['K','L','AA','K','W','ER','K','B','ER','D'],
@@ -338,9 +290,9 @@ function init(){
  o.querySelector('#tvsPreview').addEventListener('click',preview);
  o.querySelector('#tvsStop').addEventListener('click',stopAudio);
  o.querySelector('#tvsBuild').addEventListener('click',build);
- o.querySelector('#tvsSrt').addEventListener('click',function(){if(lastSrt)download(new Blob([lastSrt],{type:'text/plain;charset=utf-8'}),'pip-and-the-runaway-pancake.en.srt');});
+ o.querySelector('#tvsSrt').addEventListener('click',function(){if(lastSrt)download(new Blob([lastSrt],{type:'text/plain;charset=utf-8'}),'niko-and-the-clockwork-bird.en.srt');});
  o.querySelector('#tvsDefault').addEventListener('click',function(){if(busy)return;o.querySelector('#tvsScript').value=DEFAULT_SCRIPT;countCues();});
- o.querySelector('#tvsSave').addEventListener('click',function(){var raw=o.querySelector('#tvsScript').value,p=parseScript(raw);download(new Blob([JSON.stringify({format:'TRILYVA_DIALOGUE_1',durationSeconds:FILM,script:raw,parsedLines:p.rows.length},null,2)],{type:'application/json'}),'pip-and-the-runaway-pancake-dialogue.json');setStatus(p.errors.length?p.errors.join(' '):'Dialogue JSON exported: '+p.rows.length+' cues.',p.errors.length?'warn':'green');});
+ o.querySelector('#tvsSave').addEventListener('click',function(){var raw=o.querySelector('#tvsScript').value,p=parseScript(raw);download(new Blob([JSON.stringify({format:'TRILYVA_DIALOGUE_1',durationSeconds:FILM,script:raw,parsedLines:p.rows.length},null,2)],{type:'application/json'}),'niko-and-the-clockwork-bird-dialogue.json');setStatus(p.errors.length?p.errors.join(' '):'Dialogue JSON exported: '+p.rows.length+' cues.',p.errors.length?'warn':'green');});
  o.querySelector('#tvsImportBtn').addEventListener('click',function(){o.querySelector('#tvsImport').click();});
  o.querySelector('#tvsImport').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f)return;var reader=new FileReader();reader.onload=function(){try{var d=JSON.parse(String(reader.result)),src=typeof d==='string'?d:d.script;if(typeof src!=='string')throw new Error('JSON file has no script field.');o.querySelector('#tvsScript').value=src;countCues();setStatus('Local dialogue script imported.','green');}catch(e){setStatus('Import failed: '+e.message,'error');}};reader.readAsText(f);this.value='';});
  countCues();
@@ -406,7 +358,7 @@ function build(){
   setStatus('Writing stereo PCM samples to WAV…');bar.style.width='92%';await new Promise(function(resolve){setTimeout(resolve,0);});
   var blob=wav(left,right);lastBlob=blob;lastSrt=makeSrt(compiled);try{window.dispatchEvent(new CustomEvent('trilyva:voice-track-ready',{detail:{blob:blob,durationSeconds:FILM,sampleRate:SR}}));}catch(_){}
   if(dl.dataset.url)try{URL.revokeObjectURL(dl.dataset.url);}catch(e){}
-  var url=URL.createObjectURL(blob);dl.dataset.url=url;dl.href=url;dl.download='pip-and-the-runaway-pancake-voice-track.wav';dl.hidden=false;srt.disabled=false;bar.style.width='100%';
+  var url=URL.createObjectURL(blob);dl.dataset.url=url;dl.href=url;dl.download='niko-and-the-clockwork-bird-voice-track.wav';dl.hidden=false;srt.disabled=false;bar.style.width='100%';
   setStatus('READY · 05:00 WAV · '+(blob.size/1048576).toFixed(1)+' MB · '+compiled.length+' cues · '+(o.querySelector('#tvsAmbience').checked?'original score and atmosphere included':'dialogue only')+'.','green');
  }catch(e){console.error('TRILYVA Voice Studio',e);setStatus('Render failed: '+String(e&&e.message||e),'error');}
  finally{busy=false;btn.disabled=false;}
