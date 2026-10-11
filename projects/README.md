@@ -11,8 +11,7 @@ This directory contains a curated set of first-party browser tools, native appli
 - **KYNESTRA** — architecture, modules, desktop work, and format specifications.
 - **WEBEDYTS** — native desktop visual website editor in development; its project page separates current editor-source capabilities from release gates. No public download is available yet.
 - **Business software** — BNC AgroCare catalogue and invoice workflow.
-- **Browser tools** — Format Forge, Repo Token Meter, MailScope, and Stock Asset Vault.
-- **Creative experiments** — Prism Web Icons and Spiral Mic.
+- **Browser tools** — Format Forge, Repo Token Meter, and Stock Asset Vault.
 
 ## Project rule
 
