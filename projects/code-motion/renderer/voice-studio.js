@@ -278,7 +278,7 @@ function preview(){
   audio.play().then(function(){setStatus('Playing locally synthesized '+VOICES[who].label+' voice.','green');}).catch(function(e){setStatus('Playback blocked: '+e.message,'error');});
  }catch(e){setStatus('Voice synthesis failed: '+e.message,'error');}},0);
 }
-function addSoundscapeAsync(left,right,report){
+async function addSoundscapeAsync(left,right,report){
  var total=left.length,rng=0x52a6d19b,low=0,mid=0,chunk=SR*2,notes=[146.83,164.81,196,220,246.94,293.66,329.63,392],thunder=[62.3,87.6,139.2],chimes=[230.7,237.1,267.4,275,292.2];
  function rand(){rng=(Math.imul(1664525,rng)+1013904223)>>>0;return rng/4294967296;}
  function smooth(a,b,x){var u=Math.max(0,Math.min(1,(x-a)/(b-a)));return u*u*(3-2*u);}
