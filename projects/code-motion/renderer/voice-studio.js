@@ -215,6 +215,7 @@ function download(blob,name){var url=URL.createObjectURL(blob),a=document.create
 function css(){
  var s=document.createElement('style');s.id='trilyvaVoiceStudioCss';s.textContent=`
 #trilyvaVoiceStudioBtn{border:1px solid #45454d;padding:7px 10px!important;color:#f5f5f5!important;white-space:nowrap}
+@media(max-width:560px){.hdr-acts #trilyvaVoiceStudioBtn{display:block!important;flex:0 0 auto;padding:0 9px!important;font-size:9px!important;letter-spacing:0}}
 .tvs-overlay{position:fixed;inset:0;z-index:12000;background:rgba(0,0,0,.84);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:20px}
 .tvs-overlay.open{display:flex}.tvs-window{width:min(1180px,100%);height:min(850px,calc(100vh - 40px));background:#09090b;border:1px solid #34343b;box-shadow:0 25px 100px #000;display:flex;flex-direction:column;color:#eee;overflow:hidden;font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}
 .tvs-head{height:62px;flex:0 0 62px;display:flex;align-items:center;gap:16px;padding:0 20px;border-bottom:1px solid #29292e}.tvs-head strong{font:600 14px/1.2 ui-sans-serif,system-ui;letter-spacing:.13em}.tvs-head small{color:#85858e;font-size:10px;letter-spacing:.12em}.tvs-spacer{flex:1}.tvs-x{border:1px solid #38383f;width:33px;height:33px;color:#eee;font-size:20px}
