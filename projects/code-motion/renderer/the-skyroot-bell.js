@@ -1,9 +1,9 @@
 /* THE SKYROOT BELL — an original ten-minute fantasy cartoon for TRILYVA.
-   1920×1080 vector stage, deterministic frame rendering, no external assets.
+   4K UHD output target (3840×2160), 60 fps, deterministic vector frame rendering.
    Every frame is derived from time; scrubbing and export produce the same pose. */
 
 const SKYROOT_DURATION = 600;
-const SKYROOT_FPS = 30;
+const SKYROOT_FPS = 60;
 const SKYROOT_SIZE = { width: 1920, height: 1080 };
 const SKYROOT_CHAPTERS = [
   { time: 0,   title: "LUMENREACH",          note: "A village preparing for its lantern festival." },
@@ -954,8 +954,8 @@ if (typeof window !== "undefined" && !window.TRILYVA_SKYROOT_STORY) {
     title: "The Skyroot Bell",
     duration: SKYROOT_DURATION,
     fps: SKYROOT_FPS,
-    width: 1920,
-    height: 1080,
+    width: 3840,
+    height: 2160,
     chapters: SKYROOT_CHAPTERS,
     cues: SKYROOT_CUES,
     renderFrame: renderFrame
