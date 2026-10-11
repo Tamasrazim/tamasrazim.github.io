@@ -12,6 +12,8 @@ const films = [
     expectedDuration: 600,
     expectedWidth: 3840,
     expectedHeight: 2160,
+    expectedCanvasWidth: 3840,
+    expectedCanvasHeight: 2160,
   },
   {
     name: 'Niko and the Clockwork Bird',
@@ -20,6 +22,8 @@ const films = [
     expectedDuration: 300,
     expectedWidth: 1920,
     expectedHeight: 1080,
+    expectedCanvasWidth: 1920,
+    expectedCanvasHeight: 1080,
   },
 ];
 
@@ -105,7 +109,15 @@ function checkFilm(film) {
   scriptReferenceResolves(film.page, film.script);
 
   must(pageMarkup.includes('<canvas'), film.name + ' page provides a canvas stage');
-  must(pageMarkup.includes('1920') && pageMarkup.includes('1080'), film.name + ' retains a 16:9 render basis');
+  const canvasTag = pageMarkup.match(/<canvas\\b[^>]*>/i);
+  must(Boolean(canvasTag), film.name + ' has a measurable canvas element');
+  const canvasWidth = canvasTag ? Number((canvasTag[0].match(/\\bwidth=["'](\\d+)["']/i) || [])[1]) : 0;
+  const canvasHeight = canvasTag ? Number((canvasTag[0].match(/\\bheight=["'](\\d+)["']/i) || [])[1]) : 0;
+  must(
+    canvasWidth === film.expectedCanvasWidth && canvasHeight === film.expectedCanvasHeight,
+    film.name + ' canvas is ' + canvasWidth + ' × ' + canvasHeight,
+  );
+  must(canvasWidth / canvasHeight === 16 / 9, film.name + ' canvas keeps its 16:9 render basis');
 
   const windowObject = {};
   const sandbox = vm.createContext({ window: windowObject, console });
