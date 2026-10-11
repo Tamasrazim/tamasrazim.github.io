@@ -1,7 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine as _};
-use reqwest::{redirect::Policy, Client, StatusCode};
+use reqwest::{redirect::Policy, Client};
 use serde::Serialize;
 use serde_json::Value;
 use std::time::Duration;
