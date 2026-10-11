@@ -40,10 +40,10 @@ const externalScripts = scripts.filter(([_, attrs]) => {
   return absolute && !sameOrigin && !src.includes('googletagmanager.com/gtag/js');
 });
 must(externalScripts.length === 0, 'renderer has no external runtime script dependency');
-const stylesheetLinks = [...renderer.matchAll(/<link[^>]+\\bhref\\s*=\\s*["']([^"']+\\.css(?:\\?[^"']*)?)["'][^>]*>/gi)];
+const stylesheetLinks = [...renderer.matchAll(/<link[^>]+\bhref\s*=\s*["']([^"']+\.css(?:\?[^"']*)?)["'][^>]*>/gi)];
 const externalStylesheets = stylesheetLinks.filter(([, href]) =>
-  /^(?:https?:)?\\/\\//i.test(href) &&
-  !/^(?:https?:)?\\/\\/tamasrazim\\.github\\.io\\//i.test(href)
+  /^(?:https?:)?\/\//i.test(href) &&
+  !/^(?:https?:)?\/\/tamasrazim\.github\.io\//i.test(href)
 );
 must(externalStylesheets.length === 0, 'renderer has no external stylesheet dependency');
 
