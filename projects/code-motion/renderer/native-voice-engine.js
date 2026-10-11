@@ -49,7 +49,154 @@
     document.head.appendChild(style);
   }
 
+  var nativeProjectFilesWired = false;
+  var nativeFileOperationBusy = false;
+
+  function nativeProjectApi() {
+    var api = window.TRILYVA_NATIVE_PROJECT_API;
+    if (!api || typeof api.exportProjectJson !== 'function' || typeof api.importProjectText !== 'function') {
+      throw new Error('The renderer project bridge did not start. Reload TRILYVA before opening or saving.');
+    }
+    return api;
+  }
+
+  function nativeNameToFile(value) {
+    var raw = String(value || 'Untitled').trim();
+    try { raw = raw.normalize('NFKD').replace(/[\u0300-\u036f]/g, ''); } catch (_) {}
+    raw = raw.replace(/[<>:"/\\|?*\u0000-\u001f]/g, '-').replace(/\s+/g, '-').replace(/[^A-Za-z0-9._-]/g, '').replace(/-+/g, '-');
+    raw = raw.replace(/^[.-]+|[.-]+$/g, '').slice(0, 96);
+    if (!raw) raw = 'Untitled';
+    if (/\.tmotion$/i.test(raw)) raw = raw.replace(/\.tmotion$/i, '');
+    return raw + '.tmotion';
+  }
+
+  function nativeFileStatus(message, isError) {
+    setMainStatus(message);
+    if (el('tvsNativeState')) setState(message, isError ? 'bad' : 'good');
+  }
+
+  async function saveNativeProject(saveAs, exportCopy) {
+    if (nativeFileOperationBusy) return false;
+    nativeFileOperationBusy = true;
+    try {
+      var api = nativeProjectApi();
+      var content = api.exportProjectJson();
+      var fileName = await invoke('native_project_save', {
+        content: content,
+        suggestedName: nativeNameToFile(api.currentName()),
+        saveAs: !!saveAs,
+        exportCopy: !!exportCopy
+      });
+      if (!fileName) {
+        nativeFileStatus('Save cancelled. The current project and active file remain unchanged.', false);
+        return false;
+      }
+      if (exportCopy) {
+        nativeFileStatus('Exported a separate .tmotion copy: ' + fileName + '. The active file and unsaved state were not changed.', false);
+        return true;
+      }
+      api.markNativeSaved(fileName);
+      nativeFileStatus('Saved native project: ' + fileName, false);
+      return true;
+    } catch (error) {
+      nativeFileStatus('Native save failed: ' + String(error && error.message || error), true);
+      return false;
+    } finally {
+      nativeFileOperationBusy = false;
+    }
+  }
+
+  async function openNativeProject() {
+    if (nativeFileOperationBusy) return false;
+    nativeFileOperationBusy = true;
+    try {
+      var api = nativeProjectApi();
+      var file = await invoke('native_project_open');
+      if (!file) {
+        nativeFileStatus('Open cancelled. The current project is untouched.', false);
+        return false;
+      }
+      var accepted = await api.importProjectText(
+        file.content,
+        file.fileName,
+        function () {
+          return invoke('native_project_accept_open', { token: file.openToken });
+        },
+        function () {
+          return saveNativeProject(false, false);
+        }
+      );
+      if (accepted) {
+        nativeFileStatus('Opened native project: ' + file.fileName, false);
+        return true;
+      }
+      nativeFileStatus('Opening was cancelled or could not be completed. The selected file was not bound as the active project.', false);
+      return false;
+    } catch (error) {
+      nativeFileStatus('Native open failed: ' + String(error && error.message || error), true);
+      return false;
+    } finally {
+      nativeFileOperationBusy = false;
+    }
+  }
+
+  function installNativeProjectFiles() {
+    if (nativeProjectFilesWired) return;
+    nativeProjectFilesWired = true;
+
+    var nav = document.querySelector('.hdr-acts');
+    if (nav) {
+      var saveButton = nav.querySelector('[data-act="save"]');
+      var stored = document.createElement('button');
+      stored.type = 'button';
+      stored.id = 'trilyvaNativeStoredProjects';
+      stored.textContent = 'Stored';
+      stored.title = 'Open projects saved in this app’s local project library';
+      stored.setAttribute('aria-label', 'Open stored browser projects');
+      stored.addEventListener('click', function () {
+        try {
+          nativeProjectApi().openStoredProjectManager();
+        } catch (error) {
+          nativeFileStatus(String(error && error.message || error), true);
+        }
+      });
+      if (saveButton) saveButton.insertAdjacentElement('afterend', stored);
+      else nav.appendChild(stored);
+    }
+
+    document.addEventListener('click', function (event) {
+      var target = event.target;
+      while (target && target !== document.body && !(target.dataset && target.dataset.act)) target = target.parentNode;
+      if (!target || !target.dataset || !target.dataset.act) return;
+      var action = target.dataset.act;
+      if (action !== 'open' && action !== 'save' && action !== 'exportProject' && action !== 'importProject') return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
+      if (action === 'open' || action === 'importProject') {
+        openNativeProject();
+      } else if (action === 'save') {
+        saveNativeProject(!!event.shiftKey, false);
+      } else {
+        saveNativeProject(true, true);
+      }
+    }, true);
+
+    document.addEventListener('keydown', function (event) {
+      var modifier = event.ctrlKey || event.metaKey;
+      if (!modifier || event.altKey) return;
+      var key = String(event.key || '').toLowerCase();
+      if (key !== 's' && key !== 'o') return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
+      if (key === 'o') openNativeProject();
+      else saveNativeProject(!!event.shiftKey, false);
+    }, true);
+  }
+
   function install() {
+    installNativeProjectFiles();
     var overlay = el('trilyvaVoiceStudio');
     if (!overlay || el('tvsNativePanel')) return;
     var status = el('tvsStatus');
