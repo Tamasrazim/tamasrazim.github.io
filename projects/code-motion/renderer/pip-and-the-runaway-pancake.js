@@ -410,33 +410,33 @@ function filmTurtle(ctx,x,y,s,t,pose){
   ctx.restore();
 }
 function filmPancake(ctx,x,y,s,t,rotation,shine){
-  const hop=Math.sin(t*5.4);
-  ctx.save();ctx.translate(x,y+hop*2.2);ctx.rotate(rotation||0);ctx.scale(s*(1+Math.max(0,hop)*.018),s*(1-Math.max(0,hop)*.025));
-  // Grounded elliptical shadow and a deep toasted sidewall establish thickness.
-  const shadow=ctx.createRadialGradient(0,15,4,0,15,91);shadow.addColorStop(0,"rgba(93,47,18,.34)");shadow.addColorStop(.58,"rgba(93,47,18,.17)");shadow.addColorStop(1,"rgba(93,47,18,0)");
-  ctx.fillStyle=shadow;ctx.beginPath();ctx.ellipse(2,24,91,31,.02,0,Math.PI*2);ctx.fill();
-  const edge=ctx.createLinearGradient(-72,-55,70,78);edge.addColorStop(0,"#a84c23");edge.addColorStop(.16,"#f6b552");edge.addColorStop(.38,"#d98538");edge.addColorStop(.65,"#b95c28");edge.addColorStop(.83,"#ef9c43");edge.addColorStop(1,"#873b20");
-  ctx.fillStyle=edge;ctx.beginPath();ctx.moveTo(-76,-1);ctx.bezierCurveTo(-78,-45,-48,-75,-7,-77);ctx.bezierCurveTo(34,-84,75,-52,78,-15);ctx.bezierCurveTo(85,20,51,63,14,73);ctx.bezierCurveTo(-25,81,-72,52,-77,14);ctx.closePath();ctx.fill();ctx.strokeStyle="#8d3e20";ctx.lineWidth=4;ctx.stroke();
-  // A soft top gradient and a narrow bright lip read as a fluffy rounded surface.
-  const top=ctx.createRadialGradient(-28,-42,5,0,-2,99);top.addColorStop(0,"#fff0bb");top.addColorStop(.25,"#ffdc8d");top.addColorStop(.52,"#f5bd5f");top.addColorStop(.79,"#e9a34d");top.addColorStop(1,"#c96f31");
-  ctx.fillStyle=top;ctx.beginPath();ctx.moveTo(-68,-4);ctx.bezierCurveTo(-67,-40,-42,-63,-7,-66);ctx.bezierCurveTo(31,-74,62,-47,68,-14);ctx.bezierCurveTo(75,16,46,53,12,61);ctx.bezierCurveTo(-21,68,-60,45,-68,12);ctx.closePath();ctx.fill();ctx.strokeStyle="rgba(255,222,150,.55)";ctx.lineWidth=2.5;ctx.stroke();
-  // Uneven pores and browned freckles keep the food from looking like flat plastic.
+  const bob=Math.sin(t*5.4)*2.2,turn=rotation||0;
+  // The pancake itself is a pair of shaded 3D mesh volumes, not a flat ellipse.
+  film3DGroundShadow(ctx,x,y+18*s,s,88,.25);
+  const parts=[];
+  film3DSphere(parts,0,1,-2,77,65,17,"#b85a27",0,0,turn,8,5);
+  film3DSphere(parts,0,-5,13,68,56,10,"#eea94f",0,0,turn,8,5);
+  film3DSphere(parts,-1,-8,19,57,46,4,"#f7c970",0,0,turn,8,5);
+  film3DDraw(ctx,parts,x,y+bob,s);
+  // Surface garnish remains locked to the rotating pancake's local coordinate system.
+  ctx.save();ctx.translate(x,y+bob);ctx.rotate(turn);ctx.scale(s,s);
   for(let i=0;i<15;i++){
     const a=i*2.399,r=10+filmHash(i+9)*47,px=Math.cos(a)*r,py=Math.sin(a)*r*.7,rr=2+filmHash(i+21)*2.5;
-    ctx.fillStyle=i%3?"rgba(156,76,28,.25)":"rgba(255,249,210,.65)";ctx.beginPath();ctx.ellipse(px,py,rr,rr*.72,a,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=i%3?"rgba(156,76,28,.25)":"rgba(255,249,210,.65)";
+    ctx.beginPath();ctx.ellipse(px,py,rr,rr*.72,a,0,Math.PI*2);ctx.fill();
   }
-  // Syrup is a raised translucent ribbon with a bright reflected streak.
+  // A raised syrup path catches two separate warm highlights.
   ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle="rgba(123,57,20,.65)";ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(18,-40);ctx.bezierCurveTo(4,-27,28,-16,12,-2);ctx.bezierCurveTo(-2,9,19,15,9,27);ctx.stroke();
   const syrup=ctx.createLinearGradient(10,-40,20,27);syrup.addColorStop(0,"#9f471e");syrup.addColorStop(.35,"#c66c2c");syrup.addColorStop(.58,"#f2a34e");syrup.addColorStop(1,"#9b431c");
   ctx.strokeStyle=syrup;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(18,-40);ctx.bezierCurveTo(4,-27,28,-16,12,-2);ctx.bezierCurveTo(-2,9,19,15,9,27);ctx.stroke();
   ctx.strokeStyle="rgba(255,218,143,.76)";ctx.lineWidth=1.7;ctx.beginPath();ctx.moveTo(15,-34);ctx.bezierCurveTo(9,-27,23,-16,12,-5);ctx.stroke();
-  // Butter has rounded bevels and a specular edge.
+  // Butter: bevelled edges, soft top highlight and rounded corners.
   ctx.save();ctx.translate(-17,-19);ctx.rotate(.12+Math.sin(t*1.7)*.04);
   const butter=ctx.createLinearGradient(-14,-15,15,13);butter.addColorStop(0,"#fffbd0");butter.addColorStop(.35,"#ffeb89");butter.addColorStop(.78,"#f7cf43");butter.addColorStop(1,"#dca126");
   ctx.fillStyle=butter;filmRound(ctx,-15,-12,30,25,5);ctx.fill();ctx.strokeStyle="rgba(194,128,33,.55)";ctx.lineWidth=1.5;ctx.stroke();ctx.strokeStyle="rgba(255,255,255,.82)";ctx.lineWidth=2;filmLine(ctx,-8,-7,6,-7,"rgba(255,255,255,.82)",2);ctx.restore();
-  // Each blueberry has a contact shadow and a cool top highlight.
+  // Blueberries have individual volume, a contact shade and tiny reflected glints.
   for(let i=0;i<5;i++){
-    const a=i*1.6+t*.025,px=Math.cos(a)*47,py=Math.sin(a)*35;
+    const ang=i*1.6+t*.025,px=Math.cos(ang)*47,py=Math.sin(ang)*35;
     ctx.fillStyle="rgba(65,52,48,.2)";ctx.beginPath();ctx.ellipse(px+1,py+3,6.2,3.8,0,0,Math.PI*2);ctx.fill();
     filmVolumeEllipse(ctx,px,py,5.8,5.6,"#adc7ff","#567abb","#253b79",0,"rgba(29,53,109,.45)");
     ctx.fillStyle="rgba(255,255,255,.68)";ctx.beginPath();ctx.arc(px-1.8,py-2,1.5,0,Math.PI*2);ctx.fill();
