@@ -99,28 +99,39 @@ function film3DRotate(p,ax,ay,az){
   if(az){const c=Math.cos(az),q=Math.sin(az),nx=x*c-y*q,ny=x*q+y*c;x=nx;y=ny;}
   return [x,y,z];
 }
-function film3DDraw(ctx,parts,x,y,scale){
+function film3DDraw(ctx,parts,x,y,scale,rootRotation){
   const faces=[],D=1700,pitch=.18,cp=Math.cos(pitch),sp=Math.sin(pitch);
   const lx=-.43,ly=-.55,lz=.72,ll=Math.hypot(lx,ly,lz),L=[lx/ll,ly/ll,lz/ll];
   // A slightly elevated camera reveals the top planes of heads, shells and wings.
   const view=[0,-sp,cp],hx=L[0]+view[0],hy=L[1]+view[1],hz=L[2]+view[2],hl=Math.hypot(hx,hy,hz),H=[hx/hl,hy/hl,hz/hl];
+  const root=rootRotation||null;
   for(const part of parts){
     const geo=film3DGeometry(part.segments,part.rings),points=new Array(geo.vertices.length);
     for(let i=0;i<geo.vertices.length;i++){
       const v=geo.vertices[i];
-      let p=film3DRotate([v[0]*part.rx,v[1]*part.ry,v[2]*part.rz],part.rotX,part.rotY,part.rotZ);
-      p=[p[0]*scale,p[1]*scale,(p[2]+part.z)*scale];
-      const perspective=D/(D-p[2]);
-      points[i]={x:x+part.x*scale+p[0]*perspective,y:y+part.y*scale+(p[1]*cp+p[2]*sp)*perspective,z:p[2],world:[p[0],p[1],p[2]]};
+      const shape=film3DRotate([v[0]*part.rx,v[1]*part.ry,v[2]*part.rz],part.rotX,part.rotY,part.rotZ);
+      let p,screenX,screenY;
+      if(root){
+        // Rotate each vertex AND each part centre so the pancake tumbles as one solid object.
+        const q=film3DRotate([part.x+shape[0],part.y+shape[1],part.z+shape[2]],root.rx,root.ry,root.rz);
+        p=[q[0]*scale,q[1]*scale,q[2]*scale];
+        const perspective=D/(D-p[2]);
+        screenX=x+p[0]*perspective;
+        screenY=y+(p[1]*cp+p[2]*sp)*perspective;
+      }else{
+        p=[shape[0]*scale,shape[1]*scale,(shape[2]+part.z)*scale];
+        const perspective=D/(D-p[2]);
+        screenX=x+part.x*scale+p[0]*perspective;
+        screenY=y+part.y*scale+(p[1]*cp+p[2]*sp)*perspective;
+      }
+      points[i]={x:screenX,y:screenY,z:p[2],world:[p[0],p[1],p[2]]};
     }
-    const base=film3DColor(part.color);
     for(const tri of geo.triangles){
       const a=points[tri[0]],b=points[tri[1]],c=points[tri[2]];
       const ux=b.world[0]-a.world[0],uy=b.world[1]-a.world[1],uz=b.world[2]-a.world[2];
       const vx=c.world[0]-a.world[0],vy=c.world[1]-a.world[1],vz=c.world[2]-a.world[2];
       let nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;
       const nl=Math.hypot(nx,ny,nz)||1;nx/=nl;ny/=nl;nz/=nl;
-      // The scene camera looks from positive Z; discard hidden back faces.
       if(nz*cp-ny*sp<=.015)continue;
       const diffuse=Math.max(0,nx*L[0]+ny*L[1]+nz*L[2]);
       const spec=Math.pow(Math.max(0,nx*H[0]+ny*H[1]+nz*H[2]),20)*.16;
@@ -411,15 +422,20 @@ function filmTurtle(ctx,x,y,s,t,pose){
 }
 function filmPancake(ctx,x,y,s,t,rotation,shine){
   const bob=Math.sin(t*5.4)*2.2,turn=rotation||0;
-  // The pancake itself is a pair of shaded 3D mesh volumes, not a flat ellipse.
+  // Fast spin introduces a gentle 3D pitch and bank; the whole mesh rotates as one prop.
+  const tiltX=Math.sin(turn*.43+.28)*.68,tiltY=Math.cos(turn*.31)*.46;
+  const cz=Math.cos(turn),sz=Math.sin(turn),cx=Math.cos(tiltX),sx=Math.sin(tiltX),cy=Math.cos(tiltY),sy=Math.sin(tiltY);
+  const ax=cz*cy,ay=sz*cy,ac=cz*sy*sx-sz*cx,ad=sz*sy*sx+cz*cx;
   film3DGroundShadow(ctx,x,y+18*s,s,88,.25);
   const parts=[];
-  film3DSphere(parts,0,1,-2,77,65,17,"#b85a27",0,0,turn,8,5);
-  film3DSphere(parts,0,-5,13,68,56,10,"#eea94f",0,0,turn,8,5);
-  film3DSphere(parts,-1,-8,19,57,46,4,"#f7c970",0,0,turn,8,5);
-  film3DDraw(ctx,parts,x,y+bob,s);
-  // Surface garnish remains locked to the rotating pancake's local coordinate system.
-  ctx.save();ctx.translate(x,y+bob);ctx.rotate(turn);ctx.scale(s,s);
+  film3DSphere(parts,0,1,-2,77,65,17,"#b85a27",0,0,0,8,5);
+  film3DSphere(parts,0,-5,13,68,56,10,"#eea94f",0,0,0,8,5);
+  film3DSphere(parts,-1,-8,19,57,46,4,"#f7c970",0,0,0,8,5);
+  film3DDraw(ctx,parts,x,y+bob,s,{rx:tiltX,ry:tiltY,rz:turn});
+  // The garnish shares the exact rotation basis of the pancake's top plane.
+  const centre=film3DRotate([0,-8,19],tiltX,tiltY,turn),perspective=1700/(1700-centre[2]*s);
+  const gx=x+centre[0]*s*perspective,gy=y+bob+(centre[1]*s*Math.cos(.18)+centre[2]*s*Math.sin(.18))*perspective;
+  ctx.save();ctx.translate(gx,gy);ctx.transform(ax,ay,ac,ad,0,0);ctx.scale(s,s);ctx.translate(0,8);
   for(let i=0;i<15;i++){
     const a=i*2.399,r=10+filmHash(i+9)*47,px=Math.cos(a)*r,py=Math.sin(a)*r*.7,rr=2+filmHash(i+21)*2.5;
     ctx.fillStyle=i%3?"rgba(156,76,28,.25)":"rgba(255,249,210,.65)";
