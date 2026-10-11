@@ -49,6 +49,33 @@ function filmHash(n){const x=Math.sin(n*127.1+311.7)*43758.5453123;return x-Math
 function filmGrad(ctx,x0,y0,x1,y1,stops){const g=ctx.createLinearGradient(x0,y0,x1,y1);stops.forEach(s=>g.addColorStop(s[0],s[1]));return g;}
 function filmRound(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
 function filmLine(ctx,x1,y1,x2,y2,color,w){ctx.strokeStyle=color;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
+
+function filmVolumeEllipse(ctx,x,y,rx,ry,light,mid,shade,rotation,outline){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.rotate(rotation||0);
+  const r=Math.max(rx,ry);
+  const g=ctx.createRadialGradient(-rx*.34,-ry*.42,Math.max(1,rx*.025),rx*.04,ry*.05,r*1.22);
+  g.addColorStop(0,light);g.addColorStop(.36,mid);g.addColorStop(.76,shade);g.addColorStop(1,shade);
+  ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);ctx.fill();
+  if(outline){ctx.strokeStyle=outline;ctx.lineWidth=Math.max(1.3,r*.035);ctx.stroke();}
+  // Broad, soft highlight sells a rounded toy surface without a plastic look.
+  const h=ctx.createRadialGradient(-rx*.33,-ry*.4,0,-rx*.33,-ry*.4,rx*.64);
+  h.addColorStop(0,"rgba(255,255,255,.24)");h.addColorStop(.5,"rgba(255,255,255,.08)");h.addColorStop(1,"rgba(255,255,255,0)");
+  ctx.fillStyle=h;ctx.beginPath();ctx.ellipse(-rx*.08,-ry*.1,rx*.78,ry*.72,-.18,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+function filmTube(ctx,x1,y1,c1x,c1y,c2x,c2y,x2,y2,w,light,mid,shade){
+  const path=()=>{ctx.beginPath();ctx.moveTo(x1,y1);ctx.bezierCurveTo(c1x,c1y,c2x,c2y,x2,y2);};
+  ctx.lineCap="round";ctx.lineJoin="round";
+  ctx.strokeStyle=shade;ctx.lineWidth=w+3;path();ctx.stroke();
+  const g=ctx.createLinearGradient(Math.min(x1,x2)-w,Math.min(y1,y2)-w,Math.max(x1,x2)+w,Math.max(y1,y2)+w);
+  g.addColorStop(0,light);g.addColorStop(.5,mid);g.addColorStop(1,shade);
+  ctx.strokeStyle=g;ctx.lineWidth=w;path();ctx.stroke();
+  ctx.strokeStyle="rgba(255,255,255,.2)";ctx.lineWidth=Math.max(1,w*.16);
+  ctx.beginPath();ctx.moveTo(x1-w*.17,y1-w*.2);ctx.bezierCurveTo(c1x-w*.17,c1y-w*.2,c2x-w*.17,c2y-w*.2,x2-w*.17,y2-w*.2);ctx.stroke();
+}
+
 function filmGlow(ctx,x,y,r,color){const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,color);g.addColorStop(1,color.replace(/[\d.]+\)$/,"0)"));ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2);}
 function filmCloud(ctx,x,y,s,tone,drift){
   ctx.save();ctx.translate(x,y);ctx.scale(s,s);
@@ -170,90 +197,202 @@ function filmButterfly(ctx,x,y,s,t,c){
   ctx.strokeStyle="#54465d";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-8);ctx.lineTo(0,12);ctx.moveTo(0,-5);ctx.quadraticCurveTo(-7,-17,-10,-16);ctx.moveTo(0,-5);ctx.quadraticCurveTo(7,-17,10,-16);ctx.stroke();ctx.restore();
 }
 function filmFox(ctx,x,y,s,t,mood,pose){
-  ctx.save();ctx.translate(x,y+Math.sin(t*3.2)*2);ctx.scale(s,s);
-  const run=pose==="run",wave=pose==="wave",reach=pose==="reach",bounce=run?Math.abs(Math.sin(t*10))*8:Math.sin(t*2.4)*1.4;
-  ctx.translate(0,-bounce);
-  const shadow=ctx.createRadialGradient(0,0,2,0,0,65);shadow.addColorStop(0,"rgba(27,68,39,.24)");shadow.addColorStop(1,"rgba(27,68,39,0)");
-  ctx.fillStyle=shadow;ctx.beginPath();ctx.ellipse(0,4,58,13,0,0,Math.PI*2);ctx.fill();
-  const fur=ctx.createLinearGradient(-75,-105,32,4);fur.addColorStop(0,"#ffb66b");fur.addColorStop(.4,"#f58b48");fur.addColorStop(1,"#d55c39");
-  // Fluffy tail and pale tip.
-  ctx.fillStyle=fur;ctx.beginPath();ctx.moveTo(-18,-39);ctx.bezierCurveTo(-63,-37,-99,-71,-82,-105);ctx.bezierCurveTo(-65,-130,-38,-119,-29,-97);ctx.bezierCurveTo(-22,-78,-35,-69,-47,-65);ctx.bezierCurveTo(-27,-60,-15,-52,-12,-46);ctx.closePath();ctx.fill();
-  ctx.fillStyle="#fff4db";ctx.beginPath();ctx.moveTo(-78,-99);ctx.bezierCurveTo(-65,-121,-45,-109,-40,-96);ctx.bezierCurveTo(-37,-83,-50,-76,-61,-78);ctx.bezierCurveTo(-73,-82,-80,-89,-78,-99);ctx.fill();
-  // Legs swing on alternate phases for a readable trot.
-  const leg=(lx,phase)=>{ctx.save();ctx.translate(lx,-24);ctx.rotate(run?Math.sin(t*10+phase)*.48:Math.sin(t*2.2+phase)*.05);ctx.fillStyle="#d35d39";filmRound(ctx,-8,-1,16,32,6);ctx.fill();ctx.fillStyle="#ffe0af";filmRound(ctx,-12,23,24,10,5);ctx.fill();ctx.restore();};
+  const run=pose==="run",wave=pose==="wave",reach=pose==="reach";
+  const stride=Math.sin(t*10),breath=Math.sin(t*2.3);
+  const squashX=run?1+Math.abs(stride)*.035:1+Math.max(0,breath)*.006;
+  const squashY=run?1-Math.abs(stride)*.045:1+Math.max(0,breath)*.008;
+  ctx.save();ctx.translate(x,y+(run?Math.abs(stride)*-4:Math.sin(t*3.2)*1.7));ctx.scale(s*squashX,s*squashY);
+  ctx.rotate(run?Math.sin(t*10)*.035:Math.sin(t*1.4)*.008);
+  const shadow=ctx.createRadialGradient(0,2,2,0,2,76);shadow.addColorStop(0,"rgba(51,54,34,.3)");shadow.addColorStop(.52,"rgba(51,54,34,.13)");shadow.addColorStop(1,"rgba(51,54,34,0)");
+  ctx.fillStyle=shadow;ctx.beginPath();ctx.ellipse(0,7,71,16,0,0,Math.PI*2);ctx.fill();
+  const fur=ctx.createLinearGradient(-78,-162,50,-18);fur.addColorStop(0,"#ffc37d");fur.addColorStop(.22,"#ffab5b");fur.addColorStop(.52,"#ed7c3d");fur.addColorStop(.82,"#d45e35");fur.addColorStop(1,"#a84330");
+  const furFace=ctx.createRadialGradient(-22,-149,4,3,-119,96);furFace.addColorStop(0,"#ffc17a");furFace.addColorStop(.34,"#f9954d");furFace.addColorStop(.77,"#df6a3b");furFace.addColorStop(1,"#ad4933");
+  // Big striped tail with a tapered white tip and rim-lit fur.
+  ctx.save();ctx.rotate(Math.sin(t*2.2)*.055+(run?stride*.13:0));
+  ctx.fillStyle="rgba(91,43,29,.28)";ctx.beginPath();ctx.moveTo(-22,-40);ctx.bezierCurveTo(-72,-35,-102,-74,-91,-105);ctx.bezierCurveTo(-80,-139,-43,-129,-30,-104);ctx.bezierCurveTo(-20,-83,-40,-70,-51,-66);ctx.bezierCurveTo(-28,-60,-17,-51,-12,-45);ctx.closePath();ctx.fill();
+  const tail=ctx.createLinearGradient(-93,-126,-21,-46);tail.addColorStop(0,"#ffd294");tail.addColorStop(.35,"#f68a43");tail.addColorStop(.72,"#d45b36");tail.addColorStop(1,"#a64331");
+  ctx.fillStyle=tail;ctx.beginPath();ctx.moveTo(-18,-39);ctx.bezierCurveTo(-63,-37,-99,-71,-82,-105);ctx.bezierCurveTo(-65,-130,-38,-119,-29,-97);ctx.bezierCurveTo(-22,-78,-35,-69,-47,-65);ctx.bezierCurveTo(-27,-60,-15,-52,-12,-46);ctx.closePath();ctx.fill();ctx.strokeStyle="#aa4b31";ctx.lineWidth=2.3;ctx.stroke();
+  ctx.fillStyle=ctx.createLinearGradient(-82,-121,-39,-76);const tip=ctx.fillStyle;tip.addColorStop(0,"#fff9e9");tip.addColorStop(.7,"#f7e6cd");tip.addColorStop(1,"#d9b99c");
+  ctx.beginPath();ctx.moveTo(-78,-99);ctx.bezierCurveTo(-65,-121,-45,-109,-40,-96);ctx.bezierCurveTo(-37,-83,-50,-76,-61,-78);ctx.bezierCurveTo(-73,-82,-80,-89,-78,-99);ctx.fill();ctx.strokeStyle="rgba(255,255,255,.4)";ctx.lineWidth=2;ctx.stroke();
+  ctx.restore();
+  // Two short legs with a coloured top plane and soft cream toe caps.
+  function leg(lx,phase){
+    ctx.save();ctx.translate(lx,-27);ctx.rotate(run?Math.sin(t*10+phase)*.48:Math.sin(t*2.2+phase)*.045);
+    const g=ctx.createLinearGradient(-9,0,10,27);g.addColorStop(0,"#ffae61");g.addColorStop(.45,"#e97840");g.addColorStop(1,"#b94b32");
+    ctx.fillStyle=g;filmRound(ctx,-9,-2,18,34,7);ctx.fill();ctx.strokeStyle="#a84c32";ctx.lineWidth=1.7;ctx.stroke();
+    filmVolumeEllipse(ctx,0,26,13,8,"#fff0d3","#e9d1ac","#be967b",0,"rgba(140,73,51,.55)");
+    ctx.restore();
+  }
   leg(-16,0);leg(15,Math.PI);
-  ctx.fillStyle=fur;ctx.beginPath();ctx.moveTo(-31,-103);ctx.bezierCurveTo(-44,-78,-39,-42,-23,-29);ctx.quadraticCurveTo(0,-12,23,-31);ctx.bezierCurveTo(39,-54,33,-84,18,-103);ctx.closePath();ctx.fill();
-  const cream=ctx.createLinearGradient(-8,-80,15,-27);cream.addColorStop(0,"#fff5df");cream.addColorStop(1,"#f4d09d");ctx.fillStyle=cream;ctx.beginPath();ctx.moveTo(-10,-91);ctx.quadraticCurveTo(-7,-72,6,-64);ctx.quadraticCurveTo(18,-74,21,-92);ctx.quadraticCurveTo(27,-52,14,-38);ctx.quadraticCurveTo(-2,-29,-13,-45);ctx.quadraticCurveTo(-20,-66,-10,-91);ctx.fill();
-  // Scarf flutters in the direction of travel.
-  ctx.fillStyle="#36b9d0";ctx.beginPath();ctx.moveTo(-25,-88);ctx.quadraticCurveTo(0,-77,26,-91);ctx.lineTo(29,-80);ctx.quadraticCurveTo(2,-65,-25,-76);ctx.closePath();ctx.fill();
-  ctx.fillStyle="#90edeb";ctx.beginPath();ctx.moveTo(12,-81);ctx.lineTo(37,-78);ctx.lineTo(24,-62);ctx.lineTo(18,-75);ctx.closePath();ctx.fill();
-  // Arms pose toward the prop or out for balance.
-  ctx.strokeStyle="#e77742";ctx.lineWidth=13;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(-20,-84);ctx.quadraticCurveTo(reach?-37:-34,reach?-94:-66,reach?-52:-42,reach?-116:-55);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(20,-84);ctx.quadraticCurveTo(wave?36:36,wave?-111:-65,wave?39:40,wave?-132:-59);ctx.stroke();
-  // Head is deliberately larger than the body for clear preschool acting.
-  ctx.fillStyle=fur;ctx.beginPath();ctx.moveTo(-36,-123);ctx.lineTo(-45,-171);ctx.quadraticCurveTo(-20,-161,-8,-143);ctx.quadraticCurveTo(8,-162,34,-169);ctx.lineTo(30,-120);ctx.bezierCurveTo(43,-98,32,-79,15,-75);ctx.quadraticCurveTo(-14,-69,-32,-92);ctx.quadraticCurveTo(-44,-105,-36,-123);ctx.fill();
-  ctx.fillStyle="#ffdfae";ctx.beginPath();ctx.moveTo(-38,-158);ctx.lineTo(-41,-166);ctx.lineTo(-22,-145);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(13,-145);ctx.lineTo(29,-163);ctx.lineTo(25,-137);ctx.closePath();ctx.fill();
-  ctx.fillStyle="#fff4d9";ctx.beginPath();ctx.ellipse(12,-99,23,15,.12,0,Math.PI*2);ctx.fill();
-  // Face uses distinct open/closed expressions, catchlights and cheeks.
-  if(mood==="surprised"){ctx.fillStyle="#fff";ctx.beginPath();ctx.ellipse(-17,-121,7,10,0,0,Math.PI*2);ctx.ellipse(12,-121,7,10,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#49343a";ctx.beginPath();ctx.arc(-16,-120,3.5,0,Math.PI*2);ctx.arc(13,-120,3.5,0,Math.PI*2);ctx.fill();}
-  else if(Math.sin(t*1.2+1.7)>.993){ctx.strokeStyle="#53343a";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-24,-118);ctx.quadraticCurveTo(-17,-112,-10,-118);ctx.moveTo(5,-118);ctx.quadraticCurveTo(12,-112,20,-118);ctx.stroke();}
-  else{ctx.fillStyle="#fff";ctx.beginPath();ctx.ellipse(-17,-121,6.2,8.1,0,0,Math.PI*2);ctx.ellipse(12,-121,6.2,8.1,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#382c3c";ctx.beginPath();ctx.ellipse(-16,-120,3,5.3,0,0,Math.PI*2);ctx.ellipse(13,-120,3,5.3,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(-18,-123,1.6,0,Math.PI*2);ctx.arc(11,-123,1.6,0,Math.PI*2);ctx.fill();}
-  ctx.fillStyle="rgba(255,131,135,.45)";ctx.beginPath();ctx.ellipse(-28,-102,7,4,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#fff0d2";ctx.beginPath();ctx.ellipse(23,-103,12,8,.15,0,Math.PI*2);ctx.fill();ctx.fillStyle="#84433b";ctx.beginPath();ctx.ellipse(31,-104,4,3,0,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle="#8a433d";ctx.lineWidth=2.5;ctx.beginPath();
-  if(mood==="surprised"){ctx.ellipse(18,-89,5,7,0,0,Math.PI*2);ctx.stroke();}
-  else if(filmTalking("PIP",t)){ctx.fillStyle="#813b3c";ctx.beginPath();ctx.ellipse(15,-93,6,4.5+Math.abs(Math.sin(t*17))*2.7,.05,0,Math.PI*2);ctx.fill();ctx.fillStyle="#f58f95";ctx.beginPath();ctx.ellipse(16,-90,3.2,1.8,0,0,Math.PI*2);ctx.fill();}
-  else{ctx.arc(15,-94,10,.2,Math.PI-.2);ctx.stroke();}
-  // Small paw pads are drawn in Pip's local coordinate system.
-  if(reach||wave){ctx.fillStyle="#ffe7be";ctx.beginPath();ctx.arc(wave?39:-52,-120,5,0,Math.PI*2);ctx.fill();}
+  // Body is layered as a rounded volume, with a light chest and shaped belly.
+  ctx.fillStyle=fur;ctx.beginPath();ctx.moveTo(-31,-104);ctx.bezierCurveTo(-45,-78,-40,-42,-24,-29);ctx.quadraticCurveTo(0,-12,23,-31);ctx.bezierCurveTo(40,-54,34,-85,18,-104);ctx.closePath();ctx.fill();ctx.strokeStyle="#a94b32";ctx.lineWidth=2;ctx.stroke();
+  filmVolumeEllipse(ctx,-1,-61,27,37,"#ffce91","#ef9a59","#b94f34",-.05,"rgba(169,75,50,.35)");
+  const belly=ctx.createRadialGradient(-7,-79,2,2,-63,44);belly.addColorStop(0,"#fff8e4");belly.addColorStop(.55,"#ffebc9");belly.addColorStop(1,"#d8af86");
+  ctx.fillStyle=belly;ctx.beginPath();ctx.moveTo(-10,-92);ctx.quadraticCurveTo(-7,-73,6,-65);ctx.quadraticCurveTo(18,-75,21,-93);ctx.quadraticCurveTo(28,-52,14,-39);ctx.quadraticCurveTo(-2,-29,-13,-46);ctx.quadraticCurveTo(-20,-68,-10,-92);ctx.fill();
+  ctx.strokeStyle="rgba(159,88,55,.22)";ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(-12,-52);ctx.quadraticCurveTo(0,-46,13,-53);ctx.stroke();
+  // Teal scarf has a highlighted upper fold and a wind-driven tail.
+  const scarf=ctx.createLinearGradient(-25,-91,30,-65);scarf.addColorStop(0,"#8df1e7");scarf.addColorStop(.25,"#39c9d1");scarf.addColorStop(.68,"#1595ad");scarf.addColorStop(1,"#086b87");
+  ctx.fillStyle="#105c73";ctx.beginPath();ctx.moveTo(-27,-88);ctx.quadraticCurveTo(1,-76,27,-91);ctx.lineTo(30,-78);ctx.quadraticCurveTo(2,-63,-27,-75);ctx.closePath();ctx.fill();
+  ctx.fillStyle=scarf;ctx.beginPath();ctx.moveTo(-25,-90);ctx.quadraticCurveTo(0,-80,26,-93);ctx.lineTo(26,-83);ctx.quadraticCurveTo(1,-70,-25,-79);ctx.closePath();ctx.fill();
+  ctx.strokeStyle="rgba(255,255,255,.43)";ctx.lineWidth=2.1;ctx.beginPath();ctx.moveTo(-18,-86);ctx.quadraticCurveTo(0,-80,18,-87);ctx.stroke();
+  ctx.save();ctx.translate(21,-78);ctx.rotate(.08+Math.sin(t*6)*.12+(run?stride*.18:0));ctx.fillStyle="#0b7189";ctx.beginPath();ctx.moveTo(-3,-6);ctx.quadraticCurveTo(19,-9,25,-17);ctx.lineTo(16,12);ctx.lineTo(4,4);ctx.closePath();ctx.fill();
+  ctx.fillStyle="#75e5e2";ctx.beginPath();ctx.moveTo(-4,-8);ctx.quadraticCurveTo(15,-7,22,-16);ctx.lineTo(14,6);ctx.lineTo(4,0);ctx.closePath();ctx.fill();ctx.restore();
+  // Arms reach for the pan or spread for balance; each has a shaded upper plane.
+  const armY=reach?-101:-65,armEnd=reach?-119:wave?-132:-59;
+  filmTube(ctx,-20,-84,-35,reach?-97:-70,-45,reach?-103:-60,reach?-53:-42,armEnd,12,"#ffbd78","#e8783d","#a64230");
+  filmTube(ctx,20,-84,35,wave?-105:-67,42,wave?-113:-62,wave?39:40,armEnd,12,"#ffbd78","#e8783d","#a64230");
+  filmVolumeEllipse(ctx,reach?-53:wave?39:-42,armEnd,7,7,"#fff2d4","#f3cfa0","#be8a70",0,"rgba(158,76,51,.45)");
+  // Large, softly modelled head; the cheek/forehead overlap gives the face depth.
+  ctx.fillStyle=furFace;ctx.beginPath();ctx.moveTo(-36,-123);ctx.lineTo(-45,-171);ctx.quadraticCurveTo(-20,-161,-8,-143);ctx.quadraticCurveTo(8,-162,34,-169);ctx.lineTo(30,-120);ctx.bezierCurveTo(43,-98,32,-79,15,-75);ctx.quadraticCurveTo(-14,-69,-32,-92);ctx.quadraticCurveTo(-44,-105,-36,-123);ctx.closePath();ctx.fill();ctx.strokeStyle="#a54831";ctx.lineWidth=2.4;ctx.stroke();
+  // Ear cups use depth shading; inner pieces sit above the fur rather than replacing it.
+  filmVolumeEllipse(ctx,-31,-160,12,20,"#ffba7d","#ee8446","#a94230",-.25,"rgba(157,65,42,.5)");
+  filmVolumeEllipse(ctx,22,-159,12,20,"#ffbc7e","#e9783f","#a94230",.24,"rgba(157,65,42,.5)");
+  ctx.fillStyle=ctx.createLinearGradient(-42,-166,-22,-144);const earL=ctx.fillStyle;earL.addColorStop(0,"#ffb5b0");earL.addColorStop(.55,"#e87570");earL.addColorStop(1,"#a94b47");
+  ctx.beginPath();ctx.moveTo(-38,-158);ctx.lineTo(-40,-165);ctx.lineTo(-22,-145);ctx.closePath();ctx.fill();
+  const earR=ctx.createLinearGradient(14,-164,29,-139);earR.addColorStop(0,"#ffb5b0");earR.addColorStop(1,"#bb5450");ctx.fillStyle=earR;ctx.beginPath();ctx.moveTo(13,-145);ctx.lineTo(29,-163);ctx.lineTo(25,-137);ctx.closePath();ctx.fill();
+  // Soft mask patches and large eyes have separate catchlights, making the gaze read in close-up.
+  filmVolumeEllipse(ctx,-17,-121,10,13,"#a66a4d","#71402e","#40262a",-.04,"rgba(97,49,36,.35)");
+  filmVolumeEllipse(ctx,12,-121,10,13,"#a66a4d","#71402e","#40262a",.04,"rgba(97,49,36,.35)");
+  const blink=Math.sin(t*1.2+1.7)>.993&&mood!=="surprised";
+  if(blink){
+    ctx.strokeStyle="#503039";ctx.lineWidth=3.5;ctx.beginPath();ctx.moveTo(-24,-119);ctx.quadraticCurveTo(-17,-112,-10,-119);ctx.moveTo(5,-119);ctx.quadraticCurveTo(12,-112,20,-119);ctx.stroke();
+  }else{
+    filmVolumeEllipse(ctx,-17,-121,6.7,8.8,"#ffffff","#fbf5e8","#c1b4a1",0,"rgba(80,51,48,.45)");
+    filmVolumeEllipse(ctx,12,-121,6.7,8.8,"#ffffff","#fbf5e8","#c1b4a1",0,"rgba(80,51,48,.45)");
+    filmVolumeEllipse(ctx,-16,-120,3.5,5.6,"#65424a","#302a3b","#181726",0,null);
+    filmVolumeEllipse(ctx,13,-120,3.5,5.6,"#65424a","#302a3b","#181726",0,null);
+    filmVolumeEllipse(ctx,-18,-123,1.8,2.2,"#ffffff","#ffffff","#dce7e8",0,null);
+    filmVolumeEllipse(ctx,11,-123,1.8,2.2,"#ffffff","#ffffff","#dce7e8",0,null);
+  }
+  // Cheeks and two-piece muzzle create a rounded fox-like silhouette.
+  filmVolumeEllipse(ctx,-28,-102,8,4.5,"#ffb5a5","#f68b87","#ca5b58",-.05,null);
+  filmVolumeEllipse(ctx,23,-103,13,9,"#fff7e8","#f5dfbf","#c79a79",.10,"rgba(173,104,70,.22)");
+  filmVolumeEllipse(ctx,7,-94,13,9,"#fff9e9","#ecd0a7","#b98268",.1,null);
+  filmVolumeEllipse(ctx,31,-104,4.5,3.2,"#c86a55","#843f3b","#532d32",0,null);
+  if(mood==="surprised"){
+    filmVolumeEllipse(ctx,16,-88,5.4,7.4,"#e85c68","#8d3442","#4e2933",0,"rgba(86,41,45,.4)");
+    ctx.fillStyle="#f79ca0";ctx.beginPath();ctx.ellipse(16,-85,2.8,2.1,0,0,Math.PI*2);ctx.fill();
+  }else if(filmTalking("PIP",t)){
+    filmVolumeEllipse(ctx,15,-92,6.6,5.5,"#a84b52","#712f3a","#3d2330",0,"rgba(70,33,38,.4)");
+    ctx.fillStyle="#ed7c89";ctx.beginPath();ctx.ellipse(16,-89,3.5,1.8,.08,0,Math.PI*2);ctx.fill();
+  }else{
+    ctx.strokeStyle="#8a433d";ctx.lineWidth=2.8;ctx.beginPath();ctx.moveTo(8,-91);ctx.quadraticCurveTo(15,-84,24,-91);ctx.stroke();
+  }
+  if(mood==="worried"||mood==="thinking"){
+    ctx.strokeStyle="#994b36";ctx.lineWidth=3.2;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(-25,-135);ctx.quadraticCurveTo(-17,-140,-10,-134);ctx.moveTo(5,-134);ctx.quadraticCurveTo(12,-140,20,-134);ctx.stroke();
+  }else if(mood==="focused"){
+    ctx.strokeStyle="#994b36";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-24,-134);ctx.lineTo(-11,-132);ctx.moveTo(4,-132);ctx.lineTo(19,-135);ctx.stroke();
+  }
+  // Fur tufts and seam glints are subtle enough to survive downscaling.
+  ctx.strokeStyle="rgba(255,226,180,.55)";ctx.lineWidth=2.2;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(-31,-151);ctx.lineTo(-28,-145);ctx.moveTo(-24,-155);ctx.lineTo(-22,-150);ctx.moveTo(22,-151);ctx.lineTo(20,-146);ctx.stroke();
   ctx.restore();
 }
 function filmBird(ctx,x,y,s,t,pose){
-  ctx.save();ctx.translate(x,y+Math.sin(t*4+x*.01)*4);ctx.scale(s,s);
-  const flap=Math.sin(t*12)*.55;
-  ctx.fillStyle="#168abf";ctx.beginPath();ctx.ellipse(0,-29,31,32,-.1,0,Math.PI*2);ctx.fill();
-  const belly=ctx.createLinearGradient(-15,-22,15,4);belly.addColorStop(0,"#fff3c8");belly.addColorStop(1,"#ffd78b");ctx.fillStyle=belly;ctx.beginPath();ctx.ellipse(5,-21,19,23,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#27b7db";ctx.beginPath();ctx.ellipse(-5,-55,24,22,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#4dd2e8";ctx.beginPath();ctx.moveTo(-22,-68);ctx.quadraticCurveTo(-18,-87,-5,-72);ctx.quadraticCurveTo(0,-86,9,-71);ctx.closePath();ctx.fill();
-  ctx.fillStyle="#097cae";ctx.beginPath();ctx.ellipse(-26,-27,13,22,flap*.7,0,Math.PI*2);ctx.fill();
-  ctx.save();ctx.translate(-22,-31);ctx.rotate(pose==="fly"?flap*.9:Math.sin(t*2)*.12);ctx.fillStyle="#35c3e6";ctx.beginPath();ctx.ellipse(-3,0,17,10,-.2,0,Math.PI*2);ctx.fill();ctx.restore();
-  ctx.fillStyle="#fff";ctx.beginPath();ctx.ellipse(7,-59,7.5,9,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#243c55";ctx.beginPath();ctx.arc(9,-58,4.3,0,Math.PI*2);ctx.fill();ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(8,-61,1.5,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#ffad43";ctx.beginPath();ctx.moveTo(23,-52);ctx.lineTo(43,-45);ctx.lineTo(24,-39);ctx.closePath();ctx.fill();
-  if(filmTalking("OLLIE",t)){ctx.fillStyle="#e98731";ctx.beginPath();ctx.moveTo(24,-46);ctx.lineTo(41,-44);ctx.lineTo(24,-42);ctx.closePath();ctx.fill();}
-  if(filmTalking("OLLIE",t)){ctx.fillStyle="#e98731";ctx.beginPath();ctx.moveTo(24,-46);ctx.lineTo(41,-44);ctx.lineTo(24,-42);ctx.closePath();ctx.fill();}
-  ctx.strokeStyle="#d18c3c";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(25,-25);ctx.lineTo(25,-12);ctx.moveTo(10,-12);ctx.lineTo(27,-12);ctx.moveTo(38,-25);ctx.lineTo(39,-12);ctx.stroke();
-  ctx.strokeStyle="#7a5a5b";ctx.lineWidth=1.7;ctx.beginPath();ctx.moveTo(11,-43);ctx.quadraticCurveTo(16,-38,21,-43);ctx.stroke();
+  const flying=pose==="fly",flap=Math.sin(t*12)*.55;
+  ctx.save();ctx.translate(x,y+Math.sin(t*4+x*.01)*3.4+(flying?Math.abs(flap)*-3:0));ctx.scale(s*(flying?1.015:1),s*(flying?1-.025*Math.abs(flap):1));
+  // Tail feathers are separate enamel pieces and sit behind the body.
+  for(let i=0;i<3;i++){
+    ctx.save();ctx.translate(-6+i*11,-25);ctx.rotate((i-1)*-.24+(flying?flap*.2:0));
+    const tg=ctx.createLinearGradient(-6,-2,7,22);tg.addColorStop(0,i%2?"#72e5ed":"#5ac8e2");tg.addColorStop(.65,i%2?"#1398bf":"#1686b0");tg.addColorStop(1,"#09547c");
+    ctx.fillStyle=tg;ctx.beginPath();ctx.moveTo(-7,-1);ctx.quadraticCurveTo(-12,12,-2,25);ctx.quadraticCurveTo(7,16,5,-3);ctx.closePath();ctx.fill();ctx.strokeStyle="rgba(10,87,127,.6)";ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
+  }
+  // Wing flap and body bob are tied to the same cycle.
+  const wingGrad=ctx.createLinearGradient(-40,-45,4,-12);wingGrad.addColorStop(0,"#89e8f4");wingGrad.addColorStop(.35,"#32c0df");wingGrad.addColorStop(1,"#0877a7");
+  ctx.save();ctx.translate(-22,-30);ctx.rotate(flying?flap*.94:Math.sin(t*2)*.08);filmVolumeEllipse(ctx,-3,0,20,12,"#79e9f3","#29b9dc","#086d9b",-.2,"rgba(7,90,133,.55)");
+  ctx.strokeStyle="rgba(230,255,255,.53)";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-14,-3);ctx.quadraticCurveTo(-4,-7,8,-1);ctx.stroke();ctx.restore();
+  const body=ctx.createRadialGradient(-14,-50,3,0,-27,52);body.addColorStop(0,"#85ebef");body.addColorStop(.28,"#2dc2dc");body.addColorStop(.67,"#168ab9");body.addColorStop(1,"#07547f");
+  ctx.fillStyle=body;ctx.beginPath();ctx.ellipse(0,-29,32,33,-.1,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#08658e";ctx.lineWidth=2;ctx.stroke();
+  filmVolumeEllipse(ctx,6,-22,19,24,"#fff4cf","#ffdd92","#d69b4b",-.04,"rgba(154,98,44,.22)");
+  // Iridescent head and two soft feather tufts.
+  filmVolumeEllipse(ctx,-5,-55,24,22,"#98f4f5","#35c8e2","#0b75a7",0,"rgba(7,91,134,.45)");
+  ctx.fillStyle="#4ed7e9";ctx.beginPath();ctx.moveTo(-22,-68);ctx.quadraticCurveTo(-20,-87,-5,-72);ctx.quadraticCurveTo(0,-87,8,-72);ctx.quadraticCurveTo(14,-77,15,-65);ctx.closePath();ctx.fill();
+  ctx.strokeStyle="rgba(242,255,255,.45)";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-18,-68);ctx.quadraticCurveTo(-10,-76,-5,-69);ctx.stroke();
+  filmVolumeEllipse(ctx,7,-59,7.8,9.8,"#ffffff","#fbf3dc","#b6c6c7",0,"rgba(10,76,103,.35)");
+  filmVolumeEllipse(ctx,9,-58,4,5.1,"#5c6e83","#213d59","#0d2639",0,null);
+  filmVolumeEllipse(ctx,8,-61,1.6,1.9,"#ffffff","#ffffff","#e3f4f8",0,null);
+  // Beak has a shaded lower mandible and a bright upper plane.
+  const beak=ctx.createLinearGradient(22,-54,43,-39);beak.addColorStop(0,"#ffe087");beak.addColorStop(.45,"#ffad43");beak.addColorStop(1,"#d86b1e");
+  ctx.fillStyle="#b85e1b";ctx.beginPath();ctx.moveTo(23,-48);ctx.lineTo(42,-43);ctx.lineTo(24,-39);ctx.closePath();ctx.fill();
+  ctx.fillStyle=beak;ctx.beginPath();ctx.moveTo(22,-53);ctx.lineTo(44,-45);ctx.lineTo(24,-43);ctx.closePath();ctx.fill();
+  if(filmTalking("OLLIE",t)){ctx.fillStyle="#d76c24";ctx.beginPath();ctx.moveTo(24,-44);ctx.lineTo(39,-43);ctx.lineTo(24,-40);ctx.closePath();ctx.fill();}
+  ctx.strokeStyle="rgba(255,242,177,.75)";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(26,-51);ctx.lineTo(38,-46);ctx.stroke();
+  // Thin metal legs, round feet, and toe lines.
+  const legs=ctx.createLinearGradient(0,-20,0,4);legs.addColorStop(0,"#f5cc68");legs.addColorStop(1,"#af5a25");ctx.strokeStyle=legs;ctx.lineCap="round";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(10,-15);ctx.lineTo(10,-5);ctx.moveTo(26,-16);ctx.lineTo(27,-5);ctx.stroke();
+  ctx.strokeStyle="#eaa43b";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(1,-4);ctx.lineTo(15,-4);ctx.moveTo(20,-4);ctx.lineTo(33,-4);ctx.stroke();
   ctx.restore();
 }
 function filmTurtle(ctx,x,y,s,t,pose){
-  ctx.save();ctx.translate(x,y+Math.sin(t*2.1+x*.01)*1.5);ctx.scale(s,s);
-  const shadow=ctx.createRadialGradient(0,0,1,0,0,66);shadow.addColorStop(0,"rgba(24,74,48,.27)");shadow.addColorStop(1,"rgba(24,74,48,0)");ctx.fillStyle=shadow;ctx.beginPath();ctx.ellipse(0,5,64,13,0,0,Math.PI*2);ctx.fill();
-  for(let i=0;i<4;i++){const px=-36+(i%2)*60,py=-17+Math.floor(i/2)*19;ctx.fillStyle="#6dbb63";ctx.beginPath();ctx.ellipse(px,py,11,9,0,0,Math.PI*2);ctx.fill();}
-  const shell=ctx.createLinearGradient(-48,-66,48,-2);shell.addColorStop(0,"#ffd568");shell.addColorStop(.42,"#e69e43");shell.addColorStop(1,"#a65b34");ctx.fillStyle=shell;ctx.beginPath();ctx.ellipse(-3,-29,52,36,-.04,Math.PI,Math.PI*2);ctx.quadraticCurveTo(47,3,-4,4);ctx.quadraticCurveTo(-58,1,-55,-29);ctx.fill();
-  ctx.strokeStyle="#9b5e35";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-3,-64);ctx.lineTo(-3,2);ctx.moveTo(-44,-34);ctx.quadraticCurveTo(-3,-46,40,-34);ctx.moveTo(-36,-51);ctx.quadraticCurveTo(-22,-33,-36,-13);ctx.moveTo(30,-51);ctx.quadraticCurveTo(16,-33,30,-13);ctx.stroke();
-  ctx.fillStyle="#6ac96c";ctx.beginPath();ctx.ellipse(40,-37,27,23,.15,0,Math.PI*2);ctx.fill();ctx.fillStyle="#7bdd77";ctx.beginPath();ctx.ellipse(58,-39,18,19,.1,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#fff";ctx.beginPath();ctx.ellipse(60,-45,5.5,7,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#233e36";ctx.beginPath();ctx.arc(62,-44,2.5,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#489c58";ctx.beginPath();ctx.ellipse(12,-1,14,7,.12,0,Math.PI*2);ctx.ellipse(-22,-1,14,7,-.12,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#447b49";ctx.beginPath();ctx.ellipse(71,-31,4,3,0,0,Math.PI*2);ctx.fill();
-  if(filmTalking("TUCK",t)){ctx.fillStyle="#276c43";ctx.beginPath();ctx.ellipse(66,-26,5,3+Math.abs(Math.sin(t*12))*2,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#f29d9a";ctx.beginPath();ctx.ellipse(66,-24,2.5,1.1,0,0,Math.PI*2);ctx.fill();}
-  else{if(filmTalking("TUCK",t)){ctx.fillStyle="#276c43";ctx.beginPath();ctx.ellipse(66,-26,5,3+Math.abs(Math.sin(t*12))*2,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#f29d9a";ctx.beginPath();ctx.ellipse(66,-24,2.5,1.1,0,0,Math.PI*2);ctx.fill();}else{ctx.strokeStyle="#337b4c";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(59,-26);ctx.quadraticCurveTo(65,-22,71,-27);ctx.stroke();}}
-  if(pose==="wave"){ctx.strokeStyle="#69b95e";ctx.lineWidth=8;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(26,-46);ctx.quadraticCurveTo(38,-63,42+Math.sin(t*7)*4,-73);ctx.stroke();}
+  const walking=pose==="walk",stride=Math.sin(t*4.1);
+  ctx.save();ctx.translate(x,y+Math.sin(t*2.1+x*.01)*1.3);ctx.scale(s*(walking?1+Math.abs(stride)*.015:1),s*(walking?1-Math.abs(stride)*.025:1));
+  const shadow=ctx.createRadialGradient(0,3,1,0,3,73);shadow.addColorStop(0,"rgba(24,58,36,.32)");shadow.addColorStop(.55,"rgba(24,58,36,.12)");shadow.addColorStop(1,"rgba(24,58,36,0)");ctx.fillStyle=shadow;ctx.beginPath();ctx.ellipse(0,7,70,15,0,0,Math.PI*2);ctx.fill();
+  // Feet and short legs make Tuck feel planted on the ground.
+  for(let i=0;i<4;i++){
+    const lx=-37+(i%2)*70,ly=-11+Math.floor(i/2)*15,phase=i%2?Math.PI:0;
+    ctx.save();ctx.translate(lx,ly);ctx.rotate(walking?Math.sin(t*4+phase)*.2:Math.sin(t*1.9+phase)*.025);
+    filmVolumeEllipse(ctx,0,0,13,10,"#a4e681","#60c65e","#287b47",0,"rgba(38,112,60,.5)");
+    ctx.restore();
+  }
+  // Shell silhouette, double rim and visible scute plates create a moulded 3D dome.
+  const shell=ctx.createLinearGradient(-50,-68,44,6);shell.addColorStop(0,"#ffe48b");shell.addColorStop(.25,"#f8c655");shell.addColorStop(.58,"#dc9239");shell.addColorStop(.83,"#a75b30");shell.addColorStop(1,"#78402b");
+  ctx.fillStyle=shell;ctx.beginPath();ctx.moveTo(-53,-28);ctx.bezierCurveTo(-51,-54,-31,-69,-4,-68);ctx.bezierCurveTo(26,-70,48,-53,51,-28);ctx.bezierCurveTo(53,-7,31,4,-2,4);ctx.bezierCurveTo(-34,4,-53,-7,-53,-28);ctx.closePath();ctx.fill();ctx.strokeStyle="#8c4d2c";ctx.lineWidth=3;ctx.stroke();
+  ctx.strokeStyle="rgba(255,227,153,.77)";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-46,-30);ctx.bezierCurveTo(-41,-53,-20,-62,-2,-61);ctx.bezierCurveTo(20,-62,39,-50,44,-30);ctx.stroke();
+  const plates=[[-26,-42,18,15,-.25],[-4,-48,18,17,0],[19,-40,18,15,.26],[-19,-18,20,15,.08],[5,-20,20,15,-.06],[31,-20,12,13,.2]];
+  plates.forEach((p,i)=>filmVolumeEllipse(ctx,p[0],p[1],p[2],p[3],i%2?"#ffeaa1":"#ffd96b",i%2?"#db9a40":"#c98235","#8a4d2d",p[4],"rgba(128,70,40,.52)"));
+  // Moss-green head has a pale muzzle and bright eyes.
+  filmVolumeEllipse(ctx,40,-37,26,23,"#b9ef83","#67c666","#277d48",.06,"rgba(40,111,61,.45)");
+  filmVolumeEllipse(ctx,58,-39,18,18,"#b9f18c","#77d96c","#328749",.04,"rgba(44,113,63,.45)");
+  filmVolumeEllipse(ctx,61,-45,5.7,7.4,"#ffffff","#f7fae7","#a2b79b",0,"rgba(33,100,61,.35)");
+  filmVolumeEllipse(ctx,63,-44,2.8,4,"#617a67","#24483d","#102d32",0,null);
+  filmVolumeEllipse(ctx,62,-46,1.2,1.5,"#ffffff","#ffffff","#dceee0",0,null);
+  filmVolumeEllipse(ctx,72,-31,4.5,3.3,"#8fbb67","#397849","#205339",0,null);
+  if(filmTalking("TUCK",t)){
+    filmVolumeEllipse(ctx,66,-26,5.5,3.5,"#4d7b48","#225e3a","#123b2d",0,"rgba(26,80,42,.4)");
+    ctx.fillStyle="#efa0a0";ctx.beginPath();ctx.ellipse(66,-24.5,2.7,1.25,0,0,Math.PI*2);ctx.fill();
+  }else{ctx.strokeStyle="#286d42";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(59,-26);ctx.quadraticCurveTo(65,-22,71,-27);ctx.stroke();}
+  filmVolumeEllipse(ctx,28,-23,9,6,"#d9f7a4","#a2dc78","#5b9c52",.15,null);
+  if(pose==="wave"){
+    filmTube(ctx,26,-46,34,-56,41,-63,42+Math.sin(t*7)*4,-73,8,"#c0f28f","#68c65f","#2c8048");
+    filmVolumeEllipse(ctx,42+Math.sin(t*7)*4,-73,6.5,6,"#d2f9a3","#76d36c","#35844d",0,null);
+  }
   ctx.restore();
 }
 function filmPancake(ctx,x,y,s,t,rotation,shine){
-  ctx.save();ctx.translate(x,y+Math.sin(t*5.4)*2.4);ctx.rotate(rotation||0);ctx.scale(s,s);
-  const shadow=ctx.createRadialGradient(0,8,3,0,8,83);shadow.addColorStop(0,"rgba(101,58,24,.25)");shadow.addColorStop(1,"rgba(101,58,24,0)");ctx.fillStyle=shadow;ctx.beginPath();ctx.ellipse(0,20,84,26,0,0,Math.PI*2);ctx.fill();
-  const edge=ctx.createLinearGradient(-72,-55,65,78);edge.addColorStop(0,"#c26a2e");edge.addColorStop(.28,"#efad49");edge.addColorStop(.7,"#d78135");edge.addColorStop(1,"#a85129");
-  ctx.fillStyle=edge;ctx.beginPath();ctx.moveTo(-75,-2);ctx.bezierCurveTo(-76,-43,-47,-72,-5,-75);ctx.bezierCurveTo(35,-83,72,-52,76,-15);ctx.bezierCurveTo(84,17,52,62,14,71);ctx.bezierCurveTo(-24,80,-70,51,-76,14);ctx.closePath();ctx.fill();
-  ctx.strokeStyle="#a8562c";ctx.lineWidth=4;ctx.stroke();
-  const top=ctx.createRadialGradient(-24,-38,8,0,0,88);top.addColorStop(0,"#ffe4a0");top.addColorStop(.44,"#f8c76f");top.addColorStop(.84,"#e9a64e");top.addColorStop(1,"#dc8b39");ctx.fillStyle=top;ctx.beginPath();ctx.moveTo(-67,-4);ctx.bezierCurveTo(-66,-40,-42,-61,-7,-65);ctx.bezierCurveTo(30,-73,62,-47,67,-14);ctx.bezierCurveTo(75,16,46,53,12,60);ctx.bezierCurveTo(-20,68,-59,44,-67,12);ctx.closePath();ctx.fill();
-  ctx.strokeStyle="rgba(255,244,197,.6)";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(-5,-8,57,49,-.1,Math.PI*1.08,Math.PI*1.83);ctx.stroke();
-  // Tiny air pockets, browned freckles, glossy syrup and a pat of butter.
-  for(let i=0;i<11;i++){const a=i*2.399,r=12+filmHash(i+9)*43,px=Math.cos(a)*r,py=Math.sin(a)*r*.72;ctx.fillStyle=i%3?"rgba(171,92,38,.24)":"rgba(255,248,202,.55)";ctx.beginPath();ctx.ellipse(px,py,2.3+filmHash(i+21)*2,1.7+filmHash(i+31)*1.4,a,0,Math.PI*2);ctx.fill();}
-  ctx.strokeStyle="rgba(174,83,36,.75)";ctx.lineWidth=2.5;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(18,-40);ctx.bezierCurveTo(4,-27,28,-16,12,-2);ctx.bezierCurveTo(-2,9,19,15,9,27);ctx.stroke();
-  ctx.save();ctx.translate(-17,-19);ctx.rotate(.12+Math.sin(t*1.7)*.04);const butter=ctx.createLinearGradient(-10,-12,12,12);butter.addColorStop(0,"#fff4a4");butter.addColorStop(1,"#f5c638");ctx.fillStyle=butter;filmRound(ctx,-15,-12,30,25,5);ctx.fill();ctx.strokeStyle="rgba(255,255,255,.62)";ctx.lineWidth=2;filmLine(ctx,-8,-7,6,-7,"rgba(255,255,255,.62)",2);ctx.restore();
-  for(let i=0;i<5;i++){const a=i*1.6+t*.025,px=Math.cos(a)*47,py=Math.sin(a)*35;ctx.fillStyle="#355d9b";ctx.beginPath();ctx.arc(px,py,5.5,0,Math.PI*2);ctx.fill();ctx.fillStyle="rgba(255,255,255,.4)";ctx.beginPath();ctx.arc(px-1.5,py-1.5,1.8,0,Math.PI*2);ctx.fill();}
-  if(shine){ctx.strokeStyle="rgba(255,255,255,.6)";ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(-31,-32,24,10,-.42,Math.PI*1.1,Math.PI*1.8);ctx.stroke();}
+  const hop=Math.sin(t*5.4);
+  ctx.save();ctx.translate(x,y+hop*2.2);ctx.rotate(rotation||0);ctx.scale(s*(1+Math.max(0,hop)*.018),s*(1-Math.max(0,hop)*.025));
+  // Grounded elliptical shadow and a deep toasted sidewall establish thickness.
+  const shadow=ctx.createRadialGradient(0,15,4,0,15,91);shadow.addColorStop(0,"rgba(93,47,18,.34)");shadow.addColorStop(.58,"rgba(93,47,18,.17)");shadow.addColorStop(1,"rgba(93,47,18,0)");
+  ctx.fillStyle=shadow;ctx.beginPath();ctx.ellipse(2,24,91,31,.02,0,Math.PI*2);ctx.fill();
+  const edge=ctx.createLinearGradient(-72,-55,70,78);edge.addColorStop(0,"#a84c23");edge.addColorStop(.16,"#f6b552");edge.addColorStop(.38,"#d98538");edge.addColorStop(.65,"#b95c28");edge.addColorStop(.83,"#ef9c43");edge.addColorStop(1,"#873b20");
+  ctx.fillStyle=edge;ctx.beginPath();ctx.moveTo(-76,-1);ctx.bezierCurveTo(-78,-45,-48,-75,-7,-77);ctx.bezierCurveTo(34,-84,75,-52,78,-15);ctx.bezierCurveTo(85,20,51,63,14,73);ctx.bezierCurveTo(-25,81,-72,52,-77,14);ctx.closePath();ctx.fill();ctx.strokeStyle="#8d3e20";ctx.lineWidth=4;ctx.stroke();
+  // A soft top gradient and a narrow bright lip read as a fluffy rounded surface.
+  const top=ctx.createRadialGradient(-28,-42,5,0,-2,99);top.addColorStop(0,"#fff0bb");top.addColorStop(.25,"#ffdc8d");top.addColorStop(.52,"#f5bd5f");top.addColorStop(.79,"#e9a34d");top.addColorStop(1,"#c96f31");
+  ctx.fillStyle=top;ctx.beginPath();ctx.moveTo(-68,-4);ctx.bezierCurveTo(-67,-40,-42,-63,-7,-66);ctx.bezierCurveTo(31,-74,62,-47,68,-14);ctx.bezierCurveTo(75,16,46,53,12,61);ctx.bezierCurveTo(-21,68,-60,45,-68,12);ctx.closePath();ctx.fill();ctx.strokeStyle="rgba(255,222,150,.55)";ctx.lineWidth=2.5;ctx.stroke();
+  // Uneven pores and browned freckles keep the food from looking like flat plastic.
+  for(let i=0;i<15;i++){
+    const a=i*2.399,r=10+filmHash(i+9)*47,px=Math.cos(a)*r,py=Math.sin(a)*r*.7,rr=2+filmHash(i+21)*2.5;
+    ctx.fillStyle=i%3?"rgba(156,76,28,.25)":"rgba(255,249,210,.65)";ctx.beginPath();ctx.ellipse(px,py,rr,rr*.72,a,0,Math.PI*2);ctx.fill();
+  }
+  // Syrup is a raised translucent ribbon with a bright reflected streak.
+  ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle="rgba(123,57,20,.65)";ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(18,-40);ctx.bezierCurveTo(4,-27,28,-16,12,-2);ctx.bezierCurveTo(-2,9,19,15,9,27);ctx.stroke();
+  const syrup=ctx.createLinearGradient(10,-40,20,27);syrup.addColorStop(0,"#9f471e");syrup.addColorStop(.35,"#c66c2c");syrup.addColorStop(.58,"#f2a34e");syrup.addColorStop(1,"#9b431c");
+  ctx.strokeStyle=syrup;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(18,-40);ctx.bezierCurveTo(4,-27,28,-16,12,-2);ctx.bezierCurveTo(-2,9,19,15,9,27);ctx.stroke();
+  ctx.strokeStyle="rgba(255,218,143,.76)";ctx.lineWidth=1.7;ctx.beginPath();ctx.moveTo(15,-34);ctx.bezierCurveTo(9,-27,23,-16,12,-5);ctx.stroke();
+  // Butter has rounded bevels and a specular edge.
+  ctx.save();ctx.translate(-17,-19);ctx.rotate(.12+Math.sin(t*1.7)*.04);
+  const butter=ctx.createLinearGradient(-14,-15,15,13);butter.addColorStop(0,"#fffbd0");butter.addColorStop(.35,"#ffeb89");butter.addColorStop(.78,"#f7cf43");butter.addColorStop(1,"#dca126");
+  ctx.fillStyle=butter;filmRound(ctx,-15,-12,30,25,5);ctx.fill();ctx.strokeStyle="rgba(194,128,33,.55)";ctx.lineWidth=1.5;ctx.stroke();ctx.strokeStyle="rgba(255,255,255,.82)";ctx.lineWidth=2;filmLine(ctx,-8,-7,6,-7,"rgba(255,255,255,.82)",2);ctx.restore();
+  // Each blueberry has a contact shadow and a cool top highlight.
+  for(let i=0;i<5;i++){
+    const a=i*1.6+t*.025,px=Math.cos(a)*47,py=Math.sin(a)*35;
+    ctx.fillStyle="rgba(65,52,48,.2)";ctx.beginPath();ctx.ellipse(px+1,py+3,6.2,3.8,0,0,Math.PI*2);ctx.fill();
+    filmVolumeEllipse(ctx,px,py,5.8,5.6,"#adc7ff","#567abb","#253b79",0,"rgba(29,53,109,.45)");
+    ctx.fillStyle="rgba(255,255,255,.68)";ctx.beginPath();ctx.arc(px-1.8,py-2,1.5,0,Math.PI*2);ctx.fill();
+  }
+  if(shine){
+    const gloss=ctx.createLinearGradient(-55,-55,6,-9);gloss.addColorStop(0,"rgba(255,255,255,.34)");gloss.addColorStop(1,"rgba(255,255,255,0)");
+    ctx.fillStyle=gloss;ctx.beginPath();ctx.ellipse(-25,-31,30,12,-.48,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle="rgba(255,255,255,.7)";ctx.lineWidth=3.5;ctx.beginPath();ctx.ellipse(-31,-33,24,10,-.42,Math.PI*1.1,Math.PI*1.78);ctx.stroke();
+  }
   ctx.restore();
 }
 function filmPan(ctx,x,y,s,t,withPancake){
@@ -442,7 +581,7 @@ function renderFrame(time,frame,fps,ctx,width,height){
       filmBird(ctx,1025,772,.88,t,"perch");
       filmTurtle(ctx,1370,955,.98,t,"wave");
       for(let i=0;i<5;i++)filmButterfly(ctx,330+i*290,424+Math.sin(t*1.8+i)*33,.5,t,["#ff94b6","#a992ff","#ffca56","#72dfe7","#fff"][i]);
-      if(t>278){const p=filmEase(278,286,t);ctx.save();ctx.globalAlpha=p;ctx.fillStyle="rgba(255,249,225,.92)";filmRound(ctx,435,160,1050,180,28);ctx.fill();ctx.strokeStyle="#e9b45a";ctx.lineWidth=4;filmRound(ctx,435,160,1050,180,28);ctx.stroke();ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#267a5c";ctx.font="1000 60px ui-rounded,system-ui,sans-serif";ctx.fillText("PIP AND THE RUNAWAY PANCAKE",960,218);ctx.fillStyle="#d97954";ctx.font="800 24px ui-rounded,system-ui,sans-serif";ctx.fillText("A CLOVERFIELD MEADOW CARTOON",960,280);ctx.restore();}
+      
     }
     ctx.restore();
   }
