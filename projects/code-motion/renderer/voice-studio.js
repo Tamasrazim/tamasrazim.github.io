@@ -6,45 +6,47 @@
 'use strict';
 var SR=22050, FILM=300, TAU=Math.PI*2, audio=null, lastBlob=null, lastSrt='', busy=false;
 var VOICES={
-  NARRATOR:{label:'Narrator',f0:118,formant:.97,bright:.93,gain:.78,pan:0,rate:1},
-  NORI:{label:'Nori',f0:184,formant:1.10,bright:1.12,gain:.92,pan:-.08,rate:1.08},
-  CAPTAIN:{label:'Rabbit captain',f0:107,formant:.92,bright:.88,gain:.88,pan:.12,rate:.96},
-  BUNNY:{label:'Rabbit companion',f0:207,formant:1.16,bright:1.08,gain:.85,pan:.18,rate:1.13}
+  NARRATOR:{label:'Narrator',f0:118,formant:.97,bright:.96,gain:.78,pan:0,rate:1.02},
+  PIP:{label:'Pip the fox',f0:202,formant:1.12,bright:1.16,gain:.91,pan:-.12,rate:1.08},
+  OLLIE:{label:'Ollie the bird',f0:246,formant:1.24,bright:1.24,gain:.82,pan:.18,rate:1.15},
+  TUCK:{label:'Tuck the turtle',f0:136,formant:.96,bright:.92,gain:.88,pan:.10,rate:.93}
 };
 var DEFAULT_SCRIPT=[
-'00:01 | NARRATOR | At the edge of the blue sea, there was a village that trusted one little lighthouse.',
-'00:09 | NARRATOR | Every evening, Nori the fox climbed the tower to make sure its light could be seen for miles.',
-'00:18 | NORI | There you go, old friend. One bright light to bring everyone home.',
-'00:28 | NARRATOR | Nori was small and the lighthouse was old, but together they made the night less frightening.',
-'00:39 | NORI | Another perfect evening. Now, let us keep that light shining.',
-'00:52 | NARRATOR | Then the wind changed. Clouds covered the moon, and thunder rolled over the sea.',
-'01:00 | NORI | That cloud is moving awfully fast. Something does not feel right.',
-'01:10 | NARRATOR | Rain struck the tower. A flash lit the horizon, and the lighthouse suddenly went dark.',
-'01:20 | CAPTAIN | The beacon is gone! Keep the little lamp high and stay together!',
-'01:29 | BUNNY | I cannot see the shore. Captain, how will we find the harbor?',
-'01:38 | NARRATOR | Far beyond the rocks, the little boat lost its way. The captain searched the black water for a familiar golden beam.',
-'01:48 | NORI | I can see their tiny lamp. I have to get the lighthouse working again.',
-'01:57 | NARRATOR | Nori packed his lantern, an empty glass jar, and a warm scarf, then hurried into the rain.',
-'02:06 | NORI | Easy, Nori. One step, then another. We can do this.',
-'02:15 | NARRATOR | The pier shook under every wave. The wind tugged at his scarf, and the lantern trembled in his paw.',
-'02:24 | NORI | I am frightened too, little light. But we cannot turn back.',
-'02:32 | NARRATOR | Under the trees, tiny lights trembled among the reeds. They were fireflies, hiding from the storm.',
-'02:41 | NORI | I will not trap you. I need your help. Someone out there is waiting to get home.',
-'02:50 | NARRATOR | One firefly drifted closer. Then another. Soon the air glowed like a field of little stars.',
-'03:00 | NARRATOR | The path crossed a broken bridge above a deep ravine. Nori took a breath and stepped onto the first plank.',
-'03:08 | NORI | Stay with me, little lights. We will cross together.',
-'03:17 | NARRATOR | On the other side, a sea cave opened beneath the cliff. At its center stood an ancient mirror, cold and silent.',
-'03:27 | NORI | Maybe you can catch the lightning. Maybe you can show the lighthouse where to shine.',
-'03:36 | NARRATOR | The fireflies circled the mirror. Their reflections multiplied until the cave glittered with a thousand golden points.',
-'03:46 | NORI | You do not have to be big to make a difference. You only have to shine together.',
-'03:55 | NARRATOR | One by one, the fireflies formed a golden spiral. The old mirror gathered their glow and sent it back as a warm beam.',
-'04:06 | NORI | Come on, old friend. Remember your light.',
-'04:15 | NARRATOR | Gold swept across the waves. The lighthouse lens began to turn, and the captain saw the harbor again.',
-'04:24 | CAPTAIN | There! Follow that golden beam! Land is just ahead!',
-'04:32 | BUNNY | I can see the village! I can see the lights in the windows!',
-'04:42 | NARRATOR | The boat slipped into calm water. The storm moved away, and the first pale color of dawn touched the clouds.',
-'04:52 | NORI | You made it. I knew we could do it, together.',
-'04:57 | NARRATOR | From that night on, no light ever stood alone.'
+'00:01 | NARRATOR | In Cloverfield Meadow, Pip was making a kite for the Spring Sky Day.',
+'00:08 | PIP | This sky needs something colourful!',
+'00:16 | OLLIE | A tail of ribbons! Every colour can dance.',
+'00:25 | NARRATOR | They folded, tied and tested a little rainbow kite, bright as a box of crayons.',
+'00:35 | PIP | Ready, steady, up you go!',
+'00:43 | NARRATOR | The kite caught a wiggly wind. Then came one big WOOOOSH, and it danced right out of Pip’s paws.',
+'00:52 | PIP | My kite! Wait, little rainbow!',
+'00:59 | OLLIE | I can fly ahead, but I cannot pull it down alone.',
+'01:08 | NARRATOR | Across the meadow, the kite fluttered to a willow branch above the bubbling brook.',
+'01:17 | TUCK | We can solve it together. Slow feet, clever ideas.',
+'01:26 | PIP | I’ll hold the branch, Ollie will guide, and Tuck can steady the log.',
+'01:37 | NARRATOR | They crossed the little brook on a broad, dry log, one friend at a time.',
+'01:46 | OLLIE | Left a little! Now just a tiny bit right!',
+'01:55 | NARRATOR | A breezy gust lifted the kite again, carrying it to the flower path.',
+'02:04 | PIP | Oh! Another snag? This time, we’ll be gentle.',
+'02:13 | NARRATOR | The silky string looped around a thorny rose stem. Tugging would tear the kite.',
+'02:22 | TUCK | I’ll hold the stem still. Pip, lift the ribbon; Ollie, take the loose end.',
+'02:31 | PIP | Easy does it... a little up... and we’re free!',
+'02:40 | NARRATOR | The friends repaired the bent tail with petals, leaves, and their spare ribbons.',
+'02:49 | NARRATOR | Then the sky turned silver. A soft rain pattered through the meadow.',
+'02:58 | PIP | Our kite is getting damp. Let’s find a warm, dry place.',
+'03:07 | NARRATOR | Beneath the old willow, the friends folded the kite safely while raindrops danced on the leaves.',
+'03:16 | OLLIE | Plip, plop, plip! The rain is making a rhythm.',
+'03:25 | PIP | We can make something beautiful while we wait.',
+'03:34 | NARRATOR | Together they patched a tiny tear, smoothed each corner, and tied the last loose ribbon.',
+'03:43 | TUCK | A good plan takes patience... and friends who hold things steady.',
+'03:52 | NARRATOR | The rain passed. Sunlight peeked through the clouds, and a rainbow stretched over Cloverfield.',
+'04:01 | PIP | Look! The sky made a rainbow of its own!',
+'04:10 | OLLIE | Our kite can join it!',
+'04:18 | NARRATOR | They returned to the hill where the breeze was gentle, not wild.',
+'04:27 | PIP | This time, everyone holds a piece of the string.',
+'04:36 | NARRATOR | One, two, three—up rose the rainbow kite, bright against the morning sky.',
+'04:46 | TUCK | Teamwork looks wonderful from down here!',
+'04:52 | PIP | And it’s even better when everyone gets to fly.',
+'04:57 | NARRATOR | In Cloverfield Meadow, every colour had a friend, and every friend had a place in the sky.'
 ].join('\n');
 var VOWELS={
  AA:[730,1090,2440],AE:[660,1720,2410],AH:[600,1170,2450],AO:[570,840,2410],
@@ -101,6 +103,28 @@ var DICT={
  turned:['T','ER','N','D'],began:['B','IH','G','AE','N'],color:['K','AH','L','ER'],first:['F','ER','S','T'],
  pale:['P','EY','L'],trembled:['T','R','EH','M','B','AH','L','D'],fingers:['F','IH','NG','ER','Z']
 };
+Object.assign(DICT,{
+  pip:['P','IH','P'],ollie:['AA','L','IY'],tuck:['T','AH','K'],cloverfield:['K','L','OW','V','ER','F','IY','L','D'],
+  rainbow:['R','EY','N','B','OW'],kite:['K','AY','T'],meadow:['M','EH','D','OW'],spring:['S','P','R','IH','NG'],
+  colourful:['K','AH','L','ER','F','AH','L'],colourfuls:['K','AH','L','ER','F','AH','L','Z'],colour:['K','AH','L','ER'],
+  ribbons:['R','IH','B','AH','N','Z'],dance:['D','AE','N','S'],folded:['F','OW','L','D','IH','D'],tied:['T','AY','D'],
+  tested:['T','EH','S','T','IH','D'],crayons:['K','R','EY','AA','N','Z'],ready:['R','EH','D','IY'],steady:['S','T','EH','D','IY'],
+  wiggly:['W','IH','G','L','IY'],woooosh:['W','UH','SH'],paws:['P','AO','Z'],fluttered:['F','L','AH','T','ER','D'],
+  willow:['W','IH','L','OW'],branch:['B','R','AE','N','CH'],bubbling:['B','AH','B','AH','L','IH','NG'],brook:['B','R','UH','K'],
+  solve:['S','AA','L','V'],clever:['K','L','EH','V','ER'],crossed:['K','R','AO','S','T'],broad:['B','R','AO','D'],
+  log:['L','AO','G'],left:['L','EH','F','T'],tiny:['T','AY','N','IY'],breezy:['B','R','IY','Z','IY'],
+  snag:['S','N','AE','G'],gentle:['JH','EH','N','T','AH','L'],silky:['S','IH','L','K','IY'],string:['S','T','R','IH','NG'],
+  looped:['L','UW','P','T'],thorny:['TH','AO','R','N','IY'],rose:['R','OW','Z'],stem:['S','T','EH','M'],
+  tugging:['T','AH','G','IH','NG'],tear:['T','EH','R'],ribbon:['R','IH','B','AH','N'],loose:['L','UW','S'],
+  petals:['P','EH','T','AH','L','Z'],leaves:['L','IY','V','Z'],silver:['S','IH','L','V','ER'],pattered:['P','AE','T','ER','D'],
+  damp:['D','AE','M','P'],beneath:['B','IH','N','IY','TH'],raindrops:['R','EY','N','D','R','AA','P','S'],
+  plip:['P','L','IH','P'],plop:['P','L','AA','P'],rhythm:['R','IH','DH','AH','M'],beautiful:['B','Y','UW','T','AH','F','AH','L'],
+  patched:['P','AE','CH','T'],smoothed:['S','M','UW','DH','D'],corner:['K','AO','R','N','ER'],corners:['K','AO','R','N','ER','Z'],
+  patience:['P','EY','SH','AH','N','S'],passed:['P','AE','S','T'],sunlight:['S','AH','N','L','AY','T'],peeked:['P','IY','K','T'],
+  stretched:['S','T','R','EH','CH','T'],returned:['R','IH','T','ER','N','D'],hill:['HH','IH','L'],breeze:['B','R','IY','Z'],
+  holds:['HH','OW','L','D','Z'],piece:['P','IY','S'],morning:['M','AO','R','N','IH','NG'],hurray:['HH','UH','R','EY'],
+  teamwork:['T','IY','M','W','ER','K'],wonderful:['W','AH','N','D','ER','F','AH','L'],place:['P','L','EY','S'],friend:['F','R','EH','N','D'],friends:['F','R','EH','N','D','Z']
+});
 var escapeHtml=function(s){return String(s).replace(/[&<>"]/g,function(ch){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]);});};
 function seconds(v){var p=String(v).trim().split(':');if(p.length===2)return Math.max(0,(+p[0]||0)*60+(+p[1]||0));if(p.length===3)return Math.max(0,(+p[0]||0)*3600+(+p[1]||0)*60+(+p[2]||0));var n=Number(v);return Number.isFinite(n)?Math.max(0,n):NaN;}
 function clock(t){t=Math.max(0,t||0);return String(Math.floor(t/60)).padStart(2,'0')+':'+String(Math.floor(t%60)).padStart(2,'0');}
@@ -111,7 +135,7 @@ function parseScript(raw){
     var p=s.split('|');if(p.length<3){errors.push('Line '+(i+1)+': use MM:SS | SPEAKER | dialogue.');return;}
     var start=seconds(p.shift()),speaker=String(p.shift()).trim().toUpperCase(),text=p.join('|').trim();
     if(!Number.isFinite(start)||start>=FILM){errors.push('Line '+(i+1)+': time must be between 00:00 and 04:59.');return;}
-    if(!VOICES[speaker]){errors.push('Line '+(i+1)+': unknown speaker. Use NARRATOR, NORI, CAPTAIN, or BUNNY.');return;}
+    if(!VOICES[speaker]){errors.push('Line '+(i+1)+': unknown speaker. Use NARRATOR, PIP, OLLIE, or TUCK.');return;}
     if(!text){errors.push('Line '+(i+1)+': dialogue is empty.');return;}
     rows.push({start:start,speaker:speaker,text:text,sourceLine:i+1});
   });
@@ -235,18 +259,18 @@ function init(){
 <section class="tvs-window"><header class="tvs-head"><div><strong>TRILYVA / VOICE STUDIO</strong><br><small>LOCAL SPEECH SYNTHESIS · NO CLOUD · NO EXTERNAL RUNTIME</small></div><div class="tvs-spacer"></div><button class="tvs-x" id="tvsClose" aria-label="Close">×</button></header>
 <div class="tvs-subhead"><span>ENGINE <b>FORMANT-01</b></span><span>OUTPUT <b>PCM WAV · 16-BIT</b></span><span>FILM <b>05:00</b></span><span>NETWORK <b>NOT USED</b></span></div>
 <div class="tvs-grid"><aside class="tvs-sidebar">
-<div class="tvs-control"><label class="tvs-label" for="tvsSpeaker">Preview character</label><select id="tvsSpeaker"><option value="NARRATOR">Narrator — warm storyteller</option><option value="NORI">Nori — youthful, bright</option><option value="CAPTAIN">Captain — low, steady</option><option value="BUNNY">Rabbit — light, quick</option></select></div>
+<div class="tvs-control"><label class="tvs-label" for="tvsSpeaker">Preview character</label><select id="tvsSpeaker"><option value="NARRATOR">Narrator — warm storyteller</option><option value="PIP">Pip the fox — bright and curious</option><option value="OLLIE">Ollie the bird — high and quick</option><option value="TUCK">Tuck the turtle — warm and steady</option></select></div>
 <div class="tvs-control"><label class="tvs-label" for="tvsRate">Speech rate</label><div class="tvs-range"><input id="tvsRate" type="range" min=".75" max="1.5" value="1" step=".05"><span class="tvs-number" id="tvsRateValue">1.00×</span></div></div>
 <div class="tvs-control"><label class="tvs-label" for="tvsPitch">Pitch</label><div class="tvs-range"><input id="tvsPitch" type="range" min=".75" max="1.45" value="1" step=".05"><span class="tvs-number" id="tvsPitchValue">1.00×</span></div></div>
 <div class="tvs-control"><label class="tvs-label" for="tvsWarmth">Vocal warmth</label><div class="tvs-range"><input id="tvsWarmth" type="range" min=".75" max="1.3" value="1" step=".05"><span class="tvs-number" id="tvsWarmthValue">1.00×</span></div></div>
 <div class="tvs-control"><label class="tvs-label" for="tvsAmbience">Original score + atmosphere</label><div class="tvs-range"><input id="tvsAmbience" type="checkbox" checked><span>Procedural score, sea, storm, chimes</span></div></div>
 <div class="tvs-divider"></div><p class="tvs-note">FORMANT-01 is an original, dependency-free speech synthesizer. It exports locally and needs no account, but its voices sound synthetic rather than like neural human performances.</p>
 </aside>
-<main class="tvs-content"><div class="tvs-kpi"><div><b id="tvsLineCount">33</b><span>DIALOGUE CUES</span></div><div><b>300 s</b><span>TIMELINE LENGTH</span></div><div><b>22.05 kHz</b><span>LOCAL AUDIO</span></div></div>
-<div><label class="tvs-label" for="tvsScript">Film dialogue script · MM:SS | SPEAKER | text</label><textarea id="tvsScript" class="tvs-script" spellcheck="false"></textarea><p class="tvs-note">Edit dialogue, speaker, or timecode. Speakers: NARRATOR, NORI, CAPTAIN, BUNNY. A cue can be placed anywhere from 00:00 to 04:59.</p></div>
+<main class="tvs-content"><div class="tvs-kpi"><div><b id="tvsLineCount">35</b><span>DIALOGUE CUES</span></div><div><b>300 s</b><span>TIMELINE LENGTH</span></div><div><b>22.05 kHz</b><span>LOCAL AUDIO</span></div></div>
+<div><label class="tvs-label" for="tvsScript">Film dialogue script · MM:SS | SPEAKER | text</label><textarea id="tvsScript" class="tvs-script" spellcheck="false"></textarea><p class="tvs-note">Edit dialogue, speaker, or timecode. Speakers: NARRATOR, PIP, OLLIE, TUCK. A cue can be placed anywhere from 00:00 to 04:59.</p></div>
 <div><label class="tvs-label" for="tvsPreviewText">Voice audition</label><textarea id="tvsPreviewText" class="tvs-previewtext" spellcheck="false">We can do this together. One light can guide everyone home.</textarea><div class="tvs-buttons" style="margin-top:8px"><button class="tvs-btn" id="tvsPreview">Preview voice</button><button class="tvs-btn" id="tvsStop">Stop preview</button><button class="tvs-btn" id="tvsDefault">Restore film script</button><button class="tvs-btn" id="tvsSave">Export script JSON</button><button class="tvs-btn" id="tvsImportBtn">Import script JSON</button><input id="tvsImport" type="file" accept=".json,application/json" hidden></div></div>
 <div class="tvs-status" id="tvsStatus" role="status" aria-live="polite">Ready. Dialogue stays on this device.</div><div class="tvs-bar"><i id="tvsProgress"></i></div>
-<div class="tvs-buttons"><button class="tvs-btn primary" id="tvsBuild">Build full 05:00 WAV</button><button class="tvs-btn" id="tvsSrt" disabled>Export subtitles SRT</button><a class="tvs-btn" id="tvsDownload" hidden download="nori-and-the-last-light-voice-track.wav">Download WAV</a></div></main></div>
+<div class="tvs-buttons"><button class="tvs-btn primary" id="tvsBuild">Build full 05:00 WAV</button><button class="tvs-btn" id="tvsSrt" disabled>Export subtitles SRT</button><a class="tvs-btn" id="tvsDownload" hidden download="pip-and-the-rainbow-kite-voice-track.wav">Download WAV</a></div></main></div>
 <footer class="tvs-foot"><span class="tvs-note">The output is a synchronized 05:00 WAV with synthetic voices and optional original procedural soundscape. No network requests are made.</span><button class="tvs-btn" id="tvsCloseBottom">Close</button></footer></section>`;
  document.body.appendChild(o);o.querySelector('#tvsScript').value=DEFAULT_SCRIPT;
  o.querySelector('#tvsClose').addEventListener('click',close);o.querySelector('#tvsCloseBottom').addEventListener('click',close);
