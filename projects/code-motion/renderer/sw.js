@@ -1,4 +1,4 @@
-const CACHE = 'tamasrazim-trilyva-pwa-v77';;;
+const CACHE = 'tamasrazim-trilyva-pwa-v78';;;
 const CORE = [
   './',
   './index.html',
@@ -6,9 +6,9 @@ const CORE = [
   './voice-studio.js',
   './movie-finalizer.js',
   './niko-and-the-clockwork-bird.js',
-  './the-skyroot-bell.js',
+  './the-last-star-train.js',
   '../../trilyva/niko-and-the-clockwork-bird.html',
-  '../../trilyva/the-skyroot-bell.html',
+  '../../trilyva/the-last-star-train.html',
   './manifest.webmanifest',
   './library/library.js',
   './library/manifest.json',
