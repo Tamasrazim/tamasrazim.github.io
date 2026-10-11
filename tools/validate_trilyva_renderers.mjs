@@ -49,7 +49,12 @@ function createGradient() {
   };
 }
 
-function createCanvasContext() {
+const DRAW_METHODS = new Set([
+  'fill', 'stroke', 'fillRect', 'strokeRect', 'drawImage',
+  'fillText', 'strokeText', 'putImageData',
+]);
+
+function createCanvasContext(metrics) {
   const state = {
     globalAlpha: 1,
     globalCompositeOperation: 'source-over',
@@ -81,9 +86,11 @@ function createCanvasContext() {
   return new Proxy(state, {
     get(target, property) {
       if (property in target) return target[property];
-      // Geometry commands are stubbed. The test exercises the authored frame logic
-      // and real Canvas API argument validation without pretending to be a rasterizer.
-      if (typeof property === 'string') return function noopCanvasCommand() {};
+      // Geometry commands are stubbed. Count actual paint operations so a blank
+      // render regression is caught without pretending this is a rasterizer.
+      if (typeof property === 'string') return function noopCanvasCommand() {
+        if (DRAW_METHODS.has(property)) metrics.paintCalls += 1;
+      };
       return undefined;
     },
     set(target, property, value) {
@@ -137,12 +144,20 @@ function checkFilm(film) {
   must(Number.isFinite(fps) && fps > 0, film.name + ' declares a valid frame rate');
   must(width / height === 16 / 9, film.name + ' renderer output is 16:9');
 
-  const context = createCanvasContext();
+  const metrics = { paintCalls: 0 };
+  const context = createCanvasContext(metrics);
   const samples = Math.round(duration / SAMPLE_STEP_SECONDS) + 1;
+  let minimumPaintCallsPerFrame = Number.POSITIVE_INFINITY;
   for (let index = 0; index < samples; index += 1) {
     const time = Math.min(duration, index * SAMPLE_STEP_SECONDS);
+    const paintCallsBefore = metrics.paintCalls;
     try {
       renderFrame(time, Math.round(time * fps), fps, context, 1920, 1080);
+      const framePaintCalls = metrics.paintCalls - paintCallsBefore;
+      if (framePaintCalls < 1) {
+        throw new Error('renderFrame issued no canvas paint operation');
+      }
+      minimumPaintCallsPerFrame = Math.min(minimumPaintCallsPerFrame, framePaintCalls);
     } catch (error) {
       throw new Error(
         film.name + ' failed at ' + time.toFixed(2) + ' seconds: ' +
@@ -152,7 +167,11 @@ function checkFilm(film) {
     }
   }
 
-  must(true, film.name + ' rendered ' + samples + ' deterministic sample times without runtime or gradient errors');
+  must(
+    minimumPaintCallsPerFrame >= 1,
+    film.name + ' paints at every sampled time (minimum ' + minimumPaintCallsPerFrame + ' operations per frame)',
+  );
+  must(true, film.name + ' executed ' + samples + ' deterministic sample times without runtime or gradient errors');
 }
 
 for (const film of films) checkFilm(film);
