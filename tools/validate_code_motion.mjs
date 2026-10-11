@@ -29,7 +29,7 @@ for (const token of [
 }
 
 must(renderer.includes("value: '3840x2160'"), '4K preset exists');
-must(renderer.includes('var FPS_PRESETS = [24, 30, 60, 90, 120]'), '120 FPS preset exists');
+must(/var FPS_PRESETS = \[[^\]]*\b120\b[^\]]*\]/.test(renderer), '120 FPS preset exists');
 
 const scripts = [...renderer.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/gi)];
 const externalScripts = scripts.filter(([_, attrs]) => {
