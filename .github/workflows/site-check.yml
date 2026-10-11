@@ -9,6 +9,7 @@ on:
       - 'asset-vault/**'
       - 'assets/**'
       - 'tools/validate_site.mjs'
+      - 'tools/validate_trilyva_renderers.mjs'
       - '.github/workflows/site-check.yml'
   pull_request:
     paths:
@@ -18,6 +19,7 @@ on:
       - 'asset-vault/**'
       - 'assets/**'
       - 'tools/validate_site.mjs'
+      - 'tools/validate_trilyva_renderers.mjs'
       - '.github/workflows/site-check.yml'
 
 permissions:
@@ -33,3 +35,5 @@ jobs:
           node-version: 22
       - name: Validate site routes, DOM ids and runtime scripts
         run: node tools/validate_site.mjs
+      - name: Smoke-test sampled frames of the TRILYVA story films
+        run: node tools/validate_trilyva_renderers.mjs
