@@ -1,0 +1,49 @@
+name: Render Kurogane character sheet
+
+on:
+  push:
+    branches:
+      - kurogane-manga-pilot
+    paths:
+      - manga/kurogane-saga/production/generate_character_sheet.py
+      - .github/workflows/kurogane-manga-art.yml
+
+permissions:
+  contents: write
+
+jobs:
+  render-vector-art:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out manga branch
+        uses: actions/checkout@v4
+        with:
+          ref: kurogane-manga-pilot
+          fetch-depth: 0
+
+      - name: Generate editable SVG artwork
+        run: python manga/kurogane-saga/production/generate_character_sheet.py
+
+      - name: Validate SVG
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          p = Path("manga/kurogane-saga/artwork/character-sheet-ren-tori.svg")
+          root = ET.parse(p).getroot()
+          assert root.tag.endswith("svg"), "Output is not an SVG document"
+          assert len(list(root)) >= 80, "SVG output looks unexpectedly incomplete"
+          print(f"SVG validation passed: {p} ({p.stat().st_size:,} bytes)")
+          PY
+
+      - name: Commit generated artwork
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add manga/kurogane-saga/artwork/character-sheet-ren-tori.svg
+          if git diff --cached --quiet; then
+            echo "Artwork is unchanged."
+            exit 0
+          fi
+          git commit -m "Add Ren and Tori character reference artwork"
+          git push origin HEAD:kurogane-manga-pilot
