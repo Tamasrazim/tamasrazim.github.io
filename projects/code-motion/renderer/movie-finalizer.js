@@ -10,7 +10,7 @@
 
   var overlay, videoInput, audioInput, videoEl, audioEl, startBtn, cancelBtn;
   var statusEl, progressEl, qualityEl, keepAudioEl, videoInfo, audioInfo;
-  var recorder = null, chunks = [], working = false, cancelled = false;
+  var recorder = null, chunks = [], working = false, cancelled = false, recordingError = '';
   var videoBlob = null, audioBlob = null, audioLabel = '', videoLabel = '';
   var videoUrl = '', audioUrl = '', outputUrl = '';
   var sourceVideoStream = null, sourceAudioStream = null, mixedStream = null;
@@ -309,6 +309,7 @@
       return;
     }
     cancelled = false;
+    recordingError = '';
     working = true;
     chunks = [];
     updateButtons();
@@ -354,7 +355,8 @@
       };
       recorder.onerror = function (e) {
         var error = e.error || new Error('MediaRecorder reported an unknown error.');
-        setStatus('Recording error: ' + String(error.message || error), 'error');
+        recordingError = String(error.message || error);
+        setStatus('Recording error: ' + recordingError + '. Discarding incomplete output…', 'error');
         try { if (recorder && recorder.state !== 'inactive') recorder.stop(); } catch (_) {}
       };
       recorder.onstop = onRecordingStopped;
@@ -379,10 +381,13 @@
       await Promise.all([vp, ap]);
       setStatus('Recording started. The final file will download when the source video ends.', 'green');
     } catch (e) {
+      var message = String(e && e.message || e);
+      cancelled = true;
+      try { if (recorder && recorder.state !== 'inactive') recorder.stop(); } catch (_) {}
       stopStreams();
       working = false;
       updateButtons();
-      setStatus('Could not start finalization: ' + String(e && e.message || e), 'error');
+      setStatus('Could not start finalization: ' + message, 'error');
     }
   }
 
@@ -421,10 +426,12 @@
     recorder = null;
     working = false;
     updateButtons();
-    if (wasCancelled) {
+    if (wasCancelled || recordingError) {
       chunks = [];
       setProgress(0);
-      setStatus('Cancelled. The incomplete movie was discarded.', 'warn');
+      if (recordingError) setStatus('Recording failed. The incomplete movie was discarded: ' + recordingError, 'error');
+      else setStatus('Cancelled. The incomplete movie was discarded.', 'warn');
+      recordingError = '';
       return;
     }
     if (!chunks.length) {
