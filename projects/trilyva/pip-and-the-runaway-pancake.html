@@ -1,53 +1,13 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark"><title>Pip and the Runaway Pancake — TRILYVA</title>
-<style>
-:root{color-scheme:dark;--bg:#070708;--panel:#101013;--line:#303036;--ink:#f1f1ed;--muted:#a0a0a6;--gold:#e7c782}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 52% 0%,#171b24 0,#070708 55%);color:var(--ink);font:14px/1.5 system-ui,Segoe UI,sans-serif}header,main,footer{width:min(1500px,calc(100% - 32px));margin:auto}header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0;border-bottom:1px solid var(--line);font:10px ui-monospace,Consolas,monospace;letter-spacing:.14em;color:var(--muted)}header b{color:var(--ink);font-size:12px}header a,footer a{color:var(--ink);text-decoration:none}main{padding:clamp(20px,4vw,55px) 0 35px}.kicker{font:10px ui-monospace,Consolas,monospace;letter-spacing:.2em;color:var(--gold)}h1{font-size:clamp(35px,6vw,76px);line-height:1;letter-spacing:-.065em;margin:12px 0 14px}p{color:var(--muted);max-width:850px;line-height:1.8}.stage{position:relative;border:1px solid #33333a;background:#020309;overflow:hidden;box-shadow:0 24px 70px #0009}.stage:after{content:"";display:block;padding-top:56.25%}canvas{position:absolute;inset:0;width:100%;height:100%;display:block}.controls{background:#0d0d10;border:1px solid var(--line);border-top:0;padding:15px;display:grid;gap:13px}.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.row.main{justify-content:space-between}.time{font:12px ui-monospace,Consolas,monospace;color:var(--gold);min-width:105px}button{background:#16161a;border:1px solid #414148;color:var(--ink);padding:10px 13px;cursor:pointer;font:10px ui-monospace,Consolas,monospace;letter-spacing:.06em}button.primary{background:#e9e8e0;color:#101013;border-color:#e9e8e0}button:hover{border-color:#c7c7cc}button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:3px}input[type=range]{width:100%;accent-color:var(--gold);cursor:pointer}.chapters{display:flex;gap:6px;flex-wrap:wrap}.chapters button{padding:7px 9px;color:#b4b4ba}.story{display:grid;grid-template-columns:1fr minmax(260px,.7fr);gap:18px;margin-top:24px}.card{padding:18px;border:1px solid var(--line);background:#0b0b0d}.card h2{margin:0 0 10px;font:11px ui-monospace,Consolas,monospace;letter-spacing:.12em}.card p{font-size:12px;margin:0}.timeline-note{font:10px/1.7 ui-monospace,Consolas,monospace;color:var(--muted)}footer{border-top:1px solid var(--line);padding:18px 0 28px;color:var(--muted);font:10px ui-monospace,Consolas,monospace;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}@media(max-width:760px){.story{grid-template-columns:1fr}.row.main{align-items:flex-start;flex-direction:column}.controls{padding:10px}button{padding:9px 10px}header{align-items:flex-start;flex-direction:column}}
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta http-equiv="refresh" content="0;url=./niko-and-the-clockwork-bird.html">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/trilyva/niko-and-the-clockwork-bird.html">
+<title>TRILYVA Story — moved</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#08090a;color:#f4f2e9;font:16px/1.7 system-ui,sans-serif}main{max-width:620px;padding:32px}a{color:#f4d36a}</style>
 </head>
-<body>
-<header><b>TRILYVA / CARTOON PLAYER</b><span>CLOVERFIELD CARTOON · 16:9 · 05:00</span><a href="/projects/code-motion/renderer/">OPEN TRILYVA ↗</a></header>
-<main>
-<div class="kicker">AN ORIGINAL FIVE-MINUTE CARTOON SHORT</div>
-<h1>Pip and the Runaway Pancake</h1>
-<p>Pip flips a giant pancake for breakfast, but a wild bounce sends it rolling out of the kitchen and across Cloverfield Meadow. Pip, Ollie the bluebird and Tuck the turtle chase it over a creek log and into a blueberry patch. Working together, they invent a gentle way to catch it and bring it back for a huge shared breakfast.</p>
-<div class="stage"><canvas id="film" width="1920" height="1080" aria-label="Pip and the Runaway Pancake animated cartoon"></canvas></div>
-<div class="controls">
- <div class="row main"><div class="row"><button class="primary" id="play">PLAY FILM</button><button id="back">−10 SEC</button><button id="next">+10 SEC</button><button id="restart">RESTART</button><button id="fullscreen">FULLSCREEN</button></div><div class="time" id="clock">00:00 / 05:00</div></div>
- <input id="scrub" aria-label="Film timeline" type="range" min="0" max="300" step=".033333" value="0">
- <div class="chapters" id="chapters"></div>
- <div class="timeline-note">SHADED 3D MESH CHARACTERS · LAYERED CARTOON SETS · TIMED SUBTITLES · 16:9</div>
-</div>
-<div class="story">
- <section class="card"><h2>THE STORY</h2><p>A giant pancake bounces out of Pip’s kitchen, rolls across the meadow, wobbles over a creek and gets covered in blueberries. Pip, Ollie and Tuck stop chasing blindly and make a clever catching plan with a picnic cloth. The story ends with the pancake safely on the table and a breakfast everyone shares.</p></section>
- <section class="card"><h2>ABOUT THIS PREVIEW</h2><p>Use the chapter buttons to jump through the five-minute story. In TRILYVA, open <b>Examples</b> and select <b>Pip and the Runaway Pancake</b> to edit its frame-by-frame source. Voice Studio contains the matching 35-cue dialogue and separate local character voices. Render the animation, build the WAV, and use Finish Movie to combine the tracks.</p></section>
-</div>
-</main>
-<footer><span>ROBIUL RUMMAN RAZIM — TAMASRAZIM / TRILYVA</span><span>FRAME-DRIVEN STORY ANIMATION · <a href="/projects/trilyva/">PROJECT OVERVIEW ↑</a></span></footer>
-<script src="../code-motion/renderer/pip-and-the-runaway-pancake.js?v=20261011-8"></script>
-<script>
-(function(){
- "use strict";
- const canvas=document.getElementById("film"),ctx=canvas.getContext("2d"),play=document.getElementById("play"),scrub=document.getElementById("scrub"),clock=document.getElementById("clock"),chapters=document.getElementById("chapters");
- const marks=[[0,"Kitchen breakfast"],[36,"The great escape"],[82,"Crossing the creek"],[124,"Blueberry patch"],[170,"The catching plan"],[216,"Gentle catch"],[249,"Picnic time"]];
- let position=0,playing=false,started=0,at=0,lastDraw=0,raf=0;
- function fmt(v){let s=Math.max(0,Math.floor(v));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
- function draw(v){position=Math.max(0,Math.min(300,v));window.renderFrame(position,Math.floor(position*30),30,ctx,canvas.width,canvas.height);scrub.value=String(position);clock.textContent=fmt(position)+" / 05:00";chapters.querySelectorAll("button").forEach(b=>b.classList.toggle("active",Math.abs(Number(b.dataset.time)-position)<4));}
- function tick(now){if(!playing)return;const v=at+(now-started)/1000;if(v>=300){draw(300);stop();return}if(now-lastDraw>31){draw(v);lastDraw=now}raf=requestAnimationFrame(tick)}
- function stop(){playing=false;cancelAnimationFrame(raf);play.textContent="PLAY FILM";}
- function start(){if(position>=300)draw(0);playing=true;at=position;started=performance.now();lastDraw=0;play.textContent="PAUSE";raf=requestAnimationFrame(tick);}
- play.addEventListener("click",()=>playing?stop():start());
- document.getElementById("back").addEventListener("click",()=>{stop();draw(position-10)});
- document.getElementById("next").addEventListener("click",()=>{stop();draw(position+10)});
- document.getElementById("restart").addEventListener("click",()=>{stop();draw(0)});
- document.getElementById("fullscreen").addEventListener("click",()=>{const stage=canvas.parentElement;if(document.fullscreenElement)document.exitFullscreen();else if(stage.requestFullscreen)stage.requestFullscreen()});
- scrub.addEventListener("input",()=>{stop();draw(Number(scrub.value))});
- marks.forEach(m=>{const b=document.createElement("button");b.textContent=fmt(m[0])+" · "+m[1];b.dataset.time=m[0];b.addEventListener("click",()=>{stop();draw(m[0])});chapters.appendChild(b)});
- document.addEventListener("keydown",e=>{if(e.target&&/INPUT|TEXTAREA|BUTTON/.test(e.target.tagName))return;if(e.code==="Space"){e.preventDefault();playing?stop():start()}else if(e.key==="ArrowLeft"){stop();draw(position-5)}else if(e.key==="ArrowRight"){stop();draw(position+5)}});
- document.addEventListener("visibilitychange",()=>{if(document.hidden&&playing)stop()});
- draw(0);
-})();
-</script>
-</body></html>
+<body><main><p>TRILYVA / STORY PLAYER</p><h1>The featured short has changed.</h1><p>The new JavaScript cartoon is <strong>Niko and the Clockwork Bird</strong>, a five-minute story about an inventor and a tiny mechanical bird.</p><p><a href="./niko-and-the-clockwork-bird.html">Watch Niko and the Clockwork Bird →</a></p></main><script>location.replace("./niko-and-the-clockwork-bird.html");</script></body>
+</html>
