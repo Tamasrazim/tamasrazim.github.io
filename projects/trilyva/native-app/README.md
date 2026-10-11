@@ -44,7 +44,7 @@ Linux builds need WebKitGTK 4.1 and the native package/build dependencies listed
 
 ## Known caveats
 
-- The native shell is a packaging foundation, not a rewrite of rendering internals. The desktop-only Neural Voice panel synthesizes each dialogue cue through the optional local VoiceStudio API, mixes cues into a five-minute PCM WAV, creates matching SRT subtitles, and passes the WAV to Finish Movie.
+- The native shell is a packaging foundation, not a rewrite of rendering internals. A native project-file adapter provides system open/save dialogs for `.tmotion`, validates project JSON, prompts before dropping unsaved edits, and supports a separate export copy without changing the active file. The desktop-only Neural Voice panel synthesizes each dialogue cue through the optional local VoiceStudio API, mixes cues into a five-minute PCM WAV, creates matching SRT subtitles, and passes the WAV to Finish Movie.
 - Browser encoding APIs and WebView media codecs vary by operating system. MP4/WebM availability, frame accuracy, large-resolution limits, and memory use must be tested on each target.
 - A desktop window alone does not provide a native codec stack or guarantee 8K/60 fps. Those paths need capability probes and platform-specific tests.
 - VoiceStudio's local AI models are not embedded here. Intel Arc acceleration and commercial-use rights are not assumed.
