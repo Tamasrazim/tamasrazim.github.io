@@ -186,7 +186,11 @@
     progressEl = $('tmfProgress');
     qualityEl = $('tmfQuality');
     formatEl = $('tmfFormat');
-    formatEl.addEventListener('change', updateButtons);
+    formatEl.addEventListener('change', function () {
+      updateButtons();
+      if (!chooseMime(!!audioBlob, formatEl.value)) setStatus('This browser cannot record the selected format with the chosen tracks. Select Automatic or WebM, or remove audio if MP4 has no compatible audio codec.', 'warn');
+      else setStatus('Delivery format selected. The output container will match the supported recorder MIME type.', 'green');
+    });
     keepAudioEl = $('tmfUseGenerated');
     videoInfo = $('tmfVideoInfo');
     audioInfo = $('tmfAudioInfo');
