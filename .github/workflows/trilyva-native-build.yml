@@ -1,0 +1,72 @@
+name: TRILYVA Native Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, trilyva/native-desktop-foundation]
+    paths:
+      - "projects/code-motion/renderer/**"
+      - "projects/trilyva/native-app/**"
+      - ".github/workflows/trilyva-native-build.yml"
+  pull_request:
+    paths:
+      - "projects/code-motion/renderer/**"
+      - "projects/trilyva/native-app/**"
+      - ".github/workflows/trilyva-native-build.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trilyva-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: trilyva-windows
+          - os: macos-latest
+            artifact: trilyva-macos
+          - os: ubuntu-22.04
+            artifact: trilyva-linux
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Linux build prerequisites
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential curl wget file libxdo-dev libssl-dev librsvg2-dev libayatana-appindicator3-dev patchelf libwebkit2gtk-4.1-dev
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: projects/trilyva/native-app/package.json
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install desktop dependencies
+        working-directory: projects/trilyva/native-app
+        run: npm install
+
+      - name: Build native bundles
+        working-directory: projects/trilyva/native-app
+        run: npm run tauri:build
+
+      - name: Upload native build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: projects/trilyva/native-app/src-tauri/target/release/bundle/
+          if-no-files-found: error
+          retention-days: 14
