@@ -322,7 +322,7 @@ function build(){
   }
   if(o.querySelector('#tvsAmbience').checked)await addSoundscapeAsync(left,right,function(f,msg){bar.style.width=(28+Math.round(f*58))+'%';setStatus(msg);});
   setStatus('Writing stereo PCM samples to WAV…');bar.style.width='92%';await new Promise(function(resolve){setTimeout(resolve,0);});
-  var blob=wav(left,right);lastBlob=blob;lastSrt=makeSrt(compiled);
+  var blob=wav(left,right);lastBlob=blob;lastSrt=makeSrt(compiled);try{window.dispatchEvent(new CustomEvent('trilyva:voice-track-ready',{detail:{blob:blob,durationSeconds:FILM,sampleRate:SR}}));}catch(_){}
   if(dl.dataset.url)try{URL.revokeObjectURL(dl.dataset.url);}catch(e){}
   var url=URL.createObjectURL(blob);dl.dataset.url=url;dl.href=url;dl.download='nori-and-the-last-light-voice-track.wav';dl.hidden=false;srt.disabled=false;bar.style.width='100%';
   setStatus('READY · 05:00 WAV · '+(blob.size/1048576).toFixed(1)+' MB · '+compiled.length+' cues · '+(o.querySelector('#tvsAmbience').checked?'original score and atmosphere included':'dialogue only')+'.','green');
