@@ -97,8 +97,10 @@
     });
   }
   function updateButtons() {
-    var ready = !!videoBlob && !!videoEl && Number.isFinite(videoEl.duration) &&
-      videoEl.duration > 0 && supportsCapture() && !!chooseMime(!!audioBlob, formatEl ? formatEl.value : 'auto');
+    var ready = !!videoBlob && !!videoEl && videoEl.readyState >= 2 &&
+      Number.isFinite(videoEl.duration) && videoEl.duration > 0 &&
+      (!audioBlob || (!!audioEl && audioEl.readyState >= 2 && Number.isFinite(audioEl.duration))) &&
+      supportsCapture() && !!chooseMime(!!audioBlob, formatEl ? formatEl.value : 'auto');
     if (startBtn) startBtn.disabled = working || !ready;
     if (cancelBtn) cancelBtn.disabled = !working;
   }
@@ -318,7 +320,7 @@
     }
     var mime = chooseMime(!!audioBlob, formatEl ? formatEl.value : 'auto');
     if (!mime) {
-      setStatus('No compatible WebM MediaRecorder codec is available in this browser.', 'error');
+      setStatus('No compatible MP4 or WebM MediaRecorder codec is available in this browser.', 'error');
       return;
     }
     cancelled = false;
