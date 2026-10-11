@@ -1,4 +1,4 @@
-/* THE SKYROOT BELL — an original ten-minute fantasy cartoon for TRILYVA.
+/* THE LAST STAR TRAIN — an original ten-minute fantasy cartoon for TRILYVA.
    4K UHD output target (3840×2160), 60 fps, deterministic vector frame rendering.
    Every frame is derived from time; scrubbing and export produce the same pose. */
 
@@ -6,83 +6,84 @@ const SKYROOT_DURATION = 600;
 const SKYROOT_FPS = 60;
 const SKYROOT_SIZE = { width: 1920, height: 1080 };
 const SKYROOT_CHAPTERS = [
-  { time: 0,   title: "LUMENREACH",          note: "A village preparing for its lantern festival." },
-  { time: 46,  title: "THE MISSING BELL",    note: "The Skyroot's light begins to fade." },
-  { time: 96,  title: "SINGING BROOK",       note: "A small rescue reveals the first note." },
-  { time: 150, title: "WHISPERWOOD",         note: "Eira finds courage in a familiar sound." },
-  { time: 206, title: "THE CRYSTAL RIDGE",   note: "A little dragon flies away with the bell." },
-  { time: 263, title: "THE SKY MARKET",     note: "A playful chase across floating islands." },
-  { time: 320, title: "CLOUDREST",           note: "The missing bell has a reason for leaving." },
-  { time: 372, title: "A LIGHT TO SHARE",    note: "A small kindness changes the plan." },
-  { time: 447, title: "THE WAY BACK",        note: "The friends return before the final lantern fades." },
-  { time: 490, title: "THREE NOTES",         note: "The village helps the Skyroot remember its song." },
-  { time: 526, title: "THE SKYROOT WAKES",   note: "A new bridge of light reaches every home." },
-  { time: 572, title: "LANTERN NIGHT",       note: "No one has to watch the lights from far away." }
+ {time:0,title:"NIMBUS TERMINAL",note:"Eira joins the Starfall Express for its first night route."},
+ {time:46,title:"THE BLACKOUT STORM",note:"A storm extinguishes the skyway signals and scatters the route stars."},
+ {time:96,title:"MOSSWATER BOARDWALK",note:"The crew rescues a stranded marsh keeper and learns to follow the reeds."},
+ {time:150,title:"THE WHISPERWOOD MAZE",note:"A living forest rearranges itself; the crew reads the trail from above."},
+ {time:206,title:"MIRROR-ICE VIADUCT",note:"The Express crosses a crystalline rail bridge with a dragon guiding the front."},
+ {time:263,title:"SKY MARKET EXPRESS",note:"A crowded aerial station turns the journey into a fast, playful chase."},
+ {time:320,title:"THE ENGINE ROOM",note:"A damaged star-drive must be repaired using three different kinds of energy."},
+ {time:372,title:"WINDMILL CANYON",note:"The crew sails with the canyon wind to charge the silent engine."},
+ {time:447,title:"THE ORRERY OBSERVATORY",note:"An overhead star map reveals the true route to the missing signal."},
+ {time:490,title:"THE STORM TUNNEL",note:"A close, perspective-heavy run tests every signal the team has learned."},
+ {time:526,title:"MOONFALL GAP",note:"The rails end above a gulf; the crew builds a temporary path of light."},
+ {time:572,title:"FIRST-LIGHT HARBOR",note:"The Starfall Express returns as the whole harbor becomes a living constellation."}
 ];
 
 const SKYROOT_CUES = [
- [2, "NARRATOR", "In Lumenreach, paths grew from the roots of one enormous tree, and lanterns glowed in every little window."],
- [10, "EIRA", "Pip, look! The lanterns are waking up!"],
- [17, "PIP", "They always sparkle before the Skyroot Bell rings."],
- [25, "NARRATOR", "Eira was a young fox learning to tend the glowing gardens. Her little moth friend, Pip, carried a lantern no bigger than an apple."],
- [37, "EIRA", "This year, I get to ring the bell. I have practised all week!"],
- [47, "NARRATOR", "Then, just as the first lanterns lifted, the bell's golden note never came. Its place in the branches was empty."],
- [56, "PIP", "Eira... the roots are going dark."],
- [64, "EIRA", "Then we find the bell before the last lantern fades. Come on!"],
- [75, "NARRATOR", "A silver echo drifted from the tree, curled over the hills, and slipped toward Singing Brook."],
- [86, "PIP", "The sound is faint, but I can follow it."],
- [97, "NARRATOR", "At the brook, a tiny pebble-sprite was stuck beneath a fallen branch. The water was rising around its little stone feet."],
- [106, "EIRA", "Hold still, little one. We will move the branch together."],
- [116, "PIP", "I'll light the underside so you can see where to lift."],
- [127, "NARRATOR", "Eira pushed, Pip shone, and the branch rolled away. The pebble-sprite's shell rang like a small silver cup."],
- [137, "PEBBLE", "That is the brook's first note. Take it with you. A kind hand makes a clear sound."],
- [148, "EIRA", "One note down. Two friends, one little plan."],
- [151, "NARRATOR", "The echo led them into Whisperwood, where mist wrapped around old trees and every footstep came back as a whisper."],
- [162, "EIRA", "I know these paths... so why do they feel so strange?"],
- [171, "PIP", "Because the wood repeats what we fear. Listen for what is real."],
- [181, "NARRATOR", "The shadows shaped themselves into tall, wobbly pictures. One whispered that Eira was too small to help a whole village."],
- [192, "EIRA", "Maybe I'm small. But I can still take the next step."],
- [201, "OWL", "And that is what courage sounds like. Here, carry this leaf-feather's note."],
- [208, "NARRATOR", "Beyond the trees, crystal cliffs caught the last warm light. High above them, a little blue dragon flew with a golden bell tied to his cloud-skiff."],
- [218, "EIRA", "There! The Skyroot Bell! He's taking it away!"],
- [228, "NIX", "Just a little farther. Then my home will finally shine."],
- [239, "PIP", "He cannot hear us over that rattly sail. We will have to catch up."],
- [251, "NARRATOR", "Eira and Pip followed the bell's bright reflections up a winding stair of floating stone."],
- [264, "NARRATOR", "They reached the Sky Market, a cheerful jumble of cloud boats, ribbon stalls, and islands that bobbed like boats on a gentle sea."],
- [275, "EIRA", "Excuse me! Small dragon with the very important bell!"],
- [284, "NIX", "I'm not giving it back! I need its light!"],
- [294, "PIP", "Then please slow down so we can talk!"],
- [305, "NARRATOR", "Nix banked around a tower of folded kites. Eira hopped from one floating path to the next, while Pip looped between the fluttering ribbons."],
- [316, "EIRA", "We are not trying to take your light. We want to understand!"],
- [322, "NARRATOR", "A soft cloudbank caught the skiff like a feather pillow. The bell rolled safely into a nest of cushions, and all three landed in Cloudrest."],
- [334, "NIX", "You can stop chasing me. This is my home."],
- [344, "EIRA", "It's beautiful... but every window is dark."],
- [354, "NIX", "The lanterns in Lumenreach shine all night. Nobody noticed that our side of the clouds was dark, so I borrowed the bell."],
- [366, "PIP", "The bell calls the Skyroot to share its light. It cannot shine properly while it is away."],
- [374, "NIX", "I thought the village had so much light that it would not miss one bell."],
- [384, "EIRA", "We should have looked beyond our own windows. But taking the bell made every root dim."],
- [395, "NIX", "I did not mean to hurt anyone. I only wanted my little house to glow."],
- [405, "EIRA", "Then let's find a way to light your home without leaving everyone else in darkness."],
- [416, "NARRATOR", "Eira opened her satchel and placed a tiny glow-seed in Nix's paws. Its light was small, but it warmed the whole cloud nook."],
- [428, "NIX", "You would share your last seed with me?"],
- [437, "EIRA", "It is not my last. And tomorrow we can plant more, together."],
- [447, "NIX", "I am sorry I took the bell. I'll help you bring it home."],
- [458, "PIP", "Then we need the brook's note, the leaf-feather's note, and the crystal wind-note. All three can wake the roots."],
- [470, "NARRATOR", "Nix tuned a tiny crystal sail to catch the ridge's singing wind, then guided his skiff back toward Lumenreach."],
- [479, "NARRATOR", "The way home was dimmer than before. Glowing vines had curled up, and floating bridges hung quiet between the islands."],
- [490, "EIRA", "We are back. But the Skyroot looks lonelier than ever."],
- [500, "NIX", "I brought the bell home. I am ready to make this right."],
- [510, "NARRATOR", "Villagers carried their own lanterns to the roots. Nobody waited for one hero; every small light became part of the plan."],
- [520, "PIP", "A thousand tiny lights can show a path that one big light cannot."],
- [528, "NARRATOR", "At the base of the Skyroot, Eira placed the brook shell, the leaf-feather, and the crystal wind-note around the empty bell hook."],
- [539, "EIRA", "Brook, wood, and wind. Three voices, one song."],
- [548, "NIX", "I'll ring the bell. Will you all sing with me?"],
- [556, "NARRATOR", "The first ring was soft. The second travelled through the roots. The third rose through every branch until the whole tree answered."],
- [566, "PIP", "Look! The lights are coming back!"],
- [574, "NARRATOR", "New lantern-fruits blossomed among the leaves. Long silver roots reached across the sky, making a gentle bridge all the way to Cloudrest."],
- [583, "NIX", "A bridge to my home. Not a stolen light, but a place beside yours."],
- [590, "EIRA", "Next year, we ring the bell together."],
- [596, "NARRATOR", "And on that Lantern Night, no one watched the lights from far away. Every home belonged to the glow."]
+ [2,"NARRATOR","Every night, the Starfall Express carried little star-lanterns from Nimbus Terminal to the towns floating above the clouds."],
+ [8,"EIRA","First night as signal keeper. I know every lamp on the route!"],
+ [15,"PIP","And I know every dark corner. My lantern is ready."],
+ [23,"NARRATOR","Eira was a young fox with a pocket full of signal flags. Pip, a lantern-moth, could see tiny lights even through thick cloud."],
+ [34,"NIX","All aboard! I'm the smallest dragon ever trusted with the biggest night train."],
+ [40,"EIRA","Then let's get everyone home before dawn."],
+ [48,"NARRATOR","A storm rolled over the high skyway. One by one, the signal stars blinked out, and the track ahead vanished into cloud."],
+ [57,"NIX","My compass is spinning! I can't tell which rail leads home."],
+ [65,"EIRA","We won't guess. We'll find the route signals and light them again."],
+ [77,"PIP","The storm pushed a glow down toward Mosswater. I can see it between the reeds."],
+ [87,"NIX","Hold tight. We'll take the lower service rail."],
+ [98,"NARRATOR","The lower line crossed Mosswater Marsh on a long wooden boardwalk. A little stone-shelled marsh keeper was stranded beyond a broken section."],
+ [106,"EIRA","Stay on the planks, Pip. I'll secure this loose bridge from the safe side."],
+ [116,"PIP","The reeds are flashing in a pattern. Three short lights, then one long."],
+ [128,"NARRATOR","Together they lowered a spare rail plank into place. The marsh keeper tapped a rhythm against its shell, matching the signals."],
+ [138,"PEBBLE","Follow the rhythm, not the reflection. Water copies every light, but the reeds point to the real track."],
+ [146,"EIRA","A pattern we can trust. That's our first route clue."],
+ [151,"NARRATOR","The rail climbed into Whisperwood, where enormous leaves turned like signboards and every path looked the same from the ground."],
+ [162,"EIRA","That arch wasn't there a second ago! The forest is moving the exits."],
+ [171,"PIP","I'll fly above the canopy. From up there, the glowing roots make a map."],
+ [181,"NARRATOR","From above, the crew saw that the roots formed an arrow. The forest was not blocking the way; it was showing them a safer line."],
+ [192,"EIRA","The route bends left, then doubles back. We follow the whole pattern."],
+ [201,"OWL","Look at the shadows, little signal keeper. The tallest branch points toward the ice bridge."],
+ [208,"NARRATOR","Beyond the trees, the Mirror-Ice Viaduct stretched between two snowy cliffs. Its rails shone like silver ribbons above the mist."],
+ [218,"EIRA","No ground beside the track. Nix, can you guide the engine from the air?"],
+ [228,"NIX","Stay behind my blue wing. I'll call each turn before we reach it."],
+ [239,"PIP","The ice is reflecting the old lights. I'll mark the real rails with my lantern."],
+ [251,"NARRATOR","The train crossed the viaduct one careful signal at a time, its wheels sparkling against the frost."],
+ [264,"NARRATOR","At the Sky Market, rails looped above stalls, bridges and balloon docks. Every platform had a different height, and every bell sounded like the next stop."],
+ [275,"EIRA","Platform seven! No, the sign just spun around!"],
+ [284,"NIX","The Express is too long for that turn. We need the upper switch!"],
+ [294,"PIP","I'll light the switch while you take the wide curve."],
+ [305,"NARRATOR","The crew threaded the train between ribbons and hanging kites, then dropped onto the repair platform with only a puff of cloud behind them."],
+ [316,"EIRA","We made it. Now let's find out why the compass is still sleeping."],
+ [322,"NARRATOR","Inside the Engine Room, copper gears turned around a dark star-drive. The train had power, but the route compass had lost its pulse."],
+ [334,"NIX","The wheel is stuck. I can push, but it needs a signal to turn."],
+ [344,"EIRA","The marsh gave us rhythm. The wood gave us direction. The ice gave us a clean reflection."],
+ [354,"PIP","Three clues, three pulses. I'll flash them in order."],
+ [366,"NIX","There! The compass moved. The engine needs one strong gust to hold the signal."],
+ [374,"NARRATOR","Windmill Canyon opened ahead in a sweeping ribbon of rock. Giant windmills turned above the railway, but the storm had stalled their sails."],
+ [384,"EIRA","The sails are pointing away from the wind. We need to turn them together."],
+ [395,"NIX","I'll fly to the upper lever. Eira, take the trackside wheel!"],
+ [405,"EIRA","Pip, count the gusts. We only need one clean push."],
+ [416,"NARRATOR","The windmills caught a wide current. A blue-green stream of air rushed along the rails and flowed into the Starfall engine."],
+ [428,"NIX","I can feel the compass settling. We're nearly back on course."],
+ [437,"EIRA","Then we finish the map at the observatory."],
+ [448,"NARRATOR","The Orrery Observatory had a ceiling like a night sky and a circular floor painted with constellations. From above, the route became a pattern instead of a maze."],
+ [458,"PIP","The marsh rhythm, the forest arrow, the ice reflection... they match three stars here."],
+ [470,"NARRATOR","Eira rotated the brass star map until its glowing tracks aligned. A hidden line appeared, leading through the old storm tunnel."],
+ [481,"EIRA","We don't need the brightest signal. We need the right one."],
+ [491,"NARRATOR","The Storm Tunnel narrowed around the rails. From the engine window, each lamp arrived as a tiny point and grew into a clear signal just before the turn."],
+ [500,"NIX","Left marker, then right! Hold the centre line!"],
+ [510,"PIP","Three short flashes, one long. I have it!"],
+ [520,"EIRA","The tunnel's opening ahead. Don't slow now!"],
+ [528,"NARRATOR","The rails ended at Moonfall Gap, a deep space between two floating cliffs. The far signal was visible, but there was no bridge to reach it."],
+ [539,"EIRA","We can join the rails with light. Everyone hold a steady point!"],
+ [548,"NIX","I'll carry the first glow across. Pip, keep the far end bright."],
+ [556,"NARRATOR","Signals travelled from the train to the dragon, from the dragon to the moth, and from the moth to the far cliff. A temporary track drew itself across the gap."],
+ [566,"PIP","The route is connected! The last harbor lamp is answering!"],
+ [574,"NARRATOR","At First-Light Harbor, the Starfall Express rolled in beneath a sky turning apricot and gold. The lanterns were safe, and every platform had found its place."],
+ [583,"NIX","I thought being the pilot meant knowing every turn. You showed me how to read the signs together."],
+ [590,"EIRA","Tomorrow, we'll paint the route so no one has to find it alone."],
+ [596,"NARRATOR","As the first sun rose, the whole harbor blinked like a constellation, and the Starfall Express sounded its little welcome whistle."]
 ];
 
 const SKYROOT_SCENES = [0,46,96,150,206,263,320,372,447,490,526,572,600];
@@ -658,27 +659,15 @@ function skyOwl(ctx, x, y, s, t) {
   ctx.strokeStyle="#7b638e";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-27,12);ctx.lineTo(-37,23);ctx.moveTo(28,12);ctx.lineTo(37,22);ctx.stroke();
   ctx.restore();
 }
-function skyCaption(ctx, t) {
-  let cue = SKYROOT_CUES[0];
-  for (let i = 0; i < SKYROOT_CUES.length; i++) {
-    if (SKYROOT_CUES[i][0] <= t) cue = SKYROOT_CUES[i]; else break;
-  }
-  const next = SKYROOT_CUES.find(c => c[0] > cue[0]);
-  const fadeIn = skyEase(cue[0], cue[0] + 0.35, t);
-  const fadeOut = next ? 1 - skyEase(next[0] - 0.32, next[0], t) : 1;
-  ctx.save(); ctx.globalAlpha = fadeIn * fadeOut;
-  ctx.fillStyle = "rgba(18,25,48,0.76)"; skyRound(ctx, 220, 870, 1480, 151, 23, ctx.fillStyle, "rgba(239,241,255,0.24)", 2);
-  ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  ctx.fillStyle = "#f8d99c"; ctx.font = "800 18px ui-monospace, monospace"; ctx.fillText(cue[1], 960, 907);
-  ctx.fillStyle = "#fffaf0"; ctx.font = "600 31px ui-rounded, system-ui, sans-serif";
-  const words = cue[2].split(/\s+/), lines = []; let line = "";
-  for (let i = 0; i < words.length; i++) {
-    const test = line ? line + " " + words[i] : words[i];
-    if (ctx.measureText(test).width > 1360 && line) { lines.push(line); line = words[i]; } else line = test;
-  }
-  if (line) lines.push(line);
-  lines.slice(0,2).forEach((str, i) => ctx.fillText(str, 960, 953 + i * 37));
-  ctx.restore();
+function skyCaption(ctx,t){
+ let cue=SKYROOT_CUES[0];for(let i=0;i<SKYROOT_CUES.length;i++){if(SKYROOT_CUES[i][0]<=t)cue=SKYROOT_CUES[i];else break;}
+ const next=SKYROOT_CUES.find(c=>c[0]>cue[0]),fadeIn=skyEase(cue[0],cue[0]+.28,t),fadeOut=next?1-skyEase(next[0]-.25,next[0],t):1,alpha=fadeIn*fadeOut;
+ if(alpha<=.005)return;ctx.save();ctx.globalAlpha=alpha;
+ // Reserved upper safe area keeps dialogue away from faces, feet, tracks and props.
+ ctx.fillStyle="rgba(13,24,45,.80)";skyRound(ctx,42,30,1060,108,16,ctx.fillStyle,"rgba(224,237,244,.32)",1.5);
+ ctx.textAlign="left";ctx.textBaseline="middle";ctx.fillStyle="#f6d9a0";ctx.font="800 16px ui-monospace,monospace";ctx.fillText(cue[1],66,54);
+ ctx.fillStyle="#fff9ee";ctx.font="600 25px ui-rounded,system-ui,sans-serif";const words=cue[2].split(/\s+/),lines=[];let line="";
+ for(let i=0;i<words.length;i++){const test=line?line+" "+words[i]:words[i];if(ctx.measureText(test).width>1005&&line){lines.push(line);line=words[i];}else line=test;}if(line)lines.push(line);lines.slice(0,2).forEach((str,i)=>ctx.fillText(str,66,79+i*29));ctx.restore();
 }
 function skyParticles(ctx, t, amount, area, hue) {
   for (let i = 0; i < amount; i++) {
@@ -979,64 +968,23 @@ function skyFilmGrade(ctx,t){
    Zero-length moves are hard cuts; longer moves are motivated camera moves.
    The camera is deterministic, so frame export and timeline scrubbing agree.
    ────────────────────────────────────────────────────────────────────────── */
-const SKYROOT_SHOT_CUTS = [
-  [0,960,540,1.00,0], [4,1120,650,1.12,1.0], [9,610,845,1.42,0.18],
-  [14,660,780,1.38,0.55], [20,1110,525,1.22,0.35], [26,725,850,1.40,0.2],
-  [32,585,850,1.46,0.2], [38,1050,600,1.18,0.8], [43,1090,520,1.42,0.3],
-
-  [46,990,550,1.02,0], [50,1064,505,1.82,0.22], [55,805,900,1.48,0.3],
-  [60,885,775,1.48,0.25], [65,1064,505,1.60,0.2], [70,990,650,1.19,0.8],
-  [76,1080,450,1.34,0.3], [82,850,805,1.44,0.2], [89,1030,590,1.27,0.7],
-  [94,930,600,1.02,0.4],
-
-  [96,965,540,1.00,0], [100,1215,790,1.40,0.2], [105,820,900,1.46,0.25],
-  [110,1250,805,1.70,0.2], [115,1058,706,1.62,0.3], [120,1280,740,1.55,0.25],
-  [125,980,865,1.36,0.2], [131,1240,790,1.48,0.6], [137,1250,800,1.66,0.2],
-  [143,820,885,1.32,0.6], [148,960,560,1.02,0.4],
-
-  [150,960,545,1.00,0], [155,990,850,1.42,0.3], [160,1180,650,1.28,0.7],
-  [165,970,850,1.48,0.2], [170,880,780,1.38,0.5], [175,810,650,1.35,0.25],
-  [180,660,650,1.36,0.2], [185,790,770,1.56,0.3], [190,805,840,1.56,0.2],
-  [196,920,720,1.24,0.75], [201,1295,700,1.55,0.2], [204,990,550,1.0,0.5],
-
-  [206,960,540,1.00,0], [211,1440,510,1.47,0.3], [216,1510,515,1.75,0.18],
-  [221,800,850,1.35,0.25], [226,1420,500,1.46,0.2], [231,1410,420,1.48,0.4],
-  [237,1070,730,1.34,0.35], [243,1290,640,1.29,0.7], [249,1000,820,1.30,0.3],
-  [255,1480,525,1.34,0.4], [260,1000,540,1.0,0.7],
-
-  [263,960,540,1.00,0], [267,1460,540,1.25,0.9], [272,610,860,1.40,0.2],
-  [277,1550,505,1.42,0.2], [282,1290,820,1.45,0.25], [287,1660,530,1.35,0.25],
-  [292,1050,700,1.28,0.2], [297,1410,620,1.33,0.65], [302,1030,820,1.30,0.3],
-  [307,1640,530,1.38,0.25], [312,1110,760,1.30,0.6], [317,970,550,1.0,0.6],
-
-  [320,960,540,1.00,0], [324,1020,700,1.43,0.25], [329,850,600,1.55,0.2],
-  [334,850,660,1.50,0.25], [339,1230,860,1.30,0.6], [344,1110,850,1.45,0.2],
-  [350,850,620,1.54,0.25], [355,955,650,1.53,0.2], [360,1430,610,1.36,0.6],
-  [366,1200,750,1.45,0.2], [370,960,550,1.02,0.6],
-
-  [372,960,540,1.00,0], [376,850,630,1.42,0.2], [381,1110,850,1.36,0.3],
-  [386,1090,850,1.44,0.2], [391,1480,600,1.25,0.65], [396,830,610,1.50,0.2],
-  [401,1115,840,1.43,0.2], [406,900,775,1.28,0.6], [411,925,650,1.48,0.25],
-  [416,925,650,1.80,0.2], [421,925,650,1.95,0.45], [426,850,680,1.47,0.2],
-  [431,880,850,1.42,0.2], [437,960,550,1.0,0.7], [443,1060,650,1.20,0.5],
-
-  [447,960,540,1.00,0], [451,1450,500,1.35,0.25], [456,1145,565,1.52,0.2],
-  [461,1250,540,1.22,0.6], [466,1110,710,1.28,0.4], [471,1510,500,1.28,0.6],
-  [476,970,730,1.32,0.2], [481,850,850,1.42,0.2], [486,980,600,1.12,0.6],
-
-  [490,960,540,1.00,0], [494,1010,600,1.43,0.2], [499,1110,745,1.46,0.25],
-  [504,1025,495,1.48,0.2], [509,620,850,1.18,0.65], [514,1300,780,1.22,0.45],
-  [519,980,780,1.30,0.2], [523,960,550,1.00,0.6],
-
-  [526,960,540,1.00,0], [530,1025,495,1.48,0.2], [535,870,840,1.44,0.25],
-  [540,1025,495,1.63,0.2], [545,1040,500,1.55,0.2], [550,1025,495,1.35,0.35],
-  [555,970,700,1.28,0.4], [560,970,650,1.32,0.25], [565,1050,580,1.26,0.5],
-  [569,960,540,1.0,0.65],
-
-  [572,960,540,1.00,0], [575,560,590,1.20,0.5], [579,1150,650,1.30,0.2],
-  [583,1190,790,1.43,0.2], [587,1005,760,1.50,0.25], [591,1060,800,1.34,0.2],
-  [594,970,560,1.13,0.8], [597,960,540,1.00,0.5]
-];
+const SKYROOT_SHOT_CUTS = (() => {
+ const segments=[
+ {start:0,shots:[[0,960,540,1,0],[4,650,625,1.2,.55],[8,430,760,1.34,.22],[13,600,590,1.28,.35],[18,1170,560,1.12,.65],[23,520,680,1.3,.25],[29,930,810,1.18,.5],[35,1210,620,1.23,.25],[40,810,680,1.12,.5],[44,960,540,1,.3]]},
+ {start:46,shots:[[0,960,540,1,0],[4,1500,560,1.45,.25],[9,780,820,1.25,.2],[14,430,820,1.35,.2],[19,1300,550,1.25,.25],[24,1500,390,1.35,.25],[29,890,670,1.24,.35],[34,430,800,1.26,.2],[39,1160,640,1.25,.35],[44,960,540,1,.4]]},
+ {start:96,shots:[[0,960,540,1,0],[5,380,780,1.24,.25],[10,870,800,1.35,.2],[15,1300,490,1.15,.3],[20,920,780,1.32,.2],[25,580,770,1.22,.2],[30,1390,560,1.25,.25],[35,900,800,1.28,.2],[41,570,700,1.24,.25],[47,960,540,1,.35]]},
+ {start:150,shots:[[0,960,540,1,0],[5,430,780,1.2,.25],[10,980,770,1.32,.2],[15,1450,580,1.2,.25],[20,680,660,1.3,.2],[25,1020,700,1.32,.25],[30,1270,520,1.2,.2],[35,790,810,1.25,.2],[41,1240,650,1.24,.25],[47,960,540,1,.35]]},
+ {start:206,shots:[[0,960,540,1,0],[5,960,420,1.18,.3],[10,450,780,1.22,.2],[15,1430,570,1.24,.25],[20,960,780,1.28,.2],[25,1120,460,1.3,.2],[30,540,760,1.24,.2],[35,1390,620,1.18,.3],[41,940,640,1.24,.2],[47,960,540,1,.35]]},
+ {start:263,shots:[[0,960,540,1,0],[5,1450,540,1.2,.3],[10,500,780,1.24,.2],[15,1160,730,1.22,.2],[20,1510,470,1.25,.2],[25,830,790,1.25,.2],[30,1360,610,1.2,.3],[35,580,710,1.24,.2],[41,1120,750,1.24,.2],[47,960,540,1,.35]]},
+ {start:320,shots:[[0,960,540,1,0],[5,1320,520,1.25,.2],[10,430,820,1.24,.2],[15,1010,620,1.3,.2],[20,1500,600,1.22,.2],[25,840,790,1.28,.2],[30,1050,480,1.25,.25],[35,520,810,1.2,.2],[41,1320,720,1.25,.2],[47,960,540,1,.4]]},
+ {start:372,shots:[[0,960,540,1,0],[7,380,780,1.18,.3],[14,1450,560,1.2,.2],[21,860,790,1.25,.2],[28,1250,480,1.22,.2],[35,530,710,1.2,.2],[42,1130,700,1.24,.2],[49,1480,440,1.2,.2],[57,790,730,1.23,.2],[66,960,540,1,.4]]},
+ {start:447,shots:[[0,960,540,1,0],[5,1370,440,1.3,.2],[10,500,780,1.22,.2],[15,960,640,1.2,.2],[20,1380,700,1.25,.2],[25,780,620,1.2,.2],[31,1210,520,1.24,.2],[37,960,780,1.2,.2],[42,960,540,1,.3]]},
+ {start:490,shots:[[0,960,540,1,0],[5,960,470,1.2,.2],[10,490,810,1.24,.2],[15,1440,600,1.2,.2],[20,960,650,1.28,.2],[25,1400,470,1.2,.2],[30,700,780,1.22,.2],[34,960,540,1,.3]]},
+ {start:526,shots:[[0,960,540,1,0],[5,550,780,1.22,.2],[10,1360,650,1.2,.2],[15,960,500,1.2,.2],[20,670,820,1.25,.2],[25,1250,570,1.22,.2],[30,960,500,1.24,.2],[35,570,720,1.2,.2],[40,1320,600,1.22,.2],[45,960,540,1,.3]]},
+ {start:572,shots:[[0,960,540,1,0],[4,430,770,1.2,.2],[8,1340,620,1.2,.2],[12,960,500,1.16,.25],[16,700,760,1.15,.2],[20,1220,700,1.16,.2],[24,960,540,1,.35],[27,960,540,1,.3]]}
+ ];
+ return segments.flatMap(segment=>segment.shots.map(shot=>[segment.start+shot[0],shot[1],shot[2],shot[3],shot[4]]));
+})();
 
 function skyDirectorCamera(t) {
   let index = 0;
@@ -1340,63 +1288,136 @@ function skyDrawCinematicAction(ctx, t) {
 }
 
 
-function renderFrame(time, frame, fps, ctx, width, height, motion) {
-  const t = skyClamp(Number.isFinite(time) ? time : (frame || 0) / Math.max(1, fps || SKYROOT_FPS), 0, SKYROOT_DURATION);
-  const scale = Math.min(width / 1920, height / 1080);
-  const ox = (width - 1920 * scale) / 2, oy = (height - 1080 * scale) / 2;
-  ctx.save();
-  ctx.fillStyle = "#111b35";
-  ctx.fillRect(0, 0, width, height);
-  ctx.translate(ox, oy);
-  ctx.scale(scale, scale);
 
-  // The animated stage has its own virtual camera. Subtitles and grading stay
-  // screen-locked below it, like a finished edit rather than part of the set.
-  const camera = skyDirectorCamera(t);
-  const shake = skyDirectorShake(t);
-  ctx.save();
-  ctx.translate(960 + Math.sin(t * 31.7) * shake, 540 + Math.cos(t * 26.3) * shake * 0.58);
-  ctx.scale(camera.zoom, camera.zoom);
-  ctx.translate(-camera.x, -camera.y);
-
-  if (t < 46) skyDrawOpening(ctx,t);
-  else if (t < 96) skyDrawMissing(ctx,t);
-  else if (t < 150) skyDrawBrookScene(ctx,t);
-  else if (t < 206) skyDrawWoodScene(ctx,t);
-  else if (t < 263) skyDrawRidgeScene(ctx,t);
-  else if (t < 320) skyDrawMarketScene(ctx,t);
-  else if (t < 372) skyDrawCloudHomeScene(ctx,t,false);
-  else if (t < 447) skyDrawCloudHomeScene(ctx,t,true);
-  else if (t < 490) skyDrawReturn(ctx,t);
-  else if (t < 526) skyDrawGathering(ctx,t);
-  else if (t < 572) skyDrawAwakening(ctx,t);
-  else skyDrawFestival(ctx,t);
-
-  // Story-specific effects are layered over the action, not randomly over the
-  // whole runtime: rescue splashes, whisper echoes, flight trails, a landing,
-  // the shared glow-seed, homeward wind and the bell's expanding song.
-  skyDrawCinematicAction(ctx,t);
-  ctx.restore();
-
-  // Scene changes fade the entire composition while camera cuts continue
-  // inside every chapter; the subtitle layer remains legible during close-ups.
-  let fade = 0;
-  for (let i = 1; i < SKYROOT_SCENES.length - 1; i++) {
-    const d = Math.abs(t - SKYROOT_SCENES[i]);
-    if (d < 0.72) fade = Math.max(fade, 0.96 * (1 - d / 0.72));
-  }
-  if (fade > 0.01) {
-    ctx.fillStyle = "rgba(8,12,29," + fade.toFixed(3) + ")";
-    ctx.fillRect(0,0,1920,1080);
-  }
-  skyFilmGrade(ctx,t);
-  skyCaption(ctx,t);
-  ctx.restore();
+function starSky(ctx,t,top,middle,low){ctx.fillStyle=skyGradient(ctx,0,0,0,1080,[[0,top],[.56,middle],[1,low]]);ctx.fillRect(0,0,1920,1080);}
+function starGround(ctx,y,topColor,sideColor){ctx.fillStyle=topColor;ctx.beginPath();ctx.moveTo(0,y);ctx.bezierCurveTo(380,y-23,700,y+16,1010,y);ctx.bezierCurveTo(1350,y-18,1620,y+14,1920,y-5);ctx.lineTo(1920,1080);ctx.lineTo(0,1080);ctx.closePath();ctx.fill();ctx.fillStyle=sideColor;ctx.beginPath();ctx.moveTo(0,y+31);ctx.lineTo(1920,y+18);ctx.lineTo(1920,1080);ctx.lineTo(0,1080);ctx.closePath();ctx.fill();}
+function starTrack(ctx,y,t,perspective,color){
+ color=color||"#6d7187";ctx.save();ctx.lineCap="round";
+ if(perspective){ctx.strokeStyle="#4e536b";ctx.lineWidth=24;ctx.beginPath();ctx.moveTo(885,455);ctx.lineTo(235,1080);ctx.moveTo(1035,455);ctx.lineTo(1685,1080);ctx.stroke();ctx.strokeStyle=color;ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(885,455);ctx.lineTo(235,1080);ctx.moveTo(1035,455);ctx.lineTo(1685,1080);ctx.stroke();for(let i=0;i<23;i++){const p=i/22,yy=470+p*p*610,half=21+p*680;ctx.strokeStyle="#806d74";ctx.lineWidth=3+p*8;ctx.beginPath();ctx.moveTo(960-half,yy);ctx.lineTo(960+half,yy);ctx.stroke();}}
+ else{ctx.strokeStyle="#434a65";ctx.lineWidth=18;ctx.beginPath();ctx.moveTo(0,y-8);ctx.lineTo(1920,y-8);ctx.moveTo(0,y+12);ctx.lineTo(1920,y+12);ctx.stroke();ctx.strokeStyle=color;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(0,y-8);ctx.lineTo(1920,y-8);ctx.moveTo(0,y+12);ctx.lineTo(1920,y+12);ctx.stroke();for(let i=0;i<36;i++){const x=((i*87+t*18)%2020)-50;ctx.strokeStyle="#ad8e83";ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(x,y-18);ctx.lineTo(x,y+20);ctx.stroke();}}
+ ctx.restore();
+}
+function starTrain(ctx,x,y,s,t,tilt,glow){
+ ctx.save();ctx.translate(x,y+Math.sin(t*2.1)*1.8);ctx.rotate(tilt||0);ctx.scale(s,s);skyEllipse(ctx,0,8,151,12,"rgba(15,29,48,0.23)",null,0);
+ for(let i=0;i<3;i++){const wx=-72+i*69;skyEllipse(ctx,wx,-11,19,19,"#28334f","#d4b38c",3);ctx.save();ctx.translate(wx,-11);ctx.rotate(t*4.4+i*.5);ctx.strokeStyle="#d8c7a4";ctx.lineWidth=3;for(let k=0;k<4;k++){ctx.rotate(Math.PI/2);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,13);ctx.stroke();}ctx.restore();skyEllipse(ctx,wx,-11,5,5,"#f2ddb0",null,0);}
+ skyRound(ctx,-120,-96,238,71,17,"#314c70","#1d2c4a",4);skyPath(ctx,[[-120,-78],[-145,-61],[-143,-29],[-115,-27]],"#243952","#18283f",3);
+ skyRound(ctx,-91,-137,95,55,11,skyGradient(ctx,-90,-138,0,-80,[[0,"#8de0da"],[.45,"#3e97ad"],[1,"#254869"]]),"#223b5e",4);skyRound(ctx,-81,-127,25,28,5,"#fff0b1","#d9c7a0",2);skyRound(ctx,-45,-127,25,28,5,"#d2f7f1","#77b8c5",2);
+ skyPath(ctx,[[69,-107],[110,-102],[130,-80],[129,-44],[92,-29],[71,-48]],"#41698a","#223b5e",4);skyEllipse(ctx,107,-74,16,14,glow===false?"#90a2b8":"#fff0a2",null,0);skyGlow(ctx,109,-74,glow===false?20:42,"rgba(255,231,153,0.52)",glow===false?.12:.45);
+ skyRound(ctx,9,-91,53,34,7,"#243e60","#172a45",3);skyRound(ctx,19,-84,33,16,4,"#8ccee1","#355776",2);for(let i=0;i<3;i++)skyEllipse(ctx,-110+i*9,-148-i*10,6+i*2,5+i*2,"rgba(228,244,255,0.5)",null,0);if(glow!==false)skyGlow(ctx,-105,-109,34,"rgba(137,229,223,0.28)",.35);ctx.restore();
+}
+function starSignal(ctx,x,groundY,s,t,on,color){
+ s=s||1;color=color||"#ffe4a1";ctx.save();ctx.translate(x,groundY);ctx.scale(s,s);ctx.strokeStyle="#4e5873";ctx.lineWidth=14;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,-222);ctx.stroke();ctx.strokeStyle="#bbc8d7";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-8,0);ctx.lineTo(-8,-215);ctx.stroke();skyRound(ctx,-34,-242,68,49,12,"#27344f","#b1bed2",4);skyEllipse(ctx,0,-218,17,17,on?color:"#293149",on?"#fff3cb":"#6a7186",3);skyGlow(ctx,0,-218,on?95:28,on?"rgba(255,228,156,0.55)":"rgba(141,155,196,0.15)",on?.55:.16);ctx.strokeStyle="#e0ca9c";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-27,-257);ctx.lineTo(-9,-276);ctx.lineTo(10,-257);ctx.stroke();ctx.restore();
+}
+function starPlankWalk(ctx,x,y,w,depth,t){
+ ctx.save();ctx.fillStyle="#72575e";ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y+5);ctx.lineTo(x+w+depth,y+depth*.72);ctx.lineTo(x+depth,y+depth*.72-8);ctx.closePath();ctx.fill();ctx.fillStyle="#c29b79";ctx.beginPath();ctx.moveTo(x,y-18);ctx.lineTo(x+w,y-13);ctx.lineTo(x+w+depth,y+depth*.72-13);ctx.lineTo(x+depth,y+depth*.72-26);ctx.closePath();ctx.fill();const count=Math.max(2,Math.floor(w/48));ctx.strokeStyle="rgba(95,65,67,0.58)";ctx.lineWidth=2;for(let i=1;i<count;i++){const px=x+i*w/count;ctx.beginPath();ctx.moveTo(px,y-18);ctx.lineTo(px+depth*.1,y+depth*.72-24);ctx.stroke();}ctx.strokeStyle="#6b777d";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x,y-54);ctx.lineTo(x+w,y-49);ctx.moveTo(x+depth,y+depth*.72-61);ctx.lineTo(x+w+depth,y+depth*.72-56);ctx.stroke();for(let i=0;i<Math.floor(w/100);i++){const px=x+i*100+30;ctx.strokeStyle="#7a6c7c";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(px,y-16);ctx.lineTo(px,y-54);ctx.stroke();}ctx.restore();
+}
+function starWindLines(ctx,t,xStart,yStart,count,span,alpha,color){ctx.save();ctx.strokeStyle=color||"#d4f4ff";ctx.lineCap="round";for(let i=0;i<count;i++){const y=yStart+i*span/count+Math.sin(t*2+i)*8,x=xStart+((i*119+t*(50+i%4*11))%760);ctx.globalAlpha=alpha*(.65+.35*Math.sin(t*3+i));ctx.lineWidth=1.5+(i%3);ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+22,y-9,x+52+i%4*14,y+1);ctx.stroke();}ctx.restore();}
+function starDrawNimbusTerminal(ctx,t){
+ starSky(ctx,t,"#62a9e2","#c7e9f7","#f8d9b9");for(let i=0;i<5;i++){const x=150+i*390;skyCloud(ctx,x,200+(i%3)*92,.7+(i%2)*.22,"#f7fcff",t,i*2);skyCloud(ctx,x+160,355+(i%2)*66,.5,"#e5f2ff",t,i+4);}
+ ctx.fillStyle="#3b5677";ctx.beginPath();ctx.moveTo(130,825);ctx.lineTo(130,425);ctx.quadraticCurveTo(130,300,265,300);ctx.quadraticCurveTo(400,300,400,425);ctx.lineTo(400,825);ctx.closePath();ctx.fill();ctx.fillStyle="#d3e4e8";ctx.beginPath();ctx.moveTo(160,820);ctx.lineTo(160,434);ctx.quadraticCurveTo(160,337,265,337);ctx.quadraticCurveTo(370,337,370,434);ctx.lineTo(370,820);ctx.closePath();ctx.fill();skyRound(ctx,188,480,154,112,14,"#233d61","#e7d0a6",4);ctx.textAlign="center";ctx.fillStyle="#f7e5b7";ctx.font="800 20px ui-monospace,monospace";ctx.fillText("NIMBUS",265,525);ctx.fillText("TERMINAL",265,554);
+ ctx.fillStyle="#8395a8";ctx.fillRect(0,817,1920,263);ctx.fillStyle="#b7c2ca";ctx.fillRect(0,817,1920,16);for(let i=0;i<28;i++){ctx.strokeStyle=i%2?"#627a91":"#d3d3cb";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(i*73,836);ctx.lineTo(i*73-24,1060);ctx.stroke();}
+ starTrack(ctx,942,t,false,"#c2d7db");starTrain(ctx,820,943,.82,t,.005,true);skyFox(ctx,475,812,1,t,"happy",t<34?"walk":"reach");skyMoth(ctx,552,638,.62,t,.46);skyDragon(ctx,1244,810,.87,t,"happy",false);starSignal(ctx,1537,817,.83,t,true,"#ffe5a4");
+ for(let i=0;i<11;i++)skyFlower(ctx,75+i*174,816,.28,["#ffc1c7","#f8dfa0","#c5d5ff"][i%3],t,i);
+}
+function starDrawBlackout(ctx,t){
+ starSky(ctx,t,"#172342","#53617d","#b0a4b4");for(let i=0;i<5;i++){const px=i*430-80;skyPath(ctx,[[px,720],[px+70,520],[px+165,610],[px+260,380],[px+390,715],[px+460,760],[px,760]],["#30445f","#435775","#35425f"][i%3],"#6b7892",2);}for(let i=0;i<9;i++){const x=((i*257+t*15)%2300)-170,y=140+(i%4)*112;skyCloud(ctx,x,y,.82,"#aabbd3",t,i*3);}
+ starGround(ctx,847,"#586b7f","#344359");starTrack(ctx,934,t,false,"#9daac1");starTrain(ctx,710,935,.78,t,0,false);skyFox(ctx,430,824,1,t,"worried","idle");skyMoth(ctx,527,663,.65,t,.23);skyDragon(ctx,1215,550,.98,t,"worried",true);starSignal(ctx,1530,846,.92,t,false);ctx.strokeStyle="rgba(225,235,251,.46)";ctx.lineWidth=3;for(let i=0;i<5;i++){const x=1000+i*29;ctx.beginPath();ctx.moveTo(x,260+Math.sin(t*2+i)*6);ctx.lineTo(x-62,332+Math.sin(t*2+i)*11);ctx.stroke();}if(t>53)starWindLines(ctx,t,900,240,14,250,.22,"#dbe7ff");
+}
+function starDrawMarsh(ctx,t){
+ starSky(ctx,t,"#477eab","#9ac9cf","#f0dab0");for(let i=0;i<9;i++){const x=i*250-50;skyPath(ctx,[[x,770],[x+35,635+(i%3)*22],[x+115,690],[x+170,618],[x+235,770]],["#466d69","#5a8074","#718b73"][i%3],null,0);}
+ ctx.fillStyle=skyGradient(ctx,0,708,0,1080,[[0,"#83c9c9"],[.55,"#3c9caa"],[1,"#256b8a"]]);ctx.fillRect(0,708,1920,372);for(let i=0;i<34;i++){const x=((i*101+t*(12+i%4*4))%2060)-60,y=740+(i%7)*43+Math.sin(t*1.2+i)*4;ctx.strokeStyle="rgba(199,249,239,.56)";ctx.lineWidth=2+(i%3);ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+25,y-4,x+48,y);ctx.stroke();}
+ starPlankWalk(ctx,90,855,1640,115,t);starTrack(ctx,898,t,false,"#d7c6ad");starTrain(ctx,360,899,.61,t,0,true);for(let i=0;i<14;i++){const x=i*143+35,top=640+(i%5)*30;ctx.strokeStyle="#4b8768";ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(x,855);ctx.quadraticCurveTo(x+Math.sin(t+i)*13,740,x+Math.sin(t+i)*19,top);ctx.stroke();skyPath(ctx,[[x,top+18],[x-18,top-12],[x+4,top-37],[x+14,top-5]],"#c7d67e",null,0);}
+ // The plank deck is a real walkable plane; no character is drawn in the water below it.
+ skyFox(ctx,880,818,.98,t,t<122?"worried":"determined",t<108?"walk":t<130?"reach":"idle");skyMoth(ctx,955,678,.58,t,.45);skyPebble(ctx,1385,816,.72,t,t>128);skyDragon(ctx,1635,586,.7,t,"happy",true);
+ for(let i=0;i<9;i++){const x=260+i*170,y=1000+(i%3)*18;skyEllipse(ctx,x,y,32+((t*20+i*27)%60),6,"rgba(213,250,242,.24)",null,0);}
+}
+function starDrawWoodMaze(ctx,t){
+ starSky(ctx,t,"#263a59","#526f83","#96b1b0");for(let i=0;i<13;i++){const x=i*170-35,h=330+(i%4)*80,w=36+(i%3)*15;ctx.fillStyle=skyGradient(ctx,x-w,0,x+w,0,[[0,"#182e43"],[.5,"#53645f"],[1,"#223a4a"]]);ctx.beginPath();ctx.moveTo(x-w,1080);ctx.lineTo(x-w*.45,1080-h);ctx.quadraticCurveTo(x,1080-h-70,x+w*.5,1080-h);ctx.lineTo(x+w,1080);ctx.closePath();ctx.fill();skyPath(ctx,[[x-112,1080-h+80],[x-78,1080-h-5],[x-20,1080-h+24],[x+28,1080-h-26],[x+94,1080-h+89]],["#365f67","#3e716d","#527d72"][i%3],null,0);}
+ ctx.fillStyle="#4d515f";ctx.beginPath();ctx.moveTo(0,1080);ctx.lineTo(0,940);ctx.bezierCurveTo(310,865,420,925,615,874);ctx.bezierCurveTo(795,821,835,900,1040,875);ctx.bezierCurveTo(1290,842,1500,903,1920,828);ctx.lineTo(1920,1080);ctx.closePath();ctx.fill();ctx.strokeStyle="#a6a18a";ctx.lineWidth=20;ctx.beginPath();ctx.moveTo(0,936);ctx.bezierCurveTo(310,861,420,921,615,870);ctx.bezierCurveTo(795,817,835,896,1040,871);ctx.bezierCurveTo(1290,838,1500,899,1920,824);ctx.stroke();ctx.strokeStyle="#c8b38c";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(0,922);ctx.bezierCurveTo(310,847,420,907,615,856);ctx.bezierCurveTo(795,803,835,882,1040,857);ctx.bezierCurveTo(1290,824,1500,885,1920,810);ctx.stroke();
+ starTrain(ctx,365,886,.48,t,0,false);skyFox(ctx,930,866,1,t,"worried",t<189?"idle":"walk");skyMoth(ctx,1035,686,.63,t,.47);skyOwl(ctx,1390,707,.85,t);for(let i=0;i<7;i++){const x=570+i*86,y=839+Math.sin(i*.8)*20;skyGlow(ctx,x,y,38,"rgba(180,241,199,.3)",.28);skyStar(ctx,x,y,4,"#e4ffc9",.75);}starWindLines(ctx,t,100,410,11,240,.17,"#d1e5c9");
+}
+function starDrawIceViaduct(ctx,t){
+ starSky(ctx,t,"#507eb4","#c7e0ee","#f7e1d4");for(let i=0;i<6;i++){const x=i*360-80;skyPath(ctx,[[x,790],[x+95,570],[x+180,640],[x+250,390+(i%2)*80],[x+350,790]],["#829fb9","#a3bacb","#738ead"][i%3],"rgba(245,251,255,.68)",3);skyPath(ctx,[[x+180,640],[x+250,390+(i%2)*80],[x+286,660]],"rgba(223,248,255,.55)",null,0);}
+ ctx.fillStyle="#dcebf0";ctx.fillRect(0,805,1920,275);ctx.fillStyle="#839eb7";ctx.fillRect(0,890,1920,190);for(let i=0;i<32;i++){const x=i*63;ctx.strokeStyle="#c4d9e5";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,895);ctx.lineTo(x+18,1055);ctx.stroke();}
+ starTrack(ctx,916,t,false,"#e5f8ff");starTrain(ctx,970,918,.7,t,Math.sin(t*.45)*.012,true);skyFox(ctx,440,795,.82,t,"determined",t<220?"walk":"reach");skyMoth(ctx,515,655,.55,t,.48);skyDragon(ctx,1290,478,.92,t,t<232?"worried":"happy",true);starSignal(ctx,1530,798,.63,t,true,"#c9edff");starWindLines(ctx,t,1020,320,17,210,.28,"#f0fbff");if(t>226&&t<258){const p=skyEase(226,258,t);for(let i=0;i<14;i++){const x=690+i*40,y=880+(i%3)*10;skyGlow(ctx,x,y,14,"rgba(204,246,255,.55)",p*.48);skyStar(ctx,x,y,2.5,"#fff",p*.8);}}
+}
+function starDrawSkyMarket(ctx,t){
+ starSky(ctx,t,"#64a6dc","#d1f0f5","#ffe2bc");for(let i=0;i<7;i++){const x=i*310-50,y=450+(i%3)*78,s=.72+(i%4)*.08;skyFloatingIsland(ctx,x+120,y,s,t,["#7fb7a2","#a2cfc0","#74aaad"][i%3]);skyHouse(ctx,x+120,y-25,.42,t,true,["#efc9a8","#c6d8e8","#e6c1d7"][i%3]);}
+ ctx.fillStyle="#617e9a";ctx.beginPath();ctx.moveTo(0,812);ctx.lineTo(1920,765);ctx.lineTo(1920,1080);ctx.lineTo(0,1080);ctx.closePath();ctx.fill();ctx.fillStyle="#b9d2d8";ctx.beginPath();ctx.moveTo(0,800);ctx.lineTo(1920,753);ctx.lineTo(1920,789);ctx.lineTo(0,837);ctx.closePath();ctx.fill();starPlankWalk(ctx,60,877,1790,65,t);starTrack(ctx,930,t,false,"#d9d8d0");starTrain(ctx,1150,931,.67,t,Math.sin(t*2)*.025,true);
+ for(let i=0;i<9;i++){const x=110+i*207,y=667+(i%3)*42;ctx.strokeStyle="#806b89";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+108);ctx.stroke();skyPath(ctx,[[x,y+2],[x+48,y+17],[x,y+36]],["#f1c1c7","#bfe1ef","#f3dda2"][i%3],"#fdf0d1",2);}
+ skyFox(ctx,550,795,.86,t,t<302?"determined":"happy",t<306?"run":"reach");skyMoth(ctx,646,630,.56,t,.5);skyDragon(ctx,1540,565,.84,t,"worried",true);starWindLines(ctx,t,1100,360,12,245,.17,"#fff2d6");if(t>302&&t<318){const a=1-skyEase(312,318,t);for(let i=0;i<6;i++)skyCineLine(ctx,1000+i*28,550,970+i*31,500,935+i*33,"#fff3d4",2,a*.6);}
+}
+function starDrawEngineRoom(ctx,t){
+ starSky(ctx,t,"#16253e","#263c59","#4c5f75");for(let i=0;i<9;i++){const x=i*245-35;ctx.fillStyle=i%2?"#293e59":"#31465e";ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+65,0);ctx.lineTo(x+130,775);ctx.lineTo(x+35,775);ctx.closePath();ctx.fill();ctx.strokeStyle="#77889a";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x+35,40);ctx.lineTo(x+88,755);ctx.stroke();for(let j=0;j<5;j++)skyEllipse(ctx,x+54,120+j*125,4,4,"#e4c994",null,0);}
+ for(let g=0;g<5;g++){const x=250+g*345,y=390+(g%2)*80,r=100+(g%3)*20;ctx.save();ctx.translate(x,y);ctx.rotate(t*(g%2?.18:-.14));ctx.strokeStyle="#ad9c89";ctx.lineWidth=17;ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.stroke();ctx.strokeStyle="#5d8e9a";ctx.lineWidth=7;ctx.beginPath();ctx.arc(0,0,r-18,0,Math.PI*2);ctx.stroke();for(let k=0;k<12;k++){ctx.rotate(Math.PI/6);ctx.fillStyle="#cfb895";ctx.fillRect(r-9,-9,24,18);}skyEllipse(ctx,0,0,19,19,"#f0d4a4","#7f7d83",4,0);ctx.restore();}
+ ctx.fillStyle="#687c8d";ctx.fillRect(0,735,1920,345);ctx.fillStyle="#9faeb8";ctx.fillRect(0,754,1920,56);starTrack(ctx,923,t,false,"#d2c5a6");starTrain(ctx,1010,925,.73,t,0,false);skyFox(ctx,440,735,.89,t,"determined",t<355?"reach":"idle");skyMoth(ctx,523,589,.56,t,.42);skyDragon(ctx,1510,735,.81,t,t<366?"worried":"happy",false);skyRound(ctx,795,500,260,180,18,"#1c314a","#bdc6cb",5);skyRound(ctx,824,524,202,130,12,"#253b50","#83cbd4",3);for(let i=0;i<3;i++){const pulse=.5+.5*Math.sin(t*3+i);skyGlow(ctx,870+i*55,584,14,"rgba(133,232,218,.55)",pulse*.7);skyEllipse(ctx,870+i*55,584,7,7,["#8fe7db","#ffd995","#b9d9ff"][i],null,0);}starWindLines(ctx,t,760,325,7,60,.23,"#bceff0");if(t>338&&t<368){const p=skyEase(342,350,t);skyCineLine(ctx,876,588,955,540,1015,588,"#fff0b6",5,p*.75);skyCineLine(ctx,875,602,950,650,1015,600,"#9ce7e3",3,p*.65);}
+}
+function starDrawWindmillCanyon(ctx,t){
+ starSky(ctx,t,"#5d96c6","#d6e6e9","#f5d6b8");for(let i=0;i<8;i++){const x=i*275-40,base=785-(i%3)*40;skyPath(ctx,[[x,base],[x+80,base-250-(i%2)*80],[x+140,base-135],[x+215,base-330],[x+275,base]],["#536d83","#708c9a","#8e9eaa"][i%3],"#b3c6ca",3);}
+ ctx.fillStyle="#7f8f91";ctx.fillRect(0,800,1920,280);ctx.fillStyle="#c4b59a";ctx.fillRect(0,824,1920,57);starTrack(ctx,925,t,false,"#e5d3b8");for(let i=0;i<4;i++){const x=240+i*465,base=817,hubY=360+(i%2)*75,rot=t*.22+i*.85;ctx.strokeStyle="#685b61";ctx.lineWidth=14;ctx.beginPath();ctx.moveTo(x,base);ctx.lineTo(x,hubY);ctx.stroke();ctx.save();ctx.translate(x,hubY);ctx.rotate(rot);for(let k=0;k<4;k++){ctx.rotate(Math.PI/2);ctx.fillStyle="#e1d3b9";ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(13,-18);ctx.lineTo(26,-178);ctx.lineTo(-14,-165);ctx.closePath();ctx.fill();ctx.strokeStyle="#8c9da0";ctx.lineWidth=3;ctx.stroke();}skyEllipse(ctx,0,0,20,20,"#ffe2a2","#786c73",3,0);ctx.restore();}
+ starTrain(ctx,825,927,.7,t,Math.sin(t*.7)*.016,true);skyFox(ctx,435,806,.86,t,"determined",t<410?"reach":"walk");skyMoth(ctx,516,650,.55,t,.46);skyDragon(ctx,1300,486,.91,t,"happy",true);starWindLines(ctx,t,540,300,22,165,.4,"#d4f6ff");if(t>407&&t<439){const p=skyEase(409,420,t);for(let i=0;i<13;i++){const x=730+i*39,y=845+Math.sin(i*.8+t)*13;skyCineLine(ctx,x-80,y-30,x-20,y-8,x+32,y,"#b0f6ed",3,p*.52);skyGlow(ctx,x,y,19,"rgba(151,246,221,.35)",p*.5);}}
+}
+function starDrawObservatory(ctx,t){
+ starSky(ctx,t,"#111b3d","#293d68","#5f688d");for(let i=0;i<145;i++)skyStar(ctx,skyHash(i+522)*1920,skyHash(i+177)*715,1.2+skyHash(i+829)*2.2,"#e5eaff",.4+.6*Math.sin(t+i)*.5);
+ ctx.fillStyle="#2b3b60";ctx.beginPath();ctx.moveTo(220,780);ctx.lineTo(220,420);ctx.quadraticCurveTo(960,-160,1700,420);ctx.lineTo(1700,780);ctx.closePath();ctx.fill();ctx.strokeStyle="#9caed4";ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(220,780);ctx.lineTo(220,420);ctx.quadraticCurveTo(960,-160,1700,420);ctx.lineTo(1700,780);ctx.stroke();ctx.strokeStyle="rgba(190,211,255,.45)";ctx.lineWidth=3;for(let i=0;i<9;i++){ctx.beginPath();ctx.moveTo(280+i*165,420);ctx.lineTo(280+i*165,775);ctx.stroke();}
+ ctx.fillStyle="#7888a1";ctx.beginPath();ctx.moveTo(130,745);ctx.lineTo(1790,745);ctx.lineTo(1920,1080);ctx.lineTo(0,1080);ctx.closePath();ctx.fill();ctx.fillStyle="#344d71";ctx.beginPath();ctx.ellipse(960,846,650,190,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#c4d2dd";ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(960,846,650,190,0,0,Math.PI*2);ctx.stroke();ctx.save();ctx.translate(960,846);ctx.rotate(t*.03);for(let r=0;r<4;r++){ctx.strokeStyle=["#f1d7a6","#b7dff2","#d6c4f5","#9ee7da"][r];ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(0,0,130+r*120,48+r*37,0,0,Math.PI*2);ctx.stroke();}for(let i=0;i<16;i++){const a=i*Math.PI/8,x=Math.cos(a)*515,y=Math.sin(a)*145;skyStar(ctx,x,y,4,"#fff0bb",.9);}ctx.restore();
+ ctx.save();ctx.translate(1420,645);ctx.rotate(-.36);skyRound(ctx,-21,-114,42,225,12,"#bcab90","#49516e",4);skyRound(ctx,-33,-143,66,45,12,"#7b9bb7","#d7e0e8",3);skyEllipse(ctx,0,-143,24,16,"#bde5f0","#f2e8d0",3,0);ctx.restore();
+ starTrain(ctx,295,942,.43,t,0,false);skyFox(ctx,690,806,.87,t,"determined",t<480?"reach":"idle");skyMoth(ctx,775,661,.5,t,.45);skyOwl(ctx,1530,752,.72,t);skyDragon(ctx,1150,624,.67,t,"happy",true);
+}
+function starDrawStormTunnel(ctx,t){
+ starSky(ctx,t,"#0d1830","#1b2d49","#37455c");const vx=960,vy=395;for(let i=0;i<12;i++){const k=i/11,x=160+k*1600,topY=vy-165*(1-Math.abs(.5-k)*2),bottomY=730+Math.abs(.5-k)*180;ctx.strokeStyle=i%2?"#344a66":"#65748a";ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(vx,vy-60);ctx.quadraticCurveTo(x,vy+60,x,bottomY);ctx.stroke();ctx.strokeStyle="rgba(147,181,207,.38)";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(vx,vy-60);ctx.lineTo(x,bottomY);ctx.stroke();ctx.fillStyle="#3d4c62";ctx.beginPath();ctx.moveTo(x-26,bottomY);ctx.lineTo(x-18,topY);ctx.lineTo(x+18,topY);ctx.lineTo(x+26,bottomY);ctx.closePath();ctx.fill();}
+ ctx.fillStyle="#263851";ctx.fillRect(0,710,1920,370);ctx.fillStyle="#7e8b98";ctx.beginPath();ctx.moveTo(1380,760);ctx.lineTo(1920,770);ctx.lineTo(1920,1080);ctx.lineTo(1490,1080);ctx.closePath();ctx.fill();ctx.strokeStyle="#d2c3a7";ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(1390,778);ctx.lineTo(1920,787);ctx.stroke();starTrack(ctx,930,t,true,"#a3c4dc");starTrain(ctx,960,816,.46,t,0,true);skyFox(ctx,1640,840,.84,t,"worried","idle");skyMoth(ctx,1705,681,.5,t,.58);skyDragon(ctx,1180,570,.68,t,"determined",true);for(let i=0;i<17;i++){const x=960+Math.cos(i*2.399+t*.15)*(45+(t*14+i*33)%650),y=475+Math.sin(i*2.399+t*.15)*(23+(t*8+i*19)%210);skyStar(ctx,x,y,2,"#d5e9ff",.48);}starWindLines(ctx,t,1010,450,20,24,.28,"#b9e2ff");
+}
+function starDrawMoonfallGap(ctx,t){
+ starSky(ctx,t,"#24305f","#6b75a2","#e1c5c0");for(let i=0;i<6;i++){const x=i*350-100;skyPath(ctx,[[x,790],[x+120,560],[x+230,690],[x+310,480],[x+380,800]],["#3b526e","#566988","#6e7e9a"][i%3],"rgba(214,222,246,.52)",3);}
+ ctx.fillStyle="#5d6e83";ctx.beginPath();ctx.moveTo(0,758);ctx.lineTo(770,785);ctx.lineTo(870,875);ctx.lineTo(870,1080);ctx.lineTo(0,1080);ctx.closePath();ctx.fill();ctx.fillStyle="#9aa5a8";ctx.beginPath();ctx.moveTo(0,744);ctx.lineTo(758,770);ctx.lineTo(870,852);ctx.lineTo(0,828);ctx.closePath();ctx.fill();ctx.fillStyle="#43516d";ctx.beginPath();ctx.moveTo(1210,850);ctx.lineTo(1330,752);ctx.lineTo(1920,722);ctx.lineTo(1920,1080);ctx.lineTo(1210,1080);ctx.closePath();ctx.fill();ctx.fillStyle="#a0aeb3";ctx.beginPath();ctx.moveTo(1210,836);ctx.lineTo(1330,738);ctx.lineTo(1920,708);ctx.lineTo(1920,792);ctx.lineTo(1320,819);ctx.closePath();ctx.fill();
+ ctx.strokeStyle="#3d455d";ctx.lineWidth=17;ctx.beginPath();ctx.moveTo(0,824);ctx.lineTo(870,874);ctx.moveTo(1218,850);ctx.lineTo(1920,815);ctx.stroke();ctx.strokeStyle="#d6c4aa";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(0,824);ctx.lineTo(870,874);ctx.moveTo(1218,850);ctx.lineTo(1920,815);ctx.stroke();for(let i=0;i<12;i++){const x=i*72;ctx.strokeStyle="#beaa94";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x,818+x*.058);ctx.lineTo(x,837+x*.058);ctx.stroke();}
+ starTrain(ctx,575,855,.62,t,0,false);skyFox(ctx,275,742,.83,t,"determined","reach");skyMoth(ctx,357,612,.5,t,.52);skyDragon(ctx,1100,530,.82,t,"determined",true);starSignal(ctx,1530,738,.58,t,true,"#e2f4ff");if(t>548){const p=skyEase(548,566,t);ctx.save();ctx.globalAlpha=p;ctx.lineCap="round";ctx.strokeStyle="rgba(124,218,228,.28)";ctx.lineWidth=38;ctx.beginPath();ctx.moveTo(782,806);ctx.bezierCurveTo(920,735,1115,730,1327,750);ctx.stroke();const g=ctx.createLinearGradient(780,806,1330,750);g.addColorStop(0,"#fff0ac");g.addColorStop(.55,"#9ce4e6");g.addColorStop(1,"#d1c4ff");ctx.strokeStyle=g;ctx.lineWidth=18;ctx.beginPath();ctx.moveTo(782,806);ctx.bezierCurveTo(920,735,1115,730,1327,750);ctx.stroke();for(let i=0;i<13;i++){const p2=i/12,x=790+p2*530,y=804-p2*54+Math.sin(p2*Math.PI)*45;skyGlow(ctx,x,y,25,"rgba(255,235,169,.48)",p*.5);skyStar(ctx,x,y,3.5,"#fff3bf",p);}ctx.restore();}
+}
+function starDrawFirstLightHarbor(ctx,t){
+ starSky(ctx,t,"#e39b92","#f4d5b3","#a8d4d0");skyGlow(ctx,1470,195,210,"rgba(255,228,161,.46)",.35);skyEllipse(ctx,1470,195,71,71,skyGradient(ctx,1435,155,1510,235,[[0,"#fff6c6"],[1,"#ffbf86"]]),null,0);for(let i=0;i<7;i++)skyCloud(ctx,i*330-50,260+(i%3)*70,.5+(i%3)*.1,"#fff0e1",t,i);
+ for(let i=0;i<8;i++)skyHouse(ctx,i*250+30,520+(i%3)*38,.56+(i%3)*.04,t,true,["#f0c6ae","#d4d9ef","#c1e4de"][i%3]);ctx.fillStyle="#728e9b";ctx.fillRect(0,807,1920,273);ctx.fillStyle="#c3c3bb";ctx.fillRect(0,807,1920,18);for(let i=0;i<28;i++){ctx.strokeStyle="#8ca2a8";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(i*74,828);ctx.lineTo(i*74-28,1060);ctx.stroke();}starTrack(ctx,942,t,false,"#f3e1c1");starTrain(ctx,920,943,.83,t,.004,true);skyFox(ctx,450,802,.94,t,"happy","idle");skyMoth(ctx,536,638,.58,t,.47);skyDragon(ctx,1310,799,.83,t,"happy",false);starSignal(ctx,1550,806,.73,t,true,"#fff0b1");for(let i=0;i<24;i++)skyLantern(ctx,80+i*75,500+Math.sin(i*1.7)*62,.34+(i%3)*.04,["#ffe1a1","#bfeaf1","#e6c5f2"][i%3],t,i+95);
+ if(t>588){ctx.save();ctx.globalAlpha=skyEase(588,593,t);skyRound(ctx,535,292,850,175,26,"rgba(18,34,61,.76)","rgba(255,241,203,.72)",2);ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#fff1cb";ctx.font="900 47px ui-rounded,system-ui,sans-serif";ctx.fillText("THE LAST STAR TRAIN",960,359);ctx.fillStyle="#cdeaf0";ctx.font="700 18px ui-monospace,monospace";ctx.fillText("THE ROUTE IS OURS TO SHARE",960,411);ctx.restore();}
+}
+function starDrawSceneAction(ctx,t){
+ if(t>=48&&t<96){const p=skyEase(50,57,t)*(1-skyEase(84,93,t));ctx.save();ctx.globalAlpha=p*.6;ctx.strokeStyle="#d7e7ff";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(1450,120);ctx.lineTo(1350,235);ctx.lineTo(1395,305);ctx.lineTo(1270,416);ctx.stroke();ctx.strokeStyle="#fff";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(1450,120);ctx.lineTo(1350,235);ctx.lineTo(1395,305);ctx.lineTo(1270,416);ctx.stroke();ctx.restore();}
+ if(t>=103&&t<142){const p=skyEase(110,120,t);for(let i=0;i<7;i++)skyCineEllipse(ctx,780+i*145,984+i%3*13,22+p*48,5,"#c7fff0",2,p*.34,0);}
+ if(t>=168&&t<205){const p=skyEase(172,188,t)*(1-skyEase(197,205,t));for(let i=0;i<12;i++){const x=500+i*83,y=823+Math.sin(t*.8+i)*28;skyGlow(ctx,x,y,17,"rgba(187,246,195,.34)",p*.48);skyStar(ctx,x,y,2.8,"#edffd2",p*.8);}}
+ if(t>=215&&t<261)starWindLines(ctx,t,720,300,16,235,.34,"#e9fbff");
+ if(t>=276&&t<320){const p=skyEase(278,287,t)*(1-skyEase(313,319,t));for(let i=0;i<8;i++){const x=((i*241+t*80)%2080)-80,y=360+i%4*85;skyCineLine(ctx,x,y,x+35,y-19,x+104,y+3,["#ffdfb0","#c7e7ff","#f1c5df"][i%3],3,p*.58);}}
+ if(t>=340&&t<370){const p=skyEase(345,355,t)*(1-skyEase(364,370,t));for(let i=0;i<12;i++){const x=820+i*23,y=576+Math.sin(t+i)*22;skyGlow(ctx,x,y,13,"rgba(150,242,228,.4)",p*.7);skyStar(ctx,x,y,2.5,"#dffffa",p);}}
+ if(t>=388&&t<444)starWindLines(ctx,t,560,280,24,160,.42,"#d8faff");
+ if(t>=454&&t<488){const p=skyEase(458,469,t)*(1-skyEase(482,488,t));ctx.save();ctx.globalAlpha=p*.56;ctx.strokeStyle="#f7dfa2";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(960,846,270+(t-454)*23,76+(t-454)*8,0,0,Math.PI*2);ctx.stroke();ctx.strokeStyle="#bddfff";ctx.beginPath();ctx.ellipse(960,846,410+(t-454)*18,112+(t-454)*6,0,0,Math.PI*2);ctx.stroke();ctx.restore();}
+ if(t>=493&&t<526)starWindLines(ctx,t,965,450,24,20,.24,"#b5dfff");
+ if(t>=548&&t<572){const p=skyEase(548,565,t);for(let i=0;i<14;i++){const x=800+i*39,y=800-i%5*17;skyGlow(ctx,x,y,21,"rgba(255,237,171,.34)",p*.6);skyStar(ctx,x,y,3,"#fff0bd",p);}}
 }
 
+function renderFrame(time, frame, fps, ctx, width, height, motion) {
+ const t=skyClamp(Number.isFinite(time)?time:(frame||0)/Math.max(1,fps||SKYROOT_FPS),0,SKYROOT_DURATION);
+ const scale=Math.min(width/1920,height/1080),ox=(width-1920*scale)/2,oy=(height-1080*scale)/2;
+ ctx.save();ctx.fillStyle="#111b35";ctx.fillRect(0,0,width,height);ctx.translate(ox,oy);ctx.scale(scale,scale);
+ const camera=skyDirectorCamera(t),shake=skyDirectorShake(t);
+ ctx.save();ctx.translate(960+Math.sin(t*31.7)*shake,540+Math.cos(t*26.3)*shake*.58);ctx.scale(camera.zoom,camera.zoom);ctx.translate(-camera.x,-camera.y);
+ if(t<46)starDrawNimbusTerminal(ctx,t);
+ else if(t<96)starDrawBlackout(ctx,t);
+ else if(t<150)starDrawMarsh(ctx,t);
+ else if(t<206)starDrawWoodMaze(ctx,t);
+ else if(t<263)starDrawIceViaduct(ctx,t);
+ else if(t<320)starDrawSkyMarket(ctx,t);
+ else if(t<372)starDrawEngineRoom(ctx,t);
+ else if(t<447)starDrawWindmillCanyon(ctx,t);
+ else if(t<490)starDrawObservatory(ctx,t);
+ else if(t<526)starDrawStormTunnel(ctx,t);
+ else if(t<572)starDrawMoonfallGap(ctx,t);
+ else starDrawFirstLightHarbor(ctx,t);
+ starDrawSceneAction(ctx,t);ctx.restore();
+ let fade=0;for(let i=1;i<SKYROOT_SCENES.length-1;i++){const d=Math.abs(t-SKYROOT_SCENES[i]);if(d<.68)fade=Math.max(fade,.9*(1-d/.68));}
+ if(fade>.01){ctx.fillStyle="rgba(8,12,29,"+fade.toFixed(3)+")";ctx.fillRect(0,0,1920,1080);}
+ skyFilmGrade(ctx,t);skyCaption(ctx,t);ctx.restore();
+}
 if (typeof window !== "undefined" && !window.TRILYVA_SKYROOT_STORY) {
   window.TRILYVA_SKYROOT_STORY = {
-    title: "The Skyroot Bell",
+    title: "The Last Star Train",
     duration: SKYROOT_DURATION,
     fps: SKYROOT_FPS,
     width: 3840,
