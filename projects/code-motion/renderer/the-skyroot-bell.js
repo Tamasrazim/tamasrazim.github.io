@@ -802,6 +802,40 @@ function skyDrawReturn(ctx,t){
   }
   skyParticles(ctx,t,30,{x:0,y:150,w:1920,h:820},"rgba(255,229,177,ALPHA)");
 }
+function skyDrawGathering(ctx,t){
+  skyBackground(ctx,t,"dusk");skyGround(ctx,t,"#576f91","#2a4264");
+  skyVines(ctx,785,t,false);skyTree(ctx,970,1160,1.7,t,false,true);skyVillage(ctx,t,false,true);
+  // The village gathers around the empty hook before the ceremony begins.
+  for(let i=0;i<25;i++){
+    const a=i*2.399,rx=300+(i%4)*95,ry=210+(i%5)*40;
+    const x=970+Math.cos(a)*rx,y=760+Math.sin(a)*ry*.55;
+    skyLantern(ctx,x,y,.34+(i%3)*.035,["#f4d894","#c9dbff","#f2bed5"][i%3],t,i+84);
+  }
+  // Nix has brought the bell back; it stays quiet until everyone is ready.
+  const returned=skyEase(497,505,t);
+  if(returned>0){
+    ctx.save();ctx.globalAlpha=returned;
+    skySkiff(ctx,1190,770,.52,t,.015);
+    skyDragon(ctx,1117,744,.79,t,"happy",false);
+    skyBell(ctx,1025,495,.76,t,.18);
+    ctx.restore();
+  }
+  skyFox(ctx,skyMix(775,842,skyEase(479,505,t)),1000,.98,t,t<499?"determined":"happy","walk");
+  skyMoth(ctx,skyMix(930,975,skyEase(479,505,t)),786,.68,t,.42);
+  // Villagers place their own lights around the tree, instead of waiting for a single saviour.
+  for(let i=0;i<13;i++){
+    const x=145+i*135,y=850+(i%3)*40;
+    skyLantern(ctx,x,y,.3,["#f7dfa7","#cbdcff","#efc4d7"][i%3],t,i+109);
+  }
+  if(t>508){
+    for(let i=0;i<7;i++){
+      const p=skyEase(508,523,t),x=970+(i-3)*75,y=770-p*(85+(i%3)*15);
+      skyGlow(ctx,x,y,32,"rgba(255,224,145,0.34)",p*.32);
+      skyStar(ctx,x,y,3,"#fff0bd",.7);
+    }
+  }
+  skyParticles(ctx,t,30,{x:0,y:130,w:1920,h:780},"rgba(255,229,177,ALPHA)");
+}
 function skyDrawAwakening(ctx,t){
   skyBackground(ctx,t,"night");
   skyGround(ctx,t,"#4e6e83","#1f3d57");
@@ -876,7 +910,7 @@ function renderFrame(time, frame, fps, ctx, width, height, motion) {
   else if (t < 372) skyDrawCloudHomeScene(ctx,t,false);
   else if (t < 425) skyDrawCloudHomeScene(ctx,t,true);
   else if (t < 476) skyDrawReturn(ctx,t);
-  else if (t < 526) skyDrawAwakening(ctx,t);
+  else if (t < 526) skyDrawGathering(ctx,t);
   else if (t < 572) skyDrawAwakening(ctx,t);
   else skyDrawFestival(ctx,t);
   // Gentle fades make each location change feel like a deliberate edit.
