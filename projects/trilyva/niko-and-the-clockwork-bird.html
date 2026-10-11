@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark"><title>Niko and the Clockwork Bird — TRILYVA</title>
+<style>
+:root{color-scheme:dark;--bg:#070708;--panel:#101013;--line:#303036;--ink:#f1f1ed;--muted:#a0a0a6;--gold:#e7c782}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 52% 0%,#171b24 0,#070708 55%);color:var(--ink);font:14px/1.5 system-ui,Segoe UI,sans-serif}header,main,footer{width:min(1500px,calc(100% - 32px));margin:auto}header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0;border-bottom:1px solid var(--line);font:10px ui-monospace,Consolas,monospace;letter-spacing:.14em;color:var(--muted)}header b{color:var(--ink);font-size:12px}header a,footer a{color:var(--ink);text-decoration:none}main{padding:clamp(20px,4vw,55px) 0 35px}.kicker{font:10px ui-monospace,Consolas,monospace;letter-spacing:.2em;color:var(--gold)}h1{font-size:clamp(35px,6vw,76px);line-height:1;letter-spacing:-.065em;margin:12px 0 14px}p{color:var(--muted);max-width:850px;line-height:1.8}.stage{position:relative;border:1px solid #33333a;background:#020309;overflow:hidden;box-shadow:0 24px 70px #0009}.stage:after{content:"";display:block;padding-top:56.25%}canvas{position:absolute;inset:0;width:100%;height:100%;display:block}.controls{background:#0d0d10;border:1px solid var(--line);border-top:0;padding:15px;display:grid;gap:13px}.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.row.main{justify-content:space-between}.time{font:12px ui-monospace,Consolas,monospace;color:var(--gold);min-width:105px}button{background:#16161a;border:1px solid #414148;color:var(--ink);padding:10px 13px;cursor:pointer;font:10px ui-monospace,Consolas,monospace;letter-spacing:.06em}button.primary{background:#e9e8e0;color:#101013;border-color:#e9e8e0}button:hover{border-color:#c7c7cc}button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:3px}input[type=range]{width:100%;accent-color:var(--gold);cursor:pointer}.chapters{display:flex;gap:6px;flex-wrap:wrap}.chapters button{padding:7px 9px;color:#b4b4ba}.story{display:grid;grid-template-columns:1fr minmax(260px,.7fr);gap:18px;margin-top:24px}.card{padding:18px;border:1px solid var(--line);background:#0b0b0d}.card h2{margin:0 0 10px;font:11px ui-monospace,Consolas,monospace;letter-spacing:.12em}.card p{font-size:12px;margin:0}.timeline-note{font:10px/1.7 ui-monospace,Consolas,monospace;color:var(--muted)}footer{border-top:1px solid var(--line);padding:18px 0 28px;color:var(--muted);font:10px ui-monospace,Consolas,monospace;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}@media(max-width:760px){.story{grid-template-columns:1fr}.row.main{align-items:flex-start;flex-direction:column}.controls{padding:10px}button{padding:9px 10px}header{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header><b>TRILYVA / STORY PLAYER</b><span>CLOCKTOWN CARTOON · 16:9 · 05:00</span><a href="/projects/code-motion/renderer/">OPEN TRILYVA ↗</a></header>
+<main>
+<div class="kicker">AN ORIGINAL SOFTWARE 3D CARTOON SHORT</div>
+<h1>Niko and the Clockwork Bird</h1>
+<p>Niko, a young red-panda inventor, builds Auri, a tiny brass clockwork bird whose song depends on a missing spring. When the spring rolls into Clocktown’s stopped clock tower, they follow it through the square and into the gears. Auri’s wing is damaged on the way, so Niko repairs it before they work together to restore the clock and bring the first morning bell back to life.</p>
+<div class="stage"><canvas id="film" width="1920" height="1080" aria-label="Niko and the Clockwork Bird animated cartoon"></canvas></div>
+<div class="controls">
+ <div class="row main"><div class="row"><button class="primary" id="play">PLAY FILM</button><button id="back">−10 SEC</button><button id="next">+10 SEC</button><button id="restart">RESTART</button><button id="fullscreen">FULLSCREEN</button></div><div class="time" id="clock">00:00 / 05:00</div></div>
+ <input id="scrub" aria-label="Film timeline" type="range" min="0" max="300" step=".033333" value="0">
+ <div class="chapters" id="chapters"></div>
+ <div class="timeline-note">SHADED 3D MESH CHARACTERS · LAYERED CARTOON SETS · TIMED SUBTITLES · 16:9</div>
+</div>
+<div class="story">
+ <section class="card"><h2>THE STORY</h2><p>The story follows one clear chain of cause and effect: Auri cannot sing without her heart-spring; the spring rolls into the stopped town clock; the gear mechanism damages Auri’s wing; Niko repairs the wing before they free the spring together. The clock starts, the first bell rings, and Auri finally sings.</p></section>
+ <section class="card"><h2>ABOUT THIS PREVIEW</h2><p>Use the chapter buttons to scrub the entire five-minute story. In TRILYVA, open <b>Examples</b> and select <b>Niko and the Clockwork Bird</b> to inspect and edit its JavaScript source. The animation uses a software 3D triangle painter with shaded character meshes, layered sets, dialogue-timed mouth movement, and scene-specific camera blocking. Voice Studio contains the matching 33-cue script.</p></section>
+</div>
+</main>
+<footer><span>ROBIUL RUMMAN RAZIM — TAMASRAZIM / TRILYVA</span><span>SOFTWARE 3D STORY ANIMATION · <a href="/projects/trilyva/">PROJECT OVERVIEW ↑</a></span></footer>
+<script src="../code-motion/renderer/niko-and-the-clockwork-bird.js?v=20261011-1"></script>
+<script>
+(function(){
+ "use strict";
+ const canvas=document.getElementById("film"),ctx=canvas.getContext("2d"),play=document.getElementById("play"),scrub=document.getElementById("scrub"),clock=document.getElementById("clock"),chapters=document.getElementById("chapters");
+ const marks=[[0,"The workshop"],[54,"The runaway spring"],[90,"The town clock"],[124,"Inside the tower"],[174,"The bent wing"],[216,"The clockwork heart"],[260,"Sunrise"]] ;
+ let position=0,playing=false,started=0,at=0,lastDraw=0,raf=0;
+ function fmt(v){let s=Math.max(0,Math.floor(v));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+ function draw(v){position=Math.max(0,Math.min(300,v));window.renderFrame(position,Math.floor(position*30),30,ctx,canvas.width,canvas.height);scrub.value=String(position);clock.textContent=fmt(position)+" / 05:00";chapters.querySelectorAll("button").forEach(b=>b.classList.toggle("active",Math.abs(Number(b.dataset.time)-position)<4));}
+ function tick(now){if(!playing)return;const v=at+(now-started)/1000;if(v>=300){draw(300);stop();return}if(now-lastDraw>31){draw(v);lastDraw=now}raf=requestAnimationFrame(tick)}
+ function stop(){playing=false;cancelAnimationFrame(raf);play.textContent="PLAY FILM";}
+ function start(){if(position>=300)draw(0);playing=true;at=position;started=performance.now();lastDraw=0;play.textContent="PAUSE";raf=requestAnimationFrame(tick);}
+ play.addEventListener("click",()=>playing?stop():start());
+ document.getElementById("back").addEventListener("click",()=>{stop();draw(position-10)});
+ document.getElementById("next").addEventListener("click",()=>{stop();draw(position+10)});
+ document.getElementById("restart").addEventListener("click",()=>{stop();draw(0)});
+ document.getElementById("fullscreen").addEventListener("click",()=>{const stage=canvas.parentElement;if(document.fullscreenElement)document.exitFullscreen();else if(stage.requestFullscreen)stage.requestFullscreen()});
+ scrub.addEventListener("input",()=>{stop();draw(Number(scrub.value))});
+ marks.forEach(m=>{const b=document.createElement("button");b.textContent=fmt(m[0])+" · "+m[1];b.dataset.time=m[0];b.addEventListener("click",()=>{stop();draw(m[0])});chapters.appendChild(b)});
+ document.addEventListener("keydown",e=>{if(e.target&&/INPUT|TEXTAREA|BUTTON/.test(e.target.tagName))return;if(e.code==="Space"){e.preventDefault();playing?stop():start()}else if(e.key==="ArrowLeft"){stop();draw(position-5)}else if(e.key==="ArrowRight"){stop();draw(position+5)}});
+ document.addEventListener("visibilitychange",()=>{if(document.hidden&&playing)stop()});
+ draw(0);
+})();
+</script>
+</body></html>
