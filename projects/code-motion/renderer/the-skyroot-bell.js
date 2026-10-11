@@ -880,8 +880,8 @@ function skyDrawFestival(ctx,t){
     ctx.strokeStyle="rgba(255,251,225,0.88)";ctx.lineWidth=3;
     ctx.beginPath();ctx.moveTo(1133,620);ctx.bezierCurveTo(1280,519,1474,551,1644,465);ctx.stroke();
     skyFloatingIsland(ctx,1694,489,.49,t,"#a6ddc0");
-    skyHouse(ctx,1692,459,.31,t,true,"#d3d6f1");
-    skyLantern(ctx,1718,405,.43,"#ffe1a1",t,71);
+    skyHouse(ctx,1692,486,.31,t,true,"#d3d6f1");
+    skyLantern(ctx,1718,432,.43,"#ffe1a1",t,71);
     for(let i=0;i<9;i++){
       const p=i/8,x=1135+p*505,y=620-p*150+Math.sin(p*Math.PI)*35;
       skyGlow(ctx,x,y,30,"rgba(255,226,158,0.42)",bridge*.34);
@@ -947,4 +947,17 @@ function renderFrame(time, frame, fps, ctx, width, height, motion) {
   skyFilmGrade(ctx,t);
   skyCaption(ctx,t);
   ctx.restore();
+}
+
+if (typeof window !== "undefined" && !window.TRILYVA_SKYROOT_STORY) {
+  window.TRILYVA_SKYROOT_STORY = {
+    title: "The Skyroot Bell",
+    duration: SKYROOT_DURATION,
+    fps: SKYROOT_FPS,
+    width: 1920,
+    height: 1080,
+    chapters: SKYROOT_CHAPTERS,
+    cues: SKYROOT_CUES,
+    renderFrame: renderFrame
+  };
 }
