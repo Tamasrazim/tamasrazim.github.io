@@ -51,6 +51,7 @@
 
   var nativeProjectFilesWired = false;
   var nativeFileOperationBusy = false;
+  var nativeOpenInProgress = false;
 
   function nativeProjectApi() {
     var api = window.TRILYVA_NATIVE_PROJECT_API;
@@ -107,8 +108,8 @@
   }
 
   async function openNativeProject() {
-    if (nativeFileOperationBusy) return false;
-    nativeFileOperationBusy = true;
+    if (nativeOpenInProgress || nativeFileOperationBusy) return false;
+    nativeOpenInProgress = true;
     try {
       var api = nativeProjectApi();
       var file = await invoke('native_project_open');
@@ -136,7 +137,7 @@
       nativeFileStatus('Native open failed: ' + String(error && error.message || error), true);
       return false;
     } finally {
-      nativeFileOperationBusy = false;
+      nativeOpenInProgress = false;
     }
   }
 
