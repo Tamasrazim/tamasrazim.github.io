@@ -1,25 +1,27 @@
 # HOLLOW Texture Lab
 
-A browser-based catalogue of distinct, named CC0 PBR material assets for the HOLLOW horror-game world.
+An original, self-contained procedural material workshop for the HOLLOW horror-game world.
 
 ## Open it
 
-- Live catalogue: https://tamasrazim.github.io/projects/hollow-texture-lab/
-- Original asset library: https://ambientcg.com/
-- License: CC0 1.0 for the listed ambientCG source materials.
+- Live page: https://tamasrazim.github.io/projects/hollow-texture-lab/
 
-## Current catalogue
+## Current features
 
-- 33 distinct named source materials across concrete, masonry, rock, wood, fabric, rust, metal, painted metal, and tile categories.
-- Search, category filtering, sorting, pagination, and random selection.
-- Source-material preview images, loaded from the catalogue CDN.
-- A direct source-page link for each material.
-- No procedural texture synthesis, seed-based variants, fake PBR map generation, or duplicate recipe entries.
+- 16 original material families with 64 deterministic recipe settings each (1,024 catalogue entries).
+- Distinct material treatments for concrete, damp walls, plaster, wallpaper, wood, metal, rust, stone, moss, soil, mud, asphalt, tile, fabric, leather, and fictional organic surfaces.
+- Search, category filters, sorting, pagination, random selection, and editable seeds.
+- Locally rendered preview, surface scale, wear, brightness, roughness, and tile repetition controls.
+- Export choices from 512 px through 8192 × 8192 (8K).
+- Base-color, roughness, height, and normal-style map output.
+- No external textures, libraries, fonts, CDNs, APIs, or accounts.
 
-## Important accuracy note
+## Accuracy and performance notes
 
-This page is a catalogue, not a locally bundled texture archive. Preview images are material previews; they are not presented as the downloadable base-color maps. Open the linked original source page to inspect and obtain the available PBR maps and check the current license details. The assets are separate source materials, not original textures authored by this repository. The app requires an internet connection to load remote previews and source pages.
+This is an original procedural system, not photogrammetry or a scanned-surface library. Its current roughness, height, and normal-style maps are algorithmic approximations, not calibrated scans. The generator is designed around periodic noise and repeating material structures; verify seams and map behavior in the target game engine before production use.
+
+8K output is 67.1 million pixels and may consume several hundred MiB of memory. High-resolution output requires a modern browser with OffscreenCanvas worker support. Start at 2K or 4K if the browser or device runs out of memory. GitHub Pages serves the application source; the texture pixels are generated locally and are not stored as thousands of binary images in the repository.
 
 ## Implementation
 
-The catalogue uses plain HTML, CSS, and JavaScript and can be hosted on static GitHub Pages. It does not synthesize image pixels or claim that a preview is a full-resolution PBR map.
+Plain HTML, CSS, JavaScript Canvas APIs, and a generated Web Worker. No runtime dependency on third-party services.
