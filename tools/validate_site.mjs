@@ -344,9 +344,9 @@ must([...legacyProjectRedirects].every(pagePath=>topLevelProjectIndexes.includes
 
 function testCinematicIntroRuntime(projectKey, closeWithEscape=false, closeAutomatically=false) {
   const makeClassList=(getName,setName)=>({
-    add(...tokens){const next=new Set(String(getName()).split(/\\s+/).filter(Boolean));tokens.forEach(token=>next.add(token));setName(Array.from(next).join(' '));},
-    remove(...tokens){const next=new Set(String(getName()).split(/\\s+/).filter(Boolean));tokens.forEach(token=>next.delete(token));setName(Array.from(next).join(' '));},
-    contains(token){return String(getName()).split(/\\s+/).includes(token)}
+    add(...tokens){const next=new Set(String(getName()).split(/\s+/).filter(Boolean));tokens.forEach(token=>next.add(token));setName(Array.from(next).join(' '));},
+    remove(...tokens){const next=new Set(String(getName()).split(/\s+/).filter(Boolean));tokens.forEach(token=>next.delete(token));setName(Array.from(next).join(' '));},
+    contains(token){return String(getName()).split(/\s+/).includes(token)}
   });
   const storage=new Map();
   const timeouts=[];
