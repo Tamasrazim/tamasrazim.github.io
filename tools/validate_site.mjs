@@ -283,6 +283,96 @@ for (const [projectKey,pagePath] of [
   must(page.includes('data-cinematic-intro="'+projectKey+'"')&&page.includes('/assets/css/project-cinematic-intro.css?v=20261012-2')&&page.includes('/assets/js/project-cinematic-intro.js?v=20261012-2'),projectKey.toUpperCase()+' project overview loads its cinematic intro');
 }
 
+
+function testCinematicIntroRuntime(projectKey) {
+  const makeClassList=()=> {
+    const values=new Set();
+    return {
+      add(value){values.add(value)},
+      remove(value){values.delete(value)},
+      contains(value){return values.has(value)}
+    };
+  };
+  const storage=new Map();
+  const timeouts=[];
+  const listeners=new Map();
+  const skipHandlers={};
+  const headingAttrs=new Set();
+  let intro;
+  const documentMock={
+    activeElement:null,
+    createElement(tag){
+      const attrs={};
+      const skip={
+        handlers:skipHandlers,
+        addEventListener(type,fn){skipHandlers[type]=fn},
+        focus(){documentMock.activeElement=skip},
+        setAttribute(name,value){attrs[name]=value}
+      };
+      intro={
+        tagName:tag.toUpperCase(),
+        className:'',
+        classList:makeClassList(),
+        attrs,
+        parentNode:null,
+        innerHTML:'',
+        setAttribute(name,value){attrs[name]=value},
+        addEventListener(){},
+        removeEventListener(){},
+        focus(){documentMock.activeElement=intro},
+        contains(node){return node===intro||node===skip},
+        querySelector(selector){return selector==='.pci-skip'?skip:null}
+      };
+      intro.skip=skip;
+      return intro;
+    },
+    querySelector(selector){
+      if(selector==='.pci-skip') return intro && intro.skip;
+      if(selector==='main h1') return heading;
+      return null;
+    },
+    addEventListener(type,fn){listeners.set(type,fn)},
+    removeEventListener(type){listeners.delete(type)}
+  };
+  const heading={
+    attrs:headingAttrs,
+    hasAttribute(name){return headingAttrs.has(name)},
+    setAttribute(name,value){headingAttrs.add(name);this[name]=value},
+    removeAttribute(name){headingAttrs.delete(name);delete this[name]},
+    focus(){documentMock.activeElement=heading},
+    addEventListener(){},
+  };
+  const body={
+    classList:makeClassList(),
+    children:[],
+    getAttribute(name){return name==='data-cinematic-intro'?projectKey:null},
+    appendChild(node){node.parentNode=this;this.children.push(node)},
+    removeChild(node){this.children=this.children.filter(child=>child!==node);node.parentNode=null}
+  };
+  const windowMock={
+    sessionStorage:{
+      getItem(key){return storage.has(key)?storage.get(key):null},
+      setItem(key,value){storage.set(key,value)}
+    },
+    matchMedia(){return {matches:false}},
+    requestAnimationFrame(callback){callback(16)},
+    setTimeout(callback,delay){timeouts.push({callback,delay});return timeouts.length},
+    clearTimeout(){},
+  };
+  vm.runInNewContext(cinematicIntroJs,{
+    window:windowMock,
+    document:documentMock,
+    console,
+    setTimeout:windowMock.setTimeout,
+    clearTimeout:windowMock.clearTimeout
+  },{filename:'project-cinematic-intro.js'});
+  must(body.children.length===1&&intro.innerHTML.includes(projectKey==='code-to-svg'?'CODE → SVG':projectKey==='code-to-eps'?'CODE → EPS':projectKey.toUpperCase()),projectKey.toUpperCase()+' intro mounts its own title and artwork');
+  must(body.classList.contains('pci-lock')&&intro.classList.contains('pci-is-live')&&typeof skipHandlers.click==='function',projectKey.toUpperCase()+' intro starts, blocks background scrolling, and exposes Skip');
+  skipHandlers.click();
+  must(!body.classList.contains('pci-lock')&&intro.classList.contains('pci-is-leaving')&&storage.get('tamasrazim-cinematic-intro-v1:'+projectKey)==='shown',projectKey.toUpperCase()+' Skip closes the intro, restores scrolling, and records the session');
+}
+for(const projectKey of cinematicProjectKeys) testCinematicIntroRuntime(projectKey);
+
 const iconLibrarySource=read('projects/code-to-eps/workspace/vector-icon-library.js');
 execFileSync(process.execPath,['--check',path.join(ROOT,'projects/code-to-eps/workspace/vector-icon-library.js')]);
 const iconCtx={window:{}};
