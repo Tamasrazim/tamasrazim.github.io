@@ -1,6 +1,6 @@
 // What this does: Caches the renderer's files so the Code Motion workspace can reopen more reliably when the network is unavailable.
 
-const CACHE = 'tamasrazim-trilyva-pwa-v82';;;
+const CACHE = 'tamasrazim-trilyva-pwa-v83';
 const CORE = [
   './',
   './index.html',
@@ -21,6 +21,7 @@ const CORE = [
   './library/green-screen-overlays.js',
   './library/story-films.js',
   './library/prism-data.js',
+  '../../code-to-eps/prism-library.json',
   './library/prism-web-icons.json'
 ];
 
