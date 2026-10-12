@@ -317,8 +317,8 @@ for (const [projectKey,pagePath] of [
 }
 
 
-// Scan every top-level project route so a future project page cannot silently
-// miss its intro test. Only the two old-address pages below are redirect-only.
+// Scan every top-level route so each page declares its intended experience.
+// Some have a cinematic intro, PHASEBREAK is a standalone page, and two old URLs redirect.
 const legacyProjectRedirects = new Set([
   'projects/code-motion/index.html',
   'projects/razim-fps/index.html'
@@ -337,13 +337,16 @@ const cinematicProjectPages = new Set([
   'projects/bncagrocare/index.html',
   'projects/repo-token-meter/index.html'
 ]);
+const standaloneProjectPages = new Set([
+  'projects/phasebreak/index.html'
+]);
 const topLevelProjectIndexes = fs.readdirSync(path.join(ROOT,'projects'),{withFileTypes:true})
   .filter(entry=>entry.isDirectory())
   .map(entry=>path.join('projects',entry.name,'index.html').split(path.sep).join('/'))
   .filter(exists)
   .sort();
-must(topLevelProjectIndexes.length===cinematicProjectPages.size+legacyProjectRedirects.size,
-  'every top-level project route is covered by an intro profile or an explicit legacy redirect');
+must(topLevelProjectIndexes.length===cinematicProjectPages.size+standaloneProjectPages.size+legacyProjectRedirects.size,
+  'every top-level project route has a registered experience or an explicit legacy redirect');
 for(const pagePath of topLevelProjectIndexes) {
   const page=read(pagePath);
   const introMatch=page.match(/\bdata-cinematic-intro=["']([^"']+)["']/);
@@ -352,12 +355,16 @@ for(const pagePath of topLevelProjectIndexes) {
     must(cinematicProjectPages.has(pagePath),pagePath+' is part of the cinematic regression suite');
     must(page.includes('/assets/css/project-cinematic-intro.css?v=20261013-7')&&page.includes('/assets/js/project-cinematic-intro.js?v=20261013-7'),
       pagePath+' loads the matching cinematic intro assets');
+  } else if(standaloneProjectPages.has(pagePath)) {
+    must(!page.includes('/assets/js/project-cinematic-intro.js'),pagePath+' remains a direct standalone project page');
   } else {
     must(legacyProjectRedirects.has(pagePath),pagePath+' has an intro or an explicitly approved legacy redirect');
     must(/(?:window\.)?location\.replace\(/.test(page),pagePath+' legacy redirect has a client-side destination');
     must(!page.includes('/assets/js/project-cinematic-intro.js'),pagePath+' redirect avoids mounting a cinematic overlay');
   }
 }
+must([...standaloneProjectPages].every(pagePath=>topLevelProjectIndexes.includes(pagePath)),
+  'standalone native project pages remain registered');
 must([...legacyProjectRedirects].every(pagePath=>topLevelProjectIndexes.includes(pagePath)),
   'both documented legacy project redirects still exist');
 
