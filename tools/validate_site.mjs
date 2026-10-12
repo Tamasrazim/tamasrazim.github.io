@@ -232,6 +232,9 @@ must(exists('projects/code-to-eps/prism-library.json'),'the shared Prism dataset
 must(trilyvaRenderer.includes("const PRISM_LIBRARY_URL='../../code-to-eps/prism-library.json'")&&trilyvaRenderer.includes("const TRILYVA_PRISM_LIBRARY_URL='../../code-to-eps/prism-library.json'"),'TRILYVA Prism loaders reference the existing shared dataset');
 must(trilyvaPrismData.includes('../../../code-to-eps/prism-library.json')&&trilyvaPrismData.includes('export default data;'),'the protected Prism module exports the shared JSON data');
 must(trilyvaRendererSw.includes("const CACHE = 'tamasrazim-trilyva-pwa-v83'")&&trilyvaRendererSw.includes("'../../code-to-eps/prism-library.json'"),'TRILYVA offline cache refreshes and includes the shared Prism data');
+const trilyvaMediaStack=read('projects/code-motion/renderer/media-stack.js');
+const kynestraMediaStack=read('KYNESTRA/modules/c2m/renderer/media-stack.js');
+must(!trilyvaMediaStack.includes('FLOWER BATCH')&&!trilyvaMediaStack.includes('installBatchLink')&&!kynestraMediaStack.includes('FLOWER BATCH')&&!kynestraMediaStack.includes('installBatchLink'),'renderer does not inject the removed Flower Batch tab');
 const neoPage=read('projects/neo/index.html');
 must(neoPage.includes('"name": "NEO"')&&neoPage.includes('100 deterministic floors'),'NEO has its own canonical project page and branding');
 must(neoPage.includes('href="/projects/neo/download/">Download NEO'),'NEO project page links to the clean download route');
