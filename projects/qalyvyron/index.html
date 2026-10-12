@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505"><meta name="color-scheme" content="dark"><meta name="author" content="Robiul Rumman Razim">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<title>QALYVYRON — Beginner-First 3D Studio | Tamasrazim</title>
+<meta name="description" content="QALYVYRON is an independent desktop 3D creation and offline-rendering studio built around a simpler first-time workflow. Explore current capabilities, build status and missing systems.">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/qalyvyron/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Tamasrazim"><meta property="og:title" content="QALYVYRON — 3D creation with a simpler first session">
+<meta property="og:description" content="A local desktop 3D studio in active development: easy-first controls, editable meshes, OBJ support and a separate CPU PNG renderer.">
+<meta property="og:url" content="https://tamasrazim.github.io/projects/qalyvyron/"><meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg"><meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site-v3.css?v=20261012-1"><link rel="stylesheet" href="/assets/css/monochrome.css?v=20261012-1">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"SoftwareApplication",
+  "@id":"https://tamasrazim.github.io/projects/qalyvyron/#application",
+  "name":"QALYVYRON",
+  "url":"https://tamasrazim.github.io/projects/qalyvyron/",
+  "description":"A local-first desktop 3D creation and rendering studio in active development. The current build has a beginner-first workspace, editable primitive meshes, geometry-only OBJ import/export, read-only GLB/glTF preview, and CPU offline PNG rendering. It is not yet a complete Blender replacement.",
+  "applicationCategory":"MultimediaApplication",
+  "operatingSystem":"Windows x64; Linux build and tests",
+  "programmingLanguage":["C++17","QML","CMake"],
+  "creator":{"@id":"https://tamasrazim.github.io/#person"},
+  "isPartOf":{"@id":"https://tamasrazim.github.io/#website"},
+  "mainEntityOfPage":{"@id":"https://tamasrazim.github.io/projects/qalyvyron/#page"},
+  "featureList":["Guided first-run tour and simplified controls","Editable polygon meshes and geometry-only OBJ import/export","Read-only GLB/glTF preview import","CPU offline PNG rendering with bounded workload","Local scene files, undo/redo and unsaved-change protection"]
+}
+</script>
+<style>
+:root{color-scheme:dark;--qy-line:rgba(244,244,240,.15);--qy-muted:#a0a09a;--qy-mono:"JetBrains Mono",monospace;--qy-display:"Unbounded",system-ui,sans-serif}
+*{box-sizing:border-box}html{background:#050505;scroll-behavior:smooth}
+body.qy-page{margin:0;background:#050505;color:#f4f4f0;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+.qy-page a{color:inherit;text-decoration:none}.qy-shell{width:min(1180px,calc(100% - clamp(32px,7vw,104px)));margin-inline:auto}
+.qy-nav{min-height:76px;border-bottom:1px solid var(--qy-line);display:flex;align-items:center;justify-content:space-between;gap:18px}
+.qy-brand{display:inline-flex;align-items:center;gap:10px;font:600 13px var(--qy-display);letter-spacing:-.05em}.qy-brand-mark{display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--qy-line);font:600 13px var(--qy-mono)}
+.qy-links{display:flex;gap:clamp(12px,2vw,26px);font:9px var(--qy-mono);color:var(--qy-muted);flex-wrap:wrap}.qy-links a:hover,.qy-footer a:hover{color:#fff}
+.qy-hero{padding:clamp(68px,10vw,122px) 0 58px;border-bottom:1px solid var(--qy-line)}.qy-hero-grid{display:grid;grid-template-columns:minmax(0,1.06fr) minmax(300px,.94fr);gap:clamp(30px,5vw,70px);align-items:center}
+.qy-eyebrow{display:flex;align-items:center;gap:9px;font:9px var(--qy-mono);letter-spacing:.16em;text-transform:uppercase;color:#c5c5bf}.qy-status-dot{width:7px;height:7px;background:#ddd;border-radius:50%;box-shadow:0 0 0 4px rgba(255,255,255,.07)}
+.qy-hero h1{font:700 clamp(48px,8.3vw,98px)/.97 var(--qy-display);letter-spacing:-.095em;overflow-wrap:anywhere;margin:27px 0}.qy-hero h1 span{display:block;color:#82827c}
+.qy-lead{max-width:690px;font-size:clamp(19px,2.2vw,25px);line-height:1.58;letter-spacing:-.03em;margin:0}.qy-sub{max-width:660px;color:var(--qy-muted);font-size:13px;line-height:1.9;margin:18px 0 0}
+.qy-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:27px}.qy-button{display:inline-flex;align-items:center;justify-content:space-between;gap:20px;min-height:47px;padding:0 14px;border:1px solid var(--qy-line);font-size:11px;font-weight:650;transition:transform .2s,border-color .2s,background .2s}
+.qy-button:hover{border-color:rgba(255,255,255,.6);transform:translateY(-1px)}.qy-button.primary{background:#f4f4f0;color:#050505;border-color:#f4f4f0}.qy-button .arrow{font:15px var(--qy-mono)}
+.qy-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:23px}.qy-tag{border:1px solid var(--qy-line);padding:7px 9px;color:#c8c8c2;font:8px var(--qy-mono);text-transform:uppercase;letter-spacing:.04em}
+.qy-art{position:relative;aspect-ratio:1;min-height:300px;border:1px solid var(--qy-line);background:radial-gradient(circle at 51% 48%,rgba(255,255,255,.1),transparent 37%),repeating-linear-gradient(0deg,transparent 0 29px,rgba(255,255,255,.025) 30px 31px),repeating-linear-gradient(90deg,transparent 0 29px,rgba(255,255,255,.025) 30px 31px),#070707;overflow:hidden}
+.qy-art svg{width:100%;height:100%;display:block}.qy-orbit{fill:none;stroke:#eee;stroke-width:1;stroke-opacity:.22}.qy-orbit-animated{transform-origin:250px 250px;animation:qy-orbit-turn 28s linear infinite}
+.qy-cube-line{fill:none;stroke:#f4f4f0;stroke-width:1.4;stroke-opacity:.83;vector-effect:non-scaling-stroke}.qy-cube-back{stroke-opacity:.35;stroke-dasharray:4 7}
+.qy-art-label{position:absolute;font:8px var(--qy-mono);letter-spacing:.12em;color:#aaa}.qy-art-label.top{left:13px;top:13px}.qy-art-label.bottom{right:13px;bottom:13px;text-align:right}
+@keyframes qy-orbit-turn{to{transform:rotate(360deg)}}.qy-art-caption{display:flex;justify-content:space-between;gap:14px;padding:12px 13px;border:1px solid var(--qy-line);border-top:0;font:8px var(--qy-mono);color:var(--qy-muted);letter-spacing:.08em}
+.qy-section{padding:clamp(58px,8vw,90px) 0;border-bottom:1px solid var(--qy-line)}.qy-section-head{display:flex;align-items:end;justify-content:space-between;gap:22px;margin-bottom:31px}
+.qy-section-head .kicker{font:9px var(--qy-mono);color:var(--qy-muted);letter-spacing:.14em;text-transform:uppercase}.qy-section h2{font:600 clamp(28px,4.3vw,49px)/1.12 var(--qy-display);letter-spacing:-.065em;margin:12px 0 0}
+.qy-section-head p{max-width:430px;margin:0;color:var(--qy-muted);font-size:12px;line-height:1.8}
+.qy-feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.qy-card{min-height:205px;padding:22px;border:1px solid var(--qy-line);background:linear-gradient(150deg,rgba(255,255,255,.028),transparent 60%),#080808}
+.qy-card .number{font:9px var(--qy-mono);color:#8b8b85}.qy-card h3{font:500 17px/1.3 var(--qy-display);letter-spacing:-.04em;margin:26px 0 11px}
+.qy-card p,.qy-card li{font-size:12px;color:var(--qy-muted);line-height:1.85}.qy-card p{margin:0}.qy-card ul{padding-left:17px;margin:0}
+.qy-two-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}.qy-note{border-left:2px solid #eee;padding:5px 0 5px 16px;color:var(--qy-muted);font-size:12px;line-height:1.9;margin-top:25px}
+.qy-status-box{display:flex;align-items:flex-start;justify-content:space-between;gap:28px;padding:clamp(23px,4vw,42px);border:1px solid var(--qy-line);background:radial-gradient(circle at 95% 0%,rgba(255,255,255,.055),transparent 40%),#080808}
+.qy-status-box h3{font:500 19px var(--qy-display);margin:0 0 12px}.qy-status-box p{max-width:620px;font-size:12px;line-height:1.9;color:var(--qy-muted);margin:0}
+.qy-status-pill{white-space:nowrap;border:1px solid var(--qy-line);padding:9px 11px;font:8px var(--qy-mono);letter-spacing:.08em;text-transform:uppercase}
+.qy-footer{padding:25px 0;display:flex;align-items:center;justify-content:space-between;gap:20px;color:var(--qy-muted);font:9px var(--qy-mono)}.qy-footer a{border-bottom:1px solid var(--qy-line);padding-bottom:4px}
+@media(max-width:840px){.qy-hero-grid{grid-template-columns:1fr}.qy-art{max-width:580px;width:100%;margin:0 auto}.qy-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.qy-section-head{align-items:flex-start;flex-direction:column}.qy-status-box{flex-direction:column;gap:17px}}
+@media(max-width:580px){.qy-shell{width:calc(100% - 32px)}.qy-nav{align-items:flex-start;padding:16px 0;flex-direction:column}.qy-links{gap:12px}.qy-hero h1{font-size:clamp(45px,13vw,68px)}.qy-art{min-height:0}.qy-feature-grid,.qy-two-col{grid-template-columns:1fr}.qy-card{min-height:0}.qy-footer{align-items:flex-start;flex-direction:column}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.qy-orbit-animated{animation:none}.qy-button{transition:none}}
+</style>
+</head>
+<body class="qy-page">
+<a class="skip-link" href="#qy-main">Skip to project information</a>
+<header class="qy-shell qy-nav">
+<a class="qy-brand" href="/" aria-label="Tamasrazim home"><span class="qy-brand-mark">T</span><span>tamasrazim</span></a>
+<nav class="qy-links" aria-label="Project navigation"><a href="/#work">Selected work</a><a href="/projects/">All projects</a><a href="https://github.com/Tamasrazim/QALYVYRON">Source ↗</a></nav>
+</header>
+<main id="qy-main">
+<section class="qy-hero qy-shell"><div class="qy-hero-grid"><div>
+<div class="qy-eyebrow"><span class="qy-status-dot" aria-hidden="true"></span><span>Native software / active development</span></div>
+<h1>QALY<span>VYRON</span></h1>
+<p class="qy-lead">A 3D creation studio built around a simple idea: make the first five minutes feel obvious, then reveal deeper tools as you grow.</p>
+<p class="qy-sub">QALYVYRON is a local desktop application for building and editing 3D scenes and rendering still images. It is being developed as an independent alternative—not a clone of Blender's interface, and not yet a complete replacement for Blender.</p>
+<div class="qy-actions"><a class="qy-button primary" href="https://github.com/Tamasrazim/QALYVYRON">Explore the source <span class="arrow" aria-hidden="true">↗</span></a><a class="qy-button" href="https://github.com/Tamasrazim/QALYVYRON/actions/runs/38187040533">Verified build record <span class="arrow" aria-hidden="true">↗</span></a><a class="qy-button" href="https://github.com/Tamasrazim/QALYVYRON/blob/main/USER_GUIDE.md">User guide <span class="arrow" aria-hidden="true">↗</span></a></div>
+<div class="qy-tags"><span class="qy-tag">C++ / Qt 6</span><span class="qy-tag">Windows x64 build</span><span class="qy-tag">Linux CI</span><span class="qy-tag">Local-first</span></div>
+</div><div>
+<div class="qy-art" role="img" aria-label="Monochrome wireframe cube with orbit guides representing the QALYVYRON 3D workspace">
+<span class="qy-art-label top">SCENE SPACE / 01</span><span class="qy-art-label bottom">GEOMETRY · LIGHT · IMAGE</span>
+<svg viewBox="0 0 500 500" aria-hidden="true" focusable="false">
+<g class="qy-orbit-animated"><ellipse class="qy-orbit" cx="250" cy="250" rx="218" ry="84" transform="rotate(-32 250 250)"/><ellipse class="qy-orbit" cx="250" cy="250" rx="190" ry="120" transform="rotate(44 250 250)"/><ellipse class="qy-orbit" cx="250" cy="250" rx="216" ry="158" transform="rotate(72 250 250)" stroke-dasharray="2 7"/></g>
+<circle cx="250" cy="250" r="92" fill="#fff" fill-opacity=".025" stroke="#fff" stroke-opacity=".18"/>
+<g class="qy-cube-line"><path class="qy-cube-back" d="M250 152 L326 195 L326 285 L250 329 L174 285 L174 195 Z"/><path d="M250 206 L295 232 L295 285 L250 311 L205 285 L205 232 Z"/><path d="M250 206 L250 152 M250 206 L174 195 M250 206 L326 195 M250 311 L250 329 M205 285 L174 285 M295 285 L326 285"/><path d="M250 152 L326 195 L250 239 L174 195 Z" stroke-opacity=".46"/><path d="M250 239 L250 329 M174 195 L174 285 M326 195 L326 285"/></g><circle cx="250" cy="239" r="3.5" fill="#fff"/>
+</svg></div>
+<div class="qy-art-caption"><span>LOCAL SCENE</span><span>PREVIEW ≠ FINAL RENDER</span></div>
+</div></div></section>
+
+<section class="qy-section qy-shell"><div class="qy-section-head"><div><span class="kicker">01 / THE FIRST SESSION</span><h2>Simple first.<br>Power when needed.</h2></div><p>The current main build starts with one shape, explains the basic mouse controls, and keeps advanced parameters out of the way until they're useful.</p></div>
+<div class="qy-feature-grid">
+<article class="qy-card"><span class="number">01 / START</span><h3>A guided first run</h3><p>A welcome screen and four-step tour cover adding shapes, moving around the scene, changing appearance, and saving or rendering.</p></article>
+<article class="qy-card"><span class="number">02 / MOVE</span><h3>Work with the mouse</h3><p>Drag a shape to move it, right-drag empty space to look around, and scroll to zoom. Numeric transforms remain available in the full-tools layout.</p></article>
+<article class="qy-card"><span class="number">03 / LOOK</span><h3>Visible colour and size</h3><p>Simple view exposes clickable colour swatches and a size slider. Detailed material, camera, and light controls live behind “Show all tools.”</p></article>
+</div></section>
+
+<section class="qy-section qy-shell"><div class="qy-section-head"><div><span class="kicker">02 / WORKING SYSTEMS</span><h2>Actual geometry.<br>Actual output.</h2></div><p>These are current implementation paths, not promises based on mock controls. Import support and render capabilities still have clear limits.</p></div>
+<div class="qy-feature-grid">
+<article class="qy-card"><span class="number">01 / SCENE</span><h3>Live 3D workspace</h3><ul><li>Cube, sphere, cylinder, cone and plane.</li><li>Object list, selection, transforms and material colours.</li><li>Local scene save/open and bounded undo/redo.</li></ul></article>
+<article class="qy-card"><span class="number">02 / MESH</span><h3>Editable polygon geometry</h3><ul><li>Vertex coordinate edits and viewport selection.</li><li>Face creation, extrusion, inset, merge and delete for supported topology.</li><li>Geometry-only Wavefront OBJ import and transformed OBJ export.</li></ul></article>
+<article class="qy-card"><span class="number">03 / ASSETS</span><h3>Bring in 3D files</h3><p>Local OBJ geometry becomes editable mesh data. GLB and glTF files can be loaded for scene preview, but currently remain read-only and reference their original local files.</p></article>
+<article class="qy-card"><span class="number">04 / RENDER</span><h3>Offline PNG output</h3><p>A separate CPU renderer uses scene triangles, BVH acceleration, multisampling, directional and point lights, hard shadows, and simple diffuse indirect bounces. It reports progress and supports cancellation.</p></article>
+<article class="qy-card"><span class="number">05 / CONTROL</span><h3>Keep work recoverable</h3><p>New and Open protect unsaved changes. Save remembers the scene path; Save As creates a separate copy. The build includes common save/open/undo/redo shortcuts.</p></article>
+<article class="qy-card"><span class="number">06 / OUTPUT</span><h3>Choose a still-image size</h3><p>Render settings include 720p, 1080p, 1440p, 4K and 8K, with caps on pixel and ray workload to keep unsafe jobs bounded.</p></article>
+</div></section>
+
+<section class="qy-section qy-shell"><div class="qy-section-head"><div><span class="kicker">03 / WHAT ISN'T DONE YET</span><h2>A realistic status.</h2></div><p>Beating a mature tool means doing the hard engineering as well as making the UI approachable. The missing systems are part of the plan, not hidden in fine print.</p></div>
+<div class="qy-two-col">
+<article class="qy-card"><span class="number">MODELLING / MATERIALS</span><h3>Depth still to build</h3><ul><li>Full vertex, edge and face interaction, bevel and loop tools.</li><li>Non-destructive modifier stack, UV editing and node-based materials.</li><li>Texture, normal and material-library preservation in imported models.</li></ul></article>
+<article class="qy-card"><span class="number">RENDER / ANIMATION</span><h3>Production pipeline still to build</h3><ul><li>Soft shadows, denoising, richer PBR and imported-asset geometry in final rendering.</li><li>Timeline, keyframes, animation export, rigging and simulations.</li><li>Self-contained asset collection and release-grade installer validation.</li></ul></article>
+</div>
+<div class="qy-note">The offline renderer currently skips runtime-loaded GLB/glTF geometry. OBJ import is geometry-only: UVs, MTL materials, and textures are not preserved yet. Export Preview is a live viewport capture; Render Image is the separate offline renderer.</div>
+</section>
+
+<section class="qy-section qy-shell"><div class="qy-status-box"><div><h3>Current build status</h3><p>The linked run passed Linux build/tests and the Windows x64 build, tests, deployment staging, and packaged-app startup smoke test. The Windows ZIP is a temporary GitHub Actions artifact, not a permanent installer release. Open the run page to check artifact availability and build records.</p></div><span class="qy-status-pill">Development build · CI verified</span></div>
+<div class="qy-actions"><a class="qy-button primary" href="https://github.com/Tamasrazim/QALYVYRON/actions">Builds and tests <span class="arrow" aria-hidden="true">↗</span></a><a class="qy-button" href="https://github.com/Tamasrazim/QALYVYRON/blob/main/ROADMAP.md">Development roadmap <span class="arrow" aria-hidden="true">↗</span></a><a class="qy-button" href="/projects/">More projects <span class="arrow" aria-hidden="true">↗</span></a></div></section>
+</main>
+<footer class="qy-shell qy-footer"><span>QALYVYRON / PROJECT FILE</span><a href="/">Robiul Rumman Razim — Tamasrazim ↗</a><a href="/projects/">Project directory</a></footer>
+</body></html>

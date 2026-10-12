@@ -10,6 +10,7 @@ This directory contains a curated set of first-party browser tools, native appli
 - **TUNRUN** — native C++20 procedural 3D tunnel-flight game in development; its project page documents prototype systems, controls, ships, resources, saves, status and roadmap separately from planned features.
 - **KYNESTRA** — architecture, modules, desktop work, and format specifications.
 - **WEBEDYTS** — native desktop visual website editor in development; its project page separates current editor-source capabilities from release gates. No public download is available yet.
+- **QALYVYRON** — native C++/Qt 6 3D creation and offline-rendering studio in active development. Its project page links to the source, verified CI history, current capabilities, and remaining gaps.
 - **Business software** — BNC AgroCare catalogue and invoice workflow.
 - **Browser tools** — Format Forge, Repo Token Meter, and Stock Asset Vault.
 

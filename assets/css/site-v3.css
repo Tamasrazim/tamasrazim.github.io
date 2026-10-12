@@ -86,6 +86,12 @@ body.home-v2 .site-footer{position:relative;z-index:2;background:#050505;border-
 @media(max-width:680px){.v3-kinetic-stage{width:96vw;right:-38%;top:38%;opacity:.3}.v3-kinetic-readout{display:none}.v3-kinetic-coordinates{right:13%;top:20%;font-size:6px}.v3-project-card.v2-project-card,.v3-index-card{transform:none!important;transition:border-color .25s,background .25s}}
 @media(prefers-reduced-motion:reduce){.v3-kinetic-stage{transition:none;transform:none!important}.v3-project-card.v2-project-card,.v3-index-card{transform:none!important}.v3-project-card.v2-project-card::before,.v3-index-card::before{animation:none!important}.v3-card-art i,.v3-card-art b{transition:none}}
 
+.v3-art-qalyvyron{background:radial-gradient(circle at 65% 48%,rgba(255,255,255,.13),transparent 45%),repeating-linear-gradient(0deg,transparent 0 17px,rgba(255,255,255,.025) 18px 19px),repeating-linear-gradient(90deg,transparent 0 24px,rgba(255,255,255,.025) 25px 26px),#080808}
+.v3-art-qalyvyron i,.v3-art-qalyvyron b{width:58px;height:58px;aspect-ratio:auto;border-radius:0;right:23%;border-color:rgba(255,255,255,.54);transform:translateY(-50%) rotate(45deg) skew(-7deg,-7deg)}
+.v3-art-qalyvyron b{width:77px;height:77px;right:14%;border-color:rgba(255,255,255,.19);transform:translateY(-50%) rotate(45deg) skew(-7deg,-7deg)}
+.v3-project-card:hover .v3-art-qalyvyron i,.v3-index-card:hover .v3-art-qalyvyron i{translate:3px -4px;filter:drop-shadow(0 0 14px rgba(255,255,255,.18))}
+@media(prefers-reduced-motion:reduce){.v3-art-qalyvyron i,.v3-art-qalyvyron b{transition:none!important}}
+
 /* Tiny mobile-only correction: align the identity card and stack Active above its code. */
 @media (max-width: 680px) {
   body.home-v2 .v3-about .v2-card-holder {
