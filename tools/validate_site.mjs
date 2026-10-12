@@ -262,6 +262,8 @@ const cinematicIntroCss=read('assets/css/project-cinematic-intro.css');
 const cinematicIntroJs=read('assets/js/project-cinematic-intro.js');
 execFileSync(process.execPath,['--check',path.join(ROOT,'assets/js/project-cinematic-intro.js')]);
 must(cinematicIntroJs.includes('Object.assign(profiles')&&cinematicIntroJs.includes('Escape'),'cinematic intro has project profiles and a keyboard skip path');
+const cinematicProjectKeys=['tunrun','webedyts','qalyvyron','trilyva','neo','code-to-svg','code-to-eps','format-forge','asset-vault','kynestra','bncagrocare','repo-token-meter'];
+must(cinematicProjectKeys.every(key=>cinematicIntroJs.includes(key+': {')||cinematicIntroJs.includes('"'+key+'": {')),'cinematic intro has a dedicated animation profile for every featured project');
 must(cinematicIntroCss.includes('prefers-reduced-motion:reduce')&&cinematicIntroCss.includes('.pci-project--tunrun')&&cinematicIntroCss.includes('.pci-project--webedyts')&&cinematicIntroCss.includes('.pci-project--qalyvyron')&&cinematicIntroCss.includes('.pci-project--trilyva'),'cinematic intro has reduced-motion handling and project-specific themes');
 for (const [projectKey,pagePath] of [
   ['tunrun','projects/tunrun/index.html'],
