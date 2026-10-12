@@ -108,7 +108,8 @@
         setMenuOpen(false, false);
       });
       w.addEventListener('resize', function () {
-        if (w.innerWidth > 680 && nav.classList.contains('is-open')) {
+        // Keep the menu open at tablet widths; close it only on the full desktop layout.
+        if (w.innerWidth > 900 && nav.classList.contains('is-open')) {
           setMenuOpen(false, false);
         }
       }, { passive: true });
