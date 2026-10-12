@@ -98,23 +98,48 @@ body.pci-lock{overflow:hidden!important}
 @keyframes pci-motion-turn{to{transform:rotate(360deg)}}
 @keyframes pci-draw-line{to{stroke-dashoffset:0}}
 @keyframes pci-scan{0%{opacity:0;transform:translateY(-95px) scaleX(.4)}30%{opacity:.8}80%{opacity:.22}100%{opacity:0;transform:translateY(95px) scaleX(1)}}
-/* Homepage-only identity sequence: a restrained animated T monogram and orbital marks. */
+/* Main-site opening: a drawn wireframe, four floating work panels, and a central T monogram. */
 .pci-project--home{--pci-accent:#f1f1ed;--pci-glow:rgba(255,255,255,.17)}
 .pci-project--home .pci-title{font-size:clamp(40px,6.2vw,76px)}
-.pci-home-art{position:relative;display:grid;place-items:center;width:min(94%,620px);aspect-ratio:1;isolation:isolate;perspective:900px}
+.pci-home-art{position:relative;display:grid;place-items:center;width:min(100%,660px);aspect-ratio:1;isolation:isolate;perspective:1000px;overflow:visible}
+.pci-home-grid{position:absolute;inset:5%;opacity:.3;background-image:linear-gradient(rgba(255,255,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.09) 1px,transparent 1px);background-size:32px 32px;mask-image:radial-gradient(circle,#000 12%,transparent 72%)}
+.pci-home-blueprint{position:absolute;inset:3%;width:94%;height:94%;fill:none;stroke:rgba(241,241,237,.46);stroke-width:1;stroke-dasharray:1400;stroke-dashoffset:1400;vector-effect:non-scaling-stroke;transform:rotate(-8deg)}
+.pci-is-live .pci-home-blueprint path,.pci-is-live .pci-home-blueprint circle{animation:pci-home-draw 2.7s cubic-bezier(.2,.75,.2,1) .25s forwards}
+.pci-is-live .pci-home-blueprint path:nth-child(2){animation-delay:.4s}
+.pci-is-live .pci-home-blueprint path:nth-child(3){animation-delay:.58s}
+.pci-is-live .pci-home-blueprint circle:nth-of-type(2){animation-delay:.7s}
 .pci-home-orbit{position:absolute;width:var(--home-orbit-size);height:var(--home-orbit-size);left:50%;top:49%;border:1px solid rgba(241,241,237,var(--home-orbit-alpha));border-radius:50%;transform:translate(-50%,-50%) rotateX(var(--home-orbit-tilt)) rotateZ(var(--home-orbit-turn));box-shadow:0 0 45px rgba(255,255,255,.025);animation:pci-home-orbit var(--home-orbit-speed) linear infinite}
-.pci-home-orbit-a{--home-orbit-size:92%;--home-orbit-alpha:.32;--home-orbit-tilt:68deg;--home-orbit-turn:-24deg;--home-orbit-speed:18s;border-style:dashed}
-.pci-home-orbit-b{--home-orbit-size:72%;--home-orbit-alpha:.55;--home-orbit-tilt:55deg;--home-orbit-turn:35deg;--home-orbit-speed:13s}
-.pci-home-orbit-c{--home-orbit-size:54%;--home-orbit-alpha:.76;--home-orbit-tilt:16deg;--home-orbit-turn:-18deg;--home-orbit-speed:22s;border-style:dashed}
-.pci-home-plate{position:relative;z-index:2;display:grid;place-items:center;width:clamp(118px,17vw,208px);aspect-ratio:1;border:1px solid rgba(241,241,237,.65);background:radial-gradient(circle,var(--pci-glow),rgba(4,5,7,.92) 70%);box-shadow:0 0 70px var(--pci-glow),inset 0 0 36px rgba(255,255,255,.04);animation:pci-mark-float 4s ease-in-out infinite}
-.pci-home-plate:before,.pci-home-plate:after{content:"";position:absolute;width:calc(100% + 18px);height:calc(100% + 18px);border:1px solid rgba(241,241,237,.13);transform:rotate(45deg)}
+.pci-home-orbit-a{--home-orbit-size:92%;--home-orbit-alpha:.22;--home-orbit-tilt:68deg;--home-orbit-turn:-24deg;--home-orbit-speed:18s;border-style:dashed}
+.pci-home-orbit-b{--home-orbit-size:72%;--home-orbit-alpha:.42;--home-orbit-tilt:55deg;--home-orbit-turn:35deg;--home-orbit-speed:13s}
+.pci-home-orbit-c{--home-orbit-size:54%;--home-orbit-alpha:.67;--home-orbit-tilt:16deg;--home-orbit-turn:-18deg;--home-orbit-speed:22s;border-style:dashed}
+.pci-home-plate{position:relative;z-index:3;display:grid;place-items:center;width:clamp(115px,16vw,194px);aspect-ratio:1;border:1px solid rgba(241,241,237,.78);background:radial-gradient(circle,var(--pci-glow),rgba(4,5,7,.96) 69%);box-shadow:0 0 70px var(--pci-glow),inset 0 0 36px rgba(255,255,255,.06);animation:pci-mark-float 4s ease-in-out infinite}
+.pci-home-plate:before,.pci-home-plate:after{content:"";position:absolute;width:calc(100% + 18px);height:calc(100% + 18px);border:1px solid rgba(241,241,237,.19);transform:rotate(45deg)}
 .pci-home-plate:after{width:calc(100% + 38px);height:calc(100% + 38px);border-style:dashed;transform:rotate(15deg)}
 .pci-home-plate span{font:800 clamp(60px,9vw,108px)/1 "Unbounded",system-ui,sans-serif;letter-spacing:-.12em;margin-right:.12em}
-.pci-home-plate b{position:absolute;right:-28px;bottom:-23px;color:var(--pci-accent);font:8px "JetBrains Mono",monospace;letter-spacing:.16em;white-space:nowrap}
-.pci-home-trace{position:absolute;z-index:1;height:1px;width:70%;left:15%;background:linear-gradient(90deg,transparent,var(--pci-accent),transparent);opacity:.55;transform:rotate(var(--home-trace-angle));transform-origin:center}
-.pci-home-trace-a{--home-trace-angle:32deg;top:36%}
-.pci-home-trace-b{--home-trace-angle:-32deg;top:62%;opacity:.28}
-.pci-home-caption{position:absolute;left:0;right:0;bottom:4%;text-align:center;color:#7f7f7a;font:8px "JetBrains Mono",monospace;letter-spacing:.15em}
+.pci-home-plate b{position:absolute;right:-26px;bottom:-23px;color:var(--pci-accent);font:8px "JetBrains Mono",monospace;letter-spacing:.16em;white-space:nowrap}
+.pci-home-data{position:absolute;z-index:4;display:flex;flex-direction:column;gap:7px;width:clamp(126px,16vw,176px);padding:12px 14px 13px;border:1px solid rgba(241,241,237,.32);background:rgba(5,5,5,.88);box-shadow:0 14px 38px rgba(0,0,0,.3);opacity:0;backdrop-filter:blur(5px);transform:translateY(14px) scale(.94)}
+.pci-is-live .pci-home-data{animation:pci-home-panel-in .8s cubic-bezier(.2,.75,.2,1) forwards}
+.pci-home-data-a{left:1%;top:16%;animation-delay:.25s}
+.pci-home-data-b{right:0;top:22%;animation-delay:.48s}
+.pci-home-data-c{left:4%;bottom:17%;animation-delay:.68s}
+.pci-home-data-d{right:2%;bottom:12%;animation-delay:.9s}
+.pci-is-live .pci-home-data-a{animation-delay:.25s}.pci-is-live .pci-home-data-b{animation-delay:.48s}.pci-is-live .pci-home-data-c{animation-delay:.68s}.pci-is-live .pci-home-data-d{animation-delay:.9s}
+.pci-home-data span{color:#858580;font:7px "JetBrains Mono",monospace;letter-spacing:.14em}
+.pci-home-data b{color:#f0f0ec;font:500 11px "JetBrains Mono",monospace;letter-spacing:.07em}
+.pci-home-data i{display:block;width:100%;height:2px;background:linear-gradient(90deg,#efefea 0 42%,rgba(255,255,255,.1) 42%);transform:scaleX(.15);transform-origin:left}
+.pci-is-live .pci-home-data i{animation:pci-home-bar-in .7s ease 1s forwards}
+.pci-home-data-b i{background:linear-gradient(90deg,#efefea 0 71%,rgba(255,255,255,.1) 71%)}
+.pci-home-data-c i{background:linear-gradient(90deg,#efefea 0 56%,rgba(255,255,255,.1) 56%)}
+.pci-home-data-d i{background:linear-gradient(90deg,#efefea 0 88%,rgba(255,255,255,.1) 88%)}
+.pci-home-scan{position:absolute;z-index:2;left:4%;right:4%;top:10%;height:1px;background:linear-gradient(90deg,transparent,#f1f1ed,transparent);box-shadow:0 0 18px rgba(255,255,255,.5);opacity:0;animation:pci-home-scan 3.2s ease-in-out .3s infinite}
+.pci-home-caption{position:absolute;left:0;right:0;bottom:1%;text-align:center;color:#8b8b85;font:8px "JetBrains Mono",monospace;letter-spacing:.15em}
+@keyframes pci-home-orbit{from{rotate:0deg}to{rotate:360deg}}
+@keyframes pci-home-draw{to{stroke-dashoffset:0;opacity:1}}
+@keyframes pci-home-panel-in{to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes pci-home-bar-in{to{transform:scaleX(1)}}
+@keyframes pci-home-scan{0%{top:10%;opacity:0}18%{opacity:.8}78%{opacity:.45}100%{top:87%;opacity:0}}
+@media(max-width:760px){.pci-project--home .pci-title{font-size:clamp(34px,9vw,54px)}.pci-home-data{width:clamp(105px,31vw,140px);padding:9px 10px;gap:5px}.pci-home-data span{font-size:6px}.pci-home-data b{font-size:9px}.pci-home-data-a{left:0;top:17%}.pci-home-data-b{right:0;top:23%}.pci-home-data-c{left:0;bottom:17%}.pci-home-data-d{right:0;bottom:14%}.pci-home-caption{font-size:6px;letter-spacing:.1em}.pci-home-plate b{right:-18px;font-size:7px}.pci-home-grid{background-size:24px 24px}}
+@media(prefers-reduced-motion:reduce){.pci-home-orbit,.pci-home-plate,.pci-home-blueprint path,.pci-home-blueprint circle,.pci-home-data,.pci-home-data i,.pci-home-scan{animation:none!important;transform:none!important;opacity:1!important;stroke-dashoffset:0!important}.pci-home-data i{transform:scaleX(1)!important}}
 @media(max-width:760px){
  .pci-intro{padding:16px 18px 18px}
  .pci-topbar{font-size:8px;letter-spacing:.08em}.pci-skip{padding:9px;font-size:8px;gap:7px}.pci-skip kbd{padding-left:7px}
@@ -230,6 +255,6 @@ body.pci-lock{overflow:hidden!important}
  .pci-neo-side{width:14%}.pci-meter-scene{width:94%;padding-inline:12px}
 }
 @media(prefers-reduced-motion:reduce){
- .pci-home-orbit,.pci-home-plate,.pci-neo-floor,.pci-neo-portal,.pci-vector-art .pci-vector-path,.pci-vector-nodes circle,.pci-eps-sheet,.pci-eps-sheet svg,.pci-forge-orbit,.pci-file-tile,.pci-vault-card,.pci-kyn-orbit,.pci-kyn-module,.pci-kyn-centre,.pci-organic-orbit,.pci-vine,.pci-leaf,.pci-meter-bars i,.pci-meter-scan{animation:none!important;transform:none!important;translate:none!important;rotate:none!important;opacity:1!important;stroke-dashoffset:0!important}
+ .pci-home-orbit,.pci-home-plate,.pci-home-data,.pci-home-scan,.pci-home-blueprint path,.pci-home-blueprint circle,.pci-neo-floor,.pci-neo-portal,.pci-vector-art .pci-vector-path,.pci-vector-nodes circle,.pci-eps-sheet,.pci-eps-sheet svg,.pci-forge-orbit,.pci-file-tile,.pci-vault-card,.pci-kyn-orbit,.pci-kyn-module,.pci-kyn-centre,.pci-organic-orbit,.pci-vine,.pci-leaf,.pci-meter-bars i,.pci-meter-scan{animation:none!important;transform:none!important;translate:none!important;rotate:none!important;opacity:1!important;stroke-dashoffset:0!important}
 }
 @media(max-width:760px){.pci-project--home .pci-title{font-size:clamp(34px,9vw,54px)}}
