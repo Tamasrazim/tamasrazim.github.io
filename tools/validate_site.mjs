@@ -262,6 +262,9 @@ const cinematicIntroCss=read('assets/css/project-cinematic-intro.css');
 const cinematicIntroJs=read('assets/js/project-cinematic-intro.js');
 execFileSync(process.execPath,['--check',path.join(ROOT,'assets/js/project-cinematic-intro.js')]);
 must(cinematicIntroJs.includes('Object.assign(profiles')&&cinematicIntroJs.includes('Escape'),'cinematic intro has project profiles and a keyboard skip path');
+must(cinematicIntroJs.includes('home: {')&&cinematicIntroJs.includes('OPENING SEQUENCE / PERSONAL WEBSITE'),'cinematic intro includes a distinct homepage profile');
+must(cinematicIntroCss.includes('.pci-project--home')&&cinematicIntroCss.includes('.pci-home-art')&&cinematicIntroCss.includes('.pci-home-orbit'),'homepage intro has its own monogram scene and orbit artwork');
+must(site.includes('<body class="home-v2" data-cinematic-intro="home">')&&site.includes('project-cinematic-intro.css?v=20261013-1')&&site.includes('project-cinematic-intro.js?v=20261013-1'),'homepage loads the newly versioned cinematic intro assets');
 const cinematicProjectKeys=['tunrun','webedyts','qalyvyron','trilyva','neo','code-to-svg','code-to-eps','format-forge','asset-vault','kynestra','bncagrocare','repo-token-meter'];
 must(cinematicProjectKeys.every(key=>cinematicIntroJs.includes(key+': {')||cinematicIntroJs.includes('"'+key+'": {')),'cinematic intro has a dedicated animation profile for every featured project');
 must(cinematicIntroCss.includes('prefers-reduced-motion:reduce')&&cinematicIntroCss.includes('.pci-project--tunrun')&&cinematicIntroCss.includes('.pci-project--webedyts')&&cinematicIntroCss.includes('.pci-project--qalyvyron')&&cinematicIntroCss.includes('.pci-project--trilyva'),'cinematic intro has reduced-motion handling and project-specific themes');
@@ -413,7 +416,7 @@ function testCinematicIntroRuntime(projectKey, closeWithEscape=false, closeAutom
     clearTimeout:windowMock.clearTimeout
   },{filename:'project-cinematic-intro.js'});
   const expectedTitles={
-    tunrun:'TUNRUN',webedyts:'WEBEDYTS',qalyvyron:'QALYVYRON',trilyva:'TRILYVA',
+    home:'TAMASRAZIM',tunrun:'TUNRUN',webedyts:'WEBEDYTS',qalyvyron:'QALYVYRON',trilyva:'TRILYVA',
     neo:'NEO','code-to-svg':'CODE → SVG','code-to-eps':'CODE → EPS',
     'format-forge':'FORMAT FORGE','asset-vault':'STOCK ASSET VAULT',
     kynestra:'KYNESTRA',bncagrocare:'BNC AGROCARE','repo-token-meter':'REPO TOKEN METER'
@@ -438,6 +441,9 @@ function testCinematicIntroRuntime(projectKey, closeWithEscape=false, closeAutom
 for(const projectKey of cinematicProjectKeys) testCinematicIntroRuntime(projectKey);
 for(const projectKey of cinematicProjectKeys) testCinematicIntroRuntime(projectKey,true);
 for(const projectKey of cinematicProjectKeys) testCinematicIntroRuntime(projectKey,false,true);
+testCinematicIntroRuntime('home');
+testCinematicIntroRuntime('home',true);
+testCinematicIntroRuntime('home',false,true);
 
 function testCinematicIntroEarlyExit(projectKey, prefersReducedMotion, alreadyShown) {
   const classes=new Set();
