@@ -1,23 +1,25 @@
 # HOLLOW Texture Lab
 
-A free, browser-based procedural material library built for the HOLLOW horror-game world.
+A browser-based catalogue of distinct, named CC0 PBR material assets for the HOLLOW horror-game world.
 
 ## Open it
-Visit: https://tamasrazim.github.io/projects/hollow-texture-lab/
 
-## What is in the library?
-- 16 material families.
-- 192 deterministic recipes per family.
-- 3,072 searchable recipe variations.
-- Category filtering, paging, random selection, and recipe IDs.
-- Live material preview on a sphere, faceted object, wall panel, or floor plane.
-- Local procedural generation with adjustable scale, wear, and brightness.
-- PNG export at 512, 1024, or 2048 pixels.
-- Base-color, roughness-approximation, and normal-style-approximation map modes.
-- No paid assets, external libraries, account, or backend.
+- Live catalogue: https://tamasrazim.github.io/projects/hollow-texture-lab/
+- Original asset library: https://ambientcg.com/
+- License: CC0 1.0 for the listed ambientCG source materials.
+
+## Current catalogue
+
+- 33 distinct named source materials across concrete, masonry, rock, wood, fabric, rust, metal, painted metal, and tile categories.
+- Search, category filtering, sorting, pagination, and random selection.
+- Source-material preview images, loaded from the catalogue CDN.
+- A direct source-page link for each material.
+- No procedural texture synthesis, seed-based variants, fake PBR map generation, or duplicate recipe entries.
 
 ## Important accuracy note
-The 3,072 entries are procedural recipes, not 3,072 pre-rendered files committed to Git. The browser generates a selected recipe's pixel data on demand. Roughness and normal-style outputs are artistic approximations, not calibrated physically based maps. This is an initial texture workbench; it does not yet provide full PBR calibration, guaranteed seamless tiling, or a real WebGL mesh renderer.
 
-## How it works
-The page uses ordinary HTML, CSS, and JavaScript Canvas APIs. It works locally in a modern browser and can be hosted as a static GitHub Pages page. PNG export runs in the browser.
+This page is a catalogue, not a locally bundled texture archive. Preview images are material previews; they are not presented as the downloadable base-color maps. Open the linked original source page to inspect and obtain the available PBR maps and check the current license details. The assets are separate source materials, not original textures authored by this repository. The app requires an internet connection to load remote previews and source pages.
+
+## Implementation
+
+The catalogue uses plain HTML, CSS, and JavaScript and can be hosted on static GitHub Pages. It does not synthesize image pixels or claim that a preview is a full-resolution PBR map.
