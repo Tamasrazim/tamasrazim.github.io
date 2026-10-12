@@ -1,27 +1,27 @@
 # HOLLOW Texture Lab
 
-An original, self-contained procedural material workshop for the HOLLOW horror-game world.
+A curated library of original, individually authored surface artwork for the HOLLOW horror-game project.
 
-## Open it
+## Current collection
 
-- Live page: https://tamasrazim.github.io/projects/hollow-texture-lab/
+Each asset is a separate static SVG artwork. The page does not generate textures from procedural recipes and does not use third-party runtime libraries, remote images, CDNs, fonts, or APIs.
 
-## Current features
+- `assets/brick-wall-aged.svg` — fired-clay brick courses, recessed mortar, varied brick faces, stains and hand-placed wear.
+- `assets/concrete-pitted-wall.svg` — concrete pores, aggregate scars, streaking and chipped areas.
+- `assets/aged-pine-planks.svg` — separate timber boards, knots, grain lines, splits and worn edges.
+- `assets/rusted-sheet-metal.svg` — corroded steel, paint loss, rust blooms, scratches and fasteners.
+- `assets/cracked-ceramic-tile.svg` — old ceramic tiles, grout, glaze wear, chips and cracks.
 
-- 17 original material families with 64 deterministic recipe settings each (1,088 catalogue entries).
-- Material-specific structures include staggered brick courses and recessed mortar, concrete fissures and pits, peeling plaster, aged wallpaper ornament, wood grain, brushed metal, corrosion, stone fractures, asphalt aggregate, soil pebbles, mud cracks, moss tufts, woven fibers, leather pores, ceramic grout and fictional organic channels.
-- Search, category filters, sorting, pagination, random selection, and editable seeds.
-- Locally rendered preview, surface scale, wear, brightness, roughness, and tile repetition controls.
-- Export choices from 512 px through 8192 × 8192 (8K).
-- Base-color, roughness, height, and a tangent-space normal approximation derived from the generated height field.
-- No external textures, libraries, fonts, CDNs, APIs, or accounts.
+## Exporting
 
-## Accuracy and performance notes
+Open the live page and select an asset. Download its original SVG master, or export a PNG at 512, 1024, 2048, 4096 or 8192 pixels wide. PNG export scales the authored drawing; it cannot create extra photographic detail beyond the original artwork. Large exports may require substantial memory.
 
-This is an original procedural system, not photogrammetry or a scanned-surface library. Its current roughness, height, and normal-style maps are algorithmic approximations, not calibrated scans. The generator is designed around periodic noise and repeating material structures; verify seams and map behavior in the target game engine before production use.
+## Important quality status
 
-8K output is 67.1 million pixels and may consume several hundred MiB of memory. High-resolution output requires a modern browser with OffscreenCanvas worker support. Start at 2K or 4K if the browser or device runs out of memory. GitHub Pages serves the application source; the texture pixels are generated locally and are not stored as thousands of binary images in the repository.
+These first five assets are authored vector illustrations, not photographs, scanned materials, or photogrammetry. They are not yet validated as seamless PBR textures. The normal/roughness/height-map generator has been removed from the main interface because the goal is now unique, separately built artwork rather than procedural variants. More materials should be drawn and reviewed as individual assets before calling the collection production-ready.
 
-## Implementation
+## Local-first
 
-Plain HTML, CSS, JavaScript Canvas APIs, and a generated Web Worker. No runtime dependency on third-party services.
+All assets are in this repository and served from the same site. The gallery has no external runtime dependencies.
+
+Live page: https://tamasrazim.github.io/projects/hollow-texture-lab/
