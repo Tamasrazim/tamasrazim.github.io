@@ -29,4 +29,4 @@ Established routes for retained projects are public URLs. The former generated o
 
 Featured project routes are information pages first. Browser applications and exports live under their dedicated `workspace/` routes where applicable. KYNESTRA uses `/projects/kynestra/` for the overview and `/projects/kynestra/download/` for its Windows installer. Stock Asset Vault's overview is under `/projects/asset-vault/`; its working app remains under `/asset-vault/`. BNC AgroCare's project page links to the catalogue and separate invoice workspace.
 
-- **HOLLOW Texture Lab** — a free browser-based procedural material library with 3,072 searchable recipes, live surface previews and PNG export at `/projects/hollow-texture-lab/`. Recipe entries are generated on demand; the repository does not store thousands of pre-rendered files.
+- **HOLLOW Texture Lab** — a browser-based catalogue of 33 distinct CC0 PBR source materials, with searchable categories, source previews, and links to original maps at `/projects/hollow-texture-lab/`. It no longer synthesizes procedural texture recipes; original material maps remain at their source pages.
