@@ -258,6 +258,21 @@ must(qalyvyronPage.includes('approximately every 30 seconds')&&qalyvyronPage.inc
 must(qalyvyronPage.includes('Run 38195187492 passed')&&qalyvyronPage.includes('CTest suite')&&qalyvyronPage.includes('edge subdivision'),'QALYVYRON build status reflects current green Linux/Windows tests for mesh subdivision');
 must(qalyvyronPage.includes('disconnected selections')&&qalyvyronPage.includes('consistent face winding'),'QALYVYRON page documents tested edge-loop rejection and orientation handling');
 
+const cinematicIntroCss=read('assets/css/project-cinematic-intro.css');
+const cinematicIntroJs=read('assets/js/project-cinematic-intro.js');
+execFileSync(process.execPath,['--check',path.join(ROOT,'assets/js/project-cinematic-intro.js')]);
+must(cinematicIntroCss.includes('.pci-project--tunrun')&&cinematicIntroCss.includes('.pci-project--webedyts')&&cinematicIntroCss.includes('.pci-project--qalyvyron')&&cinematicIntroCss.includes('.pci-project--trilyva'),'cinematic intro CSS includes distinct artwork themes for the four project pages');
+must(cinematicIntroCss.includes('prefers-reduced-motion:reduce')&&cinematicIntroJs.includes('Escape')&&cinematicIntroJs.includes('sessionStorage'),'cinematic intro respects reduced motion, supports Escape, and avoids replaying in the same tab');
+for (const [projectKey, pagePath] of [
+  ['tunrun','projects/tunrun/index.html'],
+  ['webedyts','projects/webedyts/index.html'],
+  ['qalyvyron','projects/qalyvyron/index.html'],
+  ['trilyva','projects/trilyva/index.html']
+]) {
+  const page=read(pagePath);
+  must(page.includes('data-cinematic-intro="'+projectKey+'"')&&page.includes('/assets/css/project-cinematic-intro.css?v=20261012-1')&&page.includes('/assets/js/project-cinematic-intro.js?v=20261012-1'),projectKey.toUpperCase()+' project overview loads the skippable cinematic intro');
+}
+
 const iconLibrarySource=read('projects/code-to-eps/workspace/vector-icon-library.js');
 execFileSync(process.execPath,['--check',path.join(ROOT,'projects/code-to-eps/workspace/vector-icon-library.js')]);
 const iconCtx={window:{}};
