@@ -1,3 +1,5 @@
+# Runs the keyword-generation job used to prepare metadata for stock assets.
+
 name: Generate 5M Stock Keywords
 
 on:

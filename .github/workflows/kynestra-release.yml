@@ -1,3 +1,5 @@
+# Prepares and checks the packaged KYNESTRA desktop release.
+
 name: KYNESTRA Windows Installer
 
 on:

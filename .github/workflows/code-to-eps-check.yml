@@ -1,3 +1,5 @@
+# Checks the Code to EPS tool and the files it needs to produce vector output.
+
 name: CODE-EPS Check
 
 on:

@@ -1,3 +1,5 @@
+# Checks the asset vault app and its files so a broken library or missing asset is caught before deployment.
+
 name: Asset Vault Check
 
 on:

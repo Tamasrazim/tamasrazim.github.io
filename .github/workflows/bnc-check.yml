@@ -1,3 +1,5 @@
+# Checks the BNC Agrocare project and its reference data when that part of the site changes.
+
 name: BNC AgroCare Check
 
 on:
