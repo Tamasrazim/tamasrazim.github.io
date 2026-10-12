@@ -1,3 +1,8 @@
+/*
+ * What this does:
+ * Styles the BNC invoice screen: its form fields, product rows, totals, buttons, and layout on smaller screens.
+ */
+
 // What this does: Styles the BNC invoice form, product rows, totals, and printable layout.
 
 :root{
