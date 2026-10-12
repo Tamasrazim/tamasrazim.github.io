@@ -98,77 +98,64 @@ body.pci-lock{overflow:hidden!important}
 @keyframes pci-motion-turn{to{transform:rotate(360deg)}}
 @keyframes pci-draw-line{to{stroke-dashoffset:0}}
 @keyframes pci-scan{0%{opacity:0;transform:translateY(-95px) scaleX(.4)}30%{opacity:.8}80%{opacity:.22}100%{opacity:0;transform:translateY(95px) scaleX(1)}}
-/* Homepage identity build: animate the original .id-card node with its existing site.css artwork. */
+/* Homepage ID reveal: eclipse aperture, rotating card reveal, constellation bloom, and a finishing light pass. */
 .pci-project--home{--pci-accent:#f1f1ed;--pci-glow:rgba(255,255,255,.17)}
 .pci-is-live.pci-project--home .pci-progress span{animation-duration:8.35s}
-.pci-home-build-stage{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(12px,2vh,20px);width:min(1120px,100%);height:100%;min-height:0;margin:auto;padding:4px 0}
-.pci-home-build-head,.pci-home-build-foot{display:flex;align-items:center;justify-content:space-between;gap:18px;width:min(920px,100%);color:#8c8c87;font:8px "JetBrains Mono",monospace;letter-spacing:.13em;text-transform:uppercase}
-.pci-home-build-head{padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.14)}
-.pci-home-build-foot{padding-top:10px;border-top:1px solid rgba(255,255,255,.14)}
-.pci-home-build-state{display:inline-flex;align-items:center;gap:8px;color:#e8e8e3}
-.pci-home-build-state i{width:6px;height:6px;border-radius:50%;background:#eee;box-shadow:0 0 12px rgba(255,255,255,.75);animation:pci-home-state-pulse 1.1s ease-in-out infinite}
-.pci-home-id-rig{position:relative;display:grid;place-items:center;flex:1 1 auto;width:min(100%,920px);height:clamp(220px,49vh,410px);max-height:calc(100svh - 225px);min-height:0;isolation:isolate;perspective:1400px}
-.pci-home-id-outline{position:absolute;z-index:0;width:min(460px,84vw);aspect-ratio:1.586 / 1;border:1px solid rgba(241,241,237,.58);border-radius:15px;opacity:0;clip-path:inset(0 100% 0 0 round 15px);box-shadow:0 0 32px rgba(255,255,255,.05),inset 0 0 34px rgba(255,255,255,.025)}
-.pci-home-id-outline:before,.pci-home-id-outline:after{content:"";position:absolute;pointer-events:none}
-.pci-home-id-outline:before{inset:8px;border:1px dashed rgba(241,241,237,.2);border-radius:9px}
-.pci-home-id-outline:after{left:-20%;right:-20%;top:0;height:1px;background:linear-gradient(90deg,transparent,#fff,transparent);box-shadow:0 0 20px rgba(255,255,255,.8)}
-.pci-is-live.pci-project--home .pci-home-id-outline{animation:pci-home-outline-draw 1.8s cubic-bezier(.2,.75,.2,1) .12s forwards}
-.pci-home-id-mount{position:relative;z-index:2;display:grid;place-items:center;width:min(460px,84vw);aspect-ratio:1.586 / 1;perspective:1400px}
-.pci-intro.pci-project--home .id-card.pci-home-built-card{opacity:0;clip-path:inset(0 100% 0 0 round 15px);transform:perspective(1400px) rotateY(-22deg) rotateX(8deg) translateY(22px) scale(.96);filter:brightness(.2) grayscale(1);box-shadow:none;will-change:opacity,clip-path,transform,filter}
-.pci-is-live.pci-project--home .id-card.pci-home-built-card{animation:pci-home-card-assemble 6.7s cubic-bezier(.2,.75,.2,1) .2s forwards}
-.pci-intro.pci-project--home .pci-home-built-card .id-constellation-media{opacity:.1;clip-path:inset(0 100% 0 0)}
-.pci-is-live.pci-project--home .pci-home-built-card .id-constellation-media{animation:pci-home-image-unfold 1.25s cubic-bezier(.2,.75,.2,1) 1.1s forwards}
-.pci-intro.pci-project--home .pci-home-built-card .card-corner,
-.pci-intro.pci-project--home .pci-home-built-card .id-kicker,
-.pci-intro.pci-project--home .pci-home-built-card .card-chip,
-.pci-intro.pci-project--home .pci-home-built-card .id-name,
-.pci-intro.pci-project--home .pci-home-built-card .id-rule,
-.pci-intro.pci-project--home .pci-home-built-card .id-online,
-.pci-intro.pci-project--home .pci-home-built-card .id-alias,
-.pci-intro.pci-project--home .pci-home-built-card .id-signal-row,
-.pci-intro.pci-project--home .pci-home-built-card .id-mobile-copy,
-.pci-intro.pci-project--home .pci-home-built-card .status-box,
-.pci-intro.pci-project--home .pci-home-built-card .id-code{opacity:0;transform:translateY(9px)}
-.pci-is-live.pci-project--home .pci-home-built-card .card-corner{animation:pci-home-corner-in .45s ease 1.2s forwards}
-.pci-is-live.pci-project--home .pci-home-built-card .id-kicker{animation:pci-home-ui-in .55s ease 2s forwards}
-.pci-is-live.pci-project--home .pci-home-built-card .card-chip{animation:pci-home-ui-in .55s ease 2.25s forwards}
-.pci-is-live.pci-project--home .pci-home-built-card .id-name{animation:pci-home-ui-in .65s cubic-bezier(.2,.75,.2,1) 2.8s forwards}
-.pci-is-live.pci-project--home .pci-home-built-card .id-rule{animation:pci-home-rule-draw .7s ease 3.25s forwards}
-.pci-is-live.pci-project--home .pci-home-built-card .id-online{animation:pci-home-ui-in .5s ease 3.55s forwards}
-.pci-is-live.pci-project--home .pci-home-built-card .id-alias{animation:pci-home-ui-in .7s cubic-bezier(.2,.75,.2,1) 4s forwards}
-.pci-is-live.pci-project--home .pci-home-built-card .id-signal-row{animation:pci-home-ui-in .55s ease 4.65s forwards}
-.pci-is-live.pci-project--home .pci-home-built-card .id-mobile-copy{animation:pci-home-ui-in .55s ease 4.95s forwards}
-.pci-is-live.pci-project--home .pci-home-built-card .status-box{animation:pci-home-ui-in .55s ease 5.6s forwards}
-.pci-is-live.pci-project--home .pci-home-built-card .id-code{animation:pci-home-ui-in .55s ease 5.8s forwards}
-.pci-home-id-scan{position:absolute;z-index:5;left:5%;right:5%;top:9%;height:1px;opacity:0;background:linear-gradient(90deg,transparent,#f3f3ee,transparent);box-shadow:0 0 17px rgba(255,255,255,.6);pointer-events:none}
-.pci-is-live.pci-project--home .pci-home-id-scan{animation:pci-home-full-scan 3.3s ease-in-out 2.1s infinite}
-.pci-home-id-side-label{position:absolute;z-index:1;color:#777772;font:7px "JetBrains Mono",monospace;letter-spacing:.15em;writing-mode:vertical-rl}
-.pci-home-id-side-label.left{left:3%;top:26%;transform:rotate(180deg)}
-.pci-home-id-side-label.right{right:3%;bottom:24%}
-@keyframes pci-home-outline-draw{0%{opacity:0;clip-path:inset(0 100% 0 0 round 15px)}24%,100%{opacity:1;clip-path:inset(0 0 0 0 round 15px)}}
-@keyframes pci-home-card-assemble{0%{opacity:0;clip-path:inset(0 100% 0 0 round 15px);transform:perspective(1400px) rotateY(-22deg) rotateX(8deg) translateY(22px) scale(.96);filter:brightness(.2) grayscale(1)}13%{opacity:1}48%{clip-path:inset(0 0 0 0 round 15px);transform:perspective(1400px) rotateY(4deg) rotateX(-1deg) translateY(2px) scale(1);filter:brightness(.62) grayscale(.35)}72%,100%{opacity:1;clip-path:inset(0 0 0 0 round 15px);transform:none;filter:brightness(1) grayscale(0)}}
-@keyframes pci-home-image-unfold{0%{opacity:.1;clip-path:inset(0 100% 0 0)}100%{opacity:1;clip-path:inset(0 0 0 0)}}
-@keyframes pci-home-ui-in{to{opacity:1;transform:translateY(0)}}
-@keyframes pci-home-corner-in{0%{opacity:0;transform:scale(.2)}100%{opacity:1;transform:scale(1)}}
-@keyframes pci-home-rule-draw{0%{opacity:0;transform:translateY(9px) scaleX(.05);transform-origin:left}100%{opacity:1;transform:translateY(0) scaleX(1);transform-origin:left}}
-@keyframes pci-home-full-scan{0%{top:9%;opacity:0}14%{opacity:.8}80%{opacity:.4}100%{top:88%;opacity:0}}
-@keyframes pci-home-state-pulse{0%,100%{opacity:.4;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+.pci-home-build-stage{position:relative;display:grid;place-items:center;width:min(1120px,100%);height:100%;min-height:0;margin:auto;padding:0}
+.pci-home-id-rig{position:relative;display:grid;place-items:center;width:min(100%,980px);height:clamp(260px,63vh,520px);max-height:calc(100svh - 142px);min-height:0;isolation:isolate;perspective:1500px}
+.pci-home-id-rig:before{content:"";position:absolute;inset:3% 0;background:radial-gradient(ellipse at center,rgba(255,255,255,.065),transparent 53%);opacity:0;animation:pci-home-stage-bloom 1.6s ease-out .1s forwards;pointer-events:none}
+.pci-home-id-aura{position:absolute;z-index:0;width:min(74vw,740px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.10) 0%,rgba(255,255,255,.035) 26%,transparent 68%);filter:blur(12px);opacity:0;transform:scale(.28);animation:pci-home-aura-bloom 2.8s cubic-bezier(.16,1,.3,1) .12s forwards;pointer-events:none}
+.pci-home-id-ring{position:absolute;z-index:1;width:min(78%,690px);aspect-ratio:1.586 / 1;border:1px solid rgba(241,241,237,.35);border-radius:50%;opacity:0;pointer-events:none;transform-origin:center;box-shadow:0 0 35px rgba(255,255,255,.025)}
+.pci-home-id-ring-a{transform:rotateX(70deg) rotateZ(-18deg) scale(.45);animation:pci-home-ring-arrive 3.7s cubic-bezier(.16,1,.3,1) .15s forwards,pci-home-ring-drift 16s linear 3.85s infinite}
+.pci-home-id-ring-b{width:min(65%,560px);border-style:dashed;border-color:rgba(241,241,237,.22);transform:rotateX(67deg) rotateZ(32deg) scale(.55);animation:pci-home-ring-arrive 3.4s cubic-bezier(.16,1,.3,1) .38s forwards,pci-home-ring-drift-reverse 21s linear 3.8s infinite}
+.pci-home-id-outline{position:absolute;z-index:2;width:min(460px,84vw);aspect-ratio:1.586 / 1;border:1px solid rgba(241,241,237,.7);border-radius:15px;opacity:0;clip-path:inset(0 50% 0 50% round 15px);box-shadow:0 0 35px rgba(255,255,255,.045),inset 0 0 34px rgba(255,255,255,.025);pointer-events:none}
+.pci-home-id-outline:before{content:"";position:absolute;inset:8px;border:1px dashed rgba(241,241,237,.2);border-radius:9px}
+.pci-home-id-outline:after{content:"";position:absolute;top:0;bottom:0;left:50%;width:1px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.85),transparent);box-shadow:0 0 18px rgba(255,255,255,.9)}
+.pci-is-live.pci-project--home .pci-home-id-outline{animation:pci-home-outline-open 1.5s cubic-bezier(.16,1,.3,1) .25s forwards}
+.pci-home-id-mount{position:relative;z-index:3;display:grid;place-items:center;width:min(460px,84vw);aspect-ratio:1.586 / 1;perspective:1500px}
+.pci-intro.pci-project--home .id-card.pci-home-built-card{opacity:0;clip-path:inset(0 50% 0 50% round 15px);transform:perspective(1500px) rotateY(76deg) rotateX(9deg) translateY(18px) translateZ(-105px) scale(.82);transform-origin:50% 50%;filter:brightness(.15) saturate(.35);box-shadow:none;backface-visibility:hidden;will-change:opacity,clip-path,transform,filter}
+.pci-is-live.pci-project--home .id-card.pci-home-built-card{animation:pci-home-card-reveal 4.6s cubic-bezier(.16,1,.3,1) .28s forwards}
+.pci-intro.pci-project--home .pci-home-built-card .id-constellation-media{opacity:1;clip-path:circle(0% at 66% 47%)}
+.pci-is-live.pci-project--home .pci-home-built-card .id-constellation-media{animation:pci-home-constellation-bloom 1.35s cubic-bezier(.16,1,.3,1) 1.2s forwards}
+.pci-intro.pci-project--home .pci-home-built-card .id-star-field{opacity:.08;filter:brightness(2)}
+.pci-is-live.pci-project--home .pci-home-built-card .id-star-field{animation:pci-home-stars-light 1s ease-out 2s forwards}
+.pci-intro.pci-project--home .pci-home-built-card .id-top,
+.pci-intro.pci-project--home .pci-home-built-card .id-middle,
+.pci-intro.pci-project--home .pci-home-built-card .id-bottom{opacity:0;filter:blur(7px);transform:translateY(10px) scale(.985)}
+.pci-is-live.pci-project--home .pci-home-built-card .id-top{animation:pci-home-info-lock  .8s cubic-bezier(.16,1,.3,1) 1.85s forwards}
+.pci-is-live.pci-project--home .pci-home-built-card .id-middle{animation:pci-home-info-lock .9s cubic-bezier(.16,1,.3,1) 2.35s forwards}
+.pci-is-live.pci-project--home .pci-home-built-card .id-bottom{animation:pci-home-info-lock .75s cubic-bezier(.16,1,.3,1) 3.05s forwards}
+.pci-is-live.pci-project--home .pci-home-built-card::before{animation:pci-home-card-sheen 2.5s ease-in-out 1.1s 1 both}
+.pci-intro.pci-project--home .pci-home-built-card .id-image-scan{opacity:0;top:12%;transform:translateY(-10px)}
+.pci-is-live.pci-project--home .pci-home-built-card .id-image-scan{animation:pci-home-detail-scan 2.3s cubic-bezier(.16,1,.3,1) 3.15s 1 both}
+.pci-home-id-scan{position:absolute;z-index:5;left:9%;right:9%;top:9%;height:1px;opacity:0;background:linear-gradient(90deg,transparent,#f3f3ee,transparent);box-shadow:0 0 17px rgba(255,255,255,.6);pointer-events:none}
+.pci-is-live.pci-project--home .pci-home-id-scan{animation:pci-home-environment-scan 3.2s ease-in-out .55s 1 both}
+.pci-home-id-flash{position:absolute;z-index:4;left:-40%;top:32%;width:180%;height:36%;opacity:0;pointer-events:none;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.015) 45%,rgba(255,255,255,.23) 49.5%,rgba(255,255,255,.06) 51%,transparent 57%);filter:blur(2px);transform:translateX(-70%) rotate(-8deg);mix-blend-mode:screen}
+.pci-is-live.pci-project--home .pci-home-id-flash{animation:pci-home-flash-pass 1.6s cubic-bezier(.2,.75,.2,1) 4.15s 1 both}
+@keyframes pci-home-stage-bloom{to{opacity:1}}
+@keyframes pci-home-aura-bloom{0%{opacity:0;transform:scale(.28)}40%{opacity:1}100%{opacity:.5;transform:scale(1)}}
+@keyframes pci-home-ring-arrive{0%{opacity:0}35%{opacity:.6}100%{opacity:.28;transform:rotateX(70deg) rotateZ(0deg) scale(1)}}
+@keyframes pci-home-ring-drift{to{rotate:360deg}}
+@keyframes pci-home-ring-drift-reverse{to{rotate:-360deg}}
+@keyframes pci-home-outline-open{0%{opacity:0;clip-path:inset(0 50% 0 50% round 15px)}35%{opacity:1}100%{opacity:.72;clip-path:inset(0 0 0 0 round 15px)}}
+@keyframes pci-home-card-reveal{0%{opacity:0;clip-path:inset(0 50% 0 50% round 15px);transform:perspective(1500px) rotateY(76deg) rotateX(9deg) translateY(18px) translateZ(-105px) scale(.82);filter:brightness(.15) saturate(.35)}13%{opacity:1}38%{clip-path:inset(0 31% 0 31% round 15px);transform:perspective(1500px) rotateY(48deg) rotateX(5deg) translateY(8px) translateZ(-55px) scale(.9);filter:brightness(.3) saturate(.45)}67%{clip-path:inset(0 0 0 0 round 15px);transform:perspective(1500px) rotateY(-7deg) rotateX(-1deg) translateY(-3px) translateZ(7px) scale(1.015);filter:brightness(.84) saturate(.85)}84%,100%{clip-path:inset(0 0 0 0 round 15px);transform:none;filter:brightness(1) saturate(1)}}
+@keyframes pci-home-constellation-bloom{0%{clip-path:circle(0% at 66% 47%);filter:brightness(2.6) contrast(1.3)}62%{filter:brightness(1.5) contrast(1.2)}100%{clip-path:circle(145% at 66% 47%);filter:none}}
+@keyframes pci-home-stars-light{to{opacity:1;filter:brightness(1)}}
+@keyframes pci-home-info-lock{0%{opacity:0;filter:blur(7px);transform:translateY(10px) scale(.985)}72%{opacity:1;filter:blur(0);transform:translateY(-1px) scale(1)}100%{opacity:1;filter:blur(0);transform:none}}
+@keyframes pci-home-card-sheen{0%{transform:translateY(-10%);opacity:0}20%{opacity:.5}65%{opacity:.1}100%{transform:translateY(470%);opacity:0}}
+@keyframes pci-home-detail-scan{0%{top:12%;opacity:0;transform:translateY(-10px)}17%{opacity:.85}78%{opacity:.55}100%{top:86%;opacity:0;transform:translateY(8px)}}
+@keyframes pci-home-environment-scan{0%{top:9%;opacity:0}15%{opacity:.8}82%{opacity:.38}100%{top:89%;opacity:0}}
+@keyframes pci-home-flash-pass{0%{opacity:0;transform:translateX(-70%) rotate(-8deg)}15%{opacity:1}75%{opacity:.8}100%{opacity:0;transform:translateX(70%) rotate(-8deg)}}
 @media(max-width:760px){
- .pci-home-build-head,.pci-home-build-foot{width:100%;gap:8px;font-size:6px;letter-spacing:.08em}
- .pci-home-build-head{padding-bottom:8px}.pci-home-build-foot{padding-top:8px}
- .pci-home-id-rig{height:clamp(220px,42vh,340px);max-height:calc(100svh - 220px)}
+ .pci-home-id-rig{height:clamp(240px,58vh,390px);max-height:calc(100svh - 140px)}
  .pci-home-id-mount,.pci-home-id-outline{width:min(430px,86vw)}
- .pci-home-id-side-label{font-size:6px;letter-spacing:.08em}
+ .pci-home-id-ring-a{width:90%}.pci-home-id-ring-b{width:72%}
 }
-@media(max-width:440px){
- .pci-home-id-side-label{display:none}
- .pci-home-build-head,.pci-home-build-foot{font-size:5px;letter-spacing:.045em}
- .pci-home-build-state{gap:5px}
-}
+@media(max-height:620px) and (min-width:761px){.pci-home-id-rig{height:calc(100svh - 130px);max-height:460px}}
 @media(prefers-reduced-motion:reduce){
- .pci-project--home .pci-home-id-outline,.pci-project--home .pci-home-id-scan,.pci-project--home .pci-home-build-state i{animation:none!important}
- .pci-intro.pci-project--home .id-card.pci-home-built-card{animation:none!important;opacity:1;clip-path:none;transform:none;filter:none;box-shadow:initial}
- .pci-intro.pci-project--home .pci-home-built-card *{animation:none!important;opacity:1!important;transform:none!important;clip-path:none!important}
+ .pci-project--home .pci-home-id-aura,.pci-project--home .pci-home-id-ring,.pci-project--home .pci-home-id-outline,.pci-project--home .pci-home-id-scan,.pci-project--home .pci-home-id-flash,.pci-project--home .pci-home-id-rig:before{animation:none!important;opacity:1!important;transform:none!important;clip-path:none!important}
+ .pci-intro.pci-project--home .id-card.pci-home-built-card{animation:none!important;opacity:1;clip-path:none;transform:none;filter:none;box-shadow:initial;will-change:auto}
+ .pci-intro.pci-project--home .pci-home-built-card .id-constellation-media,.pci-intro.pci-project--home .pci-home-built-card .id-star-field,.pci-intro.pci-project--home .pci-home-built-card .id-top,.pci-intro.pci-project--home .pci-home-built-card .id-middle,.pci-intro.pci-project--home .pci-home-built-card .id-bottom{animation:none!important;opacity:1!important;filter:none!important;clip-path:none!important;transform:none!important}
 }
 @media(max-width:760px){
  .pci-intro{padding:16px 18px 18px}
