@@ -284,7 +284,52 @@ for (const [projectKey,pagePath] of [
 }
 
 
-function testCinematicIntroRuntime(projectKey, closeWithEscape=false) {
+// Scan every top-level project route so a future project page cannot silently
+// miss its intro test. Only the two old-address pages below are redirect-only.
+const legacyProjectRedirects = new Set([
+  'projects/code-motion/index.html',
+  'projects/razim-fps/index.html'
+]);
+const cinematicProjectPages = new Set([
+  'projects/tunrun/index.html',
+  'projects/webedyts/index.html',
+  'projects/qalyvyron/index.html',
+  'projects/trilyva/index.html',
+  'projects/neo/index.html',
+  'projects/code-to-svg/index.html',
+  'projects/code-to-eps/index.html',
+  'projects/format-forge/index.html',
+  'projects/asset-vault/index.html',
+  'projects/kynestra/index.html',
+  'projects/bncagrocare/index.html',
+  'projects/repo-token-meter/index.html'
+]);
+const topLevelProjectIndexes = fs.readdirSync(path.join(ROOT,'projects'),{withFileTypes:true})
+  .filter(entry=>entry.isDirectory())
+  .map(entry=>path.join('projects',entry.name,'index.html').split(path.sep).join('/'))
+  .filter(exists)
+  .sort();
+must(topLevelProjectIndexes.length===cinematicProjectPages.size+legacyProjectRedirects.size,
+  'every top-level project route is covered by an intro profile or an explicit legacy redirect');
+for(const pagePath of topLevelProjectIndexes) {
+  const page=read(pagePath);
+  const introMatch=page.match(/\bdata-cinematic-intro=["']([^"']+)["']/);
+  if(introMatch) {
+    must(cinematicProjectKeys.includes(introMatch[1]),pagePath+' uses a registered cinematic profile');
+    must(cinematicProjectPages.has(pagePath),pagePath+' is part of the cinematic regression suite');
+    must(page.includes('/assets/css/project-cinematic-intro.css?v=20261012-2')&&page.includes('/assets/js/project-cinematic-intro.js?v=20261012-2'),
+      pagePath+' loads the matching cinematic intro assets');
+  } else {
+    must(legacyProjectRedirects.has(pagePath),pagePath+' has an intro or an explicitly approved legacy redirect');
+    must(/(?:window\.)?location\.replace\(/.test(page),pagePath+' legacy redirect has a client-side destination');
+    must(!page.includes('/assets/js/project-cinematic-intro.js'),pagePath+' redirect avoids mounting a cinematic overlay');
+  }
+}
+must([...legacyProjectRedirects].every(pagePath=>topLevelProjectIndexes.includes(pagePath)),
+  'both documented legacy project redirects still exist');
+
+
+function testCinematicIntroRuntime(projectKey, closeWithEscape=false, closeAutomatically=false) {
   const makeClassList=()=> {
     const values=new Set();
     return {
@@ -376,17 +421,23 @@ function testCinematicIntroRuntime(projectKey, closeWithEscape=false) {
   must(body.children.length===1&&intro.innerHTML.includes(expectedTitles[projectKey]),projectKey.toUpperCase()+' intro mounts its own title and artwork');
   must(body.classList.contains('pci-lock')&&intro.classList.contains('pci-is-live')&&typeof skipHandlers.click==='function'&&timeouts.some(timer=>timer.delay===4250),projectKey.toUpperCase()+' intro starts, blocks background scrolling, exposes Skip, and has an automatic end');
   let escapePrevented=false;
-  if(closeWithEscape) {
+  if(closeAutomatically) {
+    const autoClose=timeouts.find(timer=>timer.delay===4250);
+    must(!!autoClose&&typeof autoClose.callback==='function',projectKey.toUpperCase()+' schedules its automatic dismissal');
+    autoClose.callback();
+  } else if(closeWithEscape) {
     const keyHandler=listeners.get('keydown');
     must(typeof keyHandler==='function',projectKey.toUpperCase()+' registers its keyboard handler');
     keyHandler({key:'Escape',preventDefault(){escapePrevented=true}});
   } else {
     skipHandlers.click();
   }
-  must(!body.classList.contains('pci-lock')&&intro.classList.contains('pci-is-leaving')&&storage.get('tamasrazim-cinematic-intro-v1:'+projectKey)==='shown'&&(!closeWithEscape||escapePrevented),projectKey.toUpperCase()+' '+(closeWithEscape?'Escape':'Skip')+' closes the intro, restores scrolling, and records the session');
+  const closeMethod=closeAutomatically?'automatic timeout':closeWithEscape?'Escape':'Skip';
+  must(!body.classList.contains('pci-lock')&&intro.classList.contains('pci-is-leaving')&&storage.get('tamasrazim-cinematic-intro-v1:'+projectKey)==='shown'&&(!closeWithEscape||escapePrevented),projectKey.toUpperCase()+' '+closeMethod+' closes the intro, restores scrolling, and records the session');
 }
 for(const projectKey of cinematicProjectKeys) testCinematicIntroRuntime(projectKey);
 for(const projectKey of cinematicProjectKeys) testCinematicIntroRuntime(projectKey,true);
+for(const projectKey of cinematicProjectKeys) testCinematicIntroRuntime(projectKey,false,true);
 
 function testCinematicIntroEarlyExit(projectKey, prefersReducedMotion, alreadyShown) {
   const classes=new Set();
