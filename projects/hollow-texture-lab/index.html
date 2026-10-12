@@ -1,7 +1,7 @@
 <!doctype html>
 <!--
   HOLLOW TEXTURE LAB
-  This page is a free, local-first procedural material browser for the HOLLOW horror-game project.
+  Original local-first procedural material engine for the HOLLOW horror-game project. No remote texture assets or third-party runtime dependencies.
   The thousands of entries are deterministic recipes. Texture pixels are generated in the browser
   when a material is previewed or exported, so the repository does not contain thousands of duplicate files.
 -->
@@ -23,13 +23,13 @@
 </head>
 <body>
 <header class="topbar"><a class="brand" href="/projects/"><span class="brand-mark">HT</span><span>HOLLOW / TEXTURE LAB</span></a><nav class="toplinks"><a href="/projects/">Projects ↗</a><a href="https://github.com/Tamasrazim/tamasrazim.github.io/tree/main/projects/hollow-texture-lab">Source ↗</a></nav></header>
-<section class="hero"><div><div class="eyebrow">Real PBR asset catalogue / build 002</div><h1>Every surface<br>has a story.</h1><p>A material browser for the HOLLOW horror world. Browse separate, named CC0 material assets with source previews and links to the original PBR maps. No generated pixels, fake variations, or copied image files are used by this page.</p></div><div class="hero-stat"><strong id="totalStat">33</strong><span>Separate source assets · CC0</span></div></section>
+<section class="hero"><div><div class="eyebrow">Original material engine / build 003</div><h1>Every surface<br>has a story.</h1><p>A self-contained material workshop for the HOLLOW horror world. Distinct surface families, controllable wear, tileable generation and export up to 8K. Runs locally with no external assets, libraries, APIs or CDNs.</p></div><div class="hero-stat"><strong id="totalStat">1,024</strong><span>Original material recipes</span></div></section>
 <div class="toolbar"><input id="search" class="search" type="search" placeholder="Search concrete, rust, wood, moss…" aria-label="Search materials"><select id="sort" aria-label="Sort materials"><option value="default">Library order</option><option value="name">Name A–Z</option><option value="category">Category</option></select><button id="randomBtn">Random material ↗</button></div>
-<div class="layout"><aside class="sidebar"><p class="side-title">Material families</p><div class="cat-list" id="categories"></div><p class="sidebar-note">Every card represents a separate named source material. Previews are loaded from the asset catalogue; use each source link to obtain the original PBR maps. No synthetic texture generation.</p></aside>
+<div class="layout"><aside class="sidebar"><p class="side-title">Material families</p><div class="cat-list" id="categories"></div><p class="sidebar-note">Every recipe is rendered from this project’s own code. No remote files are requested. High-resolution maps render in a background worker.</p></aside>
 <main class="content"><div class="section-head"><h2 id="listTitle">All materials</h2><span class="count" id="resultCount">33 DISTINCT ASSETS</span></div><div class="grid" id="grid" aria-live="polite"></div><div class="bottomline"><span id="pageLabel">Showing 1–24</span><div><button id="prevPage">← Previous</button> <button id="nextPage">Next →</button></div></div>
 <section class="detail" id="detail"><div><div class="eyebrow">Original material preview</div><h2 id="detailName">Concrete 029</h2><p id="detailDescription">A separate source material with original PBR maps.</p><div class="preview-stage"><span class="preview-label" id="previewLabel">SOURCE MATERIAL PREVIEW</span><img id="previewObject" class="real-preview" alt="Selected material preview"></div><div class="map-row"><span class="tag" id="mapTag">PBR MAPS ON SOURCE</span><span class="tag">CC0 1.0</span><span class="tag">SEPARATE ASSET</span></div></div>
-<div class="detail-panel"><div class="eyebrow">Selected source material</div><h2 id="recipeCode">Concrete029</h2><p id="recipeMeta">Concrete · ambientCG · CC0 1.0</p><div class="preview-actions"><a class="primary" id="sourceBtn" href="https://ambientcg.com/view?id=Concrete029" target="_blank" rel="noopener noreferrer" style="display:inline-block;text-decoration:none;padding:9px 12px;border-radius:4px">Open source asset ↗</a><button id="copySeedBtn">Copy asset ID</button></div><div class="status" id="status" role="status">Select an asset to inspect its source.</div><p style="margin-top:15px">The gallery does not synthesize pixels or pretend that preview images are downloadable maps. Each source page lists the available original PBR files and their license.</p></div></section></main></div>
-<footer class="footer"><span>HOLLOW TEXTURE LAB / REAL SOURCE MATERIALS</span><span>Separate CC0 assets · original maps remain at source</span></footer>
+<div class="detail-panel"><div class="eyebrow">Selected material</div><h2 id="recipeCode">HT-CON-001</h2><p id="recipeMeta">Concrete · Seed 19001</p><div class="status" id="status" role="status">Ready.</div></div></section></main></div>
+<footer class="footer"><span>HOLLOW TEXTURE LAB / ORIGINAL PROCEDURAL MATERIALS</span><span>Local generation · no external assets · no account</span></footer>
 <script>
 "use strict";
 /* HOLLOW's original procedural engine. Nothing is downloaded or imported. */
