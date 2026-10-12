@@ -173,6 +173,7 @@ must((site.match(/class="v3-project-card v2-project-card v2-reveal v3-reveal"/g)
 must(site.includes('11 SELECTED PROJECTS')&&!site.includes('13 SELECTED PROJECTS'),'homepage selected-work count matches its eleven cards');
 const workPage=read('work/index.html');
 must(workPage.includes('11 SELECTED PROJECTS')&&!workPage.includes('13 SELECTED PROJECTS'),'dedicated Work page displays the correct selected-project count');
+must((workPage.match(/class="v3-project-card v2-project-card v2-reveal v3-reveal"/g)||[]).length===11,'dedicated Work page contains the same eleven selected project cards');
 must(!site.includes('PRO_TOOL_MANIFEST'),'homepage omits the generated micro-tool catalogue');
 for(const ref of ['href="/projects/trilyva/"','href="/projects/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"','href="/projects/webedyts/"','href="/projects/qalyvyron/"'])must(site.includes(ref),'homepage exposes '+ref);
 must(!site.includes('href="/projects/code-motion/renderer/">Open workspace'),'homepage does not send the TRILYVA card straight to the renderer');
