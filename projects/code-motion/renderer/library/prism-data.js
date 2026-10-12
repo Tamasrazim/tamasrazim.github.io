@@ -1,2 +1,14 @@
-// What this does: Stores the shared prism-style shape and color data used by related vector and animation assets.
+// What this does: Loads the shared Prism animation definitions used by TRILYVA's protected library.
+const dataUrl = new URL("../../../code-to-eps/prism-library.json", import.meta.url);
+const response = await fetch(dataUrl, { cache: "no-store" });
 
+if (!response.ok) {
+  throw new Error("Shared Prism data could not be loaded: " + response.status);
+}
+
+const data = await response.json();
+if (!Array.isArray(data)) {
+  throw new Error("Shared Prism data must be a JSON array.");
+}
+
+export default data;
