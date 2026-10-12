@@ -7,7 +7,7 @@
  <linearGradient id="clay2" x2="0" y2="1"><stop stop-color="#bd7652"/><stop offset=".35" stop-color="#a9583d"/><stop offset="1" stop-color="#80402f"/></linearGradient>
  <linearGradient id="dark" x2="0" y2="1"><stop stop-color="#82422f"/><stop offset="1" stop-color="#512f27"/></linearGradient>
  <filter id="soft"><feGaussianBlur stdDeviation="13"/></filter>
- <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".035 .12" numOctaves="2" seed="29"/><feColorMatrix values=".3 0 0 0 .18 .3 0 0 0 .09 .3 0 0 0 .05 0 0 0 .17 0"/></filter>
+
 </defs>
 <rect width="2048" height="1024" fill="url(#mortar)"/>
 <!-- Mortar is deliberately irregular and stained, not a clean grid. -->
@@ -167,5 +167,5 @@
  <path d="M1292 120 l-7 11 4 8 -8 13 M1471 58 l-6 12 4 10 -8 10 M1644 148 l-8 10 4 10 -7 12"/>
  <path d="M1827 59 l-7 12 5 8 -8 12 M1993 137 l-7 10 3 9 -7 11"/>
 </g>
-<rect width="2048" height="1024" filter="url(#grain)" opacity=".28"/>
+
 </svg>
