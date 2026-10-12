@@ -90,6 +90,67 @@
     }
   };
 
+
+  // Every featured project has its own visual direction and short title sequence.
+  Object.assign(profiles, {
+    neo: {
+      title: "NEO", kicker: "NATIVE GAME / WINDOWS X64",
+      tagline: "FIND THE NEXT WAY THROUGH.",
+      description: "A quiet corridor turns into a puzzle of light, space, and movement.",
+      sequence: "SEQUENCE 05 / SPATIAL PUZZLE",
+      art: '<div class="pci-neo-scene" aria-hidden="true"><div class="pci-neo-floor"></div><div class="pci-neo-side pci-neo-side-left"></div><div class="pci-neo-side pci-neo-side-right"></div><div class="pci-neo-portal"><i></i><i></i><b>NEO</b></div><span class="pci-neo-marker">FLOOR 001 / GATE ONLINE</span></div>'
+    },
+    "code-to-svg": {
+      title: "CODE → SVG", kicker: "VECTOR WORKSPACE / SCALABLE ART",
+      tagline: "DRAW WITH CODE.",
+      description: "A path is traced, nodes settle into place, and a clean vector takes shape.",
+      sequence: "SEQUENCE 06 / VECTOR CONSTRUCTION",
+      art: '<div class="pci-vector-art" aria-hidden="true"><div class="pci-vector-paper"></div><svg viewBox="0 0 560 460" role="presentation"><path class="pci-vector-path" d="M75 330 C90 110 200 65 280 230 S440 390 485 105"/><path class="pci-vector-path pci-vector-path-secondary" d="M75 330 L180 122 L280 230 L390 320 L485 105"/><g class="pci-vector-nodes"><circle cx="75" cy="330" r="6"/><circle cx="180" cy="122" r="6"/><circle cx="280" cy="230" r="6"/><circle cx="390" cy="320" r="6"/><circle cx="485" cy="105" r="6"/></g></svg><span class="pci-vector-label">PATH / 05 NODES / SVG</span></div>'
+    },
+    "code-to-eps": {
+      title: "CODE → EPS", kicker: "VECTOR OUTPUT / PRINT-READY GEOMETRY",
+      tagline: "SHAPE IT. EXPORT IT.",
+      description: "A vector artboard resolves into precise contours and export marks.",
+      sequence: "SEQUENCE 07 / VECTOR OUTPUT",
+      art: '<div class="pci-eps-scene" aria-hidden="true"><div class="pci-eps-sheet"><i></i><i></i><i></i><i></i><svg viewBox="0 0 420 420" role="presentation"><path d="M210 60 335 132 335 276 210 350 85 276 85 132Z"/><path d="M210 60V205L85 276M210 205 335 132M210 205V350"/><circle cx="210" cy="205" r="77"/><path d="M130 205H290M210 125V285"/></svg></div><span class="pci-eps-label">EPS / VECTOR ARTBOARD</span></div>'
+    },
+    "format-forge": {
+      title: "FORMAT FORGE", kicker: "BROWSER TOOL / LOCAL FILE WORKFLOW",
+      tagline: "MAKE FILES FLOW.",
+      description: "File shapes rotate through a clean conversion path, ready for the next task.",
+      sequence: "SEQUENCE 08 / FILE WORKFLOW",
+      art: '<div class="pci-forge-scene" aria-hidden="true"><div class="pci-forge-orbit"></div><div class="pci-file-tile pci-file-tile-back"><span>TXT</span><i></i></div><div class="pci-file-tile pci-file-tile-mid"><span>SVG</span><i></i></div><div class="pci-file-tile pci-file-tile-front"><span>FILE</span><i></i><b>↗</b></div><span class="pci-forge-track">INPUT / TRANSFORM / OUTPUT</span></div>'
+    },
+    "asset-vault": {
+      title: "STOCK ASSET VAULT", kicker: "CREATIVE LIBRARY / LOCAL ORGANISATION",
+      tagline: "KEEP EVERY ASSET IN SIGHT.",
+      description: "A field of asset cards arranges itself into a tidy creative library.",
+      sequence: "SEQUENCE 09 / ASSET ORGANISATION",
+      art: '<div class="pci-vault-scene" aria-hidden="true"><div class="pci-vault-grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="pci-vault-card pci-vault-card-a"><b>SVG</b><span>VECTOR</span></div><div class="pci-vault-card pci-vault-card-b"><b>MP4</b><span>MOTION</span></div><div class="pci-vault-card pci-vault-card-c"><b>PNG</b><span>IMAGE</span></div><span class="pci-vault-caption">FILES / TAGS / METADATA</span></div>'
+    },
+    kynestra: {
+      title: "KYNESTRA", kicker: "MODULAR DESKTOP / CREATIVE SYSTEM",
+      tagline: "ONE CORE. CONNECTED TOOLS.",
+      description: "Independent modules align around one stable centre.",
+      sequence: "SEQUENCE 10 / MODULAR ARCHITECTURE",
+      art: '<div class="pci-kyn-scene" aria-hidden="true"><div class="pci-kyn-orbit"></div><div class="pci-kyn-module pci-kyn-module-a">CORE</div><div class="pci-kyn-module pci-kyn-module-b">MEDIA</div><div class="pci-kyn-module pci-kyn-module-c">FORGE</div><div class="pci-kyn-module pci-kyn-module-d">DATA</div><div class="pci-kyn-centre">K</div><span class="pci-kyn-caption">MODULES / SHARED STATE / LOCAL</span></div>'
+    },
+    bncagrocare: {
+      title: "BNC AGROCARE", kicker: "BUSINESS SOFTWARE / CATALOGUE + INVOICING",
+      tagline: "GROWTH MEETS GOOD WORKFLOW.",
+      description: "A branching line grows into an agricultural mark.",
+      sequence: "SEQUENCE 11 / BUSINESS WORKFLOW",
+      art: '<div class="pci-organic-scene" aria-hidden="true"><div class="pci-organic-orbit"></div><svg viewBox="0 0 520 500" role="presentation"><path class="pci-vine" d="M260 435 C240 350 278 282 260 208 S245 108 260 64"/><path class="pci-vine" d="M258 310 C193 291 155 252 115 205"/><path class="pci-vine" d="M263 234 C324 217 365 173 404 127"/><path class="pci-leaf" d="M115 205 C119 147 167 140 214 226 C179 256 139 244 115 205Z"/><path class="pci-leaf" d="M404 127 C354 102 319 130 304 205 C352 211 388 182 404 127Z"/><path class="pci-leaf" d="M260 64 C215 112 225 158 260 190 C295 157 305 111 260 64Z"/><path class="pci-leaf" d="M260 341 C204 310 176 342 191 390 C225 400 252 378 260 341Z"/></svg><span class="pci-organic-caption">CATALOGUE / INVOICE / LOCAL WORKFLOW</span></div>'
+    },
+    "repo-token-meter": {
+      title: "REPO TOKEN METER", kicker: "DEVELOPER TOOL / REPOSITORY FOOTPRINT",
+      tagline: "SEE THE SHAPE OF YOUR CODE.",
+      description: "Lines, bars, and a scanning beam turn a repository into a readable overview.",
+      sequence: "SEQUENCE 12 / REPOSITORY ANALYSIS",
+      art: '<div class="pci-meter-scene" aria-hidden="true"><div class="pci-meter-header"><span>REPO / SCAN</span><span>LOCAL</span></div><div class="pci-meter-bars"><i style="--bar:30%;--delay:.1s"></i><i style="--bar:76%;--delay:.2s"></i><i style="--bar:52%;--delay:.3s"></i><i style="--bar:91%;--delay:.4s"></i><i style="--bar:43%;--delay:.5s"></i><i style="--bar:68%;--delay:.6s"></i><i style="--bar:36%;--delay:.7s"></i><i style="--bar:84%;--delay:.8s"></i><i style="--bar:58%;--delay:.9s"></i><i style="--bar:96%;--delay:1s"></i><i style="--bar:44%;--delay:1.1s"></i><i style="--bar:72%;--delay:1.2s"></i></div><div class="pci-meter-scan"></div><div class="pci-meter-number">SHA <b>256</b> / FILE MAP</div></div>'
+    }
+  });
+
   const profile = profiles[projectKey];
   if (!profile) return;
 
