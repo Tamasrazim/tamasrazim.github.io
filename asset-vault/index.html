@@ -55,8 +55,20 @@
 }
   </script>
 <link rel="stylesheet" href="/assets/css/monochrome.css?v=20261010-1">
+<link rel="stylesheet" href="/assets/css/site-navigation.css?v=20261012-1"><script defer src="/assets/js/site-navigation.js?v=20261012-1"></script>
 </head><body><div class="app">
-<header class="topbar"><a class="brand" href="../"><span class="brand-mark">T</span><span class="brand-text">STOCK ASSET VAULT <span class="muted">— TAMASRAZIM</span></span></a><div class="muted" id="resultCount">0 shown</div><div class="top-actions"><button class="btn" id="pickBtn">Import assets</button><button class="btn danger" id="clearBtn">Clear vault</button></div></header>
+<header class="topbar"><a class="brand" href="../"><span class="brand-mark">T</span><span class="brand-text">STOCK ASSET VAULT <span class="muted">— TAMASRAZIM</span></span></a><div class="muted" id="resultCount">0 shown</div><div class="top-actions"><button class="btn" id="pickBtn">Import assets</button><button class="btn danger" id="clearBtn">Clear vault</button></div><details class="site-page-menu">
+<summary>Site pages</summary>
+<nav class="site-page-menu__links" aria-label="Main site navigation">
+<a href="/projects/" aria-current="page">Projects <span aria-hidden="true">↗</span></a>
+<a href="/work/">Work <span aria-hidden="true">↗</span></a>
+<a href="/about/">About <span aria-hidden="true">↗</span></a>
+<a href="/approach/">Approach <span aria-hidden="true">↗</span></a>
+<a href="/elsewere/">Elsewhere <span aria-hidden="true">↗</span></a>
+<a href="/licences/">Licences <span aria-hidden="true">↗</span></a>
+</nav>
+</details>
+</header>
 <div class="shell"><aside class="sidebar">
 <section class="panel"><div class="label">Vault status</div><div class="stats"><div class="stat"><strong id="totalCount">0</strong><span>Total</span></div><div class="stat"><strong id="readyCount">0</strong><span>Ready</span></div><div class="stat"><strong id="submittedCount">0</strong><span>Submitted</span></div><div class="stat"><strong id="approvedCount">0</strong><span>Approved</span></div></div></section>
 <section class="panel"><div class="label">Find</div><div class="filters"><input class="field" id="search" placeholder="Search title, file, keywords…"><select class="field" id="statusFilter"><option value="">All statuses</option><option value="ready">Ready</option><option value="submitted">Submitted</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select><select class="field" id="kindFilter"><option value="">All types</option><option value="IMAGE">Images</option><option value="VIDEO">Videos</option></select></div></section>
