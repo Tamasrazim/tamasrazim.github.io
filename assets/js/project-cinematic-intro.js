@@ -145,12 +145,12 @@
     home: {
       title: "TAMASRAZIM",
       kicker: "REGISTERED IDENTITY / LIVE BUILD",
-      tagline: "IDENTITY, ASSEMBLED FROM THE ORIGINAL.",
+      tagline: "A SINGLE ID. ONE CLEAN STRIKE.", "assets/js/project-cinematic-intro.js"
       description: "The existing identity card is the animation—not a recreation.",
-      sequence: "IDENTITY ASSEMBLY / MAIN SITE",
+      sequence: "DROP-IN IDENTITY / MAIN SITE", "assets/js/project-cinematic-intro.js"
       durationMs: 8500,
       durationLabel: "08.5 SEC",
-      art: '<div class="pci-home-id-mount" aria-label="Original identity card being assembled"></div>'
+      art: '<div class="pci-home-id-mount" aria-label="Original identity card landing into a precision frame"></div>'
     },
     "repo-token-meter": {
       title: "REPO TOKEN METER", kicker: "DEVELOPER TOOL / REPOSITORY FOOTPRINT",
@@ -169,7 +169,7 @@
   if (prefersReducedMotion) return;
 
   const sessionKey = projectKey === "home"
-    ? "tamasrazim-cinematic-intro-v3:home"
+    ? "tamasrazim-cinematic-intro-v4:home"
     : "tamasrazim-cinematic-intro-v1:" + projectKey;
   try {
     if (window.sessionStorage.getItem(sessionKey) === "shown") return;
@@ -201,24 +201,22 @@
   if (projectKey === "home") {
     intro.innerHTML = `
       <div class="pci-topbar">
-        <span>TAMASRAZIM <strong>/ PERSONAL IDENTITY</strong></span>
+        <span>TAMASRAZIM <strong>/ IDENTITY / MOTION STUDY</strong></span>
         <button class="pci-skip" type="button" aria-label="Skip identity card animation">
           SKIP INTRO <kbd>ESC</kbd>
         </button>
       </div>
       <div class="pci-home-build-stage">
         <div class="pci-home-id-rig">
-          <div class="pci-home-id-aura" aria-hidden="true"></div>
-          <div class="pci-home-id-ring pci-home-id-ring-a" aria-hidden="true"></div>
-          <div class="pci-home-id-ring pci-home-id-ring-b" aria-hidden="true"></div>
-          <div class="pci-home-id-outline" aria-hidden="true"></div>
+          <div class="pci-home-id-rail pci-home-id-rail-x" aria-hidden="true"></div>
+          <div class="pci-home-id-rail pci-home-id-rail-y" aria-hidden="true"></div>
+          <div class="pci-home-id-crop" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
           <div class="pci-home-id-scan" aria-hidden="true"></div>
-          <div class="pci-home-id-flash" aria-hidden="true"></div>
           ${profile.art}
         </div>
       </div>
       <div class="pci-bottomline">
-        <span>TR / ORIGINAL IDENTITY</span>
+        <span>TR / ID LOCKED</span>
         <div class="pci-progress" aria-hidden="true"><span></span></div>
         <span>${profile.durationLabel || "04.2 SEC"}</span>
       </div>`;

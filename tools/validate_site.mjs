@@ -262,9 +262,9 @@ const cinematicIntroCss=read('assets/css/project-cinematic-intro.css');
 const cinematicIntroJs=read('assets/js/project-cinematic-intro.js');
 execFileSync(process.execPath,['--check',path.join(ROOT,'assets/js/project-cinematic-intro.js')]);
 must(cinematicIntroJs.includes('Object.assign(profiles')&&cinematicIntroJs.includes('Escape'),'cinematic intro has project profiles and a keyboard skip path');
-must(cinematicIntroJs.includes('home: {')&&cinematicIntroJs.includes('IDENTITY ASSEMBLY / MAIN SITE'),'cinematic intro includes the homepage ID assembly profile');
+must(cinematicIntroJs.includes('home: {')&&cinematicIntroJs.includes('DROP-IN IDENTITY / MAIN SITE'),'cinematic intro includes the homepage ID assembly profile');
 must(cinematicIntroCss.includes('.pci-project--home')&&cinematicIntroCss.includes('.pci-home-id-mount')&&cinematicIntroCss.includes('.pci-home-built-card'),'homepage intro animates the original identity-card component');
-must(cinematicIntroCss.includes('@keyframes pci-home-card-reveal')&&cinematicIntroCss.includes('pci-home-constellation-bloom')&&cinematicIntroCss.includes('pci-home-flash-pass'),'homepage intro uses its new centre-opening 3D reveal and light-pass choreography');
+must(cinematicIntroCss.includes('@keyframes pci-home-card-drop')&&cinematicIntroCss.includes('pci-home-photo-wipe')&&cinematicIntroCss.includes('pci-home-crop-lock'),'homepage intro uses physical drop-in, photo wipe, and crop-mark lock choreography');
 must(cinematicIntroJs.includes('durationMs: 8500')&&cinematicIntroJs.includes('durationLabel: "08.5 SEC"'),'homepage ID assembly duration is between seven and ten seconds');
 must(cinematicIntroJs.includes('document.querySelector("main .id-card")')&&cinematicIntroJs.includes('homeMount.appendChild(homeCard)')&&cinematicIntroJs.includes('restoreHomeCard()'),'homepage animation moves and restores the original identity-card node');
 const identityCardCss=read('assets/css/site.css');
@@ -275,7 +275,7 @@ const identityCardMarkup=identityCardStart>=0&&identityCardEnd>identityCardStart
 must(identityCardMarkup.includes('src="./assets/images/tamanna-constellation.jpeg"')&&identityCardMarkup.includes('id="idAlias"')&&identityCardMarkup.includes('Robiul Rumman Razim'),'homepage keeps the original ID artwork and identity markup');
 must(identityCardCss.includes('.id-card{')&&identityCardCss.includes('.id-constellation{')&&identityCardCss.includes('.id-image-scan{')&&identityCardCss.includes('.id-kicker,.id-online,.id-status'),'original identity-card CSS assets and their styles remain in place');
 must(identityCardJs.includes("var idAlias = q('#idAlias')")&&identityCardJs.includes("scrambleTo(idAlias,'TAMASRAZIM',260)"),'original identity-card JavaScript interaction remains in place');
-must(site.includes('<body class="home-v2" data-cinematic-intro="home">')&&site.includes('project-cinematic-intro.css?v=20261013-4')&&site.includes('project-cinematic-intro.js?v=20261013-4'),'homepage loads the identity-assembly intro assets');
+must(site.includes('<body class="home-v2" data-cinematic-intro="home">')&&site.includes('project-cinematic-intro.css?v=20261013-5')&&site.includes('project-cinematic-intro.js?v=20261013-5'),'homepage loads the drop-in identity intro assets');
 const cinematicProjectKeys=['tunrun','webedyts','qalyvyron','trilyva','neo','code-to-svg','code-to-eps','format-forge','asset-vault','kynestra','bncagrocare','repo-token-meter'];
 must(cinematicProjectKeys.every(key=>cinematicIntroJs.includes(key+': {')||cinematicIntroJs.includes('"'+key+'": {')),'cinematic intro has a dedicated animation profile for every featured project');
 must(cinematicIntroCss.includes('prefers-reduced-motion:reduce')&&cinematicIntroCss.includes('.pci-project--tunrun')&&cinematicIntroCss.includes('.pci-project--webedyts')&&cinematicIntroCss.includes('.pci-project--qalyvyron')&&cinematicIntroCss.includes('.pci-project--trilyva'),'cinematic intro has reduced-motion handling and project-specific themes');
@@ -476,7 +476,7 @@ function testCinematicIntroRuntime(projectKey, closeWithEscape=false, closeAutom
     kynestra:'KYNESTRA',bncagrocare:'BNC AGROCARE','repo-token-meter':'REPO TOKEN METER'
   };
   const expectedDuration=projectKey==='home'?8500:4250;
-  const sessionKey=projectKey==='home'?'tamasrazim-cinematic-intro-v3:home':'tamasrazim-cinematic-intro-v1:'+projectKey;
+  const sessionKey=projectKey==='home'?'tamasrazim-cinematic-intro-v4:home':'tamasrazim-cinematic-intro-v1:'+projectKey;
   must(body.children.length===1&&intro.innerHTML.includes(expectedTitles[projectKey]),projectKey.toUpperCase()+' intro mounts its own title and layout');
   must(body.classList.contains('pci-lock')&&intro.classList.contains('pci-is-live')&&typeof skipHandlers.click==='function'&&timeouts.some(timer=>timer.delay===expectedDuration),projectKey.toUpperCase()+' intro starts, exposes Skip, locks scrolling, and uses the expected duration');
   if(projectKey==='home'){
@@ -520,7 +520,7 @@ function testCinematicIntroEarlyExit(projectKey, prefersReducedMotion, alreadySh
   const windowMock={
     matchMedia(){return {matches:prefersReducedMotion}},
     sessionStorage:{
-      getItem(key){const expectedKey=projectKey==='home'?'tamasrazim-cinematic-intro-v3:home':'tamasrazim-cinematic-intro-v1:'+projectKey;return alreadyShown&&key===expectedKey?'shown':null},
+      getItem(key){const expectedKey=projectKey==='home'?'tamasrazim-cinematic-intro-v4:home':'tamasrazim-cinematic-intro-v1:'+projectKey;return alreadyShown&&key===expectedKey?'shown':null},
       setItem(){}
     }
   };
