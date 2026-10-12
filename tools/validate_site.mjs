@@ -62,6 +62,9 @@ function checkInlineScripts(file){
 
 const htmlFiles=[
   'index.html',
+  'work/index.html',
+  'about/index.html',
+  'approach/index.html',
   'projects/index.html',
   'KYNESTRA/download.html',
   'projects/kynestra/index.html',
@@ -183,7 +186,14 @@ must(siteJs.includes('1000/60'),'background animation is capped at 60 FPS');
 must(siteJs.includes("event.key === 'Escape'")&&siteJs.includes("setMenuOpen(false, true)"),'mobile navigation closes on Escape and returns focus');
 must(siteJs.includes("menu.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation')"),'mobile navigation label tracks its expanded state');
 must(siteJs.includes("d.addEventListener('pointerdown'")&&siteJs.includes("nav.contains(event.target) || menu.contains(event.target)"),'mobile navigation closes on outside pointer input without toggling on the menu itself');
-must(siteJs.includes("w.innerWidth > 680"),'mobile navigation closes when returning to desktop width');
+must(siteJs.includes("w.innerWidth > 900"),'compact navigation closes only when returning to the full desktop layout');
+must(siteV3Css.includes('@media(max-width:900px)')&&siteV3Css.includes('.v3-nav.is-open{display:flex}'),'six-link navigation has a working tablet and mobile menu');
+for(const route of ['/projects/','/work/','/about/','/approach/','/elsewere/','/licences/']) must(site.includes('href="'+route+'"'),'main header links to '+route);
+for(const page of ['work','about','approach']) {
+  const pageHtml=read(page+'/index.html');
+  must(pageHtml.includes('href="/'+page+'/" aria-current="page"'),'dedicated '+page+' page marks its current navigation route');
+  for(const route of ['/projects/','/work/','/about/','/approach/','/elsewere/','/licences/']) must(pageHtml.includes('href="'+route+'"'),'dedicated '+page+' page links to '+route);
+}
 must(siteJs.includes('function scheduleProgress()')&&siteJs.includes('w.requestAnimationFrame(updateProgress)'),'scroll progress writes are coalesced with requestAnimationFrame');
 must(siteJs.includes('60000 - (now.getSeconds() * 1000) - now.getMilliseconds()'),'minute-resolution clock is scheduled on minute boundaries');
 must(siteJs.includes("d.addEventListener('visibilitychange', syncVisibility)")&&siteJs.includes('function stopOrbit()')&&siteJs.includes('function stopField()'),'decorative animation loops pause while the document is hidden');
