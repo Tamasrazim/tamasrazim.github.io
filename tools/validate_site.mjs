@@ -298,4 +298,38 @@ must(read('projects/code-to-eps/workspace/index.html').includes('id="allIconEpsB
 must(read('projects/code-to-eps/workspace/index.html').includes('id="allIconSvgBtn"'),'CODE-EPS exposes 10K icon SVG batch export');
 must(read('projects/code-to-eps/workspace/index.html').includes('const batchSize=50'),'CODE-EPS icon batch exporter uses groups of 50');
 
+const routeMenuPages=[
+  'projects/trilyva/index.html',
+  'projects/neo/index.html',
+  'projects/tunrun/index.html',
+  'projects/code-to-svg/index.html',
+  'projects/code-to-eps/index.html',
+  'projects/format-forge/index.html',
+  'projects/asset-vault/index.html',
+  'projects/kynestra/index.html',
+  'projects/bncagrocare/index.html',
+  'projects/repo-token-meter/index.html',
+  'projects/webedyts/index.html',
+  'projects/qalyvyron/index.html',
+  'projects/trilyva/the-last-star-train.html',
+  'projects/neo/download/index.html',
+  'projects/kynestra/download/index.html',
+  'projects/code-to-svg/workspace/index.html',
+  'projects/format-forge/workspace/index.html',
+  'projects/code-to-eps/workspace/index.html',
+  'projects/repo-token-meter/workspace/index.html',
+  'asset-vault/index.html'
+];
+const mainSiteRoutes=['/projects/','/work/','/about/','/approach/','/elsewere/','/licences/'];
+for(const file of routeMenuPages){
+  const page=read(file);
+  const menuStart=page.indexOf('<details class="site-page-menu">');
+  const menuEnd=page.indexOf('</details>',menuStart);
+  must(menuStart>=0&&menuEnd>menuStart,file+' has the compact main-site route menu');
+  const menuHtml=page.slice(menuStart,menuEnd+'</details>'.length);
+  for(const route of mainSiteRoutes) must(menuHtml.includes('href="'+route+'"'),file+' route menu links to '+route);
+  must(page.includes('/assets/css/site-navigation.css?v=20261012-1'),file+' loads route-menu styles');
+  must(page.includes('/assets/js/site-navigation.js?v=20261012-1'),file+' loads route-menu keyboard and dismissal behavior');
+}
+
 console.log('Global site validation complete.');
