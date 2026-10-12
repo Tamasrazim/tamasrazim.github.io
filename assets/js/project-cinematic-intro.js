@@ -145,9 +145,9 @@
     home: {
       title: "TAMASRAZIM",
       kicker: "REGISTERED IDENTITY / LIVE BUILD",
-      tagline: "A SINGLE ID. ONE CLEAN STRIKE.", "assets/js/project-cinematic-intro.js"
+      tagline: "A SINGLE ID. ONE CLEAN STRIKE.",
       description: "The existing identity card is the animation—not a recreation.",
-      sequence: "DROP-IN IDENTITY / MAIN SITE", "assets/js/project-cinematic-intro.js"
+      sequence: "DROP-IN IDENTITY / MAIN SITE",
       durationMs: 8500,
       durationLabel: "08.5 SEC",
       art: '<div class="pci-home-id-mount" aria-label="Original identity card landing into a precision frame"></div>'
