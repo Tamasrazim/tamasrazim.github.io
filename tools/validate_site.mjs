@@ -349,6 +349,7 @@ function testCinematicIntroRuntime(projectKey) {
     appendChild(node){node.parentNode=this;this.children.push(node)},
     removeChild(node){this.children=this.children.filter(child=>child!==node);node.parentNode=null}
   };
+  documentMock.body=body;
   const windowMock={
     sessionStorage:{
       getItem(key){return storage.has(key)?storage.get(key):null},
