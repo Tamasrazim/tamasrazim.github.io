@@ -142,6 +142,14 @@
       sequence: "SEQUENCE 11 / BUSINESS WORKFLOW",
       art: '<div class="pci-organic-scene" aria-hidden="true"><div class="pci-organic-orbit"></div><svg viewBox="0 0 520 500" role="presentation"><path class="pci-vine" d="M260 435 C240 350 278 282 260 208 S245 108 260 64"/><path class="pci-vine" d="M258 310 C193 291 155 252 115 205"/><path class="pci-vine" d="M263 234 C324 217 365 173 404 127"/><path class="pci-leaf" d="M115 205 C119 147 167 140 214 226 C179 256 139 244 115 205Z"/><path class="pci-leaf" d="M404 127 C354 102 319 130 304 205 C352 211 388 182 404 127Z"/><path class="pci-leaf" d="M260 64 C215 112 225 158 260 190 C295 157 305 111 260 64Z"/><path class="pci-leaf" d="M260 341 C204 310 176 342 191 390 C225 400 252 378 260 341Z"/></svg><span class="pci-organic-caption">CATALOGUE / INVOICE / LOCAL WORKFLOW</span></div>'
     },
+    home: {
+      title: "TAMASRAZIM",
+      kicker: "SOFTWARE ENGINEER / INDEPENDENT WORK",
+      tagline: "SOFTWARE. GAMES. CREATIVE TOOLS.",
+      description: "An evolving workspace for things built from scratch.",
+      sequence: "OPENING SEQUENCE / PERSONAL WEBSITE",
+      art: '<div class="pci-home-art" aria-hidden="true"><i class="pci-home-orbit pci-home-orbit-a"></i><i class="pci-home-orbit pci-home-orbit-b"></i><i class="pci-home-orbit pci-home-orbit-c"></i><div class="pci-home-plate"><span>T</span><b>01 / STUDIO</b></div><div class="pci-home-trace pci-home-trace-a"></div><div class="pci-home-trace pci-home-trace-b"></div><span class="pci-home-caption">SOFTWARE / GAMES / MOTION</span></div>'
+    },
     "repo-token-meter": {
       title: "REPO TOKEN METER", kicker: "DEVELOPER TOOL / REPOSITORY FOOTPRINT",
       tagline: "SEE THE SHAPE OF YOUR CODE.",
