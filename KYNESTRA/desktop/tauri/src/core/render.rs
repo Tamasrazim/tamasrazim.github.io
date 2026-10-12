@@ -82,7 +82,12 @@ impl RenderService {
         })
     }
 
-    pub fn start(&self, project_path: &str, job_id: &str, tasks: &TaskService) -> Result<RenderJobRecord, RenderError> {
+    pub fn start(
+        &self,
+        project_path: &str,
+        job_id: &str,
+        tasks: &TaskService,
+    ) -> Result<RenderJobRecord, RenderError> {
         let root = validate_project(project_path)?;
         let conn = db::open(&root.join("project.db"))?;
         let now = Utc::now().to_rfc3339();
@@ -104,7 +109,13 @@ impl RenderService {
             return Err(RenderError::InvalidStartState);
         }
 
-        if let Err(error) = tasks.update(project_path, &task_id, "running", 0.0, Some("render started".into())) {
+        if let Err(error) = tasks.update(
+            project_path,
+            &task_id,
+            "running",
+            0.0,
+            Some("render started".into()),
+        ) {
             let _ = conn.execute(
                 "UPDATE render_jobs SET status='queued',started_at=NULL,error=NULL WHERE job_id=?1 AND status='running'",
                 params![job_id],
@@ -119,12 +130,11 @@ impl RenderService {
     pub fn ensure_running(&self, project_path: &str, job_id: &str) -> Result<(), RenderError> {
         let root = validate_project(project_path)?;
         let conn = db::open(&root.join("project.db"))?;
-        let status: String = conn
-            .query_row(
-                "SELECT status FROM render_jobs WHERE job_id=?1",
-                params![job_id],
-                |row| row.get(0),
-            )?;
+        let status: String = conn.query_row(
+            "SELECT status FROM render_jobs WHERE job_id=?1",
+            params![job_id],
+            |row| row.get(0),
+        )?;
 
         require_running_status(&status)
     }
@@ -158,7 +168,13 @@ impl RenderService {
             return Err(RenderError::InvalidFinishState);
         }
 
-        if let Err(error) = tasks.update(project_path, &task_id, "completed", 1.0, Some("render completed and asset imported".into())) {
+        if let Err(error) = tasks.update(
+            project_path,
+            &task_id,
+            "completed",
+            1.0,
+            Some("render completed and asset imported".into()),
+        ) {
             let _ = conn.execute(
                 "UPDATE render_jobs
                  SET status='running',asset_id=NULL,output_relative_path=NULL,completed_at=NULL,error=NULL
@@ -199,7 +215,9 @@ impl RenderService {
             return Err(RenderError::InvalidFinishState);
         }
 
-        if let Err(task_error) = tasks.update(project_path, &task_id, "failed", 0.0, Some(error.into())) {
+        if let Err(task_error) =
+            tasks.update(project_path, &task_id, "failed", 0.0, Some(error.into()))
+        {
             let _ = conn.execute(
                 "UPDATE render_jobs
                  SET status='running',completed_at=NULL,error=NULL
@@ -213,7 +231,12 @@ impl RenderService {
         reader.finish()
     }
 
-    pub fn recover(&self, project_path: &str, job_id: &str, tasks: &TaskService) -> Result<RenderJobRecord, RenderError> {
+    pub fn recover(
+        &self,
+        project_path: &str,
+        job_id: &str,
+        tasks: &TaskService,
+    ) -> Result<RenderJobRecord, RenderError> {
         let root = validate_project(project_path)?;
         let conn = db::open(&root.join("project.db"))?;
 
@@ -230,7 +253,13 @@ impl RenderService {
             params![job_id],
         )?;
 
-        if let Err(error) = tasks.update(project_path, &task_id, "queued", 0.0, Some("recovered after application restart; ready to rerun".into())) {
+        if let Err(error) = tasks.update(
+            project_path,
+            &task_id,
+            "queued",
+            0.0,
+            Some("recovered after application restart; ready to rerun".into()),
+        ) {
             let _ = conn.execute(
                 "UPDATE render_jobs SET status='recoverable' WHERE job_id=?1 AND status='queued'",
                 params![job_id],
@@ -307,7 +336,12 @@ impl<'a> RenderJobReader<'a> {
             |row| row.get(0),
         )?;
 
-        Ok(Self { conn, job_id, status, started_at })
+        Ok(Self {
+            conn,
+            job_id,
+            status,
+            started_at,
+        })
     }
 
     fn finish(self) -> Result<RenderJobRecord, RenderError> {
@@ -367,4 +401,3 @@ mod tests {
         ));
     }
 }
-

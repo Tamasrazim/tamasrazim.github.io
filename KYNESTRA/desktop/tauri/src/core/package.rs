@@ -47,7 +47,11 @@ pub struct ImportResult {
 pub struct PackageService;
 
 impl PackageService {
-    pub fn export(&self, project_path: &str, output_path: &str) -> Result<PackageManifest, PackageError> {
+    pub fn export(
+        &self,
+        project_path: &str,
+        output_path: &str,
+    ) -> Result<PackageManifest, PackageError> {
         let root = validate_project(project_path)?;
         let output = PathBuf::from(output_path);
 
@@ -116,7 +120,8 @@ impl PackageService {
         let write_result = (|| -> Result<(), PackageError> {
             let file = File::create(&temp_output)?;
             let mut archive = ZipWriter::new(file);
-            let options = SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);
+            let options =
+                SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);
 
             let bytes = serde_json::to_vec_pretty(&manifest)?;
             archive.start_file(PACKAGE_MANIFEST, options)?;
@@ -151,10 +156,15 @@ impl PackageService {
         }
     }
 
-    pub fn import(&self, package_path: &str, destination_root: &Path) -> Result<ImportResult, PackageError> {
+    pub fn import(
+        &self,
+        package_path: &str,
+        destination_root: &Path,
+    ) -> Result<ImportResult, PackageError> {
         let package = Path::new(package_path);
 
-        if !package.is_file() || package.extension().and_then(|v| v.to_str()) != Some("tamasrazim") {
+        if !package.is_file() || package.extension().and_then(|v| v.to_str()) != Some("tamasrazim")
+        {
             return Err(PackageError::InvalidPackage);
         }
 
@@ -172,7 +182,11 @@ impl PackageService {
         validate_package_manifest(&manifest)?;
 
         let slug = slugify(&manifest.name);
-        let folder = format!("{}-{}.tamasrazim", slug, &manifest.project_id[..8.min(manifest.project_id.len())]);
+        let folder = format!(
+            "{}-{}.tamasrazim",
+            slug,
+            &manifest.project_id[..8.min(manifest.project_id.len())]
+        );
         let destination = destination_root.join(folder);
 
         if destination.exists() {
@@ -253,7 +267,10 @@ fn validate_working_manifest(project: &ProjectManifest) -> Result<(), PackageErr
     Ok(())
 }
 
-fn validate_manifest_consistency(package: &PackageManifest, project: &ProjectManifest) -> Result<(), PackageError> {
+fn validate_manifest_consistency(
+    package: &PackageManifest,
+    project: &ProjectManifest,
+) -> Result<(), PackageError> {
     if project.format != "tamasrazim"
         || project.format_version != "0.1"
         || project.project_id != package.project_id
@@ -323,7 +340,11 @@ fn safe_relative_path(value: &str) -> Result<PathBuf, PackageError> {
     Ok(path.to_path_buf())
 }
 
-fn collect_files(root: &Path, current: &Path, output: &mut Vec<String>) -> Result<(), PackageError> {
+fn collect_files(
+    root: &Path,
+    current: &Path,
+    output: &mut Vec<String>,
+) -> Result<(), PackageError> {
     for entry in fs::read_dir(current)? {
         let entry = entry?;
         let path = entry.path();
@@ -383,7 +404,11 @@ fn slugify(name: &str) -> String {
     }
 
     let value = output.trim_matches('-');
-    if value.is_empty() { "project".into() } else { value.into() }
+    if value.is_empty() {
+        "project".into()
+    } else {
+        value.into()
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -453,14 +478,25 @@ mod tests {
             created_by: "Other".into(),
             ..valid
         };
-        assert!(matches!(validate_working_manifest(&invalid), Err(PackageError::InvalidProjectManifest)));
+        assert!(matches!(
+            validate_working_manifest(&invalid),
+            Err(PackageError::InvalidProjectManifest)
+        ));
     }
 
     #[test]
     fn package_manifest_rejects_incompatible_version() {
         let valid_files = vec![
-            PackageFile { path: "manifest.json".into(), size: 1, sha256: "a".repeat(64) },
-            PackageFile { path: "project.db".into(), size: 1, sha256: "b".repeat(64) },
+            PackageFile {
+                path: "manifest.json".into(),
+                size: 1,
+                sha256: "a".repeat(64),
+            },
+            PackageFile {
+                path: "project.db".into(),
+                size: 1,
+                sha256: "b".repeat(64),
+            },
         ];
         let mut manifest = PackageManifest {
             format: "tamasrazim".into(),
@@ -494,8 +530,16 @@ mod tests {
             name: "Test".into(),
             created_at: "now".into(),
             files: vec![
-                PackageFile { path: "manifest.json".into(), size: 1, sha256: "a".repeat(64) },
-                PackageFile { path: "project.db".into(), size: 1, sha256: "b".repeat(64) },
+                PackageFile {
+                    path: "manifest.json".into(),
+                    size: 1,
+                    sha256: "a".repeat(64),
+                },
+                PackageFile {
+                    path: "project.db".into(),
+                    size: 1,
+                    sha256: "b".repeat(64),
+                },
             ],
         };
         assert!(validate_package_manifest(&base).is_ok());
@@ -513,7 +557,9 @@ mod tests {
         assert!(validate_package_manifest(&reserved).is_err());
 
         let mut missing_database = base;
-        missing_database.files.retain(|file| file.path != "project.db");
+        missing_database
+            .files
+            .retain(|file| file.path != "project.db");
         assert!(validate_package_manifest(&missing_database).is_err());
     }
 
@@ -574,10 +620,8 @@ mod tests {
         ).expect("project row");
 
         let output = project.join("backup.tamasrazim");
-        let result = PackageService::default().export(
-            project.to_str().unwrap(),
-            output.to_str().unwrap(),
-        );
+        let result =
+            PackageService::default().export(project.to_str().unwrap(), output.to_str().unwrap());
         assert!(matches!(result, Err(PackageError::InvalidOutput)));
     }
 
@@ -603,7 +647,8 @@ mod tests {
         symlink(&outside, project.join("source.txt")).expect("symlink");
 
         let archive = root.path().join("Symlinked.tamasrazim");
-        let result = PackageService::default().export(project.to_str().unwrap(), archive.to_str().unwrap());
+        let result =
+            PackageService::default().export(project.to_str().unwrap(), archive.to_str().unwrap());
         assert!(matches!(result, Err(PackageError::InvalidProject)));
     }
 
@@ -645,21 +690,26 @@ mod tests {
         let file = File::create(&package_path).expect("package");
         let mut zip = ZipWriter::new(file);
         let options = SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);
-        let package_manifest_bytes = serde_json::to_vec_pretty(&package_manifest).expect("package manifest");
-        zip.start_file(PACKAGE_MANIFEST, options).expect("package manifest entry");
-        zip.write_all(&package_manifest_bytes).expect("package manifest write");
-        zip.start_file("manifest.json", options).expect("manifest entry");
+        let package_manifest_bytes =
+            serde_json::to_vec_pretty(&package_manifest).expect("package manifest");
+        zip.start_file(PACKAGE_MANIFEST, options)
+            .expect("package manifest entry");
+        zip.write_all(&package_manifest_bytes)
+            .expect("package manifest write");
+        zip.start_file("manifest.json", options)
+            .expect("manifest entry");
         zip.write_all(manifest_bytes).expect("manifest write");
         zip.start_file("project.db", options).expect("db entry");
         zip.write_all(db_bytes).expect("db write");
         zip.finish().expect("finish");
 
-        let result = PackageService::default().import(
-            package_path.to_str().unwrap(),
-            &destination_root,
-        );
+        let result =
+            PackageService::default().import(package_path.to_str().unwrap(), &destination_root);
 
-        assert!(matches!(result, Err(PackageError::ImportedProjectInvalid(_))));
+        assert!(matches!(
+            result,
+            Err(PackageError::ImportedProjectInvalid(_))
+        ));
         assert!(!destination_root.join("broken-12345678.tamasrazim").exists());
     }
 
@@ -684,13 +734,19 @@ mod tests {
 
         let archive = root.path().join("Round-Trip.tamasrazim");
         let service = PackageService::default();
-        let manifest = service.export(project.to_str().unwrap(), archive.to_str().unwrap()).expect("export");
+        let manifest = service
+            .export(project.to_str().unwrap(), archive.to_str().unwrap())
+            .expect("export");
         assert_eq!(manifest.files.len(), 3);
 
         let destination_root = root.path().join("imported");
-        let imported = service.import(archive.to_str().unwrap(), &destination_root).expect("import");
+        let imported = service
+            .import(archive.to_str().unwrap(), &destination_root)
+            .expect("import");
         assert_eq!(imported.project_id, "12345678-aaaa-bbbb-cccc-dddddddddddd");
         assert_eq!(imported.files_verified, 3);
-        assert!(Path::new(&imported.project_path).join("source/example.js").is_file());
+        assert!(Path::new(&imported.project_path)
+            .join("source/example.js")
+            .is_file());
     }
 }

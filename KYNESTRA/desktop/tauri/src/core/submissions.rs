@@ -95,20 +95,29 @@ impl SubmissionService {
 
         let rows = stmt.query_map([], |row| {
             let metadata_json: String = row.get(11)?;
-            let metadata: Value = serde_json::from_str(&metadata_json).unwrap_or_else(|_| serde_json::json!({}));
+            let metadata: Value =
+                serde_json::from_str(&metadata_json).unwrap_or_else(|_| serde_json::json!({}));
             Ok(record_from_row(row, metadata))
         })?;
 
         Ok(rows.collect::<Result<Vec<_>, _>>()?)
     }
 
-    pub fn get(&self, project_path: &str, submission_id: &str) -> Result<SubmissionRecord, SubmissionError> {
+    pub fn get(
+        &self,
+        project_path: &str,
+        submission_id: &str,
+    ) -> Result<SubmissionRecord, SubmissionError> {
         validate_project(project_path)?;
         let conn = db::open(&Path::new(project_path).join("project.db"))?;
         self.get_one(&conn, submission_id)
     }
 
-    fn get_one(&self, conn: &rusqlite::Connection, id: &str) -> Result<SubmissionRecord, SubmissionError> {
+    fn get_one(
+        &self,
+        conn: &rusqlite::Connection,
+        id: &str,
+    ) -> Result<SubmissionRecord, SubmissionError> {
         conn.query_row(
             "SELECT s.submission_id,s.asset_id,a.filename,s.account_id,p.platform,p.display_name,
                     s.status,s.submitted_at,s.last_checked_at,s.public_url,s.status_reason,s.metadata_json
@@ -138,8 +147,15 @@ fn record_from_row(row: &rusqlite::Row<'_>, metadata: Value) -> SubmissionRecord
         submitted_at: row.get(7).unwrap_or(None),
         last_checked_at: row.get(8).unwrap_or(None),
         public_url: row.get(9).unwrap_or(None),
-        public_status: metadata.get("publicStatus").and_then(|v| v.as_str()).unwrap_or("unknown").into(),
-        checked_url: metadata.get("checkedUrl").and_then(|v| v.as_str()).map(str::to_string),
+        public_status: metadata
+            .get("publicStatus")
+            .and_then(|v| v.as_str())
+            .unwrap_or("unknown")
+            .into(),
+        checked_url: metadata
+            .get("checkedUrl")
+            .and_then(|v| v.as_str())
+            .map(str::to_string),
         status_reason: row.get(10).unwrap_or(None),
     }
 }
@@ -151,7 +167,10 @@ fn validate_project(path: &str) -> Result<PathBuf, SubmissionError> {
 }
 
 fn validate_status(status: &str) -> Result<(), SubmissionError> {
-    if matches!(status, "not_submitted" | "submitted" | "pending" | "approved" | "rejected" | "unknown") {
+    if matches!(
+        status,
+        "not_submitted" | "submitted" | "pending" | "approved" | "rejected" | "unknown"
+    ) {
         Ok(())
     } else {
         Err(SubmissionError::InvalidStatus)

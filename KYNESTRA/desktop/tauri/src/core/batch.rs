@@ -43,7 +43,10 @@ struct ChunkDigest {
     sha256: String,
 }
 
-pub fn package_flower_batch(input_dir: &str, output_dir: &str) -> Result<FlowerBatchPackageResult, String> {
+pub fn package_flower_batch(
+    input_dir: &str,
+    output_dir: &str,
+) -> Result<FlowerBatchPackageResult, String> {
     let input = Path::new(input_dir);
     let output = Path::new(output_dir);
 
@@ -62,9 +65,9 @@ pub fn package_flower_batch(input_dir: &str, output_dir: &str) -> Result<FlowerB
     let mut png = Vec::new();
     collect_files(input, &mut mp4, &mut jpg, &mut png)?;
 
-    mp4.sort_by(|a,b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
-    jpg.sort_by(|a,b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
-    png.sort_by(|a,b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+    mp4.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+    jpg.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+    png.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
 
     let folder_count = [mp4.len(), jpg.len(), png.len()]
         .iter()
@@ -74,8 +77,20 @@ pub fn package_flower_batch(input_dir: &str, output_dir: &str) -> Result<FlowerB
         .div_ceil(GROUP_SIZE);
 
     let mp4_zip = write_optional_zip(output, "FLOWERS_MP4.zip", &mp4, "video/mp4", true)?;
-    let jpg_zip = write_optional_zip(output, "FLOWERS_FIRST_FRAME_JPG.zip", &jpg, "image/jpeg", false)?;
-    let png_zip = write_optional_zip(output, "FLOWERS_FIRST_FRAME_PNG_TRANSPARENT.zip", &png, "image/png", false)?;
+    let jpg_zip = write_optional_zip(
+        output,
+        "FLOWERS_FIRST_FRAME_JPG.zip",
+        &jpg,
+        "image/jpeg",
+        false,
+    )?;
+    let png_zip = write_optional_zip(
+        output,
+        "FLOWERS_FIRST_FRAME_PNG_TRANSPARENT.zip",
+        &png,
+        "image/png",
+        false,
+    )?;
     let all_zip = write_master_zip(output, &mp4, &jpg, &png)?;
 
     Ok(FlowerBatchPackageResult {
@@ -111,7 +126,9 @@ fn collect_files(
     jpg: &mut Vec<FileEntry>,
     png: &mut Vec<FileEntry>,
 ) -> Result<(), String> {
-    for entry in fs::read_dir(root).map_err(|e| format!("Could not read {}: {e}", root.display()))? {
+    for entry in
+        fs::read_dir(root).map_err(|e| format!("Could not read {}: {e}", root.display()))?
+    {
         let entry = entry.map_err(|e| format!("Directory read failed: {e}"))?;
         let path = entry.path();
         if path.is_dir() {
@@ -122,7 +139,9 @@ fn collect_files(
             continue;
         }
 
-        let Some(ext) = path.extension().and_then(|x| x.to_str()) else { continue };
+        let Some(ext) = path.extension().and_then(|x| x.to_str()) else {
+            continue;
+        };
         let ext = ext.to_ascii_lowercase();
         let first_frame_png = ext == "png" && is_first_frame_png_name(&path);
         if ext != "mp4" && ext != "jpg" && ext != "jpeg" && !first_frame_png {
@@ -132,7 +151,13 @@ fn collect_files(
         let relative = path.strip_prefix(root).unwrap_or(&path);
         let name = relative.to_string_lossy().replace('\\', "/");
         let (sha256, chunks, size) = hash_file(&path)?;
-        let item = FileEntry { source: path.clone(), name, sha256, chunks, size };
+        let item = FileEntry {
+            source: path.clone(),
+            name,
+            sha256,
+            chunks,
+            size,
+        };
 
         match ext.as_str() {
             "mp4" => mp4.push(item),
@@ -145,15 +170,20 @@ fn collect_files(
 }
 
 fn is_first_frame_png_name(path: &Path) -> bool {
-    let name = path.file_name().and_then(|x| x.to_str()).unwrap_or("").to_ascii_lowercase();
-    name.contains("first") ||
-    name.contains("frame-000000") ||
-    name.contains("frame_000000") ||
-    name == "000000.png"
+    let name = path
+        .file_name()
+        .and_then(|x| x.to_str())
+        .unwrap_or("")
+        .to_ascii_lowercase();
+    name.contains("first")
+        || name.contains("frame-000000")
+        || name.contains("frame_000000")
+        || name == "000000.png"
 }
 
 fn hash_file(path: &Path) -> Result<(String, Vec<ChunkDigest>, u64), String> {
-    let mut file = File::open(path).map_err(|e| format!("Could not open {}: {e}", path.display()))?;
+    let mut file =
+        File::open(path).map_err(|e| format!("Could not open {}: {e}", path.display()))?;
     let mut whole = Sha256::new();
     let mut buf = vec![0u8; CHUNK_SIZE];
     let mut chunks = Vec::new();
@@ -161,7 +191,9 @@ fn hash_file(path: &Path) -> Result<(String, Vec<ChunkDigest>, u64), String> {
     let mut index = 0u64;
 
     loop {
-        let read = file.read(&mut buf).map_err(|e| format!("Read failed for {}: {e}", path.display()))?;
+        let read = file
+            .read(&mut buf)
+            .map_err(|e| format!("Read failed for {}: {e}", path.display()))?;
         if read == 0 {
             break;
         }
@@ -310,7 +342,10 @@ fn write_zip(
                 ));
             }
 
-            checksums.push_str(&format!("{}  {}  {}\n", item.sha256, archive_name, item.size));
+            checksums.push_str(&format!(
+                "{}  {}  {}\n",
+                item.sha256, archive_name, item.size
+            ));
             for chunk in &item.chunks {
                 chunks.push_str(&format!(
                     "{}  {}  offset={}  size={}  chunk={}\n",
@@ -407,7 +442,10 @@ fn write_master_zip(
             .map_err(|e| format!("Could not create {}: {e}", parent.display()))?;
     }
 
-    let file_name = path.file_name().and_then(|v| v.to_str()).unwrap_or("FLOWER_BATCH_ALL.zip");
+    let file_name = path
+        .file_name()
+        .and_then(|v| v.to_str())
+        .unwrap_or("FLOWER_BATCH_ALL.zip");
     let temp_path = path
         .parent()
         .unwrap_or_else(|| Path::new("."))
@@ -422,8 +460,22 @@ fn write_master_zip(
         let mut chunks = String::new();
 
         append_master_entries(&mut zip, options, mp4, "MP4", &mut checksums, &mut chunks)?;
-        append_master_entries(&mut zip, options, jpg, "FIRST_FRAME_JPG", &mut checksums, &mut chunks)?;
-        append_master_entries(&mut zip, options, png, "FIRST_FRAME_PNG_TRANSPARENT", &mut checksums, &mut chunks)?;
+        append_master_entries(
+            &mut zip,
+            options,
+            jpg,
+            "FIRST_FRAME_JPG",
+            &mut checksums,
+            &mut chunks,
+        )?;
+        append_master_entries(
+            &mut zip,
+            options,
+            png,
+            "FIRST_FRAME_PNG_TRANSPARENT",
+            &mut checksums,
+            &mut chunks,
+        )?;
 
         zip.start_file("CHECKSUMS.sha256", options)
             .map_err(|e| format!("ZIP checksum entry failed: {e}"))?;
@@ -538,7 +590,9 @@ fn append_master_entries(
             let read = source
                 .read(&mut buf)
                 .map_err(|e| format!("Read failed for {}: {e}", item.source.display()))?;
-            if read == 0 { break; }
+            if read == 0 {
+                break;
+            }
 
             let bytes = &buf[..read];
             zip.write_all(bytes)
@@ -553,7 +607,9 @@ fn append_master_entries(
                 size: read as u64,
                 sha256: hex_bytes(&chunk.finalize()),
             };
-            let expected = item.chunks.get(chunk_index as usize)
+            let expected = item
+                .chunks
+                .get(chunk_index as usize)
                 .ok_or_else(|| format!("Chunk count changed for {}", item.source.display()))?;
             if &actual != expected {
                 return Err(format!(
@@ -569,10 +625,16 @@ fn append_master_entries(
 
         let actual_sha256 = hex_bytes(&whole.finalize());
         if actual_sha256 != item.sha256 || offset != item.size {
-            return Err(format!("Source changed while packaging: {}", item.source.display()));
+            return Err(format!(
+                "Source changed while packaging: {}",
+                item.source.display()
+            ));
         }
 
-        checksums.push_str(&format!("{}  {}  {}\n", item.sha256, archive_name, item.size));
+        checksums.push_str(&format!(
+            "{}  {}  {}\n",
+            item.sha256, archive_name, item.size
+        ));
         for chunk in &item.chunks {
             chunks.push_str(&format!(
                 "{}  {}  offset={}  size={}  chunk={}\n",
@@ -623,7 +685,12 @@ mod tests {
         assert!(fs::read_dir(root.path())
             .expect("directory")
             .filter_map(Result::ok)
-            .all(|entry| entry.path().file_name().and_then(|v| v.to_str()).map(|v| !v.starts_with(".FLOWERS_MP4.zip.partial-")).unwrap_or(true)));
+            .all(|entry| entry
+                .path()
+                .file_name()
+                .and_then(|v| v.to_str())
+                .map(|v| !v.starts_with(".FLOWERS_MP4.zip.partial-"))
+                .unwrap_or(true)));
     }
 
     #[test]

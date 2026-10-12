@@ -50,7 +50,11 @@ impl AssetService {
             .ok_or(AssetError::InvalidFilename)?
             .to_string();
 
-        if filename == "manifest.json" || filename == "project.db" || filename.contains('/') || filename.contains('\\') {
+        if filename == "manifest.json"
+            || filename == "project.db"
+            || filename.contains('/')
+            || filename.contains('\\')
+        {
             return Err(AssetError::InvalidFilename);
         }
 
@@ -63,11 +67,10 @@ impl AssetService {
             return merge_duplicate_metadata(&conn, &existing, incoming_metadata);
         }
 
-        let project_id: String = conn.query_row(
-            "SELECT project_id FROM projects LIMIT 1",
-            [],
-            |row| row.get(0),
-        )?;
+        let project_id: String =
+            conn.query_row("SELECT project_id FROM projects LIMIT 1", [], |row| {
+                row.get(0)
+            })?;
 
         let metadata_value = incoming_metadata;
         let metadata_json = serde_json::to_string(&metadata_value)?;
@@ -79,9 +82,8 @@ impl AssetService {
         let target = target_dir.join(&target_name);
         let partial = target_dir.join(format!(".{}.partial", target_name));
 
-        let write_result = copy_file(source, &partial).and_then(|_| {
-            fs::rename(&partial, &target).map_err(AssetError::Io)
-        });
+        let write_result = copy_file(source, &partial)
+            .and_then(|_| fs::rename(&partial, &target).map_err(AssetError::Io));
         if let Err(error) = write_result {
             let _ = fs::remove_file(&partial);
             return Err(error);
@@ -146,7 +148,8 @@ impl AssetService {
                 mime_type: row.get(5)?,
                 size_bytes: row.get::<_, i64>(6)? as u64,
                 sha256: row.get(7)?,
-                metadata: serde_json::from_str(&metadata_json).unwrap_or_else(|_| Value::Object(Default::default())),
+                metadata: serde_json::from_str(&metadata_json)
+                    .unwrap_or_else(|_| Value::Object(Default::default())),
             })
         })?;
 
@@ -215,7 +218,10 @@ fn merge_duplicate_metadata(
         .map(str::trim)
         .filter(|value| !value.is_empty())
     {
-        if !source_modules.iter().any(|item| item.as_str() == Some(existing_module)) {
+        if !source_modules
+            .iter()
+            .any(|item| item.as_str() == Some(existing_module))
+        {
             source_modules.push(Value::String(existing_module.to_lowercase()));
         }
         merged.remove("sourceModule");
@@ -225,7 +231,11 @@ fn merge_duplicate_metadata(
         for (key, value) in incoming_map {
             if key == "sourceModule" {
                 let module = value.as_str().unwrap_or_default().trim().to_lowercase();
-                if !module.is_empty() && !source_modules.iter().any(|item| item.as_str() == Some(module.as_str())) {
+                if !module.is_empty()
+                    && !source_modules
+                        .iter()
+                        .any(|item| item.as_str() == Some(module.as_str()))
+                {
                     source_modules.push(Value::String(module));
                 }
             } else if key != "sourceModules" {
@@ -250,7 +260,10 @@ fn merge_duplicate_metadata(
     Ok(updated)
 }
 
-fn find_by_hash(conn: &rusqlite::Connection, sha256: &str) -> Result<Option<AssetRecord>, AssetError> {
+fn find_by_hash(
+    conn: &rusqlite::Connection,
+    sha256: &str,
+) -> Result<Option<AssetRecord>, AssetError> {
     let found = conn.query_row(
         "SELECT asset_id,project_id,kind,filename,relative_path,mime_type,size_bytes,sha256,metadata_json
          FROM assets WHERE sha256=?1 LIMIT 1",
@@ -295,7 +308,10 @@ fn unique_target_name(dir: &Path, filename: &str, hash: &str) -> String {
 }
 
 fn mime_from_filename(filename: &str) -> Option<String> {
-    let ext = Path::new(filename).extension()?.to_str()?.to_ascii_lowercase();
+    let ext = Path::new(filename)
+        .extension()?
+        .to_str()?
+        .to_ascii_lowercase();
     let mime = match ext.as_str() {
         "webm" => "video/webm",
         "mp4" => "video/mp4",
@@ -371,22 +387,30 @@ mod tests {
         ProjectFixture::create(&project_root);
 
         let service = AssetService::default();
-        let first = service.ingest(
-            project_root.to_str().unwrap(),
-            source.to_str().unwrap(),
-            "video",
-            Some(serde_json::json!({"sourceModule":"c2m"})),
-        ).expect("first ingest");
-        assert_eq!(first.metadata.get("sourceModule").and_then(Value::as_str), Some("c2m"));
+        let first = service
+            .ingest(
+                project_root.to_str().unwrap(),
+                source.to_str().unwrap(),
+                "video",
+                Some(serde_json::json!({"sourceModule":"c2m"})),
+            )
+            .expect("first ingest");
+        assert_eq!(
+            first.metadata.get("sourceModule").and_then(Value::as_str),
+            Some("c2m")
+        );
 
-        let second = service.ingest(
-            project_root.to_str().unwrap(),
-            source.to_str().unwrap(),
-            "video",
-            Some(serde_json::json!({"sourceModule":"forge"})),
-        ).expect("second ingest");
+        let second = service
+            .ingest(
+                project_root.to_str().unwrap(),
+                source.to_str().unwrap(),
+                "video",
+                Some(serde_json::json!({"sourceModule":"forge"})),
+            )
+            .expect("second ingest");
 
-        let modules = second.metadata
+        let modules = second
+            .metadata
             .get("sourceModules")
             .and_then(Value::as_array)
             .expect("sourceModules");
@@ -439,11 +463,28 @@ mod tests {
         ProjectFixture::create(&project_root);
 
         let service = AssetService::default();
-        let first = service.ingest(project_root.to_str().unwrap(), source.to_str().unwrap(), "render", None).expect("first ingest");
-        let second = service.ingest(project_root.to_str().unwrap(), source.to_str().unwrap(), "render", None).expect("second ingest");
+        let first = service
+            .ingest(
+                project_root.to_str().unwrap(),
+                source.to_str().unwrap(),
+                "render",
+                None,
+            )
+            .expect("first ingest");
+        let second = service
+            .ingest(
+                project_root.to_str().unwrap(),
+                source.to_str().unwrap(),
+                "render",
+                None,
+            )
+            .expect("second ingest");
 
         assert_eq!(first.asset_id, second.asset_id);
-        assert_eq!(service.list(project_root.to_str().unwrap()).unwrap().len(), 1);
+        assert_eq!(
+            service.list(project_root.to_str().unwrap()).unwrap().len(),
+            1
+        );
     }
 
     struct ProjectFixture;

@@ -21,14 +21,12 @@ impl HandoffService {
             _ => Map::new(),
         };
 
-        object.insert("sourceModule".into(), Value::String(module.trim().to_lowercase()));
+        object.insert(
+            "sourceModule".into(),
+            Value::String(module.trim().to_lowercase()),
+        );
         object.insert("handoffVersion".into(), Value::String("0.1".into()));
 
-        assets.ingest(
-            project_path,
-            source_path,
-            kind,
-            Some(Value::Object(object)),
-        )
+        assets.ingest(project_path, source_path, kind, Some(Value::Object(object)))
     }
 }

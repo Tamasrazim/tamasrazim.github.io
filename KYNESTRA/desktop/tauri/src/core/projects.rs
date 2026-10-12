@@ -52,7 +52,15 @@ impl ProjectManager {
         let project_root = root.join(folder);
 
         let result = (|| -> Result<CreateProjectResult, ProjectError> {
-            for directory in ["modules/forge", "modules/c2m", "modules/vault", "source", "assets", "renders", "previews"] {
+            for directory in [
+                "modules/forge",
+                "modules/c2m",
+                "modules/vault",
+                "source",
+                "assets",
+                "renders",
+                "previews",
+            ] {
                 fs::create_dir_all(project_root.join(directory))?;
             }
 
@@ -186,7 +194,13 @@ fn validate_database_identity(root: &Path, manifest: &ProjectManifest) -> Result
         return Err(ProjectError::DatabaseManifestMismatch);
     }
 
-    if root_path.as_deref().map(str::trim).filter(|value| !value.is_empty()).map(|value| value != expected_root.as_ref()).unwrap_or(false) {
+    if root_path
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(|value| value != expected_root.as_ref())
+        .unwrap_or(false)
+    {
         let now = Utc::now().to_rfc3339();
         conn.execute(
             "UPDATE projects SET root_path=?1,updated_at=?2 WHERE project_id=?3",
@@ -226,7 +240,10 @@ fn validate_name(name: &str) -> Result<String, ProjectError> {
         return Err(ProjectError::InvalidName);
     }
 
-    if value.chars().any(|c| matches!(c, '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|')) {
+    if value
+        .chars()
+        .any(|c| matches!(c, '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|'))
+    {
         return Err(ProjectError::InvalidName);
     }
 
@@ -295,8 +312,12 @@ mod tests {
 
         assert_eq!(created.project.name, "My Flower Project");
         assert_eq!(created.manifest.format, FORMAT);
-        assert!(Path::new(&created.project.path).join("manifest.json").is_file());
-        assert!(Path::new(&created.project.path).join("project.db").is_file());
+        assert!(Path::new(&created.project.path)
+            .join("manifest.json")
+            .is_file());
+        assert!(Path::new(&created.project.path)
+            .join("project.db")
+            .is_file());
         assert!(Path::new(&created.project.path).join("source").is_dir());
         assert!(Path::new(&created.project.path).join("renders").is_dir());
 
@@ -313,17 +334,25 @@ mod tests {
         let root = tempfile::tempdir().expect("root");
         let manager = ProjectManager::default();
 
-        let created = manager.create(root.path(), "Movable Project").expect("project");
+        let created = manager
+            .create(root.path(), "Movable Project")
+            .expect("project");
         let old_path = PathBuf::from(&created.project.path);
         let moved_path = root.path().join("moved.tamasrazim");
         fs::rename(&old_path, &moved_path).expect("move project");
 
-        let opened = manager.open(moved_path.to_str().unwrap()).expect("open moved project");
+        let opened = manager
+            .open(moved_path.to_str().unwrap())
+            .expect("open moved project");
         assert_eq!(opened.project_id, created.project.project_id);
 
         let conn = db::open(&moved_path.join("project.db")).expect("db");
         let root_path: String = conn
-            .query_row("SELECT root_path FROM projects WHERE project_id=?1", [created.project.project_id.as_str()], |row| row.get(0))
+            .query_row(
+                "SELECT root_path FROM projects WHERE project_id=?1",
+                [created.project.project_id.as_str()],
+                |row| row.get(0),
+            )
             .expect("root path");
         assert_eq!(root_path, moved_path.to_string_lossy());
     }
@@ -332,13 +361,16 @@ mod tests {
     fn validated_root_rejects_database_manifest_mismatch() {
         let root = tempfile::tempdir().expect("root");
         let manager = ProjectManager::default();
-        let created = manager.create(root.path(), "Boundary Project").expect("project");
+        let created = manager
+            .create(root.path(), "Boundary Project")
+            .expect("project");
 
         let conn = db::open(&Path::new(&created.project.path).join("project.db")).expect("db");
         conn.execute(
             "UPDATE projects SET name='Wrong Name' WHERE project_id=?1",
             [created.project.project_id.as_str()],
-        ).expect("update");
+        )
+        .expect("update");
 
         assert!(matches!(
             validated_root(&created.project.path),
@@ -350,13 +382,16 @@ mod tests {
     fn list_skips_project_with_database_mismatch() {
         let root = tempfile::tempdir().expect("root");
         let manager = ProjectManager::default();
-        let created = manager.create(root.path(), "Broken Project").expect("project");
+        let created = manager
+            .create(root.path(), "Broken Project")
+            .expect("project");
 
         let conn = db::open(&Path::new(&created.project.path).join("project.db")).expect("db");
         conn.execute(
             "UPDATE projects SET name='Wrong Name' WHERE project_id=?1",
             [created.project.project_id.as_str()],
-        ).expect("update");
+        )
+        .expect("update");
 
         let listed = manager.list(root.path()).expect("list");
         assert!(listed.is_empty());
@@ -367,12 +402,15 @@ mod tests {
         let root = tempfile::tempdir().expect("root");
         let manager = ProjectManager::default();
 
-        let created = manager.create(root.path(), "Consistent Project").expect("project");
+        let created = manager
+            .create(root.path(), "Consistent Project")
+            .expect("project");
         let conn = db::open(&Path::new(&created.project.path).join("project.db")).expect("db");
         conn.execute(
             "UPDATE projects SET project_id='different-id' WHERE project_id=?1",
             [created.project.project_id.as_str()],
-        ).expect("update");
+        )
+        .expect("update");
 
         assert!(matches!(
             manager.open(&created.project.path),
@@ -381,7 +419,8 @@ mod tests {
 
         let project_root = Path::new(&created.project.path);
         let conn = db::open(&project_root.join("project.db")).expect("db");
-        conn.execute("DELETE FROM projects", []).expect("delete project row");
+        conn.execute("DELETE FROM projects", [])
+            .expect("delete project row");
 
         assert!(matches!(
             manager.open(&created.project.path),
@@ -398,7 +437,10 @@ mod tests {
             name: "Name".into(),
             created_by: "Other".into(),
         };
-        assert!(matches!(validate_manifest(&manifest), Err(ProjectError::InvalidManifest)));
+        assert!(matches!(
+            validate_manifest(&manifest),
+            Err(ProjectError::InvalidManifest)
+        ));
     }
 
     #[test]

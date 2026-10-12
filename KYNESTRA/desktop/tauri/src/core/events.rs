@@ -39,7 +39,12 @@ impl EventBus {
         let conn = db::open(&project_path.join("project.db"))?;
         conn.execute(
             "INSERT INTO events (event_id,event_type,created_at,payload_json) VALUES (?1,?2,?3,?4)",
-            rusqlite::params![event.event_id,event.event_type,event.created_at,event.payload.to_string()]
+            rusqlite::params![
+                event.event_id,
+                event.event_type,
+                event.created_at,
+                event.payload.to_string()
+            ],
         )?;
         Ok(())
     }

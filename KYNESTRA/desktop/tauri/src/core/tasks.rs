@@ -33,10 +33,13 @@ impl TaskService {
 
         let task_id = uuid::Uuid::new_v4().to_string();
         let now = Utc::now().to_rfc3339();
-        let payload_json = serde_json::to_string(&payload.unwrap_or_else(|| Value::Object(Default::default())))?;
+        let payload_json =
+            serde_json::to_string(&payload.unwrap_or_else(|| Value::Object(Default::default())))?;
 
         let project_id: String = conn
-            .query_row("SELECT project_id FROM projects LIMIT 1", [], |row| row.get(0))
+            .query_row("SELECT project_id FROM projects LIMIT 1", [], |row| {
+                row.get(0)
+            })
             .map_err(|error| match error {
                 rusqlite::Error::QueryReturnedNoRows => TaskError::ProjectRecordMissing,
                 other => TaskError::Sqlite(other),
@@ -126,7 +129,7 @@ impl TaskService {
         let conn = db::open(&root.join("project.db"))?;
         let mut stmt = conn.prepare(
             "SELECT task_id,project_id,type,status,progress,message
-             FROM tasks ORDER BY created_at DESC"
+             FROM tasks ORDER BY created_at DESC",
         )?;
 
         let rows = stmt.query_map([], |row| {
@@ -156,10 +159,11 @@ impl TaskService {
                 continue;
             }
 
-            let valid_root = match ProjectManager::default().validated_root(path.to_string_lossy().as_ref()) {
-                Ok(value) => value,
-                Err(_) => continue,
-            };
+            let valid_root =
+                match ProjectManager::default().validated_root(path.to_string_lossy().as_ref()) {
+                    Ok(value) => value,
+                    Err(_) => continue,
+                };
             let database = valid_root.join("project.db");
             let conn = db::open(&database)?;
             let task_changed = conn.execute(
@@ -187,7 +191,9 @@ impl TaskService {
 
 fn validate_status(status: &str) -> Result<(), TaskError> {
     match status {
-        "queued" | "running" | "paused" | "recoverable" | "completed" | "failed" | "cancelled" => Ok(()),
+        "queued" | "running" | "paused" | "recoverable" | "completed" | "failed" | "cancelled" => {
+            Ok(())
+        }
         _ => Err(TaskError::InvalidStatus(status.into())),
     }
 }
@@ -195,7 +201,10 @@ fn validate_status(status: &str) -> Result<(), TaskError> {
 fn is_transition_allowed(from: &str, to: &str) -> bool {
     match from {
         "queued" => matches!(to, "running" | "cancelled"),
-        "running" => matches!(to, "paused" | "recoverable" | "completed" | "failed" | "cancelled"),
+        "running" => matches!(
+            to,
+            "paused" | "recoverable" | "completed" | "failed" | "cancelled"
+        ),
         "paused" => matches!(to, "running" | "cancelled"),
         "recoverable" => matches!(to, "queued" | "cancelled"),
         "completed" | "failed" | "cancelled" => false,
@@ -236,7 +245,10 @@ mod tests {
 
     #[test]
     fn rejects_unknown_status() {
-        assert!(matches!(validate_status("bogus"), Err(TaskError::InvalidStatus(_))));
+        assert!(matches!(
+            validate_status("bogus"),
+            Err(TaskError::InvalidStatus(_))
+        ));
     }
 
     #[test]
@@ -269,7 +281,9 @@ mod tests {
             [],
         ).expect("task row");
 
-        let tasks = TaskService::default().list(project.to_str().unwrap()).expect("list");
+        let tasks = TaskService::default()
+            .list(project.to_str().unwrap())
+            .expect("list");
         assert_eq!(tasks.len(), 1);
         assert_eq!(tasks[0].task_id, "task-list");
         assert_eq!(tasks[0].status, "queued");
@@ -296,18 +310,25 @@ mod tests {
             "INSERT INTO tasks (task_id,project_id,type,status,progress,created_at)
              VALUES ('render-task','render-test','render','queued',0,'now')",
             [],
-        ).expect("task row");
+        )
+        .expect("task row");
         conn.execute(
             "INSERT INTO render_jobs (job_id,task_id,project_id,status,format,composition_json,created_at)
              VALUES ('render-job','render-task','render-test','running','webm','{}','now')",
             [],
         ).expect("render job");
 
-        let count = TaskService::default().recover_all(root.path()).expect("recover");
+        let count = TaskService::default()
+            .recover_all(root.path())
+            .expect("recover");
         assert_eq!(count, 1);
 
         let status: String = conn
-            .query_row("SELECT status FROM render_jobs WHERE job_id='render-job'", [], |row| row.get(0))
+            .query_row(
+                "SELECT status FROM render_jobs WHERE job_id='render-job'",
+                [],
+                |row| row.get(0),
+            )
             .expect("render status");
         assert_eq!(status, "recoverable");
     }
@@ -346,13 +367,18 @@ mod tests {
             "INSERT INTO tasks (task_id,project_id,type,status,progress,created_at)
              VALUES ('task','test','render','running',0.5,'now')",
             [],
-        ).expect("task row");
+        )
+        .expect("task row");
 
-        let count = TaskService::default().recover_all(root.path()).expect("recover");
+        let count = TaskService::default()
+            .recover_all(root.path())
+            .expect("recover");
         assert_eq!(count, 1);
 
         let status: String = conn
-            .query_row("SELECT status FROM tasks WHERE task_id='task'", [], |row| row.get(0))
+            .query_row("SELECT status FROM tasks WHERE task_id='task'", [], |row| {
+                row.get(0)
+            })
             .expect("status");
         assert_eq!(status, "recoverable");
     }

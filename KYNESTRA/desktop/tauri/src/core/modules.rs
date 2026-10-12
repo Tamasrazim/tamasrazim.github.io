@@ -43,7 +43,11 @@ impl ModuleRegistry {
         modules.sort_by(|a, b| a.id.cmp(&b.id));
 
         for (index, module) in modules.iter().enumerate() {
-            if modules.iter().skip(index + 1).any(|other| other.id == module.id) {
+            if modules
+                .iter()
+                .skip(index + 1)
+                .any(|other| other.id == module.id)
+            {
                 return Err(ModuleRegistryError::DuplicateId(module.id.clone()));
             }
         }
@@ -66,7 +70,10 @@ fn validate_manifest(manifest: &ModuleManifest) -> Result<(), ModuleRegistryErro
         || manifest.version.trim().is_empty()
         || manifest.api_version != SUPPORTED_API_VERSION
         || manifest.entry.trim().is_empty()
-        || !matches!(manifest.module_type.as_str(), "renderer" | "converter" | "service")
+        || !matches!(
+            manifest.module_type.as_str(),
+            "renderer" | "converter" | "service"
+        )
         || manifest.capabilities.is_empty()
     {
         return Err(ModuleRegistryError::InvalidManifest(manifest.id.clone()));
@@ -77,15 +84,17 @@ fn validate_manifest(manifest: &ModuleManifest) -> Result<(), ModuleRegistryErro
     }
 
     let mut capabilities = std::collections::HashSet::new();
-    if manifest.capabilities.iter().any(|value| value.trim().is_empty()
-        || !capabilities.insert(value.trim().to_ascii_lowercase()))
-    {
+    if manifest.capabilities.iter().any(|value| {
+        value.trim().is_empty() || !capabilities.insert(value.trim().to_ascii_lowercase())
+    }) {
         return Err(ModuleRegistryError::InvalidManifest(manifest.id.clone()));
     }
 
     let mut events = std::collections::HashSet::new();
-    if manifest.events.iter().any(|value| value.trim().is_empty()
-        || !events.insert(value.trim().to_ascii_lowercase()))
+    if manifest
+        .events
+        .iter()
+        .any(|value| value.trim().is_empty() || !events.insert(value.trim().to_ascii_lowercase()))
     {
         return Err(ModuleRegistryError::InvalidManifest(manifest.id.clone()));
     }
@@ -109,9 +118,14 @@ mod tests {
 
     #[test]
     fn builtin_modules_validate() {
-        let modules = ModuleRegistry::default().builtin().expect("builtin modules");
+        let modules = ModuleRegistry::default()
+            .builtin()
+            .expect("builtin modules");
         assert_eq!(modules.len(), 3);
-        assert_eq!(modules.iter().map(|m| m.id.as_str()).collect::<Vec<_>>(), vec!["c2m", "forge", "vault"]);
+        assert_eq!(
+            modules.iter().map(|m| m.id.as_str()).collect::<Vec<_>>(),
+            vec!["c2m", "forge", "vault"]
+        );
     }
 
     #[test]

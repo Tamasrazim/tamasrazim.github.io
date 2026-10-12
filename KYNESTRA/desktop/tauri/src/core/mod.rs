@@ -1,14 +1,14 @@
 // What this does: Collects the core modules in one place so the rest of the app can use them through a consistent interface.
 
 pub mod accounts;
-pub mod batch;
 pub mod assets;
+pub mod batch;
 pub mod db;
 pub mod events;
-pub mod package;
-pub mod projects;
 pub mod handoff;
 pub mod modules;
+pub mod package;
+pub mod projects;
 pub mod render;
 pub mod submissions;
 pub mod tasks;
@@ -17,10 +17,10 @@ pub mod verification;
 use std::path::PathBuf;
 
 use accounts::AccountService;
-use handoff::HandoffService;
-use modules::ModuleRegistry;
 use assets::AssetService;
 use events::EventBus;
+use handoff::HandoffService;
+use modules::ModuleRegistry;
 use package::PackageService;
 use projects::ProjectManager;
 use render::RenderService;

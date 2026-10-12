@@ -33,7 +33,12 @@ impl VerificationService {
         let root = validate_project(project_path)?;
         let conn = db::open(&root.join("project.db"))?;
 
-        let (asset_id, filename, profile_url, metadata_json): (String, String, Option<String>, String) = conn.query_row(
+        let (asset_id, filename, profile_url, metadata_json): (
+            String,
+            String,
+            Option<String>,
+            String,
+        ) = conn.query_row(
             "SELECT s.asset_id,a.filename,p.profile_url,s.metadata_json
              FROM submissions s
              JOIN assets a ON a.asset_id=s.asset_id
@@ -135,13 +140,17 @@ impl VerificationService {
         reason: &str,
         metadata_json: String,
     ) -> Result<PublicStatusResult, VerificationError> {
-        let mut metadata: Value = serde_json::from_str(&metadata_json).unwrap_or_else(|_| json!({}));
+        let mut metadata: Value =
+            serde_json::from_str(&metadata_json).unwrap_or_else(|_| json!({}));
         if !metadata.is_object() {
             metadata = json!({});
         }
 
         metadata["publicStatus"] = Value::String(public_status.into());
-        metadata["checkedUrl"] = checked_url.clone().map(Value::String).unwrap_or(Value::Null);
+        metadata["checkedUrl"] = checked_url
+            .clone()
+            .map(Value::String)
+            .unwrap_or(Value::Null);
         metadata["checker"] = Value::String("exact-html-filename-v1".into());
         metadata["exactMatch"] = Value::Bool(exact_match);
 
