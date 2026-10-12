@@ -121,3 +121,97 @@ body.pci-lock{overflow:hidden!important}
 @media(prefers-reduced-motion:reduce){
  .pci-intro,.pci-intro:before,.pci-intro:after,.pci-intro *{animation:none!important;transition:none!important}
 }
+
+/* Project-specific cinematic sequences for the rest of the featured portfolio. */
+.pci-project--neo{--pci-accent:#ff765f;--pci-glow:rgba(255,76,52,.2)}
+.pci-project--code-to-svg{--pci-accent:#9c8cff;--pci-glow:rgba(118,95,255,.2)}
+.pci-project--code-to-eps{--pci-accent:#ffb58b;--pci-glow:rgba(255,129,72,.19)}
+.pci-project--format-forge{--pci-accent:#e9e35b;--pci-glow:rgba(233,227,91,.16)}
+.pci-project--asset-vault{--pci-accent:#aaff81;--pci-glow:rgba(91,255,156,.18)}
+.pci-project--kynestra{--pci-accent:#a9a2ff;--pci-glow:rgba(122,115,255,.2)}
+.pci-project--bncagrocare{--pci-accent:#8cda91;--pci-glow:rgba(72,184,94,.18)}
+.pci-project--repo-token-meter{--pci-accent:#5bff9c;--pci-glow:rgba(91,255,156,.18)}
+.pci-neo-scene,.pci-vector-art,.pci-eps-scene,.pci-forge-scene,.pci-vault-scene,.pci-kyn-scene,.pci-organic-scene,.pci-meter-scene{position:relative;width:100%;height:100%;min-height:260px;display:grid;place-items:center;overflow:hidden}
+.pci-neo-scene{perspective:850px;background:radial-gradient(ellipse at 50% 47%,rgba(255,80,55,.12),transparent 42%)}
+.pci-neo-floor{position:absolute;left:-25%;right:-25%;bottom:-15%;height:56%;transform:rotateX(66deg);transform-origin:top;background-image:linear-gradient(rgba(255,118,95,.2) 1px,transparent 1px),linear-gradient(90deg,rgba(255,118,95,.17) 1px,transparent 1px);background-size:44px 34px;mask-image:linear-gradient(transparent,#000 35%,transparent);animation:pci-floor-shift 4s linear infinite}
+.pci-neo-portal{position:relative;width:42%;height:66%;border:1px solid var(--pci-accent);display:grid;place-items:center;transform:rotateY(-12deg);box-shadow:0 0 0 12px rgba(255,118,95,.045),0 0 0 28px rgba(255,118,95,.025),0 0 55px var(--pci-glow);animation:pci-portal-breathe 3.2s ease-in-out infinite}
+.pci-neo-portal i{position:absolute;inset:12%;border:1px solid rgba(255,118,95,.7)}.pci-neo-portal i:nth-child(2){inset:25%;border-style:dashed}
+.pci-neo-portal b{font:700 clamp(18px,3vw,34px) "Unbounded",system-ui,sans-serif;letter-spacing:-.1em;color:#fff}
+.pci-neo-side{position:absolute;top:20%;bottom:17%;width:19%;border:1px solid rgba(255,118,95,.3);background:linear-gradient(130deg,rgba(255,118,95,.06),transparent 70%);transform:skewY(-12deg)}
+.pci-neo-side-left{left:7%}.pci-neo-side-right{right:7%;transform:skewY(12deg)}
+.pci-neo-marker,.pci-vector-label,.pci-eps-label,.pci-forge-track,.pci-vault-caption,.pci-kyn-caption,.pci-organic-caption,.pci-meter-number{position:absolute;z-index:3;bottom:8%;font:8px var(--v3-mono,"JetBrains Mono",monospace);letter-spacing:.12em;color:#aaa;text-align:center}
+.pci-neo-marker{top:8%;bottom:auto;left:0;right:0}
+.pci-vector-art svg{position:relative;width:92%;height:84%;overflow:visible}
+.pci-vector-paper{position:absolute;width:67%;height:64%;border:1px solid rgba(156,140,255,.4);transform:rotate(-8deg);box-shadow:16px 16px 0 rgba(156,140,255,.055)}
+.pci-vector-art .pci-vector-path{fill:none;stroke:var(--pci-accent);stroke-width:2;stroke-linecap:round;stroke-dasharray:1000;stroke-dashoffset:1000;filter:drop-shadow(0 0 7px var(--pci-glow));animation:pci-vector-draw 2.4s cubic-bezier(.2,.75,.2,1) .25s forwards}
+.pci-vector-art .pci-vector-path-secondary{stroke:#fff;stroke-width:1;opacity:.45;animation-delay:.55s}
+.pci-vector-nodes circle{fill:#07070b;stroke:var(--pci-accent);stroke-width:2;opacity:0;animation:pci-node-pop .4s ease forwards}
+.pci-vector-nodes circle:nth-child(1){animation-delay:.65s}.pci-vector-nodes circle:nth-child(2){animation-delay:.8s}.pci-vector-nodes circle:nth-child(3){animation-delay:.95s}.pci-vector-nodes circle:nth-child(4){animation-delay:1.1s}.pci-vector-nodes circle:nth-child(5){animation-delay:1.25s}
+.pci-vector-label{left:0;right:0}
+.pci-eps-sheet{position:relative;width:min(69%,390px);aspect-ratio:1;border:1px solid rgba(255,181,139,.65);background:linear-gradient(135deg,rgba(255,181,139,.08),rgba(255,181,139,.015));box-shadow:16px 16px 0 rgba(255,181,139,.04);transform:rotate(-5deg);animation:pci-sheet-settle 1s cubic-bezier(.2,.75,.2,1) .2s both}
+.pci-eps-sheet svg{width:100%;height:100%;padding:10%;fill:none;stroke:var(--pci-accent);stroke-width:1.3;stroke-dasharray:800;stroke-dashoffset:800;animation:pci-vector-draw 2.6s ease .5s forwards}
+.pci-eps-sheet>i{position:absolute;width:12px;height:12px;border-color:#fff;border-style:solid;z-index:2}
+.pci-eps-sheet>i:nth-child(1){left:-5px;top:-5px;border-width:1px 0 0 1px}.pci-eps-sheet>i:nth-child(2){right:-5px;top:-5px;border-width:1px 1px 0 0}
+.pci-eps-sheet>i:nth-child(3){left:-5px;bottom:-5px;border-width:0 0 1px 1px}.pci-eps-sheet>i:nth-child(4){right:-5px;bottom:-5px;border-width:0 1px 1px 0}
+.pci-eps-label{left:0;right:0}
+.pci-forge-scene{perspective:800px}
+.pci-forge-orbit{position:absolute;width:70%;height:34%;border:1px dashed rgba(233,227,91,.5);border-radius:50%;transform:rotate(-32deg);animation:pci-forge-orbit 9s linear infinite}
+.pci-file-tile{position:absolute;width:29%;max-width:150px;aspect-ratio:.78;border:1px solid var(--pci-accent);background:linear-gradient(145deg,rgba(233,227,91,.12),rgba(8,8,8,.9));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;box-shadow:0 18px 55px rgba(0,0,0,.25)}
+.pci-file-tile span{font:700 14px "Unbounded",system-ui,sans-serif;color:var(--pci-accent);letter-spacing:-.08em}
+.pci-file-tile i{display:block;width:60%;height:2px;background:var(--pci-accent);box-shadow:0 10px 0 rgba(233,227,91,.48),0 20px 0 rgba(233,227,91,.24)}
+.pci-file-tile-back{translate:-76px -14px;rotate:-18deg;opacity:.5;animation:pci-forge-float 4.6s ease-in-out infinite}
+.pci-file-tile-mid{translate:4px -26px;rotate:8deg;opacity:.8;animation:pci-forge-float 4.6s ease-in-out -1.4s infinite}
+.pci-file-tile-front{translate:72px 24px;rotate:14deg;animation:pci-forge-float 4.6s ease-in-out -2.8s infinite}
+.pci-file-tile-front b{position:absolute;right:-12px;top:-12px;width:29px;height:29px;display:grid;place-items:center;background:var(--pci-accent);color:#080808;font-size:16px}
+.pci-forge-track{left:0;right:0}
+.pci-vault-scene{background-image:radial-gradient(circle,rgba(91,255,156,.08) 1px,transparent 1px);background-size:25px 25px}
+.pci-vault-grid{position:absolute;inset:12%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:10px;transform:rotate(-8deg);opacity:.7}
+.pci-vault-grid i{border:1px solid rgba(170,255,129,.26);background:linear-gradient(135deg,rgba(170,255,129,.07),transparent)}
+.pci-vault-card{position:absolute;width:29%;height:35%;border:1px solid var(--pci-accent);background:linear-gradient(145deg,#13261c,#080e0b);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;box-shadow:0 18px 55px rgba(0,0,0,.42);animation:pci-vault-float 4.5s ease-in-out infinite}
+.pci-vault-card b{font:700 clamp(15px,2vw,25px) "Unbounded",system-ui,sans-serif;color:var(--pci-accent)}
+.pci-vault-card span{font:8px var(--v3-mono,monospace);letter-spacing:.15em;color:#b4d4bd}
+.pci-vault-card-a{left:13%;top:20%;rotate:-10deg}.pci-vault-card-b{right:13%;top:21%;rotate:9deg;animation-delay:-1.5s}.pci-vault-card-c{left:36%;bottom:16%;rotate:-2deg;animation-delay:-3s}
+.pci-vault-caption{left:0;right:0}
+.pci-kyn-scene{perspective:900px}
+.pci-kyn-orbit{position:absolute;width:75%;height:34%;border:1px dashed rgba(169,162,255,.5);border-radius:50%;rotate:-34deg;animation:pci-kyn-orbit 12s linear infinite}
+.pci-kyn-module{position:absolute;display:grid;place-items:center;width:27%;aspect-ratio:1.25;border:1px solid var(--pci-accent);background:linear-gradient(145deg,rgba(169,162,255,.15),rgba(6,8,15,.88));font:700 10px var(--v3-mono,monospace);letter-spacing:.12em;box-shadow:0 0 32px var(--pci-glow);animation:pci-kyn-float 4.5s ease-in-out infinite}
+.pci-kyn-module-a{left:10%;top:13%;rotate:-8deg}.pci-kyn-module-b{right:9%;top:19%;rotate:8deg;animation-delay:-1.1s}.pci-kyn-module-c{left:17%;bottom:14%;rotate:5deg;animation-delay:-2.2s}.pci-kyn-module-d{right:15%;bottom:10%;rotate:-5deg;animation-delay:-3.3s}
+.pci-kyn-centre{position:absolute;z-index:2;width:24%;aspect-ratio:1;border:1px solid #fff;display:grid;place-items:center;background:radial-gradient(circle,var(--pci-glow),#070710 70%);font:800 clamp(24px,4vw,48px) "Unbounded",system-ui,sans-serif;color:var(--pci-accent);box-shadow:0 0 0 12px rgba(169,162,255,.05),0 0 50px var(--pci-glow);animation:pci-mark-float 4s ease-in-out infinite}
+.pci-kyn-caption{left:0;right:0}
+.pci-organic-orbit{position:absolute;width:68%;height:48%;border:1px dashed rgba(140,218,145,.4);border-radius:50%;rotate:-34deg;animation:pci-organic-spin 15s linear infinite}
+.pci-organic-scene svg{position:relative;width:90%;height:88%;overflow:visible}
+.pci-vine,.pci-leaf{fill:none;stroke:var(--pci-accent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:800;stroke-dashoffset:800;animation:pci-vector-draw 2.5s cubic-bezier(.2,.75,.2,1) .3s forwards;filter:drop-shadow(0 0 9px var(--pci-glow))}
+.pci-leaf{fill:rgba(140,218,145,.07);stroke-width:1.5;animation-delay:.55s}
+.pci-organic-caption{left:0;right:0}
+.pci-meter-scene{width:min(85%,520px);height:72%;min-height:240px;border:1px solid rgba(91,255,156,.42);background:rgba(5,18,12,.83);padding:22px 20px 42px;box-shadow:0 0 40px var(--pci-glow);overflow:hidden}
+.pci-meter-header{display:flex;justify-content:space-between;border-bottom:1px solid rgba(91,255,156,.23);padding-bottom:11px;font:8px var(--v3-mono,monospace);letter-spacing:.14em;color:#b5e8c8}
+.pci-meter-bars{height:70%;display:flex;align-items:end;justify-content:space-between;gap:7px;padding-top:20px}
+.pci-meter-bars i{width:100%;height:var(--bar);border:1px solid rgba(91,255,156,.5);background:linear-gradient(0deg,rgba(91,255,156,.3),rgba(91,255,156,.025));transform-origin:bottom;transform:scaleY(.15);opacity:.35;animation:pci-bar-grow .85s cubic-bezier(.2,.75,.2,1) var(--delay) forwards,pci-bar-breathe 2.8s ease-in-out calc(var(--delay) + .9s) infinite}
+.pci-meter-scan{position:absolute;left:0;right:0;top:20%;height:1px;background:var(--pci-accent);box-shadow:0 0 14px var(--pci-accent);animation:pci-meter-sweep 2.6s ease-in-out infinite}
+.pci-meter-number{left:0;right:0;bottom:18px}
+.pci-title{font-size:clamp(40px,7.1vw,96px)}
+.pci-project--asset-vault .pci-title,.pci-project--repo-token-meter .pci-title{font-size:clamp(34px,5.5vw,74px)}
+.pci-project--code-to-svg .pci-title,.pci-project--code-to-eps .pci-title{font-size:clamp(38px,6.2vw,84px)}
+@keyframes pci-floor-shift{from{background-position:0 0,0 0}to{background-position:0 68px,44px 0}}
+@keyframes pci-portal-breathe{0%,100%{filter:brightness(.75);transform:rotateY(-12deg) scale(.98)}50%{filter:brightness(1.25);transform:rotateY(-12deg) scale(1.02)}}
+@keyframes pci-vector-draw{to{stroke-dashoffset:0}}
+@keyframes pci-node-pop{to{opacity:1}}
+@keyframes pci-sheet-settle{from{opacity:0;transform:translateY(16px) rotate(-9deg)}to{opacity:1;transform:translateY(0) rotate(-5deg)}}
+@keyframes pci-forge-orbit{to{rotate:328deg}}
+@keyframes pci-forge-float{0%,100%{translate:0 5px}50%{translate:0 -7px}}
+@keyframes pci-vault-float{0%,100%{translate:0 5px}50%{translate:0 -7px}}
+@keyframes pci-kyn-orbit{to{rotate:326deg}}
+@keyframes pci-kyn-float{0%,100%{translate:0 5px}50%{translate:0 -6px}}
+@keyframes pci-organic-spin{to{rotate:326deg}}
+@keyframes pci-bar-grow{to{transform:scaleY(1);opacity:1}}
+@keyframes pci-bar-breathe{0%,100%{filter:brightness(.8)}50%{filter:brightness(1.3)}}
+@keyframes pci-meter-sweep{0%{top:20%;opacity:.1}50%{opacity:1}100%{top:82%;opacity:.1}}
+@media(max-width:760px){
+ .pci-project--asset-vault .pci-title,.pci-project--repo-token-meter .pci-title{font-size:clamp(31px,9vw,54px)}
+ .pci-project--code-to-svg .pci-title,.pci-project--code-to-eps .pci-title{font-size:clamp(34px,10vw,60px)}
+ .pci-file-tile-back{translate:-52px -12px}.pci-file-tile-mid{translate:0 -22px}.pci-file-tile-front{translate:50px 18px}
+ .pci-neo-side{width:14%}.pci-meter-scene{width:94%;padding-inline:12px}
+}
+@media(prefers-reduced-motion:reduce){
+ .pci-neo-floor,.pci-neo-portal,.pci-vector-art .pci-vector-path,.pci-vector-nodes circle,.pci-eps-sheet,.pci-eps-sheet svg,.pci-forge-orbit,.pci-file-tile,.pci-vault-card,.pci-kyn-orbit,.pci-kyn-module,.pci-kyn-centre,.pci-organic-orbit,.pci-vine,.pci-leaf,.pci-meter-bars i,.pci-meter-scan{animation:none!important;transform:none!important;translate:none!important;rotate:none!important;opacity:1!important;stroke-dashoffset:0!important}
+}
