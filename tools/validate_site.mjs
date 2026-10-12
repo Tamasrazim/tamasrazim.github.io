@@ -234,7 +234,7 @@ must(webedytsPage.includes('not a screenshot')&&webedytsPage.includes('current e
 
 const qalyvyronPage=read('projects/qalyvyron/index.html');
 must(qalyvyronPage.includes('QALYVYRON')&&qalyvyronPage.includes('not yet a complete replacement for Blender'),'QALYVYRON has a dedicated page with honest development status');
-must(qalyvyronPage.includes('Focus Selected')&&qalyvyronPage.includes('offline PNG')&&qalyvyronPage.includes('What isn\'t done yet'),'QALYVYRON page distinguishes current functionality from unfinished systems');
+must(qalyvyronPage.includes('Focus Selected')&&qalyvyronPage.toLowerCase().includes('offline png')&&qalyvyronPage.toLowerCase().includes("what isn't done yet"),'QALYVYRON page distinguishes current functionality from unfinished systems');
 must(qalyvyronPage.includes('/actions/runs/38187040533')&&!qalyvyronPage.includes('releases/latest/download/QALYVYRON'),'QALYVYRON links its verified CI build and does not advertise an unpublished release');
 
 const iconLibrarySource=read('projects/code-to-eps/workspace/vector-icon-library.js');
