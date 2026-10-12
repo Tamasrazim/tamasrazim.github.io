@@ -299,7 +299,7 @@ for (const [projectKey,pagePath] of [
   ['repo-token-meter','projects/repo-token-meter/index.html']
 ]) {
   const page=read(pagePath);
-  must(page.includes('data-cinematic-intro="'+projectKey+'"')&&page.includes('/assets/css/project-cinematic-intro.css?v=20261013-8')&&page.includes('/assets/js/project-cinematic-intro.js?v=20261013-8'),projectKey.toUpperCase()+' project overview loads its cinematic intro');
+  must(page.includes('data-cinematic-intro="'+projectKey+'"')&&page.includes('/assets/css/project-cinematic-intro.css?v=20261013-7')&&page.includes('/assets/js/project-cinematic-intro.js?v=20261013-7'),projectKey.toUpperCase()+' project overview loads its cinematic intro');
 }
 
 
@@ -336,7 +336,7 @@ for(const pagePath of topLevelProjectIndexes) {
   if(introMatch) {
     must(cinematicProjectKeys.includes(introMatch[1]),pagePath+' uses a registered cinematic profile');
     must(cinematicProjectPages.has(pagePath),pagePath+' is part of the cinematic regression suite');
-    must(page.includes('/assets/css/project-cinematic-intro.css?v=20261013-8')&&page.includes('/assets/js/project-cinematic-intro.js?v=20261013-8'),
+    must(page.includes('/assets/css/project-cinematic-intro.css?v=20261013-7')&&page.includes('/assets/js/project-cinematic-intro.js?v=20261013-7'),
       pagePath+' loads the matching cinematic intro assets');
   } else {
     must(legacyProjectRedirects.has(pagePath),pagePath+' has an intro or an explicitly approved legacy redirect');
