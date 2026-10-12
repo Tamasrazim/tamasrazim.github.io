@@ -11,181 +11,142 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#090909">
 <meta name="color-scheme" content="dark">
-<meta name="description" content="A free procedural texture browser with 3,072 categorized material variations, live previews, and PNG export.">
+<meta name="description" content="Browse distinct CC0 PBR material assets for horror environments. Real source previews, categories, search, and links to original material maps.">
 <link rel="canonical" href="https://tamasrazim.github.io/projects/hollow-texture-lab/">
 <title>HOLLOW Texture Lab — Tamasrazim</title>
 <style>
 :root{color-scheme:dark;--bg:#090909;--panel:#111;--panel2:#171717;--line:#2b2b2b;--muted:#929292;--text:#f2f2f2;--accent:#d8d8d8;--mono:ui-monospace,SFMono-Regular,Consolas,monospace}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:var(--text);background:#202020;border:1px solid #383838;padding:9px 12px;border-radius:4px}button:hover,button:focus-visible{background:#303030;border-color:#777;outline:none}button:disabled{opacity:.4;cursor:wait}a{color:inherit}.mono,.eyebrow,.count,.tag,.field label{font-family:var(--mono);letter-spacing:.035em}.topbar{height:58px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:0 24px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;background:#090909ed;backdrop-filter:blur(14px)}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:750;letter-spacing:.08em}.brand-mark{display:grid;place-items:center;width:28px;height:28px;border:1px solid #777;font:700 12px var(--mono)}.toplinks{display:flex;gap:16px;color:#aaa;font-size:12px}.toplinks a{text-decoration:none}.toplinks a:hover{color:#fff}.hero{padding:36px 26px 24px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end}.eyebrow{font-size:10px;color:#aaa;text-transform:uppercase}.hero h1{font-size:clamp(32px,5vw,62px);line-height:.98;letter-spacing:-.055em;margin:12px 0 15px;font-weight:650}.hero p{color:#aaa;max-width:650px;margin:0}.hero-stat{text-align:right;min-width:140px}.hero-stat strong{display:block;font:500 clamp(30px,4vw,48px) var(--mono);letter-spacing:-.07em}.hero-stat span{color:#888;font:10px var(--mono);text-transform:uppercase}.toolbar{display:flex;gap:9px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid var(--line);background:#0d0d0d}.search{flex:1;min-width:190px}input,select{background:#151515;color:#eee;border:1px solid #343434;border-radius:4px;padding:10px 11px;min-width:0}input:focus,select:focus{outline:1px solid #888;border-color:#888}.layout{display:grid;grid-template-columns:210px minmax(0,1fr);min-height:70vh}.sidebar{padding:20px 14px;border-right:1px solid var(--line)}.side-title{font:10px var(--mono);color:#777;text-transform:uppercase;margin:0 0 10px;padding:0 8px}.cat-list{display:grid;gap:3px}.cat-btn{display:flex;justify-content:space-between;gap:8px;text-align:left;background:transparent;border-color:transparent;padding:8px;border-radius:3px;color:#aaa;font-size:12px}.cat-btn.active,.cat-btn:hover{background:#202020;color:#fff;border-color:#333}.cat-btn b{font:10px var(--mono);color:#777}.sidebar-note{margin:25px 8px 0;color:#777;font-size:11px;line-height:1.6}.content{min-width:0;padding:20px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:15px}.section-head h2{font-size:15px;font-weight:600;margin:0}.count{color:#888;font-size:10px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.material{min-width:0;border:1px solid #2a2a2a;background:#101010;text-align:left;padding:0;border-radius:3px;overflow:hidden;transition:border-color .15s,transform .15s}.material:hover{transform:translateY(-2px);border-color:#777;background:#121212}.material.selected{border-color:#f2f2f2;box-shadow:0 0 0 1px #eee}.thumb{display:block;width:100%;aspect-ratio:1.32;background:#222;object-fit:cover;image-rendering:auto}.material-meta{display:block;padding:10px}.material-name{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.material-sub{display:flex;justify-content:space-between;gap:5px;margin-top:5px;color:#777;font:9px var(--mono)}.bottomline{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;color:#777;font-size:11px}.detail{border-top:1px solid var(--line);margin-top:24px;padding-top:22px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);gap:22px}.detail h2{font-size:19px;margin:5px 0 4px;letter-spacing:-.025em}.detail p{color:#888;font-size:12px;margin:0 0 15px}.preview-stage{min-height:330px;display:grid;place-items:center;position:relative;overflow:hidden;border:1px solid #292929;background:radial-gradient(ellipse at center,#252525 0,#101010 45%,#090909 78%);perspective:900px}.preview-label{position:absolute;left:12px;top:10px;color:#777;font:9px var(--mono);text-transform:uppercase}.preview-object{width:min(68%,310px);aspect-ratio:1;background-color:#333;background-size:cover;background-position:center;box-shadow:0 25px 55px #000b;transition:transform .25s,border-radius .25s;transform-style:preserve-3d}.preview-object.plane{transform:rotateX(48deg) rotateZ(-16deg) scale(.9);box-shadow:18px 28px 35px #000b}.preview-object.sphere{border-radius:50%;box-shadow:inset -35px -25px 50px #000a,inset 12px 10px 22px #ffffff20,0 28px 45px #000c}.preview-object.cube{width:210px;height:210px;aspect-ratio:1;transform:rotateX(-24deg) rotateY(-35deg);clip-path:polygon(25% 5%,75% 5%,100% 28%,100% 78%,75% 100%,25% 100%,0 78%,0 28%);box-shadow:inset -25px -15px 35px #0009}.preview-object.wall{width:74%;height:235px;aspect-ratio:auto;transform:rotateY(-9deg);box-shadow:12px 18px 25px #0009}.detail-panel{border:1px solid #292929;background:#101010;padding:17px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:15px 0}.field{display:grid;gap:6px}.field label{font-size:9px;color:#888;text-transform:uppercase}.field input,.field select{width:100%;padding:8px}.preview-actions{display:flex;gap:8px;flex-wrap:wrap}.primary{background:#e8e8e8;color:#111;border-color:#e8e8e8;font-weight:700}.primary:hover{background:#fff;color:#000}.status{min-height:18px;margin-top:12px;font:10px var(--mono);color:#888}.map-row{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 15px}.tag{border:1px solid #333;color:#999;padding:5px 7px;font-size:9px}.footer{padding:22px 25px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:15px;color:#777;font-size:10px}.empty{padding:45px 10px;text-align:center;color:#888;grid-column:1/-1}.empty strong{display:block;color:#ddd;margin-bottom:6px}.mobile-cats{display:none}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:var(--text);background:#202020;border:1px solid #383838;padding:9px 12px;border-radius:4px}button:hover,button:focus-visible{background:#303030;border-color:#777;outline:none}button:disabled{opacity:.4;cursor:wait}a{color:inherit}.mono,.eyebrow,.count,.tag,.field label{font-family:var(--mono);letter-spacing:.035em}.topbar{height:58px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:0 24px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;background:#090909ed;backdrop-filter:blur(14px)}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:750;letter-spacing:.08em}.brand-mark{display:grid;place-items:center;width:28px;height:28px;border:1px solid #777;font:700 12px var(--mono)}.toplinks{display:flex;gap:16px;color:#aaa;font-size:12px}.toplinks a{text-decoration:none}.toplinks a:hover{color:#fff}.hero{padding:36px 26px 24px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end}.eyebrow{font-size:10px;color:#aaa;text-transform:uppercase}.hero h1{font-size:clamp(32px,5vw,62px);line-height:.98;letter-spacing:-.055em;margin:12px 0 15px;font-weight:650}.hero p{color:#aaa;max-width:650px;margin:0}.hero-stat{text-align:right;min-width:140px}.hero-stat strong{display:block;font:500 clamp(30px,4vw,48px) var(--mono);letter-spacing:-.07em}.hero-stat span{color:#888;font:10px var(--mono);text-transform:uppercase}.toolbar{display:flex;gap:9px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid var(--line);background:#0d0d0d}.search{flex:1;min-width:190px}input,select{background:#151515;color:#eee;border:1px solid #343434;border-radius:4px;padding:10px 11px;min-width:0}input:focus,select:focus{outline:1px solid #888;border-color:#888}.layout{display:grid;grid-template-columns:210px minmax(0,1fr);min-height:70vh}.sidebar{padding:20px 14px;border-right:1px solid var(--line)}.side-title{font:10px var(--mono);color:#777;text-transform:uppercase;margin:0 0 10px;padding:0 8px}.cat-list{display:grid;gap:3px}.cat-btn{display:flex;justify-content:space-between;gap:8px;text-align:left;background:transparent;border-color:transparent;padding:8px;border-radius:3px;color:#aaa;font-size:12px}.cat-btn.active,.cat-btn:hover{background:#202020;color:#fff;border-color:#333}.cat-btn b{font:10px var(--mono);color:#777}.sidebar-note{margin:25px 8px 0;color:#777;font-size:11px;line-height:1.6}.content{min-width:0;padding:20px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:15px}.section-head h2{font-size:15px;font-weight:600;margin:0}.count{color:#888;font-size:10px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.material{min-width:0;border:1px solid #2a2a2a;background:#101010;text-align:left;padding:0;border-radius:3px;overflow:hidden;transition:border-color .15s,transform .15s}.material:hover{transform:translateY(-2px);border-color:#777;background:#121212}.material.selected{border-color:#f2f2f2;box-shadow:0 0 0 1px #eee}.thumb{display:block;width:100%;aspect-ratio:1.32;background:#222;object-fit:cover;image-rendering:auto}.material-meta{display:block;padding:10px}.material-name{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.material-sub{display:flex;justify-content:space-between;gap:5px;margin-top:5px;color:#777;font:9px var(--mono)}.bottomline{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;color:#777;font-size:11px}.detail{border-top:1px solid var(--line);margin-top:24px;padding-top:22px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);gap:22px}.detail h2{font-size:19px;margin:5px 0 4px;letter-spacing:-.025em}.detail p{color:#888;font-size:12px;margin:0 0 15px}.preview-stage{min-height:330px;display:grid;place-items:center;position:relative;overflow:hidden;border:1px solid #292929;background:radial-gradient(ellipse at center,#252525 0,#101010 45%,#090909 78%);perspective:900px}.preview-label{position:absolute;left:12px;top:10px;color:#777;font:9px var(--mono);text-transform:uppercase}.preview-object{width:min(68%,310px);aspect-ratio:1;background-color:#333;background-size:cover;background-position:center;box-shadow:0 25px 55px #000b;transition:transform .25s,border-radius .25s;transform-style:preserve-3d}.real-preview{display:block;width:min(100%,520px);height:auto;max-height:520px;object-fit:contain;image-rendering:auto;filter:none;box-shadow:none}.preview-object.plane{transform:rotateX(48deg) rotateZ(-16deg) scale(.9);box-shadow:18px 28px 35px #000b}.preview-object.sphere{border-radius:50%;box-shadow:inset -35px -25px 50px #000a,inset 12px 10px 22px #ffffff20,0 28px 45px #000c}.preview-object.cube{width:210px;height:210px;aspect-ratio:1;transform:rotateX(-24deg) rotateY(-35deg);clip-path:polygon(25% 5%,75% 5%,100% 28%,100% 78%,75% 100%,25% 100%,0 78%,0 28%);box-shadow:inset -25px -15px 35px #0009}.preview-object.wall{width:74%;height:235px;aspect-ratio:auto;transform:rotateY(-9deg);box-shadow:12px 18px 25px #0009}.detail-panel{border:1px solid #292929;background:#101010;padding:17px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:15px 0}.field{display:grid;gap:6px}.field label{font-size:9px;color:#888;text-transform:uppercase}.field input,.field select{width:100%;padding:8px}.preview-actions{display:flex;gap:8px;flex-wrap:wrap}.primary{background:#e8e8e8;color:#111;border-color:#e8e8e8;font-weight:700}.primary:hover{background:#fff;color:#000}.status{min-height:18px;margin-top:12px;font:10px var(--mono);color:#888}.map-row{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 15px}.tag{border:1px solid #333;color:#999;padding:5px 7px;font-size:9px}.footer{padding:22px 25px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:15px;color:#777;font-size:10px}.empty{padding:45px 10px;text-align:center;color:#888;grid-column:1/-1}.empty strong{display:block;color:#ddd;margin-bottom:6px}.mobile-cats{display:none}
 @media(max-width:1100px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.detail{grid-template-columns:1fr}.preview-stage{min-height:280px}}
 @media(max-width:760px){.topbar{padding:0 14px}.toplinks{gap:10px}.hero{padding:28px 16px 20px;grid-template-columns:1fr}.hero-stat{text-align:left}.toolbar{padding:10px}.layout{grid-template-columns:1fr}.sidebar{border-right:0;border-bottom:1px solid var(--line);padding:12px}.cat-list{display:flex;overflow:auto;padding-bottom:3px}.cat-btn{white-space:nowrap;flex-shrink:0}.side-title,.sidebar-note{display:none}.content{padding:14px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.detail{gap:12px}.preview-stage{min-height:245px}.footer{padding:16px;flex-wrap:wrap}.hero h1{font-size:38px}}
 </style>
 </head>
 <body>
 <header class="topbar"><a class="brand" href="/projects/"><span class="brand-mark">HT</span><span>HOLLOW / TEXTURE LAB</span></a><nav class="toplinks"><a href="/projects/">Projects ↗</a><a href="https://github.com/Tamasrazim/tamasrazim.github.io/tree/main/projects/hollow-texture-lab">Source ↗</a></nav></header>
-<section class="hero"><div><div class="eyebrow">Procedural material library / build 001</div><h1>Every surface<br>has a story.</h1><p>A free, local-first material browser for building the HOLLOW horror world. Search thousands of categorized material recipes, inspect them on preview objects, tune their surface character, and export PNG maps.</p></div><div class="hero-stat"><strong id="totalStat">3,072</strong><span>Material recipes · 16 families</span></div></section>
-<div class="toolbar"><input id="search" class="search" type="search" placeholder="Search concrete, rust, wood, moss…" aria-label="Search materials"><select id="sort" aria-label="Sort materials"><option value="default">Library order</option><option value="name">Name A–Z</option><option value="seed">Recipe number</option></select><select id="resolution" aria-label="Export resolution"><option value="512">Export 512 px</option><option value="1024" selected>Export 1024 px</option><option value="2048">Export 2048 px</option></select><button id="randomBtn">Random material ↗</button></div>
-<div class="layout"><aside class="sidebar"><p class="side-title">Material families</p><div class="cat-list" id="categories"></div><p class="sidebar-note">3,072 deterministic recipes are created from 16 material families × 192 variations. Pixels are generated in your browser on demand; this is not a folder containing 3,072 pre-rendered image files.</p></aside>
-<main class="content"><div class="section-head"><h2 id="listTitle">All materials</h2><span class="count" id="resultCount">3,072 RECIPES</span></div><div class="grid" id="grid" aria-live="polite"></div><div class="bottomline"><span id="pageLabel">Showing 1–24</span><div><button id="prevPage">← Previous</button> <button id="nextPage">Next →</button></div></div>
-<section class="detail" id="detail"><div><div class="eyebrow">Live surface preview</div><h2 id="detailName">Cracked Concrete / 001</h2><p id="detailDescription">A procedural surface recipe with adjustable scale, wear, and brightness.</p><div class="preview-stage"><span class="preview-label" id="previewLabel">SPHERE / MATERIAL VIEW</span><div id="previewObject" class="preview-object sphere"></div></div><div class="map-row"><span class="tag" id="mapTag">BASE COLOR PNG</span><span class="tag">GENERATED LOCALLY</span><span class="tag">NO EXTERNAL LIBRARIES</span></div></div>
-<div class="detail-panel"><div class="eyebrow">Selected recipe</div><h2 id="recipeCode">HT-CON-001</h2><p id="recipeMeta">Concrete / Variation 001</p><div class="fields"><div class="field"><label for="scale">Pattern scale</label><input id="scale" type="range" min="1" max="12" value="5"></div><div class="field"><label for="wear">Wear / damage</label><input id="wear" type="range" min="0" max="100" value="58"></div><div class="field"><label for="brightness">Brightness</label><input id="brightness" type="range" min="45" max="150" value="100"></div><div class="field"><label for="previewMode">Preview object</label><select id="previewMode"><option value="sphere">Sphere</option><option value="cube">Faceted object</option><option value="wall">Wall panel</option><option value="plane">Floor plane</option></select></div><div class="field"><label for="mapType">Export map</label><select id="mapType"><option value="color">Base color</option><option value="rough">Roughness approximation</option><option value="normal">Normal-style approximation</option></select></div><div class="field"><label for="seed">Recipe seed</label><input id="seed" type="number" min="1" max="999999" value="1"></div></div><div class="preview-actions"><button class="primary" id="exportBtn">Export PNG</button><button id="refreshBtn">Regenerate preview</button><button id="copySeedBtn">Copy recipe ID</button></div><div class="status" id="status" role="status">Ready. Select a material to begin.</div><p style="margin-top:15px">Maps are generated procedurally. Roughness and normal-style outputs are visual approximations, not physically scanned or calibrated PBR data.</p></div></section></main></div>
-<footer class="footer"><span>HOLLOW TEXTURE LAB / ZERO-COST PROCEDURAL MATERIALS</span><span>Browser-generated recipes · no paid assets · no account</span></footer>
+<section class="hero"><div><div class="eyebrow">Real PBR asset catalogue / build 002</div><h1>Every surface<br>has a story.</h1><p>A material browser for the HOLLOW horror world. Browse separate, named CC0 material assets with source previews and links to the original PBR maps. No generated pixels, fake variations, or copied image files are used by this page.</p></div><div class="hero-stat"><strong id="totalStat">33</strong><span>Separate source assets · CC0</span></div></section>
+<div class="toolbar"><input id="search" class="search" type="search" placeholder="Search concrete, rust, wood, moss…" aria-label="Search materials"><select id="sort" aria-label="Sort materials"><option value="default">Library order</option><option value="name">Name A–Z</option><option value="category">Category</option></select><button id="randomBtn">Random material ↗</button></div>
+<div class="layout"><aside class="sidebar"><p class="side-title">Material families</p><div class="cat-list" id="categories"></div><p class="sidebar-note">Every card represents a separate named source material. Previews are loaded from the asset catalogue; use each source link to obtain the original PBR maps. No synthetic texture generation.</p></aside>
+<main class="content"><div class="section-head"><h2 id="listTitle">All materials</h2><span class="count" id="resultCount">33 DISTINCT ASSETS</span></div><div class="grid" id="grid" aria-live="polite"></div><div class="bottomline"><span id="pageLabel">Showing 1–24</span><div><button id="prevPage">← Previous</button> <button id="nextPage">Next →</button></div></div>
+<section class="detail" id="detail"><div><div class="eyebrow">Original material preview</div><h2 id="detailName">Concrete 029</h2><p id="detailDescription">A separate source material with original PBR maps.</p><div class="preview-stage"><span class="preview-label" id="previewLabel">SOURCE MATERIAL PREVIEW</span><img id="previewObject" class="real-preview" alt="Selected material preview"></div><div class="map-row"><span class="tag" id="mapTag">PBR MAPS ON SOURCE</span><span class="tag">CC0 1.0</span><span class="tag">SEPARATE ASSET</span></div></div>
+<div class="detail-panel"><div class="eyebrow">Selected source material</div><h2 id="recipeCode">Concrete029</h2><p id="recipeMeta">Concrete · ambientCG · CC0 1.0</p><div class="preview-actions"><a class="primary" id="sourceBtn" href="https://ambientcg.com/view?id=Concrete029" target="_blank" rel="noopener noreferrer" style="display:inline-block;text-decoration:none;padding:9px 12px;border-radius:4px">Open source asset ↗</a><button id="copySeedBtn">Copy asset ID</button></div><div class="status" id="status" role="status">Select an asset to inspect its source.</div><p style="margin-top:15px">The gallery does not synthesize pixels or pretend that preview images are downloadable maps. Each source page lists the available original PBR files and their license.</p></div></section></main></div>
+<footer class="footer"><span>HOLLOW TEXTURE LAB / REAL SOURCE MATERIALS</span><span>Separate CC0 assets · original maps remain at source</span></footer>
 <script>
 "use strict";
-// Human-readable recipe definitions: each family has a distinct procedural drawing treatment.
-const FAMILIES=[
- {key:"concrete",name:"Concrete",prefix:"CON",count:192,desc:"Cracks, aggregate, pores and weathered cement.",base:[94,92,86],style:"grain"},
- {key:"damp",name:"Damp Concrete",prefix:"DMP",count:192,desc:"Water marks and darker damp patches on cement.",base:[67,72,69],style:"damp"},
- {key:"plaster",name:"Plaster & Paint",prefix:"PLS",count:192,desc:"Aged paint, plaster flecks and uneven walls.",base:[151,143,127],style:"plaster"},
- {key:"wallpaper",name:"Wallpaper",prefix:"WAL",count:192,desc:"Faded repeating wallpaper motifs and worn paper.",base:[116,94,83],style:"pattern"},
- {key:"wood",name:"Wood & Timber",prefix:"WOD",count:192,desc:"Wood grain, knots and old floorboard variation.",base:[105,72,46],style:"wood"},
- {key:"metal",name:"Metal",prefix:"MET",count:192,desc:"Scratches, brushed metal and scuffed paint.",base:[100,105,106],style:"metal"},
- {key:"rust",name:"Rust & Oxidation",prefix:"RST",count:192,desc:"Oxidation blooms and corroded surfaces.",base:[126,68,43],style:"rust"},
- {key:"stone",name:"Stone & Rock",prefix:"STN",count:192,desc:"Rough stone, broken rock and mineral flecks.",base:[99,96,88],style:"stone"},
- {key:"moss",name:"Moss & Lichen",prefix:"MOS",count:192,desc:"Mossy stone with damp green growth.",base:[69,83,57],style:"moss"},
- {key:"soil",name:"Soil & Gravel",prefix:"SOL",count:192,desc:"Earth, pebbles, grit and packed dirt.",base:[91,69,49],style:"soil"},
- {key:"mud",name:"Wet Mud",prefix:"MUD",count:192,desc:"Wet earth, puddle marks and irregular mud clumps.",base:[61,53,43],style:"mud"},
- {key:"asphalt",name:"Asphalt & Roads",prefix:"ASP",count:192,desc:"Road grit, aggregate and old surface wear.",base:[54,56,55],style:"asphalt"},
- {key:"tile",name:"Tile & Ceramic",prefix:"TIL",count:192,desc:"Ceramic glaze, grout lines and chipped tile edges.",base:[124,126,119],style:"tile"},
- {key:"fabric",name:"Fabric & Carpet",prefix:"FAB",count:192,desc:"Woven cloth, worn carpet and thread texture.",base:[91,83,77],style:"fabric"},
- {key:"leather",name:"Leather & Rubber",prefix:"LTH",count:192,desc:"Scuffed leather grain and dull rubber.",base:[69,48,39],style:"leather"},
- {key:"organic",name:"Organic / Unknown",prefix:"ORG",count:192,desc:"Unsettling fictional surfaces and irregular growth.",base:[74,79,67],style:"organic"}
-];
-const PER_PAGE=24,TOTAL=FAMILIES.reduce((n,f)=>n+f.count,0);
-let activeFamily="all",page=0,selected=null,visibleRecipes=[];
+/*
+ * HOLLOW Texture Lab — real asset catalogue.
+ * Each entry points to a separate, named CC0 PBR material from ambientCG.
+ * No canvas painting, procedural texture synthesis, seeded variants, or fake map export.
+ * The preview images are material previews; download the actual PBR maps from the linked source.
+ */
+const ASSETS = [
+  ["Concrete029","Concrete","Concrete 029","Rough cast concrete with long formwork marks."],
+  ["Concrete030","Concrete","Concrete 030","Concrete surface variation from the original asset set."],
+  ["Concrete031","Concrete","Concrete 031","Concrete surface variation from the original asset set."],
+  ["Concrete032","Concrete","Concrete 032","Concrete surface variation from the original asset set."],
+  ["Concrete033","Concrete","Concrete 033","Concrete surface variation from the original asset set."],
+  ["Concrete034","Concrete","Concrete 034","Concrete surface variation from the original asset set."],
+  ["Concrete035","Concrete","Concrete 035","Concrete surface variation from the original asset set."],
+  ["Concrete036","Concrete","Concrete 036","Concrete surface variation from the original asset set."],
+  ["Concrete037","Concrete","Concrete 037","Concrete surface variation from the original asset set."],
+  ["Concrete038","Concrete","Concrete 038","Concrete surface variation from the original asset set."],
+  ["Concrete039","Concrete","Concrete 039","Concrete surface variation from the original asset set."],
+  ["Concrete040","Concrete","Concrete 040","Concrete surface variation from the original asset set."],
+  ["Concrete041A","Concrete","Concrete 041 A","Concrete surface variation from the original asset set."],
+  ["Concrete043D","Concrete","Concrete 043 D","Concrete material with additional metallic map."],
+  ["Bricks076B","Brick & Masonry","Bricks 076 B","Aged masonry brick surface."],
+  ["Rock002","Stone & Rock","Rock 002","Natural rock surface."],
+  ["Planks030A","Wood & Timber","Planks 030 A","Separate timber plank material."],
+  ["Wood059","Wood & Timber","Wood 059","Natural wood grain material."],
+  ["Wood010","Wood & Timber","Wood 010","Wood surface from the original PBR library."],
+  ["Wood093","Wood & Timber","Wood 093","Warm wood surface with a satin finish."],
+  ["WoodFloor023","Wood & Timber","Wood Floor 023","Timber flooring material."],
+  ["Fabric007","Fabric & Carpet","Fabric 007","Woven fabric material."],
+  ["Fabric057","Fabric & Carpet","Fabric 057","Soft woven textile material."],
+  ["Fabric058","Fabric & Carpet","Fabric 058","Light woven textile material."],
+  ["Fabric070","Fabric & Carpet","Fabric 070","Textile surface with visible weave."],
+  ["Rust001","Rust & Oxidation","Rust 001","Corroded metal surface."],
+  ["Metal023","Metal","Metal 023","Metal surface with a dedicated metallic map."],
+  ["Metal055C","Metal","Metal 055 C","Metal material with metallic response."],
+  ["Metal061A","Metal","Metal 061 A","Separate metal surface material."],
+  ["PaintedMetal012","Painted Metal","Painted Metal 012","Painted and weathered metal surface."],
+  ["Tiles028","Tile & Ceramic","Tiles 028","Ceramic tile surface."],
+  ["Tiles029","Tile & Ceramic","Tiles 029","Separate tile material."],
+  ["Tiles116","Tile & Ceramic","Tiles 116","Warm grey tile material."]
+].map(([id,category,name,description]) => ({
+  id, category, name, description,
+  preview: "https://cdn.mixos.io/ambientcg/"+id+"/1k/preview.webp?cors=1",
+  source: "https://ambientcg.com/view?id="+id
+}));
+const PER_PAGE=24;
+let activeCategory="all", page=0, selected=null, visible=[];
 const $=id=>document.getElementById(id);
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-function recipeAt(family,index){return {family,index,global:FAMILIES.slice(0,FAMILIES.indexOf(family)).reduce((n,f)=>n+f.count,0)+index+1,seed:family.prefix.charCodeAt(0)*997+index*7919+family.prefix.charCodeAt(1)*43,name:family.name+" / "+String(index+1).padStart(3,"0"),code:"HT-"+family.prefix+"-"+String(index+1).padStart(3,"0")};}
-function allRecipes(){return FAMILIES.flatMap(f=>Array.from({length:f.count},(_,i)=>recipeAt(f,i)));}
-const RECIPES=allRecipes();
-function rng(seed){let s=(seed>>>0)||1;return()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return(s>>>0)/4294967296;};}
-function color(rgb,delta=0){return "rgb("+rgb.map(v=>clamp(Math.round(v+delta),0,255)).join(",")+")";}
-
-// Multi-scale, seed-specific procedural material generator.
-// Every recipe is drawn from scratch; no downloaded texture images or copied source textures are used.
-function makeTexture(recipe,size=256,map="color"){
- const canvas=document.createElement("canvas");canvas.width=canvas.height=size;
- const ctx=canvas.getContext("2d",{willReadFrequently:true});
- const family=recipe.family,style=family.style,wear=Number($("wear").value)/100,scale=Number($("scale").value);
- const brightness=Number($("brightness").value)/100,base=family.base,seed=recipe.seed;
- const random=rng(seed+scale*101+Math.round(wear*100)*37);
- const image=ctx.createImageData(size,size),step=Math.max(1,Math.round(size/Math.max(18,34+scale*5)));
- const grid=Math.ceil(size/step);
- // Smooth, periodic value noise prevents obvious seams on the texture's outer edges.
- function smooth(t){return t*t*(3-2*t);}
- function noiseGrid(x,y,salt){
-   const gx=x/step,gy=y/step,x0=Math.floor(gx),y0=Math.floor(gy),fx=smooth(gx-x0),fy=smooth(gy-y0);
-   const h=(ix,iy)=>rngHash(seed+salt,((ix%grid)+grid)%grid,((iy%grid)+grid)%grid);
-   const a=h(x0,y0),b=h(x0+1,y0),c=h(x0,y0+1),d=h(x0+1,y0+1);
-   return (a+(b-a)*fx)+((c+(d-c)*fx)-(a+(b-a)*fx))*fy;
- }
- function periodicNoise(x,y,frequency,salt){
-   const u=x/size*frequency,v=y/size*frequency;
-   const ix=Math.floor(u),iy=Math.floor(v),fx=smooth(u-ix),fy=smooth(v-iy);
-   const h=(a,b)=>rngHash(seed+salt,((a%frequency)+frequency)%frequency,((b%frequency)+frequency)%frequency);
-   const a=h(ix,iy),b=h(ix+1,iy),c=h(ix,iy+1),d=h(ix+1,iy+1);
-   return (a+(b-a)*fx)+((c+(d-c)*fx)-(a+(b-a)*fx))*fy;
- }
- for(let y=0;y<size;y++)for(let x=0;x<size;x++){
-   const u=x/size,v=y/size;
-   const broad=periodicNoise(x,y,4,17)-.5;
-   const medium=periodicNoise(x,y,13,53)-.5;
-   const fine=periodicNoise(x,y,Math.max(24,Math.floor(size/5)),97)-.5;
-   const grain=random()-.5;
-   let structure=0,detail=0;
-   switch(style){
-    case "wood":
-      structure=(Math.sin((v*9+Math.sin(u*7+seed)*.045)*Math.PI*2)+Math.sin((v*23+Math.sin(u*13)*.02)*Math.PI*2)*.28)*.23;
-      {const dx=(u-(.2+((seed%37)/100))),dy=(v-.48)*1.9;detail+=Math.exp(-(dx*dx*25+dy*dy*90))*.26;}
-      break;
-    case "metal": structure=Math.sin(v*size*.17+Math.sin(u*size*.025)*1.8)*.1;break;
-    case "fabric": structure=(Math.sin(x*Math.PI*.8)+Math.sin(y*Math.PI*.8))*.12;break;
-    case "leather": structure=Math.sin(x*.12+Math.sin(y*.07)*2)*.045;break;
-    case "pattern": structure=Math.cos(u*Math.PI*12)*Math.cos(v*Math.PI*12)*.12;break;
-    case "tile": structure=(Math.min(u*8%1,1-u*8%1,v*8%1,1-v*8%1)<.035)?-.32:0;break;
-    case "damp": case "mud": structure=-Math.pow(Math.max(0,periodicNoise(x,y,5,211)-.48),1.4)*1.8;break;
-    case "rust": structure=Math.pow(Math.max(0,periodicNoise(x,y,7,301)-.37),1.7)*1.3;break;
-    case "moss": structure=Math.pow(Math.max(0,periodicNoise(x,y,11,401)-.43),1.4)*.9;break;
-    case "stone": structure=(periodicNoise(x,y,8,501)>.62?-.22:.02);break;
-    case "soil": case "asphalt": structure=(periodicNoise(x,y,17,601)>.76?-.3:.03);break;
-    case "organic": structure=Math.sin(u*19+Math.sin(v*13+seed)*2)*.15;detail+=Math.max(0,periodicNoise(x,y,6,701)-.65)*.5;break;
-    default: structure=(periodicNoise(x,y,9,801)>.77?-.15:.02);break;
-   }
-   let luminance=(broad*.58+medium*.46+fine*.28+grain*.07+structure+detail);
-   luminance*=style==="metal"?.55:style==="fabric"?.4:1;
-   if(map==="rough")luminance=0.5+(medium*.52+fine*.35+structure*.12);
-   if(map==="normal")luminance=0.5+(medium*.28+fine*.18+structure*.12);
-   const idx=(y*size+x)*4;
-   if(map==="rough"){
-    const val=clamp(128+luminance*190+(style==="metal"?-28:style==="mud"?-20:10),20,245);
-    image.data[idx]=image.data[idx+1]=image.data[idx+2]=val;
-   }else if(map==="normal"){
-    const left=periodicNoise(x-1,y,13,53),right=periodicNoise(x+1,y,13,53),up=periodicNoise(x,y-1,13,53),down=periodicNoise(x,y+1,13,53);
-    image.data[idx]=clamp(128+(left-right)*255,0,255);
-    image.data[idx+1]=clamp(128+(up-down)*255,0,255);
-    image.data[idx+2]=clamp(220-Math.abs(left-right)*90-Math.abs(up-down)*90,0,255);
-   }else{
-    const factor=brightness;
-    image.data[idx]=clamp(base[0]*factor+luminance*100,0,255);
-    image.data[idx+1]=clamp(base[1]*factor+luminance*96,0,255);
-    image.data[idx+2]=clamp(base[2]*factor+luminance*88,0,255);
-   }
-   image.data[idx+3]=255;
- }
- ctx.putImageData(image,0,0);
- // Material-specific physical marks layered over the noise field.
- const count=Math.round(size*(style==="wood"?0.06:style==="metal"?0.16:style==="fabric"?0.35:0.025)*(.5+scale/6));
- ctx.save();
- for(let i=0;i<count;i++){
-   const x=random()*size,y=random()*size;
-   const alpha=.035+random()*.17+wear*.12;
-   ctx.globalAlpha=alpha;
-   if(style==="wood"||style==="metal"){
-     ctx.strokeStyle=map==="color"?color(base,(random()-.5)*90):"#888";
-     ctx.lineWidth=style==="wood"?.5+random()*2:.4+random();
-     ctx.beginPath();ctx.moveTo(x,y);ctx.bezierCurveTo(x+(random()-.5)*size*.12,y+2,x+(random()-.5)*size*.16,y+random()*3,x+(random()-.5)*size*.2,y+random()*5);ctx.stroke();
-   }else if(style==="fabric"){
-     ctx.strokeStyle=map==="color"?color(base,(random()-.5)*55):"#888";ctx.lineWidth=.5;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,size);ctx.stroke();
-   }else{
-     const radius=(.4+random()*2.2)*(style==="stone"?scale/3:1);
-     ctx.fillStyle=map==="color"?color(base,(random()-.5)*(style==="rust"?190:100)):"#888";
-     ctx.beginPath();ctx.ellipse(x,y,radius,radius*(.4+random()),random()*Math.PI,0,Math.PI*2);ctx.fill();
-   }
- }
- if(map==="color"&&["grain","plaster","stone","asphalt","concrete"].includes(style)){
-   const crackCount=Math.round(wear*scale*(style==="stone"?1:2));
-   for(let i=0;i<crackCount;i++){
-     let x=random()*size,y=random()*size;
-     ctx.globalAlpha=.12+wear*.3;ctx.strokeStyle="#191917";ctx.lineWidth=.5+random()*1.2;ctx.beginPath();ctx.moveTo(x,y);
-     for(let j=0;j<5+scale;j++){x+=(random()-.5)*size*.075;y+=(random()-.5)*size*.075;ctx.lineTo(x,y);}
-     ctx.stroke();
-   }
- }
- if(map==="color"&&style==="tile"){
-   ctx.globalAlpha=.75;ctx.strokeStyle="#292a28";ctx.lineWidth=Math.max(2,size*.009);
-   for(let x=0;x<=size;x+=size/4){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,size);ctx.stroke();}
-   for(let y=0;y<=size;y+=size/4){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(size,y);ctx.stroke();}
- }
- ctx.restore();
- return canvas;
+const categories=[...new Set(ASSETS.map(a=>a.category))];
+function filtered(){
+  const q=$("search").value.trim().toLowerCase();
+  let list=ASSETS.filter(a=>(activeCategory==="all"||a.category===activeCategory)&&
+    (!q||[a.id,a.name,a.category,a.description].some(v=>v.toLowerCase().includes(q))));
+  if($("sort").value==="name") list.sort((a,b)=>a.name.localeCompare(b.name));
+  if($("sort").value==="category") list.sort((a,b)=>a.category.localeCompare(b.category)||a.name.localeCompare(b.name));
+  return list;
 }
-
-function rngHash(seed,x,y){let n=(seed^Math.imul(x+1,374761393)^Math.imul(y+1,668265263))|0;n=Math.imul(n^(n>>>13),1274126177);n^=n>>>16;return(n>>>0)/4294967295;}
-function filtered(){let q=$("search").value.trim().toLowerCase();let list=RECIPES.filter(x=>(activeFamily==="all"||x.family.key===activeFamily)&&(!q||x.name.toLowerCase().includes(q)||x.family.desc.toLowerCase().includes(q)||x.code.toLowerCase().includes(q)));if($("sort").value==="name")list.sort((a,b)=>a.name.localeCompare(b.name));if($("sort").value==="seed")list.sort((a,b)=>a.seed-b.seed);return list;}
-function drawCategories(){const box=$("categories");box.innerHTML="";const entries=[{key:"all",name:"All materials",count:TOTAL},...FAMILIES.map(f=>({key:f.key,name:f.name,count:f.count}))];for(const item of entries){const b=document.createElement("button");b.className="cat-btn"+(activeFamily===item.key?" active":"");b.innerHTML="<span>"+item.name+"</span><b>"+item.count+"</b>";b.onclick=()=>{activeFamily=item.key;page=0;drawCategories();renderGrid();};box.appendChild(b);}}
-function renderGrid(){const list=filtered(),pages=Math.max(1,Math.ceil(list.length/PER_PAGE));page=clamp(page,0,pages-1);const start=page*PER_PAGE;visibleRecipes=list.slice(start,start+PER_PAGE);$("grid").innerHTML="";$("resultCount").textContent=list.length.toLocaleString()+" RECIPES";$("listTitle").textContent=activeFamily==="all"?"All materials":FAMILIES.find(f=>f.key===activeFamily)?.name||"Materials";$("pageLabel").textContent=list.length?"Showing "+(start+1)+"–"+Math.min(start+PER_PAGE,list.length)+" of "+list.length.toLocaleString():"No matching recipes";$("prevPage").disabled=page===0;$("nextPage").disabled=page>=pages-1;
- if(!visibleRecipes.length){$("grid").innerHTML='<div class="empty"><strong>No materials found.</strong>Try a different word or choose another material family.</div>';return;}
- for(const item of visibleRecipes){const b=document.createElement("button");b.className="material"+(selected?.code===item.code?" selected":"");b.title="Preview "+item.name;const cv=makeTexture(item,128);const img=document.createElement("img");img.className="thumb";img.alt=item.name+" procedural texture preview";img.src=cv.toDataURL("image/jpeg",.78);const meta=document.createElement("span");meta.className="material-meta";meta.innerHTML='<span class="material-name"></span><span class="material-sub"><span></span><span></span></span>';meta.querySelector(".material-name").textContent=item.name;meta.querySelector(".material-sub span:first-child").textContent=item.family.name;meta.querySelector(".material-sub span:last-child").textContent=item.code;b.append(img,meta);b.onclick=()=>selectRecipe(item);$("grid").appendChild(b);}
+function drawCategories(){
+  const box=$("categories"); box.innerHTML="";
+  const entries=[{key:"all",name:"All materials",count:ASSETS.length},
+    ...categories.map(name=>({key:name,name,count:ASSETS.filter(a=>a.category===name).length}))];
+  for(const item of entries){
+    const b=document.createElement("button");
+    b.className="cat-btn"+(activeCategory===item.key?" active":"");
+    const label=document.createElement("span"), count=document.createElement("b");
+    label.textContent=item.name; count.textContent=item.count; b.append(label,count);
+    b.onclick=()=>{activeCategory=item.key;page=0;drawCategories();renderGrid();};
+    box.appendChild(b);
+  }
 }
-function selectRecipe(item){selected=item;$("detailName").textContent=item.name;$("detailDescription").textContent=item.family.desc;$("recipeCode").textContent=item.code;$("recipeMeta").textContent=item.family.name+" / Variation "+String(item.index+1).padStart(3,"0")+" / Seed "+item.seed;$("seed").value=item.seed;updatePreview();renderGrid();}
-function updatePreview(){if(!selected)return;const cv=makeTexture(selected,512);const url=cv.toDataURL("image/png");const obj=$("previewObject");obj.style.backgroundImage='url("'+url+'")';obj.className="preview-object "+$("previewMode").value;$("previewLabel").textContent=$("previewMode").value.toUpperCase()+" / MATERIAL VIEW";$("status").textContent="Preview rendered locally · "+selected.code;}
-function exportTexture(){if(!selected)return;const size=Number($("resolution").value),map=$("mapType").value;$("exportBtn").disabled=true;$("status").textContent="Generating "+size+" × "+size+" "+map+" map…";setTimeout(()=>{try{const cv=makeTexture(selected,size,map);cv.toBlob(blob=>{if(!blob){$("status").textContent="Export failed. Try a smaller resolution.";return;}const a=document.createElement("a");const url=URL.createObjectURL(blob);a.href=url;a.download=selected.code.toLowerCase()+"-"+map+"-"+size+".png";a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);$("status").textContent="Exported "+a.download+" · "+(blob.size/1024).toFixed(1)+" KB";$("exportBtn").disabled=false;}, "image/png");}catch(e){$("status").textContent="Could not export this map: "+e.message;$("exportBtn").disabled=false;}},30);}
-function chooseRandom(){const list=filtered();if(!list.length)return;selectRecipe(list[Math.floor(Math.random()*list.length)]);}
-$("search").addEventListener("input",()=>{page=0;renderGrid();});$("sort").addEventListener("change",()=>{page=0;renderGrid();});$("prevPage").onclick=()=>{page--;renderGrid();};$("nextPage").onclick=()=>{page++;renderGrid();};$("randomBtn").onclick=chooseRandom;$("exportBtn").onclick=exportTexture;$("refreshBtn").onclick=updatePreview;$("previewMode").onchange=updatePreview;
-["scale","wear","brightness"].forEach(id=>$(id).addEventListener("input",updatePreview));
-$("mapType").onchange=()=>{$("mapTag").textContent=$("mapType").selectedOptions[0].text.toUpperCase()+" PNG";updatePreview();};
-$("seed").onchange=()=>{if(!selected)return;const v=clamp(Number($("seed").value)||1,1,999999);selected={...selected,seed:v};$("seed").value=v;updatePreview();};
-$("copySeedBtn").onclick=async()=>{if(!selected)return;try{await navigator.clipboard.writeText(selected.code+" seed="+$("seed").value);$("status").textContent="Recipe ID copied."; }catch(e){$("status").textContent="Recipe ID: "+selected.code+" · seed="+$("seed").value;}};
-$("totalStat").textContent=TOTAL.toLocaleString();drawCategories();renderGrid();selectRecipe(RECIPES[0]);
+function renderGrid(){
+  const list=filtered(), pages=Math.max(1,Math.ceil(list.length/PER_PAGE));
+  page=Math.max(0,Math.min(page,pages-1)); const start=page*PER_PAGE;
+  visible=list.slice(start,start+PER_PAGE); $("grid").innerHTML="";
+  $("resultCount").textContent=list.length+" DISTINCT ASSETS";
+  $("listTitle").textContent=activeCategory==="all"?"All materials":activeCategory;
+  $("pageLabel").textContent=list.length?"Showing "+(start+1)+"–"+Math.min(start+PER_PAGE,list.length)+" of "+list.length:"No matching assets";
+  $("prevPage").disabled=page===0; $("nextPage").disabled=page>=pages-1;
+  if(!visible.length){$("grid").innerHTML='<div class="empty"><strong>No assets found.</strong>Try another search or category.</div>';return;}
+  for(const asset of visible){
+    const b=document.createElement("button"); b.className="material"+(selected?.id===asset.id?" selected":"");
+    b.title="Inspect "+asset.name;
+    const img=document.createElement("img"); img.className="thumb"; img.alt=asset.name+" material preview"; img.loading="lazy";
+    img.src=asset.preview; img.onerror=()=>{img.removeAttribute("src");img.alt="Preview unavailable — open source asset";img.style.background="#242424";};
+    const meta=document.createElement("span");meta.className="material-meta";
+    const name=document.createElement("span");name.className="material-name";name.textContent=asset.name;
+    const sub=document.createElement("span");sub.className="material-sub";
+    const cat=document.createElement("span");cat.textContent=asset.category;
+    const id=document.createElement("span");id.textContent=asset.id;
+    sub.append(cat,id);meta.append(name,sub);b.append(img,meta);b.onclick=()=>selectAsset(asset);$("grid").appendChild(b);
+  }
+}
+function selectAsset(asset){
+  selected=asset;
+  $("detailName").textContent=asset.name;
+  $("detailDescription").textContent=asset.description+" This is a separate source asset, not a generated variation.";
+  $("recipeCode").textContent=asset.id;
+  $("recipeMeta").textContent=asset.category+" · ambientCG · CC0 1.0";
+  $("previewObject").src=asset.preview;
+  $("previewObject").alt=asset.name+" material preview from ambientCG";
+  $("previewLabel").textContent="SOURCE MATERIAL PREVIEW · "+asset.id;
+  $("mapTag").textContent="PBR MAPS ON SOURCE";
+  $("status").textContent="Loaded the original asset preview. Open the source page for available map files.";
+  $("sourceBtn").href=asset.source;
+  $("sourceBtn").textContent="Open source asset ↗";
+  $("copySeedBtn").textContent="Copy asset ID";
+  renderGrid();
+}
+function chooseRandom(){const list=filtered();if(list.length)selectAsset(list[Math.floor(Math.random()*list.length)]);}
+$("search").addEventListener("input",()=>{page=0;renderGrid();});
+$("sort").addEventListener("change",()=>{page=0;renderGrid();});
+$("prevPage").onclick=()=>{page--;renderGrid();};
+$("nextPage").onclick=()=>{page++;renderGrid();};
+$("randomBtn").onclick=chooseRandom;
+$("copySeedBtn").onclick=async()=>{if(!selected)return;try{await navigator.clipboard.writeText(selected.id);$("status").textContent="Copied asset ID: "+selected.id;}catch(e){$("status").textContent="Asset ID: "+selected.id;}};
+drawCategories();renderGrid();selectAsset(ASSETS[0]);
 </script>
 </body></html>
