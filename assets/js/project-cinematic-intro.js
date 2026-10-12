@@ -169,7 +169,7 @@
   if (prefersReducedMotion) return;
 
   const sessionKey = projectKey === "home"
-    ? "tamasrazim-cinematic-intro-v2:home"
+    ? "tamasrazim-cinematic-intro-v3:home"
     : "tamasrazim-cinematic-intro-v1:" + projectKey;
   try {
     if (window.sessionStorage.getItem(sessionKey) === "shown") return;
@@ -201,30 +201,24 @@
   if (projectKey === "home") {
     intro.innerHTML = `
       <div class="pci-topbar">
-        <span>TAMASRAZIM <strong>/ IDENTITY ASSEMBLY</strong></span>
-        <button class="pci-skip" type="button" aria-label="Skip identity card assembly">
+        <span>TAMASRAZIM <strong>/ PERSONAL IDENTITY</strong></span>
+        <button class="pci-skip" type="button" aria-label="Skip identity card animation">
           SKIP INTRO <kbd>ESC</kbd>
         </button>
       </div>
       <div class="pci-home-build-stage">
-        <div class="pci-home-build-head">
-          <span>IDENTITY SYSTEM / 001</span>
-          <span class="pci-home-build-state"><i aria-hidden="true"></i> BUILD SEQUENCE ONLINE</span>
-        </div>
         <div class="pci-home-id-rig">
+          <div class="pci-home-id-aura" aria-hidden="true"></div>
+          <div class="pci-home-id-ring pci-home-id-ring-a" aria-hidden="true"></div>
+          <div class="pci-home-id-ring pci-home-id-ring-b" aria-hidden="true"></div>
           <div class="pci-home-id-outline" aria-hidden="true"></div>
           <div class="pci-home-id-scan" aria-hidden="true"></div>
+          <div class="pci-home-id-flash" aria-hidden="true"></div>
           ${profile.art}
-          <div class="pci-home-id-side-label left" aria-hidden="true">SOURCE / RRMZ</div>
-          <div class="pci-home-id-side-label right" aria-hidden="true">HANDLE / TR</div>
-        </div>
-        <div class="pci-home-build-foot">
-          <span>ARTWORK → NAME → HANDLE → ACTIVE</span>
-          <span>ORIGINAL ID / LIVE COMPONENT</span>
         </div>
       </div>
       <div class="pci-bottomline">
-        <span>${profile.sequence}</span>
+        <span>TR / ORIGINAL IDENTITY</span>
         <div class="pci-progress" aria-hidden="true"><span></span></div>
         <span>${profile.durationLabel || "04.2 SEC"}</span>
       </div>`;
