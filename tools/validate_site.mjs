@@ -262,11 +262,19 @@ const cinematicIntroCss=read('assets/css/project-cinematic-intro.css');
 const cinematicIntroJs=read('assets/js/project-cinematic-intro.js');
 execFileSync(process.execPath,['--check',path.join(ROOT,'assets/js/project-cinematic-intro.js')]);
 must(cinematicIntroJs.includes('Object.assign(profiles')&&cinematicIntroJs.includes('Escape'),'cinematic intro has project profiles and a keyboard skip path');
-must(cinematicIntroJs.includes('home: {')&&cinematicIntroJs.includes('OPENING SEQUENCE / PERSONAL WEBSITE'),'cinematic intro includes a distinct homepage profile');
-must(cinematicIntroCss.includes('.pci-project--home')&&cinematicIntroCss.includes('.pci-home-art')&&cinematicIntroCss.includes('.pci-home-orbit'),'homepage intro has its own cinematic visual system');
-must(cinematicIntroJs.includes('SOFTWARE')&&cinematicIntroJs.includes('GAMES')&&cinematicIntroJs.includes('MOTION')&&cinematicIntroJs.includes('TOOLS'),'homepage intro names the four work areas in its animation scene');
-must(cinematicIntroCss.includes('.pci-home-blueprint')&&cinematicIntroCss.includes('.pci-home-data')&&cinematicIntroCss.includes('.pci-home-scan'),'homepage intro animates blueprint geometry, work panels, and a scanning line');
-must(site.includes('<body class="home-v2" data-cinematic-intro="home">')&&site.includes('project-cinematic-intro.css?v=20261013-2')&&site.includes('project-cinematic-intro.js?v=20261013-2'),'homepage loads the newly versioned cinematic intro assets');
+must(cinematicIntroJs.includes('home: {')&&cinematicIntroJs.includes('IDENTITY ASSEMBLY / MAIN SITE'),'cinematic intro includes the homepage ID assembly profile');
+must(cinematicIntroCss.includes('.pci-project--home')&&cinematicIntroCss.includes('.pci-home-id-mount')&&cinematicIntroCss.includes('.pci-home-built-card'),'homepage intro animates the original identity-card component');
+must(cinematicIntroJs.includes('durationMs: 8500')&&cinematicIntroJs.includes('durationLabel: "08.5 SEC"'),'homepage ID assembly duration is between seven and ten seconds');
+must(cinematicIntroJs.includes('document.querySelector("main .id-card")')&&cinematicIntroJs.includes('homeMount.appendChild(homeCard)')&&cinematicIntroJs.includes('restoreHomeCard()'),'homepage animation moves and restores the original identity-card node');
+const identityCardCss=read('assets/css/site.css');
+const identityCardJs=read('assets/js/site.js');
+const identityCardStart=site.indexOf('<article class="id-card tilt reveal" data-reveal');
+const identityCardEnd=site.indexOf('</article>',identityCardStart)+10;
+const identityCardMarkup=identityCardStart>=0&&identityCardEnd>identityCardStart?site.slice(identityCardStart,identityCardEnd):'';
+must(identityCardMarkup.includes('src="./assets/images/tamanna-constellation.jpeg"')&&identityCardMarkup.includes('id="idAlias"')&&identityCardMarkup.includes('Robiul Rumman Razim'),'homepage keeps the original ID artwork and identity markup');
+must(identityCardCss.includes('.id-card{')&&identityCardCss.includes('.id-constellation{')&&identityCardCss.includes('.id-image-scan{')&&identityCardCss.includes('.id-kicker,.id-online,.id-status'),'original identity-card CSS assets and their styles remain in place');
+must(identityCardJs.includes("var idAlias = q('#idAlias')")&&identityCardJs.includes("scrambleTo(idAlias,'TAMASRAZIM',260)"),'original identity-card JavaScript interaction remains in place');
+must(site.includes('<body class="home-v2" data-cinematic-intro="home">')&&site.includes('project-cinematic-intro.css?v=20261013-3')&&site.includes('project-cinematic-intro.js?v=20261013-3'),'homepage loads the identity-assembly intro assets');
 const cinematicProjectKeys=['tunrun','webedyts','qalyvyron','trilyva','neo','code-to-svg','code-to-eps','format-forge','asset-vault','kynestra','bncagrocare','repo-token-meter'];
 must(cinematicProjectKeys.every(key=>cinematicIntroJs.includes(key+': {')||cinematicIntroJs.includes('"'+key+'": {')),'cinematic intro has a dedicated animation profile for every featured project');
 must(cinematicIntroCss.includes('prefers-reduced-motion:reduce')&&cinematicIntroCss.includes('.pci-project--tunrun')&&cinematicIntroCss.includes('.pci-project--webedyts')&&cinematicIntroCss.includes('.pci-project--qalyvyron')&&cinematicIntroCss.includes('.pci-project--trilyva'),'cinematic intro has reduced-motion handling and project-specific themes');
@@ -335,20 +343,55 @@ must([...legacyProjectRedirects].every(pagePath=>topLevelProjectIndexes.includes
 
 
 function testCinematicIntroRuntime(projectKey, closeWithEscape=false, closeAutomatically=false) {
-  const makeClassList=()=> {
-    const values=new Set();
-    return {
-      add(value){values.add(value)},
-      remove(value){values.delete(value)},
-      contains(value){return values.has(value)}
-    };
-  };
+  const makeClassList=(getName,setName)=>({
+    add(...tokens){const next=new Set(String(getName()).split(/\\s+/).filter(Boolean));tokens.forEach(token=>next.add(token));setName(Array.from(next).join(' '));},
+    remove(...tokens){const next=new Set(String(getName()).split(/\\s+/).filter(Boolean));tokens.forEach(token=>next.delete(token));setName(Array.from(next).join(' '));},
+    contains(token){return String(getName()).split(/\\s+/).includes(token)}
+  });
   const storage=new Map();
   const timeouts=[];
   const listeners=new Map();
   const skipHandlers={};
   const headingAttrs=new Set();
   let intro;
+  let homeMount=null;
+  const homeCardParent={
+    children:[],
+    insertBefore(node,referenceNode){
+      if(node.parentNode&&typeof node.parentNode.removeChild==='function')node.parentNode.removeChild(node);
+      const at=this.children.indexOf(referenceNode);
+      if(at<0)throw new Error('Expected insertion reference to exist in the ID card parent.');
+      this.children.splice(at,0,node);node.parentNode=this;return node;
+    },
+    removeChild(node){this.children=this.children.filter(child=>child!==node);node.parentNode=null;return node;}
+  };
+  let homeCard=null;
+  const originalHomeCardClassName='id-card tilt reveal';
+  const originalHomeCardStyle='--delay:3';
+  const originalHomeCardDataReveal='';
+  if(projectKey==='home'){
+    const cardAttrs={style:originalHomeCardStyle,'data-reveal':originalHomeCardDataReveal};
+    homeCard={
+      tagName:'ARTICLE',
+      className:originalHomeCardClassName,
+      attrs:cardAttrs,
+      parentNode:homeCardParent,
+      getAttribute(name){return Object.prototype.hasOwnProperty.call(cardAttrs,name)?cardAttrs[name]:null;},
+      setAttribute(name,value){cardAttrs[name]=String(value);},
+      removeAttribute(name){delete cardAttrs[name];},
+      focus(){documentMock.activeElement=homeCard;}
+    };
+    homeCard.classList=makeClassList(()=>homeCard.className,value=>{homeCard.className=value;});
+    homeCardParent.children.push(homeCard);
+  }
+  const heading={
+    attrs:headingAttrs,
+    hasAttribute(name){return headingAttrs.has(name)},
+    setAttribute(name,value){headingAttrs.add(name);this[name]=value},
+    removeAttribute(name){headingAttrs.delete(name);delete this[name]},
+    focus(){documentMock.activeElement=heading},
+    addEventListener(){},
+  };
   const documentMock={
     activeElement:null,
     createElement(tag){
@@ -359,10 +402,20 @@ function testCinematicIntroRuntime(projectKey, closeWithEscape=false, closeAutom
         focus(){documentMock.activeElement=skip},
         setAttribute(name,value){attrs[name]=value}
       };
+      homeMount={
+        className:'pci-home-id-mount',
+        children:[],
+        parentNode:null,
+        appendChild(node){
+          if(node.parentNode&&typeof node.parentNode.removeChild==='function')node.parentNode.removeChild(node);
+          node.parentNode=this;this.children.push(node);return node;
+        },
+        removeChild(node){this.children=this.children.filter(child=>child!==node);node.parentNode=null;return node;}
+      };
       intro={
         tagName:tag.toUpperCase(),
         className:'',
-        classList:makeClassList(),
+        classList:(()=>{const classes=new Set();return{add(value){classes.add(value)},remove(value){classes.delete(value)},contains(value){return classes.has(value)}}})(),
         attrs,
         parentNode:null,
         innerHTML:'',
@@ -370,34 +423,32 @@ function testCinematicIntroRuntime(projectKey, closeWithEscape=false, closeAutom
         addEventListener(){},
         removeEventListener(){},
         focus(){documentMock.activeElement=intro},
-        contains(node){return node===intro||node===skip},
-        querySelector(selector){return selector==='.pci-skip'?skip:null}
+        contains(node){return node===intro||node===skip||node===homeMount||(homeMount&&homeMount.children.includes(node))},
+        querySelector(selector){
+          if(selector==='.pci-skip')return skip;
+          if(selector==='.pci-home-id-mount'&&projectKey==='home')return homeMount;
+          return null;
+        }
       };
       intro.skip=skip;
       return intro;
     },
+    createComment(text){return{nodeType:8,textContent:text,parentNode:null};},
     querySelector(selector){
-      if(selector==='.pci-skip') return intro && intro.skip;
-      if(selector==='main h1') return heading;
+      if(selector==='.pci-skip')return intro&&intro.skip;
+      if(selector==='main h1')return heading;
+      if(selector==='main .id-card'&&projectKey==='home')return homeCard;
       return null;
     },
     addEventListener(type,fn){listeners.set(type,fn)},
     removeEventListener(type){listeners.delete(type)}
   };
-  const heading={
-    attrs:headingAttrs,
-    hasAttribute(name){return headingAttrs.has(name)},
-    setAttribute(name,value){headingAttrs.add(name);this[name]=value},
-    removeAttribute(name){headingAttrs.delete(name);delete this[name]},
-    focus(){documentMock.activeElement=heading},
-    addEventListener(){},
-  };
   const body={
-    classList:makeClassList(),
+    classList:(()=>{const classes=new Set();return{add(value){classes.add(value)},remove(value){classes.delete(value)},contains(value){return classes.has(value)}}})(),
     children:[],
     getAttribute(name){return name==='data-cinematic-intro'?projectKey:null},
-    appendChild(node){node.parentNode=this;this.children.push(node)},
-    removeChild(node){this.children=this.children.filter(child=>child!==node);node.parentNode=null}
+    appendChild(node){if(node.parentNode&&typeof node.parentNode.removeChild==='function')node.parentNode.removeChild(node);node.parentNode=this;this.children.push(node);return node;},
+    removeChild(node){this.children=this.children.filter(child=>child!==node);node.parentNode=null;return node;}
   };
   documentMock.body=body;
   const windowMock={
@@ -423,14 +474,20 @@ function testCinematicIntroRuntime(projectKey, closeWithEscape=false, closeAutom
     'format-forge':'FORMAT FORGE','asset-vault':'STOCK ASSET VAULT',
     kynestra:'KYNESTRA',bncagrocare:'BNC AGROCARE','repo-token-meter':'REPO TOKEN METER'
   };
-  must(body.children.length===1&&intro.innerHTML.includes(expectedTitles[projectKey]),projectKey.toUpperCase()+' intro mounts its own title and artwork');
-  must(body.classList.contains('pci-lock')&&intro.classList.contains('pci-is-live')&&typeof skipHandlers.click==='function'&&timeouts.some(timer=>timer.delay===4250),projectKey.toUpperCase()+' intro starts, blocks background scrolling, exposes Skip, and has an automatic end');
+  const expectedDuration=projectKey==='home'?8500:4250;
+  const sessionKey=projectKey==='home'?'tamasrazim-cinematic-intro-v2:home':'tamasrazim-cinematic-intro-v1:'+projectKey;
+  must(body.children.length===1&&intro.innerHTML.includes(expectedTitles[projectKey]),projectKey.toUpperCase()+' intro mounts its own title and layout');
+  must(body.classList.contains('pci-lock')&&intro.classList.contains('pci-is-live')&&typeof skipHandlers.click==='function'&&timeouts.some(timer=>timer.delay===expectedDuration),projectKey.toUpperCase()+' intro starts, exposes Skip, locks scrolling, and uses the expected duration');
+  if(projectKey==='home'){
+    must(homeMount.children[0]===homeCard&&homeCard.parentNode===homeMount&&homeCard.classList.contains('pci-home-built-card'),'homepage intro mounts the exact existing identity-card DOM node');
+    must(homeCard.getAttribute('style')===originalHomeCardStyle&&homeCard.getAttribute('data-reveal')===originalHomeCardDataReveal,'homepage ID card retains its native attributes while assembled');
+  }
   let escapePrevented=false;
-  if(closeAutomatically) {
-    const autoClose=timeouts.find(timer=>timer.delay===4250);
+  if(closeAutomatically){
+    const autoClose=timeouts.find(timer=>timer.delay===expectedDuration);
     must(!!autoClose&&typeof autoClose.callback==='function',projectKey.toUpperCase()+' schedules its automatic dismissal');
     autoClose.callback();
-  } else if(closeWithEscape) {
+  } else if(closeWithEscape){
     const keyHandler=listeners.get('keydown');
     must(typeof keyHandler==='function',projectKey.toUpperCase()+' registers its keyboard handler');
     keyHandler({key:'Escape',preventDefault(){escapePrevented=true}});
@@ -438,7 +495,11 @@ function testCinematicIntroRuntime(projectKey, closeWithEscape=false, closeAutom
     skipHandlers.click();
   }
   const closeMethod=closeAutomatically?'automatic timeout':closeWithEscape?'Escape':'Skip';
-  must(!body.classList.contains('pci-lock')&&intro.classList.contains('pci-is-leaving')&&storage.get('tamasrazim-cinematic-intro-v1:'+projectKey)==='shown'&&(!closeWithEscape||escapePrevented),projectKey.toUpperCase()+' '+closeMethod+' closes the intro, restores scrolling, and records the session');
+  must(!body.classList.contains('pci-lock')&&intro.classList.contains('pci-is-leaving')&&storage.get(sessionKey)==='shown'&&(!closeWithEscape||escapePrevented),projectKey.toUpperCase()+' '+closeMethod+' closes, restores scrolling, and records the session');
+  if(projectKey==='home'){
+    must(homeCard.parentNode===homeCardParent&&homeCardParent.children.length===1&&homeCardParent.children[0]===homeCard,'homepage '+closeMethod+' returns the exact same ID card to its original DOM position');
+    must(homeCard.className===originalHomeCardClassName&&homeCard.getAttribute('style')===originalHomeCardStyle&&homeCard.getAttribute('data-reveal')===originalHomeCardDataReveal,'homepage '+closeMethod+' restores the ID card original classes and inline attributes');
+  }
 }
 for(const projectKey of cinematicProjectKeys) testCinematicIntroRuntime(projectKey);
 for(const projectKey of cinematicProjectKeys) testCinematicIntroRuntime(projectKey,true);
@@ -458,7 +519,7 @@ function testCinematicIntroEarlyExit(projectKey, prefersReducedMotion, alreadySh
   const windowMock={
     matchMedia(){return {matches:prefersReducedMotion}},
     sessionStorage:{
-      getItem(key){return alreadyShown&&key==='tamasrazim-cinematic-intro-v1:'+projectKey?'shown':null},
+      getItem(key){const expectedKey=projectKey==='home'?'tamasrazim-cinematic-intro-v2:home':'tamasrazim-cinematic-intro-v1:'+projectKey;return alreadyShown&&key===expectedKey?'shown':null},
       setItem(){}
     }
   };
@@ -468,6 +529,8 @@ function testCinematicIntroEarlyExit(projectKey, prefersReducedMotion, alreadySh
 }
 testCinematicIntroEarlyExit('tunrun',true,false);
 testCinematicIntroEarlyExit('tunrun',false,true);
+testCinematicIntroEarlyExit('home',true,false);
+testCinematicIntroEarlyExit('home',false,true);
 
 const iconLibrarySource=read('projects/code-to-eps/workspace/vector-icon-library.js');
 execFileSync(process.execPath,['--check',path.join(ROOT,'projects/code-to-eps/workspace/vector-icon-library.js')]);
