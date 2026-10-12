@@ -284,7 +284,7 @@ for (const [projectKey,pagePath] of [
 }
 
 
-function testCinematicIntroRuntime(projectKey) {
+function testCinematicIntroRuntime(projectKey, closeWithEscape=false) {
   const makeClassList=()=> {
     const values=new Set();
     return {
@@ -374,11 +374,41 @@ function testCinematicIntroRuntime(projectKey) {
     kynestra:'KYNESTRA',bncagrocare:'BNC AGROCARE','repo-token-meter':'REPO TOKEN METER'
   };
   must(body.children.length===1&&intro.innerHTML.includes(expectedTitles[projectKey]),projectKey.toUpperCase()+' intro mounts its own title and artwork');
-  must(body.classList.contains('pci-lock')&&intro.classList.contains('pci-is-live')&&typeof skipHandlers.click==='function',projectKey.toUpperCase()+' intro starts, blocks background scrolling, and exposes Skip');
-  skipHandlers.click();
-  must(!body.classList.contains('pci-lock')&&intro.classList.contains('pci-is-leaving')&&storage.get('tamasrazim-cinematic-intro-v1:'+projectKey)==='shown',projectKey.toUpperCase()+' Skip closes the intro, restores scrolling, and records the session');
+  must(body.classList.contains('pci-lock')&&intro.classList.contains('pci-is-live')&&typeof skipHandlers.click==='function'&&timeouts.some(timer=>timer.delay===4250),projectKey.toUpperCase()+' intro starts, blocks background scrolling, exposes Skip, and has an automatic end');
+  let escapePrevented=false;
+  if(closeWithEscape) {
+    const keyHandler=listeners.get('keydown');
+    must(typeof keyHandler==='function',projectKey.toUpperCase()+' registers its keyboard handler');
+    keyHandler({key:'Escape',preventDefault(){escapePrevented=true}});
+  } else {
+    skipHandlers.click();
+  }
+  must(!body.classList.contains('pci-lock')&&intro.classList.contains('pci-is-leaving')&&storage.get('tamasrazim-cinematic-intro-v1:'+projectKey)==='shown'&&(!closeWithEscape||escapePrevented),projectKey.toUpperCase()+' '+(closeWithEscape?'Escape':'Skip')+' closes the intro, restores scrolling, and records the session');
 }
 for(const projectKey of cinematicProjectKeys) testCinematicIntroRuntime(projectKey);
+for(const projectKey of cinematicProjectKeys) testCinematicIntroRuntime(projectKey,true);
+
+function testCinematicIntroEarlyExit(projectKey, prefersReducedMotion, alreadyShown) {
+  const classes=new Set();
+  let children=0;
+  const body={
+    classList:{add(value){classes.add(value)},remove(value){classes.delete(value)},contains(value){return classes.has(value)}},
+    getAttribute(name){return name==='data-cinematic-intro'?projectKey:null},
+    appendChild(){children++}
+  };
+  const windowMock={
+    matchMedia(){return {matches:prefersReducedMotion}},
+    sessionStorage:{
+      getItem(key){return alreadyShown&&key==='tamasrazim-cinematic-intro-v1:'+projectKey?'shown':null},
+      setItem(){}
+    }
+  };
+  const documentMock={body,createElement(){throw new Error('Intro should not create an overlay on this path.')}};
+  vm.runInNewContext(cinematicIntroJs,{window:windowMock,document:documentMock},{filename:'project-cinematic-intro-early-exit.js'});
+  must(children===0&&!classes.has('pci-lock'),projectKey.toUpperCase()+' '+(prefersReducedMotion?'respects reduced-motion preference':'does not replay after being shown in this tab'));
+}
+testCinematicIntroEarlyExit('tunrun',true,false);
+testCinematicIntroEarlyExit('tunrun',false,true);
 
 const iconLibrarySource=read('projects/code-to-eps/workspace/vector-icon-library.js');
 execFileSync(process.execPath,['--check',path.join(ROOT,'projects/code-to-eps/workspace/vector-icon-library.js')]);
