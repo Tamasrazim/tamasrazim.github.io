@@ -1,3 +1,5 @@
+# Checks or rebuilds the manifest used by the repository token-meter tools.
+
 name: Repo Token Meter manifest
 
 on:

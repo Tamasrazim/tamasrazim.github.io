@@ -1,3 +1,5 @@
+-- Defines the local tables KYNESTRA uses to store projects, tasks, assets, and render jobs.
+
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS projects (

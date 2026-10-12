@@ -1,3 +1,5 @@
+# Checks the main website and shared assets for missing or broken pieces.
+
 name: Site Check
 
 on:

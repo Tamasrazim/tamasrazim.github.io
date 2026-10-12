@@ -1,3 +1,5 @@
+# Publishes the website to GitHub Pages after the required checks pass.
+
 name: Deploy static site to GitHub Pages
 
 on:

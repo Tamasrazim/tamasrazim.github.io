@@ -1,3 +1,5 @@
+# Runs the checks for standalone renderer pages and their supporting scripts.
+
 name: Renderer Check
 
 on:

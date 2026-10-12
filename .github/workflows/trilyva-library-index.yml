@@ -1,3 +1,5 @@
+# Keeps TRILYVA's library manifest in step with the animation modules stored in the library folder.
+
 name: TRILYVA Library Index
 
 on:
