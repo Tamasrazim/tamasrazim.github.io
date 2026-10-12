@@ -1,3 +1,3 @@
-# Caches the Format Forge workspace files so the conversion interface is easier to reopen when offline.
+// What this does: Caches the Format Forge workspace files so the conversion interface is easier to reopen when offline.
 
 const CACHE='forge-workspace-v1';const CORE=['./','./index.html','./format-forge.webmanifest'];self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin===location.origin)e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(n=>{const c=n.clone();caches.open(CACHE).then(x=>x.put(e.request,c));return n}).catch(()=>caches.match('./index.html'))));});
