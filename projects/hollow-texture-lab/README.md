@@ -8,12 +8,12 @@ An original, self-contained procedural material workshop for the HOLLOW horror-g
 
 ## Current features
 
-- 16 original material families with 64 deterministic recipe settings each (1,024 catalogue entries).
-- Distinct material treatments for concrete, damp walls, plaster, wallpaper, wood, metal, rust, stone, moss, soil, mud, asphalt, tile, fabric, leather, and fictional organic surfaces.
+- 17 original material families with 64 deterministic recipe settings each (1,088 catalogue entries).
+- Distinct material treatments for brick and mortar, concrete, damp walls, plaster, wallpaper, wood, metal, rust, stone, moss, soil, mud, asphalt, tile, fabric, leather, and fictional organic surfaces.
 - Search, category filters, sorting, pagination, random selection, and editable seeds.
 - Locally rendered preview, surface scale, wear, brightness, roughness, and tile repetition controls.
 - Export choices from 512 px through 8192 × 8192 (8K).
-- Base-color, roughness, height, and normal-style map output.
+- Base-color, roughness, height, and approximate normal-style map output.
 - No external textures, libraries, fonts, CDNs, APIs, or accounts.
 
 ## Accuracy and performance notes
