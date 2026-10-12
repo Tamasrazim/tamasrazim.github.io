@@ -3,8 +3,6 @@
  * Styles the BNC invoice screen: its form fields, product rows, totals, buttons, and layout on smaller screens.
  */
 
-// What this does: Styles the BNC invoice form, product rows, totals, and printable layout.
-
 :root{
   --forest:#0b2117;--forest2:#153b27;--forest3:#205b38;
   --lime:#d6f28f;--cream:#eeeadd;--paper:#fffdf7;--ink:#162019;
