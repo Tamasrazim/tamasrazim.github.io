@@ -1,3 +1,5 @@
+// What this does: Defines the expected renderer interfaces and shapes so page code and the validation tools agree on how rendering should work.
+
 export type StillFormat = "png" | "jpg" | "webp" | "svg";
 export type VideoContainer = "webm" | "mp4";
 export type VideoEngine = "webcodecs" | "mediarecorder";

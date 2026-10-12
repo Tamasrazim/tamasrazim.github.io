@@ -1,3 +1,5 @@
+// What this does: Builds The Last Star Train animation sequence, including the timing and movement for its story scenes.
+
 /* THE LAST STAR TRAIN — an original ten-minute fantasy cartoon for TRILYVA.
    4K UHD output target (3840×2160), 60 fps, deterministic vector frame rendering.
    Every frame is derived from time; scrubbing and export produce the same pose. */

@@ -1,3 +1,5 @@
+// What this does: Provides the reusable vector icons that the Code to EPS workspace can insert into artwork.
+
 (()=>{'use strict';
 const STYLES=[
 {slug:'monoline',name:'Monoline',sw:76},

@@ -1,3 +1,5 @@
+// What this does: Connects visual layers and media timing so a composition can be previewed and rendered as one scene.
+
 /**
  * KYNESTRA V2 media-stack compatibility descriptor.
  *

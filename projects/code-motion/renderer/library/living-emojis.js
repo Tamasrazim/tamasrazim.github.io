@@ -1,3 +1,5 @@
+// What this does: Builds the animated emoji assets used in the motion library, including their timing and visual movement.
+
 export default {
   id: "living-emojis",
   title: "LIVING EMOJIS",

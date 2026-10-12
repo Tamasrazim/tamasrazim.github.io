@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Runs the quick checks for the standalone renderer before its output is published.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

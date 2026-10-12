@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Generates the large keyword set used by the stock metadata workflow.
 """
 TRILYVA — 1,000,000,000 UNIQUE keyword-token generator.
 

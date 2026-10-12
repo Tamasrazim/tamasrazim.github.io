@@ -1,3 +1,5 @@
+// What this does: Checks the Code to EPS interface and vector-library wiring for missing or inconsistent pieces.
+
 import fs from 'node:fs';
 import vm from 'node:vm';
 

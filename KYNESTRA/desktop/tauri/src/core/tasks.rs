@@ -1,3 +1,5 @@
+// What this does: Creates and updates task records so longer work can be queued, tracked, and shown with a clear status.
+
 use super::db;
 use super::projects::ProjectManager;
 use chrono::Utc;

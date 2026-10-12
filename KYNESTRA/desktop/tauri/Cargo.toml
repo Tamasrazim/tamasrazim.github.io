@@ -1,3 +1,5 @@
+# Lists the Rust crates and build settings required by the KYNESTRA desktop application.
+
 [package]
 name = "kynestra"
 version = "0.1.0"

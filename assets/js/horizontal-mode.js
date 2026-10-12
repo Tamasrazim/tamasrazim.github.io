@@ -1,3 +1,5 @@
+// What this does: Controls the sideways-scrolling page mode, including its navigation and movement between panels.
+
 
 (function(){
   'use strict';

@@ -1,3 +1,5 @@
+// What this does: Provides the looping background animations that can be selected as scenes or layers in the renderer.
+
 /* TRILYVA — MOTION BACKGROUNDS | 100 genuinely different 12-second loop designs */
 
 function motionVars(m,seed){

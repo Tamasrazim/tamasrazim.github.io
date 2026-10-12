@@ -1,3 +1,5 @@
+// What this does: Caches Asset Vault files so its interface can reopen more reliably when a network connection is unavailable.
+
 const CACHE='tamasrazim-asset-vault-v2';
 const CORE=['./','./index.html','./css/app.css','./js/app.js','./manifest.webmanifest','./icons/icon.svg'];
 const FALLBACK_URL=new URL('./index.html',self.registration.scope).href;

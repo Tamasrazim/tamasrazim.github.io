@@ -1,3 +1,5 @@
+// What this does: Handles local account records and the account-related checks used by KYNESTRA.
+
 use super::db;
 use super::projects::ProjectManager;
 use chrono::Utc;

@@ -1,3 +1,5 @@
+// What this does: Caches the BNC catalog's local files so the catalog can reopen more reliably with a weak or missing connection.
+
 const CACHE="bnc-catalog-v1";
 const CORE=[
  "./","./index.html","./manifest.webmanifest","./FB_IMG_1789811599210.jpg","./FB_IMG_1789811611633.jpg",

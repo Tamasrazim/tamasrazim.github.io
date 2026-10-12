@@ -1,3 +1,5 @@
+// What this does: Generates the game's material and texture images used to give its rooms and objects their different looks.
+
 #include <algorithm>
 #include <cmath>
 #include <cstdio>

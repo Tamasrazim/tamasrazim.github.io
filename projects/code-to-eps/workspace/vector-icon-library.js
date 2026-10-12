@@ -1,3 +1,5 @@
+// What this does: Provides the same reusable vector icon set to the embedded Code to EPS workspace.
+
 (()=>{'use strict';
 const STYLES=[
 {slug:'monoline',name:'Monoline',sw:76},

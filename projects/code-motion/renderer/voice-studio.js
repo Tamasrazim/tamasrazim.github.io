@@ -1,3 +1,5 @@
+// What this does: Manages the voice and narration controls used alongside animations in the renderer.
+
 /* TRILYVA Voice Studio — first-party offline speech synthesis.
  * No network requests, remote APIs, CDN assets, or third-party runtime.
  * Exports timestamped synthetic dialogue and procedural atmosphere as PCM WAV.

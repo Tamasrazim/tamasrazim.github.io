@@ -1,3 +1,5 @@
+// What this does: Coordinates batch work so a group of project items can be processed without treating every item as a separate manual action.
+
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 use std::{

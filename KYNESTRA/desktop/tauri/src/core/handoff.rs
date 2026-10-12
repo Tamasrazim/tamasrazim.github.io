@@ -1,3 +1,5 @@
+// What this does: Handles passing work and project information between the desktop shell and the core services.
+
 use super::assets::{AssetError, AssetRecord, AssetService};
 use serde_json::{Map, Value};
 

@@ -1,3 +1,5 @@
+// What this does: Builds the Pip and the Rainbow Kite story sequence and its animated scene changes.
+
 // PIP AND THE RAINBOW KITE — original five-minute cartoon short, 16:9.
 // Hand-authored procedural 2D animation for TRILYVA. Deterministic by timestamp.
 // Character acting, layered painted backgrounds, camera easing, story beats and subtitles.

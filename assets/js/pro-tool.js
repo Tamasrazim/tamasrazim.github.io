@@ -1,3 +1,5 @@
+// What this does: Wires up shared tool-page behavior such as controls, status messages, and common interactions.
+
 
 (function(){
 "use strict";

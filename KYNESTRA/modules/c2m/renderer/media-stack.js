@@ -1,3 +1,5 @@
+// What this does: Connects the renderer's media layers so sound, visuals, timing, and export can be handled as one composition.
+
 /**
  * KYNESTRA V2 media-stack compatibility descriptor.
  *

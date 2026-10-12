@@ -1,3 +1,5 @@
+// What this does: Connects the KYNESTRA desktop shell's controls to the actions and status supplied by the app.
+
 const invoke = window.__TAURI__?.core?.invoke ?? null;
 const eventApi = window.__TAURI__?.event ?? null;
 const dialogApi = window.__TAURI__?.dialog ?? null;

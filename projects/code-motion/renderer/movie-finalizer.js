@@ -1,3 +1,5 @@
+// What this does: Takes the finished render output and prepares the final video or download files.
+
 /* TRILYVA Movie Finalizer — local video + audio assembly.
  * Uses built-in HTML media capture and MediaRecorder. No external runtime,
  * network requests, codecs downloads, or cloud services.

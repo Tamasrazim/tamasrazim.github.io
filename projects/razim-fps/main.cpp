@@ -1,3 +1,5 @@
+// What this does: Contains the main first-person game: its levels, menus, movement, objectives, pickups, hazards, and the loop that updates and draws each frame.
+
 #include "raylib.h"
 #include "raymath.h"
 #include "rlgl.h"

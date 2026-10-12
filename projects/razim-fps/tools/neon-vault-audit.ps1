@@ -1,3 +1,5 @@
+# Audits the game's content and build files for missing or inconsistent pieces before packaging.
+
 $ErrorActionPreference = "Stop"
 
 $game = Split-Path -Parent $PSScriptRoot

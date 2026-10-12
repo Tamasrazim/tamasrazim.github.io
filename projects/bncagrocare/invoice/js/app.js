@@ -1,3 +1,5 @@
+// What this does: Runs the BNC invoice form: it manages product rows, fills in catalog details, calculates values, saves work locally, and prepares the spreadsheet-based invoice.
+
 (()=>{"use strict";
 const $=s=>document.querySelector(s);
 const SOURCE_VERSION=54;

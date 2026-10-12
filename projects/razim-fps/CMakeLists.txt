@@ -1,3 +1,5 @@
+# Tells CMake how to compile the native Razim FPS game and connect its platform-specific source files.
+
 
 cmake_minimum_required(VERSION 3.21)
 project(neo LANGUAGES C CXX RC)

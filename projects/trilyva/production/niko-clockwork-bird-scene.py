@@ -1,3 +1,5 @@
+# Builds the scene data for Niko and the Clockwork Bird, including the objects and placements used by the animation.
+
 import bpy, math
 from mathutils import Vector
 from math import sin,cos,pi,radians

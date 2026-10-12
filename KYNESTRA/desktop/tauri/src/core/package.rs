@@ -1,3 +1,5 @@
+// What this does: Handles packaging project or module files into a form that can be moved or shared.
+
 use super::db;
 use super::projects::ProjectManager;
 use chrono::Utc;

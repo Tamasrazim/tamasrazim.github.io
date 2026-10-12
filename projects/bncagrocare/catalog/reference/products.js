@@ -1,3 +1,5 @@
+// What this does: Stores the product names and pack sizes used to fill out BNC catalog and invoice rows.
+
 window.BNC_PRODUCTS=[
   {code:"01",name:"NC Gold- 4CPA",packs:["1 Ltr x 12 Bottle","500 ml x 12 Bottle","100 ml x 30 Bottle"]},
   {code:"02",name:"NC Zinc- Mono 36%",packs:["1kg. x 10 Pack"]},

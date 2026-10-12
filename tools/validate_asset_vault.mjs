@@ -1,3 +1,5 @@
+// What this does: Checks the Asset Vault page, manifest, and asset references for missing or mismatched files.
+
 import fs from 'node:fs';
 
 const must=(ok,msg)=>{

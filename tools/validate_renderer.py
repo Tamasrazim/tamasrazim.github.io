@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Runs the renderer's validation checks and reports structural problems before the page is used.
 """Validate the browser renderer's important file contracts with only the Python stdlib."""
 
 from __future__ import annotations

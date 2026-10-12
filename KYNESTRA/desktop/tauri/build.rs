@@ -1,3 +1,5 @@
+// What this does: Runs the small build-time steps Tauri needs before compiling the desktop application.
+
 use std::{env, fs, path::PathBuf};
 
 fn main() {

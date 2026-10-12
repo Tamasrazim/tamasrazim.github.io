@@ -1,3 +1,5 @@
+// What this does: Builds the Niko and the Clockwork Bird story sequence, including the scenes and timing used by its animation.
+
 // NIKO AND THE CLOCKWORK BIRD — original five-minute 3D-styled cartoon, 16:9.
 // Rendered entirely in JavaScript: a deterministic software 3D triangle painter,
 // hand-built character meshes, layered sets, camera blocking, motion and timed dialogue.

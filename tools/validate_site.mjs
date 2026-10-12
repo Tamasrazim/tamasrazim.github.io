@@ -1,3 +1,5 @@
+// What this does: Checks the website's pages and linked assets for broken references and other structural mistakes.
+
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';

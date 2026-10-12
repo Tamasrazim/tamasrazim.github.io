@@ -1,3 +1,5 @@
+// What this does: Adds the newer site interactions used by the redesign, including layout behavior and motion tied to the page.
+
 (function () {
   'use strict';
 

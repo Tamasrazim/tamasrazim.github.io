@@ -1,3 +1,5 @@
+// What this does: Collects the story-style animation modules that can be loaded into the renderer as ready-made scenes.
+
 /* TRILYVA STORY FILMS
    Full-length, editable procedural cartoons. Source is fetched as text so the
    same file can be previewed on its film page or loaded into the code editor. */

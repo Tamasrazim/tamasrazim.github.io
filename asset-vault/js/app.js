@@ -1,3 +1,5 @@
+// What this does: Runs the Asset Vault interface: it loads the asset list, filters what is shown, and connects the visible controls to each item.
+
 (function(){
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));

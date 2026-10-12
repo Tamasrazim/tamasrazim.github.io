@@ -1,3 +1,5 @@
+// What this does: Caches the standalone renderer's files so the interface can reopen more reliably when the network is unavailable.
+
 const CACHE='tamasrazim-renderer-retired-v1';
 
 self.addEventListener('install',event=>{

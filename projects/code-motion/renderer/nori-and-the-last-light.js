@@ -1,3 +1,5 @@
+// What this does: Builds the Nori and the Last Light story sequence, coordinating the scenes and their animation timing.
+
 // NORI AND THE LAST LIGHT — full 5-minute short, 16:9
 // Pure procedural vector animation. No images, fonts, network or runtime dependencies.
 // TRILYVA frame contract: renderFrame(time, frame, fps, ctx, width, height).

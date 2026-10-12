@@ -1,3 +1,5 @@
+// What this does: Runs the checks used to decide whether a project or generated result meets KYNESTRA's verification rules.
+
 use super::db;
 use super::projects::ProjectManager;
 use chrono::Utc;

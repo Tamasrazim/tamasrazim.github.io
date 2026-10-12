@@ -1,3 +1,5 @@
+// What this does: Checks the TRILYVA story pages and renderer scripts for missing files and inconsistent scene wiring.
+
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';

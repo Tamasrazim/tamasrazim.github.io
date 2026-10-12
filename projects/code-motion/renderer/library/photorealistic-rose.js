@@ -1,3 +1,5 @@
+// What this does: Creates the rose animation asset and its movement for use in a rendered scene.
+
 /* TRILYVA — PHOTOREALISTIC ROSE / 1M MICROSTRUCTURE
  * Dense procedural raster-botanical renderer.
  */

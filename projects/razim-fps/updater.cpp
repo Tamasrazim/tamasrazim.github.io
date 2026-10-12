@@ -1,3 +1,5 @@
+// What this does: Checks the game's update information and handles applying an update without mixing that work into the main gameplay code.
+
 #define UNICODE
 #define _UNICODE
 #define NOMINMAX

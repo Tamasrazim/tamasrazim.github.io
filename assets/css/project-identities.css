@@ -1,3 +1,8 @@
+/*
+ * What this does:
+ * Gives each project its own visual identity while keeping the surrounding site consistent.
+ */
+
 /* Project identities: each detail page has its own visual language.
    Shared structure is intentional; shared appearance is not. */
 html:has(body[data-project="asset-vault"]){background:#f0f1e7}

@@ -1,3 +1,5 @@
+// What this does: Runs the small startup tasks that need to happen before the main page effects are ready.
+
 (function(){
   'use strict';
   document.documentElement.classList.replace('no-js','js');

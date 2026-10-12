@@ -1,3 +1,5 @@
+// What this does: Builds the Pip and the Runaway Pancake story, including its scene sequence and animated actions.
+
 // PIP AND THE RUNAWAY PANCAKE — original five-minute cartoon short, 16:9.
 // JavaScript hybrid 2D/3D cartoon for TRILYVA, deterministic by timestamp.
 // Layered hand-drawn environments + shaded 3D mesh characters and props + timed acting.

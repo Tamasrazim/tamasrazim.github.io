@@ -1,3 +1,8 @@
+/*
+ * What this does:
+ * Applies the site's black-and-white visual treatment without changing how page scripts behave.
+ */
+
 /* Site-wide monochrome treatment.
    A neutral saturation blend removes hue from HTML, CSS, SVG, canvas, video,
    workspace previews and images without changing component layouts or geometry. */

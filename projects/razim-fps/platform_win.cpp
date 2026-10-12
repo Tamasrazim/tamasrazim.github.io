@@ -1,3 +1,5 @@
+// What this does: Handles the Windows-only parts of Razim FPS so the main game can stay focused on gameplay rather than operating-system details.
+
 #include <algorithm>
 #if defined(_WIN32)
 #define NOMINMAX

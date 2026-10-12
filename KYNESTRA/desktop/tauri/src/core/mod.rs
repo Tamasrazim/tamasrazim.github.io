@@ -1,3 +1,5 @@
+// What this does: Collects the core modules in one place so the rest of the app can use them through a consistent interface.
+
 pub mod accounts;
 pub mod batch;
 pub mod assets;

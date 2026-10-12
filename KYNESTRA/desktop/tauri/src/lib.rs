@@ -1,3 +1,5 @@
+// What this does: Registers the desktop commands and core services that the Tauri window is allowed to call.
+
 mod core;
 
 use core::accounts::AccountRecord;

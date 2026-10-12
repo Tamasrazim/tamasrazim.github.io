@@ -1,3 +1,5 @@
+// What this does: Checks the Code Motion renderer and its modules for missing files or broken connections.
+
 import fs from 'node:fs';
 
 const must = (ok, msg) => {

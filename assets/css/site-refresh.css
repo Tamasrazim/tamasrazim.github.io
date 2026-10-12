@@ -1,3 +1,8 @@
+/*
+ * What this does:
+ * Adds a later set of visual refinements to the website's shared components.
+ */
+
 /* Tamasrazim landing-page refresh · 2026-10-10
    The identity-card component is intentionally excluded from this layer. */
 :root{--refresh-line:rgba(242,242,236,.14);--refresh-muted:rgba(242,242,236,.62);--refresh-soft:rgba(242,242,236,.035);--refresh-ease:cubic-bezier(.16,1,.3,1)}

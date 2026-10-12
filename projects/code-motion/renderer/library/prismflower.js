@@ -1,3 +1,5 @@
+// What this does: Builds the prism-flower animation assets, including the shapes and movement used to draw them.
+
 /* TRILYVA — Prism Flowers library */
 import prismData from "./prism-data.js";
 

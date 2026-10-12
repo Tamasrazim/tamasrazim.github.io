@@ -1,3 +1,5 @@
+// What this does: Finds and manages the app modules that KYNESTRA can load into a project.
+
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 

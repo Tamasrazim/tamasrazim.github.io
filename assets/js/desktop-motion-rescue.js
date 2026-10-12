@@ -1,3 +1,5 @@
+// What this does: Restores or adjusts the desktop motion behavior when the normal animation setup does not start cleanly.
+
 (function(){
   'use strict';
   var desktop=window.innerWidth>1050;

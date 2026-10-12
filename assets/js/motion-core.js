@@ -1,3 +1,5 @@
+// What this does: Contains shared motion helpers used by the site's animations so timing and interaction are handled consistently.
+
 (function(){
 'use strict';
     /* Site animation governor: keep continuous JS motion at a maximum of 60 updates/sec.

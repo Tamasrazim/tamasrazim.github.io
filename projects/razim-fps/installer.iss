@@ -1,3 +1,5 @@
+; What this does: Tells Inno Setup which game files go into the Windows installer and how the installation should be presented.
+
 ; NEO — custom Windows installer / uninstaller
 #define AppName "NEO"
 #define AppVersion "5.1"

@@ -1,3 +1,5 @@
+// What this does: This is the main site behavior file. It ties together page interactions, cursor effects, scroll behavior, and the motion that runs across the website.
+
 
   (function(){
     'use strict';

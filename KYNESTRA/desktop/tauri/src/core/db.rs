@@ -1,3 +1,5 @@
+// What this does: Opens the local project database and prepares the tables the rest of the KYNESTRA core relies on.
+
 use std::path::Path;
 
 use rusqlite::Connection;

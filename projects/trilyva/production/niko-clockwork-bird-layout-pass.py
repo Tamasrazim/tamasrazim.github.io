@@ -1,3 +1,5 @@
+# Applies a layout pass to the Niko story scenes so characters and props stay placed consistently from shot to shot.
+
 import bpy, math
 from mathutils import Vector
 from math import sin,cos,pi

@@ -1,3 +1,5 @@
+// What this does: Handles submission records and the checks needed before submitted project work is accepted.
+
 use super::db;
 use super::projects::ProjectManager;
 use chrono::Utc;

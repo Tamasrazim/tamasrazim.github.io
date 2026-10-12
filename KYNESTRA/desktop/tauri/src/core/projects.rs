@@ -1,3 +1,5 @@
+// What this does: Creates and manages local project folders and the project information stored alongside them.
+
 use super::db;
 use chrono::Utc;
 use rusqlite::params;

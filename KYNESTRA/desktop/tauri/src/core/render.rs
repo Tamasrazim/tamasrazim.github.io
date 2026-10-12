@@ -1,3 +1,5 @@
+// What this does: Creates and tracks render jobs, records their state, and connects them to the task system.
+
 use super::db;
 use super::projects::ProjectManager;
 use super::tasks::{TaskError, TaskRecord, TaskService};

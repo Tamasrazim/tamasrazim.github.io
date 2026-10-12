@@ -1,3 +1,5 @@
+// What this does: Defines the events the desktop core sends when important project or task activity happens.
+
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

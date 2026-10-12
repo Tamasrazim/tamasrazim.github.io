@@ -1,3 +1,5 @@
+// What this does: Handles project assets, including the records and checks needed to keep files linked to the right project.
+
 use super::db;
 use super::projects::ProjectManager;
 use chrono::Utc;
