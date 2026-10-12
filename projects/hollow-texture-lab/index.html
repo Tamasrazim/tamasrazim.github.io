@@ -27,7 +27,7 @@
 <div class="toolbar"><input id="search" class="search" type="search" placeholder="Search concrete, rust, wood, moss…" aria-label="Search materials"><select id="sort" aria-label="Sort materials"><option value="default">Library order</option><option value="name">Name A–Z</option><option value="category">Category</option></select><button id="randomBtn">Random material ↗</button></div>
 <div class="layout"><aside class="sidebar"><p class="side-title">Material families</p><div class="cat-list" id="categories"></div><p class="sidebar-note">Every recipe is rendered from this project’s own code. No remote files are requested. High-resolution maps render in a background worker.</p></aside>
 <main class="content"><div class="section-head"><h2 id="listTitle">All materials</h2><span class="count" id="resultCount">33 DISTINCT ASSETS</span></div><div class="grid" id="grid" aria-live="polite"></div><div class="bottomline"><span id="pageLabel">Showing 1–24</span><div><button id="prevPage">← Previous</button> <button id="nextPage">Next →</button></div></div>
-<section class="detail" id="detail"><div><div class="eyebrow">Original material preview</div><h2 id="detailName">Concrete 029</h2><p id="detailDescription">A separate source material with original PBR maps.</p><div class="preview-stage"><span class="preview-label" id="previewLabel">SOURCE MATERIAL PREVIEW</span><img id="previewObject" class="real-preview" alt="Selected material preview"></div><div class="map-row"><span class="tag" id="mapTag">PBR MAPS ON SOURCE</span><span class="tag">CC0 1.0</span><span class="tag">SEPARATE ASSET</span></div></div>
+<section class="detail" id="detail"><div><div class="eyebrow">Original material preview</div><h2 id="detailName">Concrete 029</h2><p id="detailDescription">A separate source material with original PBR maps.</p><div class="preview-stage"><span class="preview-label" id="previewLabel">SOURCE MATERIAL PREVIEW</span><img id="previewObject" class="real-preview" alt="Selected material preview"></div><div class="map-row"><span class="tag" id="mapTag">PBR MAPS ON SOURCE</span><span class="tag">ORIGINAL CODE</span><span class="tag">PROCEDURAL MATERIAL</span></div></div>
 <div class="detail-panel"><div class="eyebrow">Selected material</div><h2 id="recipeCode">HT-CON-001</h2><p id="recipeMeta">Concrete · Seed 19001</p><div class="status" id="status" role="status">Ready.</div></div></section></main></div>
 <footer class="footer"><span>HOLLOW TEXTURE LAB / ORIGINAL PROCEDURAL MATERIALS</span><span>Local generation · no external assets · no account</span></footer>
 <script>
@@ -35,6 +35,7 @@
 /* HOLLOW's original procedural engine. Nothing is downloaded or imported. */
 const F=[
 ["concrete","Concrete & Cement","CON",[112,109,101],"concrete",.86,"Aggregate, pores, casting marks, chips and cracks."],
+["brick","Brick & Mortar","BRK",[145,65,43],"brick",.93,"Running-bond clay brickwork with recessed mortar, per-brick kiln variation, pores, chips and weathering."],
 ["damp","Damp Walls","DMP",[77,82,77],"damp",.91,"Moisture stains, tide lines, mineral deposits and mildew."],
 ["plaster","Plaster & Peeling Paint","PLS",[163,153,137],"plaster",.83,"Chalky grain, aged paint, flakes and shallow cracks."],
 ["wallpaper","Aged Wallpaper","WAL",[119,96,81],"wallpaper",.74,"Faded paper fibers and embossed repeating ornament."],
@@ -54,7 +55,7 @@ const F=[
 const TOTAL=1024,PER=24,$=id=>document.getElementById(id),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));let active="all",page=0,selected=null,worker=null;
 document.querySelector(".eyebrow").textContent="Original material engine / build 003";
 document.querySelector(".hero p").textContent="A self-contained material workshop for the HOLLOW horror world. Distinct surface families, controllable wear, tileable generation and exports up to 8K. Runs locally with no external assets, libraries, APIs or CDNs.";
-$("totalStat").textContent="1,024";document.querySelector(".hero-stat span").textContent="Original material recipes";
+$("totalStat").textContent=F.reduce((n,f)=>n+f.count,0).toLocaleString();document.querySelector(".hero-stat span").textContent="Original material recipes";
 document.querySelector(".sidebar-note").textContent="Every recipe is rendered from this project's own code. The gallery works offline after loading. High-resolution maps render in a background worker.";
 document.querySelector(".footer").innerHTML="<span>HOLLOW TEXTURE LAB / ORIGINAL PROCEDURAL MATERIALS</span><span>Local generation · no external assets · no account</span>";
 const panel=document.querySelector(".detail-panel");
