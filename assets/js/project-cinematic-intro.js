@@ -169,7 +169,7 @@
   if (prefersReducedMotion) return;
 
   const sessionKey = projectKey === "home"
-    ? "tamasrazim-cinematic-intro-v5:home"
+    ? "tamasrazim-cinematic-intro-v6:home"
     : "tamasrazim-cinematic-intro-v1:" + projectKey;
   try {
     if (window.sessionStorage.getItem(sessionKey) === "shown") return;
@@ -260,6 +260,8 @@
 
   let closeTimer = 0;
   let isClosing = false;
+  let startFrame = null;
+  let didStart = false;
 
   function markAsShown() {
     try {
@@ -287,6 +289,10 @@
     if (isClosing) return;
     isClosing = true;
     window.clearTimeout(closeTimer);
+    if (startFrame !== null && typeof window.cancelAnimationFrame === "function") {
+      window.cancelAnimationFrame(startFrame);
+      startFrame = null;
+    }
     markAsShown();
     restoreHomeCard();
     intro.classList.add("pci-is-leaving");
@@ -329,11 +335,16 @@
   document.addEventListener("keydown", onKeyDown, true);
 
   // Let the browser paint the overlay before starting its entrance choreography.
-  window.requestAnimationFrame(function startIntro() {
+  const requestedFrame = window.requestAnimationFrame(function startIntro() {
+    startFrame = null;
+    if (isClosing) return;
+    didStart = true;
     intro.classList.add("pci-is-live");
     intro.focus({ preventScroll: true });
     const skip = intro.querySelector(".pci-skip");
     if (skip) skip.focus({ preventScroll: true });
   });
+  // Avoid retaining a completed frame ID if a test double runs synchronously.
+  if (!didStart && !isClosing) startFrame = requestedFrame;
   closeTimer = window.setTimeout(closeIntro, durationMs);
 })();

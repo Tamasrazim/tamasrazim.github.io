@@ -106,8 +106,8 @@ body.pci-lock{overflow:hidden!important}
 .pci-home-id-rig:before{content:"";position:absolute;inset:3% 0;background:radial-gradient(ellipse at center,rgba(255,255,255,.065),transparent 53%);opacity:0;animation:pci-home-stage-bloom 1.6s ease-out .1s forwards;pointer-events:none}
 .pci-home-id-aura{position:absolute;z-index:0;width:min(74vw,740px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.10) 0%,rgba(255,255,255,.035) 26%,transparent 68%);filter:blur(12px);opacity:0;transform:scale(.28);animation:pci-home-aura-bloom 2.8s cubic-bezier(.16,1,.3,1) .12s forwards;pointer-events:none}
 .pci-home-id-ring{position:absolute;z-index:1;width:min(78%,690px);aspect-ratio:1.586 / 1;border:1px solid rgba(241,241,237,.35);border-radius:50%;opacity:0;pointer-events:none;transform-origin:center;box-shadow:0 0 35px rgba(255,255,255,.025)}
-.pci-home-id-ring-a{transform:rotateX(70deg) rotateZ(-18deg) scale(.45);animation:pci-home-ring-arrive 3.7s cubic-bezier(.16,1,.3,1) .15s forwards,pci-home-ring-drift 16s linear 3.85s infinite}
-.pci-home-id-ring-b{width:min(65%,560px);border-style:dashed;border-color:rgba(241,241,237,.22);transform:rotateX(67deg) rotateZ(32deg) scale(.55);animation:pci-home-ring-arrive 3.4s cubic-bezier(.16,1,.3,1) .38s forwards,pci-home-ring-drift-reverse 21s linear 3.8s infinite}
+.pci-home-id-ring-a{--ring-x:70deg;--ring-z:-18deg;transform:rotateX(var(--ring-x)) rotateZ(var(--ring-z)) scale(.45);animation:pci-home-ring-arrive 3.7s cubic-bezier(.16,1,.3,1) .15s forwards,pci-home-ring-drift 16s linear 3.85s infinite}
+.pci-home-id-ring-b{--ring-x:67deg;--ring-z:32deg;width:min(65%,560px);border-style:dashed;border-color:rgba(241,241,237,.22);transform:rotateX(var(--ring-x)) rotateZ(var(--ring-z)) scale(.55);animation:pci-home-ring-arrive 3.4s cubic-bezier(.16,1,.3,1) .38s forwards,pci-home-ring-drift-reverse 21s linear 3.8s infinite}
 .pci-home-id-outline{position:absolute;z-index:2;width:min(460px,84vw);aspect-ratio:1.586 / 1;border:1px solid rgba(241,241,237,.7);border-radius:15px;opacity:0;clip-path:inset(0 50% 0 50% round 15px);box-shadow:0 0 35px rgba(255,255,255,.045),inset 0 0 34px rgba(255,255,255,.025);pointer-events:none}
 .pci-home-id-outline:before{content:"";position:absolute;inset:8px;border:1px dashed rgba(241,241,237,.2);border-radius:9px}
 .pci-home-id-outline:after{content:"";position:absolute;top:0;bottom:0;left:50%;width:1px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.85),transparent);box-shadow:0 0 18px rgba(255,255,255,.9)}
@@ -134,7 +134,7 @@ body.pci-lock{overflow:hidden!important}
 .pci-is-live.pci-project--home .pci-home-id-flash{animation:pci-home-flash-pass 1.6s cubic-bezier(.2,.75,.2,1) 4.15s 1 both}
 @keyframes pci-home-stage-bloom{to{opacity:1}}
 @keyframes pci-home-aura-bloom{0%{opacity:0;transform:scale(.28)}40%{opacity:1}100%{opacity:.5;transform:scale(1)}}
-@keyframes pci-home-ring-arrive{0%{opacity:0}35%{opacity:.6}100%{opacity:.28;transform:rotateX(70deg) rotateZ(0deg) scale(1)}}
+@keyframes pci-home-ring-arrive{0%{opacity:0}35%{opacity:.6}100%{opacity:.28;transform:rotateX(var(--ring-x,70deg)) rotateZ(var(--ring-z,0deg)) scale(1)}}
 @keyframes pci-home-ring-drift{to{rotate:360deg}}
 @keyframes pci-home-ring-drift-reverse{to{rotate:-360deg}}
 @keyframes pci-home-outline-open{0%{opacity:0;clip-path:inset(0 50% 0 50% round 15px)}35%{opacity:1}100%{opacity:.72;clip-path:inset(0 0 0 0 round 15px)}}
