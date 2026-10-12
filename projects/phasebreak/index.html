@@ -1,0 +1,135 @@
+<!doctype html>
+<!--
+  PHASEBREAK's project page describes the current Android source and the actual APK build path.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505"><meta name="color-scheme" content="dark"><meta name="author" content="Robiul Rumman Razim">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<title>PHASEBREAK — Native Android Game | Tamasrazim</title>
+<meta name="description" content="PHASEBREAK is a native, offline Android platform game. Switch between SOL and UMBRA, collect prism shards, activate checkpoints and clear generated stages.">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/phasebreak/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Tamasrazim"><meta property="og:title" content="PHASEBREAK — Native Android Game">
+<meta property="og:description" content="A two-reality platform game built as a native Android APK, with local progress and no online dependencies.">
+<meta property="og:url" content="https://tamasrazim.github.io/projects/phasebreak/"><meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site-v3.css?v=20261012-2"><script defer src="/assets/js/site-redesign.js?v=20261012-2"></script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"VideoGame",
+  "@id":"https://tamasrazim.github.io/projects/phasebreak/#game",
+  "name":"PHASEBREAK",
+  "url":"https://tamasrazim.github.io/projects/phasebreak/",
+  "description":"A native offline Android platform game about switching between two realities, collecting prism shards and clearing generated stages.",
+  "genre":["Platformer","Puzzle"],
+  "gamePlatform":"Android",
+  "operatingSystem":"Android",
+  "applicationCategory":"GameApplication",
+  "author":{"@type":"Person","name":"Robiul Rumman Razim","url":"https://tamasrazim.github.io/"}
+}
+</script>
+<style>
+.pb-wrap{width:min(1160px,calc(100% - clamp(32px,7.2vw,112px)));margin-inline:auto}
+.pb-border{border-bottom:1px solid rgba(241,241,237,.14)}
+.pb-nav{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:74px}
+.pb-navlinks{display:flex;gap:16px;flex-wrap:wrap;color:var(--v3-muted);font:9px var(--v3-mono)}
+.pb-navlinks a{text-decoration:none}.pb-navlinks a:hover{color:var(--v3-ink)}
+.pb-hero{padding:clamp(60px,9vw,112px) 0 54px}
+.pb-hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);gap:clamp(24px,5vw,70px);align-items:center}
+.pb-kicker{font:10px var(--v3-mono);letter-spacing:.16em;color:var(--v3-muted);text-transform:uppercase}
+.pb-title{font:700 clamp(48px,9.2vw,112px)/.9 var(--v3-display);letter-spacing:-.09em;margin:26px 0}
+.pb-title em{font-style:normal;color:#8e8e95}
+.pb-lead{font-size:clamp(17px,2vw,23px);line-height:1.65;max-width:620px;letter-spacing:-.025em}
+.pb-copy{color:var(--v3-muted);font-size:13px;line-height:1.9;max-width:650px}
+.pb-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:25px}
+.pb-status{display:flex;gap:7px;flex-wrap:wrap;margin-top:25px}
+.pb-pill{display:inline-flex;border:1px solid rgba(241,241,237,.18);padding:8px 10px;font:9px var(--v3-mono);letter-spacing:.05em}
+.pb-art{position:relative;min-height:360px;aspect-ratio:1.02;border:1px solid rgba(241,241,237,.14);overflow:hidden;background:radial-gradient(circle at 55% 44%,rgba(255,255,255,.1),transparent 34%),#070707}
+.pb-art-grid{position:absolute;inset:0;background:linear-gradient(90deg,transparent 49.8%,rgba(255,255,255,.1) 50%,transparent 50.2%),linear-gradient(transparent 49.8%,rgba(255,255,255,.08) 50%,transparent 50.2%);background-size:36px 36px;opacity:.5}
+.pb-orbit{position:absolute;left:50%;top:45%;width:54%;aspect-ratio:1;border:1px solid #34343b;border-radius:50%;transform:translate(-50%,-50%);animation:pb-rotate 28s linear infinite}
+.pb-orbit:before,.pb-orbit:after{content:"";position:absolute;inset:13%;border:1px dashed #777780;border-radius:50%}
+.pb-orbit:after{inset:28%;border-style:solid;animation:pb-rotate 15s linear infinite reverse}
+.pb-prism{position:absolute;left:50%;top:45%;width:92px;height:92px;border:1px solid #eee;transform:translate(-50%,-50%) rotate(45deg);animation:pb-prism 7s ease-in-out infinite}
+.pb-prism:before{content:"";position:absolute;inset:18px;border:1px solid #85858d}
+.pb-prism:after{content:"";position:absolute;left:50%;top:-18px;bottom:-18px;border-left:1px solid #85858d}
+.pb-platform{position:absolute;height:13px;border:1px solid #eee;background:#d9d9d5;transform:skewX(-24deg)}
+.pb-platform.one{left:10%;right:51%;bottom:23%}
+.pb-platform.two{left:51%;right:10%;bottom:33%;background:#101014;border-style:dashed;border-color:#94949d}
+.pb-avatar{position:absolute;left:47%;bottom:36%;width:18px;height:42px;background:#eee;clip-path:polygon(50% 0,100% 23%,82% 83%,50% 100%,18% 83%,0 23%)}
+.pb-art-label{position:absolute;left:14px;right:14px;bottom:12px;display:flex;justify-content:space-between;gap:10px;color:#8a8a92;font:8px var(--v3-mono);letter-spacing:.08em}
+@keyframes pb-rotate{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes pb-prism{0%,100%{transform:translate(-50%,-50%) rotate(45deg) scale(.94)}50%{transform:translate(-50%,-50%) rotate(225deg) scale(1.06)}}
+.pb-section{padding:clamp(54px,7vw,88px) 0;border-bottom:1px solid rgba(241,241,237,.14)}
+.pb-section-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:25px}
+.pb-section h2{font:600 clamp(28px,4.8vw,48px)/1.1 var(--v3-display);letter-spacing:-.07em;margin:0}
+.pb-section-intro{max-width:550px;color:var(--v3-muted);font-size:12px;line-height:1.9}
+.pb-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.pb-card{border:1px solid rgba(241,241,237,.14);padding:19px;background:linear-gradient(155deg,rgba(255,255,255,.025),transparent 65%),#090909;min-width:0}
+.pb-label{font:9px var(--v3-mono);letter-spacing:.13em;color:#aaa;text-transform:uppercase;margin-bottom:15px}
+.pb-card h3{font:500 15px var(--v3-display);margin:0 0 11px}
+.pb-card p{color:var(--v3-muted);font-size:12px;line-height:1.85;margin:0}
+.pb-build{border:1px solid rgba(241,241,237,.17);padding:22px;background:#080808}
+.pb-build-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+.pb-build strong{font:500 12px var(--v3-mono);color:var(--v3-ink)}
+.pb-build p{color:var(--v3-muted);font-size:12px;line-height:1.85;max-width:780px}
+.pb-code{font:10px var(--v3-mono);color:#d5d5d1;overflow-wrap:anywhere}
+.pb-footer{display:flex;justify-content:space-between;gap:16px;padding:25px 0;color:var(--v3-muted);font:9px var(--v3-mono)}
+@media(max-width:850px){.pb-hero-grid{grid-template-columns:1fr}.pb-art{max-width:600px;width:100%;margin-inline:auto}.pb-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.pb-wrap{width:calc(100% - 32px)}.pb-nav{align-items:flex-start;flex-direction:column;padding:17px 0}.pb-navlinks{gap:12px}.pb-hero{padding-top:52px}.pb-art{min-height:290px}.pb-section-head{align-items:flex-start;flex-direction:column}.pb-grid{grid-template-columns:1fr}.pb-footer{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){.pb-orbit,.pb-orbit:after,.pb-prism{animation:none!important}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to project</a>
+<header class="v3-header"><div class="v3-header-inner v3-shell">
+<a class="v3-brand" href="/" aria-label="Tamasrazim home"><span class="v3-brand-mark" aria-hidden="true">T</span><span>tamasrazim</span></a>
+<nav class="v3-nav" id="primaryNav" aria-label="Primary navigation"><a href="/projects/">Projects ↗</a><a href="/work/">Work</a><a href="/about/">About</a><a href="/approach/">Approach</a><a href="/elsewere/">Elsewhere ↗</a><a href="/licences/">Licences ↗</a></nav>
+<div class="v3-header-actions"><span class="v3-clock" id="clock" aria-label="Local time"></span><a class="v3-header-contact" href="/#contact">Contact ↗</a><button class="v3-menu" id="menuButton" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="primaryNav"><span></span><span></span></button></div>
+</div></header>
+<main id="main" class="v3-main">
+<section class="pb-wrap pb-hero pb-border">
+<div class="pb-hero-grid">
+<div>
+<p class="pb-kicker">14 / NATIVE ANDROID GAME</p>
+<h1 class="pb-title">PHASE<br><em>BREAK</em></h1>
+<p class="pb-lead">Two realities share one route. Jump, switch phases mid-air, collect prism shards, and reach the gate.</p>
+<p class="pb-copy">A new mobile game built as an installed Android application in Kotlin. It draws and simulates its world locally, saves progress on the device, and does not need an account or network connection.</p>
+<div class="pb-actions"><a class="v3-button" href="https://github.com/Tamasrazim/tamasrazim.github.io/tree/main/projects/phasebreak/android">Open Android source ↗</a><a class="v3-button secondary" href="https://github.com/Tamasrazim/tamasrazim.github.io/actions/workflows/phasebreak-android.yml">APK build status ↗</a></div>
+<div class="pb-status"><span class="pb-pill">NATIVE KOTLIN</span><span class="pb-pill">OFFLINE PLAY</span><span class="pb-pill">APK BUILD</span></div>
+</div>
+<div class="pb-art" aria-label="Abstract illustration of the two overlapping realities">
+<div class="pb-art-grid"></div><div class="pb-orbit"></div><div class="pb-prism"></div><div class="pb-platform one"></div><div class="pb-platform two"></div><div class="pb-avatar"></div>
+<div class="pb-art-label"><span>SOL / UMBRA</span><span>PHASE ENGINE / 01</span></div>
+</div>
+</div>
+</section>
+<section class="pb-wrap pb-section">
+<div class="pb-section-head"><h2>One route.<br>Two realities.</h2><p class="pb-section-intro">Each room asks you to read the path, time a jump, and switch which geometry is solid before you land. The active world is bright; the inactive route remains faintly visible.</p></div>
+<div class="pb-grid">
+<article class="pb-card"><div class="pb-label">01 / SOL</div><h3>Light phase</h3><p>Bright platforms hold the player. Switching out of SOL while standing on one means you must find another surface before gravity takes over.</p></article>
+<article class="pb-card"><div class="pb-label">02 / UMBRA</div><h3>Shadow phase</h3><p>Shadow platforms become solid on a phase swap. Change worlds in mid-air to reach a route that was only a ghost a moment ago.</p></article>
+<article class="pb-card"><div class="pb-label">03 / PROGRESSION</div><h3>Shards and checkpoints</h3><p>Collect prism shards, cross hazard sections, activate checkpoints, and clear the exit gate. Unlock progress is saved locally between sessions.</p></article>
+</div>
+</section>
+<section class="pb-wrap pb-section">
+<div class="pb-section-head"><h2>Built for<br>the phone.</h2><p class="pb-section-intro">No browser wrapper and no remote service in the gameplay path. Rendering, physics, touch input, level generation, and local saves run in the Android app.</p></div>
+<div class="pb-grid">
+<article class="pb-card"><div class="pb-label">PLATFORM</div><h3>Android APK</h3><p>Landscape-first controls designed for touch. Minimum Android version is 6.0 (API 23); the source targets Android SDK 35.</p></article>
+<article class="pb-card"><div class="pb-label">ENGINE</div><h3>Kotlin + Canvas</h3><p>A native drawing and game loop with collision checks, phase-aware platforms, hazards, pickups, camera tracking, and a 60 FPS render cap.</p></article>
+<article class="pb-card"><div class="pb-label">PRIVACY</div><h3>Offline by design</h3><p>No network permission, account flow, advertising SDK, analytics dependency, or subscription requirement. Progress stays in local app storage.</p></article>
+</div>
+</section>
+<section class="pb-wrap pb-section">
+<div class="pb-build">
+<div class="pb-build-top"><div><div class="pb-label">BUILD / ANDROID</div><h2 style="font:600 clamp(24px,4vw,37px)/1.15 var(--v3-display);letter-spacing:-.06em;margin:0">Installable test APK</h2></div><strong>DEBUG SIGNING</strong></div>
+<p>The repository's Android workflow assembles <span class="pb-code">app-debug.apk</span> whenever the game source changes. Open the build-status link above, select a successful run, and download the <span class="pb-code">phasebreak-debug-apk</span> artifact. The debug package is for direct device testing; a Play Store release needs a separately managed private signing key.</p>
+<p class="pb-code">projects/phasebreak/android/app/build/outputs/apk/debug/app-debug.apk</p>
+</div>
+</section>
+</main>
+<footer class="pb-wrap pb-footer pb-border"><span>PHASEBREAK / ANDROID GAME</span><a href="/projects/">All projects ↗</a></footer>
+</body>
+</html>

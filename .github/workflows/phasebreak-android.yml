@@ -1,0 +1,51 @@
+name: Build PHASEBREAK Android APK
+
+on:
+  push:
+    paths:
+      - "projects/phasebreak/android/**"
+      - ".github/workflows/phasebreak-android.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    name: Compile installable APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Get the source
+        uses: actions/checkout@v4
+
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform and build tools
+        run: |
+          yes | sdkmanager --licenses >/dev/null
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Compile debug APK
+        working-directory: projects/phasebreak/android
+        run: gradle --no-daemon --stacktrace :app:assembleDebug
+
+      - name: Publish APK for device testing
+        uses: actions/upload-artifact@v4
+        with:
+          name: phasebreak-debug-apk
+          path: projects/phasebreak/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
