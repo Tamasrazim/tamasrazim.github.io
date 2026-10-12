@@ -366,7 +366,13 @@ function testCinematicIntroRuntime(projectKey) {
     setTimeout:windowMock.setTimeout,
     clearTimeout:windowMock.clearTimeout
   },{filename:'project-cinematic-intro.js'});
-  must(body.children.length===1&&intro.innerHTML.includes(projectKey==='code-to-svg'?'CODE → SVG':projectKey==='code-to-eps'?'CODE → EPS':projectKey.toUpperCase()),projectKey.toUpperCase()+' intro mounts its own title and artwork');
+  const expectedTitles={
+    tunrun:'TUNRUN',webedyts:'WEBEDYTS',qalyvyron:'QALYVYRON',trilyva:'TRILYVA',
+    neo:'NEO','code-to-svg':'CODE → SVG','code-to-eps':'CODE → EPS',
+    'format-forge':'FORMAT FORGE','asset-vault':'STOCK ASSET VAULT',
+    kynestra:'KYNESTRA',bncagrocare:'BNC AGROCARE','repo-token-meter':'REPO TOKEN METER'
+  };
+  must(body.children.length===1&&intro.innerHTML.includes(expectedTitles[projectKey]),projectKey.toUpperCase()+' intro mounts its own title and artwork');
   must(body.classList.contains('pci-lock')&&intro.classList.contains('pci-is-live')&&typeof skipHandlers.click==='function',projectKey.toUpperCase()+' intro starts, blocks background scrolling, and exposes Skip');
   skipHandlers.click();
   must(!body.classList.contains('pci-lock')&&intro.classList.contains('pci-is-leaving')&&storage.get('tamasrazim-cinematic-intro-v1:'+projectKey)==='shown',projectKey.toUpperCase()+' Skip closes the intro, restores scrolling, and records the session');
