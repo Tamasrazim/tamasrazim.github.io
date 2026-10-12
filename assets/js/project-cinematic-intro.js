@@ -144,11 +144,13 @@
     },
     home: {
       title: "TAMASRAZIM",
-      kicker: "SOFTWARE ENGINEER / INDEPENDENT WORK",
-      tagline: "SOFTWARE. GAMES. CREATIVE TOOLS.",
-      description: "An evolving workspace for things built from scratch.",
-      sequence: "OPENING SEQUENCE / PERSONAL WEBSITE",
-      art: '<div class="pci-home-art" aria-hidden="true"><div class="pci-home-grid"></div><svg class="pci-home-blueprint" viewBox="0 0 600 600" role="presentation"><path d="M65 300 160 135 300 55 440 135 535 300 440 465 300 545 160 465Z"/><path d="M65 300H535M160 135 440 465M440 135 160 465M300 55V545"/><path d="M125 196 300 95 475 196V404L300 505 125 404Z"/><circle cx="300" cy="300" r="177"/><circle cx="300" cy="300" r="117"/><path d="M226 230H374M300 230V390"/></svg><i class="pci-home-orbit pci-home-orbit-a"></i><i class="pci-home-orbit pci-home-orbit-b"></i><i class="pci-home-orbit pci-home-orbit-c"></i><div class="pci-home-data pci-home-data-a"><span>01 / BUILD</span><b>SOFTWARE</b><i></i></div><div class="pci-home-data pci-home-data-b"><span>02 / PLAY</span><b>GAMES</b><i></i></div><div class="pci-home-data pci-home-data-c"><span>03 / CREATE</span><b>MOTION</b><i></i></div><div class="pci-home-data pci-home-data-d"><span>04 / SOLVE</span><b>TOOLS</b><i></i></div><div class="pci-home-plate"><span>T</span><b>TR / 2026</b></div><div class="pci-home-scan"></div><span class="pci-home-caption">BUILT FROM SCRATCH / ALWAYS IN MOTION</span></div>'
+      kicker: "REGISTERED IDENTITY / LIVE BUILD",
+      tagline: "IDENTITY, ASSEMBLED FROM THE ORIGINAL.",
+      description: "The existing identity card is the animation—not a recreation.",
+      sequence: "IDENTITY ASSEMBLY / MAIN SITE",
+      durationMs: 8500,
+      durationLabel: "08.5 SEC",
+      art: '<div class="pci-home-id-mount" aria-label="Original identity card being assembled"></div>'
     },
     "repo-token-meter": {
       title: "REPO TOKEN METER", kicker: "DEVELOPER TOOL / REPOSITORY FOOTPRINT",
@@ -166,11 +168,28 @@
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (prefersReducedMotion) return;
 
-  const sessionKey = "tamasrazim-cinematic-intro-v1:" + projectKey;
+  const sessionKey = projectKey === "home"
+    ? "tamasrazim-cinematic-intro-v2:home"
+    : "tamasrazim-cinematic-intro-v1:" + projectKey;
   try {
     if (window.sessionStorage.getItem(sessionKey) === "shown") return;
   } catch (_storageUnavailable) {
     // Continue normally if browser storage is disabled.
+  }
+
+  const durationMs = Number(profile.durationMs) > 0 ? Number(profile.durationMs) : 4250;
+  let homeCard = null;
+  let homeCardOriginalParent = null;
+  let homeCardPlaceholder = null;
+  let homeCardOriginalClassName = "";
+  let homeCardOriginalStyle = null;
+
+  if (projectKey === "home") {
+    homeCard = document.querySelector("main .id-card");
+    if (!homeCard || !homeCard.parentNode || typeof document.createComment !== "function") return;
+    homeCardOriginalParent = homeCard.parentNode;
+    homeCardOriginalClassName = homeCard.className;
+    homeCardOriginalStyle = homeCard.getAttribute("style");
   }
 
   const intro = document.createElement("section");
@@ -179,27 +198,68 @@
   intro.setAttribute("aria-modal", "true");
   intro.setAttribute("aria-label", profile.title + " cinematic introduction");
   intro.setAttribute("tabindex", "-1");
-  intro.innerHTML = `
-    <div class="pci-topbar">
-      <span>TAMASRAZIM <strong>/ PROJECT STUDIO</strong></span>
-      <button class="pci-skip" type="button" aria-label="Skip cinematic introduction">
-        SKIP INTRO <kbd>ESC</kbd>
-      </button>
-    </div>
-    <div class="pci-stage">
-      <div class="pci-scene">${profile.art}</div>
-      <div class="pci-copy">
-        <p class="pci-kicker">${profile.kicker}</p>
-        <h1 class="pci-title">${profile.title}<span class="pci-period">.</span></h1>
-        <p class="pci-tagline">${profile.tagline}</p>
-        <p class="pci-description">${profile.description}</p>
+  if (projectKey === "home") {
+    intro.innerHTML = `
+      <div class="pci-topbar">
+        <span>TAMASRAZIM <strong>/ IDENTITY ASSEMBLY</strong></span>
+        <button class="pci-skip" type="button" aria-label="Skip identity card assembly">
+          SKIP INTRO <kbd>ESC</kbd>
+        </button>
       </div>
-    </div>
-    <div class="pci-bottomline">
-      <span>${profile.sequence}</span>
-      <div class="pci-progress" aria-hidden="true"><span></span></div>
-      <span>04.2 SEC</span>
-    </div>`;
+      <div class="pci-home-build-stage">
+        <div class="pci-home-build-head">
+          <span>IDENTITY SYSTEM / 001</span>
+          <span class="pci-home-build-state"><i aria-hidden="true"></i> BUILD SEQUENCE ONLINE</span>
+        </div>
+        <div class="pci-home-id-rig">
+          <div class="pci-home-id-outline" aria-hidden="true"></div>
+          <div class="pci-home-id-scan" aria-hidden="true"></div>
+          ${profile.art}
+          <div class="pci-home-id-side-label left" aria-hidden="true">SOURCE / RRMZ</div>
+          <div class="pci-home-id-side-label right" aria-hidden="true">HANDLE / TR</div>
+        </div>
+        <div class="pci-home-build-foot">
+          <span>ARTWORK → NAME → HANDLE → ACTIVE</span>
+          <span>ORIGINAL ID / LIVE COMPONENT</span>
+        </div>
+      </div>
+      <div class="pci-bottomline">
+        <span>${profile.sequence}</span>
+        <div class="pci-progress" aria-hidden="true"><span></span></div>
+        <span>${profile.durationLabel || "04.2 SEC"}</span>
+      </div>`;
+  } else {
+    intro.innerHTML = `
+      <div class="pci-topbar">
+        <span>TAMASRAZIM <strong>/ PROJECT STUDIO</strong></span>
+        <button class="pci-skip" type="button" aria-label="Skip cinematic introduction">
+          SKIP INTRO <kbd>ESC</kbd>
+        </button>
+      </div>
+      <div class="pci-stage">
+        <div class="pci-scene">${profile.art}</div>
+        <div class="pci-copy">
+          <p class="pci-kicker">${profile.kicker}</p>
+          <h1 class="pci-title">${profile.title}<span class="pci-period">.</span></h1>
+          <p class="pci-tagline">${profile.tagline}</p>
+          <p class="pci-description">${profile.description}</p>
+        </div>
+      </div>
+      <div class="pci-bottomline">
+        <span>${profile.sequence}</span>
+        <div class="pci-progress" aria-hidden="true"><span></span></div>
+        <span>${profile.durationLabel || "04.2 SEC"}</span>
+      </div>`;
+  }
+
+  if (homeCard) {
+    const homeMount = intro.querySelector(".pci-home-id-mount");
+    if (!homeMount) return;
+    homeCardPlaceholder = document.createComment("original identity card position");
+    homeCardOriginalParent.insertBefore(homeCardPlaceholder, homeCard);
+    homeCard.classList.add("pci-home-built-card", "is-visible");
+    homeMount.appendChild(homeCard);
+  }
 
   body.appendChild(intro);
   body.classList.add("pci-lock");
@@ -215,11 +275,26 @@
     }
   }
 
+  function restoreHomeCard() {
+    if (!homeCard || !homeCardPlaceholder || !homeCardPlaceholder.parentNode) return;
+    const originalParent = homeCardPlaceholder.parentNode;
+    originalParent.insertBefore(homeCard, homeCardPlaceholder);
+    originalParent.removeChild(homeCardPlaceholder);
+    homeCard.className = homeCardOriginalClassName;
+    if (homeCardOriginalStyle === null) {
+      homeCard.removeAttribute("style");
+    } else {
+      homeCard.setAttribute("style", homeCardOriginalStyle);
+    }
+    homeCardPlaceholder = null;
+  }
+
   function closeIntro() {
     if (isClosing) return;
     isClosing = true;
     window.clearTimeout(closeTimer);
     markAsShown();
+    restoreHomeCard();
     intro.classList.add("pci-is-leaving");
     intro.setAttribute("aria-hidden", "true");
     body.classList.remove("pci-lock");
@@ -266,5 +341,5 @@
     const skip = intro.querySelector(".pci-skip");
     if (skip) skip.focus({ preventScroll: true });
   });
-  closeTimer = window.setTimeout(closeIntro, 4250);
+  closeTimer = window.setTimeout(closeIntro, durationMs);
 })();
