@@ -65,8 +65,9 @@ must(samples.length >= 10, 'renderer keeps its built-in sample library');
 
 const executable = scripts.filter(([_, attrs]) => attrs.trim() === '');
 const applicationBlocks = executable.filter(([, , source]) =>
-  source.includes('Code -> Motion — application shell') &&
-  source.includes("var APP_VERSION = '1.2.0'")
+  source.includes("var SOFTWARE = 'TRILYVA — Tamasrazim';") &&
+  source.includes('function loadProtectedLibraryModule()') &&
+  /var APP_VERSION = '\\d+\\.\\d+\\.\\d+'/.test(source)
 );
 must(applicationBlocks.length === 1, 'renderer has one executable TRILYVA application block');
 try {
@@ -81,6 +82,10 @@ must(!project.includes('Mediabunny'), 'project page has no stale Mediabunny clai
 must(!media.includes('Mediabunny'), 'media descriptor has no stale Mediabunny dependency');
 must(media.includes("containers: ['mp4', 'webm']"), 'media descriptor exposes current containers');
 must(media.includes("videoCodecs: ['avc', 'vp9', 'vp8']"), 'media descriptor exposes current codec layers');
+must(!media.includes('installBatchLink')&&!media.includes('FLOWER BATCH'),'media descriptor does not inject the removed Flower Batch tab');
+must(renderer.includes("const PRISM_LIBRARY_URL='../../code-to-eps/prism-library.json'")&&renderer.includes("const TRILYVA_PRISM_LIBRARY_URL='../../code-to-eps/prism-library.json'"),'both TRILYVA Prism loaders use the existing shared dataset');
+const prismData = fs.readFileSync(path.join(root, 'projects/code-motion/renderer/library/prism-data.js'), 'utf8');
+must(prismData.includes('../../../code-to-eps/prism-library.json')&&prismData.includes('export default data;'),'the protected Prism module exports its shared dataset');
 
 try {
   new Function(media);
