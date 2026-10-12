@@ -235,7 +235,8 @@ must(webedytsPage.includes('not a screenshot')&&webedytsPage.includes('current e
 const qalyvyronPage=read('projects/qalyvyron/index.html');
 must(qalyvyronPage.includes('QALYVYRON')&&qalyvyronPage.includes('not yet a complete replacement for Blender'),'QALYVYRON has a dedicated page with honest development status');
 must(qalyvyronPage.includes('Focus Selected')&&qalyvyronPage.toLowerCase().includes('offline png')&&qalyvyronPage.toLowerCase().includes("what isn't done yet"),'QALYVYRON page distinguishes current functionality from unfinished systems');
-must(qalyvyronPage.includes('/actions/runs/38189084118')&&!qalyvyronPage.includes('/actions/runs/38187040533')&&!qalyvyronPage.includes('releases/latest/download/QALYVYRON'),'QALYVYRON links the latest verified CI build and does not advertise an unpublished release');
+must(qalyvyronPage.includes('selectable mesh-edge lines')&&qalyvyronPage.includes('closed edge loop'),'QALYVYRON page documents tested mesh-edge selection and edge-loop face creation');
+must(qalyvyronPage.includes('/actions/runs/38193528968')&&!qalyvyronPage.includes('/actions/runs/38189084118')&&!qalyvyronPage.includes('/actions/runs/38187040533')&&!qalyvyronPage.includes('releases/latest/download/QALYVYRON'),'QALYVYRON links the latest verified CI build and does not advertise an unpublished release');
 must(qalyvyronPage.includes('approximately every 30 seconds')&&qalyvyronPage.includes('restore the snapshot'),'QALYVYRON page documents timed local recovery and startup restore');
 must(qalyvyronPage.includes('Run 38189084118 passed')&&qalyvyronPage.includes('both platforms'),'QALYVYRON build status reflects current Windows and Linux verification');
 

@@ -20,14 +20,14 @@
   "@id":"https://tamasrazim.github.io/projects/qalyvyron/#application",
   "name":"QALYVYRON",
   "url":"https://tamasrazim.github.io/projects/qalyvyron/",
-  "description":"A local-first desktop 3D creation and rendering studio in active development. The current build has a beginner-first workspace, editable primitive meshes, automatic local scene recovery, geometry-only OBJ import/export, read-only GLB/glTF preview, and CPU offline PNG rendering. It is not yet a complete Blender replacement.",
+  "description":"A local-first desktop 3D creation and rendering studio in active development. The current build has a beginner-first workspace, editable primitive meshes, selectable mesh edges, closed-edge-loop face creation, automatic local scene recovery, geometry-only OBJ import/export, read-only GLB/glTF preview, and CPU offline PNG rendering. It is not yet a complete Blender replacement.",
   "applicationCategory":"MultimediaApplication",
   "operatingSystem":"Windows x64; Linux build and tests",
   "programmingLanguage":["C++17","QML","CMake"],
   "creator":{"@id":"https://tamasrazim.github.io/#person"},
   "isPartOf":{"@id":"https://tamasrazim.github.io/#website"},
   "mainEntityOfPage":{"@id":"https://tamasrazim.github.io/projects/qalyvyron/#page"},
-  "featureList":["Guided first-run tour and simplified controls","Editable polygon meshes and geometry-only OBJ import/export","Read-only GLB/glTF preview import","CPU offline PNG rendering with bounded workload","Automatic local recovery snapshots with startup restore prompt","Local scene files, undo/redo and unsaved-change protection"]
+  "featureList":["Guided first-run tour and simplified controls","Clickable viewport vertices and unique mesh edges","Closed edge-loop selection to create supported planar convex faces","Geometry-only OBJ import/export and read-only GLB/glTF preview import","CPU offline PNG rendering with bounded workload","Automatic local recovery snapshots with startup restore prompt","Local scene files, undo/redo and unsaved-change protection"]
 }
 </script>
 <style>
@@ -78,7 +78,7 @@ body.qy-page{margin:0;background:#050505;color:#f4f4f0;font-family:Inter,ui-sans
 <h1>QALY<span>VYRON</span></h1>
 <p class="qy-lead">A 3D creation studio built around a simple idea: make the first five minutes feel obvious, then reveal deeper tools as you grow.</p>
 <p class="qy-sub">QALYVYRON is a local desktop application for building and editing 3D scenes and rendering still images. It is being developed as an independent alternative—not a clone of Blender's interface, and not yet a complete replacement for Blender.</p>
-<div class="qy-actions"><a class="qy-button primary" href="https://github.com/Tamasrazim/QALYVYRON">Explore the source <span class="arrow" aria-hidden="true">↗</span></a><a class="qy-button" href="https://github.com/Tamasrazim/QALYVYRON/actions/runs/38189084118">Verified build record <span class="arrow" aria-hidden="true">↗</span></a><a class="qy-button" href="https://github.com/Tamasrazim/QALYVYRON/blob/main/USER_GUIDE.md">User guide <span class="arrow" aria-hidden="true">↗</span></a></div>
+<div class="qy-actions"><a class="qy-button primary" href="https://github.com/Tamasrazim/QALYVYRON">Explore the source <span class="arrow" aria-hidden="true">↗</span></a><a class="qy-button" href="https://github.com/Tamasrazim/QALYVYRON/actions/runs/38193528968">Verified build record <span class="arrow" aria-hidden="true">↗</span></a><a class="qy-button" href="https://github.com/Tamasrazim/QALYVYRON/blob/main/USER_GUIDE.md">User guide <span class="arrow" aria-hidden="true">↗</span></a></div>
 <div class="qy-tags"><span class="qy-tag">C++ / Qt 6</span><span class="qy-tag">Windows x64 build</span><span class="qy-tag">Linux CI</span><span class="qy-tag">Local-first</span></div>
 </div><div>
 <div class="qy-art" role="img" aria-label="Monochrome wireframe cube with orbit guides representing the QALYVYRON 3D workspace">
@@ -101,7 +101,7 @@ body.qy-page{margin:0;background:#050505;color:#f4f4f0;font-family:Inter,ui-sans
 <section class="qy-section qy-shell"><div class="qy-section-head"><div><span class="kicker">02 / WORKING SYSTEMS</span><h2>Actual geometry.<br>Actual output.</h2></div><p>These are current implementation paths, not promises based on mock controls. Import support and render capabilities still have clear limits.</p></div>
 <div class="qy-feature-grid">
 <article class="qy-card"><span class="number">01 / SCENE</span><h3>Live 3D workspace</h3><ul><li>Cube, sphere, cylinder, cone and plane.</li><li>Object list, selection, transforms and material colours.</li><li>Focus Selected and Frame All bring the camera back to the right place.</li><li>Local scene save/open and bounded undo/redo.</li></ul></article>
-<article class="qy-card"><span class="number">02 / MESH</span><h3>Editable polygon geometry</h3><ul><li>Vertex coordinate edits and viewport selection.</li><li>Face creation, extrusion, inset, merge and delete for supported topology.</li><li>Geometry-only Wavefront OBJ import and transformed OBJ export.</li></ul></article>
+<article class="qy-card"><span class="number">02 / MESH</span><h3>Editable polygon geometry</h3><ul><li>Clickable viewport vertex markers and selectable mesh-edge lines.</li><li>Select a closed edge loop to create supported planar, convex faces.</li><li>Face creation, extrusion, inset, merge and delete for supported topology.</li><li>Geometry-only Wavefront OBJ import and transformed OBJ export.</li></ul></article>
 <article class="qy-card"><span class="number">03 / ASSETS</span><h3>Bring in 3D files</h3><p>Local OBJ geometry becomes editable mesh data. GLB and glTF files can be loaded for scene preview, but currently remain read-only and reference their original local files.</p></article>
 <article class="qy-card"><span class="number">04 / RENDER</span><h3>Offline PNG output</h3><p>A separate CPU renderer uses scene triangles, BVH acceleration, multisampling, directional and point lights, hard shadows, and simple diffuse indirect bounces. It reports progress and supports cancellation.</p></article>
 <article class="qy-card"><span class="number">05 / CONTROL</span><h3>Save and recover locally</h3><p>Unsaved scenes receive local recovery snapshots approximately every 30 seconds. On the next launch, a prompt offers to restore the snapshot. Saving or explicitly discarding clears the recovery copy, which stays separate from the original scene file.</p></article>
@@ -110,13 +110,13 @@ body.qy-page{margin:0;background:#050505;color:#f4f4f0;font-family:Inter,ui-sans
 
 <section class="qy-section qy-shell"><div class="qy-section-head"><div><span class="kicker">03 / WHAT ISN'T DONE YET</span><h2>A realistic status.</h2></div><p>Beating a mature tool means doing the hard engineering as well as making the UI approachable. The missing systems are part of the plan, not hidden in fine print.</p></div>
 <div class="qy-two-col">
-<article class="qy-card"><span class="number">MODELLING / MATERIALS</span><h3>Depth still to build</h3><ul><li>Full vertex, edge and face interaction, bevel and loop tools.</li><li>Non-destructive modifier stack, UV editing and node-based materials.</li><li>Texture, normal and material-library preservation in imported models.</li></ul></article>
+<article class="qy-card"><span class="number">MODELLING / MATERIALS</span><h3>Depth still to build</h3><ul><li>Complete vertex/edge/face editing, edge operations, bevel and loop tools beyond the initial edge-loop face workflow.</li><li>Non-destructive modifier stack, UV editing and node-based materials.</li><li>Texture, normal and material-library preservation in imported models.</li></ul></article>
 <article class="qy-card"><span class="number">RENDER / ANIMATION</span><h3>Production pipeline still to build</h3><ul><li>Soft shadows, denoising, richer PBR and imported-asset geometry in final rendering.</li><li>Timeline, keyframes, animation export, rigging and simulations.</li><li>Self-contained asset collection and release-grade installer validation.</li></ul></article>
 </div>
 <div class="qy-note">The offline renderer currently skips runtime-loaded GLB/glTF geometry. OBJ import is geometry-only: UVs, MTL materials, and textures are not preserved yet. Export Preview is a live viewport capture; Render Image is the separate offline renderer.</div>
 </section>
 
-<section class="qy-section qy-shell"><div class="qy-status-box"><div><h3>Current build status</h3><p>Run 38189084118 passed Linux Qt 6 build and project I/O tests, plus the Windows x64 build, project I/O tests, portable package staging, and packaged-app startup smoke test. The automatic scene-recovery flow is now covered by a green build on both platforms. The Windows ZIP is a temporary GitHub Actions artifact, not a permanent installer release.</p></div><span class="qy-status-pill">Development build · CI verified</span></div>
+<section class="qy-section qy-shell"><div class="qy-status-box"><div><h3>Current build status</h3><p>Run 38193528968 passed Linux Qt 6 build/tests and the Windows x64 build/tests, portable package staging, and packaged-app startup smoke test. This version includes selectable edge handles and closed-edge-loop face creation. The Windows ZIP is a temporary GitHub Actions artifact, not a permanent installer release.</p></div><span class="qy-status-pill">Development build · CI verified</span></div>
 <div class="qy-actions"><a class="qy-button primary" href="https://github.com/Tamasrazim/QALYVYRON/actions">Builds and tests <span class="arrow" aria-hidden="true">↗</span></a><a class="qy-button" href="https://github.com/Tamasrazim/QALYVYRON/blob/main/ROADMAP.md">Development roadmap <span class="arrow" aria-hidden="true">↗</span></a><a class="qy-button" href="/projects/">More projects <span class="arrow" aria-hidden="true">↗</span></a></div></section>
 </main>
 <footer class="qy-shell qy-footer"><span>QALYVYRON / PROJECT FILE</span><a href="/">Robiul Rumman Razim — Tamasrazim ↗</a><a href="/projects/">Project directory</a></footer>
