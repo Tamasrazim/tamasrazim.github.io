@@ -98,6 +98,23 @@ body.pci-lock{overflow:hidden!important}
 @keyframes pci-motion-turn{to{transform:rotate(360deg)}}
 @keyframes pci-draw-line{to{stroke-dashoffset:0}}
 @keyframes pci-scan{0%{opacity:0;transform:translateY(-95px) scaleX(.4)}30%{opacity:.8}80%{opacity:.22}100%{opacity:0;transform:translateY(95px) scaleX(1)}}
+/* Homepage-only identity sequence: a restrained animated T monogram and orbital marks. */
+.pci-project--home{--pci-accent:#f1f1ed;--pci-glow:rgba(255,255,255,.17)}
+.pci-project--home .pci-title{font-size:clamp(40px,6.2vw,76px)}
+.pci-home-art{position:relative;display:grid;place-items:center;width:min(94%,620px);aspect-ratio:1;isolation:isolate;perspective:900px}
+.pci-home-orbit{position:absolute;width:var(--home-orbit-size);height:var(--home-orbit-size);left:50%;top:49%;border:1px solid rgba(241,241,237,var(--home-orbit-alpha));border-radius:50%;transform:translate(-50%,-50%) rotateX(var(--home-orbit-tilt)) rotateZ(var(--home-orbit-turn));box-shadow:0 0 45px rgba(255,255,255,.025);animation:pci-home-orbit var(--home-orbit-speed) linear infinite}
+.pci-home-orbit-a{--home-orbit-size:92%;--home-orbit-alpha:.32;--home-orbit-tilt:68deg;--home-orbit-turn:-24deg;--home-orbit-speed:18s;border-style:dashed}
+.pci-home-orbit-b{--home-orbit-size:72%;--home-orbit-alpha:.55;--home-orbit-tilt:55deg;--home-orbit-turn:35deg;--home-orbit-speed:13s}
+.pci-home-orbit-c{--home-orbit-size:54%;--home-orbit-alpha:.76;--home-orbit-tilt:16deg;--home-orbit-turn:-18deg;--home-orbit-speed:22s;border-style:dashed}
+.pci-home-plate{position:relative;z-index:2;display:grid;place-items:center;width:clamp(118px,17vw,208px);aspect-ratio:1;border:1px solid rgba(241,241,237,.65);background:radial-gradient(circle,var(--pci-glow),rgba(4,5,7,.92) 70%);box-shadow:0 0 70px var(--pci-glow),inset 0 0 36px rgba(255,255,255,.04);animation:pci-mark-float 4s ease-in-out infinite}
+.pci-home-plate:before,.pci-home-plate:after{content:"";position:absolute;width:calc(100% + 18px);height:calc(100% + 18px);border:1px solid rgba(241,241,237,.13);transform:rotate(45deg)}
+.pci-home-plate:after{width:calc(100% + 38px);height:calc(100% + 38px);border-style:dashed;transform:rotate(15deg)}
+.pci-home-plate span{font:800 clamp(60px,9vw,108px)/1 "Unbounded",system-ui,sans-serif;letter-spacing:-.12em;margin-right:.12em}
+.pci-home-plate b{position:absolute;right:-28px;bottom:-23px;color:var(--pci-accent);font:8px "JetBrains Mono",monospace;letter-spacing:.16em;white-space:nowrap}
+.pci-home-trace{position:absolute;z-index:1;height:1px;width:70%;left:15%;background:linear-gradient(90deg,transparent,var(--pci-accent),transparent);opacity:.55;transform:rotate(var(--home-trace-angle));transform-origin:center}
+.pci-home-trace-a{--home-trace-angle:32deg;top:36%}
+.pci-home-trace-b{--home-trace-angle:-32deg;top:62%;opacity:.28}
+.pci-home-caption{position:absolute;left:0;right:0;bottom:4%;text-align:center;color:#7f7f7a;font:8px "JetBrains Mono",monospace;letter-spacing:.15em}
 @media(max-width:760px){
  .pci-intro{padding:16px 18px 18px}
  .pci-topbar{font-size:8px;letter-spacing:.08em}.pci-skip{padding:9px;font-size:8px;gap:7px}.pci-skip kbd{padding-left:7px}
@@ -213,5 +230,6 @@ body.pci-lock{overflow:hidden!important}
  .pci-neo-side{width:14%}.pci-meter-scene{width:94%;padding-inline:12px}
 }
 @media(prefers-reduced-motion:reduce){
- .pci-neo-floor,.pci-neo-portal,.pci-vector-art .pci-vector-path,.pci-vector-nodes circle,.pci-eps-sheet,.pci-eps-sheet svg,.pci-forge-orbit,.pci-file-tile,.pci-vault-card,.pci-kyn-orbit,.pci-kyn-module,.pci-kyn-centre,.pci-organic-orbit,.pci-vine,.pci-leaf,.pci-meter-bars i,.pci-meter-scan{animation:none!important;transform:none!important;translate:none!important;rotate:none!important;opacity:1!important;stroke-dashoffset:0!important}
+ .pci-home-orbit,.pci-home-plate,.pci-neo-floor,.pci-neo-portal,.pci-vector-art .pci-vector-path,.pci-vector-nodes circle,.pci-eps-sheet,.pci-eps-sheet svg,.pci-forge-orbit,.pci-file-tile,.pci-vault-card,.pci-kyn-orbit,.pci-kyn-module,.pci-kyn-centre,.pci-organic-orbit,.pci-vine,.pci-leaf,.pci-meter-bars i,.pci-meter-scan{animation:none!important;transform:none!important;translate:none!important;rotate:none!important;opacity:1!important;stroke-dashoffset:0!important}
 }
+@media(max-width:760px){.pci-project--home .pci-title{font-size:clamp(34px,9vw,54px)}}
