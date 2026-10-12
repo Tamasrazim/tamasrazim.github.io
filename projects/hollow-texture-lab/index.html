@@ -60,47 +60,116 @@ function allRecipes(){return FAMILIES.flatMap(f=>Array.from({length:f.count},(_,
 const RECIPES=allRecipes();
 function rng(seed){let s=(seed>>>0)||1;return()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return(s>>>0)/4294967296;};}
 function color(rgb,delta=0){return "rgb("+rgb.map(v=>clamp(Math.round(v+delta),0,255)).join(",")+")";}
+
+// Multi-scale, seed-specific procedural material generator.
+// Every recipe is drawn from scratch; no downloaded texture images or copied source textures are used.
 function makeTexture(recipe,size=256,map="color"){
- const c=document.createElement("canvas");c.width=c.height=size;const ctx=c.getContext("2d",{willReadFrequently:true});
- const r=rng(recipe.seed+Number($("scale").value)*113+Number($("wear").value)*29),fam=recipe.family,wear=Number($("wear").value)/100,scale=Number($("scale").value),bright=Number($("brightness").value)/100,base=fam.base;
- const factor=map==="rough"?.8:map==="normal"?1:bright;
- ctx.fillStyle=color(base,0);ctx.fillRect(0,0,size,size);
- // Generate low-frequency noise and blend it over the full surface.
- const image=ctx.createImageData(size,size);
- const cell=Math.max(2,Math.round(size/(30+scale*7)));
+ const canvas=document.createElement("canvas");canvas.width=canvas.height=size;
+ const ctx=canvas.getContext("2d",{willReadFrequently:true});
+ const family=recipe.family,style=family.style,wear=Number($("wear").value)/100,scale=Number($("scale").value);
+ const brightness=Number($("brightness").value)/100,base=family.base,seed=recipe.seed;
+ const random=rng(seed+scale*101+Math.round(wear*100)*37);
+ const image=ctx.createImageData(size,size),step=Math.max(1,Math.round(size/Math.max(18,34+scale*5)));
+ const grid=Math.ceil(size/step);
+ // Smooth, periodic value noise prevents obvious seams on the texture's outer edges.
+ function smooth(t){return t*t*(3-2*t);}
+ function noiseGrid(x,y,salt){
+   const gx=x/step,gy=y/step,x0=Math.floor(gx),y0=Math.floor(gy),fx=smooth(gx-x0),fy=smooth(gy-y0);
+   const h=(ix,iy)=>rngHash(seed+salt,((ix%grid)+grid)%grid,((iy%grid)+grid)%grid);
+   const a=h(x0,y0),b=h(x0+1,y0),c=h(x0,y0+1),d=h(x0+1,y0+1);
+   return (a+(b-a)*fx)+((c+(d-c)*fx)-(a+(b-a)*fx))*fy;
+ }
+ function periodicNoise(x,y,frequency,salt){
+   const u=x/size*frequency,v=y/size*frequency;
+   const ix=Math.floor(u),iy=Math.floor(v),fx=smooth(u-ix),fy=smooth(v-iy);
+   const h=(a,b)=>rngHash(seed+salt,((a%frequency)+frequency)%frequency,((b%frequency)+frequency)%frequency);
+   const a=h(ix,iy),b=h(ix+1,iy),c=h(ix,iy+1),d=h(ix+1,iy+1);
+   return (a+(b-a)*fx)+((c+(d-c)*fx)-(a+(b-a)*fx))*fy;
+ }
  for(let y=0;y<size;y++)for(let x=0;x<size;x++){
-  const ix=Math.floor(x/cell),iy=Math.floor(y/cell),n=rngHash(recipe.seed,ix,iy);
-  let d=(n-.5)*(map==="rough"?110:map==="normal"?22:54)+ (r()-.5)*12;
-  if(fam.style==="wood")d+=Math.sin(y/Math.max(2,scale)*.25+Math.sin(x/size*4)*2)*18;
-  if(fam.style==="damp"||fam.style==="mud")d-=Math.max(0,Math.sin(x/size*9+Math.sin(y/size*6)*2))*18*wear;
-  if(map==="rough")d=128+d*.9;
-  if(map==="normal")d=128+d*.65;
-  const p=(y*size+x)*4;
-  image.data[p]=clamp(base[0]*factor+d,0,255);image.data[p+1]=clamp(base[1]*factor+d,0,255);image.data[p+2]=clamp(base[2]*factor+d,0,255);image.data[p+3]=255;
+   const u=x/size,v=y/size;
+   const broad=periodicNoise(x,y,4,17)-.5;
+   const medium=periodicNoise(x,y,13,53)-.5;
+   const fine=periodicNoise(x,y,Math.max(24,Math.floor(size/5)),97)-.5;
+   const grain=random()-.5;
+   let structure=0,detail=0;
+   switch(style){
+    case "wood":
+      structure=(Math.sin((v*9+Math.sin(u*7+seed)*.045)*Math.PI*2)+Math.sin((v*23+Math.sin(u*13)*.02)*Math.PI*2)*.28)*.23;
+      {const dx=(u-(.2+((seed%37)/100))),dy=(v-.48)*1.9;detail+=Math.exp(-(dx*dx*25+dy*dy*90))*.26;}
+      break;
+    case "metal": structure=Math.sin(v*size*.17+Math.sin(u*size*.025)*1.8)*.1;break;
+    case "fabric": structure=(Math.sin(x*Math.PI*.8)+Math.sin(y*Math.PI*.8))*.12;break;
+    case "leather": structure=Math.sin(x*.12+Math.sin(y*.07)*2)*.045;break;
+    case "pattern": structure=Math.cos(u*Math.PI*12)*Math.cos(v*Math.PI*12)*.12;break;
+    case "tile": structure=(Math.min(u*8%1,1-u*8%1,v*8%1,1-v*8%1)<.035)?-.32:0;break;
+    case "damp": case "mud": structure=-Math.pow(Math.max(0,periodicNoise(x,y,5,211)-.48),1.4)*1.8;break;
+    case "rust": structure=Math.pow(Math.max(0,periodicNoise(x,y,7,301)-.37),1.7)*1.3;break;
+    case "moss": structure=Math.pow(Math.max(0,periodicNoise(x,y,11,401)-.43),1.4)*.9;break;
+    case "stone": structure=(periodicNoise(x,y,8,501)>.62?-.22:.02);break;
+    case "soil": case "asphalt": structure=(periodicNoise(x,y,17,601)>.76?-.3:.03);break;
+    case "organic": structure=Math.sin(u*19+Math.sin(v*13+seed)*2)*.15;detail+=Math.max(0,periodicNoise(x,y,6,701)-.65)*.5;break;
+    default: structure=(periodicNoise(x,y,9,801)>.77?-.15:.02);break;
+   }
+   let luminance=(broad*.58+medium*.46+fine*.28+grain*.07+structure+detail);
+   luminance*=style==="metal"?.55:style==="fabric"?.4:1;
+   if(map==="rough")luminance=0.5+(medium*.52+fine*.35+structure*.12);
+   if(map==="normal")luminance=0.5+(medium*.28+fine*.18+structure*.12);
+   const idx=(y*size+x)*4;
+   if(map==="rough"){
+    const val=clamp(128+luminance*190+(style==="metal"?-28:style==="mud"?-20:10),20,245);
+    image.data[idx]=image.data[idx+1]=image.data[idx+2]=val;
+   }else if(map==="normal"){
+    const left=periodicNoise(x-1,y,13,53),right=periodicNoise(x+1,y,13,53),up=periodicNoise(x,y-1,13,53),down=periodicNoise(x,y+1,13,53);
+    image.data[idx]=clamp(128+(left-right)*255,0,255);
+    image.data[idx+1]=clamp(128+(up-down)*255,0,255);
+    image.data[idx+2]=clamp(220-Math.abs(left-right)*90-Math.abs(up-down)*90,0,255);
+   }else{
+    const factor=brightness;
+    image.data[idx]=clamp(base[0]*factor+luminance*100,0,255);
+    image.data[idx+1]=clamp(base[1]*factor+luminance*96,0,255);
+    image.data[idx+2]=clamp(base[2]*factor+luminance*88,0,255);
+   }
+   image.data[idx+3]=255;
  }
  ctx.putImageData(image,0,0);
- // Add a second layer of material-specific details.
+ // Material-specific physical marks layered over the noise field.
+ const count=Math.round(size*(style==="wood"?0.06:style==="metal"?0.16:style==="fabric"?0.35:0.025)*(.5+scale/6));
  ctx.save();
- if(fam.style==="wood"||fam.style==="metal"||fam.style==="fabric"||fam.style==="leather"){
-  const lines=Math.round(size*(fam.style==="fabric"?1.5:.16)*scale/5);
-  for(let i=0;i<lines;i++){const pos=r()*size;ctx.strokeStyle=map==="color"?color(base,(r()-.5)*65):color([128,128,128],(r()-.5)*55);ctx.globalAlpha=.12+r()*.3;ctx.lineWidth=map==="normal"?1.5:1+r()*2;ctx.beginPath();if(fam.style==="wood"){ctx.moveTo(0,pos);ctx.bezierCurveTo(size*.3,pos-10*r(),size*.7,pos+10*r(),size,pos+(r()-.5)*18);}else if(fam.style==="fabric"){ctx.moveTo(pos,0);ctx.lineTo(pos,size);}else{ctx.moveTo(0,pos);ctx.lineTo(size,pos+(r()-.5)*4);}ctx.stroke();}
- }else if(fam.style==="pattern"||fam.style==="tile"){
-  const step=size/(2+scale/2);ctx.lineWidth=Math.max(1,size/256);ctx.strokeStyle=map==="color"?color(base,35):"#808080";ctx.globalAlpha=.24;
-  for(let x=0;x<=size;x+=step)for(let y=0;y<=size;y+=step){ctx.strokeRect(x,y,step,step);if(fam.style==="pattern"){ctx.beginPath();ctx.arc(x+step/2,y+step/2,step*.19,0,Math.PI*2);ctx.stroke();}}
- }else if(fam.style==="concrete"||fam.style==="grain"||fam.style==="plaster"||fam.style==="stone"||fam.style==="asphalt"||fam.style==="soil"||fam.style==="moss"||fam.style==="rust"||fam.style==="organic"||fam.style==="damp"||fam.style==="mud"){
-  const dots=Math.round(size*size/450*(.2+wear));
-  for(let i=0;i<dots;i++){const x=r()*size,y=r()*size,rad=.4+r()*(fam.style==="stone"?4:2.4)*scale/5;ctx.globalAlpha=.08+r()*.36;ctx.fillStyle=map==="color"?color(base,(r()-.5)*(fam.style==="rust"?160:100)):color([128,128,128],(r()-.5)*90);ctx.beginPath();ctx.ellipse(x,y,rad,rad*(.5+r()),r()*Math.PI,0,Math.PI*2);ctx.fill();}
-  if(wear>.2&&(fam.style==="concrete"||fam.style==="plaster"||fam.style==="stone"||fam.style==="asphalt")){
-   const cracks=Math.floor(wear*scale*2);
-   for(let i=0;i<cracks;i++){let x=r()*size,y=r()*size;ctx.globalAlpha=.18+wear*.38;ctx.strokeStyle=map==="color"?"#171715":"#777";ctx.lineWidth=.5+r()*1.2;ctx.beginPath();ctx.moveTo(x,y);for(let j=0;j<4+scale;j++){x+=(r()-.5)*size*.09;y+=(r()-.5)*size*.09;ctx.lineTo(x,y);}ctx.stroke();}
-  }
-  if(fam.style==="tile"){ctx.globalAlpha=.45;ctx.strokeStyle="#252525";ctx.lineWidth=3;ctx.strokeRect(0,0,size,size);}
+ for(let i=0;i<count;i++){
+   const x=random()*size,y=random()*size;
+   const alpha=.035+random()*.17+wear*.12;
+   ctx.globalAlpha=alpha;
+   if(style==="wood"||style==="metal"){
+     ctx.strokeStyle=map==="color"?color(base,(random()-.5)*90):"#888";
+     ctx.lineWidth=style==="wood"?.5+random()*2:.4+random();
+     ctx.beginPath();ctx.moveTo(x,y);ctx.bezierCurveTo(x+(random()-.5)*size*.12,y+2,x+(random()-.5)*size*.16,y+random()*3,x+(random()-.5)*size*.2,y+random()*5);ctx.stroke();
+   }else if(style==="fabric"){
+     ctx.strokeStyle=map==="color"?color(base,(random()-.5)*55):"#888";ctx.lineWidth=.5;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,size);ctx.stroke();
+   }else{
+     const radius=(.4+random()*2.2)*(style==="stone"?scale/3:1);
+     ctx.fillStyle=map==="color"?color(base,(random()-.5)*(style==="rust"?190:100)):"#888";
+     ctx.beginPath();ctx.ellipse(x,y,radius,radius*(.4+random()),random()*Math.PI,0,Math.PI*2);ctx.fill();
+   }
+ }
+ if(map==="color"&&["grain","plaster","stone","asphalt","concrete"].includes(style)){
+   const crackCount=Math.round(wear*scale*(style==="stone"?1:2));
+   for(let i=0;i<crackCount;i++){
+     let x=random()*size,y=random()*size;
+     ctx.globalAlpha=.12+wear*.3;ctx.strokeStyle="#191917";ctx.lineWidth=.5+random()*1.2;ctx.beginPath();ctx.moveTo(x,y);
+     for(let j=0;j<5+scale;j++){x+=(random()-.5)*size*.075;y+=(random()-.5)*size*.075;ctx.lineTo(x,y);}
+     ctx.stroke();
+   }
+ }
+ if(map==="color"&&style==="tile"){
+   ctx.globalAlpha=.75;ctx.strokeStyle="#292a28";ctx.lineWidth=Math.max(2,size*.009);
+   for(let x=0;x<=size;x+=size/4){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,size);ctx.stroke();}
+   for(let y=0;y<=size;y+=size/4){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(size,y);ctx.stroke();}
  }
  ctx.restore();
- // Blend the image's edges to keep the tile repeat less noticeable.
- if(map==="color"){const edge=Math.max(2,Math.round(size*.018));ctx.globalAlpha=.12;for(let i=0;i<edge;i++){ctx.drawImage(c,0,0,size,1,0,size-edge+i,size,1);ctx.drawImage(c,0,size-1,size,1,0,i,size,1);}ctx.globalAlpha=1;}
- return c;
+ return canvas;
 }
+
 function rngHash(seed,x,y){let n=(seed^Math.imul(x+1,374761393)^Math.imul(y+1,668265263))|0;n=Math.imul(n^(n>>>13),1274126177);n^=n>>>16;return(n>>>0)/4294967295;}
 function filtered(){let q=$("search").value.trim().toLowerCase();let list=RECIPES.filter(x=>(activeFamily==="all"||x.family.key===activeFamily)&&(!q||x.name.toLowerCase().includes(q)||x.family.desc.toLowerCase().includes(q)||x.code.toLowerCase().includes(q)));if($("sort").value==="name")list.sort((a,b)=>a.name.localeCompare(b.name));if($("sort").value==="seed")list.sort((a,b)=>a.seed-b.seed);return list;}
 function drawCategories(){const box=$("categories");box.innerHTML="";const entries=[{key:"all",name:"All materials",count:TOTAL},...FAMILIES.map(f=>({key:f.key,name:f.name,count:f.count}))];for(const item of entries){const b=document.createElement("button");b.className="cat-btn"+(activeFamily===item.key?" active":"");b.innerHTML="<span>"+item.name+"</span><b>"+item.count+"</b>";b.onclick=()=>{activeFamily=item.key;page=0;drawCategories();renderGrid();};box.appendChild(b);}}
