@@ -17,33 +17,37 @@ jobs:
     timeout-minutes: 25
     steps:
       - name: Get the source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: "8.10.2"
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
+        with:
+          accept-android-sdk-licenses: false
+          packages: ""
+
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses
 
       - name: Install Android platform and build tools
-        run: |
-          yes | sdkmanager --licenses >/dev/null
-          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
       - name: Compile debug APK
         working-directory: projects/phasebreak/android
         run: gradle --no-daemon --stacktrace :app:assembleDebug
 
       - name: Publish APK for device testing
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: phasebreak-debug-apk
           path: projects/phasebreak/android/app/build/outputs/apk/debug/app-debug.apk
