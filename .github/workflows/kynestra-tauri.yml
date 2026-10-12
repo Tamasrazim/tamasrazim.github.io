@@ -6,9 +6,11 @@ on:
   push:
     paths:
       - "KYNESTRA/**"
+      - "projects/code-motion/renderer/**"
   pull_request:
     paths:
       - "KYNESTRA/**"
+      - "projects/code-motion/renderer/**"
   workflow_dispatch:
 
 jobs:

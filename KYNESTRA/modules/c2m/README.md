@@ -1,37 +1,34 @@
 # TRILYVA
 
-C2M is KYNESTRA's JavaScript animation renderer module.
+C2M bundles the TRILYVA animation runtime inside KYNESTRA.
 
-## Source boundary
+## Runtime source
 
-Production renderer:
+The canonical renderer source is:
 
 `/projects/code-motion/renderer/`
 
-KYNESTRA-owned renderer:
-
-`/KYNESTRA/modules/c2m/renderer/`
-
-The production renderer remains untouched.
+It includes the main editor, renderer modules, icons, service worker, manifests, local libraries, and large keyword data files.
 
 ## Desktop packaging
 
-Tauri's `build.rs` copies the KYNESTRA renderer into:
+Tauri's `build.rs` copies the **complete** canonical renderer folder into:
 
 `/KYNESTRA/desktop/shell/modules/c2m/renderer/`
 
-at build time. The source of truth remains inside the module directory.
+That way dynamic imports and local files travel with `index.html`; the native app must not be built from the short placeholder in `/KYNESTRA/modules/c2m/renderer/`. This avoids maintaining two competing copies of the 200+ MiB renderer data tree.
+
+The separate batch workflow remains under `/KYNESTRA/modules/c2m/batch/`. It is not injected as a floating tab over the main renderer.
 
 ## Module behavior
 
 - JavaScript animation editor
 - deterministic frame model
-- live preview
-- frame-by-frame rendering
-- WebCodecs/local muxer export paths supported by the copied renderer
+- live preview and frame-by-frame rendering
+- WebCodecs/local muxer export paths supported by the runtime
 - 60/120 FPS targets where the runtime supports them
-- independent PWA scope
-- KYNESTRA return navigation
+- local assets and an independent PWA scope
+- KYNESTRA return navigation when running inside the desktop shell
 
 ## Core contract
 
@@ -51,7 +48,6 @@ C2M outputs can use the shared Core handoff command when running inside the desk
 `ingest_module_output(projectPath, sourcePath, "c2m", kind, metadata)`
 
 Core owns copying, hashing, deduplication, asset registration, and `asset.imported` emission.
-
 
 ## Flower Batch Lab
 

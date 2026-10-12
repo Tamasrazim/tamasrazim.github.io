@@ -83,9 +83,11 @@ must(!media.includes('Mediabunny'), 'media descriptor has no stale Mediabunny de
 must(media.includes("containers: ['mp4', 'webm']"), 'media descriptor exposes current containers');
 must(media.includes("videoCodecs: ['avc', 'vp9', 'vp8']"), 'media descriptor exposes current codec layers');
 must(!media.includes('installBatchLink')&&!media.includes('FLOWER BATCH'),'media descriptor does not inject the removed Flower Batch tab');
-must(renderer.includes("const PRISM_LIBRARY_URL='../../code-to-eps/prism-library.json'")&&renderer.includes("const TRILYVA_PRISM_LIBRARY_URL='../../code-to-eps/prism-library.json'"),'both TRILYVA Prism loaders use the existing shared dataset');
+must(renderer.includes("const PRISM_LIBRARY_URL='./library/prism-library.json'")&&renderer.includes("const TRILYVA_PRISM_LIBRARY_URL='./library/prism-library.json'"),'both TRILYVA Prism loaders use the self-contained local dataset');
 const prismData = fs.readFileSync('projects/code-motion/renderer/library/prism-data.js', 'utf8');
-must(prismData.includes('../../../code-to-eps/prism-library.json')&&prismData.includes('export default data;'),'the protected Prism module exports its shared dataset');
+must(fs.existsSync('projects/code-motion/renderer/library/prism-library.json')&&prismData.includes('./prism-library.json')&&prismData.includes('export default data;'),'the protected Prism module loads its bundled sibling dataset');
+const kynestraBuild = fs.readFileSync('KYNESTRA/desktop/tauri/build.rs', 'utf8');
+must(kynestraBuild.includes('manifest_dir.join("../../../projects/code-motion/renderer")')&&kynestraBuild.includes('fn copy_directory'),'KYNESTRA stages every renderer dependency from the canonical runtime');
 
 try {
   new Function(media);

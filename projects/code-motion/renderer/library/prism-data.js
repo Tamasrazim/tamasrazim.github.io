@@ -1,5 +1,5 @@
 // What this does: Loads the shared Prism animation definitions used by TRILYVA's protected library.
-const dataUrl = new URL("../../../code-to-eps/prism-library.json", import.meta.url);
+const dataUrl = new URL("./prism-library.json", import.meta.url);
 const response = await fetch(dataUrl, { cache: "no-store" });
 
 if (!response.ok) {
