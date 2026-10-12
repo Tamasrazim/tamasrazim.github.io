@@ -1,0 +1,99 @@
+<!doctype html>
+<!--
+  What this does:
+  Provides a dedicated, directly linkable page with the same navigation and visual language as the main site.
+-->
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark">
+<meta name="author" content="Robiul Rumman Razim">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://tamasrazim.github.io/about/">
+<title>About — Tamasrazim</title>
+<meta name="description" content="About Robiul Rumman Razim (Tamasrazim), his software projects, creative tools, and practical approach to building things.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tamasrazim">
+<meta property="og:title" content="About — Tamasrazim">
+<meta property="og:description" content="About Robiul Rumman Razim (Tamasrazim), his software projects, creative tools, and practical approach to building things.">
+<meta property="og:url" content="https://tamasrazim.github.io/about/">
+<meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="About — Tamasrazim">
+<meta name="twitter:description" content="About Robiul Rumman Razim (Tamasrazim), his software projects, creative tools, and practical approach to building things.">
+<meta name="twitter:image" content="https://tamasrazim.github.io/og-image.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23050505'/%3E%3Ctext x='32' y='44' font-family='monospace' font-size='34' fill='%23f2f2ee' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site.css?v=20261003-big2">
+<link rel="stylesheet" href="/assets/css/site-redesign.css?v=20261010-1">
+<link rel="stylesheet" href="/assets/css/site-v3.css?v=20261012-1">
+<link rel="stylesheet" href="/assets/css/monochrome.css?v=20261010-1">
+<script defer src="/assets/js/site-redesign.js?v=20261010-3"></script>
+<script defer src="/assets/js/analytics.js?v=20261010-1"></script>
+</head>
+<body class="home-v2">
+<a class="skip-link" href="#content">Skip to content</a>
+<canvas id="field" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="site-progress" id="siteProgress" aria-hidden="true"><span id="progressFill"></span></div>
+<div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+<div class="cursor-ring" id="cursorRing" aria-hidden="true"><span aria-hidden="true"></span></div>
+<header class="v3-header">
+  <div class="v3-header-inner v3-shell">
+    <a class="v3-brand" href="/" aria-label="Tamasrazim home"><span class="v3-brand-mark" aria-hidden="true">T</span><span>tamasrazim</span></a>
+    <nav class="v3-nav" id="primaryNav" aria-label="Primary navigation">
+      <a href="/projects/">Projects</a>
+      <a href="/work/">Work</a>
+      <a href="/about/" aria-current="page">About</a>
+      <a href="/approach/">Approach</a>
+      <a href="/elsewere/">Elsewhere ↗</a>
+      <a href="/licences/">Licences ↗</a>
+    </nav>
+    <div class="v3-header-actions">
+      <span class="v3-clock" id="clock" aria-label="Local time"></span>
+      <a class="v3-header-contact" href="/#contact">Contact ↗</a>
+      <button class="v3-menu" id="menuButton" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="primaryNav"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+<main class="v3-main" id="content">
+
+<section class="v3-section v3-shell" aria-labelledby="aboutTitle">
+  <div class="v3-section-top"><span class="v3-kicker">02 / ABOUT</span><span class="v3-section-index">PERSON / CONTEXT</span></div>
+  <div class="v3-work-heading">
+    <div>
+      <h1 class="v3-section-title v2-reveal v3-reveal" id="aboutTitle">A bit<br><em>about me.</em></h1>
+      <p class="v3-about-lead v2-reveal v3-reveal">I'm Robiul Rumman Razim. I use Tamasrazim online.</p>
+    </div>
+    <div>
+      <p class="v3-work-intro v2-reveal v3-reveal">I build software across native Windows applications, games, browser tools, and creative work. Some projects are ready to use; others are unfinished. I'd rather show what's real than make unfinished work sound finished.</p>
+      <p class="v3-work-intro v2-reveal v3-reveal">I grew tired of subscription-heavy software and the time spent searching for capable free alternatives. When existing tools do not meet my needs, I build my own—so I can spend more time creating and less time searching.</p>
+    </div>
+  </div>
+  <div class="v3-approach-grid">
+    <article class="v3-approach-item v2-reveal v3-reveal"><span>01 / SOFTWARE</span><h2>Apps and games</h2><p>Native desktop applications, game systems, and browser experiences built around practical features and clear project status.</p></article>
+    <article class="v3-approach-item v2-reveal v3-reveal"><span>02 / CREATIVE</span><h2>Tools for making</h2><p>Procedural motion, vector geometry, media workflows, and developer utilities that help turn a specific idea into something usable.</p></article>
+    <article class="v3-approach-item v2-reveal v3-reveal"><span>03 / PRINCIPLES</span><h2>Show what exists</h2><p>I prefer concrete project pages, working features, and honest notes about unfinished work over broad claims about what a tool might eventually do.</p></article>
+  </div>
+  <div class="v3-fact-list v2-reveal v3-reveal" style="max-width:760px;margin-top:34px">
+    <div class="v3-fact-row"><span>Focus</span><strong>Native apps / games / tools</strong></div>
+    <div class="v3-fact-row"><span>Work style</span><strong>Local-first where practical</strong></div>
+    <div class="v3-fact-row"><span>Principle</span><strong>Animation with a purpose</strong></div>
+  </div>
+  <div class="v3-hero-actions" style="margin-top:32px"><a class="v3-button primary" href="/work/">Explore selected work <span aria-hidden="true">↗</span></a><a class="v3-button secondary" href="/elsewere/">Public profiles <span aria-hidden="true">↗</span></a></div>
+</section>
+</main>
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <p class="footer-copy">© <span id="year">2026</span> Robiul Rumman Razim</p>
+    <a class="footer-link" href="/projects/">Projects ↗</a>
+    <a class="footer-link" href="/licences/">Licences ↗</a>
+    <a class="footer-link" href="/">Tamasrazim ↑</a>
+  </div>
+</footer>
+</body>
+</html>
