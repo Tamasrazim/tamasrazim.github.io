@@ -11,6 +11,9 @@ Each asset is a separate static SVG artwork. The page does not generate textures
 - `assets/aged-pine-planks.svg` — separate timber boards, knots, grain lines, splits and worn edges.
 - `assets/rusted-sheet-metal.svg` — corroded steel, paint loss, rust blooms, scratches and fasteners.
 - `assets/cracked-ceramic-tile.svg` — old ceramic tiles, grout, glaze wear, chips and cracks.
+- `assets/peeling-wallpaper.svg` — faded ornamental print, torn paper, exposed backing and damp marks.
+- `assets/damp-plaster.svg` — mineral tide marks, salt bloom, branching cracks and chipped plaster.
+- `assets/worn-corridor-carpet.svg` — flattened traffic lanes, faded ornament, pulled fibers and frayed edges.
 
 ## Exporting
 
@@ -18,7 +21,7 @@ Open the live page and select an asset. Download its original SVG master, or exp
 
 ## Important quality status
 
-These first five assets are authored vector illustrations, not photographs, scanned materials, or photogrammetry. They are not yet validated as seamless PBR textures. The normal/roughness/height-map generator has been removed from the main interface because the goal is now unique, separately built artwork rather than procedural variants. More materials should be drawn and reviewed as individual assets before calling the collection production-ready.
+These eight assets are authored vector illustrations, not photographs, scanned materials, or photogrammetry. They are not yet validated as seamless PBR textures. The normal/roughness/height-map generator has been removed from the main interface because the goal is now unique, separately built artwork rather than procedural variants. The second collection adds three distinct surfaces built as separate static SVG artworks. More materials should be drawn and reviewed as individual assets before calling the collection production-ready.
 
 ## Local-first
 
