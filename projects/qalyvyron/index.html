@@ -5,10 +5,10 @@
 <meta name="theme-color" content="#050505"><meta name="color-scheme" content="dark"><meta name="author" content="Robiul Rumman Razim">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <title>QALYVYRON — Beginner-First 3D Studio | Tamasrazim</title>
-<meta name="description" content="QALYVYRON is an independent desktop 3D creation and offline-rendering studio built around a simpler first-time workflow. Explore current capabilities, build status and missing systems.">
+<meta name="description" content="QALYVYRON is an independent desktop 3D creation and offline-rendering studio with editable meshes, local scene recovery, and an honest view of current limitations.">
 <link rel="canonical" href="https://tamasrazim.github.io/projects/qalyvyron/">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Tamasrazim"><meta property="og:title" content="QALYVYRON — 3D creation with a simpler first session">
-<meta property="og:description" content="A local desktop 3D studio in active development: easy-first controls, editable meshes, OBJ support and a separate CPU PNG renderer.">
+<meta property="og:description" content="A local desktop 3D studio in active development: easy-first controls, editable meshes, automatic scene recovery, OBJ support and a separate CPU PNG renderer.">
 <meta property="og:url" content="https://tamasrazim.github.io/projects/qalyvyron/"><meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg"><meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,14 +20,14 @@
   "@id":"https://tamasrazim.github.io/projects/qalyvyron/#application",
   "name":"QALYVYRON",
   "url":"https://tamasrazim.github.io/projects/qalyvyron/",
-  "description":"A local-first desktop 3D creation and rendering studio in active development. The current build has a beginner-first workspace, editable primitive meshes, geometry-only OBJ import/export, read-only GLB/glTF preview, and CPU offline PNG rendering. It is not yet a complete Blender replacement.",
+  "description":"A local-first desktop 3D creation and rendering studio in active development. The current build has a beginner-first workspace, editable primitive meshes, automatic local scene recovery, geometry-only OBJ import/export, read-only GLB/glTF preview, and CPU offline PNG rendering. It is not yet a complete Blender replacement.",
   "applicationCategory":"MultimediaApplication",
   "operatingSystem":"Windows x64; Linux build and tests",
   "programmingLanguage":["C++17","QML","CMake"],
   "creator":{"@id":"https://tamasrazim.github.io/#person"},
   "isPartOf":{"@id":"https://tamasrazim.github.io/#website"},
   "mainEntityOfPage":{"@id":"https://tamasrazim.github.io/projects/qalyvyron/#page"},
-  "featureList":["Guided first-run tour and simplified controls","Editable polygon meshes and geometry-only OBJ import/export","Read-only GLB/glTF preview import","CPU offline PNG rendering with bounded workload","Local scene files, undo/redo and unsaved-change protection"]
+  "featureList":["Guided first-run tour and simplified controls","Editable polygon meshes and geometry-only OBJ import/export","Read-only GLB/glTF preview import","CPU offline PNG rendering with bounded workload","Automatic local recovery snapshots with startup restore prompt","Local scene files, undo/redo and unsaved-change protection"]
 }
 </script>
 <style>
@@ -78,7 +78,7 @@ body.qy-page{margin:0;background:#050505;color:#f4f4f0;font-family:Inter,ui-sans
 <h1>QALY<span>VYRON</span></h1>
 <p class="qy-lead">A 3D creation studio built around a simple idea: make the first five minutes feel obvious, then reveal deeper tools as you grow.</p>
 <p class="qy-sub">QALYVYRON is a local desktop application for building and editing 3D scenes and rendering still images. It is being developed as an independent alternative—not a clone of Blender's interface, and not yet a complete replacement for Blender.</p>
-<div class="qy-actions"><a class="qy-button primary" href="https://github.com/Tamasrazim/QALYVYRON">Explore the source <span class="arrow" aria-hidden="true">↗</span></a><a class="qy-button" href="https://github.com/Tamasrazim/QALYVYRON/actions/runs/38187040533">Verified build record <span class="arrow" aria-hidden="true">↗</span></a><a class="qy-button" href="https://github.com/Tamasrazim/QALYVYRON/blob/main/USER_GUIDE.md">User guide <span class="arrow" aria-hidden="true">↗</span></a></div>
+<div class="qy-actions"><a class="qy-button primary" href="https://github.com/Tamasrazim/QALYVYRON">Explore the source <span class="arrow" aria-hidden="true">↗</span></a><a class="qy-button" href="https://github.com/Tamasrazim/QALYVYRON/actions/runs/38189084118">Verified build record <span class="arrow" aria-hidden="true">↗</span></a><a class="qy-button" href="https://github.com/Tamasrazim/QALYVYRON/blob/main/USER_GUIDE.md">User guide <span class="arrow" aria-hidden="true">↗</span></a></div>
 <div class="qy-tags"><span class="qy-tag">C++ / Qt 6</span><span class="qy-tag">Windows x64 build</span><span class="qy-tag">Linux CI</span><span class="qy-tag">Local-first</span></div>
 </div><div>
 <div class="qy-art" role="img" aria-label="Monochrome wireframe cube with orbit guides representing the QALYVYRON 3D workspace">
@@ -104,7 +104,7 @@ body.qy-page{margin:0;background:#050505;color:#f4f4f0;font-family:Inter,ui-sans
 <article class="qy-card"><span class="number">02 / MESH</span><h3>Editable polygon geometry</h3><ul><li>Vertex coordinate edits and viewport selection.</li><li>Face creation, extrusion, inset, merge and delete for supported topology.</li><li>Geometry-only Wavefront OBJ import and transformed OBJ export.</li></ul></article>
 <article class="qy-card"><span class="number">03 / ASSETS</span><h3>Bring in 3D files</h3><p>Local OBJ geometry becomes editable mesh data. GLB and glTF files can be loaded for scene preview, but currently remain read-only and reference their original local files.</p></article>
 <article class="qy-card"><span class="number">04 / RENDER</span><h3>Offline PNG output</h3><p>A separate CPU renderer uses scene triangles, BVH acceleration, multisampling, directional and point lights, hard shadows, and simple diffuse indirect bounces. It reports progress and supports cancellation.</p></article>
-<article class="qy-card"><span class="number">05 / CONTROL</span><h3>Keep work recoverable</h3><p>New and Open protect unsaved changes. Save remembers the scene path; Save As creates a separate copy. The build includes common save/open/undo/redo shortcuts.</p></article>
+<article class="qy-card"><span class="number">05 / CONTROL</span><h3>Save and recover locally</h3><p>Unsaved scenes receive local recovery snapshots approximately every 30 seconds. On the next launch, a prompt offers to restore the snapshot. Saving or explicitly discarding clears the recovery copy, which stays separate from the original scene file.</p></article>
 <article class="qy-card"><span class="number">06 / OUTPUT</span><h3>Choose a still-image size</h3><p>Render settings include 720p, 1080p, 1440p, 4K and 8K, with caps on pixel and ray workload to keep unsafe jobs bounded.</p></article>
 </div></section>
 
@@ -116,7 +116,7 @@ body.qy-page{margin:0;background:#050505;color:#f4f4f0;font-family:Inter,ui-sans
 <div class="qy-note">The offline renderer currently skips runtime-loaded GLB/glTF geometry. OBJ import is geometry-only: UVs, MTL materials, and textures are not preserved yet. Export Preview is a live viewport capture; Render Image is the separate offline renderer.</div>
 </section>
 
-<section class="qy-section qy-shell"><div class="qy-status-box"><div><h3>Current build status</h3><p>The linked run passed Linux build/tests and the Windows x64 build, tests, deployment staging, and packaged-app startup smoke test. The Windows ZIP is a temporary GitHub Actions artifact, not a permanent installer release. Open the run page to check artifact availability and build records.</p></div><span class="qy-status-pill">Development build · CI verified</span></div>
+<section class="qy-section qy-shell"><div class="qy-status-box"><div><h3>Current build status</h3><p>Run 38189084118 passed Linux Qt 6 build and project I/O tests, plus the Windows x64 build, project I/O tests, portable package staging, and packaged-app startup smoke test. The automatic scene-recovery flow is now covered by a green build on both platforms. The Windows ZIP is a temporary GitHub Actions artifact, not a permanent installer release.</p></div><span class="qy-status-pill">Development build · CI verified</span></div>
 <div class="qy-actions"><a class="qy-button primary" href="https://github.com/Tamasrazim/QALYVYRON/actions">Builds and tests <span class="arrow" aria-hidden="true">↗</span></a><a class="qy-button" href="https://github.com/Tamasrazim/QALYVYRON/blob/main/ROADMAP.md">Development roadmap <span class="arrow" aria-hidden="true">↗</span></a><a class="qy-button" href="/projects/">More projects <span class="arrow" aria-hidden="true">↗</span></a></div></section>
 </main>
 <footer class="qy-shell qy-footer"><span>QALYVYRON / PROJECT FILE</span><a href="/">Robiul Rumman Razim — Tamasrazim ↗</a><a href="/projects/">Project directory</a></footer>
