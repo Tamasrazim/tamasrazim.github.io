@@ -225,6 +225,13 @@ must(tunrunPage.includes("TUNRUN")&&tunrunPage.includes("Four generated aperture
 const trilyvaPage=read('projects/trilyva/index.html');
 must(trilyvaPage.includes('Open TRILYVA workspace')&&trilyvaPage.includes('deterministic'),'TRILYVA project page describes the frame model and links to the renderer');
 must(read('projects/code-motion/index.html').includes('location.replace(target)'),'legacy TRILYVA URL performs a clean replace redirect');
+const trilyvaRenderer=read('projects/code-motion/renderer/index.html');
+const trilyvaPrismData=read('projects/code-motion/renderer/library/prism-data.js');
+const trilyvaRendererSw=read('projects/code-motion/renderer/sw.js');
+must(exists('projects/code-to-eps/prism-library.json'),'the shared Prism dataset exists at its canonical local path');
+must(trilyvaRenderer.includes("const PRISM_LIBRARY_URL='../../code-to-eps/prism-library.json'")&&trilyvaRenderer.includes("const TRILYVA_PRISM_LIBRARY_URL='../../code-to-eps/prism-library.json'"),'TRILYVA Prism loaders reference the existing shared dataset');
+must(trilyvaPrismData.includes('../../../code-to-eps/prism-library.json')&&trilyvaPrismData.includes('export default data;'),'the protected Prism module exports the shared JSON data');
+must(trilyvaRendererSw.includes("const CACHE = 'tamasrazim-trilyva-pwa-v83'")&&trilyvaRendererSw.includes("'../../code-to-eps/prism-library.json'"),'TRILYVA offline cache refreshes and includes the shared Prism data');
 const neoPage=read('projects/neo/index.html');
 must(neoPage.includes('"name": "NEO"')&&neoPage.includes('100 deterministic floors'),'NEO has its own canonical project page and branding');
 must(neoPage.includes('href="/projects/neo/download/">Download NEO'),'NEO project page links to the clean download route');
