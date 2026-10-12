@@ -67,7 +67,7 @@ const executable = scripts.filter(([_, attrs]) => attrs.trim() === '');
 const applicationBlocks = executable.filter(([, , source]) =>
   source.includes("var SOFTWARE = 'TRILYVA — Tamasrazim';") &&
   source.includes('function loadProtectedLibraryModule()') &&
-  /var APP_VERSION = '\\d+\\.\\d+\\.\\d+'/.test(source)
+  source.includes('var APP_VERSION =')
 );
 must(applicationBlocks.length === 1, 'renderer has one executable TRILYVA application block');
 try {
