@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="1024" viewBox="0 0 2048 1024">
+<title>Worn carpet in a neglected corridor</title>
+<desc>Original static carpet artwork with flattened traffic lanes, faded woven ornament, pulled fibers, old stains and frayed seams. No generated pattern or procedural noise.</desc>
+<defs>
+<linearGradient id="pile" x2="0" y2="1"><stop stop-color="#51473e"/><stop offset=".25" stop-color="#393630"/><stop offset=".55" stop-color="#4b4037"/><stop offset="1" stop-color="#272824"/></linearGradient>
+<linearGradient id="wear" x2="0" y2="1"><stop stop-color="#9a8870" stop-opacity=".05"/><stop offset=".5" stop-color="#c1aa88" stop-opacity=".2"/><stop offset="1" stop-color="#a18d73" stop-opacity=".03"/></linearGradient>
+<radialGradient id="stain"><stop stop-color="#171b18" stop-opacity=".8"/><stop offset=".65" stop-color="#20231f" stop-opacity=".45"/><stop offset="1" stop-color="#20231f" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="2048" height="1024" fill="url(#pile)"/>
+<!-- broad flattened traffic lanes -->
+<path d="M0 0H310L287 1024H0Z" fill="#6b5a48" opacity=".22"/><path d="M343 0H703L678 1024H316Z" fill="#1c211d" opacity=".29"/><path d="M735 0H1089L1110 1024H704Z" fill="#6a5846" opacity=".13"/><path d="M1130 0H1490L1523 1024H1112Z" fill="#1a201c" opacity=".31"/><path d="M1530 0H1860L1918 1024H1526Z" fill="#6d5945" opacity=".14"/>
+<!-- old faded corridor motif: deliberately irregular, damaged and low contrast -->
+<g fill="none" stroke-linejoin="round" opacity=".43">
+<g stroke="#9b8162" stroke-width="13"><path d="M78 0l38 63-21 59 47 59-22 59 42 62-19 61 43 60-22 62 39 58-19 63 42 61-20 62 39 61-21 61 39 62-19 63 35 64-17 63 28 59 M278 0l-32 62 20 60-38 62 20 58-34 62 20 61-36 61 20 61-35 62 21 61-36 61 20 62-33 62 19 60-31 63 17 61-27 63 14 62-22 59 M475 0l36 60-19 62 34 61-19 60 33 61-17 61 31 61-18 62 30 61-17 62 29 61-17 61 28 63-15 61 25 62-14 63 23 60-12 61 19 59"/></g>
+<g stroke="#302a24" stroke-width="18"><path d="M121 0l24 61-19 61 25 61-18 61 23 61-17 62 21 61-17 62 21 60-16 63 20 61-15 62 19 61-13 63 16 61-12 62 14 61-10 61 11 59 M386 0l-19 62 18 60-20 62 18 61-19 60 17 62-19 61 17 62-17 61 16 62-17 61 14 62-15 61 13 63-12 60 10 63-9 60 7 61"/></g>
+<g stroke="#a58a69" stroke-width="12"><path d="M834 0l33 61-20 62 34 60-19 62 32 60-18 62 29 61-16 61 28 62-15 61 26 62-15 61 25 62-13 61 22 63-11 60 18 62-8 61 13 59 M1045 0l-31 61 21 62-35 60 20 62-32 61 18 61-29 62 16 60-28 63 15 61-26 62 14 61-24 62 12 61-20 63 10 60-16 62 7 61-11 59"/></g>
+<g stroke="#a08768" stroke-width="12"><path d="M1587 0l37 62-21 60 34 62-20 61 31 61-17 61 28 62-16 61 26 62-15 61 24 62-14 61 22 62-12 61 20 63-10 60 16 62-7 61 12 59 M1814 0l-31 62 21 60-34 62 20 61-31 61 17 61-28 62 16 61-26 62 15 61-24 62 14 61-22 62 12 61-20 63 10 60-16 62 7 61-11 59"/></g>
+</g>
+<!-- localized old stains -->
+<g fill="url(#stain)"><ellipse cx="310" cy="224" rx="190" ry="110"/><ellipse cx="695" cy="746" rx="230" ry="145"/><ellipse cx="1067" cy="293" rx="220" ry="132"/><ellipse cx="1399" cy="836" rx="255" ry="155"/><ellipse cx="1788" cy="391" rx="225" ry="145"/><ellipse cx="90" cy="899" rx="180" ry="105"/></g>
+<!-- pulled loops and snagged fibers -->
+<g fill="none" stroke-linecap="round">
+<g stroke="#b49b79" stroke-width="4" opacity=".64"><path d="M67 186l-18-15 7-18 16 4 6 17 M208 311l-16-12 3-17 17-3 8 13 M421 473l-18-15 5-17 18 2 6 15 M572 201l-15-12 4-18 16 1 6 14 M755 594l-17-13 4-18 18 2 6 15 M946 392l-17-13 4-18 17 2 6 15 M1192 721l-17-13 4-18 18 2 6 15 M1355 253l-17-13 4-18 18 2 6 15 M1613 551l-17-13 4-18 18 2 6 15 M1849 694l-17-13 4-18 18 2 6 15 M1983 154l-17-13 4-18 18 2 6 15"/></g>
+<g stroke="#171c18" stroke-width="5" opacity=".7"><path d="M152 504l-13 19 7 18-12 16 M354 726l-15 18 7 16-13 18 M643 344l-14 17 6 17-12 18 M876 900l-13 19 7 17-11 18 M1091 547l-15 19 7 17-12 18 M1466 425l-14 19 6 16-12 18 M1708 943l-14 18 6 17-11 18 M1912 527l-14 18 6 16-12 19"/></g>
+</g>
+<!-- worn nap streaks and frayed edge threads -->
+<path d="M0 0H28L20 1024H0Z M2025 0H2048V1024H2024Z" fill="#b39a79" opacity=".22"/>
+<g stroke="#c3aa88" stroke-width="3" opacity=".5"><path d="M8 33l18 14-12 17 13 16-16 15 M12 156l14 12-11 16 14 14-13 18 M8 321l17 13-11 16 13 17-14 18 M11 505l16 14-11 17 13 16-14 18 M9 691l17 13-11 17 13 16-14 18 M12 873l16 13-11 17 13 16-14 18 M2037 64l-16 14 12 17-14 17 13 18 M2035 269l-16 14 12 17-14 17 13 18 M2039 473l-16 14 12 17-14 17 13 18 M2034 674l-16 14 12 17-14 17 13 18 M2038 879l-16 14 12 17-14 17 13 18"/></g>
+<path d="M0 0H2048V24C1760 44 1510 12 1282 29S802 18 568 31 202 20 0 39Z" fill="#161a17" opacity=".55"/>
+<path d="M0 992C249 971 437 1008 678 986S1111 1006 1330 988 1792 1009 2048 987V1024H0Z" fill="#171b18" opacity=".8"/>
+</svg>
