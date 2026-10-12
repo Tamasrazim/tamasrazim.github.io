@@ -261,16 +261,24 @@ must(qalyvyronPage.includes('disconnected selections')&&qalyvyronPage.includes('
 const cinematicIntroCss=read('assets/css/project-cinematic-intro.css');
 const cinematicIntroJs=read('assets/js/project-cinematic-intro.js');
 execFileSync(process.execPath,['--check',path.join(ROOT,'assets/js/project-cinematic-intro.js')]);
-must(cinematicIntroCss.includes('.pci-project--tunrun')&&cinematicIntroCss.includes('.pci-project--webedyts')&&cinematicIntroCss.includes('.pci-project--qalyvyron')&&cinematicIntroCss.includes('.pci-project--trilyva'),'cinematic intro CSS includes distinct artwork themes for the four project pages');
-must(cinematicIntroCss.includes('prefers-reduced-motion:reduce')&&cinematicIntroJs.includes('Escape')&&cinematicIntroJs.includes('sessionStorage'),'cinematic intro respects reduced motion, supports Escape, and avoids replaying in the same tab');
-for (const [projectKey, pagePath] of [
+must(cinematicIntroJs.includes('Object.assign(profiles')&&cinematicIntroJs.includes('Escape'),'cinematic intro has project profiles and a keyboard skip path');
+must(cinematicIntroCss.includes('prefers-reduced-motion:reduce')&&cinematicIntroCss.includes('.pci-project--tunrun')&&cinematicIntroCss.includes('.pci-project--webedyts')&&cinematicIntroCss.includes('.pci-project--qalyvyron')&&cinematicIntroCss.includes('.pci-project--trilyva'),'cinematic intro has reduced-motion handling and project-specific themes');
+for (const [projectKey,pagePath] of [
   ['tunrun','projects/tunrun/index.html'],
   ['webedyts','projects/webedyts/index.html'],
   ['qalyvyron','projects/qalyvyron/index.html'],
-  ['trilyva','projects/trilyva/index.html']
+  ['trilyva','projects/trilyva/index.html'],
+  ['neo','projects/neo/index.html'],
+  ['code-to-svg','projects/code-to-svg/index.html'],
+  ['code-to-eps','projects/code-to-eps/index.html'],
+  ['format-forge','projects/format-forge/index.html'],
+  ['asset-vault','projects/asset-vault/index.html'],
+  ['kynestra','projects/kynestra/index.html'],
+  ['bncagrocare','projects/bncagrocare/index.html'],
+  ['repo-token-meter','projects/repo-token-meter/index.html']
 ]) {
   const page=read(pagePath);
-  must(page.includes('data-cinematic-intro="'+projectKey+'"')&&page.includes('/assets/css/project-cinematic-intro.css?v=20261012-1')&&page.includes('/assets/js/project-cinematic-intro.js?v=20261012-1'),projectKey.toUpperCase()+' project overview loads the skippable cinematic intro');
+  must(page.includes('data-cinematic-intro="'+projectKey+'"')&&page.includes('/assets/css/project-cinematic-intro.css?v=20261012-2')&&page.includes('/assets/js/project-cinematic-intro.js?v=20261012-2'),projectKey.toUpperCase()+' project overview loads its cinematic intro');
 }
 
 const iconLibrarySource=read('projects/code-to-eps/workspace/vector-icon-library.js');
