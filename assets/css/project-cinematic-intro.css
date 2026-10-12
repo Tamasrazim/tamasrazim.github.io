@@ -1,6 +1,6 @@
 /*
  * What this does:
- * Styles a short, project-specific cinematic opening for the four main project overview pages.
+ * Styles short, project-specific cinematic openings for the featured project overview pages.
  * The intro is decorative, stays skippable, uses no external media, and has a reduced-motion fallback.
  */
 .pci-intro{
