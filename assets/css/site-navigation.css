@@ -1,0 +1,17 @@
+/*
+ * What this does:
+ * Adds one compact route menu to project pages so readers can return to any main-site section.
+ */
+.site-page-menu{position:relative;z-index:1600;flex:0 0 auto;font-family:"JetBrains Mono",ui-monospace,monospace;color:#eee}
+.site-page-menu>summary{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 11px;border:1px solid rgba(241,241,237,.2);color:#e8e8e2;cursor:pointer;list-style:none;white-space:nowrap;font-size:9px;letter-spacing:.025em;user-select:none}
+.site-page-menu>summary::-webkit-details-marker{display:none}
+.site-page-menu>summary::after{content:"+";margin-left:10px;color:#92928b;font-size:12px}
+.site-page-menu[open]>summary::after{content:"−"}
+.site-page-menu>summary:hover,.site-page-menu>summary:focus-visible,.site-page-menu[open]>summary{border-color:rgba(241,241,237,.55);outline-offset:3px}
+.site-page-menu__links{position:absolute;top:calc(100% + 8px);right:0;width:min(235px,calc(100vw - 32px));display:grid;padding:6px;border:1px solid rgba(241,241,237,.19);background:#080808;box-shadow:0 16px 48px #000b}
+.site-page-menu__links a{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 11px;border-bottom:1px solid rgba(241,241,237,.09);color:#aaa;text-decoration:none;font-size:10px;line-height:1.4}
+.site-page-menu__links a:last-child{border-bottom:0}
+.site-page-menu__links a:hover,.site-page-menu__links a:focus-visible{color:#f3f3ef;background:#ffffff08}
+.site-page-menu__links a[aria-current="page"]{color:#f3f3ef}
+@media(max-width:760px){.site-page-menu>summary{min-height:34px;padding-inline:9px}.site-page-menu__links{right:0}}
+@media(prefers-reduced-motion:reduce){.site-page-menu *{scroll-behavior:auto}}
