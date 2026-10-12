@@ -169,7 +169,7 @@
   if (prefersReducedMotion) return;
 
   const sessionKey = projectKey === "home"
-    ? "tamasrazim-cinematic-intro-v6:home"
+    ? "tamasrazim-cinematic-intro-v7:home"
     : "tamasrazim-cinematic-intro-v1:" + projectKey;
   try {
     if (window.sessionStorage.getItem(sessionKey) === "shown") return;
@@ -179,6 +179,7 @@
 
   const durationMs = Number(profile.durationMs) > 0 ? Number(profile.durationMs) : 4250;
   let homeCard = null;
+  let homeImage = null;
   let homeCardOriginalParent = null;
   let homeCardPlaceholder = null;
   let homeCardOriginalClassName = "";
@@ -187,6 +188,7 @@
   if (projectKey === "home") {
     homeCard = document.querySelector("main .id-card");
     if (!homeCard || !homeCard.parentNode || typeof document.createComment !== "function") return;
+    homeImage = homeCard.querySelector(".id-constellation");
     homeCardOriginalParent = homeCard.parentNode;
     homeCardOriginalClassName = homeCard.className;
     homeCardOriginalStyle = homeCard.getAttribute("style");
@@ -212,13 +214,23 @@
           <div class="pci-home-id-ring pci-home-id-ring-a" aria-hidden="true"></div>
           <div class="pci-home-id-ring pci-home-id-ring-b" aria-hidden="true"></div>
           <div class="pci-home-id-outline" aria-hidden="true"></div>
+          <div class="pci-home-loading" role="status" aria-live="polite">
+            <div class="pci-home-loader-visual" aria-hidden="true">
+              <span class="pci-home-loader-orbit pci-home-loader-orbit-a"></span>
+              <span class="pci-home-loader-orbit pci-home-loader-orbit-b"></span>
+              <span class="pci-home-loader-core">TR</span>
+            </div>
+            <p class="pci-home-loading-label">LOADING ORIGINAL CONSTELLATION</p>
+            <div class="pci-home-loading-track" aria-hidden="true"><span></span></div>
+            <p class="pci-home-loading-detail">FETCHING JPG <i></i><i></i><i></i></p>
+          </div>
           <div class="pci-home-id-scan" aria-hidden="true"></div>
           <div class="pci-home-id-flash" aria-hidden="true"></div>
           ${profile.art}
         </div>
       </div>
       <div class="pci-bottomline">
-        <span>TR / ORIGINAL IDENTITY</span>
+        <span class="pci-home-bottom-label">TR / IMAGE PREPARATION</span>
         <div class="pci-progress" aria-hidden="true"><span></span></div>
         <span>${profile.durationLabel || "04.2 SEC"}</span>
       </div>`;
@@ -259,6 +271,9 @@
   body.classList.add("pci-lock");
 
   let closeTimer = 0;
+  let homeImageLoadTimer = 0;
+  let homeImageHandlers = null;
+  let homeSequenceStarted = false;
   let isClosing = false;
   let startFrame = null;
   let didStart = false;
@@ -285,10 +300,77 @@
     homeCardPlaceholder = null;
   }
 
+  function clearHomeImageWait() {
+    if (homeImageLoadTimer) {
+      window.clearTimeout(homeImageLoadTimer);
+      homeImageLoadTimer = 0;
+    }
+    if (homeImage && homeImageHandlers && typeof homeImage.removeEventListener === "function") {
+      homeImage.removeEventListener("load", homeImageHandlers.load);
+      homeImage.removeEventListener("error", homeImageHandlers.error);
+    }
+    homeImageHandlers = null;
+  }
+
+  function startHomeSequence(imageResult) {
+    if (projectKey !== "home" || homeSequenceStarted || isClosing) return;
+    homeSequenceStarted = true;
+    clearHomeImageWait();
+
+    const loaderTitle = intro.querySelector(".pci-home-loading-label");
+    const loaderDetail = intro.querySelector(".pci-home-loading-detail");
+    const footerStatus = intro.querySelector(".pci-home-bottom-label");
+    if (imageResult === "error") {
+      if (loaderTitle) loaderTitle.textContent = "JPG UNAVAILABLE";
+      if (loaderDetail) loaderDetail.textContent = "CONTINUING WITHOUT THE IMAGE";
+      if (footerStatus) footerStatus.textContent = "TR / IMAGE FALLBACK";
+    } else if (imageResult === "timeout") {
+      if (loaderTitle) loaderTitle.textContent = "IMAGE TAKING TOO LONG";
+      if (loaderDetail) loaderDetail.textContent = "CONTINUING SAFELY";
+      if (footerStatus) footerStatus.textContent = "TR / IMAGE FALLBACK";
+    } else {
+      if (loaderTitle) loaderTitle.textContent = "CONSTELLATION READY";
+      if (loaderDetail) loaderDetail.textContent = "IMAGE READY / ID SEQUENCE";
+      if (footerStatus) footerStatus.textContent = "TR / ORIGINAL IDENTITY";
+    }
+
+    intro.classList.remove("pci-home-waiting");
+    intro.classList.add("pci-is-live");
+    closeTimer = window.setTimeout(closeIntro, durationMs);
+  }
+
+  function waitForHomeImage() {
+    if (!homeImage || typeof homeImage.addEventListener !== "function") {
+      startHomeSequence("error");
+      return;
+    }
+    homeImageHandlers = {
+      load: function onHomeImageLoad() {
+        startHomeSequence(homeImage.naturalWidth > 0 ? "loaded" : "error");
+      },
+      error: function onHomeImageError() {
+        startHomeSequence("error");
+      }
+    };
+    homeImage.addEventListener("load", homeImageHandlers.load);
+    homeImage.addEventListener("error", homeImageHandlers.error);
+
+    // A slow or unavailable image must not trap the visitor in the loader.
+    homeImageLoadTimer = window.setTimeout(function homeImageTimeout() {
+      startHomeSequence("timeout");
+    }, 12000);
+
+    // The preload can finish before this script subscribes to the image events.
+    if (homeImage.complete) {
+      startHomeSequence(homeImage.naturalWidth > 0 ? "loaded" : "error");
+    }
+  }
+
   function closeIntro() {
     if (isClosing) return;
     isClosing = true;
     window.clearTimeout(closeTimer);
+    clearHomeImageWait();
     if (startFrame !== null && typeof window.cancelAnimationFrame === "function") {
       window.cancelAnimationFrame(startFrame);
       startFrame = null;
@@ -339,6 +421,14 @@
     startFrame = null;
     if (isClosing) return;
     didStart = true;
+    if (projectKey === "home") {
+      intro.classList.add("pci-home-waiting");
+      intro.focus({ preventScroll: true });
+      const skip = intro.querySelector(".pci-skip");
+      if (skip) skip.focus({ preventScroll: true });
+      waitForHomeImage();
+      return;
+    }
     intro.classList.add("pci-is-live");
     intro.focus({ preventScroll: true });
     const skip = intro.querySelector(".pci-skip");
@@ -346,5 +436,5 @@
   });
   // Avoid retaining a completed frame ID if a test double runs synchronously.
   if (!didStart && !isClosing) startFrame = requestedFrame;
-  closeTimer = window.setTimeout(closeIntro, durationMs);
+  if (projectKey !== "home") closeTimer = window.setTimeout(closeIntro, durationMs);
 })();
