@@ -13,7 +13,7 @@
   };
   var frameInterval = 1000/60;
 
-  if (d.body.classList.contains('home-v2')) {
+  if (d.body.classList.contains('home-v2') || d.body.classList.contains('project-index-v2')) {
     d.documentElement.classList.add('home-v2-motion');
 
     var reduceQuery = w.matchMedia ? w.matchMedia('(prefers-reduced-motion: reduce)') : null;
