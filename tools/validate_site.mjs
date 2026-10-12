@@ -238,7 +238,7 @@ must(qalyvyronPage.includes('Focus Selected')&&qalyvyronPage.toLowerCase().inclu
 must(qalyvyronPage.includes('selectable mesh-edge lines')&&qalyvyronPage.includes('closed edge loop'),'QALYVYRON page documents tested mesh-edge selection and edge-loop face creation');
 must(qalyvyronPage.includes('/actions/runs/38193528968')&&!qalyvyronPage.includes('/actions/runs/38189084118')&&!qalyvyronPage.includes('/actions/runs/38187040533')&&!qalyvyronPage.includes('releases/latest/download/QALYVYRON'),'QALYVYRON links the latest verified CI build and does not advertise an unpublished release');
 must(qalyvyronPage.includes('approximately every 30 seconds')&&qalyvyronPage.includes('restore the snapshot'),'QALYVYRON page documents timed local recovery and startup restore');
-must(qalyvyronPage.includes('Run 38189084118 passed')&&qalyvyronPage.includes('both platforms'),'QALYVYRON build status reflects current Windows and Linux verification');
+must(qalyvyronPage.includes('Run 38193528968 passed')&&qalyvyronPage.includes('packaged-app startup smoke test'),'QALYVYRON build status reflects the current green Linux/Windows build and startup smoke test');
 
 const iconLibrarySource=read('projects/code-to-eps/workspace/vector-icon-library.js');
 execFileSync(process.execPath,['--check',path.join(ROOT,'projects/code-to-eps/workspace/vector-icon-library.js')]);
