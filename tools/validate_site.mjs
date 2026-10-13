@@ -90,6 +90,8 @@ const htmlFiles=[
   'projects/tunrun/index.html',
   'projects/webedyts/index.html',
   'projects/qalyvyron/index.html',
+  'projects/phasebreak/index.html',
+  'projects/hollow-texture-lab/index.html',
   'projects/razim-fps/index.html',
   'projects/razim-fps/download.html',
   'projects/neo/index.html',
@@ -158,7 +160,7 @@ must(schemaStart>=0&&schemaEnd>schemaStart,'homepage contains JSON-LD schema');
 const rootSchema=JSON.parse(site.slice(schemaStart+schemaOpen.length,schemaEnd));
 must(rootSchema['@context']==='https://schema.org'&&Array.isArray(rootSchema['@graph']),'homepage schema graph parses');
 must(rootSchema['@graph'].some(n=>n['@type']==='Person'&&n['@id']==='https://tamasrazim.github.io/#person'),'schema identifies person');
-must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length===11,'schema distinguishes eleven desktop and browser software applications');
+must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length===12,'schema distinguishes twelve desktop, browser, and creative software applications');
 must(rootSchema['@graph'].some(n=>n['@id']==='https://tamasrazim.github.io/projects/code-motion/renderer/#application'&&n.name==='TRILYVA Renderer'),'schema identifies renderer as a separate tool route');
 must(rootSchema['@graph'].some(n=>n['@id']==='https://tamasrazim.github.io/#trilyva'&&n.url==='https://tamasrazim.github.io/projects/trilyva/'),'TRILYVA schema points to the project overview, not the renderer');
 must(rootSchema['@graph'].some(n=>n['@type']==='SoftwareApplication'&&n.name==='KYNESTRA'&&/Windows/.test(n.operatingSystem)),'schema identifies KYNESTRA as Windows desktop software');
@@ -208,13 +210,33 @@ must(siteV3Css.includes('left: -17px;')&&siteV3Css.includes('flex-direction: col
 const hub=read('projects/index.html');
 must(hub.includes('<title>Projects — Tamasrazim</title>'),'project directory uses simple title');
 must(!hub.includes('PRO_TOOL_MANIFEST')&&!hub.includes('tool-suite-health-console/'),'project directory omits generated catalogue');
-must((hub.match(/class="pi-card v3-index-card"/g)||[]).length===12,'project directory has twelve curated cards');
+must((hub.match(/class="pi-card v3-index-card"/g)||[]).length===13,'project directory has thirteen curated cards');
+
+const hubCategories=[...hub.matchAll(/<article\b[^>]*class="[^"]*\bpi-card\b[^"]*"[^>]*data-category="([^"]+)"/g)].map(match=>match[1]);
+const hubFilters=new Set([...hub.matchAll(/data-filter="([^"]+)"/g)].map(match=>match[1]));
+must(hubCategories.every(category=>hubFilters.has(category)),'every project category has a matching filter control');
+
+const sitemap=read('sitemap.xml');
+const sitemapUrls=new Set([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match=>match[1].trim()));
+for(const route of ['/', '/work/', '/about/', '/approach/', '/projects/', '/projects/phasebreak/', '/projects/hollow-texture-lab/']) {
+  must(sitemapUrls.has('https://tamasrazim.github.io'+route),'sitemap includes '+route);
+}
+
+const readme=read('README.md');
+const readmeSiteRoutes=[...readme.matchAll(/https:\/\/tamasrazim\.github\.io(\/[^)\s]*)?/g)].map(match=>match[1]||'/');
+for(const route of readmeSiteRoutes) {
+  const clean=route.split('#')[0].split('?')[0]||'/';
+  let target=path.resolve(ROOT,clean.replace(/^\/+/, ''));
+  if(clean==='/'||clean.endsWith('/')) target=path.join(target,'index.html');
+  must(fs.existsSync(target),'README website route '+route+' resolves');
+}
+
 must(hub.includes('type="application/ld+json"'),'project directory exposes CollectionPage schema');
 const hubSchemaOpen='<script type="application/ld+json">',hubSchemaStart=hub.indexOf(hubSchemaOpen),hubSchemaEnd=hub.indexOf('</script>',hubSchemaStart);
 must(hubSchemaStart>=0&&hubSchemaEnd>hubSchemaStart,'project directory schema script is bounded');
 const hubSchema=JSON.parse(hub.slice(hubSchemaStart+hubSchemaOpen.length,hubSchemaEnd));
 const hubItems=hubSchema.mainEntity&&hubSchema.mainEntity.itemListElement||[];
-must(hubSchema['@type']==='CollectionPage'&&hubItems.length===12,'project directory schema describes twelve curated projects');
+must(hubSchema['@type']==='CollectionPage'&&hubItems.length===13,'project directory schema describes thirteen curated projects');
 must(hubItems.every(item=>knownSchemaIds.has(item.item&&item.item['@id'])),'project directory items reference defined project entities');
 for(const ref of ['href="/projects/trilyva/"','href="/projects/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"','href="/projects/webedyts/"','href="/projects/qalyvyron/"'])must(hub.includes(ref),'project directory exposes '+ref);
 must(!hub.includes('href="/projects/code-motion/renderer/">Open workspace'),'project directory links to the TRILYVA overview first');
@@ -338,7 +360,8 @@ const cinematicProjectPages = new Set([
   'projects/repo-token-meter/index.html'
 ]);
 const standaloneProjectPages = new Set([
-  'projects/phasebreak/index.html'
+  'projects/phasebreak/index.html',
+  'projects/hollow-texture-lab/index.html'
 ]);
 const topLevelProjectIndexes = fs.readdirSync(path.join(ROOT,'projects'),{withFileTypes:true})
   .filter(entry=>entry.isDirectory())
