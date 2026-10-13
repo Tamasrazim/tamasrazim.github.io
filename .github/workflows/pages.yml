@@ -29,6 +29,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Node.js for repository validation
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate routes, markup, metadata, and runtime scripts
+        run: node tools/validate_site.mjs
+
+      - name: Smoke-test sampled frames of the TRILYVA story films
+        run: node tools/validate_trilyva_renderers.mjs
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
