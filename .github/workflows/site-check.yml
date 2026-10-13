@@ -6,7 +6,14 @@ on:
   push:
     paths:
       - 'index.html'
+      - 'work/**'
+      - 'about/**'
+      - 'approach/**'
       - 'projects/**'
+      - 'sitemap.xml'
+      - 'README.md'
+      - 'robots.txt'
+      - '.github/workflows/pages.yml'
       - 'renderer/**'
       - 'asset-vault/**'
       - 'assets/**'
@@ -16,7 +23,14 @@ on:
   pull_request:
     paths:
       - 'index.html'
+      - 'work/**'
+      - 'about/**'
+      - 'approach/**'
       - 'projects/**'
+      - 'sitemap.xml'
+      - 'README.md'
+      - 'robots.txt'
+      - '.github/workflows/pages.yml'
       - 'renderer/**'
       - 'asset-vault/**'
       - 'assets/**'
