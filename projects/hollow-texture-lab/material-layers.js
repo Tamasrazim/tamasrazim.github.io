@@ -75,18 +75,26 @@
     }
   }
 
-  // A value-noise layer gives broad material variation without moving or replacing the hand-authored features.
-  function broadNoise(x, y, seed, grid) {
-    const gx = x / grid, gy = y / grid;
-    const x0 = Math.floor(gx), y0 = Math.floor(gy);
-    const fx = gx - x0, fy = gy - y0;
-    const smoothX = fx * fx * (3 - 2 * fx);
-    const smoothY = fy * fy * (3 - 2 * fy);
-    const a = hash2(x0, y0, seed), b = hash2(x0 + 1, y0, seed);
-    const c = hash2(x0, y0 + 1, seed), d = hash2(x0 + 1, y0 + 1, seed);
-    const top = a + (b - a) * smoothX;
-    const bottom = c + (d - c) * smoothX;
-    return top + (bottom - top) * smoothY;
+  // Precompute low-frequency noise grids once per render, then interpolate while painting.
+  // This keeps large exports less expensive than recalculating grid hashes for every pixel.
+  function makeNoiseSampler(width, height, cellSize, seed) {
+    const cell = Math.max(2, cellSize);
+    const columns = Math.ceil(width / cell) + 2;
+    const rows = Math.ceil(height / cell) + 2;
+    const values = new Float32Array(columns * rows);
+    for (let gy = 0; gy < rows; gy++) {
+      for (let gx = 0; gx < columns; gx++) values[gy * columns + gx] = hash2(gx, gy, seed);
+    }
+    return (x, y) => {
+      const gx = x / cell, gy = y / cell;
+      const x0 = Math.floor(gx), y0 = Math.floor(gy);
+      const fx = gx - x0, fy = gy - y0;
+      const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+      const a = values[y0 * columns + x0], b = values[y0 * columns + x0 + 1];
+      const c = values[(y0 + 1) * columns + x0], d = values[(y0 + 1) * columns + x0 + 1];
+      const top = a + (b - a) * sx, bottom = c + (d - c) * sx;
+      return top + (bottom - top) * sy;
+    };
   }
 
   function drawAuthoredLayer(context, id, w, h, profile, strength) {
@@ -166,25 +174,30 @@
     const intensity = profile.noise * strength;
     const gridSize = Math.max(7, Math.round(21 * profile.grainSize * width / BASE_WIDTH));
     const seed = profile.seed;
+    const midField = makeNoiseSampler(width, height, gridSize, seed + 7);
+    const broadField = makeNoiseSampler(width, height, gridSize * 5, seed + 19);
+    const directionalField = makeNoiseSampler(width, height, gridSize * 2, seed + 31);
+    const aggregateField = makeNoiseSampler(width, height, Math.max(2, gridSize / 2), seed + 43);
+    const fleckField = makeNoiseSampler(width, height, Math.max(2, gridSize / 6), seed + 53);
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const i = (y * width + x) * 4;
         const high = hash2(x, y, seed) - 0.5;
-        const mid = broadNoise(x, y, seed + 7, gridSize) - 0.5;
-        const broad = broadNoise(x, y, seed + 19, gridSize * 5) - 0.5;
+        const mid = midField(x, y) - 0.5;
+        const broad = broadField(x, y) - 0.5;
         let grain = high * intensity * 0.62 + mid * intensity * 0.88 + broad * intensity * 0.90;
 
         if (profile.grain === "linear") {
-          grain += (broadNoise(x, Math.round(y / 3), seed + 31, gridSize * 2) - 0.5) * intensity * 0.36;
+          grain += (directionalField(x, Math.round(y / 3)) - 0.5) * intensity * 0.36;
         } else if (profile.grain === "brushed") {
-          grain += (hash2(x, Math.round(y / 2), seed + 37) - 0.5) * intensity * 0.42;
+          grain += (directionalField(x, Math.round(y / 2)) - 0.5) * intensity * 0.42;
         } else if (profile.grain === "woven") {
           const cross = (x % 3 === 0 ? 1.4 : x % 3 === 1 ? -0.35 : -0.8) + (y % 3 === 0 ? 0.7 : -0.15);
           grain += cross * intensity * 0.28;
         } else if (profile.grain === "aggregate") {
-          grain += (hash2(Math.round(x / 2), Math.round(y / 2), seed + 43) - 0.5) * intensity * 0.48;
+          grain += (aggregateField(x, y) - 0.5) * intensity * 0.48;
         } else if (profile.grain === "paper" || profile.grain === "chalk") {
-          const fleck = hash2(Math.round(x / 1.4), Math.round(y / 1.4), seed + 53);
+          const fleck = fleckField(x, y);
           grain += (fleck > 0.86 ? (fleck - 0.86) * intensity * 3.1 : 0);
         }
 
@@ -236,6 +249,17 @@
 
     drawAuthoredLayer(surface, id, width, height, profile, strength);
     applyMicrograin(surface, width, height, id, profile, strength, mode);
+    if (mode !== "color") {
+      // Map exports must remain grayscale even when the optional grain layer is disabled.
+      const mapFrame = surface.getImageData(0, 0, width, height);
+      const mapPixels = mapFrame.data;
+      for (let i = 0; i < mapPixels.length; i += 4) {
+        const value = Math.max(0, Math.min(255, 0.299 * mapPixels[i] + 0.587 * mapPixels[i + 1] + 0.114 * mapPixels[i + 2]));
+        mapPixels[i] = mapPixels[i + 1] = mapPixels[i + 2] = value;
+        mapPixels[i + 3] = 255;
+      }
+      surface.putImageData(mapFrame, 0, 0);
+    }
     if (mine !== renderTicket) return;
 
     // Draw at preview size after computing full export-sized maps.
