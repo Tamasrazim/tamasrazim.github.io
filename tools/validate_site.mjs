@@ -365,7 +365,9 @@ const cinematicProjectPages = new Set([
 ]);
 const standaloneProjectPages = new Set([
   'projects/phasebreak/index.html',
-  'projects/hollow-texture-lab/index.html'
+  'projects/hollow-texture-lab/index.html',
+  'projects/trss-sample-recorder/index.html',
+  'projects/trss/index.html'
 ]);
 const topLevelProjectIndexes = fs.readdirSync(path.join(ROOT,'projects'),{withFileTypes:true})
   .filter(entry=>entry.isDirectory())
