@@ -5479,6 +5479,8 @@ function dotMeshZipMetadata(item, job, result, stem, svgName) {
   var original = item.metadata && typeof item.metadata === "object" ? item.metadata : {};
   var parsed = result.parsed || {};
   var stats = result.stats || {};
+  var actualDuration = result.parsed && Number(result.parsed.durationSec) > 0 ? Number(result.parsed.durationSec) : DOT_MESH_ZIP_SETTINGS.duration;
+  var measuredFileAverageBps = result.blob && actualDuration > 0 ? Math.round(result.blob.size * 8 / actualDuration) : null;
   return merge(original, {
     schema: "trilyva.dot-mesh.delivery/1.0",
     id: item.id,
@@ -5503,7 +5505,9 @@ function dotMeshZipMetadata(item, job, result, stem, svgName) {
       frames: DOT_MESH_ZIP_SETTINGS.fps * DOT_MESH_ZIP_SETTINGS.duration,
       targetBitrateBps: DOT_MESH_ZIP_SETTINGS.bitrate,
       targetBitrateMbps: DOT_MESH_ZIP_SETTINGS.bitrate / 1000000,
-      bitrateNote: "Encoder target. Realized average bitrate can vary with the encoder and content.",
+      measuredFileAverageBitrateBps: measuredFileAverageBps,
+      measuredFileAverageBitrateMbps: measuredFileAverageBps == null ? null : Number((measuredFileAverageBps / 1000000).toFixed(3)),
+      bitrateNote: "20 Mbps is the encoder target. Measured file-average bitrate is computed from the MP4 file size and parsed duration, including container overhead.",
       bytes: result.blob ? result.blob.size : null,
       verification: result.verify ? result.verify.status : "UNKNOWN",
       sourceHash: job.metadata.sourceHash || null
@@ -5533,7 +5537,8 @@ function dotMeshZipCsvRowFor(item, meta) {
     enc.container || "MP4", enc.codec || "H.264 / AVC",
     enc.width || 3840, enc.height || 2160, enc.fps || 60,
     enc.durationSeconds || 12, enc.frames || 720,
-    enc.targetBitrateMbps || 20, enc.verification || "UNKNOWN",
+    enc.targetBitrateMbps || 20, enc.measuredFileAverageBitrateMbps == null ? "" : enc.measuredFileAverageBitrateMbps,
+    enc.verification || "UNKNOWN",
     meta.exports && meta.exports.video || "",
     meta.exports && meta.exports.vectorStill && meta.exports.vectorStill.filename || ""
   ]);
@@ -5739,7 +5744,7 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
         var metadata = dotMeshZipMetadata(item, job, result, videoName, svgName);
         metadata.exports.folder = folderName;
         var jsonText = JSON.stringify(metadata, null, 2) + "\n";
-        var csvHeader = ["ID","Title","Description","Keywords","Category","Design family","Creator","Software","Container","Codec","Width","Height","FPS","Duration seconds","Frame count","Target bitrate Mbps","Verification","Video filename","Static SVG filename"];
+        var csvHeader = ["ID","Title","Description","Keywords","Category","Design family","Creator","Software","Container","Codec","Width","Height","FPS","Duration seconds","Frame count","Target bitrate Mbps","Measured file-average bitrate Mbps","Verification","Video filename","Static SVG filename"];
         var csvText = "\uFEFF" + dotMeshZipCsvRow(csvHeader) + "\r\n" + dotMeshZipCsvRowFor(item, metadata) + "\r\n";
         await dotMeshWriteFile(folder, "metadata.json", jsonText, "application/json;charset=utf-8");
         await dotMeshWriteFile(folder, "metadata.csv", csvText, "text/csv;charset=utf-8");
@@ -5755,7 +5760,8 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
             height:result.parsed&&result.parsed.height||null,
             frames:result.parsed&&result.parsed.samples||null,
             durationSeconds:result.parsed&&result.parsed.durationSec||null,
-            averageBitrateBps:result.stats&&result.stats.bitrate||null
+            averageBitrateBps:Math.round(result.blob.size*8/((result.parsed&&result.parsed.durationSec>0)?result.parsed.durationSec:12)),
+            averageBitrateMbps:Number((result.blob.size*8/((result.parsed&&result.parsed.durationSec>0)?result.parsed.durationSec:12)/1000000).toFixed(3))
           }
         });
         addLine(title, true, "SAVED · MP4 + static SVG + JSON + CSV");
@@ -5774,14 +5780,14 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
 
   cancelled = cancelled || dotMeshZipCancelRequested;
   S.customBitrateMbps = savedBitrate;
-  var header = ["ID","Title","Description","Keywords","Category","Design family","Creator","Software","Container","Codec","Width","Height","FPS","Duration seconds","Frame count","Target bitrate Mbps","Verification","Video path","Static SVG path"];
+  var header = ["ID","Title","Description","Keywords","Category","Design family","Creator","Software","Container","Codec","Width","Height","FPS","Duration seconds","Frame count","Target bitrate Mbps","Measured file-average bitrate Mbps","Verification","Video path","Static SVG path"];
   var rows = [header];
   completed.forEach(function(row){
     var item = items[row.index-1] || {}, meta = item.metadata || {};
     rows.push([
       row.id,row.title,meta.description||item.description||"",(meta.tags||[]).join("; "),
       meta.category||item.category||"",meta.designFamily||"","Tamasrazim","TRILYVA",
-      "MP4","H.264 / AVC",3840,2160,60,12,720,20,row.verification,row.files[0],row.files[1]
+      "MP4","H.264 / AVC",3840,2160,60,12,720,20,row.actual.averageBitrateMbps,row.verification,row.files[0],row.files[1]
     ]);
   });
   var manifest = {
