@@ -8619,7 +8619,7 @@ function drawFilmSky(ctx, t) {
   drawFilmTree(ctx, 1725 + Math.sin(t * 0.08) * 10, 800, 0.93, t, 0, night);
   drawFilmTree(ctx, 1940, 790, 0.72, t, 0, night);
   if (t > 40) drawFilmTree(ctx, 1540, 790, 0.92, t, 1, night);
-  ctx.strokeStyle = filmMix('rgba(202,229,161,0.55)', 'rgba(93,180,154,0.48)', night); ctx.lineWidth = 2.5;
+  ctx.strokeStyle = night > 0.5 ? 'rgba(93,180,154,0.48)' : 'rgba(202,229,161,0.55)'; ctx.lineWidth = 2.5;
   for (var g = 0; g < 92; g++) {
     var gx = (g * 91 + 17) % 1920, gy = 790 + ((g * 29) % 220);
     ctx.beginPath(); ctx.moveTo(gx, gy); ctx.quadraticCurveTo(gx - 4 + Math.sin(g) * 7, gy - 16 - (g % 4) * 4, gx + 3, gy - 25 - (g % 5) * 5); ctx.stroke();
@@ -8825,7 +8825,6 @@ function renderFrame(time, frame, fps, ctx, width, height) {
     }
   }
   drawFilmFirefly(ctx, bugX, bugY, 0.92, t, t < 17 ? 0.55 : 1);
-  if (holding) drawFilmLantern(ctx, foxX + 90, foxY - 220, t);
   // Small floating pollen catches the available light and keeps the frame alive.
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
   for (var dust = 0; dust < 44; dust++) {
