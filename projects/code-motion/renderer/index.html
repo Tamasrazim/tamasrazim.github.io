@@ -5782,6 +5782,7 @@ async function runDotMeshZipBatch(lib,items) {
 window.trilyvaDownloadDotMeshZip = function () {
   openDotMeshZipPasswordGate();
 };
+window.addEventListener('trilyva:download-dotmesh-zip', openDotMeshZipPasswordGate);
 
 /* ============================================================
    State
