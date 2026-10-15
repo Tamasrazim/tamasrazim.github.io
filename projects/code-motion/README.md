@@ -71,6 +71,6 @@ The batch surface is available at `batch/index.html`. It discovers the current P
 
 ## Dot Mesh library
 
-The TRILYVA library registry includes **50 original dot-mesh designs**. Each design is a deterministic, transparent-background 12-second seamless loop with editable Canvas renderer source, a downloadable animated SVG, and downloadable JSON metadata. The library also exports a catalog CSV for all 50 designs. SVG animation uses native SVG animation elements; no third-party runtime or external assets are required.
+The renderer library registry includes **50 original Dot Mesh designs** with editable, deterministic 12-second animation code, animated SVG previews/downloads, and JSON metadata. The **Download Dot Mesh ZIP** button immediately before **Finish Movie** creates a local delivery package containing one MP4 per design (3840×2160, 60 FPS, H.264 with a 20 Mbps encoder target), one **static transparent 4K SVG still** from frame 0 (not animated SVG), and per-design `metadata.json` and `metadata.csv`. The ZIP also includes a catalog CSV, a batch manifest, and a README. The selected browser must support the requested H.264 4K60 configuration. The encoder target is 20 Mbps; measured average bitrates can vary.
 
-The module is `renderer/library/dot-mesh-library.js` and is registered in `renderer/library/manifest.json`. The renderer's service worker caches the module for offline use after it has been fetched once.
+The module is `renderer/library/dot-mesh-library.js`, registered through `renderer/library/manifest.json`; the PWA service worker caches it. Rendering is fully local in the browser. Fifty 12-second 4K60 videos require rendering 36,000 frames and can consume substantial time, memory, and disk space.
