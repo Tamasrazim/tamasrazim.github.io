@@ -7248,7 +7248,7 @@ function startRenderNow(job, opts) {
   S.renderStart = Date.now();
   S.activeJob = job;
   $('#cancelBtn').disabled = false;
-  $('[data-act=startRender], [data-act=renderAll], [data-act=queueRun]').forEach(function (b) { b.disabled = true; });
+  $$('[data-act=startRender], [data-act=renderAll], [data-act=queueRun]').forEach(function (b) { b.disabled = true; });
   $('#stDot').className = 'dot busy';
   showTab('p-render');
   clearLog();
@@ -7301,7 +7301,7 @@ function finishRender(job, result, opts) {
   S.rendering = false;
   S.activeJob = null;
   $('#cancelBtn').disabled = true;
-  $('[data-act=startRender], [data-act=renderAll], [data-act=queueRun]').forEach(function (b) { b.disabled = false; });
+  $$('[data-act=startRender], [data-act=renderAll], [data-act=queueRun]').forEach(function (b) { b.disabled = false; });
   $('#stDot').className = 'dot ok';
   var prog = $('#rprog');
   prog.classList.remove('scan');
