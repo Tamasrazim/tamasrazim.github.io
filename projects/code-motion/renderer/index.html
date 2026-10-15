@@ -8488,7 +8488,7 @@ else boot();
 </script>
 <script src="./voice-studio.js?v=1.0.4"></script>
 <script src="./movie-finalizer.js?v=1.0.3"></script>
-<script type="text/plain" id="sample-lumi-lost-firefly" data-title="Lumi and the Lost Firefly" data-desc="A complete 60-second original 2D family cartoon with layered painted environments, an animated fox character, a glowing firefly, creek crossing, magical grove, timed dialogue subtitles and an ElevenLabs-ready voice cue script. Configured for 3840×2160 at 60 FPS." data-loop="0" data-loopdur="60" data-dur="60" data-width="3840" data-height="2160" data-fps="60">
+<script type="text/plain" id="sample-lumi-lost-firefly" data-title="Lumi and the Lost Firefly" data-desc="A complete 60-second original 2D family cartoon with cinematic camera blocking, hand-built vector characters, distinct layered sets, character acting, secondary motion, creek crossing, a firefly reunion, timed subtitles and ElevenLabs voice cues. Defaults to 3840×2160 at 60 FPS." data-loop="0" data-loopdur="60" data-dur="60" data-width="3840" data-height="2160" data-fps="60">
 // LUMI AND THE LOST FIREFLY — original 60-second cartoon, 16:9.
 // Built for TRILYVA's deterministic renderFrame contract.
 // Native composition target: 3840×2160 at 60 FPS. No remote assets or runtime dependencies.
@@ -8682,9 +8682,13 @@ function drawFilmLantern(ctx, x, y, t) {
   ctx.fillStyle = 'rgba(255,255,255,0.83)'; ctx.beginPath(); ctx.ellipse(-8, -6, 6, 10, -0.6, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
 }
-function drawFilmFox(ctx, x, footY, s, t, holding, talking, joyful) {
-  var step = Math.sin(t * 7.1) * 17, bob = Math.abs(Math.sin(t * 7.1)) * 4;
-  ctx.save(); ctx.translate(x, footY - bob); ctx.scale(s, s);
+function drawFilmFox(ctx, x, footY, s, t, holding, talking, joyful, pose) {
+  pose = pose || 'idle';
+  var moving = pose === 'walk' || pose === 'balance';
+  var step = moving ? Math.sin(t * 7.1) * 17 : Math.sin(t * 0.7) * 2.2;
+  var bob = moving ? Math.abs(Math.sin(t * 7.1)) * 4 : Math.sin(t * 1.4) * 1.8;
+  var lean = pose === 'lean' ? 0.075 : pose === 'balance' ? -0.055 : pose === 'joy' ? -0.025 : 0;
+  ctx.save(); ctx.translate(x, footY - bob); ctx.rotate(lean + Math.sin(t * 1.8) * 0.006); ctx.scale(s, s);
   ctx.fillStyle = 'rgba(3,18,22,0.24)'; ctx.beginPath(); ctx.ellipse(0, 0, 96, 17, 0, 0, Math.PI * 2); ctx.fill();
   // Tail, drawn behind the body with independent follow-through.
   ctx.save(); ctx.translate(43, -142); ctx.rotate(Math.sin(t * 3.2) * 0.13);
@@ -8705,18 +8709,25 @@ function drawFilmFox(ctx, x, footY, s, t, holding, talking, joyful) {
   ctx.fillStyle = '#ffe8ca'; ctx.beginPath(); ctx.ellipse(2, -119, 36, 56, 0.08, 0, Math.PI * 2); ctx.fill();
   // Arms; the leading paw reaches toward the little lantern after it is made.
   ctx.strokeStyle = '#d8733d'; ctx.lineWidth = 23;
-  ctx.beginPath(); ctx.moveTo(-45, -167); ctx.quadraticCurveTo(-68, -137, -66, -101 + Math.sin(t * 3) * 5); ctx.stroke();
-  ctx.fillStyle = '#ffd9b0'; ctx.beginPath(); ctx.arc(-66, -100 + Math.sin(t * 3) * 5, 14, 0, Math.PI * 2); ctx.fill();
+  var reaching = pose === 'wave' || pose === 'joy';
+  ctx.beginPath(); ctx.moveTo(-45, -167);
+  if (reaching) ctx.quadraticCurveTo(-75, -196, -89 + Math.sin(t * 4.2) * 5, -218);
+  else ctx.quadraticCurveTo(-68, -137, -66, -101 + Math.sin(t * 3) * 5);
+  ctx.stroke();
+  ctx.fillStyle = '#ffd9b0'; ctx.beginPath();
+  ctx.arc(reaching ? -89 + Math.sin(t * 4.2) * 5 : -66, reaching ? -218 : -100 + Math.sin(t * 3) * 5, 14, 0, Math.PI * 2); ctx.fill();
   ctx.beginPath();
   if (holding) { ctx.moveTo(43, -170); ctx.quadraticCurveTo(69, -192, 78, -215); }
+  else if (reaching) { ctx.moveTo(43, -166); ctx.quadraticCurveTo(74, -190, 88 + Math.sin(t * 4.2 + 1) * 5, -218); }
   else { ctx.moveTo(43, -166); ctx.quadraticCurveTo(76, -141, 78, -113 + Math.sin(t * 2.2) * 6); }
-  ctx.stroke(); ctx.fillStyle = '#ffd9b0'; ctx.beginPath(); ctx.arc(holding ? 78 : 78, holding ? -215 : -113 + Math.sin(t * 2.2) * 6, 14, 0, Math.PI * 2); ctx.fill();
+  ctx.stroke(); ctx.fillStyle = '#ffd9b0'; ctx.beginPath();
+  ctx.arc(78, holding ? -215 : reaching ? -218 : -113 + Math.sin(t * 2.2) * 6, 14, 0, Math.PI * 2); ctx.fill();
   // Soft blue scarf with two independently animated ends.
   ctx.fillStyle = '#3d91a0'; ctx.strokeStyle = '#245967'; ctx.lineWidth = 4;
   ctx.beginPath(); ctx.moveTo(-48, -190); ctx.quadraticCurveTo(-2, -207, 48, -186); ctx.lineTo(39, -158); ctx.quadraticCurveTo(0, -145, -42, -163); ctx.closePath(); ctx.fill(); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(28, -177); ctx.bezierCurveTo(57, -167, 72 + Math.sin(t * 5) * 6, -155, 76 + Math.sin(t * 4) * 8, -128); ctx.lineTo(52, -139); ctx.closePath(); ctx.fill(); ctx.stroke();
   // Head and ears.
-  ctx.save(); ctx.translate(0, -264); ctx.rotate(Math.sin(t * 1.1) * 0.035);
+  ctx.save(); ctx.translate(0, -264); ctx.rotate(Math.sin(t * 1.1) * 0.035 + (pose === 'lean' ? 0.055 : pose === 'joy' ? -0.025 : 0));
   var head = ctx.createLinearGradient(-68, -69, 55, 73); head.addColorStop(0, '#ffb76e'); head.addColorStop(0.6, '#f58d4c'); head.addColorStop(1, '#d96b39');
   ctx.fillStyle = head; ctx.strokeStyle = '#7b3e2c'; ctx.lineWidth = 6;
   ctx.beginPath(); ctx.moveTo(-47, -35); ctx.lineTo(-65, -91); ctx.quadraticCurveTo(-67, -104, -54, -96); ctx.lineTo(-15, -61); ctx.quadraticCurveTo(0, -67, 16, -61); ctx.lineTo(56, -97); ctx.quadraticCurveTo(69, -108, 67, -89); ctx.lineTo(48, -32); ctx.quadraticCurveTo(77, -4, 67, 33); ctx.quadraticCurveTo(51, 75, 0, 73); ctx.quadraticCurveTo(-52, 73, -69, 31); ctx.quadraticCurveTo(-81, -5, -47, -35); ctx.closePath(); ctx.fill(); ctx.stroke();
@@ -8727,17 +8738,29 @@ function drawFilmFox(ctx, x, footY, s, t, holding, talking, joyful) {
     ctx.strokeStyle = '#512b28'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-38, -13); ctx.quadraticCurveTo(-27, -7, -16, -13); ctx.moveTo(16, -13); ctx.quadraticCurveTo(27, -7, 38, -13); ctx.stroke();
   } else {
     ctx.fillStyle = '#fff9e9'; ctx.beginPath(); ctx.ellipse(-27, -15, 14, 18, 0, 0, Math.PI * 2); ctx.ellipse(27, -15, 14, 18, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#4a7f79'; ctx.beginPath(); ctx.ellipse(-24, -12, 7, 10, 0, 0, Math.PI * 2); ctx.ellipse(30, -12, 7, 10, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#1b2832'; ctx.beginPath(); ctx.arc(-23, -12, 3.8, 0, Math.PI * 2); ctx.arc(31, -12, 3.8, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(-26, -16, 3.3, 0, Math.PI * 2); ctx.arc(28, -16, 3.3, 0, Math.PI * 2); ctx.fill();
+    var gaze = pose === 'curious' || pose === 'look' ? 5 : pose === 'wonder' ? 2 : pose === 'lean' ? 3 : 0;
+    ctx.fillStyle = '#4a7f79'; ctx.beginPath(); ctx.ellipse(-24 + gaze, -12, 7, 10, 0, 0, Math.PI * 2); ctx.ellipse(30 + gaze, -12, 7, 10, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#1b2832'; ctx.beginPath(); ctx.arc(-23 + gaze, -12, 3.8, 0, Math.PI * 2); ctx.arc(31 + gaze, -12, 3.8, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(-26 + gaze, -16, 3.3, 0, Math.PI * 2); ctx.arc(28 + gaze, -16, 3.3, 0, Math.PI * 2); ctx.fill();
   }
   ctx.strokeStyle = '#7b3e2c'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(-42, -39); ctx.quadraticCurveTo(-28, -47, -15, -39); ctx.moveTo(15, -39); ctx.quadraticCurveTo(29, -47, 42, -39); ctx.stroke();
   ctx.fillStyle = '#fff0d7'; ctx.beginPath(); ctx.ellipse(-4, 13, 19, 13, 0, 0, Math.PI * 2); ctx.ellipse(11, 13, 19, 13, 0, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#3a2827'; ctx.beginPath(); ctx.moveTo(-8, 0); ctx.quadraticCurveTo(0, -7, 8, 0); ctx.quadraticCurveTo(4, 10, 0, 9); ctx.quadraticCurveTo(-5, 9, -8, 0); ctx.fill();
   ctx.strokeStyle = '#6c342c'; ctx.lineWidth = 3.5; ctx.beginPath();
-  if (talking) { ctx.ellipse(0, 23, 8, 10, 0, 0, Math.PI * 2); }
-  else { ctx.moveTo(-8, 25); ctx.quadraticCurveTo(0, joyful ? 35 : 30, 9, 24); }
+  if (talking) {
+    var cueNow = filmCue(t), syllable = Math.abs(Math.sin((t - (cueNow ? cueNow.start : t)) * 13.2));
+    ctx.ellipse(0, 23, 4.5 + syllable * 4.5, 3.5 + syllable * 7, 0, 0, Math.PI * 2);
+  } else { ctx.moveTo(-8, 25); ctx.quadraticCurveTo(0, joyful ? 35 : 30, 9, 24); }
   ctx.stroke();
+  // Fine muzzle marks, whisker follicles and cheek fur keep the face readable at close-up scale.
+  ctx.fillStyle = 'rgba(112,57,44,0.48)';
+  for (var whisk = 0; whisk < 3; whisk++) {
+    ctx.beginPath(); ctx.arc(-40 + whisk * 5, 28 + (whisk % 2) * 4, 1.7, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(31 + whisk * 5, 28 + (whisk % 2) * 4, 1.7, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.strokeStyle = 'rgba(255,223,189,0.7)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(-58, 31); ctx.quadraticCurveTo(-75, 29, -82, 22); ctx.moveTo(-57, 36); ctx.quadraticCurveTo(-74, 40, -83, 37);
+  ctx.moveTo(58, 31); ctx.quadraticCurveTo(75, 29, 82, 22); ctx.moveTo(57, 36); ctx.quadraticCurveTo(74, 40, 83, 37); ctx.stroke();
   if (joyful) { ctx.strokeStyle = '#bb6541'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(-48, 24, 8, 0.2, 1.8); ctx.arc(48, 24, 8, 1.3, 2.9); ctx.stroke(); }
   ctx.restore();
   if (holding) drawFilmLantern(ctx, 85, -224, t);
@@ -8791,59 +8814,217 @@ function drawFilmTitle(ctx, t) {
     ctx.restore();
   }
 }
-function renderFrame(time, frame, fps, ctx, width, height) {
-  var t = filmClamp(time, 0, FILM_LENGTH - 1 / Math.max(1, fps));
-  ctx.save(); ctx.scale(width / 1920, height / 1080);
-  drawFilmSky(ctx, t);
-  var night = filmSmooth(5, 48, t);
-  if (t >= 30 && t < 41) drawFilmCreek(ctx, t);
-  if (t >= 41) {
-    drawFilmFlowers(ctx, t, night, true);
-    ctx.save(); ctx.globalAlpha = 0.45;
-    for (var g = 0; g < 8; g++) {
-      var gx = 1090 + g * 80, gy = 520 + Math.sin(t * 0.7 + g) * 44;
-      var gr = ctx.createRadialGradient(gx, gy, 2, gx, gy, 90);
-      gr.addColorStop(0, 'rgba(185,255,142,0.27)'); gr.addColorStop(1, 'rgba(185,255,142,0)');
-      ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(gx, gy, 90, 0, Math.PI * 2); ctx.fill();
-    }
-    ctx.restore();
-  } else {
-    drawFilmFlowers(ctx, t, night, false);
-  }
-  var move = filmSmooth(19, 30, t);
-  var foxX = t < 19 ? 550 + Math.sin(t * 0.55) * 13 : t < 30 ? 550 + move * 250 : t < 41 ? 815 + (t - 30) * 10 : 900 + Math.sin(t * 0.4) * 12;
-  var hop = t >= 30 && t < 41 ? Math.abs(Math.sin((t - 30) * 1.25)) * 47 : 0;
-  var foxY = 830 - hop;
-  var holding = t >= 18;
-  drawFilmFox(ctx, foxX, foxY, 0.91, t, holding, !!(filmCue(t) && filmCue(t).speaker === 'LUMI'), t > 40 || t < 6);
-  var bugX = t < 19 ? 1190 + Math.sin(t * 1.2) * 30 : t < 30 ? 1130 + move * 70 : t < 41 ? 1235 + Math.sin(t * 1.5) * 24 : 1270 + Math.sin(t * 1.1) * 34;
-  var bugY = t < 19 ? 540 + Math.sin(t * 2.2) * 32 : t < 30 ? 520 - move * 55 : t < 41 ? 545 + Math.sin(t * 2.7) * 25 : 478 + Math.sin(t * 1.5) * 28;
-  if (t >= 41) {
-    for (var sw = 0; sw < 22; sw++) {
-      var ang = sw * 2.399 + t * 0.08, rr = 90 + (sw % 5) * 24;
-      drawFilmFirefly(ctx, 1320 + Math.cos(ang) * rr, 495 + Math.sin(ang * 1.3) * rr * 0.76, 0.36 + (sw % 3) * 0.035, t + sw, 0.9);
-    }
-  }
-  drawFilmFirefly(ctx, bugX, bugY, 0.92, t, t < 17 ? 0.55 : 1);
-  // Small floating pollen catches the available light and keeps the frame alive.
+function drawFilmWorkshop(ctx, t, night) {
+  var fade = 1 - filmSmooth(12.5, 18.5, t);
+  if (fade <= 0) return;
+  ctx.save(); ctx.globalAlpha = fade;
+  // A small hand-built stump cottage anchors the opening shot.
+  ctx.fillStyle = 'rgba(5,20,24,0.22)'; ctx.beginPath(); ctx.ellipse(265, 792, 210, 34, 0, 0, Math.PI * 2); ctx.fill();
+  var wall = ctx.createLinearGradient(120, 560, 365, 800);
+  wall.addColorStop(0, filmMix('#b47b56', '#4e4a5b', night)); wall.addColorStop(0.55, filmMix('#87513d', '#2c3c4b', night)); wall.addColorStop(1, filmMix('#4b392f', '#172c3b', night));
+  ctx.fillStyle = wall; ctx.strokeStyle = '#43332d'; ctx.lineWidth = 7;
+  ctx.beginPath(); ctx.moveTo(121, 790); ctx.lineTo(131, 631); ctx.lineTo(213, 571); ctx.lineTo(361, 629); ctx.lineTo(378, 790); ctx.closePath(); ctx.fill(); ctx.stroke();
+  var roof = ctx.createLinearGradient(125, 565, 290, 680);
+  roof.addColorStop(0, filmMix('#a65e48', '#4a4257', night)); roof.addColorStop(1, filmMix('#5a3a3b', '#202c43', night));
+  ctx.fillStyle = roof; ctx.beginPath(); ctx.moveTo(95, 644); ctx.lineTo(213, 548); ctx.lineTo(396, 641); ctx.lineTo(377, 665); ctx.lineTo(215, 587); ctx.lineTo(126, 675); ctx.closePath(); ctx.fill(); ctx.stroke();
+  // Log seams and hand-cut wooden trim.
+  ctx.strokeStyle = 'rgba(255,222,178,0.2)'; ctx.lineWidth = 3;
+  for (var l = 0; l < 5; l++) { ctx.beginPath(); ctx.moveTo(139, 674 + l * 23); ctx.quadraticCurveTo(245, 669 + l * 23, 368, 677 + l * 22); ctx.stroke(); }
+  ctx.fillStyle = '#302b35'; ctx.beginPath(); ctx.ellipse(214, 741, 41, 55, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = filmMix('#583b35', '#202d3c', night); ctx.beginPath(); ctx.ellipse(214, 749, 31, 47, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,216,157,0.5)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(214, 749, 30, -1.15, 1.14); ctx.stroke();
+  ctx.fillStyle = '#364b50'; ctx.fillRect(280, 665, 52, 47); ctx.strokeStyle = '#d8b782'; ctx.lineWidth = 5; ctx.strokeRect(280, 665, 52, 47);
+  ctx.strokeStyle = '#d8b782'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(306, 666); ctx.lineTo(306, 710); ctx.moveTo(282, 688); ctx.lineTo(330, 688); ctx.stroke();
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
-  for (var dust = 0; dust < 44; dust++) {
-    var dx = (dust * 137 + Math.sin(t * 0.55 + dust) * 24 + t * (4 + dust % 6)) % 1920;
-    var dy = 250 + ((dust * 83 + Math.sin(t * 0.8 + dust * 2.1) * 35) % 580);
-    ctx.globalAlpha = (0.13 + 0.24 * (0.5 + 0.5 * Math.sin(t * 1.7 + dust))) * (dust % 4 === 0 ? 1.5 : 1);
-    ctx.fillStyle = dust % 3 === 0 ? '#fce7a4' : '#b5ecce';
-    ctx.beginPath(); ctx.arc(dx, dy, dust % 9 === 0 ? 3.1 : 1.4, 0, Math.PI * 2); ctx.fill();
+  var win = ctx.createRadialGradient(306, 689, 2, 306, 689, 85); win.addColorStop(0, 'rgba(255,217,137,0.55)'); win.addColorStop(1, 'rgba(255,217,137,0)');
+  ctx.fillStyle = win; ctx.beginPath(); ctx.arc(306, 689, 85, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+  ctx.fillStyle = filmMix('#654536', '#253541', night); ctx.beginPath(); ctx.ellipse(133, 789, 41, 15, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#8b6245'; ctx.fillRect(117, 783, 33, 7);
+  ctx.restore();
+}
+function drawFilmGrove(ctx, t, night) {
+  var reveal = filmSmooth(39, 44, t);
+  if (reveal <= 0) return;
+  ctx.save(); ctx.globalAlpha = reveal;
+  // Hanging willow curtains make the reunion feel like a distinct, enclosed location.
+  var trunk = ctx.createLinearGradient(1450, 340, 1790, 820);
+  trunk.addColorStop(0, filmMix('#82614e', '#37354d', night)); trunk.addColorStop(0.5, filmMix('#b38a69', '#4c5264', night)); trunk.addColorStop(1, filmMix('#59443c', '#1b3443', night));
+  ctx.fillStyle = trunk; ctx.beginPath(); ctx.moveTo(1540, 810); ctx.bezierCurveTo(1523, 660, 1579, 505, 1517, 348); ctx.quadraticCurveTo(1544, 292, 1593, 342); ctx.bezierCurveTo(1622, 510, 1611, 661, 1654, 810); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,224,185,0.28)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(1557, 759); ctx.bezierCurveTo(1572, 610, 1546, 465, 1552, 374); ctx.stroke();
+  for (var v = 0; v < 17; v++) {
+    var vx = 1360 + v * 30, vy = 365 + (v % 4) * 15;
+    ctx.strokeStyle = filmMix('#477b65', '#31566b', night); ctx.lineWidth = 4 + (v % 3);
+    ctx.beginPath(); ctx.moveTo(1570, 340); ctx.bezierCurveTo(vx - 45, vy + 50, vx + 26, vy + 155, vx + Math.sin(t * 1.7 + v) * 18, 670 + (v % 5) * 22); ctx.stroke();
+    for (var leaf = 0; leaf < 4; leaf++) {
+      var ly = vy + leaf * 61 + Math.sin(t * 1.3 + v + leaf) * 4;
+      ctx.fillStyle = filmMix('#8bbd82', '#3b7a7b', night);
+      ctx.beginPath(); ctx.ellipse(vx + (leaf % 2 ? 13 : -10), ly, 12, 24, -0.5 + leaf * 0.22, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  // Natural arch of leaves above the friends.
+  for (var q = 0; q < 22; q++) {
+    var x = 970 + q * 33, y = 385 + Math.sin(q / 21 * Math.PI) * 120;
+    ctx.fillStyle = q % 2 ? filmMix('#4e936e', '#234f65', night) : filmMix('#76a873', '#315a6d', night);
+    ctx.beginPath(); ctx.ellipse(x, y, 35, 58, -0.3 + Math.sin(q) * 0.25, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(215,241,180,0.18)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - 15, y + 26); ctx.quadraticCurveTo(x, y, x + 13, y - 25); ctx.stroke();
+  }
+  // Dew lights in the leaves.
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  for (var d = 0; d < 13; d++) {
+    var dx = 1010 + ((d * 79) % 650), dy = 450 + ((d * 47) % 175), pulse = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * 2.2 + d));
+    var dg = ctx.createRadialGradient(dx, dy, 1, dx, dy, 25);
+    dg.addColorStop(0, 'rgba(255,245,162,' + (0.52 * pulse) + ')'); dg.addColorStop(1, 'rgba(183,255,150,0)');
+    ctx.fillStyle = dg; ctx.beginPath(); ctx.arc(dx, dy, 25, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore(); ctx.restore();
+}
+function drawFilmForeground(ctx, t, night) {
+  // Out-of-focus leaf silhouettes give the composition depth without hiding the acting.
+  ctx.save(); ctx.globalAlpha = 0.66;
+  for (var i = 0; i < 7; i++) {
+    var x = -70 + i * 325, sway = Math.sin(t * 0.45 + i * 1.9) * 15;
+    ctx.save(); ctx.translate(x + sway, -35 + (i % 3) * 18); ctx.rotate(-0.6 + i * 0.19);
+    ctx.fillStyle = filmMix('#244b3b', '#102b3b', night);
+    ctx.beginPath(); ctx.ellipse(0, 0, 82, 29, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(208,229,169,0.15)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-66, 0); ctx.quadraticCurveTo(0, 4, 66, 0); ctx.stroke();
+    ctx.restore();
   }
   ctx.restore();
-  // A soft cinematic edge keeps the bright focal area centred.
+}
+function drawFilmSplash(ctx, x, y, t, strength) {
+  ctx.save(); ctx.globalAlpha = filmClamp(strength, 0, 1);
+  for (var i = 0; i < 9; i++) {
+    var a = i / 9 * Math.PI * 2, reach = 13 + (i % 3) * 7;
+    var travel = (t * 16 + i * 9) % 22;
+    ctx.strokeStyle = i % 2 ? 'rgba(188,241,231,0.82)' : 'rgba(255,242,207,0.65)';
+    ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * 7, y); ctx.quadraticCurveTo(x + Math.cos(a) * (reach + travel * 0.4), y - 5 - travel * 0.5, x + Math.cos(a) * (reach + travel), y - travel); ctx.stroke();
+  }
+  ctx.restore();
+}
+function filmCamera(t) {
+  var keys = [
+    [0, 960, 555, 1.00], [5, 930, 565, 1.03], [10, 1080, 535, 1.13],
+    [16, 1000, 575, 1.10], [21, 700, 610, 1.12], [28, 790, 635, 1.06],
+    [32, 970, 700, 1.035], [39, 1030, 720, 1.06], [44, 1250, 590, 1.12],
+    [50, 1280, 570, 1.10], [54, 970, 570, 1.035], [60, 960, 555, 1.00]
+  ];
+  var i = 0;
+  while (i < keys.length - 2 && t > keys[i + 1][0]) i++;
+  var a = keys[i], b = keys[i + 1], u = filmSmooth(0, 1, filmClamp((t - a[0]) / Math.max(0.001, b[0] - a[0]), 0, 1));
+  return { x: a[1] + (b[1] - a[1]) * u, y: a[2] + (b[2] - a[2]) * u, zoom: a[3] + (b[3] - a[3]) * u };
+}
+function drawFilmFloatingLeaves(ctx, t, night, amount) {
+  ctx.save(); ctx.globalAlpha = amount;
+  for (var i = 0; i < 18; i++) {
+    var p = (t * (0.035 + (i % 5) * 0.006) + i / 18) % 1;
+    var x = (i * 127 + Math.sin(t * 0.9 + i) * 32 + p * 250) % 1960;
+    var y = 230 + ((i * 83 + p * 490) % 555);
+    ctx.save(); ctx.translate(x, y); ctx.rotate(t * (i % 2 ? 0.65 : -0.5) + i);
+    ctx.fillStyle = filmMix('#b5b56e', '#466c6f', night);
+    ctx.beginPath(); ctx.moveTo(-10, 0); ctx.quadraticCurveTo(-2, -14, 11, -7); ctx.quadraticCurveTo(5, 7, -10, 0); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,235,184,0.38)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(7, -5); ctx.stroke();
+    ctx.restore();
+  }
+  ctx.restore();
+}
+function renderFrame(time, frame, fps, ctx, width, height) {
+  // TRILYVA supplies output-sized canvases. All geometry is authored in a 1920×1080 design space,
+  // then transformed into the requested composition, including 4K and higher output resolutions.
+  var t = filmClamp(time, 0, FILM_LENGTH - 1 / Math.max(1, fps));
+  var night = filmSmooth(4, 47, t);
+  var cam = filmCamera(t);
+  ctx.save();
+  ctx.scale(width / 1920, height / 1080);
+  ctx.save();
+  ctx.translate(960, 540); ctx.scale(cam.zoom, cam.zoom); ctx.translate(-cam.x, -cam.y);
+
+  // 01 — twilight clearing and Lumi's little forest home.
+  drawFilmSky(ctx, t);
+  drawFilmWorkshop(ctx, t, night);
+  drawFilmFloatingLeaves(ctx, t, night, 0.34 + 0.12 * Math.sin(t * 0.4));
+
+  // 02 — the creek becomes a physical obstacle; water, stones and reflected light are separate layers.
+  if (t >= 29 && t < 42) {
+    drawFilmCreek(ctx, t);
+    ctx.save(); ctx.globalAlpha = 0.23;
+    var reflection = ctx.createLinearGradient(0, 745, 0, 950);
+    reflection.addColorStop(0, 'rgba(255,237,185,0.7)'); reflection.addColorStop(1, 'rgba(97,218,227,0)');
+    ctx.fillStyle = reflection; ctx.beginPath(); ctx.moveTo(550, 780); ctx.bezierCurveTo(720, 810, 835, 795, 980, 810); ctx.lineTo(1185, 915); ctx.bezierCurveTo(930, 885, 790, 915, 610, 885); ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+
+  // 03 — the willow grove is a new visual set, not just a recoloured background.
+  if (t >= 39) drawFilmGrove(ctx, t, night);
+  if (t >= 39) drawFilmFlowers(ctx, t, night, true);
+  else drawFilmFlowers(ctx, t, night, false);
+
+  // Character blocking is keyed to the story. Between beats, movement remains continuous.
+  var foxX, foxY = 830, bugX, bugY, pose = 'idle', holding = t >= 19;
+  if (t < 9) {
+    foxX = 520 + Math.sin(t * 0.62) * 8; bugX = 1180 + Math.sin(t * 1.4) * 24; bugY = 545 + Math.sin(t * 2.2) * 30; pose = t < 5 ? 'curious' : 'look';
+  } else if (t < 17) {
+    var meet = filmSmooth(9, 17, t); foxX = 545 + meet * 55; bugX = 1160 - meet * 390; bugY = 535 - meet * 42 + Math.sin(t * 2.3) * 14; pose = 'lean';
+  } else if (t < 29) {
+    var make = filmSmooth(17, 22, t); foxX = 600 + make * 15; bugX = 775 + Math.sin(t * 1.7) * 23; bugY = 500 + Math.sin(t * 2.4) * 18; pose = t < 22 ? 'lean' : 'curious';
+  } else if (t < 42) {
+    var cross = filmSmooth(29, 42, t); foxX = 640 + cross * 600; foxY = 820 - Math.abs(Math.sin((t - 29) * 1.45)) * 34; bugX = foxX + 140 + Math.sin(t * 1.7) * 22; bugY = 485 + Math.sin(t * 2.5) * 25; pose = 'balance';
+  } else if (t < 52) {
+    foxX = 1030 + Math.sin(t * 0.6) * 12; foxY = 830 - filmSmooth(42, 46, t) * 8; bugX = 1280 + Math.sin(t * 1.1) * 30; bugY = 470 + Math.sin(t * 1.6) * 30; pose = t < 47 ? 'wonder' : 'joy';
+  } else {
+    foxX = 910 + Math.sin(t * 0.45) * 9; bugX = 1060 + Math.sin(t * 1.3) * 19; bugY = 480 + Math.sin(t * 2.1) * 18; pose = 'joy';
+  }
+  if (t >= 29 && t < 42) drawFilmSplash(ctx, foxX + 13, 835, t, 0.45 + 0.4 * Math.abs(Math.sin((t - 29) * 2.5)));
+  drawFilmFox(ctx, foxX, foxY, 0.91, t, holding, !!(filmCue(t) && filmCue(t).speaker === 'LUMI'), t > 45 || t < 6, pose);
+
+  // Keep the hero firefly in the foreground; the wingbeats and glow use separate temporal frequencies.
+  drawFilmFirefly(ctx, bugX, bugY, 0.92, t, t < 17 ? 0.52 + filmSmooth(7, 17, t) * 0.48 : 1);
+  if (t >= 41) {
+    var reunion = filmSmooth(41, 49, t);
+    var swarmCount = t < 48 ? 24 : 48;
+    for (var sw = 0; sw < swarmCount; sw++) {
+      var ang = sw * 2.399963 + t * (0.075 + (sw % 4) * 0.012);
+      var ring = 104 + (sw % 6) * 31 + Math.sin(t * 0.9 + sw) * 9;
+      var sx = 1325 + Math.cos(ang) * ring;
+      var sy = 500 + Math.sin(ang * 1.17) * ring * 0.71;
+      drawFilmFirefly(ctx, sx, sy, 0.26 + (sw % 4) * 0.045, t + sw * 0.17, 0.45 + reunion * 0.55);
+    }
+  }
+  if (holding && t < 42) {
+    // A low, soft pool of reflected lantern light reaches the grass and creek bank.
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    var lx = foxX + 84, ly = foxY - 218;
+    var pool = ctx.createRadialGradient(lx, ly + 70, 2, lx, ly + 70, 165);
+    pool.addColorStop(0, 'rgba(255,225,128,0.16)'); pool.addColorStop(1, 'rgba(255,225,128,0)');
+    ctx.fillStyle = pool; ctx.beginPath(); ctx.ellipse(lx, ly + 80, 165, 75, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+  }
+
+  // Environmental motes move in three depth planes, then the foreground canopy frames the shot.
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  for (var dust = 0; dust < 58; dust++) {
+    var speed = 3 + (dust % 7) * 1.8;
+    var dx = (dust * 137 + Math.sin(t * 0.55 + dust) * 25 + t * speed) % 1920;
+    var dy = 230 + ((dust * 83 + Math.sin(t * 0.8 + dust * 2.1) * 35) % 600);
+    var pulse = 0.5 + 0.5 * Math.sin(t * (1.3 + dust % 3 * 0.35) + dust * 2.2);
+    ctx.globalAlpha = (0.08 + 0.19 * pulse) * (dust % 6 === 0 ? 1.5 : 1);
+    ctx.fillStyle = dust % 3 === 0 ? '#fff0ad' : '#a9e8d2';
+    ctx.beginPath(); ctx.arc(dx, dy, dust % 9 === 0 ? 3.2 : 1.35, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+  drawFilmForeground(ctx, t, night);
+  ctx.restore(); // camera
+
+  // Gentle bloom and vignette are screen-space finishing layers, so typography never drifts with the camera.
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.12 + 0.09 * Math.sin(t * 0.5);
+  var bloom = ctx.createRadialGradient(960, 565, 180, 960, 565, 820);
+  bloom.addColorStop(0, 'rgba(255,210,158,0.1)'); bloom.addColorStop(1, 'rgba(255,210,158,0)');
+  ctx.fillStyle = bloom; ctx.fillRect(0, 0, 1920, 1080); ctx.restore();
   var vignette = ctx.createRadialGradient(960, 520, 250, 960, 520, 1110);
   vignette.addColorStop(0, 'rgba(0,0,0,0)'); vignette.addColorStop(0.72, 'rgba(3,10,20,0.08)'); vignette.addColorStop(1, 'rgba(3,10,20,0.43)');
   ctx.fillStyle = vignette; ctx.fillRect(0, 0, 1920, 1080);
   drawFilmTitle(ctx, t);
   drawFilmSubtitle(ctx, t);
   ctx.restore();
-}
-</script>
+}</script>
 <!-- PIP AND THE RUNAWAY PANCAKE / five-minute cartoon sample -->
 <!-- NIKO AND THE CLOCKWORK BIRD / full five-minute software-3D cartoon -->
 <script type="text/plain" id="sample-niko-clockwork-bird" data-title="Niko and the Clockwork Bird" data-desc="Five-minute software-3D cartoon: Niko the red-panda inventor and Auri the clockwork bird track a runaway brass spring into the stopped town clock, repair a damaged wing, restore the gears, and bring back the first morning bell. 33 timed dialogue cues." data-loop="0" data-loopdur="300" data-dur="300">
