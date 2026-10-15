@@ -7272,7 +7272,7 @@ function startRender(job, opts) {
         S.activeJob = null;
         try { $('#cancelBtn').disabled = true; } catch (_) {}
         try {
-          $('[data-act=startRender], [data-act=renderAll], [data-act=queueRun]').forEach(function (b) { b.disabled = false; });
+          $$('[data-act=startRender], [data-act=renderAll], [data-act=queueRun]').forEach(function (b) { b.disabled = false; });
         } catch (_) {}
         try { $('#stDot').className = 'dot'; } catch (_) {}
         try { $('#stMsg').textContent = 'Render startup failed: ' + String(e && e.message || e); } catch (_) {}
