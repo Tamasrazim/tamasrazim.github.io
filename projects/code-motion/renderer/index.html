@@ -5740,14 +5740,17 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
           throw new Error("Encoder produced " + result.parsed.width + "×" + result.parsed.height + ", not 3840×2160.");
         }
         if (result.parsed.samples !== 720) {
-          throw new Error("Encoder produced " + result.parsed.samples + " frames, not 720.");
-        }
-        if (!result.verify || result.verify.status !== "VALID") {
-          throw new Error("MP4 verification returned " + (result.verify && result.verify.status || "UNKNOWN") + ".");
+          throw new Error("MP4 contains " + result.parsed.samples + " samples; expected 720. No files for this design were accepted.");
         }
 
+        // Save the verified-size MP4 before generating secondary assets. If SVG or
+        // metadata generation fails, the expensive video render is still preserved.
         status.textContent = "Writing MP4 to " + folderName + "…";
         await dotMeshWriteFile(folder, videoName, result.blob, "video/mp4");
+        var verificationStatus = result.verify && result.verify.status || "UNKNOWN";
+        if (verificationStatus !== "VALID") {
+          addLine(title, false, "MP4 saved, but verification is " + verificationStatus + "; inspect the manifest before publishing.");
+        }
         var svg = typeof item.staticSvg === "function" ? item.staticSvg() : "";
         if (typeof svg !== "string" || !svg.startsWith("<svg")) throw new Error("Static SVG generation failed.");
         if (/<animate[\s>]/i.test(svg)) throw new Error("Static SVG unexpectedly contains animation.");
@@ -5776,11 +5779,18 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
             averageBitrateMbps:Number((result.blob.size*8/((result.parsed&&result.parsed.durationSec>0)?result.parsed.durationSec:12)/1000000).toFixed(3))
           }
         });
-        addLine(title, true, "SAVED · MP4 + static SVG + JSON + CSV");
+        addLine(title, true, "SAVED · MP4 + static SVG + JSON + CSV · verification " + verificationStatus);
         status.textContent = "Saved " + completed.length + " / 50 · " + title;
       } catch (error) {
-        failed.push({index:i+1,id:item.id,title:title,folder:folderName,stage:"render-or-save",reason:String(error&&error.message||error)});
-        addLine(title, false, String(error&&error.message||error));
+        var reason = String(error && error.message || error);
+        var partialVideo = false;
+        try {
+          var expectedVideo = await folder.getFileHandle(videoName);
+          var partialFile = await expectedVideo.getFile();
+          partialVideo = partialFile.size > 0;
+        } catch (_) {}
+        failed.push({index:i+1,id:item.id,title:title,folder:folderName,stage:"render-or-save",reason:reason,mp4Preserved:partialVideo});
+        addLine(title, false, (partialVideo ? "MP4 SAVED; secondary asset/save step failed: " : "FAILED: ") + reason);
       }
       bar.querySelector("i").style.width = (((i+1)/items.length)*100).toFixed(2)+"%";
       await new Promise(function(resolve){setTimeout(resolve,0);});
