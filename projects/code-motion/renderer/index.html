@@ -5735,13 +5735,16 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
         var result = await startRender(job, { silent:true, batch:true });
         if (dotMeshZipCancelRequested || (result && result.cancelled)) { cancelled = true; break; }
         if (!result || !result.ok || !result.blob) throw new Error(result && result.error ? String(result.error.message || result.error) : "MP4 render failed.");
-        if (result.parsed && (result.parsed.width !== 3840 || result.parsed.height !== 2160)) {
+        if (!result.parsed) throw new Error("MP4 output could not be parsed for verification; refusing to save an unverified video.");
+        if (result.parsed.width !== 3840 || result.parsed.height !== 2160) {
           throw new Error("Encoder produced " + result.parsed.width + "×" + result.parsed.height + ", not 3840×2160.");
         }
-        if (result.parsed && result.parsed.samples !== undefined && result.parsed.samples !== 720) {
+        if (result.parsed.samples !== 720) {
           throw new Error("Encoder produced " + result.parsed.samples + " frames, not 720.");
         }
-        if (result.verify && result.verify.status !== "VALID") throw new Error("MP4 verification returned " + result.verify.status + ".");
+        if (!result.verify || result.verify.status !== "VALID") {
+          throw new Error("MP4 verification returned " + (result.verify && result.verify.status || "UNKNOWN") + ".");
+        }
 
         status.textContent = "Writing MP4 to " + folderName + "…";
         await dotMeshWriteFile(folder, videoName, result.blob, "video/mp4");
