@@ -63,6 +63,17 @@ for (const [i, match] of jsSources.entries()) {
 const samples = scripts.filter(([_, attrs]) => /\btype=["']text\/plain["']/i.test(attrs));
 must(samples.length >= 10, 'renderer keeps its built-in sample library');
 
+const lumiSample = samples.find(([_, attrs]) => /\bid=["']sample-lumi-lost-firefly["']/i.test(attrs));
+must(Boolean(lumiSample), 'Lumi and the Lost Firefly camera test sample exists');
+const lumiSource = lumiSample ? lumiSample[2] : '';
+const cameraMatch = lumiSource.match(/function filmCamera\(t\)\s*\{([\s\S]*?)\n\}/);
+const cameraSource = cameraMatch ? cameraMatch[1] : '';
+must(Boolean(cameraMatch), 'Lumi film has an explicit camera plan');
+must(/name:'ESTABLISHING WIDE'/.test(cameraSource) && /name:'LANTERN INSERT'/.test(cameraSource) && /name:'WILLOW REVEAL'/.test(cameraSource), 'Lumi camera plan contains distinct editorial shots');
+must((cameraSource.match(/\{ name:/g) || []).length >= 10, 'Lumi camera plan contains at least ten separate shots');
+must(!/\bfrom\s*:|\bto\s*:/.test(cameraSource), 'Lumi camera has no interpolated in-shot pan paths');
+must(/return \{ x:shot\.x, y:shot\.y, zoom:shot\.zoom, shot:shot\.name \}/.test(cameraSource), 'Lumi camera framing is locked within each shot');
+
 const executable = scripts.filter(([_, attrs]) => attrs.trim() === '');
 const applicationBlocks = executable.filter(([, , source]) =>
   source.includes("var SOFTWARE = 'TRILYVA — Tamasrazim';") &&
