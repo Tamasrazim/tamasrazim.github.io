@@ -71,6 +71,13 @@ The batch surface is available at `batch/index.html`. It discovers the current P
 
 ## Dot Mesh library
 
-The renderer library registry includes **50 original Dot Mesh designs** with editable, deterministic 12-second animation code, animated SVG previews/downloads, and JSON metadata. The **Download Dot Mesh ZIP** button immediately before **Finish Movie** creates a local delivery package containing one MP4 per design (3840×2160, 60 FPS, H.264 with a 20 Mbps encoder target), one **static transparent 4K SVG still** from frame 0 (not animated SVG), and per-design `metadata.json` and `metadata.csv`. The ZIP also includes a catalog CSV, a batch manifest, and a README. The selected browser must support the requested H.264 4K60 configuration. The encoder target is 20 Mbps; measured average bitrates can vary.
+TRILYVA includes 50 unique procedural dot-mesh designs. Click **Dot Mesh → Folder** directly above **Finish Movie**: the browser asks you to choose a save folder, then the renderer exports every design into its own subfolder without building a huge ZIP in memory.
 
-The module is `renderer/library/dot-mesh-library.js`, registered through `renderer/library/manifest.json`; the PWA service worker caches it. Rendering is fully local in the browser. Fifty 12-second 4K60 videos require rendering 36,000 frames and can consume substantial time, memory, and disk space.
+Each completed design folder contains:
+- One 12-second 3840×2160, 60 FPS MP4 using H.264 at a 20 Mbps encoder target.
+- One static transparent 3840×2160 SVG still from frame zero (not an animated SVG).
+- `metadata.json` and `metadata.csv`.
+
+The selected folder also receives `DOT-MESH-CATALOG.csv`, `BATCH-MANIFEST.json`, and `README.txt`. Progress is shown in TRILYVA, cancellation is available, and outputs already written to the folder remain there if the batch stops. The manifest records actual verification and average bitrate where available. The 20 Mbps figure is the encoder target; the measured average can differ.
+
+The browser must support the File System Access API and H.264 at 3840×2160 / 60 FPS. Open the HTTPS GitHub Pages renderer in a current Chromium-based browser.
