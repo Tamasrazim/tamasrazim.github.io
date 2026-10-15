@@ -161,7 +161,7 @@ footer{padding:22px 0 28px;border-top:1px solid var(--line);color:#777770;displa
     const points=scene(phase);
     for(let i=0;i<points.length;i++){
       const p=points[i];
-      ctx.beginPath();ctx.arc(p.x*sx,p.y*sy,p.r,0,TWO_PI);
+      ctx.beginPath();ctx.arc(p.x*sx,p.y*sy,Math.max(.75,p.r*sx),0,TWO_PI);
       ctx.fillStyle='rgb('+p.v+','+p.v+','+p.v+')';ctx.fill();
     }
   }
