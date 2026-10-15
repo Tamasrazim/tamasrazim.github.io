@@ -130,7 +130,9 @@
       '#trilyvaMovieFinalizerBtn{border:1px solid #45454d;padding:7px 10px!important;color:#f5f5f5!important;white-space:nowrap}',
       '#trilyvaDotMeshZipBtn{border:1px solid #f3f3f4!important;padding:7px 10px!important;color:#f3f3f4!important;background:#101013!important;font-weight:700!important;white-space:nowrap;letter-spacing:.04em}',
       '#trilyvaDotMeshZipBtn:hover{background:#f3f3f4!important;color:#09090b!important}',
-      '@media(max-width:560px){.hdr-acts #trilyvaMovieFinalizerBtn,.hdr-acts #trilyvaDotMeshZipBtn{display:block!important;flex:0 0 auto;padding:0 8px!important;font-size:9px!important;letter-spacing:0}}',
+      '#trilyvaDotMeshExportStack{display:flex;flex:0 0 auto;flex-direction:column;align-self:stretch;height:46px;min-width:max-content;border-left:1px solid var(--rule)}',
+      '#trilyvaDotMeshExportStack button{height:50%;flex:1 1 50%;min-height:0;padding:0 8px!important;font-size:9px!important;line-height:1.05;letter-spacing:0;border-left:0!important}',
+      '@media(max-width:560px){.hdr-acts #trilyvaMovieFinalizerBtn,.hdr-acts #trilyvaDotMeshZipBtn{display:block!important;padding:0 8px!important;font-size:9px!important;letter-spacing:0}}',
       '.tmf-overlay{position:fixed;inset:0;z-index:12010;background:rgba(0,0,0,.86);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:20px;color:#eee}',
       '.tmf-overlay.open{display:flex}.tmf-window{width:min(950px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#09090b;border:1px solid #34343b;box-shadow:0 25px 100px #000;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}',
       '.tmf-head{display:flex;align-items:center;gap:14px;padding:17px 20px;border-bottom:1px solid #29292e}.tmf-head strong{font:600 14px/1.2 ui-sans-serif,system-ui;letter-spacing:.12em}.tmf-head small{color:#8a8a94;font-size:10px;letter-spacing:.1em}.tmf-spacer{flex:1}.tmf-x{width:33px;height:33px;border:1px solid #38383f;color:#eee;font-size:20px}',
@@ -168,14 +170,13 @@
     button.textContent = 'Finish Movie';
     button.title = 'Combine a rendered video and local audio into one WebM movie';
     button.addEventListener('click', open);
+    var exportStack = document.createElement('div');
+    exportStack.id = 'trilyvaDotMeshExportStack';
+    exportStack.setAttribute('aria-label', 'Export tools');
+    exportStack.append(dotMeshButton, button);
     var voiceButton = $('trilyvaVoiceStudioBtn');
-    if (voiceButton && voiceButton.parentNode === nav) {
-      voiceButton.insertAdjacentElement('afterend', dotMeshButton);
-      dotMeshButton.insertAdjacentElement('afterend', button);
-    } else {
-      nav.appendChild(dotMeshButton);
-      nav.appendChild(button);
-    }
+    if (voiceButton && voiceButton.parentNode === nav) voiceButton.insertAdjacentElement('afterend', exportStack);
+    else nav.appendChild(exportStack);
 
     overlay = document.createElement('div');
     overlay.id = 'trilyvaMovieFinalizer';
