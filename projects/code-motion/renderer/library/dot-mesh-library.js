@@ -194,25 +194,25 @@ function pathFor(spec, axis, index, a, cols, rows, width, height) {
   }
   return pts.join(" ");
 }
-function buildSvg(spec, thumbnail, animated) {
-  var width = thumbnail ? 480 : 1920;
-  var height = thumbnail ? 270 : 1080;
+function buildSvg(spec, thumbnail, animated, ultraHd) {
+  var width = thumbnail ? 480 : (ultraHd ? 3840 : 1920);
+  var height = thumbnail ? 270 : (ultraHd ? 2160 : 1080);
   var cols = thumbnail ? 18 : spec.columns;
   var rows = thumbnail ? 10 : spec.rows;
   var samples = [0, 0.25, 0.5, 0.75, 1];
   var bgStroke = thumbnail ? "#a8a8b2" : "#bfc0c8";
   var lineOpacity = thumbnail ? "0.38" : "0.28";
-  var dotRadius = thumbnail ? 2.05 : 3.1;
+  var dotRadius = thumbnail ? 2.05 : (ultraHd ? 6.2 : 3.1);
   var out = [];
   out.push('<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height +
     '" viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-labelledby="title desc">');
   out.push('<title id="title">' + escXml(spec.title) + '</title>');
-  out.push('<desc id="desc">' + escXml(spec.description) + ' Transparent animated dot mesh; twelve-second seamless loop.</desc>');
+  out.push('<desc id="desc">' + escXml(spec.description) + (animated ? ' Transparent animated dot mesh; twelve-second seamless loop.' : ' Static transparent vector still at frame zero from a twelve-second seamless-loop design.') + '</desc>');
   if (!thumbnail) {
     out.push('<metadata>' + escXml(JSON.stringify({
       id: spec.id, title: spec.title, creator: "Tamasrazim", software: "TRILYVA",
-      durationSeconds: 12, fps: 60, loop: true, seamless: true, background: "transparent",
-      designFamily: spec.family, category: spec.category, tags: spec.tags
+      durationSeconds: 12, fps: 60, loop: true, seamless: true, animated: !!animated, background: "transparent",
+      width: width, height: height, designFamily: spec.family, category: spec.category, tags: spec.tags
     })) + '</metadata>');
   }
   out.push('<g fill="none" stroke="' + bgStroke + '" stroke-opacity="' + lineOpacity + '" stroke-width="' + (thumbnail ? "0.85" : "1.25") + '">');
@@ -343,7 +343,7 @@ function makeDefinition(definition, index) {
     description: description,
     creator: "Tamasrazim",
     software: "TRILYVA",
-    assetType: "Animated dot-mesh vector design",
+    assetType: "Procedural dot-mesh design",
     category: definition[2],
     designFamily: family,
     durationSeconds: 12,
@@ -362,7 +362,8 @@ function makeDefinition(definition, index) {
     duration: 12, loop: true, loopDuration: 12, fps: 60,
     width: 1920, height: 1080, transparent: true, seed: seed,
     code: sourceFor(spec),
-    svg: function () { return buildSvg(spec, false, true); },
+    svg: function () { return buildSvg(spec, false, true, false); },
+    staticSvg: function () { return buildSvg(spec, false, false, true); },
     metadata: metadata,
     thumbnail: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(buildSvg(spec, true, false))
   };
