@@ -4920,7 +4920,7 @@ function openTrilyvaLibrary(){
         it.setAttribute('aria-label','Load '+String(x.title||'library item'));
         it.style.cursor='pointer';
         it.style.touchAction='manipulation';
-        if(typeof x.thumbnail==='string' && /^data:image\\/svg\\+xml/i.test(x.thumbnail)){
+        if(typeof x.thumbnail==='string' && x.thumbnail.toLowerCase().indexOf('data:image/svg+xml')===0){
           var preview=document.createElement('img');
           preview.src=x.thumbnail; preview.alt=''; preview.loading='lazy';
           preview.style.cssText='width:112px;height:63px;object-fit:contain;flex:0 0 112px;border:1px solid var(--rule);background:#070709;';
