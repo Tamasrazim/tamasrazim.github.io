@@ -1651,6 +1651,8 @@ select.mini{
           <div class="sec">
             <h4>RENDER</h4>
             <div class="btn-row"><button class="btn solid" data-act="startRender">Render Current</button><button class="btn solid" data-act="renderAll">Render All</button></div>
+            <div class="btn-row"><button class="btn solid" data-act="renderAllDotMesh" id="renderAllDotMeshBtn" style="width:100%">RENDER ALL DOT MESH · 50 DESIGNS</button></div>
+            <p class="note">Exports every Dot Mesh design to the selected folder: individual MP4, SVG, metadata.json and metadata.csv. No ZIP.</p>
             <div class="btn-row">
               <button class="btn" data-act="queueAdd">Add to queue</button>
               <button class="btn" data-act="cancelRender" id="cancelBtn" disabled>Cancel</button>
@@ -8786,6 +8788,7 @@ var ACTS = {
     withCompiled().then(function (ok) { if (ok) analyseJob(); });
   },
   renderAll: function () { openProtectedTrilyvaRenderAll(); },
+  renderAllDotMesh: function () { openDotMeshFolderPicker(); },
   exportDotMesh50: function () { openDotMeshFolderPicker(); },
   startRender: function () { withCompiled().then(function (ok) { if (ok) startRender(buildJob()); }); },
   cancelRender: cancelRender,
