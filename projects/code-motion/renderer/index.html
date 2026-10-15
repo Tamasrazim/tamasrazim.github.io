@@ -5507,8 +5507,10 @@ function dotMeshZipMetadata(item, job, result, stem, svgName) {
       sourceHash: job.metadata.sourceHash || null
     },
     exports: {
-      video: stem + ".mp4",
-      vectorStill: {
+      video: stem,
+      nominalResolution: { width: DOT_MESH_ZIP_SETTINGS.width, height: DOT_MESH_ZIP_SETTINGS.height },
+    resolution: { width: DOT_MESH_ZIP_SETTINGS.width, height: DOT_MESH_ZIP_SETTINGS.height },
+    vectorStill: {
         filename: svgName,
         format: "SVG",
         width: DOT_MESH_ZIP_SETTINGS.width,
@@ -5602,7 +5604,7 @@ async function openDotMeshZipConfirm() {
     var body=document.createElement('div');
     body.style.cssText='display:flex;flex-direction:column;gap:12px;min-height:0;';
     body.appendChild(elHTML(
-      '<div class="verified"><b>DOT MESH / DELIVERY ZIP</b><span>50 UNIQUE DESIGNS</span><span>4 OUTPUTS / DESIGN</span><span>300 ASSETS + INDEX</span></div>'+
+      '<div class="verified"><b>DOT MESH / DELIVERY ZIP</b><span>50 UNIQUE DESIGNS</span><span>4 OUTPUTS / DESIGN</span><span>200 DESIGN FILES + INDEX</span></div>'+
       '<dl class="kv">'+
       '<dt>Video</dt><dd>MP4 · H.264 / AVC · 3840 × 2160 · 60 FPS</dd>'+
       '<dt>Duration</dt><dd>12 seconds · 720 frames · seamless loop</dd>'+
@@ -8823,7 +8825,7 @@ else boot();
 })();
 </script>
 <script src="./voice-studio.js?v=1.0.4"></script>
-<script src="./movie-finalizer.js?v=1.0.3"></script>
+<script src="./movie-finalizer.js?v=1.0.4"></script>
 <script type="text/plain" id="sample-lumi-lost-firefly" data-title="Lumi and the Lost Firefly" data-desc="A complete 60-second original 2D family cartoon with cinematic camera blocking, hand-built vector characters, distinct layered sets, character acting, secondary motion, creek crossing, a firefly reunion, timed subtitles and ElevenLabs voice cues. Defaults to 3840×2160 at 60 FPS." data-loop="0" data-loopdur="60" data-dur="60" data-width="3840" data-height="2160" data-fps="60">
 // LUMI AND THE LOST FIREFLY — original 60-second cartoon, 16:9.
 // Built for TRILYVA's deterministic renderFrame contract.
