@@ -1,0 +1,228 @@
+<!doctype html>
+<!--
+  What this does:
+  Shows a 12-second cyclic dot-mesh animation and lets you export the current
+  frame as real vector SVG or EPS. The preview is generated locally in this page.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark">
+<meta name="author" content="Robiul Rumman Razim">
+<meta name="description" content="A monochrome dot-mesh wave animation on a 12-second seamless cycle, with true-vector SVG and EPS frame exports.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dot Mesh Flow — 12-Second Loop">
+<meta property="og:description" content="An animated dot field with a repeating wave cycle and editable SVG/EPS still-frame downloads.">
+<meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/code-to-eps/examples/dot-mesh-flow-12s-loop.html">
+<title>Dot Mesh Flow — 12-Second Loop | CODE → EPS</title>
+<style>
+:root{color-scheme:dark;--bg:#050505;--panel:#0b0b0b;--line:#292929;--muted:#8a8a84;--ink:#f3f3ef;--soft:#bdbdb6}
+*{box-sizing:border-box}
+html{background:var(--bg);scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(ellipse at 50% -15%,#171717 0,#050505 49%);color:var(--ink);font:14px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer}
+.shell{width:min(1440px,calc(100% - 36px));margin-inline:auto}
+.topbar{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line)}
+.brand{font:800 11px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase}
+.brand span{color:#85857e}
+.back{font:10px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;color:#b7b7b0;letter-spacing:.04em}
+.back:hover,.asset-link:hover{color:#fff;text-decoration:underline;text-underline-offset:4px}
+.hero{padding:clamp(34px,6vw,78px) 0 30px}
+.kicker{display:flex;align-items:center;gap:9px;font:10px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.15em;color:#b4b4ad;text-transform:uppercase}
+.kicker:before{content:"";width:7px;height:7px;border-radius:50%;background:#efefe9;box-shadow:0 0 15px #fff7}
+h1{margin:16px 0 12px;font:800 clamp(34px,6.5vw,78px)/.98 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:-.09em;text-transform:uppercase}
+h1 span{color:#6c6c66}
+.lead{max-width:760px;color:#b5b5ae;font-size:15px;margin:0}
+.meta-line{margin-top:20px;display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:6px 9px;border:1px solid #303030;background:#0a0a0a;border-radius:3px;color:#c0c0b9;font:9px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.06em;text-transform:uppercase}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start;padding:12px 0 60px}
+.stage,.sidecard{border:1px solid var(--line);background:rgba(8,8,8,.84);border-radius:7px;overflow:hidden}
+.stage-head{height:44px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 14px;color:#9b9b94;font:9px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase}
+.status{color:#e0e0da;white-space:nowrap}
+.canvas-wrap{background:#000;position:relative;overflow:hidden}
+canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#000}
+.controls{display:flex;gap:7px;flex-wrap:wrap;padding:13px;border-top:1px solid var(--line)}
+.btn{border:1px solid #3a3a3a;background:#101010;color:#deded7;border-radius:4px;padding:10px 12px;font:800 9px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.06em;text-transform:uppercase;transition:background .16s,color .16s,border-color .16s}
+.btn:hover,.btn.primary{background:#f0f0eb;color:#050505;border-color:#f0f0eb}
+.btn:focus-visible,.back:focus-visible,.asset-link:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.sidecard{padding:17px;margin-bottom:12px}
+.sidecard h2{font:800 11px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;margin:0 0 13px}
+.sidecard p,.sidecard li{color:#a4a49c;font-size:12px;line-height:1.7}
+.sidecard p{margin:0 0 12px}
+.sidecard ul{margin:8px 0 0;padding-left:17px}
+.sidecard li+li{margin-top:5px}
+.asset-links{display:grid;gap:8px}
+.asset-link{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 10px;border:1px solid #303030;background:#090909;border-radius:4px;font:10px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace}
+.asset-link span{color:#7e7e77}
+.note{padding:12px;border-left:2px solid #74746e;background:#101010;color:#a8a8a1;font-size:11px;line-height:1.7}
+footer{padding:22px 0 28px;border-top:1px solid var(--line);color:#777770;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font:9px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase;letter-spacing:.06em}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.sidecolumn{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.sidecard{margin:0}}
+@media(max-width:560px){.shell{width:min(100% - 22px,1440px)}.topbar{min-height:58px}.back{max-width:48%;text-align:right}.hero{padding-top:38px}.lead{font-size:13px}.layout{padding-top:6px}.sidecolumn{grid-template-columns:1fr}.stage-head{padding-inline:9px;font-size:8px}.controls{padding:9px}.btn{padding:9px 10px;flex:1}.status{font-size:8px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="shell topbar">
+  <a class="brand" href="/projects/code-to-eps/">CODE <span>→</span> EPS</a>
+  <a class="back" href="/projects/code-to-eps/workspace/">← RETURN TO VECTOR WORKSPACE</a>
+</header>
+<main class="shell">
+  <section class="hero">
+    <div class="kicker">STOCK ASSET EXAMPLE / PERIODIC VECTOR MOTION</div>
+    <h1>Dot Mesh Flow<span>.</span></h1>
+    <p class="lead">A monochrome field of dots folds into a slow, continuous wave. The movement runs on a fixed 12-second cycle, and the current composition can be exported as editable vector artwork.</p>
+    <div class="meta-line"><span class="chip">12-second loop</span><span class="chip">60 fps timing</span><span class="chip">3840 × 2160 coordinate space</span><span class="chip">SVG + EPS frame export</span></div>
+  </section>
+  <section class="layout">
+    <div class="stage">
+      <div class="stage-head"><span>LIVE DOT-MESH PREVIEW</span><span class="status" id="timeReadout">00:00.00 / 00:12.00</span></div>
+      <div class="canvas-wrap"><canvas id="meshCanvas" width="1280" height="720" role="img" aria-label="Monochrome dots deforming as a repeating wave mesh"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="playPause" type="button">Pause loop</button>
+        <button class="btn" id="restart" type="button">Restart 12s</button>
+        <button class="btn" id="exportSvg" type="button">Download current SVG</button>
+        <button class="btn" id="exportEps" type="button">Download current EPS</button>
+      </div>
+    </div>
+    <aside class="sidecolumn">
+      <section class="sidecard">
+        <h2>EXAMPLE SPECS</h2>
+        <ul>
+          <li>12 seconds per cycle, timed at 60 frames per second.</li>
+          <li>4K coordinate system for frame exports.</li>
+          <li>Thousands of separate editable circles.</li>
+          <li>No text, logo, raster texture, or outside runtime dependency.</li>
+        </ul>
+      </section>
+      <section class="sidecard">
+        <h2>STATIC VECTOR FRAME</h2>
+        <p>Use these files to inspect the first frame in a vector editor. The EPS consists of PostScript circle paths; the SVG contains native circle elements.</p>
+        <div class="asset-links">
+          <a class="asset-link" href="./Dot_Mesh_Flow_Frame_000.svg" download>Frame 000 · SVG <span>↗</span></a>
+          <a class="asset-link" href="./Dot_Mesh_Flow_Frame_000.eps" download>Frame 000 · EPS <span>↗</span></a>
+        </div>
+      </section>
+      <section class="sidecard">
+        <h2>IMPORTANT FORMAT NOTE</h2>
+        <div class="note">EPS is a still-image format, so it stores one selected frame rather than the animation. The 12-second loop is a separate video deliverable; export the vector frame for the EPS sheet.</div>
+      </section>
+    </aside>
+  </section>
+  <footer><span>CODE → EPS / DOT MESH FLOW</span><a href="/projects/">ALL PROJECTS ↑</a><span>FRAME EXPORTS ARE GENERATED LOCALLY</span></footer>
+</main>
+<script>
+(function(){
+  'use strict';
+  const W=3840,H=2160,COLS=91,ROWS=51,DURATION=12000,TWO_PI=Math.PI*2;
+  const canvas=document.getElementById('meshCanvas');
+  const ctx=canvas.getContext('2d',{alpha:false});
+  const readout=document.getElementById('timeReadout');
+  const playButton=document.getElementById('playPause');
+  const reduceMotion=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let playing=!reduceMotion;
+  let startAt=performance.now();
+  let currentPhase=0;
+  const base=[];
+  for(let row=0;row<ROWS;row++){
+    const by=92+(H-184)*row/(ROWS-1);
+    for(let col=0;col<COLS;col++){
+      const bx=118+(W-236)*col/(COLS-1);
+      const xn=(bx-W/2)/(W/2),yn=(by-H/2)/(H/2);
+      const radial=Math.sqrt(xn*xn+yn*yn);
+      base.push({bx:bx,by:by,xn:xn,yn:yn,radial:radial,angle:Math.atan2(yn,xn)});
+    }
+  }
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function scene(phase){
+    const points=[];
+    for(let i=0;i<base.length;i++){
+      const b=base[i],r=b.radial,a=b.angle;
+      const radialWave=Math.sin(TWO_PI*(r*1.7)-phase+.55*Math.sin(a*2+phase));
+      const crossWave=Math.cos(TWO_PI*(b.xn*.65+b.yn*.44)+phase);
+      const ridge=Math.exp(-Math.pow(Math.sin(a*2-phase*.7+r*3)/.46,2));
+      const disp=18+42*radialWave+13*crossWave;
+      const x=b.bx+Math.sin(b.yn*4.1+phase)*disp*.72+Math.sin(a*3-phase)*24*radialWave;
+      const y=b.by+Math.cos(b.xn*4-phase)*disp*1.05+Math.cos(a*2+phase)*30*radialWave;
+      const glow=(Math.sin(TWO_PI*(r*1.4)-phase+.3*Math.cos(a*3+phase))+1)*.5;
+      const band=(Math.sin(a*2.2+r*4-phase)+1)*.5;
+      const value=Math.round(clamp(76+100*glow+55*ridge+28*band,55,242));
+      const radius=clamp(Math.round(1.7+1.05*glow+.9*ridge),2,4);
+      if(x>=0&&x<=W&&y>=0&&y<=H)points.push({x:x,y:y,r:radius,v:value});
+    }
+    return points;
+  }
+  function draw(phase){
+    ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);
+    const sx=canvas.width/W,sy=canvas.height/H;
+    const points=scene(phase);
+    for(let i=0;i<points.length;i++){
+      const p=points[i];
+      ctx.beginPath();ctx.arc(p.x*sx,p.y*sy,p.r,0,TWO_PI);
+      ctx.fillStyle='rgb('+p.v+','+p.v+','+p.v+')';ctx.fill();
+    }
+  }
+  function timeText(phase){
+    const ms=(phase/TWO_PI)*DURATION;
+    const sec=Math.floor(ms/1000),cent=Math.floor((ms%1000)/10);
+    return '00:'+String(sec).padStart(2,'0')+'.'+String(cent).padStart(2,'0')+' / 00:12.00';
+  }
+  function download(name,content,type){
+    const blob=new Blob([content],{type:type});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=name;
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  }
+  function makeSvg(points){
+    let out='<?xml version="1.0" encoding="UTF-8"?>\n';
+    out+='<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">\n';
+    out+='<title>Dot Mesh Flow - current frame</title>\n<desc>Editable monochrome dot mesh; transparent background.</desc>\n';
+    for(let i=0;i<points.length;i++){
+      const p=points[i];out+='<circle cx="'+p.x.toFixed(2)+'" cy="'+p.y.toFixed(2)+'" r="'+p.r+'" fill="rgb('+p.v+','+p.v+','+p.v+')"/>\n';
+    }
+    return out+'</svg>\n';
+  }
+  function makeEps(points){
+    let out='%!PS-Adobe-3.0 EPSF-3.0\n';
+    out+='%%BoundingBox: 0 0 '+W+' '+H+'\n%%HiResBoundingBox: 0 0 '+W+' '+H+'\n';
+    out+='%%Title: Dot Mesh Flow - current frame\n%%Creator: CODE to EPS dot-mesh example\n%%LanguageLevel: 2\n%%DocumentData: Clean7Bit\n%%Pages: 1\n%%EndComments\n1 setlinecap\n';
+    for(let i=0;i<points.length;i++){
+      const p=points[i];out+=(p.v/255).toFixed(4)+' setgray newpath '+p.x.toFixed(2)+' '+(H-p.y).toFixed(2)+' '+p.r+' 0 360 arc closepath fill\n';
+    }
+    return out+'%%EOF\n';
+  }
+  function animate(now){
+    if(playing){
+      const elapsed=(now-startAt)%DURATION;
+      currentPhase=TWO_PI*elapsed/DURATION;
+      playButton.textContent='Pause loop';
+    }else{
+      playButton.textContent='Play 12s loop';
+    }
+    draw(currentPhase);
+    readout.textContent=timeText(currentPhase);
+    requestAnimationFrame(animate);
+  }
+  playButton.addEventListener('click',function(){
+    if(playing){playing=false;}
+    else{startAt=performance.now()-(currentPhase/TWO_PI)*DURATION;playing=true;}
+  });
+  document.getElementById('restart').addEventListener('click',function(){
+    currentPhase=0;startAt=performance.now();playing=true;
+  });
+  document.getElementById('exportSvg').addEventListener('click',function(){
+    download('Dot_Mesh_Flow_Current_Frame.svg',makeSvg(scene(currentPhase)),'image/svg+xml;charset=utf-8');
+  });
+  document.getElementById('exportEps').addEventListener('click',function(){
+    download('Dot_Mesh_Flow_Current_Frame.eps',makeEps(scene(currentPhase)),'application/postscript;charset=utf-8');
+  });
+  draw(currentPhase);
+  requestAnimationFrame(animate);
+})();
+</script>
+</body>
+</html>
