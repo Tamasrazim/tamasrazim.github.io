@@ -4789,7 +4789,7 @@ async function trilyvaDownloadLibraryItem(item, kind) {
         fps: item.fps || null, durationSeconds: item.duration || null,
         loop: item.loop === true, creator: 'Tamasrazim', software: 'TRILYVA'
       });
-    trilyvaDownloadTextAsset(base + '.metadata.json', JSON.stringify(meta, null, 2) + '\\n', 'application/json;charset=utf-8');
+    trilyvaDownloadTextAsset(base + '.metadata.json', JSON.stringify(meta, null, 2), 'application/json;charset=utf-8');
     $('#stMsg').textContent = 'Downloaded metadata · ' + String(item.title || base);
   } catch (e) {
     $('#stMsg').textContent = 'Library download failed · ' + String(e.message || e);
