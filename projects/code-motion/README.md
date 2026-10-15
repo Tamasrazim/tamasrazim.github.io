@@ -68,3 +68,9 @@ The workspace is intentionally an `index.html` application directory rather than
 ## Flower Batch Lab
 
 The batch surface is available at `batch/index.html`. It discovers the current Prism flower studies, builds deterministic idea combinations, prepares the fixed 3840×2160 / 60 FPS / 10 second contract, stages Core render jobs, and exposes the KYNESTRA-native ZIP packaging workflow.
+
+## Dot Mesh library
+
+The TRILYVA library registry includes **50 original dot-mesh designs**. Each design is a deterministic, transparent-background 12-second seamless loop with editable Canvas renderer source, a downloadable animated SVG, and downloadable JSON metadata. The library also exports a catalog CSV for all 50 designs. SVG animation uses native SVG animation elements; no third-party runtime or external assets are required.
+
+The module is `renderer/library/dot-mesh-library.js` and is registered in `renderer/library/manifest.json`. The renderer's service worker caches the module for offline use after it has been fetched once.
