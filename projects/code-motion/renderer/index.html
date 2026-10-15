@@ -4180,7 +4180,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 'use strict';
 
 var SELF_SOURCE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-var APP_VERSION = '1.2.1';
+var APP_VERSION = '1.2.2';
 var SOFTWARE = 'TRILYVA — Tamasrazim';
 
 var LIBRARY_PASSWORD_SHA256 = '8825ae35e4685a47fcfb8a76ccfc42cf2037a78ada722c115856840b200d90f5';
@@ -4756,6 +4756,45 @@ async function loadTrilyvaPrismLibrary(){
   return trilyvaPrismCache;
 }
 function trilyvaLibraryEscape(v){return String(v??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+function trilyvaDownloadTextAsset(filename, contents, mime) {
+  if (typeof contents !== 'string' || !contents.length) throw new Error('The selected library asset is empty.');
+  var blob = new Blob([contents], { type: mime || 'application/octet-stream' });
+  var url = URL.createObjectURL(blob);
+  var link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+}
+function trilyvaLibraryAssetName(item) {
+  return String(item && (item.id || item.title) || 'trilyva-library-item')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 100) || 'trilyva-library-item';
+}
+async function trilyvaDownloadLibraryItem(item, kind) {
+  try {
+    var base = trilyvaLibraryAssetName(item);
+    if (kind === 'svg') {
+      var svg = typeof item.svg === 'function' ? item.svg() : (item.svg || item.svgSource);
+      svg = await Promise.resolve(svg);
+      trilyvaDownloadTextAsset(base + '.svg', svg, 'image/svg+xml;charset=utf-8');
+      $('#stMsg').textContent = 'Downloaded animated SVG · ' + String(item.title || base);
+      return;
+    }
+    var meta = typeof item.metadata === 'function' ? await item.metadata() :
+      (item.metadata || item.meta || {
+        id: item.id || base, title: item.title || base, description: item.description || '',
+        fps: item.fps || null, durationSeconds: item.duration || null,
+        loop: item.loop === true, creator: 'Tamasrazim', software: 'TRILYVA'
+      });
+    trilyvaDownloadTextAsset(base + '.metadata.json', JSON.stringify(meta, null, 2) + '\\n', 'application/json;charset=utf-8');
+    $('#stMsg').textContent = 'Downloaded metadata · ' + String(item.title || base);
+  } catch (e) {
+    $('#stMsg').textContent = 'Library download failed · ' + String(e.message || e);
+  }
+}
 async function trilyvaLoadLibraryCode(title, code, item, opts) {
   opts = opts || {};
   var name = String(title || 'untitled').trim() || 'untitled';
@@ -4816,13 +4855,24 @@ function openTrilyvaLibrary(){
   body.innerHTML='<div class="empty">LOADING LIBRARY INDEX…</div>';
   registry.ready.then(function(){
     var toolbar=document.createElement('div');
-    toolbar.style.cssText='display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;';
+    toolbar.style.cssText='display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,240px) auto;gap:8px;align-items:center;';
     var tabs=document.createElement('div');
     tabs.style.cssText='display:flex;gap:4px;flex-wrap:wrap;';
     var search=document.createElement('input');
     search.type='search'; search.placeholder='Search library…'; search.autocomplete='off';
     search.style.cssText='width:100%;background:#09090b;border:1px solid var(--rule);padding:7px 8px;font:10px var(--mono);outline:none;';
-    toolbar.append(tabs,search);
+    var catalog=document.createElement('button');
+    catalog.type='button'; catalog.textContent='CATALOG CSV';
+    catalog.style.cssText='border:1px solid var(--rule);padding:6px 8px;background:#0a0a0c;color:var(--mut);font:9px var(--mono);letter-spacing:.08em;cursor:pointer;display:none;';
+    catalog.title='Download metadata for every item in the active library as CSV';
+    catalog.onclick=function(){
+      try{
+        if(!active||typeof active.catalogCsv!=='function')return;
+        trilyvaDownloadTextAsset('trilyva-dot-mesh-catalog.csv',active.catalogCsv(),'text/csv;charset=utf-8');
+        $('#stMsg').textContent='Downloaded library metadata catalog CSV';
+      }catch(e){$('#stMsg').textContent='Catalog download failed · '+String(e.message||e);}
+    };
+    toolbar.append(tabs,search,catalog);
 
     var list=document.createElement('div');
     list.className='list';
@@ -4836,6 +4886,7 @@ function openTrilyvaLibrary(){
     var loaded=false;
 
     function setTabs(){
+      catalog.style.display=active&&typeof active.catalogCsv==='function'?'inline-flex':'none';
       tabs.replaceChildren();
       libs.forEach(function(lib){
         var btn=document.createElement('button');
@@ -4869,19 +4920,32 @@ function openTrilyvaLibrary(){
         it.setAttribute('aria-label','Load '+String(x.title||'library item'));
         it.style.cursor='pointer';
         it.style.touchAction='manipulation';
+        if(typeof x.thumbnail==='string' && /^data:image\\/svg\\+xml/i.test(x.thumbnail)){
+          var preview=document.createElement('img');
+          preview.src=x.thumbnail; preview.alt=''; preview.loading='lazy';
+          preview.style.cssText='width:112px;height:63px;object-fit:contain;flex:0 0 112px;border:1px solid var(--rule);background:#070709;';
+          it.appendChild(preview);
+        }
         var text=document.createElement('div');
         text.style.cssText='min-width:0;flex:1;';
         text.innerHTML='<h5>'+trilyvaLibraryEscape(x.title||'Untitled')+'</h5><p>'+trilyvaLibraryEscape(x.id||('item-'+o.i))+'</p>';
-        var load=document.createElement('button');
-        load.className='x'; load.type='button'; load.textContent='LOAD';
+        var actions=document.createElement('div');
+        actions.style.cssText='display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-wrap:wrap;flex:0 0 auto;';
+        function action(label,title,handler){
+          var b=document.createElement('button');b.className='x';b.type='button';b.textContent=label;b.title=title;
+          b.onclick=function(ev){ev.preventDefault();ev.stopPropagation();handler();};
+          actions.appendChild(b);return b;
+        }
         function activate(){trilyvaLoadLibraryCode(x.title,x.code,x).catch(function(e){$('#stMsg').textContent='Library load failed · '+String(e.message||e);});}
-        it.onclick=function(ev){if(ev.target===load||load.contains(ev.target))return;activate();};
+        if(x.svg || x.svgSource) action('SVG','Download animated SVG',function(){trilyvaDownloadLibraryItem(x,'svg');});
+        if(x.metadata || x.meta) action('META','Download JSON metadata',function(){trilyvaDownloadLibraryItem(x,'metadata');});
+        action('LOAD','Load this animation into the TRILYVA editor',activate);
+        it.onclick=function(ev){if(actions.contains(ev.target))return;activate();};
         it.addEventListener('pointerup',function(ev){
-          if(ev.pointerType!=='mouse' && !(ev.target===load||load.contains(ev.target))) activate();
+          if(ev.pointerType!=='mouse' && !actions.contains(ev.target)) activate();
         });
-        it.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();activate();}};
-        load.onclick=function(ev){ev.preventDefault();ev.stopPropagation();activate();};
-        it.append(text,load);
+        it.onkeydown=function(ev){if(ev.target===it&&(ev.key==='Enter'||ev.key===' ')){ev.preventDefault();activate();}};
+        it.append(text,actions);
         frag.appendChild(it);
       });
       list.replaceChildren(frag);
