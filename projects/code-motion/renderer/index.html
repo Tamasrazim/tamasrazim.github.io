@@ -8908,37 +8908,32 @@ function drawFilmSplash(ctx, x, y, t, strength) {
   ctx.restore();
 }
 function filmCamera(t) {
-  // Shot-based 2D camera plan. Each shot has its own framing and its own
-  // small in-shot move; boundaries are deliberate editorial cuts, not one
-  // continuous left-right pan across the entire minute.
+  // Locked, cut-based camera plan. No horizontal tracking or drifting occurs
+  // inside a shot: every camera change is an intentional edit at a beat.
+  // Character action and background parallax carry motion instead of a
+  // constant sideways camera slide.
   var shots = [
-    { name:'ESTABLISHING WIDE', start:0, end:5.8, from:[960,555,0.96], to:[915,565,0.99] },
-    { name:'LUMI TWO-SHOT', start:5.8, end:9.3, from:[850,590,1.04], to:[735,600,1.12] },
-    { name:'FIREFLY CLOSE-UP', start:9.3, end:12.0, from:[1160,535,1.66], to:[1135,535,1.78] },
-    { name:'FOLLOW THE FIREFLY', start:12.0, end:16.8, from:[1080,535,1.55], to:[820,520,1.48] },
-    { name:'FIRST MEETING', start:16.8, end:19.4, from:[710,600,1.17], to:[690,595,1.23] },
-    { name:'LANTERN INSERT', start:19.4, end:22.8, from:[700,612,1.65], to:[705,612,1.78] },
-    { name:'TRAVELLING TWO-SHOT', start:22.8, end:29.0, from:[700,600,1.10], to:[690,605,1.08] },
-    { name:'LOW CREEK TRACK', start:29.0, end:36.0, from:[700,700,1.08], to:[930,705,1.12] },
-    { name:'FOLLOW TO THE WILLOW', start:36.0, end:42.0, from:[1020,660,1.12], to:[1270,640,1.14] },
-    { name:'WILLOW REVEAL', start:42.0, end:46.5, from:[1150,580,1.18], to:[1170,565,1.25] },
-    { name:'FIREFLY CANOPY REVEAL', start:46.5, end:52.0, from:[1325,540,0.88], to:[1325,485,0.92] },
-    { name:'CLOSING TWO-SHOT', start:52.0, end:60.001, from:[990,590,0.98], to:[985,590,1.02] }
+    { name:'ESTABLISHING WIDE', start:0, end:5.8, x:960, y:555, zoom:0.96 },
+    { name:'LUMI TWO-SHOT', start:5.8, end:9.3, x:850, y:590, zoom:1.04 },
+    { name:'FIREFLY CLOSE-UP', start:9.3, end:12.0, x:1160, y:535, zoom:1.66 },
+    { name:'LUMI WATCHES THE FIREFLY', start:12.0, end:16.8, x:850, y:565, zoom:1.08 },
+    { name:'FIRST MEETING', start:16.8, end:19.4, x:690, y:595, zoom:1.20 },
+    { name:'LANTERN INSERT', start:19.4, end:22.8, x:705, y:612, zoom:1.72 },
+    { name:'TRAVELLING TWO-SHOT', start:22.8, end:29.0, x:700, y:600, zoom:1.08 },
+    { name:'LOCKED CREEK WIDE', start:29.0, end:36.0, x:850, y:700, zoom:1.00 },
+    { name:'CREEK TO WILLOW', start:36.0, end:42.0, x:1080, y:650, zoom:1.00 },
+    { name:'WILLOW REVEAL', start:42.0, end:46.5, x:1170, y:565, zoom:1.14 },
+    { name:'FIREFLY CANOPY REVEAL', start:46.5, end:52.0, x:1325, y:500, zoom:0.92 },
+    { name:'CLOSING TWO-SHOT', start:52.0, end:60.001, x:1000, y:590, zoom:0.98 }
   ];
-  var shot = shots[shots.length - 1];
   for (var i = 0; i < shots.length; i++) {
-    if (t < shots[i].end) { shot = shots[i]; break; }
+    var shot = shots[i];
+    if (t < shot.end) {
+      return { x:shot.x, y:shot.y, zoom:shot.zoom, shot:shot.name };
+    }
   }
-  var p = filmClamp((t - shot.start) / Math.max(0.001, shot.end - shot.start), 0, 1);
-  // Ease into and out of each move so the camera settles instead of drifting
-  // in one direction for the whole film.
-  var u = filmSmooth(0, 1, p);
-  return {
-    x: shot.from[0] + (shot.to[0] - shot.from[0]) * u,
-    y: shot.from[1] + (shot.to[1] - shot.from[1]) * u,
-    zoom: shot.from[2] + (shot.to[2] - shot.from[2]) * u,
-    shot: shot.name
-  };
+  var last = shots[shots.length - 1];
+  return { x:last.x, y:last.y, zoom:last.zoom, shot:last.name };
 }
 function filmKey(t, keys) {
   if (t <= keys[0][0]) return keys[0][1];
