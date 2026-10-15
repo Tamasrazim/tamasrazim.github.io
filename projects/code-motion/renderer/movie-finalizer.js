@@ -153,8 +153,8 @@
     var dotMeshButton = document.createElement('button');
     dotMeshButton.id = 'trilyvaDotMeshZipBtn';
     dotMeshButton.type = 'button';
-    dotMeshButton.textContent = 'Download Dot Mesh ZIP';
-    dotMeshButton.title = 'Render all 50 Dot Mesh designs as 4K60 MP4 at a 20 Mbps target, with static SVG stills and metadata';
+    dotMeshButton.textContent = 'Dot Mesh → Folder';
+    dotMeshButton.title = 'Choose a save folder, then render all 50 Dot Mesh designs directly into it: 4K60 MP4s, static transparent SVG stills, and metadata';
     dotMeshButton.setAttribute('aria-label', 'Download Dot Mesh ZIP');
     dotMeshButton.addEventListener('click', function () {
       if (typeof window.trilyvaDownloadDotMeshZip === 'function') {
