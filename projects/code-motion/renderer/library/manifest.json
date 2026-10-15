@@ -1,9 +1,10 @@
 {
-  "version": 6,
+  "version": 7,
   "libraries": [
     "./dot-mesh-library.js",
     "./green-screen-overlays.js",
     "./living-emojis.js",
+    "./dot-mesh-library.js",
     "./motion-backgrounds.js",
     "./photorealistic-rose.js",
     "./prismflower.js",
