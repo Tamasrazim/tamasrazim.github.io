@@ -128,7 +128,9 @@
     style.id = 'trilyvaMovieFinalizerCss';
     style.textContent = [
       '#trilyvaMovieFinalizerBtn{border:1px solid #45454d;padding:7px 10px!important;color:#f5f5f5!important;white-space:nowrap}',
-      '@media(max-width:560px){.hdr-acts #trilyvaMovieFinalizerBtn{display:block!important;flex:0 0 auto;padding:0 9px!important;font-size:9px!important;letter-spacing:0}}',
+      '#trilyvaDotMeshZipBtn{border:1px solid #f3f3f4!important;padding:7px 10px!important;color:#f3f3f4!important;background:#101013!important;font-weight:700!important;white-space:nowrap;letter-spacing:.04em}',
+      '#trilyvaDotMeshZipBtn:hover{background:#f3f3f4!important;color:#09090b!important}',
+      '@media(max-width:560px){.hdr-acts #trilyvaMovieFinalizerBtn,.hdr-acts #trilyvaDotMeshZipBtn{display:block!important;flex:0 0 auto;padding:0 8px!important;font-size:9px!important;letter-spacing:0}}',
       '.tmf-overlay{position:fixed;inset:0;z-index:12010;background:rgba(0,0,0,.86);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:20px;color:#eee}',
       '.tmf-overlay.open{display:flex}.tmf-window{width:min(950px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#09090b;border:1px solid #34343b;box-shadow:0 25px 100px #000;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}',
       '.tmf-head{display:flex;align-items:center;gap:14px;padding:17px 20px;border-bottom:1px solid #29292e}.tmf-head strong{font:600 14px/1.2 ui-sans-serif,system-ui;letter-spacing:.12em}.tmf-head small{color:#8a8a94;font-size:10px;letter-spacing:.1em}.tmf-spacer{flex:1}.tmf-x{width:33px;height:33px;border:1px solid #38383f;color:#eee;font-size:20px}',
@@ -146,6 +148,20 @@
     if (!nav || $('trilyvaMovieFinalizerBtn')) return;
     injectCss();
 
+    var dotMeshButton = document.createElement('button');
+    dotMeshButton.id = 'trilyvaDotMeshZipBtn';
+    dotMeshButton.type = 'button';
+    dotMeshButton.textContent = 'Download Dot Mesh ZIP';
+    dotMeshButton.title = 'Render all 50 Dot Mesh designs as 4K60 MP4 at a 20 Mbps target, with static SVG stills and metadata';
+    dotMeshButton.setAttribute('aria-label', 'Download Dot Mesh ZIP');
+    dotMeshButton.addEventListener('click', function () {
+      if (typeof window.trilyvaDownloadDotMeshZip === 'function') {
+        window.trilyvaDownloadDotMeshZip();
+      } else {
+        window.dispatchEvent(new CustomEvent('trilyva:download-dotmesh-zip'));
+      }
+    });
+
     var button = document.createElement('button');
     button.id = 'trilyvaMovieFinalizerBtn';
     button.type = 'button';
@@ -153,8 +169,13 @@
     button.title = 'Combine a rendered video and local audio into one WebM movie';
     button.addEventListener('click', open);
     var voiceButton = $('trilyvaVoiceStudioBtn');
-    if (voiceButton && voiceButton.parentNode === nav) voiceButton.insertAdjacentElement('afterend', button);
-    else nav.appendChild(button);
+    if (voiceButton && voiceButton.parentNode === nav) {
+      voiceButton.insertAdjacentElement('afterend', dotMeshButton);
+      dotMeshButton.insertAdjacentElement('afterend', button);
+    } else {
+      nav.appendChild(dotMeshButton);
+      nav.appendChild(button);
+    }
 
     overlay = document.createElement('div');
     overlay.id = 'trilyvaMovieFinalizer';
