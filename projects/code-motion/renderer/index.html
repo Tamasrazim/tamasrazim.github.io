@@ -7232,13 +7232,58 @@ function showPreflightFailure(job, pre) {
   $('#stMsg').textContent = pre.error.message;
 }
 function startRender(job, opts) {
-  if (S.rendering) return Promise.resolve(null);
+  opts = opts || {};
+  if (S.rendering) {
+    return Promise.resolve({
+      ok: false,
+      stage: 'busy',
+      error: {
+        name: 'RenderBusyError',
+        message: 'TRILYVA is still marked as rendering; this job was not started.',
+        detail: 'The render lifecycle did not return to idle before the next batch item.'
+      }
+    });
+  }
   return renderPreflight(job).then(function (pre) {
     if (!pre.ok) {
-      showPreflightFailure(job, pre);
+      if (!opts.batch) showPreflightFailure(job, pre);
       return { ok: false, stage: 'validate', error: pre.error, probe: pre.probe || null };
     }
-    return startRenderNow(job, opts);
+    /* Guard synchronous startup exceptions too. A thrown DOM/setup error must
+       never leave S.rendering stuck and silently invalidate every later item. */
+    return Promise.resolve().then(function () {
+      return startRenderNow(job, opts);
+    }).catch(function (e) {
+      if (S.activeJob === job) {
+        S.rendering = false;
+        S.activeJob = null;
+        try { $('#cancelBtn').disabled = true; } catch (_) {}
+        try {
+          $('[data-act=startRender], [data-act=renderAll], [data-act=queueRun]').forEach(function (b) { b.disabled = false; });
+        } catch (_) {}
+        try { $('#stDot').className = 'dot'; } catch (_) {}
+        try { $('#stMsg').textContent = 'Render startup failed: ' + String(e && e.message || e); } catch (_) {}
+      }
+      return {
+        ok: false,
+        stage: 'startup',
+        error: {
+          name: e && e.name || 'RenderStartupError',
+          message: String(e && e.message || e),
+          detail: 'TRILYVA caught a synchronous render-startup exception and reset the render state so the remaining batch items can continue.'
+        }
+      };
+    });
+  }).catch(function (e) {
+    return {
+      ok: false,
+      stage: 'preflight',
+      error: {
+        name: e && e.name || 'RenderPreflightError',
+        message: String(e && e.message || e),
+        detail: 'The render preflight failed before this item could start.'
+      }
+    };
   });
 }
 function startRenderNow(job, opts) {
