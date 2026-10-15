@@ -8609,21 +8609,22 @@ function drawFilmSky(ctx, t) {
 function drawFilmLandscape(ctx, t, night) {
   var mountains = ctx.createLinearGradient(0, 490, 0, 790);
   mountains.addColorStop(0, filmMix('#77819c', '#303d5a', night)); mountains.addColorStop(1, filmMix('#8b8192', '#1e3046', night));
-  ctx.fillStyle = mountains; ctx.beginPath(); ctx.moveTo(0, 725); ctx.lineTo(0, 630); ctx.lineTo(180, 550); ctx.lineTo(320, 624); ctx.lineTo(530, 500); ctx.lineTo(740, 655); ctx.lineTo(960, 548); ctx.lineTo(1175, 636); ctx.lineTo(1390, 515); ctx.lineTo(1580, 632); ctx.lineTo(1770, 548); ctx.lineTo(1920, 620); ctx.lineTo(1920, 790); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = mountains; ctx.beginPath(); ctx.moveTo(-300, 740); ctx.lineTo(-300, 660); ctx.lineTo(-150, 610); ctx.lineTo(0, 630); ctx.lineTo(180, 550); ctx.lineTo(320, 624); ctx.lineTo(530, 500); ctx.lineTo(740, 655); ctx.lineTo(960, 548); ctx.lineTo(1175, 636); ctx.lineTo(1390, 515); ctx.lineTo(1580, 632); ctx.lineTo(1770, 548); ctx.lineTo(1920, 620); ctx.lineTo(2070, 580); ctx.lineTo(2220, 650); ctx.lineTo(2220, 790); ctx.closePath(); ctx.fill();
   var hillA = ctx.createLinearGradient(0, 620, 0, 850);
   hillA.addColorStop(0, filmMix('#69866f', '#253f4d', night)); hillA.addColorStop(1, filmMix('#345c4d', '#102c36', night));
-  ctx.fillStyle = hillA; ctx.beginPath(); ctx.moveTo(0, 742); ctx.bezierCurveTo(245, 638, 445, 745, 632, 710); ctx.bezierCurveTo(880, 655, 1050, 725, 1235, 737); ctx.bezierCurveTo(1500, 757, 1720, 644, 1920, 716); ctx.lineTo(1920, 1080); ctx.lineTo(0, 1080); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = hillA; ctx.beginPath(); ctx.moveTo(-300, 760); ctx.bezierCurveTo(-160, 720, -60, 735, 0, 742); ctx.bezierCurveTo(245, 638, 445, 745, 632, 710); ctx.bezierCurveTo(880, 655, 1050, 725, 1235, 737); ctx.bezierCurveTo(1500, 757, 1720, 644, 1920, 716); ctx.bezierCurveTo(2035, 740, 2120, 718, 2220, 748); ctx.lineTo(2220, 1080); ctx.lineTo(-300, 1080); ctx.closePath(); ctx.fill();
   var ground = ctx.createLinearGradient(0, 730, 0, 1080);
   ground.addColorStop(0, filmMix('#4f7d57', '#17383b', night)); ground.addColorStop(1, filmMix('#1d493c', '#091b28', night));
-  ctx.fillStyle = ground; ctx.fillRect(0, 770, 1920, 310);
+  ctx.fillStyle = ground; ctx.fillRect(-300, 770, 2520, 310);
   drawFilmTree(ctx, -28, 800, 1.02, t, 0, night);
   drawFilmTree(ctx, 230, 788, 0.68, t, 0, night);
   drawFilmTree(ctx, 1725 + Math.sin(t * 0.08) * 10, 800, 0.93, t, 0, night);
   drawFilmTree(ctx, 1940, 790, 0.72, t, 0, night);
-  if (t > 40) drawFilmTree(ctx, 1540, 790, 0.92, t, 1, night);
+  var willowTreeAlpha = filmSmooth(38, 42, t);
+  if (willowTreeAlpha > 0.001) { ctx.save(); ctx.globalAlpha *= willowTreeAlpha; drawFilmTree(ctx, 1540, 790, 0.92, t, 1, night); ctx.restore(); }
   ctx.strokeStyle = night > 0.5 ? 'rgba(93,180,154,0.48)' : 'rgba(202,229,161,0.55)'; ctx.lineWidth = 2.5;
   for (var g = 0; g < 92; g++) {
-    var gx = (g * 91 + 17) % 1920, gy = 790 + ((g * 29) % 220);
+    var gx = (g * 91 + 17) % 2520 - 300, gy = 790 + ((g * 29) % 220);
     ctx.beginPath(); ctx.moveTo(gx, gy); ctx.quadraticCurveTo(gx - 4 + Math.sin(g) * 7, gy - 16 - (g % 4) * 4, gx + 3, gy - 25 - (g % 5) * 5); ctx.stroke();
   }
   for (var f = 0; f < 23; f++) {
@@ -8778,7 +8779,7 @@ function drawFilmFlowers(ctx, t, night, glow) {
     if (i % 2 === 0) { ctx.fillStyle = filmMix('#77b57c', '#39786a', night); ctx.beginPath(); ctx.ellipse(x - 5, y + 5, 7, 3, -0.4, 0, Math.PI * 2); ctx.fill(); }
     ctx.fillStyle = i % 3 === 0 ? '#f4d6a0' : filmMix('#e8dbac', '#b9e78f', night);
     for (var p = 0; p < 5; p++) { var a = p * Math.PI * 2 / 5; ctx.beginPath(); ctx.ellipse(x + Math.cos(a) * 7, y + bob + Math.sin(a) * 7, 5, 7, a, 0, Math.PI * 2); ctx.fill(); }
-    ctx.fillStyle = glow ? '#fff4ae' : '#f0b875'; ctx.beginPath(); ctx.arc(x, y + bob, 4.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = filmMix('#f0b875', '#fff4ae', filmClamp(Number(glow) || 0, 0, 1)); ctx.beginPath(); ctx.arc(x, y + bob, 4.5, 0, Math.PI * 2); ctx.fill();
   }
 }
 function drawFilmSubtitle(ctx, t) {
@@ -8975,8 +8976,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 
   // 03 — the willow grove is a new visual set, not just a recoloured background.
   if (t >= 39) drawFilmGrove(ctx, t, night);
-  if (t >= 39) drawFilmFlowers(ctx, t, night, true);
-  else drawFilmFlowers(ctx, t, night, false);
+  drawFilmFlowers(ctx, t, night, filmSmooth(38.5, 43.0, t));
 
   // Character blocking uses eased keys, so shot boundaries do not teleport the characters.
   var foxX = filmKey(t, [[0,520],[9,520],[17,600],[22,615],[29,615],[42,1240],[46,1190],[52,1030],[60,910]]);
