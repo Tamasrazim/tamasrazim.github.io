@@ -5310,22 +5310,41 @@ async function renderAllLibrary(lib,items){
   if(S.rendering)return;
   S.queueStop=false;
 
-  var zip=new ENC.ZipWriter();
+  /* Ask for the destination folder directly from the user's Render All click. */
+  if(typeof window.showDirectoryPicker!=="function"){
+    openModal("TRILYVA / SAVE FOLDER UNAVAILABLE",elHTML('<div class="warnbox"><b>DIRECT FOLDER EXPORT REQUIRED</b><p>Use a current Chromium-based browser over HTTPS. Render All saves each file individually and does not create a ZIP.</p></div>'),[{label:"Close",fn:closeModal}]);
+    return;
+  }
+  var directoryHandle;
+  try{
+    directoryHandle=await window.showDirectoryPicker({id:"trilyva-render-all-output",mode:"readwrite",startIn:"downloads"});
+    if(!directoryHandle)return;
+    if(directoryHandle.queryPermission){
+      var permission=await directoryHandle.queryPermission({mode:"readwrite"});
+      if(permission!=="granted"&&directoryHandle.requestPermission)permission=await directoryHandle.requestPermission({mode:"readwrite"});
+      if(permission!=="granted")throw new Error("Write permission was not granted for the selected folder.");
+    }
+  }catch(folderError){
+    if(folderError&&folderError.name==="AbortError")return;
+    openModal("TRILYVA / FOLDER EXPORT ERROR",elHTML('<div class="warnbox"><b>Could not open the output folder</b><p>'+esc(String(folderError&&folderError.message||folderError))+'</p></div>'),[{label:"Close",fn:closeModal}]);
+    return;
+  }
+
   var startedAt=new Date().toISOString();
   var completed=[],failed=[],cancelled=false;
   var body=document.createElement('div');
-  var head=document.createElement('div');head.innerHTML='<div class="verified"><b>RENDER ALL</b><span id="batchPos">0 / '+items.length+'</span><span>5 FILES / ITEM</span><span>'+esc(lib.title||lib.id)+'</span></div>';
+  var head=document.createElement('div');head.innerHTML='<div class="verified"><b>RENDER ALL · DIRECT FOLDER</b><span id="batchPos">0 / '+items.length+'</span><span>5 FILES / ITEM</span><span>'+esc(lib.title||lib.id)+'</span></div>';
   var status=el('div','note','Preparing first animation…');
   var bar=el('div','prog');bar.innerHTML='<i style="width:0%"></i>';
   var log=el('div','list');log.style.cssText='max-height:42vh;overflow:auto;';
   body.append(head,status,bar,log);
 
   function addLine(title,good,note){
-    var it=el('div','it');it.innerHTML='<div style="flex:1"><h5>'+esc(title)+'</h5><p>'+esc(good?(note||'5/5 ASSETS CREATED & PACKAGED'):(note||'FAILED'))+'</p></div>';log.prepend(it);
+    var it=el('div','it');it.innerHTML='<div style="flex:1"><h5>'+esc(title)+'</h5><p>'+esc(good?(note||'5/5 ASSETS SAVED TO FOLDER'):(note||'FAILED'))+'</p></div>';log.prepend(it);
   }
-  function cancelBatch(){S.queueStop=true;if(S.rendering)Engine.api.cancel();status.textContent='Cancellation requested…';}
+  function cancelBatch(){S.queueStop=true;if(S.rendering&&Engine.api)Engine.api.cancel();status.textContent='Cancellation requested…';}
 
-  openModal('TRILYVA / RENDER ALL · RUNNING',body,[{label:'Cancel Batch',fn:cancelBatch}]);
+  openModal('TRILYVA / RENDER ALL · SAVING FILES ONE BY ONE',body,[{label:'Cancel Batch',fn:cancelBatch}]);
 
   for(var i=0;i<items.length;i++){
     if(S.queueStop){cancelled=true;break;}
@@ -5339,28 +5358,38 @@ async function renderAllLibrary(lib,items){
     catch(e){loaded={ok:false,error:e};}
 
     if(!loaded||!loaded.ok){
-      failed.push({index:i,id:item.id,title:itemName,stage:'compile',reason:loaded&&loaded.error?String(loaded.error.message||loaded.error):'compile failed'});
-      addLine(itemName,false,'compile failed');
+      failed.push({index:i+1,id:item.id,title:itemName,stage:'compile',reason:loaded&&loaded.error?String(loaded.error.message||loaded.error):'compile failed'});
+      addLine(itemName,false,'Compile failed; see render status.');
       continue;
     }
 
     var stem=slugify(itemName);
     if(!stem)stem='animation-'+String(i+1).padStart(3,'0');
-    var W=S.comp.width,H=S.comp.height,F=S.comp.fps;
-    var base=stem+'_'+W+'x'+H+'_'+F+'fps_12s';
-    var assets={};
+    stem=String(i+1).padStart(3,'0')+'-'+stem;
+    var itemFolder;
+    try{itemFolder=await directoryHandle.getDirectoryHandle(stem,{create:true});}
+    catch(folderCreateError){
+      failed.push({index:i+1,id:item.id,title:itemName,stage:'folder',reason:String(folderCreateError&&folderCreateError.message||folderCreateError)});
+      addLine(itemName,false,'Could not create its output folder.');
+      continue;
+    }
 
+    var W=S.comp.width,H=S.comp.height,F=S.comp.fps;
+    var base=slugify(itemName)||('animation-'+String(i+1).padStart(3,'0'));
+    base=base+'_'+W+'x'+H+'_'+F+'fps_12s';
+    var assets={}, savedFiles=[];
     try{
       status.textContent='Building vector still · '+itemName+'…';
       var vectorScene=BatchVector.sceneForCode(S.code,W,H,0,0,0);
       assets.svg=BatchVector.svg(vectorScene);
       assets.eps=BatchVector.eps(vectorScene);
+      await dotMeshWriteFile(itemFolder,base+'.svg',assets.svg,'image/svg+xml;charset=utf-8');savedFiles.push(base+'.svg');
 
       status.textContent='Rendering transparent PNG · '+itemName+'…';
       assets.png=await renderTransparentStill(item);
+      await dotMeshWriteFile(itemFolder,base+'_transparent.png',assets.png,'image/png');savedFiles.push(base+'_transparent.png');
 
       if(S.queueStop){cancelled=true;break;}
-
       var job=buildJob({exportFormat:'mp4',composition:merge(S.comp,{duration:12,loop:true,loopDuration:12})});
       job.label=itemName;
       job.metadata.title=itemName;
@@ -5370,32 +5399,26 @@ async function renderAllLibrary(lib,items){
       var result=await startRender(job,{silent:true,batch:true});
       if(!result||!result.ok)throw new Error(result&&result.error?String(result.error.message||result.error):'MP4 render failed.');
       assets.mp4=result.blob;
+      /* Save the expensive video immediately before optional metadata assets. */
+      await dotMeshWriteFile(itemFolder,base+'.mp4',assets.mp4,'video/mp4');savedFiles.push(base+'.mp4');
+
+      await dotMeshWriteFile(itemFolder,base+'.eps',assets.eps,'application/postscript');savedFiles.push(base+'.eps');
       var metadata=trilyvaStockMetadata(item,base,assets);
       assets.metadata=metadata;
+      await dotMeshWriteFile(itemFolder,'metadata.csv',assets.metadata,'text/csv;charset=utf-8');savedFiles.push('metadata.csv');
 
-      /* Package exactly five files inside one folder per animation. */
-      var dir=stem+'/';
       var svgBytes=ENC.utf8(assets.svg),epsBytes=ENC.utf8(assets.eps),metaBytes=ENC.utf8(assets.metadata);
-      zip.addBytes(dir+base+'.svg',svgBytes);
-      zip.addBytes(dir+base+'.eps',epsBytes);
-      var pngBytes=new Uint8Array(await assets.png.arrayBuffer());
-      zip.add(dir+base+'_transparent.png',assets.png,ENC.crc32Final(ENC.crc32(pngBytes)),pngBytes.length);
-      var mp4Bytes=new Uint8Array(await assets.mp4.arrayBuffer());
-      zip.add(dir+base+'.mp4',assets.mp4,ENC.crc32Final(ENC.crc32(mp4Bytes)),mp4Bytes.length);
-      zip.addBytes(dir+'metadata.csv',metaBytes);
-
+      var pngBytes=assets.png.size||0,mp4Bytes=assets.mp4.size||0;
       completed.push({
-        index:i,id:item.id,title:itemName,folder:stem,files:[
-          dir+base+'.svg',dir+base+'.eps',dir+base+'_transparent.png',dir+base+'.mp4',dir+'metadata.csv'
-        ],
-        bytes:{svg:svgBytes.length,eps:epsBytes.length,png:pngBytes.length,mp4:mp4Bytes.length,metadata:metaBytes.length},
+        index:i+1,id:item.id,title:itemName,folder:stem,files:savedFiles.slice(),
+        bytes:{svg:svgBytes.length,eps:epsBytes.length,png:pngBytes,mp4:mp4Bytes,metadata:metaBytes.length},
         verification:result.verify?result.verify.status:'UNKNOWN'
       });
-      addLine(itemName,true,'5/5 ASSETS · SVG · EPS · PNG · MP4 · METADATA');
+      addLine(itemName,true,'5/5 ASSETS SAVED · SVG · EPS · PNG · MP4 · METADATA');
       status.textContent='Completed '+(i+1)+' / '+items.length+' · '+itemName;
     }catch(e){
-      failed.push({index:i,id:item.id,title:itemName,stage:'asset-batch',reason:String(e&&e.message||e)});
-      addLine(itemName,false,String(e&&e.message||e));
+      failed.push({index:i+1,id:item.id,title:itemName,stage:'asset-save-render',savedFiles:savedFiles.slice(),reason:String(e&&e.message||e)});
+      addLine(itemName,false,savedFiles.length+' file(s) saved; '+String(e&&e.message||e));
     }
 
     bar.querySelector('i').style.width=(((i+1)/items.length)*100).toFixed(2)+'%';
@@ -5403,49 +5426,34 @@ async function renderAllLibrary(lib,items){
   }
 
   var manifest={
-    format:'TRILYVA_RENDER_ALL_5_ASSETS',
-    version:2,
-    libraryId:lib.id,
-    libraryTitle:lib.title,
-    startedAt:startedAt,
-    finishedAt:new Date().toISOString(),
-    requestedItems:items.length,
-    completedItems:completed.length,
-    failedItems:failed.length,
-    cancelled:cancelled,
+    format:'TRILYVA_RENDER_ALL_DIRECT_FOLDER',
+    version:3,
+    libraryId:lib.id,libraryTitle:lib.title,
+    startedAt:startedAt,finishedAt:new Date().toISOString(),
+    requestedItems:items.length,completedItems:completed.length,failedItems:failed.length,cancelled:cancelled,
     assetSet:['SVG still','EPS still','transparent PNG still','12-second MP4','metadata CSV'],
-    vectorStillFrame:0,
-    animations:{duration:12,fps:S.comp.fps},
+    vectorStillFrame:0,animations:{duration:12,fps:S.comp.fps},
     resolution:{width:S.comp.width,height:S.comp.height},
-    completed:completed,
-    failures:failed
+    delivery:'direct-folder; files are written individually; no ZIP is created',
+    completed:completed,failures:failed
   };
-  zip.addBytes('BATCH-MANIFEST.json',ENC.utf8(JSON.stringify(manifest,null,2)));
-  zip.addBytes('README.txt',ENC.utf8(
-    'TRILYVA — Render All / 5 assets per animation\r\n'+
-    'Library: '+lib.title+'\r\n'+
-    'Each animation folder contains: 1 SVG still, 1 EPS still, 1 transparent PNG still, 1 full 12-second MP4 and 1 metadata.csv.\r\n'+
-    'SVG / EPS / PNG represent frame 0. MP4 contains the complete loop.\r\n'+
-    'Completed: '+completed.length+'\r\nFailed: '+failed.length+'\r\nCancelled: '+(cancelled?'yes':'no')+'\r\n'
-  ));
-
-  var zipBlob;
-  try{zipBlob=zip.finish();}catch(e){zipBlob=null;}
-  closeModal();
-
-  if(zipBlob){
-    var batchName=slugify(lib.title||'trilyva-render-all')+'_render-all_5-assets.zip';
-    download(zipBlob,batchName);
-    var summary=el('div');
-    summary.innerHTML='<div class="verified"><b>BATCH COMPLETE</b><span>'+completed.length+' × 5 ASSETS</span><span>'+failed.length+' FAILED</span>'+(cancelled?'<span>CANCELLED</span>':'')+'</div>'+
-      '<p class="note">Downloaded <code>'+esc(batchName)+'</code>. Each completed animation has exactly one SVG, EPS, transparent PNG, MP4 and metadata CSV.</p>';
-    openModal('TRILYVA / RENDER ALL · COMPLETE',summary,[
-      {label:'Download ZIP again',solid:true,fn:function(){download(zipBlob,batchName);}},
-      {label:'Close',fn:closeModal}
-    ]);
-  }else{
-    openModal('TRILYVA / RENDER ALL · PACKAGE ERROR',elHTML('<div class="warnbox"><b>BATCH PACKAGE FAILED</b>The ZIP could not be finalized.</div><p class="note">'+completed.length+' animation(s) completed before packaging.</p>'),[{label:'Close',fn:closeModal}]);
+  try{
+    await dotMeshWriteFile(directoryHandle,'BATCH-MANIFEST.json',JSON.stringify(manifest,null,2),'application/json;charset=utf-8');
+    await dotMeshWriteFile(directoryHandle,'README.txt',
+      'TRILYVA — Render All / direct-folder output\r\n'+
+      'Library: '+lib.title+'\r\n'+
+      'Each animation gets its own folder with SVG, EPS, transparent PNG, full 12-second MP4 and metadata CSV.\r\n'+
+      'Files are saved individually as each item renders. No ZIP is created.\r\n'+
+      'Completed: '+completed.length+'\r\nFailed: '+failed.length+'\r\nCancelled: '+(cancelled?'yes':'no')+'\r\n',
+      'text/plain;charset=utf-8');
+  }catch(reportError){
+    failed.push({stage:'write-batch-report',reason:String(reportError&&reportError.message||reportError)});
   }
+  closeModal();
+  var summary=el('div');
+  summary.innerHTML='<div class="verified"><b>DIRECT FOLDER EXPORT FINISHED</b><span>'+completed.length+' COMPLETED</span><span>'+failed.length+' FAILED</span>'+(cancelled?'<span>CANCELLED</span>':'')+'</div>'+
+    '<p class="note">Every output was written as an individual file into its own design folder. No ZIP was created. BATCH-MANIFEST.json records completed items and failures.</p>';
+  openModal('TRILYVA / RENDER ALL · COMPLETE',summary,[{label:'Close',fn:closeModal}]);
 }
 
 
