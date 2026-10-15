@@ -4180,7 +4180,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 'use strict';
 
 var SELF_SOURCE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-var APP_VERSION = '1.2.2';
+var APP_VERSION = '1.2.3';
 var SOFTWARE = 'TRILYVA — Tamasrazim';
 
 var LIBRARY_PASSWORD_SHA256 = '8825ae35e4685a47fcfb8a76ccfc42cf2037a78ada722c115856840b200d90f5';
@@ -5447,6 +5447,341 @@ async function renderAllLibrary(lib,items){
     openModal('TRILYVA / RENDER ALL · PACKAGE ERROR',elHTML('<div class="warnbox"><b>BATCH PACKAGE FAILED</b>The ZIP could not be finalized.</div><p class="note">'+completed.length+' animation(s) completed before packaging.</p>'),[{label:'Close',fn:closeModal}]);
   }
 }
+
+
+/* ============================================================
+   Dot Mesh Delivery ZIP — 50 static SVG stills + 4K60 MP4s + metadata
+   ============================================================ */
+var DOT_MESH_ZIP_SETTINGS = { width:3840, height:2160, fps:60, duration:12, bitrate:20000000 };
+var dotMeshZipActive = false;
+var dotMeshZipCancelRequested = false;
+
+function dotMeshZipCsvCell(value) {
+  var v = Array.isArray(value) ? value.join("; ") : String(value == null ? "" : value);
+  return '"' + v.replace(/"/g, '""') + '"';
+}
+function dotMeshZipCsvRow(values) {
+  return values.map(dotMeshZipCsvCell).join(",");
+}
+function dotMeshZipTargetComposition(base) {
+  return CORE.composition(merge(base || {}, {
+    width: DOT_MESH_ZIP_SETTINGS.width,
+    height: DOT_MESH_ZIP_SETTINGS.height,
+    fps: DOT_MESH_ZIP_SETTINGS.fps,
+    duration: DOT_MESH_ZIP_SETTINGS.duration,
+    loop: true,
+    loopDuration: DOT_MESH_ZIP_SETTINGS.duration,
+    transparent: false,
+    background: "#050506"
+  }));
+}
+function dotMeshZipMetadata(item, job, result, stem, svgName) {
+  var original = item.metadata && typeof item.metadata === "object" ? item.metadata : {};
+  var parsed = result.parsed || {};
+  var stats = result.stats || {};
+  return merge(original, {
+    schema: "trilyva.dot-mesh.delivery/1.0",
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    creator: "Tamasrazim",
+    software: "TRILYVA",
+    generatedAt: new Date().toISOString(),
+    durationSeconds: DOT_MESH_ZIP_SETTINGS.duration,
+    frameCount: DOT_MESH_ZIP_SETTINGS.fps * DOT_MESH_ZIP_SETTINGS.duration,
+    loop: true,
+    seamless: true,
+    encoding: {
+      container: "MP4",
+      codec: parsed.codec || stats.codec || "H.264 / AVC",
+      width: DOT_MESH_ZIP_SETTINGS.width,
+      height: DOT_MESH_ZIP_SETTINGS.height,
+      fps: DOT_MESH_ZIP_SETTINGS.fps,
+      durationSeconds: DOT_MESH_ZIP_SETTINGS.duration,
+      frames: DOT_MESH_ZIP_SETTINGS.fps * DOT_MESH_ZIP_SETTINGS.duration,
+      targetBitrateBps: DOT_MESH_ZIP_SETTINGS.bitrate,
+      targetBitrateMbps: DOT_MESH_ZIP_SETTINGS.bitrate / 1000000,
+      bitrateNote: "Encoder target. Realized average bitrate can vary with the encoder and content.",
+      bytes: result.blob ? result.blob.size : null,
+      verification: result.verify ? result.verify.status : "UNKNOWN",
+      sourceHash: job.metadata.sourceHash || null
+    },
+    exports: {
+      video: stem + ".mp4",
+      vectorStill: {
+        filename: svgName,
+        format: "SVG",
+        width: DOT_MESH_ZIP_SETTINGS.width,
+        height: DOT_MESH_ZIP_SETTINGS.height,
+        animated: false,
+        frame: 0,
+        background: "transparent"
+      },
+      metadataJson: "metadata.json",
+      metadataCsv: "metadata.csv"
+    }
+  });
+}
+function dotMeshZipCsvRowFor(item, meta) {
+  var enc = meta.encoding || {};
+  return dotMeshZipCsvRow([
+    meta.id, meta.title, meta.description, (meta.tags || []).join("; "),
+    meta.category || "", meta.designFamily || "",
+    meta.creator || "Tamasrazim", meta.software || "TRILYVA",
+    enc.container || "MP4", enc.codec || "H.264 / AVC",
+    enc.width || 3840, enc.height || 2160, enc.fps || 60,
+    enc.durationSeconds || 12, enc.frames || 720,
+    enc.targetBitrateMbps || 20, enc.verification || "UNKNOWN",
+    meta.exports && meta.exports.video || "",
+    meta.exports && meta.exports.vectorStill && meta.exports.vectorStill.filename || ""
+  ]);
+}
+function dotMeshZipSnapshotWorkspace() {
+  return {
+    id:S.id, name:S.name, version:S.version, dirty:S.dirty, code:S.code,
+    comp:S.comp ? merge({},S.comp) : null, meta:S.meta ? merge({},S.meta) : null,
+    frame:S.frame, hash:S.hash, customBitrateMbps:S.customBitrateMbps,
+    exportFormat:S.exportFormat, quality:S.quality, timebase:S.timebase,
+    checksums:S.checksums, queueStop:S.queueStop, lastError:S.lastError
+  };
+}
+async function dotMeshZipRestoreWorkspace(saved) {
+  S.id=saved.id; S.name=saved.name; S.version=saved.version; S.code=saved.code || "";
+  S.comp=saved.comp ? CORE.composition(saved.comp) : CORE.composition({});
+  S.meta=saved.meta ? merge({},saved.meta) : defaultMeta();
+  S.frame=saved.frame || 0; S.hash=saved.hash || "";
+  S.customBitrateMbps=saved.customBitrateMbps;
+  S.exportFormat=saved.exportFormat; S.quality=saved.quality;
+  S.timebase=saved.timebase; S.checksums=saved.checksums;
+  S.queueStop=false; S.lastError=saved.lastError || null;
+  if ($('#projName')) $('#projName').value=S.name;
+  if ($('#oBitrate')) $('#oBitrate').value=S.customBitrateMbps;
+  if ($('#oQuality')) $('#oQuality').value=S.quality;
+  if ($('#oTimebase')) $('#oTimebase').value=S.timebase;
+  if ($('#oChecksum')) $('#oChecksum').value=S.checksums ? 'on' : 'off';
+  edSetValue(S.code);
+  syncMetaUI();
+  syncFileName();
+  try { await run(); } catch (_) {}
+  S.frame=saved.frame || 0;
+  S.hash=saved.hash || "";
+  markDirty(saved.dirty);
+  syncMetaUI();
+  syncFileName();
+}
+function openDotMeshZipPasswordGate() {
+  if (dotMeshZipActive) return;
+  if (S.rendering) {
+    openModal('TRILYVA / DOT MESH ZIP',elHTML('<div class="warnbox"><b>RENDER IN PROGRESS</b><p class="note">Wait for the current render to finish before starting a 50-video batch.</p></div>'),[{label:'Close',fn:closeModal}]);
+    return;
+  }
+  openLibraryPasswordGate(openDotMeshZipConfirm);
+}
+async function openDotMeshZipConfirm() {
+  var registry=window.TRILYVA_LIBRARY;
+  try {
+    if (!registry) throw new Error("The TRILYVA library registry is not available.");
+    await registry.ready;
+    var lib=registry.get("dot-mesh");
+    if (!lib) throw new Error("The Dot Mesh library is not registered in the current library manifest.");
+    var items=await lib.load();
+    if (!Array.isArray(items)||items.length!==50) throw new Error("Expected 50 Dot Mesh designs; found "+(items&&items.length||0)+".");
+    var previous=S.customBitrateMbps;
+    var probeJob;
+    try {
+      S.customBitrateMbps=DOT_MESH_ZIP_SETTINGS.bitrate/1000000;
+      probeJob=buildJob({exportFormat:"mp4",composition:dotMeshZipTargetComposition(S.comp)});
+    } finally { S.customBitrateMbps=previous; }
+    var probe=await renderPreflight(probeJob);
+    if (!probe.ok) {
+      openModal('TRILYVA / DOT MESH ZIP · ENCODER UNAVAILABLE',
+        elHTML('<div class="warnbox"><b>4K60 H.264 IS NOT AVAILABLE</b><p>'+esc(probe.error.message)+'</p><p class="note">'+esc(probe.error.detail||'The browser rejected the target encoder configuration.')+'</p><p class="note">No video batch has been started or downgraded.</p></div>'),
+        [{label:'Close',fn:closeModal}]);
+      return;
+    }
+    var body=document.createElement('div');
+    body.style.cssText='display:flex;flex-direction:column;gap:12px;min-height:0;';
+    body.appendChild(elHTML(
+      '<div class="verified"><b>DOT MESH / DELIVERY ZIP</b><span>50 UNIQUE DESIGNS</span><span>4 OUTPUTS / DESIGN</span><span>300 ASSETS + INDEX</span></div>'+
+      '<dl class="kv">'+
+      '<dt>Video</dt><dd>MP4 · H.264 / AVC · 3840 × 2160 · 60 FPS</dd>'+
+      '<dt>Duration</dt><dd>12 seconds · 720 frames · seamless loop</dd>'+
+      '<dt>Bitrate</dt><dd>20 Mbps encoder target per video</dd>'+
+      '<dt>Vector still</dt><dd>Static 4K SVG at frame 0 · transparent · no SVG animation</dd>'+
+      '<dt>Metadata</dt><dd>metadata.json + metadata.csv per design, plus one root catalog CSV and ZIP manifest</dd>'+
+      '<dt>Estimate</dt><dd>Approximately 1.5 GB of video at the nominal target bitrate, before small vector/metadata overhead. Actual file sizes vary.</dd>'+
+      '</dl>'+
+      '<div class="note">Everything is rendered and packaged locally in this browser. Encoding 36,000 frames at 4K is demanding and can take a long time; keep the tab open and allow substantial free memory and disk space. The encoder target is 20 Mbps, not a promise of an identical measured average bitrate.</div>'
+    ));
+    openModal('TRILYVA / DOT MESH ZIP · CONFIRM',body,[
+      {label:'Cancel',fn:closeModal},
+      {label:'Build ZIP · 50 × 4K60',solid:true,fn:function(){closeModal();runDotMeshZipBatch(lib,items);}
+      }
+    ]);
+  } catch(e) {
+    openModal('TRILYVA / DOT MESH ZIP · ERROR',
+      elHTML('<div class="warnbox"><b>COULD NOT PREPARE DOT MESH</b><p>'+esc(e&&e.message||e)+'</p></div>'),
+      [{label:'Close',fn:closeModal}]);
+  }
+}
+async function runDotMeshZipBatch(lib,items) {
+  if(dotMeshZipActive||S.rendering)return;
+  dotMeshZipActive=true; dotMeshZipCancelRequested=false; S.queueStop=false;
+  var saved=dotMeshZipSnapshotWorkspace();
+  var zip=new ENC.ZipWriter();
+  var startedAt=new Date().toISOString();
+  var completed=[],failed=[],cancelled=false;
+  var body=document.createElement('div');
+  var head=document.createElement('div');
+  head.innerHTML='<div class="verified"><b>DOT MESH ZIP</b><span id="dmzPos">0 / 50</span><span>4K60 · 20 Mbps</span><span>STATIC SVG</span></div>';
+  var status=el('div','note','Preparing the first design…');
+  var bar=el('div','prog');bar.innerHTML='<i style="width:0%"></i>';
+  var log=el('div','list');log.style.cssText='max-height:40vh;overflow:auto;';
+  body.append(head,status,bar,log);
+  function addLine(title,good,note) {
+    var it=el('div','it');
+    var inner=document.createElement('div');inner.style.cssText='min-width:0;flex:1;';
+    inner.innerHTML='<h5>'+esc(title)+'</h5><p>'+esc(note|| (good?'MP4 + static SVG + metadata packaged':'Failed'))+'</p>';
+    it.appendChild(inner);log.prepend(it);
+  }
+  function cancelBatch() {
+    dotMeshZipCancelRequested=true;S.queueStop=true;
+    if(S.rendering&&Engine.api)Engine.api.cancel();
+    status.textContent='Cancellation requested. Stopping the active encoder safely…';
+  }
+  openModal('TRILYVA / DOT MESH ZIP · RENDERING',body,[{label:'Cancel Batch',fn:cancelBatch}]);
+  var oldBitrate=S.customBitrateMbps;
+  try {
+    if(!ENC||!Engine.api)throw new Error("The TRILYVA render engine is not ready.");
+    S.customBitrateMbps=20;
+    for(var i=0;i<items.length;i++) {
+      if(dotMeshZipCancelRequested){cancelled=true;break;}
+      var item=items[i], title=String(item.title||item.id||('Dot Mesh '+(i+1)));
+      $('#dmzPos').textContent=i+' / '+items.length;
+      status.textContent='Loading design '+(i+1)+' / '+items.length+' · '+title;
+      bar.querySelector('i').style.width=((i/items.length)*100).toFixed(2)+'%';
+      var loaded;
+      try { loaded=await trilyvaLoadLibraryCode(title,item.code,item,{keepModal:true}); }
+      catch(e){loaded={ok:false,error:e};}
+      if(!loaded||!loaded.ok) {
+        failed.push({index:i+1,id:item.id,title:title,stage:'compile',reason:loaded&&loaded.error?String(loaded.error.message||loaded.error):'Compile failed'});
+        addLine(title,false,'Compile failed');continue;
+      }
+      var target=dotMeshZipTargetComposition(S.comp);
+      S.comp=target;
+      S.customBitrateMbps=20;
+      var stem='dot-mesh-'+String(i+1).padStart(3,'0')+'-'+slugify(item.title||item.id);
+      var folder=stem+'/';
+      var videoName=stem+'_3840x2160_60fps_20mbps_12s.mp4';
+      var svgName=stem+'_3840x2160_static.svg';
+      var mp4Blob=null;
+      try {
+        status.textContent='Rendering '+(i+1)+' / 50 · '+title+' · 3840 × 2160 · 60 FPS';
+        var job=buildJob({exportFormat:'mp4',composition:target});
+        job.label=title;job.metadata.title=title;job.metadata.description=String(item.description||'');
+        job.fileName=videoName;
+        var result=await startRender(job,{silent:true,batch:true});
+        if(dotMeshZipCancelRequested||result&&result.cancelled){cancelled=true;break;}
+        if(!result||!result.ok||!result.blob)throw new Error(result&&result.error?String(result.error.message||result.error):'MP4 render failed.');
+        if(result.parsed&&(result.parsed.width!==3840||result.parsed.height!==2160)) {
+          throw new Error('Verified output dimensions were '+result.parsed.width+' × '+result.parsed.height+', not 3840 × 2160.');
+        }
+        if(result.parsed&&result.parsed.samples!==undefined&&result.parsed.samples!==720) {
+          throw new Error('Verified output contains '+result.parsed.samples+' frames, not 720.');
+        }
+        if(result.verify&&result.verify.status!=='VALID')throw new Error('MP4 verification returned '+result.verify.status+'.');
+        mp4Blob=result.blob;
+        var staticSvg=typeof item.staticSvg==='function'?item.staticSvg():null;
+        if(typeof staticSvg!=='string'||!staticSvg.startsWith('<svg'))throw new Error('Static SVG still generation failed.');
+        if(/<animate[\s>]/i.test(staticSvg))throw new Error('Static SVG unexpectedly contains an animation element.');
+        var metadata=dotMeshZipMetadata(item,job,result,videoName,svgName);
+        var jsonText=JSON.stringify(metadata,null,2)+'\n';
+        var csvHeader=['ID','Title','Description','Keywords','Category','Design family','Creator','Software','Container','Codec','Width','Height','FPS','Duration seconds','Frame count','Target bitrate Mbps','Verification','Video filename','Static SVG filename'];
+        var csvText='\uFEFF'+dotMeshZipCsvRow(csvHeader)+'\r\n'+dotMeshZipCsvRowFor(item,metadata)+'\r\n';
+        var svgBytes=ENC.utf8(staticSvg),jsonBytes=ENC.utf8(jsonText),csvBytes=ENC.utf8(csvText);
+        var videoBytes=new Uint8Array(await mp4Blob.arrayBuffer());
+        var crc=ENC.crc32Final(ENC.crc32(videoBytes));
+        zip.add(folder+videoName,mp4Blob,crc,videoBytes.length);
+        zip.addBytes(folder+svgName,svgBytes);
+        zip.addBytes(folder+'metadata.json',jsonBytes);
+        zip.addBytes(folder+'metadata.csv',csvBytes);
+        completed.push({
+          index:i+1,id:item.id,title:title,folder:folder,
+          files:[folder+videoName,folder+svgName,folder+'metadata.json',folder+'metadata.csv'],
+          videoBytes:mp4Blob.size,svgBytes:svgBytes.length,metadataBytes:jsonBytes.length+csvBytes.length,
+          verification:result.verify?result.verify.status:'UNKNOWN',
+          actual:{width:result.parsed&&result.parsed.width||null,height:result.parsed&&result.parsed.height||null,frames:result.parsed&&result.parsed.samples||null,durationSeconds:result.parsed&&result.parsed.durationSec||null}
+        });
+        addLine(title,true,'MP4 '+fmtBytes(mp4Blob.size)+' · static SVG · JSON + CSV');
+        status.textContent='Completed '+(i+1)+' / 50 · '+title;
+      } catch(e) {
+        failed.push({index:i+1,id:item.id,title:title,stage:'render-or-package',reason:String(e&&e.message||e)});
+        addLine(title,false,String(e&&e.message||e));
+      }
+      bar.querySelector('i').style.width=(((i+1)/items.length)*100).toFixed(2)+'%';
+      await new Promise(function(resolve){setTimeout(resolve,0);});
+    }
+  } catch(e) {
+    failed.push({index:completed.length+failed.length+1,stage:'batch',reason:String(e&&e.message||e)});
+    addLine('Batch stopped',false,String(e&&e.message||e));
+  } finally {
+    S.customBitrateMbps=oldBitrate;
+    cancelled=cancelled||dotMeshZipCancelRequested;
+    var catalogHeader=['ID','Title','Description','Keywords','Category','Design family','Creator','Software','Container','Codec','Width','Height','FPS','Duration seconds','Frame count','Target bitrate Mbps','Verification','Video filename','Static SVG filename'];
+    var catalogRows=[catalogHeader];
+    completed.forEach(function(row){
+      var original=items[row.index-1]||{};
+      var enc={container:'MP4',codec:'H.264 / AVC',width:3840,height:2160,fps:60,durationSeconds:12,frames:720,targetBitrateMbps:20,verification:row.verification};
+      var meta=original.metadata||{};
+      catalogRows.push([row.id,row.title,meta.description||original.description||'',(meta.tags||[]).join('; '),meta.category||original.category||'',meta.designFamily||'',meta.creator||'Tamasrazim',meta.software||'TRILYVA',enc.container,enc.codec,enc.width,enc.height,enc.fps,enc.durationSeconds,enc.frames,enc.targetBitrateMbps,enc.verification,row.files[0].split('/').pop(),row.files[1].split('/').pop()]);
+    });
+    var manifest={
+      format:'TRILYVA_DOT_MESH_DELIVERY_ZIP',version:1,libraryId:'dot-mesh',
+      libraryTitle:'DOT MESH · 50',startedAt:startedAt,finishedAt:new Date().toISOString(),
+      requestedItems:items.length,completedItems:completed.length,failedItems:failed.length,cancelled:cancelled,
+      videoTarget:{container:'MP4',codec:'H.264 / AVC',width:3840,height:2160,fps:60,durationSeconds:12,frames:720,targetBitrateBps:20000000,targetBitrateMbps:20,bitrateNote:'20 Mbps is the encoder target; realized average bitrate varies.'},
+      vectorStill:{format:'SVG',width:3840,height:2160,animated:false,frame:0,background:'transparent'},
+      assetsPerDesign:['12-second 4K60 MP4','static transparent 4K SVG still','metadata.json','metadata.csv'],
+      completed:completed,failures:failed
+    };
+    try {
+      zip.addBytes('DOT-MESH-CATALOG.csv',ENC.utf8('\uFEFF'+catalogRows.map(dotMeshZipCsvRow).join('\r\n')+'\r\n'));
+      zip.addBytes('BATCH-MANIFEST.json',ENC.utf8(JSON.stringify(manifest,null,2)));
+      zip.addBytes('README.txt',ENC.utf8(
+        'TRILYVA DOT MESH · DELIVERY ZIP\r\n'+
+        'Requested designs: '+items.length+'\r\nCompleted designs: '+completed.length+'\r\nFailed designs: '+failed.length+'\r\nCancelled: '+(cancelled?'yes':'no')+'\r\n\r\n'+
+        'Video target: MP4 / H.264, 3840x2160, 60 FPS, 12 seconds (720 frames), 20 Mbps encoder target.\r\n'+
+        'Each completed design has one MP4, one static non-animated transparent SVG still from frame zero, one metadata.json and one metadata.csv.\r\n'+
+        'DOT-MESH-CATALOG.csv contains the completed designs. BATCH-MANIFEST.json reports actual verification and any failures.\r\n'+
+        'The 20 Mbps setting is a target; the encoder may produce a different measured average bitrate.\r\n'
+      ));
+      var zipBlob=zip.finish();
+      closeModal();
+      await dotMeshZipRestoreWorkspace(saved);
+      dotMeshZipActive=false;
+      var batchName=cancelled||failed.length?'dot-mesh_delivery_PARTIAL.zip':'dot-mesh_50_4K60_20Mbps.zip';
+      download(zipBlob,batchName);
+      var summary=el('div');
+      summary.innerHTML='<div class="verified"><b>'+(completed.length===50&&failed.length===0&&!cancelled?'DELIVERY ZIP READY':'PARTIAL ZIP READY')+'</b><span>'+completed.length+' / 50 VIDEOS</span><span>'+failed.length+' FAILED</span>'+(cancelled?'<span>CANCELLED</span>':'')+'</div>'+
+        '<p class="note">Downloaded <code>'+esc(batchName)+'</code>. Each completed design contains MP4 + static SVG + metadata JSON + metadata CSV. Videos were encoded for 3840 × 2160 at 60 FPS with a 20 Mbps target bitrate.</p>'+
+        '<p class="note">ZIP size: '+fmtBytes(zipBlob.size)+'. Check BATCH-MANIFEST.json for per-file verification and any failed or cancelled items.</p>';
+      openModal('TRILYVA / DOT MESH ZIP · COMPLETE',summary,[
+        {label:'Download ZIP again',solid:true,fn:function(){download(zipBlob,batchName);}},
+        {label:'Close',fn:closeModal}
+      ]);
+    } catch(e) {
+      closeModal();
+      try { await dotMeshZipRestoreWorkspace(saved); } catch (_) {}
+      dotMeshZipActive=false;
+      openModal('TRILYVA / DOT MESH ZIP · PACKAGE ERROR',
+        elHTML('<div class="warnbox"><b>ZIP PACKAGING FAILED</b><p>'+esc(e&&e.message||e)+'</p><p class="note">'+completed.length+' design(s) were rendered before packaging stopped.</p></div>'),
+        [{label:'Close',fn:closeModal}]);
+    }
+  }
+}
+window.trilyvaDownloadDotMeshZip = function () {
+  openDotMeshZipPasswordGate();
+};
 
 /* ============================================================
    State
