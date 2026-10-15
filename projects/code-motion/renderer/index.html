@@ -5491,6 +5491,8 @@ function dotMeshZipMetadata(item, job, result, stem, svgName) {
     frameCount: DOT_MESH_ZIP_SETTINGS.fps * DOT_MESH_ZIP_SETTINGS.duration,
     loop: true,
     seamless: true,
+    nominalResolution: { width: DOT_MESH_ZIP_SETTINGS.width, height: DOT_MESH_ZIP_SETTINGS.height },
+    resolution: { width: DOT_MESH_ZIP_SETTINGS.width, height: DOT_MESH_ZIP_SETTINGS.height },
     encoding: {
       container: "MP4",
       codec: parsed.codec || stats.codec || "H.264 / AVC",
@@ -5508,9 +5510,7 @@ function dotMeshZipMetadata(item, job, result, stem, svgName) {
     },
     exports: {
       video: stem,
-      nominalResolution: { width: DOT_MESH_ZIP_SETTINGS.width, height: DOT_MESH_ZIP_SETTINGS.height },
-    resolution: { width: DOT_MESH_ZIP_SETTINGS.width, height: DOT_MESH_ZIP_SETTINGS.height },
-    vectorStill: {
+      vectorStill: {
         filename: svgName,
         format: "SVG",
         width: DOT_MESH_ZIP_SETTINGS.width,
