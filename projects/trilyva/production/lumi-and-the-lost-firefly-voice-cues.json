@@ -1,0 +1,109 @@
+{
+  "project": "Lumi and the Lost Firefly",
+  "version": 1,
+  "targetRuntime": {
+    "durationSeconds": 60,
+    "resolution": "3840x2160",
+    "frameRate": 60,
+    "aspectRatio": "16:9",
+    "container": "MP4",
+    "suggestedVideoCodec": "H.264",
+    "note": "The cartoon example is currently silent; this file is the timed dialogue plan for creating voice clips in ElevenLabs and aligning them in an audio timeline."
+  },
+  "productionNotes": [
+    "Generate each cue as its own clean dialogue clip so each speaker can use a consistent voice.",
+    "Do not add music or sound effects to the dialogue clips; mix ambience, music and effects on separate tracks.",
+    "The start and end values are timeline targets, not a promise that generated speech will fit perfectly without adjustment. Retiming or small edits may be needed after voice generation.",
+    "Leave room tone or silence at the end of clips rather than cutting consonants. Keep all final audio inside the 60-second master."
+  ],
+  "voices": {
+    "NARRATOR": {
+      "direction": "Warm, gentle storybook narration; clear articulation, intimate and calm; wonder increases as the fireflies gather."
+    },
+    "LUMI": {
+      "direction": "Kind, curious, bright character voice; playful but never exaggerated; soft warmth in the final line."
+    },
+    "FIREFLY": {
+      "direction": "Small, lively, slightly breathless character voice; starts worried, then grows excited and relieved."
+    }
+  },
+  "cues": [
+    {
+      "id": "LFF-001",
+      "start": 0.4,
+      "end": 6.3,
+      "speaker": "NARRATOR",
+      "text": "At twilight, Lumi spotted a lonely little light trembling in the grass."
+    },
+    {
+      "id": "LFF-002",
+      "start": 6.3,
+      "end": 11,
+      "speaker": "LUMI",
+      "text": "Hey, little glow. Why are you all alone?"
+    },
+    {
+      "id": "LFF-003",
+      "start": 11,
+      "end": 16.8,
+      "speaker": "FIREFLY",
+      "text": "I lost my family. My light is too tiny!"
+    },
+    {
+      "id": "LFF-004",
+      "start": 16.8,
+      "end": 23.8,
+      "speaker": "NARRATOR",
+      "text": "Lumi folded a broad leaf around a shining drop of dew, making a tiny lantern."
+    },
+    {
+      "id": "LFF-005",
+      "start": 23.8,
+      "end": 29.5,
+      "speaker": "LUMI",
+      "text": "We'll follow the creek. Stay close to my lantern!"
+    },
+    {
+      "id": "LFF-006",
+      "start": 29.5,
+      "end": 36.5,
+      "speaker": "NARRATOR",
+      "text": "They hopped from stone to stone while the water painted silver stars."
+    },
+    {
+      "id": "LFF-007",
+      "start": 36.5,
+      "end": 41.5,
+      "speaker": "FIREFLY",
+      "text": "That old willow! My family gathers there!"
+    },
+    {
+      "id": "LFF-008",
+      "start": 41.5,
+      "end": 47,
+      "speaker": "LUMI",
+      "text": "Then let's make the darkest path sparkle!"
+    },
+    {
+      "id": "LFF-009",
+      "start": 47,
+      "end": 54,
+      "speaker": "NARRATOR",
+      "text": "One firefly answered, then ten, then a thousand tiny lights filled the clearing."
+    },
+    {
+      "id": "LFF-010",
+      "start": 54,
+      "end": 58,
+      "speaker": "FIREFLY",
+      "text": "You found them! Thank you, Lumi!"
+    },
+    {
+      "id": "LFF-011",
+      "start": 58,
+      "end": 60,
+      "speaker": "LUMI",
+      "text": "Anytime, friend."
+    }
+  ]
+}
