@@ -5637,15 +5637,22 @@ function openDotMeshZipPasswordGate() {
   });
 }
 async function prepareDotMeshFolderExport(directoryHandle) {
+  var prepBody = elHTML('<div class="verified"><b>DOT MESH / PREPARING</b><span>50 DESIGNS</span><span>4K60 · 20 Mbps</span></div><p class="note">Save folder selected. Loading the Dot Mesh library and checking the browser encoder. Rendering will start automatically after validation.</p>');
+  openModal("TRILYVA / DOT MESH · PREPARING", prepBody, [{
+    label:"Cancel", fn:function(){ dotMeshZipCancelRequested=true; closeModal(); }
+  }]);
   try {
     if (!Engine.api || !CORE || !ENC) throw new Error("TRILYVA's render engine is not ready. Reload the renderer and retry.");
     if (!window.TRILYVA_LIBRARY) await loadProtectedLibraryModule();
+    if (dotMeshZipCancelRequested) { closeModal(); return; }
     var registry = window.TRILYVA_LIBRARY;
     if (!registry) throw new Error("The library registry did not initialize.");
     await registry.ready;
+    if (dotMeshZipCancelRequested) { closeModal(); return; }
     var lib = registry.get("dot-mesh");
     if (!lib) throw new Error("Dot Mesh is missing from the library registry. Refresh TRILYVA and retry.");
     var items = await lib.load();
+    if (dotMeshZipCancelRequested) { closeModal(); return; }
     if (!Array.isArray(items) || items.length !== 50) throw new Error("Expected 50 Dot Mesh designs; found " + (items && items.length || 0) + ".");
 
     var originalBitrate = S.customBitrateMbps;
@@ -5656,12 +5663,14 @@ async function prepareDotMeshFolderExport(directoryHandle) {
       job.bitrate = DOT_MESH_ZIP_SETTINGS.bitrate;
       probe = await renderPreflight(job);
     } finally { S.customBitrateMbps = originalBitrate; }
+    if (dotMeshZipCancelRequested) { closeModal(); return; }
     if (!probe || !probe.ok) {
       throw new Error("The browser/GPU rejected H.264 at 3840×2160 / 60 FPS. No videos were started. " +
         (probe && probe.error ? probe.error.message + " " + (probe.error.detail || "") : "Encoder configuration unavailable."));
     }
     await runDotMeshFolderBatch(directoryHandle, lib, items);
   } catch (error) {
+    if (dotMeshZipCancelRequested) { closeModal(); return; }
     dotMeshFolderMessage("DOT MESH EXPORT COULD NOT START", String(error && error.message || error));
   }
 }
