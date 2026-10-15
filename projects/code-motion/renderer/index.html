@@ -8689,6 +8689,7 @@ function drawFilmFox(ctx, x, footY, s, t, holding, talking, joyful, pose) {
   pose = pose || 'idle';
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
+  var holdMix = typeof holding === 'number' ? filmClamp(holding, 0, 1) : (holding ? 1 : 0);
   var moving = pose === 'walk' || pose === 'balance';
   var step = moving ? Math.sin(t * 7.1) * 17 : Math.sin(t * 0.7) * 2.2;
   var bob = moving ? Math.abs(Math.sin(t * 7.1)) * 4 : Math.sin(t * 1.4) * 1.8;
@@ -8698,7 +8699,7 @@ function drawFilmFox(ctx, x, footY, s, t, holding, talking, joyful, pose) {
   // Tail, drawn behind the body with independent follow-through.
   ctx.save(); ctx.translate(43, -142); ctx.rotate(Math.sin(t * 3.2) * 0.13);
   var tail = ctx.createLinearGradient(20, -65, 116, 10); tail.addColorStop(0, '#f99a56'); tail.addColorStop(0.56, '#df713b'); tail.addColorStop(1, '#9b472e');
-  ctx.fillStyle = tail; ctx.strokeStyle = '#99523a'; ctx.lineWidth = 3;
+  ctx.fillStyle = tail; ctx.strokeStyle = 'rgba(153,82,58,0.26)'; ctx.lineWidth = 1.6;
   ctx.beginPath(); ctx.moveTo(-7, 18); ctx.bezierCurveTo(17, -43, 59, -77, 107, -44); ctx.bezierCurveTo(159, -7, 115, 47, 72, 35); ctx.bezierCurveTo(45, 28, 28, 5, -7, 18); ctx.closePath(); ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#fff0d7'; ctx.beginPath(); ctx.moveTo(94, -22); ctx.bezierCurveTo(127, -16, 135, 3, 112, 25); ctx.bezierCurveTo(97, 34, 85, 29, 74, 23); ctx.bezierCurveTo(96, 12, 99, -1, 94, -22); ctx.closePath(); ctx.fill();
   ctx.restore();
@@ -8709,7 +8710,7 @@ function drawFilmFox(ctx, x, footY, s, t, holding, talking, joyful, pose) {
   ctx.fillStyle = '#f4c69a'; ctx.beginPath(); ctx.ellipse(-37 + step, -17, 13, 4, 0, 0, Math.PI * 2); ctx.ellipse(26 - step, -17, 13, 4, 0, 0, Math.PI * 2); ctx.fill();
   // Body and shaded chest.
   var fur = ctx.createLinearGradient(-65, -205, 67, -43); fur.addColorStop(0, '#ffb56b'); fur.addColorStop(0.48, '#f28b49'); fur.addColorStop(1, '#c45d35');
-  ctx.fillStyle = fur; ctx.strokeStyle = 'rgba(119,62,44,0.62)'; ctx.lineWidth = 2.8;
+  ctx.fillStyle = fur; ctx.strokeStyle = 'rgba(119,62,44,0.24)'; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.ellipse(0, -128, 65, 83, -0.04, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#ffe8ca'; ctx.beginPath(); ctx.ellipse(2, -119, 36, 56, 0.08, 0, Math.PI * 2); ctx.fill();
   // Arms; the leading paw reaches toward the little lantern after it is made.
@@ -8721,20 +8722,21 @@ function drawFilmFox(ctx, x, footY, s, t, holding, talking, joyful, pose) {
   ctx.stroke();
   ctx.fillStyle = '#ffd9b0'; ctx.beginPath();
   ctx.arc(reaching ? -89 + Math.sin(t * 4.2) * 5 : -66, reaching ? -218 : -100 + Math.sin(t * 3) * 5, 14, 0, Math.PI * 2); ctx.fill();
+  var idleHandY = -113 + Math.sin(t * 2.2) * 6;
+  var holdHandY = -215;
   ctx.beginPath();
-  if (holding) { ctx.moveTo(43, -170); ctx.quadraticCurveTo(69, -192, 78, -215); }
-  else if (reaching) { ctx.moveTo(43, -166); ctx.quadraticCurveTo(74, -190, 88 + Math.sin(t * 4.2 + 1) * 5, -218); }
-  else { ctx.moveTo(43, -166); ctx.quadraticCurveTo(76, -141, 78, -113 + Math.sin(t * 2.2) * 6); }
+  if (reaching && holdMix < 0.001) { ctx.moveTo(43, -166); ctx.quadraticCurveTo(74, -190, 88 + Math.sin(t * 4.2 + 1) * 5, -218); }
+  else { ctx.moveTo(43, -166); ctx.quadraticCurveTo(76, idleHandY + (-192 - idleHandY) * holdMix, 78, idleHandY + (holdHandY - idleHandY) * holdMix); }
   ctx.stroke(); ctx.fillStyle = '#ffd9b0'; ctx.beginPath();
-  ctx.arc(78, holding ? -215 : reaching ? -218 : -113 + Math.sin(t * 2.2) * 6, 14, 0, Math.PI * 2); ctx.fill();
+  ctx.arc(78, reaching && holdMix < 0.001 ? -218 : idleHandY + (holdHandY - idleHandY) * holdMix, 14, 0, Math.PI * 2); ctx.fill();
   // Soft blue scarf with two independently animated ends.
-  ctx.fillStyle = '#3d91a0'; ctx.strokeStyle = 'rgba(36,89,103,0.72)'; ctx.lineWidth = 2.5;
+  ctx.fillStyle = '#3d91a0'; ctx.strokeStyle = 'rgba(36,89,103,0.3)'; ctx.lineWidth = 1.4;
   ctx.beginPath(); ctx.moveTo(-48, -190); ctx.quadraticCurveTo(-2, -207, 48, -186); ctx.lineTo(39, -158); ctx.quadraticCurveTo(0, -145, -42, -163); ctx.closePath(); ctx.fill(); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(28, -177); ctx.bezierCurveTo(57, -167, 72 + Math.sin(t * 5) * 6, -155, 76 + Math.sin(t * 4) * 8, -128); ctx.lineTo(52, -139); ctx.closePath(); ctx.fill(); ctx.stroke();
   // Head and ears.
   ctx.save(); ctx.translate(0, -264); ctx.rotate(Math.sin(t * 1.1) * 0.035 + (pose === 'lean' ? 0.055 : pose === 'joy' ? -0.025 : 0));
   var head = ctx.createLinearGradient(-68, -69, 55, 73); head.addColorStop(0, '#ffb76e'); head.addColorStop(0.6, '#f58d4c'); head.addColorStop(1, '#d96b39');
-  ctx.fillStyle = head; ctx.strokeStyle = 'rgba(119,62,44,0.62)'; ctx.lineWidth = 2.8;
+  ctx.fillStyle = head; ctx.strokeStyle = 'rgba(119,62,44,0.26)'; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.moveTo(-47, -35); ctx.lineTo(-65, -91); ctx.quadraticCurveTo(-67, -104, -54, -96); ctx.lineTo(-15, -61); ctx.quadraticCurveTo(0, -67, 16, -61); ctx.lineTo(56, -97); ctx.quadraticCurveTo(69, -108, 67, -89); ctx.lineTo(48, -32); ctx.quadraticCurveTo(77, -4, 67, 33); ctx.quadraticCurveTo(51, 75, 0, 73); ctx.quadraticCurveTo(-52, 73, -69, 31); ctx.quadraticCurveTo(-81, -5, -47, -35); ctx.closePath(); ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#7a4036'; ctx.beginPath(); ctx.moveTo(-54, -86); ctx.lineTo(-25, -62); ctx.lineTo(-45, -49); ctx.closePath(); ctx.moveTo(55, -86); ctx.lineTo(27, -62); ctx.lineTo(46, -49); ctx.closePath(); ctx.fill();
   ctx.fillStyle = '#ffd2a9'; ctx.beginPath(); ctx.ellipse(-42, 21, 27, 24, 0, 0, Math.PI * 2); ctx.ellipse(42, 21, 27, 24, 0, 0, Math.PI * 2); ctx.fill();
@@ -8768,7 +8770,7 @@ function drawFilmFox(ctx, x, footY, s, t, holding, talking, joyful, pose) {
   ctx.moveTo(58, 31); ctx.quadraticCurveTo(75, 29, 82, 22); ctx.moveTo(57, 36); ctx.quadraticCurveTo(74, 40, 83, 37); ctx.stroke();
   if (joyful) { ctx.strokeStyle = '#bb6541'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(-48, 24, 8, 0.2, 1.8); ctx.arc(48, 24, 8, 1.3, 2.9); ctx.stroke(); }
   ctx.restore();
-  if (holding) drawFilmLantern(ctx, 85, -224, t, filmSmooth(18.2, 20.2, t));
+  if (holdMix > 0.001) drawFilmLantern(ctx, 85, -224, t, holdMix);
   ctx.restore();
 }
 function drawFilmFlowers(ctx, t, night, glow) {
@@ -9003,8 +9005,9 @@ function renderFrame(time, frame, fps, ctx, width, height) {
   var bugAmp = filmKey(t, [[0,30],[9,30],[17,18],[29,18],[42,25],[46,30],[52,30],[60,18]]);
   var bugY = bugBaseY + Math.sin(t * 2.1) * bugAmp;
   var pose = t < 5 ? 'curious' : t < 9 ? 'look' : t < 17 ? 'lean' : t < 22 ? 'lean' : t < 29 ? 'curious' : t < 42 ? 'balance' : t < 47 ? 'wonder' : 'joy';
-  var holding = t >= 19;
-  if (t >= 29 && t < 42) drawFilmSplash(ctx, foxX + 13, 835, t, 0.45 + 0.4 * Math.abs(Math.sin((t - 29) * 2.5)));
+  var holding = filmSmooth(18.2, 20.6, t);
+  var splashWindow = filmSmooth(29.0, 30.0, t) * (1 - filmSmooth(41.0, 42.0, t));
+  if (splashWindow > 0.001) drawFilmSplash(ctx, foxX + 13, 835, t, splashWindow * (0.45 + 0.4 * Math.abs(Math.sin((t - 29) * 2.5))));
   drawFilmFox(ctx, foxX, foxY, 0.91, t, holding, !!(filmCue(t) && filmCue(t).speaker === 'LUMI'), t > 45 || t < 6, pose);
 
   // Keep the hero firefly in the foreground; the wingbeats and glow use separate temporal frequencies.
@@ -9021,9 +9024,9 @@ function renderFrame(time, frame, fps, ctx, width, height) {
       drawFilmFirefly(ctx, sx, sy, 0.26 + (sw % 4) * 0.045, t + sw * 0.17, 0.45 + reunion * 0.55, swarmIn);
     }
   }
-  if (holding && t < 42) {
+  if (holding > 0.001 && t < 42) {
     // A low, soft pool of reflected lantern light reaches the grass and creek bank.
-    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    ctx.save(); ctx.globalAlpha *= holding * (1 - filmSmooth(41.0, 42.0, t)); ctx.globalCompositeOperation = 'lighter';
     var lx = foxX + 84, ly = foxY - 218;
     var pool = ctx.createRadialGradient(lx, ly + 70, 2, lx, ly + 70, 165);
     pool.addColorStop(0, 'rgba(255,225,128,0.16)'); pool.addColorStop(1, 'rgba(255,225,128,0)');
