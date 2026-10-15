@@ -5458,36 +5458,36 @@ async function renderAllLibrary(lib,items){
 
 
 /* ============================================================
-   Dot Mesh Delivery ZIP — 50 static SVG stills + 4K60 MP4s + metadata
+   Dot Mesh Folder Export — 50 static SVG stills + 4K60 MP4s + metadata
    ============================================================ */
-var DOT_MESH_ZIP_SETTINGS = { width:3840, height:2160, fps:60, duration:12, bitrate:20000000 };
-var dotMeshZipActive = false;
-var dotMeshZipCancelRequested = false;
+var DOT_MESH_FOLDER_SETTINGS = { width:3840, height:2160, fps:60, duration:12, bitrate:20000000 };
+var dotMeshFolderActive = false;
+var dotMeshFolderCancelRequested = false;
 
-function dotMeshZipCsvCell(value) {
+function dotMeshFolderCsvCell(value) {
   var v = Array.isArray(value) ? value.join("; ") : String(value == null ? "" : value);
   return '"' + v.replace(/"/g, '""') + '"';
 }
-function dotMeshZipCsvRow(values) {
-  return values.map(dotMeshZipCsvCell).join(",");
+function dotMeshFolderCsvRow(values) {
+  return values.map(dotMeshFolderCsvCell).join(",");
 }
-function dotMeshZipTargetComposition(base) {
+function dotMeshFolderTargetComposition(base) {
   return CORE.composition(merge(base || {}, {
-    width: DOT_MESH_ZIP_SETTINGS.width,
-    height: DOT_MESH_ZIP_SETTINGS.height,
-    fps: DOT_MESH_ZIP_SETTINGS.fps,
-    duration: DOT_MESH_ZIP_SETTINGS.duration,
+    width: DOT_MESH_FOLDER_SETTINGS.width,
+    height: DOT_MESH_FOLDER_SETTINGS.height,
+    fps: DOT_MESH_FOLDER_SETTINGS.fps,
+    duration: DOT_MESH_FOLDER_SETTINGS.duration,
     loop: true,
-    loopDuration: DOT_MESH_ZIP_SETTINGS.duration,
+    loopDuration: DOT_MESH_FOLDER_SETTINGS.duration,
     transparent: false,
     background: "#050506"
   }));
 }
-function dotMeshZipMetadata(item, job, result, stem, svgName) {
+function dotMeshFolderMetadata(item, job, result, stem, svgName) {
   var original = item.metadata && typeof item.metadata === "object" ? item.metadata : {};
   var parsed = result.parsed || {};
   var stats = result.stats || {};
-  var actualDuration = result.parsed && Number(result.parsed.durationSec) > 0 ? Number(result.parsed.durationSec) : DOT_MESH_ZIP_SETTINGS.duration;
+  var actualDuration = result.parsed && Number(result.parsed.durationSec) > 0 ? Number(result.parsed.durationSec) : DOT_MESH_FOLDER_SETTINGS.duration;
   var measuredFileAverageBps = result.blob && actualDuration > 0 ? Math.round(result.blob.size * 8 / actualDuration) : null;
   return merge(original, {
     schema: "trilyva.dot-mesh.delivery/1.0",
@@ -5497,22 +5497,22 @@ function dotMeshZipMetadata(item, job, result, stem, svgName) {
     creator: "Tamasrazim",
     software: "TRILYVA",
     generatedAt: new Date().toISOString(),
-    durationSeconds: DOT_MESH_ZIP_SETTINGS.duration,
-    frameCount: DOT_MESH_ZIP_SETTINGS.fps * DOT_MESH_ZIP_SETTINGS.duration,
+    durationSeconds: DOT_MESH_FOLDER_SETTINGS.duration,
+    frameCount: DOT_MESH_FOLDER_SETTINGS.fps * DOT_MESH_FOLDER_SETTINGS.duration,
     loop: true,
     seamless: true,
-    nominalResolution: { width: DOT_MESH_ZIP_SETTINGS.width, height: DOT_MESH_ZIP_SETTINGS.height },
-    resolution: { width: DOT_MESH_ZIP_SETTINGS.width, height: DOT_MESH_ZIP_SETTINGS.height },
+    nominalResolution: { width: DOT_MESH_FOLDER_SETTINGS.width, height: DOT_MESH_FOLDER_SETTINGS.height },
+    resolution: { width: DOT_MESH_FOLDER_SETTINGS.width, height: DOT_MESH_FOLDER_SETTINGS.height },
     encoding: {
       container: "MP4",
       codec: parsed.codec || stats.codec || "H.264 / AVC",
-      width: DOT_MESH_ZIP_SETTINGS.width,
-      height: DOT_MESH_ZIP_SETTINGS.height,
-      fps: DOT_MESH_ZIP_SETTINGS.fps,
-      durationSeconds: DOT_MESH_ZIP_SETTINGS.duration,
-      frames: DOT_MESH_ZIP_SETTINGS.fps * DOT_MESH_ZIP_SETTINGS.duration,
-      targetBitrateBps: DOT_MESH_ZIP_SETTINGS.bitrate,
-      targetBitrateMbps: DOT_MESH_ZIP_SETTINGS.bitrate / 1000000,
+      width: DOT_MESH_FOLDER_SETTINGS.width,
+      height: DOT_MESH_FOLDER_SETTINGS.height,
+      fps: DOT_MESH_FOLDER_SETTINGS.fps,
+      durationSeconds: DOT_MESH_FOLDER_SETTINGS.duration,
+      frames: DOT_MESH_FOLDER_SETTINGS.fps * DOT_MESH_FOLDER_SETTINGS.duration,
+      targetBitrateBps: DOT_MESH_FOLDER_SETTINGS.bitrate,
+      targetBitrateMbps: DOT_MESH_FOLDER_SETTINGS.bitrate / 1000000,
       measuredFileAverageBitrateBps: measuredFileAverageBps,
       measuredFileAverageBitrateMbps: measuredFileAverageBps == null ? null : Number((measuredFileAverageBps / 1000000).toFixed(3)),
       bitrateNote: "20 Mbps is the encoder target. Measured file-average bitrate is computed from the MP4 file size and parsed duration, including container overhead.",
@@ -5525,8 +5525,8 @@ function dotMeshZipMetadata(item, job, result, stem, svgName) {
       vectorStill: {
         filename: svgName,
         format: "SVG",
-        width: DOT_MESH_ZIP_SETTINGS.width,
-        height: DOT_MESH_ZIP_SETTINGS.height,
+        width: DOT_MESH_FOLDER_SETTINGS.width,
+        height: DOT_MESH_FOLDER_SETTINGS.height,
         animated: false,
         frame: 0,
         background: "transparent"
@@ -5536,9 +5536,9 @@ function dotMeshZipMetadata(item, job, result, stem, svgName) {
     }
   });
 }
-function dotMeshZipCsvRowFor(item, meta) {
+function dotMeshFolderCsvRowFor(item, meta) {
   var enc = meta.encoding || {};
-  return dotMeshZipCsvRow([
+  return dotMeshFolderCsvRow([
     meta.id, meta.title, meta.description, (meta.tags || []).join("; "),
     meta.category || "", meta.designFamily || "",
     meta.creator || "Tamasrazim", meta.software || "TRILYVA",
@@ -5551,7 +5551,7 @@ function dotMeshZipCsvRowFor(item, meta) {
     meta.exports && meta.exports.vectorStill && meta.exports.vectorStill.filename || ""
   ]);
 }
-function dotMeshZipSnapshotWorkspace() {
+function dotMeshFolderSnapshotWorkspace() {
   return {
     id:S.id, name:S.name, version:S.version, dirty:S.dirty, code:S.code,
     comp:S.comp ? merge({},S.comp) : null, meta:S.meta ? merge({},S.meta) : null,
@@ -5560,7 +5560,7 @@ function dotMeshZipSnapshotWorkspace() {
     checksums:S.checksums, queueStop:S.queueStop, lastError:S.lastError
   };
 }
-async function dotMeshZipRestoreWorkspace(saved) {
+async function dotMeshFolderRestoreWorkspace(saved) {
   S.id=saved.id; S.name=saved.name; S.version=saved.version; S.code=saved.code || "";
   S.comp=saved.comp ? CORE.composition(saved.comp) : CORE.composition({});
   S.meta=saved.meta ? merge({},saved.meta) : defaultMeta();
@@ -5603,8 +5603,8 @@ function dotMeshFolderMessage(title, message) {
   openModal(title, elHTML('<div class="warnbox"><b>'+esc(title)+'</b><p>'+esc(message)+'</p></div>'),
     [{ label: "Close", fn: closeModal }]);
 }
-function openDotMeshZipPasswordGate() {
-  if (dotMeshZipActive || S.rendering) {
+function openDotMeshFolderPicker() {
+  if (dotMeshFolderActive || S.rendering) {
     dotMeshFolderMessage("DOT MESH EXPORT BUSY", "Finish or cancel the current render before starting the 50-design export.");
     return;
   }
@@ -5624,8 +5624,8 @@ function openDotMeshZipPasswordGate() {
     return;
   }
 
-  dotMeshZipActive = true;
-  dotMeshZipCancelRequested = false;
+  dotMeshFolderActive = true;
+  dotMeshFolderCancelRequested = false;
   Promise.resolve(folderPromise).then(async function (directoryHandle) {
     if (!directoryHandle) return;
     if (directoryHandle.queryPermission) {
@@ -5640,50 +5640,50 @@ function openDotMeshZipPasswordGate() {
     if (error && error.name === "AbortError") return;
     dotMeshFolderMessage("DOT MESH EXPORT COULD NOT START", String(error && error.message || error));
   }).finally(function () {
-    dotMeshZipActive = false;
-    dotMeshZipCancelRequested = false;
+    dotMeshFolderActive = false;
+    dotMeshFolderCancelRequested = false;
   });
 }
 async function prepareDotMeshFolderExport(directoryHandle) {
   var prepBody = elHTML('<div class="verified"><b>DOT MESH / PREPARING</b><span>50 DESIGNS</span><span>4K60 · 20 Mbps</span></div><p class="note">Save folder selected. Loading the Dot Mesh library and checking the browser encoder. Rendering will start automatically after validation.</p>');
   openModal("TRILYVA / DOT MESH · PREPARING", prepBody, [{
-    label:"Cancel", fn:function(){ dotMeshZipCancelRequested=true; closeModal(); }
+    label:"Cancel", fn:function(){ dotMeshFolderCancelRequested=true; closeModal(); }
   }]);
   try {
     if (!Engine.api || !CORE || !ENC) throw new Error("TRILYVA's render engine is not ready. Reload the renderer and retry.");
     if (!window.TRILYVA_LIBRARY) await loadProtectedLibraryModule();
-    if (dotMeshZipCancelRequested) { closeModal(); return; }
+    if (dotMeshFolderCancelRequested) { closeModal(); return; }
     var registry = window.TRILYVA_LIBRARY;
     if (!registry) throw new Error("The library registry did not initialize.");
     await registry.ready;
-    if (dotMeshZipCancelRequested) { closeModal(); return; }
+    if (dotMeshFolderCancelRequested) { closeModal(); return; }
     var lib = registry.get("dot-mesh");
     if (!lib) throw new Error("Dot Mesh is missing from the library registry. Refresh TRILYVA and retry.");
     var items = await lib.load();
-    if (dotMeshZipCancelRequested) { closeModal(); return; }
+    if (dotMeshFolderCancelRequested) { closeModal(); return; }
     if (!Array.isArray(items) || items.length !== 50) throw new Error("Expected 50 Dot Mesh designs; found " + (items && items.length || 0) + ".");
 
     var originalBitrate = S.customBitrateMbps;
     var probe;
     try {
       S.customBitrateMbps = 20;
-      var job = buildJob({ exportFormat: "mp4", composition: dotMeshZipTargetComposition(S.comp) });
-      job.bitrate = DOT_MESH_ZIP_SETTINGS.bitrate;
+      var job = buildJob({ exportFormat: "mp4", composition: dotMeshFolderTargetComposition(S.comp) });
+      job.bitrate = DOT_MESH_FOLDER_SETTINGS.bitrate;
       probe = await renderPreflight(job);
     } finally { S.customBitrateMbps = originalBitrate; }
-    if (dotMeshZipCancelRequested) { closeModal(); return; }
+    if (dotMeshFolderCancelRequested) { closeModal(); return; }
     if (!probe || !probe.ok) {
       throw new Error("The browser/GPU rejected H.264 at 3840×2160 / 60 FPS. No videos were started. " +
         (probe && probe.error ? probe.error.message + " " + (probe.error.detail || "") : "Encoder configuration unavailable."));
     }
     await runDotMeshFolderBatch(directoryHandle, lib, items);
   } catch (error) {
-    if (dotMeshZipCancelRequested) { closeModal(); return; }
+    if (dotMeshFolderCancelRequested) { closeModal(); return; }
     dotMeshFolderMessage("DOT MESH EXPORT COULD NOT START", String(error && error.message || error));
   }
 }
 async function runDotMeshFolderBatch(directoryHandle, lib, items) {
-  var saved = dotMeshZipSnapshotWorkspace();
+  var saved = dotMeshFolderSnapshotWorkspace();
   var savedBitrate = S.customBitrateMbps;
   var startedAt = new Date().toISOString();
   var completed = [], failed = [], cancelled = false, fatalError = null;
@@ -5702,7 +5702,7 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
     row.appendChild(textBox); log.prepend(row);
   }
   function cancelBatch() {
-    dotMeshZipCancelRequested = true; S.queueStop = true;
+    dotMeshFolderCancelRequested = true; S.queueStop = true;
     if (S.rendering && Engine.api) Engine.api.cancel();
     status.textContent = "Cancellation requested. Stopping the active render safely…";
   }
@@ -5711,7 +5711,7 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
   try {
     S.customBitrateMbps = 20;
     for (var i = 0; i < items.length; i++) {
-      if (dotMeshZipCancelRequested) { cancelled = true; break; }
+      if (dotMeshFolderCancelRequested) { cancelled = true; break; }
       var item = items[i];
       var title = String(item.title || item.id || ("Dot Mesh " + (i + 1)));
       var folderName = "Dot-Mesh-" + String(i + 1).padStart(3, "0") + "-" + dotMeshFolderSlug(title);
@@ -5729,19 +5729,19 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
         continue;
       }
       try {
-        var target = dotMeshZipTargetComposition(S.comp);
+        var target = dotMeshFolderTargetComposition(S.comp);
         S.comp = target;
         var stem = "dot-mesh-" + String(i + 1).padStart(3, "0") + "-" + dotMeshFolderSlug(title);
         var videoName = stem + "_3840x2160_60fps_20mbps_12s.mp4";
         var svgName = stem + "_3840x2160_static.svg";
         var job = buildJob({ exportFormat:"mp4", composition:target });
-        job.bitrate = DOT_MESH_ZIP_SETTINGS.bitrate;
+        job.bitrate = DOT_MESH_FOLDER_SETTINGS.bitrate;
         job.label = title; job.metadata.title = title;
         job.metadata.description = String(item.description || "");
         job.fileName = videoName;
         status.textContent = "Rendering " + (i+1) + " / 50 · " + title + " · 4K60 · 20 Mbps target";
         var result = await startRender(job, { silent:true, batch:true });
-        if (dotMeshZipCancelRequested || (result && result.cancelled)) { cancelled = true; break; }
+        if (dotMeshFolderCancelRequested || (result && result.cancelled)) { cancelled = true; break; }
         if (!result || !result.ok || !result.blob) throw new Error(result && result.error ? String(result.error.message || result.error) : "MP4 render failed.");
         if (!result.parsed) throw new Error("MP4 output could not be parsed for verification; refusing to save an unverified video.");
         if (result.parsed.width !== 3840 || result.parsed.height !== 2160) {
@@ -5764,11 +5764,11 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
         if (/<animate[\s>]/i.test(svg)) throw new Error("Static SVG unexpectedly contains animation.");
         await dotMeshWriteFile(folder, svgName, svg, "image/svg+xml;charset=utf-8");
 
-        var metadata = dotMeshZipMetadata(item, job, result, videoName, svgName);
+        var metadata = dotMeshFolderMetadata(item, job, result, videoName, svgName);
         metadata.exports.folder = folderName;
         var jsonText = JSON.stringify(metadata, null, 2) + "\n";
         var csvHeader = ["ID","Title","Description","Keywords","Category","Design family","Creator","Software","Container","Codec","Width","Height","FPS","Duration seconds","Frame count","Target bitrate Mbps","Measured file-average bitrate Mbps","Verification","Video filename","Static SVG filename"];
-        var csvText = "\uFEFF" + dotMeshZipCsvRow(csvHeader) + "\r\n" + dotMeshZipCsvRowFor(item, metadata) + "\r\n";
+        var csvText = "\uFEFF" + dotMeshFolderCsvRow(csvHeader) + "\r\n" + dotMeshFolderCsvRowFor(item, metadata) + "\r\n";
         await dotMeshWriteFile(folder, "metadata.json", jsonText, "application/json;charset=utf-8");
         await dotMeshWriteFile(folder, "metadata.csv", csvText, "text/csv;charset=utf-8");
 
@@ -5808,7 +5808,7 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
     failed.push({stage:"batch",reason:String(error&&error.message||error)});
   }
 
-  cancelled = cancelled || dotMeshZipCancelRequested;
+  cancelled = cancelled || dotMeshFolderCancelRequested;
   S.customBitrateMbps = savedBitrate;
   var header = ["ID","Title","Description","Keywords","Category","Design family","Creator","Software","Container","Codec","Width","Height","FPS","Duration seconds","Frame count","Target bitrate Mbps","Measured file-average bitrate Mbps","Verification","Video path","Static SVG path"];
   var rows = [header];
@@ -5831,7 +5831,7 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
   };
   var rootWriteError = null;
   try {
-    await dotMeshWriteFile(directoryHandle,"DOT-MESH-CATALOG.csv","\uFEFF"+rows.map(dotMeshZipCsvRow).join("\r\n")+"\r\n","text/csv;charset=utf-8");
+    await dotMeshWriteFile(directoryHandle,"DOT-MESH-CATALOG.csv","\uFEFF"+rows.map(dotMeshFolderCsvRow).join("\r\n")+"\r\n","text/csv;charset=utf-8");
     await dotMeshWriteFile(directoryHandle,"BATCH-MANIFEST.json",JSON.stringify(manifest,null,2)+"\n","application/json;charset=utf-8");
     await dotMeshWriteFile(directoryHandle,"README.txt",
       "TRILYVA DOT MESH — DIRECT-TO-FOLDER DELIVERY\r\n"+
@@ -5843,8 +5843,8 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
   } catch(error) { rootWriteError = error; }
 
   try { closeModal(); } catch (_) {}
-  try { await dotMeshZipRestoreWorkspace(saved); } catch(error) { if (!fatalError) fatalError = error; }
-  dotMeshZipActive = false;
+  try { await dotMeshFolderRestoreWorkspace(saved); } catch(error) { if (!fatalError) fatalError = error; }
+  dotMeshFolderActive = false;
 
   if (rootWriteError) {
     dotMeshFolderMessage("ROOT MANIFEST SAVE FAILED",completed.length+" videos were saved. The catalog or manifest could not be completed: "+String(rootWriteError.message||rootWriteError)+". Already-written design files remain in the selected folder.");
@@ -5857,10 +5857,10 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
   if (fatalError) report.appendChild(el("p","note","Batch issue: "+String(fatalError.message||fatalError)));
   openModal("TRILYVA / DOT MESH · FOLDER EXPORT",report,[{label:"Close",fn:closeModal}]);
 }
-window.trilyvaDownloadDotMeshZip = function () {
-  openDotMeshZipPasswordGate();
+window.trilyvaExportDotMeshFolder = function () {
+  openDotMeshFolderPicker();
 };
-window.addEventListener("trilyva:download-dotmesh-zip", openDotMeshZipPasswordGate);
+window.addEventListener("trilyva:export-dotmesh-folder", openDotMeshFolderPicker);
 
 /* ============================================================
    State
