@@ -221,6 +221,10 @@ const sitemapUrls=new Set([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(matc
 for(const route of ['/', '/work/', '/about/', '/approach/', '/projects/', '/projects/phasebreak/', '/projects/hollow-texture-lab/', '/projects/trss-sample-recorder/', '/projects/trss/']) {
   must(sitemapUrls.has('https://tamasrazim.github.io'+route),'sitemap includes '+route);
 }
+must(!sitemapUrls.has('https://tamasrazim.github.io/renderer/')&&!sitemapUrls.has('https://tamasrazim.github.io/projects/code-motion/'),'sitemap excludes legacy redirect-only routes');
+must(sitemapUrls.has('https://tamasrazim.github.io/projects/trilyva/niko-and-the-clockwork-bird.html')&&sitemapUrls.has('https://tamasrazim.github.io/projects/trilyva/the-last-star-train.html'),'sitemap includes canonical TRILYVA story pages');
+must(read('renderer/index.html').includes('location.replace("../projects/code-motion/renderer/"+location.search+location.hash)'),'legacy renderer route redirects directly to the canonical workspace and preserves query/hash');
+must(read('projects/trilyva/nori-and-the-last-light.html').includes('location.replace("./niko-and-the-clockwork-bird.html")'),'legacy Nori story route redirects directly to the canonical story');
 
 const readme=read('README.md');
 const readmeSiteRoutes=[...readme.matchAll(/https:\/\/tamasrazim\.github\.io(\/[^)\s]*)?/g)].map(match=>match[1]||'/');
@@ -259,7 +263,7 @@ must(exists('projects/code-motion/renderer/library/prism-library.json'),'TRILYVA
 must(read('projects/code-motion/renderer/library/prism-library.json')===read('projects/code-to-eps/prism-library.json'),'the renderer-local Prism data stays identical to the canonical dataset');
 must(trilyvaRenderer.includes("const PRISM_LIBRARY_URL='./library/prism-library.json'")&&trilyvaRenderer.includes("const TRILYVA_PRISM_LIBRARY_URL='./library/prism-library.json'"),'both TRILYVA Prism loaders use the self-contained local dataset');
 must(trilyvaPrismData.includes('./prism-library.json')&&trilyvaPrismData.includes('export default data;'),'the protected Prism module loads and exports its sibling JSON data');
-must(trilyvaRendererSw.includes("const CACHE = 'tamasrazim-trilyva-pwa-v84'")&&trilyvaRendererSw.includes("'./library/prism-library.json'"),'TRILYVA offline cache includes the local Prism dataset');
+must(/const CACHE = 'tamasrazim-trilyva-pwa-v\\d+'/.test(trilyvaRendererSw)&&trilyvaRendererSw.includes("'./library/prism-library.json'"),'TRILYVA offline cache uses a versioned cache and includes the local Prism dataset');
 const kynestraBuild=read('KYNESTRA/desktop/tauri/build.rs');
 must(kynestraBuild.includes('manifest_dir.join("../../../projects/code-motion/renderer")')&&kynestraBuild.includes('fn copy_directory'),'KYNESTRA packages the full canonical renderer runtime with its local dependencies');
 const trilyvaMediaStack=read('projects/code-motion/renderer/media-stack.js');
