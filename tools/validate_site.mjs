@@ -263,7 +263,7 @@ must(exists('projects/code-motion/renderer/library/prism-library.json'),'TRILYVA
 must(read('projects/code-motion/renderer/library/prism-library.json')===read('projects/code-to-eps/prism-library.json'),'the renderer-local Prism data stays identical to the canonical dataset');
 must(trilyvaRenderer.includes("const PRISM_LIBRARY_URL='./library/prism-library.json'")&&trilyvaRenderer.includes("const TRILYVA_PRISM_LIBRARY_URL='./library/prism-library.json'"),'both TRILYVA Prism loaders use the self-contained local dataset');
 must(trilyvaPrismData.includes('./prism-library.json')&&trilyvaPrismData.includes('export default data;'),'the protected Prism module loads and exports its sibling JSON data');
-must(/const CACHE = 'tamasrazim-trilyva-pwa-v\\d+'/.test(trilyvaRendererSw)&&trilyvaRendererSw.includes("'./library/prism-library.json'"),'TRILYVA offline cache uses a versioned cache and includes the local Prism dataset');
+must(/const CACHE = 'tamasrazim-trilyva-pwa-v\d+'/.test(trilyvaRendererSw)&&trilyvaRendererSw.includes("'./library/prism-library.json'"),'TRILYVA offline cache uses a versioned cache and includes the local Prism dataset');
 const kynestraBuild=read('KYNESTRA/desktop/tauri/build.rs');
 must(kynestraBuild.includes('manifest_dir.join("../../../projects/code-motion/renderer")')&&kynestraBuild.includes('fn copy_directory'),'KYNESTRA packages the full canonical renderer runtime with its local dependencies');
 const trilyvaMediaStack=read('projects/code-motion/renderer/media-stack.js');
