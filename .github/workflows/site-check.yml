@@ -6,6 +6,11 @@ on:
   push:
     paths:
       - 'index.html'
+      - '404.html'
+      - 'code-motion-tamasrazim*.html'
+      - 'KYNESTRA/**'
+      - 'licences/**'
+      - 'LICENSES/**'
       - 'work/**'
       - 'about/**'
       - 'approach/**'
@@ -22,6 +27,11 @@ on:
       - '.github/workflows/site-check.yml'
   pull_request:
     paths:
+      - '404.html'
+      - 'code-motion-tamasrazim*.html'
+      - 'KYNESTRA/**'
+      - 'licences/**'
+      - 'LICENSES/**'
       - 'index.html'
       - 'work/**'
       - 'about/**'
