@@ -222,9 +222,6 @@ for(const route of ['/', '/work/', '/about/', '/approach/', '/projects/', '/proj
 must(!sitemapUrls.has('https://tamasrazim.github.io/renderer/')&&!sitemapUrls.has('https://tamasrazim.github.io/projects/code-motion/'),'sitemap excludes legacy redirect-only routes');
 must(read('renderer/index.html').includes('location.replace("../projects/code-motion/renderer/"+location.search+location.hash)'),'legacy renderer route redirects directly to the canonical workspace and preserves query/hash');
 
-const trilyvaRenderer=read('projects/code-motion/renderer/index.html');
-must(!/sample-lumi-lost-firefly|sample-niko-clockwork-bird|voice-studio\\.js|data-act="queueAdd"|data-act="startRender"/i.test(trilyvaRenderer),'TRILYVA excludes cartoon samples and redundant render buttons');
-must(trilyvaRenderer.includes('data-act="render"')&&trilyvaRenderer.includes('data-act="renderAll"')&&trilyvaRenderer.includes('data-act="renderAllDotMesh"'),'TRILYVA retains current render, render all and dot-mesh batch actions');
 for(const removedPage of ['projects/trilyva/niko-and-the-clockwork-bird.html','projects/trilyva/the-last-star-train.html']) must(!exists(removedPage),removedPage+' removed');
 
 const readme=read('README.md');
@@ -257,6 +254,8 @@ const trilyvaPage=read('projects/trilyva/index.html');
 must(trilyvaPage.includes('Open TRILYVA workspace')&&trilyvaPage.includes('deterministic'),'TRILYVA project page describes the frame model and links to the renderer');
 must(read('projects/code-motion/index.html').includes('location.replace(target)'),'legacy TRILYVA URL performs a clean replace redirect');
 const trilyvaRenderer=read('projects/code-motion/renderer/index.html');
+must(!/sample-lumi-lost-firefly|sample-niko-clockwork-bird|data-act="queueAdd"|data-act="startRender"/i.test(trilyvaRenderer),'TRILYVA excludes cartoon samples and redundant render buttons');
+must(trilyvaRenderer.includes('data-act="render"')&&trilyvaRenderer.includes('data-act="renderAll"')&&trilyvaRenderer.includes('data-act="renderAllDotMesh"'),'TRILYVA retains current render, render all and dot-mesh batch actions');
 const trilyvaPrismData=read('projects/code-motion/renderer/library/prism-data.js');
 const trilyvaRendererSw=read('projects/code-motion/renderer/sw.js');
 must(exists('projects/code-to-eps/prism-library.json'),'the shared Prism dataset exists at its canonical local path');
