@@ -1,18 +1,11 @@
 // What this does: Caches the renderer's files so the Code Motion workspace can reopen more reliably when the network is unavailable.
 
-const CACHE = 'tamasrazim-trilyva-pwa-v105';
+const CACHE = 'tamasrazim-trilyva-pwa-v106';
 const CORE = [
   './',
   './index.html',
   './media-stack.js',
-  './voice-studio.js',
   './movie-finalizer.js',
-  './niko-and-the-clockwork-bird.js',
-  './the-last-star-train.js',
-  '../../trilyva/niko-and-the-clockwork-bird.html',
-  '../../trilyva/the-last-star-train.html',
-  '../../trilyva/production/lumi-and-the-lost-firefly-elevenlabs-cues.json',
-  '../../trilyva/production/lumi-and-the-lost-firefly.en.srt',
   './manifest.webmanifest',
   './library/library.js',
   './library/dot-mesh-library.js',
@@ -22,7 +15,6 @@ const CORE = [
   './library/living-emojis.js',
   './library/motion-backgrounds.js',
   './library/green-screen-overlays.js',
-  './library/story-films.js',
   './library/prism-data.js',
   './library/prism-library.json',
   './library/prism-web-icons.json'
