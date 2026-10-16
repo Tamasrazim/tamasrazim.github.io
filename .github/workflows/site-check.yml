@@ -61,5 +61,5 @@ jobs:
           node-version: 22
       - name: Validate site routes, DOM ids and runtime scripts
         run: node tools/validate_site.mjs
-      - name: Smoke-test sampled frames of the TRILYVA story films
+      - name: Validate TRILYVA render controls
         run: node tools/validate_trilyva_renderers.mjs
