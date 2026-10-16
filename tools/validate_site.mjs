@@ -662,7 +662,6 @@ const routeMenuPages=[
   'projects/repo-token-meter/index.html',
   'projects/webedyts/index.html',
   'projects/qalyvyron/index.html',
-  'projects/trilyva/the-last-star-train.html',
   'projects/neo/download/index.html',
   'projects/kynestra/download/index.html',
   'projects/code-to-svg/workspace/index.html',
