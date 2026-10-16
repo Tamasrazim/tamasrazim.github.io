@@ -251,7 +251,7 @@
     try {
       await mediaReady(videoEl);
       videoInfo.textContent = file.name + ' · ' + Math.round(videoEl.videoWidth) + '×' + Math.round(videoEl.videoHeight) + ' · ' + humanTime(videoEl.duration) + ' · ' + formatBytes(file.size);
-      setStatus('Video ready. Select an optional audio file or use Voice Studio’s generated WAV.', 'green');
+      setStatus('Video ready. Select an optional local audio file if needed.', 'green');
     } catch (e) {
       videoBlob = null;
       videoInfo.textContent = 'This file could not be decoded by the browser.';
