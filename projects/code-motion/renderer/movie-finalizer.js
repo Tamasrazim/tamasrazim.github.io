@@ -11,13 +11,13 @@
   'use strict';
 
   var overlay, videoInput, audioInput, videoEl, audioEl, startBtn, cancelBtn;
-  var statusEl, progressEl, qualityEl, keepAudioEl, videoInfo, audioInfo;
+  var statusEl, progressEl, qualityEl, videoInfo, audioInfo;
   var recorder = null, chunks = [], working = false, cancelled = false, recordingError = '';
   var formatEl = null;
   var videoBlob = null, audioBlob = null, audioLabel = '', videoLabel = '';
   var videoUrl = '', audioUrl = '', outputUrl = '';
   var sourceVideoStream = null, sourceAudioStream = null, mixedStream = null;
-  var lastGeneratedTrack = null, startedAt = 0, pollTimer = null;
+  var startedAt = 0, pollTimer = null;
 
   function $(id) { return document.getElementById(id); }
   function setStatus(message, kind) {
@@ -189,7 +189,7 @@
       '<header class="tmf-head"><div><strong>TRILYVA / FINISH MOVIE</strong><br><small>LOCAL ASSEMBLY · VIDEO + AUDIO → MP4 / WEBM</small></div><div class="tmf-spacer"></div><button class="tmf-x" id="tmfClose" aria-label="Close">×</button></header>',
       '<div class="tmf-body">',
       '<section class="tmf-card"><label class="tmf-label" for="tmfVideoFile">01 / Rendered video or stock clip</label><input id="tmfVideoFile" type="file" accept="video/*,.mp4,.webm,.mov,.m4v"><div class="tmf-meta" id="tmfVideoInfo">No video selected.</div><p class="tmf-note">Choose the video exported from TRILYVA. Common browser-decodable MP4 and WebM sources are supported. The source video duration determines the final length.</p></section>',
-      '<section class="tmf-card"><label class="tmf-label" for="tmfAudioFile">02 / Dialogue, music, or soundtrack (optional)</label><input id="tmfAudioFile" type="file" accept="audio/*,.wav,.mp3,.m4a,.ogg,.webm"><div class="tmf-meta" id="tmfAudioInfo">No audio selected — video-only output.</div><div class="tmf-actions" style="padding:10px 0 0"><button class="tmf-btn" id="tmfUseGenerated" disabled>Use generated Voice Studio WAV</button><button class="tmf-btn" id="tmfClearAudio">Video only</button></div><p class="tmf-note">Use the generated five-minute dialogue/soundtrack WAV or import any local audio track. Audio begins at 00:00; if it is shorter than the video, the remainder is silent.</p></section>',
+      '<section class="tmf-card"><label class="tmf-label" for="tmfAudioFile">02 / Dialogue, music, or soundtrack (optional)</label><input id="tmfAudioFile" type="file" accept="audio/*,.wav,.mp3,.m4a,.ogg,.webm"><div class="tmf-meta" id="tmfAudioInfo">No audio selected — video-only output.</div><div class="tmf-actions" style="padding:10px 0 0"><button class="tmf-btn" id="tmfClearAudio">Video only</button></div><p class="tmf-note">Import any local audio track. Audio begins at 00:00; if it is shorter than the video, the remainder is silent.</p></section>',
       '<section class="tmf-card"><label class="tmf-label" for="tmfFormat">03 / Delivery format</label><select id="tmfFormat"><option value="auto" selected>Automatic - MP4 where supported</option><option value="mp4">MP4 only - H.264 / AAC where available</option><option value="webm">WebM only - VP9 / Opus where available</option></select><div class="tmf-meta">Browser codec support decides which formats can be recorded.</div><p class="tmf-note">For stock delivery, choose the container and codec required by the target marketplace. Automatic prefers MP4 and falls back to WebM when necessary.</p></section>',
       '<section class="tmf-card"><label class="tmf-label" for="tmfQuality">04 / Video bitrate</label><select id="tmfQuality"><option value="8">Standard · 8 Mbps</option><option value="16" selected>High · 16 Mbps</option><option value="28">Very high · 28 Mbps</option><option value="45">4K / high motion · 45 Mbps</option><option value="65">Maximum · 65 Mbps</option></select><div class="tmf-meta">Automatic mode prefers MP4 when this browser supports it.</div><p class="tmf-note">Available bitrate and resolution are bounded by the browser, source file, and hardware encoder. This finalizer preserves the decoded source dimensions; it does not upscale the clip.</p></section>',
       '<section class="tmf-card"><label class="tmf-label">05 / Render method</label><div class="tmf-meta">Real-time media capture</div><p class="tmf-note">The browser plays the source video at normal speed while recording its video stream and the selected audio. A five-minute source therefore takes about five minutes to finalize. Keep this tab open while recording.</p><p class="tmf-note">This is fully local but re-encodes the video. For lossless stock delivery, keep your original render and use a separate validated muxing workflow where available.</p></section>',
@@ -217,7 +217,6 @@
       if (!chooseMime(!!audioBlob, formatEl.value)) setStatus('This browser cannot record the selected format with the chosen tracks. Select Automatic or WebM, or remove audio if MP4 has no compatible audio codec.', 'warn');
       else setStatus('Delivery format selected. The output container will match the supported recorder MIME type.', 'green');
     });
-    keepAudioEl = $('tmfUseGenerated');
     videoInfo = $('tmfVideoInfo');
     audioInfo = $('tmfAudioInfo');
 
@@ -226,17 +225,9 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && overlay.classList.contains('open')) close(); });
     videoInput.addEventListener('change', onVideoSelected);
     audioInput.addEventListener('change', onAudioSelected);
-    keepAudioEl.addEventListener('click', useGeneratedAudio);
     $('tmfClearAudio').addEventListener('click', clearAudio);
     startBtn.addEventListener('click', startRecording);
     cancelBtn.addEventListener('click', cancelRecording);
-    window.addEventListener('trilyva:voice-track-ready', function (e) {
-      if (!e.detail || !(e.detail.blob instanceof Blob)) return;
-      lastGeneratedTrack = e.detail.blob;
-      keepAudioEl.disabled = false;
-      keepAudioEl.textContent = 'Use generated Voice Studio WAV';
-      if (!audioBlob) setStatus('Voice Studio WAV is ready to use. Select a video, then click “Use generated Voice Studio WAV”.', 'green');
-    });
     updateButtons();
   }
 
@@ -293,23 +284,6 @@
       audioInfo.textContent = 'This file could not be decoded by the browser.';
       setStatus(e.message, 'error');
     }
-    updateButtons();
-  }
-
-  function useGeneratedAudio() {
-    if (!lastGeneratedTrack || working) return;
-    closeInputUrl('audio');
-    audioInput.value = '';
-    audioBlob = lastGeneratedTrack;
-    audioLabel = 'nori-and-the-last-light-voice-track.wav';
-    audioUrl = URL.createObjectURL(audioBlob);
-    audioEl.src = audioUrl;
-    audioEl.load();
-    audioInfo.textContent = audioLabel + ' · 05:00 · generated in this session';
-    mediaReady(audioEl).then(updateButtons).catch(function (e) {
-      setStatus('Generated WAV could not be decoded: ' + e.message, 'error');
-    });
-    setStatus('Using the Voice Studio track. Choose the source video, then create the movie.', 'green');
     updateButtons();
   }
 
