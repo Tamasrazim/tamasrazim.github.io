@@ -71,8 +71,6 @@ const htmlFiles=[
   'projects/kynestra/download/index.html',
   'projects/asset-vault/index.html',
   'projects/trilyva/index.html',
-  'projects/trilyva/the-last-star-train.html',
-  'projects/trilyva/niko-and-the-clockwork-bird.html',
   'asset-vault/index.html',
   'projects/code-motion/index.html',
   'projects/code-motion/renderer/index.html',
@@ -222,9 +220,12 @@ for(const route of ['/', '/work/', '/about/', '/approach/', '/projects/', '/proj
   must(sitemapUrls.has('https://tamasrazim.github.io'+route),'sitemap includes '+route);
 }
 must(!sitemapUrls.has('https://tamasrazim.github.io/renderer/')&&!sitemapUrls.has('https://tamasrazim.github.io/projects/code-motion/'),'sitemap excludes legacy redirect-only routes');
-must(sitemapUrls.has('https://tamasrazim.github.io/projects/trilyva/niko-and-the-clockwork-bird.html')&&sitemapUrls.has('https://tamasrazim.github.io/projects/trilyva/the-last-star-train.html'),'sitemap includes canonical TRILYVA story pages');
 must(read('renderer/index.html').includes('location.replace("../projects/code-motion/renderer/"+location.search+location.hash)'),'legacy renderer route redirects directly to the canonical workspace and preserves query/hash');
-must(read('projects/trilyva/nori-and-the-last-light.html').includes('location.replace("./niko-and-the-clockwork-bird.html")'),'legacy Nori story route redirects directly to the canonical story');
+
+const trilyvaRenderer=read('projects/code-motion/renderer/index.html');
+must(!/sample-lumi-lost-firefly|sample-niko-clockwork-bird|voice-studio\\.js|data-act="queueAdd"|data-act="startRender"/i.test(trilyvaRenderer),'TRILYVA excludes cartoon samples and redundant render buttons');
+must(trilyvaRenderer.includes('data-act="render"')&&trilyvaRenderer.includes('data-act="renderAll"')&&trilyvaRenderer.includes('data-act="renderAllDotMesh"'),'TRILYVA retains current render, render all and dot-mesh batch actions');
+for(const removedPage of ['projects/trilyva/niko-and-the-clockwork-bird.html','projects/trilyva/the-last-star-train.html']) must(!exists(removedPage),removedPage+' removed');
 
 const readme=read('README.md');
 const readmeSiteRoutes=[...readme.matchAll(/https:\/\/tamasrazim\.github\.io(\/[^)\s]*)?/g)].map(match=>match[1]||'/');
