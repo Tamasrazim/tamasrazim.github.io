@@ -196,8 +196,7 @@
 
       later(function () { setStage('names'); }, 3000);
       later(function () { setStage('path'); }, 4750);
-      later(function () { setStage('wordmark'); }, 7650);
-      later(showStory, 9800);
+      later(showStory, 5750);
     }
 
     function focusableItems() {
