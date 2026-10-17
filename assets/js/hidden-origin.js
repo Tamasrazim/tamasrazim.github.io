@@ -176,13 +176,13 @@
       clearTimers();
       resetStory();
       yearNumber.setAttribute('aria-label', '2026');
-      if (yearReel) yearReel.style.setProperty('--reel-step', '0');
+      if (yearReel) yearReel.style.setProperty('--reel-step', '5');
       yearNumber.classList.remove('is-ticking');
       setStage('year');
 
       if (reduceMotion && reduceMotion.matches) {
         yearNumber.setAttribute('aria-label', '2021');
-        if (yearReel) yearReel.style.setProperty('--reel-step', '5');
+        if (yearReel) yearReel.style.setProperty('--reel-step', '0');
         setStage('story');
         storyLines.forEach(function (line) {
           line.classList.add('is-visible');
@@ -196,7 +196,7 @@
       [2025, 2024, 2023, 2022, 2021].forEach(function (year, index) {
         later(function () {
           yearNumber.classList.add('is-ticking');
-          if (yearReel) yearReel.style.setProperty('--reel-step', String(index + 1));
+          if (yearReel) yearReel.style.setProperty('--reel-step', String(4 - index));
           later(function () {
             yearNumber.setAttribute('aria-label', String(year));
             yearNumber.classList.remove('is-ticking');
