@@ -7,6 +7,7 @@
     var dialog = document.getElementById('secretReveal');
     var closeButton = document.getElementById('secretClose');
     var yearNumber = document.getElementById('hoYearNumber');
+    var yearReel = document.getElementById('hoYearReel');
     var storyLines = Array.prototype.slice.call(document.querySelectorAll('#hoStoryCopy .ho-story-line'));
     var reduceMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
 
@@ -174,12 +175,14 @@
     function runSequence() {
       clearTimers();
       resetStory();
-      yearNumber.textContent = '2026';
+      yearNumber.setAttribute('aria-label', '2026');
+      if (yearReel) yearReel.style.setProperty('--reel-step', '0');
       yearNumber.classList.remove('is-ticking');
       setStage('year');
 
       if (reduceMotion && reduceMotion.matches) {
-        yearNumber.textContent = '2021';
+        yearNumber.setAttribute('aria-label', '2021');
+        if (yearReel) yearReel.style.setProperty('--reel-step', '5');
         setStage('story');
         storyLines.forEach(function (line) {
           line.classList.add('is-visible');
@@ -193,10 +196,11 @@
       [2025, 2024, 2023, 2022, 2021].forEach(function (year, index) {
         later(function () {
           yearNumber.classList.add('is-ticking');
+          if (yearReel) yearReel.style.setProperty('--reel-step', String(index + 1));
           later(function () {
-            yearNumber.textContent = String(year);
+            yearNumber.setAttribute('aria-label', String(year));
             yearNumber.classList.remove('is-ticking');
-          }, 110);
+          }, 220);
         }, 650 + index * 650);
       });
 
