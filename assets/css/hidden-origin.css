@@ -40,12 +40,12 @@
 }
 #secretReveal .ho-year-number.is-ticking{opacity:.16;transform:translateY(-8px) scale(.985)}
 #secretReveal .ho-year-rule{width:min(180px,34vw);height:1px;background:linear-gradient(90deg,transparent,#aaa,transparent);transform:scaleX(0);animation:hoRuleIn 1s .35s ease forwards}
-#secretReveal .ho-name-scene{z-index:8;justify-content:space-between;align-items:flex-start;padding:clamp(140px,22vh,230px) clamp(22px,10vw,160px) 0}
-#secretReveal .ho-name{position:relative;z-index:9;display:block;max-width:44%;color:#e8e8e8;font-family:"Unbounded",sans-serif;font-size:clamp(24px,6vw,78px);font-weight:500;letter-spacing:-.075em;opacity:0;filter:blur(8px);transform:translateY(18px)}
+#secretReveal .ho-name-scene{z-index:20;justify-content:space-between;align-items:flex-start;padding:clamp(140px,22vh,230px) clamp(22px,10vw,160px) 0;isolation:isolate}
+#secretReveal .ho-name{position:relative;z-index:21;display:block;max-width:44%;color:#f1f1f1;font-family:"Unbounded",sans-serif;font-size:clamp(24px,6vw,78px);font-weight:500;letter-spacing:-.075em;opacity:0;visibility:hidden;filter:blur(8px);transform:translateY(18px);text-shadow:0 2px 28px rgba(255,255,255,.12)}
 #secretReveal .ho-name-left{margin-top:-9vh}
-#secretReveal .ho-name-right{margin-top:9vh;color:#777}
+#secretReveal .ho-name-right{margin-top:9vh;color:#b8b8b8;text-align:right}
 #secretReveal .ho-name-caption{position:absolute;left:50%;bottom:13%;transform:translateX(-50%);white-space:nowrap;color:#555;font-size:8px;letter-spacing:.24em;opacity:0}
-#secretReveal .ho-path-scene{overflow:hidden}
+#secretReveal .ho-path-scene{z-index:5;overflow:hidden}
 #secretReveal .ho-path-svg{width:min(100vw,1000px);height:100%;max-height:100svh;overflow:visible;transform:translateY(-2%) scale(.9);transform-origin:50% 70%}
 #secretReveal .ho-flow{fill:none;stroke:url(#hoSilverFlow);stroke-width:1.7;stroke-linecap:round;stroke-dasharray:1200;stroke-dashoffset:1200;filter:url(#hoFlowGlow)}
 #secretReveal .ho-flow-b{stroke-dashoffset:1200}
@@ -107,7 +107,7 @@
   #secretReveal .ho-cinema{min-height:100svh}
   #secretReveal .ho-year-number{font-size:clamp(76px,22vw,145px)}
   #secretReveal .ho-year-kicker,#secretReveal .ho-wordmark-overline{font-size:8px;letter-spacing:.2em}
-  #secretReveal .ho-name-scene{z-index:8;padding:clamp(125px,22vh,190px) 7vw 0;align-items:flex-start}
+  #secretReveal .ho-name-scene{z-index:20;padding:clamp(125px,22vh,190px) 7vw 0;align-items:flex-start}
   #secretReveal .ho-name{font-size:clamp(22px,6.5vw,42px)}
   #secretReveal .ho-name-left{margin-top:-5vh}
   #secretReveal .ho-name-right{margin-top:5vh}
