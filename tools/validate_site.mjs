@@ -302,19 +302,13 @@ must(qalyvyronPage.includes('approximately every 30 seconds')&&qalyvyronPage.inc
 must(qalyvyronPage.includes('Run 38195187492 passed')&&qalyvyronPage.includes('CTest suite')&&qalyvyronPage.includes('edge subdivision'),'QALYVYRON build status reflects current green Linux/Windows tests for mesh subdivision');
 must(qalyvyronPage.includes('disconnected selections')&&qalyvyronPage.includes('consistent face winding'),'QALYVYRON page documents tested edge-loop rejection and orientation handling');
 
-const cinematicIntroCss=read('assets/css/project-cinematic-intro.css');
 const cinematicIntroJs=read('assets/js/project-cinematic-intro.js');
 execFileSync(process.execPath,['--check',path.join(ROOT,'assets/js/project-cinematic-intro.js')]);
-must(cinematicIntroJs.includes('Object.assign(profiles')&&cinematicIntroJs.includes('Escape'),'cinematic intro has project profiles and a keyboard skip path');
-must(cinematicIntroJs.includes('home: {')&&cinematicIntroJs.includes('IDENTITY ASSEMBLY / MAIN SITE'),'cinematic intro includes the homepage ID assembly profile');
-must(cinematicIntroCss.includes('.pci-project--home')&&cinematicIntroCss.includes('.pci-home-id-mount')&&cinematicIntroCss.includes('.pci-home-built-card'),'homepage intro animates the original identity-card component');
-must(cinematicIntroCss.includes('@keyframes pci-home-card-reveal')&&cinematicIntroCss.includes('pci-home-constellation-bloom')&&cinematicIntroCss.includes('pci-home-flash-pass'),'homepage intro uses its centre-opening 3D reveal, constellation bloom, and finishing light pass');
-must(cinematicIntroCss.includes('--ring-z:-18deg')&&cinematicIntroCss.includes('--ring-z:32deg')&&cinematicIntroCss.includes('rotateZ(var(--ring-z'),'homepage orbital rings preserve distinct crossing angles through the entrance animation');
-must(cinematicIntroCss.includes('.pci-home-loading-track span')&&cinematicIntroCss.includes('@keyframes pci-home-loader-sweep')&&cinematicIntroCss.includes('pci-home-loader-spin'),'homepage has an animated loading scene while the original JPG is pending');
-must(cinematicIntroJs.includes('waitForHomeImage()')&&cinematicIntroJs.includes('homeImage.complete')&&cinematicIntroJs.includes('12000'),'homepage waits for its source image and includes a bounded fallback');
-must(cinematicIntroJs.includes('durationMs: 8500')&&cinematicIntroJs.includes('durationLabel: "08.5 SEC"'),'homepage ID assembly duration is between seven and ten seconds');
-must(cinematicIntroJs.includes('document.querySelector("main .id-card")')&&cinematicIntroJs.includes('homeMount.appendChild(homeCard)')&&cinematicIntroJs.includes('restoreHomeCard()'),'homepage animation moves and restores the original identity-card node');
-must(cinematicIntroJs.includes('cancelAnimationFrame(startFrame)')&&cinematicIntroJs.includes('if (isClosing) return;')&&cinematicIntroJs.includes('let didStart = false;'),'homepage intro safely handles Skip or Escape before the first animation frame');
+must(cinematicIntroJs.includes('Object.assign(profiles')&&cinematicIntroJs.includes('Escape'),'project cinematic intros retain profiles and a keyboard skip path');
+must(!site.includes('data-cinematic-intro="home"')&&!site.includes('project-cinematic-intro.css?v=')&&!site.includes('project-cinematic-intro.js?v='),'homepage no longer loads the identity-card intro overlay');
+const hiddenOriginJs=read('assets/js/hidden-origin.js');
+must(hiddenOriginJs.includes('function alignOriginPaths()')&&hiddenOriginJs.includes("pathFrom(leftName, ['hoFlowA', 'hoFlowCoreA']")&&hiddenOriginJs.includes("pathFrom(rightName, ['hoFlowB', 'hoFlowCoreB']"),'hidden-origin flow paths align dynamically to the Razim and Tamanna text');
+must(site.includes('id="hoFlowA"')&&site.includes('id="hoFlowB"')&&site.includes('id="hoFlowCoreA"')&&site.includes('id="hoFlowCoreB"'),'hidden-origin SVG flow paths expose alignment targets');
 const identityCardCss=read('assets/css/site.css');
 const identityCardJs=read('assets/js/site.js');
 const identityCardStart=site.indexOf('<article class="id-card tilt reveal" data-reveal');
