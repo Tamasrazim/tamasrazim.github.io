@@ -1,9 +1,9 @@
 /* Hidden Origin v3 — self-contained monochrome identity archive. */
-#secretReveal.ho-overlay[hidden]{display:none!important}
+#secretReveal.ho-overlay[hidden]{display:none!important;clip-path:none!important}
 #secretReveal.ho-overlay:not([hidden]){
   position:fixed;inset:0;z-index:99999;display:grid;place-items:center;
   box-sizing:border-box;padding:clamp(10px,2.5vw,30px);overflow:hidden;
-  color:#f4f4f4;background:#030303;font-family:"JetBrains Mono",monospace;
+  color:#f4f4f4;background:#030303;font-family:"JetBrains Mono",monospace;clip-path:none!important;
   opacity:0;visibility:hidden;pointer-events:none;transition:opacity .28s ease,visibility .28s ease;
 }
 #secretReveal.ho-overlay.is-open{opacity:1;visibility:visible;pointer-events:auto}
