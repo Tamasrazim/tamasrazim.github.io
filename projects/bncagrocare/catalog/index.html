@@ -195,7 +195,7 @@ a{color:inherit;text-decoration:none}img{display:block;max-width:100%}button,inp
       grid.innerHTML='<div style="grid-column:1/-1;padding:42px;border:1px dashed #c5cec4;border-radius:22px;text-align:center;color:#738078">No matching product found.</div>';
       return;
     }
-    grid.innerHTML=list.map((p,i)=>'<article class="product reveal" style="--delay:'+Math.min(i,6)+'"><div class="productTop"><span class="productCode">'+esc(p.code||String(i+1).padStart(2,"0"))+'</span><span class="productMark">↗</span></div><h3>'+esc(p.name)+'</h3><div class="packLabel">'+(p.packs?.length||0)+' pack formats</div><div class="packs">'+(p.packs||[]).map(v=>'<span class="pack">'+esc(v)+'</span>').join("")+'</div></article>').join("");
+    grid.innerHTML=list.map((p,i)=>'<article class="product reveal" style="--delay:'+Math.min(i,6)+'"><div class="productTop"><span class="productCode">'+esc(p.code||String(i+1).padStart(2,"0"))+'</span><span class="productMark"></span></div><h3>'+esc(p.name)+'</h3><div class="packLabel">'+(p.packs?.length||0)+' pack formats</div><div class="packs">'+(p.packs||[]).map(v=>'<span class="pack">'+esc(v)+'</span>').join("")+'</div></article>').join("");
     requestAnimationFrame(()=>document.querySelectorAll(".product.reveal").forEach((el,i)=>setTimeout(()=>el.classList.add("in"),i*35)));
   }
   search.addEventListener("input",e=>render(e.target.value));
