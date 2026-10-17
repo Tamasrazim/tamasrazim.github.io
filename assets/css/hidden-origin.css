@@ -31,7 +31,7 @@
 }
 #secretReveal .ho-year-scene{flex-direction:column;gap:18px}
 #secretReveal .ho-year-dial{position:relative;display:grid;place-items:center;width:min(64vw,360px);aspect-ratio:1;isolation:isolate}
-#secretReveal .ho-year-dial::before{content:"";position:absolute;inset:0;border:1px solid rgba(220,220,220,.38);border-radius:50%;background:repeating-conic-gradient(from -2deg,rgba(240,240,240,.72) 0deg 1deg,transparent 1deg 10deg);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1px));mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1px))}
+#secretReveal .ho-year-dial::before{content:"";position:absolute;inset:0;border:1px solid rgba(220,220,220,.38);border-radius:50%;background:repeating-conic-gradient(from -2deg,rgba(240,240,240,.72) 0deg 1deg,transparent 1deg 10deg);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1px));mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1px));animation:hoDialSpin 12s linear infinite}
 #secretReveal .ho-year-dial::after{content:"";position:absolute;inset:11%;border:1px solid rgba(200,200,200,.16);border-radius:50%;box-shadow:inset 0 0 40px rgba(255,255,255,.025),0 0 35px rgba(255,255,255,.035)}
 #secretReveal .ho-year-dial-mark{position:absolute;z-index:2;left:50%;width:3px;height:12px;background:#eee;transform:translateX(-50%);box-shadow:0 0 12px rgba(255,255,255,.45)}
 #secretReveal .ho-year-dial-mark-top{top:-2px}
@@ -151,6 +151,7 @@
 @media(prefers-reduced-motion:reduce){
   #secretReveal.ho-overlay,#secretReveal .ho-year-scene,#secretReveal .ho-name-scene,#secretReveal .ho-path-scene,#secretReveal .ho-wordmark-scene,#secretReveal .ho-wordmark-overline,#secretReveal .ho-wordmark-underline,#secretReveal .ho-story-scene{transition:none!important}
   #secretReveal .ho-wordmark-tama,#secretReveal .ho-wordmark-srazim{animation:none;background-position:50%}
+  #secretReveal .ho-year-dial::before{animation:none}
   #secretReveal .ho-year-reel{transition:none!important}
   #secretReveal.stage-path .ho-flow-a,#secretReveal.stage-path .ho-flow-b,#secretReveal.stage-path .ho-flow-core,#secretReveal.stage-path .ho-flow-core-b,#secretReveal.stage-path .ho-path-svg,#secretReveal.stage-path .ho-flow-point,#secretReveal.stage-path .ho-camera-caption{animation:none}
   #secretReveal.stage-path .ho-flow-a,#secretReveal.stage-path .ho-flow-b,#secretReveal.stage-path .ho-flow-core,#secretReveal.stage-path .ho-flow-core-b{stroke-dashoffset:0}
