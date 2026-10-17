@@ -87,9 +87,6 @@
 #secretReveal.stage-path .ho-path-svg{animation:hoCameraDive 2.8s .5s cubic-bezier(.45,0,.25,1) forwards}
 #secretReveal.stage-path .ho-flow-point{animation:hoPointFlash .8s 2.35s ease forwards}
 #secretReveal.stage-path .ho-camera-caption{animation:hoCaption 1.4s .2s ease forwards}
-#secretReveal.stage-path .ho-wordmark-scene{opacity:1;visibility:visible;transform:translateY(30vh) scale(.42);transition-delay:.15s}
-#secretReveal.stage-path .ho-wordmark-overline{opacity:0;visibility:hidden}
-#secretReveal.stage-path .ho-wordmark-underline{width:min(180px,34vw)}
 #secretReveal.stage-wordmark .ho-wordmark-scene,#secretReveal.stage-story .ho-wordmark-scene{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
 #secretReveal.stage-wordmark .ho-wordmark-overline,#secretReveal.stage-story .ho-wordmark-overline{opacity:1;transform:translateY(0)}
 #secretReveal.stage-wordmark .ho-wordmark-underline,#secretReveal.stage-story .ho-wordmark-underline{width:min(260px,45vw)}
