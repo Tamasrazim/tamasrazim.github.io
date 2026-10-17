@@ -41,9 +41,8 @@ body.pp-page[data-project="trss"] .pp-art:before,body.pp-page[data-project="trss
 .trss-personal-note{display:flex;justify-content:center;align-items:center;width:100%;margin:28px 0 8px;padding:15px 0;border-top:1px solid var(--pp-line);border-bottom:1px solid var(--pp-line);text-align:center}
 .trss-personal-note p{margin:0;color:var(--pp-muted);font:12px/1.8 var(--pp-sans,inherit);text-align:center}.trss-personal-note .trss-note-line{display:block}.trss-personal-note .trss-note-description{display:block;max-width:620px;margin:10px auto 0;color:var(--pp-muted);font:13px/1.8 var(--pp-sans,inherit);text-align:center}
 .trss-personal-note strong{color:var(--pp-text);font-weight:600}
-.trss-vibe-word{font-weight:800;background:linear-gradient(90deg,#777 0%,#fff 45%,#aaa 70%,#777 100%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:trss-vibe-gradient 1.1s linear infinite}
-@keyframes trss-vibe-gradient{to{background-position:220% 0}}
-@media(prefers-reduced-motion:reduce){.trss-vibe-word{animation:none;background-position:50% 0}}
+.trss-vibe-word{font-weight:800!important;background:none!important;background-image:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;color:var(--pp-text,#fff)!important;-webkit-text-fill-color:var(--pp-text,#fff)!important;animation:none!important;text-shadow:none!important}
+
 
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","@id":"https://tamasrazim.github.io/projects/trss/#software","name":"TrSS","alternateName":"Tamasrazim's Real-time Scene Synthesis","url":"https://tamasrazim.github.io/projects/trss/","description":"Independent in-development research exploring DLSS 5-style neural-rendering concepts for Intel Arc GPUs, including game-frame reconstruction and temporal stability. TrSS is not an NVIDIA DLSS port and does not claim equivalent image quality or performance.","applicationCategory":"DeveloperApplication","operatingSystem":"Windows; compatible Python development environments","softwareVersion":"Research / in development","creator":{"@id":"https://tamasrazim.github.io/#person"},"isPartOf":{"@id":"https://tamasrazim.github.io/#website"},"programmingLanguage":["Python","C++"]}</script>
