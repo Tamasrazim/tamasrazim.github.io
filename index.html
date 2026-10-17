@@ -681,44 +681,55 @@
         </button>
         <span class="secret-bubble" id="secretBubble" role="status" aria-live="polite"></span>
       </div><a class="footer-link" href="/licences/">Licences </a><a class="footer-link" href="#top">Tamasrazim ↑</a></div></footer><aside class="secret-reveal ho-overlay" id="secretReveal" role="dialog" aria-modal="true" aria-labelledby="secretTitle" aria-describedby="secretSummary" hidden>
-  <div class="ho-backdrop" aria-hidden="true"><span class="ho-grid"></span><span class="ho-ring"></span></div>
-  <div class="ho-panel">
-    <header class="ho-topbar">
-      <div><p class="ho-file-label">Restricted / identity archive</p><p class="ho-file-path">/ hidden / origin / 001</p></div>
-      <button class="ho-close" id="secretClose" type="button" aria-label="Close hidden origin"><span>ESC</span><b aria-hidden="true">×</b></button>
-    </header>
-    <div class="ho-content">
-      <section class="ho-hero">
-        <div>
-          <p class="ho-overline">A private piece of the public identity</p>
-          <h2 class="ho-title" id="secretTitle"><span>TAMA</span><i aria-hidden="true">+</i><span>RAZIM</span></h2>
-        </div>
-        <p class="ho-summary" id="secretSummary">The name <strong>Tamasrazim</strong> was not assembled at random. It keeps two pieces of a real story together: Tama, carried from Tamanna, and Razim, carried from my real name.</p>
-      </section>
-      <section class="ho-ledger" aria-label="The three steps behind the name">
-        <article class="ho-entry">
-          <span class="ho-entry-no">01 / SOURCE</span><span class="ho-entry-mark" aria-hidden="true">TA</span>
-          <span class="ho-entry-type">THE FIRST FRAGMENT</span><h3>TAMANNA</h3>
-          <p>From Tamanna came <strong>Tama</strong> — a small piece of the name that stayed with the story.</p>
-        </article>
-        <article class="ho-entry">
-          <span class="ho-entry-no">02 / ROOT</span><span class="ho-entry-mark" aria-hidden="true">RZ</span>
-          <span class="ho-entry-type">THE REAL NAME</span><h3>RAZIM</h3>
-          <p><strong>Razim</strong> came from my real-life name, keeping the online identity tied to the person behind it.</p>
-        </article>
-        <article class="ho-entry">
-          <span class="ho-entry-no">03 / MERGE</span><span class="ho-entry-mark" aria-hidden="true">T/R</span>
-          <span class="ho-entry-type">THE JOIN</span><h3>TAMA + RAZIM</h3>
-          <p>The two fragments joined. The space disappeared, and the combined name became one identity.</p>
-        </article>
-      </section>
-      <section class="ho-result" aria-labelledby="hoResultTitle">
-        <p class="ho-result-label" id="hoResultTitle">FINAL IDENTITY / NAME RECORD</p>
-        <p class="ho-result-name"><span>TAMA</span><em>SRAZIM</em></p>
-        <blockquote class="ho-quote">Tama, carried from Tamanna.<br>Razim, carried from my real name.<br>Two fragments, joined into one name.</blockquote>
-        <p class="ho-note">The final name is <strong>Tamasrazim</strong>. It does not replace who I am; it remembers where the name came from.</p>
-      </section>
+  <button class="ho-close" id="secretClose" type="button" aria-label="Close hidden origin sequence"><span>ESC</span><b aria-hidden="true">×</b></button>
+  <div class="ho-cinema" id="hoCinema">
+    <div class="ho-year-scene" id="hoYearScene" aria-hidden="true">
+      <p class="ho-year-kicker">ORIGIN / TIMELINE</p>
+      <div class="ho-year-number" id="hoYearNumber">2026</div>
+      <div class="ho-year-rule"></div>
     </div>
-    <footer class="ho-footer"><span>ORIGIN RECORD / END OF FILE</span><span>TAMASRAZIM</span></footer>
+    <div class="ho-name-scene" id="hoNameScene" aria-hidden="true">
+      <span class="ho-name ho-name-left" id="hoRazim">Razim</span>
+      <span class="ho-name ho-name-right" id="hoTamanna">Tamanna</span>
+      <span class="ho-name-caption">TWO FRAGMENTS / ONE IDENTITY</span>
+    </div>
+    <div class="ho-path-scene" id="hoPathScene" aria-hidden="true">
+      <svg class="ho-path-svg" viewBox="0 0 1000 720" preserveAspectRatio="xMidYMid meet" role="presentation">
+        <defs>
+          <linearGradient id="hoSilverFlow" x1="0" y1="0" x2="0.9" y2="1">
+            <stop offset="0" stop-color="#555"/>
+            <stop offset=".48" stop-color="#f2f2f2"/>
+            <stop offset="1" stop-color="#777"/>
+          </linearGradient>
+          <filter id="hoFlowGlow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="4" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <path class="ho-flow ho-flow-a" d="M170 65 C170 170 190 220 300 300 S470 410 500 535"/>
+        <path class="ho-flow ho-flow-b" d="M830 65 C830 170 810 220 700 300 S530 410 500 535"/>
+        <path class="ho-flow-core" d="M170 65 C170 170 190 220 300 300 S470 410 500 535"/>
+        <path class="ho-flow-core ho-flow-core-b" d="M830 65 C830 170 810 220 700 300 S530 410 500 535"/>
+        <circle class="ho-flow-point" cx="500" cy="535" r="5"/>
+      </svg>
+      <div class="ho-camera-caption" id="hoCameraCaption">FOLLOW THE CONNECTION</div>
+    </div>
+    <div class="ho-wordmark-scene" id="hoWordmarkScene">
+      <p class="ho-wordmark-overline">THE NAME BECOMES ONE</p>
+      <h2 class="ho-wordmark" id="secretTitle"><span class="ho-wordmark-tama">Tama</span><span class="ho-wordmark-srazim">srazim</span></h2>
+      <div class="ho-wordmark-underline"></div>
+    </div>
+    <section class="ho-story-scene" id="hoStoryScene" aria-labelledby="hoStoryHeading">
+      <p class="ho-story-kicker" id="hoStoryHeading">ORIGIN RECORD / 001</p>
+      <p class="ho-story-intro" id="secretSummary">A name formed from two pieces of a real story.</p>
+      <div class="ho-story-copy" id="hoStoryCopy">
+        <p class="ho-story-line">From <strong>.<span class="ho-story-word">Tamanna</span></strong> came <strong>Tama</strong> — a small piece of a name that stayed with the story.</p>
+        <p class="ho-story-line"><strong>Razim</strong> came from my real-life name, keeping the online identity tied to the person behind it.</p>
+        <p class="ho-story-line">The two fragments met. The space disappeared, and the combined name became one identity.</p>
+        <p class="ho-story-line ho-story-final">Tamasrazim.</p>
+        <p class="ho-story-line ho-story-signoff">Two fragments, joined into one name.</p>
+      </div>
+      <div class="ho-story-footer"><span>END OF ORIGIN RECORD</span><span>TAMASRAZIM / 2023—2026</span></div>
+    </section>
   </div>
 </aside></body></html>
