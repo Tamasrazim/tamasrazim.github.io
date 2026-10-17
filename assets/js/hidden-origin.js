@@ -49,8 +49,9 @@
       function pointFor(element) {
         var rect = element.getBoundingClientRect();
         var point = svg.createSVGPoint();
+        // Anchor the flow just below the visible name, never through its lettering.
         point.x = rect.left + rect.width / 2;
-        point.y = rect.top + rect.height / 2;
+        point.y = rect.bottom + 5;
         return point.matrixTransform(inverse);
       }
 
@@ -64,11 +65,7 @@
           ', ' + targetX.toFixed(2) + ' ' + targetY.toFixed(2);
         pathIds.forEach(function (id) {
           var path = document.getElementById(id);
-          if (path) {
-            path.setAttribute('d', d);
-            path.style.strokeDasharray = '1200';
-            path.style.strokeDashoffset = '1200';
-          }
+          if (path) path.setAttribute('d', d);
         });
       }
 
@@ -76,8 +73,17 @@
       pathFrom(rightName, ['hoFlowB', 'hoFlowCoreB'], 'right');
     }
 
+    function keepPathsBelowNames() {
+      if (!isOpen || !dialog.classList.contains('stage-path')) return;
+      alignOriginPaths();
+      window.requestAnimationFrame(keepPathsBelowNames);
+    }
+
     function setStage(stage) {
-      if (stage === 'path') alignOriginPaths();
+      if (stage === 'path') {
+        alignOriginPaths();
+        window.requestAnimationFrame(keepPathsBelowNames);
+      }
       ['year', 'names', 'path', 'wordmark', 'story'].forEach(function (name) {
         dialog.classList.toggle('stage-' + name, name === stage);
       });
