@@ -37,6 +37,26 @@
       ['year', 'names', 'path', 'wordmark', 'story'].forEach(function (name) {
         dialog.classList.toggle('stage-' + name, name === stage);
       });
+
+      // Keep both names explicitly visible during the name and flowing-line shots.
+      var nameScene = document.getElementById('hoNameScene');
+      var razim = document.getElementById('hoRazim');
+      var tamanna = document.getElementById('hoTamanna');
+      var showNames = stage === 'names' || stage === 'path';
+      if (nameScene) {
+        nameScene.style.zIndex = showNames ? '20' : '';
+        nameScene.style.opacity = showNames ? '1' : '';
+        nameScene.style.visibility = showNames ? 'visible' : '';
+      }
+      [razim, tamanna].forEach(function (name) {
+        if (!name) return;
+        name.style.zIndex = showNames ? '40' : '';
+        name.style.display = showNames ? 'block' : '';
+        name.style.opacity = showNames ? '1' : '';
+        name.style.visibility = showNames ? 'visible' : '';
+        name.style.filter = showNames ? 'none' : '';
+        name.style.transform = showNames ? 'none' : '';
+      });
     }
 
     function resetStory() {
