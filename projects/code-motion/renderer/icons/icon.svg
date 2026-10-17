@@ -1,9 +1,13 @@
-<!-- What this image draws: The app icon used by the Code Motion renderer page. -->
+<!-- TRILYVA monochrome application icon; wordmark set in the site's Unbounded display typeface. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
-  <title id="title">KYNESTRA K</title>
-  <desc id="desc">Geometric K monogram for KYNESTRA.</desc>
+  <title id="title">Trilyva</title>
+  <desc id="desc">Monochrome Trilyva animation-rendering studio wordmark on black.</desc>
   <rect width="1024" height="1024" rx="184" fill="#050505"/>
-  <rect x="92" y="92" width="840" height="840" rx="148" fill="none" stroke="#2b2b2b" stroke-width="10"/>
-  <text x="512" y="706" text-anchor="middle" font-family="Unbounded, Orbitron, Montserrat, Arial Black, sans-serif" font-size="600" font-weight="800" letter-spacing="-52" fill="#f5f5f5">K</text>
-  <path d="M180 818H844" stroke="#f5f5f5" stroke-width="8" stroke-linecap="round" opacity=".22"/>
+  <rect x="54" y="54" width="916" height="916" rx="154" fill="none" stroke="#292929" stroke-width="8"/>
+  <path d="M144 352H880" stroke="#fff" stroke-width="5" opacity=".14"/>
+  <text x="512" y="542" text-anchor="middle" font-family="Unbounded, sans-serif" font-size="136" font-weight="700" letter-spacing="-5" fill="#f5f5f5">Trilyva</text>
+  <path d="M236 626H788" stroke="#f5f5f5" stroke-width="7" stroke-linecap="round" opacity=".7"/>
+  <path d="M236 626H420" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
+  <g fill="#f5f5f5"><circle cx="236" cy="626" r="9"/><circle cx="788" cy="626" r="9"/></g>
+  <text x="512" y="714" text-anchor="middle" font-family="Unbounded, sans-serif" font-size="26" font-weight="500" letter-spacing="7" fill="#777">FRAME BY FRAME</text>
 </svg>
