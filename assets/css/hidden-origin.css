@@ -81,9 +81,9 @@
 #secretReveal.stage-names .ho-name-left,#secretReveal.stage-names .ho-name-right,#secretReveal.stage-path .ho-name-left,#secretReveal.stage-path .ho-name-right{opacity:1;filter:blur(0);transform:translateY(0);transition:opacity .85s ease,filter .85s ease,transform .85s cubic-bezier(.2,.8,.2,1)}
 #secretReveal.stage-names .ho-name-caption,#secretReveal.stage-path .ho-name-caption{opacity:1;transition:opacity .8s ease .4s}
 #secretReveal.stage-path .ho-flow-a{animation:hoDrawPath 2.15s cubic-bezier(.3,.7,.2,1) forwards}
-#secretReveal.stage-path .ho-flow-b{animation:hoDrawPath 2.3s .62s cubic-bezier(.3,.7,.2,1) forwards}
+#secretReveal.stage-path .ho-flow-b{animation:hoDrawPath 2.3s 1.25s cubic-bezier(.3,.7,.2,1) forwards}
 #secretReveal.stage-path .ho-flow-core{animation:hoDrawPath 2.15s .05s ease forwards}
-#secretReveal.stage-path .ho-flow-core-b{animation:hoDrawPath 2.3s .67s ease forwards}
+#secretReveal.stage-path .ho-flow-core-b{animation:hoDrawPath 2.3s 1.3s ease forwards}
 #secretReveal.stage-path .ho-path-svg{animation:hoCameraDive 2.8s .5s cubic-bezier(.45,0,.25,1) forwards}
 #secretReveal.stage-path .ho-flow-point{animation:hoPointFlash .8s 2.35s ease forwards}
 #secretReveal.stage-path .ho-camera-caption{animation:hoCaption 1.4s .2s ease forwards}
