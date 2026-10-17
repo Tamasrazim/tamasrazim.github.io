@@ -53,7 +53,7 @@
 #secretReveal .ho-flow-core-b{stroke-dashoffset:1200}
 #secretReveal .ho-flow-point{fill:#f4f4f4;opacity:0;filter:url(#hoFlowGlow)}
 #secretReveal .ho-camera-caption{position:absolute;bottom:10%;left:50%;transform:translateX(-50%);white-space:nowrap;color:#696969;font-size:8px;letter-spacing:.24em;opacity:0}
-#secretReveal .ho-wordmark-scene{z-index:4;flex-direction:column;gap:20px;opacity:0;visibility:hidden;transform:translateY(7vh) scale(.96);transition:transform 1.15s cubic-bezier(.2,.75,.15,1),opacity .7s ease,visibility .7s ease}
+#secretReveal .ho-wordmark-scene{z-index:4;flex-direction:column;gap:20px;opacity:0;visibility:hidden;transform:translateY(7vh) scale(.96);transition:transform 1.15s cubic-bezier(.2,.75,.15,1),opacity .9s ease,visibility .9s ease}
 #secretReveal .ho-wordmark-overline{opacity:0;transform:translateY(8px);transition:opacity .7s ease .25s,transform .7s ease .25s}
 #secretReveal .ho-wordmark{display:flex;justify-content:center;gap:0;margin:0;padding:0 4vw;font-family:"Unbounded",sans-serif;font-size:clamp(38px,10.5vw,142px);font-weight:600;line-height:1.05;letter-spacing:-.095em;white-space:nowrap}
 #secretReveal .ho-wordmark-tama,#secretReveal .ho-wordmark-srazim{
@@ -80,12 +80,12 @@
 #secretReveal.stage-year .ho-year-scene,#secretReveal.stage-names .ho-name-scene,#secretReveal.stage-path .ho-name-scene,#secretReveal.stage-path .ho-path-scene{opacity:1;visibility:visible}
 #secretReveal.stage-names .ho-name-left,#secretReveal.stage-names .ho-name-right,#secretReveal.stage-path .ho-name-left,#secretReveal.stage-path .ho-name-right{display:block;opacity:1!important;visibility:visible!important;filter:blur(0);transform:translateY(0);transition:opacity .85s ease,filter .85s ease,transform .85s cubic-bezier(.2,.8,.2,1)}
 #secretReveal.stage-names .ho-name-caption,#secretReveal.stage-path .ho-name-caption{opacity:1;transition:opacity .8s ease .4s}
-#secretReveal.stage-path .ho-flow-a{animation:hoDrawPath 2.15s cubic-bezier(.3,.7,.2,1) forwards}
-#secretReveal.stage-path .ho-flow-b{animation:hoDrawPath 2.3s 1.25s cubic-bezier(.3,.7,.2,1) forwards}
-#secretReveal.stage-path .ho-flow-core{animation:hoDrawPath 2.15s .05s ease forwards}
-#secretReveal.stage-path .ho-flow-core-b{animation:hoDrawPath 2.3s 1.3s ease forwards}
-#secretReveal.stage-path .ho-path-svg{animation:hoCameraDive 2.8s .5s cubic-bezier(.45,0,.25,1) forwards}
-#secretReveal.stage-path .ho-flow-point{animation:hoPointFlash .8s 2.35s ease forwards}
+#secretReveal.stage-path .ho-flow-a{animation:hoDrawPath 3.5s cubic-bezier(.3,.7,.2,1) forwards}
+#secretReveal.stage-path .ho-flow-b{animation:hoDrawPath 3.8s 1.5s cubic-bezier(.3,.7,.2,1) forwards}
+#secretReveal.stage-path .ho-flow-core{animation:hoDrawPath 3.5s .05s ease forwards}
+#secretReveal.stage-path .ho-flow-core-b{animation:hoDrawPath 3.8s 1.55s ease forwards}
+#secretReveal.stage-path .ho-path-svg{animation:hoCameraDive 4.8s .5s cubic-bezier(.45,0,.25,1) forwards}
+#secretReveal.stage-path .ho-flow-point{animation:hoPointFlash .8s 4.9s ease forwards}
 #secretReveal.stage-path .ho-camera-caption{animation:hoCaption 1.4s .2s ease forwards}
 #secretReveal.stage-wordmark .ho-wordmark-scene,#secretReveal.stage-story .ho-wordmark-scene{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
 #secretReveal.stage-wordmark .ho-wordmark-overline,#secretReveal.stage-story .ho-wordmark-overline{opacity:1;transform:translateY(0)}
