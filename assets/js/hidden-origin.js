@@ -205,8 +205,9 @@
       // The two line draws meet at the center after the second path finishes.
       // Reveal the animated wordmark only after that collision, hold it for one second,
       // then transition it upward into the story.
-      later(function () { setStage('wordmark'); }, 8500);
-      later(showStory, 9500);
+      later(function () { setStage('wordmark'); }, 10300);
+      // Let the wordmark finish fading in, then hold it for one full second before it rises.
+      later(showStory, 12200);
     }
 
     function focusableItems() {
