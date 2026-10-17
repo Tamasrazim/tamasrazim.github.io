@@ -119,7 +119,7 @@
       tagline: "MAKE FILES FLOW.",
       description: "File shapes rotate through a clean conversion path, ready for the next task.",
       sequence: "SEQUENCE 08 / FILE WORKFLOW",
-      art: '<div class="pci-forge-scene" aria-hidden="true"><div class="pci-forge-orbit"></div><div class="pci-file-tile pci-file-tile-back"><span>TXT</span><i></i></div><div class="pci-file-tile pci-file-tile-mid"><span>SVG</span><i></i></div><div class="pci-file-tile pci-file-tile-front"><span>FILE</span><i></i><b>↗</b></div><span class="pci-forge-track">INPUT / TRANSFORM / OUTPUT</span></div>'
+      art: '<div class="pci-forge-scene" aria-hidden="true"><div class="pci-forge-orbit"></div><div class="pci-file-tile pci-file-tile-back"><span>TXT</span><i></i></div><div class="pci-file-tile pci-file-tile-mid"><span>SVG</span><i></i></div><div class="pci-file-tile pci-file-tile-front"><span>FILE</span><i></i><b></b></div><span class="pci-forge-track">INPUT / TRANSFORM / OUTPUT</span></div>'
     },
     "asset-vault": {
       title: "STOCK ASSET VAULT", kicker: "CREATIVE LIBRARY / LOCAL ORGANISATION",
