@@ -31,12 +31,16 @@
 }
 #secretReveal .ho-year-scene{flex-direction:column;gap:18px}
 #secretReveal .ho-year-dial{position:relative;display:grid;place-items:center;width:min(64vw,360px);aspect-ratio:1;isolation:isolate}
-#secretReveal .ho-year-dial::before{content:"";position:absolute;inset:0;border:1px solid rgba(220,220,220,.38);border-radius:50%;background:repeating-conic-gradient(from -2deg,rgba(240,240,240,.72) 0deg 1deg,transparent 1deg 10deg);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1px));mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1px));animation:hoDialSpin 12s linear infinite}
+#secretReveal .ho-year-dial::before{content:"";position:absolute;inset:0;border:1px solid rgba(220,220,220,.38);border-radius:50%;background:repeating-conic-gradient(from -2deg,rgba(240,240,240,.72) 0deg 1deg,transparent 1deg 10deg);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1px));mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1px))}
 #secretReveal .ho-year-dial::after{content:"";position:absolute;inset:11%;border:1px solid rgba(200,200,200,.16);border-radius:50%;box-shadow:inset 0 0 40px rgba(255,255,255,.025),0 0 35px rgba(255,255,255,.035)}
 #secretReveal .ho-year-dial-mark{position:absolute;z-index:2;left:50%;width:3px;height:12px;background:#eee;transform:translateX(-50%);box-shadow:0 0 12px rgba(255,255,255,.45)}
 #secretReveal .ho-year-dial-mark-top{top:-2px}
 #secretReveal .ho-year-dial-mark-bottom{bottom:-2px;opacity:.3}
-#secretReveal .ho-year-dial .ho-year-number{z-index:1;font-size:clamp(54px,12vw,132px);letter-spacing:-.09em;transform:rotate(0deg);transition:opacity .16s ease,transform .22s cubic-bezier(.2,.75,.15,1)}
+#secretReveal .ho-year-dial .ho-year-number{z-index:1;display:flex;align-items:center;justify-content:center;font-size:clamp(54px,12vw,132px);letter-spacing:-.09em;line-height:1;white-space:nowrap;transition:opacity .2s ease}
+#secretReveal .ho-year-prefix{display:block;letter-spacing:-.105em}
+#secretReveal .ho-year-reel-window{display:block;position:relative;overflow:hidden;height:1em;width:.64em;line-height:1em}
+#secretReveal .ho-year-reel{display:flex;flex-direction:column;transform:translateY(calc(var(--reel-step,0) * -1em));transition:transform .58s cubic-bezier(.22,.75,.2,1);will-change:transform}
+#secretReveal .ho-year-reel>span{display:block;flex:0 0 1em;height:1em;line-height:1em;text-align:center;letter-spacing:-.09em}
 #secretReveal .ho-year-kicker,#secretReveal .ho-wordmark-overline,#secretReveal .ho-story-kicker{
   margin:0;color:#737373;font-size:9px;letter-spacing:.28em;text-transform:uppercase;
 }
@@ -45,7 +49,8 @@
   letter-spacing:-.105em;line-height:1;color:#e9e9e9;font-variant-numeric:tabular-nums;
   text-shadow:0 0 48px rgba(255,255,255,.08);transition:opacity .16s ease,transform .16s ease;
 }
-#secretReveal .ho-year-number.is-ticking{opacity:.12;transform:rotate(-90deg) scale(.9)}
+#secretReveal .ho-year-number.is-ticking{opacity:.7}
+#secretReveal .ho-year-number.is-ticking .ho-year-reel{filter:blur(.4px)}
 #secretReveal .ho-year-rule{width:min(180px,34vw);height:1px;background:linear-gradient(90deg,transparent,#aaa,transparent);transform:scaleX(0);animation:hoRuleIn 1s .35s ease forwards}
 #secretReveal .ho-name-scene{z-index:20;justify-content:space-between;align-items:flex-start;padding:clamp(140px,22vh,230px) clamp(22px,10vw,160px) 0;isolation:isolate}
 #secretReveal .ho-name{position:absolute;z-index:40;display:block;max-width:44%;color:#f1f1f1;font-family:"Unbounded",sans-serif;font-size:clamp(24px,6vw,78px);font-weight:500;letter-spacing:-.075em;opacity:0;visibility:hidden;filter:blur(8px);transform:translateY(18px);text-shadow:0 2px 28px rgba(255,255,255,.12)}
@@ -60,7 +65,7 @@
 #secretReveal .ho-flow-core-b{stroke-dashoffset:1200}
 #secretReveal .ho-flow-point{fill:#f4f4f4;opacity:0;filter:url(#hoFlowGlow)}
 #secretReveal .ho-camera-caption{position:absolute;bottom:10%;left:50%;transform:translateX(-50%);white-space:nowrap;color:#696969;font-size:8px;letter-spacing:.24em;opacity:0}
-#secretReveal .ho-wordmark-scene{z-index:4;flex-direction:column;gap:20px;opacity:0;visibility:hidden;transform:translateY(7vh) scale(.96);transition:transform 1.15s cubic-bezier(.2,.75,.15,1),opacity .9s ease,visibility .9s ease}
+#secretReveal .ho-wordmark-scene{z-index:4;flex-direction:column;gap:20px;opacity:0;visibility:hidden;transform:translateY(25vh) scale(.68);transition:transform 1.15s cubic-bezier(.2,.75,.15,1),opacity .9s ease,visibility .9s ease}
 #secretReveal .ho-wordmark-overline{opacity:0;transform:translateY(8px);transition:opacity .7s ease .25s,transform .7s ease .25s}
 #secretReveal .ho-wordmark{display:flex;justify-content:center;gap:0;margin:0;padding:0 4vw;font-family:"Unbounded",sans-serif;font-size:clamp(38px,10.5vw,142px);font-weight:600;line-height:1.05;letter-spacing:-.095em;white-space:nowrap}
 #secretReveal .ho-wordmark-tama,#secretReveal .ho-wordmark-srazim{
@@ -93,6 +98,7 @@
 #secretReveal.stage-path .ho-flow-core-b{animation:hoDrawPath 3.8s 1.55s ease forwards}
 #secretReveal.stage-path .ho-path-svg{animation:hoCameraDive 4.8s .5s cubic-bezier(.45,0,.25,1) forwards}
 #secretReveal.stage-path .ho-flow-point{animation:hoPointFlash .8s 4.9s ease forwards}
+#secretReveal.stage-wordmark .ho-path-scene{opacity:0;visibility:hidden;transition:opacity .65s ease,visibility .65s ease}
 #secretReveal.stage-path .ho-camera-caption{animation:hoCaption 1.4s .2s ease forwards}
 #secretReveal.stage-wordmark .ho-wordmark-scene,#secretReveal.stage-story .ho-wordmark-scene{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
 #secretReveal.stage-wordmark .ho-wordmark-overline,#secretReveal.stage-story .ho-wordmark-overline{opacity:1;transform:translateY(0)}
@@ -145,7 +151,7 @@
 @media(prefers-reduced-motion:reduce){
   #secretReveal.ho-overlay,#secretReveal .ho-year-scene,#secretReveal .ho-name-scene,#secretReveal .ho-path-scene,#secretReveal .ho-wordmark-scene,#secretReveal .ho-wordmark-overline,#secretReveal .ho-wordmark-underline,#secretReveal .ho-story-scene{transition:none!important}
   #secretReveal .ho-wordmark-tama,#secretReveal .ho-wordmark-srazim{animation:none;background-position:50%}
-  #secretReveal .ho-year-dial::before{animation:none}
+  #secretReveal .ho-year-reel{transition:none!important}
   #secretReveal.stage-path .ho-flow-a,#secretReveal.stage-path .ho-flow-b,#secretReveal.stage-path .ho-flow-core,#secretReveal.stage-path .ho-flow-core-b,#secretReveal.stage-path .ho-path-svg,#secretReveal.stage-path .ho-flow-point,#secretReveal.stage-path .ho-camera-caption{animation:none}
   #secretReveal.stage-path .ho-flow-a,#secretReveal.stage-path .ho-flow-b,#secretReveal.stage-path .ho-flow-core,#secretReveal.stage-path .ho-flow-core-b{stroke-dashoffset:0}
 }
