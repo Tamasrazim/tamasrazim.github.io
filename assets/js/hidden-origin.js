@@ -202,7 +202,11 @@
 
       later(function () { setStage('names'); }, 3000);
       later(function () { setStage('path'); }, 4750);
-      later(showStory, 5750);
+      // The two line draws meet at the center after the second path finishes.
+      // Reveal the animated wordmark only after that collision, hold it for one second,
+      // then transition it upward into the story.
+      later(function () { setStage('wordmark'); }, 8500);
+      later(showStory, 9500);
     }
 
     function focusableItems() {
