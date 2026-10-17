@@ -7,10 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/project-pages.css?v=20261010-1"><link rel="stylesheet" href="/assets/css/project-identities.css?v=20261010-3"><link rel="stylesheet" href="/assets/css/monochrome.css?v=20261010-1"><link rel="stylesheet" href="/assets/css/site-navigation.css?v=20261012-1">
 <style>
-body.pp-page[data-project="trss"]{--pp-bg:#050505;--pp-panel:#0b0b0b;--pp-line:#303030;--pp-text:#f3f3f0;--pp-muted:#a4a4a0;--pp-aqua:#ededeb;--pp-violet:#888;--pp-glow-a:#111;--pp-glow-b:#080808;--pp-art-bg:#070707;--pp-core-bg:#0a0a0a;--pp-card-radius:0;--pp-tag-radius:0}
-/* The site-wide saturation overlay removes the purple gradient too. Disable that overlay only on this page; the rest of the TrSS palette is explicitly monochrome. */
-html:has(body.pp-page[data-project="trss"])::after{display:none!important}
-body.pp-page[data-project="trss"] .pp-art:before,body.pp-page[data-project="trss"] .pp-art:after{display:none!important}
+body.pp-page[data-project="trss"]{--pp-bg:#050505;--pp-panel:#0b0b0b;--pp-line:#303030;--pp-text:#f3f3f0;--pp-muted:#a4a4a0;--pp-aqua:#ededeb;--pp-violet:#888;--pp-glow-a:#111;--pp-glow-b:#080808;--pp-art-bg:#070707;--pp-core-bg:#0a0a0a;--pp-card-radius:0;--pp-tag-radius:0}body.pp-page[data-project="trss"] .pp-art:before,body.pp-page[data-project="trss"] .pp-art:after{display:none!important}
 .trss-stage{position:absolute;inset:0;overflow:hidden;isolation:isolate;background:radial-gradient(ellipse at 53% 45%,#1d1d1d 0,transparent 55%),linear-gradient(145deg,#0b0b0b,#040404)}
 .trss-stage:before{content:"";position:absolute;inset:0;opacity:.4;background-image:linear-gradient(#ffffff10 1px,transparent 1px),linear-gradient(90deg,#ffffff10 1px,transparent 1px);background-size:29px 29px;mask-image:linear-gradient(180deg,#000,transparent 94%)}
 .trss-stage-header{position:absolute;z-index:3;top:17px;left:18px;right:18px;display:flex;justify-content:space-between;gap:16px;color:#a5a5a5;font:8px/1.6 var(--pp-mono);letter-spacing:.08em}
