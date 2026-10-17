@@ -33,7 +33,51 @@
       timers = [];
     }
 
+    function alignOriginPaths() {
+      var svg = document.querySelector('#hoPathScene .ho-path-svg');
+      var leftName = document.getElementById('hoRazim');
+      var rightName = document.getElementById('hoTamanna');
+      if (!svg || !leftName || !rightName || typeof svg.createSVGPoint !== 'function') return;
+
+      var matrix = svg.getScreenCTM();
+      if (!matrix) return;
+      var inverse = matrix.inverse();
+      var view = svg.viewBox.baseVal;
+      var targetX = view.x + view.width / 2;
+      var targetY = view.y + view.height * 0.75;
+
+      function pointFor(element) {
+        var rect = element.getBoundingClientRect();
+        var point = svg.createSVGPoint();
+        point.x = rect.left + rect.width / 2;
+        point.y = rect.top + rect.height / 2;
+        return point.matrixTransform(inverse);
+      }
+
+      function pathFrom(element, pathIds, side) {
+        var start = pointFor(element);
+        var bendX = start.x + (targetX - start.x) * 0.55;
+        var controlY = Math.min(targetY - 40, start.y + Math.max(70, view.height * 0.18));
+        var d = 'M ' + start.x.toFixed(2) + ' ' + start.y.toFixed(2) +
+          ' C ' + start.x.toFixed(2) + ' ' + controlY.toFixed(2) +
+          ', ' + bendX.toFixed(2) + ' ' + (targetY - 70).toFixed(2) +
+          ', ' + targetX.toFixed(2) + ' ' + targetY.toFixed(2);
+        pathIds.forEach(function (id) {
+          var path = document.getElementById(id);
+          if (path) {
+            path.setAttribute('d', d);
+            path.style.strokeDasharray = '1200';
+            path.style.strokeDashoffset = '1200';
+          }
+        });
+      }
+
+      pathFrom(leftName, ['hoFlowA', 'hoFlowCoreA'], 'left');
+      pathFrom(rightName, ['hoFlowB', 'hoFlowCoreB'], 'right');
+    }
+
     function setStage(stage) {
+      if (stage === 'path') alignOriginPaths();
       ['year', 'names', 'path', 'wordmark', 'story'].forEach(function (name) {
         dialog.classList.toggle('stage-' + name, name === stage);
       });
