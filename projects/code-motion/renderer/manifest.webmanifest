@@ -1,8 +1,8 @@
 {
   "id":"./",
-  "name":"TRILYVA — Tamasrazim",
-  "short_name":"TRILYVA",
-  "description":"Deterministic browser-first code-driven animation renderer.",
+  "name":"Trilyva — Tamasrazim",
+  "short_name":"Trilyva",
+  "description":"Frame-by-frame JavaScript animation creation, preview, and rendering studio.",
   "start_url":"./",
   "scope":"./",
   "display":"standalone",
