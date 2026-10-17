@@ -1,94 +1,137 @@
-/* Hidden Origin v3 — self-contained monochrome identity archive. */
-#secretReveal.ho-overlay[hidden]{display:none!important;clip-path:none!important}
+/* Hidden Origin cinematic sequence — isolated from the site's normal layout. */
+#secretReveal.ho-overlay[hidden]{display:none!important}
 #secretReveal.ho-overlay:not([hidden]){
-  position:fixed;inset:0;z-index:99999;display:grid;place-items:center;
-  box-sizing:border-box;padding:clamp(10px,2.5vw,30px);overflow:hidden;
-  color:#f4f4f4;background:#030303;font-family:"JetBrains Mono",monospace;clip-path:none!important;
-  opacity:0;visibility:hidden;pointer-events:none;transition:opacity .28s ease,visibility .28s ease;
+  position:fixed;inset:0;z-index:99999;display:block;overflow:hidden;
+  background:#030303;color:#f4f4f4;font-family:"JetBrains Mono",monospace;
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .55s ease,visibility .55s ease;
 }
 #secretReveal.ho-overlay.is-open{opacity:1;visibility:visible;pointer-events:auto}
 #secretReveal.ho-overlay *{box-sizing:border-box}
-#secretReveal.ho-overlay button{font:inherit}
-#secretReveal .ho-backdrop{position:absolute;inset:0;overflow:hidden;pointer-events:none;
-  background:radial-gradient(ellipse at 75% 30%,#171717 0,transparent 45%),#030303}
-#secretReveal .ho-grid{position:absolute;inset:0;opacity:.22;background-image:
-  linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);
-  background-size:42px 42px;mask-image:linear-gradient(120deg,#000,transparent 78%)}
-#secretReveal .ho-ring{position:absolute;left:75%;top:45%;width:min(74vw,950px);aspect-ratio:1;
-  border:1px solid #292929;border-radius:50%;transform:translate(-50%,-50%) scaleY(.55) rotate(-22deg)}
-#secretReveal .ho-ring::before,#secretReveal .ho-ring::after{content:"";position:absolute;inset:12%;border:1px solid #1c1c1c;border-radius:50%}
-#secretReveal .ho-ring::after{inset:28%;border-color:#242424}
-#secretReveal .ho-panel{position:relative;z-index:1;width:min(1180px,100%);max-height:calc(100svh - 2 * clamp(10px,2.5vw,30px));
-  overflow:auto;border:1px solid #454545;background:rgba(7,7,7,.97);box-shadow:0 30px 100px #000;
-  scrollbar-color:#444 #090909;transform:translateY(12px) scale(.99);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
-#secretReveal.is-open .ho-panel{transform:translateY(0) scale(1)}
-#secretReveal .ho-topbar{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:20px;
-  padding:15px clamp(16px,3vw,34px);border-bottom:1px solid #292929;background:rgba(7,7,7,.94);backdrop-filter:blur(12px)}
-#secretReveal .ho-file-label{margin:0;color:#ddd;font-size:9px;letter-spacing:.2em;text-transform:uppercase}
-#secretReveal .ho-file-path{margin:6px 0 0;color:#666;font-size:8px;letter-spacing:.12em}
-#secretReveal .ho-close{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:38px;padding:0 12px;
-  color:#eee;background:#0a0a0a;border:1px solid #444;cursor:pointer}
-#secretReveal .ho-close span{font-size:8px;letter-spacing:.15em;color:#888}
-#secretReveal .ho-close b{font:400 21px/1 Arial,sans-serif}
-#secretReveal .ho-close:hover,#secretReveal .ho-close:focus-visible{border-color:#ddd;outline:none}
-#secretReveal .ho-content{padding:clamp(22px,4vw,54px)}
-#secretReveal .ho-hero{display:grid;grid-template-columns:minmax(0,.9fr) minmax(260px,1.1fr);gap:clamp(24px,5vw,72px);align-items:end;
-  padding-bottom:clamp(28px,4vw,48px);border-bottom:1px solid #303030}
-#secretReveal .ho-overline{display:flex;align-items:center;gap:10px;margin:0;color:#9b9b9b;font-size:9px;letter-spacing:.17em;text-transform:uppercase}
-#secretReveal .ho-overline::before{content:"";width:22px;height:1px;background:#eee}
-#secretReveal .ho-title{margin:25px 0 0;font-family:"Unbounded",sans-serif;font-size:clamp(39px,6.6vw,88px);font-weight:700;line-height:.98;letter-spacing:-.085em}
-#secretReveal .ho-title span{display:block}
-#secretReveal .ho-title span:last-child{color:#777}
-#secretReveal .ho-title i{display:block;margin:7px 0;color:#555;font-style:normal;font-size:.48em}
-#secretReveal .ho-summary{max-width:42ch;margin:0;color:#aaa;font-family:Arial,sans-serif;font-size:clamp(14px,1.5vw,18px);line-height:1.8}
-#secretReveal .ho-summary strong{color:#fff;font-weight:600}
-#secretReveal .ho-ledger{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:clamp(22px,3vw,36px)}
-#secretReveal .ho-entry{position:relative;min-height:235px;padding:clamp(18px,2.4vw,28px);overflow:hidden;
-  border:1px solid #2e2e2e;background:linear-gradient(145deg,#121212,#080808 72%);transition:transform .22s ease,border-color .22s ease}
-#secretReveal .ho-entry:hover{transform:translateY(-3px);border-color:#777}
-#secretReveal .ho-entry-no{display:flex;align-items:center;gap:10px;color:#aaa;font-size:9px;letter-spacing:.16em}
-#secretReveal .ho-entry-no::after{content:"";width:25px;height:1px;background:#555}
-#secretReveal .ho-entry-mark{position:absolute;right:14px;top:13px;color:#252525;font-size:clamp(25px,3vw,40px);font-weight:700;line-height:1;text-align:right}
-#secretReveal .ho-entry-type{display:block;margin-top:40px;color:#777;font-size:8px;letter-spacing:.18em}
-#secretReveal .ho-entry h3{margin:12px 0 10px;font-family:"Unbounded",sans-serif;font-size:clamp(18px,2.2vw,29px);line-height:1.15;letter-spacing:-.06em}
-#secretReveal .ho-entry p{max-width:34ch;margin:0;color:#a0a0a0;font-family:Arial,sans-serif;font-size:13px;line-height:1.75}
-#secretReveal .ho-entry p strong{color:#fff}
-#secretReveal .ho-entry::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:2px;background:#eee;transition:right .3s ease}
-#secretReveal .ho-entry:hover::after{right:0}
-#secretReveal .ho-result{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:12px 34px;align-items:center;
-  position:relative;margin-top:12px;padding:clamp(22px,3.5vw,42px);border:1px solid #444;background:#0d0d0d}
-#secretReveal .ho-result::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:#eee}
-#secretReveal .ho-result-label{grid-column:1/-1;margin:0;color:#777;font-size:8px;letter-spacing:.2em}
-#secretReveal .ho-result-name{margin:0;font-family:"Unbounded",sans-serif;font-size:clamp(30px,5.3vw,68px);font-weight:700;line-height:1;letter-spacing:-.09em;overflow-wrap:anywhere}
-#secretReveal .ho-result-name span{color:#fff}
-#secretReveal .ho-result-name em{color:#777;font-style:normal}
-#secretReveal .ho-quote{margin:0;padding-left:20px;border-left:1px solid #444;color:#ddd;font-family:Arial,sans-serif;font-size:14px;line-height:1.85}
-#secretReveal .ho-note{grid-column:1/-1;margin:8px 0 0;padding-top:16px;border-top:1px solid #292929;color:#888;font-family:Arial,sans-serif;font-size:12px;line-height:1.8}
-#secretReveal .ho-note strong{color:#eee}
-#secretReveal .ho-footer{display:flex;justify-content:space-between;gap:16px;padding:14px clamp(16px,3vw,34px);border-top:1px solid #292929;color:#666;font-size:8px;letter-spacing:.14em}
-#secretReveal .ho-footer span:last-child{color:#ddd}
+#secretReveal .ho-close{
+  position:fixed;right:clamp(14px,3vw,34px);top:clamp(14px,3vw,28px);z-index:30;
+  display:flex;align-items:center;gap:10px;min-height:40px;padding:0 12px;
+  color:#ddd;background:rgba(8,8,8,.7);border:1px solid #444;backdrop-filter:blur(12px);
+  font:inherit;cursor:pointer;transition:border-color .2s ease,background .2s ease;
+}
+#secretReveal .ho-close span{font-size:8px;letter-spacing:.14em;color:#888}
+#secretReveal .ho-close b{font:400 22px/1 Arial,sans-serif}
+#secretReveal .ho-close:hover,#secretReveal .ho-close:focus-visible{border-color:#eee;outline:2px solid transparent;background:#151515}
+#secretReveal .ho-cinema{position:relative;width:100%;height:100%;min-height:100svh;overflow:hidden;background:#030303}
+#secretReveal .ho-cinema::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.13;
+  background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);
+  background-size:52px 52px;mask-image:radial-gradient(ellipse at center,#000,transparent 78%);
+}
+#secretReveal .ho-year-scene,#secretReveal .ho-name-scene,#secretReveal .ho-path-scene,#secretReveal .ho-wordmark-scene{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;
+}
+#secretReveal .ho-year-scene,#secretReveal .ho-name-scene,#secretReveal .ho-path-scene{
+  opacity:0;visibility:hidden;transition:opacity .8s ease,visibility .8s ease;
+}
+#secretReveal .ho-year-scene{flex-direction:column;gap:24px}
+#secretReveal .ho-year-kicker,#secretReveal .ho-wordmark-overline,#secretReveal .ho-story-kicker{
+  margin:0;color:#737373;font-size:9px;letter-spacing:.28em;text-transform:uppercase;
+}
+#secretReveal .ho-year-number{
+  font-family:"Unbounded",sans-serif;font-size:clamp(80px,19vw,230px);font-weight:500;
+  letter-spacing:-.105em;line-height:1;color:#e9e9e9;font-variant-numeric:tabular-nums;
+  text-shadow:0 0 48px rgba(255,255,255,.08);transition:opacity .16s ease,transform .16s ease;
+}
+#secretReveal .ho-year-number.is-ticking{opacity:.16;transform:translateY(-8px) scale(.985)}
+#secretReveal .ho-year-rule{width:min(180px,34vw);height:1px;background:linear-gradient(90deg,transparent,#aaa,transparent);transform:scaleX(0);animation:hoRuleIn 1s .35s ease forwards}
+#secretReveal .ho-name-scene{justify-content:space-between;padding:0 clamp(22px,10vw,160px)}
+#secretReveal .ho-name{position:relative;color:#e8e8e8;font-family:"Unbounded",sans-serif;font-size:clamp(24px,6vw,78px);font-weight:500;letter-spacing:-.075em;opacity:0;filter:blur(8px);transform:translateY(18px)}
+#secretReveal .ho-name-left{margin-top:-9vh}
+#secretReveal .ho-name-right{margin-top:9vh;color:#777}
+#secretReveal .ho-name-caption{position:absolute;left:50%;bottom:13%;transform:translateX(-50%);white-space:nowrap;color:#555;font-size:8px;letter-spacing:.24em;opacity:0}
+#secretReveal .ho-path-scene{overflow:hidden}
+#secretReveal .ho-path-svg{width:min(100vw,1000px);height:100%;max-height:100svh;overflow:visible;transform:translateY(-2%) scale(.9);transform-origin:50% 70%}
+#secretReveal .ho-flow{fill:none;stroke:url(#hoSilverFlow);stroke-width:1.7;stroke-linecap:round;stroke-dasharray:1200;stroke-dashoffset:1200;filter:url(#hoFlowGlow)}
+#secretReveal .ho-flow-b{stroke-dashoffset:1200}
+#secretReveal .ho-flow-core{fill:none;stroke:#fff;stroke-width:.7;stroke-linecap:round;stroke-dasharray:1200;stroke-dashoffset:1200;opacity:.58}
+#secretReveal .ho-flow-core-b{stroke-dashoffset:1200}
+#secretReveal .ho-flow-point{fill:#f4f4f4;opacity:0;filter:url(#hoFlowGlow)}
+#secretReveal .ho-camera-caption{position:absolute;bottom:10%;left:50%;transform:translateX(-50%);white-space:nowrap;color:#696969;font-size:8px;letter-spacing:.24em;opacity:0}
+#secretReveal .ho-wordmark-scene{z-index:4;flex-direction:column;gap:20px;opacity:0;visibility:hidden;transform:translateY(7vh) scale(.96);transition:transform 1.15s cubic-bezier(.2,.75,.15,1),opacity .7s ease,visibility .7s ease}
+#secretReveal .ho-wordmark-overline{opacity:0;transform:translateY(8px);transition:opacity .7s ease .25s,transform .7s ease .25s}
+#secretReveal .ho-wordmark{display:flex;justify-content:center;gap:0;margin:0;padding:0 4vw;font-family:"Unbounded",sans-serif;font-size:clamp(38px,10.5vw,142px);font-weight:600;line-height:1.05;letter-spacing:-.095em;white-space:nowrap}
+#secretReveal .ho-wordmark-tama,#secretReveal .ho-wordmark-srazim{
+  color:transparent;background:linear-gradient(110deg,#626262 0%,#e5e5e5 28%,#858585 48%,#f7f7f7 58%,#555 82%,#c9c9c9 100%);
+  background-size:240% 100%;background-clip:text;-webkit-background-clip:text;animation:hoMetalFlow 5s linear infinite;
+}
+#secretReveal .ho-wordmark-srazim{animation-delay:-2.5s}
+#secretReveal .ho-wordmark-underline{width:0;height:1px;background:linear-gradient(90deg,transparent,#d9d9d9,transparent);transition:width 1s ease .4s}
+#secretReveal .ho-story-scene{
+  position:absolute;z-index:3;top:50%;left:50%;width:min(820px,calc(100% - 48px));max-height:0;
+  overflow:hidden;opacity:0;visibility:hidden;transform:translate(-50%,-35%);padding:0 0 40px;
+  transition:opacity .9s ease,visibility .9s ease,transform 1s cubic-bezier(.2,.75,.15,1),max-height .8s ease;
+}
+#secretReveal .ho-story-intro{margin:18px 0 0;color:#aaa;font-family:Arial,sans-serif;font-size:clamp(17px,2.3vw,25px);line-height:1.5}
+#secretReveal .ho-story-copy{margin-top:clamp(28px,5vh,56px);max-width:680px}
+#secretReveal .ho-story-line{margin:0 0 19px;color:#aaa;font-family:Arial,sans-serif;font-size:clamp(15px,1.7vw,19px);line-height:1.9;opacity:0;transform:translateY(9px);filter:blur(2px)}
+#secretReveal .ho-story-line strong{color:#f4f4f4;font-weight:600}
+#secretReveal .ho-story-line.ho-story-final{margin-top:clamp(30px,5vh,54px);color:#eee;font-family:"Unbounded",sans-serif;font-size:clamp(30px,5.4vw,66px);font-weight:600;letter-spacing:-.07em;line-height:1.2}
+#secretReveal .ho-story-line.ho-story-signoff{color:#777;font-size:13px}
+#secretReveal .ho-story-footer{display:flex;justify-content:space-between;gap:14px;margin-top:34px;padding-top:15px;border-top:1px solid #282828;color:#5d5d5d;font-size:8px;letter-spacing:.12em}
+#secretReveal .ho-story-footer span:last-child{color:#aaa;text-align:right}
+#secretReveal.stage-year .ho-year-scene,#secretReveal.stage-names .ho-name-scene,#secretReveal.stage-path .ho-name-scene,#secretReveal.stage-path .ho-path-scene{opacity:1;visibility:visible}
+#secretReveal.stage-names .ho-name-left,#secretReveal.stage-names .ho-name-right,#secretReveal.stage-path .ho-name-left,#secretReveal.stage-path .ho-name-right{opacity:1;filter:blur(0);transform:translateY(0);transition:opacity .85s ease,filter .85s ease,transform .85s cubic-bezier(.2,.8,.2,1)}
+#secretReveal.stage-names .ho-name-caption,#secretReveal.stage-path .ho-name-caption{opacity:1;transition:opacity .8s ease .4s}
+#secretReveal.stage-path .ho-flow-a{animation:hoDrawPath 2.15s cubic-bezier(.3,.7,.2,1) forwards}
+#secretReveal.stage-path .ho-flow-b{animation:hoDrawPath 2.3s .62s cubic-bezier(.3,.7,.2,1) forwards}
+#secretReveal.stage-path .ho-flow-core{animation:hoDrawPath 2.15s .05s ease forwards}
+#secretReveal.stage-path .ho-flow-core-b{animation:hoDrawPath 2.3s .67s ease forwards}
+#secretReveal.stage-path .ho-path-svg{animation:hoCameraDive 2.8s .5s cubic-bezier(.45,0,.25,1) forwards}
+#secretReveal.stage-path .ho-flow-point{animation:hoPointFlash .8s 2.35s ease forwards}
+#secretReveal.stage-path .ho-camera-caption{animation:hoCaption 1.4s .2s ease forwards}
+#secretReveal.stage-wordmark .ho-wordmark-scene,#secretReveal.stage-story .ho-wordmark-scene{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+#secretReveal.stage-wordmark .ho-wordmark-overline,#secretReveal.stage-story .ho-wordmark-overline{opacity:1;transform:translateY(0)}
+#secretReveal.stage-wordmark .ho-wordmark-underline,#secretReveal.stage-story .ho-wordmark-underline{width:min(260px,45vw)}
+#secretReveal.stage-story .ho-wordmark-scene{transform:translateY(-28vh) scale(.56)}
+#secretReveal.stage-story .ho-story-scene{opacity:1;visibility:visible;max-height:calc(100svh - 35px);overflow:auto;transform:translate(-50%,calc(-28vh + 125px));transition-delay:.15s}
+#secretReveal.stage-story .ho-story-line.is-visible{opacity:1;transform:translateY(0);filter:blur(0);transition:opacity .65s ease,transform .65s ease,filter .65s ease}
+#secretReveal.stage-story .ho-story-line.is-typing{opacity:1;filter:blur(0);transform:translateY(0)}
+#secretReveal.stage-story .ho-year-scene,#secretReveal.stage-story .ho-name-scene,#secretReveal.stage-story .ho-path-scene{opacity:0;visibility:hidden}
+#secretReveal.stage-story .ho-story-kicker{opacity:1}
+@keyframes hoRuleIn{to{transform:scaleX(1)}}
+@keyframes hoDrawPath{to{stroke-dashoffset:0}}
+@keyframes hoCameraDive{0%{transform:translateY(-2%) scale(.9)}55%{transform:translateY(7%) scale(1.12)}100%{transform:translateY(-4%) scale(1.42)}}
+@keyframes hoPointFlash{0%{opacity:0;r:3}35%{opacity:1;r:8}100%{opacity:.8;r:4}}
+@keyframes hoCaption{0%{opacity:0;letter-spacing:.32em}35%,75%{opacity:1;letter-spacing:.24em}100%{opacity:0;letter-spacing:.18em}}
+@keyframes hoMetalFlow{from{background-position:100% 50%}to{background-position:-140% 50%}}
 @media(max-width:680px){
- #secretReveal.ho-overlay:not([hidden]){padding:0}
- #secretReveal .ho-panel{width:100%;max-height:100svh;min-height:100svh;border:0}
- #secretReveal .ho-topbar{padding:13px 16px}
- #secretReveal .ho-content{padding:23px 16px 24px}
- #secretReveal .ho-hero{grid-template-columns:1fr;gap:20px;padding-bottom:24px}
- #secretReveal .ho-title{display:flex;flex-wrap:wrap;align-items:baseline;gap:7px;margin-top:20px;font-size:clamp(36px,11vw,62px)}
- #secretReveal .ho-title span{display:inline}
- #secretReveal .ho-title i{display:inline;margin:0;font-size:.55em}
- #secretReveal .ho-summary{font-size:14px}
- #secretReveal .ho-ledger{grid-template-columns:1fr;gap:9px}
- #secretReveal .ho-entry{min-height:0;padding:20px}
- #secretReveal .ho-entry-type{margin-top:26px}
- #secretReveal .ho-entry h3{font-size:26px}
- #secretReveal .ho-entry p{font-size:13px}
- #secretReveal .ho-result{grid-template-columns:1fr;gap:18px;padding:22px 18px}
- #secretReveal .ho-result-label,#secretReveal .ho-note{grid-column:auto}
- #secretReveal .ho-result-name{font-size:clamp(34px,10vw,54px)}
- #secretReveal .ho-quote{padding-left:14px;font-size:13px}
- #secretReveal .ho-footer{padding:12px 16px;font-size:7px}
+  #secretReveal .ho-close{right:12px;top:12px;min-height:38px;padding:0 10px}
+  #secretReveal .ho-cinema{min-height:100svh}
+  #secretReveal .ho-year-number{font-size:clamp(76px,22vw,145px)}
+  #secretReveal .ho-year-kicker,#secretReveal .ho-wordmark-overline{font-size:8px;letter-spacing:.2em}
+  #secretReveal .ho-name-scene{padding:0 7vw;align-items:center}
+  #secretReveal .ho-name{font-size:clamp(22px,6.5vw,42px)}
+  #secretReveal .ho-name-left{margin-top:-5vh}
+  #secretReveal .ho-name-right{margin-top:5vh}
+  #secretReveal .ho-name-caption{bottom:16%;font-size:7px;letter-spacing:.14em}
+  #secretReveal .ho-path-svg{width:130vw;max-width:none;height:88svh;transform:translateY(-1%) scale(.9)}
+  #secretReveal .ho-wordmark{font-size:clamp(36px,10vw,68px);letter-spacing:-.09em}
+  #secretReveal .ho-wordmark-scene{gap:15px}
+  #secretReveal.stage-story .ho-wordmark-scene{transform:translateY(-31vh) scale(.57)}
+  #secretReveal .ho-story-scene{width:calc(100% - 38px)}
+  #secretReveal.stage-story .ho-story-scene{max-height:calc(100svh - 24px);transform:translate(-50%,calc(-31vh + 105px))}
+  #secretReveal .ho-story-intro{margin-top:12px;font-size:17px}
+  #secretReveal .ho-story-copy{margin-top:25px}
+  #secretReveal .ho-story-line{font-size:15px;line-height:1.8;margin-bottom:15px}
+  #secretReveal .ho-story-line.ho-story-final{font-size:clamp(28px,8vw,44px);margin-top:26px}
+  #secretReveal .ho-story-footer{font-size:7px;letter-spacing:.06em}
+}
+@media(max-height:620px) and (min-width:681px){
+  #secretReveal .ho-story-scene{width:min(740px,calc(100% - 40px))}
+  #secretReveal .ho-story-copy{margin-top:20px}
+  #secretReveal .ho-story-line{margin-bottom:10px;line-height:1.6}
+  #secretReveal.stage-story .ho-wordmark-scene{transform:translateY(-25vh) scale(.45)}
+  #secretReveal.stage-story .ho-story-scene{transform:translate(-50%,calc(-25vh + 105px))}
 }
 @media(prefers-reduced-motion:reduce){
- #secretReveal.ho-overlay,#secretReveal .ho-panel,#secretReveal .ho-entry,#secretReveal .ho-entry::after{transition:none}
- #secretReveal .ho-entry:hover{transform:none}
+  #secretReveal.ho-overlay,#secretReveal .ho-year-scene,#secretReveal .ho-name-scene,#secretReveal .ho-path-scene,#secretReveal .ho-wordmark-scene,#secretReveal .ho-wordmark-overline,#secretReveal .ho-wordmark-underline,#secretReveal .ho-story-scene{transition:none!important}
+  #secretReveal .ho-wordmark-tama,#secretReveal .ho-wordmark-srazim{animation:none;background-position:50%}
+  #secretReveal.stage-path .ho-flow-a,#secretReveal.stage-path .ho-flow-b,#secretReveal.stage-path .ho-flow-core,#secretReveal.stage-path .ho-flow-core-b,#secretReveal.stage-path .ho-path-svg,#secretReveal.stage-path .ho-flow-point,#secretReveal.stage-path .ho-camera-caption{animation:none}
+  #secretReveal.stage-path .ho-flow-a,#secretReveal.stage-path .ho-flow-b,#secretReveal.stage-path .ho-flow-core,#secretReveal.stage-path .ho-flow-core-b{stroke-dashoffset:0}
 }
