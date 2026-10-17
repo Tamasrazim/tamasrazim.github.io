@@ -65,7 +65,7 @@
 #secretReveal .ho-flow-core-b{stroke-dashoffset:1200}
 #secretReveal .ho-flow-point{fill:#f4f4f4;opacity:0;filter:url(#hoFlowGlow)}
 #secretReveal .ho-camera-caption{position:absolute;bottom:10%;left:50%;transform:translateX(-50%);white-space:nowrap;color:#696969;font-size:8px;letter-spacing:.24em;opacity:0}
-#secretReveal .ho-wordmark-scene{z-index:4;flex-direction:column;gap:20px;opacity:0;visibility:hidden;transform:translateY(25vh) scale(.68);transition:transform 1.15s cubic-bezier(.2,.75,.15,1),opacity .9s ease,visibility .9s ease}
+#secretReveal .ho-wordmark-scene{z-index:4;flex-direction:column;gap:20px;opacity:0;visibility:hidden;transform:translateY(7vh) scale(.96);transition:transform 1.15s cubic-bezier(.2,.75,.15,1),opacity .9s ease,visibility .9s ease}
 #secretReveal .ho-wordmark-overline{opacity:0;transform:translateY(8px);transition:opacity .7s ease .25s,transform .7s ease .25s}
 #secretReveal .ho-wordmark{display:flex;justify-content:center;gap:0;margin:0;padding:0 4vw;font-family:"Unbounded",sans-serif;font-size:clamp(38px,10.5vw,142px);font-weight:600;line-height:1.05;letter-spacing:-.095em;white-space:nowrap}
 #secretReveal .ho-wordmark-tama,#secretReveal .ho-wordmark-srazim{
