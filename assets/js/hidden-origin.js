@@ -179,7 +179,7 @@
       setStage('year');
 
       if (reduceMotion && reduceMotion.matches) {
-        yearNumber.textContent = '2023';
+        yearNumber.textContent = '2021';
         setStage('story');
         storyLines.forEach(function (line) {
           line.classList.add('is-visible');
@@ -190,24 +190,24 @@
         return;
       }
 
-      [2025, 2024, 2023].forEach(function (year, index) {
+      [2025, 2024, 2023, 2022, 2021].forEach(function (year, index) {
         later(function () {
           yearNumber.classList.add('is-ticking');
           later(function () {
             yearNumber.textContent = String(year);
             yearNumber.classList.remove('is-ticking');
           }, 110);
-        }, 700 + index * 690);
+        }, 650 + index * 650);
       });
 
-      later(function () { setStage('names'); }, 3000);
-      later(function () { setStage('path'); }, 4750);
+      later(function () { setStage('names'); }, 4300);
+      later(function () { setStage('path'); }, 6050);
       // The two line draws meet at the center after the second path finishes.
       // Reveal the animated wordmark only after that collision, hold it for one second,
       // then transition it upward into the story.
-      later(function () { setStage('wordmark'); }, 10300);
+      later(function () { setStage('wordmark'); }, 11600);
       // Let the wordmark finish fading in, then hold it for one full second before it rises.
-      later(showStory, 12200);
+      later(showStory, 13500);
     }
 
     function focusableItems() {
