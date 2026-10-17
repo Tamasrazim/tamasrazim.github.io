@@ -38,7 +38,8 @@
 
       window.requestAnimationFrame(function () {
         dialog.classList.add('is-open');
-        closeButton.focus({ preventScroll: true });
+        try { closeButton.focus({ preventScroll: true }); }
+        catch (error) { closeButton.focus(); }
       });
     }
 
