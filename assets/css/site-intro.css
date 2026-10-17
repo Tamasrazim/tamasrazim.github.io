@@ -19,10 +19,10 @@
 #siteIntro .si-tama,#siteIntro .si-srazim{
   color:transparent;background:linear-gradient(110deg,#626262 0%,#e5e5e5 28%,#858585 48%,#f7f7f7 58%,#555 82%,#c9c9c9 100%);
   background-size:240% 100%;background-clip:text;-webkit-background-clip:text;
-  animation:siMetalFlow 2s linear both;
+  animation:siMetalFlow 2s linear both;animation-play-state:paused;
 }
 #siteIntro .si-srazim{animation-delay:.08s}
-#siteIntro .si-wordmark.is-active .si-tama,#siteIntro .si-wordmark.is-active .si-srazim{animation-duration:2s}
+#siteIntro [data-intro-stage="wordmark"].is-active .si-tama,#siteIntro [data-intro-stage="wordmark"].is-active .si-srazim{animation-play-state:running}
 @keyframes siMetalFlow{from{background-position:100% 50%}to{background-position:-140% 50%}}
 @media(max-width:560px){#siteIntro .si-wordmark{font-size:clamp(35px,10vw,68px);letter-spacing:-.09em}}
 @media(prefers-reduced-motion:reduce){
