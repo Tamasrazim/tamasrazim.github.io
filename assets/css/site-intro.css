@@ -1,0 +1,31 @@
+/* Main-site opening: a short monochrome welcome ending with the Hidden Origins wordmark treatment. */
+#siteIntro[hidden]{display:none!important}
+#siteIntro{
+  position:fixed;inset:0;z-index:20000;display:grid;place-items:center;
+  overflow:hidden;background:#030303;color:#f4f4f4;
+  opacity:1;visibility:visible;transition:opacity .72s ease,visibility .72s ease;
+  isolation:isolate;
+}
+#siteIntro::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.13;
+  background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);
+  background-size:52px 52px;mask-image:radial-gradient(ellipse at center,#000,transparent 78%);
+}
+#siteIntro.is-leaving{opacity:0;visibility:hidden;pointer-events:none}
+#siteIntro .si-stage{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;opacity:0;visibility:hidden;transform:translateY(10px);filter:blur(5px);transition:opacity .42s ease,transform .55s cubic-bezier(.2,.75,.15,1),filter .42s ease,visibility .42s ease}
+#siteIntro .si-stage.is-active{opacity:1;visibility:visible;transform:translateY(0);filter:blur(0)}
+#siteIntro .si-welcome,#siteIntro .si-to{font-family:"Unbounded",sans-serif;font-size:clamp(30px,7vw,76px);font-weight:500;letter-spacing:-.075em;line-height:1.1}
+#siteIntro .si-wordmark{display:flex;justify-content:center;gap:0;margin:0;padding:0 4vw;white-space:nowrap;font-family:"Unbounded",sans-serif;font-size:clamp(38px,10.5vw,142px);font-weight:600;line-height:1.05;letter-spacing:-.095em}
+#siteIntro .si-tama,#siteIntro .si-srazim{
+  color:transparent;background:linear-gradient(110deg,#626262 0%,#e5e5e5 28%,#858585 48%,#f7f7f7 58%,#555 82%,#c9c9c9 100%);
+  background-size:240% 100%;background-clip:text;-webkit-background-clip:text;
+  animation:siMetalFlow 2s linear both;
+}
+#siteIntro .si-srazim{animation-delay:.08s}
+#siteIntro .si-wordmark.is-active .si-tama,#siteIntro .si-wordmark.is-active .si-srazim{animation-duration:2s}
+@keyframes siMetalFlow{from{background-position:100% 50%}to{background-position:-140% 50%}}
+@media(max-width:560px){#siteIntro .si-wordmark{font-size:clamp(35px,10vw,68px);letter-spacing:-.09em}}
+@media(prefers-reduced-motion:reduce){
+  #siteIntro,#siteIntro .si-stage{transition:none!important}
+  #siteIntro .si-tama,#siteIntro .si-srazim{animation:none!important;background-position:50%}
+}
