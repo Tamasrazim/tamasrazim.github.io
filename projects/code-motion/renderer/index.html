@@ -4203,6 +4203,7 @@ function loadProtectedLibraryModule() {
       var registryWaitStarted = Date.now();
       var registryWaitTimer = null;
       var registrySettled = false;
+      var registryReadyAttached = false;
       function failLibraryLoad(err) {
         if (registrySettled) return;
         registrySettled = true;
@@ -4211,11 +4212,15 @@ function loadProtectedLibraryModule() {
         reject(err instanceof Error ? err : new Error(String(err || 'Library module failed to initialize.')));
       }
       function waitForRegistry() {
-        if (registrySettled) return;
+        if (registrySettled || registryReadyAttached) return;
         if (window.TRILYVA_LIBRARY && window.TRILYVA_LIBRARY.ready) {
-          registrySettled = true;
+          registryReadyAttached = true;
           if (registryWaitTimer !== null) clearTimeout(registryWaitTimer);
-          window.TRILYVA_LIBRARY.ready.then(resolve, failLibraryLoad);
+          window.TRILYVA_LIBRARY.ready.then(function (registry) {
+            if (registrySettled) return;
+            registrySettled = true;
+            resolve(registry);
+          }, failLibraryLoad);
           return;
         }
         if (Date.now() - registryWaitStarted >= 12000) {
