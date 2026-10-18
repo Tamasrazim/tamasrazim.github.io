@@ -13,6 +13,44 @@ header{height:82px;display:flex;align-items:center;justify-content:space-between
 @media(max-width:780px){header{height:auto;min-height:75px}nav a:not(.nav-cta){display:none}.hero{grid-template-columns:1fr}.hero-copy{padding:30px 0 8px}.hero-photo{min-height:380px}.section-head{align-items:start;flex-direction:column;gap:10px}.contact{align-items:start;flex-direction:column}.work-card{padding:24px;min-height:255px}}
 @media(max-width:560px){.hero h1{font-size:clamp(54px,15vw,80px)}.hero-photo{min-height:310px;border-radius:22px}.work-grid{grid-template-columns:1fr}.stats{max-width:none}.photo-label{left:18px;right:18px;bottom:18px}.contact{padding:24px}.notice{padding:18px}.brand img{width:42px;height:38px}footer{flex-direction:column;gap:8px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+
+/* Glassmorphism refresh — BNC main project page. Preserve the original content and links. */
+:root{--green:#173c29;--deep:#102a1d;--lime:#d9ef9c;--paper:#edf2e9;--ink:#15261c;--muted:#607267;--line:rgba(255,255,255,.62);--white:#fff;--radius:26px}
+body{background:radial-gradient(ellipse at 8% 7%,rgba(181,219,151,.46),transparent 33%),radial-gradient(ellipse at 92% 28%,rgba(170,205,187,.42),transparent 32%),linear-gradient(145deg,#f4f5ed 0%,#e8efe6 50%,#f4f3e9 100%);background-attachment:fixed}
+body:before{content:"";position:fixed;z-index:-1;pointer-events:none;width:36vw;height:36vw;min-width:260px;min-height:260px;left:-12vw;top:35vh;border-radius:50%;background:rgba(177,215,143,.25);filter:blur(70px);animation:bncGlassDrift 18s ease-in-out infinite alternate}
+body:after{content:"";position:fixed;z-index:-1;pointer-events:none;width:34vw;height:34vw;min-width:240px;min-height:240px;right:-12vw;top:8vh;border-radius:50%;background:rgba(133,181,151,.2);filter:blur(80px);animation:bncGlassDrift 22s ease-in-out infinite alternate-reverse}
+header{position:relative;z-index:10}
+.brand img{border:1px solid rgba(255,255,255,.65);background:rgba(255,255,255,.42);backdrop-filter:blur(14px)}
+nav a{transition:background .25s,color .25s,transform .25s}
+nav a:hover{background:rgba(255,255,255,.58);transform:translateY(-1px)}
+.nav-cta,.button{box-shadow:0 10px 28px rgba(23,60,41,.16)}
+.button{transition:transform .28s,box-shadow .28s,background .28s;box-shadow:0 8px 22px rgba(23,60,41,.1)}
+.button:hover{transform:translateY(-3px);box-shadow:0 16px 32px rgba(23,60,41,.18)}
+.button.ghost{background:rgba(255,255,255,.36);border-color:rgba(23,60,41,.25);backdrop-filter:blur(12px)}
+.hero{gap:clamp(18px,2.4vw,32px)}
+.hero-copy{padding-left:clamp(4px,1vw,14px)}
+.hero h1{letter-spacing:-.09em}
+.hero-photo{border:1px solid rgba(255,255,255,.58);box-shadow:0 28px 85px rgba(13,44,26,.18);isolation:isolate}
+.hero-photo img{transition:transform 1.1s cubic-bezier(.2,.7,.2,1),filter .8s}
+.hero-photo:hover img{transform:scale(1.035);filter:saturate(1.08)}
+.hero-photo:after{background:linear-gradient(0deg,rgba(7,29,17,.76),transparent 62%),linear-gradient(90deg,rgba(7,29,17,.25),transparent)}
+.photo-label{padding:18px;border:1px solid rgba(255,255,255,.26);border-radius:18px;background:rgba(15,43,28,.28);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.section-head{margin-top:clamp(45px,7vw,82px)}
+.work-card{border:1px solid rgba(255,255,255,.78);background:linear-gradient(135deg,rgba(255,255,255,.72),rgba(255,255,255,.34));backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 16px 45px rgba(28,62,39,.045);transition:transform .38s cubic-bezier(.2,.7,.2,1),box-shadow .38s,border-color .38s}
+.work-card:after{border-color:rgba(98,132,77,.13);box-shadow:0 0 0 23px rgba(246,247,238,.34),0 0 0 46px rgba(251,251,246,.28)}
+.work-card:hover{transform:translateY(-5px);box-shadow:0 25px 70px rgba(28,62,39,.1);border-color:rgba(255,255,255,.98)}
+.notice{border:1px solid rgba(255,255,255,.66);background:rgba(229,237,220,.62);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 12px 36px rgba(27,59,37,.05)}
+.contact{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.22);background:linear-gradient(125deg,rgba(16,42,29,.94),rgba(31,77,49,.82));box-shadow:0 26px 70px rgba(13,44,26,.16)}
+.contact:after{content:"";position:absolute;width:320px;height:320px;right:-120px;top:-180px;border-radius:50%;border:1px solid rgba(255,255,255,.18);box-shadow:0 0 0 28px rgba(255,255,255,.035),0 0 0 58px rgba(255,255,255,.025);pointer-events:none}
+.contact>*{position:relative;z-index:1}
+.contact-links a{background:rgba(255,255,255,.055);backdrop-filter:blur(10px);transition:background .25s,transform .25s}
+.contact-links a:hover{background:rgba(255,255,255,.14);transform:translateY(-2px)}
+.site-page-menu>summary{background:rgba(255,255,255,.48);backdrop-filter:blur(16px);border-color:rgba(23,60,41,.2)}
+.site-page-menu__links{background:rgba(248,250,244,.9)!important;border:1px solid rgba(255,255,255,.8)!important;backdrop-filter:blur(24px)!important;box-shadow:0 20px 55px rgba(19,48,29,.13)!important}
+@keyframes bncGlassDrift{from{transform:translate3d(0,-12px,0) scale(.96)}to{transform:translate3d(35px,22px,0) scale(1.08)}}
+@media(max-width:780px){body{background-attachment:scroll}.hero-photo{box-shadow:0 20px 55px rgba(13,44,26,.14)}}
+@media(prefers-reduced-motion:reduce){body:before,body:after{animation:none!important}.hero-photo img,.work-card,.button,.contact-links a{transition:none!important}}
+
 </style><link rel="stylesheet" href="/assets/css/site-navigation.css?v=20261012-1"><script defer src="/assets/js/site-navigation.js?v=20261012-1"></script><link rel="stylesheet" href="/assets/css/project-cinematic-intro.css?v=20261013-7"><script defer src="/assets/js/project-cinematic-intro.js?v=20261013-7"></script></head>
 <body class="pp-page" data-project="bncagrocare" data-cinematic-intro="bncagrocare"><div class="wrap">
 <header><details class="site-page-menu">
