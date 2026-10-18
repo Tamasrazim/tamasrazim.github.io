@@ -104,7 +104,7 @@ function box(cell){cell.border={top:{style:"thin",color:{argb:"FF777777"}},botto
 ws.getRow(12).eachCell({includeEmpty:true},function(cell){cell.font={name:"Arial",size:8,bold:true};cell.alignment={vertical:"middle",horizontal:"center",wrapText:true};box(cell);});
 for(var row=13;row<=16;row++){ws.getRow(row).eachCell({includeEmpty:true},function(cell,col){box(cell);cell.font={name:"Arial",size:8};cell.alignment={vertical:"middle",horizontal:([4,5,6,10,11,12].includes(col)?"right":"left")};if([6,12].includes(col))cell.numFmt='"৳"#,##0.00';});}
 [17,18,19,20].forEach(function(row){ws.getRow(row).eachCell({includeEmpty:true},function(cell){box(cell);cell.font={name:"Arial",size:9};cell.alignment={vertical:"middle",horizontal:"left"};});});
-ws.getCell("D16").numFmt="0.##";ws.getCell("L16").numFmt='"৳"#,##0.00';ws.getCell("L17").numFmt='0.##"%"';ws.getCell("L18").numFmt='"৳"#,##0.00';
+ws.getCell("D18").numFmt="0.##";ws.getCell("L18").numFmt='"৳"#,##0.00';ws.getCell("L19").numFmt='0.##"%"';ws.getCell("L20").numFmt='"৳"#,##0.00';
 ws.getCell("B20").font={name:"Arial",size:9,bold:true};ws.getCell("L20").font={name:"Arial",size:9,bold:true};
 ["A23","A26"].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8};});["A24","G24"].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8};});["A25","G25"].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8,bold:true};});
 var buffer=await wb.xlsx.writeBuffer();downloadBlob(new Blob([buffer],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),fileSafe(state.invoiceNo)+".xlsx");showStatus("Original-layout XLSX downloaded");
