@@ -5,3 +5,56 @@
 @media(max-width:680px){.topbar-inner{align-items:flex-start;padding:12px 0;flex-direction:column}.top-actions{justify-content:start;width:100%}.save-state{width:100%}.layout{width:92vw}.page-intro{display:block}.intro-side{margin-top:17px}.panel{padding:16px;border-radius:16px}.form-grid{gap:10px}.summary-strip strong{font-size:13px}.paper{padding:17px}.paper-brand{font-size:22px}.paper-bottom{grid-template-columns:1fr}.export-buttons{grid-template-columns:1fr}.export-buttons #xlsxBtn{grid-column:auto}.site-footer{flex-direction:column}.page-intro h1{font-size:53px}}
 @media print{@page{size:A4 landscape;margin:10mm}html,body{background:white!important;color:black!important;font-size:10pt}.screen-only,.topbar,.page-intro,.editor,.preview-toolbar,.export-panel,.privacy-note,.site-footer{display:none!important}.layout{width:100%;margin:0;padding:0}.workspace{display:block;padding:0}.preview-column{position:static;display:block}.paper{width:100%;max-width:none;min-height:0;margin:0;padding:4mm;border:0;border-radius:0;box-shadow:none;overflow:visible}.paper-head{padding-bottom:9mm}.paper-brand{font-size:22pt}.paper-meta{margin:8mm 0;gap:4mm 12mm}.paper-table{font-size:8pt}.paper-table th{font-size:7pt;padding:5pt}.paper-table td{padding:5pt}.paper-bottom{margin-top:8mm}.paper-footer{margin-top:12mm}.total-row.grand strong{font-size:13pt}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
+
+/* This paper layer mirrors the supplied BNC_AgroCare_Invoice_Sheet_exact workbook. */
+.paper{min-height:0;padding:10px;background:#fffefa;border:1px solid #c8c8c8;border-radius:2px;box-shadow:0 8px 28px rgba(16,42,29,.07);overflow:visible}
+.invoice-sheet{width:100%;table-layout:fixed;border-collapse:collapse;background:#fff;color:#111;font:7px/1.15 Arial,Helvetica,sans-serif;letter-spacing:0}
+.invoice-sheet col{width:auto}
+.invoice-sheet td{padding:2px 2px;vertical-align:middle;overflow-wrap:anywhere}
+.invoice-sheet .sheet-title td{height:24px;font-size:15px;font-weight:700;padding:2px 1px}
+.invoice-sheet .sheet-subtitle td{height:12px;font-size:7px}
+.invoice-sheet .sheet-ref td{height:12px}
+.invoice-sheet .sheet-invoice td{height:17px}
+.invoice-sheet .sheet-invoice-title{text-align:center;font-size:12px;font-weight:700}
+.invoice-sheet .sheet-label,.invoice-sheet .sheet-value,.invoice-sheet .sheet-date{font-size:7px}
+.invoice-sheet .sheet-rep td{height:16px;font-size:7px}
+.invoice-sheet .sheet-gap td{height:12px}
+.invoice-sheet .sheet-columns td{height:18px;border:1px solid #777;text-align:center;font-weight:700;font-size:6.2px;white-space:normal}
+.invoice-sheet .sheet-item td{height:18px;border:1px solid #9b9b9b;font-size:6.4px}
+.invoice-sheet .sheet-item .sheet-sl{text-align:center}
+.invoice-sheet .sheet-item .sheet-num,.invoice-sheet .sheet-st .sheet-num,.invoice-sheet .sheet-summary .sheet-num{text-align:right;white-space:nowrap}
+.invoice-sheet .sheet-item .sheet-product,.invoice-sheet .sheet-item .sheet-pack{overflow-wrap:anywhere}
+.invoice-sheet .sheet-amount{font-variant-numeric:tabular-nums}
+.invoice-sheet .sheet-st td,.invoice-sheet .sheet-summary td{height:16px;border:1px solid #9b9b9b}
+.invoice-sheet .sheet-st td{height:18px}
+.invoice-sheet .sheet-summary td{font-size:7px}
+.invoice-sheet .sheet-total td{font-weight:700}
+.invoice-sheet .sheet-words td{height:16px;font-size:6.8px}
+.invoice-sheet .sheet-spacer td{height:18px}
+.invoice-sheet .sheet-disclaimer td{height:10px;font-size:7px}
+.invoice-sheet .sheet-signline td{height:12px;font-size:6px}
+.invoice-sheet .sheet-signature td{height:15px;font-size:7px}
+.invoice-sheet .sheet-contact td{height:12px;font-size:7px}
+@media(max-width:680px){.paper{padding:5px}.invoice-sheet{font-size:5.8px}.invoice-sheet .sheet-title td{font-size:12px}.invoice-sheet .sheet-columns td{font-size:5.2px}.invoice-sheet .sheet-item td{font-size:5.3px}.invoice-sheet td{padding:1px}}
+@media print{
+@page{size:A4 portrait;margin:14mm}
+.paper{width:100%;max-width:none;min-height:0;margin:0;padding:0;border:0;border-radius:0;box-shadow:none;overflow:visible}
+.invoice-sheet{width:100%;font-size:8pt;line-height:1.15}
+.invoice-sheet td{padding:2pt}
+.invoice-sheet .sheet-title td{height:24pt;font-size:16pt}
+.invoice-sheet .sheet-subtitle td{height:12pt;font-size:7.5pt}
+.invoice-sheet .sheet-ref td{height:12pt}
+.invoice-sheet .sheet-invoice td{height:17pt}
+.invoice-sheet .sheet-invoice-title{font-size:12pt}
+.invoice-sheet .sheet-rep td{height:16pt;font-size:7.5pt}
+.invoice-sheet .sheet-gap td{height:12pt}
+.invoice-sheet .sheet-columns td{height:18pt;font-size:7pt}
+.invoice-sheet .sheet-item td{height:18pt;font-size:7pt}
+.invoice-sheet .sheet-st td,.invoice-sheet .sheet-summary td{height:16pt;font-size:8pt}
+.invoice-sheet .sheet-words td{height:16pt;font-size:7.5pt}
+.invoice-sheet .sheet-spacer td{height:18pt}
+.invoice-sheet .sheet-disclaimer td{height:10pt;font-size:7.5pt}
+.invoice-sheet .sheet-signline td{height:12pt;font-size:7pt}
+.invoice-sheet .sheet-signature td{height:15pt;font-size:8pt}
+.invoice-sheet .sheet-contact td{height:12pt;font-size:7.5pt}
+}
