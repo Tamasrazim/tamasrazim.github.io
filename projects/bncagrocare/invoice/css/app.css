@@ -58,3 +58,7 @@
 .invoice-sheet .sheet-signature td{height:15pt;font-size:8pt}
 .invoice-sheet .sheet-contact td{height:12pt;font-size:7.5pt}
 }
+
+/* Keep the seller, buyer, address and mobile details on the printed invoice itself. */
+.invoice-sheet .sheet-buyer td{height:18px;font-size:7px;border-bottom:1px solid #aaa}
+@media print{.invoice-sheet .sheet-buyer td{height:18pt;font-size:8pt}}
