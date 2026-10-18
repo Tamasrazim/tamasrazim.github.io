@@ -1,134 +1,15 @@
 <!doctype html>
-<!--
-  What this does:
-  Defines the BNC invoice screen, including its buyer details, product rows, and invoice actions.
--->
-<html lang="en">
-<head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-QSPL315P1W"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-QSPL315P1W');
-</script>
-
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="A digital invoice workflow associated with the BNC AgroCare catalogue project, designed to support representative-side record handling.">
-<link rel="canonical" href="https://tamasrazim.github.io/projects/bncagrocare/invoice/">
-<meta name="theme-color" content="#0d2418">
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" href="./icons/icon.svg">
-<title>BNC AgroCare Invoice Workflow</title>
-<script type="application/ld+json">
-{
-  "@type": "SoftwareApplication",
-  "@id": "https://tamasrazim.github.io/projects/bncagrocare/invoice/#application",
-  "name": "BNC AgroCare Invoice",
-  "url": "https://tamasrazim.github.io/projects/bncagrocare/invoice/",
-  "description": "Invoice workflow for representatives, associated with the BNC AgroCare catalogue project.",
-  "applicationCategory": "BusinessApplication",
-  "operatingSystem": "Web Browser",
-  "creator": {
-    "@id": "https://tamasrazim.github.io/#person"
-  },
-  "isPartOf": {
-    "@id": "https://tamasrazim.github.io/#bncagrocare"
-  }
-}
-</script>
-<link rel="stylesheet" href="./css/app.css">
-<link rel="stylesheet" href="/assets/css/monochrome.css?v=20261010-1">
-</head>
+<!-- What this page does: Provides an invoice workspace with live totals, local drafts, XLSX/CSV export and printing. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#173c29"><meta name="description" content="Create BNC AgroCare invoices with live calculations, local draft saving, XLSX and CSV export, and print support."><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icons/icon.svg"><link rel="canonical" href="https://tamasrazim.github.io/projects/bncagrocare/invoice/"><title>Invoice Workspace — BNC AgroCare</title><link rel="stylesheet" href="./css/app.css?v=20261018-1"></head>
 <body>
-<header class="topbar">
-  <div class="topbarInner">
-    <a class="brand" href="../" aria-label="Back to BNC Agro Care"><img src="../FB_IMG_1789811599210.jpg" alt="BNC Agro Care"><span>Invoice</span></a>
-    <div class="session"><i></i><span id="status">Ready</span></div>
-    <div class="topActions">
-      <a class="ghostBtn" href="../">Website</a>
-      <button id="newBtn" type="button">New</button>
-      <button id="saveBtn" type="button" class="solidBtn">Save</button>
-      <button id="installBtn" type="button" hidden>Install</button>
-    </div>
-  </div>
-</header>
-
-<main>
-<section class="workspaceIntro">
-  <div class="shell introGrid">
-    <div class="introCopy">
-      <div class="eyebrow">BNC / REPRESENTATIVE WORKSPACE</div>
-      <h1>Build the<br><em>invoice.</em></h1>
-      <p>One screen for customer details, product lines and the live workbook. Work here, then download the finished XLSX.</p>
-      <div class="introStats"><span><strong id="rowMetric">6</strong> physical rows</span><span><strong id="slotMetric">12</strong> line slots</span><span>Local drafts</span></div>
-    </div>
-    <div class="introPanel">
-      <div class="introOrb"></div>
-      <div class="introSheet"><b>INVOICE</b><i></i><i></i><i></i><i></i><strong>XLSX</strong></div>
-      <div class="introCaption"><span>LIVE WORKBOOK</span><strong>Editable before export</strong></div>
-    </div>
-  </div>
-</section>
-
-<section class="shell mainGrid">
-  <aside class="controlColumn">
-    <article class="card">
-      <div class="cardHead"><div><small>01 / CUSTOMER</small><h2>Invoice details</h2></div><span>INPUT</span></div>
-      <div class="formGrid">
-        <label>Reference<input data-k="ref" placeholder="X2"></label>
-        <label>Invoice No.<input data-k="invoiceNo" inputmode="numeric" placeholder="0002"></label>
-        <label>Date<input data-k="date" type="date"></label>
-        <label>Commission %<input data-k="commission" type="number" min="0" step=".01" placeholder="0"></label>
-        <label class="wide">Trader / Dealer<input data-k="trader" placeholder="M/S ______ Traders"></label>
-        <label class="wide">Buyer<input data-k="buyer" placeholder="Name:"></label>
-        <label class="wide">Address<input data-k="address" placeholder="Address"></label>
-        <label class="wide">Mobile<input data-k="mobile" inputmode="tel" placeholder="01XXXXXXXXX"></label>
-      </div>
-      <div class="repCard"><img src="../FB_IMG_1789811599210.jpg" alt="BNC Agro Care"><div><small>Representative</small><strong>Md Rezaul Karim</strong><em>Officer BNC Agro Care · Area Manager · 01718-306103</em></div></div>
-    </article>
-
-    <article class="card productCard">
-      <div class="cardHead"><div><small>02 / PRODUCTS</small><h2>Line items</h2></div><button id="addBtn" class="addBtn" type="button">+ Add row</button></div>
-      <div id="products"></div>
-      <div id="productSuggestions" class="productCatalogDock" hidden>
-        <div class="catalogDockHead">
-          <div><small>CATALOG / LIVE SUGGESTIONS</small><strong>Products & pack sizes</strong></div>
-          <span id="productSuggestMeta">10 PRODUCTS</span>
-        </div>
-        <div id="catalogRail" class="catalogRail"></div>
-      </div>
-      <div id="summary" class="summary"></div>
-    </article>
-
-    <article class="card draftsCard">
-      <div class="cardHead"><div><small>03 / LOCAL</small><h2>Saved invoices</h2></div><span>DEVICE</span></div>
-      <div id="history"></div>
-    </article>
-  </aside>
-
-  <section class="previewColumn">
-    <article class="previewCard">
-      <div class="previewHead">
-        <div><small>LIVE DOCUMENT</small><h2>Workbook preview</h2></div>
-        <span id="xlsxState" class="state">READY</span>
-      </div>
-      <div class="previewMeta"><span>Current invoice</span><strong id="previewFitState">FIT TO PANE</strong></div>
-      <div class="workbookViewport"><div id="sheetPreview" class="stage"><div class="emptyPage"><strong>Loading invoice…</strong><span>The current workbook will appear here.</span></div></div></div>
-      <div class="previewActions"><button id="previewBtn" class="syncBtn" type="button">Refresh</button><button id="downloadBtn" class="downloadBtn" type="button">Download XLSX</button></div>
-    </article>
-  </section>
-</section>
-</main>
-
-<footer class="footer"><a href="https://tamasrazim.github.io/" target="_blank" rel="noopener noreferrer">© Robiul Rumman Razim</a></footer>
-<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-<script src="../reference/products.js"></script>
-<script src="../reference/addProductRow.js"></script>
-<script src="./js/app.js"></script>
-<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});</script>
-</body>
-</html>
+<header class="topbar screen-only"><div class="topbar-inner"><a class="brand" href="../"><img src="../FB_IMG_1789811599210.jpg" alt=""><span>BNC AgroCare<small>SALES / INVOICE WORKSPACE</small></span></a><div class="top-actions"><span class="save-state" id="status" role="status" aria-live="polite">Ready</span><button class="btn btn-soft" id="newBtn" type="button">New invoice</button><button class="btn btn-primary" id="saveBtn" type="button">Save draft</button><button class="btn btn-soft" id="installBtn" type="button" hidden>Install</button></div></div></header>
+<main class="layout"><section class="page-intro screen-only"><div><p class="eyebrow">BNC / REPRESENTATIVE DESK</p><h1>Build the <span>invoice.</span></h1><p class="intro-copy">Enter buyer details and line items. Totals update as you work; save a draft on this device or export a file for your records.</p></div><div class="intro-side"><span class="number">01—03</span><strong>Details <i>→</i> Items <i>→</i> Export</strong><small>LOCAL WORKSPACE · NO ACCOUNT</small></div></section>
+<div class="workspace"><section class="editor screen-only" aria-label="Invoice editor">
+<article class="panel"><div class="panel-title"><div><span class="step">01 / DETAILS</span><h2>Invoice information</h2></div><span class="panel-note">EDITABLE</span></div><div class="form-grid">
+<label>Reference<input data-field="ref" type="text" placeholder="X2" autocomplete="off"></label><label>Invoice number<input data-field="invoiceNo" type="text" placeholder="0002" autocomplete="off"></label><label>Invoice date<input data-field="date" type="date"></label><label>Commission (%)<input data-field="commission" type="number" min="0" max="100" step="0.01" inputmode="decimal"></label><label class="wide">Trader / Dealer<input data-field="trader" type="text" placeholder="Dealer or trader name" autocomplete="organization"></label><label class="wide">Buyer name<input data-field="buyer" type="text" placeholder="Buyer name" autocomplete="name"></label><label class="wide">Delivery / buyer address<input data-field="address" type="text" placeholder="Address" autocomplete="street-address"></label><label class="wide">Mobile number<input data-field="mobile" type="tel" placeholder="Mobile number" autocomplete="tel"></label></div>
+<div class="representative"><div class="rep-mark">BNC</div><div><small>Representative details</small><strong>Md Rezaul Karim</strong><span>Officer BNC AgroCare · Area Manager · 01718-306103</span></div></div></article>
+<article class="panel"><div class="panel-title"><div><span class="step">02 / LINE ITEMS</span><h2>Products and quantities</h2></div><button class="btn btn-soft" id="addBtn" type="button">+ Add row</button></div><p class="hint">Choose a listed product or type a custom name. Quantity is measured in cartons; rate is per carton.</p><div class="table-wrap"><table class="items-table"><thead><tr><th scope="col">#</th><th scope="col">Product</th><th scope="col">Pack size</th><th scope="col">Cartons</th><th scope="col">Rate / carton</th><th scope="col">Amount</th><th scope="col"><span class="sr-only">Remove row</span></th></tr></thead><tbody id="itemsBody"></tbody></table></div><datalist id="product-list"></datalist><div class="summary-strip"><div><small>Cartons</small><strong id="cartonsTotal">0</strong></div><div><small>Subtotal</small><strong id="subtotalMetric">৳0.00</strong></div><div><small>Net payable</small><strong id="payableMetric">৳0.00</strong></div></div></article>
+<article class="panel saved-panel"><div class="panel-title"><div><span class="step">03 / DEVICE STORAGE</span><h2>Saved invoices</h2></div><span class="panel-note">THIS DEVICE</span></div><p class="hint">Drafts stay in this browser on this device. Export important invoices for a separate backup.</p><div id="history" class="history"></div></article></section>
+<section class="preview-column"><div class="preview-toolbar screen-only"><div><span class="step">LIVE DOCUMENT</span><strong>Invoice preview</strong><small>Updates from the editor</small></div><span class="preview-badge" id="previewState">LIVE</span></div><div id="paper" class="paper" aria-label="Invoice preview"></div><div class="export-panel screen-only"><div><span class="step">EXPORT</span><strong>Take the invoice with you</strong><small>Spreadsheet, CSV or print / PDF</small></div><div class="export-buttons"><button class="btn btn-primary" id="xlsxBtn" type="button">Download XLSX</button><button class="btn btn-soft" id="csvBtn" type="button">Download CSV</button><button class="btn btn-soft" id="printBtn" type="button">Print / Save PDF</button></div></div><p class="privacy-note screen-only">Drafts are stored locally in this browser. Nothing is sent to a BNC server.</p></section></div></main>
+<footer class="site-footer screen-only"><a href="../">Back to BNC AgroCare</a><span>Invoice workspace · Local-first</span></footer>
+<script defer src="../reference/products.js"></script><script defer src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script><script defer src="./js/app.js?v=20261018-1"></script></body></html>

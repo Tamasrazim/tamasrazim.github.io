@@ -1,46 +1,6 @@
-// What this does: Caches the invoice app's files so the screen can reopen more reliably when the connection is weak or unavailable.
-
-const CACHE="bnc-invoice-v28";
-const CORE=["./","./index.html","./css/app.css","./js/app.js","./manifest.webmanifest","./icons/icon.svg","../reference/products.js","../reference/addProductRow.js","../reference/BNCFINAL.xlsx"];
-const EXCEL="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js";
-
-self.addEventListener("install",event=>event.waitUntil((async()=>{
-  const cache=await caches.open(CACHE);
-  await cache.addAll(CORE);
-  try{await cache.add(EXCEL,await fetch(EXCEL,{mode:"no-cors"}))}catch{}
-  await self.skipWaiting();
-})()));
-
-self.addEventListener("activate",event=>event.waitUntil(
-  caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())
-));
-
-self.addEventListener("fetch",event=>{
-  if(event.request.method!=="GET")return;
-  const url=new URL(event.request.url);
-  const same=url.origin===location.origin;
-  if(!same&&url.href!==EXCEL)return;
-  const isWorkbook=same&&/\.xlsx$/i.test(url.pathname);
-
-  event.respondWith((async()=>{
-    const cached=await caches.match(event.request,{ignoreSearch:true});
-    if(cached)return cached;
-
-    try{
-      const response=await fetch(event.request);
-      if(response.ok||response.type==="opaque"){
-        caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));
-      }
-      return response;
-    }catch{
-      if(isWorkbook){
-        const workbook=await caches.match("../reference/BNCFINAL.xlsx",{ignoreSearch:true});
-        if(workbook)return workbook;
-        throw new Error("BNC workbook unavailable");
-      }
-      const fallback=await caches.match("./index.html",{ignoreSearch:true});
-      if(fallback)return fallback;
-      throw new Error("Offline resource unavailable");
-    }
-  })());
-});
+// What this does: Caches the invoice workspace shell, shared product data and local brand asset for offline editing.
+const CACHE="bnc-invoice-v3";
+const CORE=["./","./index.html","./css/app.css?v=20261018-1","./js/app.js?v=20261018-1","./manifest.webmanifest","./icons/icon.svg","../reference/products.js","../FB_IMG_1789811599210.jpg"];
+self.addEventListener("install",event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
+self.addEventListener("activate",event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith("bnc-invoice-")&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
+self.addEventListener("fetch",event=>{if(event.request.method!=="GET")return;const url=new URL(event.request.url);if(url.origin!==self.location.origin)return;event.respondWith(caches.match(event.request).then(hit=>hit||fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response;}).catch(()=>caches.match("./index.html"))));});

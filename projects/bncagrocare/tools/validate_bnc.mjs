@@ -1,36 +1,14 @@
-// What this does: Checks that BNC product reference data and supporting app files agree with one another.
-
+// What this does: Validates BNC pages, shared product data, invoice controls and JavaScript syntax.
 import fs from "node:fs";
-import {execFileSync} from "node:child_process";
-
+import { execFileSync } from "node:child_process";
 const root=fs.existsSync("projects/bncagrocare")?"projects/bncagrocare":".";
-const need=[
-  "index.html",
-  "reference/products.js",
-  "reference/addProductRow.js",
-  "reference/BNCFINAL.xlsx",
-  "invoice/index.html",
-  "invoice/css/app.css",
-  "invoice/js/app.js",
-  "invoice/sw.js"
-];
-
-for(const p of need){
-  if(!fs.existsSync(root+"/"+p))throw Error("Missing required BNC asset");
-}
-
-const html=fs.readFileSync(root+"/invoice/index.html","utf8");
-const js=fs.readFileSync(root+"/invoice/js/app.js","utf8");
-const row=fs.readFileSync(root+"/reference/addProductRow.js","utf8");
-
-if(!html.includes("Download XLSX"))throw Error("XLSX download control missing");
-if(!js.includes("writeBuffer"))throw Error("XLSX export missing");
-if(!js.includes("ensureLiveWorkbook"))throw Error("Live workbook loader missing");
-if(!row.includes("ws.insertRow(stRow,[]"))throw Error("ExcelJS row insertion path missing");
-if(!row.includes("unmergeAll(ws,merges)")||!row.includes("restoreMerges(ws,merges,stRow)"))throw Error("Merge-safe merge handling missing");
-
-for(const file of ["invoice/js/app.js","invoice/sw.js","reference/addProductRow.js"]){
-  execFileSync(process.execPath,["--check",root+"/"+file]);
-}
-
-console.log("BNC invoice validation passed");
+const required=["index.html","reference/products.js","catalog/index.html","catalog/sw.js","catalog/manifest.webmanifest","invoice/index.html","invoice/css/app.css","invoice/js/app.js","invoice/sw.js","invoice/manifest.webmanifest"];
+for(const file of required)if(!fs.existsSync(root+"/"+file))throw new Error("Missing required BNC file: "+file);
+const overview=fs.readFileSync(root+"/index.html","utf8"),catalogue=fs.readFileSync(root+"/catalog/index.html","utf8"),invoice=fs.readFileSync(root+"/invoice/index.html","utf8"),app=fs.readFileSync(root+"/invoice/js/app.js","utf8"),productData=fs.readFileSync(root+"/reference/products.js","utf8");
+for(const path of ['./catalog/','./invoice/'])if(!overview.includes('href="'+path+'"'))throw new Error("Overview missing link to "+path);
+for(const feature of ['id="search"','id="products"','window.BNC_PRODUCTS'])if(!catalogue.includes(feature))throw new Error("Catalogue feature missing: "+feature);
+for(const feature of ['id="itemsBody"','id="xlsxBtn"','id="csvBtn"','id="printBtn"','id="history"'])if(!invoice.includes(feature))throw new Error("Invoice control missing: "+feature);
+for(const feature of ['downloadXLSX','downloadCSV','window.print()','localStorage','function calc()','function renderPreview()'])if(!app.includes(feature))throw new Error("Invoice implementation missing: "+feature);
+if((productData.match(/\{ code:/g)||[]).length!==10)throw new Error("Expected 10 shared BNC products");
+for(const file of ["reference/products.js","catalog/reference/products.js","catalog/sw.js","invoice/sw.js","invoice/js/app.js"])if(file.endsWith(".js"))execFileSync(process.execPath,["--check",root+"/"+file]);
+console.log("BNC rebuild validation passed: pages, controls, 10 products and JavaScript syntax.");

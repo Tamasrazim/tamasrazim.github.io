@@ -1,36 +1,13 @@
-// What this does: Checks that the BNC catalog, reference product list, and supporting files agree with one another.
-
+// What this does: Checks catalogue rendering paths and shared product data.
 import fs from "node:fs";
-import {execFileSync} from "node:child_process";
-
-const root=fs.existsSync("projects/bncagrocare")?"projects/bncagrocare":".";
-const need=[
-  "index.html",
-  "reference/products.js",
-  "reference/addProductRow.js",
-  "reference/BNCFINAL.xlsx",
-  "invoice/index.html",
-  "invoice/css/app.css",
-  "invoice/js/app.js",
-  "invoice/sw.js"
-];
-
-for(const p of need){
-  if(!fs.existsSync(root+"/"+p))throw Error("Missing required BNC asset");
-}
-
-const html=fs.readFileSync(root+"/invoice/index.html","utf8");
-const js=fs.readFileSync(root+"/invoice/js/app.js","utf8");
-const row=fs.readFileSync(root+"/reference/addProductRow.js","utf8");
-
-if(!html.includes("Download XLSX"))throw Error("XLSX download control missing");
-if(!js.includes("writeBuffer"))throw Error("XLSX export missing");
-if(!js.includes("ensureLiveWorkbook"))throw Error("Live workbook loader missing");
-if(!row.includes("ws.insertRow(stRow,[]"))throw Error("ExcelJS row insertion path missing");
-if(!row.includes("unmergeAll(ws,merges)")||!row.includes("restoreMerges(ws,merges,stRow)"))throw Error("Merge-safe merge handling missing");
-
-for(const file of ["invoice/js/app.js","invoice/sw.js","reference/addProductRow.js"]){
-  execFileSync(process.execPath,["--check",root+"/"+file]);
-}
-
-console.log("BNC invoice validation passed");
+import { execFileSync } from "node:child_process";
+const root=fs.existsSync("projects/bncagrocare/catalog")?"projects/bncagrocare/catalog":".";
+const parent=root.endsWith("/catalog")?root.slice(0,-8):"..";
+for(const file of ["index.html","sw.js","manifest.webmanifest","reference/products.js"])if(!fs.existsSync(root+"/"+file))throw new Error("Missing catalogue file: "+file);
+const html=fs.readFileSync(root+"/index.html","utf8"),data=fs.readFileSync(parent+"/reference/products.js","utf8");
+if(!html.includes('id="search"')||!html.includes('id="products"'))throw new Error("Catalogue search interface is incomplete");
+if(!html.includes("../reference/products.js"))throw new Error("Catalogue must load shared BNC product data");
+if((data.match(/\{ code:/g)||[]).length!==10)throw new Error("Expected 10 catalogue products");
+execFileSync(process.execPath,["--check",root+"/sw.js"]);
+execFileSync(process.execPath,["--check",parent+"/reference/products.js"]);
+console.log("BNC catalogue validation passed.");
