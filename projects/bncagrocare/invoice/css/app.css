@@ -62,3 +62,8 @@
 }
 
 @media print{.invoice-sheet .sheet-buyer td{height:18pt;font-size:8pt}.invoice-sheet .sheet-buyer-address td{height:24pt}}
+
+
+/* Keep the original invoice footer alignment consistent in preview and print. */
+.invoice-sheet .sheet-disclaimer td{text-align:center!important}
+.invoice-sheet .sheet-signline td:last-child,.invoice-sheet .sheet-signature td:last-child{text-align:right!important}
