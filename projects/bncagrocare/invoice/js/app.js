@@ -97,7 +97,7 @@ merge("B21:C21","Total Taka (In words):");merge("D21:K21",amountWords(totals.pay
 merge("A23:L23","\u0987\u09a8\u09ad\u09df\u09c7\u099c \u0995\u09c3\u09a4 \u09aa\u09a8\u09cd\u09af \u09ab\u09bf\u09b0\u09ce \u09a8\u09c7\u0993\u09df\u09be \u09b9\u09df /");merge("A24:F24","\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026");merge("G24:L24","........................................................");merge("A25:F25","Customer Signature");merge("G25:L25","Authorized Signature");merge("A26:L26","Mob: 01718-306103, 01724-358341");
 for(var rr=1;rr<=26;rr++){ws.getRow(rr).eachCell({includeEmpty:true},function(cell){cell.font=Object.assign({name:"Arial",size:9,color:{argb:"FF111111"}},cell.font||{});cell.alignment=Object.assign({vertical:"middle",horizontal:"left"},cell.alignment||{});});}
 ws.getCell("A1").font={name:"Arial",size:15,bold:true};ws.getCell("A1").alignment={vertical:"middle",horizontal:"left"};
-["A2","A3","A24"].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8};});
+["A2","A3","A26"].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8};});
 ws.getCell("C5").font={name:"Arial",size:12,bold:true};ws.getCell("C5").alignment={vertical:"middle",horizontal:"center"};
 ws.getCell("I5").font={name:"Arial",size:9,bold:true};["I6","I7","I8"].forEach(function(a){ws.getCell(a).font={name:"Arial",size:9};});
 function box(cell){cell.border={top:{style:"thin",color:{argb:"FF777777"}},bottom:{style:"thin",color:{argb:"FF777777"}},left:{style:"thin",color:{argb:"FF777777"}},right:{style:"thin",color:{argb:"FF777777"}}};}
@@ -106,7 +106,7 @@ for(var row=13;row<=16;row++){ws.getRow(row).eachCell({includeEmpty:true},functi
 [17,18,19,20].forEach(function(row){ws.getRow(row).eachCell({includeEmpty:true},function(cell){box(cell);cell.font={name:"Arial",size:9};cell.alignment={vertical:"middle",horizontal:"left"};});});
 ws.getCell("D16").numFmt="0.##";ws.getCell("L16").numFmt='"৳"#,##0.00';ws.getCell("L17").numFmt='0.##"%"';ws.getCell("L18").numFmt='"৳"#,##0.00';
 ws.getCell("B20").font={name:"Arial",size:9,bold:true};ws.getCell("L20").font={name:"Arial",size:9,bold:true};
-["A21","A24"].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8};});["A22","G22"].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8};});["A23","G23"].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8,bold:true};});
+["A23","A26"].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8};});["A24","G24"].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8};});["A25","G25"].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8,bold:true};});
 var buffer=await wb.xlsx.writeBuffer();downloadBlob(new Blob([buffer],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),fileSafe(state.invoiceNo)+".xlsx");showStatus("Original-layout XLSX downloaded");
 }catch(error){console.error(error);showStatus("XLSX export failed; use CSV or print");}
 finally{button.disabled=false;button.textContent="Download XLSX";}
