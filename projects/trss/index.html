@@ -37,14 +37,8 @@ body.pp-page[data-project="trss"]{--pp-bg:#050505;--pp-panel:#0b0b0b;--pp-line:#
 @media(max-width:480px){.trss-roadmap-head{align-items:start;flex-direction:column}.trss-roadmap-head span{text-align:left}.trss-track{gap:2px}.trss-seg{height:10px}.trss-stage-header,.trss-stage-footer{left:11px;right:11px;font-size:7px}}
 @media(prefers-reduced-motion:reduce){.trss-mesh,.trss-points,.trss-scan{animation:none!important}.trss-scan{display:none}}
 
-.trss-personal-note{display:flex;justify-content:center;align-items:center;width:100%;margin:28px 0 8px;padding:15px 0;border-top:1px solid var(--pp-line);border-bottom:1px solid var(--pp-line);text-align:center}
-.trss-personal-note p{margin:0;color:var(--pp-muted);font:12px/1.8 var(--pp-sans,inherit);text-align:center}.trss-personal-note .trss-note-line{display:block}.trss-personal-note .trss-note-description{display:block;max-width:620px;margin:10px auto 0;color:var(--pp-muted);font:13px/1.8 var(--pp-sans,inherit);text-align:center}
-.trss-personal-note strong{color:var(--pp-text);font-weight:600}
-.trss-vibe-word{display:inline-block;font-weight:800!important;background-image:linear-gradient(90deg,#6d28d9 0%,#a855f7 22%,#e9d5ff 48%,#c084fc 72%,#6d28d9 100%)!important;background-size:300% 100%!important;background-repeat:repeat!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;-webkit-text-fill-color:transparent!important;animation:trss-vibe-gradient 4s linear infinite!important;text-shadow:none!important;filter:none!important}
 
 
-@keyframes trss-vibe-gradient{0%{background-position:0% 50%}100%{background-position:300% 50%}}
-@media(prefers-reduced-motion:reduce){.trss-vibe-word{animation:none!important;background-position:50% 50%!important}}
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","@id":"https://tamasrazim.github.io/projects/trss/#software","name":"TrSS","alternateName":"Tamasrazim's Real-time Scene Synthesis","url":"https://tamasrazim.github.io/projects/trss/","description":"Independent in-development research exploring DLSS 5-style neural-rendering concepts for Intel Arc GPUs, including game-frame reconstruction and temporal stability. TrSS is not an NVIDIA DLSS port and does not claim equivalent image quality or performance.","applicationCategory":"DeveloperApplication","operatingSystem":"Windows; compatible Python development environments","softwareVersion":"Research / in development","creator":{"@id":"https://tamasrazim.github.io/#person"},"isPartOf":{"@id":"https://tamasrazim.github.io/#website"},"programmingLanguage":["Python","C++"]}</script>
 </head><body class="pp-page" data-project="trss">
@@ -104,5 +98,5 @@ body.pp-page[data-project="trss"]{--pp-bg:#050505;--pp-panel:#0b0b0b;--pp-line:#
 <article class="pp-card"><div class="pp-card-top"><span>OPEN / 03</span><span>HARDWARE</span></div><h3>Arc B580 validation</h3><p>Measure image quality, latency, stability and memory use end-to-end on the physical target GPU. No verified live-game performance numbers are claimed here.</p></article>
 </div></section>
 <div class="pp-bottom"><div><strong>Research build—not a plug-and-play graphics feature.</strong><p>There is no validated live-game neural renderer or completed Arc B580 performance test yet. Capture, offline training and native probes remain separate parts of the work.</p></div><a class="pp-text-link" href="/projects/trss-sample-recorder/">Explore the sample recorder ↗</a></div>
-</main><section id="trss-personal-note" class="trss-personal-note" aria-label="A personal note"><p><span class="trss-note-line">And yeah, I'm</span><span class="trss-note-line"><strong><span class="trss-vibe-word">Vibe Coding.</span></strong></span><span class="trss-note-description">It's challenging to work through complex ideas, but building ambitious things and learning along the way is genuinely fun.</span></p></section>
+</main>
 <footer class="pp-shell pp-footer"><span>Robiul Rumman Razim — Tamasrazim</span><a href="/projects/">All projects</a><a href="/projects/trss-sample-recorder/">Sample Recorder</a><a href="/">Home ↑</a></footer></body></html>
