@@ -33,7 +33,7 @@ function itemCells(item,serial,withSerial){item=item||blankItem();var live=hasIt
 var rows='';
 rows+='<tr class="sheet-title"><td colspan="12">BNC AGRO CARE</td></tr>';
 rows+='<tr class="sheet-subtitle"><td colspan="12">Reg. Office kajolgouri, khorna,Shajahanpur,bogura</td></tr>';
-rows+='<tr class="sheet-subtitle"><td colspan="12">Mob: 01718-306103, 01724-358341</td></tr>';
+rows+='<tr class="sheet-subtitle"><td colspan="12">Mobile: 01718-306103, 01724-358341</td></tr>';
 rows+='<tr class="sheet-ref">'+td('Ref:')+td(state.ref)+'<td colspan="10"></td></tr>';
 rows+='<tr class="sheet-invoice">'+td('No','sheet-label')+td(state.invoiceNo,'sheet-value')+'<td colspan="6" class="sheet-invoice-title">Invoice</td><td colspan="4" class="sheet-date">Invoice Date: '+esc(state.date||'')+'</td></tr>';
 rows+='<tr class="sheet-buyer"><td colspan="2">Trader / Dealer:</td><td colspan="4">'+esc(state.trader)+'</td><td colspan="2">Representative:</td><td colspan="4">Nem: Md Rezaul Karim</td></tr>';
@@ -47,7 +47,7 @@ rows+='<tr class="sheet-st">'+td('')+'<td colspan="2">ST</td>'+td('0','sheet-num
 rows+='<tr class="sheet-summary">'+td('')+'<td colspan="2">Total Carton</td>'+td(totals.cartons.toLocaleString("en-BD",{maximumFractionDigits:2}),'sheet-num')+td('')+td('')+td('')+td('')+'<td colspan="3">Total Taka</td>'+td(amount(totals.subtotal),'sheet-num sheet-amount')+'</tr>';
 rows+='<tr class="sheet-summary"><td></td><td colspan="10">Commission %</td>'+td(totals.commissionPct.toLocaleString("en-BD",{maximumFractionDigits:2})+'%','sheet-num sheet-amount')+'</tr>';
 rows+='<tr class="sheet-summary sheet-total"><td></td><td colspan="10">Total Amount</td>'+td(amount(totals.payable),'sheet-num sheet-amount')+'</tr>';
-rows+='<tr class="sheet-words"><td></td><td colspan="2">Total Taka (In words):</td><td colspan="8">'+esc(amountWords(totals.payable))+'</td><td></td></tr>';
+rows+='<tr class="sheet-words"><td></td><td colspan="2">Total Amount (in words):</td><td colspan="8">'+esc(amountWords(totals.payable))+'</td><td></td></tr>';
 rows+='<tr class="sheet-spacer"><td colspan="12"></td></tr>';
 rows+='<tr class="sheet-disclaimer"><td colspan="12">\u0987\u09a8\u09ad\u09df\u09c7\u099c \u0995\u09c3\u09a4 \u09aa\u09a8\u09cd\u09af \u09ab\u09bf\u09b0\u09ce \u09a8\u09c7\u0993\u09df\u09be \u09b9\u09df \u09a8\u09be /</td></tr>';
 rows+='<tr class="sheet-signline"><td colspan="6">\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026</td><td colspan="6">........................................................</td></tr>';
