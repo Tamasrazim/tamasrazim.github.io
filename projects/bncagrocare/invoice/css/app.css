@@ -18,6 +18,8 @@
 .invoice-sheet .sheet-invoice-title{text-align:center;font-size:12px;font-weight:700}
 .invoice-sheet .sheet-label,.invoice-sheet .sheet-value,.invoice-sheet .sheet-date{font-size:7px}
 .invoice-sheet .sheet-rep td{height:16px;font-size:7px}
+.invoice-sheet .sheet-buyer td{height:18px;font-size:7px;border-bottom:1px solid #aaa}
+.invoice-sheet .sheet-buyer-address td{height:24px;white-space:pre-wrap}
 .invoice-sheet .sheet-gap td{height:12px}
 .invoice-sheet .sheet-columns td{height:18px;border:1px solid #777;text-align:center;font-weight:700;font-size:6.2px;white-space:normal}
 .invoice-sheet .sheet-item td{height:18px;border:1px solid #9b9b9b;font-size:6.4px}
@@ -59,6 +61,4 @@
 .invoice-sheet .sheet-contact td{height:12pt;font-size:7.5pt}
 }
 
-/* Keep the seller, buyer, address and mobile details on the printed invoice itself. */
-.invoice-sheet .sheet-buyer td{height:18px;font-size:7px;border-bottom:1px solid #aaa}
-@media print{.invoice-sheet .sheet-buyer td{height:18pt;font-size:8pt}}
+@media print{.invoice-sheet .sheet-buyer td{height:18pt;font-size:8pt}.invoice-sheet .sheet-buyer-address td{height:24pt}}
