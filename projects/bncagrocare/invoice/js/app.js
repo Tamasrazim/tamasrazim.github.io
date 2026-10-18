@@ -74,7 +74,7 @@ button.disabled=true;button.textContent="Preparing XLSX…";
 try{
 var totals=calc(),items=totals.items,wb=new ExcelJS.Workbook();
 wb.creator="BNC AgroCare";wb.subject="Sales invoice";wb.title="BNC AgroCare Invoice "+state.invoiceNo;wb.created=new Date();
-var ws=wb.addWorksheet("Invoice",{pageSetup:{paperSize:9,orientation:"portrait",fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:.35,right:.35,top:.5,bottom:.5,header:.2,footer:.2}});
+var ws=wb.addWorksheet("Invoice",{pageSetup:{paperSize:9,orientation:"portrait",fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:.35,right:.35,top:.5,bottom:.5,header:.2,footer:.2}}});
 ws.columns=[2.13,10.25,9.25,3.38,6.5,7.88,2.13,10.25,9.88,3.13,8.38,9.88].map(function(width){return {width:width};});
 function set(addr,value){ws.getCell(addr).value=value;}function merge(ref,value){ws.mergeCells(ref);set(ref.split(':')[0],value);}
 merge("A1:L1","BNC AgroCare");merge("A2:L2","Registered Office: Kajolgouri, Khorna, Shajahanpur, Bogura.");merge("A3:L3","Mobile: 01718-306103, 01724-358341");merge("A4:B4","Ref:");merge("C4:L4",state.ref);
@@ -91,7 +91,7 @@ var st=last+1,tr=st+1,cr=tr+1,net=cr+1,words=net+1,disc=words+2,sign=disc+1,sig=
 merge("B"+st+":C"+st,"ST");set("D"+st,0);set("F"+st,0);merge("H"+st+":I"+st,"ST");set("J"+st,0);set("L"+st,0);
 merge("B"+tr+":C"+tr,"Total Cartons");set("D"+tr,{formula:"SUM(D"+first+":D"+last+")+SUM(J"+first+":J"+last+")",result:totals.cartons});merge("I"+tr+":K"+tr,"Total Amount (Tk.)");set("L"+tr,{formula:"SUM(F"+first+":F"+last+")+SUM(L"+first+":L"+last+")",result:totals.subtotal});
 merge("B"+cr+":K"+cr,"Commission (%)");set("L"+cr,totals.commissionPct);merge("B"+net+":K"+net,"Net Amount");set("L"+net,{formula:"L"+tr+"*(1-L"+cr+"/100)",result:totals.payable});
-merge("B"+words+":C"+words,"Amount in words:");merge("D"+words+":K"+words,amountWords(totals.payable));merge("A"+disc+":L"+disc,"Invoice goods cannot be returned.");
+merge("B"+words+":C"+words,"Amount in words:");merge("D"+words+":K"+words,amountWords(totals.payable));merge("A"+disc+":L"+disc,"\u0987\u09a8\u09ad\u09df\u09c7\u099c \u0995\u09c3\u09a4 \u09aa\u09a8\u09cd\u09af \u09ab\u09bf\u09b0\u09ce \u09a8\u09c7\u0993\u09df\u09be \u09b9\u09df \u09a8\u09be /");
 merge("A"+sign+":F"+sign,"........................................................");merge("G"+sign+":L"+sign,"........................................................");merge("A"+sig+":F"+sig,"Buyer Signature");merge("G"+sig+":L"+sig,"Authorized Signature");merge("A"+contact+":L"+contact,"Mobile: 01718-306103, 01724-358341");
 for(var rr=1;rr<=contact;rr++){ws.getRow(rr).eachCell({includeEmpty:true},function(cell){cell.font=Object.assign({name:"Arial",size:9,color:{argb:"FF111111"}},cell.font||{});cell.alignment=Object.assign({vertical:"middle",horizontal:"left",wrapText:true},cell.alignment||{});});}
 ws.getRow(1).height=24;ws.getRow(2).height=16;ws.getRow(3).height=14;ws.getRow(4).height=18;ws.getRow(5).height=20;ws.getCell("A1").font={name:"Arial",size:15,bold:true};ws.getCell("A1").alignment={vertical:"middle",horizontal:"left"};
