@@ -4334,6 +4334,8 @@ function sha256(text) {
   }).catch(function () { return null; });
 }
 function download(blob, name) {
+  /* Fail visibly instead of silently leaving a dead download link when an encoder returned no Blob. */
+  if (!(blob instanceof Blob)) throw new TypeError('Download was not created: the renderer returned no file data.');
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url; a.download = name; a.rel = 'noopener';
@@ -4856,7 +4858,7 @@ function openTrilyvaLibrary(){
   body.innerHTML='<div class="empty">LOADING LIBRARY INDEX…</div>';
   registry.ready.then(function(){
     var toolbar=document.createElement('div');
-    toolbar.style.cssText='display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,240px) auto;gap:8px;align-items:center;';
+    toolbar.style.cssText='display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,240px) auto auto;gap:8px;align-items:center;';
     var tabs=document.createElement('div');
     tabs.style.cssText='display:flex;gap:4px;flex-wrap:wrap;';
     var search=document.createElement('input');
@@ -8840,7 +8842,20 @@ function initDispatch() {
     var fn = ACTS[t.dataset.act];
     if (!fn) return;
     ev.preventDefault();
-    fn(ev);
+    try {
+      var result = fn(ev);
+      if (result && typeof result.then === 'function') {
+        result.catch(function (error) {
+          var message = String(error && error.message || error);
+          try { $('#stMsg').textContent = 'Action failed · ' + message; } catch (_) {}
+          try { logLine('UI ACTION FAILED — ' + message, true); } catch (_) {}
+        });
+      }
+    } catch (error) {
+      var message = String(error && error.message || error);
+      try { $('#stMsg').textContent = 'Action failed · ' + message; } catch (_) {}
+      try { logLine('UI ACTION FAILED — ' + message, true); } catch (_) {}
+    }
   });
   $('#modal').addEventListener('click', function (ev) { if (ev.target === $('#modal')) closeModal(); });
   $('#filePick').addEventListener('change', function () {
