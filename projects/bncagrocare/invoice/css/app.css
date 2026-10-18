@@ -67,3 +67,23 @@
 /* Keep the original invoice footer alignment consistent in preview and print. */
 .invoice-sheet .sheet-disclaimer td{text-align:center!important}
 .invoice-sheet .sheet-signline td:last-child,.invoice-sheet .sheet-signature td:last-child{text-align:right!important}
+
+
+/* Glass product catalogue: screen-only controls, separate from printed invoice output. */
+@media screen{
+  .product-picker{position:fixed;z-index:9999;display:grid;grid-template-rows:auto minmax(0,1fr);gap:9px;max-width:calc(100vw - 24px);padding:11px;border:1px solid rgba(255,255,255,.94);border-radius:21px;background:linear-gradient(145deg,rgba(255,255,255,.86),rgba(241,247,237,.72));box-shadow:0 28px 78px rgba(12,38,23,.2),0 2px 0 rgba(255,255,255,.95) inset,0 0 0 1px rgba(255,255,255,.22) inset;-webkit-backdrop-filter:blur(30px) saturate(175%);backdrop-filter:blur(30px) saturate(175%);color:var(--ink);overflow:hidden;transform:translateZ(0)}
+  .product-picker[hidden]{display:none!important}
+  .product-picker-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:3px 4px 7px;border-bottom:1px solid rgba(91,121,91,.17);color:#627567;font:850 8px ui-monospace,monospace;letter-spacing:.13em}
+  .product-picker-head span:last-child{padding:5px 7px;border-radius:999px;background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.94);color:#59745e;letter-spacing:.04em;white-space:nowrap}
+  .product-picker-list{display:grid;gap:6px;min-height:0;overflow:auto;overscroll-behavior:contain;padding:1px 2px 3px}
+  .product-picker-option{width:100%;min-width:0;display:grid;grid-template-columns:34px minmax(0,1fr) 18px;align-items:center;gap:9px;padding:10px 9px;border:1px solid rgba(255,255,255,.94);border-radius:14px;text-align:left;color:var(--ink);background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(248,250,245,.56));box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 4px 12px rgba(27,57,34,.035);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);cursor:pointer;transition:transform .22s cubic-bezier(.2,.8,.2,1),background .22s,border-color .22s,box-shadow .22s}
+  .product-picker-option:hover,.product-picker-option.is-active,.product-picker-option:focus-visible{outline:none;transform:translateY(-1px);border-color:rgba(139,174,124,.8);background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(230,241,222,.87));box-shadow:0 1px 0 rgba(255,255,255,.98) inset,0 9px 22px rgba(28,65,35,.09)}
+  .product-picker-code{width:30px;height:30px;display:grid;place-items:center;border-radius:10px;background:rgba(24,68,39,.07);border:1px solid rgba(24,68,39,.07);color:#507158;font:900 9px ui-monospace,monospace}
+  .product-picker-copy{min-width:0;display:grid;gap:4px}.product-picker-copy strong{font-size:11px;line-height:1.2;overflow-wrap:anywhere}.product-picker-copy small{font-size:9px;line-height:1.3;color:#758479;overflow-wrap:anywhere}
+  .product-picker-arrow{justify-self:end;color:#719176;font-size:13px;transition:transform .22s}.product-picker-option:hover .product-picker-arrow,.product-picker-option.is-active .product-picker-arrow{transform:translate(2px,-2px)}
+  .items-table input[data-product-picker]{cursor:text}.items-table input.product-picked{animation:productPickerPicked .45s ease-out}
+  @keyframes productPickerPicked{from{box-shadow:0 0 0 4px rgba(153,194,126,.42)}to{box-shadow:0 0 0 0 rgba(153,194,126,0)}}
+}
+@media print{.product-picker{display:none!important}}
+@media(max-width:520px){.product-picker-option{grid-template-columns:29px minmax(0,1fr) 12px;padding:9px 7px;gap:7px}.product-picker-code{width:27px;height:27px}}
+@media(prefers-reduced-motion:reduce){.product-picker-option,.product-picker-arrow{transition:none!important}.product-picker-option:hover,.product-picker-option.is-active{transform:none!important}}
