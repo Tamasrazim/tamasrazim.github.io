@@ -4204,8 +4204,7 @@ function loadProtectedLibraryModule() {
       if (existing) {
         existing.addEventListener('load', waitForRegistry, { once: true });
         existing.addEventListener('error', function () {
-          libraryModulePromise = null;
-          reject(new Error('Library module failed to load.'));
+          failLibraryLoad(new Error('Library module failed to load.'));
         }, { once: true });
         waitForRegistry();
         return;
@@ -4217,20 +4216,33 @@ function loadProtectedLibraryModule() {
       script.dataset.trilyvaLibrary = '1';
       script.onload = waitForRegistry;
       script.onerror = function () {
-        libraryModulePromise = null;
-        reject(new Error('Library module failed to load.'));
+        failLibraryLoad(new Error('Library module failed to load. Check the library folder and manifest request in the browser console.'));
       };
       document.head.appendChild(script);
 
+      var registryWaitStarted = Date.now();
+      var registryWaitTimer = null;
+      var registrySettled = false;
+      function failLibraryLoad(err) {
+        if (registrySettled) return;
+        registrySettled = true;
+        if (registryWaitTimer !== null) clearTimeout(registryWaitTimer);
+        libraryModulePromise = null;
+        reject(err instanceof Error ? err : new Error(String(err || 'Library module failed to initialize.')));
+      }
       function waitForRegistry() {
-        if (!window.TRILYVA_LIBRARY || !window.TRILYVA_LIBRARY.ready) {
-          setTimeout(waitForRegistry, 0);
+        if (registrySettled) return;
+        if (window.TRILYVA_LIBRARY && window.TRILYVA_LIBRARY.ready) {
+          registrySettled = true;
+          if (registryWaitTimer !== null) clearTimeout(registryWaitTimer);
+          window.TRILYVA_LIBRARY.ready.then(resolve, failLibraryLoad);
           return;
         }
-        window.TRILYVA_LIBRARY.ready.then(resolve, function (err) {
-          libraryModulePromise = null;
-          reject(err);
-        });
+        if (Date.now() - registryWaitStarted >= 12000) {
+          failLibraryLoad(new Error('Library module loaded but did not initialize within 12 seconds. Check library.js and manifest.json, then reload TRILYVA.'));
+          return;
+        }
+        registryWaitTimer = setTimeout(waitForRegistry, 50);
       }
     });
   }
@@ -4339,8 +4351,15 @@ function download(blob, name) {
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url; a.download = name; a.rel = 'noopener';
-  document.body.appendChild(a); a.click();
-  setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 8000);
+  document.body.appendChild(a);
+  try {
+    a.click();
+  } finally {
+    setTimeout(function () {
+      if (a.parentNode) a.parentNode.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 8000);
+  }
 }
 
 /* ============================================================
