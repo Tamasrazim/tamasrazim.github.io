@@ -36,11 +36,10 @@ rows+='<tr class="sheet-subtitle"><td colspan="12">Reg. Office kajolgouri, khorn
 rows+='<tr class="sheet-subtitle"><td colspan="12">Mob: 01718-306103, 01724-358341</td></tr>';
 rows+='<tr class="sheet-ref">'+td('Ref:')+td(state.ref)+'<td colspan="10"></td></tr>';
 rows+='<tr class="sheet-invoice">'+td('No','sheet-label')+td(state.invoiceNo,'sheet-value')+'<td colspan="6" class="sheet-invoice-title">Invoice</td><td colspan="4" class="sheet-date">Invoice Date: '+esc(state.date||'')+'</td></tr>';
-rows+='<tr class="sheet-rep"><td colspan="8"></td><td colspan="4">Nem: Md Rezaul Karim</td></tr>';
-rows+='<tr class="sheet-rep"><td colspan="8"></td><td colspan="4">Officer BNC AGRO CARE Area Manager</td></tr>';
-rows+='<tr class="sheet-rep"><td colspan="8"></td><td colspan="4">Mob: 01718-306103</td></tr>';
-rows+='<tr class="sheet-buyer"><td colspan="2">Trader / Dealer:</td><td colspan="4">'+esc(state.trader)+'</td><td colspan="2">Buyer Name:</td><td colspan="4">'+esc(state.buyer)+'</td></tr>';
-rows+='<tr class="sheet-buyer"><td colspan="2">Buyer Address:</td><td colspan="6">'+esc(state.address)+'</td><td colspan="1">Mobile:</td><td colspan="3">'+esc(state.mobile)+'</td></tr>';
+rows+='<tr class="sheet-buyer"><td colspan="2">Trader / Dealer:</td><td colspan="4">'+esc(state.trader)+'</td><td colspan="2">Representative:</td><td colspan="4">Nem: Md Rezaul Karim</td></tr>';
+rows+='<tr class="sheet-buyer"><td colspan="2">Buyer Name:</td><td colspan="4">'+esc(state.buyer)+'</td><td colspan="2"></td><td colspan="4">Officer BNC AGRO CARE Area Manager</td></tr>';
+rows+='<tr class="sheet-buyer sheet-buyer-address"><td colspan="2">Buyer Address:</td><td colspan="4">'+esc(state.address)+'</td><td colspan="2"></td><td colspan="4">Mob: 01718-306103</td></tr>';
+rows+='<tr class="sheet-buyer"><td colspan="2">Mobile:</td><td colspan="4">'+esc(state.mobile)+'</td><td colspan="6"></td></tr>';
 rows+='<tr class="sheet-gap"><td colspan="12"></td></tr>';
 rows+='<tr class="sheet-columns">'+['SL','Products Name','Pack Size','Ctn','Rate / Ctn','Amount Tk.','SL','Products Name','Pack Size','Ctn','Rate / Ctn','Amount Tk.'].map(function(v){return td(v,'sheet-colhead');}).join('')+'</tr>';
 for(var i=0;i<4;i++){var left=items[i]||blankItem(),right=items[i+4]||blankItem();rows+='<tr class="sheet-item">'+itemCells(left,String(i+1).padStart(2,'0'),true)+itemCells(right,String(i+5).padStart(2,'0'),false)+'</tr>';}
@@ -81,7 +80,7 @@ function set(addr,value){ws.getCell(addr).value=value;}
 function merge(ref,value){ws.mergeCells(ref);set(ref.split(':')[0],value);}
 merge("A1:L1","BNC AGRO CARE");merge("A2:L2","Reg. Office kajolgouri, khorna,Shajahanpur,bogura");merge("A3:L3","Mob: 01718-306103, 01724-358341");
 set("A4","Ref:");set("B4",state.ref);set("A5","No");set("B5",state.invoiceNo);merge("C5:H5","Invoice");merge("I5:L5","Invoice Date: "+(state.date||""));
-merge("I6:L6","Nem: Md Rezaul Karim");merge("I7:L7","Officer BNC AGRO CARE Area Manager");merge("I8:L8","Mob: 01718-306103");merge("A9:B9","Trader / Dealer:");merge("C9:F9",state.trader);merge("G9:H9","Buyer Name:");merge("I9:L9",state.buyer);merge("A10:B10","Buyer Address:");merge("C10:H10",state.address);merge("I10:I10","Mobile:");merge("J10:L10",state.mobile);
+merge("A6:B6","Trader / Dealer:");merge("C6:F6",state.trader);merge("G6:H6","Representative:");merge("I6:L6","Nem: Md Rezaul Karim");merge("A7:B7","Buyer Name:");merge("C7:F7",state.buyer);merge("G7:H7","");merge("I7:L7","Officer BNC AGRO CARE Area Manager");merge("A8:B8","Buyer Address:");merge("C8:F8",state.address);merge("G8:H8","");merge("I8:L8","Mob: 01718-306103");merge("A9:B9","Mobile:");merge("C9:F9",state.mobile);merge("G9:L9","");ws.getCell("C8").alignment={vertical:"middle",horizontal:"left",wrapText:true};ws.getRow(8).height=24;
 ["SL","Products Name","Pack Size","Ctn","Rate / Ctn","Amount Tk.","SL","Products Name","Pack Size","Ctn","Rate / Ctn","Amount Tk."].forEach(function(v,i){set(ws.getRow(12).getCell(i+1).address,v);});
 for(var i=0;i<4;i++){
 var l=items[i]||blankItem(),r=items[i+4]||blankItem(),row=13+i,lv=hasItem(l),rv=hasItem(r);
