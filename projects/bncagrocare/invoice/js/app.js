@@ -4,7 +4,7 @@
 var products=window.BNC_PRODUCTS||[];
 var $=function(selector,root){return (root||document).querySelector(selector);};
 var $$=function(selector,root){return Array.prototype.slice.call((root||document).querySelectorAll(selector));};
-var CURRENT_KEY="bnc-agrocare-invoice-current-v2",HISTORY_KEY="bnc-agrocare-invoice-history-v2",ROW_LIMIT=8,statusTimer=null,deferredInstallPrompt=null;
+var CURRENT_KEY="bnc-agrocare-invoice-current-v2",HISTORY_KEY="bnc-agrocare-invoice-history-v2",ROW_LIMIT=100,statusTimer=null,deferredInstallPrompt=null;
 function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function blankItem(){return {name:"",pack:"",qty:"",rate:""};}
 function freshState(number){return {ref:"X2",invoiceNo:number||"0002",date:today(),commission:"0",trader:"",buyer:"",address:"",mobile:"",items:[blankItem(),blankItem(),blankItem()]};}
@@ -31,28 +31,29 @@ function td(value,cls,span){return '<td'+(span?' colspan="'+span+'"':'')+(cls?' 
 function amount(value){return currency(value);}
 function itemCells(item,serial,withSerial){item=item||blankItem();var live=hasItem(item),qty=live?n(item.qty):'',rate=live?n(item.rate):'',sum=live?n(item.qty)*n(item.rate):'';return td(withSerial?serial:'','sheet-sl')+td(live?item.name:'','sheet-product')+td(live?item.pack:'','sheet-pack')+td(qty,'sheet-num')+td(live?amount(rate):'','sheet-num')+td(live?amount(sum):'','sheet-num sheet-amount');}
 var rows='';
-rows+='<tr class="sheet-title"><td colspan="12">BNC AGRO CARE</td></tr>';
-rows+='<tr class="sheet-subtitle"><td colspan="12">Reg. Office kajolgouri, khorna,Shajahanpur,bogura</td></tr>';
+var previewRowCount=Math.max(4,Math.ceil(items.length/2));
+rows+='<tr class="sheet-title"><td colspan="12">BNC AgroCare</td></tr>';
+rows+='<tr class="sheet-subtitle"><td colspan="12">Registered Office: Kajolgouri, Khorna, Shajahanpur, Bogura.</td></tr>';
 rows+='<tr class="sheet-subtitle"><td colspan="12">Mobile: 01718-306103, 01724-358341</td></tr>';
-rows+='<tr class="sheet-ref">'+td('Ref:')+td(state.ref)+'<td colspan="10"></td></tr>';
+rows+='<tr class="sheet-ref">'+td('Ref:','',2)+td(state.ref,'',10)+'</tr>';
 rows+='<tr class="sheet-invoice">'+td('No','sheet-label')+td(state.invoiceNo,'sheet-value')+'<td colspan="6" class="sheet-invoice-title">Invoice</td><td colspan="4" class="sheet-date">Invoice Date: '+esc(state.date||'')+'</td></tr>';
-rows+='<tr class="sheet-buyer"><td colspan="2">Trader / Dealer:</td><td colspan="4">'+esc(state.trader)+'</td><td colspan="2">Representative:</td><td colspan="4">Nem: Md Rezaul Karim</td></tr>';
-rows+='<tr class="sheet-buyer"><td colspan="2">Buyer Name:</td><td colspan="4">'+esc(state.buyer)+'</td><td colspan="2"></td><td colspan="4">Officer BNC AGRO CARE Area Manager</td></tr>';
-rows+='<tr class="sheet-buyer sheet-buyer-address"><td colspan="2">Buyer Address:</td><td colspan="4">'+esc(state.address)+'</td><td colspan="2"></td><td colspan="4">Mob: 01718-306103</td></tr>';
+rows+='<tr class="sheet-buyer"><td colspan="2">Trader / Dealer:</td><td colspan="4">'+esc(state.trader)+'</td><td colspan="2">Representative:</td><td colspan="4">Name: Md Rezaul Karim</td></tr>';
+rows+='<tr class="sheet-buyer"><td colspan="2">Buyer Name:</td><td colspan="4">'+esc(state.buyer)+'</td><td colspan="2"></td><td colspan="4">Officer, BNC AgroCare · Area Manager</td></tr>';
+rows+='<tr class="sheet-buyer sheet-buyer-address"><td colspan="2">Buyer Address:</td><td colspan="4">'+esc(state.address)+'</td><td colspan="2"></td><td colspan="4">Mobile: 01718-306103</td></tr>';
 rows+='<tr class="sheet-buyer"><td colspan="2">Mobile:</td><td colspan="4">'+esc(state.mobile)+'</td><td colspan="6"></td></tr>';
 rows+='<tr class="sheet-gap"><td colspan="12"></td></tr>';
-rows+='<tr class="sheet-columns">'+['SL','Products Name','Pack Size','Ctn','Rate / Ctn','Amount Tk.','SL','Products Name','Pack Size','Ctn','Rate / Ctn','Amount Tk.'].map(function(v){return td(v,'sheet-colhead');}).join('')+'</tr>';
-for(var i=0;i<4;i++){var left=items[i]||blankItem(),right=items[i+4]||blankItem();rows+='<tr class="sheet-item">'+itemCells(left,String(i+1).padStart(2,'0'),true)+itemCells(right,String(i+5).padStart(2,'0'),false)+'</tr>';}
+rows+='<tr class="sheet-columns">'+['SL','Product Name','Pack Size','Cartons','Rate / Carton','Amount (Tk.)','SL','Product Name','Pack Size','Cartons','Rate / Carton','Amount (Tk.)'].map(function(v){return td(v,'sheet-colhead');}).join('')+'</tr>';
+for(var i=0;i<previewRowCount;i++){var left=items[i]||blankItem(),right=items[i+previewRowCount]||blankItem();rows+='<tr class="sheet-item">'+itemCells(left,String(i+1).padStart(2,'0'),true)+itemCells(right,String(i+previewRowCount+1).padStart(2,'0'),false)+'</tr>';}
 rows+='<tr class="sheet-st">'+td('')+'<td colspan="2">ST</td>'+td('0','sheet-num')+td('')+td(amount(0),'sheet-num')+td('')+'<td colspan="2">ST</td>'+td('0','sheet-num')+td('')+td(amount(0),'sheet-num')+'</tr>';
-rows+='<tr class="sheet-summary">'+td('')+'<td colspan="2">Total Carton</td>'+td(totals.cartons.toLocaleString("en-BD",{maximumFractionDigits:2}),'sheet-num')+td('')+td('')+td('')+td('')+'<td colspan="3">Total Taka</td>'+td(amount(totals.subtotal),'sheet-num sheet-amount')+'</tr>';
-rows+='<tr class="sheet-summary"><td></td><td colspan="10">Commission %</td>'+td(totals.commissionPct.toLocaleString("en-BD",{maximumFractionDigits:2})+'%','sheet-num sheet-amount')+'</tr>';
+rows+='<tr class="sheet-summary">'+td('')+'<td colspan="2">Total Cartons</td>'+td(totals.cartons.toLocaleString("en-BD",{maximumFractionDigits:2}),'sheet-num')+td('')+td('')+td('')+td('')+'<td colspan="3">Total Amount (Tk.)</td>'+td(amount(totals.subtotal),'sheet-num sheet-amount')+'</tr>';
+rows+='<tr class="sheet-summary"><td></td><td colspan="10">Commission (%)</td>'+td(totals.commissionPct.toLocaleString("en-BD",{maximumFractionDigits:2})+'%','sheet-num sheet-amount')+'</tr>';
 rows+='<tr class="sheet-summary sheet-total"><td></td><td colspan="10">Total Amount</td>'+td(amount(totals.payable),'sheet-num sheet-amount')+'</tr>';
 rows+='<tr class="sheet-words"><td></td><td colspan="2">Total Amount (in words):</td><td colspan="8">'+esc(amountWords(totals.payable))+'</td><td></td></tr>';
 rows+='<tr class="sheet-spacer"><td colspan="12"></td></tr>';
 rows+='<tr class="sheet-disclaimer"><td colspan="12">\u0987\u09a8\u09ad\u09df\u09c7\u099c \u0995\u09c3\u09a4 \u09aa\u09a8\u09cd\u09af \u09ab\u09bf\u09b0\u09ce \u09a8\u09c7\u0993\u09df\u09be \u09b9\u09df \u09a8\u09be /</td></tr>';
 rows+='<tr class="sheet-signline"><td colspan="6">\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026</td><td colspan="6">........................................................</td></tr>';
 rows+='<tr class="sheet-signature"><td colspan="6">Customer Signature</td><td colspan="6">Authorized Signature</td></tr>';
-rows+='<tr class="sheet-contact"><td colspan="12">Mob: 01718-306103, 01724-358341</td></tr>';
+rows+='<tr class="sheet-contact"><td colspan="12">Mobile: 01718-306103, 01724-358341</td></tr>';
 var widths=[2.13,10.25,9.25,3.38,6.5,7.88,2.13,10.25,9.88,3.13,8.38,9.88],sum=widths.reduce(function(a,b){return a+b;},0);
 $("#paper").innerHTML='<table class="invoice-sheet" aria-label="BNC AgroCare original invoice sheet"><colgroup>'+widths.map(function(w){return '<col style="width:'+(w/sum*100)+'%;">';}).join('')+'</colgroup><tbody>'+rows+'</tbody></table>';
 $("#previewState").textContent="ORIGINAL LAYOUT";
@@ -66,47 +67,42 @@ function normalizeState(){state.items=Array.isArray(state.items)?state.items.sli
 function newInvoice(){var raw=String(state.invoiceNo||"0000");var match=raw.match(/^(.*?)(\d+)$/);var next=match?match[1]+String(Number(match[2])+1).padStart(match[2].length,"0"):"0001";if(!window.confirm("Start a new invoice? Save your current work first if you need to keep it."))return;state=freshState(next);syncFields();renderItems();renderSummary();renderPreview();saveCurrent();showStatus("New invoice ready");}
 function downloadBlob(blob,name){var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1200);}
 function csvCell(value){var v=String(value==null?"":value);return '"'+v.replace(/"/g,'""')+'"';}
-function downloadCSV(){var totals=calc();var rows=[["BNC AgroCare Invoice"],["Invoice number",state.invoiceNo],["Reference",state.ref],["Date",state.date],["Trader / Dealer",state.trader],["Buyer",state.buyer],["Address",state.address],["Mobile",state.mobile],[],["SL","Product","Pack size","Cartons","Rate / carton","Amount"]];totals.items.filter(hasItem).forEach(function(item,index){rows.push([index+1,item.name,item.pack,item.qty,item.rate,item.amount.toFixed(2)]);});rows.push([],["","","","","Subtotal",totals.subtotal.toFixed(2)],["","","","","Commission ("+totals.commissionPct+"%)",totals.commission.toFixed(2)],["","","","","Net payable",totals.payable.toFixed(2)],["Amount in words",amountWords(totals.payable)]);var csv="\ufeff"+rows.map(function(row){return row.map(csvCell).join(",");}).join("\r\n");downloadBlob(new Blob([csv],{type:"text/csv;charset=utf-8;"}),fileSafe(state.invoiceNo)+".csv");showStatus("CSV downloaded");}
+function downloadCSV(){var totals=calc();var rows=[["BNC AgroCare Invoice"],["Invoice number",state.invoiceNo],["Reference",state.ref],["Date",state.date],["Trader / Dealer",state.trader],["Buyer",state.buyer],["Address",state.address],["Mobile",state.mobile],[],["SL","Product name","Pack size","Cartons","Rate per carton","Amount (Tk.)"]];totals.items.filter(hasItem).forEach(function(item,index){rows.push([index+1,item.name,item.pack,item.qty,item.rate,item.amount.toFixed(2)]);});rows.push([],["","","","","Subtotal",totals.subtotal.toFixed(2)],["","","","","Commission ("+totals.commissionPct+"%)",totals.commission.toFixed(2)],["","","","","Net payable",totals.payable.toFixed(2)],["Amount in words",amountWords(totals.payable)]);var csv="\ufeff"+rows.map(function(row){return row.map(csvCell).join(",");}).join("\r\n");downloadBlob(new Blob([csv],{type:"text/csv;charset=utf-8;"}),fileSafe(state.invoiceNo)+".csv");showStatus("CSV downloaded");}
 async function downloadXLSX(){
 var button=$("#xlsxBtn");if(!window.ExcelJS){showStatus("XLSX library unavailable; use CSV or print");return;}
 button.disabled=true;button.textContent="Preparing XLSX…";
 try{
 var totals=calc(),items=totals.items,wb=new ExcelJS.Workbook();
 wb.creator="BNC AgroCare";wb.subject="Sales invoice";wb.title="BNC AgroCare Invoice "+state.invoiceNo;wb.created=new Date();
-var ws=wb.addWorksheet("Invoice",{pageSetup:{paperSize:9,orientation:"portrait",fitToPage:true,fitToWidth:1,fitToHeight:1,margins:{left:.7,right:.7,top:.75,bottom:.75,header:.3,footer:.3}}});
+var ws=wb.addWorksheet("Invoice",{pageSetup:{paperSize:9,orientation:"portrait",fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:.35,right:.35,top:.5,bottom:.5,header:.2,footer:.2}});
 ws.columns=[2.13,10.25,9.25,3.38,6.5,7.88,2.13,10.25,9.88,3.13,8.38,9.88].map(function(width){return {width:width};});
-[24,12,12,12,17,16,16,16,18,18,12,18,18,18,18,18,18,16,16,16,16,18,10,12,15,12].forEach(function(height,i){ws.getRow(i+1).height=height;});
-function set(addr,value){ws.getCell(addr).value=value;}
-function merge(ref,value){ws.mergeCells(ref);set(ref.split(':')[0],value);}
-merge("A1:L1","BNC AGRO CARE");merge("A2:L2","Reg. Office kajolgouri, khorna,Shajahanpur,bogura");merge("A3:L3","Mob: 01718-306103, 01724-358341");
-set("A4","Ref:");set("B4",state.ref);set("A5","No");set("B5",state.invoiceNo);merge("C5:H5","Invoice");merge("I5:L5","Invoice Date: "+(state.date||""));
-merge("A6:B6","Trader / Dealer:");merge("C6:F6",state.trader);merge("G6:H6","Representative:");merge("I6:L6","Nem: Md Rezaul Karim");merge("A7:B7","Buyer Name:");merge("C7:F7",state.buyer);merge("G7:H7","");merge("I7:L7","Officer BNC AGRO CARE Area Manager");merge("A8:B8","Buyer Address:");merge("C8:F8",state.address);merge("G8:H8","");merge("I8:L8","Mob: 01718-306103");merge("A9:B9","Mobile:");merge("C9:F9",state.mobile);merge("G9:L9","");ws.getCell("C8").alignment={vertical:"middle",horizontal:"left",wrapText:true};ws.getRow(8).height=24;
-["SL","Products Name","Pack Size","Ctn","Rate / Ctn","Amount Tk.","SL","Products Name","Pack Size","Ctn","Rate / Ctn","Amount Tk."].forEach(function(v,i){set(ws.getRow(12).getCell(i+1).address,v);});
-for(var i=0;i<4;i++){
-var l=items[i]||blankItem(),r=items[i+4]||blankItem(),row=13+i,lv=hasItem(l),rv=hasItem(r);
-[String(i+1).padStart(2,"0"),lv?l.name:"",lv?l.pack:"",lv?n(l.qty):"",lv?n(l.rate):"",null,"",rv?r.name:"",rv?r.pack:"",rv?n(r.qty):"",rv?n(r.rate):"",null].forEach(function(v,j){set(ws.getRow(row).getCell(j+1).address,v);});
-set("F"+row,{formula:'IF(B'+row+'="","",D'+row+'*E'+row+')',result:lv?n(l.qty)*n(l.rate):""});
-set("L"+row,{formula:'IF(H'+row+'="","",J'+row+'*K'+row+')',result:rv?n(r.qty)*n(r.rate):""});
-}
-merge("B17:C17","ST");set("D17",0);set("F17",0);merge("H17:I17","ST");set("J17",0);set("L17",0);
-merge("B18:C18","Total Carton");set("D18",{formula:"SUM(D13:D16)+SUM(J13:J16)",result:totals.cartons});merge("I18:K18","Total Taka");set("L18",{formula:"SUM(F13:F16)+SUM(L13:L16)",result:totals.subtotal});
-merge("B19:K19","Commission %");set("L19",totals.commissionPct);
-merge("B20:K20","Total Amount");set("L20",{formula:"L18*(1-L19/100)",result:totals.payable});
-merge("B21:C21","Total Amount (in words):");merge("D21:K21",amountWords(totals.payable));
-merge("A23:L23","\u0987\u09a8\u09ad\u09df\u09c7\u099c \u0995\u09c3\u09a4 \u09aa\u09a8\u09cd\u09af \u09ab\u09bf\u09b0\u09ce \u09a8\u09c7\u0993\u09df\u09be \u09b9\u09df /");merge("A24:F24","\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026");merge("G24:L24","........................................................");merge("A25:F25","Customer Signature");merge("G25:L25","Authorized Signature");merge("A26:L26","Mob: 01718-306103, 01724-358341");
-for(var rr=1;rr<=26;rr++){ws.getRow(rr).eachCell({includeEmpty:true},function(cell){cell.font=Object.assign({name:"Arial",size:9,color:{argb:"FF111111"}},cell.font||{});cell.alignment=Object.assign({vertical:"middle",horizontal:"left"},cell.alignment||{});});}
-ws.getCell("A1").font={name:"Arial",size:15,bold:true};ws.getCell("A1").alignment={vertical:"middle",horizontal:"left"};
-["A2","A3","A26"].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8};});
-ws.getCell("C5").font={name:"Arial",size:12,bold:true};ws.getCell("C5").alignment={vertical:"middle",horizontal:"center"};
-ws.getCell("I5").font={name:"Arial",size:9,bold:true};["I6","I7","I8"].forEach(function(a){ws.getCell(a).font={name:"Arial",size:9};});
+function set(addr,value){ws.getCell(addr).value=value;}function merge(ref,value){ws.mergeCells(ref);set(ref.split(':')[0],value);}
+merge("A1:L1","BNC AgroCare");merge("A2:L2","Registered Office: Kajolgouri, Khorna, Shajahanpur, Bogura.");merge("A3:L3","Mobile: 01718-306103, 01724-358341");merge("A4:B4","Ref:");merge("C4:L4",state.ref);
+set("A5","Invoice No.:");set("B5",state.invoiceNo);merge("C5:H5","INVOICE");merge("I5:L5","Invoice Date: "+(state.date||""));
+merge("A6:B6","Trader / Dealer:");merge("C6:F6",state.trader);merge("G6:H6","Representative:");merge("I6:L6","Name: Md Rezaul Karim");
+merge("A7:B7","Buyer Name:");merge("C7:F7",state.buyer);merge("G7:H7","");merge("I7:L7","Officer, BNC AgroCare · Area Manager");
+merge("A8:B8","Buyer Address:");merge("C8:F8",state.address);merge("G8:H8","");merge("I8:L8","Mobile: 01718-306103");merge("A9:B9","Buyer Mobile:");merge("C9:F9",state.mobile);merge("G9:L9","");
+var count=Math.max(4,Math.ceil(items.length/2)),head=11,first=12,last=first+count-1;
+["SL","Product Name","Pack Size","Cartons","Rate / Carton","Amount (Tk.)","SL","Product Name","Pack Size","Cartons","Rate / Carton","Amount (Tk.)"].forEach(function(v,i){set(ws.getRow(head).getCell(i+1).address,v);});
+for(var i=0;i<count;i++){var l=items[i]||blankItem(),r=items[i+count]||blankItem(),row=first+i,lv=hasItem(l),rv=hasItem(r);
+[String(i+1).padStart(2,"0"),lv?l.name:"",lv?l.pack:"",lv?n(l.qty):"",lv?n(l.rate):"",null,String(i+count+1).padStart(2,"0"),rv?r.name:"",rv?r.pack:"",rv?n(r.qty):"",rv?n(r.rate):"",null].forEach(function(v,j){set(ws.getRow(row).getCell(j+1).address,v);});
+set("F"+row,{formula:'IF(B'+row+'="","",D'+row+'*E'+row+')',result:lv?n(l.qty)*n(l.rate):""});set("L"+row,{formula:'IF(H'+row+'="","",J'+row+'*K'+row+')',result:rv?n(r.qty)*n(r.rate):""});ws.getRow(row).height=18;}
+var st=last+1,tr=st+1,cr=tr+1,net=cr+1,words=net+1,disc=words+2,sign=disc+1,sig=sign+1,contact=sig+1;
+merge("B"+st+":C"+st,"ST");set("D"+st,0);set("F"+st,0);merge("H"+st+":I"+st,"ST");set("J"+st,0);set("L"+st,0);
+merge("B"+tr+":C"+tr,"Total Cartons");set("D"+tr,{formula:"SUM(D"+first+":D"+last+")+SUM(J"+first+":J"+last+")",result:totals.cartons});merge("I"+tr+":K"+tr,"Total Amount (Tk.)");set("L"+tr,{formula:"SUM(F"+first+":F"+last+")+SUM(L"+first+":L"+last+")",result:totals.subtotal});
+merge("B"+cr+":K"+cr,"Commission (%)");set("L"+cr,totals.commissionPct);merge("B"+net+":K"+net,"Net Amount");set("L"+net,{formula:"L"+tr+"*(1-L"+cr+"/100)",result:totals.payable});
+merge("B"+words+":C"+words,"Amount in words:");merge("D"+words+":K"+words,amountWords(totals.payable));merge("A"+disc+":L"+disc,"Invoice goods cannot be returned.");
+merge("A"+sign+":F"+sign,"........................................................");merge("G"+sign+":L"+sign,"........................................................");merge("A"+sig+":F"+sig,"Buyer Signature");merge("G"+sig+":L"+sig,"Authorized Signature");merge("A"+contact+":L"+contact,"Mobile: 01718-306103, 01724-358341");
+for(var rr=1;rr<=contact;rr++){ws.getRow(rr).eachCell({includeEmpty:true},function(cell){cell.font=Object.assign({name:"Arial",size:9,color:{argb:"FF111111"}},cell.font||{});cell.alignment=Object.assign({vertical:"middle",horizontal:"left",wrapText:true},cell.alignment||{});});}
+ws.getRow(1).height=24;ws.getRow(2).height=16;ws.getRow(3).height=14;ws.getRow(4).height=18;ws.getRow(5).height=20;ws.getCell("A1").font={name:"Arial",size:15,bold:true};ws.getCell("A1").alignment={vertical:"middle",horizontal:"left"};
+["A2","A3","A"+contact].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8};});ws.getCell("C5").font={name:"Arial",size:12,bold:true};ws.getCell("C5").alignment={vertical:"middle",horizontal:"center"};ws.getCell("I5").font={name:"Arial",size:9,bold:true};
 function box(cell){cell.border={top:{style:"thin",color:{argb:"FF777777"}},bottom:{style:"thin",color:{argb:"FF777777"}},left:{style:"thin",color:{argb:"FF777777"}},right:{style:"thin",color:{argb:"FF777777"}}};}
-ws.getRow(12).eachCell({includeEmpty:true},function(cell){cell.font={name:"Arial",size:8,bold:true};cell.alignment={vertical:"middle",horizontal:"center",wrapText:true};box(cell);});
-for(var row=13;row<=16;row++){ws.getRow(row).eachCell({includeEmpty:true},function(cell,col){box(cell);cell.font={name:"Arial",size:8};cell.alignment={vertical:"middle",horizontal:([4,5,6,10,11,12].includes(col)?"right":"left")};if([6,12].includes(col))cell.numFmt='"৳"#,##0.00';});}
-[17,18,19,20].forEach(function(row){ws.getRow(row).eachCell({includeEmpty:true},function(cell){box(cell);cell.font={name:"Arial",size:9};cell.alignment={vertical:"middle",horizontal:"left"};});});
-ws.getCell("D18").numFmt="0.##";ws.getCell("L18").numFmt='"৳"#,##0.00';ws.getCell("L19").numFmt='0.##"%"';ws.getCell("L20").numFmt='"৳"#,##0.00';
-ws.getCell("B20").font={name:"Arial",size:9,bold:true};ws.getCell("L20").font={name:"Arial",size:9,bold:true};
-["A23","A26"].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8};});["A24","G24"].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8};});["A25","G25"].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8,bold:true};});
-var buffer=await wb.xlsx.writeBuffer();downloadBlob(new Blob([buffer],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),fileSafe(state.invoiceNo)+".xlsx");showStatus("Original-layout XLSX downloaded");
+ws.getRow(head).eachCell({includeEmpty:true},function(cell){cell.font={name:"Arial",size:8,bold:true};cell.alignment={vertical:"middle",horizontal:"center",wrapText:true};box(cell);});
+for(var row=first;row<=last;row++){ws.getRow(row).eachCell({includeEmpty:true},function(cell,col){box(cell);cell.font={name:"Arial",size:8};cell.alignment={vertical:"middle",horizontal:([4,5,6,10,11,12].includes(col)?"right":"left"),wrapText:true};if([6,12].includes(col))cell.numFmt='"৳"#,##0.00';});}
+[st,tr,cr,net].forEach(function(row){ws.getRow(row).eachCell({includeEmpty:true},function(cell){box(cell);cell.font={name:"Arial",size:9};cell.alignment={vertical:"middle",horizontal:"left",wrapText:true};});});
+ws.getCell("D"+tr).numFmt="0.##";ws.getCell("L"+tr).numFmt='"৳"#,##0.00';ws.getCell("L"+cr).numFmt='0.##"%"';ws.getCell("L"+net).numFmt='"৳"#,##0.00';ws.getCell("B"+net).font={name:"Arial",size:9,bold:true};ws.getCell("L"+net).font={name:"Arial",size:9,bold:true};
+["A"+disc,"A"+contact].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8};});["A"+sign,"G"+sign].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8};});["A"+sig,"G"+sig].forEach(function(a){ws.getCell(a).font={name:"Arial",size:8,bold:true};});
+var buffer=await wb.xlsx.writeBuffer();downloadBlob(new Blob([buffer],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),fileSafe(state.invoiceNo)+".xlsx");showStatus("XLSX downloaded");
 }catch(error){console.error(error);showStatus("XLSX export failed; use CSV or print");}
 finally{button.disabled=false;button.textContent="Download XLSX";}
 }
