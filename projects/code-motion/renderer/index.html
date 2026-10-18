@@ -4200,26 +4200,6 @@ function loadProtectedLibraryModule() {
   if (window.TRILYVA_LIBRARY && window.TRILYVA_LIBRARY.ready) return window.TRILYVA_LIBRARY.ready;
   if (!libraryModulePromise) {
     libraryModulePromise = new Promise(function (resolve, reject) {
-      var existing = document.querySelector('script[data-trilyva-library]');
-      if (existing) {
-        existing.addEventListener('load', waitForRegistry, { once: true });
-        existing.addEventListener('error', function () {
-          failLibraryLoad(new Error('Library module failed to load.'));
-        }, { once: true });
-        waitForRegistry();
-        return;
-      }
-
-      var script = document.createElement('script');
-      script.type = 'module';
-      script.src = './library/library.js?v=' + encodeURIComponent(APP_VERSION);
-      script.dataset.trilyvaLibrary = '1';
-      script.onload = waitForRegistry;
-      script.onerror = function () {
-        failLibraryLoad(new Error('Library module failed to load. Check the library folder and manifest request in the browser console.'));
-      };
-      document.head.appendChild(script);
-
       var registryWaitStarted = Date.now();
       var registryWaitTimer = null;
       var registrySettled = false;
@@ -4239,16 +4219,36 @@ function loadProtectedLibraryModule() {
           return;
         }
         if (Date.now() - registryWaitStarted >= 12000) {
-          failLibraryLoad(new Error('Library module loaded but did not initialize within 12 seconds. Check library.js and manifest.json, then reload TRILYVA.'));
+          failLibraryLoad(new Error('Library module did not initialize within 12 seconds. Check library.js, manifest.json and the module paths, then reload TRILYVA.'));
           return;
         }
         registryWaitTimer = setTimeout(waitForRegistry, 50);
       }
+
+      var existing = document.querySelector('script[data-trilyva-library]');
+      if (existing) {
+        existing.addEventListener('load', waitForRegistry, { once: true });
+        existing.addEventListener('error', function () {
+          failLibraryLoad(new Error('Library module failed to load. Check the library folder and manifest request in the browser console.'));
+        }, { once: true });
+        waitForRegistry();
+        return;
+      }
+
+      var script = document.createElement('script');
+      script.type = 'module';
+      script.src = './library/library.js?v=' + encodeURIComponent(APP_VERSION);
+      script.dataset.trilyvaLibrary = '1';
+      script.onload = waitForRegistry;
+      script.onerror = function () {
+        failLibraryLoad(new Error('Library module failed to load. Check the library folder and manifest request in the browser console.'));
+      };
+      document.head.appendChild(script);
+      waitForRegistry();
     });
   }
   return libraryModulePromise;
 }
-
 function openLibraryPasswordGate(afterAccess) {
   var body = document.createElement('div');
   body.style.cssText = 'display:flex;flex-direction:column;gap:10px;min-height:0;';
