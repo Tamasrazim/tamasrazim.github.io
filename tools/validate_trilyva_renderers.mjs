@@ -37,3 +37,13 @@ for(const file of [
   'projects/code-motion/renderer/library/story-films.js',
   'projects/code-motion/renderer/voice-studio.js'
 ]) must(!fs.existsSync(path.join(ROOT,file)),file+' removed');
+
+const xyzSource = read('projects/code-motion/renderer/library/xyz-library.js');
+const xyzModule = await import('data:text/javascript;charset=utf-8,' + encodeURIComponent(xyzSource));
+const xyzItems = await xyzModule.default.load();
+must(manifest.libraries.includes('./xyz-library.js'), 'XYZ is registered in the TRILYVA library manifest');
+must(serviceWorker.includes('tamasrazim-trilyva-pwa-v110') && serviceWorker.includes('./library/xyz-library.js'), 'XYZ module is included in the bumped offline cache');
+must(xyzItems.length === 50, 'XYZ library contains 50 distinct editable animations');
+must(new Set(xyzItems.map(item => item.title)).size === 50, 'XYZ animation titles are all unique');
+must(xyzItems.every(item => item.code.includes('function renderFrame') && item.code.length > 250), 'all XYZ animations contain editable renderFrame source');
+must(new Set(xyzItems.map(item => item.code.slice(item.code.indexOf('ctx.save();') + 12))).size === 50, 'XYZ animation source bodies are not identical');

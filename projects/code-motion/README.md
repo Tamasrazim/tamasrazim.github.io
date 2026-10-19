@@ -81,3 +81,8 @@ Each completed design folder contains:
 The selected folder also receives `DOT-MESH-CATALOG.csv`, `BATCH-MANIFEST.json`, and `README.txt`. Progress is shown in TRILYVA, cancellation is available, and outputs already written to the folder remain there if the batch stops. The manifest records actual verification and average bitrate where available. The 20 Mbps figure is the encoder target; the measured average can differ.
 
 The browser must support the File System Access API and H.264 at 3840×2160 / 60 FPS. Open the HTTPS GitHub Pages renderer in a current Chromium-based browser.
+
+## XYZ animation library
+
+TRILYVA's renderer includes the **XYZ** library with 50 distinct procedural animations. Each entry uses its own Canvas drawing structure and motion logic, exposes an editable `renderFrame` function, and loops deterministically over 12 seconds at the composition's frame rate. The library is self-contained and has no external runtime dependencies.
+
