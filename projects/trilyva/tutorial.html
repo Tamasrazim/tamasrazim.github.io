@@ -1,0 +1,119 @@
+<!doctype html>
+<!--
+  What this does:
+  Teaches a first-time user how to make, preview, verify, and export a deterministic animation in TRILYVA.
+  The code examples mirror the Quick Start and renderFrame contract used by the live workspace.
+-->
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark">
+<meta name="author" content="Robiul Rumman Razim">
+<meta name="description" content="The TRILYVA beginner tutorial: write frame-driven motion, preview it, configure a composition, analyse loops, and export verified video or image sequences.">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/trilyva/tutorial.html">
+<title>TRILYVA Tutorial — From Code to Render</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site-v3.css?v=20261010-3">
+<style>
+:root{color-scheme:dark;--t-bg:#050505;--t-panel:rgba(255,255,255,.045);--t-line:rgba(255,255,255,.14);--t-muted:#a3a39d;--t-ink:#f1f1ed}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:26px}body{margin:0;background:radial-gradient(ellipse at 80% 0%,rgba(255,255,255,.07),transparent 34%),var(--t-bg);color:var(--t-ink);font-family:Arial,Helvetica,sans-serif}.wrap{width:min(1100px,calc(100% - 36px));margin:auto}.top{height:82px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--t-line);gap:18px}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;font:10px 'JetBrains Mono',monospace;letter-spacing:.1em}.brand img{width:54px;height:54px;object-fit:contain;border:1px solid var(--t-line);border-radius:13px}.top nav{display:flex;gap:17px;flex-wrap:wrap;font:10px 'JetBrains Mono',monospace}.top nav a,.crumb a{color:var(--t-muted);text-decoration:none}.top nav a:hover,.crumb a:hover{color:white}.hero{padding:clamp(55px,9vw,110px) 0 58px;border-bottom:1px solid var(--t-line)}.eyebrow{font:10px 'JetBrains Mono',monospace;letter-spacing:.18em;color:var(--t-muted);text-transform:uppercase}.hero h1{font:700 clamp(42px,8.7vw,92px)/1.02 'Unbounded',sans-serif;letter-spacing:-.075em;margin:25px 0}.hero h1 span{color:#898983}.lead{max-width:750px;font-size:clamp(17px,2.2vw,22px);line-height:1.7;color:#d4d4ce}.muted{color:var(--t-muted);line-height:1.8}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:43px;padding:0 16px;border:1px solid var(--t-line);border-radius:8px;text-decoration:none;color:var(--t-ink);font:10px 'JetBrains Mono',monospace;letter-spacing:.04em;background:rgba(255,255,255,.035)}.btn.primary{background:#f1f1ed;color:#050505;border-color:#f1f1ed}.section{padding:56px 0;border-bottom:1px solid var(--t-line)}.section-head{display:flex;align-items:end;justify-content:space-between;gap:22px;margin-bottom:25px}.section h2{font:600 clamp(23px,4vw,37px)/1.2 'Unbounded',sans-serif;letter-spacing:-.06em;margin:12px 0}.section-head p{max-width:520px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{border:1px solid var(--t-line);border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.018));padding:22px;min-width:0;box-shadow:0 14px 40px rgba(0,0,0,.18);backdrop-filter:blur(12px)}.num{font:10px 'JetBrains Mono',monospace;color:var(--t-muted);letter-spacing:.13em}.card h3{font:500 17px 'Unbounded',sans-serif;letter-spacing:-.04em;margin:15px 0 10px}.card p{font-size:13px;line-height:1.8;color:#bdbdb7}.mock{margin-top:17px;padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:#080808;font:10px 'JetBrains Mono',monospace;color:#bcbcb5}.mockbar{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--t-line);padding-bottom:10px;margin-bottom:10px;color:#eee}.pill{display:inline-block;border:1px solid #4d4d49;border-radius:5px;padding:5px 7px;margin:3px 3px 0 0;color:#ddd}.pill.active{background:#eee;color:#080808;border-color:#eee}pre{white-space:pre;overflow:auto;padding:18px;border:1px solid var(--t-line);border-radius:12px;background:#080808;color:#e7e7e1;font:12px/1.8 'JetBrains Mono',monospace;tab-size:2}code{font-family:'JetBrains Mono',monospace;color:#f1f1ed}.inline{padding:2px 5px;border:1px solid var(--t-line);border-radius:5px;background:#111}.callout{border-left:2px solid #eee;padding:14px 17px;background:rgba(255,255,255,.04);color:#c9c9c2;font-size:13px;line-height:1.8;margin:20px 0}.steps{display:grid;gap:10px}.step{display:grid;grid-template-columns:52px minmax(0,1fr);gap:15px;border:1px solid var(--t-line);border-radius:12px;padding:17px;background:var(--t-panel)}.step .n{font:12px 'JetBrains Mono',monospace;color:#9a9a93;padding-top:4px}.step h3{margin:0 0 8px;font-size:15px}.step p{margin:0;color:#bdbdb7;font-size:13px;line-height:1.8}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--t-line);vertical-align:top;line-height:1.7}.table th{font:10px 'JetBrains Mono',monospace;color:var(--t-muted)}footer{padding:30px 0 45px;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;color:var(--t-muted);font:10px 'JetBrains Mono',monospace}footer a{color:inherit}@media(max-width:700px){.top{height:auto;min-height:76px;padding:12px 0;align-items:flex-start}.top nav{justify-content:flex-end;gap:9px}.brand img{width:43px;height:43px}.brand{gap:8px}.grid{grid-template-columns:1fr}.section-head{display:block}.card{padding:18px}.table{font-size:12px}.table th,.table td{padding:9px 6px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header class="wrap top">
+<a class="brand" href="/projects/trilyva/" aria-label="TRILYVA project home"><img src="/assets/brand/trilyva/T.svg" alt="TRILYVA wordmark"><span>TRILYVA / FIELD GUIDE</span></a>
+<nav aria-label="Tutorial navigation"><a href="#start">START</a><a href="#code">CODE</a><a href="#render">RENDER</a><a href="#troubleshoot">FIXES</a></nav>
+</header>
+<main>
+<section class="wrap hero" id="start">
+<div class="eyebrow">TRILYVA / BEGINNER TUTORIAL / 01</div>
+<h1>From code<br><span>to motion.</span></h1>
+<p class="lead">Make your first animation, scrub through its frames, configure a composition, and export a real file. This guide follows the controls and frame model used in the live TRILYVA workspace.</p>
+<p class="muted">You do not need to create a canvas or start an animation loop yourself. TRILYVA supplies the canvas context and evaluates your function at explicit frame times.</p>
+<div class="actions"><a class="btn primary" href="/projects/code-motion/renderer/">OPEN TRILYVA WORKSPACE ↗</a><a class="btn" href="/projects/code-motion/renderer/examples/chatgpt-motion-loop.html">OPEN MOTION EXAMPLE ↗</a></div>
+<div class="callout"><strong>Core idea:</strong> preview playback is for seeing the motion; rendering evaluates every requested frame in order. A slower render is okay. Missing or duplicated frames are not.</div>
+</section>
+<section class="wrap section">
+<div class="section-head"><div><div class="eyebrow">01 / THE WORKSPACE</div><h2>Know the main controls.</h2></div><p class="muted">A visual map of the live workspace controls, recreated for this guide. It is an explanatory diagram, not a captured screenshot.</p></div>
+<div class="grid">
+<article class="card"><div class="num">A / SOURCE</div><h3>Write the animation</h3><p>The editor holds JavaScript that draws one frame at a time. Use <code class="inline">renderFrame()</code>, then press Run to compile and preview the current source.</p><div class="mock"><div class="mockbar"><span>ANIMATION SOURCE</span><span>RUN ↵</span></div><span>function renderFrame(time, frame, fps, ctx, width, height) {</span><br><span>&nbsp;&nbsp;// draw one frame</span><br><span>}</span></div></article>
+<article class="card"><div class="num">B / PREVIEW</div><h3>Inspect the motion</h3><p>Play, pause, scrub, step one frame, or inspect a specific frame. The preview can run slower than the export and may use a smaller raster.</p><div class="mock"><div class="mockbar"><span>LIVE PREVIEW</span><span>FRAME 000 / 600</span></div><span class="pill active">PLAY</span><span class="pill">INSPECT FRAME</span><span class="pill">FULLSCREEN</span><div style="height:65px;margin-top:12px;border:1px solid #454541;border-radius:6px;background:radial-gradient(circle at 50% 50%,#777 0 2px,#191919 3px,transparent 38%),linear-gradient(120deg,#080808,#252525,#080808)"></div></div></article>
+<article class="card"><div class="num">C / SETTINGS</div><h3>Choose the composition</h3><p>Set resolution, frame rate, duration, background, random seed, and loop length. Use a small test render before committing to a large export.</p><div class="mock"><div class="mockbar"><span>COMPOSITION</span><span>16:9</span></div><span class="pill">1080p</span><span class="pill active">4K</span><span class="pill">24</span><span class="pill active">60 FPS</span><span class="pill">10 s</span><span class="pill">30 s</span></div></article>
+<article class="card"><div class="num">D / OUTPUT</div><h3>Render and verify</h3><p>Pick an available output, render every frame, then inspect the completed file's verification report before using it elsewhere.</p><div class="mock"><div class="mockbar"><span>RENDER</span><span>STATUS</span></div><span class="pill active">ANALYSE JOB</span><span class="pill">TEST RENDER</span><br><span class="pill">MP4</span><span class="pill">WEBM</span><span class="pill">PNG · ZIP</span></div></article>
+</div>
+</section>
+<section class="wrap section" id="code">
+<div class="section-head"><div><div class="eyebrow">02 / FIRST ANIMATION</div><h2>Paste this exact starter.</h2></div><p class="muted">This is the same basic <code class="inline">renderFrame()</code> pattern documented in the live workspace's Quick Start.</p></div>
+<pre><code>window.renderFrame = function (time, frame, fps, ctx, width, height) {
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, width, height);
+  var x = width * 0.5 + Math.cos(time * 2) * 200;
+  ctx.fillStyle = "#fff";
+  ctx.beginPath();
+  ctx.arc(x, height * 0.5, 40, 0, Math.PI * 2);
+  ctx.fill();
+};</code></pre>
+<div class="steps">
+<div class="step"><div class="n">01</div><div><h3>Open the workspace</h3><p>Open TRILYVA, find the Animation Source editor, and select the existing example code. Save a copy first if you want to keep the current project.</p></div></div>
+<div class="step"><div class="n">02</div><div><h3>Replace and run</h3><p>Paste the starter function and press <strong>Run</strong> (Ctrl + Enter on Windows/Linux, or ⌘ + Enter on macOS). You should see a white circle moving horizontally on black.</p></div></div>
+<div class="step"><div class="n">03</div><div><h3>Scrub to test</h3><p>Move the timeline or step frame-by-frame. The circle's position is derived from <code class="inline">time</code>, so jumping directly to a frame still gives the correct position.</p></div></div>
+</div>
+<div class="callout">TRILYVA's full render function contract is <code>renderFrame(time, frame, fps, ctx, width, height)</code>. You can declare fewer arguments if you do not need them. Do not create your own canvas or call <code>requestAnimationFrame()</code> inside the animation.</div>
+</section>
+<section class="wrap section">
+<div class="section-head"><div><div class="eyebrow">03 / FRAME MODEL</div><h2>Think in frames, not wall time.</h2></div></div>
+<div class="grid">
+<article class="card"><div class="num">FRAME TIME</div><h3>One formula</h3><pre><code>time = frame / fps</code></pre><p>At 60 fps, frame 60 is evaluated at 1 second. Each requested frame gets a predictable timestamp, even if rendering takes longer than real time.</p></article>
+<article class="card"><div class="num">30-SECOND EXAMPLE</div><h3>How many frames?</h3><pre><code>frameCount = duration * fps
+30 * 60 = 1800 frames
+frames: 0 ... 1799</code></pre><p>The output is 30 seconds long. The wrap frame is not written as an extra duplicate of frame zero.</p></article>
+</div>
+</section>
+<section class="wrap section" id="render">
+<div class="section-head"><div><div class="eyebrow">04 / EXPORT</div><h2>Make a verified render.</h2></div><p class="muted">Use the settings in order; large dimensions and high frame rates increase the amount of work dramatically.</p></div>
+<div class="steps">
+<div class="step"><div class="n">01</div><div><h3>Choose a manageable test</h3><p>Start with 1080p, 30 or 60 fps, and a short duration. Confirm the motion looks right before raising the output size.</p></div></div>
+<div class="step"><div class="n">02</div><div><h3>Set the duration and background</h3><p>Choose a duration such as 10 or 30 seconds. Transparent backgrounds are useful for image sequences; the checkerboard is preview UI, not part of the rendered pixels.</p></div></div>
+<div class="step"><div class="n">03</div><div><h3>Analyse, then test</h3><p>Use <strong>Analyse job</strong> to check the configuration, then <strong>Test render</strong> to catch errors without waiting for a full job.</p></div></div>
+<div class="step"><div class="n">04</div><div><h3>Render and inspect</h3><p>Choose an output format that the current browser reports as available. When complete, check the verification status and download the resulting file.</p></div></div>
+</div>
+<table class="table" style="margin-top:22px"><thead><tr><th>OUTPUT</th><th>USE IT FOR</th><th>IMPORTANT LIMIT</th></tr></thead><tbody>
+<tr><td>MP4 / H.264</td><td>Common delivery and sharing</td><td>Browser/device encoder support varies. Alpha transparency is not written.</td></tr>
+<tr><td>WebM / VP9 or VP8</td><td>Web playback and compact video</td><td>Available encoder profiles depend on the browser.</td></tr>
+<tr><td>PNG sequence → ZIP or folder</td><td>Lossless frames and transparency</td><td>Large jobs can use substantial storage; ZIP output has a size ceiling.</td></tr>
+</tbody></table>
+<div class="callout">The live workspace probes the selected resolution, frame rate, and codec before offering a render path. Do not assume every device supports every combination; trust the capability status shown in Diagnostics.</div>
+</section>
+<section class="wrap section">
+<div class="section-head"><div><div class="eyebrow">05 / SEAMLESS LOOPS</div><h2>Make the motion periodic.</h2></div></div>
+<p class="muted">Enabling the Loop setting tells TRILYVA the intended cycle length. It does not automatically make arbitrary animation loop. Use periodic functions so the last rendered moment joins the first cleanly.</p>
+<pre><code>// A repeating angle: the same value returns after one cycle.
+const angle = motion.loopProgress * TAU;
+const x = width * 0.5 + Math.cos(angle) * width * 0.2;
+const y = height * 0.5 + Math.sin(angle) * height * 0.1;</code></pre>
+<div class="steps">
+<div class="step"><div class="n">01</div><div><h3>Set the loop duration</h3><p>Enable Loop and choose the same cycle duration as your intended composition.</p></div></div>
+<div class="step"><div class="n">02</div><div><h3>Use circular motion</h3><p>Use sine/cosine or another periodic expression. Avoid motion that only grows, such as <code class="inline">x += 1</code>, unless it is wrapped back around deliberately.</p></div></div>
+<div class="step"><div class="n">03</div><div><h3>Analyse the seam</h3><p>Press <strong>Analyse seam</strong>. A mismatch means the first and wrap frames differ; revise the animation until the seam test matches at the sampled resolution.</p></div></div>
+</div>
+</section>
+<section class="wrap section" id="troubleshoot">
+<div class="section-head"><div><div class="eyebrow">06 / QUICK FIXES</div><h2>When something breaks.</h2></div></div>
+<table class="table"><thead><tr><th>SYMPTOM</th><th>CHECK THIS FIRST</th></tr></thead><tbody>
+<tr><td>Preview is blank</td><td>Read the compile/runtime message, check braces and quotes, then press Run again.</td></tr>
+<tr><td>Preview and export differ</td><td>Avoid <code>Math.random()</code>, <code>Date.now()</code>, and variables that accumulate across frames. Use seeded <code>random()</code> and derive values from the current frame/time.</td></tr>
+<tr><td>Loop seam mismatches</td><td>Check every animated value for periodicity. An enabled Loop checkbox alone does not create a loop.</td></tr>
+<tr><td>MP4 is unavailable</td><td>Open Diagnostics. Try a lower resolution/frame rate or use an output format the browser confirms is supported.</td></tr>
+<tr><td>Transparent video looks opaque</td><td>This pipeline does not write an alpha plane to MP4/WebM. Use a PNG sequence for transparent output.</td></tr>
+<tr><td>Large render is slow</td><td>That is not automatically a failure. Test a short section first, keep the tab visible, and check available storage and memory.</td></tr>
+</tbody></table>
+<div class="actions"><a class="btn primary" href="/projects/code-motion/renderer/">TRY IT IN TRILYVA ↗</a><a class="btn" href="/projects/code-motion/renderer/examples/chatgpt-motion-loop.html">STUDY A COMPLETE EXAMPLE ↗</a><a class="btn" href="/projects/trilyva/">BACK TO TRILYVA ↗</a></div>
+</section>
+</main>
+<footer class="wrap"><span>ROBIUL RUMMAN RAZIM — TAMASRAZIM / TRILYVA</span><span><a href="/projects/">PROJECTS</a> · <a href="/">MAIN SITE</a></span></footer>
+</body>
+</html>
