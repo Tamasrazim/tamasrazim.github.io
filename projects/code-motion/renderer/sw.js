@@ -1,6 +1,6 @@
 // What this does: Caches the renderer's files so the Code Motion workspace can reopen more reliably when the network is unavailable.
 
-const CACHE = 'tamasrazim-trilyva-pwa-v106';
+const CACHE = 'tamasrazim-trilyva-pwa-v107';
 const CORE = [
   './',
   './index.html',
@@ -17,7 +17,9 @@ const CORE = [
   './library/green-screen-overlays.js',
   './library/prism-data.js',
   './library/prism-library.json',
-  './library/prism-web-icons.json'
+  './library/prism-web-icons.json',
+  './examples/chatgpt-motion-loop.html',
+  './examples/chatgpt-30s-seamless-loop.js'
 ];
 
 self.addEventListener('install', function (event) {
