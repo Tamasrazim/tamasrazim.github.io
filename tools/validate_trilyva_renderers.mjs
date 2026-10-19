@@ -1,4 +1,4 @@
-// What this does: Verifies TRILYVA's core render controls and ensures removed cartoon pages stay out of the site.
+// What this does: Verifies TRILYVA's render controls, full tutorial, and removal of promotional animation samples.
 import fs from 'node:fs';
 import path from 'node:path';
 const ROOT=process.cwd();
@@ -6,22 +6,34 @@ const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const must=(condition,message)=>{if(!condition)throw new Error(message);console.log('PASS',message);};
 const renderer=read('projects/code-motion/renderer/index.html');
 const overview=read('projects/trilyva/index.html');
+const tutorial=read('projects/trilyva/tutorial.html');
 const manifest=read('projects/code-motion/renderer/library/manifest.json');
 const serviceWorker=read('projects/code-motion/renderer/sw.js');
-const loopExample=read('projects/code-motion/renderer/examples/chatgpt-motion-loop.html');
-const loopSource=read('projects/code-motion/renderer/examples/chatgpt-30s-seamless-loop.js');
 must(renderer.includes('data-act="render"'),'header retains Render action');
-must(renderer.includes('id="sample-chatgpt-motion-loop"')&&/data-loop="1" data-loopdur="30" data-dur="30"/.test(renderer),'Examples includes the 30-second ChatGPT motion loop');
-must(loopSource.includes('function renderFrame(')&&loopSource.includes('LOOP_SECONDS = 30'),'ChatGPT sample uses the TRILYVA frame contract and 30-second loop');
-must(loopExample.includes('id="preview"')&&loopExample.includes('COPY SOURCE')&&loopExample.includes('./chatgpt-30s-seamless-loop.js'),'ChatGPT example has a live preview and source controls');
-must(serviceWorker.includes('./examples/chatgpt-motion-loop.html')&&serviceWorker.includes('./examples/chatgpt-30s-seamless-loop.js'),'ChatGPT example is included in the offline cache');
-must(overview.includes('/projects/code-motion/renderer/examples/chatgpt-motion-loop.html'),'TRILYVA overview links to the ChatGPT motion example');
 must(renderer.includes('data-act="renderAll"'),'render panel retains Render All');
 must(renderer.includes('data-act="renderAllDotMesh"'),'render panel retains Dot Mesh batch action');
 must(renderer.includes('data-act="cancelRender"'),'render panel retains Cancel');
 must(!/data-act="queueAdd"|data-act="startRender"/i.test(renderer),'duplicate queue/current-render buttons are removed');
-must(!/sample-lumi-lost-firefly|sample-niko-clockwork-bird|voice-studio\\.js/i.test(renderer),'cartoon samples and voice studio are removed');
+must(!renderer.includes('sample-chatgpt-motion-loop')&&!/ChatGPT Ad Edit|chatgpt-motion-loop|chatgpt-30s-seamless-loop/i.test(renderer),'ChatGPT promotional sample is removed from renderer');
+must(tutorial.includes('/assets/brand/trilyva/T.svg'),'tutorial uses the TRILYVA T.svg brand icon');
+for(const section of ['id="workspace"','id="first"','id="code"','id="motion"','id="composition"','id="preview"','id="export"','id="loops"','id="quality"','id="formats"','id="fixes"','id="workflow"']) must(tutorial.includes(section),'full tutorial includes '+section);
+must(tutorial.includes('not a fixed video length'),'tutorial explains it is not tied to a fixed video length');
+must(overview.includes('/projects/trilyva/tutorial.html'),'TRILYVA overview links to the complete tutorial');
+must(serviceWorker.includes('tamasrazim-trilyva-pwa-v109'),'renderer service worker cache version is bumped');
+must(!/chatgpt-motion-loop|chatgpt-30s-seamless-loop|trilyva-60s-motion-edit/i.test(serviceWorker),'promotional animation assets are removed from offline cache');
+must(!/chatgpt-motion-loop|chatgpt-30s-seamless-loop|trilyva-60s-motion-edit/i.test(overview),'TRILYVA overview no longer links to fixed-length promo animations');
 must(!/story-films|cartoon/i.test(manifest),'cartoon collection is absent from the library manifest');
 must(!/niko-and-the-clockwork-bird|the-last-star-train|lumi-and-the-lost-firefly|voice-studio|story-films/i.test(serviceWorker),'cartoon files are absent from offline cache');
 must(!/Watch The Last Star Train|cartoon|Niko and the Clockwork Bird/i.test(overview),'TRILYVA overview has no cartoon promotion');
-for(const file of ['projects/trilyva/niko-and-the-clockwork-bird.html','projects/trilyva/the-last-star-train.html','projects/code-motion/renderer/niko-and-the-clockwork-bird.js','projects/code-motion/renderer/the-last-star-train.js','projects/code-motion/renderer/library/story-films.js','projects/code-motion/renderer/voice-studio.js']) must(!fs.existsSync(path.join(ROOT,file)),file+' removed');
+for(const file of [
+  'projects/code-motion/renderer/examples/chatgpt-motion-loop.html',
+  'projects/code-motion/renderer/examples/chatgpt-30s-seamless-loop.js',
+  'projects/code-motion/renderer/examples/trilyva-60s-motion-edit.html',
+  'projects/code-motion/renderer/examples/trilyva-60s-motion-edit.js',
+  'projects/trilyva/niko-and-the-clockwork-bird.html',
+  'projects/trilyva/the-last-star-train.html',
+  'projects/code-motion/renderer/niko-and-the-clockwork-bird.js',
+  'projects/code-motion/renderer/the-last-star-train.js',
+  'projects/code-motion/renderer/library/story-films.js',
+  'projects/code-motion/renderer/voice-studio.js'
+]) must(!fs.existsSync(path.join(ROOT,file)),file+' removed');
