@@ -113,8 +113,8 @@ function renderFrame(time, frame, fps, ctx, width, height) {
   }
 
   // Beat-synced micro-pulses, a consistent grain layer, and a slow camera drift tie shots together.
-  ctx.save();ctx.translate(Math.sin(t*TAU/8)*10,Math.cos(t*TAU/10)*7);
-  grid(.035,t*12);grainDots(150,41,.13);
+  ctx.save();ctx.translate(Math.sin(t*TAU/10)*10,Math.cos(t*TAU/15)*7);
+  grid(.035,t*80/30);grainDots(150,41,.13);
   if(scene===0){
     // SHOT 01 — cold open: a single pulse grows from black; this exact state returns at 30s.
     var pulse=Math.pow(Math.max(0,Math.cos(t*TAU/3)),10);
@@ -180,8 +180,8 @@ function renderFrame(time, frame, fps, ctx, width, height) {
     // SHOT 09 — return-to-opening bridge. All elements resolve toward the cold-open signal.
     var out=ease(local/1.5);ctx.save();ctx.globalAlpha=1-out;text("ChatGPT",960,660,92,1,"center",undefined,600);ctx.restore();
     ctx.save();ctx.globalAlpha=out;
-    var ring=28+70*ease(local/1.5);ctx.strokeStyle="rgba(255,255,255,"+(.25+.7*Math.pow(Math.max(0,Math.cos(local*TAU/3)),10))+")";ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(960,500,ring,0,TAU);ctx.stroke();
-    for(var j=0;j<48;j++){var an=j*TAU/48+local*.08,rad=mix(190,120,out)+65*Math.sin(local*2+j*.8);ctx.beginPath();ctx.fillStyle="rgba(255,255,255,"+(.2+.6*hash(j))+")";ctx.arc(960+Math.cos(an)*rad,500+Math.sin(an)*rad,1+2*hash(j+9),0,TAU);ctx.fill();}
+    var ring=mix(98,28,out);ctx.strokeStyle="rgba(255,255,255,"+(.25+.7*Math.pow(Math.max(0,Math.cos((1-out)*TAU/3)),10))+")";ctx.lineWidth=1+2*out;ctx.beginPath();ctx.arc(960,500,ring,0,TAU);ctx.stroke();
+    for(var j=0;j<48;j++){var an=j*TAU/48+(1-out)*.08,rad=mix(190,120,out)+65*Math.sin((1-out)*2+j*.8);ctx.beginPath();ctx.fillStyle="rgba(255,255,255,"+(.2+.6*hash(j))+")";ctx.arc(960+Math.cos(an)*rad,500+Math.sin(an)*rad,1+2*hash(j+9),0,TAU);ctx.fill();}
     ctx.restore();frameCorners("SIGNAL","01");
   }
   ctx.restore();
