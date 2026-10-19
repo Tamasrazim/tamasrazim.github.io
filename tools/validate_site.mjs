@@ -74,6 +74,7 @@ const htmlFiles=[
   'asset-vault/index.html',
   'projects/code-motion/index.html',
   'projects/code-motion/renderer/index.html',
+  'projects/code-motion/renderer/examples/chatgpt-motion-loop.html',
   'projects/bncagrocare/index.html',
   'projects/bncagrocare/catalog/index.html',
   'projects/bncagrocare/invoice/index.html',
@@ -99,6 +100,8 @@ for(const file of htmlFiles) must(exists(file),file+' exists');
 for(const file of htmlFiles) checkLocalRefs(file);
 
 checkInlineScripts('projects/code-to-eps/workspace/index.html');
+checkInlineScripts('projects/code-motion/renderer/examples/chatgpt-motion-loop.html');
+checkScript('projects/code-motion/renderer/examples/chatgpt-30s-seamless-loop.js');
 
 const codeEps=read('projects/code-to-eps/workspace/index.html');
 must(codeEps.includes('id="allSvgBtn"'),'CODE-EPS exposes Export All SVG');
