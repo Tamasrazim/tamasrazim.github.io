@@ -1,0 +1,280 @@
+<!doctype html>
+<!--
+  What this does:
+  Presents a live, scrub-able 30-second ChatGPT motion study and its TRILYVA source.
+  The animation is original procedural artwork and has no external visual dependencies.
+-->
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#050506">
+<meta name="description" content="A 30-second seamless ChatGPT-inspired motion study, rendered live by deterministic TRILYVA canvas code.">
+<meta property="og:title" content="ChatGPT Motion Loop — TRILYVA Example">
+<meta property="og:description" content="An original monochrome, 30-second seamless procedural animation with editable TRILYVA source code.">
+<meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/code-motion/renderer/examples/chatgpt-motion-loop.html">
+<title>ChatGPT Motion Loop — TRILYVA Example</title>
+<style>
+:root{color-scheme:dark;--bg:#050506;--panel:#0b0b0d;--line:#26262c;--ink:#f3f3f5;--muted:#93939c;--quiet:#5e5e68;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}
+html{min-height:100%;background:var(--bg);scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(ellipse at 50% 0%,#151519 0,transparent 48rem),var(--bg);color:var(--ink);font:14px/1.6 var(--sans)}
+a{color:inherit}
+button{font:inherit;cursor:pointer}
+.shell{width:min(1320px,calc(100% - 40px));margin-inline:auto}
+header{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line)}
+.brand{font:600 12px var(--mono);letter-spacing:.08em;text-decoration:none}
+.brand span{color:#888;margin-left:8px;font-weight:400}
+.nav{display:flex;flex-wrap:wrap;gap:18px;color:var(--muted);font:10px var(--mono);letter-spacing:.06em}
+.nav a{text-decoration:none}.nav a:hover{color:#fff}
+.hero{padding:50px 0 26px;display:flex;justify-content:space-between;align-items:end;gap:22px}
+.kicker,.meta{color:var(--muted);font:10px var(--mono);letter-spacing:.15em;text-transform:uppercase}
+h1{margin:10px 0 8px;font-size:clamp(31px,5vw,56px);letter-spacing:-.055em;line-height:1.05;font-weight:500}
+.lead{max-width:700px;color:#b3b3bc;line-height:1.8;margin:0}
+.hero-meta{text-align:right;white-space:nowrap;color:var(--muted);font:10px/1.9 var(--mono)}
+.stage{border:1px solid #303037;background:#050506;box-shadow:0 28px 100px #0009;overflow:hidden}
+.canvas-wrap{position:relative;background:#050506;aspect-ratio:16/9}
+canvas{display:block;width:100%;height:100%;object-fit:contain}
+.stage-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:13px 15px;border-top:1px solid var(--line);background:#0a0a0d}
+.controls{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.btn{min-height:36px;padding:0 12px;border:1px solid #3a3a42;background:#101014;color:#f4f4f6;border-radius:7px;font:10px var(--mono);letter-spacing:.04em;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn:hover{background:#202025;border-color:#707078}
+.btn.primary{background:#f4f4f6;color:#08080a;border-color:#f4f4f6}
+.btn.primary:hover{background:#d9d9df}
+.spacer{flex:1}
+.clock{font:11px var(--mono);font-variant-numeric:tabular-nums;color:#ddd}
+.scrub{display:grid;grid-template-columns:auto minmax(100px,1fr) auto;align-items:center;gap:12px;padding:13px 15px;border-top:1px solid var(--line);background:#08080a}
+.scrub label,.scrub output{font:10px var(--mono);color:var(--muted)}
+input[type=range]{width:100%;accent-color:#fff;cursor:ew-resize}
+.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-top:0}
+.stat{padding:15px;background:#09090b;min-width:0}
+.stat b{display:block;font:11px var(--mono);letter-spacing:.03em}
+.stat span{display:block;margin-top:5px;color:var(--muted);font:9px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.below{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,.52fr);gap:24px;padding:42px 0 60px}
+.panel{border:1px solid var(--line);background:linear-gradient(130deg,#ffffff06,transparent 65%),#09090c;padding:21px}
+.panel h2{font-size:19px;font-weight:500;letter-spacing:-.03em;margin:0 0 12px}
+.panel p{color:#a9a9b2;font-size:12px;line-height:1.8;margin:0 0 15px}
+.panel ul{padding-left:17px;color:#b4b4bd;font-size:12px;line-height:1.9;margin:12px 0 0}
+.codebox{margin-top:14px;border:1px solid #292930;background:#050507;overflow:hidden}
+.codehead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-bottom:1px solid #25252c;font:10px var(--mono);color:var(--muted)}
+pre{margin:0;padding:16px;max-height:650px;overflow:auto;font:11px/1.65 var(--mono);white-space:pre;color:#ddd}
+.status{min-height:18px;color:var(--muted);font:10px var(--mono)}
+.note{margin-top:15px!important;color:#777780!important;font:10px/1.8 var(--mono)!important}
+footer{border-top:1px solid var(--line);padding:18px 0 26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--muted);font:9px var(--mono);letter-spacing:.05em}
+@media(max-width:760px){.shell{width:calc(100% - 24px)}header{padding:15px 0;align-items:flex-start;flex-direction:column}.nav{gap:12px}.hero{align-items:flex-start;flex-direction:column;padding-top:34px}.hero-meta{text-align:left}.summary{grid-template-columns:repeat(2,minmax(0,1fr))}.below{grid-template-columns:1fr;padding-top:25px}.stage-foot{align-items:flex-start;flex-direction:column}.scrub{grid-template-columns:1fr;gap:7px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header class="shell">
+  <a class="brand" href="/projects/trilyva/">TRILYVA<span>/ EXAMPLES</span></a>
+  <nav class="nav" aria-label="Example navigation">
+    <a href="/projects/trilyva/">PROJECT OVERVIEW</a>
+    <a href="../">OPEN WORKSPACE</a>
+    <a href="#source">SOURCE CODE</a>
+  </nav>
+</header>
+
+<main class="shell">
+  <section class="hero">
+    <div>
+      <div class="kicker">MOTION STUDY 001 / CHATGPT</div>
+      <h1>A loop about an AI.</h1>
+      <p class="lead">An original monochrome motion piece built from code: a woven abstract mark, quiet orbital geometry, a scanner sweep and a restrained wordmark. The motion is deterministic and designed to wrap at exactly 30 seconds.</p>
+    </div>
+    <div class="hero-meta">30 SECONDS<br>16:9 / 1920 × 1080<br>60 FPS TARGET</div>
+  </section>
+
+  <section class="stage" aria-label="Live animation preview">
+    <div class="canvas-wrap"><canvas id="preview" width="1920" height="1080" aria-label="Animated ChatGPT motion study"></canvas></div>
+    <div class="stage-foot">
+      <div class="controls">
+        <button class="btn primary" type="button" id="playBtn">Ⅱ PAUSE</button>
+        <button class="btn" type="button" id="restartBtn">↺ RESTART</button>
+        <button class="btn" type="button" id="copyBtn">COPY SOURCE</button>
+        <a class="btn" href="./chatgpt-30s-seamless-loop.js" download>DOWNLOAD .JS</a>
+        <a class="btn" href="../">OPEN TRILYVA</a>
+      </div>
+      <span class="spacer"></span>
+      <span class="clock" id="clock" aria-live="off">00:00.000 / 00:30.000</span>
+    </div>
+    <div class="scrub">
+      <label for="seek">TIMELINE</label>
+      <input id="seek" type="range" min="0" max="30000" step="1" value="0" aria-label="Scrub 30-second animation">
+      <output for="seek" id="frameReadout">FRAME 0000 / 1800</output>
+    </div>
+  </section>
+
+  <section class="summary" aria-label="Animation settings">
+    <div class="stat"><b>00:30.000</b><span>Loop duration</span></div>
+    <div class="stat"><b>1,800</b><span>Frames at 60 FPS</span></div>
+    <div class="stat"><b>1920 × 1080</b><span>Composition size</span></div>
+    <div class="stat"><b>Procedural</b><span>External assets: none</span></div>
+  </section>
+
+  <section class="below">
+    <article class="panel" id="source">
+      <div class="kicker">01 / SOURCE</div>
+      <h2>Code is the artwork.</h2>
+      <p>The animation uses TRILYVA's <code>renderFrame(time, frame, fps, ctx, width, height)</code> contract. Its moving elements are functions of the loop phase, rather than accumulated positions or random values. That makes the wrap deterministic and keeps the code editable.</p>
+      <div class="codebox">
+        <div class="codehead"><span>chatgpt-30s-seamless-loop.js</span><button class="btn" type="button" id="copyCodeBtn">COPY CODE</button></div>
+        <pre><code id="sourceCode">// Loading source…</code></pre>
+      </div>
+      <p class="status" id="sourceStatus" role="status">Loading local source file…</p>
+    </article>
+
+    <aside class="panel">
+      <div class="kicker">02 / USE IN TRILYVA</div>
+      <h2>Try it in the editor.</h2>
+      <p>This page is the preview. To render your own output, copy or download the source, open the TRILYVA workspace, and paste the code into its editor.</p>
+      <ul>
+        <li>Resolution: 1920 × 1080</li>
+        <li>Frame rate: 60 fps</li>
+        <li>Duration: 30 seconds</li>
+        <li>Frame count: 1,800 (the wrap frame is excluded)</li>
+        <li>Enable loop mode for preview playback</li>
+      </ul>
+      <p class="note">The source generates frames; it does not include an encoded MP4. Actual video codecs and export formats depend on the browser and the selected TRILYVA render path.</p>
+      <a class="btn primary" style="width:100%;margin-top:7px" href="../">OPEN TRILYVA WORKSPACE ↗</a>
+    </aside>
+  </section>
+</main>
+
+<footer class="shell">
+  <span>TRILYVA / ORIGINAL PROCEDURAL MOTION</span>
+  <span>ROB IUL RUMMAN RAZIM — TAMASRAZIM</span>
+  <a href="/projects/trilyva/">PROJECT OVERVIEW ↑</a>
+</footer>
+
+<script src="./chatgpt-30s-seamless-loop.js"></script>
+<script>
+(function () {
+  "use strict";
+  // The preview uses the exact same renderFrame function as the downloadable source.
+  var DURATION = 30;
+  var FPS = 60;
+  var FRAME_COUNT = DURATION * FPS;
+  var canvas = document.getElementById("preview");
+  var ctx = canvas.getContext("2d", { alpha: false });
+  var playBtn = document.getElementById("playBtn");
+  var restartBtn = document.getElementById("restartBtn");
+  var copyBtn = document.getElementById("copyBtn");
+  var copyCodeBtn = document.getElementById("copyCodeBtn");
+  var seek = document.getElementById("seek");
+  var clock = document.getElementById("clock");
+  var frameReadout = document.getElementById("frameReadout");
+  var sourceCode = document.getElementById("sourceCode");
+  var sourceStatus = document.getElementById("sourceStatus");
+  var isPlaying = false;
+  var currentTime = 0;
+  var startTime = 0;
+  var startOffset = 0;
+  var lastPaintTime = -1;
+  var sourceText = "";
+  var previousStamp = 0;
+
+  function formatTime(seconds) {
+    var totalMs = Math.floor(seconds * 1000 + 0.5);
+    var mins = Math.floor(totalMs / 60000);
+    var secs = Math.floor((totalMs % 60000) / 1000);
+    var ms = totalMs % 1000;
+    return String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0") + "." + String(ms).padStart(3, "0");
+  }
+  function paint(time) {
+    currentTime = ((time % DURATION) + DURATION) % DURATION;
+    var frame = Math.min(FRAME_COUNT - 1, Math.floor(currentTime * FPS));
+    renderFrame(currentTime, frame, FPS, ctx, canvas.width, canvas.height);
+    clock.textContent = formatTime(currentTime) + " / 00:30.000";
+    frameReadout.textContent = "FRAME " + String(frame).padStart(4, "0") + " / 1800";
+    if (document.activeElement !== seek) seek.value = String(Math.round(currentTime * 1000));
+    lastPaintTime = currentTime;
+  }
+  function setPlaying(playing) {
+    isPlaying = playing;
+    if (isPlaying) {
+      startOffset = currentTime;
+      startTime = performance.now();
+      playBtn.textContent = "Ⅱ PAUSE";
+      playBtn.classList.add("primary");
+      tick(performance.now());
+    } else {
+      playBtn.textContent = "▶ PLAY";
+      playBtn.classList.remove("primary");
+      paint(currentTime);
+    }
+  }
+  function tick(stamp) {
+    if (!isPlaying) return;
+    if (stamp - previousStamp >= 1000 / 60) {
+      paint(startOffset + (stamp - startTime) / 1000);
+      previousStamp = stamp;
+    }
+    requestAnimationFrame(tick);
+  }
+  function fallbackCopy(text) {
+    var field = document.createElement("textarea");
+    field.value = text;
+    field.setAttribute("readonly", "");
+    field.style.position = "fixed";
+    field.style.opacity = "0";
+    document.body.appendChild(field);
+    field.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (err) { ok = false; }
+    field.remove();
+    return ok;
+  }
+  async function copySource() {
+    if (!sourceText) {
+      sourceStatus.textContent = "Source is still loading. Try again in a moment.";
+      return;
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(sourceText);
+      } else if (!fallbackCopy(sourceText)) {
+        throw new Error("Clipboard is unavailable");
+      }
+      sourceStatus.textContent = "Source copied. Open TRILYVA and paste it into the editor.";
+    } catch (err) {
+      sourceStatus.textContent = "Copy was blocked by the browser. Use Download .JS or select the source below.";
+    }
+  }
+
+  playBtn.addEventListener("click", function () { setPlaying(!isPlaying); });
+  restartBtn.addEventListener("click", function () { setPlaying(false); paint(0); });
+  copyBtn.addEventListener("click", copySource);
+  copyCodeBtn.addEventListener("click", copySource);
+  seek.addEventListener("input", function () {
+    setPlaying(false);
+    currentTime = Number(seek.value) / 1000;
+    paint(currentTime);
+  });
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden && isPlaying) setPlaying(false);
+  });
+
+  fetch("./chatgpt-30s-seamless-loop.js", { cache: "no-store" })
+    .then(function (response) {
+      if (!response.ok) throw new Error("Source request failed: " + response.status);
+      return response.text();
+    })
+    .then(function (text) {
+      sourceText = text;
+      sourceCode.textContent = text;
+      sourceStatus.textContent = "Source loaded from the same file used by the live preview.";
+    })
+    .catch(function () {
+      sourceStatus.textContent = "Could not load the text panel. The Download .JS link still opens the source file.";
+    });
+
+  // Start automatically unless the visitor has asked the browser to reduce motion.
+  paint(0);
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) setPlaying(true);
+})();
+</script>
+</body>
+</html>
