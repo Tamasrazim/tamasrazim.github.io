@@ -98,7 +98,7 @@
   <link rel="stylesheet" href="/assets/css/project-cinematic-intro.css?v=20261013-7">
 </head>
 <body class="project-detail-v3" data-project="trilyva" data-cinematic-intro="trilyva">
-<header class="tri-wrap tri-nav"><a class="v3-brand" href="/"><span class="v3-brand-mark" aria-hidden="true">T</span><span>tamasrazim</span></a><nav class="tri-navlinks" aria-label="TRILYVA project navigation"><a href="#overview">Overview</a><a href="#capabilities">Capabilities</a><a href="#model">Frame model</a><a href="#limits">Status</a></nav><a class="v3-header-contact" href="/projects/">All projects </a><details class="site-page-menu">
+<header class="tri-wrap tri-nav"><a class="v3-brand" href="/"><span class="v3-brand-mark" aria-hidden="true">T</span><span>tamasrazim</span></a><nav class="tri-navlinks" aria-label="TRILYVA project navigation"><a href="#overview">Overview</a><a href="#capabilities">Capabilities</a><a href="#examples">Example</a><a href="#model">Frame model</a><a href="#limits">Status</a></nav><a class="v3-header-contact" href="/projects/">All projects </a><details class="site-page-menu">
 <summary>Site pages</summary>
 <nav class="site-page-menu__links" aria-label="Main site navigation">
 <a href="/projects/" aria-current="page">Projects <span aria-hidden="true"></span></a>
@@ -114,7 +114,7 @@
 <section class="tri-wrap tri-hero" id="overview"><div class="tri-hero-grid"><div><p class="tri-kicker">CREATIVE SOFTWARE / BROWSER RUNTIME</p><h1 class="tri-title">TRILYVA<span>.</span></h1>
 <p class="tri-lead">I built TRILYVA around frame-driven motion: write the animation, watch it move, then render the frames you actually asked for.</p>
 <p class="tri-p">This page explains how TRILYVA works. The renderer has its own route, so you can read first and open the workspace when you're ready.</p>
-<div class="tri-actions"><a class="v3-button primary" href="/projects/code-motion/renderer/">Open TRILYVA workspace</a></div>
+<div class="tri-actions"><a class="v3-button primary" href="/projects/code-motion/renderer/">Open TRILYVA workspace</a><a class="v3-button secondary" href="/projects/code-motion/renderer/examples/chatgpt-motion-loop.html">Watch ChatGPT motion loop</a></div>
 <div class="tri-facts"><div class="tri-fact"><b>Frame-first</b><small>Deterministic timing</small></div><div class="tri-fact"><b>Browser</b><small>No install required</small></div><div class="tri-fact"><b>Local</b><small>Client-side workflow</small></div><div class="tri-fact"><b>Native?</b><small>Web application today</small></div></div>
 </div>
 <div class="tri-art" aria-label="Procedural orbit artwork representing deterministic motion"><svg viewBox="0 0 700 700" role="presentation" focusable="false">
@@ -136,6 +136,8 @@
 <article class="tri-card"><span>07 / VECTOR</span><h3>Creative export workflows</h3><p>TRILYVA sits alongside my vector tools and stock-asset workflow, but those tools keep their own pages and workspaces.</p></article>
 <article class="tri-card"><span>08 / INSTALL</span><h3>Browser-first delivery</h3><p>Open the renderer in a supported browser. Export options vary by browser and hardware, so the available settings matter more than a blanket promise of codec support.</p></article>
 </div></section>
+
+<section class="tri-wrap tri-section" id="examples"><div class="tri-head"><h2>Example motion study</h2><p>Take a 30-second procedural ChatGPT-inspired motion loop apart, scrub its timeline, inspect the source, and copy the animation into the TRILYVA editor.</p></div><div class="tri-grid"><article class="tri-card"><span>01 / 30-SECOND LOOP</span><h3>ChatGPT Motion Loop</h3><p>An original monochrome motion study built from deterministic canvas code: a woven abstract mark, orbiting geometry, scan lines and a waveform. No external visual assets are required.</p><p style="margin-top:14px"><a class="v3-button secondary" href="/projects/code-motion/renderer/examples/chatgpt-motion-loop.html">Preview and inspect source ↗</a></p></article><article class="tri-card"><span>TRILYVA CONTRACT</span><h3>Editable at frame level</h3><p>The example follows renderFrame(time, frame, fps, ctx, width, height). Its moving elements repeat on a 30-second cycle, making the example suitable for a seamless-loop workflow.</p></article></div></section>
 
 <section class="tri-wrap tri-section" id="model"><div class="tri-head"><h2>Frame model</h2><p>The preview can prioritise responsive playback. Export follows the requested frame sequence instead.</p></div>
 <div class="tri-grid">
