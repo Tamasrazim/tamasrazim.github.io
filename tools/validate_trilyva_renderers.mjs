@@ -17,7 +17,7 @@ must(!/data-act="queueAdd"|data-act="startRender"/i.test(renderer),'duplicate qu
 must(!renderer.includes('sample-chatgpt-motion-loop')&&!/ChatGPT Ad Edit|chatgpt-motion-loop|chatgpt-30s-seamless-loop/i.test(renderer),'ChatGPT promotional sample is removed from renderer');
 must(tutorial.includes('/assets/brand/trilyva/T.svg'),'tutorial uses the TRILYVA T.svg brand icon');
 for(const section of ['id="workspace"','id="first"','id="code"','id="motion"','id="composition"','id="preview"','id="export"','id="loops"','id="quality"','id="formats"','id="fixes"','id="workflow"']) must(tutorial.includes(section),'full tutorial includes '+section);
-must(tutorial.includes('not tied to a fixed video length'),'tutorial explains it is not tied to a fixed video length');
+must(tutorial.includes('not a fixed 60-second animation or promo'),'tutorial explains it is not tied to a fixed video length');
 must(overview.includes('/projects/trilyva/tutorial.html'),'TRILYVA overview links to the complete tutorial');
 must(serviceWorker.includes('tamasrazim-trilyva-pwa-v109'),'renderer service worker cache version is bumped');
 must(!/chatgpt-motion-loop|chatgpt-30s-seamless-loop|trilyva-60s-motion-edit/i.test(serviceWorker),'promotional animation assets are removed from offline cache');
