@@ -1,5 +1,5 @@
 {
-  "version": 9,
+  "version": 10,
   "libraries": [
     "./dot-mesh-library.js",
     "./green-screen-overlays.js",
@@ -7,6 +7,7 @@
     "./motion-backgrounds.js",
     "./photorealistic-rose.js",
     "./prismflower.js",
+    "./xyz-001-abyssal-tide.js",
     "./xyz-library.js"
   ]
 }
