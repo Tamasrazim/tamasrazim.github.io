@@ -178,7 +178,7 @@ function music(on){try{
 }catch(e){}}
 /* ---------- save data ---------- */
 let S={u:1,r:{},sens:1,fov:80};
-try{const j=JSON.parse(localStorage.getItem('fracture1')||'null');if(j&&typeof j=='object'){if(Number.isInteger(j.u))S.u=Math.max(1,Math.min(100,j.u));if(j.r&&typeof j.r=='object')for(const k in j.r){const v=j.r[k];if(+k>=0&&+k<200&&v&&isFinite(v.t)&&isFinite(v.o))S.r[k]={t:+v.t,o:+v.o}}if(isFinite(j.sens))S.sens=Math.max(.3,Math.min(2.5,j.sens));if(isFinite(j.fov))S.fov=Math.max(60,Math.min(100,j.fov))}}catch(e){}
+try{const j=JSON.parse(localStorage.getItem('fracture1')||'null');if(j&&typeof j=='object'){if(Number.isInteger(j.u))S.u=Math.max(1,Math.min(100,j.u));if(j.r&&typeof j.r=='object')for(const k in j.r){const v=j.r[k];if(+k>=0&&+k<200&&v&&isFinite(v.t)&&isFinite(v.o))S.r[k]={t:+v.t,o:+v.o,score:isFinite(v.score)?Math.max(0,Math.min(100,+v.score)):0,rank:typeof v.rank==='string'&&/^[SABCD]$/.test(v.rank)?v.rank:''}}if(isFinite(j.sens))S.sens=Math.max(.3,Math.min(2.5,j.sens));if(isFinite(j.fov))S.fov=Math.max(60,Math.min(100,j.fov))}}catch(e){}
 const save=()=>{try{localStorage.setItem('fracture1',JSON.stringify(S))}catch(e){}};
 /* ---------- levels ---------- */
 const LV0=[
@@ -437,11 +437,17 @@ function play(i){if(i<0||i>99||i>=S.u)return;load(i);place0(G.cp0);G.time=0;G.t=
  if(!touchDevice())lock();hint(LV[i].hint);music(true);G.intro=1.4;DF=0}
 function pause(){if(G.state!='play')return;G.state='pause';setTouchVisible(false);$('combat').classList.remove('on');$('se').value=S.sens;$('fv').value=S.fov;show('p')}
 function toMenu(id){music(false);setTouchVisible(false);$('combat').classList.remove('on');G.state=id=='m'?'menu':'select';$('hud').style.display='none';$('cx').style.display='none';try{document.exitPointerLock();if(document.fullscreenElement)document.exitFullscreen()}catch(e){}show(id)}
-function buildSel(){let n=0,h='';LV.forEach((l,i)=>{const rc=S.r[i+(HC?100:0)],lk=i>=S.u;if(rc)n++;h+=`<div class="card${lk?' lk':''}" data-a="pl" data-i="${i}" style="--c:#${l.ac.map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join('')}"><b>${i+1}</b><span>${l.nm}</span><small>${rc?fmt(rc.t)+' | '+rc.o+'/'+TOT[i]+' orbs':lk?'Locked':'New'}</small></div>`});$('gd').innerHTML=h;$('pr').textContent='Campaign: '+n+' of 100 levels complete'}
+function buildSel(){let n=0,h='';LV.forEach((l,i)=>{const rc=S.r[i+(HC?100:0)],lk=i>=S.u;if(rc)n++;h+=`<div class="card${lk?' lk':''}" data-a="pl" data-i="${i}" style="--c:#${l.ac.map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join('')}"><b>${i+1}</b><span>${l.nm}</span><small>${rc?(rc.rank?rc.rank+'-RANK · ':'')+fmt(rc.t)+' | '+rc.o+'/'+TOT[i]+' orbs':lk?'Locked':'New'}</small></div>`});$('gd').innerHTML=h;$('pr').textContent='Campaign: '+n+' of 100 levels complete'}
 function win(){if(!canEscape()){hint('ESCAPE LOCKED — relays '+G.relays+'/'+G.Q.length+' · sentries '+activeGuards()+' remaining.');return}G.state='done';setTouchVisible(false);$('combat').classList.remove('on');music(false);try{document.exitPointerLock()}catch(e){}
- const i=G.i,ki=i+(HC?100:0),t=G.time,o=G.got,pr=S.r[ki],nb=!pr||t<pr.t;S.r[ki]={t:nb?t:pr.t,o:Math.max(o,pr?pr.o:0),q:G.relays,s:Math.ceil(G.stability)};if(i<99)S.u=Math.max(S.u,i+2);save();snd(660,.5,'triangle',.08,1320);
- const last=i==99;$('dt').textContent=last?'CAMPAIGN COMPLETE':'LEVEL COMPLETE';
- $('ds').textContent=(last?'The fracture is sealed. ':'')+'Time '+fmt(t)+(nb?' (new best)':' (best '+fmt(S.r[ki].t)+')')+'  |  Shards '+o+'/'+G.O.length+'  |  Relays '+G.relays+'/'+G.Q.length+'  |  Caches '+G.pickupsGot+'/'+G.pickups.length+'  |  Stability '+Math.ceil(G.stability)+'%; lives remaining '+G.lives+'.';
+ const i=G.i,ki=i+(HC?100:0),t=G.time,o=G.got,pr=S.r[ki],nb=!pr||t<pr.t;
+ const shardRatio=G.O.length?G.got/G.O.length:1,cacheRatio=G.pickups.length?G.pickupsGot/G.pickups.length:1,lifeRatio=G.lives/(HC?1:3);
+ const targetTime=G.L.n*4.2+35,speedRatio=Math.max(0,Math.min(1,1.2-G.time/targetTime));
+ const score=Math.round(30*G.stability/100+25*shardRatio+15*cacheRatio+15*lifeRatio+15*speedRatio);
+ const rank=score>=90?'S':score>=78?'A':score>=62?'B':score>=45?'C':'D',oldScore=pr&&isFinite(pr.score)?pr.score:-1,bestScore=Math.max(score,oldScore,0),bestRank=score>=oldScore?rank:(pr.rank||rank);
+ S.r[ki]={t:nb?t:pr.t,o:Math.max(o,pr?pr.o:0),q:G.relays,s:Math.ceil(G.stability),score:bestScore,rank:bestRank};
+ if(i<99)S.u=Math.max(S.u,i+2);save();snd(660,.5,'triangle',.08,1320);
+ const last=i==99;$('dt').textContent=(last?'CAMPAIGN COMPLETE':'LEVEL COMPLETE')+' · '+rank+'-RANK';
+ $('ds').textContent=(last?'The fracture is sealed. ':'')+'Run score '+score+'/100 · Best '+bestScore+'/100 · Time '+fmt(t)+(nb?' (new best time)':' (best '+fmt(S.r[ki].t)+')')+'  |  Shards '+o+'/'+G.O.length+'  |  Relays '+G.relays+'/'+G.Q.length+'  |  Caches '+G.pickupsGot+'/'+G.pickups.length+'  |  Stability '+Math.ceil(G.stability)+'%; lives remaining '+G.lives+'.';
  $('nx').style.display=last?'none':'';show('d')}
 let rT;document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a;
  if(a=='cont')play(Math.min(S.u,100)-1);else if(a=='sel'){buildSel();toMenu('s')}else if(a=='menu')toMenu('m');
