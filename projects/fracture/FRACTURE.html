@@ -205,15 +205,17 @@ const drawSkyBackdrop=(time,top,low,accent,biome,pitch,yaw)=>{
  gl.drawArrays(gl.TRIANGLES,0,3);
  gl.depthMask(true);gl.enable(gl.DEPTH_TEST);gl.useProgram(pg);gl.bindVertexArray(vao);
 };
+/* Keep the original 4K artwork while using a memory-conscious raster size on touch devices. */
+const textureMaxSize=Math.min(gl.getParameter(gl.MAX_TEXTURE_SIZE),(matchMedia('(pointer: coarse)').matches||('ontouchstart' in window))?2048:4096);
 /* Load the original 4096 × 4096 vector-authored surface atlas with a safe neutral fallback. */
 const atlasTexture=gl.createTexture();gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,atlasTexture);
 gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([225,225,225,255]));
 gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
 gl.uniform1i(U.uAtlas,0);gl.uniform1f(U.uMat,0);
-const atlasLoadState={ready:0,failed:0};const reportAtlas=ok=>{if(ok)atlasLoadState.ready++;else atlasLoadState.failed++;const el=$('texture-status');if(!el)return;if(atlasLoadState.failed)el.textContent='ATLAS FALLBACK ACTIVE · '+atlasLoadState.ready+'/2 TEXTURES';else el.textContent=atlasLoadState.ready===2?'MATERIALS ONLINE · 16 SURFACES + 16 MARKING SETS':'LOADING ORIGINAL 4K ATLASES · '+atlasLoadState.ready+'/2';};
+const atlasLoadState={ready:0,failed:0};const reportAtlas=ok=>{if(ok)atlasLoadState.ready++;else atlasLoadState.failed++;const el=$('texture-status');if(!el)return;if(atlasLoadState.failed)el.textContent='ATLAS FALLBACK ACTIVE · '+atlasLoadState.ready+'/2 TEXTURES';else el.textContent=atlasLoadState.ready===2?'32 SURFACE SETS ONLINE · GPU-SCALED TEXTURES':'LOADING ORIGINAL 4K ATLASES · '+atlasLoadState.ready+'/2';};
 const atlasImage=new Image();atlasImage.decoding='async';atlasImage.onload=()=>{
  try{
-  const maxSize=gl.getParameter(gl.MAX_TEXTURE_SIZE);let source=atlasImage;
+  const maxSize=textureMaxSize;let source=atlasImage;
   if(atlasImage.naturalWidth>maxSize){const c=document.createElement('canvas');c.width=c.height=maxSize;c.getContext('2d').drawImage(atlasImage,0,0,maxSize,maxSize);source=c}
   gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,atlasTexture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
   gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,source);gl.generateMipmap(gl.TEXTURE_2D);
@@ -229,7 +231,7 @@ gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParamet
 gl.uniform1i(U.uDecals,1);
 const decalImage=new Image();decalImage.decoding='async';decalImage.onload=()=>{
  try{
-  const maxSize=gl.getParameter(gl.MAX_TEXTURE_SIZE);let source=decalImage;
+  const maxSize=textureMaxSize;let source=decalImage;
   if(decalImage.naturalWidth>maxSize){const c=document.createElement('canvas');c.width=c.height=maxSize;c.getContext('2d').drawImage(decalImage,0,0,maxSize,maxSize);source=c}
   gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,decalTexture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
   gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,source);gl.generateMipmap(gl.TEXTURE_2D);
