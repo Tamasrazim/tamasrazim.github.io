@@ -121,8 +121,10 @@ void main(){float c=cos(uRot),s=sin(uRot);vec3 p=aP*uSz,n=aN;float ca=cos(uTl),s
 vN=vec3(c*n.x+s*n.z,n.y,-s*n.x+c*n.z);vW=p+uPos;vL=aP*2.;gl_Position=uVP*vec4(vW,1.);}`;
 const FS=`#version 300 es
 precision highp float;in vec3 vW,vN,vL;
-uniform vec3 uCol,uAcc,uEye,uFog;uniform float uFd,uEm,uSm,uMat;uniform sampler2D uAtlas;out vec4 o;
-vec3 sampleMaterial(vec2 p){vec2 tile=vec2(mod(uMat,4.0),floor(uMat/4.0));vec2 uv=(tile+vec2(.075)+fract(p)*.85)/4.0;return texture(uAtlas,uv).rgb;}
+uniform vec3 uCol,uAcc,uEye,uFog;uniform float uFd,uEm,uSm,uMat;uniform sampler2D uAtlas,uDecals;out vec4 o;
+vec2 tileUV(vec2 p){vec2 tile=vec2(mod(uMat,4.0),floor(uMat/4.0));return (tile+vec2(.075)+fract(p)*.85)/4.0;}
+vec3 sampleMaterial(vec2 p){return texture(uAtlas,tileUV(p)).rgb;}
+vec4 sampleDecal(vec2 p){return texture(uDecals,tileUV(p));}
 void main(){
 vec3 n=normalize(vN),V=normalize(uEye-vW),L=normalize(vec3(.4,.9,.3)),H=normalize(L+V);
 float ndl=max(dot(n,L),0.),d=.22+ndl*.9;
@@ -142,16 +144,19 @@ vec3 tex=sampleMaterial(vW.zy*.075)*axis.x+sampleMaterial(vW.xz*.075)*axis.y+sam
 float texLuma=dot(tex,vec3(.299,.587,.114));
 float texRelief=.70+texLuma*.58;
 vec3 texTint=mix(vec3(1.0),tex,.13);
+/* Sparse transparent markings are projected at a larger scale to avoid noisy micro-text. */
+vec4 mark=sampleDecal(vW.zy*.018)*axis.x+sampleDecal(vW.xz*.018)*axis.y+sampleDecal(vW.xy*.018)*axis.z;
+float markAlpha=clamp(mark.a*.72,0.0,.34);
 float spec=pow(max(dot(n,H),0.),28.)*(.12+.28*ndl);
 float fres=pow(1.-max(dot(n,V),0.),3.);
-vec3 c=uCol*d*tx*texRelief*texTint;c=mix(c,uAcc,rim*.68*(1.-uSm));
+vec3 c=uCol*d*tx*texRelief*texTint;c=mix(c,c*.72+mark.rgb*.5,markAlpha);c=mix(c,uAcc,rim*.68*(1.-uSm));
 c+=uCol*(grain-.5)*.045+uAcc*(seam*.035*(1.-uSm)+panelWear*.018+spec+fres*uSm*.42)+uCol*uEm;
 float f=1.-exp(-uFd*length(vW-uEye));o=vec4(mix(c,uFog,f),1.);
 }`;
 const mkS=(t,s)=>{const x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))throw gl.getShaderInfoLog(x);return x};
 const pg=gl.createProgram();gl.attachShader(pg,mkS(gl.VERTEX_SHADER,VS));gl.attachShader(pg,mkS(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pg);
 if(!gl.getProgramParameter(pg,gl.LINK_STATUS))throw gl.getProgramInfoLog(pg);
-gl.useProgram(pg);const U={};['uVP','uPos','uSz','uRot','uCol','uAcc','uEye','uFog','uFd','uEm','uSm','uTl','uAtlas','uMat'].forEach(n=>U[n]=gl.getUniformLocation(pg,n));
+gl.useProgram(pg);const U={};['uVP','uPos','uSz','uRot','uCol','uAcc','uEye','uFog','uFd','uEm','uSm','uTl','uAtlas','uDecals','uMat'].forEach(n=>U[n]=gl.getUniformLocation(pg,n));
 /* Load the original 4096 × 4096 vector-authored surface atlas with a safe neutral fallback. */
 const atlasTexture=gl.createTexture();gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,atlasTexture);
 gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([225,225,225,255]));
@@ -168,6 +173,21 @@ const atlasImage=new Image();atlasImage.decoding='async';atlasImage.onload=()=>{
  }catch(err){console.warn('FRACTURE material atlas unavailable:',err)}
 };atlasImage.onerror=()=>console.warn('FRACTURE: material atlas could not be loaded.');
 atlasImage.src='./assets/material-atlas.svg';
+/* A second, transparent 4K atlas supplies sparse vents, route marks, chips and sci-fi insignia. */
+const decalTexture=gl.createTexture();gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,decalTexture);
+gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,0]));
+gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+gl.uniform1i(U.uDecals,1);
+const decalImage=new Image();decalImage.decoding='async';decalImage.onload=()=>{
+ try{
+  const maxSize=gl.getParameter(gl.MAX_TEXTURE_SIZE);let source=decalImage;
+  if(decalImage.naturalWidth>maxSize){const c=document.createElement('canvas');c.width=c.height=maxSize;c.getContext('2d').drawImage(decalImage,0,0,maxSize,maxSize);source=c}
+  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,decalTexture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,source);gl.generateMipmap(gl.TEXTURE_2D);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+ }catch(err){console.warn('FRACTURE surface markings unavailable:',err)}
+};decalImage.onerror=()=>console.warn('FRACTURE: surface decal atlas could not be loaded.');
+decalImage.src='./assets/surface-decals.svg';
 const V=[];for(let a=0;a<3;a++)for(const s of[-1,1]){const u=(a+1)%3,v=(a+2)%3;for(const[i,j]of[[-1,-1],[1,-1],[1,1],[-1,-1],[1,1],[-1,1]]){const p=[0,0,0],n=[0,0,0];p[a]=s*.5;p[u]=i*.5;p[v]=j*.5;n[a]=s;V.push(...p,...n)}}
 const vao=gl.createVertexArray();gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(V),gl.STATIC_DRAW);
 gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,24,0);gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,24,12);
