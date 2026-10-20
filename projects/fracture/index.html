@@ -1,90 +1,179 @@
 <!doctype html>
-<!-- FRACTURE: self-contained 3D parkour game. Physics, rendering, UI, and controls live here. -->
+<!-- FRACTURE project overview: design notes, mechanics, controls, and direct access to the playable build. -->
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#08090b"><meta name="description" content="FRACTURE is a monochrome 3D gravity-parkour browser game. Run shifting platforms, invert gravity, collect shards, and reach the exit.">
-<title>FRACTURE — Gravity Parkour</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08090b">
+<meta name="color-scheme" content="dark">
+<meta name="author" content="Robiul Rumman Razim">
+<meta name="description" content="FRACTURE is a monochrome 3D gravity-parkour browser game by Tamasrazim. Sprint across shifting platforms, flip gravity, collect shards, and reach the exit. Play on desktop or mobile.">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/fracture/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tamasrazim">
+<meta property="og:title" content="FRACTURE — Gravity Parkour">
+<meta property="og:description" content="A momentum-driven parkour experiment built around shifting platforms and gravity inversion. Play directly in your browser.">
+<meta property="og:url" content="https://tamasrazim.github.io/projects/fracture/">
+<meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site-v3.css?v=20261012-2">
+<link rel="stylesheet" href="/assets/css/monochrome.css?v=20261010-1">
+<title>FRACTURE — Gravity Parkour | Tamasrazim</title>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"VideoGame","name":"FRACTURE","url":"https://tamasrazim.github.io/projects/fracture/","genre":["Platform game","Physics puzzle"],"gamePlatform":["Web browser","Mobile browser"],"applicationCategory":"Game","playMode":"SinglePlayer","author":{"@type":"Person","name":"Robiul Rumman Razim","alternateName":"Tamasrazim"},"description":"A monochrome browser parkour experiment featuring shifting platforms, gravity inversion, checkpoints, and collectible shards."}
+</script>
 <style>
-/* Monochrome HUD, responsive overlays, and touch controls. */
-:root{color-scheme:dark;--bg:#08090b;--fg:#f3f4f6;--muted:#999da6;--line:#34373e}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-#game{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}button{font:inherit;cursor:pointer;border:1px solid #555963;background:#17191e;color:#f3f4f6;padding:12px 16px;font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}button:hover{background:#292c32;border-color:#f3f4f6}.primary{background:#f3f4f6;color:#090a0c;border-color:#f3f4f6}.primary:hover{background:#fff;color:#000}
-#hud{position:fixed;inset:0;display:none;pointer-events:none}.top{position:absolute;top:22px;left:24px;right:24px;display:flex;justify-content:space-between;gap:16px}.brand{font-weight:900;letter-spacing:.28em;font-size:13px}.micro{font-size:9px;letter-spacing:.18em;color:var(--muted);margin-top:6px}.stats{display:flex;gap:18px;text-align:right}.stats label{display:block;color:var(--muted);font-size:9px;letter-spacing:.15em}.stats b{display:block;font-size:17px;margin-top:4px;font-variant-numeric:tabular-nums}.objective{position:absolute;top:94px;left:24px;font-size:10px;letter-spacing:.14em}.objective small{display:block;color:var(--muted);margin-top:6px}.help{position:absolute;bottom:20px;left:24px;font:10px/2 ui-monospace,monospace;color:#e0e1e4}.help kbd{border:1px solid #666a73;padding:2px 5px;font:inherit}.gravity{position:absolute;bottom:23px;right:24px;text-align:right;font-size:10px;letter-spacing:.15em}.gravity small{display:block;color:var(--muted);margin-top:6px;font-size:9px}.crosshair{position:absolute;top:50%;left:50%;width:18px;height:18px;transform:translate(-50%,-50%);opacity:.6}.crosshair:before,.crosshair:after{content:"";position:absolute;background:#fff}.crosshair:before{width:1px;height:18px;left:8px}.crosshair:after{height:1px;width:18px;top:8px}
-.screen{position:fixed;inset:0;display:grid;place-items:center;padding:20px;background:linear-gradient(90deg,#050608ed,#05060878 70%,#050608c9)}.panel{width:min(560px,100%);padding:clamp(24px,5vw,46px);border:1px solid #42464f;background:#090a0de8;box-shadow:0 24px 100px #0009;backdrop-filter:blur(12px)}.tag{font:9px ui-monospace,monospace;letter-spacing:.23em;color:#b7bac2}.title{font-size:clamp(52px,11vw,92px);font-weight:950;letter-spacing:-.09em;line-height:.87;margin:23px 0 18px}.title span{display:block;color:#777c86}.desc{font-size:13px;line-height:1.8;color:#b8bbc2;max-width:400px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:25px}.foot{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #30333a;margin-top:27px;padding-top:16px;font:9px ui-monospace,monospace;letter-spacing:.09em;color:#8e929a}.hidden{display:none!important}#toast{position:fixed;top:22%;left:50%;transform:translateX(-50%);background:#f3f4f6;color:#090a0c;padding:10px 15px;font:800 10px ui-monospace,monospace;letter-spacing:.15em;opacity:0;transition:opacity .2s;pointer-events:none}#toast.show{opacity:1}
-#touch{display:none;position:fixed;bottom:12px;left:12px;right:12px;justify-content:space-between;pointer-events:none}.touchgroup{display:flex;gap:5px}.touchgroup button{pointer-events:auto;min-width:46px;min-height:44px;padding:7px;background:#101216dc}
-@media(max-width:600px){.top{top:13px;left:13px;right:13px}.stats{gap:9px}.stats b{font-size:14px}.objective{left:13px;top:80px}.help{left:13px;bottom:72px;font-size:9px}.gravity{right:13px;bottom:70px;font-size:9px}.panel{padding:24px}.foot{font-size:8px}}
-</style></head>
+:root{color-scheme:dark;--f-bg:#08090b;--f-panel:#0e1014;--f-line:#30333a;--f-text:#f0f1f4;--f-muted:#a0a4ad;--f-soft:#777d87}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--f-bg)}
+body{margin:0;background:var(--f-bg);color:var(--f-text);font-family:"JetBrains Mono",ui-monospace,monospace;min-height:100vh}
+a{color:inherit}
+.fr-shell{width:min(1160px,calc(100% - 48px));margin-inline:auto}
+.fr-nav{height:76px;border-bottom:1px solid #ffffff17;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.fr-brand{display:flex;align-items:center;gap:11px;text-decoration:none;font:700 12px "Unbounded",sans-serif;letter-spacing:-.04em}
+.fr-mark{display:grid;place-items:center;width:31px;height:31px;border:1px solid #777c86;font:700 13px "Unbounded",sans-serif}
+.fr-links{display:flex;align-items:center;gap:22px;font-size:10px;color:var(--f-muted)}
+.fr-links a{text-decoration:none}.fr-links a:hover{color:#fff}
+.fr-hero{min-height:590px;display:grid;grid-template-columns:1.06fr .94fr;gap:30px;align-items:center;padding-top:40px;padding-bottom:70px}
+.fr-kicker{font-size:9px;letter-spacing:.2em;color:#c3c6ce;text-transform:uppercase}
+.fr-live{display:inline-flex;align-items:center;gap:9px;border:1px solid #ffffff22;border-radius:2px;padding:8px 10px;color:#d9dbe1;font-size:8px;letter-spacing:.13em}
+.fr-dot{display:inline-block;width:6px;height:6px;background:#f0f1f4;border-radius:50%;box-shadow:0 0 12px #fff8}
+h1{font:800 clamp(58px,9vw,116px)/.87 "Unbounded",sans-serif;letter-spacing:-.1em;margin:28px 0 23px}
+h1 span{display:block;color:#626772}
+.fr-lead{color:#b8bcc5;font:400 clamp(13px,1.4vw,16px)/1.9 "JetBrains Mono",monospace;max-width:520px}
+.fr-ctas{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:29px}
+.fr-button{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:48px;padding:0 17px;border:1px solid #737984;text-decoration:none;font-size:9px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;transition:transform .18s ease,background .18s ease,border-color .18s ease}
+.fr-button:hover{transform:translateY(-2px);border-color:#fff}
+.fr-button.primary{background:#f3f4f6;color:#08090b;border-color:#f3f4f6}
+.fr-button.primary:hover{background:#fff}
+.fr-footnote{font-size:9px;color:#7d828c;line-height:1.9;margin-top:16px}
+.fr-art{position:relative;min-height:410px;border:1px solid #ffffff20;overflow:hidden;background:radial-gradient(ellipse at 55% 47%,#272a31 0,#111318 45%,#090a0c 78%)}
+.fr-art:before,.fr-art:after{content:"";position:absolute;pointer-events:none}
+.fr-art:before{inset:0;background-image:linear-gradient(#ffffff0c 1px,transparent 1px),linear-gradient(90deg,#ffffff0c 1px,transparent 1px);background-size:32px 32px;transform:perspective(450px) rotateX(57deg) scale(1.6);transform-origin:center 70%;opacity:.7}
+.fr-art:after{inset:0;background:linear-gradient(115deg,transparent 20%,#ffffff05 50%,transparent 72%)}
+.fr-art-label{position:absolute;z-index:2;left:18px;top:18px;font-size:8px;letter-spacing:.19em;color:#b7bbc4}
+.fr-art-index{position:absolute;z-index:2;right:18px;bottom:16px;text-align:right;font-size:8px;letter-spacing:.16em;color:#868b95;line-height:1.9}
+.fr-structure{position:absolute;inset:0;width:100%;height:100%;z-index:1}
+.fr-metrics{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--f-line);border-bottom:1px solid var(--f-line)}
+.fr-metric{padding:20px 18px;border-right:1px solid var(--f-line)}.fr-metric:last-child{border-right:0}
+.fr-metric b{display:block;font:700 18px "Unbounded",sans-serif;letter-spacing:-.05em}.fr-metric span{display:block;color:var(--f-muted);font-size:8px;letter-spacing:.14em;margin-top:8px}
+.fr-section{padding:86px 0;border-bottom:1px solid #ffffff17}
+.fr-section-head{display:grid;grid-template-columns:.7fr 1.3fr;gap:30px;align-items:start;margin-bottom:34px}
+.fr-eyebrow{font-size:9px;color:#9fa4ad;letter-spacing:.2em}
+h2{font:700 clamp(27px,4vw,44px)/1.12 "Unbounded",sans-serif;letter-spacing:-.07em;margin:10px 0}
+.fr-section-intro{font-size:11px;line-height:2;color:#aeb2bb;max-width:680px;margin:0}
+.fr-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.fr-card{min-height:205px;border:1px solid #ffffff1d;padding:23px;background:linear-gradient(145deg,#111318,#0a0b0d)}
+.fr-card-num{font-size:9px;color:#878c96;letter-spacing:.14em}
+.fr-card h3{font:600 16px "Unbounded",sans-serif;letter-spacing:-.05em;margin:31px 0 12px}
+.fr-card p{font-size:10px;line-height:1.9;color:#aeb2bb;margin:0}
+.fr-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fr-control-panel{border:1px solid #ffffff1d;padding:24px}
+.fr-control-panel h3{font:600 13px "Unbounded",sans-serif;margin:0 0 22px}
+.fr-control-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 0;border-top:1px solid #ffffff14;font-size:10px}
+.fr-control-row span{color:#a4a9b2}
+.fr-keys{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px}
+kbd{display:inline-flex;align-items:center;justify-content:center;min-width:26px;min-height:24px;border:1px solid #555a64;padding:3px 6px;font:9px "JetBrains Mono",monospace;color:#f1f2f4}
+.fr-note{border-left:2px solid #d6d8dd;padding:15px 18px;background:#ffffff06;color:#b5b9c2;font-size:10px;line-height:1.9;margin-top:18px}
+.fr-bottom{padding:62px 0;display:flex;align-items:center;justify-content:space-between;gap:28px}
+.fr-bottom h2{font-size:clamp(23px,4vw,39px);margin:10px 0}
+.fr-bottom p{color:var(--f-muted);font-size:10px;line-height:1.9;max-width:540px}
+.fr-bottom-actions{display:flex;flex-wrap:wrap;gap:9px}
+.fr-footer{border-top:1px solid #ffffff17;padding:22px 0 36px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:#777d87;font-size:8px;letter-spacing:.08em}
+.fr-footer a{text-decoration:none}
+@media(max-width:800px){
+ .fr-shell{width:min(100% - 30px,680px)}.fr-nav{height:64px}.fr-links{gap:12px;font-size:9px}
+ .fr-hero{grid-template-columns:1fr;min-height:auto;padding-top:54px;padding-bottom:36px;gap:30px}
+ .fr-art{min-height:330px;grid-row:1}.fr-hero-copy{grid-row:2}
+ .fr-metrics{grid-template-columns:1fr 1fr}.fr-metric:nth-child(2){border-right:0}.fr-metric:nth-child(-n+2){border-bottom:1px solid var(--f-line)}
+ .fr-section{padding:58px 0}.fr-section-head{grid-template-columns:1fr;gap:14px}.fr-cards{grid-template-columns:1fr}.fr-card{min-height:0}.fr-card h3{margin-top:21px}
+ .fr-controls{grid-template-columns:1fr}.fr-bottom{align-items:flex-start;flex-direction:column;padding:48px 0}
+}
+@media(max-width:420px){
+ .fr-shell{width:calc(100% - 26px)}.fr-links{gap:10px}.fr-links a:nth-child(2){display:none}
+ .fr-art{min-height:280px}h1{font-size:clamp(55px,16vw,78px)}.fr-metric{padding:17px 12px}.fr-metric b{font-size:16px}
+ .fr-control-panel{padding:18px}.fr-control-row{align-items:flex-start}.fr-keys{max-width:55%}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.fr-button{transition:none}}
+</style>
+</head>
 <body>
-<canvas id="game" aria-label="FRACTURE 3D gravity parkour"></canvas>
-<div id="hud"><div class="top"><div><div class="brand">FRACTURE <span style="color:#777">/ 01</span></div><div class="micro">GRAVITY PARKOUR PROTOCOL</div></div><div class="stats"><div><label>DISTANCE</label><b id="distance">000</b></div><div><label>SHARDS</label><b id="shards">00</b></div><div><label>FALLS</label><b id="falls">00</b></div></div></div><div class="objective">OBJECTIVE // REACH THE EXIT<small>Momentum is a tool. The void is not forgiving.</small></div><div class="crosshair"></div><div class="help"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> MOVE &nbsp; <kbd>SPACE</kbd> JUMP<br><kbd>Q</kbd> FLIP GRAVITY &nbsp; <kbd>SHIFT</kbd> SPRINT<br><kbd>R</kbd> RESTART CHECKPOINT &nbsp; <kbd>ESC</kbd> PAUSE</div><div class="gravity"><strong id="gravityText">↓ GRAVITY: NORMAL</strong><small>Q TO INVERT WHEN AIRBORNE</small></div></div>
-<div id="start" class="screen"><div class="panel"><div class="tag">TAMASRAZIM INTERACTIVE // EXPERIMENT 001</div><div class="title">FRACT<span>URE.</span></div><div class="desc">Reality has gaps. Sprint across shifting platforms, invert gravity to reach impossible routes, collect shards, and find the exit beacon. Every jump is a commitment.</div><div class="actions"><button class="primary" id="play">Enter the fracture ↗</button><button id="showControls">Controls</button></div><div id="controls" class="desc hidden" style="margin-top:16px">WASD moves relative to the camera. Space jumps; Q flips gravity while airborne. Shift sprints. R returns to your latest checkpoint. On phones, use the on-screen controls.</div><div class="foot"><span>BUILD 0.1.0</span><span>LOCAL · NO ACCOUNT REQUIRED</span></div></div></div>
-<div id="pause" class="screen hidden"><div class="panel"><div class="tag">SYSTEM INTERRUPT</div><div class="title" style="font-size:60px">PAUSED<span>.</span></div><div class="desc">The fracture is holding its breath.</div><div class="actions"><button class="primary" id="resume">Resume</button><button id="restart">Restart checkpoint</button><button id="toMenu">Main menu</button></div></div></div>
-<div id="complete" class="screen hidden"><div class="panel"><div class="tag">SECTOR CLEARED // 001</div><div class="title">WELL<span>DONE.</span></div><div class="desc" id="summary">You crossed the fracture.</div><div class="actions"><button class="primary" id="again">Run again ↗</button><button id="completeMenu">Main menu</button></div></div></div><div id="toast">CHECKPOINT LOCKED</div>
-<div id="touch"><div class="touchgroup"><button data-key="KeyA">◀</button><button data-key="KeyW">▲</button><button data-key="KeyS">▼</button><button data-key="KeyD">▶</button></div><div class="touchgroup"><button data-key="Space">JUMP</button><button data-key="KeyQ">FLIP</button></div></div>
-<script>
-/* Compact perspective renderer and 3D collision simulation; no external dependencies. */
-(()=>{'use strict';
-const canvas=document.querySelector('#game'),ctx=canvas.getContext('2d'),$=id=>document.getElementById(id);
-let W=innerWidth,H=innerHeight,DPR=1;function resize(){W=innerWidth;H=innerHeight;DPR=Math.min(devicePixelRatio||1,1.6);canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0)}addEventListener('resize',resize);resize();
-const vec=(x=0,y=0,z=0)=>({x,y,z}),add=(a,b)=>vec(a.x+b.x,a.y+b.y,a.z+b.z),sub=(a,b)=>vec(a.x-b.x,a.y-b.y,a.z-b.z),mul=(a,s)=>vec(a.x*s,a.y*s,a.z*s),dot=(a,b)=>a.x*b.x+a.y*b.y+a.z*b.z,len=a=>Math.hypot(a.x,a.y,a.z),norm=a=>mul(a,1/(len(a)||1));
-let state='menu',keys={},last=0,time=0,toastTime=0,camera={p:vec(0,3,-7),yaw:0,pitch:-.13},mouseDown=false;
-const player={p:vec(0,1,0),v:vec(),r:.32,ground:false,gravity:1,flipCD:0,spawn:vec(0,1,0),shards:0,falls:0,checkpoint:0};
-let platforms=[],collectibles=[],goal=null;
-function platform(x,y,z,w,h,d,o={}){return {p:vec(x,y,z),w,h,d,base:vec(x,y,z),moving:o.moving||'',amp:o.amp||0,phase:o.phase||0,checkpoint:!!o.checkpoint,goal:!!o.goal,prev:vec(x,y,z),delta:vec()}}
-function build(){platforms=[];collectibles=[];platforms.push(platform(0,0,1,5,1,5,{checkpoint:true}));
-const course=[
-[-1,0,7,2.5,.42,2.4], [1.3,.45,10.3,2.1,.42,2.1], [3.2,1,13.6,2.1,.42,2.1], [2,1.7,16.9,2.1,.42,2.1],[-.5,2,20.2,2.1,.42,2.1],[-2.9,1.5,23.5,2.1,.42,2.1],[-3.5,.7,26.8,2.1,.42,2.1],[-1.5,.2,30.1,2.3,.42,2.1],[1.5,.8,33.4,2.1,.42,2.1],[3.5,1.4,36.7,2.1,.42,2.1],[2.2,2.1,40,2.2,.42,2.2],[0,2.7,43.3,2.1,.42,2.1],[-2.6,2,46.6,2.2,.42,2.1],[-3.4,1.1,49.9,2.1,.42,2.1],[-.8,.6,53.2,2.1,.42,2.1],[1.9,1.2,56.5,2.1,.42,2.1],[3.1,1.9,59.8,2.1,.42,2.1],[.8,2.6,63.1,2.5,.5,2.5]];
-course.forEach((a,i)=>platforms.push(platform(...a,i===4?{moving:'y',amp:1.0,phase:.4}:i===8?{moving:'x',amp:1.25,phase:2.0}:i===12?{moving:'z',amp:1.0,phase:1.3}:{})));
-platforms.push(platform(0,2.6,67.2,5,.6,4,{checkpoint:true,goal:true}));goal=platforms[platforms.length-1];
-for(let z=0;z<72;z+=4){platforms.push(platform(-7,-2,z,.14,7,.14));platforms.push(platform(7,-2,z,.14,7,.14))}
-[7,13.6,20.2,26.8,33.4,40,46.6,53.2,59.8].forEach((z,i)=>{let p=platforms.find(p=>Math.abs(p.base.z-z)<.01);collectibles.push({p:vec(p.p.x,p.p.y+1.25,p.p.z),got:false,phase:i*.8})})
-}
-build();
-function updateUI(){$('distance').textContent=String(Math.max(0,Math.floor(player.p.z))).padStart(3,'0');$('shards').textContent=String(player.shards).padStart(2,'0');$('falls').textContent=String(player.falls).padStart(2,'0');$('gravityText').textContent=player.gravity===1?'↓ GRAVITY: NORMAL':'↑ GRAVITY: INVERTED'}
-function toast(t){$('toast').textContent=t;$('toast').classList.add('show');toastTime=1.4}
-function reset(full){player.p=vec(0,1,0);player.v=vec();player.gravity=1;player.ground=false;player.spawn=vec(0,1,0);player.checkpoint=0;if(full){player.shards=0;player.falls=0;collectibles.forEach(c=>c.got=false)}camera.yaw=0;camera.pitch=-.13;updateUI()}
-function start(){reset(true);state='play';$('start').classList.add('hidden');$('pause').classList.add('hidden');$('complete').classList.add('hidden');$('hud').style.display='block';$('touch').style.display=('ontouchstart'in window)?'flex':'none';last=performance.now()}
-$('play').onclick=start;$('again').onclick=start;$('showControls').onclick=()=>$('controls').classList.toggle('hidden');$('resume').onclick=()=>{state='play';$('pause').classList.add('hidden');last=performance.now()};$('restart').onclick=()=>{player.p={...player.spawn};player.v=vec();player.gravity=1;state='play';$('pause').classList.add('hidden')};function menu(){state='menu';$('hud').style.display='none';$('pause').classList.add('hidden');$('complete').classList.add('hidden');$('start').classList.remove('hidden')} $('toMenu').onclick=$('completeMenu').onclick=menu;
-function flip(){if(state!=='play'||player.ground||player.flipCD>0)return;player.gravity*=-1;player.v.y=player.gravity*1.8;player.flipCD=.4;toast(player.gravity===-1?'GRAVITY INVERTED':'GRAVITY RESTORED');updateUI()}
-addEventListener('keydown',e=>{if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();keys[e.code]=true;if(e.repeat)return;if(e.code==='KeyQ')flip();if(e.code==='KeyR'&&state==='play'){player.p={...player.spawn};player.v=vec();player.gravity=1}if(e.code==='Escape'){if(state==='play'){state='pause';$('pause').classList.remove('hidden')}else if(state==='pause')$('resume').click()}if((e.code==='Space'||e.code==='ArrowUp')&&state==='play'&&player.ground){player.v.y=-player.gravity*7.1;player.ground=false}});
-addEventListener('keyup',e=>{keys[e.code]=false});
-document.querySelectorAll('[data-key]').forEach(b=>{const code=b.dataset.key;const down=e=>{e.preventDefault();keys[code]=true;if(code==='KeyQ')flip();if(code==='Space'&&state==='play'&&player.ground){player.v.y=-player.gravity*7.1;player.ground=false}};const up=e=>{e.preventDefault();keys[code]=false};b.addEventListener('pointerdown',down);['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,up))});
-canvas.addEventListener('pointerdown',e=>{if(state==='play'&&e.pointerType==='mouse'){mouseDown=true;canvas.setPointerCapture(e.pointerId)}});canvas.addEventListener('pointerup',()=>mouseDown=false);canvas.addEventListener('pointermove',e=>{if(mouseDown){camera.yaw-=e.movementX*.003;camera.pitch=Math.max(-.65,Math.min(.25,camera.pitch-e.movementY*.002))}});
-const rotate=(v,yaw,pitch)=>{let x=v.x*Math.cos(yaw)-v.z*Math.sin(yaw),z=v.x*Math.sin(yaw)+v.z*Math.cos(yaw);return vec(x,v.y*Math.cos(pitch)-z*Math.sin(pitch),v.y*Math.sin(pitch)+z*Math.cos(pitch))};
-function project(p){let q=rotate(sub(p,camera.p),camera.yaw,camera.pitch),f=Math.min(W,H)*.88;if(q.z<.18)return null;return {x:W/2+q.x*f/q.z,y:H*.48-q.y*f/q.z,z:q.z}}
-const corners=o=>{let x=o.p.x,y=o.p.y,z=o.p.z,a=o.w/2,b=o.h/2,c=o.d/2;return [vec(x-a,y-b,z-c),vec(x+a,y-b,z-c),vec(x+a,y+b,z-c),vec(x-a,y+b,z-c),vec(x-a,y-b,z+c),vec(x+a,y-b,z+c),vec(x+a,y+b,z+c),vec(x-a,y+b,z+c)]};
-const faces=[[0,1,2,3],[4,7,6,5],[0,4,5,1],[3,2,6,7],[0,3,7,4],[1,5,6,2]];
-function poly(points,fill,stroke){if(points.some(p=>!p))return;ctx.beginPath();ctx.moveTo(points[0].x,points[0].y);for(let i=1;i<points.length;i++)ctx.lineTo(points[i].x,points[i].y);ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=.8;ctx.stroke()}}
-function drawBox(o){let cs=corners(o),ps=cs.map(project);let depth=ps.reduce((a,p)=>a+(p?p.z:0),0)/ps.length;if(depth<.1)return;faces.forEach((f,i)=>{let brightness=[.33,.58,.2,.75,.25,.43][i],base=o.goal?'#e9ebef':o.checkpoint?'#b9bdc5':o.moving?'#969ba5':'#737781';let col=o.goal?(i===3?'#fff':'#c9ccd2'):o.checkpoint?(i===3?'#dce0e6':'#777c85'):o.moving?(i===3?'#d5d8de':'#6e737c'):(i===3?'#b5b8bf':'#4a4e56');poly(f.map(j=>ps[j]),col,'#f4f5f71c')});return depth}
-function background(){ctx.fillStyle='#08090b';ctx.fillRect(0,0,W,H);let g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#15171c');g.addColorStop(1,'#07080a');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.strokeStyle='#ffffff0b';ctx.lineWidth=1;for(let i=0;i<14;i++){let x=(i*97-(camera.p.x*12)%97+W)%W;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let i=0;i<10;i++){let y=(i*61+(camera.p.y*8)%61)%H;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}for(let i=0;i<10;i++){let z=8+i*7,x=Math.sin(i*1.9)*7;let a=project(vec(x,-2,z)),b=project(vec(x,5,z));if(a&&b){ctx.strokeStyle='#ffffff0c';ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}}}
-function draw(){background();let visible=[];for(const p of platforms){if(p.p.z<camera.p.z-12||p.p.z>camera.p.z+42)continue;let d=drawBox(p);if(d)visible.push({p,d})}for(const c of collectibles){if(c.got)continue;let pos=add(c.p,vec(0,Math.sin(time*2+c.phase)*.14,0)),q=project(pos);if(!q)continue;let r=Math.max(2,Math.min(11,70/q.z));ctx.save();ctx.translate(q.x,q.y);ctx.rotate(time*1.2+c.phase);ctx.beginPath();ctx.moveTo(0,-r);ctx.lineTo(r*.7,0);ctx.lineTo(0,r);ctx.lineTo(-r*.7,0);ctx.closePath();ctx.fillStyle='#f5f6f8';ctx.fill();ctx.strokeStyle='#6e737d';ctx.stroke();ctx.restore()}
-let pp=project(add(player.p,vec(0,.2,0)));if(pp){let r=Math.max(3,Math.min(18,75/pp.z));ctx.save();ctx.translate(pp.x,pp.y);ctx.fillStyle='#f4f5f6';ctx.strokeStyle='#111216';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-r*1.3);ctx.lineTo(r*.55,r);ctx.lineTo(0,r*.55);ctx.lineTo(-r*.55,r);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()}
- // Draw goal beacon marker
- let gp=project(vec(0,3.8,67.2));if(gp){ctx.strokeStyle='#ffffffa0';ctx.lineWidth=1;ctx.beginPath();ctx.arc(gp.x,gp.y,Math.max(4,25/gp.z),0,Math.PI*2);ctx.stroke()}
-}
-function update(dt){time+=dt;if(toastTime>0){toastTime-=dt;if(toastTime<=0)$('toast').classList.remove('show')}if(state!=='play')return;player.runTime+=dt;player.flipCD=Math.max(0,player.flipCD-dt);
- // Animate platforms in world space, keeping their previous positions for moving-platform carry.
- for(const p of platforms){p.prev={...p.p};if(p.moving==='y')p.p.y=p.base.y+Math.sin(time*1.25+p.phase)*p.amp;if(p.moving==='x')p.p.x=p.base.x+Math.sin(time*1.1+p.phase)*p.amp;if(p.moving==='z')p.p.z=p.base.z+Math.sin(time*1.0+p.phase)*p.amp;p.delta=sub(p.p,p.prev)}
- const forward=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),side=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0),speed=(keys.ShiftLeft||keys.ShiftRight)?8.5:6;
- const fx=Math.sin(camera.yaw),fz=Math.cos(camera.yaw),rx=Math.cos(camera.yaw),rz=-Math.sin(camera.yaw);let ax=side*rx+forward*fx,az=side*rz+forward*fz,al=Math.hypot(ax,az);if(al>1){ax/=al;az/=al}
- player.v.x+=(ax*speed-player.v.x)*Math.min(1,dt*8);player.v.z+=(az*speed-player.v.z)*Math.min(1,dt*8);if(!side&&!forward){player.v.x*=Math.pow(.025,dt);player.v.z*=Math.pow(.025,dt)}
- if(keys.Space&&player.ground){player.v.y=-player.gravity*7.1;player.ground=false}
- player.v.y+=player.gravity*18*dt;player.v.y=Math.max(-14,Math.min(14,player.v.y));
- let old={...player.p};player.p=add(player.p,mul(player.v,dt));player.ground=false;
- // Landing checks against top surfaces while falling toward gravity.
- for(const p of platforms){if(p.h>2||Math.abs(player.p.x-p.p.x)>(p.w/2+player.r)||Math.abs(player.p.z-p.p.z)>(p.d/2+player.r))continue;
-  let top=p.p.y+p.h/2,bottom=p.p.y-p.h/2;
-  if(player.gravity===1&&old.y-player.r>=top-.05&&player.p.y-player.r<=top&&player.v.y<0){player.p.y=top+player.r;player.v.y=0;player.ground=true;player.p.x+=p.delta.x;player.p.z+=p.delta.z}
-  else if(player.gravity===-1&&old.y+player.r<=bottom+.05&&player.p.y+player.r>=bottom&&player.v.y>0){player.p.y=bottom-player.r;player.v.y=0;player.ground=true;player.p.x+=p.delta.x;player.p.z+=p.delta.z}
-  if(player.ground&&p.checkpoint&&p.p.z>player.spawn.z+8){player.spawn=vec(p.p.x,p.p.y+(player.gravity===1?p.h/2+player.r:-p.h/2-player.r),p.p.z);player.checkpoint=p.p.z;toast('CHECKPOINT LOCKED')}
- }
- for(const c of collectibles){if(c.got)continue;let pos=add(c.p,vec(0,Math.sin(time*2+c.phase)*.14,0));if(len(sub(player.p,pos))<.9){c.got=true;player.shards++;updateUI();toast('SHARD ACQUIRED')}}
- if(player.p.y< -9||player.p.y>12||player.p.z<player.spawn.z-5){player.falls++;respawn();return}
- camera.p.x+=(player.p.x-camera.p.x)*Math.min(1,dt*4);camera.p.y+=(player.p.y+2.6-camera.p.y)*Math.min(1,dt*4);camera.p.z+=(player.p.z-6.5-camera.p.z)*Math.min(1,dt*3.5);camera.yaw+=(0-camera.yaw)*Math.min(1,dt*1.8);camera.pitch+=(-.13-camera.pitch)*Math.min(1,dt*1.8);
- if(player.p.z>65.9&&Math.abs(player.p.x)<2.5){state='complete';$('summary').textContent='Exit reached in '+player.runTime.toFixed(1)+' seconds · '+player.shards+' / '+collectibles.length+' shards · '+player.falls+' falls.';$('complete').classList.remove('hidden')}
- updateUI()
-}
-function loop(now){let dt=Math.min(.033,(now-last)/1000||0);last=now;update(dt);draw();requestAnimationFrame(loop)}requestAnimationFrame(loop);
-})();
-</script></body></html>
+<header class="fr-shell fr-nav">
+<a class="fr-brand" href="/" aria-label="Tamasrazim home"><span class="fr-mark">T</span><span>tamasrazim</span></a>
+<nav class="fr-links" aria-label="Project navigation"><a href="/projects/">Projects</a><a href="/work/">Work</a><a href="#overview">Overview</a><a href="#controls">Controls</a></nav>
+</header>
+<main>
+<section class="fr-shell fr-hero" id="overview">
+<div class="fr-hero-copy">
+<div class="fr-live"><span class="fr-dot"></span> BROWSER GAME / PLAYABLE PROTOTYPE</div>
+<p class="fr-kicker" style="margin-top:26px">INTERACTIVE EXPERIMENT 001</p>
+<h1>FRACT<span>URE.</span></h1>
+<p class="fr-lead">The path is unstable. Read the movement, commit to the jump, and bend gravity when the floor stops being useful.</p>
+<div class="fr-ctas"><a class="fr-button primary" href="/projects/fracture/play.html">Play FRACTURE <span aria-hidden="true">↗</span></a><a class="fr-button" href="#controls">How to play ↓</a></div>
+<p class="fr-footnote">Runs in a modern browser · No account · No install · Keyboard and touch controls</p>
+</div>
+<div class="fr-art" aria-label="Abstract illustration of platforms suspended in a dark geometric space" role="img">
+<span class="fr-art-label">FRACTURE / SECTOR 001</span>
+<svg class="fr-structure" viewBox="0 0 600 420" fill="none" aria-hidden="true">
+<g stroke="#ffffff" stroke-opacity=".24" stroke-width="1">
+<path d="M25 335L300 160 574 335 300 405Z"/><path d="M25 280L300 105 574 280 300 350Z"/><path d="M25 225L300 50 574 225 300 295Z"/>
+<path d="M25 225V335M300 50V160M574 225V335M300 295V405"/>
+</g>
+<g stroke="#f4f5f7" stroke-width="1.5">
+<path d="M215 300L290 253 365 300 290 347Z" fill="#686d77"/><path d="M215 300V272L290 225V253Z" fill="#3c4048"/><path d="M290 253V225L365 272V300Z" fill="#a4a8b0"/>
+<path d="M325 205L376 173 427 205 376 237Z" fill="#818690"/><path d="M325 205V187L376 155V173Z" fill="#4b5059"/><path d="M376 173V155L427 187V205Z" fill="#c5c8ce"/>
+<path d="M138 183L174 160 210 183 174 206Z" fill="#777c86"/><path d="M138 183V168L174 145V160Z" fill="#454952"/><path d="M174 160V145L210 168V183Z" fill="#aeb2bb"/>
+<path d="M290 225L290 183" stroke-dasharray="3 6" stroke-opacity=".65"/><circle cx="290" cy="177" r="5" fill="#f1f2f4" stroke="none"/>
+</g>
+<g fill="#f3f4f6" font-family="monospace" font-size="9" letter-spacing="2"><text x="35" y="35">GRAVITY / VARIABLE</text><text x="438" y="388">REACH THE EXIT</text></g>
+</svg>
+<div class="fr-art-index">SHIFTING GEOMETRY<br>PHYSICS × PRECISION × TIMING</div>
+</div>
+</section>
+<section class="fr-shell fr-metrics" aria-label="Game features">
+<div class="fr-metric"><b>3D</b><span>PERSPECTIVE WORLD</span></div>
+<div class="fr-metric"><b>Q / FLIP</b><span>GRAVITY MANIPULATION</span></div>
+<div class="fr-metric"><b>01</b><span>SECTOR TO CLEAR</span></div>
+<div class="fr-metric"><b>0</b><span>ACCOUNTS REQUIRED</span></div>
+</section>
+<section class="fr-section"><div class="fr-shell">
+<div class="fr-section-head"><div><div class="fr-eyebrow">01 / CORE LOOP</div><h2>Movement is<br>the puzzle.</h2></div><p class="fr-section-intro">FRACTURE is a compact, single-player parkour prototype. Keep momentum through a line of floating platforms, judge the moving ones, recover at checkpoints, and use gravity inversion to change how you approach a gap. Shards reward exploration; the exit beacon ends the sector.</p></div>
+<div class="fr-cards">
+<article class="fr-card"><span class="fr-card-num">MECHANIC / 01</span><h3>Momentum</h3><p>Accelerate, brake, and sprint. Small adjustments to direction matter more than frantic inputs when the next platform is narrow.</p></article>
+<article class="fr-card"><span class="fr-card-num">MECHANIC / 02</span><h3>Gravity shift</h3><p>Invert gravity while airborne to push toward a different surface. Watch the HUD indicator so you know which direction will pull you.</p></article>
+<article class="fr-card"><span class="fr-card-num">MECHANIC / 03</span><h3>Moving platforms</h3><p>Three platform patterns move along different axes. Time the approach, land, and let checkpoints reduce the cost of a failed jump.</p></article>
+</div>
+</div></section>
+<section class="fr-section" id="controls"><div class="fr-shell">
+<div class="fr-section-head"><div><div class="fr-eyebrow">02 / INPUT MAP</div><h2>Choose your<br>setup.</h2></div><p class="fr-section-intro">On phones and tablets, start the game and use the virtual joystick for movement. Drag on the open play area to look around; the action buttons stay in thumb reach. Landscape orientation gives you more room, but portrait mode remains supported.</p></div>
+<div class="fr-controls">
+<div class="fr-control-panel"><h3>Keyboard / Desktop</h3>
+<div class="fr-control-row"><span>Move</span><div class="fr-keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></div></div>
+<div class="fr-control-row"><span>Jump</span><div class="fr-keys"><kbd>SPACE</kbd></div></div>
+<div class="fr-control-row"><span>Flip gravity</span><div class="fr-keys"><kbd>Q</kbd></div></div>
+<div class="fr-control-row"><span>Sprint</span><div class="fr-keys"><kbd>SHIFT</kbd></div></div>
+<div class="fr-control-row"><span>Restart checkpoint</span><div class="fr-keys"><kbd>R</kbd></div></div>
+<div class="fr-control-row"><span>Pause / resume</span><div class="fr-keys"><kbd>ESC</kbd></div></div>
+<div class="fr-control-row"><span>Look</span><div class="fr-keys"><kbd>DRAG</kbd></div></div>
+</div>
+<div class="fr-control-panel"><h3>Mobile / Touch</h3>
+<div class="fr-control-row"><span>Move</span><div class="fr-keys">Virtual joystick</div></div>
+<div class="fr-control-row"><span>Look around</span><div class="fr-keys">Drag open screen</div></div>
+<div class="fr-control-row"><span>Jump</span><div class="fr-keys">JUMP</div></div>
+<div class="fr-control-row"><span>Invert gravity</span><div class="fr-keys">FLIP</div></div>
+<div class="fr-control-row"><span>Run faster</span><div class="fr-keys">Hold RUN</div></div>
+<div class="fr-control-row"><span>Pause / screen fit</span><div class="fr-keys">PAUSE / FULL SCREEN</div></div>
+</div>
+</div>
+<div class="fr-note">Prototype note: FRACTURE is a custom canvas-rendered 3D-style browser game, not a full production 3D engine. Touch controls, physics, rendering, and level logic are contained in the game page; no backend or login is required.</div>
+</div></section>
+<section class="fr-shell fr-bottom">
+<div><div class="fr-eyebrow">03 / ENTER THE SECTOR</div><h2>Find your footing.</h2><p>Start a fresh run, learn the rhythm of the platforms, and see how many shards you can collect before the exit.</p></div>
+<div class="fr-bottom-actions"><a class="fr-button primary" href="/projects/fracture/play.html">Launch playable build ↗</a><a class="fr-button" href="https://github.com/Tamasrazim/tamasrazim.github.io/blob/main/projects/fracture/play.html">View game source ↗</a></div>
+</section>
+</main>
+<footer class="fr-shell fr-footer"><span>FRACTURE / EXPERIMENT 001</span><span>DESIGNED AND BUILT BY TAMASRAZIM</span><a href="/projects/">ALL PROJECTS ↗</a></footer>
+</body></html>
