@@ -166,7 +166,7 @@ function update(dt){time+=dt;if(toastTime>0){toastTime-=dt;if(toastTime<=0)$('to
   if(player.ground&&p.checkpoint&&p.p.z>player.spawn.z+8){player.spawn=vec(p.p.x,p.p.y+(player.gravity===1?p.h/2+player.r:-p.h/2-player.r),p.p.z);player.checkpoint=p.p.z;toast('CHECKPOINT LOCKED')}
  }
  for(const c of collectibles){if(c.got)continue;let pos=add(c.p,vec(0,Math.sin(time*2+c.phase)*.14,0));if(len(sub(player.p,pos))<.9){c.got=true;player.shards++;updateUI();toast('SHARD ACQUIRED')}}
- if(player.p.y< -9||player.p.y>12||player.p.z<player.spawn.z-5){player.falls++;respawn();return}
+ if(player.p.y< -9||player.p.y>12||player.p.z<player.spawn.z-5){player.falls++;player.shards=0;collectibles.forEach(c=>c.got=false);updateUI();toast('FALL PENALTY · SHARDS LOST');respawn();return}
  camera.p.x+=(player.p.x-camera.p.x)*Math.min(1,dt*4);camera.p.y+=(player.p.y+2.6-camera.p.y)*Math.min(1,dt*4);camera.p.z+=(player.p.z-6.5-camera.p.z)*Math.min(1,dt*3.5);camera.yaw+=(0-camera.yaw)*Math.min(1,dt*1.8);camera.pitch+=(-.13-camera.pitch)*Math.min(1,dt*1.8);
  if(player.p.z>65.9&&Math.abs(player.p.x)<2.5){state='complete';$('touch').style.display='none';$('mobileHint').style.display='none';$('summary').textContent='Exit reached in '+player.runTime.toFixed(1)+' seconds · '+player.shards+' / '+collectibles.length+' shards · '+player.falls+' falls.';$('complete').classList.remove('hidden')}
  updateUI()
