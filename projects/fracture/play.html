@@ -178,8 +178,8 @@ function update(dt){time+=dt;flipFlash=Math.max(0,flipFlash-dt*2.6);flipPulse=Ma
   // Top/underside landings are handled separately below, so this cannot shove a clean landing away.
   if(player.p.y>bottom&&player.p.y<top){const dx=player.p.x-p.p.x,dz=player.p.z-p.p.z,ox=p.w/2+player.r-Math.abs(dx),oz=p.d/2+player.r-Math.abs(dz);if(ox>0&&oz>0){if(ox<oz){player.p.x=p.p.x+((dx||old.x-p.p.x)<0?-1:1)*(p.w/2+player.r);player.v.x=0}else{player.p.z=p.p.z+((dz||old.z-p.p.z)<0?-1:1)*(p.d/2+player.r);player.v.z=0}}}
   if(p.h>2||Math.abs(player.p.x-p.p.x)>(p.w/2+player.r)||Math.abs(player.p.z-p.p.z)>(p.d/2+player.r))continue;
-  if(player.gravity===1&&old.y-player.r>=top-.12&&player.p.y-player.r<=top&&player.v.y<0){player.p.y=top+player.r;player.v.y=0;player.ground=true;groundedPlatform=p;player.p.x+=p.delta.x;player.p.z+=p.delta.z;player.coyote=.11}
-  else if(player.gravity===-1&&old.y+player.r<=bottom+.12&&player.p.y+player.r>=bottom&&player.v.y>0){player.p.y=bottom-player.r;player.v.y=0;player.ground=true;groundedPlatform=p;player.p.x+=p.delta.x;player.p.z+=p.delta.z;player.coyote=.11}
+  if(player.gravity===1&&old.y-player.r>=top-.12&&player.p.y-player.r<=top&&player.v.y<0){player.p.y=top+player.r;player.v.y=0;player.ground=true;groundedPlatform=p;player.coyote=.11}
+  else if(player.gravity===-1&&old.y+player.r<=bottom+.12&&player.p.y+player.r>=bottom&&player.v.y>0){player.p.y=bottom-player.r;player.v.y=0;player.ground=true;groundedPlatform=p;player.coyote=.11}
   if(player.ground&&p.checkpoint&&p.p.z>player.spawn.z+8){player.spawn=vec(p.p.x,p.p.y+(player.gravity===1?p.h/2+player.r:-p.h/2-player.r),p.p.z);player.checkpoint=p.p.z;toast('CHECKPOINT LOCKED')}
  }
  if(player.ground&&!wasGround){player.landTime=.18;cameraKick=Math.min(.28,Math.abs(old.y-player.p.y)*.08);burst(vec(player.p.x,player.p.y-player.gravity*.2,player.p.z),Math.min(18,8+Math.floor(len(player.v)*1.2)),1.8);player.coyote=.11}else if(!player.ground)groundedPlatform=null
