@@ -20,11 +20,34 @@ label{display:block;margin:10px 0}input[type=range]{width:200px;vertical-align:m
 #cx{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:#fffa;display:none;pointer-events:none}
 #hint{position:fixed;bottom:12%;left:0;right:0;text-align:center;opacity:0;transition:opacity .6s;pointer-events:none;text-shadow:0 1px 6px #000;font-size:18px}#hint.on{opacity:.95}
 #dg{position:fixed;left:10px;bottom:10px;font:11px monospace;display:none;background:#0009;padding:8px;pointer-events:none}#dg.on{display:block}
+/* Touch input uses the same first-person physics; no player avatar or alternate camera is rendered. */
+canvas{touch-action:none}
+#touch{position:fixed;inset:0;z-index:4;display:none;pointer-events:none;touch-action:none}
+#touch.on{display:block}
+#stick{position:absolute;left:max(16px,env(safe-area-inset-left,0px));bottom:max(18px,env(safe-area-inset-bottom,0px));width:136px;height:136px;border:1px solid #ffffff55;border-radius:50%;background:rgba(7,10,20,.58);box-shadow:inset 0 0 25px #7ad7ff18,0 8px 28px #0005;pointer-events:auto;touch-action:none}
+#stick:before{content:"";position:absolute;inset:28px;border:1px solid #ffffff1c;border-radius:50%}
+#knob{position:absolute;left:42px;top:42px;width:50px;height:50px;border:1px solid #c7f1ff99;border-radius:50%;background:rgba(122,215,255,.28);box-shadow:0 0 24px #7ad7ff25;transform:translate(0,0);pointer-events:none}
+#touch-actions{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:max(18px,env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(2,minmax(70px,88px));gap:8px;pointer-events:auto}
+.touch-btn{margin:0;min-height:54px;padding:10px 8px;border:1px solid #ffffff45;border-radius:15px;background:rgba(9,14,26,.76);backdrop-filter:blur(8px);font:600 10px ui-monospace,monospace;letter-spacing:.1em;touch-action:none;user-select:none;-webkit-user-select:none}
+.touch-btn:active{background:rgba(122,215,255,.3);border-color:var(--ac)}
+#touch-pause{position:absolute;top:max(14px,env(safe-area-inset-top,0px));right:max(14px,env(safe-area-inset-right,0px));min-width:48px;min-height:44px;padding:8px 12px;pointer-events:auto}
+@media(max-width:560px){#stick{width:116px;height:116px}#knob{left:35px;top:35px;width:44px;height:44px}#touch-actions{grid-template-columns:repeat(2,70px);gap:6px}.touch-btn{min-height:48px;font-size:9px}}
 </style></head><body>
-<canvas id="c"></canvas><div id="cx"></div><div id="hud"><div id="hl"></div><div id="hr"></div></div><div id="hint"></div><pre id="dg"></pre>
+<canvas id="c"></canvas>
+<div id="touch" aria-label="Touch controls">
+  <div id="stick" role="application" aria-label="Movement joystick"><div id="knob"></div></div>
+  <div id="touch-actions">
+    <button class="touch-btn" data-touch="jump">JUMP</button>
+    <button class="touch-btn" data-touch="dash">DASH</button>
+    <button class="touch-btn" data-touch="sprint">SPRINT</button>
+    <button class="touch-btn" data-touch="respawn">RESPAWN</button>
+  </div>
+  <button class="touch-btn" id="touch-pause" data-touch="pause" aria-label="Pause game">Ⅱ</button>
+</div>
+<div id="cx"></div><div id="hud"><div id="hl"></div><div id="hr"></div></div><div id="hint"></div><pre id="dg"></pre>
 <div class="ov on" id="m"><div class="gl"><h1>FRACTURE</h1><p>One hundred levels. One broken world.</p>
 <button data-a="cont">Continue</button><button data-a="sel">Level select</button><button data-a="hc">Mode: Standard</button><button data-a="rst" id="rb">Reset progress</button>
-<p>WASD move, mouse look, Shift sprint, Space jump, E dash, R respawn, Esc pause, M music, F3 diagnostics</p></div></div>
+<p>WASD move, mouse look, Shift sprint, Space jump, E dash, R respawn, Esc pause, M music, F3 diagnostics. Touch: joystick to move, drag to look.</p></div></div>
 <div class="ov" id="s"><div class="gl"><h2>Level select</h2><p id="pr"></p><div class="grid" id="gd"></div><button data-a="menu">Back</button></div></div>
 <div class="ov" id="p"><div class="gl"><h2>Paused</h2>
 <label>Mouse sensitivity <input type="range" id="se" min=".3" max="2.5" step=".05"></label>
@@ -156,6 +179,28 @@ function load(i){const d=mk(i);Object.assign(G,{i,B:d.B,O:d.O,SW:d.SW,lo:d.lo,hi
 function place0(c){P.c=c.c.slice();P.v=[0,0,0];P.g=c.g;P.yaw=c.yaw;P.pit=0;P.roll=P.g<0?Math.PI:0;P.gr=false;P.ride=null;P.coy=0;P.jb=0;P.dc=0;P.dd=0;P.wt=0;P.wl=null;P.wb=null;G.fc=.6}
 function respawn(){place0(HC?G.cp0:G.cp)}
 let CJ=0,CV=0,DF=0,TL=0,PH=0;const K={},HF=[.35,.85,.35];
+/* Touch controls feed the same movement and jump state as the keyboard controls. */
+const touchRoot=$('touch'),stick=$('stick'),knob=$('knob');
+const touchDevice=()=>matchMedia('(pointer: coarse)').matches||('ontouchstart' in window);
+let stickPointer=null,lookPointer=null,stickX=0,stickY=0,lookX=0,lookY=0;
+const lim=(v,a,b)=>Math.max(a,Math.min(b,v));
+function clearStick(){K.KeyW=K.KeyA=K.KeyS=K.KeyD=0;stickX=stickY=0;knob.style.transform='translate(0px,0px)'}
+function setTouchVisible(on){touchRoot.classList.toggle('on',!!on&&touchDevice());if(!touchRoot.classList.contains('on')){clearStick();K.KeyE=K.ShiftLeft=0;stickPointer=null;lookPointer=null}}
+function updateStick(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,rad=r.width*.31;stickX=lim((e.clientX-cx)/rad,-1,1);stickY=lim((e.clientY-cy)/rad,-1,1);knob.style.transform='translate('+Math.round(stickX*rad)+'px,'+Math.round(stickY*rad)+'px)';K.KeyA=stickX<-.22;K.KeyD=stickX>.22;K.KeyW=stickY<-.22;K.KeyS=stickY>.22}
+stick.addEventListener('pointerdown',e=>{if(!touchDevice())return;e.preventDefault();e.stopPropagation();stickPointer=e.pointerId;stick.setPointerCapture(e.pointerId);updateStick(e)});
+stick.addEventListener('pointermove',e=>{if(e.pointerId===stickPointer){e.preventDefault();updateStick(e)}});
+function releaseStick(e){if(e.pointerId!==stickPointer)return;stickPointer=null;clearStick()}
+stick.addEventListener('pointerup',releaseStick);stick.addEventListener('pointercancel',releaseStick);stick.addEventListener('lostpointercapture',releaseStick);
+document.querySelectorAll('[data-touch]').forEach(btn=>{
+ const action=btn.dataset.touch;
+ btn.addEventListener('pointerdown',e=>{if(!touchDevice()||G.state!=='play')return;e.preventDefault();e.stopPropagation();try{btn.setPointerCapture(e.pointerId)}catch(_){}if(action==='pause'){pause();return}if(action==='jump'){P.jb=.12;return}if(action==='dash'){K.KeyE=1;return}if(action==='sprint'){K.ShiftLeft=1;return}if(action==='respawn'){respawn();return}});
+ const release=()=>{if(action==='dash')K.KeyE=0;if(action==='sprint')K.ShiftLeft=0};
+ btn.addEventListener('pointerup',release);btn.addEventListener('pointercancel',release);btn.addEventListener('lostpointercapture',release);
+});
+cv.addEventListener('pointerdown',e=>{if(!touchDevice()||e.pointerType!=='touch'||G.state!=='play')return;lookPointer=e.pointerId;lookX=e.clientX;lookY=e.clientY});
+addEventListener('pointermove',e=>{if(lookPointer!==e.pointerId||G.state!=='play')return;const dx=e.clientX-lookX,dy=e.clientY-lookY;lookX=e.clientX;lookY=e.clientY;P.yaw-=dx*.003*S.sens*P.g;P.pit=lim(P.pit-dy*.003*S.sens*P.g,-1.5,1.5)});
+function releaseLook(e){if(e.pointerId===lookPointer)lookPointer=null}
+addEventListener('pointerup',releaseLook);addEventListener('pointercancel',releaseLook);
 function mv(a,dt){P.c[a]+=P.v[a]*dt;
  for(const b of G.B){if(!b.on)continue;const bp=[b.x,b.y,b.z],bh=[b.hx,b.hy,b.hz];
   if(Math.abs(P.c[0]-bp[0])<HF[0]+bh[0]-1e-4&&Math.abs(P.c[1]-bp[1])<HF[1]+bh[1]-1e-4&&Math.abs(P.c[2]-bp[2])<HF[2]+bh[2]-1e-4){
@@ -198,13 +243,13 @@ const show=id=>['m','s','p','d'].forEach(k=>$(k).classList.toggle('on',k===id));
 let hT;function hint(t){const h=$('hint');h.textContent=t;h.classList.add('on');clearTimeout(hT);hT=setTimeout(()=>h.classList.remove('on'),5500)}
 const lock=()=>{try{const p=cv.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}};
 function play(i){if(i<0||i>99||i>=S.u)return;load(i);place0(G.cp0);G.time=0;G.t=0;G.got=0;show();$('hud').style.display='flex';$('cx').style.display='block';
- $('hl').textContent=(i+1)+'  '+LV[i].nm+(HC?'  [HARDCORE]':'');G.state='play';
+ $('hl').textContent=(i+1)+'  '+LV[i].nm+(HC?'  [HARDCORE]':'');G.state='play';setTouchVisible(true);
  try{if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}
- lock();hint(LV[i].hint);music(true);G.intro=1.4;DF=0}
-function pause(){if(G.state!='play')return;G.state='pause';$('se').value=S.sens;$('fv').value=S.fov;show('p')}
-function toMenu(id){music(false);G.state=id=='m'?'menu':'select';$('hud').style.display='none';$('cx').style.display='none';try{document.exitPointerLock()}catch(e){}show(id)}
+ if(!touchDevice())lock();hint(LV[i].hint);music(true);G.intro=1.4;DF=0}
+function pause(){if(G.state!='play')return;G.state='pause';setTouchVisible(false);$('se').value=S.sens;$('fv').value=S.fov;show('p')}
+function toMenu(id){music(false);setTouchVisible(false);G.state=id=='m'?'menu':'select';$('hud').style.display='none';$('cx').style.display='none';try{document.exitPointerLock();if(document.fullscreenElement)document.exitFullscreen()}catch(e){}show(id)}
 function buildSel(){let n=0,h='';LV.forEach((l,i)=>{const rc=S.r[i+(HC?100:0)],lk=i>=S.u;if(rc)n++;h+=`<div class="card${lk?' lk':''}" data-a="pl" data-i="${i}" style="--c:#${l.ac.map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join('')}"><b>${i+1}</b><span>${l.nm}</span><small>${rc?fmt(rc.t)+' | '+rc.o+'/'+TOT[i]+' orbs':lk?'Locked':'New'}</small></div>`});$('gd').innerHTML=h;$('pr').textContent='Campaign: '+n+' of 100 levels complete'}
-function win(){G.state='done';music(false);try{document.exitPointerLock()}catch(e){}
+function win(){G.state='done';setTouchVisible(false);music(false);try{document.exitPointerLock()}catch(e){}
  const i=G.i,ki=i+(HC?100:0),t=G.time,o=G.got,pr=S.r[ki],nb=!pr||t<pr.t;S.r[ki]={t:nb?t:pr.t,o:Math.max(o,pr?pr.o:0)};if(i<99)S.u=Math.max(S.u,i+2);save();snd(660,.5,'triangle',.08,1320);
  const last=i==99;$('dt').textContent=last?'CAMPAIGN COMPLETE':'LEVEL COMPLETE';
  $('ds').textContent=(last?'The fracture is sealed. ':'')+'Time '+fmt(t)+(nb?' (new best)':' (best '+fmt(S.r[ki].t)+')')+'  |  Orbs '+o+'/'+G.O.length;
@@ -213,13 +258,13 @@ let rT;document.addEventListener('click',e=>{const el=e.target.closest('[data-a]
  if(a=='cont')play(Math.min(S.u,100)-1);else if(a=='sel'){buildSel();toMenu('s')}else if(a=='menu')toMenu('m');
  else if(a=='pl')play(+el.dataset.i);else if(a=='rs')play(G.i);else if(a=='nx')play(G.i+1);
  else if(a=='hc'){HC=!HC;el.textContent='Mode: '+(HC?'Hardcore, no checkpoints':'Standard')}
- else if(a=='res'){show();G.state='play';lock();music(true)}
+ else if(a=='res'){show();G.state='play';setTouchVisible(true);if(!touchDevice())lock();music(true)}
  else if(a=='rst'){const b=$('rb');if(b.dataset.c){S.u=1;S.r={};save();b.textContent='Reset progress';delete b.dataset.c;clearTimeout(rT)}else{b.dataset.c=1;b.textContent='Click again to erase all progress';rT=setTimeout(()=>{b.textContent='Reset progress';delete b.dataset.c},3500)}}});
 $('se').oninput=e=>{S.sens=+e.target.value;save()};$('fv').oninput=e=>{S.fov=+e.target.value;save()};
 addEventListener('keydown',e=>{K[e.code]=1;if(G.state=='play'){if(e.code=='Space'){P.jb=.12;e.preventDefault()}if(e.code=='KeyR')respawn();if(e.code=='KeyP'||e.code=='Escape')pause()}if(e.code=='KeyM'){MUS=!MUS;music(MUS&&G.state=='play')}if(e.code=='F3'){e.preventDefault();$('dg').classList.toggle('on')}});
 addEventListener('keyup',e=>K[e.code]=0);addEventListener('blur',()=>{for(const k in K)K[k]=0;pause()});
 addEventListener('mousemove',e=>{if(G.state=='play'&&document.pointerLockElement===cv){P.yaw-=e.movementX*.0022*S.sens*P.g;P.pit=Math.max(-1.5,Math.min(1.5,P.pit-e.movementY*.0022*S.sens*P.g))}});
-document.addEventListener('pointerlockchange',()=>{if(!document.pointerLockElement)pause()});
+document.addEventListener('pointerlockchange',()=>{if(!touchDevice()&&!document.pointerLockElement)pause()});
 /* ---------- main loop (single rAF, fixed 120 Hz physics) ---------- */
 const HS=1/120;let last=performance.now(),acc=0,fps=60,ft=16;load(0);place0(G.cp0);
 function frame(now){requestAnimationFrame(frame);const rd=(now-last)/1000,dt=Math.min(.1,rd||.016);last=now;fps+=(1/Math.max(rd,1e-3)-fps)*.1;ft=rd*1000;
