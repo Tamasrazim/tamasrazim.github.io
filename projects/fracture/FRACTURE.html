@@ -121,14 +121,20 @@ uniform vec3 uCol,uAcc,uEye,uFog;uniform float uFd,uEm,uSm;out vec4 o;
 void main(){
 vec3 n=normalize(vN),V=normalize(uEye-vW),L=normalize(vec3(.4,.9,.3)),H=normalize(L+V);
 float ndl=max(dot(n,L),0.),d=.22+ndl*.9;
-float tx=.96+.04*sin(vW.x*5.)*sin(vW.z*5.)+.025*sin(vW.y*8.);
+/* Layered procedural material: broad wear, micro-grain, panel seams and chipped edges. */
+float macro=sin(vW.x*1.7+sin(vW.z*1.1)*1.8)*sin(vW.z*1.9+sin(vW.y*.8)*1.4);
+float micro=.5+.5*sin(vW.x*31.+sin(vW.z*23.)*2.4)*sin(vW.y*29.+vW.z*11.);
+float scratches=pow(max(0.,sin(vW.x*73.+sin(vW.y*9.)*2.)),22.);
+float tx=.91+macro*.055+(micro-.5)*.11-scratches*.09;
 vec3 a=abs(vL);float rim=step(1.5,step(.93,a.x)+step(.93,a.y)+step(.93,a.z));
 float grain=.5+.5*sin(vW.x*37.+sin(vW.z*23.))*sin(vW.y*29.+vW.z*11.);
-float seam=1.-smoothstep(.012,.05,abs(fract(vW.y*.38)-.5));
+float grid=min(min(abs(fract(vW.x*.22)-.5),abs(fract(vW.z*.22)-.5)),abs(fract(vW.y*.22)-.5));
+float seam=1.-smoothstep(.012,.038,grid);
+float panelWear=1.-smoothstep(.12,.49,abs(sin(vW.x*1.4+vW.z*.8)*sin(vW.y*.7)));
 float spec=pow(max(dot(n,H),0.),28.)*(.12+.28*ndl);
 float fres=pow(1.-max(dot(n,V),0.),3.);
 vec3 c=uCol*d*tx;c=mix(c,uAcc,rim*.68*(1.-uSm));
-c+=uCol*(grain-.5)*.025+uAcc*(seam*.025*(1.-uSm)+spec+fres*uSm*.42)+uCol*uEm;
+c+=uCol*(grain-.5)*.045+uAcc*(seam*.035*(1.-uSm)+panelWear*.018+spec+fres*uSm*.42)+uCol*uEm;
 float f=1.-exp(-uFd*length(vW-uEye));o=vec4(mix(c,uFog,f),1.);
 }`;
 const mkS=(t,s)=>{const x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))throw gl.getShaderInfoLog(x);return x};
