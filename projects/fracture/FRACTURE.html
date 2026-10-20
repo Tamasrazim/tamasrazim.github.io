@@ -182,7 +182,7 @@ void main(){
  float auroraWave=sin(vUv.x*22.0+sin(vUv.y*6.0+uSkyTime*.045)*2.2+uSkyYaw*.17);
  float aurora=pow(max(0.0,auroraWave),8.0)*smoothstep(horizon+.13,horizon+.53,y);
  if(uSkyBiome==1.0||uSkyBiome==4.0)c=mix(c,uSkyAccent,aurora*.22);
- float ember=step(.995,skyHash(floor(vUv*vec2(125.0,90.0))+vec2(floor(uSkyTime*1.7)))*(1.0-smoothstep(horizon,horizon+.42,y));
+ float ember=step(.995,skyHash(floor(vUv*vec2(125.0,90.0))+vec2(floor(uSkyTime*1.7)))*(1.0-smoothstep(horizon,horizon+.42,y)));
  if(uSkyBiome==7.0)c+=vec3(1.0,.2,.055)*ember*.68;
  float ripples=sin(vUv.y*115.0+cloudB*2.2+uSkyTime*.03);
  c+=uSkyTop*ripples*.009;
