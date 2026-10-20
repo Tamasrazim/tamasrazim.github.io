@@ -53,8 +53,8 @@ html,body{height:100%;height:100dvh;overscroll-behavior:none}
 </style></head>
 <body>
 <canvas id="game" aria-label="FRACTURE 3D gravity parkour"></canvas>
-<div id="hud"><div class="top"><div><div class="brand">FRACTURE <span style="color:#777">/ 01</span></div><div class="micro">GRAVITY PARKOUR PROTOCOL</div></div><div class="stats"><div><label>DISTANCE</label><b id="distance">000</b></div><div><label>SHARDS</label><b id="shards">00</b></div><div><label>FALLS</label><b id="falls">00</b></div></div></div><div class="objective">OBJECTIVE // REACH THE EXIT<small>Momentum is a tool. The void is not forgiving.</small></div><div class="crosshair"></div><div class="help"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> MOVE &nbsp; <kbd>SPACE</kbd> JUMP<br><kbd>Q</kbd> FLIP GRAVITY &nbsp; <kbd>SHIFT</kbd> SPRINT<br><kbd>R</kbd> RESTART CHECKPOINT &nbsp; <kbd>ESC</kbd> PAUSE</div><div class="gravity"><strong id="gravityText">↓ GRAVITY: NORMAL</strong><small>Q TO INVERT WHEN AIRBORNE</small></div></div>
-<div id="start" class="screen"><div class="panel"><div class="tag">TAMASRAZIM INTERACTIVE // EXPERIMENT 001</div><div class="title">FRACT<span>URE.</span></div><div class="desc">Reality has gaps. Sprint across shifting platforms, invert gravity to reach impossible routes, collect shards, and find the exit beacon. Every jump is a commitment.</div><div class="actions"><button class="primary" id="play">Enter the fracture ↗</button><button id="showControls">Controls</button></div><div id="controls" class="desc hidden" style="margin-top:16px">WASD moves relative to the camera. Space jumps; Q flips gravity while airborne. Shift sprints. R returns to your latest checkpoint. On phones, use the on-screen controls.</div><div class="foot"><span>BUILD 0.1.0</span><span>LOCAL · NO ACCOUNT REQUIRED</span></div></div></div>
+<div id="hud"><div class="top"><div><div class="brand">FRACTURE <span style="color:#777">/ 01</span></div><div class="micro">HARD MODE / PRECISION PROTOCOL</div></div><div class="stats"><div><label>DISTANCE</label><b id="distance">000</b></div><div><label>SHARDS</label><b id="shards">00</b></div><div><label>FALLS</label><b id="falls">00</b></div></div></div><div class="objective">OBJECTIVE // REACH THE EXIT<small>Momentum is a tool. The void is not forgiving.</small></div><div class="crosshair"></div><div class="help"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> MOVE &nbsp; <kbd>SPACE</kbd> JUMP<br><kbd>Q</kbd> FLIP GRAVITY &nbsp; <kbd>SHIFT</kbd> SPRINT<br><kbd>R</kbd> RESTART CHECKPOINT &nbsp; <kbd>ESC</kbd> PAUSE</div><div class="gravity"><strong id="gravityText">↓ GRAVITY: NORMAL</strong><small>Q TO INVERT WHEN AIRBORNE</small></div></div>
+<div id="start" class="screen"><div class="panel"><div class="tag">TAMASRAZIM INTERACTIVE // HARD MODE</div><div class="title">FRACT<span>URE.</span></div><div class="desc">Reality has gaps. Sprint across shifting platforms, invert gravity to reach impossible routes, collect shards, and find the exit beacon. Platforms are narrow, moving targets drift out of reach, and momentum is deliberately unforgiving. Every jump is a commitment.</div><div class="actions"><button class="primary" id="play">Enter the fracture ↗</button><button id="showControls">Controls</button></div><div id="controls" class="desc hidden" style="margin-top:16px">WASD moves relative to the camera. Space jumps; Q flips gravity while airborne. Shift sprints. R returns to your latest checkpoint. On phones, use the on-screen controls.</div><div class="foot"><span>BUILD 0.2.0 · HARD COURSE</span><span>LOCAL · NO ACCOUNT REQUIRED</span></div></div></div>
 <div id="pause" class="screen hidden"><div class="panel"><div class="tag">SYSTEM INTERRUPT</div><div class="title" style="font-size:60px">PAUSED<span>.</span></div><div class="desc">The fracture is holding its breath.</div><div class="actions"><button class="primary" id="resume">Resume</button><button id="restart">Restart checkpoint</button><button id="toMenu">Main menu</button></div></div></div>
 <div id="complete" class="screen hidden"><div class="panel"><div class="tag">SECTOR CLEARED // 001</div><div class="title">WELL<span>DONE.</span></div><div class="desc" id="summary">You crossed the fracture.</div><div class="actions"><button class="primary" id="again">Run again ↗</button><button id="completeMenu">Main menu</button></div></div></div><div id="toast">CHECKPOINT LOCKED</div>
 
@@ -77,10 +77,35 @@ const player={p:vec(0,1,0),v:vec(),r:.32,ground:false,gravity:1,flipCD:0,spawn:v
 let platforms=[],collectibles=[],goal=null;
 function platform(x,y,z,w,h,d,o={}){return {p:vec(x,y,z),w,h,d,base:vec(x,y,z),moving:o.moving||'',amp:o.amp||0,phase:o.phase||0,checkpoint:!!o.checkpoint,goal:!!o.goal,prev:vec(x,y,z),delta:vec()}}
 function build(){platforms=[];collectibles=[];platforms.push(platform(0,0,1,5,1,5,{checkpoint:true}));
+/* HARD COURSE: narrow landings, alternating height, and moving targets. */
 const course=[
-[-1,0,7,2.5,.42,2.4], [1.3,.45,10.3,2.1,.42,2.1], [3.2,1,13.6,2.1,.42,2.1], [2,1.7,16.9,2.1,.42,2.1],[-.5,2,20.2,2.1,.42,2.1],[-2.9,1.5,23.5,2.1,.42,2.1],[-3.5,.7,26.8,2.1,.42,2.1],[-1.5,.2,30.1,2.3,.42,2.1],[1.5,.8,33.4,2.1,.42,2.1],[3.5,1.4,36.7,2.1,.42,2.1],[2.2,2.1,40,2.2,.42,2.2],[0,2.7,43.3,2.1,.42,2.1],[-2.6,2,46.6,2.2,.42,2.1],[-3.4,1.1,49.9,2.1,.42,2.1],[-.8,.6,53.2,2.1,.42,2.1],[1.9,1.2,56.5,2.1,.42,2.1],[3.1,1.9,59.8,2.1,.42,2.1],[.8,2.6,63.1,2.5,.5,2.5]];
-course.forEach((a,i)=>platforms.push(platform(...a,i===4?{moving:'y',amp:1.0,phase:.4}:i===8?{moving:'x',amp:1.25,phase:2.0}:i===12?{moving:'z',amp:1.0,phase:1.3}:{})));
-platforms.push(platform(0,2.6,67.2,5,.6,4,{checkpoint:true,goal:true}));goal=platforms[platforms.length-1];
+[-1,0,7,1.65,.38,1.65],
+[.5,.35,10.5,1.5,.38,1.55],
+[2.1,.75,14,1.45,.38,1.5],
+[1.1,1.25,17.5,1.45,.38,1.45],
+[-.8,1.55,21,1.45,.38,1.45],
+[-2.3,1.05,24.5,1.4,.38,1.45],
+[-1.5,.35,28,1.45,.38,1.45],
+[.5,.05,31.5,1.4,.38,1.4],
+[2.1,.65,35,1.4,.38,1.4],
+[1.0,1.2,38.5,1.35,.38,1.4],
+[-1.0,1.65,42,1.35,.38,1.4],
+[-2.5,2.0,45.5,1.4,.38,1.4],
+[-1.2,1.4,49,1.35,.38,1.4],
+[.7,.7,52.5,1.35,.38,1.35],
+[2.25,1.0,56,1.3,.38,1.35],
+[1.1,1.6,59.5,1.3,.38,1.35],
+[-.7,2.1,63,1.35,.38,1.35]
+];
+course.forEach((a,i)=>{
+ const moving=[1,3,5,7,9,11,13,15].includes(i);
+ const axis=i%3===0?'y':i%3===1?'x':'z';
+ const amp=axis==='y'?.62:axis==='x'?.72:.68;
+ platforms.push(platform(...a,moving?{moving:axis,amp,phase:i*1.37}:{}));
+});
+/* A midpoint checkpoint keeps the precision section punishing without forcing a full replay. */
+platforms.push(platform(0,2.35,39.8,1.5,.4,1.5,{checkpoint:true}));
+platforms.push(platform(0,2.6,67.2,4.2,.6,3.5,{checkpoint:true,goal:true}));goal=platforms[platforms.length-1];
 for(let z=0;z<72;z+=4){platforms.push(platform(-7,-2,z,.14,7,.14));platforms.push(platform(7,-2,z,.14,7,.14))}
 [7,13.6,20.2,26.8,33.4,40,46.6,53.2,59.8].forEach((z,i)=>{let p=platforms.find(p=>Math.abs(p.base.z-z)<.01);collectibles.push({p:vec(p.p.x,p.p.y+1.25,p.p.z),got:false,phase:i*.8})})
 }
@@ -90,7 +115,7 @@ function toast(t){$('toast').textContent=t;$('toast').classList.add('show');toas
 function reset(full){player.p=vec(0,1,0);player.v=vec();player.gravity=1;player.ground=false;player.spawn=vec(0,1,0);player.checkpoint=0;player.runTime=0;if(full){player.shards=0;player.falls=0;collectibles.forEach(c=>c.got=false)}camera.yaw=0;camera.pitch=-.13;updateUI()}
 function start(){reset(true);state='play';$('start').classList.add('hidden');$('pause').classList.add('hidden');$('complete').classList.add('hidden');$('hud').style.display='block';const touchMode=matchMedia('(pointer:coarse)').matches||innerWidth<=760;$('touch').style.display=touchMode?'flex':'none';$('mobileHint').style.display=touchMode?'block':'none';last=performance.now()}
 $('play').onclick=start;$('again').onclick=start;$('showControls').onclick=()=>$('controls').classList.toggle('hidden');$('resume').onclick=()=>{state='play';$('pause').classList.add('hidden');const touchMode=matchMedia('(pointer:coarse)').matches||innerWidth<=760;$('touch').style.display=touchMode?'flex':'none';$('mobileHint').style.display=touchMode?'block':'none';last=performance.now()};$('restart').onclick=()=>{player.p={...player.spawn};player.v=vec();player.gravity=1;state='play';$('pause').classList.add('hidden');const touchMode=matchMedia('(pointer:coarse)').matches||innerWidth<=760;$('touch').style.display=touchMode?'flex':'none';$('mobileHint').style.display=touchMode?'block':'none';last=performance.now()};function menu(){state='menu';$('hud').style.display='none';$('touch').style.display='none';$('mobileHint').style.display='none';$('pause').classList.add('hidden');$('complete').classList.add('hidden');$('start').classList.remove('hidden')} $('toMenu').onclick=$('completeMenu').onclick=menu;
-function flip(){if(state!=='play'||player.ground||player.flipCD>0)return;player.gravity*=-1;player.v.y=-player.gravity*1.8;player.flipCD=.4;toast(player.gravity===-1?'GRAVITY INVERTED':'GRAVITY RESTORED');updateUI()}\nfunction jump(){if(state==='play'&&player.ground){player.v.y=player.gravity*7.1;player.ground=false}}
+function flip(){if(state!=='play'||player.ground||player.flipCD>0)return;player.gravity*=-1;player.v.y=-player.gravity*1.8;player.flipCD=.4;toast(player.gravity===-1?'GRAVITY INVERTED':'GRAVITY RESTORED');updateUI()}\nfunction jump(){if(state==='play'&&player.ground){player.v.y=player.gravity*7.8;player.ground=false}}
 addEventListener('keydown',e=>{if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();keys[e.code]=true;if(e.repeat)return;if(e.code==='KeyQ')flip();if(e.code==='KeyR'&&state==='play'){player.p={...player.spawn};player.v=vec();player.gravity=1}if(e.code==='Escape'){if(state==='play'){state='pause';$('pause').classList.remove('hidden');$('touch').style.display='none';$('mobileHint').style.display='none'}else if(state==='pause')$('resume').click()}if(e.code==='Space'||e.code==='ArrowUp')jump()});
 addEventListener('keyup',e=>{keys[e.code]=false});
 
@@ -127,11 +152,11 @@ let pp=project(add(player.p,vec(0,.2,0)));if(pp){let r=Math.max(3,Math.min(18,75
 function update(dt){time+=dt;if(toastTime>0){toastTime-=dt;if(toastTime<=0)$('toast').classList.remove('show')}if(state!=='play')return;player.runTime+=dt;player.flipCD=Math.max(0,player.flipCD-dt);
  // Animate platforms in world space, keeping their previous positions for moving-platform carry.
  for(const p of platforms){p.prev={...p.p};if(p.moving==='y')p.p.y=p.base.y+Math.sin(time*1.25+p.phase)*p.amp;if(p.moving==='x')p.p.x=p.base.x+Math.sin(time*1.1+p.phase)*p.amp;if(p.moving==='z')p.p.z=p.base.z+Math.sin(time*1.0+p.phase)*p.amp;p.delta=sub(p.p,p.prev)}
- const forward=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),side=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0),speed=(keys.ShiftLeft||keys.ShiftRight)?8.5:6;
+ const forward=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),side=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0),speed=(keys.ShiftLeft||keys.ShiftRight)?8.8:5.6;
  const fx=Math.sin(camera.yaw),fz=Math.cos(camera.yaw),rx=Math.cos(camera.yaw),rz=-Math.sin(camera.yaw);let ax=side*rx+forward*fx,az=side*rz+forward*fz,al=Math.hypot(ax,az);if(al>1){ax/=al;az/=al}
- player.v.x+=(ax*speed-player.v.x)*Math.min(1,dt*8);player.v.z+=(az*speed-player.v.z)*Math.min(1,dt*8);if(!side&&!forward){player.v.x*=Math.pow(.025,dt);player.v.z*=Math.pow(.025,dt)}
- if(keys.Space&&player.ground){player.v.y=player.gravity*7.1;player.ground=false}
- player.v.y-=player.gravity*18*dt;player.v.y=Math.max(-14,Math.min(14,player.v.y));
+ player.v.x+=(ax*speed-player.v.x)*Math.min(1,dt*5.5);player.v.z+=(az*speed-player.v.z)*Math.min(1,dt*5.5);if(!side&&!forward){player.v.x*=Math.pow(.025,dt);player.v.z*=Math.pow(.025,dt)}
+ if(keys.Space&&player.ground){player.v.y=player.gravity*7.8;player.ground=false}
+ player.v.y-=player.gravity*20.5*dt;player.v.y=Math.max(-16,Math.min(16,player.v.y));
  let old={...player.p};player.p=add(player.p,mul(player.v,dt));player.ground=false;
  // Landing checks against top surfaces while falling toward gravity.
  for(const p of platforms){if(p.h>2||Math.abs(player.p.x-p.p.x)>(p.w/2+player.r)||Math.abs(player.p.z-p.p.z)>(p.d/2+player.r))continue;
