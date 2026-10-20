@@ -176,7 +176,7 @@ function update(dt){time+=dt;flipFlash=Math.max(0,flipFlash-dt*2.6);flipPulse=Ma
   let top=p.p.y+p.h/2,bottom=p.p.y-p.h/2;
   // Resolve horizontal box-side penetration while the runner's centre is inside the box height.
   // Top/underside landings are handled separately below, so this cannot shove a clean landing away.
-  if(player.p.y>bottom&&player.p.y<top){const dx=player.p.x-p.p.x,dz=player.p.z-p.p.z,ox=p.w/2+player.r-Math.abs(dx),oz=p.d/2+player.r-Math.abs(dz);if(ox>0&&oz>0){if(ox<oz){player.p.x=p.p.x+(dx||old.x-p.p.x||1<0?-1:1)*(p.w/2+player.r);player.v.x=0}else{player.p.z=p.p.z+(dz||old.z-p.p.z||1<0?-1:1)*(p.d/2+player.r);player.v.z=0}}}
+  if(player.p.y>bottom&&player.p.y<top){const dx=player.p.x-p.p.x,dz=player.p.z-p.p.z,ox=p.w/2+player.r-Math.abs(dx),oz=p.d/2+player.r-Math.abs(dz);if(ox>0&&oz>0){if(ox<oz){player.p.x=p.p.x+((dx||old.x-p.p.x)<0?-1:1)*(p.w/2+player.r);player.v.x=0}else{player.p.z=p.p.z+((dz||old.z-p.p.z)<0?-1:1)*(p.d/2+player.r);player.v.z=0}}}
   if(p.h>2||Math.abs(player.p.x-p.p.x)>(p.w/2+player.r)||Math.abs(player.p.z-p.p.z)>(p.d/2+player.r))continue;
   if(player.gravity===1&&old.y-player.r>=top-.12&&player.p.y-player.r<=top&&player.v.y<0){player.p.y=top+player.r;player.v.y=0;player.ground=true;groundedPlatform=p;player.p.x+=p.delta.x;player.p.z+=p.delta.z;player.coyote=.11}
   else if(player.gravity===-1&&old.y+player.r<=bottom+.12&&player.p.y+player.r>=bottom&&player.v.y>0){player.p.y=bottom-player.r;player.v.y=0;player.ground=true;groundedPlatform=p;player.p.x+=p.delta.x;player.p.z+=p.delta.z;player.coyote=.11}
