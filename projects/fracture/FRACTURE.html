@@ -121,7 +121,8 @@ void main(){float c=cos(uRot),s=sin(uRot);vec3 p=aP*uSz,n=aN;float ca=cos(uTl),s
 vN=vec3(c*n.x+s*n.z,n.y,-s*n.x+c*n.z);vW=p+uPos;vL=aP*2.;gl_Position=uVP*vec4(vW,1.);}`;
 const FS=`#version 300 es
 precision highp float;in vec3 vW,vN,vL;
-uniform vec3 uCol,uAcc,uEye,uFog;uniform float uFd,uEm,uSm;out vec4 o;
+uniform vec3 uCol,uAcc,uEye,uFog;uniform float uFd,uEm,uSm,uMat;uniform sampler2D uAtlas;out vec4 o;
+vec3 sampleMaterial(vec2 p){vec2 tile=vec2(mod(uMat,4.0),floor(uMat/4.0));vec2 uv=(tile+vec2(.075)+fract(p)*.85)/4.0;return texture(uAtlas,uv).rgb;}
 void main(){
 vec3 n=normalize(vN),V=normalize(uEye-vW),L=normalize(vec3(.4,.9,.3)),H=normalize(L+V);
 float ndl=max(dot(n,L),0.),d=.22+ndl*.9;
@@ -135,16 +136,38 @@ float grain=.5+.5*sin(vW.x*37.+sin(vW.z*23.))*sin(vW.y*29.+vW.z*11.);
 float grid=min(min(abs(fract(vW.x*.22)-.5),abs(fract(vW.z*.22)-.5)),abs(fract(vW.y*.22)-.5));
 float seam=1.-smoothstep(.012,.038,grid);
 float panelWear=1.-smoothstep(.12,.49,abs(sin(vW.x*1.4+vW.z*.8)*sin(vW.y*.7)));
+/* World-space triplanar projection keeps seams off corners and uses the 4K 16-material atlas. */
+vec3 axis=pow(abs(n),vec3(4.0));axis/=max(axis.x+axis.y+axis.z,.0001);
+vec3 tex=sampleMaterial(vW.zy*.075)*axis.x+sampleMaterial(vW.xz*.075)*axis.y+sampleMaterial(vW.xy*.075)*axis.z;
+float texLuma=dot(tex,vec3(.299,.587,.114));
+float texRelief=.70+texLuma*.58;
+vec3 texTint=mix(vec3(1.0),tex,.13);
 float spec=pow(max(dot(n,H),0.),28.)*(.12+.28*ndl);
 float fres=pow(1.-max(dot(n,V),0.),3.);
-vec3 c=uCol*d*tx;c=mix(c,uAcc,rim*.68*(1.-uSm));
+vec3 c=uCol*d*tx*texRelief*texTint;c=mix(c,uAcc,rim*.68*(1.-uSm));
 c+=uCol*(grain-.5)*.045+uAcc*(seam*.035*(1.-uSm)+panelWear*.018+spec+fres*uSm*.42)+uCol*uEm;
 float f=1.-exp(-uFd*length(vW-uEye));o=vec4(mix(c,uFog,f),1.);
 }`;
 const mkS=(t,s)=>{const x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))throw gl.getShaderInfoLog(x);return x};
 const pg=gl.createProgram();gl.attachShader(pg,mkS(gl.VERTEX_SHADER,VS));gl.attachShader(pg,mkS(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pg);
 if(!gl.getProgramParameter(pg,gl.LINK_STATUS))throw gl.getProgramInfoLog(pg);
-gl.useProgram(pg);const U={};['uVP','uPos','uSz','uRot','uCol','uAcc','uEye','uFog','uFd','uEm','uSm','uTl'].forEach(n=>U[n]=gl.getUniformLocation(pg,n));
+gl.useProgram(pg);const U={};['uVP','uPos','uSz','uRot','uCol','uAcc','uEye','uFog','uFd','uEm','uSm','uTl','uAtlas','uMat'].forEach(n=>U[n]=gl.getUniformLocation(pg,n));
+/* Load the original 4096 × 4096 vector-authored surface atlas with a safe neutral fallback. */
+const atlasTexture=gl.createTexture();gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,atlasTexture);
+gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([225,225,225,255]));
+gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+gl.uniform1i(U.uAtlas,0);gl.uniform1f(U.uMat,0);
+const atlasImage=new Image();atlasImage.decoding='async';atlasImage.onload=()=>{
+ try{
+  const maxSize=gl.getParameter(gl.MAX_TEXTURE_SIZE);let source=atlasImage;
+  if(atlasImage.naturalWidth>maxSize){const c=document.createElement('canvas');c.width=c.height=maxSize;c.getContext('2d').drawImage(atlasImage,0,0,maxSize,maxSize);source=c}
+  gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,atlasTexture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,source);gl.generateMipmap(gl.TEXTURE_2D);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  $('texture-status')&&($('texture-status').textContent='4K MATERIAL ATLAS · 16 SURFACES');
+ }catch(err){console.warn('FRACTURE material atlas unavailable:',err)}
+};atlasImage.onerror=()=>console.warn('FRACTURE: material atlas could not be loaded.');
+atlasImage.src='./assets/material-atlas.svg';
 const V=[];for(let a=0;a<3;a++)for(const s of[-1,1]){const u=(a+1)%3,v=(a+2)%3;for(const[i,j]of[[-1,-1],[1,-1],[1,1],[-1,-1],[1,1],[-1,1]]){const p=[0,0,0],n=[0,0,0];p[a]=s*.5;p[u]=i*.5;p[v]=j*.5;n[a]=s;V.push(...p,...n)}}
 const vao=gl.createVertexArray();gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(V),gl.STATIC_DRAW);
 gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,24,0);gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,24,12);
@@ -155,9 +178,24 @@ const persp=(f,a,n,fa)=>{const t=1/Math.tan(f/2),r=1/(n-fa);return[t/a,0,0,0,0,t
 function look(e,f,u){const r=nrm(crs(f,u)),w=crs(r,f);return[r[0],w[0],-f[0],0,r[1],w[1],-f[1],0,r[2],w[2],-f[2],0,-dot(r,e),-dot(w,e),dot(f,e),1]}
 function mul(a,b){const o=new Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+j]*b[i*4+k];o[i*4+j]=s}return o}
 let RS=1;function rz(){RS=Math.min(devicePixelRatio||1,1.5);cv.width=innerWidth*RS|0;cv.height=innerHeight*RS|0;gl.viewport(0,0,cv.width,cv.height)}addEventListener('resize',rz);rz();
-const dr=(x,y,z,sx,sy,sz,col,ac,em,rot)=>{gl.uniform3f(U.uPos,x,y,z);gl.uniform3f(U.uSz,sx,sy,sz);gl.uniform3fv(U.uCol,col);gl.uniform3fv(U.uAcc,ac);gl.uniform1f(U.uEm,em||0);gl.uniform1f(U.uRot,rot||0);gl.uniform1f(U.uSm,0);gl.uniform1f(U.uTl,0);gl.drawArrays(4,0,36);G.dc++};
+const materialFor=(c,em,smooth)=>{
+ const r=c[0],g=c[1],b=c[2],hi=Math.max(r,g,b),lo=Math.min(r,g,b),lum=(r+g+b)/3;
+ if(em>1.75)return 15;
+ if(r>g*1.23&&r>b*1.2)return em>.55?5:6;
+ if(r>g*1.23&&g>b*1.12)return em>.55?13:7;
+ if(g>r*1.28&&b>r*1.12)return smooth?14:8;
+ if(g>r*1.16&&g>b*1.04)return smooth?14:1;
+ if(b>r*1.12&&g>r*1.03)return smooth?4:3;
+ if(hi-lo<.09&&hi>.62)return smooth?10:2;
+ if(lum<.17)return smooth?10:0;
+ if(r>g*1.12&&g>b*.78)return smooth?11:12;
+ if(em>.7)return smooth?15:8;
+ if(lum>.52)return smooth?13:2;
+ return smooth?10:0;
+};
+const dr=(x,y,z,sx,sy,sz,col,ac,em,rot)=>{gl.uniform3f(U.uPos,x,y,z);gl.uniform3f(U.uSz,sx,sy,sz);gl.uniform3fv(U.uCol,col);gl.uniform3fv(U.uAcc,ac);gl.uniform1f(U.uEm,em||0);gl.uniform1f(U.uRot,rot||0);gl.uniform1f(U.uSm,0);gl.uniform1f(U.uTl,0);gl.uniform1f(U.uMat,materialFor(col,em||0,0));gl.drawArrays(4,0,36);G.dc++};
 const RIM=Hx('#ff6a8a');
-const dre=(x,y,z,sx,sy,sz,col,em,rot,tl)=>{gl.bindVertexArray(vao2);gl.uniform3f(U.uPos,x,y,z);gl.uniform3f(U.uSz,sx,sy,sz);gl.uniform3fv(U.uCol,col);gl.uniform3fv(U.uAcc,RIM);gl.uniform1f(U.uEm,em||0);gl.uniform1f(U.uRot,rot||0);gl.uniform1f(U.uSm,1);gl.uniform1f(U.uTl,tl||0);gl.drawArrays(4,0,V2.length/6);gl.bindVertexArray(vao);G.dc++};
+const dre=(x,y,z,sx,sy,sz,col,em,rot,tl)=>{gl.bindVertexArray(vao2);gl.uniform3f(U.uPos,x,y,z);gl.uniform3f(U.uSz,sx,sy,sz);gl.uniform3fv(U.uCol,col);gl.uniform3fv(U.uAcc,RIM);gl.uniform1f(U.uEm,em||0);gl.uniform1f(U.uRot,rot||0);gl.uniform1f(U.uSm,1);gl.uniform1f(U.uTl,tl||0);gl.uniform1f(U.uMat,materialFor(col,em||0,1));gl.drawArrays(4,0,V2.length/6);gl.bindVertexArray(vao);G.dc++};
 /* ---------- audio ---------- */
 let AC;function snd(f,d=.1,ty='sine',v=.07,f2){try{AC=AC||new AudioContext();const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type=ty;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(1e-4,t+d);o.connect(g).connect(AC.destination);o.start();o.stop(t+d)}catch(e){}}
 /* ---------- bass-boosted music (live synth, 140 bpm) ---------- */
