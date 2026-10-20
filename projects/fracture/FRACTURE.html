@@ -154,10 +154,56 @@ vec3 c=uCol*d*tx*texRelief*texTint;c=mix(c,c*.72+mark.rgb*.5,markAlpha);c=mix(c,
 c+=uCol*(grain-.5)*.045+uAcc*(seam*.035*(1.-uSm)+panelWear*.018+spec+fres*uSm*.42)+uCol*uEm;
 float f=1.-exp(-uFd*length(vW-uEye));o=vec4(mix(c,uFog,f),1.);
 }`;
+const SKYVS=`#version 300 es
+out vec2 vUv;
+void main(){vec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2));vUv=p;gl_Position=vec4(p*2.0-1.0,1.0,1.0);}`;
+const SKYFS=`#version 300 es
+precision highp float;
+in vec2 vUv;out vec4 outColor;
+uniform vec3 uSkyTop,uSkyLow,uSkyAccent;
+uniform float uSkyTime,uSkyPitch,uSkyYaw,uSkyBiome;
+float skyHash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+void main(){
+ float y=clamp(vUv.y,0.0,1.0);
+ float horizon=clamp(.51-uSkyPitch*.38,.09,.91);
+ float grad=smoothstep(horizon-.25,horizon+.43,y);
+ vec3 c=mix(uSkyLow,uSkyTop,grad);
+ float haze=exp(-pow((y-horizon)/.13,2.0));
+ c+=uSkyAccent*haze*.11;
+ float cloudA=sin(vUv.x*17.0+sin(vUv.y*10.0+uSkyTime*.028+uSkyYaw*.35)*2.0+uSkyTime*.018);
+ float cloudB=sin(vUv.x*31.0-vUv.y*16.0+sin(vUv.y*7.0+uSkyTime*.014)*1.7);
+ float clouds=pow(max(0.0,cloudA*.62+cloudB*.38),5.0)*smoothstep(horizon+.025,horizon+.46,y);
+ float cloudAmount=(uSkyBiome==6.0 ? 0.16 : 0.21);
+ c=mix(c,mix(uSkyTop,uSkyAccent,.46),clouds*cloudAmount);
+ vec2 cell=floor(vUv*vec2(170.0,105.0));
+ float stars=step(.9971,skyHash(cell))*smoothstep(horizon+.04,horizon+.36,y);
+ stars*=.62+.38*sin(uSkyTime*1.6+skyHash(cell+7.0)*6.28);
+ c+=vec3(.62,.79,1.0)*stars*.78;
+ float auroraWave=sin(vUv.x*22.0+sin(vUv.y*6.0+uSkyTime*.045)*2.2+uSkyYaw*.17);
+ float aurora=pow(max(0.0,auroraWave),8.0)*smoothstep(horizon+.13,horizon+.53,y);
+ if(uSkyBiome==1.0||uSkyBiome==4.0)c=mix(c,uSkyAccent,aurora*.22);
+ float ember=step(.995,skyHash(floor(vUv*vec2(125.0,90.0))+vec2(floor(uSkyTime*1.7)))*(1.0-smoothstep(horizon,horizon+.42,y));
+ if(uSkyBiome==7.0)c+=vec3(1.0,.2,.055)*ember*.68;
+ float ripples=sin(vUv.y*115.0+cloudB*2.2+uSkyTime*.03);
+ c+=uSkyTop*ripples*.009;
+ outColor=vec4(c,1.0);
+}`;
 const mkS=(t,s)=>{const x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))throw gl.getShaderInfoLog(x);return x};
 const pg=gl.createProgram();gl.attachShader(pg,mkS(gl.VERTEX_SHADER,VS));gl.attachShader(pg,mkS(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pg);
 if(!gl.getProgramParameter(pg,gl.LINK_STATUS))throw gl.getProgramInfoLog(pg);
 gl.useProgram(pg);const U={};['uVP','uPos','uSz','uRot','uCol','uAcc','uEye','uFog','uFd','uEm','uSm','uTl','uAtlas','uDecals','uMat'].forEach(n=>U[n]=gl.getUniformLocation(pg,n));
+/* A fullscreen pass gives each biome animated cloud bands, horizon haze and stars. */
+const skyProgram=gl.createProgram();gl.attachShader(skyProgram,mkS(gl.VERTEX_SHADER,SKYVS));gl.attachShader(skyProgram,mkS(gl.FRAGMENT_SHADER,SKYFS));gl.linkProgram(skyProgram);
+if(!gl.getProgramParameter(skyProgram,gl.LINK_STATUS))throw gl.getProgramInfoLog(skyProgram);
+const skyU={top:gl.getUniformLocation(skyProgram,'uSkyTop'),low:gl.getUniformLocation(skyProgram,'uSkyLow'),accent:gl.getUniformLocation(skyProgram,'uSkyAccent'),time:gl.getUniformLocation(skyProgram,'uSkyTime'),pitch:gl.getUniformLocation(skyProgram,'uSkyPitch'),yaw:gl.getUniformLocation(skyProgram,'uSkyYaw'),biome:gl.getUniformLocation(skyProgram,'uSkyBiome')};
+const skyVao=gl.createVertexArray();
+const drawSkyBackdrop=(time,top,low,accent,biome,pitch,yaw)=>{
+ gl.disable(gl.DEPTH_TEST);gl.depthMask(false);gl.useProgram(skyProgram);gl.bindVertexArray(skyVao);
+ gl.uniform3fv(skyU.top,top);gl.uniform3fv(skyU.low,low);gl.uniform3fv(skyU.accent,accent);
+ gl.uniform1f(skyU.time,time);gl.uniform1f(skyU.pitch,pitch);gl.uniform1f(skyU.yaw,yaw);gl.uniform1f(skyU.biome,biome);
+ gl.drawArrays(gl.TRIANGLES,0,3);
+ gl.depthMask(true);gl.enable(gl.DEPTH_TEST);gl.useProgram(pg);gl.bindVertexArray(vao);
+};
 /* Load the original 4096 × 4096 vector-authored surface atlas with a safe neutral fallback. */
 const atlasTexture=gl.createTexture();gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,atlasTexture);
 gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([225,225,225,255]));
@@ -530,6 +576,7 @@ function frame(now){requestAnimationFrame(frame);const rd=(now-last)/1000,dt=Mat
  else{const cp=Math.cos(P.pit);f=[-Math.sin(P.yaw)*cp,Math.sin(P.pit),-Math.cos(P.yaw)*cp];const rt=[Math.cos(P.yaw),0,-Math.sin(P.yaw)],u0=crs(rt,f),cr=Math.cos(P.roll+TL),sr=Math.sin(P.roll+TL);u=[0,1,2].map(k=>u0[k]*cr+rt[k]*sr);e=[P.c[0],P.c[1]+(G.stance==='crouch'?.15:.65)*P.g+CJ+BB,P.c[2]]}
  const VP=mul(persp(Math.min(140,S.fov+(cv.height>cv.width?12:0)+Math.min(hs,26)*.9+DF*14+45*(G.intro/1.4)**2)*Math.PI/180,cv.width/cv.height,.1,500),look(e,f,u));
  const sky=G.envSky||L.sky;gl.clearColor(sky[0],sky[1],sky[2],1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);G.dc=0;
+ drawSkyBackdrop(t,sky,L.pl.map(v=>v*.42),L.ac,G.envBiome||0,G.state==='play'?P.pit:0,G.state==='play'?P.yaw:0);
  if(G.state==='play'&&G.shake>0){e=e.map((v,j)=>v+(Math.random()-.5)*G.shake*(j===1?.22:.12));VP=mul(persp(Math.min(140,S.fov+(cv.height>cv.width?12:0)+Math.min(hs,26)*.9+DF*14+45*(G.intro/1.4)**2)*Math.PI/180,cv.width/cv.height,.1,500),look(e,f,u))}gl.uniformMatrix4fv(U.uVP,false,VP);gl.uniform3fv(U.uEye,e);gl.uniform3fv(U.uFog,sky);gl.uniform1f(U.uFd,G.envBiome===4?.019:G.envBiome===6?.009:.013);
  const dc=L.pl.map(v=>v*.3);
  for(const p of G.props){
