@@ -155,7 +155,7 @@ course.forEach((a,i)=>{
 platforms.push(platform(0,2.35,39.8,1.5,.4,1.5,{checkpoint:true}));
 platforms.push(platform(0,2.6,67.2,4.2,.6,3.5,{checkpoint:true,goal:true}));goal=platforms[platforms.length-1];
 for(let z=0;z<72;z+=4){platforms.push(platform(-7,-2,z,.14,7,.14));platforms.push(platform(7,-2,z,.14,7,.14))}
-[7,13.6,20.2,26.8,33.4,40,46.6,53.2,59.8].forEach((z,i)=>{let p=platforms.find(p=>Math.abs(p.base.z-z)<.01);collectibles.push({p:vec(p.p.x,p.p.y+1.25,p.p.z),platform:p,got:false,phase:i*.8})})
+[7,14,21,28,35,42,49,56,63].forEach((z,i)=>{const p=platforms.find(p=>Math.abs(p.base.z-z)<.01);if(p)collectibles.push({p:vec(p.p.x,p.p.y+1.25,p.p.z),platform:p,got:false,phase:i*.8})})
 }
 build();
 function updateUI(){$('distance').textContent=String(Math.max(0,Math.floor(player.p.z))).padStart(3,'0');$('shards').textContent=String(player.shards).padStart(2,'0');$('falls').textContent=String(player.falls).padStart(2,'0');$('gravityText').textContent=player.gravity===1?'↓ GRAVITY: NORMAL':'↑ GRAVITY: INVERTED'}
