@@ -31,7 +31,7 @@ label{display:block;margin:10px 0}input[type=range]{width:200px;vertical-align:m
  #hud{gap:5px;padding:calc(7px + env(safe-area-inset-top,0px)) 8px 6px;font-size:10px;flex-wrap:wrap}
  #combat{left:8px;right:8px;bottom:calc(104px + env(safe-area-inset-bottom,0px));max-width:calc(100vw - 16px);font-size:10px}
  #touch{padding-bottom:env(safe-area-inset-bottom,0px)}
- #touch-actions{gap:6px;grid-template-columns:repeat(3,minmax(0,1fr))}
+ #touch-actions{gap:6px;grid-template-columns:repeat(4,minmax(0,1fr))}
  .touch-btn{min-height:42px;padding:8px 4px;font-size:10px;touch-action:none}
  #stick{width:104px;height:104px;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:12px}
  #knob{width:40px;height:40px}
@@ -89,6 +89,7 @@ canvas{touch-action:none}
   <div id="touch-actions">
     <button class="touch-btn" data-touch="jump">JUMP</button>
     <button class="touch-btn" data-touch="dash">DASH</button>
+    <button class="touch-btn" data-touch="emp">EMP</button>
     <button class="touch-btn" data-touch="sprint">SPRINT</button>
     <button class="touch-btn" data-touch="crouch">CROUCH / SLIDE</button>
     <button class="touch-btn" data-touch="fire">FIRE</button>
@@ -99,7 +100,7 @@ canvas{touch-action:none}
 <div id="cx"></div><div id="hud"><div id="hl"></div><div id="hr"></div></div><div id="nav" aria-live="polite"><span id="nav-arrow">▲</span><span id="nav-label">OBJECTIVE</span><span id="nav-distance"></span></div><div id="hint"></div><div id="alert"></div><div id="stance">STANDING</div><div id="combat"><div id="combat-title">SUIT STATUS</div><div id="stability-track"><div id="stability-fill"></div></div><div id="combat-info"></div></div><pre id="dg"></pre>
 <div class="ov" id="m"><div class="gl"><h1>FRACTURE</h1><p>One hundred levels. One broken world. Solve the route. Survive the fracture.</p>
 <button data-a="cont">Continue</button><button data-a="sel">Level select</button><button data-a="hc">Mode: Standard</button><button data-a="rst" id="rb">Reset progress</button>
-<p>WASD move, mouse look, Shift sprint, Space jump, E dash (2 charges), click/hold or F to fire, R reload, Esc pause, M music. Activate 3 relays, eliminate every sentry, collect shards, then escape. Touch: joystick + drag-look; JUMP, DASH, SPRINT, CROUCH / SLIDE, FIRE and RELOAD.</p><p id="texture-status" class="asset-status">LOADING 4K MATERIAL + DECAL ATLASES</p></div></div>
+<p>WASD move, mouse look, Shift sprint, Space jump, E dash (2 charges), Q EMP pulse (2 charges), click/hold or F to fire, R reload, Esc pause, M music. Activate 3 relays, eliminate every sentry, collect shards, then escape. Touch: joystick + drag-look; JUMP, DASH, SPRINT, CROUCH / SLIDE, FIRE and RELOAD.</p><p id="texture-status" class="asset-status">LOADING 4K MATERIAL + DECAL ATLASES</p></div></div>
 <div class="ov" id="s"><div class="gl"><h2>Level select</h2><p id="pr"></p><div class="grid" id="gd"></div><button data-a="menu">Back</button></div></div>
 <div class="ov" id="p"><div class="gl"><h2>Paused</h2>
 <label>Mouse sensitivity <input type="range" id="se" min=".3" max="2.5" step=".05"></label>
@@ -348,14 +349,14 @@ function mk(i){
  /* Security sentries guard different route platforms. Each stage includes a finite ammo reserve to clear them. */
  const guards=Math.min(7,2+Math.floor(i/15));
  const safe=B.filter(b=>b.t===0&&!b.goal&&!b.cp&&!b.no&&b.hx>1.25&&b.hz>1.25&&Math.hypot(b.x,b.z)>9&&!Q.some(q=>Math.hypot(q.x-b.x,q.z-b.z)<6));
- for(let j=0;j<guards&&safe.length;j++){const ix=Math.min(safe.length-1,Math.floor((j+1)/(guards+1)*safe.length)),b=safe.splice(ix,1)[0];if(!b)continue;E.push({x:b.x,y:b.y+b.s*1.45,z:b.z,bx:b.x,by:b.y+b.s*1.45,bz:b.z,phase:R(0,6.28),hp:3,alive:true,cool:R(.7,1.5),id:j})}
+ for(let j=0;j<guards&&safe.length;j++){const ix=Math.min(safe.length-1,Math.floor((j+1)/(guards+1)*safe.length)),b=safe.splice(ix,1)[0];if(!b)continue;E.push({x:b.x,y:b.y+b.s*1.45,z:b.z,bx:b.x,by:b.y+b.s*1.45,bz:b.z,phase:R(0,6.28),hp:3,alive:true,cool:R(.7,1.5),stun:0,id:j})}
  let a=1e9,b=-1e9,c=1e9,d=-1e9,lo=1e9,hi=-1e9;for(const o of B){a=Math.min(a,o.x);b=Math.max(b,o.x);c=Math.min(c,o.z);d=Math.max(d,o.z);lo=Math.min(lo,o.y);hi=Math.max(hi,o.y)}
  const D=[];for(let n=0;n<26;n++)for(let t=0;t<8;t++){const e={x:R(a-70,b+70),y:R(lo-30,hi+35),z:R(c-70,d+70),s:R(4,16),r:R(0,6)};if(B.every(o=>Math.hypot(o.x-e.x,o.z-e.z)>e.s+12||Math.abs(o.y-e.y)>e.s+14)){D.push(e);break}}
  return{B,O,SW,Q,E,lo,hi,deco:D,cp0:{b:null,c:[0,.87,0],g:1,yaw:0}};
 }
 const TOT=LV.map((_,i)=>mk(i).O.length);
 /* ---------- game state ---------- */
-const G={state:'menu',intro:0,i:0,t:0,time:0,got:0,relays:0,stability:100,lives:3,goalHinted:0,ammo:12,reserve:48,kills:0,dashCharges:2,dashWait:0,weaponWait:0,reloadWait:0,_reloading:false,alertTime:0,fc:0,shake:0,recoil:0,muzzle:0,hitFlash:0,stance:'stand',slideTime:0,footTimer:0,props:[],particles:[],B:[],O:[],Q:[],E:[],shots:[],pickups:[],pickupsGot:0,cp:null,cp0:null,lo:0,hi:0,L:LV[0],deco:[],dc:0};
+const G={state:'menu',intro:0,i:0,t:0,time:0,got:0,relays:0,stability:100,lives:3,goalHinted:0,ammo:12,reserve:48,kills:0,dashCharges:2,dashWait:0,empCharges:2,empWait:0,empTime:0,weaponWait:0,reloadWait:0,_reloading:false,alertTime:0,fc:0,shake:0,recoil:0,muzzle:0,hitFlash:0,stance:'stand',slideTime:0,footTimer:0,props:[],particles:[],B:[],O:[],Q:[],E:[],shots:[],pickups:[],pickupsGot:0,cp:null,cp0:null,lo:0,hi:0,L:LV[0],deco:[],dc:0};
 const P={c:[0,.87,0],v:[0,0,0],yaw:0,pit:0,roll:0,g:1,gr:false,ride:null,coy:0,jb:0};
 function load(i){
  const d=mk(i),props=[],rngp=rng(i*4519+98),R=(a,b)=>a+(b-a)*rngp(),biome=i%8;
@@ -438,6 +439,21 @@ function fireWeapon(){
  else flashAlert('SHOT FIRED · AIM AT A RED SENTRY');
 }
 function reloadWeapon(){if(G.state!=='play'||G.ammo>=12||G.reserve<=0||G.reloadWait>0||G._reloading)return;G._reloading=true;G.reloadWait=1.15;snd(240,.08,'square',.035,180)}
+/* EMP pulse temporarily disables nearby sentries and erases incoming bolts. */
+function activateEMP(){
+ if(G.state!=='play')return;
+ if(G.empWait>0){hint('EMP RECHARGING · '+G.empWait.toFixed(1)+'s');return}
+ if(G.empCharges<=0){flashAlert('EMP EMPTY · FIND A SURGE CORE');snd(110,.08,'square',.025,70);return}
+ G.empCharges--;G.empWait=4.8;G.empTime=.72;G.shake=Math.min(1,G.shake+.22);DF=Math.max(DF,.1);
+ let stunned=0,cleared=0;
+ for(const e of G.E){if(!e.alive)continue;const d=Math.hypot(e.x-P.c[0],e.y-P.c[1],e.z-P.c[2]);if(d<14){e.stun=Math.max(e.stun||0,2.8);e.cool=Math.max(e.cool,.5);stunned++}}
+ for(let i=G.shots.length-1;i>=0;i--){const b=G.shots[i];if(Math.hypot(b.x-P.c[0],b.y-P.c[1],b.z-P.c[2])<14){G.shots.splice(i,1);cleared++}}
+ for(let k=0;k<36;k++){const a=k*Math.PI*2/36,vert=((k%5)-2)*.55;G.particles.push({x:P.c[0]+Math.cos(a)*.65,y:P.c[1]+vert*.25,z:P.c[2]+Math.sin(a)*.65,vx:Math.cos(a)*RFX(7,12),vy:vert*3,vz:Math.sin(a)*RFX(7,12),life:.35+Math.random()*.42,col:CYAN})}
+ snd(165,.32,'sawtooth',.06,42);snd(660,.24,'sine',.05,1240);
+ if(cleared)G.stability=Math.min(100,G.stability+Math.min(8,cleared*2));
+ hint('EMP PULSE · '+stunned+' '+(stunned===1?'SENTRY':'SENTRIES')+' STUNNED · '+cleared+' BOLTS CLEARED');
+}
+const RFX=(a,b)=>a+Math.random()*(b-a);
 
 let CJ=0,CV=0,DF=0,TL=0,PH=0;const K={},HF=[.35,.85,.35];
 /* Touch controls feed the same movement and jump state as the keyboard controls. */
@@ -454,7 +470,7 @@ function releaseStick(e){if(e.pointerId!==stickPointer)return;stickPointer=null;
 stick.addEventListener('pointerup',releaseStick);stick.addEventListener('pointercancel',releaseStick);stick.addEventListener('lostpointercapture',releaseStick);
 document.querySelectorAll('[data-touch]').forEach(btn=>{
  const action=btn.dataset.touch;
- btn.addEventListener('pointerdown',e=>{if(!touchDevice()||G.state!=='play')return;e.preventDefault();e.stopPropagation();try{btn.setPointerCapture(e.pointerId)}catch(_){}if(action==='pause'){pause();return}if(action==='jump'){P.jb=.12;return}if(action==='crouch'){K.ControlLeft=1;return}if(action==='dash'){K.KeyE=1;return}if(action==='sprint'){K.ShiftLeft=1;return}if(action==='fire'){K.KeyF=1;fireWeapon();return}if(action==='reload'){reloadWeapon();return}});
+ btn.addEventListener('pointerdown',e=>{if(!touchDevice()||G.state!=='play')return;e.preventDefault();e.stopPropagation();try{btn.setPointerCapture(e.pointerId)}catch(_){}if(action==='pause'){pause();return}if(action==='emp'){activateEMP();return}if(action==='jump'){P.jb=.12;return}if(action==='crouch'){K.ControlLeft=1;return}if(action==='dash'){K.KeyE=1;return}if(action==='sprint'){K.ShiftLeft=1;return}if(action==='fire'){K.KeyF=1;fireWeapon();return}if(action==='reload'){reloadWeapon();return}});
  const release=()=>{if(action==='crouch')K.ControlLeft=0;if(action==='dash'){K.KeyE=0;P.dashHeld=false}if(action==='sprint')K.ShiftLeft=0;if(action==='fire')K.KeyF=0};
  btn.addEventListener('pointerup',release);btn.addEventListener('pointercancel',release);btn.addEventListener('lostpointercapture',release);
 });
@@ -476,7 +492,7 @@ function land(b,vi){if(vi>3){b.jv-=Math.min(vi,30)*.35*P.g;CV-=Math.min(vi,30)*.
  if(b.t==3){P.v[1]=19*P.g;P.gr=false;P.ride=null;snd(300,.25,'sine',.08,700)}
  if(b.t==4&&G.fc<=0){P.g=-P.g;G.fc=1;P.gr=false;P.ride=null;snd(200,.4,'sawtooth',.05,500)}}
 function step(dt){
- G.t+=dt;G.time+=dt;G.fc-=dt;G.stability=Math.max(0,G.stability-dt*(.36+Math.min(G.i,99)*.004));
+ G.t+=dt;G.time+=dt;G.fc-=dt;G.empWait=Math.max(0,G.empWait-dt);G.empTime=Math.max(0,G.empTime-dt);G.stability=Math.max(0,G.stability-dt*(.36+Math.min(G.i,99)*.004));
  for(const b of G.B){b.dx=b.dz=0;b.jv+=(-180*b.jy-7*b.jv)*dt;b.jy+=b.jv*dt;
   if(b.t==1){const a=G.t*b.sp+b.p0,nx=b.x0+b.ax*Math.sin(a)*b.am,nz=b.z0+b.az*Math.sin(a)*b.am;b.dx=nx-b.x;b.dz=nz-b.z;b.x=nx;b.z=nz}
   else if(b.t==2){if(b.on){if(b.tm>=0){b.tm+=dt;if(b.tm>.75){b.on=0;b.rs=4;snd(120,.25,'sawtooth',.05,50)}}}else if((b.rs-=dt)<=0){b.on=1;b.tm=-1}}
@@ -487,7 +503,7 @@ function step(dt){
   else if(b.t==12){const ph=(G.t+(b.p0||0))%4,amt=ph<1.15?ph/1.15:ph<1.65?1:ph<2.75?1-(ph-1.65)/1.1:0;b.crushAmt=Math.max(0,Math.min(1,amt));b.crusherY=b.y+b.s*(5.8-4.35*b.crushAmt);b.hazardOn=b.crushAmt>.82;b.warnOn=b.crushAmt>.55&&b.crushAmt<=.82}
   else if(b.t==13){const ph=(G.t+(b.p0||0))%4.8;b.warnOn=ph>=1.5&&ph<2.2;b.hazardOn=ph>=2.2&&ph<4.0}}
  /* Sentries strafe around posts and fire aimed energy bolts when the player is exposed. */
- for(const e of G.E){if(!e.alive)continue;e.phase+=dt*1.1;e.x=e.bx+Math.sin(e.phase)*1.25;e.z=e.bz+Math.cos(e.phase*.8)*1.25;e.y+=(e.by+Math.sin(G.t*3+e.phase)*.18-e.y)*Math.min(1,dt*5);e.cool-=dt;
+ for(const e of G.E){if(!e.alive)continue;e.stun=Math.max(0,(e.stun||0)-dt);const stunned=e.stun>0;e.phase+=dt*(stunned?.16:1.1);e.x=e.bx+Math.sin(e.phase)*1.25;e.z=e.bz+Math.cos(e.phase*.8)*1.25;e.y+=(e.by+Math.sin(G.t*3+e.phase)*.18-e.y)*Math.min(1,dt*5);if(stunned){e.cool=Math.max(e.cool,.35);continue}e.cool-=dt;
   const dx=P.c[0]-e.x,dy=P.c[1]-e.y,dz=P.c[2]-e.z,dist=Math.hypot(dx,dy,dz);
   const detect=G.stance==='crouch'?14:G.stance==='slide'?18:(K.ShiftLeft||K.ShiftRight)?27:23;
   if(dist<detect&&dist>3&&e.cool<=0){const inv=1/dist,aimY=P.c[1]+(G.stance==='crouch'?-0.38:0);G.shots.push({x:e.x,y:e.y,z:e.z,vx:dx*inv*15,vy:(aimY-e.y)*inv*15,vz:dz*inv*15,life:2.2});e.cool=1.35+((e.id%3)*.25);snd(190,.05,'square',.025,125);for(let k=0;k<3;k++)G.particles.push({x:e.x,y:e.y,z:e.z,vx:(Math.random()-.5)*1.6,vy:(Math.random()-.5)*1.6,vz:(Math.random()-.5)*1.6,life:.12+k*.035})}
@@ -520,7 +536,7 @@ function step(dt){
   p.taken=true;G.pickupsGot++;
   if(p.type==='cell'){G.stability=Math.min(100,G.stability+28);hint('STABILITY CELL · +28% SUIT CHARGE');snd(740,.18,'sine',.07,1180)}
   else if(p.type==='ammo'){const mag=Math.min(4,12-G.ammo),reserve=Math.min(12,60-G.reserve);G.ammo+=mag;G.reserve+=reserve;hint('AMMO CACHE · +'+mag+' MAGAZINE / +'+reserve+' RESERVE');snd(420,.14,'square',.05,760)}
-  else{G.dashCharges=2;G.dashWait=0;G.stability=Math.min(100,G.stability+8);hint('SURGE CORE · DASH RECHARGED');snd(510,.22,'triangle',.07,1020)}
+  else{G.dashCharges=2;G.dashWait=0;G.empCharges=Math.min(2,G.empCharges+1);G.stability=Math.min(100,G.stability+8);hint('SURGE CORE · DASH + EMP RECHARGED');snd(510,.22,'triangle',.07,1020)}
   for(let j=0;j<9;j++)G.particles.push({x:p.x,y:p.y,z:p.z,vx:(Math.random()-.5)*3,vy:Math.random()*4,vz:(Math.random()-.5)*3,life:.3+Math.random()*.35});
  }
  /* Ordered relays must be reached in sequence. Each one recharges the survival meter. */
@@ -544,7 +560,7 @@ const fmt=t=>(t/60|0)+':'+(t%60).toFixed(1).padStart(4,'0');
 const show=id=>['m','s','p','d'].forEach(k=>$(k).classList.toggle('on',k===id));
 let hT;function hint(t){const h=$('hint');h.textContent=t;h.classList.add('on');clearTimeout(hT);hT=setTimeout(()=>h.classList.remove('on'),5500)}
 const lock=()=>{try{const p=cv.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}};
-function play(i){if(i<0||i>99||i>=S.u)return;load(i);place0(G.cp0);G.time=0;G.t=0;G.got=0;G.relays=0;G.shake=G.recoil=G.muzzle=G.hitFlash=G.slideTime=0;G.particles.length=0;G.stability=100;G.lives=HC?1:3;G.kills=0;G.ammo=12;G.reserve=48;G.dashCharges=2;G.dashWait=0;G.weaponWait=0;G.reloadWait=0;G._reloading=false;G.shots.length=0;G.goalHinted=0;G.Q.forEach(q=>q.on=false);G.E.forEach(e=>{e.hp=3;e.alive=true;e.cool=1});show();$('combat').classList.add('on');$('hud').style.display='flex';$('cx').style.display='block';
+function play(i){if(i<0||i>99||i>=S.u)return;load(i);place0(G.cp0);G.time=0;G.t=0;G.got=0;G.relays=0;G.shake=G.recoil=G.muzzle=G.hitFlash=G.slideTime=0;G.particles.length=0;G.stability=100;G.lives=HC?1:3;G.kills=0;G.ammo=12;G.reserve=48;G.dashCharges=2;G.dashWait=0;G.weaponWait=0;G.reloadWait=0;G._reloading=false;G.shots.length=0;G.goalHinted=0;G.empCharges=2;G.empWait=0;G.empTime=0;G.Q.forEach(q=>q.on=false);G.E.forEach(e=>{e.hp=3;e.alive=true;e.cool=1;e.stun=0});show();$('combat').classList.add('on');$('hud').style.display='flex';$('cx').style.display='block';
  $('hl').textContent=(i+1)+'  '+LV[i].nm+(HC?'  [HARDCORE]':'');G.state='play';setTouchVisible(true);
  try{if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}
  if(touchDevice()&&screen.orientation&&screen.orientation.lock)screen.orientation.lock('portrait').catch(()=>{});
@@ -570,7 +586,7 @@ let rT;document.addEventListener('click',e=>{const el=e.target.closest('[data-a]
  else if(a=='res'){show();G.state='play';setTouchVisible(true);$('combat').classList.add('on');if(!touchDevice())lock();music(true)}
  else if(a=='rst'){const b=$('rb');if(b.dataset.c){S.u=1;S.r={};save();b.textContent='Reset progress';delete b.dataset.c;clearTimeout(rT)}else{b.dataset.c=1;b.textContent='Click again to erase all progress';rT=setTimeout(()=>{b.textContent='Reset progress';delete b.dataset.c},3500)}}});
 $('se').oninput=e=>{S.sens=+e.target.value;save()};$('fv').oninput=e=>{S.fov=+e.target.value;save()};
-addEventListener('keydown',e=>{if(e.code==='KeyF'&&G.state==='play'){K.KeyF=1;fireWeapon()}K[e.code]=1;if(G.state==='play'){if(e.code==='Space'){P.jb=.12;e.preventDefault()}if(e.code==='KeyR')reloadWeapon();if(e.code==='KeyC'&&G.state==='play'&&P.gr&&Math.hypot(P.v[0],P.v[2])>5){G.slideTime=.72;G.stance='slide';P.v[0]*=1.35;P.v[2]*=1.35;snd(95,.16,'sawtooth',.025,45)}if(e.code==='KeyP'||e.code==='Escape')pause()}if(e.code==='KeyM'){MUS=!MUS;music(MUS&&G.state==='play')}if(e.code==='F3'){e.preventDefault();$('dg').classList.toggle('on')}});
+addEventListener('keydown',e=>{if(e.code==='KeyF'&&G.state==='play'){K.KeyF=1;fireWeapon()}if(e.code==='KeyQ'&&G.state==='play')activateEMP();K[e.code]=1;if(G.state==='play'){if(e.code==='Space'){P.jb=.12;e.preventDefault()}if(e.code==='KeyR')reloadWeapon();if(e.code==='KeyC'&&G.state==='play'&&P.gr&&Math.hypot(P.v[0],P.v[2])>5){G.slideTime=.72;G.stance='slide';P.v[0]*=1.35;P.v[2]*=1.35;snd(95,.16,'sawtooth',.025,45)}if(e.code==='KeyP'||e.code==='Escape')pause()}if(e.code==='KeyM'){MUS=!MUS;music(MUS&&G.state==='play')}if(e.code==='F3'){e.preventDefault();$('dg').classList.toggle('on')}});
 addEventListener('keyup',e=>{K[e.code]=0;if(e.code==='KeyF')K.KeyF=0;if(e.code==='KeyE')P.dashHeld=false});addEventListener('blur',()=>{for(const k in K)K[k]=0;P.dashHeld=false;pause()});
 addEventListener('mousemove',e=>{if(G.state=='play'&&document.pointerLockElement===cv){P.yaw-=e.movementX*.0022*S.sens*P.g;P.pit=Math.max(-1.5,Math.min(1.5,P.pit-e.movementY*.0022*S.sens*P.g))}});
 document.addEventListener('pointerlockchange',()=>{if(!touchDevice()&&!document.pointerLockElement)pause()});
@@ -774,8 +790,10 @@ function frame(now){requestAnimationFrame(frame);const rd=(now-last)/1000,dt=Mat
   dre(q.x,q.y+Math.sin(t*2.5+q.index)*.12,q.z,.36,.36,.36,col,q.on ? .35 : 1.25,t+q.index,q.platform.s<0?Math.PI:0);
  }
  /* Security drones are animated targets; their red shells dim when eliminated. */
- for(const e of G.E){if(!e.alive)continue;dre(e.x,e.y,e.z,.78,.72,.78,TC[11],1.1,t+e.phase,0);const charging=e.cool<.42,core=.3+(charging?.13*Math.sin(t*32):0);dre(e.x,e.y,e.z,core,core*.94,core,TC[2],charging?2.6:1.6,t*2+e.phase,0);if(charging)dre(e.x,e.y,e.z,.95,.055,.95,TC[11],.45,t*4,0);dr(e.x,e.y+.7,e.z,.6,.08,.6,TC[11],TC[11],.55,0)}
- for(const b of G.shots){const rot=Math.atan2(b.vx,b.vz);dr(b.x,b.y,b.z,.18,.18,.45,TC[11],TC[11],1.8,rot);for(let j=1;j<=3;j++)dr(b.x-b.vx*.012*j,b.y-b.vy*.012*j,b.z-b.vz*.012*j,.07-j*.012,.07-j*.012,.14,TC[11],TC[11],1.05-j*.2,rot)}for(let i=G.particles.length-1;i>=0;i--){const p=G.particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.vy-=12*dt;p.life-=dt;if(p.life<=0){G.particles.splice(i,1);continue}dr(p.x,p.y,p.z,.09,.09,.09,TC[2],TC[2],1.5,0)}
+ for(const e of G.E){if(!e.alive)continue;const stunned=(e.stun||0)>0,charging=e.cool<.42&&!stunned,shell=stunned?CYAN:TC[11],core=.3+(charging?.13*Math.sin(t*32):0);dre(e.x,e.y,e.z,.78,.72,.78,shell,stunned?.9:1.1,t+e.phase,0);dre(e.x,e.y,e.z,stunned?.38:core,stunned?.36:core*.94,stunned?.38:core,stunned?CYAN:TC[2],stunned?2.2:charging?2.6:1.6,t*2+e.phase,0);if(stunned)dre(e.x,e.y-.2,e.z,1.02,.08,1.02,CYAN,1.25,t*3,0);else if(charging)dre(e.x,e.y,e.z,.95,.055,.95,TC[11],.45,t*4,0);dr(e.x,e.y+.7,e.z,.6,.08,.6,shell,shell,.55,0)}
+ for(const b of G.shots){const rot=Math.atan2(b.vx,b.vz);dr(b.x,b.y,b.z,.18,.18,.45,TC[11],TC[11],1.8,rot);for(let j=1;j<=3;j++)dr(b.x-b.vx*.012*j,b.y-b.vy*.012*j,b.z-b.vz*.012*j,.07-j*.012,.07-j*.012,.14,TC[11],TC[11],1.05-j*.2,rot)}for(let i=G.particles.length-1;i>=0;i--){const p=G.particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.vy-=12*dt;p.life-=dt;if(p.life<=0){G.particles.splice(i,1);continue}const pc=p.col||TC[2];dr(p.x,p.y,p.z,.09,.09,.09,pc,pc,p.col?1.05:1.5,0)}
+ /* Expanding floor-level ion ring communicates EMP radius without covering the view. */
+ if(G.state==='play'&&G.empTime>0){const progress=1-G.empTime/.72,ring=1.2+progress*12.8,yy=P.c[1]-.78*P.g;for(let k=0;k<16;k++){const a=k*Math.PI*2/16,x=P.c[0]+Math.cos(a)*ring,z=P.c[2]+Math.sin(a)*ring;dre(x,yy,z,.34,.075,.34,CYAN,1.2,a,0)}}
  /* Camera-relative first-person gun, armored glove, recoil and muzzle flash. */if(G.state==='play'){const cp=Math.cos(P.pit),fw=[-Math.sin(P.yaw)*cp,Math.sin(P.pit),-Math.cos(P.yaw)*cp],rt=[Math.cos(P.yaw),0,-Math.sin(P.yaw)],up=nrm(crs(rt,fw)),base=[e[0]+fw[0]*1.15,e[1]+fw[1]*1.15,e[2]+fw[2]*1.15],at=(x,y,z)=>[base[0]+rt[0]*x+up[0]*y+fw[0]*z,base[1]+rt[1]*x+up[1]*y+fw[1]*z,base[2]+rt[2]*x+up[2]*y+fw[2]*z],rr=G.recoil;let q=at(.38,-.34+rr*.13,0);dr(...q,.22,.2,.48,TC[9],TC[1],.12,-.12);q=at(.38,-.25+rr*.13,-.25);dr(...q,.13,.13,.38,TC[7],TC[2],.25,-.12);q=at(.38,-.25+rr*.13,-.47);dr(...q,.085,.09,.22,TC[6],TC[2],.6,-.12);q=at(.22,-.43,0);dr(...q,.2,.17,.34,TC[8],TC[9],.06,-.25);if(G.muzzle>0){q=at(.38,-.25+rr*.13,-.64);dre(...q,.18+G.muzzle*3,.18+G.muzzle*3,.18+G.muzzle*3,TC[2],2,t*22,0);q=at(.38,-.25+rr*.13,-.74);dr(...q,.06,.06,.3,TC[2],TC[2],2,0)}}if(G.hitFlash>0){gl.disable(gl.DEPTH_TEST);dr(e[0]+f[0]*.35,e[1]+f[1]*.35,e[2]+f[2]*.35,1.1,1.1,.08,TC[11],TC[11],G.hitFlash*4,0);gl.enable(gl.DEPTH_TEST)}$('stance').textContent=G.stance.toUpperCase();$('stance').classList.toggle('on',G.state==='play');
  if(G.state!=='play')$('nav').classList.remove('on');
  if(G.state==='play'){
@@ -789,7 +807,7 @@ function frame(now){requestAnimationFrame(frame);const rd=(now-last)/1000,dt=Mat
    $('nav-label').textContent=navLabel;
    $('nav-distance').textContent=Math.round(dist)+'u';
   }
-  $('hr').textContent=fmt(G.time)+' · RELAY '+G.relays+'/'+G.Q.length+' · GUARDS '+activeGuards()+' · '+Math.round(hs*3.6)+' km/h';$('combat-info').textContent='STABILITY  '+Math.ceil(G.stability)+'%    LIVES  '+G.lives+'\nAMMO  '+G.ammo+' / '+G.reserve+'    '+(G._reloading?'RELOADING…':'')+'\nDASH  '+G.dashCharges+'/2    RELAYS  '+G.relays+'/3    GUARDS  '+activeGuards()+'\nSUPPLY CACHES  '+G.pickupsGot+'/'+G.pickups.length;$('stability-fill').style.width=G.stability+'%';$('stability-fill').style.background=G.stability<25?'#ff455d':G.stability<55?'#ff9c45':'#a7ff58'}
+  $('hr').textContent=fmt(G.time)+' · RELAY '+G.relays+'/'+G.Q.length+' · GUARDS '+activeGuards()+' · '+Math.round(hs*3.6)+' km/h';$('combat-info').textContent='STABILITY  '+Math.ceil(G.stability)+'%    LIVES  '+G.lives+'\nAMMO  '+G.ammo+' / '+G.reserve+'    '+(G._reloading?'RELOADING…':'')+'\nDASH  '+G.dashCharges+'/2    EMP  '+G.empCharges+'/2'+(G.empWait>0?' · '+G.empWait.toFixed(1)+'s':'')+'\nRELAYS  '+G.relays+'/3    GUARDS  '+activeGuards()+'\nSUPPLY CACHES  '+G.pickupsGot+'/'+G.pickups.length;$('stability-fill').style.width=G.stability+'%';$('stability-fill').style.background=G.stability<25?'#ff455d':G.stability<55?'#ff9c45':'#a7ff58'}
  if(G.alertTime>0){G.alertTime-=dt;if(G.alertTime<=0)$('alert').classList.remove('on')}
  if($('dg').classList.contains('on'))$('dg').textContent=`pos ${P.c.map(v=>v.toFixed(2))}\nvel ${P.v.map(v=>v.toFixed(2))}\ngrounded ${P.gr}  gravity ${P.g>0?'down':'up'}\nplatform type ${P.ride?P.ride.t:'-'}  checkpoint ${G.cp&&G.cp.b?'platform':'start'}\nphysics step ${(HS*1000).toFixed(2)} ms (${n} this frame)\nfps ${fps.toFixed(0)}  frame ${ft.toFixed(1)} ms\nresolution scale ${RS}  draw calls ${G.dc}`;
 }
