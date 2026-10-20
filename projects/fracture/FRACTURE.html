@@ -442,9 +442,9 @@ function frame(now){requestAnimationFrame(frame);const rd=(now-last)/1000,dt=Mat
  const L=G.L,t=now/1000,hs=Math.hypot(P.v[0],P.v[2]);let e,f,u;DF*=Math.exp(-5*dt);if(G.state=='play')G.intro=Math.max(0,G.intro-dt);TL+=((((K.KeyD?1:0)-(K.KeyA?1:0))*-.04*P.g)-TL)*Math.min(1,dt*8);const BB=P.gr&&G.state=='play'?Math.sin(t*(G.stance==='crouch'?8:15))*(G.stance==='crouch'?.018:.045)*Math.min(1,hs/10):0;G.shake=Math.max(0,G.shake-dt*2.8);G.recoil=Math.max(0,G.recoil-dt*5.5);G.muzzle=Math.max(0,G.muzzle-dt);G.hitFlash=Math.max(0,G.hitFlash-dt);G.footTimer-=dt;if(G.state==='play'&&P.gr&&hs>2&&G.footTimer<=0){G.footTimer=G.stance==='slide'?.22:G.stance==='crouch'?.42:.3;snd(G.stance==='slide'?65:95,.045,'triangle',.012,G.stance==='slide'?40:65)}
  if(G.state=='menu'||G.state=='select'){const a=t*.15;e=[Math.cos(a)*14,7,Math.sin(a)*14-10];f=nrm([-e[0],-e[1],-12-e[2]]);u=[0,1,0]}
  else{const cp=Math.cos(P.pit);f=[-Math.sin(P.yaw)*cp,Math.sin(P.pit),-Math.cos(P.yaw)*cp];const rt=[Math.cos(P.yaw),0,-Math.sin(P.yaw)],u0=crs(rt,f),cr=Math.cos(P.roll+TL),sr=Math.sin(P.roll+TL);u=[0,1,2].map(k=>u0[k]*cr+rt[k]*sr);e=[P.c[0],P.c[1]+(G.stance==='crouch'?.15:.65)*P.g+CJ+BB,P.c[2]]}
- const VP=mul(persp(Math.min(140,S.fov+Math.min(hs,26)*.9+DF*14+45*(G.intro/1.4)**2)*Math.PI/180,cv.width/cv.height,.1,500),look(e,f,u));
+ const VP=mul(persp(Math.min(140,S.fov+(cv.height>cv.width?12:0)+Math.min(hs,26)*.9+DF*14+45*(G.intro/1.4)**2)*Math.PI/180,cv.width/cv.height,.1,500),look(e,f,u));
  const sky=G.envSky||L.sky;gl.clearColor(sky[0],sky[1],sky[2],1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);G.dc=0;
- if(G.state==='play'&&G.shake>0){e=e.map((v,j)=>v+(Math.random()-.5)*G.shake*(j===1?.22:.12));VP=mul(persp(Math.min(140,S.fov+Math.min(hs,26)*.9+DF*14+45*(G.intro/1.4)**2)*Math.PI/180,cv.width/cv.height,.1,500),look(e,f,u))}gl.uniformMatrix4fv(U.uVP,false,VP);gl.uniform3fv(U.uEye,e);gl.uniform3fv(U.uFog,sky);gl.uniform1f(U.uFd,G.envBiome===4?.019:G.envBiome===6?.009:.013);
+ if(G.state==='play'&&G.shake>0){e=e.map((v,j)=>v+(Math.random()-.5)*G.shake*(j===1?.22:.12));VP=mul(persp(Math.min(140,S.fov+(cv.height>cv.width?12:0)+Math.min(hs,26)*.9+DF*14+45*(G.intro/1.4)**2)*Math.PI/180,cv.width/cv.height,.1,500),look(e,f,u))}gl.uniformMatrix4fv(U.uVP,false,VP);gl.uniform3fv(U.uEye,e);gl.uniform3fv(U.uFog,sky);gl.uniform1f(U.uFd,G.envBiome===4?.019:G.envBiome===6?.009:.013);
  const dc=L.pl.map(v=>v*.3);
  for(const p of G.props){
   if(p.type==='island'){
@@ -505,7 +505,7 @@ function frame(now){requestAnimationFrame(frame);const rd=(now-last)/1000,dt=Mat
  /* Biome atmosphere: drifting snow, volcanic embers, jungle motes and windblown dust. */
  if(G.state==='play'){
   const biome=G.envBiome||0,wind=Math.sin(t*.31)*1.8;
-  for(let k=0;k<18;k++){
+  for(let k=0,kMax=touchDevice()?9:18;k<kMax;k++){
    const seed=k*17.173,phase=t*(biome===6?.72:biome===7?1.3:.35)+seed;
    const wx=P.c[0]+Math.sin(seed*1.7+Math.sin(t*.12))*10+wind;
    const wz=P.c[2]-5-(k%6)*4+Math.cos(seed*.7+t*.08)*2.2;
