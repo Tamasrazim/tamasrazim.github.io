@@ -36,7 +36,7 @@ html,body{height:100%;height:100dvh;overscroll-behavior:none}
  .top{top:max(10px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));gap:8px}
  .brand{font-size:11px}.micro{font-size:7px;margin-top:4px}.stats{gap:10px}.stats label{font-size:7px}.stats b{font-size:13px;margin-top:2px}
  .objective{top:67px;left:12px;font-size:8px}.objective small{font-size:8px;max-width:210px}
- .help{display:none}.gravity{bottom:calc(max(10px,env(safe-area-inset-bottom)) + 6px);right:12px;max-width:112px;font-size:8px;text-shadow:0 1px 8px #000}
+  .help{display:none}.gravity{top:67px;bottom:auto;right:12px;max-width:112px;font-size:8px;text-shadow:0 1px 8px #000}
  #mobileHint{display:block}.crosshair{opacity:.28}
 }
 @media (orientation:portrait) and (pointer:coarse){
@@ -89,7 +89,7 @@ function toast(t){$('toast').textContent=t;$('toast').classList.add('show');toas
 function reset(full){player.p=vec(0,1,0);player.v=vec();player.gravity=1;player.ground=false;player.spawn=vec(0,1,0);player.checkpoint=0;player.runTime=0;if(full){player.shards=0;player.falls=0;collectibles.forEach(c=>c.got=false)}camera.yaw=0;camera.pitch=-.13;updateUI()}
 function start(){reset(true);state='play';$('start').classList.add('hidden');$('pause').classList.add('hidden');$('complete').classList.add('hidden');$('hud').style.display='block';$('touch').style.display=(matchMedia('(pointer:coarse)').matches||innerWidth<=760)?'flex':'none';last=performance.now()}
 $('play').onclick=start;$('again').onclick=start;$('showControls').onclick=()=>$('controls').classList.toggle('hidden');$('resume').onclick=()=>{state='play';$('pause').classList.add('hidden');last=performance.now()};$('restart').onclick=()=>{player.p={...player.spawn};player.v=vec();player.gravity=1;state='play';$('pause').classList.add('hidden')};function menu(){state='menu';$('hud').style.display='none';$('pause').classList.add('hidden');$('complete').classList.add('hidden');$('start').classList.remove('hidden')} $('toMenu').onclick=$('completeMenu').onclick=menu;
-function flip(){if(state!=='play'||player.ground||player.flipCD>0)return;player.gravity*=-1;player.v.y=player.gravity*1.8;player.flipCD=.4;toast(player.gravity===-1?'GRAVITY INVERTED':'GRAVITY RESTORED');updateUI()}\nfunction jump(){if(state==='play'&&player.ground){player.v.y=player.gravity*7.1;player.ground=false}}
+function flip(){if(state!=='play'||player.ground||player.flipCD>0)return;player.gravity*=-1;player.v.y=-player.gravity*1.8;player.flipCD=.4;toast(player.gravity===-1?'GRAVITY INVERTED':'GRAVITY RESTORED');updateUI()}\nfunction jump(){if(state==='play'&&player.ground){player.v.y=player.gravity*7.1;player.ground=false}}
 addEventListener('keydown',e=>{if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();keys[e.code]=true;if(e.repeat)return;if(e.code==='KeyQ')flip();if(e.code==='KeyR'&&state==='play'){player.p={...player.spawn};player.v=vec();player.gravity=1}if(e.code==='Escape'){if(state==='play'){state='pause';$('pause').classList.remove('hidden')}else if(state==='pause')$('resume').click()}if(e.code==='Space'||e.code==='ArrowUp')jump()});
 addEventListener('keyup',e=>{keys[e.code]=false});
 
