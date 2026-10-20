@@ -16,7 +16,7 @@ button:hover,.card:hover,button:focus-visible{background:rgba(122,215,255,.25);b
 .card b{font-size:30px;font-weight:200}.card small{opacity:.7}
 .card.lk{opacity:.35;pointer-events:none}
 label{display:block;margin:10px 0}input[type=range]{width:200px;vertical-align:middle}
-#hud{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:16px;right:16px;display:none;justify-content:space-between;pointer-events:none;text-shadow:0 1px 6px #000;font-size:17px}
+#hud{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:16px;right:16px;display:none;justify-content:space-between;gap:12px;pointer-events:none;text-shadow:0 1px 6px #000;font-size:clamp(10px,1.5vw,16px)}#hr{text-align:right;max-width:68%;line-height:1.5}
 #cx{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:#fffa;display:none;pointer-events:none}
 #hint{position:fixed;bottom:12%;left:0;right:0;text-align:center;opacity:0;transition:opacity .6s;pointer-events:none;text-shadow:0 1px 6px #000;font-size:18px}#hint.on{opacity:.95}
 #dg{position:fixed;left:10px;bottom:10px;font:11px monospace;display:none;background:#0009;padding:8px;pointer-events:none}#dg.on{display:block}
@@ -45,9 +45,9 @@ canvas{touch-action:none}
   <button class="touch-btn" id="touch-pause" data-touch="pause" aria-label="Pause game">Ⅱ</button>
 </div>
 <div id="cx"></div><div id="hud"><div id="hl"></div><div id="hr"></div></div><div id="hint"></div><pre id="dg"></pre>
-<div class="ov on" id="m"><div class="gl"><h1>FRACTURE</h1><p>One hundred levels. One broken world.</p>
+<div class="ov on" id="m"><div class="gl"><h1>FRACTURE</h1><p>One hundred levels. One broken world. Solve the route. Survive the fracture.</p>
 <button data-a="cont">Continue</button><button data-a="sel">Level select</button><button data-a="hc">Mode: Standard</button><button data-a="rst" id="rb">Reset progress</button>
-<p>WASD move, mouse look, Shift sprint, Space jump, E dash, R respawn, Esc pause, M music, F3 diagnostics. Touch: joystick to move, drag to look.</p></div></div>
+<p>WASD move, mouse look, Shift sprint, Space jump, E dash, R respawn, Esc pause, M music, F3 diagnostics. Activate three relays in order, collect shards to restore stability, and reach the exit. Touch: joystick to move, drag to look.</p></div></div>
 <div class="ov" id="s"><div class="gl"><h2>Level select</h2><p id="pr"></p><div class="grid" id="gd"></div><button data-a="menu">Back</button></div></div>
 <div class="ov" id="p"><div class="gl"><h2>Paused</h2>
 <label>Mouse sensitivity <input type="range" id="se" min=".3" max="2.5" step=".05"></label>
@@ -138,10 +138,10 @@ const LV=Array.from({length:100},(_,i)=>{const u=Math.min(1,i/60),h=(i*47+13)%36
 const PZi=i=>{const u=Math.min(1,i/60);return[.1+.12*u,.08+.1*u,.06+.06*u,.07+.06*u]};
 /* puzzle mix per level: pulse, slab, boost, bridge */
 const PZ=[[0,0,0,0],[0,0,.12,0],[0,0,0,0],[0,0,.3,0],[.18,0,0,0],[0,.15,0,.12],[.12,.15,.1,.12],[.12,.12,.1,.15],[.15,.15,.12,.15],[.15,.15,.15,.15]];
-const TC=[0,Hx('#6aa8ff'),Hx('#ffb35c'),Hx('#5cffb0'),Hx('#c07aff'),Hx('#ff6ad5'),Hx('#35e8c8'),Hx('#ff5c6a'),Hx('#b0ff5c')],GOLD=Hx('#ffd75c'),CYAN=Hx('#5cf0ff');
+const TC=[0,Hx('#6aa8ff'),Hx('#ffb35c'),Hx('#5cffb0'),Hx('#c07aff'),Hx('#ff6ad5'),Hx('#35e8c8'),Hx('#ff5c6a'),Hx('#b0ff5c'),Hx('#8c9dff'),Hx('#d5b5ff'),Hx('#ff455d'),Hx('#ff9c45'),Hx('#a7ff58')],GOLD=Hx('#ffd75c'),CYAN=Hx('#5cf0ff');
 /* Each level is built by a seeded walker: every step respects jump reach (gap<=4.2, rise<=0.9, jump apex 1.6, range ~5.4), so each route is completable by construction. */
 function mk(i){
- const L=LV[i],r=rng(i*7919+5),R=(a,b)=>a+(b-a)*r(),B=[],O=[],SW=[];
+ const L=LV[i],r=rng(i*7919+5),R=(a,b)=>a+(b-a)*r(),B=[],O=[],SW=[],Q=[];
  let x=0,z=0,h=0,Y=0,s=1,ph=4,lF=-9,lC=0;
  const add=o=>{o.on=1;o.jy=0;o.jv=0;o.tm=-1;o.dx=o.dz=0;o.x0=o.x;o.z0=o.z;o.hy=.5;o.t=o.t||0;o.yaw=h;o.sy=Y;o.s=s;o.col=o.t?TC[o.t].map(v=>v*.55):L.pl;o.ac=o.t?TC[o.t]:L.ac;B.push(o);return o};
  const place=(w,gap,dy,t)=>{x+=-Math.sin(h)*(ph+gap+w/2);z+=-Math.cos(h)*(ph+gap+w/2);Y+=s*dy;ph=w/2;return add({x,y:Y-s*.5,z,hx:w/2,hz:w/2,t})};
@@ -153,10 +153,13 @@ function mk(i){
   if(!last&&k>2){const a=L.pm,b=a+L.pc,c=b+L.pb,d=c+L.pf;t=q<a?1:q<b?2:q<c?3:(q<d&&k-lF>3)?4:0}
   if(!last&&k>2&&t==0){const z=PZi(i),q2=r();t=q2<z[0]?5:q2<z[0]+z[1]?7:q2<z[0]+z[1]+z[2]?6:q2<z[0]+z[1]+z[2]+z[3]?8:0}
   if(!last&&k>2&&t==0){const nj=.1+.12*Math.min(1,i/60),q3=r();t=q3<nj?9:q3<nj*1.8?10:0}
+  /* New survival hazards appear more often as the campaign progresses. */
+  if(!last&&k>5&&t==0){const u=Math.min(1,i/60),q4=r();t=q4<.07+.08*u?11:q4<.12+.14*u?12:q4<.19+.20*u?13:0}
   if(t==1){const m=place(3,2.1,0,1);m.ax=-Math.sin(h);m.az=-Math.cos(h);m.am=1.2;m.sp=1.1;m.p0=R(0,6.28);p=place(w,2.1,dy*.5,0)}
   else if(t==3){place(3,R(2,2.6),0,3);p=place(4.5,2.8,4.2,0)}
   else if(t==9){const H=R(6,10)+Math.min(4,i/20);p=place(4,1.6,H,0);p.hy=H/2+1.2;p.y=Y-s*p.hy}
   else if(t==10){h=Math.abs(h)<.79?0:h<0?-1.5708:1.5708;const px=x,pz=z,pp=ph;p=place(5,11,0,0);const sd=r()<.5?-1:1,off=Math.max(pp,2.5)+.3,ux=-Math.sin(h),uz=-Math.cos(h),wl=add({x:(px+x)/2-uz*sd*off,y:Y+s*3,z:(pz+z)/2+ux*sd*off,hx:Math.abs(ux)>.5?(Math.hypot(x-px,z-pz)+1)/2:.3,hz:Math.abs(uz)>.5?(Math.hypot(x-px,z-pz)+1)/2:.3,t:0});wl.hy=4}
+  else if(t==11||t==12||t==13){p=place(w,gap,dy,t);p.p0=R(0,6.28);p.hazardOn=0;p.warnOn=0}
   else if(t==5){for(let j=0;j<4;j++)place(3,2.4,0,5).p0=j*.9;p=place(w,2.4,0,0)}
   else if(t==6){place(5,2.5,0,6);p=place(7,8,0,0)}
   else if(t==7){p=place(7,gap,0,0);p.no=1;const sl=add({x:p.x,y:Y+s*1.5,z:p.z,hx:3.5,hz:3.5,t:7});sl.by=sl.y;sl.gy=0;sl.p0=R(0,6.28)}
@@ -167,17 +170,30 @@ function mk(i){
   if(last){p.goal=1;p.col=Hx('#8a7a2a');p.ac=GOLD}
   if(!last&&r()<L.po){if(r()<.5)O.push({x:p.x,y:Y+s*1.4,z:p.z});else O.push({x:p.x+Math.sin(h)*(p.hx+gap/2),y:Y+s*2.6,z:p.z+Math.cos(h)*(p.hx+gap/2)})}
  }
+ /* Every stage has three ordered relay puzzles on stable platforms along the main route. */
+ const targets=B.filter(b=>b.t==0&&!b.goal&&!b.no&&b.hy<1.5&&b.hx>1.1&&b.hz>1.1);
+ const fractions=[.24,.52,.78];
+ fractions.forEach((f,index)=>{const j=Math.min(targets.length-1,Math.floor(targets.length*f)),b=targets[j];if(!b)return;Q.push({x:b.x,y:b.y+b.s*1.42,z:b.z,index,on:false,platform:b,name:['IGNITION','PHASE LOCK','ANCHOR'][index]})});
  let a=1e9,b=-1e9,c=1e9,d=-1e9,lo=1e9,hi=-1e9;for(const o of B){a=Math.min(a,o.x);b=Math.max(b,o.x);c=Math.min(c,o.z);d=Math.max(d,o.z);lo=Math.min(lo,o.y);hi=Math.max(hi,o.y)}
  const D=[];for(let n=0;n<26;n++)for(let t=0;t<8;t++){const e={x:R(a-70,b+70),y:R(lo-30,hi+35),z:R(c-70,d+70),s:R(4,16),r:R(0,6)};if(B.every(o=>Math.hypot(o.x-e.x,o.z-e.z)>e.s+12||Math.abs(o.y-e.y)>e.s+14)){D.push(e);break}}
- return{B,O,SW,lo,hi,deco:D,cp0:{b:null,c:[0,.87,0],g:1,yaw:0}};
+ return{B,O,SW,Q,lo,hi,deco:D,cp0:{b:null,c:[0,.87,0],g:1,yaw:0}};
 }
 const TOT=LV.map((_,i)=>mk(i).O.length);
 /* ---------- game state ---------- */
-const G={state:'menu',intro:0,i:0,t:0,time:0,got:0,fc:0,B:[],O:[],cp:null,cp0:null,lo:0,hi:0,L:LV[0],deco:[],dc:0};
+const G={state:'menu',intro:0,i:0,t:0,time:0,got:0,relays:0,stability:100,lives:3,goalHinted:0,fc:0,B:[],O:[],Q:[],cp:null,cp0:null,lo:0,hi:0,L:LV[0],deco:[],dc:0};
 const P={c:[0,.87,0],v:[0,0,0],yaw:0,pit:0,roll:0,g:1,gr:false,ride:null,coy:0,jb:0};
-function load(i){const d=mk(i);Object.assign(G,{i,B:d.B,O:d.O,SW:d.SW,lo:d.lo,hi:d.hi,deco:d.deco,cp0:d.cp0,cp:d.cp0,L:LV[i]})}
+function load(i){const d=mk(i);Object.assign(G,{i,B:d.B,O:d.O,SW:d.SW,Q:d.Q,lo:d.lo,hi:d.hi,deco:d.deco,cp0:d.cp0,cp:d.cp0,L:LV[i]})}
 function place0(c){P.c=c.c.slice();P.v=[0,0,0];P.g=c.g;P.yaw=c.yaw;P.pit=0;P.roll=P.g<0?Math.PI:0;P.gr=false;P.ride=null;P.coy=0;P.jb=0;P.dc=0;P.dd=0;P.wt=0;P.wl=null;P.wb=null;G.fc=.6}
 function respawn(){place0(HC?G.cp0:G.cp)}
+/* Running out of stability costs a life; Standard respawns at the last checkpoint. */
+function stabilityFail(){
+ if(G.state!=='play')return;
+ G.lives--;snd(95,.45,'sawtooth',.09,35);
+ if(G.lives<=0){G.state='dead';setTouchVisible(false);music(false);try{document.exitPointerLock()}catch(e){}
+  $('dt').textContent='SIGNAL LOST';$('ds').textContent='The fracture consumed your last stability charge. Relays '+G.relays+'/'+G.Q.length+' · Shards '+G.got+'. Re-enter the level and change your route.';
+  $('nx').style.display='none';show('d');return;}
+ G.stability=55;G.goalHinted=0;respawn();hint('STABILITY LOST — '+G.lives+' LIVES LEFT. Checkpoint restored; keep moving and collect shards.');
+}
 let CJ=0,CV=0,DF=0,TL=0,PH=0;const K={},HF=[.35,.85,.35];
 /* Touch controls feed the same movement and jump state as the keyboard controls. */
 const touchRoot=$('touch'),stick=$('stick'),knob=$('knob');
@@ -210,17 +226,20 @@ function land(b,vi){if(vi>3){b.jv-=Math.min(vi,30)*.35*P.g;CV-=Math.min(vi,30)*.
  if(b.t==6){P.v[0]=-Math.sin(b.yaw)*18;P.v[2]=-Math.cos(b.yaw)*18}
  if(b.t==2&&b.tm<0)b.tm=0;
  if(b.cp&&G.cp.b!==b){G.cp={b,c:[b.x,b.sy+b.s*.87,b.z],g:b.s,yaw:b.yaw};snd(520,.2,'triangle',.06,780)}
- if(b.goal&&G.state=='play')win();
+ if(b.goal&&G.state=='play'){if(G.relays>=G.Q.length)win();else if(!G.goalHinted){G.goalHinted=1;hint('EXIT SEALED — activate the three relays in order. Current progress: '+G.relays+'/'+G.Q.length)}}
  if(b.t==3){P.v[1]=19*P.g;P.gr=false;P.ride=null;snd(300,.25,'sine',.08,700)}
  if(b.t==4&&G.fc<=0){P.g=-P.g;G.fc=1;P.gr=false;P.ride=null;snd(200,.4,'sawtooth',.05,500)}}
 function step(dt){
- G.t+=dt;G.time+=dt;G.fc-=dt;
+ G.t+=dt;G.time+=dt;G.fc-=dt;G.stability=Math.max(0,G.stability-dt*(.38+Math.min(G.i,80)*.002));
  for(const b of G.B){b.dx=b.dz=0;b.jv+=(-180*b.jy-7*b.jv)*dt;b.jy+=b.jv*dt;
   if(b.t==1){const a=G.t*b.sp+b.p0,nx=b.x0+b.ax*Math.sin(a)*b.am,nz=b.z0+b.az*Math.sin(a)*b.am;b.dx=nx-b.x;b.dz=nz-b.z;b.x=nx;b.z=nz}
   else if(b.t==2){if(b.on){if(b.tm>=0){b.tm+=dt;if(b.tm>.75){b.on=0;b.rs=4;snd(120,.25,'sawtooth',.05,50)}}}else if((b.rs-=dt)<=0){b.on=1;b.tm=-1}}
   else if(b.t==5){const c=(G.t+b.p0)%3;b.on=c<1.7?1:0;b.wn=c>1.25&&c<1.7}
   else if(b.t==7){const nr=Math.abs(P.c[0]-b.x)<b.hx+.6&&Math.abs(P.c[2]-b.z)<b.hz+.6&&Math.abs(P.c[1]-b.sy)<3.4,op=nr||Math.sin(G.t*1.9+b.p0)>-.2;b.gy+=Math.max(-5*dt,Math.min(5*dt,(op?1.6:0)-b.gy));b.y=b.by+b.s*b.gy}
-  else if(b.t==8){if(b.on&&(b.bt-=dt)<=0)b.on=0}}
+  else if(b.t==8){if(b.on&&(b.bt-=dt)<=0)b.on=0}
+  else if(b.t==11){const ph=(G.t+(b.p0||0))%3.4;b.warnOn=ph>=1.15&&ph<1.85;b.hazardOn=ph>=1.85&&ph<2.7}
+  else if(b.t==12){const ph=(G.t+(b.p0||0))%4,amt=ph<1.15?ph/1.15:ph<1.65?1:ph<2.75?1-(ph-1.65)/1.1:0;b.crushAmt=Math.max(0,Math.min(1,amt));b.crusherY=b.y+b.s*(5.8-4.35*b.crushAmt);b.hazardOn=b.crushAmt>.82;b.warnOn=b.crushAmt>.55&&b.crushAmt<=.82}
+  else if(b.t==13){const ph=(G.t+(b.p0||0))%4.8;b.warnOn=ph>=1.5&&ph<2.2;b.hazardOn=ph>=2.2&&ph<4.0}}
  if(P.ride&&P.ride.t==1){P.c[0]+=P.ride.dx;P.c[2]+=P.ride.dz}
  const sy=Math.sin(P.yaw),cy=Math.cos(P.yaw),mx=(K.KeyD?1:0)-(K.KeyA?1:0),mz=(K.KeyW?1:0)-(K.KeyS?1:0);
  let wx=-sy*mz+cy*mx*P.g,wz=-cy*mz-sy*mx*P.g;const l=Math.hypot(wx,wz);if(l>1){wx/=l;wz/=l}
@@ -233,7 +252,20 @@ function step(dt){
  if(P.wt>0&&!P.gr&&P.wl&&P.wb){if(hs>5){P.v[1]+=23*P.g*dt;P.v[0]-=P.wl[0]*2;P.v[2]-=P.wl[1]*2}else if(K.KeyW)P.v[1]=5*P.g;else if(K.KeyS)P.v[1]=-6*P.g;else if(P.v[1]*P.g<-2.5)P.v[1]=-2.5*P.g;
   const tp=P.wb.y+P.g*P.wb.hy;if(P.g*(tp-(P.c[1]-.85*P.g))<.45){P.v[0]=-P.wl[0]*5;P.v[2]=-P.wl[1]*5;P.v[1]=6*P.g}}P.v[1]=Math.max(-40,Math.min(40,P.v[1]));
  P.gr=false;P.ride=null;mv(0,dt);mv(2,dt);mv(1,dt);
- for(const o of G.O)if(!o.k&&(o.x-P.c[0])**2+(o.y-P.c[1])**2+(o.z-P.c[2])**2<1.5){o.k=1;G.got++;snd(880,.15,'sine',.06,1320)}
+ for(const o of G.O)if(!o.k&&(o.x-P.c[0])**2+(o.y-P.c[1])**2+(o.z-P.c[2])**2<1.5){o.k=1;G.got++;G.stability=Math.min(100,G.stability+9);snd(880,.15,'sine',.06,1320)}
+ /* Ordered relays must be reached in sequence. Each one recharges the survival meter. */
+ for(const q of G.Q)if(!q.on&&q.index===G.relays&&(q.x-P.c[0])**2+(q.z-P.c[2])**2<2.8**2&&Math.abs(q.y-P.c[1])<2.6){
+  q.on=true;G.relays++;G.stability=Math.min(100,G.stability+18);G.goalHinted=0;snd(610+q.index*170,.3,'triangle',.08,1050+q.index*180);
+  hint(q.name+' ONLINE — '+G.relays+'/'+G.Q.length+' relays. Stability recharged.');
+ }
+ /* Timed laser decks, crushers and fracture vents drain stability while occupied. */
+ for(const b of G.B){if(b.t<11||b.t>13||!b.on)continue;
+  const deck=Math.abs(P.c[1]-(b.y+b.s*(b.hy+HF[1])))<1.25;
+  if(b.t===11&&b.hazardOn&&deck&&Math.abs(P.c[0]-b.x)<b.hx+.35&&Math.abs(P.c[2]-b.z)<b.hz+.35)G.stability=Math.max(0,G.stability-dt*17);
+  if(b.t===12&&b.hazardOn&&Math.abs(P.c[0]-b.x)<.95&&Math.abs(P.c[2]-b.z)<.95&&Math.abs(P.c[1]-b.crusherY)<1.45)G.stability=Math.max(0,G.stability-dt*40);
+  if(b.t===13&&b.hazardOn&&deck&&(P.c[0]-b.x)**2+(P.c[2]-b.z)**2<2.0**2)G.stability=Math.max(0,G.stability-dt*12);
+ }
+ if(G.stability<=0){stabilityFail();return}
  for(const w of G.SW){if(!w.k&&(w.x-P.c[0])**2+(w.y-P.c[1])**2+(w.z-P.c[2])**2<6){w.k=1;for(const b of G.B)if(b.t==8&&b.id==w.id){b.on=1;b.bt=8}snd(700,.2,'sine',.07,1400)}else if(w.k&&!G.B.some(b=>b.t==8&&b.id==w.id&&b.on))w.k=0}
  if(P.c[1]<G.lo-30||P.c[1]>G.hi+30){respawn();snd(150,.3,'triangle',.07,60)}
 }
@@ -242,17 +274,17 @@ const fmt=t=>(t/60|0)+':'+(t%60).toFixed(1).padStart(4,'0');
 const show=id=>['m','s','p','d'].forEach(k=>$(k).classList.toggle('on',k===id));
 let hT;function hint(t){const h=$('hint');h.textContent=t;h.classList.add('on');clearTimeout(hT);hT=setTimeout(()=>h.classList.remove('on'),5500)}
 const lock=()=>{try{const p=cv.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}};
-function play(i){if(i<0||i>99||i>=S.u)return;load(i);place0(G.cp0);G.time=0;G.t=0;G.got=0;show();$('hud').style.display='flex';$('cx').style.display='block';
+function play(i){if(i<0||i>99||i>=S.u)return;load(i);place0(G.cp0);G.time=0;G.t=0;G.got=0;G.relays=0;G.stability=100;G.lives=HC?1:3;G.goalHinted=0;G.Q.forEach(q=>q.on=false);show();$('hud').style.display='flex';$('cx').style.display='block';
  $('hl').textContent=(i+1)+'  '+LV[i].nm+(HC?'  [HARDCORE]':'');G.state='play';setTouchVisible(true);
  try{if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}
  if(!touchDevice())lock();hint(LV[i].hint);music(true);G.intro=1.4;DF=0}
 function pause(){if(G.state!='play')return;G.state='pause';setTouchVisible(false);$('se').value=S.sens;$('fv').value=S.fov;show('p')}
 function toMenu(id){music(false);setTouchVisible(false);G.state=id=='m'?'menu':'select';$('hud').style.display='none';$('cx').style.display='none';try{document.exitPointerLock();if(document.fullscreenElement)document.exitFullscreen()}catch(e){}show(id)}
 function buildSel(){let n=0,h='';LV.forEach((l,i)=>{const rc=S.r[i+(HC?100:0)],lk=i>=S.u;if(rc)n++;h+=`<div class="card${lk?' lk':''}" data-a="pl" data-i="${i}" style="--c:#${l.ac.map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join('')}"><b>${i+1}</b><span>${l.nm}</span><small>${rc?fmt(rc.t)+' | '+rc.o+'/'+TOT[i]+' orbs':lk?'Locked':'New'}</small></div>`});$('gd').innerHTML=h;$('pr').textContent='Campaign: '+n+' of 100 levels complete'}
-function win(){G.state='done';setTouchVisible(false);music(false);try{document.exitPointerLock()}catch(e){}
- const i=G.i,ki=i+(HC?100:0),t=G.time,o=G.got,pr=S.r[ki],nb=!pr||t<pr.t;S.r[ki]={t:nb?t:pr.t,o:Math.max(o,pr?pr.o:0)};if(i<99)S.u=Math.max(S.u,i+2);save();snd(660,.5,'triangle',.08,1320);
+function win(){if(G.relays<G.Q.length){hint('EXIT SEALED — activate all three relays first.');return}G.state='done';setTouchVisible(false);music(false);try{document.exitPointerLock()}catch(e){}
+ const i=G.i,ki=i+(HC?100:0),t=G.time,o=G.got,pr=S.r[ki],nb=!pr||t<pr.t;S.r[ki]={t:nb?t:pr.t,o:Math.max(o,pr?pr.o:0),q:G.relays,s:Math.ceil(G.stability)};if(i<99)S.u=Math.max(S.u,i+2);save();snd(660,.5,'triangle',.08,1320);
  const last=i==99;$('dt').textContent=last?'CAMPAIGN COMPLETE':'LEVEL COMPLETE';
- $('ds').textContent=(last?'The fracture is sealed. ':'')+'Time '+fmt(t)+(nb?' (new best)':' (best '+fmt(S.r[ki].t)+')')+'  |  Orbs '+o+'/'+G.O.length;
+ $('ds').textContent=(last?'The fracture is sealed. ':'')+'Time '+fmt(t)+(nb?' (new best)':' (best '+fmt(S.r[ki].t)+')')+'  |  Shards '+o+'/'+G.O.length+'  |  Relays '+G.relays+'/'+G.Q.length+'  |  Stability '+Math.ceil(G.stability)+'%; lives remaining '+G.lives+'.';
  $('nx').style.display=last?'none':'';show('d')}
 let rT;document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a;
  if(a=='cont')play(Math.min(S.u,100)-1);else if(a=='sel'){buildSel();toMenu('s')}else if(a=='menu')toMenu('m');
@@ -280,10 +312,29 @@ function frame(now){requestAnimationFrame(frame);const rd=(now-last)/1000,dt=Mat
  for(const b of G.B){if(!b.on){if(b.t==5||b.t==8)dr(b.x,b.y,b.z,b.hx*2,.1,b.hz*2,b.col,b.ac,.15,0);continue}const hot=b.t==2&&b.tm>0,sh=hot?Math.sin(t*70)*.04:0;
   dr(b.x+sh,b.y+b.jy,b.z,b.hx*2*(1+Math.abs(b.jy)*.15),b.hy*2,b.hz*2*(1+Math.abs(b.jy)*.15),hot?TC[2]:b.col,b.ac,hot?.4:b.wn&&Math.sin(t*30)>0?1:b.t?.25:0,0);
   if(b.cp)dr(b.x,b.sy+b.s*1.4,b.z,.2,2.8,.2,CYAN,CYAN,G.cp.b===b?1.3:.4,0);
-  if(b.goal)dr(b.x,b.sy+b.s*3.5,b.z,.8,7,.8,GOLD,GOLD,1,t)}
+  if(b.goal){
+   dr(b.x,b.sy+b.s*3.5,b.z,.8,7,.8,GOLD,GOLD,1,t);
+   if(G.relays<G.Q.length)dr(b.x,b.sy+b.s*1.45,b.z,1.6,.22,1.6,TC[7],TC[7],.95,t*1.8);
+  }
+  if(b.t==11)dr(b.x,b.y+b.s*.62,b.z,b.hx*1.8,.07,.14,b.hazardOn?TC[7]:b.warnOn?TC[2]:CYAN,b.hazardOn?TC[7]:CYAN,b.hazardOn?1.4:.3,t*1.7);
+  if(b.t==12){
+   dr(b.x,b.crusherY||b.y+b.s*5.8,b.z,1.35,.7,1.35,b.hazardOn?TC[7]:TC[12],b.hazardOn?TC[7]:TC[12],b.hazardOn?1.3:.25,t);
+   dr(b.x-b.hx*.55,b.y+b.s*2.8,b.z,.09,5.2,.09,TC[12],TC[12],.45,0);dr(b.x+b.hx*.55,b.y+b.s*2.8,b.z,.09,5.2,.09,TC[12],TC[12],.45,0);
+  }
+  if(b.t==13){
+   const fc=b.hazardOn?TC[13]:b.warnOn?TC[2]:TC[6];
+   dr(b.x,b.y+b.s*.62,b.z,b.hx*1.7,.08,.16,fc,fc,b.hazardOn?1.2:.25,t*.9);
+   dr(b.x,b.y+b.s*.64,b.z,.16,.08,b.hz*1.7,fc,fc,b.hazardOn?1.2:.25,-t*1.1);
+  }
+ }
  for(const o of G.O)if(!o.k)dr(o.x,o.y+Math.sin(t*3+o.x)*.15,o.z,.5,.5,.5,GOLD,GOLD,1.3,t*2);
  for(const w of G.SW)dr(w.x,w.y+Math.sin(t*3)*.1,w.z,.7,.7,.7,TC[8],TC[8],w.k?.3:1.6,t*3);
- if(G.state=='play')$('hr').textContent=fmt(G.time)+'   orbs '+G.got+'/'+G.O.length+'   '+Math.round(hs*3.6)+' km/h'+(P.dc<=0?'   dash ready':'');
+ for(const q of G.Q){
+  const col=q.on?TC[3]:(q.index===G.relays?CYAN:TC[7]);
+  dr(q.x,q.platform.y+q.platform.s*.82,q.z,.28,.8,.28,col,col,q.on ? .25 : 1.1,t+q.index);
+  dre(q.x,q.y+Math.sin(t*2.5+q.index)*.12,q.z,.36,.36,.36,col,q.on ? .35 : 1.25,t+q.index,q.platform.s<0?Math.PI:0);
+ }
+ if(G.state=='play')$('hr').textContent=fmt(G.time)+' · RELAY '+G.relays+'/'+G.Q.length+' · STABILITY '+Math.ceil(G.stability)+'% · LIVES '+G.lives+' · SHARDS '+G.got+' · '+Math.round(hs*3.6)+' km/h'+(P.dc<=0?' · DASH READY':'');
  if($('dg').classList.contains('on'))$('dg').textContent=`pos ${P.c.map(v=>v.toFixed(2))}\nvel ${P.v.map(v=>v.toFixed(2))}\ngrounded ${P.gr}  gravity ${P.g>0?'down':'up'}\nplatform type ${P.ride?P.ride.t:'-'}  checkpoint ${G.cp&&G.cp.b?'platform':'start'}\nphysics step ${(HS*1000).toFixed(2)} ms (${n} this frame)\nfps ${fps.toFixed(0)}  frame ${ft.toFixed(1)} ms\nresolution scale ${RS}  draw calls ${G.dc}`;
 }
 requestAnimationFrame(frame);
