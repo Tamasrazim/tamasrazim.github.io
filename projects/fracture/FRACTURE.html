@@ -22,6 +22,7 @@ label{display:block;margin:10px 0}input[type=range]{width:200px;vertical-align:m
 #nav-label{overflow:hidden;text-overflow:ellipsis}#nav-distance{opacity:.7}
 @media(max-width:600px) and (orientation:portrait){#nav{top:calc(49px + env(safe-area-inset-top,0px));font-size:9px;padding:7px 10px;gap:6px;max-width:calc(100vw - 18px)}}#stance{position:fixed;right:16px;bottom:16px;z-index:3;display:none;padding:7px 10px;background:#050711b8;border:1px solid #ffffff35;border-radius:9px;font:10px ui-monospace,monospace;letter-spacing:.1em;pointer-events:none}#stance.on{display:block}#combat{position:fixed;left:16px;bottom:16px;z-index:3;display:none;min-width:210px;max-width:min(42vw,340px);padding:10px 12px;background:#050711c9;border:1px solid #ffffff35;border-radius:12px;backdrop-filter:blur(10px);font:11px/1.8 ui-monospace,monospace;pointer-events:none;white-space:pre-line}#combat.on{display:block}#stability-track{height:5px;background:#ffffff20;overflow:hidden;border-radius:9px;margin:3px 0 5px}#stability-fill{height:100%;width:100%;background:#a7ff58;transition:width .12s linear,background .12s linear}#alert{position:fixed;top:18%;left:0;right:0;text-align:center;font:700 clamp(12px,2vw,18px) ui-monospace,monospace;letter-spacing:.14em;color:#ff657a;text-shadow:0 2px 8px #000;opacity:0;pointer-events:none;z-index:3}#alert.on{opacity:1}@media(max-width:560px){#combat{left:10px;bottom:145px;min-width:190px;font-size:10px}}
 #cx{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:#fffa;display:none;pointer-events:none}
+.asset-status{margin-top:13px!important;font:10px/1.7 ui-monospace,monospace!important;letter-spacing:.14em;color:#7beeff;opacity:.78!important;text-transform:uppercase}
 #hint{position:fixed;bottom:12%;left:0;right:0;text-align:center;opacity:0;transition:opacity .6s;pointer-events:none;text-shadow:0 1px 6px #000;font-size:18px}#hint.on{opacity:.95}
 #dg{position:fixed;left:10px;bottom:10px;font:11px monospace;display:none;background:#0009;padding:8px;pointer-events:none}#dg.on{display:block}
 /* Portrait-first mobile layout; gameplay remains full-screen and responsive. */
@@ -98,7 +99,7 @@ canvas{touch-action:none}
 <div id="cx"></div><div id="hud"><div id="hl"></div><div id="hr"></div></div><div id="nav" aria-live="polite"><span id="nav-arrow">▲</span><span id="nav-label">OBJECTIVE</span><span id="nav-distance"></span></div><div id="hint"></div><div id="alert"></div><div id="stance">STANDING</div><div id="combat"><div id="combat-title">SUIT STATUS</div><div id="stability-track"><div id="stability-fill"></div></div><div id="combat-info"></div></div><pre id="dg"></pre>
 <div class="ov" id="m"><div class="gl"><h1>FRACTURE</h1><p>One hundred levels. One broken world. Solve the route. Survive the fracture.</p>
 <button data-a="cont">Continue</button><button data-a="sel">Level select</button><button data-a="hc">Mode: Standard</button><button data-a="rst" id="rb">Reset progress</button>
-<p>WASD move, mouse look, Shift sprint, Space jump, E dash (2 charges), click/hold or F to fire, R reload, Esc pause, M music. Activate 3 relays, eliminate every sentry, collect shards, then escape. Touch: joystick + drag-look; JUMP, DASH, SPRINT, CROUCH / SLIDE, FIRE and RELOAD.</p></div></div>
+<p>WASD move, mouse look, Shift sprint, Space jump, E dash (2 charges), click/hold or F to fire, R reload, Esc pause, M music. Activate 3 relays, eliminate every sentry, collect shards, then escape. Touch: joystick + drag-look; JUMP, DASH, SPRINT, CROUCH / SLIDE, FIRE and RELOAD.</p><p id="texture-status" class="asset-status">LOADING 4K MATERIAL + DECAL ATLASES</p></div></div>
 <div class="ov" id="s"><div class="gl"><h2>Level select</h2><p id="pr"></p><div class="grid" id="gd"></div><button data-a="menu">Back</button></div></div>
 <div class="ov" id="p"><div class="gl"><h2>Paused</h2>
 <label>Mouse sensitivity <input type="range" id="se" min=".3" max="2.5" step=".05"></label>
@@ -162,6 +163,7 @@ const atlasTexture=gl.createTexture();gl.activeTexture(gl.TEXTURE0);gl.bindTextu
 gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([225,225,225,255]));
 gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
 gl.uniform1i(U.uAtlas,0);gl.uniform1f(U.uMat,0);
+const atlasLoadState={ready:0,failed:0};const reportAtlas=ok=>{if(ok)atlasLoadState.ready++;else atlasLoadState.failed++;const el=$('texture-status');if(!el)return;if(atlasLoadState.failed)el.textContent='ATLAS FALLBACK ACTIVE · '+atlasLoadState.ready+'/2 TEXTURES';else el.textContent=atlasLoadState.ready===2?'MATERIALS ONLINE · 16 SURFACES + 16 MARKING SETS':'LOADING ORIGINAL 4K ATLASES · '+atlasLoadState.ready+'/2';};
 const atlasImage=new Image();atlasImage.decoding='async';atlasImage.onload=()=>{
  try{
   const maxSize=gl.getParameter(gl.MAX_TEXTURE_SIZE);let source=atlasImage;
@@ -169,9 +171,9 @@ const atlasImage=new Image();atlasImage.decoding='async';atlasImage.onload=()=>{
   gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,atlasTexture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
   gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,source);gl.generateMipmap(gl.TEXTURE_2D);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-  $('texture-status')&&($('texture-status').textContent='4K MATERIAL ATLAS · 16 SURFACES');
- }catch(err){console.warn('FRACTURE material atlas unavailable:',err)}
-};atlasImage.onerror=()=>console.warn('FRACTURE: material atlas could not be loaded.');
+  reportAtlas(true);
+ }catch(err){console.warn('FRACTURE material atlas unavailable:',err);reportAtlas(false)}
+};atlasImage.onerror=()=>{console.warn('FRACTURE: material atlas could not be loaded.');reportAtlas(false)};
 atlasImage.src='./assets/material-atlas.svg';
 /* A second, transparent 4K atlas supplies sparse vents, route marks, chips and sci-fi insignia. */
 const decalTexture=gl.createTexture();gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,decalTexture);
@@ -184,9 +186,9 @@ const decalImage=new Image();decalImage.decoding='async';decalImage.onload=()=>{
   if(decalImage.naturalWidth>maxSize){const c=document.createElement('canvas');c.width=c.height=maxSize;c.getContext('2d').drawImage(decalImage,0,0,maxSize,maxSize);source=c}
   gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,decalTexture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
   gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,source);gl.generateMipmap(gl.TEXTURE_2D);
-  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
- }catch(err){console.warn('FRACTURE surface markings unavailable:',err)}
-};decalImage.onerror=()=>console.warn('FRACTURE: surface decal atlas could not be loaded.');
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);reportAtlas(true);
+ }catch(err){console.warn('FRACTURE surface markings unavailable:',err);reportAtlas(false)}
+};decalImage.onerror=()=>{console.warn('FRACTURE: surface decal atlas could not be loaded.');reportAtlas(false)};
 decalImage.src='./assets/surface-decals.svg';
 const V=[];for(let a=0;a<3;a++)for(const s of[-1,1]){const u=(a+1)%3,v=(a+2)%3;for(const[i,j]of[[-1,-1],[1,-1],[1,1],[-1,-1],[1,1],[-1,1]]){const p=[0,0,0],n=[0,0,0];p[a]=s*.5;p[u]=i*.5;p[v]=j*.5;n[a]=s;V.push(...p,...n)}}
 const vao=gl.createVertexArray();gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(V),gl.STATIC_DRAW);
