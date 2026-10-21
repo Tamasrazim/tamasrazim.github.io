@@ -487,11 +487,11 @@ const touchRoot=$('touch'),stick=$('stick'),knob=$('knob');
 const touchDevice=()=>matchMedia('(pointer: coarse)').matches||('ontouchstart' in window);
 let stickPointer=null,lookPointer=null,stickX=0,stickY=0,lookX=0,lookY=0;
 const lim=(v,a,b)=>Math.max(a,Math.min(b,v));
-function clearStick(){K.KeyW=K.KeyA=K.KeyS=K.KeyD=K.ShiftLeft=0;stickX=stickY=0;knob.style.transform='translate(0px,0px)';stick.style.left='';stick.style.top=''}
+function clearStick(){K.KeyW=K.KeyA=K.KeyS=K.KeyD=K.ShiftLeft=0;stickX=stickY=0;knob.style.transform='translate(0px,0px)';if(!stick.classList.contains('custom-position')){stick.style.left='';stick.style.top='';stick.style.bottom=''}}
 function setTouchVisible(on){touchRoot.classList.toggle('on',!!on&&touchDevice());if(!touchRoot.classList.contains('on')){clearStick();K.KeyE=K.ShiftLeft=K.KeyF=0;stickPointer=null;lookPointer=null}}
 function updateStick(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,rad=r.width*.47;stickX=lim((e.clientX-cx)/rad,-1,1);stickY=lim((e.clientY-cy)/rad,-1,1);knob.style.transform='translate('+Math.round(stickX*rad*.66)+'px,'+Math.round(stickY*rad*.66)+'px)';K.KeyA=stickX<-.2;K.KeyD=stickX>.2;K.KeyW=stickY<-.2;K.KeyS=stickY>.2;K.ShiftLeft=stickY<-.82&&Math.abs(stickX)<.55}
-stick.addEventListener('pointerdown',e=>{if(!touchDevice()||G.state!=='play')return;e.preventDefault();e.stopPropagation();stickPointer=e.pointerId;const size=stick.offsetWidth;stick.style.left=lim(e.clientX-size/2,8,innerWidth-size-8)+'px';stick.style.top=lim(e.clientY-size/2,48,innerHeight-size-8)+'px';stick.style.bottom='auto';stick.setPointerCapture(e.pointerId);updateStick(e)});
-stick.addEventListener('pointermove',e=>{if(e.pointerId===stickPointer){e.preventDefault();updateStick(e)}});
+stick.addEventListener('pointerdown',e=>{if(touchEditing)return;if(!touchDevice()||G.state!=='play')return;e.preventDefault();e.stopPropagation();stickPointer=e.pointerId;if(!stick.classList.contains('custom-position')){const size=stick.offsetWidth;stick.style.left=lim(e.clientX-size/2,8,innerWidth-size-8)+'px';stick.style.top=lim(e.clientY-size/2,48,innerHeight-size-8)+'px';stick.style.bottom='auto'}stick.setPointerCapture(e.pointerId);updateStick(e)});
+stick.addEventListener('pointermove',e=>{if(touchEditing)return;if(e.pointerId===stickPointer){e.preventDefault();updateStick(e)}});
 function releaseStick(e){if(e.pointerId!==stickPointer)return;stickPointer=null;clearStick()}
 stick.addEventListener('pointerup',releaseStick);stick.addEventListener('pointercancel',releaseStick);stick.addEventListener('lostpointercapture',releaseStick);
 document.querySelectorAll('[data-touch]').forEach(btn=>{
