@@ -1404,8 +1404,35 @@ select.mini{
 }
 </script>
 <link rel="stylesheet" href="/assets/css/monochrome.css?v=20261010-1">
+<style>
+#trilyvaPasswordGate{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:24px;background:rgba(5,5,6,.98);color:#f2f2f4;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+#trilyvaPasswordGate form{width:min(100%,390px);padding:clamp(24px,6vw,40px);border:1px solid #33333a;border-radius:18px;background:linear-gradient(145deg,#151518,#09090a);box-shadow:0 24px 100px #0008}
+#trilyvaPasswordGate .trilyva-gate-mark{font:700 12px ui-monospace,monospace;letter-spacing:.16em}
+#trilyvaPasswordGate .trilyva-gate-mark span{color:#777780;font-weight:400}
+#trilyvaPasswordGate h1{font-size:clamp(25px,5vw,34px);letter-spacing:-.04em;margin:34px 0 8px}
+#trilyvaPasswordGate p{color:#a4a4ad;font-size:14px;margin:0 0 26px}
+#trilyvaPasswordGate label{display:block;font:11px ui-monospace,monospace;letter-spacing:.14em;color:#a4a4ad;margin-bottom:8px}
+#trilyvaGatePassword{display:block;width:100%;box-sizing:border-box;padding:13px 14px;border:1px solid #3a3a42;border-radius:9px;background:#080809;color:#fff;font:16px ui-monospace,monospace;outline:none}
+#trilyvaGatePassword:focus{border-color:#bcbcc5}
+#trilyvaGateSubmit{width:100%;margin-top:12px;padding:13px;border:0;border-radius:9px;background:#f2f2f4;color:#080809;font-weight:750;cursor:pointer}
+#trilyvaGateSubmit:disabled{opacity:.55;cursor:wait}
+#trilyvaGateError{min-height:18px;margin-top:12px;color:#ffaaaa;font-size:12px}
+#trilyvaPasswordGate small{display:block;margin-top:18px;color:#73737c;font-size:11px}
+</style>
 </head>
 <body>
+<div id="trilyvaPasswordGate" role="dialog" aria-modal="true" aria-labelledby="trilyvaGateTitle">
+  <form id="trilyvaPasswordForm" autocomplete="off">
+    <div class="trilyva-gate-mark">TRILYVA <span>· TAMASRAZIM</span></div>
+    <h1 id="trilyvaGateTitle">Access required</h1>
+    <p>Enter your password to open the renderer.</p>
+    <label for="trilyvaGatePassword">PASSWORD</label>
+    <input id="trilyvaGatePassword" type="password" autocomplete="current-password" required autofocus>
+    <button id="trilyvaGateSubmit" type="submit">Unlock TRILYVA</button>
+    <div id="trilyvaGateError" role="alert" aria-live="polite"></div>
+    <small>Access resets when this page is refreshed.</small>
+  </form>
+</div>
 <div id="grain" aria-hidden="true"></div>
 <div id="renderTargetHost" aria-hidden="true"></div>
 <div id="cursor" aria-hidden="true"></div>
@@ -7291,6 +7318,11 @@ function showPreflightFailure(job, pre) {
 }
 function startRender(job, opts) {
   opts = opts || {};
+  /* The page-entry gate sets this only after SHA-256 verification. */
+  if (renderAccessMode === null && window.__TRILYVA_ACCESS_MODE) {
+    renderAccessMode = window.__TRILYVA_ACCESS_MODE;
+    singleRenderPermit = renderAccessMode === 'single';
+  }
   /* Render access is intentionally volatile: reloading the page clears it. */
   if (renderAccessMode !== 'unlimited' &&
       !(renderAccessMode === 'single' && singleRenderPermit)) {
@@ -9038,6 +9070,48 @@ function boot() {
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
 else boot();
+})();
+</script>
+<script>
+(function(){
+  var gate=document.getElementById('trilyvaPasswordGate');
+  var form=document.getElementById('trilyvaPasswordForm');
+  var input=document.getElementById('trilyvaGatePassword');
+  var button=document.getElementById('trilyvaGateSubmit');
+  var error=document.getElementById('trilyvaGateError');
+  var unlimitedHash='8825ae35e4685a47fcfb8a76ccfc42cf2037a78ada722c115856840b200d90f5';
+  var singleHash='d438906f29bd6a84465c288a73fa994dd6f53665fd987a9d239a1cc53248c35b';
+  document.documentElement.style.overflow='hidden';
+  document.body.style.overflow='hidden';
+  input.focus();
+  form.addEventListener('submit',function(event){
+    event.preventDefault();
+    error.textContent='';
+    button.disabled=true;
+    button.textContent='Verifying…';
+    if(!window.crypto||!window.crypto.subtle){
+      error.textContent='Secure password verification is unavailable in this browser.';
+      button.disabled=false;button.textContent='Unlock TRILYVA';return;
+    }
+    window.crypto.subtle.digest('SHA-256',new TextEncoder().encode(input.value)).then(function(buffer){
+      var hash=Array.prototype.map.call(new Uint8Array(buffer),function(b){return b.toString(16).padStart(2,'0');}).join('');
+      if(hash===unlimitedHash){
+        window.__TRILYVA_ACCESS_MODE='unlimited';
+      }else if(hash===singleHash){
+        window.__TRILYVA_ACCESS_MODE='single';
+      }else{
+        error.textContent='Incorrect password. Try again.';
+        input.value='';input.focus();button.disabled=false;button.textContent='Unlock TRILYVA';return;
+      }
+      gate.remove();
+      document.documentElement.style.overflow='';
+      document.body.style.overflow='';
+      window.dispatchEvent(new CustomEvent('trilyva:unlocked',{detail:{mode:window.__TRILYVA_ACCESS_MODE}}));
+    }).catch(function(){
+      error.textContent='Password verification failed. Please try again.';
+      button.disabled=false;button.textContent='Unlock TRILYVA';
+    });
+  });
 })();
 </script>
 <script>
