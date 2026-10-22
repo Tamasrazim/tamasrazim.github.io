@@ -1549,6 +1549,15 @@ html:has(#trilyvaPasswordGate)::after{display:none!important}
  #trilyvaPasswordGate form,#trilyvaPasswordGate .trilyva-gate-console::before,#trilyvaPasswordGate .trilyva-gate-console::after,#trilyvaPasswordGate .trilyva-gate-reactor,#trilyvaPasswordGate .trilyva-gate-reactor::before,#trilyvaPasswordGate .trilyva-gate-reactor i,#trilyvaPasswordGate .trilyva-gate-round-segments i.active,#trilyvaPasswordGate .trilyva-gate-tile,#trilyvaPasswordGate .trilyva-gate-mode-toggle span,#trilyvaPasswordGate .trilyva-gate-console-led{animation:none!important;transition:none!important}
  #trilyvaPasswordGate .trilyva-gate-tile.is-lit{transform:none!important}
 }
+
+/* Strict black, white and grey palette; no red tint survives this filter. */
+#trilyvaPasswordGate{filter:grayscale(1)}
+#trilyvaPasswordGate .trilyva-gate-round-segments{grid-template-columns:repeat(4,1fr)}
+#trilyvaPasswordGate .trilyva-gate-round-segments i{width:clamp(13px,4.5vw,21px)}
+#trilyvaPasswordGate .trilyva-gate-tile.is-miss{background:#292929;border-color:#fff}
+#trilyvaPasswordGate .trilyva-gate-tile.is-lit{background:linear-gradient(145deg,#eee,#686868);border-color:#fff;color:#050505}
+#trilyvaPasswordGate .trilyva-gate-tile.is-lit .trilyva-gate-tile-symbol{color:#050505;text-shadow:0 0 12px #fff}
+#trilyvaPasswordGate .trilyva-gate-progress-track i{background:linear-gradient(90deg,#777,#fff);box-shadow:0 0 10px rgba(255,255,255,.65)}
 </style>
 </head>
 <body>
@@ -1598,7 +1607,7 @@ html:has(#trilyvaPasswordGate)::after{display:none!important}
     <div class="trilyva-gate-ticker" aria-hidden="true"><div class="trilyva-gate-ticker-track"><span><strong>ATTENTION</strong> / SYNCHRONIZE THE PULSE / VERIFY SIGNAL / ACCESS LOCKED / DO NOT LOSE THE PATTERN / </span><span><strong>ATTENTION</strong> / SYNCHRONIZE THE PULSE / VERIFY SIGNAL / ACCESS LOCKED / DO NOT LOSE THE PATTERN / </span></div></div>
     <div class="trilyva-gate-systemline" aria-hidden="true">LIVE SIGNAL // AUTHORIZATION TEST // ACTIVE</div>
     <h1 id="trilyvaGateTitle" data-glitch="SIGNAL SYNCHRONIZATION">Access required</h1>
-    <p id="trilyvaGateDescription">Memorise the pulse sequence and repeat it across three rounds — or switch to password access.</p>
+    <p id="trilyvaGateDescription">Four phases. Memorise 6, 8, 10, then 12 pulses. One mistake regenerates the phase; replay is limited.</p>
     <section id="trilyvaGatePuzzle" class="trilyva-gate-console" aria-label="Signal memory puzzle">
       <div class="trilyva-gate-console-head">
         <span class="trilyva-gate-console-label"><i class="trilyva-gate-console-led"></i> SIGNAL MEMORY PROTOCOL</span>
@@ -1606,12 +1615,12 @@ html:has(#trilyvaPasswordGate)::after{display:none!important}
         <span class="trilyva-gate-console-code">TRI-04</span>
       </div>
       <div class="trilyva-gate-round-row">
-        <span id="trilyvaGateRound">PHASE 01 / 03</span>
-        <div class="trilyva-gate-round-segments" id="trilyvaGateRoundSegments" aria-hidden="true"><i class="active"></i><i></i><i></i></div>
+        <span id="trilyvaGateRound">PHASE 01 / 04</span>
+        <div class="trilyva-gate-round-segments" id="trilyvaGateRoundSegments" aria-hidden="true"><i class="active"></i><i></i><i></i><i></i></div>
       </div>
       <div class="trilyva-gate-instruction-row">
         <span id="trilyvaGateInstruction" role="status" aria-live="polite">INITIALIZING SIGNAL…</span>
-        <span id="trilyvaGateSequenceProgress">0 / 3</span>
+        <span id="trilyvaGateSequenceProgress">0 / 6</span>
       </div>
       <div class="trilyva-gate-tiles" role="group" aria-label="Repeat the displayed pulse sequence">
         <button type="button" class="trilyva-gate-tile" data-pulse="0" aria-label="Pulse one, triangle"><span class="trilyva-gate-tile-number">01</span><span class="trilyva-gate-tile-symbol" aria-hidden="true">▲</span><span class="trilyva-gate-tile-name">ALPHA</span><i aria-hidden="true"></i></button>
@@ -1620,7 +1629,7 @@ html:has(#trilyvaPasswordGate)::after{display:none!important}
         <button type="button" class="trilyva-gate-tile" data-pulse="3" aria-label="Pulse four, square"><span class="trilyva-gate-tile-number">04</span><span class="trilyva-gate-tile-symbol" aria-hidden="true">■</span><span class="trilyva-gate-tile-name">DELTA</span><i aria-hidden="true"></i></button>
       </div>
       <div class="trilyva-gate-console-foot">
-        <button id="trilyvaGateReplay" type="button" class="trilyva-gate-replay"><span aria-hidden="true">↻</span> REPLAY SIGNAL</button>
+        <button id="trilyvaGateReplay" type="button" class="trilyva-gate-replay">↻ REPLAY SIGNAL · 1 LEFT</button>
         <span id="trilyvaGatePuzzleStatus" aria-live="polite">CALIBRATING // PLEASE WAIT</span>
       </div>
       <div class="trilyva-gate-progress-track" aria-hidden="true"><i id="trilyvaGateInputProgress"></i></div>
@@ -1633,7 +1642,7 @@ html:has(#trilyvaPasswordGate)::after{display:none!important}
       <button id="trilyvaGateSubmit" type="submit">Unlock TRILYVA</button>
     </section>
     <div id="trilyvaGateError" role="alert" aria-live="polite"></div>
-    <small>THREE PHASES. ONE SIGNAL. PUZZLE ACCESS GRANTS A SINGLE RENDER; REFRESH TO RESET.</small>
+    <small>FOUR PHASES. 36 PULSES. ONE REPLAY PER PHASE. ONE ERROR REGENERATES THE SIGNAL.</small>
     <a href="mailto:trilyva@tamasrazim.anonaddy.com">Ask for password</a>
   </form>
 </div>
@@ -9345,22 +9354,29 @@ else boot();
   var showingPassword=false;
   var puzzleUnlocked=false;
   var unlocked=false;
-  var roundLengths=[3,4,5];
+  var roundLengths=[6,8,10,12];
+  var replayRemaining=1;
+  var pulseDurations=[310,245,190,145];
+  var pulseGaps=[110,88,68,52];
   document.documentElement.style.overflow='hidden';
   document.body.style.overflow='hidden';
 
   function wait(ms){return new Promise(function(resolve){window.setTimeout(resolve,ms);});}
   function showError(message){error.textContent=message||'';}
+  function updateReplayButton(enabled){
+    replayButton.disabled=!enabled||replayRemaining<1;
+    replayButton.textContent=replayRemaining>0?'↻ REPLAY SIGNAL · '+replayRemaining+' LEFT':'REPLAY LOCKED · 0 LEFT';
+  }
   function setTilesEnabled(enabled){
     tiles.forEach(function(tile){tile.disabled=!enabled;});
-    replayButton.disabled=!enabled;
+    updateReplayButton(enabled);
   }
   function setProgress(done,total){
     sequenceProgress.textContent=done+' / '+total;
     inputProgress.style.width=(total?Math.round(done/total*100):0)+'%';
   }
   function updateRoundUI(){
-    roundLabel.textContent='PHASE '+String(currentRound).padStart(2,'0')+' / 03';
+    roundLabel.textContent='PHASE '+String(currentRound).padStart(2,'0')+' / 04';
     var segments=roundSegments.querySelectorAll('i');
     Array.prototype.forEach.call(segments,function(segment,index){
       segment.classList.toggle('active',index===currentRound-1);
@@ -9370,14 +9386,15 @@ else boot();
   }
   function makeSequence(length){
     sequence=[];
-    for(var i=0;i<length;i++){
-      var next=Math.floor(Math.random()*4);
-      if(i>0&&next===sequence[i-1]) next=(next+1+Math.floor(Math.random()*3))%4;
-      sequence.push(next);
-    }
+    for(var i=0;i<length;i++) sequence.push(Math.floor(Math.random()*4));
   }
-  async function playSequence(){
+  async function playSequence(isReplay){
     if(showingPassword||isPlaying||puzzleUnlocked||unlocked)return;
+    if(isReplay){
+      if(replayRemaining<1)return;
+      replayRemaining--;
+      updateReplayButton(false);
+    }
     isPlaying=true;
     expectedPosition=0;
     setTilesEnabled(false);
@@ -9390,9 +9407,9 @@ else boot();
       var tile=tiles[sequence[i]];
       tile.classList.add('is-lit');
       puzzleStatus.textContent='PULSE '+String(i+1).padStart(2,'0')+' / '+String(sequence.length).padStart(2,'0');
-      await wait(340);
+      await wait(pulseDurations[currentRound-1]||145);
       tile.classList.remove('is-lit');
-      await wait(145);
+      await wait(pulseGaps[currentRound-1]||52);
     }
     isPlaying=false;
     setTilesEnabled(true);
@@ -9402,6 +9419,8 @@ else boot();
   function beginRound(round){
     if(unlocked||showingPassword)return;
     currentRound=round;
+    replayRemaining=1;
+    updateReplayButton(false);
     makeSequence(roundLengths[currentRound-1]);
     updateRoundUI();
     instruction.textContent='MEMORIZE THE NEXT PATTERN';
@@ -9427,15 +9446,17 @@ else boot();
     tile.classList.add('is-miss');
     window.setTimeout(function(){tile.classList.remove('is-miss');},380);
     expectedPosition=0;
+    replayRemaining=0;
     setProgress(0,sequence.length);
     isPlaying=true;
     setTilesEnabled(false);
-    instruction.textContent='SIGNAL DESYNC // RESTARTING';
-    puzzleStatus.textContent='MISMATCH DETECTED — REPLAY INCOMING';
+    instruction.textContent='SIGNAL DESYNC // PHASE REJECTED';
+    puzzleStatus.textContent='PATTERN INVALID — NEW SIGNAL GENERATED';
     window.setTimeout(function(){
       isPlaying=false;
-      playSequence();
-    },600);
+      makeSequence(roundLengths[currentRound-1]);
+      playSequence(false);
+    },720);
   }
   tiles.forEach(function(tile){
     tile.disabled=true;
@@ -9456,7 +9477,7 @@ else boot();
       setTilesEnabled(false);
       roundSegments.querySelectorAll('i')[currentRound-1].classList.add('done');
       roundSegments.querySelectorAll('i')[currentRound-1].classList.remove('active');
-      if(currentRound>=3){
+      if(currentRound>=4){
         gate.classList.add('is-success');
         instruction.textContent='ALL SIGNALS VERIFIED';
         puzzleStatus.textContent='AUTHORIZATION ACCEPTED';
@@ -9472,7 +9493,7 @@ else boot();
       }
     });
   });
-  replayButton.addEventListener('click',function(){playSequence();});
+  replayButton.addEventListener('click',function(){playSequence(true);});
   toggleMode.addEventListener('click',function(){
     showingPassword=!showingPassword;
     puzzle.hidden=showingPassword;
@@ -9481,7 +9502,7 @@ else boot();
     toggleMode.innerHTML=showingPassword?'BACK TO PUZZLE <span aria-hidden="true">↻</span>':'USE PASSWORD INSTEAD <span aria-hidden="true">↗</span>';
     title.textContent=showingPassword?'Password access':'Access required';
     title.setAttribute('data-glitch',showingPassword?'PASSWORD REQUIRED':'SIGNAL SYNCHRONIZATION');
-    description.textContent=showingPassword?'Enter your access password to unlock TRILYVA.':'Memorise the pulse sequence and repeat it across three rounds — or switch to password access.';
+    description.textContent=showingPassword?'Enter your access password to unlock TRILYVA.':'Four phases. Memorise 6, 8, 10, then 12 pulses. One mistake regenerates the phase; replay is limited.';
     showError('');
     if(showingPassword){input.focus();submitButton.textContent='Unlock TRILYVA';}
     else{input.value='';}
