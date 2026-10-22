@@ -1416,9 +1416,13 @@ select.mini{
 #trilyvaPasswordGate .trilyva-gate-brand{display:flex;flex-direction:column;align-items:flex-start;gap:16px;margin-bottom:26px}#trilyvaPasswordGate .trilyva-gate-logo{display:block;width:clamp(108px,32vw,150px);height:auto;aspect-ratio:1;object-fit:contain}#trilyvaPasswordGate h1{margin-top:0}
 #trilyvaPasswordGate .trilyva-gate-mark span{color:#777780;font-weight:400}
 #trilyvaPasswordGate .trilyva-gate-brand{display:block;margin-bottom:25px}
-#trilyvaPasswordGate .trilyva-gate-animation{display:block;width:100%;height:auto;overflow:hidden;background:#030303;border:1px solid rgba(240,0,0,.38);border-radius:10px;box-shadow:0 0 30px rgba(240,0,0,.07)}
+#trilyvaPasswordGate .trilyva-gate-animation{display:block;width:100%;height:auto;overflow:hidden;background:#030303;border:0;border-radius:0;box-shadow:none}
 html:has(#trilyvaPasswordGate)::after{display:none!important}
-@media(prefers-reduced-motion:reduce){#trilyvaPasswordGate .trilyva-gate-animation animateTransform{display:none!important}}
+@media(prefers-reduced-motion:reduce){
+  #trilyvaPasswordGate .trilyva-gate-animation animate,
+  #trilyvaPasswordGate .trilyva-gate-animation animateTransform{display:none!important}
+  #trilyvaPasswordGate #trilyvaGateWordReveal{opacity:1!important;transform:none!important;filter:none!important}
+}
 #trilyvaPasswordGate h1{font-size:clamp(25px,5vw,34px);letter-spacing:-.04em;margin:34px 0 8px}
 #trilyvaPasswordGate p{color:#a4a4ad;font-size:14px;margin:0 0 26px}
 #trilyvaPasswordGate label{display:block;font:11px ui-monospace,monospace;letter-spacing:.14em;color:#a4a4ad;margin-bottom:8px}
@@ -1436,14 +1440,13 @@ html:has(#trilyvaPasswordGate)::after{display:none!important}
     <div class="trilyva-gate-brand">
       <svg class="trilyva-gate-animation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 170" role="img" aria-labelledby="trilyvaGateAnimationTitle trilyvaGateAnimationDesc">
         <title id="trilyvaGateAnimationTitle">Trilyva metallic wordmark animation</title>
-        <desc id="trilyvaGateAnimationDesc">The same black, subtle-grid and two-second metallic white-gradient reveal used by the Tamasrazim site intro, adapted to the Trilyva wordmark.</desc>
+        <desc id="trilyvaGateAnimationDesc">Trilyva uses the same two-second metallic gradient sweep, Unbounded typography, dark grid and soft reveal as the Tamasrazim site intro.</desc>
         <defs>
           <pattern id="trilyvaGateGrid" width="52" height="52" patternUnits="userSpaceOnUse">
             <path d="M52 0H0V52" fill="none" stroke="#fff" stroke-width="1" opacity=".08"/>
           </pattern>
-          <radialGradient id="trilyvaGateGridFade">
+          <radialGradient id="trilyvaGateGridFade" cx="50%" cy="50%" r="78%">
             <stop offset="0" stop-color="#fff"/>
-            <stop offset=".78" stop-color="#fff" stop-opacity=".65"/>
             <stop offset="1" stop-color="#000"/>
           </radialGradient>
           <mask id="trilyvaGateGridMask">
@@ -1458,10 +1461,19 @@ html:has(#trilyvaPasswordGate)::after{display:none!important}
             <stop offset="1" stop-color="#c9c9c9"/>
             <animateTransform attributeName="gradientTransform" type="translate" values="-1.4 0;1.96 0" dur="2s" calcMode="linear" fill="freeze"/>
           </linearGradient>
+          <filter id="trilyvaGateRevealBlur" x="-20%" y="-100%" width="140%" height="300%">
+            <feGaussianBlur stdDeviation="5">
+              <animate attributeName="stdDeviation" values="5;0" dur=".42s" fill="freeze"/>
+            </feGaussianBlur>
+          </filter>
         </defs>
         <rect width="640" height="170" fill="#030303"/>
         <rect width="640" height="170" fill="url(#trilyvaGateGrid)" mask="url(#trilyvaGateGridMask)"/>
-        <text x="320" y="98" text-anchor="middle" font-family="Unbounded, sans-serif" font-size="74" font-weight="600" letter-spacing="-7.03" fill="url(#trilyvaGateWhiteSweep)">Trilyva.</text>
+        <g id="trilyvaGateWordReveal" opacity="0" transform="translate(0 10)" filter="url(#trilyvaGateRevealBlur)">
+          <animate attributeName="opacity" values="0;1" dur=".42s" fill="freeze"/>
+          <animateTransform attributeName="transform" type="translate" values="0 10;0 0" dur=".55s" calcMode="spline" keyTimes="0;1" keySplines=".2 .75 .15 1" fill="freeze"/>
+          <text x="320" y="98" text-anchor="middle" font-family="Unbounded, sans-serif" font-size="74" font-weight="600" letter-spacing="-7.03" fill="url(#trilyvaGateWhiteSweep)">Trilyva.</text>
+        </g>
         <path d="M112 132H528" fill="none" stroke="#f00000" stroke-width="1.2" opacity=".68"/>
       </svg>
     </div>
