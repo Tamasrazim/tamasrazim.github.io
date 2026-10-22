@@ -4949,19 +4949,7 @@ function openTrilyvaLibrary(){
         $('#stMsg').textContent='Downloaded library metadata catalog CSV';
       }catch(e){$('#stMsg').textContent='Catalog download failed · '+String(e.message||e);}
     };
-    var renderAllDotMesh=document.createElement('button');
-    renderAllDotMesh.type='button';
-    renderAllDotMesh.textContent='RENDER ALL DOT MESH';
-    renderAllDotMesh.style.cssText='border:1px solid var(--rule);padding:7px 10px;background:#fff;color:#000;font:10px var(--mono);font-weight:700;letter-spacing:.06em;cursor:pointer;display:none;white-space:nowrap;';
-    renderAllDotMesh.title='Render all 50 Dot Mesh designs and save MP4, SVG and metadata files directly to a folder';
-    renderAllDotMesh.onclick=function(){
-      if(!active||active.id!=='dot-mesh'){
-        $('#stMsg').textContent='Select DOT MESH · 50 first.';
-        return;
-      }
-      openDotMeshFolderPicker();
-    };
-    toolbar.append(tabs,search,catalog,renderAllDotMesh);
+    toolbar.append(tabs,search,catalog);
 
     var list=document.createElement('div');
     list.className='list';
@@ -4976,7 +4964,6 @@ function openTrilyvaLibrary(){
 
     function setTabs(){
       catalog.style.display=active&&typeof active.catalogCsv==='function'?'inline-flex':'none';
-      renderAllDotMesh.style.display=active&&active.id==='dot-mesh'?'inline-flex':'none';
       tabs.replaceChildren();
       libs.forEach(function(lib){
         var btn=document.createElement('button');
