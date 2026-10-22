@@ -1,12 +1,13 @@
 // What this does: Caches the renderer's files so the Code Motion workspace can reopen more reliably when the network is unavailable.
 
-const CACHE = 'tamasrazim-trilyva-pwa-v114';
+const CACHE = 'tamasrazim-trilyva-pwa-v115';
 const CORE = [
   './',
   './index.html',
   '/assets/brand/trilyva/T.svg',
   './media-stack.js',
   './movie-finalizer.js',
+  './firebase-analytics.js',
   './manifest.webmanifest',
   './library/library.js',
   './library/dot-mesh-library.js',
