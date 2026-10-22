@@ -4199,6 +4199,10 @@ var APP_VERSION = '1.2.8';
 var SOFTWARE = 'TRILYVA — Tamasrazim';
 
 var LIBRARY_PASSWORD_SHA256 = '8825ae35e4685a47fcfb8a76ccfc42cf2037a78ada722c115856840b200d90f5';
+var RENDER_UNLIMITED_PASSWORD_SHA256 = '8825ae35e4685a47fcfb8a76ccfc42cf2037a78ada722c115856840b200d90f5';
+var RENDER_SINGLE_PASSWORD_SHA256 = 'd438906f29bd6a84465c288a73fa994dd6f53665fd987a9d239a1cc53248c35b';
+var renderAccessMode = null; // In-memory only; refresh resets access.
+var singleRenderPermit = false;
 var libraryModulePromise = null;
 
 function sha256Hex(text) {
@@ -7287,6 +7291,31 @@ function showPreflightFailure(job, pre) {
 }
 function startRender(job, opts) {
   opts = opts || {};
+  /* Render access is intentionally volatile: reloading the page clears it. */
+  if (renderAccessMode !== 'unlimited' &&
+      !(renderAccessMode === 'single' && singleRenderPermit)) {
+    var entered = window.prompt('TRILYVA RENDER ACCESS\\nEnter a render password. Unlimited access lasts until refresh; the other password authorizes one render.');
+    if (entered === null) {
+      return Promise.resolve({ ok:false, stage:'access', error:{ name:'RenderAccessCancelled', message:'Render cancelled: access code was not entered.', detail:'No render was started.' } });
+    }
+    return sha256Hex(entered).then(function (hash) {
+      if (hash === RENDER_UNLIMITED_PASSWORD_SHA256) {
+        renderAccessMode = 'unlimited';
+        singleRenderPermit = false;
+      } else if (hash === RENDER_SINGLE_PASSWORD_SHA256) {
+        renderAccessMode = 'single';
+        singleRenderPermit = true;
+      } else {
+        throw new Error('Incorrect render password.');
+      }
+      var nextOpts = Object.assign({}, opts, { _renderAccessChecked:true });
+      return startRender(job, nextOpts);
+    }).catch(function (err) {
+      var message = String(err && err.message || err);
+      try { $('#stMsg').textContent = message; } catch (_) {}
+      return { ok:false, stage:'access', error:{ name:'RenderAccessError', message:message, detail:'The render did not start because access verification failed.' } };
+    });
+  }
   if (S.rendering) {
     return Promise.resolve({
       ok: false,
@@ -7306,6 +7335,13 @@ function startRender(job, opts) {
     /* Guard synchronous startup exceptions too. A thrown DOM/setup error must
        never leave S.rendering stuck and silently invalidate every later item. */
     return Promise.resolve().then(function () {
+      /* Consume a one-render grant only when the render is about to start. */
+      if (renderAccessMode === 'single') {
+        if (!singleRenderPermit) {
+          return { ok:false, stage:'access', error:{ name:'RenderAccessUsed', message:'The single-render password has already been used.', detail:'Enter a render password to start another render.' } };
+        }
+        singleRenderPermit = false;
+      }
       return startRenderNow(job, opts);
     }).catch(function (e) {
       if (S.activeJob === job) {
