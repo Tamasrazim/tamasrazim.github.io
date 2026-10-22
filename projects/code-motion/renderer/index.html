@@ -110,6 +110,8 @@ body.has-cursor #cursor{opacity:.5}
   border-bottom:1px solid var(--rule);background:var(--panel);position:relative;z-index:40;
 }
 .brand{display:flex;align-items:center;gap:8px;padding:0 14px;border-right:1px solid var(--rule);white-space:nowrap}
+.trilyva-app-logo{display:block;width:36px;height:36px;object-fit:contain;flex:0 0 auto}.trilyva-brand-copy{display:flex;align-items:center;gap:8px}.trilyva-brand-copy em{margin-top:0;align-self:center}
+@media(max-width:560px){.trilyva-app-logo{width:30px;height:30px}.trilyva-brand-copy{gap:5px}.trilyva-brand-copy b{font-size:10px}.trilyva-brand-copy em{font-size:8px;letter-spacing:.13em}}
 .brand b{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.14em}
 .brand .ar{font-family:var(--mono);font-size:12px;color:var(--mut);display:inline-block;animation:arrow 3.4s ease-in-out infinite}
 @keyframes arrow{0%,66%,100%{transform:translateX(0);opacity:.5}75%{transform:translateX(3px);opacity:1}}
@@ -1408,6 +1410,7 @@ select.mini{
 #trilyvaPasswordGate{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:24px;background:rgba(5,5,6,.98);color:#f2f2f4;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
 #trilyvaPasswordGate form{width:min(100%,390px);padding:clamp(24px,6vw,40px);border:1px solid #33333a;border-radius:18px;background:linear-gradient(145deg,#151518,#09090a);box-shadow:0 24px 100px #0008}
 #trilyvaPasswordGate .trilyva-gate-mark{font:700 12px ui-monospace,monospace;letter-spacing:.16em}
+#trilyvaPasswordGate .trilyva-gate-brand{display:flex;flex-direction:column;align-items:flex-start;gap:16px;margin-bottom:26px}#trilyvaPasswordGate .trilyva-gate-logo{display:block;width:clamp(108px,32vw,150px);height:auto;aspect-ratio:1;object-fit:contain}#trilyvaPasswordGate h1{margin-top:0}
 #trilyvaPasswordGate .trilyva-gate-mark span{color:#777780;font-weight:400}
 #trilyvaPasswordGate h1{font-size:clamp(25px,5vw,34px);letter-spacing:-.04em;margin:34px 0 8px}
 #trilyvaPasswordGate p{color:#a4a4ad;font-size:14px;margin:0 0 26px}
@@ -1423,7 +1426,7 @@ select.mini{
 <body>
 <div id="trilyvaPasswordGate" role="dialog" aria-modal="true" aria-labelledby="trilyvaGateTitle">
   <form id="trilyvaPasswordForm" autocomplete="off">
-    <div class="trilyva-gate-mark">TRILYVA <span>· TAMASRAZIM</span></div>
+    <div class="trilyva-gate-brand"><img class="trilyva-gate-logo" src="/assets/brand/trilyva/T.svg" alt="" width="150" height="150"><div class="trilyva-gate-mark">TRILYVA <span>· TAMASRAZIM</span></div></div>
     <h1 id="trilyvaGateTitle">Access required</h1>
     <p>Enter your password to open the renderer.</p>
     <label for="trilyvaGatePassword">PASSWORD</label>
@@ -1441,7 +1444,7 @@ select.mini{
 <div id="app">
 
   <header id="hdr">
-    <div class="brand"><b>TRILYVA</b><em>TAMASRAZIM</em></div>
+    <div class="brand"><img class="trilyva-app-logo" src="/assets/brand/trilyva/T.svg" alt="" width="36" height="36"><span class="trilyva-brand-copy"><b>TRILYVA</b><em>TAMASRAZIM</em></span></div>
     <div class="proj" id="projWrap">
       <input id="projName" value="Untitled" aria-label="Project name" spellcheck="false">
       <span class="vtag num" id="projVer">v1</span>
