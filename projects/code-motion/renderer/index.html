@@ -1410,12 +1410,18 @@ select.mini{
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/monochrome.css?v=20261010-1">
 <style>
-#trilyvaPasswordGate{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:24px;background:rgba(5,5,6,.98);color:#f2f2f4;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-#trilyvaPasswordGate form{width:min(100%,390px);padding:clamp(24px,6vw,40px);border:1px solid #33333a;border-radius:18px;background:linear-gradient(145deg,#151518,#09090a);box-shadow:0 24px 100px #0008}
+#trilyvaPasswordGate{position:fixed;isolation:isolate;inset:0;z-index:2147483647;display:grid;place-items:center;padding:24px;background:#030303;color:#f2f2f4;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden}
+#trilyvaPasswordGate::before{content:"";position:absolute;inset:-4%;z-index:0;pointer-events:none;opacity:.4;background:radial-gradient(ellipse at 13% 19%,rgba(240,0,0,.13),transparent 36%),radial-gradient(ellipse at 89% 84%,rgba(240,0,0,.1),transparent 32%),linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:auto,auto,48px 48px,48px 48px;mask-image:radial-gradient(ellipse at center,#000 18%,transparent 85%);animation:trilyva-gate-grid-nag 13s linear infinite}
+#trilyvaPasswordGate::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.35;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 5px),linear-gradient(180deg,transparent 0%,rgba(240,0,0,.12) 48%,transparent 100%);background-size:100% 5px,100% 180%;animation:trilyva-gate-scan-nag 6.5s linear infinite}
+#trilyvaPasswordGate form{position:relative;z-index:2;width:min(100%,390px);padding:clamp(24px,6vw,40px);border:1px solid #3b171a;border-radius:2px;background:linear-gradient(145deg,rgba(17,17,19,.97),rgba(5,5,6,.99));box-shadow:0 24px 100px #000,0 0 0 1px rgba(240,0,0,.1),0 0 38px rgba(240,0,0,.07);animation:trilyva-gate-card-nag 5.4s ease-in-out infinite,trilyva-gate-border-nag 2.8s ease-in-out infinite}
 #trilyvaPasswordGate .trilyva-gate-mark{font:700 12px ui-monospace,monospace;letter-spacing:.16em}
 #trilyvaPasswordGate .trilyva-gate-brand{display:flex;flex-direction:column;align-items:flex-start;gap:16px;margin-bottom:26px}#trilyvaPasswordGate .trilyva-gate-logo{display:block;width:clamp(108px,32vw,150px);height:auto;aspect-ratio:1;object-fit:contain}#trilyvaPasswordGate h1{margin-top:0}
 #trilyvaPasswordGate .trilyva-gate-mark span{color:#777780;font-weight:400}
-#trilyvaPasswordGate .trilyva-gate-brand{display:block;margin-bottom:25px}
+#trilyvaPasswordGate .trilyva-gate-alert{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 17px;padding:8px 9px;border:1px solid rgba(240,0,0,.38);color:#ff4a4a;font:700 9px/1.25 ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;animation:trilyva-gate-alert-nag 2.4s ease-in-out infinite}
+#trilyvaPasswordGate .trilyva-gate-alert-label{display:flex;align-items:center;gap:7px}
+#trilyvaPasswordGate .trilyva-gate-led{width:6px;height:6px;flex:0 0 6px;background:#f00000;box-shadow:0 0 9px #f00000;animation:trilyva-gate-led-nag 1.7s ease-in-out infinite}
+#trilyvaPasswordGate .trilyva-gate-counter{color:#8b5558;font-size:8px;white-space:nowrap}
+#trilyvaPasswordGate .trilyva-gate-brand{display:block;margin-bottom:13px}
 #trilyvaPasswordGate .trilyva-gate-animation{display:block;width:100%;height:auto;overflow:hidden;background:#030303;border:0;border-radius:0;box-shadow:none}
 html:has(#trilyvaPasswordGate)::after{display:none!important}
 @media(prefers-reduced-motion:reduce){
@@ -1423,13 +1429,39 @@ html:has(#trilyvaPasswordGate)::after{display:none!important}
   #trilyvaPasswordGate .trilyva-gate-animation animateTransform{display:none!important}
   #trilyvaPasswordGate #trilyvaGateWordReveal{opacity:1!important;transform:none!important;filter:none!important}
 }
-#trilyvaPasswordGate h1{font-size:clamp(25px,5vw,34px);letter-spacing:-.04em;margin:34px 0 8px}
-#trilyvaPasswordGate p{color:#a4a4ad;font-size:14px;margin:0 0 26px}
+#trilyvaPasswordGate h1{position:relative;font-size:clamp(25px,5vw,34px);letter-spacing:-.06em;margin:26px 0 8px;text-transform:uppercase}
+#trilyvaPasswordGate h1::after{content:attr(data-glitch);position:absolute;left:1px;top:0;color:#f00000;opacity:.42;clip-path:inset(45% 0 38% 0);transform:translateX(-1px);pointer-events:none;animation:trilyva-gate-title-nag 4.6s steps(1,end) infinite}
+#trilyvaPasswordGate .trilyva-gate-systemline{display:flex;align-items:center;gap:7px;margin:0 0 13px;color:#f00000;font:9px/1.4 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase}
+#trilyvaPasswordGate .trilyva-gate-systemline::before{content:"";width:5px;height:5px;background:#f00000;flex:0 0 5px}
+#trilyvaPasswordGate p{color:#a4a4ad;font-size:14px;margin:0 0 21px}
+#trilyvaPasswordGate .trilyva-gate-ticker{width:100%;overflow:hidden;margin:12px 0 21px;border-top:1px solid #251113;border-bottom:1px solid #251113;padding:7px 0;color:#a83b40;font:8px/1.2 ui-monospace,monospace;letter-spacing:.16em;white-space:nowrap}
+#trilyvaPasswordGate .trilyva-gate-ticker-track{display:flex;width:max-content;animation:trilyva-gate-ticker-nag 9s linear infinite}
+#trilyvaPasswordGate .trilyva-gate-ticker-track span{padding-right:22px}
+#trilyvaPasswordGate .trilyva-gate-ticker strong{color:#f00000;font-weight:700}
 #trilyvaPasswordGate label{display:block;font:11px ui-monospace,monospace;letter-spacing:.14em;color:#a4a4ad;margin-bottom:8px}
 #trilyvaGatePassword{display:block;width:100%;box-sizing:border-box;padding:13px 14px;border:1px solid #3a3a42;border-radius:9px;background:#080809;color:#fff;font:16px ui-monospace,monospace;outline:none}
 #trilyvaGatePassword:focus{border-color:#bcbcc5}
-#trilyvaGateSubmit{width:100%;margin-top:12px;padding:13px;border:0;border-radius:9px;background:#f2f2f4;color:#080809;font-weight:750;cursor:pointer}
-#trilyvaGateSubmit:disabled{opacity:.55;cursor:wait}
+#trilyvaGateSubmit{position:relative;width:100%;margin-top:12px;padding:13px;border:1px solid #f00000;border-radius:2px;background:#f2f2f4;color:#080809;font-weight:850;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;animation:trilyva-gate-button-nag 3.6s ease-in-out infinite}
+#trilyvaGateSubmit::after{content:"  // CONFIRM";font:8px ui-monospace,monospace;letter-spacing:.04em}
+#trilyvaGateSubmit:hover:not(:disabled){background:#f00000;border-color:#f00000;color:#fff;transform:translateX(2px)}
+#trilyvaGateSubmit:disabled{opacity:.55;cursor:wait;animation:none}
+#trilyvaPasswordGate small{display:block;margin-top:18px;color:#73737c;font-size:10px;line-height:1.6;letter-spacing:.035em}
+#trilyvaPasswordGate a{color:#c2a2a4;text-decoration-color:#6c272b;text-underline-offset:3px}
+#trilyvaPasswordGate a:hover{color:#fff}
+@keyframes trilyva-gate-grid-nag{from{background-position:0 0,0 0,0 0,0 0}to{background-position:0 0,0 0,48px 48px,-48px 48px}}
+@keyframes trilyva-gate-scan-nag{from{background-position:0 0,0 -180%}to{background-position:0 0,0 180%}}
+@keyframes trilyva-gate-card-nag{0%,84%,100%{transform:translateX(0)}86%{transform:translateX(-2px)}88%{transform:translateX(2px)}90%{transform:translateX(-1px)}92%{transform:translateX(0)}}
+@keyframes trilyva-gate-border-nag{0%,100%{border-color:#321316;box-shadow:0 24px 100px #000,0 0 0 1px rgba(240,0,0,.08),0 0 24px rgba(240,0,0,.025)}50%{border-color:#832127;box-shadow:0 24px 100px #000,0 0 0 1px rgba(240,0,0,.32),0 0 42px rgba(240,0,0,.1)}}
+@keyframes trilyva-gate-alert-nag{0%,100%{background:rgba(240,0,0,.015);letter-spacing:.14em}50%{background:rgba(240,0,0,.09);letter-spacing:.16em}}
+@keyframes trilyva-gate-led-nag{0%,100%{opacity:.4;box-shadow:0 0 2px #f00000}50%{opacity:1;box-shadow:0 0 12px #f00000}}
+@keyframes trilyva-gate-title-nag{0%,88%,90%,100%{clip-path:inset(45% 0 38% 0);transform:translateX(-1px)}89%{clip-path:inset(10% 0 74% 0);transform:translateX(3px)}91%{clip-path:inset(62% 0 18% 0);transform:translateX(-3px)}}
+@keyframes trilyva-gate-ticker-nag{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes trilyva-gate-button-nag{0%,100%{box-shadow:0 0 0 rgba(240,0,0,0)}50%{box-shadow:0 0 17px rgba(240,0,0,.2)}}
+@media(prefers-reduced-motion:reduce){
+ #trilyvaPasswordGate::before,#trilyvaPasswordGate::after,#trilyvaPasswordGate form,#trilyvaPasswordGate .trilyva-gate-alert,#trilyvaPasswordGate .trilyva-gate-led,#trilyvaPasswordGate h1::after,#trilyvaPasswordGate .trilyva-gate-ticker-track,#trilyvaGateSubmit{animation:none!important;transform:none!important}
+ #trilyvaPasswordGate::after{display:none}
+ #trilyvaPasswordGate .trilyva-gate-ticker-track{transform:translateX(0)!important}
+}
 #trilyvaGateError{min-height:18px;margin-top:12px;color:#ffaaaa;font-size:12px}
 #trilyvaPasswordGate small{display:block;margin-top:18px;color:#73737c;font-size:11px}
 </style>
@@ -1437,6 +1469,7 @@ html:has(#trilyvaPasswordGate)::after{display:none!important}
 <body>
 <div id="trilyvaPasswordGate" role="dialog" aria-modal="true" aria-labelledby="trilyvaGateTitle">
   <form id="trilyvaPasswordForm" autocomplete="off">
+    <div class="trilyva-gate-alert" aria-hidden="true"><span class="trilyva-gate-alert-label"><i class="trilyva-gate-led"></i> SECURITY PROTOCOL ACTIVE</span><span class="trilyva-gate-counter">WARNING 001/099</span></div>
     <div class="trilyva-gate-brand">
       <svg class="trilyva-gate-animation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 170" role="img" aria-labelledby="trilyvaGateAnimationTitle trilyvaGateAnimationDesc">
         <title id="trilyvaGateAnimationTitle">Trilyva metallic wordmark animation</title>
@@ -1477,13 +1510,15 @@ html:has(#trilyvaPasswordGate)::after{display:none!important}
         <path d="M112 132H528" fill="none" stroke="#f00000" stroke-width="1.2" opacity=".68"/>
       </svg>
     </div>
-    <h1 id="trilyvaGateTitle">Access required</h1>
-    <p>Enter your password to open the renderer.</p>
+    <div class="trilyva-gate-ticker" aria-hidden="true"><div class="trilyva-gate-ticker-track"><span><strong>ATTENTION</strong> / PASSWORD REQUIRED / ACCESS NOT GRANTED / PLEASE COMPLY / ATTENTION / PASSWORD REQUIRED / ACCESS NOT GRANTED / PLEASE COMPLY / </span><span><strong>ATTENTION</strong> / PASSWORD REQUIRED / ACCESS NOT GRANTED / PLEASE COMPLY / ATTENTION / PASSWORD REQUIRED / ACCESS NOT GRANTED / PLEASE COMPLY / </span></div></div>
+    <div class="trilyva-gate-systemline" aria-hidden="true">MAXIMUM SECURITY // MINIMUM PATIENCE</div>
+    <h1 id="trilyvaGateTitle" data-glitch="ACCESS REQUIRED">Access required</h1>
+    <p>Enter your password to open the renderer. Yes, this is still the password field.</p>
     <label for="trilyvaGatePassword">PASSWORD</label>
     <input id="trilyvaGatePassword" type="password" autocomplete="current-password" required autofocus>
     <button id="trilyvaGateSubmit" type="submit">Unlock TRILYVA</button>
     <div id="trilyvaGateError" role="alert" aria-live="polite"></div>
-    <small>Access resets when this page is refreshed.</small>
+    <small>NOTICE: ACCESS RESETS ON REFRESH. THIS NOTICE IS INTENTIONALLY REPEATED BY THE SYSTEM. YOUR PASSWORD IS STILL REQUIRED.</small>
     <a href="mailto:trilyva@tamasrazim.anonaddy.com">Ask for password</a>
   </form>
 </div>
