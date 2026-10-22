@@ -7,7 +7,7 @@
    Shared structure is intentional; shared appearance is not. */
 html:has(body[data-project="asset-vault"]){background:#f0f1e7}
 html:has(body[data-project="code-to-svg"]){background:#f3f1ff}
-html:has(body[data-project="trilyva"]){background:#f4f1e8}
+html:has(body[data-project="trilyva"]){background:#050505}
 html:has(body[data-project="bncagrocare"]){background:#f2f3df}
 body.pp-page[data-project]{
   color:var(--pp-text)!important;
@@ -237,39 +237,39 @@ body.project-detail-v3[data-project="neo"] .v3-detail-panel{border-color:rgba(25
 body.project-detail-v3[data-project="neo"] .v3-detail-panel h2{color:#ff8a78}
 body.project-detail-v3[data-project="neo"] .v3-detail-note{border-left-color:#ff654f}
 
-/* TRILYVA — bright motion-design studio: ivory canvas, blue/cyan orbit and editorial spacing. */
+/* TRILYVA — dark monochrome motion-design workspace. */
 body.project-detail-v3[data-project="trilyva"]{
-  --v3-bg:#f4f1e8;--v3-ink:#171a26;--v3-muted:#5d6271;--v3-dim:#7f8490;--v3-line:rgba(31,39,81,.26);--v3-soft:rgba(31,39,81,.12);
-  background:radial-gradient(ellipse at 84% 12%,rgba(105,129,255,.12),transparent 30rem),var(--v3-bg)!important;
+  --v3-bg:#050505;--v3-ink:#f1f1ed;--v3-muted:#a0a09a;--v3-dim:#6d6d68;--v3-line:rgba(241,241,237,.17);--v3-soft:rgba(241,241,237,.09);
+  background:radial-gradient(ellipse at 84% 12%,rgba(255,255,255,.055),transparent 30rem),var(--v3-bg)!important;
 }
-body.project-detail-v3[data-project="trilyva"] .tri-nav{border-bottom-color:rgba(31,39,81,.2)}
-body.project-detail-v3[data-project="trilyva"] .v3-brand-mark{border-color:#3547d8;color:#3547d8;border-radius:8px}
-body.project-detail-v3[data-project="trilyva"] .tri-navlinks{color:#5d6271}
-body.project-detail-v3[data-project="trilyva"] .tri-navlinks a:hover{color:#3547d8}
-body.project-detail-v3[data-project="trilyva"] .v3-header-contact{border-color:rgba(53,71,216,.3);color:#3547d8}
-body.project-detail-v3[data-project="trilyva"] .tri-hero{border-bottom-color:rgba(31,39,81,.18)}
-body.project-detail-v3[data-project="trilyva"] .tri-kicker{color:#565fc1}
-body.project-detail-v3[data-project="trilyva"] .tri-title{font-weight:800;color:#171a26}
-body.project-detail-v3[data-project="trilyva"] .tri-title span{color:#4e42df}
-body.project-detail-v3[data-project="trilyva"] .tri-lead{max-width:620px;font-size:clamp(19px,2.4vw,27px);letter-spacing:-.035em}
-body.project-detail-v3[data-project="trilyva"] .tri-p{color:#5d6271}
-body.project-detail-v3[data-project="trilyva"] .tri-art{border-color:rgba(53,71,216,.22);border-radius:50%;min-height:0;aspect-ratio:1;background:radial-gradient(circle at 50% 50%,#dce2ff,#eceffd 56%,#f4f1e8 75%);box-shadow:0 22px 70px rgba(74,83,174,.12)}
-body.project-detail-v3[data-project="trilyva"] .tri-art svg{filter:invert(1) sepia(.45) saturate(4) hue-rotate(190deg)}
-body.project-detail-v3[data-project="trilyva"] .tri-art-meta{color:#555e91}
-body.project-detail-v3[data-project="trilyva"] .tri-art-meta span:last-child{color:#3547d8}
-body.project-detail-v3[data-project="trilyva"] .v3-button.primary{background:#3547d8;color:#fff!important;border-color:#3547d8}
-body.project-detail-v3[data-project="trilyva"] .v3-button.secondary{border-color:rgba(53,71,216,.3);color:#262b4a}
-body.project-detail-v3[data-project="trilyva"] .tri-section{border-bottom-color:rgba(31,39,81,.18)}
-body.project-detail-v3[data-project="trilyva"] .tri-head h2{color:#171a26}
-body.project-detail-v3[data-project="trilyva"] .tri-head p{color:#5d6271}
-body.project-detail-v3[data-project="trilyva"] .tri-card{border-color:rgba(53,71,216,.19);background:linear-gradient(145deg,#fff,rgba(231,234,255,.65));border-radius:12px;padding:24px}
-body.project-detail-v3[data-project="trilyva"] .tri-card span{color:#4e42df}
-body.project-detail-v3[data-project="trilyva"] .tri-card h3{color:#171a26}
-body.project-detail-v3[data-project="trilyva"] .tri-card p{color:#5d6271}
-body.project-detail-v3[data-project="trilyva"] .tri-fact{border-top-color:rgba(53,71,216,.22)}
-body.project-detail-v3[data-project="trilyva"] .tri-fact b{color:#171a26}
-body.project-detail-v3[data-project="trilyva"] .tri-fact small{color:#5d6271}
-body.project-detail-v3[data-project="trilyva"] .tri-footer{border-top-color:rgba(53,71,216,.2);color:#5d6271}
+body.project-detail-v3[data-project="trilyva"] .tri-nav{border-bottom-color:var(--v3-soft)}
+body.project-detail-v3[data-project="trilyva"] .v3-brand-mark{border-color:#777;color:var(--v3-ink);border-radius:0}
+body.project-detail-v3[data-project="trilyva"] .tri-navlinks{color:var(--v3-muted)}
+body.project-detail-v3[data-project="trilyva"] .tri-navlinks a:hover{color:var(--v3-ink)}
+body.project-detail-v3[data-project="trilyva"] .v3-header-contact{border-color:var(--v3-line);color:var(--v3-ink)}
+body.project-detail-v3[data-project="trilyva"] .tri-hero{border-bottom-color:var(--v3-soft)}
+body.project-detail-v3[data-project="trilyva"] .tri-kicker{color:var(--v3-muted)}
+body.project-detail-v3[data-project="trilyva"] .tri-title{font-weight:800;color:var(--v3-ink)}
+body.project-detail-v3[data-project="trilyva"] .tri-title span{color:#8d8d87}
+body.project-detail-v3[data-project="trilyva"] .tri-lead{max-width:620px;font-size:clamp(19px,2.4vw,27px);letter-spacing:-.035em;color:var(--v3-ink)}
+body.project-detail-v3[data-project="trilyva"] .tri-p{color:var(--v3-muted)}
+body.project-detail-v3[data-project="trilyva"] .tri-art{border-color:var(--v3-line);border-radius:0;min-height:0;aspect-ratio:1;background:radial-gradient(circle at 50% 50%,#171717,#0a0a0a 56%,#050505 78%);box-shadow:none}
+body.project-detail-v3[data-project="trilyva"] .tri-art svg{filter:none}
+body.project-detail-v3[data-project="trilyva"] .tri-art-meta{color:var(--v3-muted)}
+body.project-detail-v3[data-project="trilyva"] .tri-art-meta span:last-child{color:var(--v3-ink)}
+body.project-detail-v3[data-project="trilyva"] .v3-button.primary{background:var(--v3-ink);color:#050505!important;border-color:var(--v3-ink)}
+body.project-detail-v3[data-project="trilyva"] .v3-button.secondary{border-color:var(--v3-line);color:var(--v3-ink)}
+body.project-detail-v3[data-project="trilyva"] .tri-section{border-bottom-color:var(--v3-soft)}
+body.project-detail-v3[data-project="trilyva"] .tri-head h2{color:var(--v3-ink)}
+body.project-detail-v3[data-project="trilyva"] .tri-head p{color:var(--v3-muted)}
+body.project-detail-v3[data-project="trilyva"] .tri-card{border-color:var(--v3-line);background:linear-gradient(145deg,#ffffff06,transparent 55%),#080808;border-radius:0;padding:24px}
+body.project-detail-v3[data-project="trilyva"] .tri-card span{color:#c2c2bc}
+body.project-detail-v3[data-project="trilyva"] .tri-card h3{color:var(--v3-ink)}
+body.project-detail-v3[data-project="trilyva"] .tri-card p{color:var(--v3-muted)}
+body.project-detail-v3[data-project="trilyva"] .tri-fact{border-top-color:var(--v3-line)}
+body.project-detail-v3[data-project="trilyva"] .tri-fact b{color:var(--v3-ink)}
+body.project-detail-v3[data-project="trilyva"] .tri-fact small{color:var(--v3-muted)}
+body.project-detail-v3[data-project="trilyva"] .tri-footer{border-top-color:var(--v3-soft);color:var(--v3-muted)}
 
 /* TUNRUN — midnight flight HUD with cyan tunnel rings and amber hazard telemetry. */
 body.project-detail-v3[data-project="tunrun"]{
