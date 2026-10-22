@@ -1693,6 +1693,7 @@ select.mini{
           </div>
           <div class="sec">
             <h4>RENDER</h4>
+            <div class="btn-row"><button class="btn" data-act="resetDefaults" title="Reset composition, preview and export controls without replacing your animation source">RESET CONTROLS TO DEFAULTS</button></div>
             <div class="btn-row"><button class="btn solid" data-act="renderAll">Render All</button></div>
             <div class="btn-row"><button class="btn solid" data-act="renderAllDotMesh" id="renderAllDotMeshBtn" style="width:100%">RENDER ALL DOT MESH · 50 DESIGNS</button></div>
             <p class="note">Exports every Dot Mesh design to the selected folder: individual MP4, SVG, metadata.json and metadata.csv. No ZIP.</p>
@@ -5561,15 +5562,21 @@ function dotMeshFolderCsvRow(values) {
   return values.map(dotMeshFolderCsvCell).join(",");
 }
 function dotMeshFolderTargetComposition(base) {
-  return CORE.composition(merge(base || {}, {
+  // Batch exports never inherit stale UI choices from the project currently open.
+  return CORE.composition(merge(CORE.COMP_DEFAULTS, {
     width: DOT_MESH_FOLDER_SETTINGS.width,
     height: DOT_MESH_FOLDER_SETTINGS.height,
     fps: DOT_MESH_FOLDER_SETTINGS.fps,
     duration: DOT_MESH_FOLDER_SETTINGS.duration,
     loop: true,
     loopDuration: DOT_MESH_FOLDER_SETTINGS.duration,
+    speed: 1,
+    reverse: false,
+    seed: 12345,
     transparent: false,
-    background: "#050506"
+    background: "#050506",
+    colorSpace: "srgb",
+    pixelAspect: 1
   }));
 }
 function dotMeshFolderMetadata(item, job, result, stem, svgName) {
@@ -5798,6 +5805,9 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
   openModal("TRILYVA / DOT MESH · SAVING TO FOLDER", body, [{ label: "Cancel Batch", fn: cancelBatch }]);
 
   try {
+    // A prior cancelled queue must not silently short-circuit this fresh batch.
+    S.queueStop = false;
+    if (S.playing) pause();
     S.customBitrateMbps = 20;
     for (var i = 0; i < items.length; i++) {
       if (dotMeshFolderCancelRequested) { cancelled = true; break; }
@@ -6679,6 +6689,48 @@ function applyComp(patch) {
   if (S.compareMode) refreshCompare();
   var sizeChanged = before.width !== S.comp.width || before.height !== S.comp.height;
   if (sizeChanged) $('#stMsg').textContent = 'composition is now ' + S.comp.width + '×' + S.comp.height + ' — export raster changed, preview raster follows the scale setting';
+}
+
+function resetRendererDefaults() {
+  if (S.rendering || dotMeshFolderActive) {
+    $('#stMsg').textContent = 'A render is active. Cancel it before resetting controls.';
+    return;
+  }
+  if (S.playing) pause();
+  if (S.compareMode) toggleCompare();
+
+  // Preserve the loaded animation and metadata; reset its controls only.
+  S.loopPlayback = true;
+  S.queueStop = false;
+  S.exportFormat = 'mp4';
+  S.quality = 'standard';
+  S.timebase = 'ms';
+  S.checksums = true;
+  S.customBitrateMbps = 25;
+  S.pngTarget = 'zip';
+  S.analysis = null;
+
+  applyComp(CORE.COMP_DEFAULTS);
+  setFrame(0);
+  $('#loopBtn').classList.add('on');
+  $('#pvScale').value = 'auto';
+  $('#oQuality').value = S.quality;
+  $('#oBitrate').value = S.customBitrateMbps;
+  $('#oTimebase').value = S.timebase;
+  $('#oTimebase').disabled = false;
+  $('#oChecksum').value = 'on';
+  segMark($('#segFmt'), S.exportFormat);
+  $('#analysis').innerHTML = '';
+  syncMetaSupport();
+  syncFileName();
+  computeRaster();
+  sizeCanvasFrame();
+  drawRuler();
+  requestPreview(true);
+  refreshMedia();
+  showTab('p-comp');
+  showMobile('preview');
+  $('#stMsg').textContent = 'Defaults restored. The current animation source and metadata were preserved.';
 }
 
 function syncCompUI() {
@@ -8897,6 +8949,7 @@ var ACTS = {
     withCompiled().then(function (ok) { if (ok) analyseJob(); });
   },
   renderAll: function () { openProtectedTrilyvaRenderAll(); },
+  resetDefaults: resetRendererDefaults,
   renderAllDotMesh: function () { openDotMeshFolderPicker(); },
   exportDotMesh50: function () { openDotMeshFolderPicker(); },
   startRender: function () { withCompiled().then(function (ok) { if (ok) startRender(buildJob()); }); },
@@ -9126,7 +9179,7 @@ else boot();
   });
 })();
 </script>
-<script src="./movie-finalizer.js?v=1.0.6"></script>
+<script src="./movie-finalizer.js?v=1.0.7"></script>
 <script type="module" src="./firebase-analytics.js?v=20261022-1"></script>
 </body>
 </html>
