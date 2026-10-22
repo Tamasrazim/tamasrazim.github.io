@@ -1464,6 +1464,91 @@ html:has(#trilyvaPasswordGate)::after{display:none!important}
 }
 #trilyvaGateError{min-height:18px;margin-top:12px;color:#ffaaaa;font-size:12px}
 #trilyvaPasswordGate small{display:block;margin-top:18px;color:#73737c;font-size:11px}
+
+/* Animated signal puzzle: the gate is a challenge now, not a warning poster. */
+#trilyvaPasswordGate{overflow-y:auto;align-items:start;padding:clamp(10px,2.5vh,24px)}
+#trilyvaPasswordGate form{margin:auto;max-width:430px;animation:trilyva-gate-card-nag 5.4s ease-in-out infinite,trilyva-gate-border-nag 2.8s ease-in-out infinite,trilyva-gate-card-float 4.8s ease-in-out infinite}
+#trilyvaPasswordGate .trilyva-gate-brand{margin-bottom:8px}
+#trilyvaPasswordGate .trilyva-gate-ticker{margin:9px 0 13px}
+#trilyvaPasswordGate h1{margin:14px 0 6px}
+#trilyvaPasswordGate p{font-size:12px;line-height:1.55;margin-bottom:13px}
+#trilyvaPasswordGate .trilyva-gate-console{position:relative;isolation:isolate;overflow:hidden;margin:14px 0 10px;padding:12px;border:1px solid #3e272b;background:radial-gradient(ellipse at 50% 0,rgba(240,0,0,.12),transparent 58%),linear-gradient(150deg,rgba(17,17,19,.97),rgba(4,4,5,.99));box-shadow:inset 0 0 28px rgba(240,0,0,.045),0 0 20px rgba(240,0,0,.06)}
+#trilyvaPasswordGate .trilyva-gate-console::before{content:"";position:absolute;z-index:-1;pointer-events:none;inset:-80% 0 auto;height:75%;background:linear-gradient(180deg,transparent,rgba(240,0,0,.18),rgba(255,255,255,.06),transparent);animation:trilyva-gate-console-sweep 2.7s linear infinite}
+#trilyvaPasswordGate .trilyva-gate-console::after{content:"";position:absolute;z-index:-1;pointer-events:none;inset:0;opacity:.28;background:repeating-linear-gradient(0deg,transparent 0 8px,rgba(255,255,255,.025) 8px 9px);background-size:100% 18px;animation:trilyva-gate-console-lines 1.8s linear infinite}
+#trilyvaPasswordGate .trilyva-gate-console-head{display:flex;align-items:center;gap:8px;min-height:25px;padding-bottom:9px;border-bottom:1px solid rgba(255,255,255,.09);font:8px/1.2 ui-monospace,monospace;letter-spacing:.12em;color:#b4b4bc}
+#trilyvaPasswordGate .trilyva-gate-console-label{display:flex;align-items:center;gap:6px;flex:1}
+#trilyvaPasswordGate .trilyva-gate-console-led{display:inline-block;width:5px;height:5px;background:#f00000;box-shadow:0 0 10px #f00000;animation:trilyva-gate-led-nag .8s ease-in-out infinite}
+#trilyvaPasswordGate .trilyva-gate-console-code{color:#f00000}
+#trilyvaPasswordGate .trilyva-gate-reactor{position:relative;display:block;width:24px;height:24px;border:1px solid rgba(240,0,0,.5);border-radius:50%;background:conic-gradient(from 0deg,transparent,#f00000,transparent 65%);animation:trilyva-gate-reactor-spin 1.4s linear infinite}
+#trilyvaPasswordGate .trilyva-gate-reactor::before{content:"";position:absolute;inset:4px;border:1px dashed #aaa;border-radius:50%;animation:trilyva-gate-reactor-spin 2s linear infinite reverse}
+#trilyvaPasswordGate .trilyva-gate-reactor i{position:absolute;inset:9px;border-radius:50%;background:#f00000;box-shadow:0 0 9px #f00000;animation:trilyva-gate-reactor-pulse .7s ease-in-out infinite alternate}
+#trilyvaPasswordGate .trilyva-gate-round-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:11px 0 9px;color:#dddde2;font:9px ui-monospace,monospace;letter-spacing:.12em}
+#trilyvaPasswordGate .trilyva-gate-round-segments{display:flex;gap:4px}
+#trilyvaPasswordGate .trilyva-gate-round-segments i{display:block;width:21px;height:3px;background:#27272b;transition:background .2s,box-shadow .2s}
+#trilyvaPasswordGate .trilyva-gate-round-segments i.active{background:#f00000;box-shadow:0 0 8px rgba(240,0,0,.8);animation:trilyva-gate-segment-pulse .8s ease-in-out infinite alternate}
+#trilyvaPasswordGate .trilyva-gate-round-segments i.done{background:#eaeaf0;box-shadow:0 0 8px rgba(255,255,255,.55)}
+#trilyvaPasswordGate .trilyva-gate-instruction-row{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:25px;margin-bottom:9px;color:#ffb4b8;font:8px/1.4 ui-monospace,monospace;letter-spacing:.07em}
+#trilyvaPasswordGate #trilyvaGateSequenceProgress{white-space:nowrap;color:#fff;font-size:10px}
+#trilyvaPasswordGate .trilyva-gate-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+#trilyvaPasswordGate .trilyva-gate-tile{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;min-height:88px;padding:7px 3px;overflow:hidden;border:1px solid #37373e;border-radius:2px;background:linear-gradient(145deg,#171719,#070708);color:#e7e7ec;cursor:pointer;transition:transform .16s,border-color .16s,background .16s,box-shadow .16s;animation:trilyva-gate-tile-idle 3s ease-in-out infinite}
+#trilyvaPasswordGate .trilyva-gate-tile:nth-child(2){animation-delay:-.7s}
+#trilyvaPasswordGate .trilyva-gate-tile:nth-child(3){animation-delay:-1.4s}
+#trilyvaPasswordGate .trilyva-gate-tile:nth-child(4){animation-delay:-2.1s}
+#trilyvaPasswordGate .trilyva-gate-tile::before{content:"";position:absolute;z-index:-1;inset:-100% -25%;background:linear-gradient(120deg,transparent 40%,rgba(255,255,255,.12) 50%,transparent 60%);transform:translateX(-55%);transition:transform .25s}
+#trilyvaPasswordGate .trilyva-gate-tile:hover:not(:disabled){transform:translateY(-3px) scale(1.025);border-color:#b5434a;box-shadow:0 0 15px rgba(240,0,0,.14)}
+#trilyvaPasswordGate .trilyva-gate-tile:hover:not(:disabled)::before{transform:translateX(55%)}
+#trilyvaPasswordGate .trilyva-gate-tile:disabled{cursor:wait;opacity:.78}
+#trilyvaPasswordGate .trilyva-gate-tile-number{align-self:flex-start;padding-left:5px;color:#666671;font:7px ui-monospace,monospace}
+#trilyvaPasswordGate .trilyva-gate-tile-symbol{font-size:22px;line-height:1;transition:transform .2s,color .2s,text-shadow .2s}
+#trilyvaPasswordGate .trilyva-gate-tile-name{color:#777780;font:7px ui-monospace,monospace;letter-spacing:.12em}
+#trilyvaPasswordGate .trilyva-gate-tile i{position:absolute;left:0;right:0;bottom:0;height:2px;background:#34343a}
+#trilyvaPasswordGate .trilyva-gate-tile.is-lit{transform:scale(1.055) translateY(-2px);border-color:#fff;background:linear-gradient(145deg,#3b1518,#171012);box-shadow:0 0 24px rgba(240,0,0,.46),inset 0 0 19px rgba(240,0,0,.16);animation:trilyva-gate-tile-hit .3s ease-out}
+#trilyvaPasswordGate .trilyva-gate-tile.is-lit .trilyva-gate-tile-symbol{color:#fff;text-shadow:0 0 12px #f00000;transform:scale(1.24) rotate(8deg)}
+#trilyvaPasswordGate .trilyva-gate-tile.is-lit i{background:#f00000;box-shadow:0 0 9px #f00000}
+#trilyvaPasswordGate .trilyva-gate-tile.is-good{border-color:#eee;background:#252527}
+#trilyvaPasswordGate .trilyva-gate-tile.is-miss{border-color:#f00000;background:#48070c;animation:trilyva-gate-tile-error .34s steps(2,end)}
+#trilyvaPasswordGate .trilyva-gate-console-foot{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-top:10px}
+#trilyvaPasswordGate .trilyva-gate-replay{border:1px solid #47474f;border-radius:2px;padding:8px 9px;background:#111113;color:#e7e7ec;font:8px ui-monospace,monospace;letter-spacing:.08em;cursor:pointer;transition:background .2s,border-color .2s}
+#trilyvaPasswordGate .trilyva-gate-replay span{display:inline-block;margin-right:4px;color:#f00000;font-size:14px;vertical-align:-1px}
+#trilyvaPasswordGate .trilyva-gate-replay:hover:not(:disabled){border-color:#f00000;background:#250a0c}
+#trilyvaPasswordGate #trilyvaGatePuzzleStatus{color:#8b8b95;font:7px/1.5 ui-monospace,monospace;letter-spacing:.08em;text-align:right}
+#trilyvaPasswordGate .trilyva-gate-progress-track{height:2px;margin-top:10px;overflow:hidden;background:#232328}
+#trilyvaPasswordGate .trilyva-gate-progress-track i{display:block;width:0;height:100%;background:linear-gradient(90deg,#f00000,#fff);box-shadow:0 0 10px #f00000;transition:width .18s}
+#trilyvaPasswordGate .trilyva-gate-mode-toggle{display:flex;justify-content:space-between;align-items:center;width:100%;padding:10px 1px;border:0;border-bottom:1px solid #343036;background:transparent;color:#aaaab3;font:8px ui-monospace,monospace;letter-spacing:.14em;text-align:left;cursor:pointer;transition:color .2s,border-color .2s}
+#trilyvaPasswordGate .trilyva-gate-mode-toggle span{color:#f00000;font-size:13px;animation:trilyva-gate-arrow-pulse .8s ease-in-out infinite alternate}
+#trilyvaPasswordGate .trilyva-gate-mode-toggle:hover{color:#fff;border-color:#f00000}
+#trilyvaPasswordGate .trilyva-gate-password-panel{margin-top:14px;padding:13px;border:1px solid #453238;background:linear-gradient(135deg,rgba(240,0,0,.07),rgba(0,0,0,.5))}
+#trilyvaPasswordGate .trilyva-gate-password-heading{display:flex;justify-content:space-between;gap:8px;margin-bottom:13px;color:#eee;font:9px ui-monospace,monospace;letter-spacing:.1em}
+#trilyvaPasswordGate .trilyva-gate-password-heading span{color:#8d5559;font-size:7px;text-align:right}
+#trilyvaPasswordGate .trilyva-gate-password-panel[hidden],#trilyvaPasswordGate .trilyva-gate-console[hidden]{display:none!important}
+#trilyvaGatePassword{border-radius:2px}
+#trilyvaGateSubmit{margin-top:10px}
+#trilyvaPasswordGate #trilyvaGateError{min-height:14px;margin-top:8px;font-size:11px}
+#trilyvaPasswordGate small{margin-top:10px;font-size:8px;line-height:1.5}
+#trilyvaPasswordGate form>a{display:inline-block;margin-top:8px;font:8px ui-monospace,monospace;letter-spacing:.08em}
+#trilyvaPasswordGate.is-success form{animation:trilyva-gate-success .65s ease-in-out 1!important}
+@keyframes trilyva-gate-card-float{0%,100%{translate:0 0}50%{translate:0 -3px}}
+@keyframes trilyva-gate-console-sweep{0%{transform:translateY(-110%)}100%{transform:translateY(245%)}}
+@keyframes trilyva-gate-console-lines{from{background-position:0 0}to{background-position:0 18px}}
+@keyframes trilyva-gate-reactor-spin{to{transform:rotate(360deg)}}
+@keyframes trilyva-gate-reactor-pulse{from{opacity:.35;transform:scale(.65)}to{opacity:1;transform:scale(1.2)}}
+@keyframes trilyva-gate-segment-pulse{from{opacity:.45}to{opacity:1}}
+@keyframes trilyva-gate-tile-idle{0%,100%{border-color:#37373e}50%{border-color:#5b3439}}
+@keyframes trilyva-gate-tile-hit{0%{transform:scale(.92)}65%{transform:scale(1.09)}100%{transform:scale(1.055) translateY(-2px)}}
+@keyframes trilyva-gate-tile-error{0%,100%{translate:0 0}25%{translate:-4px 0}75%{translate:4px 0}}
+@keyframes trilyva-gate-arrow-pulse{from{opacity:.35;transform:translateX(-2px)}to{opacity:1;transform:translateX(3px)}}
+@keyframes trilyva-gate-success{0%,100%{filter:none}40%{filter:brightness(2.3);box-shadow:0 0 60px rgba(255,255,255,.24)}}
+@media(max-width:420px){
+ #trilyvaPasswordGate{padding:8px}
+ #trilyvaPasswordGate form{padding:18px}
+ #trilyvaPasswordGate .trilyva-gate-tile{min-height:76px}
+ #trilyvaPasswordGate .trilyva-gate-console{padding:9px}
+ #trilyvaPasswordGate .trilyva-gate-console-label{font-size:7px}
+}
+@media(prefers-reduced-motion:reduce){
+ #trilyvaPasswordGate form,#trilyvaPasswordGate .trilyva-gate-console::before,#trilyvaPasswordGate .trilyva-gate-console::after,#trilyvaPasswordGate .trilyva-gate-reactor,#trilyvaPasswordGate .trilyva-gate-reactor::before,#trilyvaPasswordGate .trilyva-gate-reactor i,#trilyvaPasswordGate .trilyva-gate-round-segments i.active,#trilyvaPasswordGate .trilyva-gate-tile,#trilyvaPasswordGate .trilyva-gate-mode-toggle span,#trilyvaPasswordGate .trilyva-gate-console-led{animation:none!important;transition:none!important}
+ #trilyvaPasswordGate .trilyva-gate-tile.is-lit{transform:none!important}
+}
 </style>
 </head>
 <body>
@@ -1510,15 +1595,45 @@ html:has(#trilyvaPasswordGate)::after{display:none!important}
         <path d="M112 132H528" fill="none" stroke="#f00000" stroke-width="1.2" opacity=".68"/>
       </svg>
     </div>
-    <div class="trilyva-gate-ticker" aria-hidden="true"><div class="trilyva-gate-ticker-track"><span><strong>ATTENTION</strong> / PASSWORD REQUIRED / ACCESS NOT GRANTED / PLEASE COMPLY / ATTENTION / PASSWORD REQUIRED / ACCESS NOT GRANTED / PLEASE COMPLY / </span><span><strong>ATTENTION</strong> / PASSWORD REQUIRED / ACCESS NOT GRANTED / PLEASE COMPLY / ATTENTION / PASSWORD REQUIRED / ACCESS NOT GRANTED / PLEASE COMPLY / </span></div></div>
-    <div class="trilyva-gate-systemline" aria-hidden="true">MAXIMUM SECURITY // MINIMUM PATIENCE</div>
-    <h1 id="trilyvaGateTitle" data-glitch="ACCESS REQUIRED">Access required</h1>
-    <p>Enter your password to open the renderer. Yes, this is still the password field.</p>
-    <label for="trilyvaGatePassword">PASSWORD</label>
-    <input id="trilyvaGatePassword" type="password" autocomplete="current-password" required autofocus>
-    <button id="trilyvaGateSubmit" type="submit">Unlock TRILYVA</button>
+    <div class="trilyva-gate-ticker" aria-hidden="true"><div class="trilyva-gate-ticker-track"><span><strong>ATTENTION</strong> / SYNCHRONIZE THE PULSE / VERIFY SIGNAL / ACCESS LOCKED / DO NOT LOSE THE PATTERN / </span><span><strong>ATTENTION</strong> / SYNCHRONIZE THE PULSE / VERIFY SIGNAL / ACCESS LOCKED / DO NOT LOSE THE PATTERN / </span></div></div>
+    <div class="trilyva-gate-systemline" aria-hidden="true">LIVE SIGNAL // AUTHORIZATION TEST // ACTIVE</div>
+    <h1 id="trilyvaGateTitle" data-glitch="SIGNAL SYNCHRONIZATION">Access required</h1>
+    <p id="trilyvaGateDescription">Memorise the pulse sequence and repeat it across three rounds — or switch to password access.</p>
+    <section id="trilyvaGatePuzzle" class="trilyva-gate-console" aria-label="Signal memory puzzle">
+      <div class="trilyva-gate-console-head">
+        <span class="trilyva-gate-console-label"><i class="trilyva-gate-console-led"></i> SIGNAL MEMORY PROTOCOL</span>
+        <span class="trilyva-gate-reactor" aria-hidden="true"><i></i></span>
+        <span class="trilyva-gate-console-code">TRI-04</span>
+      </div>
+      <div class="trilyva-gate-round-row">
+        <span id="trilyvaGateRound">PHASE 01 / 03</span>
+        <div class="trilyva-gate-round-segments" id="trilyvaGateRoundSegments" aria-hidden="true"><i class="active"></i><i></i><i></i></div>
+      </div>
+      <div class="trilyva-gate-instruction-row">
+        <span id="trilyvaGateInstruction" role="status" aria-live="polite">INITIALIZING SIGNAL…</span>
+        <span id="trilyvaGateSequenceProgress">0 / 3</span>
+      </div>
+      <div class="trilyva-gate-tiles" role="group" aria-label="Repeat the displayed pulse sequence">
+        <button type="button" class="trilyva-gate-tile" data-pulse="0" aria-label="Pulse one, triangle"><span class="trilyva-gate-tile-number">01</span><span class="trilyva-gate-tile-symbol" aria-hidden="true">▲</span><span class="trilyva-gate-tile-name">ALPHA</span><i aria-hidden="true"></i></button>
+        <button type="button" class="trilyva-gate-tile" data-pulse="1" aria-label="Pulse two, circle"><span class="trilyva-gate-tile-number">02</span><span class="trilyva-gate-tile-symbol" aria-hidden="true">●</span><span class="trilyva-gate-tile-name">BETA</span><i aria-hidden="true"></i></button>
+        <button type="button" class="trilyva-gate-tile" data-pulse="2" aria-label="Pulse three, diamond"><span class="trilyva-gate-tile-number">03</span><span class="trilyva-gate-tile-symbol" aria-hidden="true">◆</span><span class="trilyva-gate-tile-name">GAMMA</span><i aria-hidden="true"></i></button>
+        <button type="button" class="trilyva-gate-tile" data-pulse="3" aria-label="Pulse four, square"><span class="trilyva-gate-tile-number">04</span><span class="trilyva-gate-tile-symbol" aria-hidden="true">■</span><span class="trilyva-gate-tile-name">DELTA</span><i aria-hidden="true"></i></button>
+      </div>
+      <div class="trilyva-gate-console-foot">
+        <button id="trilyvaGateReplay" type="button" class="trilyva-gate-replay"><span aria-hidden="true">↻</span> REPLAY SIGNAL</button>
+        <span id="trilyvaGatePuzzleStatus" aria-live="polite">CALIBRATING // PLEASE WAIT</span>
+      </div>
+      <div class="trilyva-gate-progress-track" aria-hidden="true"><i id="trilyvaGateInputProgress"></i></div>
+    </section>
+    <button id="trilyvaGateToggleMode" type="button" class="trilyva-gate-mode-toggle">USE PASSWORD INSTEAD <span aria-hidden="true">↗</span></button>
+    <section id="trilyvaGatePasswordPanel" class="trilyva-gate-password-panel" hidden>
+      <div class="trilyva-gate-password-heading">PASSWORD OVERRIDE <span>MANUAL AUTHORIZATION</span></div>
+      <label for="trilyvaGatePassword">PASSWORD</label>
+      <input id="trilyvaGatePassword" type="password" autocomplete="current-password">
+      <button id="trilyvaGateSubmit" type="submit">Unlock TRILYVA</button>
+    </section>
     <div id="trilyvaGateError" role="alert" aria-live="polite"></div>
-    <small>NOTICE: ACCESS RESETS ON REFRESH. THIS NOTICE IS INTENTIONALLY REPEATED BY THE SYSTEM. YOUR PASSWORD IS STILL REQUIRED.</small>
+    <small>THREE PHASES. ONE SIGNAL. PUZZLE ACCESS GRANTS A SINGLE RENDER; REFRESH TO RESET.</small>
     <a href="mailto:trilyva@tamasrazim.anonaddy.com">Ask for password</a>
   </form>
 </div>
@@ -9206,41 +9321,197 @@ else boot();
   var gate=document.getElementById('trilyvaPasswordGate');
   var form=document.getElementById('trilyvaPasswordForm');
   var input=document.getElementById('trilyvaGatePassword');
-  var button=document.getElementById('trilyvaGateSubmit');
+  var submitButton=document.getElementById('trilyvaGateSubmit');
   var error=document.getElementById('trilyvaGateError');
+  var puzzle=document.getElementById('trilyvaGatePuzzle');
+  var passwordPanel=document.getElementById('trilyvaGatePasswordPanel');
+  var toggleMode=document.getElementById('trilyvaGateToggleMode');
+  var title=document.getElementById('trilyvaGateTitle');
+  var description=document.getElementById('trilyvaGateDescription');
+  var roundLabel=document.getElementById('trilyvaGateRound');
+  var roundSegments=document.getElementById('trilyvaGateRoundSegments');
+  var instruction=document.getElementById('trilyvaGateInstruction');
+  var sequenceProgress=document.getElementById('trilyvaGateSequenceProgress');
+  var puzzleStatus=document.getElementById('trilyvaGatePuzzleStatus');
+  var inputProgress=document.getElementById('trilyvaGateInputProgress');
+  var replayButton=document.getElementById('trilyvaGateReplay');
+  var tiles=Array.prototype.slice.call(document.querySelectorAll('#trilyvaGatePuzzle [data-pulse]'));
   var unlimitedHash='8825ae35e4685a47fcfb8a76ccfc42cf2037a78ada722c115856840b200d90f5';
   var singleHash='d438906f29bd6a84465c288a73fa994dd6f53665fd987a9d239a1cc53248c35b';
+  var sequence=[];
+  var expectedPosition=0;
+  var currentRound=1;
+  var isPlaying=false;
+  var showingPassword=false;
+  var puzzleUnlocked=false;
+  var unlocked=false;
+  var roundLengths=[3,4,5];
   document.documentElement.style.overflow='hidden';
   document.body.style.overflow='hidden';
-  input.focus();
-  form.addEventListener('submit',function(event){
-    event.preventDefault();
-    error.textContent='';
-    button.disabled=true;
-    button.textContent='Verifying…';
-    if(!window.crypto||!window.crypto.subtle){
-      error.textContent='Secure password verification is unavailable in this browser.';
-      button.disabled=false;button.textContent='Unlock TRILYVA';return;
+
+  function wait(ms){return new Promise(function(resolve){window.setTimeout(resolve,ms);});}
+  function showError(message){error.textContent=message||'';}
+  function setTilesEnabled(enabled){
+    tiles.forEach(function(tile){tile.disabled=!enabled;});
+    replayButton.disabled=!enabled;
+  }
+  function setProgress(done,total){
+    sequenceProgress.textContent=done+' / '+total;
+    inputProgress.style.width=(total?Math.round(done/total*100):0)+'%';
+  }
+  function updateRoundUI(){
+    roundLabel.textContent='PHASE '+String(currentRound).padStart(2,'0')+' / 03';
+    var segments=roundSegments.querySelectorAll('i');
+    Array.prototype.forEach.call(segments,function(segment,index){
+      segment.classList.toggle('active',index===currentRound-1);
+      segment.classList.toggle('done',index<currentRound-1);
+    });
+    setProgress(0,roundLengths[currentRound-1]);
+  }
+  function makeSequence(length){
+    sequence=[];
+    for(var i=0;i<length;i++){
+      var next=Math.floor(Math.random()*4);
+      if(i>0&&next===sequence[i-1]) next=(next+1+Math.floor(Math.random()*3))%4;
+      sequence.push(next);
     }
-    window.crypto.subtle.digest('SHA-256',new TextEncoder().encode(input.value)).then(function(buffer){
-      var hash=Array.prototype.map.call(new Uint8Array(buffer),function(b){return b.toString(16).padStart(2,'0');}).join('');
-      if(hash===unlimitedHash){
-        window.__TRILYVA_ACCESS_MODE='unlimited';
-      }else if(hash===singleHash){
-        window.__TRILYVA_ACCESS_MODE='single';
-      }else{
-        error.textContent='Incorrect password. Try again.';
-        input.value='';input.focus();button.disabled=false;button.textContent='Unlock TRILYVA';return;
-      }
+  }
+  async function playSequence(){
+    if(showingPassword||isPlaying||puzzleUnlocked||unlocked)return;
+    isPlaying=true;
+    expectedPosition=0;
+    setTilesEnabled(false);
+    setProgress(0,sequence.length);
+    instruction.textContent='WATCH THE PULSES // DO NOT TAP';
+    puzzleStatus.textContent='SIGNAL TRANSMITTING…';
+    await wait(400);
+    for(var i=0;i<sequence.length;i++){
+      if(!gate.isConnected)return;
+      var tile=tiles[sequence[i]];
+      tile.classList.add('is-lit');
+      puzzleStatus.textContent='PULSE '+String(i+1).padStart(2,'0')+' / '+String(sequence.length).padStart(2,'0');
+      await wait(340);
+      tile.classList.remove('is-lit');
+      await wait(145);
+    }
+    isPlaying=false;
+    setTilesEnabled(true);
+    instruction.textContent='REPEAT THE SIGNAL IN ORDER';
+    puzzleStatus.textContent='INPUT ENABLED // MATCH EXACTLY';
+  }
+  function beginRound(round){
+    if(unlocked||showingPassword)return;
+    currentRound=round;
+    makeSequence(roundLengths[currentRound-1]);
+    updateRoundUI();
+    instruction.textContent='MEMORIZE THE NEXT PATTERN';
+    playSequence();
+  }
+  function unlock(mode){
+    if(unlocked)return;
+    unlocked=true;
+    window.__TRILYVA_ACCESS_MODE=mode;
+    gate.classList.add('is-success');
+    showError('');
+    puzzleStatus.textContent='SIGNAL ACCEPTED // ACCESS GRANTED';
+    instruction.textContent='AUTHORIZATION COMPLETE';
+    window.setTimeout(function(){
+      if(!gate.isConnected)return;
       gate.remove();
       document.documentElement.style.overflow='';
       document.body.style.overflow='';
       window.dispatchEvent(new CustomEvent('trilyva:unlocked',{detail:{mode:window.__TRILYVA_ACCESS_MODE}}));
-    }).catch(function(){
-      error.textContent='Password verification failed. Please try again.';
-      button.disabled=false;button.textContent='Unlock TRILYVA';
+    },650);
+  }
+  function mismatch(tile){
+    tile.classList.add('is-miss');
+    window.setTimeout(function(){tile.classList.remove('is-miss');},380);
+    expectedPosition=0;
+    setProgress(0,sequence.length);
+    isPlaying=true;
+    setTilesEnabled(false);
+    instruction.textContent='SIGNAL DESYNC // RESTARTING';
+    puzzleStatus.textContent='MISMATCH DETECTED — REPLAY INCOMING';
+    window.setTimeout(function(){
+      isPlaying=false;
+      playSequence();
+    },600);
+  }
+  tiles.forEach(function(tile){
+    tile.disabled=true;
+    tile.addEventListener('click',function(){
+      if(showingPassword||isPlaying||puzzleUnlocked||unlocked)return;
+      var pulse=Number(tile.getAttribute('data-pulse'));
+      if(pulse!==sequence[expectedPosition]){
+        mismatch(tile);
+        return;
+      }
+      tile.classList.add('is-good');
+      window.setTimeout(function(){tile.classList.remove('is-good');},220);
+      expectedPosition++;
+      setProgress(expectedPosition,sequence.length);
+      puzzleStatus.textContent='MATCH '+String(expectedPosition).padStart(2,'0')+' / '+String(sequence.length).padStart(2,'0');
+      if(expectedPosition<sequence.length)return;
+      puzzleUnlocked=true;
+      setTilesEnabled(false);
+      roundSegments.querySelectorAll('i')[currentRound-1].classList.add('done');
+      roundSegments.querySelectorAll('i')[currentRound-1].classList.remove('active');
+      if(currentRound>=3){
+        gate.classList.add('is-success');
+        instruction.textContent='ALL SIGNALS VERIFIED';
+        puzzleStatus.textContent='AUTHORIZATION ACCEPTED';
+        unlock('single');
+      }else{
+        instruction.textContent='PHASE VERIFIED // NEXT SIGNAL';
+        puzzleStatus.textContent='MATCH CONFIRMED — LOADING NEXT PHASE';
+        var nextRound=currentRound+1;
+        window.setTimeout(function(){
+          puzzleUnlocked=false;
+          beginRound(nextRound);
+        },700);
+      }
     });
   });
+  replayButton.addEventListener('click',function(){playSequence();});
+  toggleMode.addEventListener('click',function(){
+    showingPassword=!showingPassword;
+    puzzle.hidden=showingPassword;
+    passwordPanel.hidden=!showingPassword;
+    input.required=showingPassword;
+    toggleMode.innerHTML=showingPassword?'BACK TO PUZZLE <span aria-hidden="true">↻</span>':'USE PASSWORD INSTEAD <span aria-hidden="true">↗</span>';
+    title.textContent=showingPassword?'Password access':'Access required';
+    title.setAttribute('data-glitch',showingPassword?'PASSWORD REQUIRED':'SIGNAL SYNCHRONIZATION');
+    description.textContent=showingPassword?'Enter your access password to unlock TRILYVA.':'Memorise the pulse sequence and repeat it across three rounds — or switch to password access.';
+    showError('');
+    if(showingPassword){input.focus();submitButton.textContent='Unlock TRILYVA';}
+    else{input.value='';}
+  });
+  form.addEventListener('submit',function(event){
+    event.preventDefault();
+    if(!showingPassword)return;
+    showError('');
+    submitButton.disabled=true;
+    submitButton.textContent='Verifying…';
+    if(!window.crypto||!window.crypto.subtle){
+      showError('Secure password verification is unavailable in this browser.');
+      submitButton.disabled=false;submitButton.textContent='Unlock TRILYVA';return;
+    }
+    window.crypto.subtle.digest('SHA-256',new TextEncoder().encode(input.value)).then(function(buffer){
+      var hash=Array.prototype.map.call(new Uint8Array(buffer),function(b){return b.toString(16).padStart(2,'0');}).join('');
+      if(hash===unlimitedHash){
+        unlock('unlimited');
+      }else if(hash===singleHash){
+        unlock('single');
+      }else{
+        showError('Incorrect password. Try again.');
+        input.value='';input.focus();submitButton.disabled=false;submitButton.textContent='Unlock TRILYVA';
+      }
+    }).catch(function(){
+      showError('Password verification failed. Please try again.');
+      submitButton.disabled=false;submitButton.textContent='Unlock TRILYVA';
+    });
+  });
+  beginRound(1);
 })();
 </script>
 <script>
