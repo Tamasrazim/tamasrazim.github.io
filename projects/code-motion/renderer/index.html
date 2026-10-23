@@ -2015,7 +2015,7 @@ html:has(#trilyvaPasswordGate)::after{display:none!important}
 </div>
 
 <input type="file" id="filePick" accept=".tmotion,.json,application/json" class="hide">
-<input type="file" id="batchJsPick" accept=".js,text/javascript,application/javascript" multiple class="hide">
+<input type="file" id="batchJsPick" accept=".js,.zip,text/javascript,application/javascript,application/zip" multiple class="hide">
 <script type="text/js-source" id="src-runtime">
 /* ============================================================
    MotionCore — animation runtime + canonical composition model.
@@ -8020,29 +8020,96 @@ function openBatchUploadPicker() {
   var pick = $('#batchJsPick');
   if (pick) { pick.value = ''; pick.click(); }
 }
-function handleBatchLibraryFiles(fileList) {
-  var files = Array.prototype.slice.call(fileList || []).filter(function (f) {
-    return /\.js$/i.test(f.name) && f.size <= 8 * 1024 * 1024;
+function readBatchJsFile(file) {
+  return new Promise(function (resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      var code = String(reader.result || '');
+      if (!code.trim()) return reject(new Error(file.name + ' is empty.'));
+      resolve({ name: file.name, code: code, size: file.size });
+    };
+    reader.onerror = function () { reject(new Error('Could not read ' + file.name)); };
+    reader.readAsText(file);
   });
-  if (!files.length) {
-    $('#stMsg').textContent = 'Choose one or more .js files (maximum 8 MB per file).';
+}
+function unzipBatchJsFiles(file) {
+  return file.arrayBuffer().then(function (buffer) {
+    var bytes = new Uint8Array(buffer), view = new DataView(buffer);
+    var min = Math.max(0, bytes.length - 65557), eocd = -1;
+    for (var p = bytes.length - 22; p >= min; p--) {
+      if (view.getUint32(p, true) === 0x06054b50) { eocd = p; break; }
+    }
+    if (eocd < 0) throw new Error(file.name + ' is not a valid ZIP archive.');
+    var count = view.getUint16(eocd + 10, true);
+    var offset = view.getUint32(eocd + 16, true);
+    var entries = [], skipped = 0, total = 0;
+    for (var i = 0; i < count; i++) {
+      if (offset + 46 > bytes.length || view.getUint32(offset, true) !== 0x02014b50) break;
+      var flags = view.getUint16(offset + 8, true);
+      var method = view.getUint16(offset + 10, true);
+      var compressedSize = view.getUint32(offset + 20, true);
+      var uncompressedSize = view.getUint32(offset + 24, true);
+      var nameLen = view.getUint16(offset + 28, true);
+      var extraLen = view.getUint16(offset + 30, true);
+      var commentLen = view.getUint16(offset + 32, true);
+      var localOffset = view.getUint32(offset + 42, true);
+      var nameBytes = bytes.slice(offset + 46, offset + 46 + nameLen);
+      var name = new TextDecoder().decode(nameBytes).replace(/\\/g, '/');
+      offset += 46 + nameLen + extraLen + commentLen;
+      if (!/\.js$/i.test(name) || /(^|\/)__MACOSX\//i.test(name) || /(^|\/)\./.test(name)) continue;
+      if (flags & 1) { skipped++; continue; }
+      if (uncompressedSize > 8 * 1024 * 1024 || total + uncompressedSize > 64 * 1024 * 1024) { skipped++; continue; }
+      if (localOffset + 30 > bytes.length || view.getUint32(localOffset, true) !== 0x04034b50) { skipped++; continue; }
+      var localNameLen = view.getUint16(localOffset + 26, true);
+      var localExtraLen = view.getUint16(localOffset + 28, true);
+      var dataStart = localOffset + 30 + localNameLen + localExtraLen;
+      if (dataStart + compressedSize > bytes.length) { skipped++; continue; }
+      var compressed = bytes.slice(dataStart, dataStart + compressedSize);
+      var payload;
+      if (method === 0) payload = Promise.resolve(compressed);
+      else if (method === 8 && typeof DecompressionStream === 'function') {
+        try {
+          var stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+          payload = new Response(stream).arrayBuffer().then(function (b) { return new Uint8Array(b); });
+        } catch (e) { payload = Promise.reject(new Error('This browser cannot decompress ZIP files. Try extracting the ZIP and selecting the .js files.')); }
+      } else {
+        skipped++;
+        continue;
+      }
+      entries.push(payload.then(function (data) {
+        if (data.length > 8 * 1024 * 1024) { skipped++; return null; }
+        total += data.length;
+        return { name: name, code: new TextDecoder().decode(data), size: data.length };
+      }));
+    }
+    return Promise.all(entries).then(function (items) {
+      items = items.filter(Boolean);
+      if (!items.length) throw new Error('No supported .js files found in ZIP. Use unencrypted ZIP with STORE or DEFLATE compression; max 8 MB per JS file and 64 MB total.');
+      items.skippedCount = skipped;
+      return items;
+    });
+  });
+}
+function handleBatchLibraryFiles(fileList) {
+  var selected = Array.prototype.slice.call(fileList || []);
+  var files = selected.filter(function (f) { return /\.js$/i.test(f.name) && f.size <= 8 * 1024 * 1024; });
+  var zips = selected.filter(function (f) { return /\.zip$/i.test(f.name); });
+  var skipped = selected.length - files.length - zips.length;
+  var tasks = files.map(readBatchJsFile).concat(zips.map(unzipBatchJsFiles));
+  if (!tasks.length) {
+    $('#stMsg').textContent = 'Choose .js files or ZIP archives containing .js files.';
     return;
   }
-  if (files.length !== (fileList || []).length) {
-    $('#stMsg').textContent = 'Some files were skipped: only .js files up to 8 MB each are accepted.';
-  }
-  Promise.all(files.map(function (file) {
-    return new Promise(function (resolve, reject) {
-      var reader = new FileReader();
-      reader.onload = function () {
-        var code = String(reader.result || '');
-        if (!code.trim()) return reject(new Error(file.name + ' is empty.'));
-        resolve({ name: file.name, code: code, size: file.size });
-      };
-      reader.onerror = function () { reject(new Error('Could not read ' + file.name)); };
-      reader.readAsText(file);
+  Promise.all(tasks).then(function (results) {
+    var items = [];
+    results.forEach(function (result) {
+      if (Array.isArray(result)) {
+        items = items.concat(result);
+        skipped += result.skippedCount || 0;
+      } else items.push(result);
     });
-  })).then(function (items) {
+    if (!items.length) throw new Error('No usable JavaScript files found. Each .js file must be 8 MB or smaller.');
+    if (skipped) $('#stMsg').textContent = 'Skipped ' + skipped + ' unsupported or oversized file(s).';
     prompt2('CREATE BATCH LIBRARY', 'Library name', 'My Animation Library', function (name) {
       if (!name) { $('#stMsg').textContent = 'Batch library creation cancelled.'; return; }
       openBatchLibraryDB().then(function () {
