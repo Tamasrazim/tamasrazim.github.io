@@ -4825,143 +4825,174 @@ async function trilyvaLoadLibraryCode(title, code, item, opts) {
 
 function openTrilyvaLibrary(){
   var body=document.createElement('div');
-  body.style.cssText='display:flex;flex-direction:column;gap:9px;min-height:0;';
+  body.style.cssText='display:flex;flex-direction:column;gap:10px;min-height:0;';
   openModal('TRILYVA / LIBRARY',body,[{label:'Close',fn:closeModal}]);
 
+  var importHeading=el('h4',null,'IMPORT INTO LIBRARY');
+  importHeading.style.cssText='font:9px var(--mono);letter-spacing:.18em;color:var(--mut);margin:0 0 2px;';
+  var importButtons=el('div');
+  importButtons.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;';
+  var uploadJs=el('button','btn solid','UPLOAD .JS');
+  var uploadFolderZip=el('button','btn','UPLOAD FOLDER / ZIP');
+  [uploadJs,uploadFolderZip].forEach(function(b){b.type='button';b.style.cssText+=';margin:0;min-width:0;padding:10px 6px;font-size:10px;'});
+  importButtons.append(uploadJs,uploadFolderZip);
+
+  var chooseSource=el('div');
+  chooseSource.style.cssText='display:none;grid-template-columns:1fr 1fr auto;gap:7px;';
+  var chooseFolder=el('button','btn','CHOOSE FOLDER');
+  var chooseZip=el('button','btn','CHOOSE ZIP');
+  var cancelChoose=el('button','btn','CANCEL');
+  [chooseFolder,chooseZip,cancelChoose].forEach(function(b){b.type='button';b.style.cssText+=';margin:0;padding:8px 5px;font-size:9px;'});
+  chooseSource.append(chooseFolder,chooseZip,cancelChoose);
+
+  var help=el('p','note','Each import becomes its own local library with a date and time. Folder imports collect .js files; each ZIP is stored as a separate library. Files stay in this browser.');
+  var importStatus=el('p','note','');
+  importStatus.style.cssText='min-height:1.3em;margin:0;color:var(--ink-2);overflow-wrap:anywhere;';
+  var localHeading=el('h4',null,'LOCAL LIBRARIES');
+  localHeading.style.cssText='font:9px var(--mono);letter-spacing:.18em;color:var(--mut);margin:5px 0 0;padding-bottom:7px;border-bottom:1px solid var(--rule);';
+  var localList=el('div');
+  localList.style.cssText='display:flex;flex-direction:column;gap:7px;max-height:36vh;overflow:auto;';
+  var builtInHeading=el('h4',null,'BUILT-IN LIBRARIES');
+  builtInHeading.style.cssText='font:9px var(--mono);letter-spacing:.18em;color:var(--mut);margin:8px 0 0;padding-bottom:7px;border-bottom:1px solid var(--rule);';
+  var builtInArea=el('div');
+  builtInArea.style.cssText='display:flex;flex-direction:column;gap:8px;min-height:0;';
+  
+  var jsPicker=document.createElement('input');
+  jsPicker.type='file';jsPicker.accept='.js,text/javascript,application/javascript';jsPicker.style.display='none';
+  var folderPicker=document.createElement('input');
+  folderPicker.type='file';folderPicker.multiple=true;folderPicker.setAttribute('webkitdirectory','');folderPicker.setAttribute('directory','');folderPicker.style.display='none';
+  var zipPicker=document.createElement('input');
+  zipPicker.type='file';zipPicker.accept='.zip,application/zip';zipPicker.multiple=true;zipPicker.style.display='none';
+
+  body.replaceChildren(importHeading,importButtons,chooseSource,help,importStatus,localHeading,localList,builtInHeading,builtInArea,jsPicker,folderPicker,zipPicker);
+
+  function refreshLocal(){renderLocalBatchLibraries(localList,localHeading);}
+  function reportError(label,error){
+    importStatus.textContent=label+' · '+String(error&&error.message||error);
+    $('#stMsg').textContent=importStatus.textContent;
+  }
+  uploadJs.onclick=function(){jsPicker.value='';jsPicker.click();};
+  uploadFolderZip.onclick=function(){chooseSource.style.display=chooseSource.style.display==='grid'?'none':'grid';};
+  cancelChoose.onclick=function(){chooseSource.style.display='none';};
+  chooseFolder.onclick=function(){folderPicker.value='';folderPicker.click();};
+  chooseZip.onclick=function(){zipPicker.value='';zipPicker.click();};
+
+  jsPicker.onchange=function(){
+    var file=this.files&&this.files[0];this.value='';
+    if(!file)return;
+    importStatus.textContent='Reading '+file.name+'…';
+    createLibraryFromSingleJs(file).then(function(lib){
+      importStatus.textContent='Created '+lib.title+' · 1 JavaScript file';
+      refreshLocal();
+    }).catch(function(e){reportError('JavaScript import failed',e);});
+  };
+  folderPicker.onchange=function(){
+    var files=Array.prototype.slice.call(this.files||[]);this.value='';
+    chooseSource.style.display='none';
+    if(!files.length)return;
+    importStatus.textContent='Reading folder · '+files.length+' file(s)…';
+    createLibrariesFromFolder(files).then(function(libs){
+      importStatus.textContent='Created '+libs.length+' folder library/libraries · '+libs.reduce(function(n,lib){return n+lib.items.length;},0)+' JavaScript file(s)';
+      refreshLocal();
+    }).catch(function(e){reportError('Folder import failed',e);});
+  };
+  zipPicker.onchange=function(){
+    var files=Array.prototype.slice.call(this.files||[]);this.value='';
+    chooseSource.style.display='none';
+    if(!files.length)return;
+    importStatus.textContent='Reading '+files.length+' ZIP archive(s)…';
+    createLibrariesFromZips(files,function(message){importStatus.textContent=message;}).then(function(result){
+      importStatus.textContent='Created '+result.created.length+' ZIP library/libraries'+(result.errors.length?' · '+result.errors.length+' archive(s) failed':'');
+      refreshLocal();
+      if(result.errors.length)reportError('ZIP import warning',new Error(result.errors.join(' | ')));
+    }).catch(function(e){reportError('ZIP import failed',e);});
+  };
+
+  refreshLocal();
   var registry=window.TRILYVA_LIBRARY;
   if(!registry){
-    body.innerHTML='<div class="empty">LIBRARY REGISTRY NOT READY</div>';
+    builtInArea.innerHTML='<div class="empty">BUILT-IN LIBRARY REGISTRY NOT READY</div>';
     return;
   }
-
-  body.innerHTML='<div class="empty">LOADING LIBRARY INDEX…</div>';
   registry.ready.then(function(){
-    if(!registry.all().length){
-      body.innerHTML='<div class="empty">NO LIBRARIES INSTALLED</div><p class="note">The built-in Prism, Flowers, Dot Mesh and other library collections have been removed from this site.</p>';
+    var libs=registry.all();
+    if(!libs.length){
+      builtInArea.innerHTML='<div class="empty">NO BUILT-IN LIBRARIES INSTALLED</div>';
       return;
     }
     var toolbar=document.createElement('div');
-    toolbar.style.cssText='display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,240px) auto auto;gap:8px;align-items:center;';
+    toolbar.style.cssText='display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,240px) auto;gap:8px;align-items:center;';
     var tabs=document.createElement('div');
     tabs.style.cssText='display:flex;gap:4px;flex-wrap:wrap;';
     var search=document.createElement('input');
-    search.type='search'; search.placeholder='Search library…'; search.autocomplete='off';
+    search.type='search';search.placeholder='Search built-in library…';search.autocomplete='off';
     search.style.cssText='width:100%;background:#09090b;border:1px solid var(--rule);padding:7px 8px;font:10px var(--mono);outline:none;';
     var catalog=document.createElement('button');
-    catalog.type='button'; catalog.textContent='CATALOG CSV';
+    catalog.type='button';catalog.textContent='CATALOG CSV';
     catalog.style.cssText='border:1px solid var(--rule);padding:6px 8px;background:#0a0a0c;color:var(--mut);font:9px var(--mono);letter-spacing:.08em;cursor:pointer;display:none;';
-    catalog.title='Download metadata for every item in the active library as CSV';
+    catalog.title='Download metadata for every item in the active built-in library as CSV';
     catalog.onclick=function(){
       try{
         if(!active||typeof active.catalogCsv!=='function')return;
-        trilyvaDownloadTextAsset('trilyva-dot-mesh-catalog.csv',active.catalogCsv(),'text/csv;charset=utf-8');
+        trilyvaDownloadTextAsset('trilyva-library-catalog.csv',active.catalogCsv(),'text/csv;charset=utf-8');
         $('#stMsg').textContent='Downloaded library metadata catalog CSV';
       }catch(e){$('#stMsg').textContent='Catalog download failed · '+String(e.message||e);}
     };
     toolbar.append(tabs,search,catalog);
-
-    var list=document.createElement('div');
-    list.className='list';
-    list.style.cssText='max-height:52vh;overflow:auto;';
-
-    body.replaceChildren(toolbar,list);
-
-    var libs=registry.all();
-    var active=libs[0]||null;
-    var data=[];
-    var loaded=false;
-
+    var list=document.createElement('div');list.className='list';list.style.cssText='max-height:35vh;overflow:auto;';
+    builtInArea.replaceChildren(toolbar,list);
+    var active=libs[0]||null,data=[],loaded=false;
     function setTabs(){
       catalog.style.display=active&&typeof active.catalogCsv==='function'?'inline-flex':'none';
       tabs.replaceChildren();
       libs.forEach(function(lib){
-        var btn=document.createElement('button');
-        btn.type='button';
-        btn.textContent=lib.title;
+        var btn=document.createElement('button');btn.type='button';btn.textContent=lib.title;
         btn.style.cssText='border:1px solid var(--rule);padding:6px 9px;background:'+(active===lib?'#fff':'#0a0a0c')+';color:'+(active===lib?'#000':'var(--mut)')+';font:9px var(--mono);letter-spacing:.08em;cursor:pointer;';
         btn.title=lib.description||'';
         btn.onclick=function(){active=lib;loaded=false;setTabs();loadActive();};
         tabs.appendChild(btn);
       });
     }
-
     function render(){
       var q=search.value.trim().toLowerCase();
-      var items=data.map(function(x,i){return {x:x,i:i};}).filter(function(o){
-        var x=o.x||{};
-        var hay=String(x.title||'')+' '+String(x.id||'')+' '+String(x.category||x.cat||'');
+      var items=data.map(function(x,i){return{x:x,i:i};}).filter(function(o){
+        var x=o.x||{};var hay=String(x.title||'')+' '+String(x.id||'')+' '+String(x.category||x.cat||'');
         return !q||hay.toLowerCase().indexOf(q)>=0;
       });
-      if(!items.length){
-        list.innerHTML='<div class="empty">NO MATCHES</div>';
-        return;
-      }
+      if(!items.length){list.innerHTML='<div class="empty">NO MATCHES</div>';return;}
       var frag=document.createDocumentFragment();
       items.forEach(function(o){
-        var x=o.x;
-        var it=document.createElement('div');
-        it.className='it';
-        it.tabIndex=0;
-        it.setAttribute('role','button');
-        it.setAttribute('aria-label','Load '+String(x.title||'library item'));
-        it.style.cursor='pointer';
-        it.style.touchAction='manipulation';
-        if(typeof x.thumbnail==='string' && x.thumbnail.toLowerCase().indexOf('data:image/svg+xml')===0){
-          var preview=document.createElement('img');
-          preview.src=x.thumbnail; preview.alt=''; preview.loading='lazy';
-          preview.style.cssText='width:112px;height:63px;object-fit:contain;flex:0 0 112px;border:1px solid var(--rule);background:#070709;';
-          it.appendChild(preview);
+        var x=o.x,it=document.createElement('div');it.className='it';it.tabIndex=0;it.setAttribute('role','button');
+        it.setAttribute('aria-label','Load '+String(x.title||'library item'));it.style.cursor='pointer';it.style.touchAction='manipulation';
+        if(typeof x.thumbnail==='string'&&x.thumbnail.toLowerCase().indexOf('data:image/svg+xml')===0){
+          var preview=document.createElement('img');preview.src=x.thumbnail;preview.alt='';preview.loading='lazy';
+          preview.style.cssText='width:112px;height:63px;object-fit:contain;flex:0 0 112px;border:1px solid var(--rule);background:#070709;';it.appendChild(preview);
         }
-        var text=document.createElement('div');
-        text.style.cssText='min-width:0;flex:1;';
+        var text=document.createElement('div');text.style.cssText='min-width:0;flex:1;';
         text.innerHTML='<h5>'+trilyvaLibraryEscape(x.title||'Untitled')+'</h5><p>'+trilyvaLibraryEscape(x.id||('item-'+o.i))+'</p>';
-        var actions=document.createElement('div');
-        actions.style.cssText='display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-wrap:wrap;flex:0 0 auto;';
-        function action(label,title,handler){
-          var b=document.createElement('button');b.className='x';b.type='button';b.textContent=label;b.title=title;
-          b.onclick=function(ev){ev.preventDefault();ev.stopPropagation();handler();};
-          actions.appendChild(b);return b;
-        }
+        var actions=document.createElement('div');actions.style.cssText='display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-wrap:wrap;flex:0 0 auto;';
+        function action(label,title,handler){var b=document.createElement('button');b.className='x';b.type='button';b.textContent=label;b.title=title;b.onclick=function(ev){ev.preventDefault();ev.stopPropagation();handler();};actions.appendChild(b);}
         function activate(){trilyvaLoadLibraryCode(x.title,x.code,x).catch(function(e){$('#stMsg').textContent='Library load failed · '+String(e.message||e);});}
-        if(x.svg || x.svgSource) action('SVG','Download animated SVG',function(){trilyvaDownloadLibraryItem(x,'svg');});
-        if(x.metadata || x.meta) action('META','Download JSON metadata',function(){trilyvaDownloadLibraryItem(x,'metadata');});
-        action('LOAD','Load this animation into the TRILYVA editor',activate);
-        it.onclick=function(ev){if(actions.contains(ev.target))return;activate();};
-        it.addEventListener('pointerup',function(ev){
-          if(ev.pointerType!=='mouse' && !actions.contains(ev.target)) activate();
-        });
+        if(x.svg||x.svgSource)action('SVG','Download animated SVG',function(){trilyvaDownloadLibraryItem(x,'svg');});
+        if(x.metadata||x.meta)action('META','Download JSON metadata',function(){trilyvaDownloadLibraryItem(x,'metadata');});
+        action('LOAD','Load this animation into the editor',activate);
+        it.onclick=function(ev){if(!actions.contains(ev.target))activate();};
+        it.addEventListener('pointerup',function(ev){if(ev.pointerType!=='mouse'&&!actions.contains(ev.target))activate();});
         it.onkeydown=function(ev){if(ev.target===it&&(ev.key==='Enter'||ev.key===' ')){ev.preventDefault();activate();}};
-        it.append(text,actions);
-        frag.appendChild(it);
+        it.append(text,actions);frag.appendChild(it);
       });
       list.replaceChildren(frag);
     }
-
     async function loadActive(){
-      if(!active){
-        list.innerHTML='<div class="empty">NO LIBRARIES REGISTERED</div>';
-        return;
-      }
-      list.innerHTML='<div class="empty">LOADING '+trilyvaLibraryEscape(active.title)+'…</div>';
-      search.value='';
-      try{
-        data=await active.load();
-        loaded=true;
-        render();
-      }catch(e){
-        loaded=false;
-        list.innerHTML='<div class="empty">LIBRARY LOAD FAILED<br><br>'+trilyvaLibraryEscape(e.message)+'</div>';
-      }
+      if(!active){list.innerHTML='<div class="empty">NO BUILT-IN LIBRARIES REGISTERED</div>';return;}
+      list.innerHTML='<div class="empty">LOADING '+trilyvaLibraryEscape(active.title)+'…</div>';search.value='';
+      try{data=await active.load();loaded=true;render();}
+      catch(e){loaded=false;list.innerHTML='<div class="empty">LIBRARY LOAD FAILED<br><br>'+trilyvaLibraryEscape(e.message)+'</div>';}
     }
-
     search.oninput=function(){if(loaded)render();};
-    setTabs();
-    loadActive();
-  }).catch(function(e){
-    body.innerHTML='<div class="empty">LIBRARY INDEX FAILED<br><br>'+trilyvaLibraryEscape(e.message)+'</div>';
-  });
+    setTabs();loadActive();
+  }).catch(function(e){builtInArea.innerHTML='<div class="empty">BUILT-IN LIBRARY INDEX FAILED<br><br>'+trilyvaLibraryEscape(e.message)+'</div>';});
 }
-
 /* ============================================================
    Render All — five-file asset batch
    ============================================================ */
@@ -7677,122 +7708,249 @@ function batchLibraryStore(mode) {
   return BatchLibraryDB.db.transaction('libraries', mode).objectStore('libraries');
 }
 function openBatchUploadPicker() {
-  var pick = $('#batchJsPick');
-  if (pick) { pick.value = ''; pick.click(); }
+  openTrilyvaLibrary();
 }
-function readBatchJsFile(file) {
-  return new Promise(function (resolve, reject) {
-    var reader = new FileReader();
-    reader.onload = function () {
-      var code = String(reader.result || '');
-      if (!code.trim()) return reject(new Error(file.name + ' is empty.'));
-      resolve({ name: file.name, code: code, size: file.size });
+function trilyvaLocalTimestamp(date){
+  var d=date instanceof Date?date:new Date(date);
+  return d.getFullYear()+'-'+pad(d.getMonth()+1,2)+'-'+pad(d.getDate(),2)+' '+pad(d.getHours(),2)+':'+pad(d.getMinutes(),2)+':'+pad(d.getSeconds(),2);
+}
+function readBatchJsFile(file){
+  return new Promise(function(resolve,reject){
+    if(file.size>8*1024*1024)return reject(new Error(file.name+' exceeds the 8 MB per-file limit.'));
+    var reader=new FileReader();
+    reader.onload=function(){
+      var code=String(reader.result||'');
+      if(!code.trim())return reject(new Error(file.name+' is empty.'));
+      resolve({name:file.name,code:code,size:file.size,path:file.webkitRelativePath||file.name});
     };
-    reader.onerror = function () { reject(new Error('Could not read ' + file.name)); };
+    reader.onerror=function(){reject(new Error('Could not read '+file.name));};
     reader.readAsText(file);
   });
 }
-function unzipBatchJsFiles(file) {
-  return file.arrayBuffer().then(function (buffer) {
-    var bytes = new Uint8Array(buffer), view = new DataView(buffer);
-    var min = Math.max(0, bytes.length - 65557), eocd = -1;
-    for (var p = bytes.length - 22; p >= min; p--) {
-      if (view.getUint32(p, true) === 0x06054b50) { eocd = p; break; }
+function trilyvaZipCrcTable(){
+  if(trilyvaZipCrcTable.cache)return trilyvaZipCrcTable.cache;
+  var table=new Uint32Array(256);
+  for(var n=0;n<256;n++){
+    var c=n;
+    for(var k=0;k<8;k++)c=(c&1)?(0xedb88320^(c>>>1)):(c>>>1);
+    table[n]=c>>>0;
+  }
+  trilyvaZipCrcTable.cache=table;return table;
+}
+function trilyvaZipCrcUpdate(crc,byte){
+  return (crc>>>8)^trilyvaZipCrcTable()[(crc^byte)&255];
+}
+function trilyvaZipCrc32(bytes){
+  var crc=0xffffffff;
+  for(var i=0;i<bytes.length;i++)crc=trilyvaZipCrcUpdate(crc,bytes[i]);
+  return (crc^0xffffffff)>>>0;
+}
+function trilyvaZipDecrypt(encrypted,password,checkByte){
+  var table=trilyvaZipCrcTable(),key0=0x12345678,key1=0x23456789,key2=0x34567890;
+  function updateKey(byte){
+    key0=(key0>>>8)^table[(key0^byte)&255];
+    key1=(Math.imul((key1+(key0&255))>>>0,134775813)+1)>>>0;
+    key2=(key2>>>8)^table[(key2^(key1>>>24))&255];
+  }
+  var passBytes=new TextEncoder().encode(String(password));
+  for(var p=0;p<passBytes.length;p++)updateKey(passBytes[p]);
+  if(encrypted.length<12)throw new Error('Encrypted ZIP entry is shorter than its security header.');
+  var plain=new Uint8Array(encrypted.length);
+  for(var i=0;i<encrypted.length;i++){
+    var temp=(key2|2)>>>0;
+    var mask=(Math.imul(temp,(temp^1)>>>0)>>>8)&255;
+    var byte=encrypted[i]^mask;
+    plain[i]=byte;updateKey(byte);
+  }
+  if(plain[11]!==checkByte){
+    var error=new Error('Incorrect ZIP password. Check the password and try again.');
+    error.code='TRILYVA_ZIP_BAD_PASSWORD';throw error;
+  }
+  return plain.slice(12);
+}
+async function trilyvaInflateZipEntry(bytes,method){
+  if(method===0)return bytes;
+  if(method!==8)throw new Error('ZIP compression method '+method+' is not supported. Use STORE or DEFLATE compression.');
+  if(typeof DecompressionStream!=='function')throw new Error('This browser cannot decompress DEFLATE ZIP files. Extract the ZIP and choose the folder instead.');
+  try{
+    var stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return new Uint8Array(await new Response(stream).arrayBuffer());
+  }catch(e){throw new Error('Could not decompress this ZIP entry. It may be damaged or use unsupported compression.');}
+}
+async function unzipBatchJsFiles(file,password){
+  var buffer=await file.arrayBuffer();
+  var bytes=new Uint8Array(buffer),view=new DataView(buffer);
+  var min=Math.max(0,bytes.length-65557),eocd=-1;
+  for(var p=bytes.length-22;p>=min;p--){
+    if(view.getUint32(p,true)===0x06054b50){eocd=p;break;}
+  }
+  if(eocd<0)throw new Error(file.name+' is not a valid supported ZIP archive.');
+  var disk=view.getUint16(eocd+4,true),centralDisk=view.getUint16(eocd+6,true);
+  var count=view.getUint16(eocd+10,true),offset=view.getUint32(eocd+16,true);
+  if(disk!==0||centralDisk!==0||count===0xffff||offset===0xffffffff)throw new Error('Multi-disk and ZIP64 archives are not supported by this browser uploader.');
+  var entries=[],skipped=0,totalDeclared=0;
+  for(var i=0;i<count;i++){
+    if(offset+46>bytes.length||view.getUint32(offset,true)!==0x02014b50)throw new Error('ZIP central directory is damaged.');
+    var flags=view.getUint16(offset+8,true),method=view.getUint16(offset+10,true);
+    var modTime=view.getUint16(offset+12,true),crc=view.getUint32(offset+16,true);
+    var compressedSize=view.getUint32(offset+20,true),uncompressedSize=view.getUint32(offset+24,true);
+    var nameLen=view.getUint16(offset+28,true),extraLen=view.getUint16(offset+30,true),commentLen=view.getUint16(offset+32,true);
+    var localOffset=view.getUint32(offset+42,true);
+    var name=new TextDecoder().decode(bytes.slice(offset+46,offset+46+nameLen)).replace(/\\/g,'/');
+    var extraStart=offset+46+nameLen,extraEnd=extraStart+extraLen;
+    var aes=false;
+    for(var ex=extraStart;ex+4<=extraEnd;){
+      var tag=view.getUint16(ex,true),len=view.getUint16(ex+2,true);
+      if(ex+4+len>extraEnd)break;
+      if(tag===0x9901)aes=true;
+      ex+=4+len;
     }
-    if (eocd < 0) throw new Error(file.name + ' is not a valid ZIP archive.');
-    var count = view.getUint16(eocd + 10, true);
-    var offset = view.getUint32(eocd + 16, true);
-    var entries = [], skipped = 0, total = 0;
-    for (var i = 0; i < count; i++) {
-      if (offset + 46 > bytes.length || view.getUint32(offset, true) !== 0x02014b50) break;
-      var flags = view.getUint16(offset + 8, true);
-      var method = view.getUint16(offset + 10, true);
-      var compressedSize = view.getUint32(offset + 20, true);
-      var uncompressedSize = view.getUint32(offset + 24, true);
-      var nameLen = view.getUint16(offset + 28, true);
-      var extraLen = view.getUint16(offset + 30, true);
-      var commentLen = view.getUint16(offset + 32, true);
-      var localOffset = view.getUint32(offset + 42, true);
-      var nameBytes = bytes.slice(offset + 46, offset + 46 + nameLen);
-      var name = new TextDecoder().decode(nameBytes).replace(/\\/g, '/');
-      offset += 46 + nameLen + extraLen + commentLen;
-      if (!/\.js$/i.test(name) || /(^|\/)__MACOSX\//i.test(name) || /(^|\/)\./.test(name)) continue;
-      if (flags & 1) { skipped++; continue; }
-      if (uncompressedSize > 8 * 1024 * 1024 || total + uncompressedSize > 64 * 1024 * 1024) { skipped++; continue; }
-      if (localOffset + 30 > bytes.length || view.getUint32(localOffset, true) !== 0x04034b50) { skipped++; continue; }
-      var localNameLen = view.getUint16(localOffset + 26, true);
-      var localExtraLen = view.getUint16(localOffset + 28, true);
-      var dataStart = localOffset + 30 + localNameLen + localExtraLen;
-      if (dataStart + compressedSize > bytes.length) { skipped++; continue; }
-      var compressed = bytes.slice(dataStart, dataStart + compressedSize);
-      var payload;
-      if (method === 0) payload = Promise.resolve(compressed);
-      else if (method === 8 && typeof DecompressionStream === 'function') {
-        try {
-          var stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
-          payload = new Response(stream).arrayBuffer().then(function (b) { return new Uint8Array(b); });
-        } catch (e) { payload = Promise.reject(new Error('This browser cannot decompress ZIP files. Try extracting the ZIP and selecting the .js files.')); }
-      } else {
-        skipped++;
-        continue;
-      }
-      (function (entryName, entryPayload) {
-        entries.push(entryPayload.then(function (data) {
-          if (data.length > 8 * 1024 * 1024) { skipped++; return null; }
-          total += data.length;
-          return { name: entryName, code: new TextDecoder().decode(data), size: data.length };
-        }));
-      })(name, payload);
+    offset+=46+nameLen+extraLen+commentLen;
+    if(!/\.js$/i.test(name)||/(^|\/)__MACOSX\//i.test(name)||/(^|\/)\./.test(name)||/(^|\/)node_modules\//i.test(name))continue;
+    if(aes||method===99)throw new Error('This ZIP uses WinZip AES encryption, which this browser-only importer cannot unlock yet. Re-save it with classic ZipCrypto encryption or extract it and choose the folder.');
+    var encrypted=!!(flags&1);
+    if(encrypted&&password===null){
+      var required=new Error('PASSWORD_REQUIRED');
+      required.code='TRILYVA_ZIP_PASSWORD_REQUIRED';throw required;
     }
-    return Promise.all(entries).then(function (items) {
-      items = items.filter(Boolean);
-      if (!items.length) throw new Error('No supported .js files found in ZIP. Use unencrypted ZIP with STORE or DEFLATE compression; max 8 MB per JS file and 64 MB total.');
-      items.skippedCount = skipped;
-      return items;
-    });
+    if(uncompressedSize>8*1024*1024||totalDeclared+uncompressedSize>64*1024*1024){skipped++;continue;}
+    if(localOffset+30>bytes.length||view.getUint32(localOffset,true)!==0x04034b50){skipped++;continue;}
+    var localNameLen=view.getUint16(localOffset+26,true),localExtraLen=view.getUint16(localOffset+28,true);
+    var dataStart=localOffset+30+localNameLen+localExtraLen;
+    if(dataStart+compressedSize>bytes.length){skipped++;continue;}
+    var compressed=bytes.slice(dataStart,dataStart+compressedSize);
+    if(encrypted){
+      var checkByte=(flags&8)?((modTime>>>8)&255):((crc>>>24)&255);
+      compressed=trilyvaZipDecrypt(compressed,password,checkByte);
+    }
+    var payload=await trilyvaInflateZipEntry(compressed,method);
+    if(payload.length>8*1024*1024||totalDeclared+payload.length>64*1024*1024){skipped++;continue;}
+    if(trilyvaZipCrc32(payload)!==(crc>>>0)){
+      var invalid=new Error(encrypted?'Incorrect ZIP password or damaged archive.':'ZIP entry checksum failed: '+name);
+      if(encrypted)invalid.code='TRILYVA_ZIP_BAD_PASSWORD';
+      throw invalid;
+    }
+    totalDeclared+=payload.length;
+    entries.push({name:name,code:new TextDecoder().decode(payload),size:payload.length,path:name});
+  }
+  if(!entries.length)throw new Error('No usable .js files found in '+file.name+'. Each script must be at most 8 MB and total extracted scripts at most 64 MB.');
+  entries.skippedCount=skipped;
+  return entries;
+}
+async function unzipBatchJsFilesWithPassword(file){
+  var password=null,attempts=0;
+  while(true){
+    try{return await unzipBatchJsFiles(file,password);}
+    catch(e){
+      if(e.code!=='TRILYVA_ZIP_PASSWORD_REQUIRED'&&e.code!=='TRILYVA_ZIP_BAD_PASSWORD')throw e;
+      if(attempts>=3)throw new Error('ZIP password attempts exceeded for '+file.name+'.');
+      var entered=window.prompt(e.code==='TRILYVA_ZIP_PASSWORD_REQUIRED'?'This ZIP is password-protected. Enter the password to unlock '+file.name+':':'Incorrect ZIP password for '+file.name+'. Try again:');
+      if(entered===null)throw new Error('Password entry cancelled for '+file.name+'.');
+      password=entered;attempts++;
+    }
+  }
+}
+async function saveLocalTrilyvaLibrary(title,source,items){
+  if(!items||!items.length)throw new Error('The selected source contains no JavaScript files.');
+  var now=new Date(),stamp=trilyvaLocalTimestamp(now);
+  var base=String(title||'Imported Library').replace(/\s*[—-]\s*\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}$/,'').trim();
+  var rec={
+    id:uid('batchlib'),title:(base||'Imported Library')+' — '+stamp,
+    source:String(source||'Imported files'),created:now.toISOString(),modified:now.toISOString(),
+    count:items.length,
+    items:items.map(function(item){return{name:String(item.name||item.path||'animation.js'),path:String(item.path||item.name||''),code:String(item.code||''),size:Number(item.size)||0};})
+  };
+  await openBatchLibraryDB();
+  await idbAsk(batchLibraryStore('readwrite').put(rec));
+  return rec;
+}
+async function createLibraryFromSingleJs(file){
+  if(!/\.js$/i.test(file.name))throw new Error('Choose a .js file.');
+  var item=await readBatchJsFile(file);
+  item.path=file.name;
+  return saveLocalTrilyvaLibrary(file.name.replace(/\.js$/i,''),'JavaScript file · '+file.name,[item]);
+}
+async function createLibrariesFromFolder(files){
+  var groups=Object.create(null),skipped=0,totalSize=0;
+  files.forEach(function(file){
+    var rel=String(file.webkitRelativePath||file.name).replace(/\\/g,'/');
+    if(!/\.js$/i.test(rel)||/(^|\/)__MACOSX\//i.test(rel)||/(^|\/)\./.test(rel)||/(^|\/)node_modules\//i.test(rel)){skipped++;return;}
+    var parts=rel.split('/'),root=parts.length>1?parts[0]:'Selected Folder';
+    var name=parts.length>1?parts.slice(1).join('/') : file.name;
+    if(!groups[root])groups[root]=[];
+    groups[root].push({file:file,name:name,path:rel});
+  });
+  var roots=Object.keys(groups),saved=[];
+  if(!roots.length)throw new Error('No .js files found in the selected folder.');
+  for(var r=0;r<roots.length;r++){
+    var root=roots[r],group=groups[root],items=[],size=0;
+    for(var i=0;i<group.length;i++){
+      size+=group[i].file.size;
+      if(group[i].file.size>8*1024*1024)throw new Error(group[i].file.name+' exceeds the 8 MB per-file limit.');
+      if(size>64*1024*1024)throw new Error('Folder '+root+' exceeds the 64 MB total JavaScript limit.');
+      var item=await readBatchJsFile(group[i].file);
+      item.name=group[i].name;item.path=group[i].path;items.push(item);
+    }
+    saved.push(await saveLocalTrilyvaLibrary(root,'Folder import · '+root,items));
+  }
+  if(skipped)$('#stMsg').textContent='Skipped '+skipped+' non-JavaScript or hidden file(s).';
+  return saved;
+}
+async function createLibrariesFromZips(files,onProgress){
+  var created=[],errors=[];
+  for(var i=0;i<files.length;i++){
+    var file=files[i];
+    if(!/\.zip$/i.test(file.name)){errors.push(file.name+': not a ZIP file');continue;}
+    try{
+      if(onProgress)onProgress('Unlocking / reading '+file.name+'…');
+      var items=await unzipBatchJsFilesWithPassword(file);
+      var title=file.name.replace(/\.zip$/i,'')||'ZIP Library';
+      var saved=await saveLocalTrilyvaLibrary(title,'ZIP archive · '+file.name,items);
+      created.push(saved);
+    }catch(e){errors.push(file.name+': '+String(e&&e.message||e));}
+  }
+  return {created:created,errors:errors};
+}
+function trilyvaLoadLocalLibraryItem(lib,item){
+  askDiscard('Load "'+item.name+'" from '+lib.title+'? This replaces the current editor code.',function(){
+    S.id=null;
+    S.name=String(item.name||lib.title).split('/').pop().replace(/\.js$/i,'').replace(/[^a-zA-Z0-9._ -]+/g,'-')||'Imported Animation';
+    S.version=1;$('#projName').value=S.name;
+    edSetValue(item.code);S.code=item.code;markDirty(true);run();
+    closeModal();showTab('p-render');
+    $('#stMsg').textContent='Loaded '+item.name+' from "'+lib.title+'" · review, then Render Current Code';
   });
 }
-function handleBatchLibraryFiles(fileList) {
-  var selected = Array.prototype.slice.call(fileList || []);
-  var files = selected.filter(function (f) { return /\.js$/i.test(f.name) && f.size <= 8 * 1024 * 1024; });
-  var zips = selected.filter(function (f) { return /\.zip$/i.test(f.name); });
-  var skipped = selected.length - files.length - zips.length;
-  var tasks = files.map(readBatchJsFile).concat(zips.map(unzipBatchJsFiles));
-  if (!tasks.length) {
-    $('#stMsg').textContent = 'Choose .js files or ZIP archives containing .js files.';
-    return;
-  }
-  Promise.all(tasks).then(function (results) {
-    var items = [];
-    results.forEach(function (result) {
-      if (Array.isArray(result)) {
-        items = items.concat(result);
-        skipped += result.skippedCount || 0;
-      } else items.push(result);
-    });
-    if (!items.length) throw new Error('No usable JavaScript files found. Each .js file must be 8 MB or smaller.');
-    if (skipped) $('#stMsg').textContent = 'Skipped ' + skipped + ' unsupported or oversized file(s).';
-    prompt2('CREATE BATCH LIBRARY', 'Library name', 'My Animation Library', function (name) {
-      if (!name) { $('#stMsg').textContent = 'Batch library creation cancelled.'; return; }
-      openBatchLibraryDB().then(function () {
-        var rec = {
-          id: uid('batchlib'),
-          title: name.slice(0, 100),
-          created: new Date().toISOString(),
-          modified: new Date().toISOString(),
-          count: items.length,
-          items: items
-        };
-        return idbAsk(batchLibraryStore('readwrite').put(rec)).then(function () {
-          $('#stMsg').textContent = 'Created local library "' + rec.title + '" · ' + items.length + ' JavaScript file(s)';
-          openBatchLibraries();
-        });
-      }).catch(function (err) {
-        $('#stMsg').textContent = 'Library save failed · ' + String(err && err.message || err);
+function renderLocalBatchLibraries(container,heading){
+  container.innerHTML='<div class="empty">LOADING LOCAL LIBRARIES…</div>';
+  openBatchLibraryDB().then(function(){return idbAsk(batchLibraryStore('readonly').getAll());}).then(function(libs){
+    libs.sort(function(a,b){return String(b.created||'').localeCompare(String(a.created||''));});
+    heading.textContent='LOCAL LIBRARIES · '+libs.length;
+    container.replaceChildren();
+    if(!libs.length){container.appendChild(el('div','empty','NO UPLOADED LIBRARIES YET'));return;}
+    libs.forEach(function(lib){
+      var section=el('div','it');section.style.cssText='display:block;padding:10px;';
+      var title=el('h5',null,lib.title+' · '+((lib.items||[]).length)+' FILES');
+      var date=new Date(lib.created);
+      var info=el('p',null,'Created '+(isNaN(date.getTime())?'unknown date':date.toLocaleString())+' · '+String(lib.source||'local import')+' · stored on this browser');
+      section.append(title,info);
+      (lib.items||[]).forEach(function(item){
+        var row=el('div');row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--rule);';
+        var name=el('div',null,item.name||item.path||'animation.js');name.style.cssText='min-width:0;flex:1;overflow-wrap:anywhere;font:10px var(--mono);color:var(--ink-2);';
+        var load=el('button','btn','LOAD');load.type='button';load.style.cssText='width:auto;margin:0;padding:6px 9px;';
+        load.addEventListener('click',function(){trilyvaLoadLocalLibraryItem(lib,item);});
+        row.append(name,load);section.appendChild(row);
       });
+      var remove=el('button','btn','DELETE LIBRARY');remove.type='button';remove.style.cssText='margin-top:8px;';
+      remove.addEventListener('click',function(){
+        if(!window.confirm('Delete local library "'+lib.title+'" and all its stored files from this browser?'))return;
+        idbAsk(batchLibraryStore('readwrite').delete(lib.id)).then(function(){renderLocalBatchLibraries(container,heading);}).catch(function(err){$('#stMsg').textContent='Delete failed · '+String(err&&err.message||err);});
+      });
+      section.appendChild(remove);container.appendChild(section);
     });
-  }).catch(function (err) {
-    openModal('BATCH UPLOAD FAILED', elHTML('<div class="warnbox"><b>FILE READ ERROR</b>' + esc(String(err && err.message || err)) + '</div>'), [{ label: 'Close', solid: true, fn: closeModal }]);
+  }).catch(function(e){
+    heading.textContent='LOCAL LIBRARIES';
+    container.innerHTML='<div class="empty">LOCAL LIBRARY STORAGE FAILED<br><br>'+trilyvaLibraryEscape(e.message||e)+'</div>';
   });
 }
 function openBatchLibraries() {
