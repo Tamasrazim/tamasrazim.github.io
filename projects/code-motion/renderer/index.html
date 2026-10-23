@@ -5239,7 +5239,7 @@ var BatchVector = (function () {
   return {sceneForCode:sceneForCode,stripBackground:stripBackground,svg:svg,eps:eps};
 })();
 
-function trilyvaStockMetadata(item, stem, assets){
+function trilyvaStockMetadata(item, stem, assets, outputFileName){
   var baseKeywords=[
     'motion background','abstract background','seamless loop','looping animation','animated background',
     '12 second loop','procedural animation','procedural graphics','digital background','modern background',
@@ -5264,7 +5264,7 @@ function trilyvaStockMetadata(item, stem, assets){
   var desc='Seamless 12-second procedural motion background with flowing geometric movement, luminous linework and a clean dark composition, created for video, design and digital projects.';
   function csv(v){v=String(v==null?'':v);return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
   var row=[
-    stem+'.mp4',title,desc,keywords.join(','),
+    String(outputFileName|| (stem+'.mp4')),title,desc,keywords.join(','),
     'Backgrounds/Textures', 'Yes','No','No'
   ].map(csv).join(',');
   return 'Filename,Title,Description,Keywords,Categories,Illustration,Mature Content,Editorial\r\n'+row+'\r\n';
@@ -5289,210 +5289,419 @@ async function renderTransparentStill(item){
   }
 }
 
-function openRenderAllLibrary() {
-  var body=document.createElement('div');
-  body.style.cssText='display:flex;flex-direction:column;gap:9px;min-height:0;';
-  openModal('TRILYVA / RENDER ALL · CHOOSE LIBRARY',body,[{label:'Close',fn:closeModal}]);
-
-  var registry=window.TRILYVA_LIBRARY;
-  if(!registry){body.innerHTML='<div class="empty">LIBRARY REGISTRY NOT READY</div>';return;}
-  body.innerHTML='<div class="empty">LOADING LIBRARY INDEX…</div>';
-
-  registry.ready.then(function(){
-    var libs=registry.all();
-    if(!libs.length){body.innerHTML='<div class="empty">NO LIBRARIES REGISTERED</div>';return;}
-    var intro=el('div','note','Choose a library. Every animation will produce 5 assets: SVG, EPS, transparent PNG, full MP4 and one metadata CSV.');
-    var list=el('div','list');list.style.cssText='max-height:54vh;overflow:auto;';
-
-    libs.forEach(function(lib){
-      var it=el('div','it');it.style.cursor='pointer';
-      var textBox=document.createElement('div');textBox.style.cssText='min-width:0;flex:1;';
-      textBox.innerHTML='<h5>'+trilyvaLibraryEscape(lib.title||lib.id)+'</h5><p>'+trilyvaLibraryEscape(lib.description||'TRILYVA library')+'</p>';
-      var choose=el('button','x','CHOOSE');choose.type='button';
-
-      function pick(){
-        choose.disabled=true;list.querySelectorAll('button').forEach(function(b){b.disabled=true;});
-        list.innerHTML='<div class="empty">LOADING '+trilyvaLibraryEscape(lib.title)+'…</div>';
-        Promise.resolve(lib.load()).then(function(items){
-          var usable=(items||[]).filter(function(x){return x&&x.code;});
-          if(!usable.length)throw new Error('This library contains no renderable animation entries.');
-          openRenderAllConfirm(lib,usable);
-        }).catch(function(e){list.innerHTML='<div class="empty">LIBRARY LOAD FAILED<br><br>'+trilyvaLibraryEscape(e.message||e)+'</div>';});
-      }
-      it.onclick=function(ev){if(ev.target!==choose&&!choose.contains(ev.target))pick();};
-      choose.onclick=function(ev){ev.preventDefault();ev.stopPropagation();pick();};
-      it.append(textBox,choose);list.appendChild(it);
-    });
-    body.replaceChildren(intro,list);
-  }).catch(function(e){body.innerHTML='<div class="empty">LIBRARY INDEX FAILED<br><br>'+trilyvaLibraryEscape(e.message||e)+'</div>';});
+function trilyvaReadStillPrefs(){
+  var frameNode=$('#stillFrameIndex');
+  var frame=frameNode?Math.floor(Number(frameNode.value)||0):0;
+  frame=Math.max(0,frame);
+  var formats=[];
+  ['png','jpg','svg','eps'].forEach(function(fmt){
+    var node=$('#stillFmt'+fmt.charAt(0).toUpperCase()+fmt.slice(1));
+    if(node&&node.checked)formats.push(fmt);
+  });
+  if(!formats.length){
+    formats=['png'];
+    var pngNode=$('#stillFmtPng');if(pngNode)pngNode.checked=true;
+  }
+  return{frame:frame,formats:formats};
 }
-
+function trilyvaApplyStillPrefs(prefs){
+  var frameNode=$('#stillFrameIndex');
+  if(frameNode)frameNode.value=Math.max(0,Math.floor(Number(prefs.frame)||0));
+  ['png','jpg','svg','eps'].forEach(function(fmt){
+    var node=$('#stillFmt'+fmt.charAt(0).toUpperCase()+fmt.slice(1));
+    if(node)node.checked=(prefs.formats||[]).indexOf(fmt)>=0;
+  });
+}
+async function trilyvaRenderRasterStillBlobs(code,composition,frame,needPng,needJpg){
+  var originalCode=S.code,originalComp=merge({},S.comp);
+  var targetComp=CORE.composition(merge({},composition));
+  var compiled=await Engine.api.compile(code,targetComp);
+  if(!compiled||!compiled.ok)throw new Error('Could not compile the animation for the selected still frame.');
+  try{
+    var rendered=await Engine.api.renderOne(frame,targetComp.width,targetComp.height);
+    if(!rendered||!rendered.ok)throw new Error((rendered&&rendered.error&&rendered.error.message)||'Still-frame rendering failed.');
+    var canvas=document.createElement('canvas');
+    canvas.width=targetComp.width;canvas.height=targetComp.height;
+    var context=canvas.getContext('2d',{alpha:true});
+    if(!context)throw new Error('A 2D canvas is unavailable for still-frame export.');
+    if(rendered.bitmap){context.drawImage(rendered.bitmap,0,0);if(rendered.bitmap.close)rendered.bitmap.close();}
+    else if(rendered.canvas)context.drawImage(rendered.canvas,0,0);
+    else throw new Error('The renderer returned no frame pixels.');
+    var output={};
+    if(needPng){
+      output.png=await new Promise(function(resolve,reject){
+        canvas.toBlob(function(blob){blob?resolve(blob):reject(new Error('PNG encoding failed.'));},'image/png');
+      });
+    }
+    if(needJpg){
+      var jpgCanvas=document.createElement('canvas');
+      jpgCanvas.width=targetComp.width;jpgCanvas.height=targetComp.height;
+      var jpgContext=jpgCanvas.getContext('2d');
+      if(!jpgContext)throw new Error('A 2D canvas is unavailable for JPG export.');
+      jpgContext.fillStyle=targetComp.background||'#000000';
+      jpgContext.fillRect(0,0,jpgCanvas.width,jpgCanvas.height);
+      jpgContext.drawImage(canvas,0,0);
+      output.jpg=await new Promise(function(resolve,reject){
+        jpgCanvas.toBlob(function(blob){blob?resolve(blob):reject(new Error('JPG encoding failed.'));},'image/jpeg',0.94);
+      });
+    }
+    return output;
+  }finally{
+    var restored=await Engine.api.compile(originalCode,originalComp);
+    if(!restored||!restored.ok)throw new Error('Failed to restore the editor renderer after still-frame export.');
+  }
+}
+async function trilyvaBuildStillAssets(code,composition,frame,formats){
+  var assets={},errors=[];
+  var wantsPng=formats.indexOf('png')>=0,wantsJpg=formats.indexOf('jpg')>=0;
+  if(wantsPng||wantsJpg){
+    try{
+      var raster=await trilyvaRenderRasterStillBlobs(code,composition,frame,wantsPng,wantsJpg);
+      Object.keys(raster).forEach(function(k){assets[k]=raster[k];});
+    }catch(e){(wantsPng?['png']:[]).concat(wantsJpg?['jpg']:[]).forEach(function(fmt){errors.push({format:fmt,reason:String(e&&e.message||e)});});}
+  }
+  if(formats.indexOf('svg')>=0||formats.indexOf('eps')>=0){
+    try{
+      var c=CORE.composition(merge({},composition));
+      var frameTime=CORE.frameToTime(c,frame);
+      var progress=c.frameCount>1?frame/(c.frameCount-1):0;
+      var scene=BatchVector.sceneForCode(code,c.width,c.height,frame,frameTime,progress,c.fps);
+      if(formats.indexOf('svg')>=0)assets.svg=new Blob([BatchVector.svg(scene)],{type:'image/svg+xml;charset=utf-8'});
+      if(formats.indexOf('eps')>=0)assets.eps=new Blob([BatchVector.eps(scene)],{type:'application/postscript'});
+    }catch(e){
+      ['svg','eps'].filter(function(fmt){return formats.indexOf(fmt)>=0;}).forEach(function(fmt){errors.push({format:fmt,reason:String(e&&e.message||e)});});
+    }
+  }
+  return{assets:assets,errors:errors};
+}
+async function trilyvaBlobCrc32(blob){
+  var crc=0xffffffff;
+  if(blob&&typeof blob.stream==='function'&&typeof blob.stream().getReader==='function'){
+    var reader=blob.stream().getReader();
+    try{
+      while(true){
+        var part=await reader.read();
+        if(part.done)break;
+        crc=ENC.crc32(part.value,crc);
+      }
+    }finally{try{reader.releaseLock();}catch(_){}}
+  }else{
+    crc=ENC.crc32(new Uint8Array(await blob.arrayBuffer()),crc);
+  }
+  return ENC.crc32Final(crc);
+}
+function trilyvaTimestampSlug(){
+  var d=new Date();
+  return d.getFullYear()+pad(d.getMonth()+1,2)+pad(d.getDate(),2)+'_'+pad(d.getHours(),2)+pad(d.getMinutes(),2)+pad(d.getSeconds(),2);
+}
+function trilyvaNormaliseLibraryItems(items){
+  return(items||[]).filter(function(x){return x&&typeof x.code==='string'&&x.code.trim();}).map(function(x,i){
+    var raw=String(x.title||x.name||x.id||('Animation '+(i+1)));
+    return Object.assign({},x,{
+      title:raw.replace(/\.js$/i,''),
+      name:String(x.name||x.fileName||raw+'.js'),
+      id:String(x.id||('item-'+(i+1)))
+    });
+  });
+}
+async function trilyvaGetRenderableLibraries(){
+  await loadProtectedLibraryModule();
+  var builtIns=(window.TRILYVA_LIBRARY?window.TRILYVA_LIBRARY.all():[]).map(function(lib){
+    return{key:'builtin:'+lib.id,id:lib.id,title:String(lib.title||lib.id),kind:'builtin',description:String(lib.description||'Built-in TRILYVA library')};
+  });
+  await openBatchLibraryDB();
+  var local=await idbAsk(batchLibraryStore('readonly').getAll());
+  local=(local||[]).map(function(lib){
+    return{key:'local:'+lib.id,id:lib.id,title:String(lib.title||lib.id),kind:'local',description:String(lib.source||'Locally uploaded library'),created:lib.created};
+  });
+  local.sort(function(a,b){return String(b.created||'').localeCompare(String(a.created||''));});
+  return{builtIns:builtIns,local:local};
+}
+async function trilyvaResolveRenderLibrary(selection){
+  if(!selection)throw new Error('Choose a library first.');
+  if(selection.kind==='local'){
+    await openBatchLibraryDB();
+    var record=await idbAsk(batchLibraryStore('readonly').get(selection.id));
+    if(!record)throw new Error('That local library no longer exists. Open Library and choose it again.');
+    return{key:'local:'+record.id,id:record.id,title:String(record.title||record.id),kind:'local',source:String(record.source||'Local library'),items:trilyvaNormaliseLibraryItems(record.items||[])};
+  }
+  await loadProtectedLibraryModule();
+  var ref=(window.TRILYVA_LIBRARY.all()||[]).find(function(lib){return lib.id===selection.id;});
+  if(!ref)throw new Error('That built-in library is not available.');
+  var items=trilyvaNormaliseLibraryItems(await ref.load());
+  return{key:'builtin:'+ref.id,id:ref.id,title:String(ref.title||ref.id),kind:'builtin',source:String(ref.description||'Built-in TRILYVA library'),items:items,ref:ref};
+}
+function trilyvaOpenFullLibraryChooser(){
+  var body=el('div');body.style.cssText='display:flex;flex-direction:column;gap:9px;min-height:0;';
+  body.appendChild(el('p','note','Choose which full library to render. Uploaded libraries are stored in this browser; built-in libraries come from the TRILYVA library registry.'));
+  openModal('TRILYVA / RENDER FULL LIBRARY · CHOOSE',body,[{label:'Close',fn:closeModal}]);
+  body.appendChild(el('div','empty','LOADING LIBRARIES…'));
+  trilyvaGetRenderableLibraries().then(function(groups){
+    body.replaceChildren();
+    function addGroup(title,libs){
+      body.appendChild(el('h4',null,title+' · '+libs.length));
+      if(!libs.length){body.appendChild(el('div','empty','NO LIBRARIES'));return;}
+      libs.forEach(function(lib){
+        var row=el('div','it');row.style.cssText='display:flex;align-items:center;gap:9px;';
+        var details=el('div');details.style.cssText='min-width:0;flex:1;';
+        details.append(el('h5',null,lib.title),el('p',null,lib.description||lib.kind));
+        if(lib.created)details.appendChild(el('p','note','Created '+new Date(lib.created).toLocaleString()));
+        var choose=el('button','btn solid','CHOOSE');choose.type='button';choose.style.cssText='margin:0;width:auto;padding:7px 9px;';
+        choose.onclick=function(){
+          choose.disabled=true;
+          trilyvaResolveRenderLibrary(lib).then(function(resolved){
+            trilyvaSelectFullRenderLibrary({key:resolved.key,id:resolved.id,title:resolved.title,kind:resolved.kind});
+            openRenderAllConfirm(resolved,resolved.items);
+          }).catch(function(e){choose.disabled=false;$('#stMsg').textContent='Library load failed · '+String(e.message||e);});
+        };
+        row.append(details,choose);body.appendChild(row);
+      });
+    }
+    addGroup('LOCAL LIBRARIES',groups.local);
+    addGroup('BUILT-IN LIBRARIES',groups.builtIns);
+  }).catch(function(e){
+    body.innerHTML='<div class="empty">LIBRARY LIST FAILED<br><br>'+trilyvaLibraryEscape(e.message||e)+'</div>';
+  });
+}
+function openRenderAllLibrary(){
+  if(S.rendering||dotMeshFolderActive||TRILYVA_FULL_LIBRARY_ACTIVE){
+    $('#stMsg').textContent='A render is already active. Finish or cancel it before starting another full library.';
+    return;
+  }
+  if(!TRILYVA_SELECTED_RENDER_LIBRARY){trilyvaOpenFullLibraryChooser();return;}
+  var selection=TRILYVA_SELECTED_RENDER_LIBRARY;
+  var body=el('div');body.appendChild(el('div','empty','LOADING '+selection.title+'…'));
+  openModal('TRILYVA / RENDER FULL LIBRARY',body,[{label:'Choose Another Library',fn:function(){closeModal();trilyvaOpenFullLibraryChooser();}},{label:'Close',fn:closeModal}]);
+  trilyvaResolveRenderLibrary(selection).then(function(resolved){
+    trilyvaSelectFullRenderLibrary({key:resolved.key,id:resolved.id,title:resolved.title,kind:resolved.kind});
+    openRenderAllConfirm(resolved,resolved.items);
+  }).catch(function(e){body.innerHTML='<div class="warnbox"><b>LIBRARY LOAD FAILED</b>'+trilyvaLibraryEscape(e.message||e)+'</div>';});
+}
 function openRenderAllConfirm(lib,items){
-  var body=document.createElement('div');
-  var twelve=items.filter(function(x){return Number(x.duration)===12&&x.loop===true&&Number(x.loopDuration)===12;}).length;
-  body.appendChild(elHTML(
-    '<div class="verified"><b>RENDER ALL</b><span>'+items.length+' ITEMS</span><span>'+twelve+' × 12 S LOOP</span><span>5 OUTPUTS / ITEM</span></div>'+
-    '<p class="note">Each item produces <code>SVG</code>, <code>EPS</code>, <code>PNG</code> with transparent background, <code>MP4</code> for the full loop, and <code>metadata.csv</code>. SVG/EPS/PNG are frame 0 stills; MP4 is the complete 12-second animation.</p>'+
-    '<p class="note">Current MP4 settings: <b>'+esc(S.exportFormat.toUpperCase())+'</b> is ignored for the batch media target — Render All always writes MP4. Resolution: '+S.comp.width+'×'+S.comp.height+' · '+S.comp.fps+' fps.</p>'
-  ));
-  openModal('TRILYVA / RENDER ALL · '+(lib.title||lib.id),body,[
-    {label:'Back',fn:function(){closeModal();openRenderAllLibrary();}},
-    {label:'Render All',solid:true,fn:function(){closeModal();renderAllLibrary(lib,items);}},
+  items=trilyvaNormaliseLibraryItems(items);
+  if(!items.length){
+    openModal('TRILYVA / EMPTY LIBRARY',elHTML('<div class="empty">THIS LIBRARY HAS NO RENDERABLE JAVASCRIPT FILES.</div>'),[{label:'Close',fn:closeModal}]);
+    return;
+  }
+  trilyvaSelectFullRenderLibrary({key:lib.key,id:lib.id,title:lib.title,kind:lib.kind});
+  var body=el('div');body.style.cssText='display:flex;flex-direction:column;gap:12px;min-height:0;';
+  var videos=el('div');videos.style.cssText='display:flex;flex-wrap:wrap;gap:10px 16px;';
+  videos.appendChild(el('h4',null,'FULL VIDEO OUTPUTS'));
+  function checkboxOption(parent,id,label,checked){
+    var wrapper=el('label');wrapper.style.cssText='display:inline-flex;align-items:center;gap:5px;font:10px var(--mono);color:var(--ink-2);';
+    var input=document.createElement('input');input.type='checkbox';input.id=id;input.checked=!!checked;
+    wrapper.append(input,document.createTextNode(label));parent.appendChild(wrapper);return input;
+  }
+  var videoRow=el('div');videoRow.style.cssText='display:flex;flex-wrap:wrap;gap:10px 16px;';
+  var mp4=checkboxOption(videoRow,'fullFmtMp4','MP4',true);
+  var webm=checkboxOption(videoRow,'fullFmtWebm','WebM',false);
+  var stillHeading=el('h4',null,'STILL OUTPUTS · ONE FRAME PER ITEM');
+  var stillRow=el('div');stillRow.style.cssText='display:flex;flex-wrap:wrap;gap:10px 16px;';
+  var prefs=trilyvaReadStillPrefs();
+  var stillChecks={};
+  ['png','jpg','svg','eps'].forEach(function(fmt){stillChecks[fmt]=checkboxOption(stillRow,'fullStill'+fmt.toUpperCase(),fmt.toUpperCase(),prefs.formats.indexOf(fmt)>=0);});
+  var frameRow=el('div','row');frameRow.appendChild(el('label',null,'Still frame (0-based)'));
+  var frameInput=document.createElement('input');frameInput.type='number';frameInput.min='0';frameInput.step='1';frameInput.value=String(prefs.frame);frameInput.style.maxWidth='120px';frameRow.appendChild(frameInput);
+  var details=el('div','note','Library: '+lib.title+' · '+items.length+' animations. Each selected video format renders the full composition. PNG/JPG/SVG/EPS export the selected frame; frame 0 is the first frame. Files will be written into a timestamped library folder, or into a ZIP archive you choose.');
+  var warning=el('p','note','SVG and EPS use TRILYVA’s editable vector recorder; code that uses unsupported Canvas features may still render to video/PNG/JPG while its vector still is marked as failed.');
+  body.append(el('h4',null,'VIDEO FORMATS'),videoRow,stillHeading,stillRow,frameRow,details,warning);
+  function collectSettings(){
+    var videoFormats=[];
+    if(mp4.checked)videoFormats.push('mp4');
+    if(webm.checked)videoFormats.push('webm');
+    if(!videoFormats.length)throw new Error('Select at least one video format: MP4 or WebM.');
+    var stillFormats=['png','jpg','svg','eps'].filter(function(fmt){return stillChecks[fmt].checked;});
+    if(!stillFormats.length){stillFormats=['png'];stillChecks.png.checked=true;}
+    var frame=Math.max(0,Math.floor(Number(frameInput.value)||0));
+    var settings={videoFormats:videoFormats,stillFormats:stillFormats,frame:frame};
+    trilyvaApplyStillPrefs({frame:frame,formats:stillFormats});
+    return settings;
+  }
+  function failedAction(error){$('#stMsg').textContent='Full-library export could not start · '+String(error&&error.message||error);openModal('TRILYVA / EXPORT ERROR',elHTML('<div class="warnbox">'+trilyvaLibraryEscape(error&&error.message||error)+'</div>'),[{label:'Close',fn:closeModal}]);}
+  function startFolder(){
+    var settings;
+    try{settings=collectSettings();}catch(e){$('#stMsg').textContent=e.message;return;}
+    if(typeof window.showDirectoryPicker!=='function'){failedAction(new Error('This browser cannot choose an output folder. Open TRILYVA in a current Chromium-based browser over HTTPS.'));return;}
+    var folderPromise;
+    try{folderPromise=window.showDirectoryPicker({id:'trilyva-full-library-output',mode:'readwrite',startIn:'downloads'});}
+    catch(e){failedAction(e);return;}
+    Promise.resolve(folderPromise).then(async function(parent){
+      if(!parent)return;
+      if(parent.queryPermission){
+        var permission=await parent.queryPermission({mode:'readwrite'});
+        if(permission!=='granted'&&parent.requestPermission)permission=await parent.requestPermission({mode:'readwrite'});
+        if(permission!=='granted')throw new Error('Write permission was not granted for the selected folder.');
+      }
+      var rootName=slugify(lib.title)+'_'+trilyvaTimestampSlug();
+      var root=await parent.getDirectoryHandle(rootName,{create:true});
+      closeModal();
+      renderAllLibrary(lib,items,settings,{mode:'folder',root:root,rootName:rootName});
+    }).catch(function(e){if(e&&e.name==='AbortError')return;failedAction(e);});
+  }
+  function startZip(){
+    var settings;
+    try{settings=collectSettings();}catch(e){$('#stMsg').textContent=e.message;return;}
+    if(typeof window.showSaveFilePicker!=='function'){failedAction(new Error('This browser cannot choose a ZIP save location. Open TRILYVA in a current Chromium-based browser over HTTPS.'));return;}
+    var suggested=slugify(lib.title)+'_'+trilyvaTimestampSlug()+'.zip';
+    var savePromise;
+    try{savePromise=window.showSaveFilePicker({id:'trilyva-full-library-zip',suggestedName:suggested,types:[{description:'ZIP archive',accept:{'application/zip':['.zip']}}]});}
+    catch(e){failedAction(e);return;}
+    Promise.resolve(savePromise).then(function(fileHandle){
+      if(!fileHandle)return;
+      closeModal();
+      renderAllLibrary(lib,items,settings,{mode:'zip',fileHandle:fileHandle,rootName:suggested.replace(/\.zip$/i,'')});
+    }).catch(function(e){if(e&&e.name==='AbortError')return;failedAction(e);});
+  }
+  openModal('TRILYVA / RENDER FULL '+String(lib.title).toUpperCase()+' · OUTPUT OPTIONS',body,[
+    {label:'Choose Another Library',fn:function(){closeModal();trilyvaOpenFullLibraryChooser();}},
+    {label:'SAVE TO FOLDER',solid:true,fn:startFolder},
+    {label:'SAVE AS ZIP',solid:true,fn:startZip},
     {label:'Cancel',fn:closeModal}
   ]);
 }
-
-async function renderAllLibrary(lib,items){
-  if(S.rendering)return;
-  S.queueStop=false;
-
-  /* Ask for the destination folder directly from the user's Render All click. */
-  if(typeof window.showDirectoryPicker!=="function"){
-    openModal("TRILYVA / SAVE FOLDER UNAVAILABLE",elHTML('<div class="warnbox"><b>DIRECT FOLDER EXPORT REQUIRED</b><p>Use a current Chromium-based browser over HTTPS. Render All saves each file individually and does not create a ZIP.</p></div>'),[{label:"Close",fn:closeModal}]);
-    return;
-  }
-  var directoryHandle;
-  try{
-    directoryHandle=await window.showDirectoryPicker({id:"trilyva-render-all-output",mode:"readwrite",startIn:"downloads"});
-    if(!directoryHandle)return;
-    if(directoryHandle.queryPermission){
-      var permission=await directoryHandle.queryPermission({mode:"readwrite"});
-      if(permission!=="granted"&&directoryHandle.requestPermission)permission=await directoryHandle.requestPermission({mode:"readwrite"});
-      if(permission!=="granted")throw new Error("Write permission was not granted for the selected folder.");
-    }
-  }catch(folderError){
-    if(folderError&&folderError.name==="AbortError")return;
-    openModal("TRILYVA / FOLDER EXPORT ERROR",elHTML('<div class="warnbox"><b>Could not open the output folder</b><p>'+esc(String(folderError&&folderError.message||folderError))+'</p></div>'),[{label:"Close",fn:closeModal}]);
-    return;
-  }
-
-  var startedAt=new Date().toISOString();
-  var completed=[],failed=[],cancelled=false;
-  var body=document.createElement('div');
-  var head=document.createElement('div');head.innerHTML='<div class="verified"><b>RENDER ALL · DIRECT FOLDER</b><span id="batchPos">0 / '+items.length+'</span><span>5 FILES / ITEM</span><span>'+esc(lib.title||lib.id)+'</span></div>';
-  var status=el('div','note','Preparing first animation…');
+var TRILYVA_FULL_LIBRARY_ACTIVE=false;
+async function renderAllLibrary(lib,items,settings,destination){
+  if(S.rendering||dotMeshFolderActive||TRILYVA_FULL_LIBRARY_ACTIVE)return;
+  TRILYVA_FULL_LIBRARY_ACTIVE=true;S.queueStop=false;
+  var startedAt=new Date().toISOString(),completed=[],failures=[],cancelled=false,zipWriter=destination.mode==='zip'?new ENC.ZipWriter():null;
+  var body=el('div');body.style.cssText='display:flex;flex-direction:column;gap:8px;min-height:0;';
+  var head=el('div');head.innerHTML='<div class="verified"><b>RENDER FULL LIBRARY</b><span id="fullLibPos">0 / '+items.length+'</span><span>'+settings.videoFormats.map(function(x){return x.toUpperCase();}).join(' + ')+'</span><span>'+esc(lib.title)+'</span></div>';
+  var status=el('p','note','Preparing the first animation…');
   var bar=el('div','prog');bar.innerHTML='<i style="width:0%"></i>';
-  var log=el('div','list');log.style.cssText='max-height:42vh;overflow:auto;';
+  var log=el('div','list');log.style.cssText='max-height:40vh;overflow:auto;';
   body.append(head,status,bar,log);
-
-  function addLine(title,good,note){
-    var it=el('div','it');it.innerHTML='<div style="flex:1"><h5>'+esc(title)+'</h5><p>'+esc(good?(note||'5/5 ASSETS SAVED TO FOLDER'):(note||'FAILED'))+'</p></div>';log.prepend(it);
+  function addLine(title,good,message){
+    var row=el('div','it');row.innerHTML='<div style="min-width:0;flex:1"><h5>'+esc(title)+'</h5><p>'+esc(message|| (good?'SAVED':'FAILED'))+'</p></div>';log.prepend(row);
   }
-  function cancelBatch(){S.queueStop=true;if(S.rendering&&Engine.api)Engine.api.cancel();status.textContent='Cancellation requested…';}
-
-  openModal('TRILYVA / RENDER ALL · SAVING FILES ONE BY ONE',body,[{label:'Cancel Batch',fn:cancelBatch}]);
-
-  for(var i=0;i<items.length;i++){
-    if(S.queueStop){cancelled=true;break;}
-    var item=items[i],itemName=String(item.title||item.id||('Item '+(i+1)));
-    $('#batchPos').textContent=i+' / '+items.length;
-    status.textContent='Preparing '+itemName+'…';
-    bar.querySelector('i').style.width=((i/items.length)*100).toFixed(2)+'%';
-
-    var loaded;
-    try{loaded=await trilyvaLoadLibraryCode(itemName,item.code,item,{keepModal:true});}
-    catch(e){loaded={ok:false,error:e};}
-
-    if(!loaded||!loaded.ok){
-      failed.push({index:i+1,id:item.id,title:itemName,stage:'compile',reason:loaded&&loaded.error?String(loaded.error.message||loaded.error):'compile failed'});
-      addLine(itemName,false,'Compile failed; see render status.');
-      continue;
+  function stopBatch(){S.queueStop=true;if(S.rendering&&Engine.api)Engine.api.cancel();status.textContent='Cancellation requested…';}
+  openModal('TRILYVA / RENDERING FULL LIBRARY',body,[{label:'Cancel Batch',fn:stopBatch}]);
+  async function writeAsset(itemFolder,relativePath,fileName,data,mime){
+    var blob=data instanceof Blob?data:new Blob([data],{type:mime||'application/octet-stream'});
+    if(destination.mode==='folder'){
+      await dotMeshWriteFile(itemFolder,fileName,blob,mime);
+    }else{
+      if(zipWriter.entries.length>=65530)throw new Error('Classic ZIP is reaching its 65,535-entry limit.');
+      var crc=await trilyvaBlobCrc32(blob);
+      zipWriter.add(destination.rootName+'/'+relativePath,blob,crc,blob.size);
     }
-
-    var stem=slugify(itemName);
-    if(!stem)stem='animation-'+String(i+1).padStart(3,'0');
-    stem=String(i+1).padStart(3,'0')+'-'+stem;
-    var itemFolder;
-    try{itemFolder=await directoryHandle.getDirectoryHandle(stem,{create:true});}
-    catch(folderCreateError){
-      failed.push({index:i+1,id:item.id,title:itemName,stage:'folder',reason:String(folderCreateError&&folderCreateError.message||folderCreateError)});
-      addLine(itemName,false,'Could not create its output folder.');
-      continue;
-    }
-
-    var W=S.comp.width,H=S.comp.height,F=S.comp.fps;
-    var base=slugify(itemName)||('animation-'+String(i+1).padStart(3,'0'));
-    base=base+'_'+W+'x'+H+'_'+F+'fps_12s';
-    var assets={}, savedFiles=[];
-    try{
-      status.textContent='Building vector still · '+itemName+'…';
-      var vectorScene=BatchVector.sceneForCode(S.code,W,H,0,0,0);
-      assets.svg=BatchVector.svg(vectorScene);
-      assets.eps=BatchVector.eps(vectorScene);
-      await dotMeshWriteFile(itemFolder,base+'.svg',assets.svg,'image/svg+xml;charset=utf-8');savedFiles.push(base+'.svg');
-
-      status.textContent='Rendering transparent PNG · '+itemName+'…';
-      assets.png=await renderTransparentStill(item);
-      await dotMeshWriteFile(itemFolder,base+'_transparent.png',assets.png,'image/png');savedFiles.push(base+'_transparent.png');
-
-      if(S.queueStop){cancelled=true;break;}
-      var job=buildJob({exportFormat:'mp4',composition:merge(S.comp,{duration:12,loop:true,loopDuration:12})});
-      job.label=itemName;
-      job.metadata.title=itemName;
-      job.metadata.description=String(item.description||job.metadata.description||'');
-      job.fileName=base+'.mp4';
-      status.textContent='Rendering MP4 · '+itemName+' · '+W+'×'+H+' · '+F+' fps · 12 s';
-      var result=await startRender(job,{silent:true,batch:true});
-      if(!result||!result.ok)throw new Error(result&&result.error?String(result.error.message||result.error):'MP4 render failed.');
-      assets.mp4=result.blob;
-      /* Save the expensive video immediately before optional metadata assets. */
-      await dotMeshWriteFile(itemFolder,base+'.mp4',assets.mp4,'video/mp4');savedFiles.push(base+'.mp4');
-
-      await dotMeshWriteFile(itemFolder,base+'.eps',assets.eps,'application/postscript');savedFiles.push(base+'.eps');
-      var metadata=trilyvaStockMetadata(item,base,assets);
-      assets.metadata=metadata;
-      await dotMeshWriteFile(itemFolder,'metadata.csv',assets.metadata,'text/csv;charset=utf-8');savedFiles.push('metadata.csv');
-
-      var svgBytes=ENC.utf8(assets.svg),epsBytes=ENC.utf8(assets.eps),metaBytes=ENC.utf8(assets.metadata);
-      var pngBytes=assets.png.size||0,mp4Bytes=assets.mp4.size||0;
-      completed.push({
-        index:i+1,id:item.id,title:itemName,folder:stem,files:savedFiles.slice(),
-        bytes:{svg:svgBytes.length,eps:epsBytes.length,png:pngBytes,mp4:mp4Bytes,metadata:metaBytes.length},
-        verification:result.verify?result.verify.status:'UNKNOWN'
-      });
-      addLine(itemName,true,'5/5 ASSETS SAVED · SVG · EPS · PNG · MP4 · METADATA');
-      status.textContent='Completed '+(i+1)+' / '+items.length+' · '+itemName;
-    }catch(e){
-      failed.push({index:i+1,id:item.id,title:itemName,stage:'asset-save-render',savedFiles:savedFiles.slice(),reason:String(e&&e.message||e)});
-      addLine(itemName,false,savedFiles.length+' file(s) saved; '+String(e&&e.message||e));
-    }
-
-    bar.querySelector('i').style.width=(((i+1)/items.length)*100).toFixed(2)+'%';
-    await new Promise(function(r){setTimeout(r,0);});
+    return{name:fileName,bytes:blob.size};
   }
-
-  var manifest={
-    format:'TRILYVA_RENDER_ALL_DIRECT_FOLDER',
-    version:3,
-    libraryId:lib.id,libraryTitle:lib.title,
-    startedAt:startedAt,finishedAt:new Date().toISOString(),
-    requestedItems:items.length,completedItems:completed.length,failedItems:failed.length,cancelled:cancelled,
-    assetSet:['SVG still','EPS still','transparent PNG still','12-second MP4','metadata CSV'],
-    vectorStillFrame:0,animations:{duration:12,fps:S.comp.fps},
-    resolution:{width:S.comp.width,height:S.comp.height},
-    delivery:'direct-folder; files are written individually; no ZIP is created',
-    completed:completed,failures:failed
-  };
   try{
-    await dotMeshWriteFile(directoryHandle,'BATCH-MANIFEST.json',JSON.stringify(manifest,null,2),'application/json;charset=utf-8');
-    await dotMeshWriteFile(directoryHandle,'README.txt',
-      'TRILYVA — Render All / direct-folder output\r\n'+
-      'Library: '+lib.title+'\r\n'+
-      'Each animation gets its own folder with SVG, EPS, transparent PNG, full 12-second MP4 and metadata CSV.\r\n'+
-      'Files are saved individually as each item renders. No ZIP is created.\r\n'+
-      'Completed: '+completed.length+'\r\nFailed: '+failed.length+'\r\nCancelled: '+(cancelled?'yes':'no')+'\r\n',
-      'text/plain;charset=utf-8');
-  }catch(reportError){
-    failed.push({stage:'write-batch-report',reason:String(reportError&&reportError.message||reportError)});
+    for(var i=0;i<items.length;i++){
+      if(S.queueStop){cancelled=true;break;}
+      var item=items[i],itemName=String(item.title||item.name||item.id||('Animation '+(i+1)));
+      $('#fullLibPos').textContent=(i+1)+' / '+items.length;
+      status.textContent='Loading '+itemName+'…';
+      bar.querySelector('i').style.width=(i/items.length*100).toFixed(2)+'%';
+      var itemOutputDir=null,itemFolderName=String(i+1).padStart(4,'0')+'-'+(slugify(itemName)||'animation-'+(i+1));
+      try{
+        if(destination.mode==='folder')itemOutputDir=await destination.root.getDirectoryHandle(itemFolderName,{create:true});
+        var loaded=await trilyvaLoadLibraryCode(itemName,item.code,item,{keepModal:true});
+        if(!loaded||!loaded.ok)throw new Error(loaded&&loaded.error?String(loaded.error.message||loaded.error):'Animation code did not compile.');
+        var itemComp=merge({},S.comp);
+        if(Number(item.duration)>0)itemComp.duration=Number(item.duration);
+        if(Number(item.loopDuration)>0)itemComp.loopDuration=Number(item.loopDuration);
+        if(typeof item.loop==='boolean')itemComp.loop=item.loop;
+        itemComp=CORE.composition(itemComp);
+        var stillFrame=Math.min(settings.frame,Math.max(0,itemComp.frameCount-1));
+        var W=itemComp.width,H=itemComp.height,F=itemComp.fps;
+        var base=(slugify(itemName)||('animation-'+String(i+1)))+'_'+W+'x'+H+'_'+F+'fps';
+        var stillBase=base+'_frame-'+String(stillFrame).padStart(6,'0');
+        var files=[],assetNotes=[],assetBlobs={};
+        status.textContent='Rendering selected still frame '+stillFrame+' · '+itemName+'…';
+        var stillResult=await trilyvaBuildStillAssets(item.code,itemComp,stillFrame,settings.stillFormats);
+        Object.keys(stillResult.assets).forEach(function(fmt){assetBlobs[fmt]=stillResult.assets[fmt];});
+        stillResult.errors.forEach(function(error){failures.push({item:itemName,stage:'still-'+error.format,reason:error.reason});assetNotes.push(error.format.toUpperCase()+': '+error.reason);});
+        for(var stillIndex=0;stillIndex<settings.stillFormats.length;stillIndex++){
+          if(S.queueStop){cancelled=true;break;}
+          var fmt=settings.stillFormats[stillIndex],blob=assetBlobs[fmt];
+          if(!blob)continue;
+          var ext=fmt==='jpg'?'jpg':fmt;
+          var fileName=stillBase+'.'+ext,relative=itemFolderName+'/'+fileName;
+          try{
+            await writeAsset(itemOutputDir,relative,fileName,blob,fmt==='svg'?'image/svg+xml':fmt==='eps'?'application/postscript':fmt==='jpg'?'image/jpeg':'image/png');
+            files.push(fileName);
+          }catch(e){failures.push({item:itemName,stage:'save-'+fmt,reason:String(e&&e.message||e)});assetNotes.push(fmt.toUpperCase()+': save failed');}
+        }
+        if(cancelled)break;
+        for(var videoIndex=0;videoIndex<settings.videoFormats.length;videoIndex++){
+          if(S.queueStop){cancelled=true;break;}
+          var videoFmt=settings.videoFormats[videoIndex];
+          var job=buildJob({exportFormat:videoFmt,composition:itemComp});
+          job.code=item.code;job.label=itemName;job.metadata.title=itemName;
+          job.metadata.description=String(item.description||job.metadata.description||'');
+          job.fileName=base+'.'+videoFmt;
+          status.textContent='Rendering '+videoFmt.toUpperCase()+' · '+itemName+' · '+W+'×'+H+' · '+F+' fps';
+          var result=await startRender(job,{silent:true,batch:true});
+          if(!result||!result.ok){
+            var reason=result&&result.error?String(result.error.message||result.error):videoFmt.toUpperCase()+' render failed';
+            failures.push({item:itemName,stage:'video-'+videoFmt,reason:reason});assetNotes.push(videoFmt.toUpperCase()+': '+reason);continue;
+          }
+          var videoBlob=result.blob;
+          if(!videoBlob){failures.push({item:itemName,stage:'video-'+videoFmt,reason:'The renderer returned no video file.'});continue;}
+          try{
+            await writeAsset(itemOutputDir,itemFolderName+'/'+job.fileName,job.fileName,videoBlob,videoFmt==='webm'?'video/webm':'video/mp4');
+            files.push(job.fileName);assetBlobs[videoFmt]=videoBlob;
+          }catch(e){failures.push({item:itemName,stage:'save-'+videoFmt,reason:String(e&&e.message||e)});assetNotes.push(videoFmt.toUpperCase()+': save failed');}
+        }
+        if(cancelled)break;
+        var metaVideo=settings.videoFormats.length?base+'.'+settings.videoFormats[0]:base+'.'+(settings.stillFormats[0]||'png');
+        var metadata=trilyvaStockMetadata(item,base,assetBlobs,metaVideo);
+        try{
+          await writeAsset(itemOutputDir,itemFolderName+'/metadata.csv','metadata.csv',metadata,'text/csv;charset=utf-8');
+          files.push('metadata.csv');
+        }catch(e){failures.push({item:itemName,stage:'metadata',reason:String(e&&e.message||e)});}
+        completed.push({index:i+1,id:item.id||itemName,title:itemName,folder:itemFolderName,files:files.slice(),stillFrame:stillFrame,errors:assetNotes});
+        addLine(itemName,true,files.length+' file(s) saved'+(assetNotes.length?' · '+assetNotes.length+' issue(s)':''));
+        status.textContent='Completed '+(i+1)+' / '+items.length+' · '+itemName;
+      }catch(e){
+        failures.push({index:i+1,id:item.id||itemName,title:itemName,stage:'item',reason:String(e&&e.message||e)});
+        addLine(itemName,false,String(e&&e.message||e));
+      }
+      bar.querySelector('i').style.width=(((i+1)/items.length)*100).toFixed(2)+'%';
+      await new Promise(function(resolve){setTimeout(resolve,0);});
+    }
+  }catch(batchError){
+    failures.push({stage:'batch',reason:String(batchError&&batchError.message||batchError)});
   }
+  var manifest={
+    format:'TRILYVA_FULL_LIBRARY_EXPORT',version:1,libraryId:lib.id,libraryTitle:lib.title,librarySource:lib.source||lib.kind,
+    startedAt:startedAt,finishedAt:new Date().toISOString(),requestedItems:items.length,completedItems:completed.length,
+    failureCount:failures.length,cancelled:cancelled,videoFormats:settings.videoFormats,stillFormats:settings.stillFormats,
+    stillFrameRequested:settings.frame,assetSet:settings.videoFormats.concat(settings.stillFormats),resolution:{width:S.comp.width,height:S.comp.height},fps:S.comp.fps,
+    destination:destination.mode,completed:completed,failures:failures
+  };
+  var readme='TRILYVA — Full Library Export\r\nLibrary: '+lib.title+'\r\nCreated: '+startedAt+'\r\nVideo formats: '+settings.videoFormats.join(', ')+'\r\nStill formats: '+settings.stillFormats.join(', ')+'\r\nSelected frame: '+settings.frame+' (0-based)\r\nCompleted items: '+completed.length+'\r\nIssues: '+failures.length+'\r\n';
+  try{
+    if(destination.mode==='folder'){
+      await dotMeshWriteFile(destination.root,'BATCH-MANIFEST.json',JSON.stringify(manifest,null,2),'application/json;charset=utf-8');
+      await dotMeshWriteFile(destination.root,'README.txt',readme,'text/plain;charset=utf-8');
+    }else{
+      var manifestBlob=new Blob([JSON.stringify(manifest,null,2)],{type:'application/json;charset=utf-8'});
+      zipWriter.add(destination.rootName+'/BATCH-MANIFEST.json',manifestBlob,await trilyvaBlobCrc32(manifestBlob),manifestBlob.size);
+      var readmeBlob=new Blob([readme],{type:'text/plain;charset=utf-8'});
+      zipWriter.add(destination.rootName+'/README.txt',readmeBlob,await trilyvaBlobCrc32(readmeBlob),readmeBlob.size);
+      var zipBlob=zipWriter.finish();
+      if(!destination.fileHandle)throw new Error('The selected ZIP save file is missing.');
+      var writable=await destination.fileHandle.createWritable();
+      try{await writable.write(zipBlob);await writable.close();}
+      catch(zipWriteError){try{await writable.abort();}catch(_){}throw zipWriteError;}
+    }
+  }catch(reportError){
+    failures.push({stage:'write-report-or-zip',reason:String(reportError&&reportError.message||reportError)});
+  }
+  TRILYVA_FULL_LIBRARY_ACTIVE=false;
   closeModal();
   var summary=el('div');
-  summary.innerHTML='<div class="verified"><b>DIRECT FOLDER EXPORT FINISHED</b><span>'+completed.length+' COMPLETED</span><span>'+failed.length+' FAILED</span>'+(cancelled?'<span>CANCELLED</span>':'')+'</div>'+
-    '<p class="note">Every output was written as an individual file into its own design folder. No ZIP was created. BATCH-MANIFEST.json records completed items and failures.</p>';
-  openModal('TRILYVA / RENDER ALL · COMPLETE',summary,[{label:'Close',fn:closeModal}]);
+  summary.appendChild(elHTML('<div class="verified"><b>FULL LIBRARY EXPORT FINISHED</b><span>'+completed.length+' COMPLETED</span><span>'+failures.length+' ISSUE(S)</span>'+(cancelled?'<span>CANCELLED</span>':'')+'</div><p class="note">Selected videos and still frames were saved to the chosen '+(destination.mode==='folder'?'folder':'ZIP file')+'. BATCH-MANIFEST.json contains per-file issues and render results.</p>'));
+  var summaryBody=el('div');summaryBody.style.cssText='display:flex;flex-direction:column;gap:8px;';summaryBody.append(summary.firstChild);
+  if(failures.length){
+    var errors=el('div','list');errors.style.cssText='max-height:36vh;overflow:auto;';
+    failures.slice(0,80).forEach(function(f){errors.appendChild(el('div','it',String(f.item||'Batch')+' · '+String(f.stage||'error')+' · '+String(f.reason||'')));});
+    summaryBody.appendChild(errors);
+  }
+  openModal('TRILYVA / FULL LIBRARY · COMPLETE',summaryBody,[{label:'Close',fn:closeModal}]);
 }
-
-
 /* ============================================================
    Dot Mesh Folder Export — 50 static SVG stills + 4K60 MP4s + metadata
    ============================================================ */
