@@ -1664,6 +1664,7 @@ html:has(#trilyvaPasswordGate)::after{display:none!important}
       <button data-act="open">Open</button>
       <button data-act="save">Save<kbd>⌘S</kbd></button>
       <button data-act="samples">Examples</button>
+      <button data-act="library">Library</button>
       <button data-act="run" class="key">Run<kbd>⌘⏎</kbd></button>
       <button data-act="render" class="key">Render</button>
     </nav>
@@ -4570,11 +4571,11 @@ function openLibraryPasswordGate(afterAccess) {
 }
 
 function openProtectedTrilyvaLibrary() {
-  return openTrilyvaLibrary();
+  return loadProtectedLibraryModule().then(function () { openTrilyvaLibrary(); });
 }
 
 function openProtectedTrilyvaRenderAll() {
-  return openRenderAllLibrary();
+  return loadProtectedLibraryModule().then(function () { openRenderAllLibrary(); });
 }
 
 var $ = function (s, r) { return (r || document).querySelector(s); };
@@ -9343,6 +9344,7 @@ var ACTS = {
   open: openProjectDialog,
   save: function (ev) { saveProject(ev && ev.shiftKey ? 'as' : null); },
   samples: samplesDialog,
+  library: openProtectedTrilyvaLibrary,
   run: function () { run(); },
   render: function () {
     showTab('p-render'); showMobile('rail');
