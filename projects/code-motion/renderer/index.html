@@ -5376,8 +5376,9 @@ async function trilyvaBuildStillAssets(code,composition,frame,formats){
 }
 async function trilyvaBlobCrc32(blob){
   var crc=0xffffffff;
-  if(blob&&typeof blob.stream==='function'&&typeof blob.stream().getReader==='function'){
-    var reader=blob.stream().getReader();
+  var stream=blob&&typeof blob.stream==='function'?blob.stream():null;
+  if(stream&&typeof stream.getReader==='function'){
+    var reader=stream.getReader();
     try{
       while(true){
         var part=await reader.read();
@@ -5485,8 +5486,6 @@ function openRenderAllConfirm(lib,items){
   }
   trilyvaSelectFullRenderLibrary({key:lib.key,id:lib.id,title:lib.title,kind:lib.kind});
   var body=el('div');body.style.cssText='display:flex;flex-direction:column;gap:12px;min-height:0;';
-  var videos=el('div');videos.style.cssText='display:flex;flex-wrap:wrap;gap:10px 16px;';
-  videos.appendChild(el('h4',null,'FULL VIDEO OUTPUTS'));
   function checkboxOption(parent,id,label,checked){
     var wrapper=el('label');wrapper.style.cssText='display:inline-flex;align-items:center;gap:5px;font:10px var(--mono);color:var(--ink-2);';
     var input=document.createElement('input');input.type='checkbox';input.id=id;input.checked=!!checked;
@@ -5562,6 +5561,10 @@ function openRenderAllConfirm(lib,items){
 var TRILYVA_FULL_LIBRARY_ACTIVE=false;
 async function renderAllLibrary(lib,items,settings,destination){
   if(S.rendering||dotMeshFolderActive||TRILYVA_FULL_LIBRARY_ACTIVE)return;
+  if(destination.mode==='zip'&&(!ENC||typeof ENC.ZipWriter!=='function')){
+    openModal('TRILYVA / ZIP EXPORT UNAVAILABLE',elHTML('<div class="warnbox">The built-in ZIP writer did not initialize. Reload TRILYVA and retry.</div>'),[{label:'Close',fn:closeModal}]);
+    return;
+  }
   TRILYVA_FULL_LIBRARY_ACTIVE=true;S.queueStop=false;
   var startedAt=new Date().toISOString(),completed=[],failures=[],cancelled=false,zipWriter=destination.mode==='zip'?new ENC.ZipWriter():null;
   var body=el('div');body.style.cssText='display:flex;flex-direction:column;gap:8px;min-height:0;';
