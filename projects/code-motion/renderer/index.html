@@ -5083,6 +5083,10 @@ function openTrilyvaLibrary(){
 
   body.innerHTML='<div class="empty">LOADING LIBRARY INDEX…</div>';
   registry.ready.then(function(){
+    if(!registry.all().length){
+      body.innerHTML='<div class="empty">NO LIBRARIES INSTALLED</div><p class="note">The built-in Prism, Flowers, Dot Mesh and other library collections have been removed from this site.</p>';
+      return;
+    }
     var toolbar=document.createElement('div');
     toolbar.style.cssText='display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,240px) auto auto;gap:8px;align-items:center;';
     var tabs=document.createElement('div');
