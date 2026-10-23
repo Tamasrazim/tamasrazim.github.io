@@ -1410,6 +1410,11 @@ select.mini{
 #stDot.busy{animation:triUiHalo 1.8s ease-in-out infinite}
 @media(prefers-reduced-motion:reduce){#tabs button,#tabs button::after,#work>.pane,.btn,button,.ib,.seg button{animation:none!important;transition:none!important;transform:none!important}#stage:hover::after{animation:none!important}}
 body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-motion #work>.pane,body.noui-motion .btn,body.noui-motion button,body.noui-motion .ib,body.noui-motion .seg button,body.noui-motion #p-docs.on,body.noui-motion #stDot.busy{animation:none!important;transition:none!important;transform:none!important}
+
+.hdr-acts button.prompt-action{padding-inline:10px;color:#fff}
+.hdr-acts button.prompt-action::after{transform:scaleX(1);opacity:.4}
+.hdr-acts button.prompt-action:hover::after{opacity:1}
+@media (max-width:860px){.hdr-acts button.prompt-action{padding-inline:6px;font-size:10px;letter-spacing:.04em}}
 </style>
   <script type="application/ld+json">
 {
@@ -1454,6 +1459,7 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
       <button data-act="open">Open</button>
       <button data-act="save">Save<kbd>⌘S</kbd></button>
       <button data-act="samples">Examples</button>
+      <button data-act="copyPrompt" class="prompt-action" title="Copy a ready-to-paste prompt for TRILYVA-compatible animation code">Copy Prompt</button>
       <button data-act="library">Library</button>
       <button data-act="run" class="key">Run<kbd>⌘⏎</kbd></button>
       <button data-act="render" class="key">Render</button>
@@ -9449,7 +9455,7 @@ var DOCS = [
   '<p>The live preview is not the render. The preview draws whatever frame it can, as fast as it can, at whatever raster fits your screen. The render walks <code>frame = 0 … frameCount-1</code> and evaluates your code at <code>time = frame / fps</code> for every single one. Slow is fine. Wrong is not.</p>',
 
   '<h5>QUICK START</h5>',
-  '<p>Write a function, press Run, scrub the timeline, press Render. Open <b>Examples</b> for ten complete animations to read or take apart.</p>',
+  '<p>Write a function, press Run, scrub the timeline, press Render. Open <b>Examples</b> for ten complete animations to read or take apart. Use <b>Copy Prompt</b> in the workspace header to copy a prompt designed for this renderer contract and frame-by-frame export.</p>',
   '<pre>window.renderFrame = function (time, frame, fps, ctx, width, height) {\n  ctx.fillStyle = "#000";\n  ctx.fillRect(0, 0, width, height);\n  var x = width * 0.5 + Math.cos(time * 2) * 200;\n  ctx.fillStyle = "#fff";\n  ctx.beginPath();\n  ctx.arc(x, height * 0.5, 40, 0, Math.PI * 2);\n  ctx.fill();\n};</pre>',
   '<p>Fewer arguments are fine — <code>function (time, frame, fps, ctx, width, height)</code> is the full contract, and you can declare only the ones you need. An optional <code>window.setup(ctx, width, height)</code> runs once per compile.</p>',
 
@@ -9595,6 +9601,43 @@ function maybeShowFirstLoadDocs() {
 }
 
 /* ============================================================
+   LLM prompt for TRILYVA-compatible, frame-deterministic animation code
+   ============================================================ */
+var TRILYVA_ANIMATION_PROMPT = [
+  "You are an expert creative-coding animator writing one complete animation for TRILYVA.",
+  "",
+  "ANIMATION BRIEF: [Replace this line with the scene, mood, palette, aspect ratio, and motion you want.]",
+  "",
+  "OUTPUT REQUIREMENTS",
+  "- Return only complete, ready-to-paste JavaScript. Do not add Markdown fences, explanations, setup files, imports, or package instructions.",
+  "- Use the exact TRILYVA entry point: window.renderFrame = function (time, frame, fps, ctx, width, height) { ... };",
+  "- Use the Canvas 2D context supplied as ctx. The composition dimensions are width and height.",
+  "- Write for the actual TRILYVA animation renderer, not a standalone web page.",
+  "",
+  "FRAME-BY-FRAME RULES",
+  "- The renderer may request any frame on its own or in any order. Recreate the complete intended scene on every call.",
+  "- Derive all positions, rotations, scales, opacity, particles, transitions, and other animated values from time, frame, fps, or deterministic formulas.",
+  "- Do not use requestAnimationFrame, setInterval, setTimeout, Date.now, Math.random, or variables that accumulate from one frame call to another.",
+  "- Do not create your own canvas, animation loop, DOM UI, network request, file access, or external dependency. Do not load remote images, fonts, audio, libraries, or other assets.",
+  "- Use only standard JavaScript and supported Canvas 2D drawing operations. Prefer TRILYVA helpers such as lerp, clamp, map, smoothstep, ease, spring, noise, random, and motion values when appropriate.",
+  "- Redraw the scene fully from its current state. Paint the background if the brief calls for one; preserve transparency when the brief explicitly requires it.",
+  "",
+  "QUALITY AND PERFORMANCE",
+  "- Build a polished composition with clear hierarchy, intentional pacing, smooth motion, and carefully aligned details.",
+  "- Scale the design using width and height instead of assuming one fixed resolution.",
+  "- Keep per-frame work reasonable. Avoid excessive particle counts, unnecessary allocations, huge blur effects, and expensive loops that make high-resolution rendering impractical.",
+  "- Guard edge cases such as zero dimensions, frame 0, the final frame, and values outside a transition interval.",
+  "- If a seamless loop is requested, make every animated property periodic over the intended duration; do not rely on a loop toggle alone.",
+  "- Before returning, check the syntax, variable names, function signature, Canvas API calls, determinism, and that every frame is drawn independently.",
+  "",
+  "Return the complete animation code only."
+].join('\n');
+
+function copyAnimationPrompt() {
+  copyText(TRILYVA_ANIMATION_PROMPT, 'TRILYVA animation prompt copied — paste it into your LLM');
+}
+
+/* ============================================================
    Actions
    ============================================================ */
 var ACTS = {
@@ -9604,6 +9647,7 @@ var ACTS = {
   open: openProjectDialog,
   save: function (ev) { saveProject(ev && ev.shiftKey ? 'as' : null); },
   samples: samplesDialog,
+  copyPrompt: copyAnimationPrompt,
   library: openProtectedTrilyvaLibrary,
   run: function () { run(); },
   render: function () {
