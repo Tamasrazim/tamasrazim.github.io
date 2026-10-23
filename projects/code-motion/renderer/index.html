@@ -7527,7 +7527,7 @@ function showPreflightFailure(job, pre) {
     '</div>';
   $('#stMsg').textContent = pre.error.message;
 }
-function startRender(job, opts) {
+function startRenderBase(job, opts) {
   opts = opts || {};
   if (S.rendering) {
     return Promise.resolve({
@@ -7580,6 +7580,37 @@ function startRender(job, opts) {
         detail: 'The render preflight failed before this item could start.'
       }
     };
+  });
+}
+function startRender(job, opts) {
+  opts=opts||{};
+  return startRenderBase(job,opts).then(async function(result){
+    if(!result||!result.ok||opts.batch||opts.skipStillExports)return result;
+    try{
+      var prefs=trilyvaReadStillPrefs();
+      var composition=CORE.composition(merge({},job.composition));
+      var frame=Math.min(prefs.frame,Math.max(0,composition.frameCount-1));
+      var built=await trilyvaBuildStillAssets(job.code,composition,frame,prefs.formats);
+      var saved=[],errors=built.errors.slice();
+      for(var i=0;i<prefs.formats.length;i++){
+        var fmt=prefs.formats[i],blob=built.assets[fmt];
+        if(!blob)continue;
+        var title=job.metadata&&job.metadata.title||job.label||'TRILYVA';
+        var filename=slugify(title)+'_frame-'+String(frame).padStart(6,'0')+'.'+fmt;
+        download(blob,filename);saved.push(fmt.toUpperCase());
+        if(i+1<prefs.formats.length)await new Promise(function(resolve){setTimeout(resolve,90);});
+      }
+      if(saved.length){
+        $('#stMsg').textContent='Render complete · saved frame '+frame+' as '+saved.join(', ')+(errors.length?' · '+errors.length+' still-format issue(s)':'');
+      }else{
+        $('#stMsg').textContent='Video render complete, but no still format could be exported'+(errors.length?' · '+errors.map(function(e){return e.format.toUpperCase()+': '+e.reason;}).join(' | '):'');
+      }
+      if(errors.length)logLine('STILL EXPORT WARNINGS — '+errors.map(function(e){return e.format.toUpperCase()+': '+e.reason;}).join(' | '),true);
+    }catch(stillError){
+      try{$('#stMsg').textContent='Video render complete · still export failed: '+String(stillError&&stillError.message||stillError);}catch(_){}
+      try{logLine('STILL EXPORT FAILED — '+String(stillError&&stillError.message||stillError),true);}catch(_){}
+    }
+    return result;
   });
 }
 function startRenderNow(job, opts) {
@@ -9532,8 +9563,9 @@ var ACTS = {
       return startRender(buildJob());
     });
   },
-  renderAll: function () { openProtectedTrilyvaRenderAll(); },
-  resetDefaults: resetRendererDefaults,
+  renderAll: function () { openRenderAllLibrary(); },
+  renderFullLibrary: openRenderAllLibrary,
+  resetDefaults: openRenderAllLibrary,
   renderAllDotMesh: function () { openDotMeshFolderPicker(); },
   exportDotMesh50: function () { openDotMeshFolderPicker(); },
   startRender: function () { withCompiled().then(function (ok) { if (ok) startRender(buildJob()); }); },
