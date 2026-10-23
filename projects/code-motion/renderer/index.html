@@ -1903,6 +1903,8 @@ html:has(#trilyvaPasswordGate)::after{display:none!important}
           <div class="sec">
             <h4>RENDER</h4>
             <div class="btn-row"><button class="btn" data-act="resetDefaults" title="Reset composition, preview and export controls without replacing your animation source">RESET CONTROLS TO DEFAULTS</button></div>
+            <div class="btn-row"><button class="btn solid" data-act="startRender" id="renderCurrentCodeBtn">RENDER CURRENT CODE</button></div>
+            <p class="note">Renders the code currently in the editor using the selected composition, frame rate, duration, format and quality settings.</p>
             <div class="btn-row"><button class="btn solid" data-act="renderAll">Render All</button></div>
             <div class="btn-row"><button class="btn solid" data-act="renderAllDotMesh" id="renderAllDotMeshBtn" style="width:100%">RENDER ALL DOT MESH · 50 DESIGNS</button></div>
             <p class="note">Exports every Dot Mesh design to the selected folder: individual MP4, SVG, metadata.json and metadata.csv. No ZIP.</p>
@@ -9142,7 +9144,10 @@ var ACTS = {
   run: function () { run(); },
   render: function () {
     showTab('p-render'); showMobile('rail');
-    withCompiled().then(function (ok) { if (ok) analyseJob(); });
+    withCompiled().then(function (ok) {
+      if (!ok) return;
+      return startRender(buildJob());
+    });
   },
   renderAll: function () { openProtectedTrilyvaRenderAll(); },
   resetDefaults: resetRendererDefaults,
