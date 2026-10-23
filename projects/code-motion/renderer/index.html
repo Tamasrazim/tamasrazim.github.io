@@ -1669,9 +1669,9 @@ select.mini{
           </div>
           <div class="sec">
             <h4>RENDER</h4>
-            <div class="btn-row"><button class="btn" data-act="resetDefaults" title="Reset composition, preview and export controls without replacing your animation source">RESET CONTROLS TO DEFAULTS</button></div>
+            <div class="btn-row"><button class="btn" data-act="renderFullLibrary" id="renderFullLibraryBtn" title="Render every item in the selected library to a folder or ZIP">RENDER FULL LIBRARY</button></div>
             <div class="btn-row"><button class="btn solid" data-act="startRender" id="renderCurrentCodeBtn">RENDER CURRENT CODE</button></div>
-            <p class="note">Renders the code currently in the editor using the selected composition, frame rate, duration, format and quality settings.</p>
+            <div class="row"><label for="stillFrameIndex">Still frame</label><input id="stillFrameIndex" type="number" min="0" step="1" value="0" style="max-width:100px" aria-describedby="stillExportNote"></div><div id="stillExportFormats" style="display:flex;flex-wrap:wrap;gap:8px 12px;margin:6px 0 2px;font:10px var(--mono);color:var(--ink-2)"><label><input type="checkbox" id="stillFmtPng" checked> PNG</label><label><input type="checkbox" id="stillFmtJpg"> JPG</label><label><input type="checkbox" id="stillFmtSvg"> SVG</label><label><input type="checkbox" id="stillFmtEps"> EPS</label></div><p class="note" id="stillExportNote">Frame numbers start at 0. After a successful render, TRILYVA also saves the selected still formats for this frame. PNG is the default.</p><p class="note">Renders the code currently in the editor using the selected composition, frame rate, duration, format and quality settings.</p>
             <div class="btn-row">
               <button class="btn" data-act="cancelRender" id="cancelBtn" disabled>Cancel</button>
             </div>
@@ -4823,6 +4823,24 @@ async function trilyvaLoadLibraryCode(title, code, item, opts) {
   return result || { ok: false };
 }
 
+var TRILYVA_SELECTED_RENDER_LIBRARY = null;
+function trilyvaSelectFullRenderLibrary(selection){
+  TRILYVA_SELECTED_RENDER_LIBRARY=selection||null;
+  var button=$('#renderFullLibraryBtn');
+  if(button){
+    if(selection&&selection.title){
+      var clean=String(selection.title).replace(/\s*[—-]\s*\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}$/,'').trim();
+      var label=clean.toUpperCase();
+      if(label.length>30)label=label.slice(0,27)+'…';
+      button.textContent='RENDER FULL '+label+' LIBRARY';
+      button.title='Render every item in '+selection.title+' to a chosen folder or ZIP';
+    }else{
+      button.textContent='RENDER FULL LIBRARY';
+      button.title='Choose a library, then render its items to a folder or ZIP';
+    }
+  }
+  return TRILYVA_SELECTED_RENDER_LIBRARY;
+}
 function openTrilyvaLibrary(){
   var body=document.createElement('div');
   body.style.cssText='display:flex;flex-direction:column;gap:10px;min-height:0;';
@@ -4949,7 +4967,7 @@ function openTrilyvaLibrary(){
         var btn=document.createElement('button');btn.type='button';btn.textContent=lib.title;
         btn.style.cssText='border:1px solid var(--rule);padding:6px 9px;background:'+(active===lib?'#fff':'#0a0a0c')+';color:'+(active===lib?'#000':'var(--mut)')+';font:9px var(--mono);letter-spacing:.08em;cursor:pointer;';
         btn.title=lib.description||'';
-        btn.onclick=function(){active=lib;loaded=false;setTabs();loadActive();};
+        btn.onclick=function(){active=lib;loaded=false;trilyvaSelectFullRenderLibrary({key:'builtin:'+lib.id,id:lib.id,title:lib.title,kind:'builtin'});setTabs();loadActive();};
         tabs.appendChild(btn);
       });
     }
@@ -5116,10 +5134,11 @@ var BatchVector = (function () {
   Recorder.prototype.fill=function(){if(this.path.length)this.s.ops.push({t:'path',commands:this.path.slice(),fill:this.fillStyle,stroke:null,width:0,opacity:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter,m:this.m.slice()});};
   Recorder.prototype.stroke=function(){if(this.path.length)this.s.ops.push({t:'path',commands:this.path.slice(),fill:null,stroke:this.strokeStyle,width:+this.lineWidth||1,opacity:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter,m:this.m.slice()});};
 
-  function sceneForCode(code,W,H,frame,time,loopProgress){
+  function sceneForCode(code,W,H,frame,time,loopProgress,fps){
     var scene=new Scene(W,H),ctx=new Recorder(scene,W,H);
+    var renderFps=Number(fps)>0?Number(fps):60;
     var fn=new Function('time','frame','fps','ctx','width','height','motion','TAU',code+'\nif(typeof renderFrame==="function"){renderFrame(time,frame,fps,ctx,width,height,motion,TAU);}');
-    fn(time,frame,60,ctx,W,H,{loopProgress:loopProgress,scale:1},Math.PI*2);
+    fn(time,frame,renderFps,ctx,W,H,{loopProgress:loopProgress,scale:1},Math.PI*2);
     return scene;
   }
   function stripBackground(code){
@@ -8054,7 +8073,16 @@ function renderLocalBatchLibraries(container,heading){
       var title=el('h5',null,lib.title+' · '+((lib.items||[]).length)+' FILES');
       var date=new Date(lib.created);
       var info=el('p',null,'Created '+(isNaN(date.getTime())?'unknown date':date.toLocaleString())+' · '+String(lib.source||'local import')+' · stored on this browser');
-      section.append(title,info);
+      var selectForRender=el('button','btn','SELECT FOR FULL RENDER');
+      selectForRender.type='button';
+      selectForRender.style.cssText='margin:7px 0;width:auto;padding:7px 9px;font-size:9px;';
+      if(TRILYVA_SELECTED_RENDER_LIBRARY&&TRILYVA_SELECTED_RENDER_LIBRARY.key==='local:'+lib.id)selectForRender.textContent='SELECTED FOR FULL RENDER';
+      selectForRender.addEventListener('click',function(){
+        trilyvaSelectFullRenderLibrary({key:'local:'+lib.id,id:lib.id,title:lib.title,kind:'local'});
+        selectForRender.textContent='SELECTED FOR FULL RENDER';
+        $('#stMsg').textContent='Selected '+lib.title+' for full-library rendering.';
+      });
+      section.append(title,info,selectForRender);
       (lib.items||[]).forEach(function(item){
         var row=el('div');row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--rule);';
         var name=el('div',null,item.name||item.path||'animation.js');name.style.cssText='min-width:0;flex:1;overflow-wrap:anywhere;font:10px var(--mono);color:var(--ink-2);';
