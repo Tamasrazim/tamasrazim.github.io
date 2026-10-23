@@ -7904,35 +7904,49 @@ async function unzipBatchJsFiles(file,password){
     var nameLen=view.getUint16(offset+28,true),extraLen=view.getUint16(offset+30,true),commentLen=view.getUint16(offset+32,true);
     var localOffset=view.getUint32(offset+42,true);
     var name=new TextDecoder().decode(bytes.slice(offset+46,offset+46+nameLen)).replace(/\\/g,'/');
-    var extraStart=offset+46+nameLen,extraEnd=extraStart+extraLen;
-    var aes=false;
+    var extraStart=offset+46+nameLen,extraEnd=extraStart+extraLen,aesInfo=null;
     for(var ex=extraStart;ex+4<=extraEnd;){
       var tag=view.getUint16(ex,true),len=view.getUint16(ex+2,true);
       if(ex+4+len>extraEnd)break;
-      if(tag===0x9901)aes=true;
+      if(tag===0x9901){
+        if(len<7)throw new Error('ZIP AES extra field is malformed.');
+        aesInfo={
+          version:view.getUint16(ex+4,true),
+          vendor:String.fromCharCode(bytes[ex+6],bytes[ex+7]),
+          strength:bytes[ex+8],
+          method:view.getUint16(ex+9,true)
+        };
+      }
       ex+=4+len;
     }
     offset+=46+nameLen+extraLen+commentLen;
     if(!/\.js$/i.test(name)||/(^|\/)__MACOSX\//i.test(name)||/(^|\/)\./.test(name)||/(^|\/)node_modules\//i.test(name))continue;
-    if(aes||method===99)throw new Error('This ZIP uses WinZip AES encryption, which this browser-only importer cannot unlock yet. Re-save it with classic ZipCrypto encryption or extract it and choose the folder.');
-    var encrypted=!!(flags&1);
-    if(encrypted&&password===null){
-      var required=new Error('PASSWORD_REQUIRED');
-      required.code='TRILYVA_ZIP_PASSWORD_REQUIRED';throw required;
-    }
+    if(method===99&&!aesInfo)throw new Error('This ZIP marks an entry as AES-encrypted but is missing its AES metadata.');
+    if(aesInfo&&!(flags&1))throw new Error('ZIP AES metadata is present but the entry is not marked encrypted.');
     if(uncompressedSize>8*1024*1024||totalDeclared+uncompressedSize>64*1024*1024){skipped++;continue;}
     if(localOffset+30>bytes.length||view.getUint32(localOffset,true)!==0x04034b50){skipped++;continue;}
     var localNameLen=view.getUint16(localOffset+26,true),localExtraLen=view.getUint16(localOffset+28,true);
     var dataStart=localOffset+30+localNameLen+localExtraLen;
     if(dataStart+compressedSize>bytes.length){skipped++;continue;}
-    var compressed=bytes.slice(dataStart,dataStart+compressedSize);
-    if(encrypted){
-      var checkByte=(flags&8)?((modTime>>>8)&255):((crc>>>24)&255);
-      compressed=trilyvaZipDecrypt(compressed,password,checkByte);
+    var compressed=bytes.slice(dataStart,dataStart+compressedSize),encrypted=!!(flags&1);
+    if(encrypted&&password===null){
+      var required=new Error('PASSWORD_REQUIRED');
+      required.code='TRILYVA_ZIP_PASSWORD_REQUIRED';throw required;
     }
-    var payload=await trilyvaInflateZipEntry(compressed,method);
+    var payload,skipCrc=false,actualMethod=method;
+    if(aesInfo){
+      var aesResult=await trilyvaZipAesDecrypt(compressed,password,aesInfo);
+      actualMethod=aesResult.method;skipCrc=aesResult.skipCrc;
+      payload=await trilyvaInflateZipEntry(aesResult.data,actualMethod);
+    }else{
+      if(encrypted){
+        var checkByte=(flags&8)?((modTime>>>8)&255):((crc>>>24)&255);
+        compressed=trilyvaZipDecrypt(compressed,password,checkByte);
+      }
+      payload=await trilyvaInflateZipEntry(compressed,actualMethod);
+    }
     if(payload.length>8*1024*1024||totalDeclared+payload.length>64*1024*1024){skipped++;continue;}
-    if(trilyvaZipCrc32(payload)!==(crc>>>0)){
+    if(!skipCrc&&trilyvaZipCrc32(payload)!==(crc>>>0)){
       var invalid=new Error(encrypted?'Incorrect ZIP password or damaged archive.':'ZIP entry checksum failed: '+name);
       if(encrypted)invalid.code='TRILYVA_ZIP_BAD_PASSWORD';
       throw invalid;
