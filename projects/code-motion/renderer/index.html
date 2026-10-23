@@ -1386,6 +1386,30 @@ select.mini{
 .hdr-acts .hdr-example:hover{background:var(--raise);color:#fff}
 @media(max-width:560px){.hdr-acts .hdr-example{display:none}}
 
+
+/* TRILYVA motion layer — restrained monochrome UI feedback */
+@keyframes triUiRise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes triUiSweep{0%{transform:translateX(-130%);opacity:0}18%{opacity:.34}100%{transform:translateX(130%);opacity:0}}
+@keyframes triUiHalo{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}50%{box-shadow:0 0 0 1px rgba(255,255,255,.12)}}
+@keyframes triUiTabLine{from{transform:scaleX(.25);opacity:.2}to{transform:scaleX(1);opacity:1}}
+#tabs button{position:relative;isolation:isolate;transition:color var(--t-mid),background var(--t-mid),transform var(--t-fast)}
+#tabs button::after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:1px;background:#fff;transform:scaleX(0);transform-origin:left;opacity:0;transition:transform var(--t-mid),opacity var(--t-mid)}
+#tabs button.on::after{transform:scaleX(1);opacity:1;animation:triUiTabLine 280ms cubic-bezier(.2,.7,.3,1)}
+#tabs button:hover{transform:translateY(-1px)}
+#stage{isolation:isolate}
+#stage::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:4;background:linear-gradient(105deg,transparent 36%,rgba(255,255,255,.035) 50%,transparent 64%);transform:translateX(-130%);opacity:0}
+#stage:hover::after{animation:triUiSweep 1.1s ease-out}
+#work>.pane{animation:triUiRise 420ms cubic-bezier(.16,.84,.28,1) both}
+#paneCode{animation-delay:35ms!important}#panePreview{animation-delay:75ms!important}#paneRail{animation-delay:115ms!important}
+.btn,button,.ib,.seg button{transition:transform var(--t-fast),background var(--t-mid),border-color var(--t-mid),box-shadow var(--t-mid),color var(--t-mid)}
+.btn:not(:disabled):active,button:not(:disabled):active{transform:translateY(1px) scale(.992)}
+.btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:1px solid rgba(255,255,255,.9);outline-offset:2px}
+#p-docs.on{animation:triUiRise 280ms cubic-bezier(.16,.84,.28,1) both}
+#p-docs h5{position:relative;padding-left:10px}
+#p-docs h5::before{content:"";position:absolute;left:0;top:.1em;bottom:.1em;width:2px;background:#f4f4f6;opacity:.65}
+#stDot.busy{animation:triUiHalo 1.8s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){#tabs button,#tabs button::after,#work>.pane,.btn,button,.ib,.seg button{animation:none!important;transition:none!important;transform:none!important}#stage:hover::after{animation:none!important}}
+body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-motion #work>.pane,body.noui-motion .btn,body.noui-motion button,body.noui-motion .ib,body.noui-motion .seg button,body.noui-motion #p-docs.on,body.noui-motion #stDot.busy{animation:none!important;transition:none!important;transform:none!important}
 </style>
   <script type="application/ld+json">
 {
@@ -1494,6 +1518,7 @@ select.mini{
         <span class="sp"></span>
         <button data-act="cmpToggle" id="cmpBtn">Compare export</button>
         <button data-act="inspect">Inspect frame</button>
+        <button data-act="docs" title="Open documentation · F12">Docs · F12</button>
         <button data-act="full">Fullscreen</button>
       </div>
       <div id="stage">
@@ -9366,6 +9391,15 @@ function initCursor() {
   });
 }
 
+function openDocsTab() {
+  var panel = $('#p-docs');
+  if (panel && typeof DOCS === 'string') panel.innerHTML = DOCS;
+  showTab('p-docs');
+  if (window.matchMedia && window.matchMedia('(max-width: 900px)').matches) showMobile('rail');
+  markTrilyvaDocsSeen();
+  $('#stMsg').textContent = 'TRILYVA documentation opened.';
+}
+
 /* ============================================================
    Keyboard
    ============================================================ */
@@ -9373,6 +9407,15 @@ function typing(t) {
   return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
 }
 function initShortcuts() {
+  // Route F12 to the built-in manual whenever the browser passes it to the page.
+  // Browser-level shortcuts may be handled before page JavaScript can intercept them.
+  window.addEventListener('keydown', function (ev) {
+    if (ev.key !== 'F12') return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+    openDocsTab();
+  }, true);
   document.addEventListener('keydown', function (ev) {
     var meta = ev.metaKey || ev.ctrlKey, k = ev.key;
     if (k === 'Escape') {
@@ -9409,6 +9452,14 @@ var DOCS = [
   '<p>Write a function, press Run, scrub the timeline, press Render. Open <b>Examples</b> for ten complete animations to read or take apart.</p>',
   '<pre>window.renderFrame = function (time, frame, fps, ctx, width, height) {\n  ctx.fillStyle = "#000";\n  ctx.fillRect(0, 0, width, height);\n  var x = width * 0.5 + Math.cos(time * 2) * 200;\n  ctx.fillStyle = "#fff";\n  ctx.beginPath();\n  ctx.arc(x, height * 0.5, 40, 0, Math.PI * 2);\n  ctx.fill();\n};</pre>',
   '<p>Fewer arguments are fine — <code>function (time, frame, fps, ctx, width, height)</code> is the full contract, and you can declare only the ones you need. An optional <code>window.setup(ctx, width, height)</code> runs once per compile.</p>',
+
+  '<h5>RENDER ONE ANIMATION / SAVE STILL FRAMES</h5>',
+  '<p>Open <b>RENDER</b> and set the still-frame index. Frame numbers are zero-based: <code>0</code> is the first frame. Select any combination of <b>PNG</b>, <b>JPG</b>, <b>SVG</b> and <b>EPS</b>; PNG is selected by default. A normal successful render automatically downloads the chosen still formats for that frame as well as the selected video output. Change the frame index before rendering to save a different moment.</p>',
+  '<p>PNG is raster and can preserve transparency. JPG is raster and does not preserve transparency. SVG and EPS use the vector scene recorder, so they work only for supported drawing operations; if the animation uses unsupported canvas features, the vector file can be incomplete or fail. The app reports a warning rather than treating a failed vector export as a successful file.</p>',
+
+  '<h5>RENDER FULL LIBRARY</h5>',
+  '<p>Use <b>RENDER FULL LIBRARY</b> to export every animation in a selected built-in or locally imported library. Choose <b>SAVE TO FOLDER</b> to pick a destination directory, or <b>SAVE AS ZIP</b> to pick the ZIP file location. Each library item gets its own output folder, with MP4, the selected still formats, and metadata/manifest files. Choose formats and the zero-based still-frame index in the batch settings before starting.</p>',
+  '<p>Use the Library panel to import a single <code>.js</code> animation or a folder/ZIP containing JS files. Imported libraries are stored in this browser on this device, not uploaded to a server. Folder and ZIP destination pickers require a supported browser with the File System Access API; if a picker is unavailable, use a supported desktop browser.</p>',
 
   '<h5>THE MOTION API</h5>',
   '<p>Everything below is available as a global inside your animation. None of it is required — plain <code>Math</code> and the 2D context are enough.</p>',
@@ -9597,6 +9648,7 @@ var ACTS = {
   },
   cmpToggle: toggleCompare,
   inspect: inspectFrame,
+  docs: openDocsTab,
   full: toggleFullscreen,
   find: openFind,
   findClose: closeFind,
