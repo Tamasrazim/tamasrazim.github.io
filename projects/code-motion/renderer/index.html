@@ -1904,6 +1904,9 @@ html:has(#trilyvaPasswordGate)::after{display:none!important}
             <h4>RENDER</h4>
             <div class="btn-row"><button class="btn" data-act="resetDefaults" title="Reset composition, preview and export controls without replacing your animation source">RESET CONTROLS TO DEFAULTS</button></div>
             <div class="btn-row"><button class="btn solid" data-act="startRender" id="renderCurrentCodeBtn">RENDER CURRENT CODE</button></div>
+            <div class="btn-row"><button class="btn" data-act="uploadBatch" id="uploadBatchBtn">UPLOAD BATCH · CREATE LIBRARY</button></div>
+            <div class="btn-row"><button class="btn" data-act="openBatchLibraries" id="openBatchLibrariesBtn">OPEN BATCH LIBRARIES</button></div>
+            <p class="note">Import multiple JavaScript animation files into a named library saved in this browser. Files are not uploaded to a server.</p>
             <p class="note">Renders the code currently in the editor using the selected composition, frame rate, duration, format and quality settings.</p>
             <div class="btn-row">
               <button class="btn" data-act="cancelRender" id="cancelBtn" disabled>Cancel</button>
@@ -2012,6 +2015,7 @@ html:has(#trilyvaPasswordGate)::after{display:none!important}
 </div>
 
 <input type="file" id="filePick" accept=".tmotion,.json,application/json" class="hide">
+<input type="file" id="batchJsPick" accept=".js,text/javascript,application/javascript" multiple class="hide">
 <script type="text/js-source" id="src-runtime">
 /* ============================================================
    MotionCore — animation runtime + canonical composition model.
@@ -7989,6 +7993,143 @@ function runQueue() {
    Modal + clipboard
    ============================================================ */
 function elHTML(html) { var d = document.createElement('div'); d.innerHTML = html; return d; }
+
+/* ============================================================
+   User batch libraries — local-only IndexedDB
+   ============================================================ */
+var BatchLibraryDB = { db: null, opening: null };
+function openBatchLibraryDB() {
+  if (BatchLibraryDB.db) return Promise.resolve(BatchLibraryDB.db);
+  if (BatchLibraryDB.opening) return BatchLibraryDB.opening;
+  BatchLibraryDB.opening = new Promise(function (resolve, reject) {
+    if (!window.indexedDB) return reject(new Error('IndexedDB is unavailable in this browser.'));
+    var req = indexedDB.open('trilyva-batch-libraries', 1);
+    req.onupgradeneeded = function (ev) {
+      var db = ev.target.result;
+      if (!db.objectStoreNames.contains('libraries')) db.createObjectStore('libraries', { keyPath: 'id' });
+    };
+    req.onsuccess = function () { BatchLibraryDB.db = req.result; resolve(req.result); };
+    req.onerror = function () { BatchLibraryDB.opening = null; reject(req.error || new Error('Could not open batch library storage.')); };
+  });
+  return BatchLibraryDB.opening;
+}
+function batchLibraryStore(mode) {
+  return BatchLibraryDB.db.transaction('libraries', mode).objectStore('libraries');
+}
+function openBatchUploadPicker() {
+  var pick = $('#batchJsPick');
+  if (pick) { pick.value = ''; pick.click(); }
+}
+function handleBatchLibraryFiles(fileList) {
+  var files = Array.prototype.slice.call(fileList || []).filter(function (f) {
+    return /\.js$/i.test(f.name) && f.size <= 8 * 1024 * 1024;
+  });
+  if (!files.length) {
+    $('#stMsg').textContent = 'Choose one or more .js files (maximum 8 MB per file).';
+    return;
+  }
+  if (files.length !== (fileList || []).length) {
+    $('#stMsg').textContent = 'Some files were skipped: only .js files up to 8 MB each are accepted.';
+  }
+  Promise.all(files.map(function (file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        var code = String(reader.result || '');
+        if (!code.trim()) return reject(new Error(file.name + ' is empty.'));
+        resolve({ name: file.name, code: code, size: file.size });
+      };
+      reader.onerror = function () { reject(new Error('Could not read ' + file.name)); };
+      reader.readAsText(file);
+    });
+  })).then(function (items) {
+    prompt2('CREATE BATCH LIBRARY', 'Library name', 'My Animation Library', function (name) {
+      if (!name) { $('#stMsg').textContent = 'Batch library creation cancelled.'; return; }
+      openBatchLibraryDB().then(function () {
+        var rec = {
+          id: uid('batchlib'),
+          title: name.slice(0, 100),
+          created: new Date().toISOString(),
+          modified: new Date().toISOString(),
+          count: items.length,
+          items: items
+        };
+        return idbAsk(batchLibraryStore('readwrite').put(rec)).then(function () {
+          $('#stMsg').textContent = 'Created local library "' + rec.title + '" · ' + items.length + ' JavaScript file(s)';
+          openBatchLibraries();
+        });
+      }).catch(function (err) {
+        $('#stMsg').textContent = 'Library save failed · ' + String(err && err.message || err);
+      });
+    });
+  }).catch(function (err) {
+    openModal('BATCH UPLOAD FAILED', elHTML('<div class="warnbox"><b>FILE READ ERROR</b>' + esc(String(err && err.message || err)) + '</div>'), [{ label: 'Close', solid: true, fn: closeModal }]);
+  });
+}
+function openBatchLibraries() {
+  openBatchLibraryDB().then(function () {
+    return idbAsk(batchLibraryStore('readonly').getAll());
+  }).then(function (libs) {
+    var body = el('div');
+    body.style.cssText = 'display:flex;flex-direction:column;gap:9px;min-height:0;';
+    if (!libs.length) {
+      body.appendChild(el('div', 'empty', 'NO BATCH LIBRARIES YET · USE UPLOAD BATCH TO CREATE ONE.'));
+      openModal('TRILYVA / BATCH LIBRARIES', body, [{ label: 'Close', fn: closeModal }, { label: 'Upload Batch', solid: true, fn: function () { closeModal(); openBatchUploadPicker(); } }]);
+      return;
+    }
+    libs.sort(function (a, b) { return (b.created || '').localeCompare(a.created || ''); });
+    var list = el('div', 'list');
+    list.style.cssText = 'max-height:56vh;overflow:auto;';
+    libs.forEach(function (lib) {
+      var section = el('div', 'it');
+      section.style.cssText = 'display:block;';
+      var heading = el('h5', null, lib.title + ' · ' + (lib.items || []).length + ' FILES');
+      var info = el('p', null, 'Created ' + new Date(lib.created).toLocaleString() + ' · stored on this browser');
+      section.append(heading, info);
+      (lib.items || []).forEach(function (item, index) {
+        var row = el('div');
+        row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--rule);';
+        var name = el('div', null, item.name);
+        name.style.cssText = 'min-width:0;flex:1;overflow-wrap:anywhere;font:10px var(--mono);color:var(--ink-2);';
+        var load = el('button', 'btn', 'LOAD');
+        load.style.cssText = 'width:auto;margin:0;padding:6px 9px;';
+        load.addEventListener('click', function () {
+          askDiscard('Load "' + item.name + '" from ' + lib.title + '? This replaces the current editor code.', function () {
+            S.id = null; S.name = item.name.replace(/\.js$/i, '') || lib.title; S.version = 1;
+            $('#projName').value = S.name;
+            edSetValue(item.code);
+            S.code = item.code;
+            markDirty(true);
+            run();
+            closeModal();
+            showTab('p-render');
+            $('#stMsg').textContent = 'Loaded ' + item.name + ' from "' + lib.title + '" · review, then Render Current Code';
+          });
+        });
+        row.append(name, load);
+        section.appendChild(row);
+      });
+      var remove = el('button', 'btn', 'DELETE LIBRARY');
+      remove.style.cssText = 'margin-top:8px;';
+      remove.addEventListener('click', function () {
+        if (!window.confirm('Delete local library "' + lib.title + '" and its stored files?')) return;
+        idbAsk(batchLibraryStore('readwrite').delete(lib.id)).then(function () {
+          closeModal(); openBatchLibraries();
+        }).catch(function (err) { $('#stMsg').textContent = 'Delete failed · ' + String(err && err.message || err); });
+      });
+      section.appendChild(remove);
+      list.appendChild(section);
+    });
+    body.appendChild(list);
+    openModal('TRILYVA / BATCH LIBRARIES', body, [
+      { label: 'Close', fn: closeModal },
+      { label: 'Upload Another Batch', solid: true, fn: function () { closeModal(); openBatchUploadPicker(); } }
+    ]);
+  }).catch(function (err) {
+    $('#stMsg').textContent = 'Could not open batch libraries · ' + String(err && err.message || err);
+  });
+}
+
 function openModal(title, bodyNode, buttons) {
   $('#modalTitle').textContent = title;
   var b = $('#modalBody'); b.innerHTML = ''; b.appendChild(bodyNode);
@@ -9151,6 +9292,8 @@ var ACTS = {
   renderAllDotMesh: function () { openDotMeshFolderPicker(); },
   exportDotMesh50: function () { openDotMeshFolderPicker(); },
   startRender: function () { withCompiled().then(function (ok) { if (ok) startRender(buildJob()); }); },
+  uploadBatch: openBatchUploadPicker,
+  openBatchLibraries: openBatchLibraries,
   cancelRender: cancelRender,
   analyze: analyseJob,
   identifyFrame: identifyFrame,
@@ -9221,6 +9364,10 @@ function initDispatch() {
   $('#modal').addEventListener('click', function (ev) { if (ev.target === $('#modal')) closeModal(); });
   $('#filePick').addEventListener('change', function () {
     if (this.files && this.files[0]) importProject(this.files[0]);
+    this.value = '';
+  });
+  $('#batchJsPick').addEventListener('change', function () {
+    if (this.files && this.files.length) handleBatchLibraryFiles(this.files);
     this.value = '';
   });
   $('#findQ').addEventListener('input', runFind);
