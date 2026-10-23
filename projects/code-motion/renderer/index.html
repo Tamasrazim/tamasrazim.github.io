@@ -5491,9 +5491,7 @@ function openRenderAllConfirm(lib,items){
     var input=document.createElement('input');input.type='checkbox';input.id=id;input.checked=!!checked;
     wrapper.append(input,document.createTextNode(label));parent.appendChild(wrapper);return input;
   }
-  var videoRow=el('div');videoRow.style.cssText='display:flex;flex-wrap:wrap;gap:10px 16px;';
-  var mp4=checkboxOption(videoRow,'fullFmtMp4','MP4',true);
-  var webm=checkboxOption(videoRow,'fullFmtWebm','WebM',false);
+  var videoRow=el('p','note','Each library item is rendered as a full MP4 video using the current resolution, frame rate, duration, quality and bitrate settings.');
   var stillHeading=el('h4',null,'STILL OUTPUTS · ONE FRAME PER ITEM');
   var stillRow=el('div');stillRow.style.cssText='display:flex;flex-wrap:wrap;gap:10px 16px;';
   var prefs=trilyvaReadStillPrefs();
@@ -5505,10 +5503,7 @@ function openRenderAllConfirm(lib,items){
   var warning=el('p','note','SVG and EPS use TRILYVA’s editable vector recorder; code that uses unsupported Canvas features may still render to video/PNG/JPG while its vector still is marked as failed.');
   body.append(el('h4',null,'VIDEO FORMATS'),videoRow,stillHeading,stillRow,frameRow,details,warning);
   function collectSettings(){
-    var videoFormats=[];
-    if(mp4.checked)videoFormats.push('mp4');
-    if(webm.checked)videoFormats.push('webm');
-    if(!videoFormats.length)throw new Error('Select at least one video format: MP4 or WebM.');
+    var videoFormats=['mp4'];
     var stillFormats=['png','jpg','svg','eps'].filter(function(fmt){return stillChecks[fmt].checked;});
     if(!stillFormats.length){stillFormats=['png'];stillChecks.png.checked=true;}
     var frame=Math.max(0,Math.floor(Number(frameInput.value)||0));
