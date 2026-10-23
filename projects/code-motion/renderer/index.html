@@ -7768,6 +7768,113 @@ function trilyvaZipDecrypt(encrypted,password,checkByte){
   }
   return plain.slice(12);
 }
+var TRILYVA_AES_SBOX_CACHE=null;
+function trilyvaAesMul(a,b){
+  var r=0;
+  for(var i=0;i<8;i++){
+    if(b&1)r^=a;
+    var high=a&0x80;a=(a<<1)&255;if(high)a^=0x1b;b>>>=1;
+  }
+  return r&255;
+}
+function trilyvaAesPow(a,p){
+  var r=1;
+  while(p){if(p&1)r=trilyvaAesMul(r,a);a=trilyvaAesMul(a,a);p>>>=1;}
+  return r;
+}
+function trilyvaAesSbox(){
+  if(TRILYVA_AES_SBOX_CACHE)return TRILYVA_AES_SBOX_CACHE;
+  var box=new Uint8Array(256);
+  for(var i=0;i<256;i++){
+    var x=i?trilyvaAesPow(i,254):0;
+    var rot1=((x<<1)|(x>>>7))&255,rot2=((x<<2)|(x>>>6))&255;
+    var rot3=((x<<3)|(x>>>5))&255,rot4=((x<<4)|(x>>>4))&255;
+    box[i]=(x^rot1^rot2^rot3^rot4^0x63)&255;
+  }
+  TRILYVA_AES_SBOX_CACHE=box;return box;
+}
+function trilyvaAesExpandKey(key){
+  var nk=key.length/4;
+  if(nk!==4&&nk!==6&&nk!==8)throw new Error('Unsupported AES key size.');
+  var rounds=nk+6,totalWords=4*(rounds+1),expanded=new Uint8Array(totalWords*4);
+  expanded.set(key);
+  var box=trilyvaAesSbox(),rcon=1;
+  for(var word=nk;word<totalWords;word++){
+    var temp=Array.from(expanded.slice((word-1)*4,word*4));
+    if(word%nk===0){
+      var first=temp[0];
+      temp=[box[temp[1]]^rcon,box[temp[2]],box[temp[3]],box[first]];
+      rcon=trilyvaAesMul(rcon,2);
+    }else if(nk>6&&word%nk===4){
+      temp=temp.map(function(v){return box[v];});
+    }
+    for(var j=0;j<4;j++)expanded[word*4+j]=expanded[(word-nk)*4+j]^temp[j];
+  }
+  return {bytes:expanded,rounds:rounds,sbox:box};
+}
+function trilyvaAesBlockWithSchedule(input,schedule){
+  var state=new Uint8Array(input),keys=schedule.bytes,box=schedule.sbox;
+  for(var i=0;i<16;i++)state[i]^=keys[i];
+  for(var round=1;round<schedule.rounds;round++){
+    for(var s=0;s<16;s++)state[s]=box[state[s]];
+    var p=state.slice();
+    state[1]=p[5];state[5]=p[9];state[9]=p[13];state[13]=p[1];
+    state[2]=p[10];state[6]=p[14];state[10]=p[2];state[14]=p[6];
+    state[3]=p[15];state[7]=p[3];state[11]=p[7];state[15]=p[11];
+    for(var col=0;col<4;col++){
+      var o=col*4,a=state[o],b=state[o+1],c=state[o+2],d=state[o+3],all=a^b^c^d;
+      state[o]=a^all^trilyvaAesMul(a^b,2);
+      state[o+1]=b^all^trilyvaAesMul(b^c,2);
+      state[o+2]=c^all^trilyvaAesMul(c^d,2);
+      state[o+3]=d^all^trilyvaAesMul(d^a,2);
+    }
+    var keyOffset=round*16;
+    for(var q=0;q<16;q++)state[q]^=keys[keyOffset+q];
+  }
+  for(var f=0;f<16;f++)state[f]=box[state[f]];
+  var last=state.slice();
+  state[1]=last[5];state[5]=last[9];state[9]=last[13];state[13]=last[1];
+  state[2]=last[10];state[6]=last[14];state[10]=last[2];state[14]=last[6];
+  state[3]=last[15];state[7]=last[3];state[11]=last[7];state[15]=last[11];
+  var finalOffset=schedule.rounds*16;
+  for(var z=0;z<16;z++)state[z]^=keys[finalOffset+z];
+  return state;
+}
+function trilyvaAesCtrDecrypt(ciphertext,key){
+  var schedule=trilyvaAesExpandKey(key),out=new Uint8Array(ciphertext.length),counter=1;
+  for(var offset=0;offset<ciphertext.length;offset+=16,counter++){
+    if(counter>0xffffffff)throw new Error('AES ZIP entry exceeds the supported counter range.');
+    var block=new Uint8Array(16);block[0]=counter&255;block[1]=(counter>>>8)&255;block[2]=(counter>>>16)&255;block[3]=(counter>>>24)&255;
+    var stream=trilyvaAesBlockWithSchedule(block,schedule),n=Math.min(16,ciphertext.length-offset);
+    for(var i=0;i<n;i++)out[offset+i]=ciphertext[offset+i]^stream[i];
+  }
+  return out;
+}
+async function trilyvaZipAesDecrypt(encrypted,password,aesInfo){
+  if(!window.crypto||!window.crypto.subtle)throw new Error('Secure ZIP password unlocking is unavailable in this browser.');
+  var strength=Number(aesInfo&&aesInfo.strength),keyLength=strength===1?16:strength===2?24:strength===3?32:0;
+  if(!keyLength)throw new Error('Unsupported WinZip AES strength. Expected AES-128, AES-192 or AES-256.');
+  if(aesInfo.vendor!=='AE')throw new Error('Unrecognized ZIP AES vendor marker.');
+  var saltLength=keyLength/2;
+  if(encrypted.length<saltLength+12)throw new Error('The AES-encrypted ZIP entry is truncated.');
+  var salt=encrypted.slice(0,saltLength),verify=encrypted.slice(saltLength,saltLength+2);
+  var cipher=encrypted.slice(saltLength+2,encrypted.length-10),auth=encrypted.slice(encrypted.length-10);
+  var passBytes=new TextEncoder().encode(String(password));
+  var baseKey=await window.crypto.subtle.importKey('raw',passBytes,{name:'PBKDF2'},false,['deriveBits']);
+  var bits=new Uint8Array(await window.crypto.subtle.deriveBits({name:'PBKDF2',salt:salt,iterations:1000,hash:'SHA-1'},baseKey,(keyLength*2+2)*8));
+  var encKey=bits.slice(0,keyLength),authKey=bits.slice(keyLength,keyLength*2),expected=bits.slice(keyLength*2);
+  if(verify[0]!==expected[0]||verify[1]!==expected[1]){
+    var wrong=new Error('Incorrect ZIP password. Check the password and try again.');
+    wrong.code='TRILYVA_ZIP_BAD_PASSWORD';throw wrong;
+  }
+  var hmacKey=await window.crypto.subtle.importKey('raw',authKey,{name:'HMAC',hash:'SHA-1'},false,['sign']);
+  var signature=new Uint8Array(await window.crypto.subtle.sign('HMAC',hmacKey,cipher));
+  for(var i=0;i<10;i++)if(signature[i]!==auth[i]){
+    var invalid=new Error('Incorrect ZIP password or damaged AES-encrypted archive.');
+    invalid.code='TRILYVA_ZIP_BAD_PASSWORD';throw invalid;
+  }
+  return {data:trilyvaAesCtrDecrypt(cipher,encKey),method:Number(aesInfo.method),skipCrc:Number(aesInfo.version)===2};
+}
 async function trilyvaInflateZipEntry(bytes,method){
   if(method===0)return bytes;
   if(method!==8)throw new Error('ZIP compression method '+method+' is not supported. Use STORE or DEFLATE compression.');
