@@ -9377,10 +9377,6 @@ function initDispatch() {
     if (this.files && this.files[0]) importProject(this.files[0]);
     this.value = '';
   });
-  $('#batchJsPick').addEventListener('change', function () {
-    if (this.files && this.files.length) handleBatchLibraryFiles(this.files);
-    this.value = '';
-  });
   $('#findQ').addEventListener('input', runFind);
   $('#findQ').addEventListener('keydown', function (ev) {
     if (ev.key === 'Enter') { ev.preventDefault(); stepMatch(ev.shiftKey ? -1 : 1); }
