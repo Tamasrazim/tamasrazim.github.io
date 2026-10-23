@@ -4513,63 +4513,6 @@ function loadProtectedLibraryModule() {
   }
   return libraryModulePromise;
 }
-function openLibraryPasswordGate(afterAccess) {
-  var body = document.createElement('div');
-  body.style.cssText = 'display:flex;flex-direction:column;gap:10px;min-height:0;';
-  body.innerHTML =
-    '<div class="warnbox"><b>LIBRARY ACCESS</b>Enter the access code to load the TRILYVA libraries. The code is required again after a new page load.</div>' +
-    '<label style="font:10px var(--mono);letter-spacing:.12em;color:var(--mut);">ACCESS CODE' +
-    '<input id="libraryPass" type="password" inputmode="numeric" autocomplete="off" spellcheck="false" style="display:block;width:100%;margin-top:7px;background:#09090b;border:1px solid var(--rule);padding:9px 10px;font:12px var(--mono);color:var(--ink);outline:none;" aria-label="Library access code">' +
-    '</label>' +
-    '<div id="libraryPassMsg" class="note">Library data is not requested until access is granted.</div>';
-
-  function status(msg) {
-    var n = body.querySelector('#libraryPassMsg');
-    if (n) n.textContent = msg;
-  }
-
-  function attempt() {
-    var input = body.querySelector('#libraryPass');
-    var value = input ? input.value : '';
-    if (!value) {
-      status('Enter the access code.');
-      if (input) input.focus();
-      return;
-    }
-    status('VERIFYING…');
-    var actions = body.closest('#modalBox').querySelector('#modalFoot');
-    Array.prototype.forEach.call(actions.querySelectorAll('button'), function (b) { b.disabled = true; });
-    sha256Hex(value).then(function (hash) {
-      if (hash !== LIBRARY_PASSWORD_SHA256) throw new Error('INCORRECT ACCESS CODE');
-      status('ACCESS GRANTED · LOADING LIBRARY INDEX…');
-      return loadProtectedLibraryModule();
-    }).then(function () {
-      closeModal();
-      (afterAccess || openTrilyvaLibrary)();
-    }).catch(function (err) {
-      Array.prototype.forEach.call(actions.querySelectorAll('button'), function (b) { b.disabled = false; });
-      status(String(err && err.message || err));
-      if (input) {
-        input.select();
-        input.focus();
-      }
-    });
-  }
-
-  openModal('TRILYVA / LIBRARY ACCESS', body, [
-    { label: 'Cancel', fn: closeModal },
-    { label: 'Unlock', solid: true, fn: attempt }
-  ]);
-
-  var input = body.querySelector('#libraryPass');
-  if (input) input.addEventListener('keydown', function (ev) {
-    if (ev.key === 'Enter') {
-      ev.preventDefault();
-      attempt();
-    }
-  });
-}
-
 function openProtectedTrilyvaLibrary() {
   return loadProtectedLibraryModule().then(function () { openTrilyvaLibrary(); });
 }
