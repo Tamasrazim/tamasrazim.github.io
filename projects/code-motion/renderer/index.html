@@ -8076,11 +8076,13 @@ function unzipBatchJsFiles(file) {
         skipped++;
         continue;
       }
-      entries.push(payload.then(function (data) {
-        if (data.length > 8 * 1024 * 1024) { skipped++; return null; }
-        total += data.length;
-        return { name: name, code: new TextDecoder().decode(data), size: data.length };
-      }));
+      (function (entryName, entryPayload) {
+        entries.push(entryPayload.then(function (data) {
+          if (data.length > 8 * 1024 * 1024) { skipped++; return null; }
+          total += data.length;
+          return { name: entryName, code: new TextDecoder().decode(data), size: data.length };
+        }));
+      })(name, payload);
     }
     return Promise.all(entries).then(function (items) {
       items = items.filter(Boolean);
