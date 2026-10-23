@@ -98,6 +98,21 @@
 <link rel="stylesheet" href="/assets/css/monochrome.css?v=20261010-1">
 <link rel="stylesheet" href="/assets/css/site-navigation.css?v=20261012-1"><script defer src="/assets/js/site-navigation.js?v=20261012-1"></script>
   <link rel="stylesheet" href="/assets/css/project-cinematic-intro.css?v=20261013-7">
+
+<style>
+/* TRILYVA project-page motion polish */
+@keyframes triPageEnter{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.tri-section{animation:triPageEnter .72s cubic-bezier(.16,.84,.28,1) both}
+.tri-section:nth-of-type(2){animation-delay:70ms}.tri-section:nth-of-type(3){animation-delay:120ms}.tri-section:nth-of-type(4){animation-delay:170ms}
+.tri-card{transition:transform .28s cubic-bezier(.2,.7,.3,1),background .28s ease,border-color .28s ease}
+.tri-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.34);background:rgba(255,255,255,.035)}
+.tri-card h3{transition:letter-spacing .28s ease}.tri-card:hover h3{letter-spacing:.015em}
+.tri-actions a,.tri-navlinks a{transition:transform .22s ease,opacity .22s ease,border-color .22s ease}
+.tri-actions a:hover{transform:translateY(-2px)}
+.tri-art svg{transform-origin:center;transition:transform .8s cubic-bezier(.16,.84,.28,1)}
+.tri-art:hover svg{transform:rotate(2deg) scale(1.015)}
+@media(prefers-reduced-motion:reduce){.tri-section{animation:none!important}.tri-card,.tri-card h3,.tri-actions a,.tri-navlinks a,.tri-art svg{transition:none!important;transform:none!important}}
+</style>
 </head>
 <body class="project-detail-v3" data-project="trilyva" data-cinematic-intro="trilyva">
 <header class="tri-wrap tri-nav"><a class="v3-brand" href="/" aria-label="Tamasrazim home"><img class="trilyva-brand-logo" src="/assets/brand/trilyva/T.svg" alt="" width="48" height="48"><span>tamasrazim</span></a><nav class="tri-navlinks" aria-label="TRILYVA project navigation"><a href="#overview">Overview</a><a href="/projects/trilyva/tutorial.html">Tutorial ↗</a><a href="#capabilities">Capabilities</a><a href="#examples">Example</a><a href="#model">Frame model</a><a href="#limits">Status</a></nav><a class="v3-header-contact" href="/projects/">All projects </a><details class="site-page-menu">
@@ -115,11 +130,11 @@
 <main>
 <section class="tri-wrap tri-hero" id="overview"><div class="tri-hero-grid"><div><p class="tri-kicker">CREATIVE SOFTWARE / BROWSER RUNTIME</p><h1 class="tri-title">TRILYVA<span>.</span></h1>
 <p class="tri-lead">I built TRILYVA around frame-driven motion: write the animation, watch it move, then render the frames you actually asked for.</p>
-<p class="tri-p">This page explains how TRILYVA works. The renderer has its own route, so you can read first and open the workspace when you're ready.</p>
+<p class="tri-p">This page covers the current browser-first renderer: code-driven animation, frame-based video output, still-frame exports, and whole-library batch delivery. The workspace has its own route, while the field guide explains the actual controls and their limits.</p>
 <div class="tri-actions"><a class="v3-button primary" href="/projects/code-motion/renderer/">Open TRILYVA workspace</a><a class="v3-button secondary" href="/projects/trilyva/tutorial.html">Read the complete tutorial</a></div>
 <div class="tri-facts"><div class="tri-fact"><b>Frame-first</b><small>Deterministic timing</small></div><div class="tri-fact"><b>Browser</b><small>No install required</small></div><div class="tri-fact"><b>Local</b><small>Client-side workflow</small></div><div class="tri-fact"><b>Native?</b><small>Web application today</small></div></div>
 </div>
-<div class="tri-art" aria-label="Procedural orbit artwork representing deterministic motion"><svg viewBox="0 0 700 700" role="presentation" focusable="false">
+<div class="tri-art" id="examples" aria-label="Procedural orbit artwork representing deterministic motion"><svg viewBox="0 0 700 700" role="presentation" focusable="false">
 <defs><radialGradient id="triGlow"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
 <circle cx="350" cy="350" r="270" fill="url(#triGlow)"/>
 <g class="tri-orbit"><ellipse cx="350" cy="350" rx="278" ry="104" fill="none" stroke="#fff" stroke-opacity=".56"/><ellipse cx="350" cy="350" rx="240" ry="165" fill="none" stroke="#fff" stroke-opacity=".23"/><ellipse cx="350" cy="350" rx="298" ry="195" fill="none" stroke="#fff" stroke-opacity=".14" stroke-dasharray="2 10"/><path d="M65 350 C156 134 260 106 350 132 S570 210 630 350 S445 577 350 586 S126 515 65 350Z" fill="none" stroke="#fff" stroke-opacity=".22"/></g>
@@ -136,10 +151,12 @@
 <article class="tri-card"><span>05 / AUDIO</span><h3>Offline Voice Studio</h3><p>I also built an offline voice studio using formant synthesis. It can produce timed dialogue, a procedural soundscape, a five-minute PCM WAV and subtitle cues; the voice is intentionally synthetic, not a neural voice clone.</p></article>
 <article class="tri-card"><span>06 / MOVIE</span><h3>Local Movie Finalizer</h3><p>The local finalizer combines a video or stock clip with a browser-decodable audio file. MP4 depends on recorder support; automatic mode can fall back to WebM. It captures and re-encodes in real time, so this isn't a lossless muxer.</p></article>
 <article class="tri-card"><span>07 / VECTOR</span><h3>Creative export workflows</h3><p>TRILYVA sits alongside my vector tools and stock-asset workflow, but those tools keep their own pages and workspaces.</p></article>
-<article class="tri-card"><span>08 / INSTALL</span><h3>Browser-first delivery</h3><p>Open the renderer in a supported browser. Export options vary by browser and hardware, so the available settings matter more than a blanket promise of codec support.</p></article>
+<article class="tri-card"><span>08 / LIBRARY</span><h3>Render a complete library</h3><p>Choose a built-in or imported JavaScript library, then export the collection into a folder or ZIP. Each item receives its own video, selected still frames, and metadata files.</p></article>
+<article class="tri-card"><span>09 / STILL FRAMES</span><h3>PNG, JPG, SVG and EPS</h3><p>Select a frame index and the still formats you need. PNG is selected by default; vector exports depend on the drawing operations supported by the vector recorder.</p></article>
+<article class="tri-card"><span>10 / INSTALL</span><h3>Browser-first delivery</h3><p>Open the renderer in a supported browser. Export options vary by browser and hardware, and folder/ZIP destination pickers require compatible browser support.</p></article>
 </div></section>
 
-<section class="tri-wrap tri-section" id="tutorial"><div class="tri-head"><h2>Complete TRILYVA tutorial</h2><p>Learn the real workflow from the first frame to a verified export: workspace orientation, animation code, frame timing, motion design, composition settings, preview, rendering, output formats, loops, and troubleshooting. Work through the chapters at your own pace; this is not tied to a fixed video length.</p></div><div class="tri-grid"><article class="tri-card"><span>FIELD GUIDE / 12 CHAPTERS</span><h3>Learn TRILYVA step by step</h3><p>Includes a working starter animation, code explanations, practical render checklist, format limitations, and fixes for common problems. Uses the T.svg brand mark and clearly labels explanatory diagrams rather than presenting mockups as screenshots.</p><p style="margin-top:14px"><a class="v3-button secondary" href="/projects/trilyva/tutorial.html">Open the complete tutorial ↗</a></p></article></div></section>
+<section class="tri-wrap tri-section" id="tutorial"><div class="tri-head"><h2>Complete TRILYVA tutorial</h2><p>Learn the real workflow from the first frame to a verified export: workspace orientation, animation code, frame timing, motion design, composition settings, preview, rendering, output formats, loops, and troubleshooting. Work through the chapters at your own pace; this is not tied to a fixed video length.</p></div><div class="tri-grid"><article class="tri-card"><span>FIELD GUIDE / 12 CHAPTERS</span><h3>Learn TRILYVA step by step</h3><p>Includes a working starter animation, code explanations, still-frame export steps, full-library folder/ZIP delivery, a practical render checklist, format limitations, and fixes for common problems. Diagrams are labelled as explanatory guidance, not real screenshots.</p><p style="margin-top:14px"><a class="v3-button secondary" href="/projects/trilyva/tutorial.html">Open the complete tutorial ↗</a></p></article></div></section>
 
 <section class="tri-wrap tri-section" id="model"><div class="tri-head"><h2>Frame model</h2><p>The preview can prioritise responsive playback. Export follows the requested frame sequence instead.</p></div>
 <div class="tri-grid">
@@ -151,7 +168,7 @@
 <section class="tri-wrap tri-section" id="limits"><div class="tri-head"><h2>Project status</h2><p>TRILYVA's editor is usable, but export support still depends on the current renderer and the browser running it.</p></div>
 <div class="tri-grid">
 <article class="tri-card"><span>AVAILABLE</span><h3>Open the workspace</h3><p>Start here for the overview; use the workspace button above when you want to open the renderer.</p></article>
-<article class="tri-card"><span>CAPABILITY-DEPENDENT</span><h3>Codec / output support</h3><p>MP4/WebM, codec, resolution and frame rate depend on the selected configuration and browser support. Unsupported configurations must remain unavailable.</p></article>
+<article class="tri-card"><span>CAPABILITY-DEPENDENT</span><h3>Codec / output support</h3><p>MP4/WebM video encoding depends on the selected configuration and browser support. Still-frame PNG/JPG exports are raster; SVG/EPS may be limited by unsupported drawing operations. Folder and ZIP destinations depend on browser file-picker support.</p></article>
 <article class="tri-card"><span>PROJECT FAMILY</span><h3>Separate creative tools</h3><p>Related vector and stock-asset tools have their own pages. TRILYVA's overview explains the workspace rather than implying every related export path is validated in one renderer.</p></article>
 </div>
 <div class="tun-callout">The workspace and project page are separate by design: visit this overview for project details, or launch the renderer when you are ready to work.</div>
