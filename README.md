@@ -2,6 +2,11 @@
 
 [Website](https://tamasrazim.github.io/) · [Selected projects](https://tamasrazim.github.io/projects/) · [GitHub](https://github.com/Tamasrazim)
 
+## TRILYVA native desktop rebuild
+
+The authoritative implementation specification is [TRILYVA/README.md](TRILYVA/README.md). Any work on the native desktop application must read and follow that document before coding. It defines the product behaviour, custom monochrome glassmorphism UI, logo and intro motion, icon system, render contract, export pipeline, library, native packaging, and release acceptance tests. The native application must not embed or repackage the browser workspace as its UI.
+
+
 ## What this repository contains
 
 This repository deploys my personal website and a curated set of real project pages on GitHub Pages. It also contains code, assets, product work, engineering checks, documentation, and release workflows behind those projects.
