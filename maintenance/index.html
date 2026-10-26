@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<title>Maintenance — Tamasrazim</title>
+<title>TRILYVA Is in Maintenance — Tamasrazim</title>
 <style>
 :root{color-scheme:dark;--bg:#050505;--ink:#f2f2ee;--muted:#969690;--line:#292929;--mono:"JetBrains Mono",ui-monospace,monospace;--display:"Unbounded",system-ui,sans-serif}
 *{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 76% 24%,#171717 0,transparent 34%),var(--bg);color:var(--ink);font:14px/1.7 system-ui,-apple-system,"Segoe UI",sans-serif;display:grid;place-items:center;padding:clamp(18px,4vw,54px)}
@@ -36,48 +36,11 @@ a{color:inherit;text-decoration:none}.shell{position:relative;isolation:isolate;
 <main class="shell">
 <header class="top"><a class="brand" href="/" aria-label="Tamasrazim homepage"><img src="/assets/brand/trilyva/T.svg" width="40" height="40" alt=""><span><b>TAMASRAZIM</b><span>BY ROBIUL RUMMAN RAZIM</span></span></a><div class="status"><span class="dot" aria-hidden="true"></span><span>Maintenance in progress</span></div></header>
 <section class="content">
-<div class="copy"><div class="kicker">System status / temporary interruption</div><h1 id="publicTitle">MAINTENANCE<span>.</span></h1><p class="lead" id="publicMessage">This part of the website is undergoing maintenance. Please check back soon.</p><p class="note" id="publicDetail">The website owner has temporarily paused this route. Your requested address can be retried when service resumes.</p><div class="actions"><button class="button primary" id="retryButton" type="button">Check again</button><a class="button" href="/">Return home</a></div></div>
+<div class="copy"><div class="kicker">TRILYVA / temporary interruption</div><h1>TRILYVA IS IN MAINTENANCE<span>.</span></h1><p class="lead">The TRILYVA workspace is temporarily unavailable while maintenance is in progress.</p><p class="note">Please check back soon. Normal access will return when maintenance is complete.</p><div class="actions"><a class="button primary" href="/">Return home</a></div></div>
 <div class="instrument" aria-hidden="true"><div class="orbit-label top"><span>TAMASRAZIM / SYS</span><span>PAUSED</span></div><div class="core"></div><div class="orbit-label bottom"><span>PUBLIC ROUTES</span><span>STANDBY</span></div></div>
 </section>
-<section class="telemetry" aria-label="Maintenance status"><div class="metric"><b>01 / ROUTE</b><span id="routeName">Temporarily paused</span></div><div class="metric"><b>02 / STATUS</b><span id="routeState">Checking status</span></div><div class="metric"><b>03 / NEXT STEP</b><span>Check again later</span></div></section>
+<section class="telemetry" aria-label="Maintenance notice"><div class="metric"><b>01 / SERVICE</b><span>TRILYVA workspace</span></div><div class="metric"><b>02 / STATUS</b><span>Maintenance in progress</span></div><div class="metric"><b>03 / NEXT STEP</b><span>Check back soon</span></div></section>
 <footer class="footer"><span>Robiul Rumman Razim — Tamasrazim</span><span>MAINTENANCE / PUBLIC STATUS</span></footer>
 </main>
-<script>
-(function(){
-'use strict';
-var retry=document.getElementById('retryButton');
-var query=new URLSearchParams(location.search);
-var from=query.get('from')||'/';
-if(!from.startsWith('/')||from.startsWith('//')||from.indexOf('\\')!==-1)from='/';
-var routePath=from.split(/[?#]/)[0]||'/';
-document.getElementById('routeName').textContent=from.slice(0,80);
-function isTrilyva(p){return /^\/projects\/trilyva(?:\/|$)/i.test(p)||/^\/projects\/code-motion\/(?:renderer|batch)(?:\/|$)/i.test(p)||/^\/projects\/code-motion\/legacy-renderer\.html$/i.test(p);}
-function isProject(p){return /^\/projects(?:\/|$)/i.test(p);}
-function isProfile(p){return p==='/'||p==='/index.html'||/^\/(?:about|approach|elsewere|licences)(?:\/|$)/i.test(p);}
-function isWorkspace(p){return /^\/(?:KYNESTRA|asset-vault|renderer)(?:\/|$)/i.test(p)||/^\/code-motion-tamasrazim2?\.html$/i.test(p);}
-function isWork(p){return /^\/work(?:\/|$)/i.test(p);}
-function blocked(c){var scopes=c.scopes||{};return c.globalEnabled===true||(scopes.trilyva===true&&isTrilyva(routePath))||(scopes.projects===true&&isProject(routePath))||(scopes.profile===true&&isProfile(routePath))||(scopes.work===true&&isWork(routePath))||(scopes.workspaces===true&&isWorkspace(routePath));}
-function check(){
- retry.disabled=true;
- fetch('/maintanence/config.json?status='+Date.now(),{cache:'no-store',headers:{Accept:'application/json'}})
- .then(function(r){if(!r.ok)throw new Error();return r.json();})
- .then(function(c){
-   var enabled=blocked(c);
-   document.getElementById('routeState').textContent=enabled?'This route is paused':'This route is available';
-   var h=document.getElementById('publicTitle');
-   h.textContent=(c.title||'Temporarily unavailable').replace(/[.\s]+$/,'').toUpperCase();
-   var dot=document.createElement('span');dot.textContent='.';h.appendChild(dot);
-   document.getElementById('publicMessage').textContent=c.message||'This part of the website is undergoing maintenance. Please check back soon.';
-   document.getElementById('publicDetail').textContent=enabled?'The requested route is still paused. Check again after the relevant maintenance switch is turned off.':'Maintenance is no longer active for this route. You can safely return to the page you requested.';
-   retry.disabled=false;
-   if(enabled){retry.textContent='Check again';retry.onclick=check;}
-   else{retry.textContent='Open requested route';retry.onclick=function(){location.href=from;};}
- })
- .catch(function(){document.getElementById('routeState').textContent='Status unavailable';document.getElementById('publicDetail').textContent='The status file could not be reached. Try again in a moment.';retry.disabled=false;retry.textContent='Reload status';retry.onclick=function(){location.reload();};});
-}
-retry.onclick=check;
-check();
-})();
-</script>
 </body>
 </html>
