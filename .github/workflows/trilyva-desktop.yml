@@ -1,4 +1,4 @@
-name: TRILYVA Desktop Build
+name: TRILYVA Multi-Platform Build
 
 on:
   push:
@@ -22,16 +22,43 @@ permissions:
   contents: read
 
 jobs:
-  windows-x64:
-    name: Windows x64 / MSI + NSIS
-    runs-on: windows-latest
+  desktop:
+    name: Desktop / ${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: Windows-x64
+            runner: windows-latest
+            bundles: "msi nsis"
+            ffmpeg: windows
+          - platform: Linux-x64
+            runner: ubuntu-22.04
+            bundles: "deb appimage"
+            ffmpeg: linux64
+          - platform: macOS-Apple-Silicon
+            runner: macos-26
+            bundles: "dmg"
+            ffmpeg: macosarm64
+          - platform: macOS-Intel
+            runner: macos-26-intel
+            bundles: "dmg"
+            ffmpeg: macos64
     defaults:
       run:
         working-directory: TRILYVA/desktop/tauri
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential curl wget file libssl-dev libxdo-dev \
+            libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf libfuse2
 
       - name: Install stable Rust
         uses: dtolnay/rust-toolchain@stable
@@ -39,17 +66,32 @@ jobs:
           toolchain: stable
           components: rustfmt
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Cache Cargo
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: "TRILYVA/desktop/tauri -> target"
 
-      - name: Prepare bundled FFmpeg and FFprobe
+      - name: Prepare bundled FFmpeg and FFprobe (Windows)
+        if: runner.os == 'Windows'
         shell: pwsh
         run: ./scripts/prepare-ffmpeg.ps1
 
-      - name: Apply Rust formatting
-        run: cargo fmt --all
+      - name: Prepare bundled FFmpeg and FFprobe (Linux / macOS)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: bash ./scripts/prepare-ffmpeg.sh "${{ matrix.ffmpeg }}"
+
+      - name: Install Tauri CLI
+        run: npm install --global "@tauri-apps/cli@^2"
+
+      - name: Generate platform and mobile icons
+        shell: bash
+        run: tauri icon ../../../assets/brand/trilyva/T.svg --output icons --ios-color "#050505"
 
       - name: Check formatting
         run: cargo fmt --all -- --check
@@ -57,18 +99,129 @@ jobs:
       - name: Run tests
         run: cargo test
 
-      - name: Install Tauri CLI
-        run: npm install --global "@tauri-apps/cli@^2"
+      - name: Build installers
+        shell: bash
+        run: tauri build --bundles ${{ matrix.bundles }}
 
-      - name: Build Windows installers
-        run: tauri build --bundles msi nsis
-
-      - name: Upload installers
+      - name: Upload desktop installers
         uses: actions/upload-artifact@v4
         with:
-          name: TRILYVA-Windows-x64-${{ github.sha }}
+          name: TRILYVA-${{ matrix.platform }}-${{ github.sha }}
           path: |
             TRILYVA/desktop/tauri/target/release/bundle/nsis/*.exe
             TRILYVA/desktop/tauri/target/release/bundle/msi/*.msi
+            TRILYVA/desktop/tauri/target/release/bundle/deb/*.deb
+            TRILYVA/desktop/tauri/target/release/bundle/appimage/*.AppImage
+            TRILYVA/desktop/tauri/target/release/bundle/dmg/*.dmg
+          if-no-files-found: error
+          retention-days: 14
+
+  android:
+    name: Mobile / Android ARM64 APK
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: TRILYVA/desktop/tauri
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK / NDK components
+        shell: bash
+        run: |
+          sdkmanager --install "platform-tools" "platforms;android-37" "build-tools;37.0.0" "ndk;27.2.12479018"
+          echo "NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
+          echo "$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_PATH"
+
+      - name: Install Rust Android target
+        run: rustup target add aarch64-linux-android
+
+      - name: Install Tauri CLI
+        run: npm install --global "@tauri-apps/cli@^2"
+
+      - name: Initialize Android project
+        run: tauri android init --ci
+
+      - name: Generate Android icons
+        run: tauri icon ../../../assets/brand/trilyva/T.svg --output icons --ios-color "#050505"
+
+      - name: Build Android debug APK
+        run: tauri android build --debug --apk --target aarch64
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: TRILYVA-Android-ARM64-debug-${{ github.sha }}
+          path: TRILYVA/desktop/tauri/gen/android/app/build/outputs/**/*.apk
+          if-no-files-found: error
+          retention-days: 14
+
+  ios-simulator:
+    name: Mobile / iOS Simulator ARM64
+    runs-on: macos-26
+    defaults:
+      run:
+        working-directory: TRILYVA/desktop/tauri
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install CocoaPods
+        run: brew install cocoapods
+
+      - name: Install Rust iOS targets
+        run: rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
+
+      - name: Install Tauri CLI
+        run: npm install --global "@tauri-apps/cli@^2"
+
+      - name: Initialize iOS project
+        run: tauri ios init --ci
+
+      - name: Generate iOS icons
+        run: tauri icon ../../../assets/brand/trilyva/T.svg --output icons --ios-color "#050505"
+
+      - name: Build unsigned iOS Simulator app
+        run: tauri ios build --debug --target aarch64-sim
+
+      - name: Archive iOS Simulator app
+        shell: bash
+        run: |
+          APP_PATH="$(find gen -type d -name '*.app' -path '*iphonesimulator*' -print -quit)"
+          if [[ -z "$APP_PATH" ]]; then
+            APP_PATH="$(find gen -type d -name '*.app' -print -quit)"
+          fi
+          if [[ -z "$APP_PATH" ]]; then
+            echo "No iOS .app bundle was produced." >&2
+            find gen -maxdepth 8 -type d -print || true
+            exit 1
+          fi
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$RUNNER_TEMP/TRILYVA-iOS-Simulator.zip"
+          echo "Archived $APP_PATH"
+
+      - name: Upload iOS Simulator app
+        uses: actions/upload-artifact@v4
+        with:
+          name: TRILYVA-iOS-Simulator-ARM64-${{ github.sha }}
+          path: ${{ runner.temp }}/TRILYVA-iOS-Simulator.zip
           if-no-files-found: error
           retention-days: 14

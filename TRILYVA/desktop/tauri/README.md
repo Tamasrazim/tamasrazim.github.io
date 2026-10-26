@@ -2,15 +2,23 @@
 
 This project packages the existing TRILYVA renderer without changing its interface. The build script copies projects/code-motion/renderer to the Tauri frontend directory and makes only packaging-specific changes for the logo path, browser service worker, browser analytics, and the injected desktop command bridge.
 
-## Build on Windows
+## Multi-platform CI builds
 
-From this directory, run:
-- ./scripts/prepare-ffmpeg.ps1
-- cargo install tauri-cli --locked
-- cargo fmt --all -- --check
-- cargo test
-- cargo tauri dev
-- cargo tauri build --bundles nsis,msi
+The GitHub Actions workflow builds desktop installers for Windows x64 (NSIS + MSI), Linux x64 (DEB + AppImage), macOS Apple Silicon (DMG), and macOS Intel (DMG), plus an Android ARM64 debug APK and an unsigned iOS Simulator app. Each target runs as a separate job in the same workflow so all targets start together.
+
+The Windows job prepares FFmpeg using `scripts/prepare-ffmpeg.ps1`; Linux and macOS use `scripts/prepare-ffmpeg.sh`. The platform icon set is generated from the square TRILYVA SVG before packaging.
+
+The Android APK is a debug/sideloading artifact rather than a Google Play release. The iOS artifact is for the Simulator, not a device-installable IPA. Creating a signed iOS device IPA, notarized macOS DMG, or production-signed Windows installer requires the appropriate Apple/Windows signing credentials and provisioning configuration.
+
+To test locally on Windows, run:
+- `./scripts/prepare-ffmpeg.ps1`
+- `npm install --global "@tauri-apps/cli@^2"`
+- `tauri icon ../../../assets/brand/trilyva/T.svg --output icons`
+- `cargo fmt --all -- --check`
+- `cargo test`
+- `tauri build --bundles nsis msi`
+
+On Linux and macOS, use `bash ./scripts/prepare-ffmpeg.sh linux64`, `macos64`, or `macosarm64` as appropriate before running `tauri build`.
 
 The prepared static FFmpeg executables are packaged as resources. If they are not present, the app still opens but reports the missing dependency and falls back to looking for the tools on PATH.
 

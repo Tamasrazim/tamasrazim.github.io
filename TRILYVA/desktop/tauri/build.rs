@@ -86,39 +86,45 @@ fn stage_workspace() -> Result<(), Box<dyn std::error::Error>> {
 </script>"#;
     html = html.replace(service_worker, "");
 
-    // This panel exists only in the desktop package. The canonical browser UI is left unchanged.
-    let alpha_panel = r#"<div class="sec" id="desktopAlphaExport" style="border-top:1px solid var(--rule);margin-top:14px;padding-top:14px">
-      <h4>TRANSPARENT VIDEO · DESKTOP</h4>
-      <p class="note">Set BACKGROUND to TRANSPARENT and export as PNG·DIR or PNG·ZIP first. Then encode that sequence as VP9 WebM with alpha or ProRes 4444 MOV. PNG and SVG can preserve transparency; JPG and EPS are opaque formats, and all still exports remain available above.</p>
-      <div class="row"><label>PNG frame source</label><span class="val dim" id="alphaFolderLabel">Not selected</span></div>
-      <div class="btn-row"><button class="btn" type="button" id="alphaChooseFrames">Choose PNG·DIR folder</button>
-        <button class="btn" type="button" id="alphaChooseArchive">Choose PNG·ZIP archive</button>
-        <select id="alphaProfile" aria-label="Transparent output format"><option value="webm">WebM · VP9 + alpha</option><option value="mov">MOV · ProRes 4444</option><option value="apng">APNG · animated image + alpha</option></select></div>
-      <div class="row"><label>Frame settings</label><span class="val dim" id="alphaSettingsLabel">Current composition</span></div>
-      <button class="btn solid" type="button" id="alphaEncodeButton">ENCODE TRANSPARENT VIDEO</button>
-      <div class="note" id="alphaExportStatus" role="status" aria-live="polite">Alpha export is verified after encoding. A file without an alpha pixel format is rejected.</div>
-    </div>"#;
-    // Anchor to the stable ID rather than the note copy, which can change as export options evolve.
-    let still_note_marker = r#"<p class="note" id="stillExportNote">"#;
-    if !html.contains("id=\"desktopAlphaExport\"") {
-        let start = html
-            .find(still_note_marker)
-            .ok_or("Could not locate the still-frame export note to install the desktop alpha encoder UI.")?;
-        let end_relative = html[start..]
-            .find("</p>")
-            .ok_or("Could not locate the end of the still-frame export note.")?;
-        let insert_at = start + end_relative + "</p>".len();
-        html.insert_str(insert_at, &format!("\n{alpha_panel}"));
-    }
-
-    let bridge_tag = r#"<script src="./desktop-bridge.js"></script>"#;
-    let alpha_script_tag = r#"<script src="./desktop-alpha-export.js"></script>"#;
-    if !html.contains(bridge_tag) || !html.contains(alpha_script_tag) {
-        if let Some(index) = html.rfind("</body>") {
-            let scripts = format!("{bridge_tag}\n{alpha_script_tag}\n");
-            html.insert_str(index, &scripts);
-        } else {
-            html.push_str(&format!("{bridge_tag}\n{alpha_script_tag}\n"));
+    // The desktop alpha-encoder UI relies on external FFmpeg executables, which are not bundled for mobile.
+    // Keep mobile shells free of desktop-only controls; mobile builds retain the shared renderer UI.
+    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
+    let is_mobile_target = target_os == "android" || target_os == "ios";
+    if !is_mobile_target {
+        // This panel exists only in the desktop package. The canonical browser UI is left unchanged.
+        let alpha_panel = r#"<div class="sec" id="desktopAlphaExport" style="border-top:1px solid var(--rule);margin-top:14px;padding-top:14px">
+          <h4>TRANSPARENT VIDEO · DESKTOP</h4>
+          <p class="note">Set BACKGROUND to TRANSPARENT and export as PNG·DIR or PNG·ZIP first. Then encode that sequence as VP9 WebM with alpha or ProRes 4444 MOV. PNG and SVG can preserve transparency; JPG and EPS are opaque formats, and all still exports remain available above.</p>
+          <div class="row"><label>PNG frame source</label><span class="val dim" id="alphaFolderLabel">Not selected</span></div>
+          <div class="btn-row"><button class="btn" type="button" id="alphaChooseFrames">Choose PNG·DIR folder</button>
+            <button class="btn" type="button" id="alphaChooseArchive">Choose PNG·ZIP archive</button>
+            <select id="alphaProfile" aria-label="Transparent output format"><option value="webm">WebM · VP9 + alpha</option><option value="mov">MOV · ProRes 4444</option><option value="apng">APNG · animated image + alpha</option></select></div>
+          <div class="row"><label>Frame settings</label><span class="val dim" id="alphaSettingsLabel">Current composition</span></div>
+          <button class="btn solid" type="button" id="alphaEncodeButton">ENCODE TRANSPARENT VIDEO</button>
+          <div class="note" id="alphaExportStatus" role="status" aria-live="polite">Alpha export is verified after encoding. A file without an alpha pixel format is rejected.</div>
+        </div>"#;
+        // Anchor to the stable ID rather than the note copy, which can change as export options evolve.
+        let still_note_marker = r#"<p class="note" id="stillExportNote">"#;
+        if !html.contains("id=\"desktopAlphaExport\"") {
+            let start = html
+                .find(still_note_marker)
+                .ok_or("Could not locate the still-frame export note to install the desktop alpha encoder UI.")?;
+            let end_relative = html[start..]
+                .find("</p>")
+                .ok_or("Could not locate the end of the still-frame export note.")?;
+            let insert_at = start + end_relative + "</p>".len();
+            html.insert_str(insert_at, &format!("\n{alpha_panel}"));
+        }
+    
+        let bridge_tag = r#"<script src="./desktop-bridge.js"></script>"#;
+        let alpha_script_tag = r#"<script src="./desktop-alpha-export.js"></script>"#;
+        if !html.contains(bridge_tag) || !html.contains(alpha_script_tag) {
+            if let Some(index) = html.rfind("</body>") {
+                let scripts = format!("{bridge_tag}\n{alpha_script_tag}\n");
+                html.insert_str(index, &scripts);
+            } else {
+                html.push_str(&format!("{bridge_tag}\n{alpha_script_tag}\n"));
+            }
         }
     }
     fs::write(html_path, html)?;
