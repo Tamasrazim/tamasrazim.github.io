@@ -1,6 +1,6 @@
 // What this does: Caches the renderer's files so the Code Motion workspace can reopen more reliably when the network is unavailable.
 
-const CACHE = 'tamasrazim-trilyva-pwa-v140';
+const CACHE = 'tamasrazim-trilyva-pwa-v141';
 const CORE = [
   './',
   './index.html',
@@ -47,13 +47,6 @@ self.addEventListener('activate', function (event) {
 
 self.addEventListener('fetch', function (event) {
   if (event.request.method !== 'GET') return;
-
-  // The global maintenance flag must always be checked against the network.
-  // Do not cache timestamped variants of this small control file in the PWA cache.
-  if (new URL(event.request.url).pathname === '/projects/trilyva/maintenance.json') {
-    event.respondWith(fetch(event.request, { cache: 'no-store' }));
-    return;
-  }
 
   event.respondWith(
     caches.match(event.request)
