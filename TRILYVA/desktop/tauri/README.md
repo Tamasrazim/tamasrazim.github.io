@@ -34,3 +34,5 @@ The desktop build adds a **TRANSPARENT VIDEO · DESKTOP** panel to the existing 
 - **APNG** as a transparent animated-image output using the FFmpeg `apng` encoder and RGBA pixel format.
 
 The output is not accepted just because FFmpeg wrote a file: FFprobe checks its video stream, frame count, and pixel format. If the resulting stream does not report an alpha-capable pixel format, TRILYVA deletes the output and reports failure. Support still depends on the packaged FFmpeg build advertising the required encoder, muxer, and pixel format. The alpha panel encodes an already-rendered PNG sequence; it does not re-render the animation a second time.
+
+The Render workspace also includes **EXPORT VECTOR FRAME SEQUENCE · SVG ZIP**. It writes one editable SVG file per composition frame plus a manifest and README, with optional background removal when the composition's transparent-background option is enabled. This works only for drawing operations represented by TRILYVA's vector recorder; raster effects or unsupported Canvas operations may fail, and EPS remains an opaque still-image format.
