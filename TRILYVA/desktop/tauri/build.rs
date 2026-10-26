@@ -94,7 +94,7 @@ fn stage_workspace() -> Result<(), Box<dyn std::error::Error>> {
       <div class="row"><label>PNG frame source</label><span class="val dim" id="alphaFolderLabel">Not selected</span></div>
       <div class="btn-row"><button class="btn" type="button" id="alphaChooseFrames">Choose PNG·DIR folder</button>
         <button class="btn" type="button" id="alphaChooseArchive">Choose PNG·ZIP archive</button>
-        <select id="alphaProfile" aria-label="Transparent video format"><option value="webm">WebM · VP9 + alpha</option><option value="mov">MOV · ProRes 4444</option></select></div>
+        <select id="alphaProfile" aria-label="Transparent output format"><option value="webm">WebM · VP9 + alpha</option><option value="mov">MOV · ProRes 4444</option><option value="apng">APNG · animated image + alpha</option></select></div>
       <div class="row"><label>Frame settings</label><span class="val dim" id="alphaSettingsLabel">Current composition</span></div>
       <button class="btn solid" type="button" id="alphaEncodeButton">ENCODE TRANSPARENT VIDEO</button>
       <div class="note" id="alphaExportStatus" role="status" aria-live="polite">Alpha export is verified after encoding. A file without an alpha pixel format is rejected.</div>
