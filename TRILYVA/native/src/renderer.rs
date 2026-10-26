@@ -400,7 +400,6 @@ impl FrameRenderer {
         }
     }
 
-    pub fn source(&self) -> &str { &self.source }
 }
 
 fn draw_command(pixmap: &mut Pixmap, command: &Value, scale: Transform) -> Result<(), RenderError> {
@@ -615,4 +614,5 @@ mod tests {
         assert!(error.to_string().contains("gradient fills are not supported"));
     }
 }
+
 
