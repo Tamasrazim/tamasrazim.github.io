@@ -76,6 +76,8 @@ pub struct PngSequenceEncodeOptions {
     pub encoder: String,
     pub bitrate_bps: Option<u64>,
     pub pixel_format: Option<String>,
+    #[serde(default)]
+    pub preserve_alpha: bool,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -87,6 +89,8 @@ pub struct MediaVerification {
     pub video_codec: Option<String>,
     pub width: Option<u32>,
     pub height: Option<u32>,
+    pub pixel_format: Option<String>,
+    pub alpha_channel: bool,
     pub frame_rate: Option<String>,
     pub frames_read: Option<u64>,
     pub duration_seconds: Option<f64>,
@@ -414,6 +418,101 @@ fn muxer_for_extension(extension: &str) -> Option<&'static str> {
     }
 }
 
+
+fn pixel_format_has_alpha(value: &str) -> bool {
+    let format = value.to_ascii_lowercase();
+    format.starts_with("yuva")
+        || format.starts_with("gbrap")
+        || format.starts_with("rgba")
+        || format.starts_with("bgra")
+        || format.starts_with("argb")
+        || format.starts_with("abgr")
+        || format.starts_with("gray8a")
+        || format.starts_with("gray16a")
+        || format.starts_with("ya8")
+        || format.starts_with("ya16")
+}
+
+fn find_png_sequence_prefix(input_dir: &Path, frame_count: u64) -> Result<String, String> {
+    const FIRST_SUFFIX: &str = "000000.png";
+    let mut prefixes = Vec::<String>::new();
+
+    for entry in fs::read_dir(input_dir)
+        .map_err(|error| format!("Cannot list the PNG frame directory: {error}"))?
+    {
+        let entry = entry.map_err(|error| format!("Cannot read the PNG frame directory: {error}"))?;
+        if !entry.file_type().map_err(|error| format!("Cannot inspect a frame file: {error}"))?.is_file() {
+            continue;
+        }
+        let name = entry.file_name();
+        let Some(name) = name.to_str() else { continue; };
+        if let Some(prefix) = name.strip_suffix(FIRST_SUFFIX) {
+            prefixes.push(prefix.to_string());
+        }
+    }
+    prefixes.sort();
+    prefixes.dedup();
+
+    let mut complete = Vec::<String>::new();
+    for prefix in prefixes {
+        let last = input_dir.join(format!("{prefix}{:06}.png", frame_count.saturating_sub(1)));
+        if !last.is_file() {
+            continue;
+        }
+        let mut gap = None;
+        for index in 0..frame_count {
+            let frame = input_dir.join(format!("{prefix}{index:06}.png"));
+            if !frame.is_file() {
+                gap = Some(index);
+                break;
+            }
+        }
+        if let Some(index) = gap {
+            return Err(format!(
+                "PNG sequence '{prefix}' has a missing frame at index {index:06}. Export the complete sequence again before encoding."
+            ));
+        }
+        complete.push(prefix);
+    }
+
+    match complete.len() {
+        1 => Ok(complete.remove(0)),
+        0 => Err(format!(
+            "No complete zero-based PNG sequence was found. Select the PNG·DIR output containing frame 000000.png or a TRILYVA-named sequence such as animation_000000.png, with {frame_count} consecutive frames."
+        )),
+        _ => Err("This folder contains multiple complete PNG sequences. Choose a folder containing only the intended animation sequence.".to_string()),
+    }
+}
+
+fn probe_image_dimensions(app: &AppHandle, path: &Path) -> Result<(u32, u32), String> {
+    let ffprobe = resolve_tool(app, "ffprobe");
+    let path_text = path.to_string_lossy().into_owned();
+    let output = Command::new(ffprobe)
+        .arg("-v").arg("error")
+        .arg("-select_streams").arg("v:0")
+        .arg("-show_entries").arg("stream=width,height")
+        .arg("-of").arg("json")
+        .arg(&path_text)
+        .stdin(Stdio::null())
+        .output()
+        .map_err(|error| format!("Could not inspect PNG frame dimensions: {error}"))?;
+    if !output.status.success() {
+        return Err(format!(
+            "FFprobe could not inspect the first PNG frame: {}",
+            String::from_utf8_lossy(&output.stderr).trim()
+        ));
+    }
+    let data: Value = serde_json::from_slice(&output.stdout)
+        .map_err(|error| format!("FFprobe returned invalid PNG dimension data: {error}"))?;
+    let stream = data.get("streams").and_then(Value::as_array).and_then(|items| items.first())
+        .ok_or_else(|| "The first file in the sequence is not a readable image frame.".to_string())?;
+    let width = stream.get("width").and_then(Value::as_u64).and_then(|n| u32::try_from(n).ok())
+        .ok_or_else(|| "FFprobe did not report the PNG width.".to_string())?;
+    let height = stream.get("height").and_then(Value::as_u64).and_then(|n| u32::try_from(n).ok())
+        .ok_or_else(|| "FFprobe did not report the PNG height.".to_string())?;
+    Ok((width, height))
+}
+
 fn checked_output_path(value: &str) -> Result<PathBuf, String> {
     let path = PathBuf::from(value);
     if path.as_os_str().is_empty() {
@@ -453,19 +552,39 @@ pub fn encode_png_sequence(app: AppHandle, options: PngSequenceEncodeOptions) ->
         return Err("The frame input must be a directory.".to_string());
     }
 
-    let first = input_dir.join("frame_000000.png");
-    let last = input_dir.join(format!("frame_{:06}.png", config.frame_count - 1));
-    if !first.is_file() || !last.is_file() {
+    let prefix = find_png_sequence_prefix(&input_dir, config.frame_count)?;
+    let first = input_dir.join(format!("{prefix}000000.png"));
+    let (input_width, input_height) = probe_image_dimensions(&app, &first)?;
+    if input_width != config.width || input_height != config.height {
         return Err(format!(
-            "A complete zero-based PNG sequence is required. Expected both {} and {}.",
-            first.display(),
-            last.display()
+            "The PNG sequence is {input_width}×{input_height}, but the current render settings are {}×{}. Match the composition settings to the exported PNG frames and try again.",
+            config.width, config.height
         ));
     }
 
     let output = checked_output_path(&options.output_path)?;
-    let extension = output.extension().and_then(|value| value.to_str()).unwrap_or("");
-    let muxer = muxer_for_extension(extension).ok_or_else(|| "Unsupported output container.".to_string())?;
+    let extension = output.extension().and_then(|value| value.to_str()).unwrap_or("").to_ascii_lowercase();
+    let muxer = muxer_for_extension(&extension).ok_or_else(|| "Unsupported output container.".to_string())?;
+    let alpha_webm = options.preserve_alpha && extension == "webm" && options.encoder == "libvpx-vp9";
+    let alpha_mov = options.preserve_alpha && extension == "mov" && options.encoder == "prores_ks";
+    if options.preserve_alpha && !alpha_webm && !alpha_mov {
+        return Err("Alpha video profiles are WebM + VP9 (libvpx-vp9) or MOV + ProRes 4444 (prores_ks). Select the matching encoder and file extension.".to_string());
+    }
+    if options.preserve_alpha {
+        if let Some(requested) = options.pixel_format.as_deref() {
+            let expected = if alpha_webm { "yuva420p" } else { "yuva444p10le" };
+            if requested != expected {
+                return Err(format!("Alpha profile requires pixel format {expected}; refusing an override that could discard transparency."));
+            }
+        }
+    }
+    let alpha_pixel_format = if alpha_webm {
+        Some("yuva420p")
+    } else if alpha_mov {
+        Some("yuva444p10le")
+    } else {
+        options.pixel_format.as_deref()
+    };
     let caps = discover(&app);
     if !caps.ffmpeg_available || !caps.ffprobe_available {
         return Err("FFmpeg and FFprobe must both be available before encoding.".to_string());
@@ -484,13 +603,13 @@ pub fn encode_png_sequence(app: AppHandle, options: PngSequenceEncodeOptions) ->
         ));
     }
 
-    if let Some(pixel_format) = options.pixel_format.as_deref() {
+    if let Some(pixel_format) = alpha_pixel_format {
         if !caps.pixel_formats.iter().any(|value| value == pixel_format) {
-            return Err(format!("Pixel format '{pixel_format}' is not available in this FFmpeg build."));
+            return Err(format!("Required pixel format '{pixel_format}' for this export profile is not available in the packaged FFmpeg build."));
         }
     }
 
-    let input_pattern = input_dir.join("frame_%06d.png").to_string_lossy().into_owned();
+    let input_pattern = input_dir.join(format!("{prefix}%06d.png")).to_string_lossy().into_owned();
     let output_text = output.to_string_lossy().into_owned();
     let frame_count = config.frame_count;
     let fps_text = config.fps.to_string();
@@ -510,10 +629,20 @@ pub fn encode_png_sequence(app: AppHandle, options: PngSequenceEncodeOptions) ->
         .arg("-fps_mode").arg("passthrough")
         .arg("-c:v").arg(&options.encoder);
 
-    if let Some(pixel_format) = options.pixel_format.as_deref() {
+    if let Some(pixel_format) = alpha_pixel_format {
         command.arg("-pix_fmt").arg(pixel_format);
     }
-    if let Some(bitrate) = config.bitrate_bps {
+    if alpha_webm {
+        command.arg("-auto-alt-ref").arg("0");
+        command.arg("-metadata:s:v:0").arg("alpha_mode=1");
+        if let Some(bitrate) = config.bitrate_bps {
+            command.arg("-b:v").arg(bitrate.to_string());
+        } else {
+            command.arg("-b:v").arg("0").arg("-crf").arg("30");
+        }
+    } else if alpha_mov {
+        command.arg("-profile:v").arg("4");
+    } else if let Some(bitrate) = config.bitrate_bps {
         command.arg("-b:v").arg(bitrate.to_string());
     }
     if muxer == "mp4" {
@@ -610,6 +739,13 @@ pub fn encode_png_sequence(app: AppHandle, options: PngSequenceEncodeOptions) ->
             ));
         }
     }
+    if options.preserve_alpha && !verification.alpha_channel {
+        let _ = fs::remove_file(&output);
+        return Err(format!(
+            "Alpha verification failed: FFprobe reports pixel format '{}', which does not expose an alpha channel. The output was removed rather than being presented as transparent.",
+            verification.pixel_format.as_deref().unwrap_or("unknown")
+        ));
+    }
 
     let _ = app.emit(
         "trilyva://encode-progress",
@@ -652,7 +788,7 @@ pub fn verify_media_file(app: &AppHandle, value: &str) -> Result<MediaVerificati
         .arg("-count_frames")
         .arg("-select_streams").arg("v:0")
         .arg("-show_entries")
-        .arg("format=format_name,duration:stream=codec_name,width,height,r_frame_rate,nb_read_frames,duration")
+        .arg("format=format_name,duration:stream=codec_name,width,height,pix_fmt,r_frame_rate,nb_read_frames,duration")
         .arg("-of").arg("json")
         .arg(&path_text)
         .stdin(Stdio::null())
@@ -667,6 +803,8 @@ pub fn verify_media_file(app: &AppHandle, value: &str) -> Result<MediaVerificati
             video_codec: None,
             width: None,
             height: None,
+            pixel_format: None,
+            alpha_channel: false,
             frame_rate: None,
             frames_read: None,
             duration_seconds: None,
@@ -683,6 +821,8 @@ pub fn verify_media_file(app: &AppHandle, value: &str) -> Result<MediaVerificati
     let codec = stream.and_then(|s| s.get("codec_name")).and_then(Value::as_str).map(str::to_owned);
     let width = stream.and_then(|s| s.get("width")).and_then(Value::as_u64).and_then(|n| u32::try_from(n).ok());
     let height = stream.and_then(|s| s.get("height")).and_then(Value::as_u64).and_then(|n| u32::try_from(n).ok());
+    let pixel_format = stream.and_then(|s| s.get("pix_fmt")).and_then(Value::as_str).map(str::to_owned);
+    let alpha_channel = pixel_format.as_deref().map(pixel_format_has_alpha).unwrap_or(false);
     let rate = stream.and_then(|s| s.get("r_frame_rate")).and_then(Value::as_str).map(str::to_owned);
     let frames = integer(stream.and_then(|s| s.get("nb_read_frames")));
     let duration = number(stream.and_then(|s| s.get("duration")))
@@ -697,6 +837,8 @@ pub fn verify_media_file(app: &AppHandle, value: &str) -> Result<MediaVerificati
         video_codec: codec,
         width,
         height,
+        pixel_format,
+        alpha_channel,
         frame_rate: rate,
         frames_read: frames,
         duration_seconds: duration,
@@ -724,6 +866,16 @@ mod tests {
         assert!(!muxers.contains(&"hls".to_string()));
         let formats = parse_pixel_formats("Pixel formats:\nIO... yuv420p 3 12 8\nIO... rgba 4 32 8\n");
         assert!(formats.contains(&"yuv420p".to_string()));
+    }
+
+    #[test]
+    fn alpha_pixel_formats_are_detected() {
+        assert!(pixel_format_has_alpha("yuva420p"));
+        assert!(pixel_format_has_alpha("yuva444p10le"));
+        assert!(pixel_format_has_alpha("rgba"));
+        assert!(pixel_format_has_alpha("gbrap"));
+        assert!(!pixel_format_has_alpha("yuv420p"));
+        assert!(!pixel_format_has_alpha("yuv444p10le"));
     }
 
     #[test]
