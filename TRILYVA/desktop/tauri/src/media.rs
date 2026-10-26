@@ -686,7 +686,7 @@ pub fn write_native_sequence_chunk(
 ) -> Result<NativeSequenceWriteReceipt, String> {
     if file_name.is_empty()
         || file_name.contains('/')
-        || file_name.contains('\\\\')
+        || file_name.contains('\\')
         || !file_name.ends_with(".png")
     {
         return Err("The native chunk writer accepts PNG filenames only, not paths.".to_string());
