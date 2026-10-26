@@ -115,7 +115,7 @@
 </style>
 </head>
 <body class="project-detail-v3" data-project="trilyva" data-cinematic-intro="trilyva">
-<header class="tri-wrap tri-nav"><a class="v3-brand" href="/" aria-label="Tamasrazim home"><img class="trilyva-brand-logo" src="/assets/brand/trilyva/T.svg" alt="" width="48" height="48"><span>tamasrazim</span></a><nav class="tri-navlinks" aria-label="TRILYVA project navigation"><a href="#overview">Overview</a><a href="/projects/trilyva/tutorial.html">Tutorial ↗</a><a href="#capabilities">Capabilities</a><a href="#examples">Example</a><a href="#model">Frame model</a><a href="#limits">Status</a></nav><a class="v3-header-contact" href="/projects/">All projects </a><details class="site-page-menu">
+<header class="tri-wrap tri-nav"><a class="v3-brand" href="/" aria-label="Tamasrazim home"><img class="trilyva-brand-logo" src="/assets/brand/trilyva/T.svg" alt="" width="48" height="48"><span>tamasrazim</span></a><nav class="tri-navlinks" aria-label="TRILYVA project navigation"><a href="#overview">Overview</a><a href="/projects/trilyva/tutorial.html">Tutorial ↗</a><a href="#capabilities">Capabilities</a><a href="#examples">Example</a><a href="#model">Frame model</a><a href="#limits">Status</a><a href="/projects/trilyva/updates/">Desktop updates</a></nav><a class="v3-header-contact" href="/projects/">All projects </a><details class="site-page-menu">
 <summary>Site pages</summary>
 <nav class="site-page-menu__links" aria-label="Main site navigation">
 <a href="/projects/" aria-current="page">Projects <span aria-hidden="true"></span></a>
@@ -131,8 +131,8 @@
 <section class="tri-wrap tri-hero" id="overview"><div class="tri-hero-grid"><div><p class="tri-kicker">CREATIVE SOFTWARE / BROWSER RUNTIME</p><h1 class="tri-title">TRILYVA<span>.</span></h1>
 <p class="tri-lead">I built TRILYVA around frame-driven motion: write the animation, watch it move, then render the frames you actually asked for.</p>
 <p class="tri-p">This page covers the current browser-first renderer: code-driven animation, frame-based video output, still-frame exports, and whole-library batch delivery. The workspace has its own route, while the field guide explains the actual controls and their limits.</p>
-<div class="tri-actions"><a class="v3-button primary" href="/projects/code-motion/renderer/">Open TRILYVA workspace</a><a class="v3-button secondary" href="/projects/trilyva/tutorial.html">Read the complete tutorial</a></div>
-<div class="tri-facts"><div class="tri-fact"><b>Frame-first</b><small>Deterministic timing</small></div><div class="tri-fact"><b>Browser</b><small>No install required</small></div><div class="tri-fact"><b>Local</b><small>Client-side workflow</small></div><div class="tri-fact"><b>Native?</b><small>Web application today</small></div></div>
+<div class="tri-actions"><a class="v3-button primary" href="/projects/code-motion/renderer/">Open TRILYVA workspace</a><a class="v3-button secondary" href="/projects/trilyva/tutorial.html">Read the complete tutorial</a><a class="v3-button secondary" href="/projects/trilyva/updates/">Desktop progress & downloads</a></div>
+<div class="tri-facts"><div class="tri-fact"><b>Frame-first</b><small>Deterministic timing</small></div><div class="tri-fact"><b>Browser</b><small>No install required</small></div><div class="tri-fact"><b>Local</b><small>Client-side workflow</small></div><div class="tri-fact"><b>Desktop</b><small>Rust + Tauri roadmap</small></div></div>
 </div>
 <div class="tri-art" id="examples" aria-label="Procedural orbit artwork representing deterministic motion"><svg viewBox="0 0 700 700" role="presentation" focusable="false">
 <defs><radialGradient id="triGlow"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
@@ -166,12 +166,13 @@
 <article class="tri-card"><span>VALIDATION</span><h3>Honest capability checks</h3><p>The app checks the browser's encoder capabilities before offering a resolution and frame rate for export.</p></article>
 </div></section>
 
-<section class="tri-wrap tri-section" id="limits"><div class="tri-head"><h2>Project status</h2><p>TRILYVA's editor is usable, but export support still depends on the current renderer and the browser running it.</p></div>
+<section class="tri-wrap tri-section" id="limits"><div class="tri-head"><h2>Project status</h2><p>The browser workspace remains the currently available edition. Desktop development status, OS targets, and published packages are tracked on the dedicated updates page.</p></div>
 <div class="tri-grid">
 <article class="tri-card"><span>AVAILABLE</span><h3>Open the workspace</h3><p>Start here for the overview; use the workspace button above when you want to open the renderer.</p></article>
 <article class="tri-card"><span>CAPABILITY-DEPENDENT</span><h3>Codec / output support</h3><p>MP4/WebM video encoding depends on the selected configuration and browser support. Still-frame PNG/JPG exports are raster; SVG/EPS may be limited by unsupported drawing operations. Folder and ZIP destinations depend on browser file-picker support.</p></article>
 <article class="tri-card"><span>PROJECT FAMILY</span><h3>Separate creative tools</h3><p>Related vector and stock-asset tools have their own pages. TRILYVA's overview explains the workspace rather than implying every related export path is validated in one renderer.</p></article>
 </div>
+<div class="tri-grid" style="margin-top:10px"><article class="tri-card"><span>DESKTOP DEVELOPMENT</span><h3>Rust + Tauri edition</h3><p>Follow implementation progress, planned Windows/Linux/macOS targets, codec roadmap, and selectable download packages. A platform is marked available only after a matching release exists.</p><p style="margin-top:14px"><a class="v3-button secondary" href="/projects/trilyva/updates/">View desktop progress & downloads ↗</a></p></article></div>
 <div class="tun-callout">The workspace and project page are separate by design: visit this overview for project details, or launch the renderer when you are ready to work.</div>
 </section>
 </main>
