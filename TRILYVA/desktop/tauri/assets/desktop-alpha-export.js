@@ -68,10 +68,12 @@
   archiveButton.addEventListener("click", function () { chooseInput("zip"); });
 
   profileSelect.addEventListener("change", function () {
-    var prores = profileSelect.value === "mov";
-    setStatus(prores
+    var profile = profileSelect.value;
+    setStatus(profile === "mov"
       ? "ProRes 4444 MOV keeps a high-quality 10-bit-capable alpha channel; the output is larger."
-      : "VP9 WebM keeps an alpha channel and is usually smaller. Encoding requires the packaged FFmpeg build to support libvpx-vp9.");
+      : profile === "apng"
+        ? "APNG creates a transparent animated image from the PNG sequence. It can be large; use it for image-based animation rather than long video."
+        : "VP9 WebM keeps an alpha channel and is usually smaller. Encoding requires the packaged FFmpeg build to support libvpx-vp9.");
   });
 
   encodeButton.addEventListener("click", async function () {
@@ -126,9 +128,9 @@
         height: c.height,
         fps: c.fps,
         frameCount: c.frameCount,
-        encoder: profile === "webm" ? "libvpx-vp9" : "prores_ks",
+        encoder: profile === "webm" ? "libvpx-vp9" : profile === "mov" ? "prores_ks" : "apng",
         bitrateBps: bitrate,
-        pixelFormat: profile === "webm" ? "yuva420p" : "yuva444p10le",
+        pixelFormat: profile === "webm" ? "yuva420p" : profile === "mov" ? "yuva444p10le" : "rgba",
         preserveAlpha: true
       });
 
@@ -137,7 +139,7 @@
         throw new Error("The encoder returned without verified alpha-channel metadata. Do not use this output as a transparent asset.");
       }
       setStatus("VERIFIED · " + basename(result.outputPath) + " · " +
-        (v.videoCodec || "video") + " · " + (v.pixelFormat || "unknown pixel format") +
+        (v.videoCodec || "image sequence") + " · " + (v.pixelFormat || "unknown pixel format") +
         " · " + result.expectedFrames + " frames · " + c.width + "×" + c.height + " @ " + c.fps +
         " FPS · alpha channel confirmed.");
     } catch (error) {
