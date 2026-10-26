@@ -811,19 +811,42 @@ pub fn encode_png_sequence(app: AppHandle, options: PngSequenceEncodeOptions) ->
                 .unwrap_or_else(|| "The file failed output validation.".to_string())
         ));
     }
-    if let Some(actual) = verification.frames_read {
-        if actual != frame_count {
+    if verification.width != Some(config.width) || verification.height != Some(config.height) {
+        let _ = fs::remove_file(&output);
+        return Err(format!(
+            "Dimension mismatch: expected {}×{}, FFprobe reported {}×{}. The output was removed.",
+            config.width,
+            config.height,
+            verification.width.map(|value| value.to_string()).unwrap_or_else(|| "unknown".to_string()),
+            verification.height.map(|value| value.to_string()).unwrap_or_else(|| "unknown".to_string())
+        ));
+    }
+    match verification.frames_read {
+        Some(actual) if actual == frame_count => {}
+        Some(actual) => {
             let _ = fs::remove_file(&output);
             return Err(format!(
                 "Frame-count mismatch: expected {frame_count}, FFprobe counted {actual}. The output was removed."
             ));
         }
+        None => {
+            let _ = fs::remove_file(&output);
+            return Err("FFprobe did not report a decoded frame count. The output was removed rather than treating an unchecked render as verified.".to_string());
+        }
+    }
+    if !frame_rate_matches(verification.frame_rate.as_deref(), config.fps) {
+        let _ = fs::remove_file(&output);
+        return Err(format!(
+            "Frame-rate mismatch: expected {} FPS, FFprobe reported '{}'. The output was removed.",
+            config.fps,
+            verification.frame_rate.as_deref().unwrap_or("unknown")
+        ));
     }
     if options.preserve_alpha && !verification.alpha_channel {
         let _ = fs::remove_file(&output);
         return Err(format!(
-            "Alpha verification failed: FFprobe reports pixel format '{}', which does not expose an alpha channel. The output was removed rather than being presented as transparent.",
-            verification.pixel_format.as_deref().unwrap_or("unknown")
+            "Alpha verification failed: {}. The output was removed rather than being presented as transparent.",
+            verification.diagnostic.as_deref().unwrap_or_else(|| verification.pixel_format.as_deref().unwrap_or("unknown pixel format"))
         ));
     }
 
@@ -850,6 +873,52 @@ pub fn encode_png_sequence(app: AppHandle, options: PngSequenceEncodeOptions) ->
         elapsed_milliseconds: started.elapsed().as_millis(),
         verification,
     })
+}
+
+fn decoded_alpha_has_transparency(ffmpeg: &Path, media: &Path, extension: &str) -> Result<bool, String> {
+    let mut command = Command::new(ffmpeg);
+    command.arg("-v").arg("error").arg("-nostdin");
+    // VP9 WebM carries its alpha plane in codec side data. Force libvpx so FFmpeg
+    // decodes that plane for alphaextract instead of trusting container metadata alone.
+    if extension == "webm" {
+        command.arg("-c:v").arg("libvpx-vp9");
+    }
+    let output = command
+        .arg("-i")
+        .arg(media)
+        .arg("-map").arg("0:v:0")
+        .arg("-vf").arg("alphaextract,scale=64:64:flags=area")
+        .arg("-frames:v").arg("1")
+        .arg("-f").arg("rawvideo")
+        .arg("-pix_fmt").arg("gray")
+        .arg("pipe:1")
+        .stdin(Stdio::null())
+        .output()
+        .map_err(|error| format!("Could not decode the output alpha plane: {error}"))?;
+    if !output.status.success() {
+        return Err(format!(
+            "FFmpeg could not decode the output alpha plane: {}",
+            String::from_utf8_lossy(&output.stderr).trim()
+        ));
+    }
+    // Scaling the first alpha plane to 64×64 keeps verification memory bounded,
+    // even for 16K renders. A true transparent background should produce values
+    // below full opacity; a codec/container that only advertises alpha will fail.
+    if output.stdout.len() != 64 * 64 {
+        return Err(format!(
+            "The alpha verification probe returned {} bytes instead of 4096.",
+            output.stdout.len()
+        ));
+    }
+    Ok(output.stdout.iter().any(|value| *value < 250))
+}
+
+fn frame_rate_matches(value: Option<&str>, expected_fps: u32) -> bool {
+    let Some(value) = value else { return false; };
+    let Some((numerator, denominator)) = value.split_once('/') else { return false; };
+    let Ok(numerator) = numerator.parse::<u64>() else { return false; };
+    let Ok(denominator) = denominator.parse::<u64>() else { return false; };
+    denominator > 0 && numerator == u64::from(expected_fps) * denominator
 }
 
 pub fn verify_media_file(app: &AppHandle, value: &str) -> Result<MediaVerification, String> {
@@ -919,8 +988,25 @@ fn verify_media_file_internal(
     let width = stream.and_then(|s| s.get("width")).and_then(Value::as_u64).and_then(|n| u32::try_from(n).ok());
     let height = stream.and_then(|s| s.get("height")).and_then(Value::as_u64).and_then(|n| u32::try_from(n).ok());
     let pixel_format = stream.and_then(|s| s.get("pix_fmt")).and_then(Value::as_str).map(str::to_owned);
-    let alpha_channel = pixel_format.as_deref().map(pixel_format_has_alpha).unwrap_or(false);
+    let metadata_alpha = pixel_format.as_deref().map(pixel_format_has_alpha).unwrap_or(false);
     let rate = stream.and_then(|s| s.get("r_frame_rate")).and_then(Value::as_str).map(str::to_owned);
+    let mut alpha_verification_diagnostic = None;
+    let alpha_channel = if preserve_alpha {
+        if !metadata_alpha {
+            false
+        } else {
+            let ffmpeg = resolve_tool(app, "ffmpeg");
+            match decoded_alpha_has_transparency(&ffmpeg, &path, &extension) {
+                Ok(has_transparency) => has_transparency,
+                Err(error) => {
+                    alpha_verification_diagnostic = Some(error);
+                    false
+                }
+            }
+        }
+    } else {
+        metadata_alpha
+    };
     let frames = integer(stream.and_then(|s| s.get("nb_read_frames")));
     let duration = number(stream.and_then(|s| s.get("duration")))
         .or_else(|| number(format.and_then(|f| f.get("duration"))));
@@ -939,7 +1025,19 @@ fn verify_media_file_internal(
         frame_rate: rate,
         frames_read: frames,
         duration_seconds: duration,
-        diagnostic: if verified { None } else { Some("No valid video stream was reported.".to_string()) },
+        diagnostic: if !verified {
+            Some("No valid video stream was reported.".to_string())
+        } else if preserve_alpha && !alpha_channel {
+            Some(alpha_verification_diagnostic.unwrap_or_else(|| {
+                if metadata_alpha {
+                    "The stream advertises alpha metadata, but the decoded frame did not contain transparent pixels.".to_string()
+                } else {
+                    format!("The output pixel format '{}' does not expose an alpha channel.", pixel_format.as_deref().unwrap_or("unknown"))
+                }
+            }))
+        } else {
+            None
+        },
     })
 }
 
@@ -973,6 +1071,16 @@ mod tests {
         assert!(pixel_format_has_alpha("gbrap"));
         assert!(!pixel_format_has_alpha("yuv420p"));
         assert!(!pixel_format_has_alpha("yuv444p10le"));
+    }
+
+    #[test]
+    fn frame_rate_contract_requires_exact_integer_rate() {
+        assert!(frame_rate_matches(Some("60/1"), 60));
+        assert!(frame_rate_matches(Some("240/4"), 60));
+        assert!(!frame_rate_matches(Some("60000/1001"), 60));
+        assert!(!frame_rate_matches(Some("0/1"), 60));
+        assert!(!frame_rate_matches(None, 60));
+        assert!(!frame_rate_matches(Some("not-a-rate"), 60));
     }
 
     #[test]
