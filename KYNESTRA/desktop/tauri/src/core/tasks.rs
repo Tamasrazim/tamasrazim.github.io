@@ -345,7 +345,7 @@ mod tests {
         db::open(&project.join("project.db")).expect("db");
 
         let result = TaskService::default().create(project.to_str().unwrap(), "render", None);
-        assert!(matches!(result, Err(TaskError::ProjectRecordMissing)));
+        assert!(matches!(result, Err(TaskError::InvalidProject)));
     }
 
     #[test]
