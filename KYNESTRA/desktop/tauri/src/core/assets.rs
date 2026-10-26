@@ -50,13 +50,7 @@ impl AssetService {
             .ok_or(AssetError::InvalidFilename)?
             .to_string();
 
-        if filename == "manifest.json"
-            || filename == "project.db"
-            || filename.contains('/')
-            || filename.contains('\\')
-        {
-            return Err(AssetError::InvalidFilename);
-        }
+        validate_asset_filename(&filename)?;
 
         let database = project.join("project.db");
         let conn = db::open(&database)?;
@@ -291,6 +285,18 @@ fn find_by_hash(
     }
 }
 
+fn validate_asset_filename(filename: &str) -> Result<(), AssetError> {
+    if filename.is_empty()
+        || filename == "manifest.json"
+        || filename == "project.db"
+        || filename.contains('/')
+        || filename.contains('\\\\')
+    {
+        return Err(AssetError::InvalidFilename);
+    }
+    Ok(())
+}
+
 fn unique_target_name(dir: &Path, filename: &str, hash: &str) -> String {
     let initial = dir.join(filename);
     if !initial.exists() {
@@ -359,25 +365,15 @@ mod tests {
 
     #[test]
     fn rejects_windows_style_filename() {
-        let root = tempfile::tempdir().expect("temp directory");
-        let source = root.path().join(r"bad\name.txt");
-        fs::write(&source, b"invalid filename test").expect("source");
-
-        let project_root = root.path().join("filename-check.tamasrazim");
-        ProjectFixture::create(&project_root);
-
-        let service = AssetService::default();
-        let result = service.ingest(
-            project_root.to_str().unwrap(),
-            source.to_string_lossy().as_ref(),
-            "text",
-            None,
-        );
-
-        assert!(matches!(result, Err(AssetError::InvalidFilename)));
+        // A backslash is a path separator on Windows, so test this directly to
+        // keep the filename-validation regression test portable.
+        assert!(matches!(
+            validate_asset_filename(r"bad\name.txt"),
+            Err(AssetError::InvalidFilename)
+        ));
     }
 
-    #[test]
+        #[test]
     fn deduplicate_merges_source_modules() {
         let root = tempfile::tempdir().expect("temp directory");
         let source = root.path().join("render.webm");
