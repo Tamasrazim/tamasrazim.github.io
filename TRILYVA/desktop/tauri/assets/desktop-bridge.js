@@ -15,6 +15,17 @@
     choosePngSequenceDirectory: () => invoke("choose_png_sequence_directory"),
     choosePngSequenceArchive: () => invoke("choose_png_sequence_archive"),
     chooseAlphaOutput: (profile) => invoke("choose_alpha_output", { profile }),
+    beginNativePngSequence: (config, projectName, prefix) => invoke("begin_native_png_sequence", {
+      config, projectName, prefix
+    }),
+    writeNativeSequenceFile: (sessionId, fileName, base64Data) => invoke("write_native_sequence_file", {
+      sessionId, fileName, base64Data
+    }),
+    finalizeNativePngSequence: (sessionId) => invoke("finalize_native_png_sequence", { sessionId }),
+    discardNativePngSequence: (sessionId) => invoke("discard_native_png_sequence", { sessionId }),
+    encodeNativePngSequence: (sessionId, outputPath, profile, bitrateBps) => invoke("encode_native_png_sequence", {
+      sessionId, outputPath, profile, bitrateBps
+    }),
     encodePngSequence: (options) => invoke("encode_png_sequence", { options }),
     verifyMediaFile: (path) => invoke("verify_media_file", { path }),
     onEncodeProgress: async (callback) => {
