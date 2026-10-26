@@ -27,6 +27,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "icon": ["icons/icon.ico"],
     "category": "Video",
     "shortDescription": "Code-driven motion graphics and frame-accurate rendering",
     "longDescription": "TRILYVA is a code-driven animation workspace with a local media encoding backend.",
