@@ -1,4 +1,4 @@
-// Desktop-only alpha video export using the renderer's transparent PNG·DIR output.
+// Desktop alpha export panel: render the current code to native PNG files, then encode/verify alpha media.
 (function () {
   "use strict";
 
@@ -10,6 +10,7 @@
     return;
   }
 
+  var integratedButton = document.getElementById("alphaRenderEncodeButton");
   var chooseButton = document.getElementById("alphaChooseFrames");
   var archiveButton = document.getElementById("alphaChooseArchive");
   var encodeButton = document.getElementById("alphaEncodeButton");
@@ -42,6 +43,56 @@
       settingsLabel.textContent = "Composition not ready";
     }
   }
+  function bytesToBase64(buffer) {
+    var bytes = new Uint8Array(buffer);
+    var chunks = [];
+    var step = 0x8000;
+    for (var i = 0; i < bytes.length; i += step) {
+      chunks.push(String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + step, bytes.length))));
+    }
+    return btoa(chunks.join(""));
+  }
+  function nativeDirectoryHandle(session) {
+    return {
+      name: session.folderName,
+      getFileHandle: function (fileName) {
+        return Promise.resolve({
+          createWritable: function () {
+            return Promise.resolve({
+              write: function (blob) {
+                if (!(blob instanceof Blob)) blob = new Blob([blob]);
+                if (blob.size > 256 * 1024 * 1024) {
+                  return Promise.reject(new Error("Frame " + fileName + " exceeds the safe 256 MiB native-transfer limit. Use a lighter scene or a lower resolution."));
+                }
+                return blob.arrayBuffer().then(function (buffer) {
+                  return desktop.writeNativeSequenceFile(session.sessionId, fileName, bytesToBase64(buffer));
+                });
+              },
+              close: function () { return Promise.resolve(); }
+            });
+          }
+        });
+      }
+    };
+  }
+  async function withProgress(callback) {
+    var unlisten = await desktop.onEncodeProgress(callback);
+    activeUnlisten = unlisten;
+    return unlisten;
+  }
+  function profileDetails(profile) {
+    if (profile === "mov") return {
+      encoder: "prores_ks",
+      pixelFormat: "yuva444p10le",
+      label: "ProRes 4444 MOV"
+    };
+    if (profile === "apng") return {
+      encoder: "apng",
+      pixelFormat: "rgba",
+      label: "APNG"
+    };
+    return { encoder: "libvpx-vp9", pixelFormat: "yuva420p", label: "VP9 WebM" };
+  }
 
   async function chooseInput(kind) {
     chooseButton.disabled = true;
@@ -70,15 +121,146 @@
   profileSelect.addEventListener("change", function () {
     var profile = profileSelect.value;
     setStatus(profile === "mov"
-      ? "ProRes 4444 MOV keeps a high-quality 10-bit-capable alpha channel; the output is larger."
+      ? "ProRes 4444 MOV keeps a high-quality alpha channel; the output is larger."
       : profile === "apng"
-        ? "APNG creates a transparent animated image from the PNG sequence. It can be large; use it for image-based animation rather than long video."
-        : "VP9 WebM keeps an alpha channel and is usually smaller. Encoding requires the packaged FFmpeg build to support libvpx-vp9.");
+        ? "APNG creates a transparent animated image from the rendered PNG sequence. It can be large."
+        : "VP9 WebM can preserve alpha when encoded with the native FFmpeg pipeline.");
   });
+
+  async function chooseOutput(profile) {
+    setStatus("Choose where to save " + profileDetails(profile).label + "…");
+    return desktop.chooseAlphaOutput(profile);
+  }
+
+  async function renderCurrentAndEncode() {
+    if (S.rendering) {
+      setStatus("Finish or cancel the current render before starting a native transparent export.", true);
+      return;
+    }
+    var session = null;
+    var renderedComplete = false;
+    var outputPath = null;
+    var unlisten = null;
+    integratedButton.disabled = true;
+    chooseButton.disabled = true;
+    archiveButton.disabled = true;
+    encodeButton.disabled = true;
+    profileSelect.disabled = true;
+    try {
+      if (typeof withCompiled !== "function" || typeof buildJob !== "function" || typeof startRender !== "function" || !Ed || !Ed.ta) {
+        throw new Error("The TRILYVA render engine is not ready. Reload the workspace and try again.");
+      }
+      if (!(await withCompiled())) {
+        throw new Error("The current animation code did not pass TRILYVA's render contract. Fix the error shown in the preview before exporting.");
+      }
+      var c = getComposition();
+      if (!c.transparent) {
+        throw new Error("Set Composition → Background → Transparent first. TRILYVA will not claim alpha for an opaque composition.");
+      }
+      var profile = profileSelect.value;
+      outputPath = await chooseOutput(profile);
+      if (!outputPath) {
+        setStatus("Export cancelled. No frames or media output were written.");
+        return;
+      }
+
+      // Build the ordinary renderer job with PNG·DIR as its sink. The virtual directory
+      // adapter writes each frame directly to a native folder instead of browser downloads.
+      var job = buildJob({ exportFormat: "dir" });
+      job.code = Ed.ta.value;
+      job.format = "png";
+      job.target = "dir";
+      job.exportFormat = "dir";
+      var prefix = String((job.metadata && job.metadata.slug) || "frame") + "_";
+      var settings = {
+        width: c.width,
+        height: c.height,
+        fps: c.fps,
+        frameCount: c.frameCount,
+        bitrateBps: null
+      };
+      setStatus("Choose a parent folder for the rendered PNG sequence…");
+      session = await desktop.beginNativePngSequence(settings, job.label || "TRILYVA", prefix);
+      if (!session) {
+        setStatus("Export cancelled. No frames or media output were written.");
+        return;
+      }
+      folderLabel.textContent = session.folderName;
+      folderLabel.title = session.directory;
+      setStatus("Rendering every frame to " + session.folderName + "…");
+      var renderResult = await startRender(job, {
+        silent: true,
+        skipStillExports: true,
+        dirHandle: nativeDirectoryHandle(session),
+        onProgress: function (progress) {
+          if (!progress || !Number.isFinite(progress.percent)) return;
+          var pct = Math.max(0, Math.min(100, progress.done / Math.max(1, progress.total) * 100));
+          setStatus("RENDERING · " + Math.floor(pct) + "% · frame " +
+            Number(progress.frame + 1).toLocaleString() + " / " + Number(progress.total).toLocaleString());
+        }
+      });
+      if (!renderResult || !renderResult.ok || renderResult.cancelled) {
+        await desktop.discardNativePngSequence(session.sessionId).catch(function () {});
+        session = null;
+        var reason = renderResult && renderResult.error ? renderResult.error.message : "The renderer did not complete all frames.";
+        throw new Error("Transparent render stopped before completion: " + reason);
+      }
+      await desktop.finalizeNativePngSequence(session.sessionId);
+      renderedComplete = true;
+      inputPath = session.directory;
+      folderLabel.textContent = session.folderName + " · rendered frames";
+      folderLabel.title = session.directory;
+      setStatus("RENDER COMPLETE · " + c.frameCount.toLocaleString() + " frames. Starting native " + profileDetails(profileSelect.value).label + " encoding…");
+
+      var bitrate = null;
+      if (profileSelect.value === "webm") {
+        var bitrateMbps = Number(document.getElementById("oBitrate").value);
+        if (Number.isFinite(bitrateMbps) && bitrateMbps > 0) {
+          bitrate = Math.round(bitrateMbps * 1000000);
+        }
+      }
+      unlisten = await withProgress(function (progress) {
+        if (!progress || !Number.isFinite(progress.percent)) return;
+        setStatus("ENCODING · " + Math.floor(Math.max(0, Math.min(100, progress.percent))) +
+          "% · frame " + Number(progress.frame || 0).toLocaleString() + " / " + c.frameCount.toLocaleString());
+      });
+      setStatus("Encoding and verifying " + profileDetails(profileSelect.value).label + "…");
+      var result = await desktop.encodeNativePngSequence(session.sessionId, outputPath, profileSelect.value, bitrate);
+      var v = result && result.verification;
+      if (!result || !v || !v.verified || !v.alphaChannel || result.expectedFrames !== c.frameCount) {
+        throw new Error("The native encoder did not verify the expected frame count and decoded transparency. The frame sequence has been kept at " + session.directory);
+      }
+      setStatus("VERIFIED · " + basename(result.outputPath) + " · " +
+        (v.videoCodec || "image sequence") + " · " + (v.pixelFormat || "unknown pixel format") +
+        " · " + result.expectedFrames.toLocaleString() + " frames · " + c.width + "×" + c.height +
+        " @ " + c.fps + " FPS · decoded alpha confirmed. Source frames remain in " + session.folderName + ".");
+    } catch (error) {
+      setStatus(String(error && error.message || error), true);
+      if (session && !renderedComplete) {
+        await desktop.discardNativePngSequence(session.sessionId).catch(function () {});
+      } else if (session && renderedComplete) {
+        inputPath = session.directory;
+        folderLabel.textContent = session.folderName + " · frames available for retry";
+        folderLabel.title = session.directory;
+      }
+    } finally {
+      if (typeof unlisten === "function") {
+        try { unlisten(); } catch (_) {}
+      }
+      if (activeUnlisten === unlisten) activeUnlisten = null;
+      integratedButton.disabled = false;
+      chooseButton.disabled = false;
+      archiveButton.disabled = false;
+      encodeButton.disabled = false;
+      profileSelect.disabled = false;
+    }
+  }
+
+  integratedButton.addEventListener("click", renderCurrentAndEncode);
 
   encodeButton.addEventListener("click", async function () {
     if (!inputPath) {
-      setStatus("Choose the PNG·DIR folder or PNG·ZIP archive first. Render the composition with BACKGROUND set to TRANSPARENT.", true);
+      setStatus("Choose the PNG·DIR folder or PNG·ZIP archive first, or use RENDER CURRENT CODE + EXPORT ALPHA.", true);
       return;
     }
 
@@ -87,7 +269,7 @@
     try {
       c = getComposition();
       if (!c.transparent) {
-        setStatus("Set Composition → Background → Transparent before rendering the PNG sequence. Alpha export is blocked while the current composition is opaque.", true);
+        setStatus("Set Composition → Background → Transparent before encoding. Alpha export is blocked while the current composition is opaque.", true);
         return;
       }
     } catch (error) {
@@ -101,30 +283,22 @@
     profileSelect.disabled = true;
     var unlisten = null;
     try {
-      setStatus("Choose where to save the transparent video…");
+      setStatus("Choose where to save " + profileDetails(profile).label + "…");
       var outputPath = await desktop.chooseAlphaOutput(profile);
       if (!outputPath) {
         setStatus("Export cancelled. No output was written.");
         return;
       }
-
       var bitrate = null;
       if (profile === "webm") {
         var bitrateMbps = Number(document.getElementById("oBitrate").value);
-        if (Number.isFinite(bitrateMbps) && bitrateMbps > 0) {
-          bitrate = Math.round(bitrateMbps * 1000000);
-        }
+        if (Number.isFinite(bitrateMbps) && bitrateMbps > 0) bitrate = Math.round(bitrateMbps * 1000000);
       }
-
-      unlisten = await desktop.onEncodeProgress(function (progress) {
+      unlisten = await withProgress(function (progress) {
         if (!progress || !Number.isFinite(progress.percent)) return;
-        var pct = Math.max(0, Math.min(100, progress.percent));
-        var frame = Number.isFinite(progress.frame) ? progress.frame : 0;
-        setStatus("FFmpeg " + Math.floor(pct) + "% · frame " + frame + " / " + c.frameCount);
+        setStatus("ENCODING · " + Math.floor(Math.max(0, Math.min(100, progress.percent))) +
+          "% · frame " + Number(progress.frame || 0).toLocaleString() + " / " + c.frameCount.toLocaleString());
       });
-      activeUnlisten = unlisten;
-
-      setStatus("Checking PNG sequence and alpha-capable encoder…");
       var result = await desktop.encodePngSequence({
         inputDir: inputPath,
         outputPath: outputPath,
@@ -132,20 +306,18 @@
         height: c.height,
         fps: c.fps,
         frameCount: c.frameCount,
-        encoder: profile === "webm" ? "libvpx-vp9" : profile === "mov" ? "prores_ks" : "apng",
+        encoder: profileDetails(profile).encoder,
         bitrateBps: bitrate,
-        pixelFormat: profile === "webm" ? "yuva420p" : profile === "mov" ? "yuva444p10le" : "rgba",
+        pixelFormat: profileDetails(profile).pixelFormat,
         preserveAlpha: true
       });
-
       var v = result && result.verification;
       if (!result || !v || !v.verified || !v.alphaChannel) {
-        throw new Error("The encoder returned without verified alpha-channel metadata. Do not use this output as a transparent asset.");
+        throw new Error("Output verification failed: decoded alpha was not confirmed. Do not use this as a transparent asset.");
       }
       setStatus("VERIFIED · " + basename(result.outputPath) + " · " +
         (v.videoCodec || "image sequence") + " · " + (v.pixelFormat || "unknown pixel format") +
-        " · " + result.expectedFrames + " frames · " + c.width + "×" + c.height + " @ " + c.fps +
-        " FPS · alpha channel confirmed.");
+        " · " + result.expectedFrames.toLocaleString() + " frames · decoded alpha confirmed.");
     } catch (error) {
       setStatus(String(error && error.message || error), true);
     } finally {
