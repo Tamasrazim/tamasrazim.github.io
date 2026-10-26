@@ -86,6 +86,10 @@
     var c;
     try {
       c = getComposition();
+      if (!c.transparent) {
+        setStatus("Set Composition → Background → Transparent before rendering the PNG sequence. Alpha export is blocked while the current composition is opaque.", true);
+        return;
+      }
     } catch (error) {
       setStatus(String(error && error.message || error), true);
       return;
