@@ -46,7 +46,7 @@
     '<section id="triMaintenanceDialog" role="dialog" aria-modal="true" aria-labelledby="triMaintenanceTitle">',
     '<div class="tm-top"><div class="tm-kicker">TRILYVA / OWNER CONTROLS</div><button type="button" class="tm-close" id="triMaintenanceClose">Close</button></div>',
     '<h2 id="triMaintenanceTitle">Maintenance mode<span>.</span></h2>',
-    '<p>Switch the public TRILYVA pages into maintenance mode. When enabled, new visits to the workspace, project overview, tutorial, and updates page are redirected here.</p>',
+    '<p>Switch the public TRILYVA pages into maintenance mode. New visits are redirected, and already-open TRILYVA tabs automatically check the switch about every 30 seconds.</p>',
     '<div class="tm-state" id="triMaintenanceState" data-on="false"><span class="tm-led" aria-hidden="true"></span><strong id="triMaintenanceStateText">Checking published status...</strong></div>',
     '<div class="tm-actions"><button type="button" id="triMaintenanceRefresh">Refresh status</button><button type="button" id="triMaintenanceCopy">Copy page link</button><a class="tm-button" href="' + PAGE_URL + '" target="_blank" rel="noopener noreferrer">Open page</a></div>',
     '<label for="triMaintenanceToken">GitHub fine-grained personal access token</label>',
