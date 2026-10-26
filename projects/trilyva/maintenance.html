@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="TRILYVA is temporarily unavailable while maintenance is in progress.">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/trilyva/maintenance.html">
+<link rel="icon" type="image/svg+xml" href="/assets/brand/trilyva/T.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>TRILYVA — Maintenance</title>
+<style>
+:root{color-scheme:dark;--bg:#050505;--ink:#f2f2ee;--muted:#969690;--line:#292929;--panel:#0a0a0a;--mono:"JetBrains Mono",ui-monospace,monospace;--display:"Unbounded",system-ui,sans-serif}
+*{box-sizing:border-box}
+html{min-height:100%;background:var(--bg);scroll-behavior:smooth}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 76% 24%,#171717 0,transparent 34%),var(--bg);color:var(--ink);font:14px/1.7 system-ui,-apple-system,"Segoe UI",sans-serif;display:grid;place-items:center;padding:clamp(18px,4vw,54px);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.shell{position:relative;isolation:isolate;width:min(1100px,100%);min-height:min(760px,calc(100svh - 36px));padding:clamp(22px,5vw,58px);border:1px solid var(--line);background:linear-gradient(135deg,rgba(14,14,14,.97),rgba(5,5,5,.98));overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
+.shell:before{content:"";position:absolute;z-index:-1;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:32px 32px;mask-image:linear-gradient(135deg,#000,transparent 74%);pointer-events:none}
+.top{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;font:10px/1.5 var(--mono);letter-spacing:.12em}
+.brand img{width:40px;height:40px;object-fit:contain;border:1px solid var(--line)}
+.brand b{display:block;font-weight:700;letter-spacing:.16em}
+.brand span{display:block;color:var(--muted);font-size:9px}
+.status{display:inline-flex;align-items:center;gap:9px;border:1px solid #373737;padding:8px 11px;color:#c9c9c2;font:9px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.dot{width:7px;height:7px;border-radius:50%;background:#e6e6e0;box-shadow:0 0 0 4px #ffffff10;animation:pulse 1.8s ease-in-out infinite}
+.content{display:grid;grid-template-columns:minmax(0,1fr) minmax(200px,.56fr);gap:clamp(28px,6vw,84px);align-items:center;padding:clamp(48px,8vw,96px) 0}
+.kicker{font:10px var(--mono);letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+h1{font:700 clamp(44px,8.1vw,105px)/.99 var(--display);letter-spacing:-.085em;margin:27px 0 24px;overflow-wrap:anywhere}
+h1 span{color:#777771}
+.lead{max-width:54ch;font-size:clamp(15px,1.7vw,19px);line-height:1.85;color:#c9c9c2}
+.note{max-width:58ch;margin-top:16px;color:var(--muted);font-size:12px;line-height:1.9}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+.button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border:1px solid #3a3a3a;color:var(--ink);font:10px var(--mono);letter-spacing:.045em;transition:background .2s,border-color .2s,transform .2s}
+.button.primary{background:var(--ink);color:#050505;border-color:var(--ink)}
+.button:hover{transform:translateY(-2px);border-color:#f2f2ee}
+.instrument{position:relative;justify-self:center;width:min(100%,310px);aspect-ratio:1;border:1px solid var(--line);display:grid;place-items:center;background:radial-gradient(circle,#161616 0,#080808 63%,#050505 75%);overflow:hidden}
+.instrument:before,.instrument:after{content:"";position:absolute;inset:12%;border:1px solid #ffffff17;border-radius:50%;animation:orbit 28s linear infinite}
+.instrument:after{inset:24%;border-style:dashed;animation-direction:reverse;animation-duration:19s}
+.core{width:34%;aspect-ratio:1;border:1px solid #bdbdb5;display:grid;place-items:center;transform:rotate(45deg);box-shadow:0 0 50px #ffffff09;animation:core 7s ease-in-out infinite}
+.core:after{content:"";width:43%;height:43%;background:#e8e8e2}
+.orbit-label{position:absolute;left:14px;right:14px;display:flex;justify-content:space-between;gap:10px;color:#777;font:8px var(--mono);letter-spacing:.1em}
+.orbit-label.top{top:13px}.orbit-label.bottom{bottom:13px}
+.telemetry{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);margin-top:10px}
+.metric{padding:14px 16px;min-width:0}
+.metric+.metric{border-left:1px solid var(--line)}
+.metric b{display:block;font:10px var(--mono);letter-spacing:.08em;overflow-wrap:anywhere}
+.metric span{display:block;margin-top:5px;color:var(--muted);font:8px/1.6 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.footer{display:flex;justify-content:space-between;align-items:end;gap:18px;padding-top:19px;border-top:1px solid var(--line);color:#686862;font:9px/1.7 var(--mono);letter-spacing:.04em}
+.footer span:last-child{text-align:right}
+@keyframes pulse{50%{opacity:.3;box-shadow:0 0 0 8px #ffffff05}}
+@keyframes orbit{to{transform:rotate(360deg)}}
+@keyframes core{0%,100%{transform:rotate(45deg) scale(.94)}50%{transform:rotate(135deg) scale(1.06)}}
+@media(max-width:720px){.shell{min-height:calc(100svh - 36px)}.content{grid-template-columns:1fr;padding:48px 0;gap:35px}.instrument{width:min(68vw,255px);grid-row:1}.copy{grid-row:2}.telemetry{grid-template-columns:1fr}.metric+.metric{border-left:0;border-top:1px solid var(--line)}.metric{display:flex;justify-content:space-between;align-items:center;gap:14px}.metric span{margin:0;text-align:right}.top{align-items:flex-start}.status{font-size:8px;padding:7px}.footer{align-items:flex-start;flex-direction:column}.footer span:last-child{text-align:left}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="top">
+    <a class="brand" href="/projects/trilyva/" aria-label="TRILYVA project page">
+      <img src="/assets/brand/trilyva/T.svg" width="40" height="40" alt="">
+      <span><b>TRILYVA</b><span>BY TAMASRAZIM</span></span>
+    </a>
+    <div class="status"><span class="dot" aria-hidden="true"></span><span>Maintenance in progress</span></div>
+  </header>
+  <section class="content">
+    <div class="copy">
+      <div class="kicker">Workspace status / 01</div>
+      <h1>MAINTENANCE<span>.</span></h1>
+      <p class="lead">TRILYVA is temporarily unavailable while maintenance or updates are in progress.</p>
+      <p class="note">Please check back shortly. This page will remain available while the workspace is offline; no completion time is being advertised.</p>
+      <div class="actions">
+        <a class="button primary" href="/projects/code-motion/renderer/">Try the workspace again</a>
+        <a class="button" href="/">Return home</a>
+      </div>
+    </div>
+    <div class="instrument" aria-hidden="true">
+      <div class="orbit-label top"><span>TRILYVA / SYS</span><span>OFFLINE</span></div>
+      <div class="core"></div>
+      <div class="orbit-label bottom"><span>RENDER PIPELINE</span><span>STANDBY</span></div>
+    </div>
+  </section>
+  <section class="telemetry" aria-label="Workspace status">
+    <div class="metric"><b>01 / ACCESS</b><span>Temporarily paused</span></div>
+    <div class="metric"><b>02 / UPDATES</b><span>In progress</span></div>
+    <div class="metric"><b>03 / NEXT STEP</b><span>Retry later</span></div>
+  </section>
+  <footer class="footer"><span>Robiul Rumman Razim — Tamasrazim</span><span>TRILYVA / MAINTENANCE PAGE</span></footer>
+</main>
+</body>
+</html>
