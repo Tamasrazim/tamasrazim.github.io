@@ -99,6 +99,12 @@ jobs:
       - name: Stage frontend for Tauri preflight
         run: node ./scripts/stage-frontend.mjs
 
+      - name: Validate desktop JavaScript entrypoints
+        run: |
+          node --check ./assets/desktop-bridge.js
+          node --check ./assets/desktop-alpha-export.js
+          node --check ./scripts/stage-frontend.mjs
+
       - name: Apply Rust formatting
         run: cargo fmt --all
 
