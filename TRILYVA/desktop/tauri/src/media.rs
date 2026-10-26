@@ -595,8 +595,8 @@ struct NativeSequenceSession {
     finalized: bool,
 }
 
-#[derive(Default)]
-pub struct NativeSequenceStore(Mutex<HashMap<String, NativeSequenceSession>>);
+#[derive(Clone, Default)]
+pub struct NativeSequenceStore(Arc<Mutex<HashMap<String, NativeSequenceSession>>>);
 
 fn native_slug(value: &str) -> String {
     let mut output = String::new();
