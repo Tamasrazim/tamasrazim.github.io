@@ -14,6 +14,7 @@ case "$platform" in
     archive_name="ffmpeg-master-latest-linux64-gpl.tar.xz"
     archive_url="https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/$archive_name"
     archive="$work/$archive_name"
+    mkdir -p "$work"
     curl --fail --location --retry 5 --retry-connrefused "$archive_url" --output "$archive"
     tar -xJf "$archive" -C "$extract"
     ffmpeg_source="$(find "$extract" -type f -name ffmpeg -print -quit)"
@@ -25,10 +26,10 @@ case "$platform" in
       macos64) architecture="amd64" ;;
       macosarm64) architecture="arm64" ;;
     esac
-    # Martin Riedl supplies standalone, signed macOS builds for both Intel and Apple Silicon.
-    ffmpeg_url="https://ffmpeg.martin-riedl.de/redirect/latest/macos/$architecture/release/ffmpeg.zip"
-    ffprobe_url="https://ffmpeg.martin-riedl.de/redirect/latest/macos/$architecture/release/ffprobe.zip"
-    mkdir -p "$extract/ffmpeg" "$extract/ffprobe"
+    # The provider's redirect URL must include the build channel (snapshot or release).
+    ffmpeg_url="https://ffmpeg.martin-riedl.de/redirect/latest/macos/$architecture/snapshot/ffmpeg.zip"
+    ffprobe_url="https://ffmpeg.martin-riedl.de/redirect/latest/macos/$architecture/snapshot/ffprobe.zip"
+    mkdir -p "$extract/ffmpeg" "$extract/ffprobe" "$work"
     curl --fail --location --retry 5 --retry-connrefused "$ffmpeg_url" --output "$work/ffmpeg.zip"
     curl --fail --location --retry 5 --retry-connrefused "$ffprobe_url" --output "$work/ffprobe.zip"
     unzip -q "$work/ffmpeg.zip" -d "$extract/ffmpeg"
