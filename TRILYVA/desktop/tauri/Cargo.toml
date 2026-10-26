@@ -23,3 +23,4 @@ uuid = { version = "1", features = ["v4", "serde"] }
 rfd = "0.15"
 tempfile = "3"
 zip = { version = "2", default-features = false, features = ["deflate"] }
+base64 = "0.22"
