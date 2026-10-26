@@ -53,9 +53,10 @@ var routePath=from.split(/[?#]/)[0]||'/';
 document.getElementById('routeName').textContent=from.slice(0,80);
 function isTrilyva(p){return /^\/projects\/trilyva(?:\/|$)/i.test(p)||/^\/projects\/code-motion\/(?:renderer|batch)(?:\/|$)/i.test(p)||/^\/projects\/code-motion\/legacy-renderer\.html$/i.test(p);}
 function isProject(p){return /^\/projects(?:\/|$)/i.test(p);}
-function isProfile(p){return p==='/'||p==='/index.html'||/^\/(?:about|approach|elsewere|licences|work)(?:\/|$)/i.test(p);}
+function isProfile(p){return p==='/'||p==='/index.html'||/^\/(?:about|approach|elsewere|licences)(?:\/|$)/i.test(p);}
 function isWorkspace(p){return /^\/(?:KYNESTRA|asset-vault|renderer)(?:\/|$)/i.test(p)||/^\/code-motion-tamasrazim2?\.html$/i.test(p);}
-function blocked(c){var scopes=c.scopes||{};return c.globalEnabled===true||(scopes.trilyva===true&&isTrilyva(routePath))||(scopes.projects===true&&isProject(routePath))||(scopes.profile===true&&isProfile(routePath))||(scopes.workspaces===true&&isWorkspace(routePath));}
+function isWork(p){return /^\/work(?:\/|$)/i.test(p);}
+function blocked(c){var scopes=c.scopes||{};return c.globalEnabled===true||(scopes.trilyva===true&&isTrilyva(routePath))||(scopes.projects===true&&isProject(routePath))||(scopes.profile===true&&isProfile(routePath))||(scopes.work===true&&isWork(routePath))||(scopes.workspaces===true&&isWorkspace(routePath));}
 function check(){
  retry.disabled=true;
  fetch('/maintanence/config.json?status='+Date.now(),{cache:'no-store',headers:{Accept:'application/json'}})
