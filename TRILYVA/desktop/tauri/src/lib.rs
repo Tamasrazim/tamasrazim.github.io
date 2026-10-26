@@ -125,6 +125,22 @@ async fn write_native_sequence_file(
 }
 
 #[tauri::command]
+async fn write_native_sequence_chunk(
+    store: tauri::State<'_, media::NativeSequenceStore>,
+    session_id: String,
+    file_name: String,
+    base64_data: String,
+    final_chunk: bool,
+) -> Result<media::NativeSequenceWriteReceipt, String> {
+    let store = store.inner().clone();
+    tokio::task::spawn_blocking(move || {
+        media::write_native_sequence_chunk(&store, &session_id, &file_name, &base64_data, final_chunk)
+    })
+    .await
+    .map_err(|error| format!("Native frame-chunk worker failed: {error}"))?
+}
+
+#[tauri::command]
 async fn finalize_native_png_sequence(
     store: tauri::State<'_, media::NativeSequenceStore>,
     session_id: String,
@@ -229,6 +245,7 @@ pub fn run() {
             choose_alpha_output,
             begin_native_png_sequence,
             write_native_sequence_file,
+            write_native_sequence_chunk,
             finalize_native_png_sequence,
             discard_native_png_sequence,
             encode_native_png_sequence,
