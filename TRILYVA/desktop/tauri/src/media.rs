@@ -594,7 +594,7 @@ pub fn encode_png_sequence(app: AppHandle, options: PngSequenceEncodeOptions) ->
         for index in 0..archive.len() {
             let mut entry = archive.by_index(index)
                 .map_err(|error| format!("Could not read ZIP entry {index}: {error}"))?;
-            let Some(relative) = entry.enclosed_name().map(Path::to_path_buf) else { continue; };
+            let Some(relative) = entry.enclosed_name() else { continue; };
             if relative.components().count() != 1 {
                 continue;
             }
