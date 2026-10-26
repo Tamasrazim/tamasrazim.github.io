@@ -1,0 +1,12 @@
+{
+  "globalEnabled": false,
+  "scopes": {
+    "profile": false,
+    "projects": false,
+    "trilyva": false,
+    "workspaces": false
+  },
+  "title": "Temporarily unavailable",
+  "message": "This part of the website is undergoing maintenance. Please check back soon.",
+  "updatedAt": null
+}
