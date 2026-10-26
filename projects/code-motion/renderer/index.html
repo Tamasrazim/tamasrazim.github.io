@@ -6627,8 +6627,20 @@ var BatchVector = (function () {
     g.stops.forEach(function(s2){var c2=rgb(s2.color);l+='<stop offset="'+fmt(s2.offset*100)+'%" stop-color="'+hex(c2)+'" stop-opacity="'+fmt(c2.a)+'"/>';});
     return l+'</linearGradient>';
   }
-  function svg(scene){
-    var defs=[],gid=0,seen=new Map(),body=[];
+  function svg(scene,transparent){
+    var defs=[],gid=0,seen=new Map(),body=[],skippedBackground=false;
+    function coversCanvasBackground(o,cmds){
+      if(o.t!=='rect'||!o.fill||o.stroke||o.comp&&o.comp!=='source-over')return false;
+      if(o.opacity!=null&&o.opacity<0.999)return false;
+      var bounds=transformCommands(cmds,o.m||identity()),xs=[],ys=[];
+      bounds.forEach(function(cmd){
+        for(var j=1;j<cmd.length;j+=2){xs.push(cmd[j]);ys.push(cmd[j+1]);}
+      });
+      if(!xs.length||!ys.length)return false;
+      var minX=Math.min.apply(Math,xs),maxX=Math.max.apply(Math,xs);
+      var minY=Math.min.apply(Math,ys),maxY=Math.max.apply(Math,ys);
+      return minX<=0.5&&minY<=0.5&&maxX>=scene.W-0.5&&maxY>=scene.H-0.5;
+    }
     function paint(v){
       if(v==null)return 'none';
       if(v instanceof Gradient){
@@ -6640,6 +6652,12 @@ var BatchVector = (function () {
     scene.ops.forEach(function(o){
       var m=o.m||identity(),cmds=transformCommands(commandsForOp(o),m);
       if(!cmds.length)return;
+      // Transparent SVG stills must not inherit an opaque full-canvas background
+      // painted by common Canvas animation templates. Keep all foreground paths.
+      if(transparent&&!skippedBackground&&coversCanvasBackground(o,commandsForOp(o))){
+        skippedBackground=true;
+        return;
+      }
       var st='fill="'+paint(o.fill||null)+'" stroke="'+paint(o.stroke||null)+'" stroke-width="'+fmt(o.width||0)+'" opacity="'+fmt(o.opacity==null?1:o.opacity)+'"';
       var extra=o.comp==='screen'?' style="mix-blend-mode:screen"':'';
       if(o.t==='rect')body.push('<path d="'+pathSvg(cmds)+'" '+st+extra+'/>');
@@ -6814,8 +6832,9 @@ async function trilyvaBuildStillAssets(code,composition,frame,formats){
       var c=CORE.composition(merge({},composition));
       var frameTime=CORE.frameToTime(c,frame);
       var progress=c.frameCount>1?frame/(c.frameCount-1):0;
-      var scene=BatchVector.sceneForCode(code,c.width,c.height,frame,frameTime,progress,c.fps);
-      if(formats.indexOf('svg')>=0)assets.svg=new Blob([BatchVector.svg(scene)],{type:'image/svg+xml;charset=utf-8'});
+      var vectorCode=c.transparent?BatchVector.stripBackground(code):code;
+      var scene=BatchVector.sceneForCode(vectorCode,c.width,c.height,frame,frameTime,progress,c.fps);
+      if(formats.indexOf('svg')>=0)assets.svg=new Blob([BatchVector.svg(scene,c.transparent)],{type:'image/svg+xml;charset=utf-8'});
       if(formats.indexOf('eps')>=0)assets.eps=new Blob([BatchVector.eps(scene)],{type:'application/postscript'});
     }catch(e){
       ['svg','eps'].filter(function(fmt){return formats.indexOf(fmt)>=0;}).forEach(function(fmt){errors.push({format:fmt,reason:String(e&&e.message||e)});});
