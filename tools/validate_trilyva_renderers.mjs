@@ -45,7 +45,7 @@ must(tutorial.includes('/assets/brand/trilyva/T.svg'),'tutorial uses the TRILYVA
 for(const section of ['id="workspace"','id="first"','id="code"','id="motion"','id="composition"','id="preview"','id="export"','id="loops"','id="quality"','id="formats"','id="fixes"','id="workflow"']) must(tutorial.includes(section),'full tutorial includes '+section);
 must(tutorial.includes('not a fixed 60-second animation or promo'),'tutorial explains it is not tied to a fixed video length');
 must(overview.includes('/projects/trilyva/tutorial.html'),'TRILYVA overview links to the complete tutorial');
-must(serviceWorker.includes('tamasrazim-trilyva-pwa-v123'),'renderer service worker cache version is bumped');
+must(serviceWorker.includes('tamasrazim-trilyva-pwa-v142'),'renderer service worker cache version is bumped');
 must(!/chatgpt-motion-loop|chatgpt-30s-seamless-loop|trilyva-60s-motion-edit/i.test(serviceWorker),'promotional animation assets are removed from offline cache');
 must(!/chatgpt-motion-loop|chatgpt-30s-seamless-loop|trilyva-60s-motion-edit/i.test(overview),'TRILYVA overview no longer links to fixed-length promo animations');
 must(!/story-films|cartoon/i.test(manifest),'cartoon collection is absent from the library manifest');
@@ -63,6 +63,8 @@ for(const file of [
   'projects/code-motion/renderer/library/story-films.js',
   'projects/code-motion/renderer/voice-studio.js'
 ]) must(!fs.existsSync(path.join(ROOT,file)),file+' removed');
+
+must(renderer.includes('id="sample-starfall-phonk-cut"') && renderer.includes('data-title="Starfall Fist — Phonk Character Edit"') && renderer.includes('data-dur="30"') && renderer.includes('data-fps="60"'), 'Examples includes the 30-second Starfall Fist phonk character edit');
 
 const xyzSource = read('projects/code-motion/renderer/library/xyz-library.js');
 const xyzModule = await import('data:text/javascript;charset=utf-8,' + encodeURIComponent(xyzSource));
