@@ -303,7 +303,7 @@
     const body = norm(release.body);
     return !release.draft && Boolean(release.published_at) &&
       (title.includes("trilyva") || tag.includes("trilyva") ||
-       (title.includes("trilyva desktop")) || (body.includes("[trilyva release]")));
+       (title.includes("trilyva desktop")) || (body.includes("[trilyva-release]")));
   }
 
   function hasAny(text, patterns) {
