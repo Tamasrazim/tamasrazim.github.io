@@ -44,13 +44,37 @@ a{color:inherit;text-decoration:none}.shell{position:relative;isolation:isolate;
 </main>
 <script>
 (function(){
+'use strict';
 var retry=document.getElementById('retryButton');
 var query=new URLSearchParams(location.search);
 var from=query.get('from')||'/';
-if(!from.startsWith('/')||from.startsWith('//')||from.indexOf('\\')!==-1)from='/';
+if(!from.startsWith('/')||from.startsWith('//')||from.indexOf('\\\\')!==-1)from='/';
+var routePath=from.split(/[?#]/)[0]||'/';
 document.getElementById('routeName').textContent=from.slice(0,80);
-function check(){fetch('/maintanence/config.json?status='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error();return r.json();}).then(function(c){var enabled=c.globalEnabled===true||Object.keys(c.scopes||{}).some(function(k){return c.scopes[k]===true;});document.getElementById('routeState').textContent=enabled?'Maintenance active':'Most maintenance switches are off';document.getElementById('publicTitle').textContent=(c.title||'Temporarily unavailable').toUpperCase()+'.';document.getElementById('publicMessage').textContent=c.message||'This part of the website is undergoing maintenance. Please check back soon.';document.getElementById('publicDetail').textContent=enabled?'The requested route is still paused. Check again after the maintenance switch is turned off.':'Maintenance is no longer active. You can return to the requested route.';retry.textContent='Open requested route';retry.onclick=function(){location.href=from;};if(!enabled){retry.disabled=false;retry.textContent='Return to requested route';}}).catch(function(){document.getElementById('routeState').textContent='Status unavailable';document.getElementById('publicDetail').textContent='The status file could not be reached. Try again in a moment.';retry.textContent='Reload status';retry.onclick=function(){location.reload();};});}
-retry.addEventListener('click',function(){check();});
+function isTrilyva(p){return /^\/projects\/trilyva(?:\/|$)/i.test(p)||/^\/projects\/code-motion\/(?:renderer|batch)(?:\/|$)/i.test(p)||/^\/projects\/code-motion\/legacy-renderer\.html$/i.test(p)||/^\/(?:renderer|code-motion-tamasrazim2?\.html)(?:\/|$)/i.test(p);}
+function isProject(p){return /^\/projects(?:\/|$)/i.test(p);}
+function isProfile(p){return p==='/'||/^\/(?:about|approach|elsewere|licences|work)(?:\/|$)/i.test(p);}
+function isWorkspace(p){return /^\/(?:KYNESTRA|asset-vault)(?:\/|$)/i.test(p);}
+function blocked(c){var scopes=c.scopes||{};return c.globalEnabled===true||(scopes.trilyva===true&&isTrilyva(routePath))||(scopes.projects===true&&isProject(routePath))||(scopes.profile===true&&isProfile(routePath))||(scopes.workspaces===true&&isWorkspace(routePath));}
+function check(){
+ retry.disabled=true;
+ fetch('/maintanence/config.json?status='+Date.now(),{cache:'no-store',headers:{Accept:'application/json'}})
+ .then(function(r){if(!r.ok)throw new Error();return r.json();})
+ .then(function(c){
+   var enabled=blocked(c);
+   document.getElementById('routeState').textContent=enabled?'This route is paused':'This route is available';
+   var h=document.getElementById('publicTitle');
+   h.textContent=(c.title||'Temporarily unavailable').replace(/[.\s]+$/,'').toUpperCase();
+   var dot=document.createElement('span');dot.textContent='.';h.appendChild(dot);
+   document.getElementById('publicMessage').textContent=c.message||'This part of the website is undergoing maintenance. Please check back soon.';
+   document.getElementById('publicDetail').textContent=enabled?'The requested route is still paused. Check again after the relevant maintenance switch is turned off.':'Maintenance is no longer active for this route. You can safely return to the page you requested.';
+   retry.disabled=false;
+   if(enabled){retry.textContent='Check again';retry.onclick=check;}
+   else{retry.textContent='Open requested route';retry.onclick=function(){location.href=from;};}
+ })
+ .catch(function(){document.getElementById('routeState').textContent='Status unavailable';document.getElementById('publicDetail').textContent='The status file could not be reached. Try again in a moment.';retry.disabled=false;retry.textContent='Reload status';retry.onclick=function(){location.reload();};});
+}
+retry.onclick=check;
 check();
 })();
 </script>
