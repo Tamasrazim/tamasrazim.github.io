@@ -875,6 +875,10 @@ pub fn encode_png_sequence(app: AppHandle, options: PngSequenceEncodeOptions) ->
     })
 }
 
+fn alpha_samples_contain_transparency(samples: &[u8]) -> bool {
+    samples.len() == 64 * 64 && samples.iter().any(|value| *value < 250)
+}
+
 fn decoded_alpha_has_transparency(ffmpeg: &Path, media: &Path, extension: &str) -> Result<bool, String> {
     let mut command = Command::new(ffmpeg);
     command.arg("-v").arg("error").arg("-nostdin");
@@ -910,7 +914,7 @@ fn decoded_alpha_has_transparency(ffmpeg: &Path, media: &Path, extension: &str) 
             output.stdout.len()
         ));
     }
-    Ok(output.stdout.iter().any(|value| *value < 250))
+    Ok(alpha_samples_contain_transparency(&output.stdout))
 }
 
 fn frame_rate_matches(value: Option<&str>, expected_fps: u32) -> bool {
@@ -1074,6 +1078,21 @@ mod tests {
         assert!(pixel_format_has_alpha("gbrap"));
         assert!(!pixel_format_has_alpha("yuv420p"));
         assert!(!pixel_format_has_alpha("yuv444p10le"));
+    }
+
+    #[test]
+    fn alpha_verification_requires_actual_transparent_pixels() {
+        let opaque = vec![255u8; 64 * 64];
+        assert!(!alpha_samples_contain_transparency(&opaque));
+
+        let mut transparent = opaque.clone();
+        transparent[0] = 0;
+        assert!(alpha_samples_contain_transparency(&transparent));
+
+        let mut partial = opaque;
+        partial[4095] = 128;
+        assert!(alpha_samples_contain_transparency(&partial));
+        assert!(!alpha_samples_contain_transparency(&[0u8; 12]));
     }
 
     #[test]
