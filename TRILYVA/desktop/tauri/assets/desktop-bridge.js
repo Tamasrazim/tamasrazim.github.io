@@ -13,6 +13,7 @@
     mediaCapabilities: () => invoke("media_capabilities"),
     validateRenderConfig: (config) => invoke("validate_render_config", { config }),
     choosePngSequenceDirectory: () => invoke("choose_png_sequence_directory"),
+    choosePngSequenceArchive: () => invoke("choose_png_sequence_archive"),
     chooseAlphaOutput: (profile) => invoke("choose_alpha_output", { profile }),
     encodePngSequence: (options) => invoke("encode_png_sequence", { options }),
     verifyMediaFile: (path) => invoke("verify_media_file", { path }),
