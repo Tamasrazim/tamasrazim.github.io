@@ -93,6 +93,9 @@ jobs:
         shell: bash
         run: tauri icon ../../../assets/brand/trilyva/T.svg --output icons --ios-color "#050505"
 
+      - name: Stage frontend for Tauri preflight
+        run: node ./scripts/stage-frontend.mjs
+
       - name: Apply Rust formatting
         run: cargo fmt --all
 
@@ -156,6 +159,9 @@ jobs:
       - name: Install Tauri CLI
         run: npm install --global "@tauri-apps/cli@^2"
 
+      - name: Stage frontend for Tauri preflight
+        run: node ./scripts/stage-frontend.mjs
+
       - name: Initialize Android project
         run: tauri android init --ci
 
@@ -196,6 +202,9 @@ jobs:
 
       - name: Install Tauri CLI
         run: npm install --global "@tauri-apps/cli@^2"
+
+      - name: Stage frontend for Tauri preflight
+        run: node ./scripts/stage-frontend.mjs
 
       - name: Initialize iOS project
         run: tauri ios init --ci
