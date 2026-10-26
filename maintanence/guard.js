@@ -35,7 +35,11 @@
 
   function isProfileRoute(p) {
     return p === '/' || p === '/index.html' ||
-      /^\/(?:about|approach|elsewere|licences|work)(?:\/|$)/i.test(p);
+      /^\/(?:about|approach|elsewere|licences)(?:\/|$)/i.test(p);
+  }
+
+  function isWorkRoute(p) {
+    return /^\/work(?:\/|$)/i.test(p);
   }
 
   function isWorkspaceRoute(p) {
@@ -50,6 +54,7 @@
     if (scopes.trilyva === true && isTrilyvaRoute(path)) return true;
     if (scopes.projects === true && isProjectRoute(path)) return true;
     if (scopes.profile === true && isProfileRoute(path)) return true;
+    if (scopes.work === true && isWorkRoute(path)) return true;
     if (scopes.workspaces === true && isWorkspaceRoute(path)) return true;
     return false;
   }
