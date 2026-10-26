@@ -23,12 +23,12 @@ case "$platform" in
     ;;
   macos64|macosarm64)
     case "$platform" in
-      macos64) architecture="amd64" ;;
-      macosarm64) architecture="arm64" ;;
+      macos64) architecture="amd64"; channel="release" ;;
+      macosarm64) architecture="arm64"; channel="snapshot" ;;
     esac
-    # The provider's redirect URL must include the build channel (snapshot or release).
-    ffmpeg_url="https://ffmpeg.martin-riedl.de/redirect/latest/macos/$architecture/snapshot/ffmpeg.zip"
-    ffprobe_url="https://ffmpeg.martin-riedl.de/redirect/latest/macos/$architecture/snapshot/ffprobe.zip"
+    # Intel snapshots ended in 2026; Apple Silicon still receives current snapshot builds.
+    ffmpeg_url="https://ffmpeg.martin-riedl.de/redirect/latest/macos/$architecture/$channel/ffmpeg.zip"
+    ffprobe_url="https://ffmpeg.martin-riedl.de/redirect/latest/macos/$architecture/$channel/ffprobe.zip"
     mkdir -p "$extract/ffmpeg" "$extract/ffprobe" "$work"
     curl --fail --location --retry 5 --retry-connrefused "$ffmpeg_url" --output "$work/ffmpeg.zip"
     curl --fail --location --retry 5 --retry-connrefused "$ffprobe_url" --output "$work/ffprobe.zip"
