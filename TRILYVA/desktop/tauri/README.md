@@ -27,7 +27,7 @@ Input frames use frame_%06d.png, starting at frame_000000.png, with no missing i
 
 The existing renderer remains responsible for deterministic composition rendering and already supports still-frame PNG, JPG, SVG, and EPS export. PNG and SVG can preserve transparency; JPG and EPS are opaque formats. PNG·DIR exports the rendered composition as a consecutive sequence of PNG files.
 
-The desktop build adds a **TRANSPARENT VIDEO · DESKTOP** panel to the existing Render workspace. To use it, set **Background → Transparent**, render to **PNG·DIR**, select that resulting folder in the alpha panel, and keep the composition width, height, FPS, and duration equal to the PNG sequence. The panel can then encode:
+The desktop build adds a **TRANSPARENT VIDEO · DESKTOP** panel to the existing Render workspace. To use it, set **Background → Transparent**, render to **PNG·DIR** or **PNG·ZIP**, select that folder/archive in the alpha panel, and keep the composition width, height, FPS, and duration equal to the PNG sequence. ZIPs are safely extracted to a temporary directory inside the encoder workflow. The panel can then encode:
 
 - **WebM / VP9 alpha** using `libvpx-vp9`, `yuva420p`, and alternate-reference frames disabled.
 - **MOV / ProRes 4444** using `prores_ks`, profile 4, and `yuva444p10le`.
