@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark">
+<meta name="author" content="Robiul Rumman Razim">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<title>TRILYVA Desktop — Progress, OS Support & Downloads</title>
+<meta name="description" content="Track TRILYVA desktop development, planned operating-system support, the Rust and Tauri architecture, encoder roadmap, and published downloads.">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/trilyva/updates/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tamasrazim">
+<meta property="og:title" content="TRILYVA Desktop — Progress & Downloads">
+<meta property="og:description" content="Development progress, operating-system targets, release notes, and platform-selectable downloads for TRILYVA.">
+<meta property="og:url" content="https://tamasrazim.github.io/projects/trilyva/updates/">
+<meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site-v3.css?v=20261010-3">
+<link rel="stylesheet" href="/assets/css/project-identities.css?v=20261022-1">
+<link rel="stylesheet" href="/assets/css/monochrome.css?v=20261010-1">
+<link rel="stylesheet" href="/assets/css/site-navigation.css?v=20261012-1">
+<script defer src="/assets/js/site-navigation.js?v=20261012-1"></script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"SoftwareApplication",
+  "name":"TRILYVA Desktop",
+  "applicationCategory":"MultimediaApplication",
+  "operatingSystem":"Windows, Linux, macOS",
+  "description":"Planned Rust and Tauri desktop edition of TRILYVA. This page reports development status and published builds.",
+  "author":{"@type":"Person","name":"Robiul Rumman Razim"},
+  "url":"https://tamasrazim.github.io/projects/trilyva/updates/"
+}
+</script>
+<style>
+:root{scroll-behavior:smooth}
+.tu-wrap{width:min(1120px,calc(100% - clamp(32px,7.2vw,112px)));margin-inline:auto}
+.tu-nav{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:74px;border-bottom:1px solid rgba(241,241,237,.14)}
+.tu-brand{display:flex;align-items:center;gap:12px;font:600 11px var(--v3-mono);letter-spacing:.08em;text-transform:lowercase}
+.tu-brand img{display:block;width:42px;height:42px;object-fit:contain}
+.tu-navlinks{display:flex;gap:16px;flex-wrap:wrap;align-items:center;font:9px var(--v3-mono);color:var(--v3-muted)}
+.tu-navlinks a:hover{color:var(--v3-ink)}
+.tu-hero{padding:clamp(58px,9vw,112px) 0 50px;border-bottom:1px solid rgba(241,241,237,.14)}
+.tu-eyebrow{display:flex;align-items:center;gap:10px;font:9px var(--v3-mono);letter-spacing:.16em;color:var(--v3-muted);text-transform:uppercase}
+.tu-dot{width:7px;height:7px;border-radius:50%;background:#d6d6d0;box-shadow:0 0 0 4px #ffffff10;display:inline-block}
+.tu-hero-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:36px;align-items:end}
+.tu-title{font:700 clamp(46px,8.7vw,102px)/.98 var(--v3-display);letter-spacing:-.085em;margin:26px 0}
+.tu-title span{color:#888880}
+.tu-lead{font-size:clamp(17px,2vw,22px);line-height:1.7;max-width:720px}
+.tu-copy{font-size:12px;line-height:1.9;color:var(--v3-muted);max-width:700px}
+.tu-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:24px}
+.tu-panel{border:1px solid rgba(241,241,237,.16);padding:22px;background:linear-gradient(145deg,#ffffff08,transparent 66%),#080808}
+.tu-panel-label{font:9px var(--v3-mono);letter-spacing:.14em;color:var(--v3-muted);text-transform:uppercase}
+.tu-status-line{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:17px 0 10px}
+.tu-status-line strong{font:600 16px var(--v3-display);letter-spacing:-.04em}
+.tu-pill{display:inline-flex;align-items:center;gap:7px;border:1px solid #ffffff20;padding:6px 9px;font:8px var(--v3-mono);letter-spacing:.08em;text-transform:uppercase;color:#ddd}
+.tu-small{font:10px/1.8 var(--v3-mono);color:var(--v3-muted)}
+.tu-section{padding:clamp(50px,7.5vw,84px) 0;border-bottom:1px solid rgba(241,241,237,.14)}
+.tu-section-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:26px}
+.tu-section-head h2{font:600 clamp(28px,4.6vw,46px)/1.12 var(--v3-display);letter-spacing:-.065em;margin:0}
+.tu-section-head p{max-width:560px;color:var(--v3-muted);font-size:12px;line-height:1.9;margin:0}
+.tu-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tu-card{border:1px solid rgba(241,241,237,.14);padding:20px;background:linear-gradient(145deg,#ffffff06,transparent 56%),#080808;min-width:0;transition:transform .25s ease,border-color .25s ease}
+.tu-card:hover{transform:translateY(-3px);border-color:#ffffff45}
+.tu-card-kicker{font:9px var(--v3-mono);letter-spacing:.12em;color:#a6a6a0;text-transform:uppercase}
+.tu-card h3{font:500 15px/1.5 var(--v3-display);margin:13px 0 9px}
+.tu-card p{font-size:12px;line-height:1.85;color:var(--v3-muted);margin:0}
+.tu-card-foot{margin-top:17px;padding-top:13px;border-top:1px solid #ffffff12;font:9px/1.7 var(--v3-mono);color:#bdbdb6}
+.tu-roadmap{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.tu-step{min-height:170px;border-top:1px solid #ffffff45;padding:15px 10px 10px 0}
+.tu-step-num{font:9px var(--v3-mono);color:#999}
+.tu-step h3{font:500 12px/1.5 var(--v3-display);margin:15px 0 8px}
+.tu-step p{font-size:11px;line-height:1.8;color:var(--v3-muted);margin:0}
+.tu-step-status{display:inline-block;margin-top:12px;border:1px solid #ffffff20;padding:5px 7px;font:8px var(--v3-mono);letter-spacing:.08em;text-transform:uppercase;color:#c4c4bd}
+.tu-download-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(290px,.82fr);gap:12px;align-items:stretch}
+.tu-download-card{border:1px solid rgba(241,241,237,.18);padding:clamp(20px,3.5vw,34px);background:linear-gradient(145deg,#ffffff08,transparent 60%),#080808}
+.tu-field-label{display:block;font:9px var(--v3-mono);letter-spacing:.12em;color:var(--v3-muted);text-transform:uppercase;margin:24px 0 9px}
+.tu-select{width:100%;min-height:48px;padding:0 14px;color:#f2f2ed;background:#101010;border:1px solid #ffffff33;border-radius:0;font:11px var(--v3-mono);outline:none}
+.tu-select:focus-visible{border-color:#fff;box-shadow:0 0 0 2px #ffffff18}
+.tu-download-button{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:52px;margin-top:12px;padding:0 16px;background:#f2f2ed;color:#080808;border:1px solid #f2f2ed;font:600 10px var(--v3-mono);letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:transform .2s ease,background .2s ease}
+.tu-download-button:hover{transform:translateY(-2px);background:#fff}
+.tu-download-button:focus-visible{outline:2px solid #fff;outline-offset:4px}
+.tu-download-note{min-height:64px;margin-top:16px;padding:12px;border:1px solid #ffffff18;background:#ffffff04;color:#c3c3bc;font-size:11px;line-height:1.8}
+.tu-download-note a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+.tu-os-list{display:grid;gap:0}
+.tu-os-row{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;border-bottom:1px solid #ffffff16;padding:15px 0}
+.tu-os-row:first-child{border-top:1px solid #ffffff16}
+.tu-os-row strong{display:block;font:500 12px var(--v3-display)}
+.tu-os-row small{display:block;margin-top:5px;color:var(--v3-muted);font:9px/1.7 var(--v3-mono)}
+.tu-badge{border:1px solid #ffffff25;padding:6px 8px;font:8px var(--v3-mono);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.tu-release{border:1px solid #ffffff19;padding:18px;margin-top:10px}
+.tu-release h3{margin:0 0 8px;font:500 14px var(--v3-display)}
+.tu-release p{margin:0;color:var(--v3-muted);font-size:11px;line-height:1.8}
+.tu-release a{display:inline-block;margin-top:12px;font:9px var(--v3-mono);text-decoration:underline;text-underline-offset:4px}
+.tu-footer{border-top:1px solid rgba(241,241,237,.14);padding:24px 0;display:flex;justify-content:space-between;gap:16px;color:var(--v3-muted);font:9px var(--v3-mono)}
+.tu-link{color:var(--v3-ink);text-decoration:underline;text-underline-offset:4px}
+.tu-toast{position:fixed;left:50%;bottom:22px;z-index:1000;transform:translate(-50%,20px);opacity:0;pointer-events:none;width:min(560px,calc(100% - 28px));background:#f2f2ed;color:#050505;padding:14px 16px;font:10px/1.7 var(--v3-mono);box-shadow:0 18px 60px #0009;transition:opacity .25s ease,transform .25s ease}
+.tu-toast.is-visible{opacity:1;transform:translate(-50%,0)}
+@media(max-width:900px){.tu-hero-grid,.tu-download-layout{grid-template-columns:1fr}.tu-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.tu-roadmap{grid-template-columns:repeat(3,minmax(0,1fr))}.tu-section-head{align-items:flex-start;flex-direction:column}}
+@media(max-width:600px){.tu-wrap{width:calc(100% - 32px)}.tu-nav{align-items:flex-start;flex-direction:column;padding:16px 0}.tu-navlinks{gap:12px}.tu-grid{grid-template-columns:1fr}.tu-roadmap{grid-template-columns:repeat(2,minmax(0,1fr))}.tu-footer{flex-direction:column}.tu-title{font-size:clamp(47px,15vw,76px)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}.tu-card:hover,.tu-download-button:hover{transform:none}}
+</style>
+</head>
+<body class="project-detail-v3" data-project="trilyva-updates">
+<header class="tu-wrap tu-nav">
+  <a class="tu-brand" href="/projects/trilyva/" aria-label="TRILYVA project overview"><img src="/assets/brand/trilyva/T.svg" alt="" width="42" height="42"><span>TRILYVA / DESKTOP</span></a>
+  <nav class="tu-navlinks" aria-label="TRILYVA desktop navigation">
+    <a href="/projects/trilyva/">Overview</a>
+    <a href="#progress">Progress</a>
+    <a href="#platforms">OS support</a>
+    <a href="#downloads">Downloads</a>
+    <a href="#releases">Release notes</a>
+  </nav>
+  <a class="v3-header-contact" href="/projects/">All projects</a>
+</header>
+<main>
+<section class="tu-wrap tu-hero">
+  <div class="tu-eyebrow"><span class="tu-dot" aria-hidden="true"></span> DEVELOPMENT TRACKER / DESKTOP EDITION</div>
+  <div class="tu-hero-grid">
+    <div>
+      <h1 class="tu-title">TRILYVA<span>.</span><br>Desktop.</h1>
+      <p class="tu-lead">The next stage: a Rust + Tauri desktop application built around frame-accurate animation rendering, a real encoding backend, and broad format support.</p>
+      <p class="tu-copy">The browser workspace remains available today. The desktop edition is not released yet. This page separates verified, existing browser functionality from desktop engineering goals, shows the operating-system targets, and will surface real download assets when a TRILYVA release is published.</p>
+      <div class="tu-actions">
+        <a class="v3-button primary" href="#downloads">Choose a download</a>
+        <a class="v3-button secondary" href="/projects/code-motion/renderer/">Open browser workspace</a>
+        <a class="v3-button secondary" href="#progress">View progress</a>
+      </div>
+    </div>
+    <aside class="tu-panel" aria-label="Current release status">
+      <div class="tu-panel-label">CURRENT PUBLIC STATUS</div>
+      <div class="tu-status-line"><strong id="currentStatus">Desktop builds not published</strong><span class="tu-pill">PRE-RELEASE</span></div>
+      <p class="tu-copy" id="releaseSummary">The Rust + Tauri desktop release is not yet available for download. The page checks GitHub Releases for published TRILYVA packages.</p>
+      <div class="tu-status-line"><strong>Browser workspace</strong><span class="tu-pill">AVAILABLE</span></div>
+      <p class="tu-small">The existing browser-based TRILYVA workspace can still be opened without installing the desktop edition.</p>
+      <div class="tu-card-foot">LAST CHECK <span id="lastCheck">Checking releases…</span></div>
+    </aside>
+  </div>
+</section>
+
+<section class="tu-wrap tu-section" id="progress">
+  <div class="tu-section-head">
+    <h2>Current progress</h2>
+    <p>The desktop release is being tracked separately from the existing browser app. Status labels describe implementation and publication state; planned capabilities are not advertised as already shipped.</p>
+  </div>
+  <div class="tu-grid">
+    <article class="tu-card"><div class="tu-card-kicker">01 / FOUNDATION</div><h3>Product architecture</h3><p>Direction defined: retain the current interface and connect it to a Rust backend through Tauri commands and events. No redesign of the existing workspace is part of this track.</p><div class="tu-card-foot">STATUS / SPECIFICATION DEFINED</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">02 / DESKTOP SHELL</div><h3>Rust + Tauri integration</h3><p>The desktop shell must preserve the current editor, preview, panels, and animation behaviour while adding desktop process and file management.</p><div class="tu-card-foot">STATUS / NOT YET RELEASED</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">03 / RENDER ENGINE</div><h3>Deterministic frame pipeline</h3><p>Target design: render each requested frame by index and timestamp instead of recording live preview playback. Output verification must reject incomplete renders.</p><div class="tu-card-foot">STATUS / IMPLEMENTATION TO VERIFY</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">04 / MEDIA BACKEND</div><h3>FFmpeg + FFprobe</h3><p>Planned encoding layer with runtime capability discovery, validated encoder settings, useful diagnostics, cancellation, and inspection of completed files.</p><div class="tu-card-foot">STATUS / PLANNED</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">05 / DISTRIBUTION</div><h3>Installers and updates</h3><p>Platform-specific packaging, signatures where applicable, release assets, checksums, and version notes must be produced and tested before a package is listed as available.</p><div class="tu-card-foot">STATUS / NO PUBLIC BUILD</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">06 / RULE OF RECORD</div><h3>Only verified features count</h3><p>Every OS label and download link on this page will be driven by release evidence. A roadmap target is never shown as a shipped capability.</p><div class="tu-card-foot">STATUS / ONGOING</div></article>
+  </div>
+</section>
+
+<section class="tu-wrap tu-section">
+  <div class="tu-section-head">
+    <h2>Engineering roadmap</h2>
+    <p>These milestones describe the intended desktop build sequence. The roadmap is not a claim that every item has already been implemented.</p>
+  </div>
+  <div class="tu-roadmap">
+    <article class="tu-step"><div class="tu-step-num">PHASE 01</div><h3>Inspect and preserve the browser app</h3><p>Map existing code, editor contracts, workspace behaviour, and output workflows.</p><span class="tu-step-status">Baseline</span></article>
+    <article class="tu-step"><div class="tu-step-num">PHASE 02</div><h3>Rust + Tauri shell</h3><p>Connect the existing frontend to a secure local application backend.</p><span class="tu-step-status">Planned</span></article>
+    <article class="tu-step"><div class="tu-step-num">PHASE 03</div><h3>Render and encode</h3><p>Bridge deterministic frames to FFmpeg, with bounded memory and cancellation.</p><span class="tu-step-status">Planned</span></article>
+    <article class="tu-step"><div class="tu-step-num">PHASE 04</div><h3>Detect codecs and hardware</h3><p>Expose only the encoders, containers, pixel formats, and acceleration methods present in the packaged build.</p><span class="tu-step-status">Planned</span></article>
+    <article class="tu-step"><div class="tu-step-num">PHASE 05</div><h3>Test and publish</h3><p>Validate output files, run OS builds, publish checksums and release notes.</p><span class="tu-step-status">Not released</span></article>
+  </div>
+</section>
+
+<section class="tu-wrap tu-section" id="platforms">
+  <div class="tu-section-head">
+    <h2>Operating-system support</h2>
+    <p>The browser app and desktop edition are different delivery targets. Desktop packages appear as supported only after a matching release asset has been published.</p>
+  </div>
+  <div class="tu-grid">
+    <article class="tu-card"><div class="tu-card-kicker">CURRENT</div><h3>Modern desktop browsers</h3><p>The existing browser workspace can be opened in a compatible browser. Export behaviour depends on browser codecs, APIs, hardware, and file-picker support.</p><div class="tu-card-foot">BROWSER WORKSPACE / AVAILABLE</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">TARGET</div><h3>Windows 10 / 11 · x64</h3><p>Planned primary desktop target, with an installer and portable package when the build pipeline is ready.</p><div class="tu-card-foot">DESKTOP / NO PUBLISHED BUILD</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">TARGET</div><h3>Windows · ARM64</h3><p>Optional architecture target. Availability depends on successful compilation and verification of all required components.</p><div class="tu-card-foot">DESKTOP / NOT VERIFIED</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">TARGET</div><h3>Linux · x86_64</h3><p>Planned Linux packages may include AppImage, DEB, or archive formats depending on release testing.</p><div class="tu-card-foot">DESKTOP / NO PUBLISHED BUILD</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">TARGET</div><h3>Linux · ARM64</h3><p>Architecture support depends on the availability of compatible builds and media libraries.</p><div class="tu-card-foot">DESKTOP / NOT VERIFIED</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">TARGET</div><h3>macOS · Apple Silicon / Intel</h3><p>Separate or universal packages will be listed only after the corresponding macOS builds are created and checked.</p><div class="tu-card-foot">DESKTOP / NO PUBLISHED BUILD</div></article>
+  </div>
+  <p class="tu-copy" style="margin-top:18px">These are intended support targets, not a statement that desktop binaries are ready. Package availability and tested versions will be listed in the release section below.</p>
+</section>
+
+<section class="tu-wrap tu-section" id="downloads">
+  <div class="tu-section-head">
+    <h2>Downloads</h2>
+    <p>Select an exact operating-system/package variation. The download action only opens a matching asset from a published TRILYVA release; it does not point to another project's installer.</p>
+  </div>
+  <div class="tu-download-layout">
+    <div class="tu-download-card">
+      <div class="tu-panel-label">SELECT PLATFORM PACKAGE</div>
+      <label class="tu-field-label" for="packageChoice">Operating system / package</label>
+      <select class="tu-select" id="packageChoice" name="packageChoice">
+        <option value="windows-x64-installer">Windows 10 / 11 · x64 installer (.exe / .msi)</option>
+        <option value="windows-x64-portable">Windows · x64 portable (.zip)</option>
+        <option value="windows-arm64-installer">Windows · ARM64 installer</option>
+        <option value="linux-x64-appimage">Linux · x86_64 AppImage</option>
+        <option value="linux-x64-deb">Linux · x86_64 DEB package</option>
+        <option value="linux-arm64-appimage">Linux · ARM64 AppImage</option>
+        <option value="macos-arm64">macOS · Apple Silicon</option>
+        <option value="macos-x64">macOS · Intel</option>
+        <option value="macos-universal">macOS · Universal package</option>
+      </select>
+      <button class="tu-download-button" id="downloadButton" type="button"><span id="downloadButtonText">Check selected build</span><span aria-hidden="true">↗</span></button>
+      <div class="tu-download-note" id="downloadNote" role="status" aria-live="polite">Checking public TRILYVA releases. If no matching package has been published, this control will explain that instead of offering a broken or unrelated download.</div>
+      <p class="tu-small" style="margin-top:14px">For now, the browser workspace is the available option. No desktop installer is currently listed as published.</p>
+      <a class="tu-link" href="/projects/code-motion/renderer/">Open the browser workspace →</a>
+    </div>
+    <div class="tu-download-card">
+      <div class="tu-panel-label">RELEASE CHECK</div>
+      <div class="tu-status-line"><strong id="assetSummary">No desktop package detected</strong><span class="tu-pill" id="assetCount">0 ASSETS</span></div>
+      <p class="tu-copy" id="assetDescription">This page checks public repository releases for a TRILYVA-specific release and platform-matching assets. Builds from other projects are deliberately excluded.</p>
+      <div class="tu-os-list" style="margin-top:22px">
+        <div class="tu-os-row"><div><strong>Windows</strong><small>Installer / portable archive</small></div><span class="tu-badge">Awaiting build</span></div>
+        <div class="tu-os-row"><div><strong>Linux</strong><small>AppImage / DEB / archive</small></div><span class="tu-badge">Awaiting build</span></div>
+        <div class="tu-os-row"><div><strong>macOS</strong><small>Apple Silicon / Intel</small></div><span class="tu-badge">Awaiting build</span></div>
+      </div>
+      <div class="tu-actions">
+        <a class="v3-button secondary" id="releasesLink" href="https://github.com/Tamasrazim/tamasrazim.github.io/releases" target="_blank" rel="noopener noreferrer">All repository releases</a>
+        <button class="v3-button secondary" id="refreshReleases" type="button">Check again</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tu-wrap tu-section" id="media-roadmap">
+  <div class="tu-section-head">
+    <h2>Media pipeline goals</h2>
+    <p>These are planned desktop goals. Exact support will come from the actual FFmpeg build, the selected encoder, and the host hardware—not from a fixed marketing list.</p>
+  </div>
+  <div class="tu-grid">
+    <article class="tu-card"><div class="tu-card-kicker">ENCODERS</div><h3>Software and hardware paths</h3><p>Target discovery of available H.264, HEVC, AV1, VP9, and other FFmpeg encoders. Hardware paths such as QSV, NVENC, AMF, and VideoToolbox are conditional on the platform, driver, build, and GPU.</p><div class="tu-card-foot">ROADMAP / CAPABILITY-DEPENDENT</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">CONTAINERS</div><h3>Flexible output formats</h3><p>Target container options include MP4, MOV, MKV, WebM, and AVI where the packaged muxers and selected codec combination support them.</p><div class="tu-card-foot">ROADMAP / NOT YET VERIFIED</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">FRAME SEQUENCES</div><h3>Images and transparency</h3><p>Target PNG/JPEG sequences and selected still formats. Alpha export depends on the actual encoder, pixel format, and container. Unsupported options must be clearly rejected.</p><div class="tu-card-foot">ROADMAP / FORMAT-DEPENDENT</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">DETERMINISM</div><h3>Frame count and timestamps</h3><p>The planned render pipeline must process the requested frames in order, independently from preview playback, and validate the output before reporting success.</p><div class="tu-card-foot">ROADMAP / TESTS REQUIRED</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">HIGH-END OUTPUT</div><h3>16K · 240 FPS · 2 Gbps</h3><p>These are design targets, not universal promises. Usable combinations will depend on memory, frame buffers, encoder limits, hardware, storage, and output format.</p><div class="tu-card-foot">TARGET / NOT A PERFORMANCE GUARANTEE</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">RELIABILITY</div><h3>Verified, cancellable jobs</h3><p>Target job progress, cancellation, bounded-memory transfer, error diagnostics, output inspection, and cleanup after failed or interrupted renders.</p><div class="tu-card-foot">ROADMAP / TESTS REQUIRED</div></article>
+  </div>
+</section>
+
+<section class="tu-wrap tu-section" id="releases">
+  <div class="tu-section-head">
+    <h2>Release notes & updates</h2>
+    <p>This list is populated from public GitHub releases associated with TRILYVA. The site will not invent a version number or display another project's release as a TRILYVA update.</p>
+  </div>
+  <div id="releaseList" aria-live="polite">
+    <article class="tu-release"><h3>Checking releases…</h3><p>Loading public release information from GitHub.</p></article>
+  </div>
+  <div class="tu-actions">
+    <a class="v3-button primary" href="https://github.com/Tamasrazim/tamasrazim.github.io" target="_blank" rel="noopener noreferrer">Project repository</a>
+    <a class="v3-button secondary" href="https://github.com/Tamasrazim/tamasrazim.github.io/issues" target="_blank" rel="noopener noreferrer">Issues & feedback</a>
+    <a class="v3-button secondary" href="/projects/trilyva/">Back to TRILYVA overview</a>
+  </div>
+</section>
+</main>
+<footer class="tu-wrap tu-footer">
+  <span>Robiul Rumman Razim — Tamasrazim / TRILYVA</span>
+  <span><a href="/projects/trilyva/">PROJECT OVERVIEW ↑</a> · <a href="/projects/">PROJECT DIRECTORY ↑</a></span>
+  <a href="/licences/" style="font:9px/1.6 monospace;letter-spacing:.08em;text-decoration:none;white-space:nowrap">LICENCES</a>
+</footer>
+<div class="tu-toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  "use strict";
+  const API = "https://api.github.com/repos/Tamasrazim/tamasrazim.github.io/releases?per_page=100";
+  const ALL_RELEASES = "https://github.com/Tamasrazim/tamasrazim.github.io/releases";
+  const select = document.getElementById("packageChoice");
+  const downloadButton = document.getElementById("downloadButton");
+  const downloadButtonText = document.getElementById("downloadButtonText");
+  const downloadNote = document.getElementById("downloadNote");
+  const releaseSummary = document.getElementById("releaseSummary");
+  const currentStatus = document.getElementById("currentStatus");
+  const lastCheck = document.getElementById("lastCheck");
+  const assetSummary = document.getElementById("assetSummary");
+  const assetCount = document.getElementById("assetCount");
+  const assetDescription = document.getElementById("assetDescription");
+  const releaseList = document.getElementById("releaseList");
+  const toast = document.getElementById("toast");
+  let trilyvaReleases = [];
+  let isLoading = false;
+  let toastTimer;
+
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add("is-visible");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("is-visible"), 4800);
+  }
+
+  function norm(value) {
+    return String(value || "").toLowerCase().replace(/[_.]+/g, "-");
+  }
+
+  function isTrilyvaRelease(release) {
+    const title = norm(release.name);
+    const tag = norm(release.tag_name);
+    const body = norm(release.body);
+    return !release.draft && Boolean(release.published_at) &&
+      (title.includes("trilyva") || tag.includes("trilyva") ||
+       (title.includes("trilyva desktop")) || (body.includes("[trilyva release]")));
+  }
+
+  function hasAny(text, patterns) {
+    return patterns.some((pattern) => pattern.test(text));
+  }
+
+  function matchesAsset(asset, choice) {
+    const name = norm(asset.name);
+    const hasArchArm = hasAny(name, [/-arm64\b/, /-aarch64\b/, /-armv8\b/, /apple-silicon/]);
+    const hasArchX64 = hasAny(name, [/-x64\b/, /-x86-64\b/, /-x86_64\b/, /-amd64\b/, /-intel\b/]);
+    const isWin = hasAny(name, [/windows/, /(^|\W)win(32|64)?(\W|$)/]);
+    const isLinux = name.includes("linux");
+    const isMac = hasAny(name, [/macos/, /mac-os/, /darwin/, /osx/, /\.dmg$/, /\.pkg$/]);
+    const isInstaller = /\.(exe|msi)$/.test(name) && !name.includes("portable");
+    const isPortable = name.endsWith(".zip") && name.includes("portable");
+    const isAppImage = name.endsWith(".appimage");
+    const isDeb = name.endsWith(".deb");
+    const isDmgPkgZip = /\.(dmg|pkg|zip)$/.test(name);
+    const hasUniversal = name.includes("universal");
+
+    switch (choice) {
+      case "windows-x64-installer":
+        return isWin && isInstaller && !hasArchArm && (!hasArchX64 || name.includes("x64") || name.includes("amd64"));
+      case "windows-x64-portable":
+        return isWin && isPortable && !hasArchArm;
+      case "windows-arm64-installer":
+        return isWin && isInstaller && hasArchArm;
+      case "linux-x64-appimage":
+        return isLinux && isAppImage && !hasArchArm;
+      case "linux-x64-deb":
+        return isLinux && isDeb && !hasArchArm;
+      case "linux-arm64-appimage":
+        return isLinux && isAppImage && hasArchArm;
+      case "macos-arm64":
+        return isMac && isDmgPkgZip && (hasArchArm || hasUniversal);
+      case "macos-x64":
+        return isMac && isDmgPkgZip && (hasArchX64 || hasUniversal);
+      case "macos-universal":
+        return isMac && isDmgPkgZip && hasUniversal;
+      default:
+        return false;
+    }
+  }
+
+  function selectedAsset() {
+    for (const release of trilyvaReleases) {
+      const assets = Array.isArray(release.assets) ? release.assets : [];
+      const match = assets.find(asset => matchesAsset(asset, select.value));
+      if (match) return { release, asset: match };
+    }
+    return null;
+  }
+
+  function renderReleaseList() {
+    if (!trilyvaReleases.length) {
+      releaseList.innerHTML =
+        '<article class="tu-release"><h3>No public TRILYVA desktop release yet</h3><p>No published release explicitly associated with TRILYVA was found. That is expected while desktop builds are being prepared. The browser workspace remains available.</p><a href="' + ALL_RELEASES + '" target="_blank" rel="noopener noreferrer">Browse repository releases →</a></article>';
+      return;
+    }
+    releaseList.innerHTML = "";
+    trilyvaReleases.slice(0, 6).forEach(release => {
+      const article = document.createElement("article");
+      article.className = "tu-release";
+      const heading = document.createElement("h3");
+      heading.textContent = release.name || release.tag_name || "TRILYVA release";
+      const info = document.createElement("p");
+      const date = release.published_at ? new Date(release.published_at).toLocaleDateString(undefined, {year:"numeric",month:"short",day:"numeric"}) : "Date unavailable";
+      const assets = Array.isArray(release.assets) ? release.assets.length : 0;
+      info.textContent = date + " · " + assets + " downloadable asset" + (assets === 1 ? "" : "s") + (release.prerelease ? " · pre-release" : "");
+      const link = document.createElement("a");
+      link.href = release.html_url || ALL_RELEASES;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Release details →";
+      article.append(heading, info, link);
+      releaseList.appendChild(article);
+    });
+  }
+
+  function updateSelectionStatus() {
+    const match = selectedAsset();
+    if (match) {
+      downloadButtonText.textContent = "Download " + match.asset.name;
+      downloadNote.textContent = "Ready: " + match.asset.name + " · " + match.release.tag_name + ". The file comes from a published TRILYVA release.";
+      const sizeMb = match.asset.size ? (match.asset.size / 1048576).toFixed(1) + " MB" : "Size not reported";
+      assetSummary.textContent = match.asset.name;
+      assetCount.textContent = sizeMb.toUpperCase();
+      assetDescription.textContent = "Version " + match.release.tag_name + " · published " + new Date(match.release.published_at).toLocaleDateString() + ".";
+    } else {
+      downloadButtonText.textContent = "Check selected build";
+      const choice = select.options[select.selectedIndex]?.textContent || "selected platform";
+      downloadNote.textContent = "No published TRILYVA package currently matches: " + choice + ". This target is not available for download yet. Check the release page for future builds, or open the browser workspace now.";
+      assetSummary.textContent = "No matching package";
+      assetCount.textContent = "NOT FOUND";
+      assetDescription.textContent = trilyvaReleases.length
+        ? "A TRILYVA release exists, but it does not include an asset matching this operating-system/package selection."
+        : "No published TRILYVA desktop release has been detected yet. Other projects' assets are excluded intentionally.";
+    }
+  }
+
+  async function loadReleases() {
+    if (isLoading) return;
+    isLoading = true;
+    lastCheck.textContent = "Refreshing…";
+    try {
+      const response = await fetch(API, {headers: {"Accept":"application/vnd.github+json"}, cache:"no-store"});
+      if (!response.ok) throw new Error("GitHub returned HTTP " + response.status);
+      const releases = await response.json();
+      if (!Array.isArray(releases)) throw new Error("Unexpected release response");
+      trilyvaReleases = releases.filter(isTrilyvaRelease).sort((a,b) => new Date(b.published_at) - new Date(a.published_at));
+      lastCheck.textContent = new Date().toLocaleString();
+      const assetTotal = trilyvaReleases.reduce((sum, release) => sum + (Array.isArray(release.assets) ? release.assets.length : 0), 0);
+      if (trilyvaReleases.length) {
+        currentStatus.textContent = "TRILYVA release detected";
+        releaseSummary.textContent = trilyvaReleases.length + " published TRILYVA release(s) found. Select a package below to see whether a matching asset is available.";
+        assetSummary.textContent = "Release found";
+        assetCount.textContent = assetTotal + " ASSETS";
+      } else {
+        currentStatus.textContent = "Desktop builds not published";
+        releaseSummary.textContent = "No published TRILYVA desktop release was detected. Desktop packages will appear here only after they have been uploaded as release assets.";
+        assetSummary.textContent = "No desktop package detected";
+        assetCount.textContent = "0 ASSETS";
+      }
+      renderReleaseList();
+      updateSelectionStatus();
+    } catch (error) {
+      lastCheck.textContent = "Could not refresh";
+      releaseSummary.textContent = "The public release check failed. This does not indicate a build is available; use the repository release page to check manually.";
+      releaseList.innerHTML = "";
+      const article = document.createElement("article");
+      article.className = "tu-release";
+      const heading = document.createElement("h3");
+      heading.textContent = "Release check unavailable";
+      const p = document.createElement("p");
+      p.textContent = "GitHub's release data could not be loaded in this browser. Try again or open the repository releases page directly.";
+      const link = document.createElement("a");
+      link.href = ALL_RELEASES;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Open GitHub releases →";
+      article.append(heading, p, link);
+      releaseList.appendChild(article);
+      downloadNote.textContent = "The release check failed. No download can be confirmed right now; please check GitHub Releases.";
+      showToast("Couldn't check GitHub Releases. Try again or open the release page.");
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  downloadButton.addEventListener("click", () => {
+    const match = selectedAsset();
+    if (match && match.asset.browser_download_url) {
+      window.location.assign(match.asset.browser_download_url);
+      return;
+    }
+    showToast("No downloadable TRILYVA build matches this selection yet.");
+    downloadNote.innerHTML = 'No package has been published for this selection yet. <a href="' + ALL_RELEASES + '" target="_blank" rel="noopener noreferrer">Check GitHub Releases</a> or <a href="/projects/code-motion/renderer/">use the browser workspace</a>.';
+  });
+  select.addEventListener("change", updateSelectionStatus);
+  document.getElementById("refreshReleases").addEventListener("click", loadReleases);
+  loadReleases();
+})();
+</script>
+</body>
+</html>
