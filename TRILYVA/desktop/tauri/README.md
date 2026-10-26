@@ -6,7 +6,7 @@ This project packages the existing TRILYVA renderer without changing its interfa
 
 On desktop, set the composition background to Transparent, choose WebM, MOV, or APNG in the desktop alpha panel, and press **RENDER CURRENT CODE + EXPORT ALPHA**. TRILYVA compiles the current editor code, writes each PNG frame sequentially to a native directory without a browser download/re-import round trip, checks the manifest and complete frame sequence, then runs the native encoder. The encoder checks dimensions, exact frame count, requested FPS, advertised alpha support, and decoded non-opaque alpha samples. A failed render removes its incomplete frame directory. A successful render keeps the source frame folder for reuse; a failed encode leaves complete frames available for retry.
 
-Frame data is sent one frame at a time and each native transfer is limited to 256 MiB to avoid unbounded IPC payloads. If an unusually complex frame exceeds this limit, reduce resolution/scene complexity or use the existing PNG-sequence export path.
+Each PNG frame is streamed in bounded 4 MiB IPC chunks. The decoded frame is capped at 256 MiB to avoid unbounded memory/IPC payloads. If an unusually complex frame exceeds this limit, reduce resolution/scene complexity or use the existing PNG-sequence export path.
 
 ## Multi-platform CI builds
 
