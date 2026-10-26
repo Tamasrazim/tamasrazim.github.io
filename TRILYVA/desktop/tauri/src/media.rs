@@ -918,7 +918,10 @@ fn frame_rate_matches(value: Option<&str>, expected_fps: u32) -> bool {
     let Some((numerator, denominator)) = value.split_once('/') else { return false; };
     let Ok(numerator) = numerator.parse::<u64>() else { return false; };
     let Ok(denominator) = denominator.parse::<u64>() else { return false; };
-    denominator > 0 && numerator == u64::from(expected_fps) * denominator
+    let Some(expected_numerator) = u64::from(expected_fps).checked_mul(denominator) else {
+        return false;
+    };
+    denominator > 0 && numerator == expected_numerator
 }
 
 pub fn verify_media_file(app: &AppHandle, value: &str) -> Result<MediaVerification, String> {
@@ -1020,7 +1023,7 @@ fn verify_media_file_internal(
         video_codec: codec,
         width,
         height,
-        pixel_format,
+        pixel_format: pixel_format.clone(),
         alpha_channel,
         frame_rate: rate,
         frames_read: frames,
