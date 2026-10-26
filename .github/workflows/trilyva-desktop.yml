@@ -93,6 +93,9 @@ jobs:
         shell: bash
         run: tauri icon ../../../assets/brand/trilyva/T.svg --output icons --ios-color "#050505"
 
+      - name: Apply Rust formatting
+        run: cargo fmt --all
+
       - name: Check formatting
         run: cargo fmt --all -- --check
 
@@ -143,7 +146,7 @@ jobs:
       - name: Install Android SDK / NDK components
         shell: bash
         run: |
-          sdkmanager --install "platform-tools" "platforms;android-37" "build-tools;37.0.0" "ndk;27.2.12479018"
+          sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;27.2.12479018"
           echo "NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
           echo "$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_PATH"
 
@@ -185,8 +188,8 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install CocoaPods
-        run: brew install cocoapods
+      - name: Install iOS build dependencies
+        run: brew install cocoapods xcodegen libimobiledevice
 
       - name: Install Rust iOS targets
         run: rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
