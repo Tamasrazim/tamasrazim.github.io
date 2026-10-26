@@ -64,7 +64,7 @@
                 if (blob.size > 256 * 1024 * 1024) {
                   return Promise.reject(new Error("Frame " + fileName + " exceeds the safe 256 MiB native-transfer limit. Use a lighter scene or a lower resolution."));
                 }
-                if (/\\.png$/i.test(fileName)) {
+                if (/\.png$/i.test(fileName)) {
                   var chunkSize = 4 * 1024 * 1024;
                   if (!blob.size) return Promise.reject(new Error("Refusing to transfer an empty PNG frame."));
                   var offset = 0;
