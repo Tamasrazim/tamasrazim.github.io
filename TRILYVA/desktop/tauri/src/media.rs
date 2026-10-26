@@ -4,7 +4,7 @@ use serde_json::{json, Value};
 use std::{
     collections::VecDeque,
     fs,
-    io::{BufRead, BufReader},
+    io::{BufRead, BufReader, Write},
     path::{Path, PathBuf},
     process::{Command, Stdio},
     sync::{Arc, Mutex},
@@ -12,6 +12,7 @@ use std::{
     time::Instant,
 };
 use tauri::{AppHandle, Emitter, Manager};
+use zip::ZipArchive;
 use uuid::Uuid;
 
 const MAX_DIMENSION: u32 = 16_384;
@@ -545,11 +546,51 @@ pub fn encode_png_sequence(app: AppHandle, options: PngSequenceEncodeOptions) ->
         bitrate_bps: options.bitrate_bps,
     })?;
 
-    let input_dir = PathBuf::from(&options.input_dir)
+    let selected_input = PathBuf::from(&options.input_dir)
         .canonicalize()
-        .map_err(|error| format!("Cannot open the frame directory: {error}"))?;
+        .map_err(|error| format!("Cannot open the frame folder or ZIP archive: {error}"))?;
+    let mut temp_guard: Option<tempfile::TempDir> = None;
+    let input_dir = if selected_input.is_dir() {
+        selected_input
+    } else if selected_input.is_file()
+        && selected_input.extension().and_then(|value| value.to_str())
+            .map(|value| value.eq_ignore_ascii_case("zip")).unwrap_or(false)
+    {
+        let temp = tempfile::tempdir()
+            .map_err(|error| format!("Could not create a temporary PNG sequence directory: {error}"))?;
+        let file = fs::File::open(&selected_input)
+            .map_err(|error| format!("Could not open PNG sequence ZIP: {error}"))?;
+        let mut archive = ZipArchive::new(file)
+            .map_err(|error| format!("The selected file is not a readable ZIP archive: {error}"))?;
+        for index in 0..archive.len() {
+            let mut entry = archive.by_index(index)
+                .map_err(|error| format!("Could not read ZIP entry {index}: {error}"))?;
+            let Some(relative) = entry.enclosed_name().map(Path::to_path_buf) else { continue; };
+            if relative.components().count() != 1 {
+                continue;
+            }
+            let file_name = relative.file_name().and_then(|value| value.to_str()).unwrap_or("");
+            if !file_name.to_ascii_lowercase().ends_with(".png") {
+                continue;
+            }
+            let destination = temp.path().join(relative);
+            let mut target = fs::OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(&destination)
+                .map_err(|error| format!("Could not stage PNG frame {}: {error}", destination.display()))?;
+            std::io::copy(&mut entry, &mut target)
+                .map_err(|error| format!("Could not extract PNG frame {}: {error}", destination.display()))?;
+            target.flush()
+                .map_err(|error| format!("Could not finish staging PNG frame {}: {error}", destination.display()))?;
+        }
+        temp_guard = Some(temp);
+        temp_guard.as_ref().expect("temporary folder was assigned").path().to_path_buf()
+    } else {
+        return Err("Select a PNG frame folder or a TRILYVA PNG·ZIP archive.".to_string());
+    };
     if !input_dir.is_dir() {
-        return Err("The frame input must be a directory.".to_string());
+        return Err("The frame input must be a directory or a valid PNG sequence ZIP.".to_string());
     }
 
     let prefix = find_png_sequence_prefix(&input_dir, config.frame_count)?;
