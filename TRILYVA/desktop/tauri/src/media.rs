@@ -592,6 +592,8 @@ struct NativeSequenceSession {
     prefix: String,
     config: ValidatedRenderConfig,
     next_frame: u64,
+    pending_frame: Option<String>,
+    pending_frame_bytes: usize,
     finalized: bool,
 }
 
@@ -661,6 +663,8 @@ pub fn create_native_sequence(
         prefix,
         config: config.clone(),
         next_frame: 0,
+        pending_frame: None,
+        pending_frame_bytes: 0,
         finalized: false,
     };
     let mut sessions = store.0.lock().map_err(|_| "The native render-session registry is unavailable.".to_string())?;
@@ -670,6 +674,75 @@ pub fn create_native_sequence(
         directory: directory.to_string_lossy().into_owned(),
         folder_name: directory.file_name().and_then(|name| name.to_str()).unwrap_or("TRILYVA-frames").to_string(),
         expected_frames: config.frame_count,
+    })
+}
+
+pub fn write_native_sequence_chunk(
+    store: &NativeSequenceStore,
+    session_id: &str,
+    file_name: &str,
+    base64_data: &str,
+    final_chunk: bool,
+) -> Result<NativeSequenceWriteReceipt, String> {
+    if file_name.is_empty()
+        || file_name.contains('/')
+        || file_name.contains('\\\\')
+        || !file_name.ends_with(".png")
+    {
+        return Err("The native chunk writer accepts PNG filenames only, not paths.".to_string());
+    }
+    let data = BASE64.decode(base64_data)
+        .map_err(|error| format!("The PNG frame chunk was not valid base64: {error}"))?;
+    if data.is_empty() {
+        return Err("Refusing to append an empty PNG frame chunk.".to_string());
+    }
+
+    let mut sessions = store.0.lock().map_err(|_| "The native render-session registry is unavailable.".to_string())?;
+    let session = sessions.get_mut(session_id).ok_or_else(|| "This native render session expired or was cancelled.".to_string())?;
+    if session.finalized {
+        return Err("The native PNG sequence is already finalized.".to_string());
+    }
+    let expected = format!("{}{:06}.png", session.prefix, session.next_frame);
+    let starting_frame = session.pending_frame.is_none();
+    if starting_frame && file_name != expected {
+        return Err(format!("Frame order contract failed: expected '{expected}', received '{file_name}'. No frame was written."));
+    }
+    if let Some(pending_name) = session.pending_frame.as_deref() {
+        if pending_name != file_name {
+            return Err(format!("Frame '{pending_name}' is still being streamed; received a chunk for '{file_name}'."));
+        }
+    }
+    let next_size = session.pending_frame_bytes.checked_add(data.len())
+        .ok_or_else(|| "The native PNG frame size overflowed its safety counter.".to_string())?;
+    if next_size > MAX_NATIVE_FRAME_BYTES {
+        return Err(format!("Frame '{file_name}' exceeds the safe native frame limit of {} MiB.", MAX_NATIVE_FRAME_BYTES / (1024 * 1024)));
+    }
+
+    let destination = session.directory.join(file_name);
+    let mut options = fs::OpenOptions::new();
+    options.write(true).append(true);
+    if starting_frame {
+        options.create_new(true);
+    }
+    let mut file = options.open(&destination)
+        .map_err(|error| format!("Could not open native frame chunk target '{file_name}': {error}"))?;
+    file.write_all(&data).map_err(|error| format!("Could not append native frame chunk '{file_name}': {error}"))?;
+    file.flush().map_err(|error| format!("Could not flush native frame chunk '{file_name}': {error}"))?;
+
+    if starting_frame {
+        session.pending_frame = Some(file_name.to_string());
+    }
+    session.pending_frame_bytes = next_size;
+    if final_chunk {
+        session.next_frame += 1;
+        session.pending_frame = None;
+        session.pending_frame_bytes = 0;
+    }
+
+    Ok(NativeSequenceWriteReceipt {
+        next_frame: session.next_frame,
+        expected_frames: session.config.frame_count,
+        finalized: session.finalized,
     })
 }
 
@@ -703,6 +776,9 @@ pub fn write_native_sequence_file(
     }
 
     if file_name == "manifest.json" {
+        if session.pending_frame.is_some() {
+            return Err("Cannot write the manifest while the last PNG frame is still being streamed.".to_string());
+        }
         if session.next_frame != session.config.frame_count {
             return Err(format!("The renderer tried to finish its manifest after {} of {} frames.", session.next_frame, session.config.frame_count));
         }
@@ -732,16 +808,7 @@ pub fn write_native_sequence_file(
             .map_err(|error| format!("Could not write the native sequence README: {error}"))?;
         file.write_all(&data).map_err(|error| format!("Could not finish the native sequence README: {error}"))?;
     } else {
-        let expected = format!("{}{:06}.png", session.prefix, session.next_frame);
-        if file_name != expected {
-            return Err(format!("Frame order contract failed: expected '{expected}', received '{file_name}'. No frame was written."));
-        }
-        let destination = session.directory.join(file_name);
-        let mut file = fs::OpenOptions::new().write(true).create_new(true).open(&destination)
-            .map_err(|error| format!("Could not create native frame {file_name}: {error}"))?;
-        file.write_all(&data).map_err(|error| format!("Could not write native frame {file_name}: {error}"))?;
-        file.flush().map_err(|error| format!("Could not flush native frame {file_name}: {error}"))?;
-        session.next_frame += 1;
+        return Err("PNG frames must be transferred with the ordered chunked writer.".to_string());
     }
 
     Ok(NativeSequenceWriteReceipt {
@@ -754,6 +821,9 @@ pub fn write_native_sequence_file(
 pub fn finalize_native_sequence(store: &NativeSequenceStore, session_id: &str) -> Result<NativeSequenceInfo, String> {
     let sessions = store.0.lock().map_err(|_| "The native render-session registry is unavailable.".to_string())?;
     let session = sessions.get(session_id).ok_or_else(|| "This native render session expired or was cancelled.".to_string())?;
+    if session.pending_frame.is_some() {
+        return Err("The last PNG frame has unfinished native transfer chunks.".to_string());
+    }
     if !session.finalized || session.next_frame != session.config.frame_count {
         return Err(format!("The sequence is incomplete: {} of {} frames, manifest finalized={}.", session.next_frame, session.config.frame_count, session.finalized));
     }
@@ -1333,21 +1403,42 @@ mod tests {
             &frame
         ).is_err());
 
-        let first = write_native_sequence_file(
+        let first_half = BASE64.encode(b"test-");
+        let second_half = BASE64.encode(b"png-frame");
+        let first_partial = write_native_sequence_chunk(
             &store,
             &session.session_id,
             "native-test_000000.png",
-            &frame,
+            &first_half,
+            false,
         )
-        .expect("write first frame");
-        assert_eq!(first.next_frame, 1);
-        assert!(!first.finalized);
-
-        let second = write_native_sequence_file(
+        .expect("write first chunk");
+        assert_eq!(first_partial.next_frame, 0);
+        assert!(!first_partial.finalized);
+        assert!(write_native_sequence_chunk(
             &store,
             &session.session_id,
             "native-test_000001.png",
             &frame,
+            true
+        ).is_err());
+
+        let first = write_native_sequence_chunk(
+            &store,
+            &session.session_id,
+            "native-test_000000.png",
+            &second_half,
+            true,
+        )
+        .expect("finish first frame");
+        assert_eq!(first.next_frame, 1);
+
+        let second = write_native_sequence_chunk(
+            &store,
+            &session.session_id,
+            "native-test_000001.png",
+            &frame,
+            true,
         )
         .expect("write second frame");
         assert_eq!(second.next_frame, 2);
