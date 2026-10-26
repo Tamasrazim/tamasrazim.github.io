@@ -485,6 +485,35 @@ fn find_png_sequence_prefix(input_dir: &Path, frame_count: u64) -> Result<String
     }
 }
 
+
+fn validate_alpha_manifest(input_dir: &Path, config: &ValidatedRenderConfig) -> Result<(), String> {
+    let manifest_path = input_dir.join("manifest.json");
+    let contents = fs::read_to_string(&manifest_path).map_err(|_| {
+        "Transparent output requires manifest.json from TRILYVA's PNG·DIR or PNG·ZIP export. Re-export the frames from TRILYVA with Background set to Transparent.".to_string()
+    })?;
+    let manifest: Value = serde_json::from_str(&contents)
+        .map_err(|error| format!("The PNG sequence manifest is invalid JSON: {error}"))?;
+    let composition = manifest.get("composition")
+        .ok_or_else(|| "The PNG sequence manifest does not include its composition settings.".to_string())?;
+    let transparent = composition.get("transparent").and_then(Value::as_bool).unwrap_or(false);
+    if !transparent {
+        return Err("The PNG sequence was rendered with an opaque background. Set Composition → Background → Transparent, render a fresh PNG·DIR or PNG·ZIP sequence, then encode again.".to_string());
+    }
+    let width = composition.get("width").and_then(Value::as_u64);
+    let height = composition.get("height").and_then(Value::as_u64);
+    let fps = composition.get("fps").and_then(Value::as_u64);
+    let frames = composition.get("frameCount").and_then(Value::as_u64)
+        .or_else(|| manifest.get("frameCount").and_then(Value::as_u64));
+    if width != Some(config.width as u64)
+        || height != Some(config.height as u64)
+        || fps != Some(config.fps as u64)
+        || frames != Some(config.frame_count)
+    {
+        return Err("The PNG sequence manifest does not match the current width, height, FPS, and frame count. Restore the render settings used for the PNG sequence or render the frames again.".to_string());
+    }
+    Ok(())
+}
+
 fn probe_image_dimensions(app: &AppHandle, path: &Path) -> Result<(u32, u32), String> {
     let ffprobe = resolve_tool(app, "ffprobe");
     let path_text = path.to_string_lossy().into_owned();
@@ -570,7 +599,9 @@ pub fn encode_png_sequence(app: AppHandle, options: PngSequenceEncodeOptions) ->
                 continue;
             }
             let file_name = relative.file_name().and_then(|value| value.to_str()).unwrap_or("");
-            if !file_name.to_ascii_lowercase().ends_with(".png") {
+            let is_png = file_name.to_ascii_lowercase().ends_with(".png");
+            let is_manifest = file_name.eq_ignore_ascii_case("manifest.json");
+            if !is_png && !is_manifest {
                 continue;
             }
             let destination = temp.path().join(relative);
@@ -593,6 +624,9 @@ pub fn encode_png_sequence(app: AppHandle, options: PngSequenceEncodeOptions) ->
         return Err("The frame input must be a directory or a valid PNG sequence ZIP.".to_string());
     }
 
+    if options.preserve_alpha {
+        validate_alpha_manifest(&input_dir, &config)?;
+    }
     let prefix = find_png_sequence_prefix(&input_dir, config.frame_count)?;
     let first = input_dir.join(format!("{prefix}000000.png"));
     let (input_width, input_height) = probe_image_dimensions(&app, &first)?;
