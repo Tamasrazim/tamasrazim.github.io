@@ -24,7 +24,8 @@ On Linux, the native window requires X11/Wayland and OpenGL development librarie
 - Custom monochrome application artwork and a Windows Inno Setup installer.
 - The app has no embedded WebView and no dependency on the existing web workspace for its UI.
 
-This is the first native foundation, not a claim of full feature parity yet. Advanced Canvas APIs (text/font rasterization, gradients, images, compositing), background preview rendering, render cancellation, codec exports, complete project/library migration, frame-by-frame output verification, and polished OS-specific installers are explicit follow-up implementation work. The Windows installer is scripted; the multi-platform builds still need CI confirmation.
+This is the first native foundation, not a claim of full feature parity yet. Advanced Canvas APIs (text/font rasterization, gradients, images, compositing), background preview rendering, render cancellation, codec exports, complete project/library migration, frame-by-frame output verification, and polished OS-specific installers are explicit follow-up implementation work. See [the verification record](../VERIFICATION.md) for the latest CI evidence and local installation status. A successful CI build confirms compilation and packaging; it does not confirm an installed application's behaviour on every operating system.
 
 The exporter currently labels alpha as a request in the manifest; export verification must be expanded before an output is presented as alpha-verified. Inspect actual pixels before using an asset that requires transparency.
+
 
