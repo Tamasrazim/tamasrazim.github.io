@@ -290,7 +290,7 @@ fn validate_asset_filename(filename: &str) -> Result<(), AssetError> {
         || filename == "manifest.json"
         || filename == "project.db"
         || filename.contains('/')
-        || filename.contains('\\\\')
+        || filename.contains('\\')
     {
         return Err(AssetError::InvalidFilename);
     }
