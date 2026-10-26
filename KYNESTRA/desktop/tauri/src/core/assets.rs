@@ -373,7 +373,7 @@ mod tests {
         ));
     }
 
-        #[test]
+    #[test]
     fn deduplicate_merges_source_modules() {
         let root = tempfile::tempdir().expect("temp directory");
         let source = root.path().join("render.webm");
