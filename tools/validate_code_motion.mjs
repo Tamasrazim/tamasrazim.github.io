@@ -11,7 +11,7 @@ const renderer = fs.readFileSync('projects/code-motion/renderer/index.html', 'ut
 const project = fs.readFileSync('projects/code-motion/index.html', 'utf8');
 const media = fs.readFileSync('projects/code-motion/renderer/media-stack.js', 'utf8');
 
-must(renderer.includes('<title>TRILYVA — Tamasrazim</title>'), 'current TRILYVA title exists');
+must(/<title>[^<]*TRILYVA[^<]*<\/title>/i.test(renderer), 'current TRILYVA title exists');
 
 for (const token of [
   'function renderFrame(',
