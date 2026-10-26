@@ -21,6 +21,9 @@
     writeNativeSequenceFile: (sessionId, fileName, base64Data) => invoke("write_native_sequence_file", {
       sessionId, fileName, base64Data
     }),
+    writeNativeSequenceChunk: (sessionId, fileName, base64Data, finalChunk) => invoke("write_native_sequence_chunk", {
+      sessionId, fileName, base64Data, finalChunk
+    }),
     finalizeNativePngSequence: (sessionId) => invoke("finalize_native_png_sequence", { sessionId }),
     discardNativePngSequence: (sessionId) => invoke("discard_native_png_sequence", { sessionId }),
     encodeNativePngSequence: (sessionId, outputPath, profile, bitrateBps) => invoke("encode_native_png_sequence", {
