@@ -4,7 +4,8 @@
     "profile": false,
     "projects": false,
     "trilyva": false,
-    "workspaces": false
+    "workspaces": false,
+    "work": false
   },
   "title": "Temporarily unavailable",
   "message": "This part of the website is undergoing maintenance. Please check back soon.",
