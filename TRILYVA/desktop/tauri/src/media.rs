@@ -794,7 +794,7 @@ pub fn encode_png_sequence(app: AppHandle, options: PngSequenceEncodeOptions) ->
         return Err(format!("FFmpeg failed with {status}. {diagnostic}"));
     }
 
-    let verification = match verify_media_file(&app, &output_text) {
+    let verification = match verify_media_file_internal(&app, &output_text, options.preserve_alpha) {
         Ok(verification) => verification,
         Err(error) => {
             let _ = fs::remove_file(&output);
@@ -853,6 +853,14 @@ pub fn encode_png_sequence(app: AppHandle, options: PngSequenceEncodeOptions) ->
 }
 
 pub fn verify_media_file(app: &AppHandle, value: &str) -> Result<MediaVerification, String> {
+    verify_media_file_internal(app, value, false)
+}
+
+fn verify_media_file_internal(
+    app: &AppHandle,
+    value: &str,
+    preserve_alpha: bool,
+) -> Result<MediaVerification, String> {
     let path = PathBuf::from(value);
     if !path.is_file() {
         return Err("The selected output file does not exist.".to_string());
@@ -863,13 +871,22 @@ pub fn verify_media_file(app: &AppHandle, value: &str) -> Result<MediaVerificati
     }
 
     let path_text = path.to_string_lossy().into_owned();
-    let output = Command::new(ffprobe)
+    let extension = path.extension().and_then(|value| value.to_str()).unwrap_or("").to_ascii_lowercase();
+    let mut probe = Command::new(ffprobe);
+    probe
         .arg("-v").arg("error")
         .arg("-count_frames")
         .arg("-select_streams").arg("v:0")
         .arg("-show_entries")
         .arg("format=format_name,duration:stream=codec_name,width,height,pix_fmt,r_frame_rate,nb_read_frames,duration")
-        .arg("-of").arg("json")
+        .arg("-of").arg("json");
+    // WebM alpha is stored as a VP9 side stream; forcing libvpx asks FFprobe
+    // to decode that alpha plane rather than the built-in VP9 decoder, which
+    // can report an opaque pixel format for a valid alpha-bearing WebM.
+    if preserve_alpha && extension == "webm" {
+        probe.arg("-c:v").arg("libvpx-vp9");
+    }
+    let output = probe
         .arg(&path_text)
         .stdin(Stdio::null())
         .output()
