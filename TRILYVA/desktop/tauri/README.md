@@ -31,5 +31,6 @@ The desktop build adds a **TRANSPARENT VIDEO · DESKTOP** panel to the existing 
 
 - **WebM / VP9 alpha** using `libvpx-vp9`, `yuva420p`, and alternate-reference frames disabled.
 - **MOV / ProRes 4444** using `prores_ks`, profile 4, and `yuva444p10le`.
+- **APNG** as a transparent animated-image output using the FFmpeg `apng` encoder and RGBA pixel format.
 
 The output is not accepted just because FFmpeg wrote a file: FFprobe checks its video stream, frame count, and pixel format. If the resulting stream does not report an alpha-capable pixel format, TRILYVA deletes the output and reports failure. Support still depends on the packaged FFmpeg build advertising the required encoder, muxer, and pixel format. The alpha panel encodes an already-rendered PNG sequence; it does not re-render the animation a second time.
