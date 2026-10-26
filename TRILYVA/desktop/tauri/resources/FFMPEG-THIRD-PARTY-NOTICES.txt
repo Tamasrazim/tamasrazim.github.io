@@ -1,0 +1,15 @@
+TRILYVA desktop bundles FFmpeg binaries prepared by the Windows build workflow.
+
+Upstream build project:
+https://github.com/BtbN/FFmpeg-Builds
+
+FFmpeg project and licensing:
+https://ffmpeg.org/legal.html
+https://ffmpeg.org/
+
+The current workflow downloads the GPL-configured static Windows x64 archive named:
+ffmpeg-master-latest-win64-gpl.zip
+
+The generated package records the exact build configuration and license summary from the executable's -version and -L output. This build can include third-party libraries with separate license terms. Read the licenses and corresponding source availability from the upstream FFmpeg build/source projects before redistribution.
+
+Codec support is determined at runtime from the actual packaged binary and may vary by build. This notice does not guarantee that any particular encoder is present or works with every output configuration.
