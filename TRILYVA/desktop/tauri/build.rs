@@ -87,7 +87,6 @@ fn stage_workspace() -> Result<(), Box<dyn std::error::Error>> {
     html = html.replace(service_worker, "");
 
     // This panel exists only in the desktop package. The canonical browser UI is left unchanged.
-    let still_marker = r#"<p class="note" id="stillExportNote">Frame numbers start at 0. After a successful render, TRILYVA also saves the selected still formats for this frame. PNG is the default.</p>"#;
     let alpha_panel = r#"<div class="sec" id="desktopAlphaExport" style="border-top:1px solid var(--rule);margin-top:14px;padding-top:14px">
       <h4>TRANSPARENT VIDEO · DESKTOP</h4>
       <p class="note">Set BACKGROUND to TRANSPARENT and export as PNG·DIR or PNG·ZIP first. Then encode that sequence as VP9 WebM with alpha or ProRes 4444 MOV. PNG and SVG can preserve transparency; JPG and EPS are opaque formats, and all still exports remain available above.</p>
@@ -99,11 +98,17 @@ fn stage_workspace() -> Result<(), Box<dyn std::error::Error>> {
       <button class="btn solid" type="button" id="alphaEncodeButton">ENCODE TRANSPARENT VIDEO</button>
       <div class="note" id="alphaExportStatus" role="status" aria-live="polite">Alpha export is verified after encoding. A file without an alpha pixel format is rejected.</div>
     </div>"#;
+    // Anchor to the stable ID rather than the note copy, which can change as export options evolve.
+    let still_note_marker = r#"<p class="note" id="stillExportNote">"#;
     if !html.contains("id=\"desktopAlphaExport\"") {
-        if !html.contains(still_marker) {
-            return Err("Could not locate the still-frame export section to install the desktop alpha encoder UI.".into());
-        }
-        html = html.replace(still_marker, &format!("{still_marker}\n{alpha_panel}"));
+        let start = html
+            .find(still_note_marker)
+            .ok_or("Could not locate the still-frame export note to install the desktop alpha encoder UI.")?;
+        let end_relative = html[start..]
+            .find("</p>")
+            .ok_or("Could not locate the end of the still-frame export note.")?;
+        let insert_at = start + end_relative + "</p>".len();
+        html.insert_str(insert_at, &format!("\n{alpha_panel}"));
     }
 
     let bridge_tag = r#"<script src="./desktop-bridge.js"></script>"#;
