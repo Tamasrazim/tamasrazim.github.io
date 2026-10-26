@@ -26,7 +26,7 @@
     return /^\/projects\/trilyva(?:\/|$)/i.test(p) ||
       /^\/projects\/code-motion\/(?:renderer|batch)(?:\/|$)/i.test(p) ||
       /^\/projects\/code-motion\/legacy-renderer\.html$/i.test(p) ||
-      /^\/(?:renderer|code-motion-tamasrazim2?\.html)(?:\/|$)/i.test(p);
+      /^\/code-motion-tamasrazim2?\.html$/i.test(p);
   }
 
   function isProjectRoute(p) {
@@ -34,12 +34,13 @@
   }
 
   function isProfileRoute(p) {
-    return p === '/' ||
+    return p === '/' || p === '/index.html' ||
       /^\/(?:about|approach|elsewere|licences|work)(?:\/|$)/i.test(p);
   }
 
   function isWorkspaceRoute(p) {
-    return /^\/(?:KYNESTRA|asset-vault)(?:\/|$)/i.test(p);
+    return /^\/(?:KYNESTRA|asset-vault|renderer)(?:\/|$)/i.test(p) ||
+      /^\/code-motion-tamasrazim2?\.html$/i.test(p);
   }
 
   function shouldRedirect(config) {
