@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Owner controls for Tamasrazim website maintenance and route availability.">
+<link rel="canonical" href="https://tamasrazim.github.io/maintanence/">
+<link rel="icon" type="image/svg+xml" href="/assets/brand/trilyva/T.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Maintenance Control — Tamasrazim</title>
+<style>
+:root{color-scheme:dark;--bg:#050505;--panel:#0b0b0b;--line:#2a2a2a;--ink:#f2f2ee;--muted:#9b9b95;--mono:"JetBrains Mono",ui-monospace,monospace;--display:"Unbounded",system-ui,sans-serif}
+*{box-sizing:border-box}
+html{background:var(--bg);scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(ellipse at 78% 0%,#171717 0,transparent 37%),var(--bg);color:var(--ink);font:14px/1.7 system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:inherit;text-decoration:none}
+.wrap{width:min(1120px,calc(100% - 36px));margin:auto}
+header{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;font:10px/1.6 var(--mono);letter-spacing:.13em}
+.brand img{width:40px;height:40px;object-fit:contain;border:1px solid var(--line)}
+.brand strong{display:block}.brand small{display:block;color:var(--muted);font-size:9px}
+.toplink{font:10px var(--mono);color:var(--muted);border:1px solid var(--line);padding:9px 12px}
+.hero{padding:clamp(48px,8vw,90px) 0 35px;border-bottom:1px solid var(--line)}
+.kicker{font:10px var(--mono);letter-spacing:.17em;color:var(--muted);text-transform:uppercase}
+h1{font:700 clamp(38px,7.5vw,88px)/1.02 var(--display);letter-spacing:-.085em;margin:21px 0}
+h1 span{color:#777}
+.lead{max-width:760px;color:#bdbdb7;line-height:1.9;font-size:15px}
+.notice{border:1px solid #393939;background:#0a0a0a;padding:15px 17px;margin:28px 0 0;max-width:900px;color:#aaa;font-size:12px;line-height:1.9}
+.notice strong{color:#f2f2ee}
+.main{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(270px,.7fr);gap:18px;padding:30px 0 65px;align-items:start}
+.panel{border:1px solid var(--line);background:linear-gradient(145deg,#0c0c0c,#060606);padding:clamp(18px,3vw,28px);min-width:0}
+.panel h2{font:600 17px var(--display);letter-spacing:-.04em;margin:0 0 9px}
+.sub{color:var(--muted);font-size:12px;line-height:1.8;margin:0 0 20px}
+.switches{display:grid;gap:10px}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px;border:1px solid var(--line);background:#080808;cursor:pointer}
+.switch:hover{border-color:#656565}
+.switch b{display:block;font:10px var(--mono);letter-spacing:.08em}
+.switch small{display:block;color:var(--muted);font-size:11px;line-height:1.6;margin-top:4px;max-width:500px}
+.switch input{appearance:none;width:42px;height:24px;flex:0 0 auto;border:1px solid #555;background:#161616;position:relative;cursor:pointer;transition:background .18s,border-color .18s}
+.switch input:before{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;background:#8b8b85;transition:transform .18s,background .18s}
+.switch input:checked{background:#e9e9e3;border-color:#e9e9e3}
+.switch input:checked:before{transform:translateX(18px);background:#050505}
+.switch input:focus-visible{outline:2px solid #fff;outline-offset:3px}
+label.field{display:block;font:10px var(--mono);letter-spacing:.07em;color:#c8c8c2;margin:17px 0 7px}
+input.text,textarea{display:block;width:100%;border:1px solid #333;background:#030303;color:var(--ink);padding:12px;font:12px/1.7 var(--mono);outline:none;resize:vertical}
+input.text:focus,textarea:focus{border-color:#aaa}
+textarea{min-height:112px}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}
+button,.btn{border:1px solid #414141;background:#101010;color:var(--ink);min-height:42px;padding:0 14px;font:10px var(--mono);letter-spacing:.035em;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+button.primary{background:#f2f2ee;color:#050505;border-color:#f2f2ee}
+button:hover,.btn:hover{border-color:#eee}
+button:disabled{opacity:.45;cursor:wait}
+.status{display:flex;gap:10px;align-items:center;border:1px solid var(--line);background:#080808;padding:12px;margin:19px 0;color:#bbb;font:10px var(--mono);letter-spacing:.05em}
+.led{width:8px;height:8px;border-radius:50%;background:#6f6f68;flex:0 0 auto}
+.status[data-active="true"] .led{background:#f0f0ea;box-shadow:0 0 0 4px #ffffff12}
+.status strong{font-weight:600}
+.message{min-height:25px;margin-top:13px;color:#bcbcb6;font:11px/1.8 var(--mono);overflow-wrap:anywhere}
+.message[data-kind="error"]{color:#efb1b1}.message[data-kind="success"]{color:#cfe4c6}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+.help{font-size:11px;line-height:1.9;color:#858580}
+.help a{color:#eee;text-decoration:underline;text-underline-offset:3px}
+.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:15px}
+.metric{border:1px solid var(--line);padding:12px;min-width:0}
+.metric b{display:block;font:10px var(--mono)}
+.metric span{display:block;margin-top:5px;color:var(--muted);font:9px/1.6 var(--mono);text-transform:uppercase}
+footer{padding:19px 0 27px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:16px;color:#686862;font:9px var(--mono);letter-spacing:.04em}
+@media(max-width:800px){.main{grid-template-columns:1fr}.hero{padding-top:50px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.switch{padding:12px}.switch b{font-size:9px}.metrics{grid-template-columns:1fr}footer{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <a class="brand" href="/" aria-label="Tamasrazim homepage"><img src="/assets/brand/trilyva/T.svg" alt=""><span><strong>TAMASRAZIM</strong><small>OWNER / SITE CONTROLS</small></span></a>
+  <a class="toplink" href="/maintenance/" target="_blank" rel="noopener">OPEN PUBLIC PAGE</a>
+</header>
+<section class="hero">
+  <div class="kicker">Operations / Global route management</div>
+  <h1>MAINTENANCE<br>CONTROL<span>.</span></h1>
+  <p class="lead">One control surface for maintenance on the main site, portfolio sections, project pages, TRILYVA, and other workspaces. The public maintenance screen is separate from this dashboard.</p>
+  <div class="notice"><strong>Protected writes:</strong> changing live settings requires a GitHub fine-grained token with Contents: Read and write access to this repository. The token is used only for the current save and is not stored in browser storage. Anyone who possesses that token can make the same changes.</div>
+</section>
+<main class="main">
+  <section class="panel">
+    <h2>Route controls</h2>
+    <p class="sub">Enable only the sections you need to pause. The global switch overrides every section. Changes take effect after GitHub Pages publishes the new configuration.</p>
+    <div class="switches">
+      <label class="switch"><span><b>GLOBAL / ENTIRE WEBSITE</b><small>Redirect every guarded public HTML route to the maintenance screen.</small></span><input id="globalEnabled" type="checkbox" aria-label="Enable maintenance for the entire website"></label>
+      <label class="switch"><span><b>PROFILE / MAIN PAGES</b><small>Home, About, Approach, Elsewhere, Licences, and Work.</small></span><input id="scopeProfile" type="checkbox" aria-label="Enable maintenance for profile pages"></label>
+      <label class="switch"><span><b>PROJECTS / ALL PROJECT ROUTES</b><small>All pages under the projects directory, including project landing pages and workspaces.</small></span><input id="scopeProjects" type="checkbox" aria-label="Enable maintenance for project pages"></label>
+      <label class="switch"><span><b>TRILYVA / WORKSPACES</b><small>TRILYVA overview, renderer, tutorial, updates, and associated Code Motion renderer routes.</small></span><input id="scopeTrilyva" type="checkbox" aria-label="Enable maintenance for TRILYVA"></label>
+      <label class="switch"><span><b>OTHER WORKSPACES</b><small>KYNESTRA, the standalone asset vault, and the legacy renderer routes.</small></span><input id="scopeWorkspaces" type="checkbox" aria-label="Enable maintenance for other workspaces"></label>
+    </div>
+    <hr>
+    <label class="field" for="publicTitle">PUBLIC PAGE HEADING</label>
+    <input class="text" id="publicTitle" maxlength="100" value="Temporarily unavailable">
+    <label class="field" for="publicMessage">PUBLIC STATUS MESSAGE</label>
+    <textarea id="publicMessage" maxlength="500">This part of the website is undergoing maintenance. Please check back soon.</textarea>
+    <div class="actions">
+      <button class="primary" id="saveSettings">Save settings</button>
+      <button id="refreshSettings">Refresh status</button>
+      <button id="resetSettings">Clear all maintenance switches</button>
+    </div>
+    <div class="message" id="statusMessage" role="status" aria-live="polite"></div>
+  </section>
+  <aside class="panel">
+    <h2>Live overview</h2>
+    <p class="sub">Public status values are readable by the site guard. The administrative token is required only to change them.</p>
+    <div class="status" id="currentState" data-active="false"><span class="led"></span><strong id="currentStateText">Loading current status…</strong></div>
+    <div class="metrics">
+      <div class="metric"><b id="metricGlobal">—</b><span>Global</span></div>
+      <div class="metric"><b id="metricSections">—</b><span>Sections paused</span></div>
+      <div class="metric"><b id="metricUpdated">NEVER</b><span>Last update</span></div>
+      <div class="metric"><b>GITHUB PAGES</b><span>Static hosting</span></div>
+    </div>
+    <hr>
+    <label class="field" for="githubToken">GITHUB FINE-GRAINED TOKEN</label>
+    <input class="text" id="githubToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste token for this save only">
+    <div class="help">Create a token restricted to <strong>Tamasrazim/tamasrazim.github.io</strong> and grant <strong>Contents: Read and write</strong>. Do not paste the token into public code or share it. <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Open GitHub token settings</a>.</div>
+    <div class="actions"><a class="btn" href="https://github.com/Tamasrazim/tamasrazim.github.io/commits/main/maintanence/config.json" target="_blank" rel="noopener">View config history</a><a class="btn" href="/maintenance/" target="_blank" rel="noopener">Preview public page</a></div>
+  </aside>
+</main>
+<footer><span>Robiul Rumman Razim — Tamasrazim</span><span>MAINTENANCE CONTROL / PRIVATE ACTIONS REQUIRE TOKEN</span></footer>
+</div>
+<script>
+(function(){
+'use strict';
+var CONFIG_URL='/maintanence/config.json';
+var API_URL='https://api.github.com/repos/Tamasrazim/tamasrazim.github.io/contents/maintanence/config.json';
+var $=function(id){return document.getElementById(id);};
+var fields={globalEnabled:$('globalEnabled'),profile:$('scopeProfile'),projects:$('scopeProjects'),trilyva:$('scopeTrilyva'),workspaces:$('scopeWorkspaces')};
+var token=$('githubToken'), message=$('statusMessage'), saveButton=$('saveSettings');
+var lastConfig=null, busy=false;
+function note(text,kind){message.textContent=text||'';message.setAttribute('data-kind',kind||'');}
+function getDraft(){return {globalEnabled:fields.globalEnabled.checked,scopes:{profile:fields.profile.checked,projects:fields.projects.checked,trilyva:fields.trilyva.checked,workspaces:fields.workspaces.checked},title:$('publicTitle').value.trim()||'Temporarily unavailable',message:$('publicMessage').value.trim()||'This part of the website is undergoing maintenance.',updatedAt:new Date().toISOString()};}
+function fill(config){lastConfig=config||{};var scopes=lastConfig.scopes||{};fields.globalEnabled.checked=lastConfig.globalEnabled===true;fields.profile.checked=scopes.profile===true;fields.projects.checked=scopes.projects===true;fields.trilyva.checked=scopes.trilyva===true;fields.workspaces.checked=scopes.workspaces===true;$('publicTitle').value=lastConfig.title||'Temporarily unavailable';$('publicMessage').value=lastConfig.message||'This part of the website is undergoing maintenance. Please check back soon.';renderSummary(lastConfig);}
+function renderSummary(config){var scopes=config.scopes||{}, active=['profile','projects','trilyva','workspaces'].filter(function(k){return scopes[k]===true;}).length;var on=config.globalEnabled===true||active>0;$('currentState').setAttribute('data-active',on?'true':'false');$('currentStateText').textContent=config.globalEnabled===true?'GLOBAL MAINTENANCE ENABLED':active?'SECTION MAINTENANCE ENABLED':'ALL ROUTES OPEN';$('metricGlobal').textContent=config.globalEnabled===true?'ON':'OFF';$('metricSections').textContent=String(active);$('metricUpdated').textContent=config.updatedAt?new Date(config.updatedAt).toLocaleString():'NEVER';}
+function load(){note('Reading published configuration…','');fetch(CONFIG_URL+'?status='+Date.now(),{cache:'no-store',headers:{Accept:'application/json'}}).then(function(r){if(!r.ok)throw new Error('Could not read the published configuration.');return r.json();}).then(function(c){fill(c);note('Loaded published status.','success');}).catch(function(e){note(e.message||'Could not read current status.','error');});}
+function encodeBase64Utf8(value){var bytes=new TextEncoder().encode(value),binary='';for(var i=0;i<bytes.length;i++)binary+=String.fromCharCode(bytes[i]);return btoa(binary);}
+function busyState(on){busy=on;saveButton.disabled=on;$('refreshSettings').disabled=on;$('resetSettings').disabled=on;}
+function save(){if(busy)return;var key=token.value.trim();if(!key){note('Paste a fine-grained GitHub token with Contents: Read and write permission for this repository.','error');token.focus();return;}var draft=getDraft();busyState(true);note('Reading current repository version…','');var headers={Accept:'application/vnd.github+json',Authorization:'Bearer '+key,'X-GitHub-Api-Version':'2022-11-28'};fetch(API_URL,{method:'GET',headers:headers,cache:'no-store'}).then(function(r){return r.json().then(function(f){if(!r.ok)throw new Error(f.message||'GitHub could not read the config. Check token permission.');return f;});}).then(function(file){return fetch(API_URL,{method:'PUT',headers:Object.assign({},headers,{'Content-Type':'application/json'}),body:JSON.stringify({message:'site: update centralized maintenance controls',content:encodeBase64Utf8(JSON.stringify(draft,null,2)+'\n'),sha:file.sha,branch:'main'})}).then(function(r){return r.json().then(function(result){if(!r.ok)throw new Error(result.message||'GitHub rejected the config update.');return result;});});}).then(function(){fill(draft);note('Settings committed. GitHub Pages must publish the config before live redirects update.','success');}).catch(function(e){note(e.message||'Could not save settings.','error');}).finally(function(){token.value='';key='';busyState(false);});}
+$('saveSettings').addEventListener('click',save);
+$('refreshSettings').addEventListener('click',load);
+$('resetSettings').addEventListener('click',function(){fields.globalEnabled.checked=false;Object.keys(fields).filter(function(k){return k!=='globalEnabled';}).forEach(function(k){fields[k].checked=false;});note('All switches cleared in the form. Click Save settings to publish this change.','');});
+load();
+})();
+</script>
+</body>
+</html>
