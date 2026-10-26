@@ -1,5 +1,5 @@
 /* TRILYVA global maintenance redirect.
-   This script fails open if the status endpoint is unreachable. */
+   This script fails open if the status endpoint is unreachable and polls active tabs. */
 (function () {
   'use strict';
   var maintenancePage = '/projects/trilyva/maintenance.html';
@@ -11,33 +11,47 @@
   document.head.appendChild(style);
   root.classList.add('trilyva-maintenance-checking');
 
-  var finished = false;
-  var controller = new AbortController();
-  var timeout = setTimeout(function () {
-    controller.abort();
-    reveal();
-  }, 2200);
+  var initialFinished = false;
+  var checking = false;
 
   function reveal() {
-    if (finished) return;
-    finished = true;
-    clearTimeout(timeout);
+    if (initialFinished) return;
+    initialFinished = true;
     root.classList.remove('trilyva-maintenance-checking');
   }
 
-  fetch('/projects/trilyva/maintenance.json?check=' + Date.now(), {
-    cache: 'no-store',
-    headers: { Accept: 'application/json' },
-    signal: controller.signal
-  }).then(function (response) {
-    if (!response.ok) throw new Error('Maintenance status unavailable');
-    return response.json();
-  }).then(function (state) {
-    clearTimeout(timeout);
-    if (state && state.enabled === true) {
-      window.location.replace(maintenancePage);
-      return;
-    }
-    reveal();
-  }).catch(reveal);
+  function checkStatus(isInitial) {
+    if (checking) return;
+    checking = true;
+    var controller = new AbortController();
+    var timeout = setTimeout(function () {
+      controller.abort();
+      if (isInitial) reveal();
+    }, isInitial ? 2200 : 4000);
+
+    fetch('/projects/trilyva/maintenance.json?check=' + Date.now(), {
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+      signal: controller.signal
+    }).then(function (response) {
+      if (!response.ok) throw new Error('Maintenance status unavailable');
+      return response.json();
+    }).then(function (state) {
+      if (state && state.enabled === true) {
+        window.location.replace(maintenancePage);
+        return;
+      }
+      if (isInitial) reveal();
+    }).catch(function () {
+      if (isInitial) reveal();
+    }).finally(function () {
+      clearTimeout(timeout);
+      checking = false;
+    });
+  }
+
+  checkStatus(true);
+  // If maintenance is enabled while someone already has TRILYVA open,
+  // send that active tab to the same page on the next successful check.
+  window.setInterval(function () { checkStatus(false); }, 30000);
 })();
