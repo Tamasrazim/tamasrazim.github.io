@@ -61,7 +61,7 @@ jobs:
         run: npm install --global "@tauri-apps/cli@^2"
 
       - name: Build Windows installers
-        run: tauri build --bundles nsis,msi
+        run: tauri build --bundles msi nsis
 
       - name: Upload installers
         uses: actions/upload-artifact@v4
