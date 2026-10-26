@@ -608,12 +608,13 @@ pub fn encode_png_sequence(app: AppHandle, options: PngSequenceEncodeOptions) ->
     let muxer = muxer_for_extension(&extension).ok_or_else(|| "Unsupported output container.".to_string())?;
     let alpha_webm = options.preserve_alpha && extension == "webm" && options.encoder == "libvpx-vp9";
     let alpha_mov = options.preserve_alpha && extension == "mov" && options.encoder == "prores_ks";
-    if options.preserve_alpha && !alpha_webm && !alpha_mov {
-        return Err("Alpha video profiles are WebM + VP9 (libvpx-vp9) or MOV + ProRes 4444 (prores_ks). Select the matching encoder and file extension.".to_string());
+    let alpha_apng = options.preserve_alpha && extension == "apng" && options.encoder == "apng";
+    if options.preserve_alpha && !alpha_webm && !alpha_mov && !alpha_apng {
+        return Err("Alpha profiles are WebM + VP9 (libvpx-vp9), MOV + ProRes 4444 (prores_ks), or APNG (apng). Select the matching encoder and file extension.".to_string());
     }
     if options.preserve_alpha {
         if let Some(requested) = options.pixel_format.as_deref() {
-            let expected = if alpha_webm { "yuva420p" } else { "yuva444p10le" };
+            let expected = if alpha_webm { "yuva420p" } else if alpha_mov { "yuva444p10le" } else { "rgba" };
             if requested != expected {
                 return Err(format!("Alpha profile requires pixel format {expected}; refusing an override that could discard transparency."));
             }
@@ -623,6 +624,8 @@ pub fn encode_png_sequence(app: AppHandle, options: PngSequenceEncodeOptions) ->
         Some("yuva420p")
     } else if alpha_mov {
         Some("yuva444p10le")
+    } else if alpha_apng {
+        Some("rgba")
     } else {
         options.pixel_format.as_deref()
     };
@@ -683,8 +686,10 @@ pub fn encode_png_sequence(app: AppHandle, options: PngSequenceEncodeOptions) ->
         }
     } else if alpha_mov {
         command.arg("-profile:v").arg("4");
-    } else if let Some(bitrate) = config.bitrate_bps {
-        command.arg("-b:v").arg(bitrate.to_string());
+    } else if !alpha_apng {
+        if let Some(bitrate) = config.bitrate_bps {
+            command.arg("-b:v").arg(bitrate.to_string());
+        }
     }
     if muxer == "mp4" {
         command.arg("-movflags").arg("+faststart");
