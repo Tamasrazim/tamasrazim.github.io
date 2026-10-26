@@ -294,7 +294,7 @@
   }
 
   function norm(value) {
-    return String(value || "").toLowerCase().replace(/[_.]+/g, "-");
+    return String(value || "").toLowerCase().replace(/_/g, "-").replace(/\s+/g, "-");
   }
 
   function isTrilyvaRelease(release) {
