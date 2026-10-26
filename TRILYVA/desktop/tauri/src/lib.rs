@@ -51,6 +51,19 @@ async fn choose_png_sequence_directory() -> Result<Option<String>, String> {
 }
 
 #[tauri::command]
+async fn choose_png_sequence_archive() -> Result<Option<String>, String> {
+    tokio::task::spawn_blocking(|| {
+        rfd::FileDialog::new()
+            .set_title("Choose a TRILYVA PNG frame sequence ZIP")
+            .add_filter("TRILYVA PNG sequence archive", &["zip"])
+            .pick_file()
+            .map(|path| path.to_string_lossy().into_owned())
+    })
+    .await
+    .map_err(|error| format!("PNG sequence ZIP picker failed: {error}"))
+}
+
+#[tauri::command]
 async fn choose_alpha_output(profile: String) -> Result<Option<String>, String> {
     tokio::task::spawn_blocking(move || {
         let (filter_name, extension, file_name) = match profile.as_str() {
@@ -103,6 +116,7 @@ pub fn run() {
             media_capabilities,
             validate_render_config,
             choose_png_sequence_directory,
+            choose_png_sequence_archive,
             choose_alpha_output,
             encode_png_sequence,
             verify_media_file
