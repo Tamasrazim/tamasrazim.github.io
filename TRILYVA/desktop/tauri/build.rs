@@ -59,6 +59,11 @@ fn stage_workspace() -> Result<(), Box<dyn std::error::Error>> {
     fs::copy(&bridge_source, &bridge_target)?;
     println!("cargo:rerun-if-changed={}", bridge_source.display());
 
+    let alpha_script_source = manifest.join("assets/desktop-alpha-export.js");
+    let alpha_script_target = shell.join("desktop-alpha-export.js");
+    fs::copy(&alpha_script_source, &alpha_script_target)?;
+    println!("cargo:rerun-if-changed={}", alpha_script_source.display());
+
     let html_path = shell.join("index.html");
     let mut html = fs::read_to_string(&html_path)?;
     html = html.replace(
@@ -81,12 +86,33 @@ fn stage_workspace() -> Result<(), Box<dyn std::error::Error>> {
 </script>"#;
     html = html.replace(service_worker, "");
 
+    // This panel exists only in the desktop package. The canonical browser UI is left unchanged.
+    let still_marker = r#"<p class="note" id="stillExportNote">Frame numbers start at 0. After a successful render, TRILYVA also saves the selected still formats for this frame. PNG is the default.</p>"#;
+    let alpha_panel = r#"<div class="sec" id="desktopAlphaExport" style="border-top:1px solid var(--rule);margin-top:14px;padding-top:14px">
+      <h4>TRANSPARENT VIDEO · DESKTOP</h4>
+      <p class="note">Set BACKGROUND to TRANSPARENT and export the animation with PNG·DIR first. Then encode that same sequence as VP9 WebM with alpha or ProRes 4444 MOV. PNG, JPG, SVG and EPS still exports remain available above.</p>
+      <div class="row"><label>PNG frame folder</label><span class="val dim" id="alphaFolderLabel">Not selected</span></div>
+      <div class="btn-row"><button class="btn" type="button" id="alphaChooseFrames">Choose PNG·DIR folder</button>
+        <select id="alphaProfile" aria-label="Transparent video format"><option value="webm">WebM · VP9 + alpha</option><option value="mov">MOV · ProRes 4444</option></select></div>
+      <div class="row"><label>Frame settings</label><span class="val dim" id="alphaSettingsLabel">Current composition</span></div>
+      <button class="btn solid" type="button" id="alphaEncodeButton">ENCODE TRANSPARENT VIDEO</button>
+      <div class="note" id="alphaExportStatus" role="status" aria-live="polite">Alpha export is verified after encoding. A file without an alpha pixel format is rejected.</div>
+    </div>"#;
+    if !html.contains("id=\"desktopAlphaExport\"") {
+        if !html.contains(still_marker) {
+            return Err("Could not locate the still-frame export section to install the desktop alpha encoder UI.".into());
+        }
+        html = html.replace(still_marker, &format!("{still_marker}\n{alpha_panel}"));
+    }
+
     let bridge_tag = r#"<script src="./desktop-bridge.js"></script>"#;
-    if !html.contains(bridge_tag) {
+    let alpha_script_tag = r#"<script src="./desktop-alpha-export.js"></script>"#;
+    if !html.contains(bridge_tag) || !html.contains(alpha_script_tag) {
         if let Some(index) = html.rfind("</body>") {
-            html.insert_str(index, &format!("{bridge_tag}\n"));
+            let scripts = format!("{bridge_tag}\n{alpha_script_tag}\n");
+            html.insert_str(index, &scripts);
         } else {
-            html.push_str(bridge_tag);
+            html.push_str(&format!("{bridge_tag}\n{alpha_script_tag}\n"));
         }
     }
     fs::write(html_path, html)?;
