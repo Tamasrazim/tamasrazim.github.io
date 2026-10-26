@@ -128,6 +128,15 @@ impl ProjectManager {
         Ok(summary_from_manifest(&root, &manifest))
     }
 
+    /// Validates a project package and returns its canonical project root.
+    ///
+    /// All core services go through this check so a path is only accepted when
+    /// its manifest and project database agree on the project identity.
+    pub fn validated_root(&self, path: &str) -> Result<PathBuf, ProjectError> {
+        let summary = self.open(path)?;
+        Ok(PathBuf::from(summary.path))
+    }
+
     pub fn list(&self, root: &Path) -> Result<Vec<ProjectSummary>, ProjectError> {
         if !root.exists() {
             return Ok(Vec::new());
@@ -158,8 +167,7 @@ impl ProjectManager {
 }
 
 pub(crate) fn validated_root(path: &str) -> Result<PathBuf, ProjectError> {
-    let summary = ProjectManager::default().open(path)?;
-    Ok(PathBuf::from(summary.path))
+    ProjectManager::default().validated_root(path)
 }
 
 fn validate_database_identity(root: &Path, manifest: &ProjectManifest) -> Result<(), ProjectError> {
