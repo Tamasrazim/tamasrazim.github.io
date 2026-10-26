@@ -9118,10 +9118,10 @@ function startRenderNow(job, opts) {
   renderStat({ frame: 0, done: 0, total: c.frameCount, elapsedMs: 0, renderFps: 0, msPerFrame: 0, bytes: 0 }, job);
   toyShow(true);
 
-  var dirHandle = null;
-  var pre = (job.format === 'png' && job.target === 'dir')
+  var dirHandle = opts.dirHandle || null;
+  var pre = (job.format === 'png' && job.target === 'dir' && !dirHandle)
     ? pickDirectory().then(function (h) { dirHandle = h; logLine('writing frames into folder "' + h.name + '"'); })
-    : Promise.resolve();
+    : (dirHandle ? Promise.resolve().then(function () { logLine('writing frames into folder "' + (dirHandle.name || 'native output') + '"'); }) : Promise.resolve());
 
   var sawFirstFrame = false;
   function onLog(msg) {
@@ -9131,6 +9131,9 @@ function startRenderNow(job, opts) {
     if (/^muxed /.test(msg)) setStage('FINALISING');
   }
   function onProgress(p) {
+    if (typeof opts.onProgress === 'function') {
+      try { opts.onProgress(p); } catch (progressError) { logLine('progress callback failed: ' + String(progressError && progressError.message || progressError), true); }
+    }
     if (!sawFirstFrame) { sawFirstFrame = true; setStage('RENDERING'); prog.classList.remove('scan'); }
     S.lastProgress = p;
     renderStat(p, job);
