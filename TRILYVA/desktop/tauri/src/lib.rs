@@ -83,6 +83,113 @@ async fn choose_alpha_output(profile: String) -> Result<Option<String>, String> 
     .map_err(|error| format!("Alpha video save dialog failed: {error}"))
 }
 
+
+#[tauri::command]
+async fn begin_native_png_sequence(
+    store: tauri::State<'_, media::NativeSequenceStore>,
+    config: media::RenderConfig,
+    project_name: String,
+    prefix: String,
+) -> Result<Option<media::NativeSequenceInfo>, String> {
+    let Some(parent) = tokio::task::spawn_blocking(|| {
+        rfd::FileDialog::new()
+            .set_title("Choose where TRILYVA should save the transparent render frames")
+            .pick_folder()
+    })
+    .await
+    .map_err(|error| format!("Native frame-folder picker failed: {error}"))? else {
+        return Ok(None);
+    };
+    let store = store.inner().clone();
+    tokio::task::spawn_blocking(move || {
+        media::create_native_sequence(&store, parent, &project_name, &prefix, config)
+    })
+    .await
+    .map_err(|error| format!("Native sequence setup worker failed: {error}"))?
+    .map(Some)
+}
+
+#[tauri::command]
+async fn write_native_sequence_file(
+    store: tauri::State<'_, media::NativeSequenceStore>,
+    session_id: String,
+    file_name: String,
+    base64_data: String,
+) -> Result<media::NativeSequenceWriteReceipt, String> {
+    let store = store.inner().clone();
+    tokio::task::spawn_blocking(move || {
+        media::write_native_sequence_file(&store, &session_id, &file_name, &base64_data)
+    })
+    .await
+    .map_err(|error| format!("Native frame-write worker failed: {error}"))?
+}
+
+#[tauri::command]
+async fn finalize_native_png_sequence(
+    store: tauri::State<'_, media::NativeSequenceStore>,
+    session_id: String,
+) -> Result<media::NativeSequenceInfo, String> {
+    let store = store.inner().clone();
+    tokio::task::spawn_blocking(move || {
+        media::finalize_native_sequence(&store, &session_id)
+    })
+    .await
+    .map_err(|error| format!("Native sequence verification worker failed: {error}"))?
+}
+
+#[tauri::command]
+async fn discard_native_png_sequence(
+    store: tauri::State<'_, media::NativeSequenceStore>,
+    session_id: String,
+) -> Result<(), String> {
+    let store = store.inner().clone();
+    tokio::task::spawn_blocking(move || {
+        media::discard_native_sequence(&store, &session_id)
+    })
+    .await
+    .map_err(|error| format!("Native sequence cleanup worker failed: {error}"))?
+}
+
+#[tauri::command]
+async fn encode_native_png_sequence(
+    app: tauri::AppHandle,
+    store: tauri::State<'_, media::NativeSequenceStore>,
+    session_id: String,
+    output_path: String,
+    profile: String,
+    bitrate_bps: Option<u64>,
+) -> Result<media::EncodeResult, String> {
+    let (encoder, pixel_format) = match profile.as_str() {
+        "webm" => ("libvpx-vp9", "yuva420p"),
+        "mov" => ("prores_ks", "yuva444p10le"),
+        "apng" => ("apng", "rgba"),
+        _ => return Err("Choose WebM, MOV, or APNG for transparent output.".to_string()),
+    };
+    let store_ref = store.inner().clone();
+    let options = media::native_sequence_encode_options(
+        &store_ref,
+        &session_id,
+        output_path,
+        encoder.to_string(),
+        bitrate_bps,
+        Some(pixel_format.to_string()),
+    )?;
+    let app_for_worker = app.clone();
+    let store_for_worker = store_ref.clone();
+    let session_for_worker = session_id.clone();
+    let result = tokio::task::spawn_blocking(move || {
+        media::encode_png_sequence(app_for_worker, options)
+    })
+    .await
+    .map_err(|error| format!("Native media encoder worker failed: {error}"))?;
+    if result.is_ok() {
+        // Keep the rendered PNG frames on disk for possible vector/sequence reuse,
+        // but release the in-memory session once a verified media export succeeds.
+        let _ = media::release_native_sequence(&store_for_worker, &session_for_worker);
+    }
+    result
+}
+
 #[tauri::command]
 async fn encode_png_sequence(
     app: tauri::AppHandle,
@@ -106,6 +213,7 @@ async fn verify_media_file(
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .manage(media::NativeSequenceStore::default())
         .setup(|app| {
             // Missing media tools are reported in the workspace; they do not block startup.
             let _ = media::discover(app.handle());
@@ -119,6 +227,11 @@ pub fn run() {
             choose_png_sequence_directory,
             choose_png_sequence_archive,
             choose_alpha_output,
+            begin_native_png_sequence,
+            write_native_sequence_file,
+            finalize_native_png_sequence,
+            discard_native_png_sequence,
+            encode_native_png_sequence,
             encode_png_sequence,
             verify_media_file
         ])
