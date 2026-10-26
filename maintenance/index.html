@@ -51,10 +51,10 @@ var from=query.get('from')||'/';
 if(!from.startsWith('/')||from.startsWith('//')||from.indexOf('\\')!==-1)from='/';
 var routePath=from.split(/[?#]/)[0]||'/';
 document.getElementById('routeName').textContent=from.slice(0,80);
-function isTrilyva(p){return /^\/projects\/trilyva(?:\/|$)/i.test(p)||/^\/projects\/code-motion\/(?:renderer|batch)(?:\/|$)/i.test(p)||/^\/projects\/code-motion\/legacy-renderer\.html$/i.test(p)||/^\/(?:renderer|code-motion-tamasrazim2?\.html)(?:\/|$)/i.test(p);}
+function isTrilyva(p){return /^\/projects\/trilyva(?:\/|$)/i.test(p)||/^\/projects\/code-motion\/(?:renderer|batch)(?:\/|$)/i.test(p)||/^\/projects\/code-motion\/legacy-renderer\.html$/i.test(p);}
 function isProject(p){return /^\/projects(?:\/|$)/i.test(p);}
-function isProfile(p){return p==='/'||/^\/(?:about|approach|elsewere|licences|work)(?:\/|$)/i.test(p);}
-function isWorkspace(p){return /^\/(?:KYNESTRA|asset-vault)(?:\/|$)/i.test(p);}
+function isProfile(p){return p==='/'||p==='/index.html'||/^\/(?:about|approach|elsewere|licences|work)(?:\/|$)/i.test(p);}
+function isWorkspace(p){return /^\/(?:KYNESTRA|asset-vault|renderer)(?:\/|$)/i.test(p)||/^\/code-motion-tamasrazim2?\.html$/i.test(p);}
 function blocked(c){var scopes=c.scopes||{};return c.globalEnabled===true||(scopes.trilyva===true&&isTrilyva(routePath))||(scopes.projects===true&&isProject(routePath))||(scopes.profile===true&&isProfile(routePath))||(scopes.workspaces===true&&isWorkspace(routePath));}
 function check(){
  retry.disabled=true;
