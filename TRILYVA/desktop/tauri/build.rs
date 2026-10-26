@@ -90,7 +90,7 @@ fn stage_workspace() -> Result<(), Box<dyn std::error::Error>> {
     let still_marker = r#"<p class="note" id="stillExportNote">Frame numbers start at 0. After a successful render, TRILYVA also saves the selected still formats for this frame. PNG is the default.</p>"#;
     let alpha_panel = r#"<div class="sec" id="desktopAlphaExport" style="border-top:1px solid var(--rule);margin-top:14px;padding-top:14px">
       <h4>TRANSPARENT VIDEO · DESKTOP</h4>
-      <p class="note">Set BACKGROUND to TRANSPARENT and export as PNG·DIR or PNG·ZIP first. Then encode that sequence as VP9 WebM with alpha or ProRes 4444 MOV. PNG, JPG, SVG and EPS still exports remain available above.</p>
+      <p class="note">Set BACKGROUND to TRANSPARENT and export as PNG·DIR or PNG·ZIP first. Then encode that sequence as VP9 WebM with alpha or ProRes 4444 MOV. PNG and SVG can preserve transparency; JPG and EPS are opaque formats, and all still exports remain available above.</p>
       <div class="row"><label>PNG frame source</label><span class="val dim" id="alphaFolderLabel">Not selected</span></div>
       <div class="btn-row"><button class="btn" type="button" id="alphaChooseFrames">Choose PNG·DIR folder</button>
         <button class="btn" type="button" id="alphaChooseArchive">Choose PNG·ZIP archive</button>
