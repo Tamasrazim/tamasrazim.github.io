@@ -12,6 +12,8 @@
     status: () => invoke("desktop_status"),
     mediaCapabilities: () => invoke("media_capabilities"),
     validateRenderConfig: (config) => invoke("validate_render_config", { config }),
+    choosePngSequenceDirectory: () => invoke("choose_png_sequence_directory"),
+    chooseAlphaOutput: (profile) => invoke("choose_alpha_output", { profile }),
     encodePngSequence: (options) => invoke("encode_png_sequence", { options }),
     verifyMediaFile: (path) => invoke("verify_media_file", { path }),
     onEncodeProgress: async (callback) => {
