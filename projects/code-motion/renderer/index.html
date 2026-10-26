@@ -1702,7 +1702,10 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
             <h4>RENDER</h4>
             <div class="btn-row"><button class="btn" data-act="renderFullLibrary" id="renderFullLibraryBtn" title="Render every item in the selected library to a folder or ZIP">RENDER FULL LIBRARY</button></div>
             <div class="btn-row"><button class="btn solid" data-act="startRender" id="renderCurrentCodeBtn">RENDER CURRENT CODE</button></div>
-            <div class="row"><label for="stillFrameIndex">Still frame</label><input id="stillFrameIndex" type="number" min="0" step="1" value="0" style="max-width:100px" aria-describedby="stillExportNote"></div><div id="stillExportFormats" style="display:flex;flex-wrap:wrap;gap:8px 12px;margin:6px 0 2px;font:10px var(--mono);color:var(--ink-2)"><label><input type="checkbox" id="stillFmtPng" checked> PNG</label><label><input type="checkbox" id="stillFmtJpg"> JPG</label><label><input type="checkbox" id="stillFmtSvg"> SVG</label><label><input type="checkbox" id="stillFmtEps"> EPS</label></div><p class="note" id="stillExportNote">Frame numbers start at 0. After a successful render, TRILYVA also saves the selected still formats for this frame. PNG is the default.</p><p class="note">Renders the code currently in the editor using the selected composition, frame rate, duration, format and quality settings.</p>
+            <div class="row"><label for="stillFrameIndex">Still frame</label><input id="stillFrameIndex" type="number" min="0" step="1" value="0" style="max-width:100px" aria-describedby="stillExportNote"></div><div id="stillExportFormats" style="display:flex;flex-wrap:wrap;gap:8px 12px;margin:6px 0 2px;font:10px var(--mono);color:var(--ink-2)"><label><input type="checkbox" id="stillFmtPng" checked> PNG</label><label><input type="checkbox" id="stillFmtJpg"> JPG</label><label><input type="checkbox" id="stillFmtSvg"> SVG</label><label><input type="checkbox" id="stillFmtEps"> EPS</label></div><p class="note" id="stillExportNote">Frame numbers start at 0. After a successful render, TRILYVA also saves the selected still formats for this frame. PNG is the default.</p>
+            <div class="btn-row"><button class="btn" data-act="exportSvgSequence" id="exportSvgSequenceBtn">EXPORT VECTOR FRAME SEQUENCE · SVG ZIP</button></div>
+            <p class="note">Packages every frame as an editable SVG file in a ZIP. Best for vector-compatible Canvas drawing; unsupported effects or drawing APIs can prevent a vector export.</p>
+            <p class="note">Renders the code currently in the editor using the selected composition, frame rate, duration, format and quality settings.</p>
             <div class="btn-row">
               <button class="btn" data-act="cancelRender" id="cancelBtn" disabled>Cancel</button>
             </div>
@@ -11079,6 +11082,87 @@ function copyAnimationPrompt() {
 /* ============================================================
    Actions
    ============================================================ */
+async function exportSvgSequence() {
+  if (S.rendering) throw new Error("Wait for the active render to finish before exporting the vector sequence.");
+  if (!CORE || !ENC || !BatchVector || !Ed || !Ed.ta) throw new Error("The vector export engine is not ready.");
+  var code = Ed.ta.value;
+  var comp = CORE.composition(S.comp);
+  if (!code.trim()) throw new Error("The code editor is empty.");
+  if (comp.frameCount > 10000 && !window.confirm(
+    "This will create " + comp.frameCount.toLocaleString() +
+    " separate SVG frames. The ZIP may be very large and export may take a long time. Continue?"
+  )) return;
+
+  var button = $("#exportSvgSequenceBtn");
+  var oldLabel = button ? button.textContent : "";
+  var zip = new ENC.ZipWriter();
+  var stem = slugify(S.meta && S.meta.title || S.name || "trilyva-vector");
+  var started = Date.now(), totalBytes = 0;
+  var failures = [];
+  if (button) { button.disabled = true; button.textContent = "EXPORTING SVG FRAMES…"; }
+
+  try {
+    for (var frame = 0; frame < comp.frameCount; frame++) {
+      var frameTime = CORE.frameToTime(comp, frame);
+      var progress = comp.frameCount > 1 ? frame / (comp.frameCount - 1) : 0;
+      var vectorCode = comp.transparent ? BatchVector.stripBackground(code) : code;
+      var scene = BatchVector.sceneForCode(
+        vectorCode, comp.width, comp.height, frame, frameTime, progress, comp.fps
+      );
+      var svgText = BatchVector.svg(scene, !!comp.transparent);
+      var blob = new Blob([svgText], { type: "image/svg+xml;charset=utf-8" });
+      var bytes = new Uint8Array(await blob.arrayBuffer());
+      var name = stem + "_" + ("000000" + frame).slice(-6) + ".svg";
+      zip.add(name, blob, ENC.crc32Final(ENC.crc32(bytes)), bytes.length);
+      totalBytes += bytes.length;
+
+      if (frame === 0 || frame % 10 === 0 || frame === comp.frameCount - 1) {
+        var percent = Math.floor((frame + 1) / comp.frameCount * 100);
+        $("#stMsg").textContent = "SVG sequence " + percent + "% · frame " +
+          (frame + 1).toLocaleString() + " / " + comp.frameCount.toLocaleString();
+        if (button) button.textContent = "SVG " + percent + "%";
+        await new Promise(function (resolve) { setTimeout(resolve, 0); });
+      }
+    }
+
+    var manifest = {
+      format: "TRILYVA_SVG_FRAME_SEQUENCE",
+      version: 1,
+      creator: "TRILYVA — Tamasrazim",
+      title: S.meta && S.meta.title || S.name || "TRILYVA vector sequence",
+      width: comp.width,
+      height: comp.height,
+      fps: comp.fps,
+      durationSeconds: comp.duration,
+      frameCount: comp.frameCount,
+      transparentBackground: !!comp.transparent,
+      naming: stem + "_%06d.svg",
+      generatedAt: new Date().toISOString(),
+      sourceHash: S.hash || null,
+      note: "Each SVG represents the deterministic vector-recorder evaluation of one frame. SVG compatibility is limited to the Canvas operations implemented by TRILYVA's vector recorder."
+    };
+    zip.addBytes("manifest.json", ENC.utf8(JSON.stringify(manifest, null, 2)));
+    zip.addBytes("README.txt", ENC.utf8(
+      "TRILYVA SVG FRAME SEQUENCE\r\n" +
+      comp.width + "x" + comp.height + " @ " + comp.fps + " FPS\r\n" +
+      comp.frameCount + " frames, " + comp.duration.toFixed(3) + " seconds\r\n\r\n" +
+      "Each SVG is an independent editable vector frame. Files are numbered from 000000.\r\n" +
+      "Some Canvas APIs and raster effects are not represented by the vector recorder.\r\n" +
+      "When the composition is transparent, the first full-canvas background rectangle is omitted from SVG output.\r\n"
+    ));
+    var output = zip.finish();
+    download(output, stem + "_svg_frames_" + stampNow() + ".zip");
+    logLine("VECTOR SEQUENCE COMPLETE · " + comp.frameCount + " SVG frames · " +
+      (output.size / 1048576).toFixed(2) + " MB · " + ((Date.now() - started) / 1000).toFixed(1) + "s", true);
+    $("#stMsg").textContent = "SVG sequence downloaded · " + comp.frameCount + " vector frames";
+  } catch (error) {
+    throw new Error("SVG frame sequence stopped: " + String(error && error.message || error) +
+      ". The vector recorder supports a subset of Canvas drawing operations; no incomplete ZIP was downloaded.");
+  } finally {
+    if (button) { button.disabled = false; button.textContent = oldLabel; }
+  }
+}
+
 var ACTS = {
   'new': function () {
     askDiscard('Start a new project?', function () { newProject('sample-starter'); });
@@ -11102,6 +11186,7 @@ var ACTS = {
   renderAllDotMesh: function () { openDotMeshFolderPicker(); },
   exportDotMesh50: function () { openDotMeshFolderPicker(); },
   startRender: function () { withCompiled().then(function (ok) { if (ok) startRender(buildJob()); }); },
+  exportSvgSequence: exportSvgSequence,
   cancelRender: cancelRender,
   analyze: analyseJob,
   identifyFrame: identifyFrame,
