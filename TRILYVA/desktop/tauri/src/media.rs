@@ -1306,6 +1306,88 @@ mod tests {
     use super::*;
 
     #[test]
+    fn native_sequence_requires_ordered_complete_transparent_frames() {
+        let parent = tempfile::tempdir().expect("temporary parent");
+        let store = NativeSequenceStore::default();
+        let config = RenderConfig {
+            width: 16,
+            height: 16,
+            fps: 30,
+            frame_count: 2,
+            bitrate_bps: None,
+        };
+        let session = create_native_sequence(
+            &store,
+            parent.path().to_path_buf(),
+            "Native Test",
+            "native-test_",
+            config,
+        )
+        .expect("create sequence");
+
+        let frame = BASE64.encode(b"test-png-frame");
+        assert!(write_native_sequence_file(
+            &store,
+            &session.session_id,
+            "native-test_000001.png",
+            &frame
+        ).is_err());
+
+        let first = write_native_sequence_file(
+            &store,
+            &session.session_id,
+            "native-test_000000.png",
+            &frame,
+        )
+        .expect("write first frame");
+        assert_eq!(first.next_frame, 1);
+        assert!(!first.finalized);
+
+        let second = write_native_sequence_file(
+            &store,
+            &session.session_id,
+            "native-test_000001.png",
+            &frame,
+        )
+        .expect("write second frame");
+        assert_eq!(second.next_frame, 2);
+        assert!(!second.finalized);
+
+        let manifest = serde_json::json!({
+            "frameCount": 2,
+            "composition": {
+                "width": 16,
+                "height": 16,
+                "fps": 30,
+                "frameCount": 2,
+                "transparent": true
+            }
+        });
+        let manifest_base64 = BASE64.encode(serde_json::to_vec(&manifest).expect("manifest JSON"));
+        let final_receipt = write_native_sequence_file(
+            &store,
+            &session.session_id,
+            "manifest.json",
+            &manifest_base64,
+        )
+        .expect("write manifest");
+        assert!(final_receipt.finalized);
+
+        let final_info = finalize_native_sequence(&store, &session.session_id)
+            .expect("finalize verified sequence");
+        assert_eq!(final_info.expected_frames, 2);
+        discard_native_sequence(&store, &session.session_id).expect("discard temporary test sequence");
+    }
+
+    #[test]
+    fn native_filename_prefix_rejects_path_components() {
+        assert!(safe_sequence_prefix("valid_name_").is_ok());
+        assert!(safe_sequence_prefix("../escape_").is_err());
+        assert!(safe_sequence_prefix("valid/name_").is_err());
+        assert!(safe_sequence_prefix("missing-underscore").is_err());
+    }
+
+    #[test]
     fn parses_video_and_audio_encoders() {
         let text = "Encoders:\n V..... = Video\n A..... = Audio\n V....D libx264 H.264 / AVC\n A..... aac AAC (Advanced Audio Coding)\n";
         let parsed = parse_flagged_entries(text, true);
