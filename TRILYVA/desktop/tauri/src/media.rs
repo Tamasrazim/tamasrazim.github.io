@@ -681,7 +681,7 @@ pub fn write_native_sequence_file(
 ) -> Result<NativeSequenceWriteReceipt, String> {
     if file_name.is_empty()
         || file_name.contains('/')
-        || file_name.contains('\\\\')
+        || file_name.contains('\\')
         || file_name == "."
         || file_name == ".."
     {
