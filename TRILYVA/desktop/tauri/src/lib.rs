@@ -73,7 +73,7 @@ async fn choose_alpha_output(profile: String) -> Result<Option<String>, String> 
             _ => return None,
         };
         rfd::FileDialog::new()
-            .set_title("Save transparent video")
+            .set_title("Save transparent media output")
             .add_filter(filter_name, &[extension])
             .set_file_name(file_name)
             .save_file()
