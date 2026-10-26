@@ -2,6 +2,12 @@
 
 This project packages the existing TRILYVA renderer without changing its interface. The build script copies projects/code-motion/renderer to the Tauri frontend directory and makes only packaging-specific changes for the logo path, browser service worker, browser analytics, and the injected desktop command bridge.
 
+## Integrated transparent render workflow
+
+On desktop, set the composition background to Transparent, choose WebM, MOV, or APNG in the desktop alpha panel, and press **RENDER CURRENT CODE + EXPORT ALPHA**. TRILYVA compiles the current editor code, writes each PNG frame sequentially to a native directory without a browser download/re-import round trip, checks the manifest and complete frame sequence, then runs the native encoder. The encoder checks dimensions, exact frame count, requested FPS, advertised alpha support, and decoded non-opaque alpha samples. A failed render removes its incomplete frame directory. A successful render keeps the source frame folder for reuse; a failed encode leaves complete frames available for retry.
+
+Frame data is sent one frame at a time and each native transfer is limited to 256 MiB to avoid unbounded IPC payloads. If an unusually complex frame exceeds this limit, reduce resolution/scene complexity or use the existing PNG-sequence export path.
+
 ## Multi-platform CI builds
 
 The GitHub Actions workflow builds desktop installers for Windows x64 (NSIS + MSI), Linux x64 (DEB + AppImage), macOS Apple Silicon (DMG), and macOS Intel (DMG), plus an Android ARM64 debug APK and an unsigned iOS Simulator app. Each target runs as a separate job in the same workflow so all targets start together.
