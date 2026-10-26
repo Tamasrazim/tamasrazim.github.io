@@ -246,7 +246,7 @@ impl TrilyvaApp {
             painter.circle_stroke(
                 center,
                 radius,
-                Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 255, 255, (18 - i * 2).max(4) as u8)),
+                Stroke::new(1.0_f32, Color32::from_rgba_unmultiplied(255, 255, 255, (18 - i * 2).max(4) as u8)),
             );
         }
         let scale = (0.7 + progress * 0.3).min(1.0);
@@ -433,7 +433,7 @@ impl eframe::App for TrilyvaApp {
                     ui.add_space(10.0);
                     egui::Frame::new()
                         .fill(Color32::from_rgb(10, 10, 12))
-                        .stroke(Stroke::new(1.0, Color32::from_rgb(42, 42, 47)))
+                        .stroke(Stroke::new(1.0_f32, Color32::from_rgb(42, 42, 47)))
                         .corner_radius(CornerRadius::same(16))
                         .inner_margin(egui::Margin::same(10))
                         .show(ui, |ui| {
@@ -461,7 +461,7 @@ impl eframe::App for TrilyvaApp {
                     });
                     if self.library_open {
                         ui.add_space(10.0);
-                        egui::Frame::new().fill(theme::PANEL).stroke(Stroke::new(1.0, theme::LINE)).corner_radius(CornerRadius::same(14)).inner_margin(egui::Margin::same(12)).show(ui, |ui| {
+                        egui::Frame::new().fill(theme::PANEL).stroke(Stroke::new(1.0_f32, theme::LINE)).corner_radius(CornerRadius::same(14)).inner_margin(egui::Margin::same(12)).show(ui, |ui| {
                             ui.horizontal(|ui| {
                                 ui.label(RichText::new("Local projects").strong());
                                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
@@ -512,14 +512,14 @@ fn paint_checkerboard(painter: &egui::Painter, rect: Rect, cell: f32) {
             }
         }
     }
-    painter.rect_stroke(rect, CornerRadius::same(8), Stroke::new(1.0, Color32::from_rgb(48, 48, 53)), egui::StrokeKind::Inside);
+    painter.rect_stroke(rect, CornerRadius::same(8), Stroke::new(1.0_f32, Color32::from_rgb(48, 48, 53)), egui::StrokeKind::Inside);
 }
 
 fn paint_logo(painter: &egui::Painter, center: Pos2, size: f32, time: f32) {
     let radius = (size * 0.2) as u8;
     let outer = Rect::from_center_size(center, Vec2::splat(size * 1.42));
     painter.rect_filled(outer, CornerRadius::same(radius), Color32::from_rgb(16, 16, 18));
-    painter.rect_stroke(outer, CornerRadius::same(radius), Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 255, 255, 40)), egui::StrokeKind::Inside);
+    painter.rect_stroke(outer, CornerRadius::same(radius), Stroke::new(1.0_f32, Color32::from_rgba_unmultiplied(255, 255, 255, 40)), egui::StrokeKind::Inside);
     let w = size * 0.18;
     let h = size * 0.82;
     let bar = Rect::from_center_size(Pos2::new(center.x, center.y + h * 0.11), Vec2::new(w, h));
@@ -527,14 +527,14 @@ fn paint_logo(painter: &egui::Painter, center: Pos2, size: f32, time: f32) {
     let top = Rect::from_center_size(Pos2::new(center.x, center.y - h * 0.31), Vec2::new(size * 0.66, w));
     painter.rect_filled(top, CornerRadius::same((w * 0.22) as u8), theme::WHITE);
     let orbit = Rect::from_center_size(center, Vec2::splat(size * 1.08));
-    painter.circle_stroke(center, size * (0.58 + 0.025 * (time * 1.8).sin()), Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 255, 255, 90)));
+    painter.circle_stroke(center, size * (0.58 + 0.025 * (time * 1.8).sin()), Stroke::new(1.0_f32, Color32::from_rgba_unmultiplied(255, 255, 255, 90)));
     let angle = time * 2.0;
     painter.circle_filled(Pos2::new(center.x + angle.cos() * orbit.width() * 0.49, center.y + angle.sin() * orbit.height() * 0.49), size * 0.035, theme::WHITE);
 }
 
 fn export_sequence(project: &Project, code: &str, output: &PathBuf, tx: &Sender<ExportEvent>) -> Result<PathBuf, String> {
     let total = u64::from(project.fps.max(1)) * u64::from(project.duration_seconds.max(1));
-    let mut renderer = FrameRenderer::new(code).map_err(|e| e.to_string())?;
+    let renderer = FrameRenderer::new(code).map_err(|e| e.to_string())?;
     let file = File::create(output).map_err(|e| e.to_string())?;
     let mut zip = ZipWriter::new(file);
     let options = SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);
@@ -582,3 +582,4 @@ fn export_sequence(project: &Project, code: &str, output: &PathBuf, tx: &Sender<
     zip.finish().map_err(|e| e.to_string())?;
     Ok(output.clone())
 }
+
