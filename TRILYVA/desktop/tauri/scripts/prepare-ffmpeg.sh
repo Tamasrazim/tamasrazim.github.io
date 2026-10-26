@@ -2,18 +2,40 @@
 set -euo pipefail
 
 platform="${1:?Usage: prepare-ffmpeg.sh linux64|macos64|macosarm64}"
+work="${RUNNER_TEMP:-$(mktemp -d)}/trilyva-ffmpeg-$platform"
+extract="$work/extract"
+resource="$(pwd)/resources/bin"
+notice="$(pwd)/resources/FFMPEG-THIRD-PARTY-NOTICES.txt"
+mkdir -p "$extract" "$resource"
+trap 'rm -rf "$work"' EXIT
+
 case "$platform" in
   linux64)
     archive_name="ffmpeg-master-latest-linux64-gpl.tar.xz"
     archive_url="https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/$archive_name"
+    archive="$work/$archive_name"
+    curl --fail --location --retry 5 --retry-connrefused "$archive_url" --output "$archive"
+    tar -xJf "$archive" -C "$extract"
+    ffmpeg_source="$(find "$extract" -type f -name ffmpeg -print -quit)"
+    ffprobe_source="$(find "$extract" -type f -name ffprobe -print -quit)"
+    source_description="$archive_url"
     ;;
-  macos64)
-    archive_name="ffmpeg-master-latest-macos64-gpl.zip"
-    archive_url="https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/$archive_name"
-    ;;
-  macosarm64)
-    archive_name="ffmpeg-master-latest-macosarm64-gpl.zip"
-    archive_url="https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/$archive_name"
+  macos64|macosarm64)
+    case "$platform" in
+      macos64) architecture="amd64" ;;
+      macosarm64) architecture="arm64" ;;
+    esac
+    # Martin Riedl supplies standalone, signed macOS builds for both Intel and Apple Silicon.
+    ffmpeg_url="https://ffmpeg.martin-riedl.de/redirect/latest/macos/$architecture/release/ffmpeg.zip"
+    ffprobe_url="https://ffmpeg.martin-riedl.de/redirect/latest/macos/$architecture/release/ffprobe.zip"
+    mkdir -p "$extract/ffmpeg" "$extract/ffprobe"
+    curl --fail --location --retry 5 --retry-connrefused "$ffmpeg_url" --output "$work/ffmpeg.zip"
+    curl --fail --location --retry 5 --retry-connrefused "$ffprobe_url" --output "$work/ffprobe.zip"
+    unzip -q "$work/ffmpeg.zip" -d "$extract/ffmpeg"
+    unzip -q "$work/ffprobe.zip" -d "$extract/ffprobe"
+    ffmpeg_source="$(find "$extract/ffmpeg" -type f -name ffmpeg -print -quit)"
+    ffprobe_source="$(find "$extract/ffprobe" -type f -name ffprobe -print -quit)"
+    source_description="FFmpeg: $ffmpeg_url ; FFprobe: $ffprobe_url"
     ;;
   *)
     echo "Unsupported FFmpeg platform: $platform" >&2
@@ -21,24 +43,8 @@ case "$platform" in
     ;;
 esac
 
-work="${RUNNER_TEMP:-$(mktemp -d)}/trilyva-ffmpeg-$platform"
-archive="$work/$archive_name"
-extract="$work/extract"
-resource="$(pwd)/resources/bin"
-notice="$(pwd)/resources/FFMPEG-THIRD-PARTY-NOTICES.txt"
-mkdir -p "$extract" "$resource"
-trap 'rm -rf "$work"' EXIT
-
-curl --fail --location --retry 5 --retry-connrefused "$archive_url" --output "$archive"
-case "$archive_name" in
-  *.zip) unzip -q "$archive" -d "$extract" ;;
-  *.tar.xz) tar -xJf "$archive" -C "$extract" ;;
-esac
-
-ffmpeg_source="$(find "$extract" -type f -name ffmpeg -print -quit)"
-ffprobe_source="$(find "$extract" -type f -name ffprobe -print -quit)"
-if [[ -z "$ffmpeg_source" || -z "$ffprobe_source" ]]; then
-  echo "The downloaded FFmpeg archive did not contain both ffmpeg and ffprobe." >&2
+if [[ -z "$ffmpeg_source" || ! -f "$ffmpeg_source" || -z "$ffprobe_source" || ! -f "$ffprobe_source" ]]; then
+  echo "The downloaded FFmpeg archive did not contain both executable binaries." >&2
   exit 1
 fi
 
@@ -48,7 +54,7 @@ version="$("$resource/ffmpeg" -version 2>&1 | head -n 1)"
 license="$("$resource/ffmpeg" -L 2>&1 || true)"
 {
   echo "TRILYVA FFmpeg package record"
-  echo "Source: $archive_url"
+  echo "Sources: $source_description"
   echo "Prepared UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
   echo
   echo "FFmpeg -version:"
@@ -57,7 +63,7 @@ license="$("$resource/ffmpeg" -L 2>&1 || true)"
   echo "FFmpeg -L:"
   echo "$license"
   echo
-  echo "Upstream: https://github.com/BtbN/FFmpeg-Builds"
+  echo "Upstream build information: https://ffmpeg.martin-riedl.de/"
   echo "Licensing overview: https://ffmpeg.org/legal.html"
 } > "$notice"
 echo "Prepared $platform FFmpeg and FFprobe."
