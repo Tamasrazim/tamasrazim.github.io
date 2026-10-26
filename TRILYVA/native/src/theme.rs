@@ -39,15 +39,8 @@ pub fn install(ctx: &egui::Context) {
 pub fn glass_frame() -> Frame {
     Frame::new()
         .fill(Color32::from_rgba_unmultiplied(255, 255, 255, 8))
-        .stroke(Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 255, 255, 24)))
+        .stroke(Stroke::new(1.0_f32, Color32::from_rgba_unmultiplied(255, 255, 255, 24)))
         .corner_radius(CornerRadius::same(16))
         .inner_margin(Margin::same(12))
 }
 
-pub fn small_glass_frame() -> Frame {
-    Frame::new()
-        .fill(Color32::from_rgba_unmultiplied(255, 255, 255, 5))
-        .stroke(Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 255, 255, 18)))
-        .corner_radius(CornerRadius::same(12))
-        .inner_margin(Margin::same(9))
-}
