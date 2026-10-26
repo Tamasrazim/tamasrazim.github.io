@@ -1,8 +1,9 @@
 // Runtime discovery, export validation, PNG-sequence encoding, and output verification.
+use base64::{engine::general_purpose::STANDARD as BASE64, Engine as Base64Engine};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::{
-    collections::VecDeque,
+    collections::{HashMap, VecDeque},
     fs,
     io::{BufRead, BufReader, Write},
     path::{Path, PathBuf},
@@ -563,6 +564,258 @@ fn checked_output_path(value: &str) -> Result<PathBuf, String> {
         return Err("Choose a supported output extension: MP4, MOV, MKV, WebM, AVI, TS, GIF, or APNG.".to_string());
     }
     Ok(path)
+}
+
+
+const MAX_NATIVE_FRAME_BYTES: usize = 256 * 1024 * 1024;
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NativeSequenceInfo {
+    pub session_id: String,
+    pub directory: String,
+    pub folder_name: String,
+    pub expected_frames: u64,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NativeSequenceWriteReceipt {
+    pub next_frame: u64,
+    pub expected_frames: u64,
+    pub finalized: bool,
+}
+
+#[derive(Debug, Clone)]
+struct NativeSequenceSession {
+    directory: PathBuf,
+    prefix: String,
+    config: ValidatedRenderConfig,
+    next_frame: u64,
+    finalized: bool,
+}
+
+#[derive(Default)]
+pub struct NativeSequenceStore(Mutex<HashMap<String, NativeSequenceSession>>);
+
+fn native_slug(value: &str) -> String {
+    let mut output = String::new();
+    let mut pending_dash = false;
+    for ch in value.chars() {
+        if ch.is_ascii_alphanumeric() {
+            if pending_dash && !output.is_empty() {
+                output.push('-');
+            }
+            output.push(ch.to_ascii_lowercase());
+            pending_dash = false;
+        } else {
+            pending_dash = true;
+        }
+        if output.len() >= 64 {
+            break;
+        }
+    }
+    let output = output.trim_matches('-').to_string();
+    if output.is_empty() { "trilyva".to_string() } else { output }
+}
+
+fn safe_sequence_prefix(prefix: &str) -> Result<String, String> {
+    if prefix.is_empty()
+        || prefix.len() > 90
+        || !prefix.chars().all(|ch| ch.is_ascii_alphanumeric() || ch == '-' || ch == '_')
+        || !prefix.ends_with('_')
+    {
+        return Err("The native frame filename prefix is invalid.".to_string());
+    }
+    Ok(prefix.to_string())
+}
+
+pub fn create_native_sequence(
+    store: &NativeSequenceStore,
+    parent: PathBuf,
+    project_name: &str,
+    prefix: &str,
+    config: RenderConfig,
+) -> Result<NativeSequenceInfo, String> {
+    let config = validate_config(config)?;
+    if !parent.is_dir() {
+        return Err("Choose an existing parent folder for the rendered frames.".to_string());
+    }
+    let prefix = safe_sequence_prefix(prefix)?;
+    let slug = native_slug(project_name);
+    let stamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_err(|error| format!("System clock could not create a folder name: {error}"))?
+        .as_secs();
+    let mut directory = parent.join(format!("TRILYVA-{slug}-{stamp}-frames"));
+    let mut suffix = 1u32;
+    while directory.exists() {
+        directory = parent.join(format!("TRILYVA-{slug}-{stamp}-frames-{suffix}"));
+        suffix = suffix.checked_add(1).ok_or_else(|| "Could not allocate a unique frame folder name.".to_string())?;
+    }
+    fs::create_dir(&directory).map_err(|error| format!("Could not create the native frame folder: {error}"))?;
+
+    let id = Uuid::new_v4().to_string();
+    let session = NativeSequenceSession {
+        directory: directory.clone(),
+        prefix,
+        config: config.clone(),
+        next_frame: 0,
+        finalized: false,
+    };
+    let mut sessions = store.0.lock().map_err(|_| "The native render-session registry is unavailable.".to_string())?;
+    sessions.insert(id.clone(), session);
+    Ok(NativeSequenceInfo {
+        session_id: id,
+        directory: directory.to_string_lossy().into_owned(),
+        folder_name: directory.file_name().and_then(|name| name.to_str()).unwrap_or("TRILYVA-frames").to_string(),
+        expected_frames: config.frame_count,
+    })
+}
+
+pub fn write_native_sequence_file(
+    store: &NativeSequenceStore,
+    session_id: &str,
+    file_name: &str,
+    base64_data: &str,
+) -> Result<NativeSequenceWriteReceipt, String> {
+    if file_name.is_empty()
+        || file_name.contains('/')
+        || file_name.contains('\\\\')
+        || file_name == "."
+        || file_name == ".."
+    {
+        return Err("The native sequence writer accepts filenames only, not paths.".to_string());
+    }
+    let data = BASE64.decode(base64_data)
+        .map_err(|error| format!("The PNG frame payload was not valid base64: {error}"))?;
+    if data.len() > MAX_NATIVE_FRAME_BYTES {
+        return Err(format!("A single frame is {} MiB, exceeding TRILYVA's safe native IPC frame limit of {} MiB.", data.len() / (1024 * 1024), MAX_NATIVE_FRAME_BYTES / (1024 * 1024)));
+    }
+    if data.is_empty() {
+        return Err("Refusing to write an empty native sequence file.".to_string());
+    }
+
+    let mut sessions = store.0.lock().map_err(|_| "The native render-session registry is unavailable.".to_string())?;
+    let session = sessions.get_mut(session_id).ok_or_else(|| "This native render session expired or was cancelled.".to_string())?;
+    if session.finalized {
+        return Err("The native PNG sequence is already finalized.".to_string());
+    }
+
+    if file_name == "manifest.json" {
+        if session.next_frame != session.config.frame_count {
+            return Err(format!("The renderer tried to finish its manifest after {} of {} frames.", session.next_frame, session.config.frame_count));
+        }
+        let manifest: Value = serde_json::from_slice(&data)
+            .map_err(|error| format!("The render manifest is invalid JSON: {error}"))?;
+        let composition = manifest.get("composition")
+            .ok_or_else(|| "The render manifest has no composition object.".to_string())?;
+        if composition.get("width").and_then(Value::as_u64) != Some(session.config.width as u64)
+            || composition.get("height").and_then(Value::as_u64) != Some(session.config.height as u64)
+            || composition.get("fps").and_then(Value::as_u64) != Some(session.config.fps as u64)
+            || composition.get("frameCount").and_then(Value::as_u64) != Some(session.config.frame_count)
+            || composition.get("transparent").and_then(Value::as_bool) != Some(true)
+        {
+            return Err("The native render manifest does not match the requested transparent composition.".to_string());
+        }
+        let destination = session.directory.join("manifest.json");
+        let mut file = fs::OpenOptions::new().write(true).create_new(true).open(&destination)
+            .map_err(|error| format!("Could not write the native render manifest: {error}"))?;
+        file.write_all(&data).map_err(|error| format!("Could not finish the native render manifest: {error}"))?;
+        session.finalized = true;
+    } else if file_name == "README.txt" {
+        if session.next_frame != session.config.frame_count {
+            return Err("The sequence README cannot be written before every frame is complete.".to_string());
+        }
+        let destination = session.directory.join("README.txt");
+        let mut file = fs::OpenOptions::new().write(true).create_new(true).open(&destination)
+            .map_err(|error| format!("Could not write the native sequence README: {error}"))?;
+        file.write_all(&data).map_err(|error| format!("Could not finish the native sequence README: {error}"))?;
+    } else {
+        let expected = format!("{}{:06}.png", session.prefix, session.next_frame);
+        if file_name != expected {
+            return Err(format!("Frame order contract failed: expected '{expected}', received '{file_name}'. No frame was written."));
+        }
+        let destination = session.directory.join(file_name);
+        let mut file = fs::OpenOptions::new().write(true).create_new(true).open(&destination)
+            .map_err(|error| format!("Could not create native frame {file_name}: {error}"))?;
+        file.write_all(&data).map_err(|error| format!("Could not write native frame {file_name}: {error}"))?;
+        file.flush().map_err(|error| format!("Could not flush native frame {file_name}: {error}"))?;
+        session.next_frame += 1;
+    }
+
+    Ok(NativeSequenceWriteReceipt {
+        next_frame: session.next_frame,
+        expected_frames: session.config.frame_count,
+        finalized: session.finalized,
+    })
+}
+
+pub fn finalize_native_sequence(store: &NativeSequenceStore, session_id: &str) -> Result<NativeSequenceInfo, String> {
+    let sessions = store.0.lock().map_err(|_| "The native render-session registry is unavailable.".to_string())?;
+    let session = sessions.get(session_id).ok_or_else(|| "This native render session expired or was cancelled.".to_string())?;
+    if !session.finalized || session.next_frame != session.config.frame_count {
+        return Err(format!("The sequence is incomplete: {} of {} frames, manifest finalized={}.", session.next_frame, session.config.frame_count, session.finalized));
+    }
+    validate_alpha_manifest(&session.directory, &session.config)?;
+    let prefix = find_png_sequence_prefix(&session.directory, session.config.frame_count)?;
+    if prefix != session.prefix {
+        return Err("The native sequence filename prefix changed during rendering.".to_string());
+    }
+    Ok(NativeSequenceInfo {
+        session_id: session_id.to_string(),
+        directory: session.directory.to_string_lossy().into_owned(),
+        folder_name: session.directory.file_name().and_then(|name| name.to_str()).unwrap_or("TRILYVA-frames").to_string(),
+        expected_frames: session.config.frame_count,
+    })
+}
+
+pub fn native_sequence_encode_options(
+    store: &NativeSequenceStore,
+    session_id: &str,
+    output_path: String,
+    encoder: String,
+    bitrate_bps: Option<u64>,
+    pixel_format: Option<String>,
+) -> Result<PngSequenceEncodeOptions, String> {
+    let sessions = store.0.lock().map_err(|_| "The native render-session registry is unavailable.".to_string())?;
+    let session = sessions.get(session_id).ok_or_else(|| "This native render session expired or was cancelled.".to_string())?;
+    if !session.finalized || session.next_frame != session.config.frame_count {
+        return Err("Cannot encode an incomplete native PNG sequence.".to_string());
+    }
+    Ok(PngSequenceEncodeOptions {
+        input_dir: session.directory.to_string_lossy().into_owned(),
+        output_path,
+        width: session.config.width,
+        height: session.config.height,
+        fps: session.config.fps,
+        frame_count: session.config.frame_count,
+        encoder,
+        bitrate_bps,
+        pixel_format,
+        preserve_alpha: true,
+    })
+}
+
+pub fn discard_native_sequence(store: &NativeSequenceStore, session_id: &str) -> Result<(), String> {
+    let session = store.0.lock().map_err(|_| "The native render-session registry is unavailable.".to_string())?
+        .remove(session_id);
+    if let Some(session) = session {
+        fs::remove_dir_all(&session.directory)
+            .map_err(|error| format!("Could not remove the cancelled native frame folder: {error}"))?;
+    }
+    Ok(())
+}
+
+pub fn release_native_sequence(store: &NativeSequenceStore, session_id: &str) -> Result<(), String> {
+    let sessions = store.0.lock().map_err(|_| "The native render-session registry is unavailable.".to_string())?;
+    let session = sessions.get(session_id).ok_or_else(|| "This native render session expired or was cancelled.".to_string())?;
+    if !session.finalized {
+        return Err("Cannot release an incomplete native PNG sequence.".to_string());
+    }
+    drop(sessions);
+    store.0.lock().map_err(|_| "The native render-session registry is unavailable.".to_string())?.remove(session_id);
+    Ok(())
 }
 
 pub fn encode_png_sequence(app: AppHandle, options: PngSequenceEncodeOptions) -> Result<EncodeResult, String> {
