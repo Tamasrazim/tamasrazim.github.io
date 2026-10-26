@@ -100,7 +100,9 @@ fn stage_workspace() -> Result<(), Box<dyn std::error::Error>> {
             <button class="btn" type="button" id="alphaChooseArchive">Choose PNG·ZIP archive</button>
             <select id="alphaProfile" aria-label="Transparent output format"><option value="webm">WebM · VP9 + alpha</option><option value="mov">MOV · ProRes 4444</option><option value="apng">APNG · animated image + alpha</option></select></div>
           <div class="row"><label>Frame settings</label><span class="val dim" id="alphaSettingsLabel">Current composition</span></div>
-          <button class="btn solid" type="button" id="alphaEncodeButton">ENCODE TRANSPARENT VIDEO</button>
+          <button class="btn solid" type="button" id="alphaRenderEncodeButton">RENDER CURRENT CODE + EXPORT ALPHA</button>
+          <p class="note">One click renders every frame from the current editor to a native sequence, then encodes and verifies the selected transparent format. No browser download/re-import round trip.</p>
+          <button class="btn" type="button" id="alphaEncodeButton">ENCODE AN EXISTING PNG SEQUENCE</button>
           <div class="note" id="alphaExportStatus" role="status" aria-live="polite">Alpha export is verified after encoding. A file without an alpha pixel format is rejected.</div>
         </div>"#;
         // Anchor to the stable ID rather than the note copy, which can change as export options evolve.
