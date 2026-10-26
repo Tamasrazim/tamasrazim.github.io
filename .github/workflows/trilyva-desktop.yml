@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - trilyva-desktop-**
     paths:
       - "TRILYVA/**"
       - "projects/code-motion/renderer/**"
@@ -17,6 +16,10 @@ on:
       - "assets/brand/trilyva/T.svg"
       - ".github/workflows/trilyva-desktop.yml"
   workflow_dispatch:
+
+concurrency:
+  group: trilyva-multiplatform-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
