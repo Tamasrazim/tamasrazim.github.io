@@ -39,6 +39,37 @@ fn validate_render_config(config: media::RenderConfig) -> Result<media::Validate
 }
 
 #[tauri::command]
+async fn choose_png_sequence_directory() -> Result<Option<String>, String> {
+    tokio::task::spawn_blocking(|| {
+        rfd::FileDialog::new()
+            .set_title("Choose a TRILYVA PNG frame sequence folder")
+            .pick_folder()
+            .map(|path| path.to_string_lossy().into_owned())
+    })
+    .await
+    .map_err(|error| format!("PNG directory picker failed: {error}"))
+}
+
+#[tauri::command]
+async fn choose_alpha_output(profile: String) -> Result<Option<String>, String> {
+    tokio::task::spawn_blocking(move || {
+        let (filter_name, extension, file_name) = match profile.as_str() {
+            "webm" => ("Transparent WebM video", "webm", "trilyva-alpha.webm"),
+            "mov" => ("ProRes 4444 MOV video", "mov", "trilyva-alpha.mov"),
+            _ => return None,
+        };
+        rfd::FileDialog::new()
+            .set_title("Save transparent video")
+            .add_filter(filter_name, &[extension])
+            .set_file_name(file_name)
+            .save_file()
+            .map(|path| path.to_string_lossy().into_owned())
+    })
+    .await
+    .map_err(|error| format!("Alpha video save dialog failed: {error}"))
+}
+
+#[tauri::command]
 async fn encode_png_sequence(
     app: tauri::AppHandle,
     options: media::PngSequenceEncodeOptions,
@@ -71,6 +102,8 @@ pub fn run() {
             desktop_status,
             media_capabilities,
             validate_render_config,
+            choose_png_sequence_directory,
+            choose_alpha_output,
             encode_png_sequence,
             verify_media_file
         ])
