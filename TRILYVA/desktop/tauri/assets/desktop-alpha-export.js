@@ -193,7 +193,7 @@
         skipStillExports: true,
         dirHandle: nativeDirectoryHandle(session),
         onProgress: function (progress) {
-          if (!progress || !Number.isFinite(progress.percent)) return;
+          if (!progress || !Number.isFinite(progress.done) || !Number.isFinite(progress.total)) return;
           var pct = Math.max(0, Math.min(100, progress.done / Math.max(1, progress.total) * 100));
           setStatus("RENDERING · " + Math.floor(pct) + "% · frame " +
             Number(progress.frame + 1).toLocaleString() + " / " + Number(progress.total).toLocaleString());
