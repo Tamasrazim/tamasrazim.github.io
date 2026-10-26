@@ -1,6 +1,22 @@
 use rquickjs::{Context, Runtime};
 use serde_json::Value;
+use std::{
+    fmt::Display,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc, Mutex,
+    },
+    time::{Duration, Instant},
+};
 use tiny_skia::{BlendMode, FillRule, Paint, PathBuilder, Pixmap, Stroke, Transform};
+
+const SCRIPT_MEMORY_LIMIT: usize = 64 * 1024 * 1024;
+const SCRIPT_STACK_LIMIT: usize = 256 * 1024;
+const SCRIPT_TIME_BUDGET: Duration = Duration::from_millis(250);
+const MAX_SOURCE_BYTES: usize = 1_000_000;
+const MAX_FRAME_COMMAND_BYTES: usize = 16 * 1024 * 1024;
+const MAX_FRAME_COMMANDS: usize = 100_000;
+const MAX_OUTPUT_PIXELS: u64 = 100_000_000;
 
 const BRIDGE: &str = r###"
 globalThis.window = globalThis;
@@ -40,12 +56,14 @@ globalThis.__trilyvaFrame = (function () {
   const cloneStyle = () => ({
     fillStyle: ctx.fillStyle, strokeStyle: ctx.strokeStyle,
     lineWidth: ctx.lineWidth, globalAlpha: ctx.globalAlpha,
-    lineCap: ctx.lineCap, lineJoin: ctx.lineJoin
+    lineCap: ctx.lineCap, lineJoin: ctx.lineJoin,
+    lineDash: ctx.__lineDash || []
   });
   const emitPath = (op, p, style) => commands.push({
     op, path: p, fill: style.fillStyle, stroke: style.strokeStyle,
     width: style.lineWidth, alpha: style.globalAlpha,
-    lineCap: style.lineCap, lineJoin: style.lineJoin
+    lineCap: style.lineCap, lineJoin: style.lineJoin,
+    lineDash: style.lineDash
   });
   const pathPoint = (op, p) => path.push(Object.assign({ op }, p));
   function beginPath() { path = []; }
@@ -132,7 +150,7 @@ globalThis.__trilyvaFrame = (function () {
     setLineDash: function (segments) { ctx.__lineDash = Array.isArray(segments) ? segments.slice() : []; },
     getLineDash: function () { return ctx.__lineDash || []; }
   });
-  function reset(w, h) {
+  function reset(w, h, seed) {
     commands.length = 0;
     path = [];
     matrix = [1, 0, 0, 1, 0, 0];
@@ -142,12 +160,25 @@ globalThis.__trilyvaFrame = (function () {
     ctx.strokeStyle = "#ffffff";
     ctx.lineWidth = 1;
     ctx.globalAlpha = 1;
+    ctx.lineCap = "butt";
+    ctx.lineJoin = "miter";
+    ctx.__lineDash = [];
     ctx.font = "16px sans-serif";
+    let randomState = ((Number(seed) >>> 0) ^ 0x9e3779b9) >>> 0;
+    Math.random = function () {
+      randomState = (randomState + 0x6D2B79F5) >>> 0;
+      let value = randomState;
+      value = Math.imul(value ^ (value >>> 15), value | 1);
+      value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+      return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+    };
   }
   return { ctx, beginFrame: reset };
 })();
 globalThis.TAU = Math.PI * 2;
 globalThis.PI = Math.PI;
+globalThis.Date = undefined;
+globalThis.performance = undefined;
 globalThis.lerp = (a, b, t) => a + (b - a) * t;
 globalThis.clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 globalThis.map = (v, a, b, c, d) => c + ((v - a) / (b - a || 1)) * (d - c);
@@ -208,26 +239,60 @@ pub enum RenderError {
     Dimensions(u32, u32),
     #[error("Rasterizer: {0}")]
     Raster(String),
+    #[error("JavaScript exceeded its {0} ms execution budget")]
+    ExecutionBudget(u64),
+    #[error("JavaScript source exceeds the {0} byte safety limit")]
+    SourceTooLarge(usize),
 }
 
 pub struct FrameRenderer {
-    context: Context,
-    _runtime: Runtime,
+    runtime: Runtime,
+    deadline: Arc<Mutex<Instant>>,
+    interrupted: Arc<AtomicBool>,
     source: String,
 }
 
 impl FrameRenderer {
     pub fn new(source: &str) -> Result<Self, RenderError> {
+        if source.len() > MAX_SOURCE_BYTES {
+            return Err(RenderError::SourceTooLarge(MAX_SOURCE_BYTES));
+        }
         let runtime = Runtime::new().map_err(|e| RenderError::Script(e.to_string()))?;
-        let context = Context::full(&runtime).map_err(|e| RenderError::Script(e.to_string()))?;
-        context.with(|ctx| {
+        runtime.set_memory_limit(SCRIPT_MEMORY_LIMIT);
+        runtime.set_max_stack_size(SCRIPT_STACK_LIMIT);
+
+        let deadline = Arc::new(Mutex::new(Instant::now()));
+        let interrupted = Arc::new(AtomicBool::new(false));
+        let handler_deadline = Arc::clone(&deadline);
+        let handler_interrupted = Arc::clone(&interrupted);
+        runtime.set_interrupt_handler(Some(Box::new(move || {
+            let expired = handler_deadline
+                .lock()
+                .map(|limit| Instant::now() >= *limit)
+                .unwrap_or(true);
+            if expired {
+                handler_interrupted.store(true, Ordering::Relaxed);
+            }
+            expired
+        })));
+
+        let renderer = Self {
+            runtime,
+            deadline,
+            interrupted,
+            source: source.to_owned(),
+        };
+        renderer.arm_execution_budget()?;
+        let context = Context::full(&renderer.runtime)
+            .map_err(|error| RenderError::Script(error.to_string()))?;
+        context.with(|ctx| -> Result<(), RenderError> {
             ctx.eval::<(), _>(BRIDGE)
-                .map_err(|e| RenderError::Script(e.to_string()))?;
-            ctx.eval::<(), _>(format!("(function() {{\n{}\n}})();", source))
-                .map_err(|e| RenderError::Script(e.to_string()))?;
+                .map_err(|error| renderer.script_error(error))?;
+            ctx.eval::<(), _>(format!("(function() {{\n{}\n}})();", renderer.source))
+                .map_err(|error| renderer.script_error(error))?;
             let available = ctx
                 .eval::<bool, _>("typeof globalThis.renderFrame === 'function'")
-                .map_err(|e| RenderError::Script(e.to_string()))?;
+                .map_err(|error| renderer.script_error(error))?;
             if !available {
                 return Err(RenderError::Script(
                     "No window.renderFrame function was found. Define window.renderFrame(time, frame, fps, ctx, width, height).".to_string(),
@@ -235,7 +300,7 @@ impl FrameRenderer {
             }
             Ok(())
         })?;
-        Ok(Self { context, _runtime: runtime, source: source.to_owned() })
+        Ok(renderer)
     }
 
     pub fn render(
@@ -251,18 +316,60 @@ impl FrameRenderer {
         if logical_width == 0 || logical_height == 0 || output_width == 0 || output_height == 0 {
             return Err(RenderError::Dimensions(output_width, output_height));
         }
-        let request = format!(
-            "globalThis.__trilyvaFrame.beginFrame({logical_width}, {logical_height});\
-             globalThis.renderFrame({time:.9}, {frame}, {fps}, globalThis.__trilyvaFrame.ctx, {logical_width}, {logical_height});\
-             JSON.stringify(globalThis.__trilyvaCommands)"
-        );
-        let command_json = self.context.with(|ctx| {
-            ctx.eval::<String, _>(request).map_err(|e| RenderError::Script(e.to_string()))
+        if !time.is_finite() || fps == 0 {
+            return Err(RenderError::Commands(
+                "Frame time must be finite and frame rate must be non-zero.".into(),
+            ));
+        }
+        let output_pixels = u64::from(output_width) * u64::from(output_height);
+        if output_pixels > MAX_OUTPUT_PIXELS {
+            return Err(RenderError::Raster(format!(
+                "Requested frame exceeds the {MAX_OUTPUT_PIXELS} pixel safety limit."
+            )));
+        }
+
+        self.arm_execution_budget()?;
+        let context = Context::full(&self.runtime)
+            .map_err(|error| RenderError::Script(error.to_string()))?;
+        let command_json = context.with(|ctx| -> Result<String, RenderError> {
+            ctx.eval::<(), _>(BRIDGE)
+                .map_err(|error| self.script_error(error))?;
+            ctx.eval::<(), _>(format!(
+                "globalThis.__trilyvaFrame.beginFrame({logical_width}, {logical_height}, {frame});"
+            ))
+            .map_err(|error| self.script_error(error))?;
+            ctx.eval::<(), _>(format!("(function() {{\n{}\n}})();", self.source))
+                .map_err(|error| self.script_error(error))?;
+            let available = ctx
+                .eval::<bool, _>("typeof globalThis.renderFrame === 'function'")
+                .map_err(|error| self.script_error(error))?;
+            if !available {
+                return Err(RenderError::Script(
+                    "No window.renderFrame function was found. Define window.renderFrame(time, frame, fps, ctx, width, height).".to_string(),
+                ));
+            }
+            let request = format!(
+                "globalThis.renderFrame({time:.12}, {frame}, {fps}, globalThis.__trilyvaFrame.ctx, {logical_width}, {logical_height});\
+                 JSON.stringify(globalThis.__trilyvaCommands)"
+            );
+            ctx.eval::<String, _>(request)
+                .map_err(|error| self.script_error(error))
         })?;
+        drop(context);
+        if command_json.len() > MAX_FRAME_COMMAND_BYTES {
+            return Err(RenderError::Commands(format!(
+                "Frame drawing data exceeds the {MAX_FRAME_COMMAND_BYTES} byte safety limit."
+            )));
+        }
         let commands: Value = serde_json::from_str(&command_json)
             .map_err(|e| RenderError::Commands(e.to_string()))?;
         let list = commands.as_array()
             .ok_or_else(|| RenderError::Commands("The frame did not return a command array.".into()))?;
+        if list.len() > MAX_FRAME_COMMANDS {
+            return Err(RenderError::Commands(format!(
+                "Frame contains more than the {MAX_FRAME_COMMANDS} command safety limit."
+            )));
+        }
         let mut pixmap = Pixmap::new(output_width, output_height)
             .ok_or(RenderError::Dimensions(output_width, output_height))?;
         let scale = Transform::from_scale(
@@ -275,13 +382,47 @@ impl FrameRenderer {
         Ok(pixmap)
     }
 
+    fn arm_execution_budget(&self) -> Result<(), RenderError> {
+        self.interrupted.store(false, Ordering::Relaxed);
+        let mut deadline = self
+            .deadline
+            .lock()
+            .map_err(|_| RenderError::Script("JavaScript runtime deadline lock was poisoned.".into()))?;
+        *deadline = Instant::now() + SCRIPT_TIME_BUDGET;
+        Ok(())
+    }
+
+    fn script_error(&self, error: impl Display) -> RenderError {
+        if self.interrupted.load(Ordering::Relaxed) {
+            RenderError::ExecutionBudget(SCRIPT_TIME_BUDGET.as_millis() as u64)
+        } else {
+            RenderError::Script(error.to_string())
+        }
+    }
+
     pub fn source(&self) -> &str { &self.source }
 }
 
 fn draw_command(pixmap: &mut Pixmap, command: &Value, scale: Transform) -> Result<(), RenderError> {
     let op = command.get("op").and_then(Value::as_str).unwrap_or("");
-    if op == "text" { return Ok(()); }
-    let Some(segments) = command.get("path").and_then(Value::as_array) else { return Ok(()); };
+    if op == "text" {
+        return Err(RenderError::Raster(
+            "Canvas text drawing is not supported yet; this frame was not rendered.".into(),
+        ));
+    }
+    if !matches!(op, "fill" | "stroke" | "clear") {
+        return Err(RenderError::Commands(format!(
+            "Unsupported Canvas operation '{op}'."
+        )));
+    }
+    let Some(segments) = command.get("path").and_then(Value::as_array) else {
+        return Err(RenderError::Commands(format!(
+            "Canvas operation '{op}' has no supported path data."
+        )));
+    };
+    if segments.is_empty() {
+        return Ok(());
+    }
     let mut builder = PathBuilder::new();
     for segment in segments {
         match segment.get("op").and_then(Value::as_str).unwrap_or("") {
@@ -293,7 +434,9 @@ fn draw_command(pixmap: &mut Pixmap, command: &Value, scale: Transform) -> Resul
                 number(segment, "x")?, number(segment, "y")?,
             ),
             "Z" => builder.close(),
-            _ => {}
+            other => return Err(RenderError::Commands(format!(
+                "Unsupported Canvas path segment '{other}'."
+            ))),
         }
     }
     let Some(path) = builder.finish() else { return Ok(()); };
@@ -303,15 +446,32 @@ fn draw_command(pixmap: &mut Pixmap, command: &Value, scale: Transform) -> Resul
     if op == "clear" {
         paint.blend_mode = BlendMode::Clear;
     } else if op == "fill" {
-        paint.set_color(parse_color(command.get("fill").and_then(Value::as_str).unwrap_or("#ffffff"), alpha)
+        let color = command.get("fill").and_then(Value::as_str).ok_or_else(|| {
+            RenderError::Raster("Canvas gradient fills are not supported yet; use a solid fill color.".into())
+        })?;
+        paint.set_color(parse_color(color, alpha)
             .ok_or_else(|| RenderError::Raster("Unsupported fill color.".into()))?);
     } else if op == "stroke" {
-        paint.set_color(parse_color(command.get("stroke").and_then(Value::as_str).unwrap_or("#ffffff"), alpha)
+        let color = command.get("stroke").and_then(Value::as_str).ok_or_else(|| {
+            RenderError::Raster("Canvas gradient strokes are not supported yet; use a solid stroke color.".into())
+        })?;
+        paint.set_color(parse_color(color, alpha)
             .ok_or_else(|| RenderError::Raster("Unsupported stroke color.".into()))?);
     } else {
-        return Ok(());
+        return Err(RenderError::Commands(format!("Unsupported Canvas operation '{op}'.")));
     }
     if op == "stroke" {
+        let line_cap = command.get("lineCap").and_then(Value::as_str).unwrap_or("butt");
+        let line_join = command.get("lineJoin").and_then(Value::as_str).unwrap_or("miter");
+        let has_dash = command
+            .get("lineDash")
+            .and_then(Value::as_array)
+            .is_some_and(|segments| !segments.is_empty());
+        if line_cap != "butt" || line_join != "miter" || has_dash {
+            return Err(RenderError::Raster(
+                "Canvas line caps, joins, and dash patterns are not supported yet; use butt caps, miter joins, and solid lines.".into(),
+            ));
+        }
         let width = command.get("width").and_then(Value::as_f64).unwrap_or(1.0) as f32;
         pixmap.stroke_path(&path, &paint, &Stroke { width: width.max(0.1), ..Default::default() }, scale, None);
     } else {
@@ -369,6 +529,7 @@ fn parse_color(input: &str, opacity: f32) -> Option<tiny_skia::Color> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
     fn renders_basic_canvas_frame_from_native_contract() {
         let source = r##"window.renderFrame = function(time, frame, fps, ctx, width, height) {
@@ -385,4 +546,73 @@ mod tests {
         assert_eq!(frame.height(), 90);
         assert!(frame.data().chunks_exact(4).any(|p| p[0] > 200 && p[1] > 200 && p[2] > 200));
     }
+
+    #[test]
+    fn frame_output_does_not_depend_on_render_order() {
+        let source = r##"var calls = 0;
+            window.renderFrame = function(time, frame, fps, ctx, width, height) {
+                calls += 1;
+                ctx.fillStyle = calls % 2 ? "#ffffff" : "#000000";
+                ctx.fillRect(0, 0, width, height);
+            };"##;
+        let renderer = FrameRenderer::new(source).expect("contract should load");
+        let frame_zero = renderer.render(0.0, 0, 60, 16, 16, 16, 16).expect("frame should render");
+        let frame_seven = renderer.render(7.0 / 60.0, 7, 60, 16, 16, 16, 16).expect("frame should render");
+        assert_eq!(frame_zero.data(), frame_seven.data());
+    }
+
+    #[test]
+    fn math_random_is_repeatable_for_the_same_frame() {
+        let source = r##"window.renderFrame = function(time, frame, fps, ctx, width, height) {
+                var red = Math.floor(Math.random() * 256);
+                ctx.fillStyle = "rgb(" + red + ",0,0)";
+                ctx.fillRect(0, 0, width, height);
+            };"##;
+        let renderer = FrameRenderer::new(source).expect("contract should load");
+        let first = renderer.render(0.1, 6, 60, 16, 16, 16, 16).expect("frame should render");
+        let repeated = renderer.render(0.1, 6, 60, 16, 16, 16, 16).expect("frame should render");
+        assert_eq!(first.data(), repeated.data());
+    }
+
+    #[test]
+    fn infinite_frame_script_is_interrupted() {
+        let source = r##"window.renderFrame = function() { while (true) {} };"##;
+        let renderer = FrameRenderer::new(source).expect("contract should load");
+        let error = match renderer.render(0.0, 0, 60, 16, 16, 16, 16) {
+            Ok(_) => panic!("infinite script must stop"),
+            Err(error) => error,
+        };
+        assert!(matches!(error, RenderError::ExecutionBudget(_)));
+    }
+
+    #[test]
+    fn unsupported_text_is_reported_instead_of_dropped() {
+        let source = r##"window.renderFrame = function(time, frame, fps, ctx) {
+                ctx.fillText("unsupported", 2, 12);
+            };"##;
+        let renderer = FrameRenderer::new(source).expect("contract should load");
+        let error = match renderer.render(0.0, 0, 60, 16, 16, 16, 16) {
+            Ok(_) => panic!("text is not implemented"),
+            Err(error) => error,
+        };
+        assert!(error.to_string().contains("text drawing is not supported"));
+    }
+
+    #[test]
+    fn unsupported_gradient_is_not_replaced_with_solid_white() {
+        let source = r##"window.renderFrame = function(time, frame, fps, ctx, width, height) {
+                var gradient = ctx.createLinearGradient(0, 0, width, 0);
+                gradient.addColorStop(0, "#000000");
+                gradient.addColorStop(1, "#ffffff");
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+            };"##;
+        let renderer = FrameRenderer::new(source).expect("contract should load");
+        let error = match renderer.render(0.0, 0, 60, 16, 16, 16, 16) {
+            Ok(_) => panic!("gradient is not implemented"),
+            Err(error) => error,
+        };
+        assert!(error.to_string().contains("gradient fills are not supported"));
+    }
 }
+
