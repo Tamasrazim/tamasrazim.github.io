@@ -69,6 +69,7 @@ async fn choose_alpha_output(profile: String) -> Result<Option<String>, String> 
         let (filter_name, extension, file_name) = match profile.as_str() {
             "webm" => ("Transparent WebM video", "webm", "trilyva-alpha.webm"),
             "mov" => ("ProRes 4444 MOV video", "mov", "trilyva-alpha.mov"),
+            "apng" => ("Transparent animated PNG", "apng", "trilyva-alpha.apng"),
             _ => return None,
         };
         rfd::FileDialog::new()
