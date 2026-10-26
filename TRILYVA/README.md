@@ -2,7 +2,7 @@
 
 **Product owner:** Tamasrazim  
 **Product name:** TRILYVA  
-**Document purpose:** The single source of truth Codex must follow when building the native desktop application from scratch.  
+**Document purpose:** The single source of truth for building the native desktop application from scratch.
 **Status:** Implementation specification, not a statement that every listed feature is already implemented.  
 **Primary rule:** Build the actual product described here. Do not stop at a mock-up, a static preview, a thin wrapper, or a renamed copy of the browser application.
 
@@ -44,11 +44,11 @@ These are acceptance requirements rather than optional ideas.
 
 ## 3. What the native rebuild means
 
-The old browser renderer is not the native application. Codex must create the desktop product as a separate implementation and port the important mechanisms and user-facing capabilities into it.
+The old browser renderer is not the native application. Build the desktop product as a separate implementation and port the important mechanisms and user-facing capabilities into it.
 
 The existing renderer can be inspected to understand its established contract, project behaviour, export metadata, filename conventions, frame calculations, error handling, library behaviours, and feature priorities. Reuse compatible algorithms and format rules where appropriate, but do not render its DOM, transplant its page CSS into a browser window, or use it as the actual desktop workspace.
 
-A reasonable native design is a Rust desktop process with a native GPU-backed interface, an embedded JavaScript engine, a native drawing engine, a native job coordinator, and a bundled or reliably discovered local media backend. The exact libraries can be chosen by Codex after checking current compatibility, licences, supported platforms, memory requirements, and maintenance. The design must satisfy the behaviour in this document.
+A reasonable native design is a Rust desktop process with a native GPU-backed interface, an embedded JavaScript engine, a native drawing engine, a native job coordinator, and a bundled or reliably discovered local media backend. Choose libraries after checking current compatibility, licences, supported platforms, memory requirements, and maintenance. The design must satisfy the behaviour in this document.
 
 ### Mandatory separation of responsibilities
 
@@ -1219,9 +1219,9 @@ Exact module names can differ, but responsibilities must remain separated. Keep 
 - Do not download runtime dependencies during normal app launch.
 - Explain the design decision for any major rendering, scripting, or codec dependency.
 
-## 27. Implementation order for Codex
+## 27. Implementation order
 
-Codex must work on the real codebase, keep changes reviewable, and build in verifiable steps. It must not stop after creating screens.
+Work on the real codebase, keep changes reviewable, and build in verifiable steps. Do not stop after creating screens.
 
 ### Phase 1 — repository audit and design foundation
 - Inspect the existing public renderer, its contracts, exports, examples, formats, settings, metadata, and library flows.
@@ -1285,7 +1285,7 @@ Codex must work on the real codebase, keep changes reviewable, and build in veri
 
 At the end of each phase, report what was actually implemented, tests run, tests that failed, and features not yet implemented. Do not call a phase complete if its acceptance tests are still queued or failing.
 
-## 28. Instructions Codex must follow while working
+## 28. Development requirements
 
 - Read this entire document before editing files.
 - Inspect the existing project and its real contracts before changing anything.
@@ -1311,4 +1311,5 @@ The Native Desktop rebuild is done only when TRILYVA can be installed and launch
 
 Most importantly, it must feel like a coherent creative application. The editor, preview, composition inspector, timeline, project model, renderer, export controls, and library must be parts of one product—not separate web screens placed in a native-looking frame.
 
-This document is the specification Codex should implement against. Where implementation details require an engineering decision, choose the approach that best preserves the user-visible requirements above, document the decision, test it, and update this document only when the product owner approves a change.
+This document is the implementation specification. Where implementation details require an engineering decision, choose the approach that best preserves the user-visible requirements above, document the decision, test it, and update this document only when the product owner approves a change.
+
