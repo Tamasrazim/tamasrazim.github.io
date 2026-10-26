@@ -1,0 +1,32 @@
+[package]
+name = "trilyva-native"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.92"
+description = "TRILYVA native motion graphics workstation"
+authors = ["Tamasrazim"]
+license = "MIT"
+build = "build.rs"
+
+[dependencies]
+eframe = { version = "0.37", features = ["default_fonts"] }
+rquickjs = "0.14"
+tiny-skia = "0.12"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rfd = "0.15"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+directories = "6"
+sha2 = "0.10"
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "2"
+
+[build-dependencies]
+winres = "0.1"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = true
+panic = "abort"

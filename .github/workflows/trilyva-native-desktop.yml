@@ -1,0 +1,115 @@
+name: TRILYVA Native Desktop
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [trilyva-native-rebuild]
+    paths:
+      - "TRILYVA/native/**"
+      - ".github/workflows/trilyva-native-desktop.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trilyva-native-desktop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    name: Windows · native app + custom installer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Generate TRILYVA artwork
+        run: python TRILYVA/native/packaging/generate-icon.py
+      - name: Build native desktop binary
+        run: cargo build --manifest-path TRILYVA/native/Cargo.toml --release
+      - name: Install Inno Setup
+        run: choco install innosetup --yes --no-progress
+      - name: Build the custom installer
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force artifacts | Out-Null
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (!(Test-Path $iscc)) { $iscc = "$env:ProgramFiles\Inno Setup 6\ISCC.exe" }
+          & $iscc "/DAppVersion=0.1.0" "/DAppExe=..\..\target\release\trilyva-native.exe" "TRILYVA/native/packaging/windows/trilyva.iss"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TRILYVA-Windows-x64-Setup
+          path: artifacts/TRILYVA-Setup-x64.exe
+          if-no-files-found: error
+
+  linux:
+    name: Linux · native binary
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config libx11-dev libxcursor-dev libxrandr-dev libxi-dev libxkbcommon-dev libwayland-dev libgl1-mesa-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev
+      - name: Build native desktop binary
+        run: cargo build --manifest-path TRILYVA/native/Cargo.toml --release
+      - name: Run native renderer tests
+        run: cargo test --manifest-path TRILYVA/native/Cargo.toml
+      - name: Package portable Linux archive
+        run: |
+          mkdir -p artifacts/TRILYVA
+          cp TRILYVA/native/target/release/trilyva-native artifacts/TRILYVA/
+          cp TRILYVA/native/README.md artifacts/TRILYVA/
+          tar -C artifacts -czf artifacts/TRILYVA-Linux-x64.tar.gz TRILYVA
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TRILYVA-Linux-x64
+          path: artifacts/TRILYVA-Linux-x64.tar.gz
+          if-no-files-found: error
+
+  macos:
+    name: macOS · native app bundle
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15-intel
+            target: x86_64-apple-darwin
+            label: Intel
+          - runner: macos-15
+            target: aarch64-apple-darwin
+            label: Apple-Silicon
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Generate TRILYVA artwork
+        run: python TRILYVA/native/packaging/generate-icon.py
+      - name: Build native desktop binary
+        run: cargo build --manifest-path TRILYVA/native/Cargo.toml --release --target ${{ matrix.target }}
+      - name: Package macOS app and disk image
+        run: |
+          mkdir -p artifacts/TRILYVA.app/Contents/MacOS artifacts/TRILYVA.app/Contents/Resources
+          cp TRILYVA/native/target/${{ matrix.target }}/release/trilyva-native artifacts/TRILYVA.app/Contents/MacOS/TRILYVA
+          cp TRILYVA/native/assets/trilyva.png artifacts/TRILYVA.app/Contents/Resources/trilyva.png
+          chmod +x artifacts/TRILYVA.app/Contents/MacOS/TRILYVA
+          cat > artifacts/TRILYVA.app/Contents/Info.plist <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict><key>CFBundleName</key><string>TRILYVA</string><key>CFBundleDisplayName</key><string>TRILYVA</string><key>CFBundleExecutable</key><string>TRILYVA</string><key>CFBundleIdentifier</key><string>com.tamasrazim.trilyva.native</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleVersion</key><string>0.1.0</string><key>CFBundleIconFile</key><string>trilyva</string></dict></plist>
+          PLIST
+          hdiutil create -volname TRILYVA -srcfolder artifacts/TRILYVA.app -ov -format UDZO artifacts/TRILYVA-macOS-${{ matrix.label }}.dmg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TRILYVA-macOS-${{ matrix.label }}
+          path: artifacts/TRILYVA-macOS-${{ matrix.label }}.dmg
+          if-no-files-found: error
