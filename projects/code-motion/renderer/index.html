@@ -1704,7 +1704,10 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
             <h4>RENDER</h4>
             <div class="btn-row"><button class="btn" data-act="renderFullLibrary" id="renderFullLibraryBtn" title="Render every item in the selected library to a folder or ZIP">RENDER FULL LIBRARY</button></div>
             <div class="btn-row"><button class="btn solid" data-act="startRender" id="renderCurrentCodeBtn">RENDER CURRENT CODE</button></div>
-            <div class="row"><label for="stillFrameIndex">Still frame</label><input id="stillFrameIndex" type="number" min="0" step="1" value="0" style="max-width:100px" aria-describedby="stillExportNote"></div><div id="stillExportFormats" style="display:flex;flex-wrap:wrap;gap:8px 12px;margin:6px 0 2px;font:10px var(--mono);color:var(--ink-2)"><label><input type="checkbox" id="stillFmtPng" checked> PNG</label><label><input type="checkbox" id="stillFmtJpg"> JPG</label><label><input type="checkbox" id="stillFmtSvg"> SVG</label><label><input type="checkbox" id="stillFmtEps"> EPS</label></div><p class="note" id="stillExportNote">Frame numbers start at 0. After a successful render, TRILYVA also saves the selected still formats for this frame. PNG is the default.</p><p class="note">Renders the code currently in the editor using the selected composition, frame rate, duration, format and quality settings.</p>
+            <div class="row"><label for="stillFrameIndex">Still frame</label><input id="stillFrameIndex" type="number" min="0" step="1" value="0" style="max-width:100px" aria-describedby="stillExportNote"></div><div id="stillExportFormats" style="display:flex;flex-wrap:wrap;gap:8px 12px;margin:6px 0 2px;font:10px var(--mono);color:var(--ink-2)"><label><input type="checkbox" id="stillFmtPng" checked> PNG</label><label><input type="checkbox" id="stillFmtWebp"> WebP</label><label><input type="checkbox" id="stillFmtJpg"> JPG</label><label><input type="checkbox" id="stillFmtSvg"> SVG</label><label><input type="checkbox" id="stillFmtEps"> EPS</label></div><p class="note" id="stillExportNote">Frame numbers start at 0. After a successful render, TRILYVA also saves the selected still formats for this frame. PNG is the default; WebP can preserve alpha where supported.</p>
+            <div class="btn-row"><button class="btn" data-act="exportSvgSequence" id="exportSvgSequenceBtn">EXPORT VECTOR FRAME SEQUENCE · SVG ZIP</button></div>
+            <p class="note">Packages every frame as an editable SVG file in a ZIP. Best for vector-compatible Canvas drawing; unsupported effects or drawing APIs can prevent a vector export.</p>
+            <p class="note">Renders the code currently in the editor using the selected composition, frame rate, duration, format and quality settings.</p>
             <div class="btn-row">
               <button class="btn" data-act="cancelRender" id="cancelBtn" disabled>Cancel</button>
             </div>
@@ -8209,8 +8212,20 @@ var BatchVector = (function () {
     g.stops.forEach(function(s2){var c2=rgb(s2.color);l+='<stop offset="'+fmt(s2.offset*100)+'%" stop-color="'+hex(c2)+'" stop-opacity="'+fmt(c2.a)+'"/>';});
     return l+'</linearGradient>';
   }
-  function svg(scene){
-    var defs=[],gid=0,seen=new Map(),body=[];
+  function svg(scene,transparent){
+    var defs=[],gid=0,seen=new Map(),body=[],skippedBackground=false;
+    function coversCanvasBackground(o,cmds){
+      if(o.t!=='rect'||!o.fill||o.stroke||o.comp&&o.comp!=='source-over')return false;
+      if(o.opacity!=null&&o.opacity<0.999)return false;
+      var bounds=transformCommands(cmds,o.m||identity()),xs=[],ys=[];
+      bounds.forEach(function(cmd){
+        for(var j=1;j<cmd.length;j+=2){xs.push(cmd[j]);ys.push(cmd[j+1]);}
+      });
+      if(!xs.length||!ys.length)return false;
+      var minX=Math.min.apply(Math,xs),maxX=Math.max.apply(Math,xs);
+      var minY=Math.min.apply(Math,ys),maxY=Math.max.apply(Math,ys);
+      return minX<=0.5&&minY<=0.5&&maxX>=scene.W-0.5&&maxY>=scene.H-0.5;
+    }
     function paint(v){
       if(v==null)return 'none';
       if(v instanceof Gradient){
@@ -8222,6 +8237,12 @@ var BatchVector = (function () {
     scene.ops.forEach(function(o){
       var m=o.m||identity(),cmds=transformCommands(commandsForOp(o),m);
       if(!cmds.length)return;
+      // Transparent SVG stills must not inherit an opaque full-canvas background
+      // painted by common Canvas animation templates. Keep all foreground paths.
+      if(transparent&&!skippedBackground&&coversCanvasBackground(o,commandsForOp(o))){
+        skippedBackground=true;
+        return;
+      }
       var st='fill="'+paint(o.fill||null)+'" stroke="'+paint(o.stroke||null)+'" stroke-width="'+fmt(o.width||0)+'" opacity="'+fmt(o.opacity==null?1:o.opacity)+'"';
       var extra=o.comp==='screen'?' style="mix-blend-mode:screen"':'';
       if(o.t==='rect')body.push('<path d="'+pathSvg(cmds)+'" '+st+extra+'/>');
@@ -8325,7 +8346,7 @@ function trilyvaReadStillPrefs(){
   var frame=frameNode?Math.floor(Number(frameNode.value)||0):0;
   frame=Math.max(0,frame);
   var formats=[];
-  ['png','jpg','svg','eps'].forEach(function(fmt){
+  ['png','jpg','webp','svg','eps'].forEach(function(fmt){
     var node=$('#stillFmt'+fmt.charAt(0).toUpperCase()+fmt.slice(1));
     if(node&&node.checked)formats.push(fmt);
   });
@@ -8338,12 +8359,12 @@ function trilyvaReadStillPrefs(){
 function trilyvaApplyStillPrefs(prefs){
   var frameNode=$('#stillFrameIndex');
   if(frameNode)frameNode.value=Math.max(0,Math.floor(Number(prefs.frame)||0));
-  ['png','jpg','svg','eps'].forEach(function(fmt){
+  ['png','jpg','webp','svg','eps'].forEach(function(fmt){
     var node=$('#stillFmt'+fmt.charAt(0).toUpperCase()+fmt.slice(1));
     if(node)node.checked=(prefs.formats||[]).indexOf(fmt)>=0;
   });
 }
-async function trilyvaRenderRasterStillBlobs(code,composition,frame,needPng,needJpg){
+async function trilyvaRenderRasterStillBlobs(code,composition,frame,needPng,needJpg,needWebp){
   var originalCode=S.code,originalComp=merge({},S.comp);
   var targetComp=CORE.composition(merge({},composition));
   var compiled=await Engine.api.compile(code,targetComp);
@@ -8362,6 +8383,17 @@ async function trilyvaRenderRasterStillBlobs(code,composition,frame,needPng,need
     if(needPng){
       output.png=await new Promise(function(resolve,reject){
         canvas.toBlob(function(blob){blob?resolve(blob):reject(new Error('PNG encoding failed.'));},'image/png');
+      });
+    }
+    if(needWebp){
+      output.webp=await new Promise(function(resolve,reject){
+        canvas.toBlob(function(blob){
+          if(!blob)return reject(new Error('WebP encoding failed.'));
+          if(String(blob.type||'').toLowerCase()!=='image/webp'){
+            return reject(new Error('This runtime did not produce WebP. Use PNG for an alpha-preserving still image.'));
+          }
+          resolve(blob);
+        },'image/webp',0.94);
       });
     }
     if(needJpg){
@@ -8384,20 +8416,24 @@ async function trilyvaRenderRasterStillBlobs(code,composition,frame,needPng,need
 }
 async function trilyvaBuildStillAssets(code,composition,frame,formats){
   var assets={},errors=[];
-  var wantsPng=formats.indexOf('png')>=0,wantsJpg=formats.indexOf('jpg')>=0;
-  if(wantsPng||wantsJpg){
+  var wantsPng=formats.indexOf('png')>=0,wantsJpg=formats.indexOf('jpg')>=0,wantsWebp=formats.indexOf('webp')>=0;
+  if(wantsPng||wantsJpg||wantsWebp){
     try{
-      var raster=await trilyvaRenderRasterStillBlobs(code,composition,frame,wantsPng,wantsJpg);
+      var raster=await trilyvaRenderRasterStillBlobs(code,composition,frame,wantsPng,wantsJpg,wantsWebp);
       Object.keys(raster).forEach(function(k){assets[k]=raster[k];});
-    }catch(e){(wantsPng?['png']:[]).concat(wantsJpg?['jpg']:[]).forEach(function(fmt){errors.push({format:fmt,reason:String(e&&e.message||e)});});}
+    }catch(e){
+      (wantsPng?['png']:[]).concat(wantsJpg?['jpg']:[]).concat(wantsWebp?['webp']:[])
+        .forEach(function(fmt){errors.push({format:fmt,reason:String(e&&e.message||e)});});
+    }
   }
   if(formats.indexOf('svg')>=0||formats.indexOf('eps')>=0){
     try{
       var c=CORE.composition(merge({},composition));
       var frameTime=CORE.frameToTime(c,frame);
       var progress=c.frameCount>1?frame/(c.frameCount-1):0;
-      var scene=BatchVector.sceneForCode(code,c.width,c.height,frame,frameTime,progress,c.fps);
-      if(formats.indexOf('svg')>=0)assets.svg=new Blob([BatchVector.svg(scene)],{type:'image/svg+xml;charset=utf-8'});
+      var vectorCode=c.transparent?BatchVector.stripBackground(code):code;
+      var scene=BatchVector.sceneForCode(vectorCode,c.width,c.height,frame,frameTime,progress,c.fps);
+      if(formats.indexOf('svg')>=0)assets.svg=new Blob([BatchVector.svg(scene,c.transparent)],{type:'image/svg+xml;charset=utf-8'});
       if(formats.indexOf('eps')>=0)assets.eps=new Blob([BatchVector.eps(scene)],{type:'application/postscript'});
     }catch(e){
       ['svg','eps'].filter(function(fmt){return formats.indexOf(fmt)>=0;}).forEach(function(fmt){errors.push({format:fmt,reason:String(e&&e.message||e)});});
@@ -8527,7 +8563,7 @@ function openRenderAllConfirm(lib,items){
   var stillRow=el('div');stillRow.style.cssText='display:flex;flex-wrap:wrap;gap:10px 16px;';
   var prefs=trilyvaReadStillPrefs();
   var stillChecks={};
-  ['png','jpg','svg','eps'].forEach(function(fmt){stillChecks[fmt]=checkboxOption(stillRow,'fullStill'+fmt.toUpperCase(),fmt.toUpperCase(),prefs.formats.indexOf(fmt)>=0);});
+  ['png','jpg','webp','svg','eps'].forEach(function(fmt){stillChecks[fmt]=checkboxOption(stillRow,'fullStill'+fmt.toUpperCase(),fmt.toUpperCase(),prefs.formats.indexOf(fmt)>=0);});
   var frameRow=el('div','row');frameRow.appendChild(el('label',null,'Still frame (0-based)'));
   var frameInput=document.createElement('input');frameInput.type='number';frameInput.min='0';frameInput.step='1';frameInput.value=String(prefs.frame);frameInput.style.maxWidth='120px';frameRow.appendChild(frameInput);
   var details=el('div','note','Library: '+lib.title+' · '+items.length+' animations. Each selected video format renders the full composition. PNG/JPG/SVG/EPS export the selected frame; frame 0 is the first frame. Files will be written into a timestamped library folder, or into a ZIP archive you choose.');
@@ -8535,7 +8571,7 @@ function openRenderAllConfirm(lib,items){
   body.append(el('h4',null,'VIDEO FORMATS'),videoRow,stillHeading,stillRow,frameRow,details,warning);
   function collectSettings(){
     var videoFormats=['mp4'];
-    var stillFormats=['png','jpg','svg','eps'].filter(function(fmt){return stillChecks[fmt].checked;});
+    var stillFormats=['png','jpg','webp','svg','eps'].filter(function(fmt){return stillChecks[fmt].checked;});
     if(!stillFormats.length){stillFormats=['png'];stillChecks.png.checked=true;}
     var frame=Math.max(0,Math.floor(Number(frameInput.value)||0));
     var settings={videoFormats:videoFormats,stillFormats:stillFormats,frame:frame};
@@ -8648,7 +8684,7 @@ async function renderAllLibrary(lib,items,settings,destination){
           var ext=fmt==='jpg'?'jpg':fmt;
           var fileName=stillBase+'.'+ext,relative=itemFolderName+'/'+fileName;
           try{
-            await writeAsset(itemOutputDir,relative,fileName,blob,fmt==='svg'?'image/svg+xml':fmt==='eps'?'application/postscript':fmt==='jpg'?'image/jpeg':'image/png');
+            await writeAsset(itemOutputDir,relative,fileName,blob,fmt==='svg'?'image/svg+xml':fmt==='eps'?'application/postscript':fmt==='jpg'?'image/jpeg':fmt==='webp'?'image/webp':'image/png');
             files.push(fileName);
           }catch(e){failures.push({item:itemName,stage:'save-'+fmt,reason:String(e&&e.message||e)});assetNotes.push(fmt.toUpperCase()+': save failed');}
         }
@@ -10664,10 +10700,10 @@ function startRenderNow(job, opts) {
   renderStat({ frame: 0, done: 0, total: c.frameCount, elapsedMs: 0, renderFps: 0, msPerFrame: 0, bytes: 0 }, job);
   toyShow(true);
 
-  var dirHandle = null;
-  var pre = (job.format === 'png' && job.target === 'dir')
+  var dirHandle = opts.dirHandle || null;
+  var pre = (job.format === 'png' && job.target === 'dir' && !dirHandle)
     ? pickDirectory().then(function (h) { dirHandle = h; logLine('writing frames into folder "' + h.name + '"'); })
-    : Promise.resolve();
+    : (dirHandle ? Promise.resolve().then(function () { logLine('writing frames into folder "' + (dirHandle.name || 'native output') + '"'); }) : Promise.resolve());
 
   var sawFirstFrame = false;
   function onLog(msg) {
@@ -10677,6 +10713,9 @@ function startRenderNow(job, opts) {
     if (/^muxed /.test(msg)) setStage('FINALISING');
   }
   function onProgress(p) {
+    if (typeof opts.onProgress === 'function') {
+      try { opts.onProgress(p); } catch (progressError) { logLine('progress callback failed: ' + String(progressError && progressError.message || progressError), true); }
+    }
     if (!sawFirstFrame) { sawFirstFrame = true; setStage('RENDERING'); prog.classList.remove('scan'); }
     S.lastProgress = p;
     renderStat(p, job);
@@ -12460,8 +12499,8 @@ var DOCS = [
   '<p>Fewer arguments are fine — <code>function (time, frame, fps, ctx, width, height)</code> is the full contract, and you can declare only the ones you need. An optional <code>window.setup(ctx, width, height)</code> runs once per compile.</p>',
 
   '<h5>RENDER ONE ANIMATION / SAVE STILL FRAMES</h5>',
-  '<p>Open <b>RENDER</b> and set the still-frame index. Frame numbers are zero-based: <code>0</code> is the first frame. Select any combination of <b>PNG</b>, <b>JPG</b>, <b>SVG</b> and <b>EPS</b>; PNG is selected by default. A normal successful render automatically downloads the chosen still formats for that frame as well as the selected video output. Change the frame index before rendering to save a different moment.</p>',
-  '<p>PNG is raster and can preserve transparency. JPG is raster and does not preserve transparency. SVG and EPS use the vector scene recorder, so they work only for supported drawing operations; if the animation uses unsupported canvas features, the vector file can be incomplete or fail. The app reports a warning rather than treating a failed vector export as a successful file.</p>',
+  '<p>Open <b>RENDER</b> and set the still-frame index. Frame numbers are zero-based: <code>0</code> is the first frame. Select any combination of <b>PNG</b>, <b>WebP</b>, <b>JPG</b>, <b>SVG</b> and <b>EPS</b>; PNG is selected by default. A normal successful render automatically downloads the chosen still formats for that frame as well as the selected video output. Change the frame index before rendering to save a different moment.</p>',
+  '<p>PNG and WebP are raster formats that can preserve transparency when supported by the runtime. JPG does not preserve transparency. SVG and EPS use the vector scene recorder, so they work only for supported drawing operations; EPS is opaque, and if the animation uses unsupported canvas features, a vector file can be incomplete or fail. The app reports a warning rather than treating a failed vector export as a successful file.</p>',
 
   '<h5>RENDER FULL LIBRARY</h5>',
   '<p>Use <b>RENDER FULL LIBRARY</b> to export every animation in a selected built-in or locally imported library. Choose <b>SAVE TO FOLDER</b> to pick a destination directory, or <b>SAVE AS ZIP</b> to pick the ZIP file location. Each library item gets its own output folder, with MP4, the selected still formats, and metadata/manifest files. Choose formats and the zero-based still-frame index in the batch settings before starting.</p>',
@@ -12642,6 +12681,87 @@ function copyAnimationPrompt() {
 /* ============================================================
    Actions
    ============================================================ */
+async function exportSvgSequence() {
+  if (S.rendering) throw new Error("Wait for the active render to finish before exporting the vector sequence.");
+  if (!CORE || !ENC || !BatchVector || !Ed || !Ed.ta) throw new Error("The vector export engine is not ready.");
+  var code = Ed.ta.value;
+  var comp = CORE.composition(S.comp);
+  if (!code.trim()) throw new Error("The code editor is empty.");
+  if (comp.frameCount > 10000 && !window.confirm(
+    "This will create " + comp.frameCount.toLocaleString() +
+    " separate SVG frames. The ZIP may be very large and export may take a long time. Continue?"
+  )) return;
+
+  var button = $("#exportSvgSequenceBtn");
+  var oldLabel = button ? button.textContent : "";
+  var zip = new ENC.ZipWriter();
+  var stem = slugify(S.meta && S.meta.title || S.name || "trilyva-vector");
+  var started = Date.now(), totalBytes = 0;
+  var failures = [];
+  if (button) { button.disabled = true; button.textContent = "EXPORTING SVG FRAMES…"; }
+
+  try {
+    for (var frame = 0; frame < comp.frameCount; frame++) {
+      var frameTime = CORE.frameToTime(comp, frame);
+      var progress = comp.frameCount > 1 ? frame / (comp.frameCount - 1) : 0;
+      var vectorCode = comp.transparent ? BatchVector.stripBackground(code) : code;
+      var scene = BatchVector.sceneForCode(
+        vectorCode, comp.width, comp.height, frame, frameTime, progress, comp.fps
+      );
+      var svgText = BatchVector.svg(scene, !!comp.transparent);
+      var blob = new Blob([svgText], { type: "image/svg+xml;charset=utf-8" });
+      var bytes = new Uint8Array(await blob.arrayBuffer());
+      var name = stem + "_" + ("000000" + frame).slice(-6) + ".svg";
+      zip.add(name, blob, ENC.crc32Final(ENC.crc32(bytes)), bytes.length);
+      totalBytes += bytes.length;
+
+      if (frame === 0 || frame % 10 === 0 || frame === comp.frameCount - 1) {
+        var percent = Math.floor((frame + 1) / comp.frameCount * 100);
+        $("#stMsg").textContent = "SVG sequence " + percent + "% · frame " +
+          (frame + 1).toLocaleString() + " / " + comp.frameCount.toLocaleString();
+        if (button) button.textContent = "SVG " + percent + "%";
+        await new Promise(function (resolve) { setTimeout(resolve, 0); });
+      }
+    }
+
+    var manifest = {
+      format: "TRILYVA_SVG_FRAME_SEQUENCE",
+      version: 1,
+      creator: "TRILYVA — Tamasrazim",
+      title: S.meta && S.meta.title || S.name || "TRILYVA vector sequence",
+      width: comp.width,
+      height: comp.height,
+      fps: comp.fps,
+      durationSeconds: comp.duration,
+      frameCount: comp.frameCount,
+      transparentBackground: !!comp.transparent,
+      naming: stem + "_%06d.svg",
+      generatedAt: new Date().toISOString(),
+      sourceHash: S.hash || null,
+      note: "Each SVG represents the deterministic vector-recorder evaluation of one frame. SVG compatibility is limited to the Canvas operations implemented by TRILYVA's vector recorder."
+    };
+    zip.addBytes("manifest.json", ENC.utf8(JSON.stringify(manifest, null, 2)));
+    zip.addBytes("README.txt", ENC.utf8(
+      "TRILYVA SVG FRAME SEQUENCE\r\n" +
+      comp.width + "x" + comp.height + " @ " + comp.fps + " FPS\r\n" +
+      comp.frameCount + " frames, " + comp.duration.toFixed(3) + " seconds\r\n\r\n" +
+      "Each SVG is an independent editable vector frame. Files are numbered from 000000.\r\n" +
+      "Some Canvas APIs and raster effects are not represented by the vector recorder.\r\n" +
+      "When the composition is transparent, the first full-canvas background rectangle is omitted from SVG output.\r\n"
+    ));
+    var output = zip.finish();
+    download(output, stem + "_svg_frames_" + stampNow() + ".zip");
+    logLine("VECTOR SEQUENCE COMPLETE · " + comp.frameCount + " SVG frames · " +
+      (output.size / 1048576).toFixed(2) + " MB · " + ((Date.now() - started) / 1000).toFixed(1) + "s", true);
+    $("#stMsg").textContent = "SVG sequence downloaded · " + comp.frameCount + " vector frames";
+  } catch (error) {
+    throw new Error("SVG frame sequence stopped: " + String(error && error.message || error) +
+      ". The vector recorder supports a subset of Canvas drawing operations; no incomplete ZIP was downloaded.");
+  } finally {
+    if (button) { button.disabled = false; button.textContent = oldLabel; }
+  }
+}
+
 var ACTS = {
   'new': function () {
     askDiscard('Start a new project?', function () { newProject('sample-starter'); });
@@ -12665,6 +12785,7 @@ var ACTS = {
   renderAllDotMesh: function () { openDotMeshFolderPicker(); },
   exportDotMesh50: function () { openDotMeshFolderPicker(); },
   startRender: function () { withCompiled().then(function (ok) { if (ok) startRender(buildJob()); }); },
+  exportSvgSequence: exportSvgSequence,
   cancelRender: cancelRender,
   analyze: analyseJob,
   identifyFrame: identifyFrame,
