@@ -11,12 +11,13 @@
   }
 
   var chooseButton = document.getElementById("alphaChooseFrames");
+  var archiveButton = document.getElementById("alphaChooseArchive");
   var encodeButton = document.getElementById("alphaEncodeButton");
   var profileSelect = document.getElementById("alphaProfile");
   var folderLabel = document.getElementById("alphaFolderLabel");
   var settingsLabel = document.getElementById("alphaSettingsLabel");
   var statusBox = document.getElementById("alphaExportStatus");
-  var inputDirectory = null;
+  var inputPath = null;
   var activeUnlisten = null;
 
   function setStatus(message, error) {
@@ -28,7 +29,7 @@
     return pieces[pieces.length - 1] || path;
   }
   function getComposition() {
-    if (typeof S === "undefined" || typeof CORE === "undefined") {
+    if (typeof S === "undefined" || typeof CORE === "undefined" || !S || !CORE) {
       throw new Error("TRILYVA composition settings are not ready. Reload the workspace and try again.");
     }
     return CORE.composition(S.comp);
@@ -42,22 +43,29 @@
     }
   }
 
-  chooseButton.addEventListener("click", async function () {
+  async function chooseInput(kind) {
     chooseButton.disabled = true;
+    archiveButton.disabled = true;
     try {
-      var selected = await desktop.choosePngSequenceDirectory();
+      var selected = kind === "zip"
+        ? await desktop.choosePngSequenceArchive()
+        : await desktop.choosePngSequenceDirectory();
       if (!selected) return;
-      inputDirectory = selected;
+      inputPath = selected;
       folderLabel.textContent = basename(selected);
       folderLabel.title = selected;
-      setStatus("Frame folder selected. Keep the composition settings matching this PNG sequence, then encode.");
+      setStatus((kind === "zip" ? "PNG·ZIP archive" : "PNG·DIR folder") +
+        " selected. Keep the composition settings matching this sequence, then encode.");
       syncSettings();
     } catch (error) {
       setStatus(String(error && error.message || error), true);
     } finally {
       chooseButton.disabled = false;
+      archiveButton.disabled = false;
     }
-  });
+  }
+  chooseButton.addEventListener("click", function () { chooseInput("folder"); });
+  archiveButton.addEventListener("click", function () { chooseInput("zip"); });
 
   profileSelect.addEventListener("change", function () {
     var prores = profileSelect.value === "mov";
@@ -67,8 +75,8 @@
   });
 
   encodeButton.addEventListener("click", async function () {
-    if (!inputDirectory) {
-      setStatus("Choose the PNG·DIR frame folder first. Render the composition with BACKGROUND set to TRANSPARENT.", true);
+    if (!inputPath) {
+      setStatus("Choose the PNG·DIR folder or PNG·ZIP archive first. Render the composition with BACKGROUND set to TRANSPARENT.", true);
       return;
     }
 
@@ -83,6 +91,7 @@
 
     encodeButton.disabled = true;
     chooseButton.disabled = true;
+    archiveButton.disabled = true;
     profileSelect.disabled = true;
     var unlisten = null;
     try {
@@ -111,7 +120,7 @@
 
       setStatus("Checking PNG sequence and alpha-capable encoder…");
       var result = await desktop.encodePngSequence({
-        inputDir: inputDirectory,
+        inputDir: inputPath,
         outputPath: outputPath,
         width: c.width,
         height: c.height,
@@ -140,13 +149,14 @@
       if (activeUnlisten === unlisten) activeUnlisten = null;
       encodeButton.disabled = false;
       chooseButton.disabled = false;
+      archiveButton.disabled = false;
       profileSelect.disabled = false;
     }
   });
 
   if (typeof MutationObserver !== "undefined") {
     var observer = new MutationObserver(syncSettings);
-    var target = document.getElementById("segRes") || document.getElementById("p-render");
+    var target = document.getElementById("p-comp") || document.getElementById("p-render");
     if (target) observer.observe(target, { subtree: true, attributes: true, childList: true });
   }
   syncSettings();
