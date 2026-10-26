@@ -27,13 +27,12 @@
 <script type="application/ld+json">
 {
   "@context":"https://schema.org",
-  "@type":"SoftwareApplication",
-  "name":"TRILYVA Desktop",
-  "applicationCategory":"MultimediaApplication",
-  "operatingSystem":"Windows, Linux, macOS",
-  "description":"Planned Rust and Tauri desktop edition of TRILYVA. This page reports development status and published builds.",
+  "@type":"WebPage",
+  "name":"TRILYVA Desktop Development Updates",
+  "url":"https://tamasrazim.github.io/projects/trilyva/updates/",
+  "description":"Development status, planned operating-system targets, and published packages for the planned Rust and Tauri desktop edition of TRILYVA.",
   "author":{"@type":"Person","name":"Robiul Rumman Razim"},
-  "url":"https://tamasrazim.github.io/projects/trilyva/updates/"
+  "isPartOf":{"@type":"WebSite","name":"Tamasrazim","url":"https://tamasrazim.github.io/"}
 }
 </script>
 <style>
@@ -149,8 +148,8 @@
   </div>
   <div class="tu-grid">
     <article class="tu-card"><div class="tu-card-kicker">01 / FOUNDATION</div><h3>Product architecture</h3><p>Direction defined: retain the current interface and connect it to a Rust backend through Tauri commands and events. No redesign of the existing workspace is part of this track.</p><div class="tu-card-foot">STATUS / SPECIFICATION DEFINED</div></article>
-    <article class="tu-card"><div class="tu-card-kicker">02 / DESKTOP SHELL</div><h3>Rust + Tauri integration</h3><p>The desktop shell must preserve the current editor, preview, panels, and animation behaviour while adding desktop process and file management.</p><div class="tu-card-foot">STATUS / NOT YET RELEASED</div></article>
-    <article class="tu-card"><div class="tu-card-kicker">03 / RENDER ENGINE</div><h3>Deterministic frame pipeline</h3><p>Target design: render each requested frame by index and timestamp instead of recording live preview playback. Output verification must reject incomplete renders.</p><div class="tu-card-foot">STATUS / IMPLEMENTATION TO VERIFY</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">02 / DESKTOP SHELL</div><h3>Rust + Tauri integration</h3><p>The desktop shell must preserve the current editor, preview, panels, and animation behaviour while adding desktop process and file management.</p><div class="tu-card-foot">STATUS / PLANNED; NOT IMPLEMENTED</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">03 / RENDER ENGINE</div><h3>Deterministic frame pipeline</h3><p>Target design: render each requested frame by index and timestamp instead of recording live preview playback. Output verification must reject incomplete renders.</p><div class="tu-card-foot">STATUS / DESIGN TARGET; NOT IMPLEMENTED</div></article>
     <article class="tu-card"><div class="tu-card-kicker">04 / MEDIA BACKEND</div><h3>FFmpeg + FFprobe</h3><p>Planned encoding layer with runtime capability discovery, validated encoder settings, useful diagnostics, cancellation, and inspection of completed files.</p><div class="tu-card-foot">STATUS / PLANNED</div></article>
     <article class="tu-card"><div class="tu-card-kicker">05 / DISTRIBUTION</div><h3>Installers and updates</h3><p>Platform-specific packaging, signatures where applicable, release assets, checksums, and version notes must be produced and tested before a package is listed as available.</p><div class="tu-card-foot">STATUS / NO PUBLIC BUILD</div></article>
     <article class="tu-card"><div class="tu-card-kicker">06 / RULE OF RECORD</div><h3>Only verified features count</h3><p>Every OS label and download link on this page will be driven by release evidence. A roadmap target is never shown as a shipped capability.</p><div class="tu-card-foot">STATUS / ONGOING</div></article>
@@ -174,7 +173,7 @@
 <section class="tu-wrap tu-section" id="platforms">
   <div class="tu-section-head">
     <h2>Operating-system support</h2>
-    <p>The browser app and desktop edition are different delivery targets. Desktop packages appear as supported only after a matching release asset has been published.</p>
+    <p>The browser app and desktop edition are different delivery targets. Desktop packages appear as downloadable only after a matching release asset has been published.</p>
   </div>
   <div class="tu-grid">
     <article class="tu-card"><div class="tu-card-kicker">CURRENT</div><h3>Modern desktop browsers</h3><p>The existing browser workspace can be opened in a compatible browser. Export behaviour depends on browser codecs, APIs, hardware, and file-picker support.</p><div class="tu-card-foot">BROWSER WORKSPACE / AVAILABLE</div></article>
