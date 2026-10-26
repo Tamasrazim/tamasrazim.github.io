@@ -178,11 +178,11 @@
   </div>
   <div class="tu-grid">
     <article class="tu-card"><div class="tu-card-kicker">CURRENT</div><h3>Modern desktop browsers</h3><p>The existing browser workspace can be opened in a compatible browser. Export behaviour depends on browser codecs, APIs, hardware, and file-picker support.</p><div class="tu-card-foot">BROWSER WORKSPACE / AVAILABLE</div></article>
-    <article class="tu-card"><div class="tu-card-kicker">TARGET</div><h3>Windows 10 / 11 · x64</h3><p>Planned primary desktop target, with an installer and portable package when the build pipeline is ready.</p><div class="tu-card-foot">DESKTOP / NO PUBLISHED BUILD</div></article>
-    <article class="tu-card"><div class="tu-card-kicker">TARGET</div><h3>Windows · ARM64</h3><p>Optional architecture target. Availability depends on successful compilation and verification of all required components.</p><div class="tu-card-foot">DESKTOP / NOT VERIFIED</div></article>
-    <article class="tu-card"><div class="tu-card-kicker">TARGET</div><h3>Linux · x86_64</h3><p>Planned Linux packages may include AppImage, DEB, or archive formats depending on release testing.</p><div class="tu-card-foot">DESKTOP / NO PUBLISHED BUILD</div></article>
-    <article class="tu-card"><div class="tu-card-kicker">TARGET</div><h3>Linux · ARM64</h3><p>Architecture support depends on the availability of compatible builds and media libraries.</p><div class="tu-card-foot">DESKTOP / NOT VERIFIED</div></article>
-    <article class="tu-card"><div class="tu-card-kicker">TARGET</div><h3>macOS · Apple Silicon / Intel</h3><p>Separate or universal packages will be listed only after the corresponding macOS builds are created and checked.</p><div class="tu-card-foot">DESKTOP / NO PUBLISHED BUILD</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">TARGET</div><h3>Windows 10 / 11 · x64</h3><p>Planned primary desktop target, with an installer and portable package when the build pipeline is ready.</p><div class="tu-card-foot" id="statusWindowsX64">DESKTOP / AWAITING RELEASE</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">TARGET</div><h3>Windows · ARM64</h3><p>Optional architecture target. Availability depends on successful compilation and verification of all required components.</p><div class="tu-card-foot" id="statusWindowsArm64">DESKTOP / AWAITING RELEASE</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">TARGET</div><h3>Linux · x86_64</h3><p>Planned Linux packages may include AppImage, DEB, or archive formats depending on release testing.</p><div class="tu-card-foot" id="statusLinuxX64">DESKTOP / AWAITING RELEASE</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">TARGET</div><h3>Linux · ARM64</h3><p>Architecture support depends on the availability of compatible builds and media libraries.</p><div class="tu-card-foot" id="statusLinuxArm64">DESKTOP / AWAITING RELEASE</div></article>
+    <article class="tu-card"><div class="tu-card-kicker">TARGET</div><h3>macOS · Apple Silicon / Intel</h3><p>Separate or universal packages will be listed only after the corresponding macOS builds are created and checked.</p><div class="tu-card-foot" id="statusMacArm64">DESKTOP / AWAITING RELEASE</div><div class="tu-card-foot" id="statusMacX64">INTEL BUILD / AWAITING RELEASE</div></article>
   </div>
   <p class="tu-copy" style="margin-top:18px">These are intended support targets, not a statement that desktop binaries are ready. Package availability and tested versions will be listed in the release section below.</p>
 </section>
@@ -217,9 +217,9 @@
       <div class="tu-status-line"><strong id="assetSummary">No desktop package detected</strong><span class="tu-pill" id="assetCount">0 ASSETS</span></div>
       <p class="tu-copy" id="assetDescription">This page checks public repository releases for a TRILYVA-specific release and platform-matching assets. Builds from other projects are deliberately excluded.</p>
       <div class="tu-os-list" style="margin-top:22px">
-        <div class="tu-os-row"><div><strong>Windows</strong><small>Installer / portable archive</small></div><span class="tu-badge">Awaiting build</span></div>
-        <div class="tu-os-row"><div><strong>Linux</strong><small>AppImage / DEB / archive</small></div><span class="tu-badge">Awaiting build</span></div>
-        <div class="tu-os-row"><div><strong>macOS</strong><small>Apple Silicon / Intel</small></div><span class="tu-badge">Awaiting build</span></div>
+        <div class="tu-os-row"><div><strong>Windows</strong><small>Installer / portable archive</small></div><span class="tu-badge" id="osWindowsBadge">Awaiting build</span></div>
+        <div class="tu-os-row"><div><strong>Linux</strong><small>AppImage / DEB / archive</small></div><span class="tu-badge" id="osLinuxBadge">Awaiting build</span></div>
+        <div class="tu-os-row"><div><strong>macOS</strong><small>Apple Silicon / Intel</small></div><span class="tu-badge" id="osMacBadge">Awaiting build</span></div>
       </div>
       <div class="tu-actions">
         <a class="v3-button secondary" id="releasesLink" href="https://github.com/Tamasrazim/tamasrazim.github.io/releases" target="_blank" rel="noopener noreferrer">All repository releases</a>
@@ -383,6 +383,37 @@
     });
   }
 
+  function setText(id, value) {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value;
+  }
+
+  function hasAssetFor(choice) {
+    return trilyvaReleases.some(release =>
+      (Array.isArray(release.assets) ? release.assets : []).some(asset => matchesAsset(asset, choice))
+    );
+  }
+
+  function updatePlatformStatuses() {
+    const windowsX64 = hasAssetFor("windows-x64-installer") || hasAssetFor("windows-x64-portable");
+    const windowsArm64 = hasAssetFor("windows-arm64-installer");
+    const linuxX64 = hasAssetFor("linux-x64-appimage") || hasAssetFor("linux-x64-deb");
+    const linuxArm64 = hasAssetFor("linux-arm64-appimage");
+    const macArm64 = hasAssetFor("macos-arm64");
+    const macX64 = hasAssetFor("macos-x64");
+    setText("statusWindowsX64", windowsX64 ? "DESKTOP / PACKAGE AVAILABLE" : "DESKTOP / AWAITING RELEASE");
+    setText("statusWindowsArm64", windowsArm64 ? "DESKTOP / PACKAGE AVAILABLE" : "DESKTOP / AWAITING RELEASE");
+    setText("statusLinuxX64", linuxX64 ? "DESKTOP / PACKAGE AVAILABLE" : "DESKTOP / AWAITING RELEASE");
+    setText("statusLinuxArm64", linuxArm64 ? "DESKTOP / PACKAGE AVAILABLE" : "DESKTOP / AWAITING RELEASE");
+    setText("statusMacArm64", macArm64 ? "APPLE SILICON / PACKAGE AVAILABLE" : "APPLE SILICON / AWAITING RELEASE");
+    setText("statusMacX64", macX64 ? "INTEL BUILD / PACKAGE AVAILABLE" : "INTEL BUILD / AWAITING RELEASE");
+    const windows = windowsX64 || windowsArm64;
+    const linux = linuxX64 || linuxArm64;
+    setText("osWindowsBadge", windows ? "Package available" : "Awaiting build");
+    setText("osLinuxBadge", linux ? "Package available" : "Awaiting build");
+    setText("osMacBadge", macArm64 || macX64 ? "Package available" : "Awaiting build");
+  }
+
   function updateSelectionStatus() {
     const match = selectedAsset();
     if (match) {
@@ -429,6 +460,7 @@
       }
       renderReleaseList();
       updateSelectionStatus();
+      updatePlatformStatuses();
     } catch (error) {
       lastCheck.textContent = "Could not refresh";
       releaseSummary.textContent = "The public release check failed. This does not indicate a build is available; use the repository release page to check manually.";
