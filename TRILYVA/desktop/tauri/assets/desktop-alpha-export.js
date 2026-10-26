@@ -64,6 +64,24 @@
                 if (blob.size > 256 * 1024 * 1024) {
                   return Promise.reject(new Error("Frame " + fileName + " exceeds the safe 256 MiB native-transfer limit. Use a lighter scene or a lower resolution."));
                 }
+                if (/\\.png$/i.test(fileName)) {
+                  var chunkSize = 4 * 1024 * 1024;
+                  if (!blob.size) return Promise.reject(new Error("Refusing to transfer an empty PNG frame."));
+                  var offset = 0;
+                  function writeNextChunk() {
+                    var end = Math.min(blob.size, offset + chunkSize);
+                    return blob.slice(offset, end).arrayBuffer().then(function (buffer) {
+                      var isFinalChunk = end === blob.size;
+                      return desktop.writeNativeSequenceChunk(
+                        session.sessionId, fileName, bytesToBase64(buffer), isFinalChunk
+                      ).then(function () {
+                        offset = end;
+                        return offset < blob.size ? writeNextChunk() : undefined;
+                      });
+                    });
+                  }
+                  return writeNextChunk();
+                }
                 return blob.arrayBuffer().then(function (buffer) {
                   return desktop.writeNativeSequenceFile(session.sessionId, fileName, bytesToBase64(buffer));
                 });
