@@ -90,6 +90,84 @@
       renderCounters();renderLibrary();renderHistory();renderFavorites();renderRail();
     }catch(error){toast("Local image library unavailable: "+(error.message || "storage error."));}
   }
+  async function inflateZipEntry(compressed,limit){
+    if(typeof DecompressionStream==="undefined")throw new Error("This browser cannot decompress CBZ archives. Use an image folder instead.");
+    const reader=new Blob([compressed]).stream().pipeThrough(new DecompressionStream("deflate-raw")).getReader();
+    const chunks=[];let total=0;
+    try{
+      while(true){
+        const result=await reader.read();if(result.done)break;
+        total+=result.value.byteLength;
+        if(total>limit){await reader.cancel();throw new Error("An archive page expands beyond the 30 MB per-page limit.");}
+        chunks.push(result.value);
+      }
+    }catch(error){try{await reader.cancel();}catch(_){}throw error;}
+    const output=new Uint8Array(total);let offset=0;
+    for(const chunk of chunks){output.set(chunk,offset);offset+=chunk.byteLength;}
+    return output;
+  }
+
+  async function extractZipImageFiles(file){
+    if(!file) return [];
+    const maxBytes=200*1024*1024;
+    if(file.size>maxBytes)throw new Error("Archive exceeds the 200 MB import limit.");
+    const buffer=await file.arrayBuffer();const view=new DataView(buffer);const bytes=new Uint8Array(buffer);
+    const min=Math.max(0,bytes.length-65557);let end=-1;
+    for(let offset=bytes.length-22;offset>=min;offset--){if(view.getUint32(offset,true)===0x06054b50){end=offset;break;}}
+    if(end<0)throw new Error("This file is not a supported ZIP or CBZ archive.");
+    if(view.getUint16(end+4,true)!==0||view.getUint16(end+6,true)!==0)throw new Error("Multi-disk ZIP archives are not supported.");
+    const entryCount=view.getUint16(end+10,true);const directoryOffset=view.getUint32(end+16,true);
+    if(entryCount===0xffff||directoryOffset===0xffffffff)throw new Error("ZIP64 archives are not supported yet.");
+    if(entryCount>10000)throw new Error("Archive contains too many entries.");
+    const entries=[];let cursor=directoryOffset;let totalDeclared=0;
+    const imagePattern=/\.(png|jpe?g|webp|gif|avif|bmp|tiff?)$/i;
+    for(let index=0;index<entryCount;index++){
+      if(cursor+46>bytes.length||view.getUint32(cursor,true)!==0x02014b50)throw new Error("The archive directory is damaged.");
+      const flags=view.getUint16(cursor+8,true);const method=view.getUint16(cursor+10,true);
+      const compressedSize=view.getUint32(cursor+20,true);const uncompressedSize=view.getUint32(cursor+24,true);
+      const nameLength=view.getUint16(cursor+28,true);const extraLength=view.getUint16(cursor+30,true);const commentLength=view.getUint16(cursor+32,true);
+      const localOffset=view.getUint32(cursor+42,true);const nameStart=cursor+46;
+      if(nameStart+nameLength+extraLength+commentLength>bytes.length)throw new Error("The archive directory contains an invalid filename.");
+      let path=new TextDecoder("utf-8").decode(bytes.slice(nameStart,nameStart+nameLength)).replace(/\\/g,"/");
+      cursor=nameStart+nameLength+extraLength+commentLength;
+      if(!path||path.endsWith("/")||!imagePattern.test(path)||path.split("/").some(part=>part===".."||part.startsWith(".")||part==="__MACOSX"))continue;
+      if(flags&1)throw new Error("Password-protected archives are not supported.");
+      if(method!==0&&method!==8)throw new Error("The archive uses an unsupported compression method.");
+      if(!uncompressedSize||uncompressedSize>30*1024*1024)throw new Error("An archive page exceeds the 30 MB per-page limit.");
+      totalDeclared+=uncompressedSize;if(totalDeclared>maxBytes)throw new Error("Archive pages exceed the 200 MB total import limit.");
+      entries.push({path,method,compressedSize,uncompressedSize,localOffset});
+      if(entries.length>300)throw new Error("Import limited to 300 image pages per archive.");
+    }
+    if(!entries.length)return [];
+    entries.sort((a,b)=>a.path.localeCompare(b.path,undefined,{numeric:true,sensitivity:"base"}));
+    const files=[];
+    for(const entry of entries){
+      const local=entry.localOffset;
+      if(local+30>bytes.length||view.getUint32(local,true)!==0x04034b50)throw new Error("An archive page has an invalid local header.");
+      const localNameLength=view.getUint16(local+26,true);const localExtraLength=view.getUint16(local+28,true);
+      const dataStart=local+30+localNameLength+localExtraLength;const dataEnd=dataStart+entry.compressedSize;
+      if(dataStart<0||dataEnd>bytes.length)throw new Error("An archive page is truncated.");
+      const compressed=bytes.slice(dataStart,dataEnd);
+      const decoded=entry.method===0?compressed:await inflateZipEntry(compressed,entry.uncompressedSize);
+      if(decoded.byteLength!==entry.uncompressedSize)throw new Error("An archive page size did not match its directory entry.");
+      const baseName=entry.path.split("/").pop();
+      const ext=baseName.split(".").pop().toLowerCase();
+      const mime=({jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",webp:"image/webp",gif:"image/gif",avif:"image/avif",bmp:"image/bmp",tif:"image/tiff",tiff:"image/tiff"})[ext]||"application/octet-stream";
+      const extracted=new File([decoded],baseName,{type:mime});
+      Object.defineProperty(extracted,"webkitRelativePath",{value:entry.path,configurable:true});
+      files.push(extracted);
+    }
+    return files;
+  }
+
+  async function importImageArchive(file){
+    if(!file)return;
+    try{
+      const files=await extractZipImageFiles(file);
+      if(!files.length){toast("No supported manga page images were found in this archive.");return;}
+      await importImageFolder(files);
+    }catch(error){toast("Archive import failed: "+(error.message||"unsupported archive."));}
+  }
   async function importImageFolder(fileList){
     const images=Array.from(fileList || []).filter(file=>
       (file.type || "").startsWith("image/") || /\.(png|jpe?g|webp|gif|avif|bmp|tiff?)$/i.test(file.name || "")
