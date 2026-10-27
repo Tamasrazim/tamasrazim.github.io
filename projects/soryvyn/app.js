@@ -1094,7 +1094,7 @@
   $$(".embedded-tab").forEach(button=>button.addEventListener("click",()=>navigateEmbedded(button.dataset.sourceTab)));
   $("#embeddedBack").addEventListener("click",()=>{
     if(embeddedHistoryIndex>0){embeddedHistoryIndex--;navigateEmbedded(embeddedHistory[embeddedHistoryIndex],false);}
-    else toast("You're at the start of the source preview.");
+    else toast("You are at the first source category.");
   });
   $("#embeddedForward").addEventListener("click",()=>{
     if(embeddedHistoryIndex<embeddedHistory.length-1){embeddedHistoryIndex++;navigateEmbedded(embeddedHistory[embeddedHistoryIndex],false);}
