@@ -41,10 +41,11 @@ The Windows artifact ZIP was downloaded and its local SHA-256 matched GitHub's a
 - Product name: TRILYVA
 - Installer size: 4,541,073 bytes
 - Installer SHA-256: `db97fb469b6bc7b1a7faa7320d9b85b366ff21cf104451e097fd4879f1660053`
-- Authenticode status: **NotSigned**
+- Installer Authenticode status: **NotSigned**
 
-The installer has **not** been run. Therefore installation, first launch, app interaction, uninstall, and repeat-install behaviour are **not yet verified**. The next desktop check should install the build, launch it, exercise project save/open and a small PNG sequence export, uninstall it, confirm the app is removed, and repeat once to catch leftover-state issues. Running the unsigned installer is waiting for the user's immediate confirmation.
+On 2026-10-27, the installer was run after the user authorized installation. TRILYVA opened to its native workspace, displayed the starter animation, and reported “Animation compiled.” The installed executable is also unsigned; its SHA-256 is `1c0480d6771695c90910978ae3cfec652e2044ffd2cc71fcd37b5446e600e3d7`. The Inno Setup uninstaller is present.
 
+Project save/open and PNG export checks were interrupted when the app window closed during desktop interaction. Those behaviors remain unverified; the closure was not diagnosed as a crash. The app is currently left installed. Uninstall and repeat-install checks have not yet been run.
 ## Known product limits
 
 The current native build is an early foundation, not full feature parity. The native README tracks remaining work, including text/font rendering, gradients, image drawing, compositing, background preview rendering, render cancellation, video/codec export, and the complete project/library workflow. CI verifies compilation, packaging, and the listed renderer tests; it does not verify those unfinished features or certify the installers for distribution.
