@@ -1057,6 +1057,8 @@
   $("#librarySearch").addEventListener("input",event=>{libraryQuery=event.target.value;renderLibrary();});
   $("#exportBackupButton").addEventListener("click",exportBackup);
   $("#importImagesButton").addEventListener("click",()=>$("#importImagesFile").click());
+  $("#libraryEmptyImportButton").addEventListener("click",()=>$("#importImagesFile").click());
+  $("#libraryEmptyArchiveButton").addEventListener("click",()=>$("#importArchiveFile").click());
   $("#importArchiveButton").addEventListener("click",()=>$("#importArchiveFile").click());
   $("#heroArchiveButton").addEventListener("click",()=>$("#importArchiveFile").click());
   $("#discoverArchiveButton").addEventListener("click",()=>$("#importArchiveFile").click());
