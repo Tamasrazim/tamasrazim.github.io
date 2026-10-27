@@ -208,7 +208,7 @@ must(siteV3Css.includes('left: -17px;')&&siteV3Css.includes('flex-direction: col
 const hub=read('projects/index.html');
 must(hub.includes('<title>Projects — Tamasrazim</title>'),'project directory uses simple title');
 must(!hub.includes('PRO_TOOL_MANIFEST')&&!hub.includes('tool-suite-health-console/'),'project directory omits generated catalogue');
-must((hub.match(/class="pi-card v3-index-card"/g)||[]).length===15,'project directory has fifteen curated cards');
+must((hub.match(/class="pi-card v3-index-card"/g)||[]).length===17,'project directory has seventeen curated cards');
 
 const hubCategories=[...hub.matchAll(/<article\b[^>]*class="[^"]*\bpi-card\b[^"]*"[^>]*data-category="([^"]+)"/g)].map(match=>match[1]);
 const hubFilters=new Set([...hub.matchAll(/data-filter="([^"]+)"/g)].map(match=>match[1]));
