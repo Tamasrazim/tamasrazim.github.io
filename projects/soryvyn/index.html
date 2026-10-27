@@ -105,23 +105,23 @@
                 <div class="source-mini-list" id="sourceMiniList"></div>
                 <button class="text-link" data-route="sources">Open source browser <span>↗</span></button>
               </div>
-              <div class="window-footer"><span><i></i> SAFE PREVIEW</span><span>NO EXTERNAL NAVIGATION</span></div>
+              <div class="window-footer"><span><i></i> LOCAL READER</span><span>OFFICIAL SOURCES OPEN SECURELY</span></div>
             </aside>
           </div>
 
           <div class="section-heading">
-            <div><div class="eyebrow">CURATED FOR YOU</div><h2>Explore the collection<span class="heading-period">.</span></h2></div>
-            <div class="section-tools"><span id="resultCount">08 TITLES</span><button class="view-toggle is-selected" data-view="grid" aria-label="Grid view"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></svg></button><button class="view-toggle" data-view="list" aria-label="List view"><svg viewBox="0 0 24 24"><path d="M9 5h11M9 12h11M9 19h11M4 5h.01M4 12h.01M4 19h.01"/></svg></button></div>
+            <div><div class="eyebrow">YOUR READING SPACE</div><h2>Your collection<span class="heading-period">.</span></h2></div>
+            <div class="section-tools"><span id="resultCount">00 TITLES</span><button class="view-toggle is-selected" data-view="grid" aria-label="Grid view"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></svg></button><button class="view-toggle" data-view="list" aria-label="List view"><svg viewBox="0 0 24 24"><path d="M9 5h11M9 12h11M9 19h11M4 5h.01M4 12h.01M4 19h.01"/></svg></button></div>
           </div>
           <div class="category-row" id="categoryRow" role="group" aria-label="Filter by category">
-            <button class="category-chip is-active" data-category="All">All stories <span>08</span></button>
-            <button class="category-chip" data-category="Manga">Manga <span>03</span></button>
-            <button class="category-chip" data-category="Manhwa">Manhwa <span>03</span></button>
-            <button class="category-chip" data-category="Manhua">Manhua <span>02</span></button>
+            <button class="category-chip is-active" data-category="All">All stories <span>00</span></button>
+            <button class="category-chip" data-category="Manga">Manga <span>00</span></button>
+            <button class="category-chip" data-category="Manhwa">Manhwa <span>00</span></button>
+            <button class="category-chip" data-category="Manhua">Manhua <span>00</span></button>
             <div class="sort-control"><span>SORT BY</span><select id="sortSelect" aria-label="Sort titles"><option value="featured">Featured</option><option value="title">Title A–Z</option><option value="rating">Rating</option><option value="updated">Recently updated</option></select></div>
           </div>
           <div class="title-grid" id="titleGrid" aria-live="polite"></div>
-          <div class="load-more-row"><span>END OF PREVIEW COLLECTION</span><span class="load-more-line"></span><span>01 / 01</span></div>
+          <div class="empty-state collection-empty" id="discoverEmpty"><div class="empty-symbol">▤</div><h2>Your reading shelf is ready.</h2><p>Open official manga platforms to find a title, or import your own page images to read them in SORYVYN’s 3D book.</p><div class="empty-actions"><button class="primary-button" data-route="sources" type="button">Browse official sources</button><button class="secondary-button" id="discoverImportButton" type="button">Import page images</button></div></div>
           <footer class="app-footer"><span>© SORYVYN <span id="footerYear"></span></span><span>MADE FOR THE WAY YOU READ</span><a href="./privacy.html">PRIVACY</a><a href="#roadmap" id="roadmapLink">BUILD STATUS ↗</a></footer>
         </section>
 
@@ -143,21 +143,21 @@
         </section>
 
         <section class="page generic-page" data-page="sources" hidden>
-          <div class="page-heading source-page-heading"><div><div class="eyebrow"><span class="eyebrow-mark"></span> INTERNAL DISCOVERY ENVIRONMENT</div><h1>Source browser<span class="heading-period">.</span></h1><p>A browser-like view dedicated exclusively to manga, manhwa, and manhua sources.</p></div><div class="source-count-block"><strong id="sourceCount">04</strong><span>SAMPLE SOURCES</span></div></div>
+          <div class="page-heading source-page-heading"><div><div class="eyebrow"><span class="eyebrow-mark"></span> OFFICIAL READING DESTINATIONS</div><h1>Source browser<span class="heading-period">.</span></h1><p>Find manga, manhwa, and manhua through official publisher and creator platforms.</p></div><div class="source-count-block"><strong id="sourceCount">06</strong><span>OFFICIAL SOURCES</span></div></div>
           <div class="embedded-browser">
-            <div class="embedded-toolbar"><div class="embedded-nav"><button class="icon-button" id="embeddedBack" aria-label="Back">←</button><button class="icon-button" id="embeddedForward" aria-label="Forward">→</button><button class="icon-button" id="embeddedReload" aria-label="Reload">↻</button></div><div class="embedded-address"><span class="secure-mark">◇</span><span id="embeddedAddress">soryvyn://source-network/discover</span><span class="address-lock">INTERNAL</span></div><button class="icon-button" id="embeddedHome" aria-label="Source browser home"><svg viewBox="0 0 24 24"><path d="m3 11 9-7 9 7M5.5 9.5V20h13V9.5M9.5 20v-6h5v6"/></svg></button></div>
-            <div class="embedded-subnav"><button class="embedded-tab is-active" data-source-tab="discover">Discover</button><button class="embedded-tab" data-source-tab="trending">Trending</button><button class="embedded-tab" data-source-tab="new">Recently added</button><span class="embedded-category-note">MANGA · MANHWA · MANHUA ONLY</span></div>
-            <div class="embedded-body"><div class="embedded-body-top"><div><div class="eyebrow">SOURCE CATALOGUE <span class="demo-badge">DEMO DATA</span></div><h2 id="embeddedTitle">Choose a source. Find a story.</h2></div><div class="source-tools"><label class="search-box compact"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4 4"/></svg><input id="sourceSearch" type="search" placeholder="Filter sources…"></label><select id="sourceLanguage" aria-label="Filter sources by language"><option value="all">All languages</option><option value="en">English</option><option value="ja">Japanese</option><option value="ko">Korean</option><option value="zh">Chinese</option></select></div></div>
+            <div class="embedded-toolbar"><div class="embedded-nav"><button class="icon-button" id="embeddedBack" aria-label="Back">←</button><button class="icon-button" id="embeddedForward" aria-label="Forward">→</button><button class="icon-button" id="embeddedReload" aria-label="Reload">↻</button></div><div class="embedded-address"><span class="secure-mark">◇</span><span id="embeddedAddress">soryvyn://official-sources/discover</span><span class="address-lock">INTERNAL</span></div><button class="icon-button" id="embeddedHome" aria-label="Source browser home"><svg viewBox="0 0 24 24"><path d="m3 11 9-7 9 7M5.5 9.5V20h13V9.5M9.5 20v-6h5v6"/></svg></button></div>
+            <div class="embedded-subnav"><button class="embedded-tab is-active" data-source-tab="discover">All platforms</button><button class="embedded-tab" data-source-tab="manga">Manga</button><button class="embedded-tab" data-source-tab="manhwa">Manhwa</button><button class="embedded-tab" data-source-tab="manhua">Manhua</button><span class="embedded-category-note">MANGA · MANHWA · MANHUA ONLY</span></div>
+            <div class="embedded-body"><div class="embedded-body-top"><div><div class="eyebrow">SOURCE DIRECTORY</div><h2 id="embeddedTitle">Choose a source. Find a story.</h2></div><div class="source-tools"><label class="search-box compact"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4 4"/></svg><input id="sourceSearch" type="search" placeholder="Search a title on official platforms…"></label></div></div>
               <div class="source-catalogue" id="sourceCatalogue"></div>
-              <div class="embedded-disclaimer"><span>ⓘ</span> This is an interface prototype. The listed source names and availability are illustrative placeholders, not live services. No third-party site is loaded.</div>
+              <div class="embedded-disclaimer"><span>ⓘ</span> SORYVYN opens publisher and platform pages in a separate tab. Access, chapter availability, language, and regional restrictions are controlled by each provider.</div>
             </div>
-            <div class="embedded-statusbar"><span><i class="connection-dot"></i> SANDBOX ACTIVE</span><span id="embeddedStatus">4 SAMPLE CONNECTORS</span><span>NO EXTERNAL NAVIGATION</span></div>
+            <div class="embedded-statusbar"><span><i class="connection-dot"></i> SOURCE DIRECTORY READY</span><span id="embeddedStatus">06 OFFICIAL PLATFORMS</span><span>EXTERNAL LINKS OPEN IN NEW TAB</span></div>
           </div>
         </section>
 
         <section class="page generic-page" data-page="history" hidden>
-          <div class="page-heading"><div class="eyebrow">PICK UP WHERE YOU LEFT OFF</div><h1>Reading history<span class="heading-period">.</span></h1><p>Titles you opened in this session.</p></div>
-          <div class="title-grid" id="historyGrid"></div><div class="empty-state" id="historyEmpty"><div class="empty-symbol">◷</div><h2>Your story starts here.</h2><p>Open a title to add it to this local preview history.</p><button class="secondary-button" data-route="discover">Discover stories</button></div>
+          <div class="page-heading"><div class="eyebrow">PICK UP WHERE YOU LEFT OFF</div><h1>Reading history<span class="heading-period">.</span></h1><p>Titles you have opened in SORYVYN.</p></div>
+          <div class="title-grid" id="historyGrid"></div><div class="empty-state" id="historyEmpty"><div class="empty-symbol">◷</div><h2>Your story starts here.</h2><p>Open a title to add it to your reading history.</p><button class="secondary-button" data-route="discover">Discover stories</button></div>
         </section>
 
         <section class="page generic-page" data-page="favorites" hidden>
