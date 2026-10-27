@@ -6,15 +6,15 @@ SORYVYN is a web PWA for manga, manhwa, and manhua reading. It provides a real t
 
 > **Current status:** The live web PWA is hosted in the main website repository at `https://tamasrazim.github.io/projects/soryvyn/`. The local 3D reader, folder import, offline app shell, bookmarks, backups, and official-source directory are implemented. Online chapters are opened through official provider websites; SORYVYN does not scrape, mirror, or bypass publisher access controls.
 
-## Web PWA status — Chunk 01
+## Current web PWA implementation
 
-The web PWA includes the responsive monochrome interface, a two-page 3D book with drag, wheel, and keyboard page turns, local folder import stored in IndexedDB, saved library items, favorites, reading history and progress, spread bookmarks, JSON backup export/import, installability, a service worker, and an offline app shell. Discover no longer invents a catalogue of fictional manga. Search routes users to official provider destinations, and the source directory links to MANGA Plus by SHUEISHA, WEBTOON, VIZ Manga, KODANSHA, Tapas, and GlobalComix. The privacy page is linked from the app footer.
+The web PWA includes the responsive monochrome interface, a two-page 3D book with drag, wheel, and keyboard page turns, local folder import stored in IndexedDB, saved library items, favorites, reading history and progress, spread bookmarks, JSON backup export/import, installability, a service worker, and an offline app shell. Discover no longer invents a catalogue of fictional manga. Search routes users to official provider destinations, and the source directory links to MANGA Plus by SHUEISHA, WEBTOON, VIZ Manga, KODANSHA, Tapas, and GlobalComix. The privacy page is linked from the app footer. The `.github/workflows/soryvyn-check.yml` workflow checks JavaScript syntax, required PWA files, official-source URLs, manifest scope, and the absence of retired fictional seed data.
 
 **Source behavior:** these are real official platform links, not in-app chapter connectors. Selecting a platform opens its own website in a new tab; provider sign-in, chapter availability, language, pricing, and offline rules remain controlled by that provider. The local SORYVYN reader opens image pages imported by the user. It does not claim to fetch online chapters into the custom reader.
 
 ### Run the PWA locally
 
-The web build has no package install or build step. From the repository root, run `python -m http.server 4173` and open `http://localhost:4173`. Keep the server running to test service-worker caching and installability. PWA behavior requires `localhost` or HTTPS; opening the file directly with `file://` does not provide the full PWA lifecycle. GitHub Pages deployment is wired through the repository workflow. The public URL is `https://tamasrazim.github.io/projects/soryvyn/` once the first deployment succeeds and GitHub Pages is enabled for this repository.
+The web build has no package install or build step. From the main website repository root, run `python -m http.server 4173` and open `http://localhost:4173/projects/soryvyn/`. Keep the server running to test service-worker caching and installability. PWA behavior requires `localhost` or HTTPS; opening the file directly with `file://` does not provide the full PWA lifecycle. The app is deployed as a subdirectory of the main Tamasrazim website, not from the standalone SORYVYN repository.
 
 ## Product architecture overview
 
