@@ -1,0 +1,23 @@
+{
+  "id": "./",
+  "name": "SORYVYN — Manga Reading Space",
+  "short_name": "SORYVYN",
+  "description": "A focused space for manga, manhwa, and manhua discovery and reading.",
+  "lang": "en",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#0b0c0d",
+  "theme_color": "#0b0c0d",
+  "categories": ["books", "entertainment"],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
