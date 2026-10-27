@@ -1,5 +1,4 @@
-/* SORYVYN web PWA · Chunk 01
-   Local demo interface only. No source websites are fetched in this milestone. */
+/* SORYVYN web PWA. Official source directory and local 3D reader. */
 (() => {
   "use strict";
 
@@ -351,7 +350,7 @@
     }
     const classes = item.cover || "cover-a";
     return `<div class="cover-art ${classes} ${extraClass}" aria-hidden="true">
-      <span class="cover-label">SORYVYN ORIGINAL / SAMPLE</span>
+      <span class="cover-label">SORYVYN LOCAL EDITION</span>
       <span class="cover-kicker">${escapeHTML(item.kicker || "STORIES IN MOTION")}</span>
       <i class="cover-shape one"></i><i class="cover-shape two"></i>
       <span class="cover-title">${escapeHTML(item.title)}</span>
@@ -371,7 +370,7 @@
         <div class="card-category"><span>${escapeHTML(item.category)}</span><i></i><span>${escapeHTML(item.genre)}</span></div>
         <h3 title="${escapeHTML(item.title)}">${escapeHTML(item.title)}</h3>
         <div class="card-subtitle"><span>${escapeHTML(item.status)} · ${item.chapters} ch.</span><span class="card-rating">★ ${item.rating.toFixed(1)}</span></div>
-        ${progress>0?`<div class="card-progress" title="Preview reading progress"><span style="width:${Math.min(100,progress/8*100)}%"></span></div>`:""}
+        ${progress>0?`<div class="card-progress" title="Reading progress"><span style="width:${Math.min(100,progress/8*100)}%"></span></div>`:""}
       </div>
     </article>`;
   }
@@ -501,18 +500,19 @@
     const capacity=Math.max(1,titles.length+localImportedTitles.length);
     $("#storagePercent").textContent=Math.min(100,Math.round(state.savedIds.length/capacity*100))+"%";
     $("#storageFill").style.width=Math.min(100,state.savedIds.length/capacity*100)+"%";
-    $("#storageLabel").textContent=state.savedIds.length?state.savedIds.length+" saved "+(state.savedIds.length===1?"title":"titles"):"Demo collection";
+    $("#storageLabel").textContent=state.savedIds.length?state.savedIds.length+" saved "+(state.savedIds.length===1?"title":"titles"):"Local collection";
     $("#footerYear").textContent=new Date().getFullYear();
   }
 
   function renderMiniSources(){
-    $("#sourceMiniList").innerHTML=sourceSeed.slice(0,3).map(source=>`<div class="source-mini"><span class="source-mini-icon">${source.symbol}</span><span class="source-mini-copy"><strong>${escapeHTML(source.name)}</strong><small>${source.languageLabel.toUpperCase()} · SAMPLE</small></span><i class="source-mini-status"></i></div>`).join("");
+    const target=$("#sourceMiniList");if(!target)return;
+    target.innerHTML=sourceSeed.slice(0,3).map(source=>'<a class="source-mini" href="'+escapeHTML(source.url)+'" target="_blank" rel="noopener noreferrer"><span class="source-mini-icon">'+escapeHTML(source.symbol)+'</span><span class="source-mini-copy"><strong>'+escapeHTML(source.name)+'</strong><small>OFFICIAL · OPEN SITE</small></span><i class="source-mini-status"></i></a>').join("");
   }
 
   function renderRail(){
     const list=$("#railSourceList");
     if(!list) return;
-    list.innerHTML=sourceSeed.slice(0,3).map(source=>`<div class="rail-source"><span class="rail-source-mark">${source.symbol}</span><span class="rail-source-copy"><strong>${escapeHTML(source.name)}</strong><small>${state.enabledSources.includes(source.id)?"ENABLED · DEMO":"DISABLED"}</small></span><i class="rail-source-state" style="opacity:${state.enabledSources.includes(source.id)?1:.18}"></i></div>`).join("");
+    list.innerHTML=sourceSeed.slice(0,3).map(source=>`<a class="rail-source" href="${escapeHTML(source.url)}" target="_blank" rel="noopener noreferrer"><span class="rail-source-mark">${escapeHTML(source.symbol)}</span><span class="rail-source-copy"><strong>${escapeHTML(source.name)}</strong><small>OFFICIAL · OPEN SITE</small></span><i class="rail-source-state"></i></a>`).join("");
     const recently=[...state.history].reverse().map(titleById).filter(Boolean).filter((item,index,list)=>list.findIndex(x=>x.id===item.id)===index).slice(0,3);
     $("#continueReading").innerHTML=recently.length?recently.map(item=>`<div class="continue-item" data-open-title="${item.id}" tabindex="0" role="button"><div class="continue-thumb">${renderCover(item,"rail-cover")}</div><div class="continue-copy"><strong>${escapeHTML(item.title)}</strong><small>PAGE ${String(state.progress[item.id]||1).padStart(2,"0")} · ${item.category.toUpperCase()}</small><div class="mini-progress"><span style="width:${Math.min(100,(Number(state.progress[item.id]||1)/8)*100)}%"></span></div></div></div>`).join(""):`<div class="rail-empty">Open a title and it will appear here.</div>`;
     $$(".rail-cover").forEach(cover=>{cover.style.aspectRatio="unset";cover.style.width="100%";cover.style.height="100%";cover.querySelectorAll(".cover-label,.cover-kicker,.cover-title,.cover-no").forEach(node=>node.remove());});
@@ -558,7 +558,7 @@
     state.history=state.history.slice(-100);
     currentTitleId=id;
     persist();
-    $("#titleModalContent").innerHTML=`<div class="modal-title-layout">${renderCover(item,"modal-title-cover")}<div class="modal-title-copy"><div class="eyebrow">${item.category.toUpperCase()} <span>·</span> ${item.language.toUpperCase()}</div><h2 id="modalTitle">${escapeHTML(item.title)}</h2><p>${escapeHTML(item.description)}</p><div class="modal-tags">${item.tags.map(tag=>`<span>${escapeHTML(tag)}</span>`).join("")}</div><div class="modal-actions"><button class="primary-button" data-reader-open="${item.id}">Read preview <span>→</span></button><button class="secondary-button" data-save-title="${item.id}">${isSaved(id)?"Saved ✓":"Save to library"}</button><button class="secondary-button" data-favorite-title="${item.id}">${isFavorite(id)?"Favorited ✓":"♡ Favorite"}</button></div></div></div><div class="modal-bottom-meta"><span>${escapeHTML(item.creator)}</span><span>${item.chaptersLabel.toUpperCase()}</span><span>★ ${item.rating.toFixed(1)}</span></div>`;
+    $("#titleModalContent").innerHTML=`<div class="modal-title-layout">${renderCover(item,"modal-title-cover")}<div class="modal-title-copy"><div class="eyebrow">${item.category.toUpperCase()} <span>·</span> ${item.language.toUpperCase()}</div><h2 id="modalTitle">${escapeHTML(item.title)}</h2><p>${escapeHTML(item.description)}</p><div class="modal-tags">${item.tags.map(tag=>`<span>${escapeHTML(tag)}</span>`).join("")}</div><div class="modal-actions"><button class="primary-button" data-reader-open="${item.id}">Read in book <span>→</span></button><button class="secondary-button" data-save-title="${item.id}">${isSaved(id)?"Saved ✓":"Save to library"}</button><button class="secondary-button" data-favorite-title="${item.id}">${isFavorite(id)?"Favorited ✓":"♡ Favorite"}</button></div></div></div><div class="modal-bottom-meta"><span>${escapeHTML(item.creator)}</span><span>${item.chaptersLabel.toUpperCase()}</span><span>★ ${item.rating.toFixed(1)}</span></div>`;
     showModal($("#titleModal"));
     renderRail();
   }
@@ -656,7 +656,7 @@
       '<div class="manga-page-head"><span>' + escapeHTML(heading.toUpperCase()) + '</span><span>CH. 01</span></div>' +
       '<div class="manga-page-rule"></div>' +
       '<div class="manga-panels ' + layout + '">' + panels + '</div>' +
-      '<div class="manga-page-foot"><span>SORYVYN · SAMPLE EDITION</span><span class="manga-page-number">' + String(pageNumber).padStart(2,"0") + '</span></div>' +
+      '<div class="manga-page-foot"><span>SORYVYN · LOCAL EDITION</span><span class="manga-page-number">' + String(pageNumber).padStart(2,"0") + '</span></div>' +
       '</div>';
   }
 
@@ -745,7 +745,7 @@
     const totalPages=pageCountFor(activeItem);
     const targetSpread = readerSpread + direction;
     if(targetSpread < 0 || targetSpread >= totalSpreads){
-      if(!quiet) toast(direction > 0 ? "You've reached the end of this preview." : "You're at the beginning of this book.");
+      if(!quiet) toast(direction > 0 ? "You have reached the end of this book." : "You're at the beginning of this book.");
       return null;
     }
     const item = activeItem;
@@ -891,10 +891,10 @@
     if(!sourceById(id))return;
     if(state.enabledSources.includes(id)){
       state.enabledSources=state.enabledSources.filter(value=>value!==id);
-      toast("Sample source disabled.");
+      toast("Official source removed from quick list.");
     }else{
       state.enabledSources.push(id);
-      toast("Sample source enabled.");
+      toast("Official source added to quick list.");
     }
     persist();renderSources();renderRail();
   }
@@ -999,7 +999,7 @@
     $("#app").classList.toggle("rail-collapsed");
     toast($("#app").classList.contains("rail-collapsed")?"Reading desk collapsed.":"Reading desk restored.");
   });
-  $("#sourceWindowRefresh").addEventListener("click",()=>{renderMiniSources();toast("Sample source panel refreshed.");});
+  $("#sourceWindowRefresh").addEventListener("click",()=>{renderMiniSources();toast("Official source panel refreshed.");});
   $("#sourceSearch").addEventListener("input",event=>{sourceQuery=event.target.value;renderSources();});
   if($("#sourceLanguage"))$("#sourceLanguage").addEventListener("change",event=>{sourceLanguage=event.target.value;renderSources();});
   $$(".embedded-tab").forEach(button=>button.addEventListener("click",()=>navigateEmbedded(button.dataset.sourceTab)));
@@ -1013,8 +1013,8 @@
   });
   $("#embeddedReload").addEventListener("click",()=>{renderSources();toast("Official source directory refreshed.");});
   $("#embeddedHome").addEventListener("click",()=>navigateEmbedded("discover"));
-  $("#profileButton").addEventListener("click",()=>toast("Local demo profile. Account sync is not part of Chunk 01."));
-  $("#profileTop").addEventListener("click",()=>toast("SORYVYN preview · local browser storage only."));
+  $("#profileButton").addEventListener("click",()=>toast("SORYVYN stores your reading data on this device."));
+  $("#profileTop").addEventListener("click",()=>toast("SORYVYN · local browser storage."));
   $("#roadmapLink").addEventListener("click",event=>{event.preventDefault();showModal($("#roadmapModal"));});
   $("#readerPrev").addEventListener("click",()=>turnSpread(-1));
   $("#readerBookmark").addEventListener("click",toggleCurrentBookmark);
@@ -1030,7 +1030,7 @@
     }
   });
 
-  window.addEventListener("online",()=>{$("#connectionLabel").textContent="LOCAL PREVIEW";toast("Connection restored. Demo data remains local.");});
+  window.addEventListener("online",()=>{$("#connectionLabel").textContent="LOCAL MODE";toast("Connection restored. Local library is available.");});
   window.addEventListener("offline",()=>{$("#connectionLabel").textContent="OFFLINE MODE";toast("Offline mode. Cached app shell remains available.");});
   window.addEventListener("beforeinstallprompt",event=>{
     event.preventDefault();installPrompt=event;$("#installButton").hidden=false;
