@@ -944,6 +944,10 @@
     if(saveButton){event.preventDefault();event.stopPropagation();toggleSaved(saveButton.dataset.saveTitle);return;}
     const favButton=event.target.closest("[data-favorite-title]");
     if(favButton){event.preventDefault();event.stopPropagation();toggleFavorite(favButton.dataset.favoriteTitle);return;}
+    const openBookmarkButton=event.target.closest("[data-open-bookmark]");
+    if(openBookmarkButton){openBookmarkedSpread(openBookmarkButton.dataset.openBookmark);return;}
+    const removeBookmarkButton=event.target.closest("[data-unbookmark]");
+    if(removeBookmarkButton){unbookmarkSpread(removeBookmarkButton.dataset.unbookmark);return;}
     const readerButton=event.target.closest("[data-reader-open]");
     if(readerButton){openReader(readerButton.dataset.readerOpen);return;}
     const titleButton=event.target.closest("[data-open-title]");
