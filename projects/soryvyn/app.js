@@ -237,6 +237,7 @@
       favoriteIds:uniqueKnown(incoming.favoriteIds,knownTitles),
       history:uniqueKnown(incoming.history,knownTitles).slice(-100),
       progress,
+      bookmarks,
       enabledSources:uniqueKnown(incoming.enabledSources,knownSources),
       category:incoming.category === "All" || allowedCategories.has(incoming.category) ? incoming.category : "All",
       genre:typeof incoming.genre === "string" && knownGenres.has(incoming.genre) ? incoming.genre : "all",
@@ -261,6 +262,7 @@
         favoriteIds:state.favoriteIds.filter(id=>portableIds.has(id)),
         history:state.history.filter(id=>portableIds.has(id)).slice(-100),
         progress:portableProgress,
+        bookmarks:state.bookmarks.filter(key=>{const entry=parseBookmarkKey(key);return entry && portableIds.has(entry.item.id);}),
         enabledSources:state.enabledSources.slice(),
         category:state.category,
         genre:state.genre,
@@ -1028,6 +1030,7 @@
   $("#profileTop").addEventListener("click",()=>toast("SORYVYN preview · local browser storage only."));
   $("#roadmapLink").addEventListener("click",event=>{event.preventDefault();showModal($("#roadmapModal"));});
   $("#readerPrev").addEventListener("click",()=>turnSpread(-1));
+  $("#readerBookmark").addEventListener("click",toggleCurrentBookmark);
   $("#readerNext").addEventListener("click",()=>turnSpread(1));
   attachBookInteractions();
   $("#readerModal").addEventListener("close",()=>{
