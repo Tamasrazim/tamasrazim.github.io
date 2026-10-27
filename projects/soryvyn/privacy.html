@@ -7,7 +7,7 @@
   <meta name="description" content="SORYVYN privacy notes for the web PWA.">
   <title>Privacy — SORYVYN</title>
   <style>
-    :root{color-scheme:dark;--bg:#0b0c0d;--panel:#111315;--line:#292c30;--text:#f0f1ef;--muted:#a0a4a7;--accent:#dce0dc}
+    :root{color-scheme:dark;--bg:#0b0c0d;--panel:#111315;--line:#292c30;--text:#f0f1ef;--muted:#a0a4a7}
     *{box-sizing:border-box}
     body{margin:0;background:radial-gradient(ellipse at 20% 0%,#25292d 0,transparent 38%),var(--bg);color:var(--text);font:16px/1.75 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     main{width:min(820px,calc(100% - 36px));margin:0 auto;padding:64px 0 88px}
@@ -38,24 +38,24 @@
 
     <section>
       <h2>What this PWA stores</h2>
-      <p>Saved titles, favorites, reading history, page progress, bookmarks, imported image pages, theme preference, and whether the information notice was dismissed.view notice was dismissed may be stored in your browser's local storage under <code>soryvyn.web.chunk01</code>.</p>
-      <p>This data stays in the browser profile on this device. Clearing site data or switching browser profiles can remove or separate it.</p>
+      <p>Saved titles, favorites, reading history, page progress, bookmarks, imported image pages, theme preference, and whether the information notice was dismissed may be stored in browser-managed storage, including the <code>soryvyn.web.chunk01</code> local-storage key and the SORYVYN IndexedDB library.</p>
+      <p>This data stays in the browser profile on this device. Clearing site data or switching browser profiles can remove or separate it. JSON backups are downloaded directly by the browser; imported image files are not included in those backups.</p>
     </section>
 
     <section>
       <h2>Network activity</h2>
-      <p>The source directory links to official publisher and creator platforms. Opening those sites may send requests to the provider under its own privacy policy. SORYVYN does not scrape or mirror their chapters. The local reader displays image pages imported by the user.ORYVYN account, or send your search terms, favorites, bookmarks, or reading progress to a SORYVYN backend. JSON backups created from My Library are downloaded directly by your browser and are not uploaded to SORYVYN. Local page collections are also saved in browser-managed storage on this device; the JSON backup contains preferences and progress, not those page files.</p>
-      <p>The website is intended to be hosted by GitHub Pages. The hosting provider may process standard request and security information under its own terms and privacy policy.</p>
+      <p>The source directory links to official publisher and creator platforms. Opening a platform sends requests to that provider and is governed by its own privacy policy. SORYVYN does not scrape or mirror provider chapters. The custom 3D reader displays page images imported by the user.</p>
+      <p>SORYVYN does not send search terms, favorites, bookmarks, reading progress, or imported page files to a SORYVYN backend. GitHub Pages may process standard request and security information under its own terms and privacy policy.</p>
     </section>
 
     <section>
       <h2>Offline storage</h2>
-      <p>When available, the service worker caches the application shell so the interface can reopen offline. Cached application files and local preferences may remain until the browser removes them or you clear the site's stored data.</p>
+      <p>The service worker caches the application shell so the interface can reopen offline. Imported page images and reading state are stored locally by the browser. Cached application files and local data may remain until the browser removes them or you clear the site's stored data.</p>
     </section>
 
     <section>
-      <h2>Future versions</h2>
-      <p>Live source connectors, imports, downloads, analytics, accounts, synchronization, and native builds are not part of this preview. Before any feature introduces additional data collection or third-party network activity, this notice should be updated to explain it.</p>
+      <h2>Features not currently available</h2>
+      <p>SORYVYN does not currently provide account synchronization or an in-app online chapter-fetching service. Official chapter access remains on provider websites. Any future feature that adds data collection or third-party network activity must be documented here before release.</p>
     </section>
 
     <footer><span>© <span id="year"></span> SORYVYN · Robiul Rumman Razim</span><div class="footer-actions"><a href="./LICENSE">Proprietary notice</a><a href="./">Return to SORYVYN →</a></div></footer>
