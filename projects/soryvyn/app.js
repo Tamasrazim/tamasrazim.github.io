@@ -519,17 +519,11 @@
   }
 
   function renderSources(){
-    const term=sourceQuery.trim().toLocaleLowerCase();
+    const query=sourceQuery.trim();
     const categoryByTab={discover:null,manga:"Manga",manhwa:"Manhwa",manhua:"Manhua"};
-    const sources=sourceSeed.filter(source=>{
-      if(categoryByTab[sourceTab]&&!source.categories.includes(categoryByTab[sourceTab]))return false;
-      if(sourceLanguage!=="all"&&source.language!==sourceLanguage)return false;
-      if(term&&![source.name,source.languageLabel,source.description,...source.categories].join(" ").toLocaleLowerCase().includes(term))return false;
-      return true;
-    });
+    const sources=sourceSeed.filter(source=>!categoryByTab[sourceTab]||source.categories.includes(categoryByTab[sourceTab]));
     $("#sourceCatalogue").innerHTML=sources.length?sources.map(source=>{
-      const query=sourceQuery.trim();
-      const searchHref=source.id==="mangaplus"&&!query?source.searchUrl:source.searchUrl+encodeURIComponent(query);
+      const searchHref=query?(source.id==="mangaplus"?source.url:source.searchUrl+encodeURIComponent(query)):source.url;
       return '<article class="source-card" data-source-card="'+escapeHTML(source.id)+'"><div class="source-card-icon">'+escapeHTML(source.symbol)+'</div><div class="source-card-main"><div class="source-card-title"><strong>'+escapeHTML(source.name)+'</strong><span class="source-type">'+source.categories.join(" / ").toUpperCase()+'</span></div><p>'+escapeHTML(source.description)+'</p><div class="source-card-meta"><span>'+escapeHTML(source.languageLabel)+'</span><span>•</span><span>OFFICIAL PLATFORM</span></div><div class="source-card-actions"><a class="secondary-button" href="'+escapeHTML(source.url)+'" target="_blank" rel="noopener noreferrer">Open platform</a><a class="primary-button" href="'+escapeHTML(searchHref)+'" target="_blank" rel="noopener noreferrer">'+(query?"Search title":"Browse catalogue")+'</a></div></div></article>';
     }).join(""):'<div class="empty-state"><div class="empty-symbol">⌕</div><h2>No official platforms match.</h2><p>Try another category or search term.</p></div>';
     $("#sourceCount").textContent=String(sourceSeed.length).padStart(2,"0");
@@ -1007,7 +1001,7 @@
   });
   $("#sourceWindowRefresh").addEventListener("click",()=>{renderMiniSources();toast("Sample source panel refreshed.");});
   $("#sourceSearch").addEventListener("input",event=>{sourceQuery=event.target.value;renderSources();});
-  $("#sourceLanguage").addEventListener("change",event=>{sourceLanguage=event.target.value;renderSources();});
+  if($("#sourceLanguage"))$("#sourceLanguage").addEventListener("change",event=>{sourceLanguage=event.target.value;renderSources();});
   $$(".embedded-tab").forEach(button=>button.addEventListener("click",()=>navigateEmbedded(button.dataset.sourceTab)));
   $("#embeddedBack").addEventListener("click",()=>{
     if(embeddedHistoryIndex>0){embeddedHistoryIndex--;navigateEmbedded(embeddedHistory[embeddedHistoryIndex],false);}
