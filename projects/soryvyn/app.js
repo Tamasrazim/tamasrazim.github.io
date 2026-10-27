@@ -963,6 +963,7 @@
     renderDiscover();
   }));
   $("#globalSearch").addEventListener("input",event=>{titleQuery=event.target.value;renderDiscover();});
+  $("#globalSearch").addEventListener("keydown",event=>{if(event.key!=="Enter"||!event.currentTarget.value.trim())return;sourceQuery=event.currentTarget.value.trim();$("#sourceSearch").value=sourceQuery;changeRoute("sources");renderSources();});
   $("#sortSelect").addEventListener("change",renderDiscover);
   $("#filterButton").addEventListener("click",()=>showModal($("#filterModal")));
   $("#dismissNotice").addEventListener("click",()=>{$("#dismissNotice").closest(".demo-notice").remove();state.noticeDismissed=true;persist();});
@@ -978,6 +979,8 @@
   $("#librarySearch").addEventListener("input",event=>{libraryQuery=event.target.value;renderLibrary();});
   $("#exportBackupButton").addEventListener("click",exportBackup);
   $("#importImagesButton").addEventListener("click",()=>$("#importImagesFile").click());
+  $("#heroImportButton").addEventListener("click",()=>$("#importImagesFile").click());
+  $("#discoverImportButton").addEventListener("click",()=>$("#importImagesFile").click());
   $("#importImagesFile").addEventListener("change",event=>{
     const files=event.target.files;
     event.target.value="";
