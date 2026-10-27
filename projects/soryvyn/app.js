@@ -148,7 +148,7 @@
   }
 
   const defaultState = {
-    savedIds:[], favoriteIds:[], history:[], progress:{}, bookmarks:[], enabledSources:["northstar","moon","silk","inkhouse"],
+    savedIds:[], favoriteIds:[], history:[], progress:{}, bookmarks:[], enabledSources:["mangaplus","webtoon","viz","kodansha","tapas","globalcomix"],
     category:"All",genre:"all",status:"all",theme:"dark",noticeDismissed:false
   };
 
