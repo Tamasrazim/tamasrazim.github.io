@@ -1,17 +1,224 @@
 <!doctype html>
-<html lang="en">
+<!--
+  What this does:
+  Provides a complete, practical TRILYVA guide from opening the renderer through writing frame-driven code,
+  composing motion, testing, rendering, exporting, and troubleshooting. All capability notes are browser-aware.
+-->
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050505">
-<meta name="robots" content="noindex,nofollow">
-<meta name="description" content="TRILYVA is in maintenance.">
-<link rel="canonical" href="https://tamasrazim.github.io/maintenance/">
-<title>TRILYVA is in maintenance.</title>
-<meta http-equiv="refresh" content="0;url=/maintenance/">
-<script>window.location.replace("/maintenance/");</script>
+<meta name="color-scheme" content="dark">
+
+<meta name="author" content="Robiul Rumman Razim">
+<meta name="description" content="The complete TRILYVA tutorial: learn the workspace, write animations, work with frames and time, design motion, configure output, render, export, and troubleshoot.">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/trilyva/tutorial.html">
+<title>TRILYVA Tutorial — The Complete Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site-v3.css?v=20261010-3">
+<style>
+:root{color-scheme:dark;--bg:#050505;--panel:rgba(255,255,255,.045);--line:rgba(255,255,255,.14);--muted:#a3a39d;--ink:#f1f1ed}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:22px}body{margin:0;background:radial-gradient(ellipse at 80% 0%,rgba(255,255,255,.07),transparent 34%),var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif}.wrap{width:min(1120px,calc(100% - 36px));margin:auto}.top{min-height:78px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);gap:18px}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;font:10px 'JetBrains Mono',monospace;letter-spacing:.1em}.brand img{width:48px;height:48px;object-fit:contain;border:1px solid var(--line);border-radius:12px}.top nav{display:flex;gap:14px;flex-wrap:wrap;font:10px 'JetBrains Mono',monospace}.top nav a,.crumb a{color:var(--muted);text-decoration:none}.top nav a:hover,.crumb a:hover{color:white}.hero{padding:clamp(48px,8vw,96px) 0 52px;border-bottom:1px solid var(--line)}.eyebrow,.tag{font:10px 'JetBrains Mono',monospace;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}.hero h1{font:700 clamp(39px,8vw,86px)/1.03 'Unbounded',sans-serif;letter-spacing:-.075em;margin:23px 0}.hero h1 span{color:#888882}.lead{max-width:800px;font-size:clamp(17px,2.2vw,21px);line-height:1.75;color:#d4d4ce}.muted{color:var(--muted);line-height:1.8}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 15px;border:1px solid var(--line);border-radius:8px;text-decoration:none;color:var(--ink);font:10px 'JetBrains Mono',monospace;letter-spacing:.035em;background:rgba(255,255,255,.035)}.btn.primary{background:#f1f1ed;color:#050505;border-color:#f1f1ed}.section{padding:48px 0;border-bottom:1px solid var(--line);scroll-margin-top:20px}.section-head{display:flex;align-items:end;justify-content:space-between;gap:22px;margin-bottom:23px}.section h2{font:600 clamp(22px,4vw,35px)/1.25 'Unbounded',sans-serif;letter-spacing:-.06em;margin:10px 0}.section h3{font:500 16px 'Unbounded',sans-serif;letter-spacing:-.035em;margin:13px 0 8px}.section p,.section li{font-size:13px;line-height:1.9;color:#c6c6bf}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.card{border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.016));padding:20px;min-width:0;box-shadow:0 14px 40px rgba(0,0,0,.16)}.num{font:10px 'JetBrains Mono',monospace;color:var(--muted);letter-spacing:.13em}.card p{margin:8px 0 0}.toc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.toc a{display:block;border:1px solid var(--line);border-radius:8px;padding:12px;color:#deded8;text-decoration:none;font:11px/1.6 'JetBrains Mono',monospace}.toc a:hover{background:rgba(255,255,255,.07)}pre{white-space:pre;overflow:auto;padding:17px;border:1px solid var(--line);border-radius:11px;background:#080808;color:#e7e7e1;font:12px/1.8 'JetBrains Mono',monospace;tab-size:2}code{font-family:'JetBrains Mono',monospace;color:#f1f1ed}.inline{padding:2px 5px;border:1px solid var(--line);border-radius:5px;background:#111}.callout{border-left:2px solid #eee;padding:13px 16px;background:rgba(255,255,255,.04);color:#c9c9c2;font-size:13px;line-height:1.9;margin:18px 0}.steps{display:grid;gap:9px}.step{display:grid;grid-template-columns:44px minmax(0,1fr);gap:13px;border:1px solid var(--line);border-radius:11px;padding:15px;background:var(--panel)}.step .n{font:11px 'JetBrains Mono',monospace;color:var(--muted);padding-top:3px}.step h3{margin:0 0 5px;font-size:14px}.step p{margin:0}.diagram{margin-top:16px;border:1px solid var(--line);border-radius:12px;padding:14px;background:#080808}.diagramtop{display:flex;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line);font:10px 'JetBrains Mono',monospace;color:#e9e9e4}.diagramgrid{display:grid;grid-template-columns:1.1fr 1fr;gap:9px;margin-top:10px}.diagramcell{min-height:70px;padding:12px;border:1px solid #39393d;border-radius:7px;background:linear-gradient(135deg,#141416,#080808);font:10px/1.8 'JetBrains Mono',monospace;color:#bcbcb6}.bar{height:5px;background:#333;margin:7px 0;border-radius:3px;overflow:hidden}.bar i{display:block;height:100%;width:64%;background:#e8e8e3}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.8}.table th{font:10px 'JetBrains Mono',monospace;color:var(--muted)}.checklist{display:grid;gap:8px;padding:0;list-style:none}.checklist li{padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}.checklist li:before{content:'□';margin-right:9px;color:#fff}footer{padding:28px 0 42px;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;color:var(--muted);font:10px 'JetBrains Mono',monospace}footer a{color:inherit}@media(max-width:720px){.top{padding:12px 0;align-items:flex-start}.top nav{justify-content:flex-end;gap:8px}.brand img{width:40px;height:40px}.brand{gap:7px}.grid,.toc{grid-template-columns:1fr}.section-head{display:block}.card{padding:17px}.table{font-size:12px}.table th,.table td{padding:8px 5px}.diagramgrid{grid-template-columns:1fr}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+@keyframes fieldGuideRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.card,.step,.callout{transition:transform .24s cubic-bezier(.2,.7,.3,1),border-color .24s ease,background .24s ease}
+.card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.3)}
+.step:hover{background:rgba(255,255,255,.025)}
+a{transition:opacity .2s ease,color .2s ease,border-color .2s ease}
+@media(prefers-reduced-motion:no-preference){.hero{animation:fieldGuideRise .65s cubic-bezier(.16,.84,.28,1) both}.section{animation:fieldGuideRise .55s cubic-bezier(.16,.84,.28,1) both}}
+@media(prefers-reduced-motion:reduce){.card,.step,.callout,a,.hero,.section{animation:none!important;transition:none!important;transform:none!important}}
+</style>
 </head>
 <body>
-<p>TRILYVA is in maintenance. <a href="/maintenance/">Continue</a>.</p>
+<header class="wrap top">
+<a class="brand" href="/projects/trilyva/" aria-label="TRILYVA project home"><img src="/assets/brand/trilyva/T.svg" alt="TRILYVA T icon"><span>TRILYVA / COMPLETE FIELD GUIDE</span></a>
+<nav aria-label="Tutorial navigation"><a href="#contents">CONTENTS</a><a href="#first">FIRST PROJECT</a><a href="#motion">MOTION</a><a href="#export">EXPORT</a><a href="#fixes">FIXES</a></nav>
+</header>
+<main>
+<section class="wrap hero" id="start">
+<div class="eyebrow">TRILYVA / THE COMPLETE TUTORIAL</div>
+<h1>From first frame<br><span>to final export.</span></h1>
+<p class="lead">A full practical guide to using TRILYVA: understand the workspace, write a working animation, shape the motion, choose a composition, test the browser's capabilities, render, export, and diagnose common problems. It also covers full-library folder/ZIP batches and saving a chosen frame as PNG, JPG, SVG, or EPS.</p>
+<p class="muted">This is a complete written tutorial, not a fixed 60-second animation or promo. Follow it at your own pace; there is no time limit. Duration, frame rate, resolution, and output format are choices for your project and depend on the options available in the running browser.</p>
+<div class="actions"><a class="btn primary" href="/projects/code-motion/renderer/">OPEN TRILYVA WORKSPACE ↗</a><a class="btn" href="/projects/trilyva/">ABOUT TRILYVA ↗</a></div>
+<div class="callout"><strong>Before you begin:</strong> this guide includes explanatory diagrams rather than fake screenshots. The workspace is the source of truth for the current controls and capability indicators; labels and export options can change as the project evolves.</div>
+</section>
+<section class="wrap section" id="contents">
+<div class="section-head"><div><div class="eyebrow">FIELD GUIDE / INDEX</div><h2>Choose a chapter.</h2></div><p class="muted">Start at chapter 01 if this is your first visit. Return to any chapter as a reference while working.</p></div>
+<div class="toc">
+<a href="#workspace">01 / Workspace tour</a><a href="#first">02 / First animation</a><a href="#code">03 / Understand the code</a><a href="#motion">04 / Build better motion</a><a href="#composition">05 / Composition settings</a><a href="#preview">06 / Preview and inspect</a><a href="#export">07 / Render and export</a><a href="#loops">08 / Seamless loops</a><a href="#quality">09 / Quality checklist</a><a href="#formats">10 / Formats and limits</a><a href="#fixes">11 / Troubleshooting</a><a href="#workflow">12 / Repeatable workflow</a>
+</div>
+</section>
+<section class="wrap section" id="workspace">
+<div class="section-head"><div><div class="eyebrow">01 / WORKSPACE TOUR</div><h2>Know the work areas.</h2></div><p class="muted">The exact layout can evolve. Use the real app labels and diagnostics as the authority when they differ from this overview.</p></div>
+<div class="grid">
+<article class="card"><div class="num">A / SOURCE</div><h3>Animation code</h3><p>This is where you describe how a frame should look. A frame-driven animation is a function of time/frame, rather than a recording of your mouse movements.</p></article>
+<article class="card"><div class="num">B / PREVIEW</div><h3>See the current result</h3><p>Use preview playback to judge timing and composition. Scrub or inspect frames when you need to find a specific visual issue. Preview responsiveness is not a guarantee of export speed.</p></article>
+<article class="card"><div class="num">C / COMPOSITION</div><h3>Set the output shape</h3><p>Configure the dimensions, frame rate, duration, background, and any loop-related settings offered by the current workspace.</p></article>
+<article class="card"><div class="num">D / RENDER + DIAGNOSTICS</div><h3>Check, render, verify</h3><p>Analyse the selected job, test a short render, then run the full export. Check the browser capability and completion status instead of assuming a codec is supported.</p></article>
+</div>
+<div class="diagram" role="img" aria-label="Explanatory diagram of source, preview, composition and output areas; not a screenshot"><div class="diagramtop"><span>WORKSPACE MAP / EXPLANATORY</span><span>NOT A SCREENSHOT</span></div><div class="diagramgrid"><div class="diagramcell">SOURCE EDITOR<div class="bar"><i></i></div><div class="bar"><i style="width:42%"></i></div><div class="bar"><i style="width:76%"></i></div></div><div class="diagramcell">LIVE PREVIEW<div style="height:45px;border:1px solid #444;margin-top:8px;background:radial-gradient(circle at 50% 50%,#eee 0 4px,#333 5px,transparent 35%),#0b0b0d"></div></div><div class="diagramcell">COMPOSITION<div class="bar"><i style="width:58%"></i></div><div class="bar"><i style="width:70%"></i></div></div><div class="diagramcell">RENDER / EXPORT<div class="bar"><i style="width:85%"></i></div><div class="bar"><i style="width:34%"></i></div></div></div></div>
+<div class="callout">The diagram above is illustrative UI guidance, not a captured application screen. For real controls, open the workspace and follow the current interface.</div>
+</section>
+<section class="wrap section" id="first">
+<div class="section-head"><div><div class="eyebrow">02 / FIRST ANIMATION</div><h2>Make something move.</h2></div><p class="muted">Start with one simple shape. Once this works, build up with text, paths, layers, gradients, and more complicated timing.</p></div>
+<div class="steps">
+<div class="step"><div class="n">01</div><div><h3>Open the renderer</h3><p>Launch the workspace. Locate the animation source editor and the Run/preview action. If a previous project is loaded, copy its code somewhere safe before replacing it.</p></div></div>
+<div class="step"><div class="n">02</div><div><h3>Paste this starter</h3><p>It clears the frame, computes a position from the current time, then draws a white circle.</p></div></div>
+</div>
+<pre><code>window.renderFrame = function (time, frame, fps, ctx, width, height) {
+  ctx.fillStyle = "#050505";
+  ctx.fillRect(0, 0, width, height);
+
+  const travel = Math.cos(time * 2) * width * 0.22;
+  const x = width * 0.5 + travel;
+  const y = height * 0.5;
+
+  ctx.beginPath();
+  ctx.arc(x, y, Math.min(width, height) * 0.045, 0, Math.PI * 2);
+  ctx.fillStyle = "#ffffff";
+  ctx.fill();
+};</code></pre>
+<div class="steps">
+<div class="step"><div class="n">03</div><div><h3>Run the code</h3><p>Use the workspace's Run/compile control. If the interface documents a keyboard shortcut, you can use it too. The exact starter should produce a white circle on a dark background.</p></div></div>
+<div class="step"><div class="n">04</div><div><h3>Play and scrub</h3><p>Play the preview to feel the motion, then drag the timeline or inspect individual frames. The circle should move left and right and return smoothly because cosine is periodic.</p></div></div>
+<div class="step"><div class="n">05</div><div><h3>Change one value at a time</h3><p>Change the radius, travel distance, or <code class="inline">time * 2</code> speed. Re-run and compare. Small isolated changes make it easier to learn what each parameter controls.</p></div></div>
+</div>
+</section>
+<section class="wrap section" id="code">
+<div class="section-head"><div><div class="eyebrow">03 / UNDERSTAND THE CODE</div><h2>What the function receives.</h2></div></div>
+<table class="table"><thead><tr><th>ARGUMENT</th><th>MEANING</th><th>USE IT FOR</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>Time in seconds for the requested frame.</td><td>Motion curves, fades, timed scene changes.</td></tr>
+<tr><td><code>frame</code></td><td>The current frame index.</td><td>Frame-accurate logic, frame-based patterns.</td></tr>
+<tr><td><code>fps</code></td><td>Frames per second selected for the job.</td><td>Converting frame counts into time.</td></tr>
+<tr><td><code>ctx</code></td><td>The Canvas 2D drawing context supplied by the renderer.</td><td>Drawing paths, shapes, text, gradients and images already available to the project.</td></tr>
+<tr><td><code>width</code> / <code>height</code></td><td>The active render dimensions.</td><td>Scale layouts to the chosen output rather than hardcoding one screen size.</td></tr>
+</tbody></table>
+<div class="grid" style="margin-top:14px">
+<article class="card"><div class="num">TIMEBASE</div><h3>Time from frame index</h3><pre><code>time = frame / fps</code></pre><p>At 30 fps, 30 frames represent one second. At 60 fps, 60 frames represent one second. If the renderer evaluates frame 300 at 30 fps, the timestamp is 10 seconds.</p></article>
+<article class="card"><div class="num">DETERMINISM</div><h3>Always derive the frame</h3><pre><code>const x = centerX + Math.sin(time) * radius;</code></pre><p>Prefer calculations from the current frame/time. Avoid incrementing a shared position each call: rendering can request frames out of playback order.</p></article>
+</div>
+<div class="callout">Do not create a second canvas or run your own <code>requestAnimationFrame()</code> loop inside <code>renderFrame()</code>. The renderer owns the frame clock and supplies the drawing context.</div>
+</section>
+<section class="wrap section" id="motion">
+<div class="section-head"><div><div class="eyebrow">04 / BUILD BETTER MOTION</div><h2>Compose, animate, refine.</h2></div><p class="muted">A good animation has a visual hierarchy. Begin with the main action, then add supporting detail only when it improves the idea.</p></div>
+<div class="grid">
+<article class="card"><div class="num">01 / EASING</div><h3>Make movement feel intentional</h3><pre><code>function easeOut(t) {
+  t = Math.max(0, Math.min(1, t));
+  return 1 - Math.pow(1 - t, 3);
+}</code></pre><p>Use eased progress for entrances and exits. Linear movement is useful for technical motion; eased movement often feels more natural for typography and objects.</p></article>
+<article class="card"><div class="num">02 / TIMING</div><h3>Build a scene from progress</h3><pre><code>const start = 2;       // seconds
+const length = 1.25;   // seconds
+const p = Math.max(0, Math.min(
+  1, (time - start) / length
+));</code></pre><p>Keep scene start and duration explicit. Clamp progress so an entrance reaches its final state and stays there.</p></article>
+<article class="card"><div class="num">03 / LAYERS</div><h3>Draw back to front</h3><p>Draw background first, then large forms, then typography and fine details. Canvas uses the order you issue drawing calls, so foreground elements should usually be drawn last.</p></article>
+<article class="card"><div class="num">04 / TYPE</div><h3>Design for the frame</h3><p>Keep key text away from the edges, use a small number of type sizes, and verify legibility at the final output size. Do not rely on a tiny preview to judge fine details.</p></article>
+<article class="card"><div class="num">05 / COLOUR</div><h3>Use colour with purpose</h3><p>Use consistent background, foreground, and accent colours. If the render needs transparency, do not paint an opaque background rectangle over the canvas.</p></article>
+<article class="card"><div class="num">06 / PERFORMANCE</div><h3>Measure before adding detail</h3><p>Many gradients, huge text effects, and thousands of particles can make each frame expensive. Test a short sequence before increasing resolution, duration, or complexity.</p></article>
+</div>
+</section>
+<section class="wrap section" id="composition">
+<div class="section-head"><div><div class="eyebrow">05 / COMPOSITION</div><h2>Choose settings for the delivery.</h2></div></div>
+<div class="steps">
+<div class="step"><div class="n">01</div><div><h3>Set the aspect ratio</h3><p>Choose a frame shape that matches the destination. For a standard widescreen video, use 16:9 when that option is available. Recheck typography after changing dimensions.</p></div></div>
+<div class="step"><div class="n">02</div><div><h3>Pick resolution</h3><p>Use a smaller size for look-development and debugging. Move to the delivery resolution only after the composition is approved. Larger images increase memory use and render time substantially.</p></div></div>
+<div class="step"><div class="n">03</div><div><h3>Pick frame rate and duration</h3><p>Choose them based on the intended motion and destination—not because one example used a particular length. Frame count is duration multiplied by FPS; many workflows use frames numbered from zero through frameCount minus one.</p></div></div>
+<div class="step"><div class="n">04</div><div><h3>Choose the background</h3><p>Use a solid background for a finished composition. Use transparent output only when the selected export path supports it; transparency in the preview alone does not guarantee transparency in a video file.</p></div></div>
+</div>
+<div class="callout">High resolution and high frame rate combinations can be very demanding. TRILYVA's actual diagnostics and enabled settings take priority over any general example in this guide.</div>
+</section>
+<section class="wrap section" id="preview">
+<div class="section-head"><div><div class="eyebrow">06 / PREVIEW AND INSPECT</div><h2>Find problems before rendering.</h2></div></div>
+<div class="grid">
+<article class="card"><div class="num">PLAYBACK</div><h3>Judge the rhythm</h3><p>Watch the full sequence at least once. Look for abrupt changes, unreadable text, overlapping elements, and transitions that start too early or finish too late.</p></article>
+<article class="card"><div class="num">SCRUBBING</div><h3>Inspect specific moments</h3><p>Scrub to the beginning and end of each scene. If a problem appears only between two moments, inspect the frames around that transition. Press F12 to open the in-app DOCS panel when the browser lets the page receive that key; otherwise click the DOCS tab or the Docs · F12 toolbar button.</p></article>
+<article class="card"><div class="num">FRAME CHECK</div><h3>Look at exact frames</h3><p>For flicker or jitter, compare adjacent frames. Verify that positions are calculated from time/frame, and avoid unseeded randomness or mutable state.</p></article>
+<article class="card"><div class="num">DEVICE CHECK</div><h3>Preview is not export speed</h3><p>The preview can prioritise responsiveness and may not run at the requested output frame rate. Use a test render to validate the actual export path.</p></article>
+</div>
+</section>
+<section class="wrap section" id="export">
+<div class="section-head"><div><div class="eyebrow">07 / RENDER AND EXPORT</div><h2>Use a safe render sequence.</h2></div><p class="muted">Do not begin with the biggest possible job. Validate the idea, validate the settings, then render the complete output.</p></div>
+<div class="steps">
+<div class="step"><div class="n">01</div><div><h3>Save or copy your source</h3><p>Keep a known-good copy of the animation before changing the composition or attempting a large render.</p></div></div>
+<div class="step"><div class="n">02</div><div><h3>Analyse the job</h3><p>Use the available analysis/diagnostics controls to check the selected dimensions, frame rate, duration, and browser-supported output path.</p></div></div>
+<div class="step"><div class="n">03</div><div><h3>Run a short test render</h3><p>Render a short duration or test range if the workspace provides it. Confirm that the result plays, has the correct framing, and contains the intended background.</p></div></div>
+<div class="step"><div class="n">04</div><div><h3>Render the complete job</h3><p>Keep the tab open and avoid closing the workspace while it is processing. Large jobs can take a long time and require significant memory or storage.</p></div></div>
+<div class="step"><div class="n">05</div><div><h3>Inspect the output</h3><p>Play the exported file or inspect the downloaded image sequence. Check the beginning, middle, and end, and confirm the dimensions and duration before delivery.</p></div></div>
+<div class="step"><div class="n">06</div><div><h3>Save a still frame</h3><p>In the workspace Render panel, choose a frame index and select PNG, JPG, SVG, or EPS. Frame indices start at zero; the default is frame 0 and PNG. After a successful standard render, the selected still formats are exported automatically. Change the frame index to save another moment.</p></div></div>
+<div class="step"><div class="n">07</div><div><h3>Render a full library</h3><p>Choose Render Full Library, select a built-in or imported library, then choose Save to Folder or Save as ZIP. Set the still formats and frame index first. The output includes each animation’s MP4, selected stills, and metadata; video encoder availability and vector-operation support still depend on the current browser and renderer.</p></div></div>
+</div>
+</section>
+<section class="wrap section" id="loops">
+<div class="section-head"><div><div class="eyebrow">08 / SEAMLESS LOOPS</div><h2>Make the ending meet the beginning.</h2></div></div>
+<p>A loop setting describes the intended cycle; it cannot make arbitrary movement seamless by itself. Use periodic functions and avoid one-way accumulation.</p>
+<pre><code>const TAU = Math.PI * 2;
+const cycleSeconds = 4;
+const phase = (time % cycleSeconds) / cycleSeconds;
+const angle = phase * TAU;
+
+const x = width * 0.5 + Math.cos(angle) * width * 0.2;
+const y = height * 0.5 + Math.sin(angle) * height * 0.1;</code></pre>
+<div class="steps">
+<div class="step"><div class="n">01</div><div><h3>Choose one cycle duration</h3><p>Use the same intended duration in the composition and the motion math.</p></div></div>
+<div class="step"><div class="n">02</div><div><h3>Loop every moving element</h3><p>Check position, rotation, scale, opacity, particles, text, and background—not just the main object.</p></div></div>
+<div class="step"><div class="n">03</div><div><h3>Test the seam</h3><p>Use the workspace's seam analysis if available and inspect the first and last displayed frames. The final encoded frame is before the exact wrap time, so design transitions accordingly.</p></div></div>
+</div>
+</section>
+<section class="wrap section" id="quality">
+<div class="section-head"><div><div class="eyebrow">09 / QUALITY CHECK</div><h2>Preflight your animation.</h2></div></div>
+<ul class="checklist">
+<li>The first frame looks intentional and doesn't flash unexpectedly.</li>
+<li>Text is readable at the final dimensions and stays inside safe margins.</li>
+<li>Motion values come from the current time/frame rather than accumulated state.</li>
+<li>Random elements use a stable seed or deterministic formula.</li>
+<li>Scene transitions have no accidental gaps, jumps, or single-frame flashes.</li>
+<li>Background and alpha behaviour match the selected output format.</li>
+<li>A short test render has been checked before the full job.</li>
+<li>The exported file opens and the duration, dimensions, and frame rate are correct.</li>
+<li>The first and last moments have been inspected if the animation is intended to loop.</li>
+</ul>
+</section>
+<section class="wrap section" id="formats">
+<div class="section-head"><div><div class="eyebrow">10 / FORMATS AND LIMITS</div><h2>Choose a format that fits.</h2></div></div>
+<table class="table"><thead><tr><th>OUTPUT PATH</th><th>GOOD FOR</th><th>CHECK FIRST</th></tr></thead><tbody>
+<tr><td>MP4 / H.264</td><td>Common playback and sharing.</td><td>Browser/device encoder availability; typical MP4 output does not carry alpha transparency.</td></tr>
+<tr><td>WebM / VP8 or VP9</td><td>Web playback and supported browser workflows.</td><td>Actual codec/profile support varies by browser and device.</td></tr>
+<tr><td>PNG image sequence</td><td>Lossless frames, compositing, and transparency.</td><td>Many frames can require a lot of storage; archive/ZIP support may have limits.</td></tr>
+<tr><td>Still frame: PNG / JPG</td><td>Export a chosen frame as a raster image; PNG is suitable for transparency.</td><td>JPG has no alpha channel. Frame numbering starts at zero; the default is frame 0.</td></tr>
+<tr><td>Still frame: SVG / EPS</td><td>Vector-oriented still export for supported drawing operations.</td><td>The vector recorder cannot translate every possible Canvas 2D operation; inspect the output and any warning.</td></tr>
+<tr><td>Full library: folder / ZIP</td><td>Batch-export a chosen library with MP4, selected still frames, and metadata.</td><td>Folder/ZIP destination pickers need supported browser file access. Video and vector output still have capability limits.</td></tr>
+</tbody></table>
+<div class="callout">Related TRILYVA tools can have their own export capabilities. Do not assume an option available in a separate vector or audio tool is automatically available in the animation renderer.</div>
+</section>
+<section class="wrap section" id="fixes">
+<div class="section-head"><div><div class="eyebrow">11 / TROUBLESHOOTING</div><h2>Diagnose the actual failure.</h2></div></div>
+<table class="table"><thead><tr><th>SYMPTOM</th><th>WHAT TO CHECK</th></tr></thead><tbody>
+<tr><td>Blank preview</td><td>Read the compile/runtime message; check braces, quotes, variable names, and whether the function is assigned to <code>window.renderFrame</code> as expected.</td></tr>
+<tr><td>Animation jumps or flickers</td><td>Derive each frame from time/frame. Avoid <code>Math.random()</code>, <code>Date.now()</code>, or positions that accumulate on every call.</td></tr>
+<tr><td>Preview and export differ</td><td>Check whether the preview uses a lower resolution or responsive playback. Confirm the render settings and run a short export test.</td></tr>
+<tr><td>Codec or format unavailable</td><td>Trust the current capability/diagnostics result. Try a supported alternative or reduce the dimensions/frame rate.</td></tr>
+<tr><td>Transparent output looks solid</td><td>Confirm that the selected format preserves alpha. Use a transparent image sequence if the video path does not support it.</td></tr>
+<tr><td>Render is slow</td><td>Reduce resolution for tests, simplify expensive drawing, shorten the test range, and check available memory/storage.</td></tr>
+<tr><td>Downloaded file is missing or incomplete</td><td>Wait for the renderer's completion status, check browser download permissions/storage, and retry with a small test job.</td></tr>
+<tr><td>Loop doesn't join cleanly</td><td>Check every animated property at the seam; a loop toggle does not automatically make non-periodic movement repeat.</td></tr>
+</tbody></table>
+</section>
+<section class="wrap section" id="workflow">
+<div class="section-head"><div><div class="eyebrow">12 / REPEATABLE WORKFLOW</div><h2>From idea to delivery.</h2></div></div>
+<div class="steps">
+<div class="step"><div class="n">01</div><div><h3>Design a still frame</h3><p>Decide what the viewer should notice first. Establish the background, focal element, and typography before adding motion.</p></div></div>
+<div class="step"><div class="n">02</div><div><h3>Animate one property</h3><p>Move, scale, rotate, or fade the focal element. Check that it works throughout the timeline.</p></div></div>
+<div class="step"><div class="n">03</div><div><h3>Add scenes and transitions</h3><p>Use explicit time windows and reusable drawing helpers. Keep source organised so later changes remain manageable.</p></div></div>
+<div class="step"><div class="n">04</div><div><h3>Preview and diagnose</h3><p>Scrub through transitions, inspect exact frames, and remove flicker or unintended jumps.</p></div></div>
+<div class="step"><div class="n">05</div><div><h3>Test, render, verify</h3><p>Use a manageable test export first, then the final settings. Inspect the resulting file before sharing or editing it further.</p></div></div>
+</div>
+<div class="actions"><a class="btn primary" href="/projects/code-motion/renderer/">START MAKING IN TRILYVA ↗</a><a class="btn" href="/projects/trilyva/">PROJECT OVERVIEW ↗</a><a class="btn" href="#start">BACK TO TOP ↑</a></div>
+</section>
+</main>
+<footer class="wrap"><span>ROBIUL RUMMAN RAZIM — TAMASRAZIM / TRILYVA</span><span><a href="/projects/">PROJECTS</a> · <a href="/">MAIN SITE</a></span></footer>
 </body>
 </html>
