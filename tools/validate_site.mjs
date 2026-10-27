@@ -158,7 +158,7 @@ must(schemaStart>=0&&schemaEnd>schemaStart,'homepage contains JSON-LD schema');
 const rootSchema=JSON.parse(site.slice(schemaStart+schemaOpen.length,schemaEnd));
 must(rootSchema['@context']==='https://schema.org'&&Array.isArray(rootSchema['@graph']),'homepage schema graph parses');
 must(rootSchema['@graph'].some(n=>n['@type']==='Person'&&n['@id']==='https://tamasrazim.github.io/#person'),'schema identifies person');
-must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length===14,'schema includes fourteen documented software applications');
+must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length===15,'schema includes fifteen documented software applications');
 must(rootSchema['@graph'].some(n=>n['@id']==='https://tamasrazim.github.io/projects/code-motion/renderer/#application'&&n.name==='TRILYVA Renderer'),'schema identifies renderer as a separate tool route');
 must(rootSchema['@graph'].some(n=>n['@id']==='https://tamasrazim.github.io/#trilyva'&&n.url==='https://tamasrazim.github.io/projects/trilyva/'),'TRILYVA schema points to the project overview, not the renderer');
 must(rootSchema['@graph'].some(n=>n['@type']==='SoftwareApplication'&&n.name==='KYNESTRA'&&/Windows/.test(n.operatingSystem)),'schema identifies KYNESTRA as Windows desktop software');
