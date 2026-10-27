@@ -1,0 +1,56 @@
+name: SORYVYN PWA checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "projects/soryvyn/**"
+      - ".github/workflows/soryvyn-check.yml"
+  pull_request:
+    paths:
+      - "projects/soryvyn/**"
+      - ".github/workflows/soryvyn-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JavaScript syntax
+        run: node --check projects/soryvyn/app.js
+      - name: Validate PWA files and source scope
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const assert = require('node:assert/strict');
+          const root = 'projects/soryvyn/';
+          const html = fs.readFileSync(root + 'index.html', 'utf8');
+          const app = fs.readFileSync(root + 'app.js', 'utf8');
+          const manifest = JSON.parse(fs.readFileSync(root + 'manifest.webmanifest', 'utf8'));
+          const sw = fs.readFileSync(root + 'sw.js', 'utf8');
+          for (const path of ['app.css', 'app.js', 'icon.svg', 'privacy.html', 'LICENSE', 'README.md']) {
+            assert.ok(fs.existsSync(root + path), 'Missing required file: ' + path);
+          }
+          assert.ok(html.includes('id="readerModal"'), '3D reader markup is missing');
+          assert.ok(html.includes('id="importImagesFile"'), 'Local image import control is missing');
+          assert.ok(html.includes('id="readerBookmark"'), 'Spread bookmark control is missing');
+          assert.ok(app.includes('function renderSources()'), 'Official source directory is missing');
+          for (const host of ['mangaplus.shueisha.co.jp', 'webtoons.com', 'viz.com', 'kodansha.us', 'tapas.io', 'globalcomix.com']) {
+            assert.ok(app.includes(host), 'Missing official provider URL: ' + host);
+          }
+          assert.equal(manifest.start_url, './');
+          assert.equal(manifest.scope, './');
+          assert.match(sw, /CACHE_VERSION\s*=\s*"soryvyn-shell-v7"/);
+          assert.ok(!app.includes('The Quiet Between Stars'), 'Fictional seed title must not return');
+          assert.ok(!app.includes('Northstar Index'), 'Fictional source connector must not return');
+          console.log('SORYVYN PWA structure and official-source allowlist validated.');
+          NODE
