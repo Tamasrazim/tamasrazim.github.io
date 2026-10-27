@@ -6,7 +6,7 @@ SORYVYN is being implemented as a real web PWA first. The native application is 
 
 - Responsive monochrome web PWA at `/projects/soryvyn/`.
 - Two-page 3D open-book reader with drag, mouse-wheel, and keyboard page turns.
-- Local image-folder import, sorted naturally by filename, stored in IndexedDB.
+- Local image-folder and CBZ/ZIP archive import, sorted naturally by filename, stored in IndexedDB.
 - Local reading progress, history, saved titles, favorites, and per-spread bookmarks.
 - JSON backup export and validated restore.
 - PWA manifest, service worker, and offline shell cache.
@@ -26,7 +26,7 @@ Use source-owned public search/catalogue endpoints only where the provider permi
 Keep the custom 3D reader for local/imported pages and content the user is authorized to open in it. Provider-hosted chapters open on the provider's website unless the provider explicitly permits in-app rendering.
 
 ### 4. Local import hardening
-Add archive import with safe path validation, duplicate detection, storage quota handling, and rollback on partial failures. Keep folder import working without an account or cloud service.
+Add duplicate detection, storage quota handling, and rollback on partial failures. Keep folder and CBZ/ZIP imports working without an account or cloud service.
 
 ### 5. Offline library
 Add clear local storage usage, per-edition removal, export of original imported files when browser APIs permit it, and robust recovery after a browser restart. Do not download provider chapters unless the provider explicitly supports it.
