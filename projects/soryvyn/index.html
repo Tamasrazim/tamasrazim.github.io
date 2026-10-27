@@ -90,7 +90,7 @@
       <h2>Your pages.<br>Your book.</h2>
       <p>Import manga page images and read them in a tactile, two-page 3D book with drag, wheel, and keyboard page turns.</p>
       <div class="featured-meta"><span>LOCAL LIBRARY</span><i></i><span>3D PAGE TURNS</span><i></i><span>OFFLINE READY</span></div>
-      <button class="primary-button" id="heroImportButton" type="button">Import page images <span>↗</span></button>
+      <div class="empty-actions"><button class="primary-button" id="heroImportButton" type="button">Import image folder</button><button class="secondary-button" id="heroArchiveButton" type="button">Import CBZ / ZIP</button></div>
     </div>
     <div class="featured-art" aria-hidden="true"><div class="moon"></div><div class="mountain mountain-back"></div><div class="mountain mountain-front"></div><div class="featured-wordmark">YOUR<br>PAGES<br>YOUR<br>BOOK</div><div class="featured-serial">S V — BOOK</div></div>
     <span class="feature-index">LOCAL READER <span>────────</span> 3D / 02</span>
@@ -120,14 +120,14 @@
             <div class="sort-control"><span>SORT BY</span><select id="sortSelect" aria-label="Sort titles"><option value="featured">Featured</option><option value="title">Title A–Z</option><option value="rating">Rating</option><option value="updated">Recently updated</option></select></div>
           </div>
           <div class="title-grid" id="titleGrid" aria-live="polite"></div>
-          <div class="empty-state collection-empty" id="discoverEmpty"><div class="empty-symbol">▤</div><h2>Your reading shelf is ready.</h2><p>Open official manga platforms to find a title, or import your own page images to read them in SORYVYN’s 3D book.</p><div class="empty-actions"><button class="primary-button" data-route="sources" type="button">Browse official sources</button><button class="secondary-button" id="discoverImportButton" type="button">Import page images</button></div></div>
+          <div class="empty-state collection-empty" id="discoverEmpty"><div class="empty-symbol">▤</div><h2>Your reading shelf is ready.</h2><p>Open official manga platforms to find a title, or import your own page images to read them in SORYVYN’s 3D book.</p><div class="empty-actions"><button class="primary-button" data-route="sources" type="button">Browse official sources</button><button class="secondary-button" id="discoverImportButton" type="button">Import image folder</button><button class="secondary-button" id="discoverArchiveButton" type="button">Import CBZ / ZIP</button></div></div>
           <footer class="app-footer"><span>© SORYVYN <span id="footerYear"></span></span><span>MADE FOR THE WAY YOU READ</span><a href="./privacy.html">PRIVACY</a><a href="#roadmap" id="roadmapLink">BUILD STATUS ↗</a></footer>
         </section>
 
         <section class="page generic-page" data-page="library" hidden>
           <div class="page-heading"><div class="eyebrow">YOUR PERSONAL ARCHIVE</div><h1>My library<span class="heading-period">.</span></h1><p>Your saved titles, ready when you are.</p></div>
-          <div class="page-toolbar library-toolbar"><div class="search-box compact"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4 4"/></svg><input id="librarySearch" type="search" placeholder="Search your library…"></div><div class="library-backup-actions"><button class="primary-button" id="importImagesButton" type="button">Import image folder</button><input id="importImagesFile" type="file" webkitdirectory directory multiple accept="image/*" hidden><button class="secondary-button" id="exportBackupButton" type="button">Export backup</button><button class="secondary-button" id="importBackupButton" type="button">Import backup</button><input id="importBackupFile" type="file" accept="application/json,.json" hidden></div><span class="small-meta" id="librarySummary">0 SAVED TITLES</span></div>
-          <p class="library-import-note">Import numbered manga page images from a folder. Images stay in this browser and are not included in the JSON preference backup.</p>
+          <div class="page-toolbar library-toolbar"><div class="search-box compact"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4 4"/></svg><input id="librarySearch" type="search" placeholder="Search your library…"></div><div class="library-backup-actions"><button class="primary-button" id="importImagesButton" type="button">Import image folder</button><input id="importImagesFile" type="file" webkitdirectory directory multiple accept="image/*" hidden><button class="secondary-button" id="importArchiveButton" type="button">Import CBZ / ZIP</button><input id="importArchiveFile" type="file" accept=".cbz,.zip,application/zip,application/x-cbz" hidden><button class="secondary-button" id="exportBackupButton" type="button">Export backup</button><button class="secondary-button" id="importBackupButton" type="button">Import backup</button><input id="importBackupFile" type="file" accept="application/json,.json" hidden></div><span class="small-meta" id="librarySummary">0 SAVED TITLES</span></div>
+          <p class="library-import-note">Import an image folder or CBZ / ZIP archive. Pages stay in this browser and are not included in the JSON preference backup.</p>
           <div class="title-grid" id="libraryGrid"></div><div class="empty-state" id="libraryEmpty" hidden><div class="empty-symbol">▤</div><h2>A shelf waiting to happen.</h2><p>Save a title from Discover to keep it here.</p><button class="secondary-button" data-route="discover">Explore titles</button></div>
         </section>
 
@@ -138,7 +138,7 @@
 
         <section class="page generic-page" data-page="downloads" hidden>
           <div class="page-heading"><div class="eyebrow">READ ANYWHERE</div><h1>Downloads<span class="heading-period">.</span></h1><p>Manage your imported page images and understand where offline access is supported.</p></div>
-          <div class="placeholder-panel"><span class="placeholder-icon">↓</span><div><h2>Official chapter downloads stay with each provider.</h2><p>SORYVYN does not copy or bypass publisher download controls. For offline reading in the 3D book, import page images you have the right to use.</p></div><button class="secondary-button" id="downloadsImportButton" type="button">Import page images</button></div>
+          <div class="placeholder-panel"><span class="placeholder-icon">↓</span><div><h2>Official chapter downloads stay with each provider.</h2><p>SORYVYN does not copy or bypass publisher download controls. For offline reading in the 3D book, import page images you have the right to use.</p></div><div class="empty-actions"><button class="secondary-button" id="downloadsImportButton" type="button">Import image folder</button><button class="secondary-button" id="downloadsArchiveButton" type="button">Import CBZ / ZIP</button></div></div>
         </section>
 
         <section class="page generic-page" data-page="sources" hidden>
