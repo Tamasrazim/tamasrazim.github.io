@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b0c0d">
-  <meta name="description" content="SORYVYN privacy notes for the browser preview.">
+  <meta name="description" content="SORYVYN privacy notes for the web PWA.">
   <title>Privacy — SORYVYN</title>
   <style>
     :root{color-scheme:dark;--bg:#0b0c0d;--panel:#111315;--line:#292c30;--text:#f0f1ef;--muted:#a0a4a7;--accent:#dce0dc}
@@ -32,19 +32,19 @@
 <body>
   <main>
     <a class="brand" href="./" aria-label="SORYVYN home"><span class="mark" aria-hidden="true">S</span><span>SORYVYN</span></a>
-    <p class="eyebrow">Privacy · Browser preview</p>
+    <p class="eyebrow">Privacy · Web PWA</p>
     <h1>Your reading space.<br>Your device.</h1>
-    <p class="lead">The current SORYVYN preview is designed around local browser storage. It does not require an account.</p>
+    <p class="lead">SORYVYN stores imported page images, reading progress, bookmarks, and preferences in this browser. It does not require an account.</p>
 
     <section>
-      <h2>What this preview stores</h2>
-      <p>Saved titles, favorites, recent reading activity, sample reading progress, enabled sample sources, theme preference, and whether the preview notice was dismissed may be stored in your browser's local storage under <code>soryvyn.web.chunk01</code>.</p>
+      <h2>What this PWA stores</h2>
+      <p>Saved titles, favorites, reading history, page progress, bookmarks, imported image pages, theme preference, and whether the information notice was dismissed.view notice was dismissed may be stored in your browser's local storage under <code>soryvyn.web.chunk01</code>.</p>
       <p>This data stays in the browser profile on this device. Clearing site data or switching browser profiles can remove or separate it.</p>
     </section>
 
     <section>
       <h2>Network activity</h2>
-      <p>The current prototype uses fictional sample titles and sample source profiles. It does not fetch manga pages from source websites, create a SORYVYN account, or send your search terms, favorites, bookmarks, or reading progress to a SORYVYN backend. JSON backups created from My Library are downloaded directly by your browser and are not uploaded to SORYVYN. Local page collections are also saved in browser-managed storage on this device; the JSON backup contains preferences and progress, not those page files.</p>
+      <p>The source directory links to official publisher and creator platforms. Opening those sites may send requests to the provider under its own privacy policy. SORYVYN does not scrape or mirror their chapters. The local reader displays image pages imported by the user.ORYVYN account, or send your search terms, favorites, bookmarks, or reading progress to a SORYVYN backend. JSON backups created from My Library are downloaded directly by your browser and are not uploaded to SORYVYN. Local page collections are also saved in browser-managed storage on this device; the JSON backup contains preferences and progress, not those page files.</p>
       <p>The website is intended to be hosted by GitHub Pages. The hosting provider may process standard request and security information under its own terms and privacy policy.</p>
     </section>
 
