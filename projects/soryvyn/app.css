@@ -927,3 +927,8 @@ dialog{color:var(--text)}
 .source-card-main{overflow-wrap:anywhere}
 .source-card-actions a:focus-visible,.empty-actions button:focus-visible{outline:2px solid #e8e9e4;outline-offset:3px}
 @media(max-width:560px){.source-card-actions{gap:6px}.source-card-actions .secondary-button,.source-card-actions .primary-button{flex:1}.collection-empty{padding:26px 14px}}
+
+.source-mini,.rail-source{color:inherit;text-decoration:none}
+.source-mini:focus-visible,.rail-source:focus-visible{outline:2px solid #e8e9e4;outline-offset:3px;border-radius:5px}
+.source-card-actions a{white-space:nowrap}
+.source-card-actions .primary-button:hover,.empty-actions .primary-button:hover{filter:brightness(1.08)}
