@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0c0d">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="SORYVYN — a focused home for manga, manhwa, and manhua discovery and reading.">
+  <meta name="application-name" content="SORYVYN">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./app.css">
+  <title>SORYVYN — Read beyond the ordinary</title>
+</head>
+<body>
+  <div class="app-frame" id="app">
+    <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+      <a class="brand" href="#discover" data-route="discover" aria-label="SORYVYN home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 36 36"><path d="M8 7.5h20v4H12v5h13.5a4.5 4.5 0 0 1 0 9H8v-4h17.5a.5.5 0 0 0 0-1H12a4 4 0 0 1-4-4z" fill="currentColor"/><path d="M8 28.5h20v-2.8H8z" fill="currentColor" opacity=".42"/></svg></span>
+        <span class="brand-word">SORYVYN<span class="brand-period">.</span><small>READING SPACE</small></span>
+      </a>
+
+      <div class="sidebar-label">YOUR SPACE</div>
+      <nav class="nav-stack">
+        <button class="nav-item is-active" data-route="discover"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4M11 7.5v7M7.5 11h7"/></svg></span><span>Discover</span><kbd>⌘ 1</kbd></button>
+        <button class="nav-item" data-route="library"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20M8 7h8"/></svg></span><span>My library</span><span class="nav-count" id="libraryCount">0</span></button>
+        <button class="nav-item" data-route="updates"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M5 18V6M5 18h14"/><path d="m7.5 14 4-4 3 2 4.5-6"/><path d="M15.5 6H19v3.5"/></svg></span><span>Updates</span></button>
+        <button class="nav-item" data-route="downloads"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 3v11m-4-4 4 4 4-4"/><path d="M4 16v4h16v-4"/></svg></span><span>Downloads</span><span class="nav-count" id="downloadCount">0</span></button>
+      </nav>
+
+      <div class="sidebar-label sidebar-label-spaced">EXPLORE</div>
+      <nav class="nav-stack">
+        <button class="nav-item" data-route="sources"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.7 12h16.6M12 3.5a13.7 13.7 0 0 1 0 17M12 3.5a13.7 13.7 0 0 0 0 17"/></svg></span><span>Source browser</span><span class="live-dot" title="Demo mode"></span></button>
+        <button class="nav-item" data-route="history"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M4 11a8 8 0 1 1 2.2 5.5"/><path d="M4 5v6h6M12 7v5l3 2"/></svg></span><span>Reading history</span></button>
+        <button class="nav-item" data-route="favorites"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M20.5 8.5c0 5-8.5 10-8.5 10s-8.5-5-8.5-10A4.5 4.5 0 0 1 12 6.7 4.5 4.5 0 0 1 20.5 8.5Z"/></svg></span><span>Favorites</span></button>
+        <button class="nav-item" data-route="bookmarks"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-4-6 4z"/></svg></span><span>Bookmarks</span><span class="nav-count" id="bookmarkCount">00</span></button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="storage-card">
+          <div class="storage-top"><span class="storage-glyph">◫</span><span>LOCAL LIBRARY</span><span class="storage-status">READY</span></div>
+          <div class="storage-line"><span id="storageLabel">Demo collection</span><span id="storagePercent">0%</span></div>
+          <div class="storage-track"><span id="storageFill"></span></div>
+          <p>Everything stays on this device in this preview.</p>
+        </div>
+        <button class="profile-button" id="profileButton">
+          <span class="avatar">S</span><span class="profile-meta"><strong>Reader mode</strong><small>Local profile</small></span><span class="profile-menu">•••</span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div class="breadcrumbs"><span class="crumb-muted">SORYVYN</span><span class="crumb-sep">/</span><span id="crumbCurrent">Discover</span></div>
+        <div class="topbar-actions">
+          <div class="connection-pill"><span class="connection-dot"></span><span id="connectionLabel">LOCAL PREVIEW</span></div>
+          <button class="icon-button theme-button" id="themeToggle" aria-label="Toggle theme" title="Toggle theme"><svg viewBox="0 0 24 24"><path d="M20 15.5A8 8 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5Z"/></svg></button>
+          <button class="install-button" id="installButton" hidden><svg viewBox="0 0 24 24"><path d="M12 3v11m-4-4 4 4 4-4M4 16v4h16v-4"/></svg><span>Install app</span></button>
+          <button class="avatar avatar-small" id="profileTop" aria-label="Profile">S</button>
+        </div>
+      </header>
+
+      <div class="scroll-area" id="scrollArea">
+        <section class="page page-discover" data-page="discover">
+          <div class="welcome-row">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-mark"></span> YOUR NEXT OBSESSION STARTS HERE</div>
+              <h1>Stories worth<br><span>staying up for.</span></h1>
+              <p class="hero-description">A quieter corner of the internet for manga, manhwa, and manhua.</p>
+            </div>
+            <div class="hero-stamp" aria-hidden="true"><div class="stamp-ring"><span>SV</span><i></i></div><span class="stamp-caption">ISSUE Nº 001<br>THE DISCOVERY EDITION</span></div>
+          </div>
+
+          <div class="search-row">
+            <label class="search-box" for="globalSearch">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4 4"/></svg>
+              <input id="globalSearch" type="search" placeholder="Search titles, creators, genres…" autocomplete="off">
+              <kbd> / </kbd>
+            </label>
+            <button class="filter-button" id="filterButton"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10m-7 6h4"/><circle cx="8" cy="6" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="12" cy="18" r="1.5"/></svg><span>Filters</span></button>
+          </div>
+
+          <div class="demo-notice"><span class="notice-icon">i</span><span><strong>Preview mode.</strong> This first build uses original sample titles and mock source data. Live source connectors arrive in a later chunk.</span><button id="dismissNotice" aria-label="Dismiss notice">×</button></div>
+
+          <div class="featured-layout">
+            <article class="featured-card">
+              <div class="featured-backdrop" aria-hidden="true"><div class="featured-orbit orbit-one"></div><div class="featured-orbit orbit-two"></div><div class="featured-shape shape-one"></div><div class="featured-shape shape-two"></div><div class="featured-grid"></div></div>
+              <div class="featured-copy">
+                <span class="featured-tag">EDITOR'S PICK <span>·</span> SAMPLE TITLE</span>
+                <h2>The Quiet<br>Between Stars</h2>
+                <p>A cartographer of forgotten worlds discovers a map that redraws itself every night.</p>
+                <div class="featured-meta"><span>MANHWA</span><i></i><span>FANTASY</span><i></i><span>ONGOING</span></div>
+                <button class="primary-button" data-open-title="quiet-stars">Explore title <span>↗</span></button>
+              </div>
+              <div class="featured-art" aria-hidden="true"><div class="moon"></div><div class="mountain mountain-back"></div><div class="mountain mountain-front"></div><div class="featured-wordmark">THE<br>QUIET<br>BETWEEN<br>STARS</div><div class="featured-serial">S V — 001</div></div>
+              <span class="feature-index">FEATURE 001 <span>────────</span> 06 / 12</span>
+            </article>
+            <aside class="source-window">
+              <div class="window-chrome"><div class="window-dots"><i></i><i></i><i></i></div><span>INTERNAL SOURCE VIEW</span><button id="sourceWindowRefresh" aria-label="Refresh sample source">↻</button></div>
+              <div class="window-address"><span class="secure-mark">◇</span><span>soryvyn://source-network</span><span class="address-lock">LOCAL</span></div>
+              <div class="window-content">
+                <div class="window-overline">SOURCE NETWORK <span>DEMO</span></div>
+                <h3>Find your<br>next chapter.</h3>
+                <p>Explore compatible discovery sources in one focused place.</p>
+                <div class="source-mini-list" id="sourceMiniList"></div>
+                <button class="text-link" data-route="sources">Open source browser <span>↗</span></button>
+              </div>
+              <div class="window-footer"><span><i></i> SAFE PREVIEW</span><span>NO EXTERNAL NAVIGATION</span></div>
+            </aside>
+          </div>
+
+          <div class="section-heading">
+            <div><div class="eyebrow">CURATED FOR YOU</div><h2>Explore the collection<span class="heading-period">.</span></h2></div>
+            <div class="section-tools"><span id="resultCount">08 TITLES</span><button class="view-toggle is-selected" data-view="grid" aria-label="Grid view"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></svg></button><button class="view-toggle" data-view="list" aria-label="List view"><svg viewBox="0 0 24 24"><path d="M9 5h11M9 12h11M9 19h11M4 5h.01M4 12h.01M4 19h.01"/></svg></button></div>
+          </div>
+          <div class="category-row" id="categoryRow" role="group" aria-label="Filter by category">
+            <button class="category-chip is-active" data-category="All">All stories <span>08</span></button>
+            <button class="category-chip" data-category="Manga">Manga <span>03</span></button>
+            <button class="category-chip" data-category="Manhwa">Manhwa <span>03</span></button>
+            <button class="category-chip" data-category="Manhua">Manhua <span>02</span></button>
+            <div class="sort-control"><span>SORT BY</span><select id="sortSelect" aria-label="Sort titles"><option value="featured">Featured</option><option value="title">Title A–Z</option><option value="rating">Rating</option><option value="updated">Recently updated</option></select></div>
+          </div>
+          <div class="title-grid" id="titleGrid" aria-live="polite"></div>
+          <div class="load-more-row"><span>END OF PREVIEW COLLECTION</span><span class="load-more-line"></span><span>01 / 01</span></div>
+          <footer class="app-footer"><span>© SORYVYN <span id="footerYear"></span></span><span>MADE FOR THE WAY YOU READ</span><a href="./privacy.html">PRIVACY</a><a href="#roadmap" id="roadmapLink">BUILD STATUS ↗</a></footer>
+        </section>
+
+        <section class="page generic-page" data-page="library" hidden>
+          <div class="page-heading"><div class="eyebrow">YOUR PERSONAL ARCHIVE</div><h1>My library<span class="heading-period">.</span></h1><p>Your saved titles, ready when you are.</p></div>
+          <div class="page-toolbar library-toolbar"><div class="search-box compact"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4 4"/></svg><input id="librarySearch" type="search" placeholder="Search your library…"></div><div class="library-backup-actions"><button class="primary-button" id="importImagesButton" type="button">Import image folder</button><input id="importImagesFile" type="file" webkitdirectory directory multiple accept="image/*" hidden><button class="secondary-button" id="exportBackupButton" type="button">Export backup</button><button class="secondary-button" id="importBackupButton" type="button">Import backup</button><input id="importBackupFile" type="file" accept="application/json,.json" hidden></div><span class="small-meta" id="librarySummary">0 SAVED TITLES</span></div>
+          <p class="library-import-note">Import numbered manga page images from a folder. Images stay in this browser and are not included in the JSON preference backup.</p>
+          <div class="title-grid" id="libraryGrid"></div><div class="empty-state" id="libraryEmpty" hidden><div class="empty-symbol">▤</div><h2>A shelf waiting to happen.</h2><p>Save a title from Discover to keep it here.</p><button class="secondary-button" data-route="discover">Explore titles</button></div>
+        </section>
+
+        <section class="page generic-page" data-page="updates" hidden>
+          <div class="page-heading"><div class="eyebrow">THE LATEST PAGES</div><h1>Updates<span class="heading-period">.</span></h1><p>Chapter update feeds will connect to supported sources in a later chunk.</p></div>
+          <div class="placeholder-panel"><span class="placeholder-icon">↻</span><div><h2>Your update feed is quiet.</h2><p>The current build has no live source connections. When connectors arrive, enabled manga, manhwa, and manhua sources will populate this space.</p></div><button class="secondary-button" data-route="sources">Explore sources</button></div>
+        </section>
+
+        <section class="page generic-page" data-page="downloads" hidden>
+          <div class="page-heading"><div class="eyebrow">READ ANYWHERE</div><h1>Downloads<span class="heading-period">.</span></h1><p>Manage chapters saved for offline reading.</p></div>
+          <div class="placeholder-panel"><span class="placeholder-icon">↓</span><div><h2>No downloads yet.</h2><p>Download queue, chapter progress, pause/resume, and offline chapter verification are planned for Chunk 5.</p></div><button class="secondary-button" data-route="discover">Browse collection</button></div>
+        </section>
+
+        <section class="page generic-page" data-page="sources" hidden>
+          <div class="page-heading source-page-heading"><div><div class="eyebrow"><span class="eyebrow-mark"></span> INTERNAL DISCOVERY ENVIRONMENT</div><h1>Source browser<span class="heading-period">.</span></h1><p>A browser-like view dedicated exclusively to manga, manhwa, and manhua sources.</p></div><div class="source-count-block"><strong id="sourceCount">04</strong><span>SAMPLE SOURCES</span></div></div>
+          <div class="embedded-browser">
+            <div class="embedded-toolbar"><div class="embedded-nav"><button class="icon-button" id="embeddedBack" aria-label="Back">←</button><button class="icon-button" id="embeddedForward" aria-label="Forward">→</button><button class="icon-button" id="embeddedReload" aria-label="Reload">↻</button></div><div class="embedded-address"><span class="secure-mark">◇</span><span id="embeddedAddress">soryvyn://source-network/discover</span><span class="address-lock">INTERNAL</span></div><button class="icon-button" id="embeddedHome" aria-label="Source browser home"><svg viewBox="0 0 24 24"><path d="m3 11 9-7 9 7M5.5 9.5V20h13V9.5M9.5 20v-6h5v6"/></svg></button></div>
+            <div class="embedded-subnav"><button class="embedded-tab is-active" data-source-tab="discover">Discover</button><button class="embedded-tab" data-source-tab="trending">Trending</button><button class="embedded-tab" data-source-tab="new">Recently added</button><span class="embedded-category-note">MANGA · MANHWA · MANHUA ONLY</span></div>
+            <div class="embedded-body"><div class="embedded-body-top"><div><div class="eyebrow">SOURCE CATALOGUE <span class="demo-badge">DEMO DATA</span></div><h2 id="embeddedTitle">Choose a source. Find a story.</h2></div><div class="source-tools"><label class="search-box compact"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4 4"/></svg><input id="sourceSearch" type="search" placeholder="Filter sources…"></label><select id="sourceLanguage" aria-label="Filter sources by language"><option value="all">All languages</option><option value="en">English</option><option value="ja">Japanese</option><option value="ko">Korean</option><option value="zh">Chinese</option></select></div></div>
+              <div class="source-catalogue" id="sourceCatalogue"></div>
+              <div class="embedded-disclaimer"><span>ⓘ</span> This is an interface prototype. The listed source names and availability are illustrative placeholders, not live services. No third-party site is loaded.</div>
+            </div>
+            <div class="embedded-statusbar"><span><i class="connection-dot"></i> SANDBOX ACTIVE</span><span id="embeddedStatus">4 SAMPLE CONNECTORS</span><span>NO EXTERNAL NAVIGATION</span></div>
+          </div>
+        </section>
+
+        <section class="page generic-page" data-page="history" hidden>
+          <div class="page-heading"><div class="eyebrow">PICK UP WHERE YOU LEFT OFF</div><h1>Reading history<span class="heading-period">.</span></h1><p>Titles you opened in this session.</p></div>
+          <div class="title-grid" id="historyGrid"></div><div class="empty-state" id="historyEmpty"><div class="empty-symbol">◷</div><h2>Your story starts here.</h2><p>Open a title to add it to this local preview history.</p><button class="secondary-button" data-route="discover">Discover stories</button></div>
+        </section>
+
+        <section class="page generic-page" data-page="favorites" hidden>
+          <div class="page-heading"><div class="eyebrow">THE ONES YOU LOVE</div><h1>Favorites<span class="heading-period">.</span></h1><p>A short list of stories you want to keep close.</p></div>
+          <div class="title-grid" id="favoritesGrid"></div><div class="empty-state" id="favoritesEmpty"><div class="empty-symbol">♡</div><h2>Make room for a favorite.</h2><p>Tap the bookmark on any title card to save it here.</p><button class="secondary-button" data-route="discover">Explore titles</button></div>
+        </section>
+
+        <section class="page generic-page" data-page="bookmarks" hidden>
+          <div class="page-heading"><div class="eyebrow">SAVED PAGE POSITIONS</div><h1>Bookmarks<span class="heading-period">.</span></h1><p>Spread bookmarks are being finished. The 3D reader, local image imports, reading progress, and library backups are available in this preview.</p></div>
+          <div id="bookmarksList" class="bookmark-list"></div>
+          <div class="empty-state" id="bookmarksEmpty" hidden><div class="empty-symbol">▤</div><h2>Spread bookmarks are coming soon.</h2><p>This shelf is prepared for saved page positions but cannot save or open them in this build yet.</p><button class="secondary-button" data-route="discover">Explore titles</button></div>
+        </section>
+      </div>
+    </main>
+
+    <aside class="right-rail" id="rightRail">
+      <div class="rail-header"><span>READING DESK</span><button class="icon-button" id="railCollapse" aria-label="Collapse reading desk">↗</button></div>
+      <div class="profile-card">
+        <div class="profile-card-top"><span class="eyebrow">YOUR READING RHYTHM</span><span class="pulse-mark"></span></div>
+        <div class="reading-ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-track" cx="60" cy="60" r="49"/><circle class="ring-progress" cx="60" cy="60" r="49"/></svg><div><strong id="readingMinutes">00</strong><span>MINUTES</span></div></div>
+        <div class="reading-message"><strong>Every page counts.</strong><p>Your reading stats will take shape as you explore.</p></div>
+        <div class="reading-stats"><div><strong id="historyStat">00</strong><span>OPENED</span></div><div><strong id="savedStat">00</strong><span>SAVED</span></div><div><strong id="readStat">00</strong><span>READ</span></div></div>
+      </div>
+      <div class="rail-section">
+        <div class="rail-section-title"><span>CONTINUE READING</span><button class="quiet-action" data-route="history">VIEW ALL ↗</button></div>
+        <div id="continueReading" class="continue-list"><div class="rail-empty">Open a title and it will appear here.</div></div>
+      </div>
+      <div class="rail-section rail-sources">
+        <div class="rail-section-title"><span>YOUR SOURCES</span><button class="quiet-action" data-route="sources">MANAGE ↗</button></div>
+        <div id="railSourceList" class="rail-source-list"></div>
+      </div>
+      <div class="rail-bottom"><div class="privacy-indicator"><span class="privacy-shield">◇</span><span><strong>LOCAL BY DEFAULT</strong><small>Your preview activity stays in this browser.</small></span></div><div class="rail-version"><span>SORYVYN WEB</span><span>BUILD 0.1.0 · CHUNK 01</span></div></div>
+    </aside>
+  </div>
+
+  <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+  <dialog class="modal title-modal" id="titleModal" aria-labelledby="modalTitle">
+    <button class="modal-close" data-close-modal aria-label="Close title details">×</button>
+    <div id="titleModalContent"></div>
+  </dialog>
+  <dialog class="modal reader-modal" id="readerModal" aria-label="SORYVYN three-dimensional open-book reader">
+    <div class="reader-topbar">
+      <div class="reader-brand"><span class="reader-mini-mark">S</span><div class="reader-brand-copy"><strong id="readerTitle">Preview reader</strong><small id="readerSubtitle">CHAPTER 01 · OPEN BOOK</small></div></div>
+      <div class="reader-status"><span class="reader-book-chip"><i></i> OPEN BOOK · TWO-PAGE SPREAD</span><span id="readerPageLabel" aria-live="polite">SPREAD 01 / 04 · PAGES 01–02</span></div>
+      <button class="modal-close reader-close" data-close-modal aria-label="Close reader">×</button>
+    </div>
+    <div class="reader-bookroom" id="readerBookroom">
+      <div class="book-frame" id="bookFrame" tabindex="0" role="group" aria-label="Open book. Drag a page left or right, use the mouse wheel, or use the Previous and Next spread buttons to turn pages.">
+        <div class="book-cover" aria-hidden="true"></div>
+        <div class="book-stack book-stack-left" aria-hidden="true"></div>
+        <div class="book-stack book-stack-right" aria-hidden="true"></div>
+        <div class="book-object">
+          <div class="book-spread" id="bookSpread">
+            <article class="book-page left" id="leftBookPage" aria-label="Left page"></article>
+            <article class="book-page right" id="rightBookPage" aria-label="Right page"></article>
+            <div class="book-spine" aria-hidden="true"></div>
+            <button class="page-edge-zone previous" id="bookPrevZone" type="button" aria-label="Turn to previous spread"><span>‹</span></button>
+            <button class="page-edge-zone next" id="bookNextZone" type="button" aria-label="Turn to next spread"><span>›</span></button>
+          </div>
+        </div>
+        <div class="book-drag-indicator"><span class="drag-corner">↶</span><span>DRAG A PAGE TO TURN</span><i></i><span>SCROLL TO FLIP</span></div>
+      </div>
+    </div>
+    <div class="reader-controls">
+      <button class="secondary-button reader-nav-button" id="readerPrev" type="button"><span aria-hidden="true">←</span> Previous spread</button>
+      <div class="reader-progress"><span id="readerProgressLabel">TURN THE PAGE · KEEP THE STORY MOVING</span><div class="reader-progress-track"><span id="readerProgressFill"></span></div><div class="reader-progress-bottom"><small>DRAG · WHEEL · ARROW KEYS</small><button class="secondary-button reader-bookmark-button" id="readerBookmark" type="button" aria-pressed="false" aria-label="Spread bookmarks are not active yet" title="Spread bookmarks are coming in a later update" disabled>Bookmarks coming soon</button></div></div>
+      <button class="primary-button reader-nav-button" id="readerNext" type="button">Next spread <span aria-hidden="true">→</span></button>
+    </div>
+    <div class="reader-demo-note">SORYVYN OPEN-BOOK PREVIEW · ORIGINAL SAMPLE PANELS · PAGE TURNING IS INTERACTIVE</div>
+  </dialog>
+  <dialog class="modal filter-modal" id="filterModal" aria-labelledby="filterTitle">
+    <div class="modal-heading"><div><div class="eyebrow">REFINE YOUR DISCOVERY</div><h2 id="filterTitle">Find your kind of story.</h2></div><button class="modal-close" data-close-modal aria-label="Close filters">×</button></div>
+    <div class="filter-form"><label>Content category<select id="filterCategory"><option value="All">All allowed categories</option><option value="Manga">Manga</option><option value="Manhwa">Manhwa</option><option value="Manhua">Manhua</option></select></label><label>Genre<select id="filterGenre"><option value="all">All genres</option><option value="Fantasy">Fantasy</option><option value="Mystery">Mystery</option><option value="Action">Action</option><option value="Slice of Life">Slice of Life</option><option value="Sci-Fi">Sci-Fi</option><option value="Drama">Drama</option></select></label><label>Reading status<select id="filterStatus"><option value="all">Any status</option><option value="Ongoing">Ongoing</option><option value="Completed">Completed</option></select></label><div class="filter-actions"><button class="secondary-button" id="resetFilters">Reset</button><button class="primary-button" id="applyFilters">Apply filters</button></div></div>
+  </dialog>
+  <dialog class="modal roadmap-modal" id="roadmapModal" aria-labelledby="roadmapTitle">
+    <button class="modal-close" data-close-modal aria-label="Close build status">×</button><div class="eyebrow">PRODUCT ROADMAP</div><h2 id="roadmapTitle">Seven chunks. One reading space.</h2><p>Chunk 01 establishes the web PWA shell, app design system, responsive navigation, sample catalogue, browser-like source sandbox, local demo state, and offline app shell.</p><div class="roadmap-list"><div class="roadmap-item is-done"><span>01</span><div><strong>PWA shell & interaction system</strong><small>Responsive UI, demo catalogue, source sandbox, offline app shell.</small></div><b>COMPLETE</b></div><div class="roadmap-item"><span>02</span><div><strong>Source engine & source catalogue</strong><small>Typed adapters, category guardrails, source registry and health.</small></div><b>PLANNED</b></div><div class="roadmap-item"><span>03</span><div><strong>Unified search & title details</strong><small>Progressive results, metadata, chapters and source fallbacks.</small></div><b>PLANNED</b></div><div class="roadmap-item"><span>04</span><div><strong>Reader engine & local import</strong><small>Local image-folder import and real pages in the 3D book are implemented; archives and more reading modes remain.</small></div><b>PARTIAL</b></div><div class="roadmap-item"><span>05</span><div><strong>Offline downloads</strong><small>Persistent queue, retries, cancellation and chapter verification.</small></div><b>PLANNED</b></div><div class="roadmap-item"><span>06</span><div><strong>Library, history & backup</strong><small>Local JSON backup/restore is available; collections and advanced library tools remain planned.</small></div><b>PARTIAL</b></div><div class="roadmap-item"><span>07</span><div><strong>Hardening & release</strong><small>Testing, accessibility, performance, installability and deployment guide.</small></div><b>PLANNED</b></div></div>
+  </dialog>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
