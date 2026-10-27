@@ -8,22 +8,14 @@
   const STORAGE_KEY = "soryvyn.web.chunk01";
   const allowedCategories = new Set(["Manga", "Manhwa", "Manhua"]);
 
-  const titles = [
-    {id:"quiet-stars",title:"The Quiet Between Stars",category:"Manhwa",genre:"Fantasy",status:"Ongoing",rating:9.1,chapters:42,updated:8,language:"Korean",source:"Moon Archive",cover:"cover-a",coverNo:"001",kicker:"A MAP OF THE UNKNOWN",creator:"Yuna Seo",description:"A cartographer of forgotten worlds discovers a map that redraws itself every night. Every new line leads to a place no one remembers—and a memory she was never meant to recover.",tags:["Fantasy","Adventure","Mystery"],chaptersLabel:"42 chapters",featured:true},
-    {id:"glass-moon",title:"Glass Moon Protocol",category:"Manga",genre:"Sci-Fi",status:"Completed",rating:8.8,chapters:26,updated:7,language:"Japanese",source:"Northstar Index",cover:"cover-b",coverNo:"002",kicker:"THE LAST TRANSMISSION",creator:"A. Moriyama",description:"On a city where night has become a subscription, a quiet repair technician receives a signal from the moon—one that should have gone dark a century ago.",tags:["Sci-Fi","Mystery","Drama"],chaptersLabel:"26 chapters"},
-    {id:"lilies-sleep",title:"Where Lilies Sleep",category:"Manga",genre:"Mystery",status:"Ongoing",rating:8.6,chapters:18,updated:6,language:"Japanese",source:"Inkhouse Mirror",cover:"cover-c",coverNo:"003",kicker:"A FLOWER REMEMBERS",creator:"Natsumi Rei",description:"A new student arrives at an academy that has no graduation records. The only clue to its missing alumni is a lily pressed inside a library book.",tags:["Mystery","Drama","Supernatural"],chaptersLabel:"18 chapters"},
-    {id:"paper-kingdom",title:"The Paper Kingdom",category:"Manhua",genre:"Fantasy",status:"Ongoing",rating:9.0,chapters:64,updated:5,language:"Chinese",source:"Silk Panel",cover:"cover-d",coverNo:"004",kicker:"DRAWN INTO DESTINY",creator:"Lin Yue",description:"A young mapmaker can fold paper into any place she has visited. When a forgotten empire begins to vanish, she must sketch a way back into its history.",tags:["Fantasy","Adventure","Action"],chaptersLabel:"64 chapters"},
-    {id:"rainline",title:"After the Rainline",category:"Manhwa",genre:"Slice of Life",status:"Completed",rating:8.9,chapters:32,updated:4,language:"Korean",source:"Moon Archive",cover:"cover-e",coverNo:"005",kicker:"MEET ME AT PLATFORM NINE",creator:"Han Ji-woo",description:"Two strangers keep leaving notes in the same secondhand bookshop. As the seasons turn, their separate stories begin to overlap in unexpected ways.",tags:["Slice of Life","Romance","Drama"],chaptersLabel:"32 chapters"},
-    {id:"zero-meridian",title:"Zero Meridian",category:"Manga",genre:"Action",status:"Ongoing",rating:8.4,chapters:51,updated:3,language:"Japanese",source:"Northstar Index",cover:"cover-f",coverNo:"006",kicker:"NO NORTH. NO RETURN.",creator:"K. Arata",description:"When every compass begins pointing toward the same empty ocean, a rookie navigator joins an expedition to find the source of the world's new magnetic pull.",tags:["Action","Adventure","Sci-Fi"],chaptersLabel:"51 chapters"},
-    {id:"lanterns-deep",title:"Lanterns in the Deep",category:"Manhwa",genre:"Fantasy",status:"Ongoing",rating:9.3,chapters:29,updated:2,language:"Korean",source:"Inkhouse Mirror",cover:"cover-g",coverNo:"007",kicker:"LIGHT IS A LIVING THING",creator:"Mira Kwon",description:"In a coastal town where lanterns are lit for the lost, a young keeper learns that some lights are not guiding people home. They are keeping something asleep.",tags:["Fantasy","Mystery","Adventure"],chaptersLabel:"29 chapters"},
-    {id:"fourth-seal",title:"The Fourth Seal",category:"Manhua",genre:"Action",status:"Completed",rating:8.7,chapters:38,updated:1,language:"Chinese",source:"Silk Panel",cover:"cover-h",coverNo:"008",kicker:"EVERY DOOR HAS A PRICE",creator:"Wei Chen",description:"A locksmith who can open impossible doors is asked to break the final seal beneath an abandoned city. The key fits—but the lock remembers every hand that touched it.",tags:["Action","Fantasy","Thriller"],chaptersLabel:"38 chapters"}
-  ].filter(item => allowedCategories.has(item.category));
-
+  const titles = [];
   const sourceSeed = [
-    {id:"northstar",name:"Northstar Index",symbol:"N",language:"ja",languageLabel:"Japanese",categories:["Manga"],description:"A sample catalogue focused on Japanese manga metadata.",count:1824,health:"Demo connector"},
-    {id:"moon",name:"Moon Archive",symbol:"M",language:"ko",languageLabel:"Korean",categories:["Manhwa"],description:"An illustrative source profile for Korean manhwa discovery.",count:946,health:"Demo connector"},
-    {id:"silk",name:"Silk Panel",symbol:"S",language:"zh",languageLabel:"Chinese",categories:["Manhua"],description:"A mock source profile for Chinese manhua discovery.",count:613,health:"Demo connector"},
-    {id:"inkhouse",name:"Inkhouse Mirror",symbol:"I",language:"en",languageLabel:"English",categories:["Manga","Manhwa","Manhua"],description:"A fictional multi-category source used to test filtering and layout.",count:2078,health:"Demo connector"}
+    {id:"mangaplus",name:"MANGA Plus by SHUEISHA",symbol:"M+",language:"en",languageLabel:"MULTILINGUAL",categories:["Manga"],description:"The official Shueisha manga service. Chapter availability and languages depend on each title and region.",url:"https://mangaplus.shueisha.co.jp/",searchUrl:"https://mangaplus.shueisha.co.jp/titles"},
+    {id:"webtoon",name:"WEBTOON",symbol:"W",language:"en",languageLabel:"ENGLISH",categories:["Manhwa"],description:"Official webcomics platform with original series, ongoing releases, and completed stories.",url:"https://www.webtoons.com/en/",searchUrl:"https://www.webtoons.com/en/search?keyword="},
+    {id:"viz",name:"VIZ Manga",symbol:"V",language:"en",languageLabel:"ENGLISH",categories:["Manga"],description:"Official English manga publisher and digital reading catalogue. Availability varies by region and title.",url:"https://www.viz.com/",searchUrl:"https://www.viz.com/search?search="},
+    {id:"kodansha",name:"KODANSHA",symbol:"K",language:"en",languageLabel:"ENGLISH",categories:["Manga"],description:"Publisher-operated catalogue for licensed manga, volume information, and available digital previews.",url:"https://kodansha.us/",searchUrl:"https://kodansha.us/?s="},
+    {id:"tapas",name:"Tapas",symbol:"T",language:"en",languageLabel:"ENGLISH",categories:["Manhwa"],description:"Official digital comics and webnovel platform, including creator-published and licensed series.",url:"https://tapas.io/",searchUrl:"https://tapas.io/search?q="},
+    {id:"globalcomix",name:"GlobalComix",symbol:"G",language:"en",languageLabel:"MULTILINGUAL",categories:["Manga","Manhwa","Manhua"],description:"Digital comics platform with manga, manhwa, manhua, and independent comics from participating publishers and creators.",url:"https://globalcomix.com/",searchUrl:"https://globalcomix.com/search?terms="}
   ];
   const localImportedTitles = [];
   const importedPageUrls = new Map();
@@ -528,26 +520,23 @@
 
   function renderSources(){
     const term=sourceQuery.trim().toLocaleLowerCase();
-    let sources=sourceSeed.filter(source=>{
-      if(!source.categories.some(category=>allowedCategories.has(category))) return false;
+    const categoryByTab={discover:null,manga:"Manga",manhwa:"Manhwa",manhua:"Manhua"};
+    const sources=sourceSeed.filter(source=>{
+      if(categoryByTab[sourceTab]&&!source.categories.includes(categoryByTab[sourceTab]))return false;
       if(sourceLanguage!=="all"&&source.language!==sourceLanguage)return false;
       if(term&&![source.name,source.languageLabel,source.description,...source.categories].join(" ").toLocaleLowerCase().includes(term))return false;
       return true;
     });
-    if(sourceTab==="trending") sources=sources.slice().reverse();
-    if(sourceTab==="new") sources=sources.slice().sort((a,b)=>a.name.localeCompare(b.name));
     $("#sourceCatalogue").innerHTML=sources.length?sources.map(source=>{
-      const enabled=state.enabledSources.includes(source.id);
-      return `<article class="source-card" data-source-card="${source.id}">
-        <div class="source-card-icon">${source.symbol}</div>
-        <div class="source-card-main"><div class="source-card-title"><strong>${escapeHTML(source.name)}</strong><span class="source-type">${source.categories.join(" / ").toUpperCase()}</span></div><p>${escapeHTML(source.description)}</p><div class="source-card-meta"><span>${source.languageLabel.toUpperCase()}</span><span>•</span><span>ILLUSTRATIVE INDEX</span><span>•</span><span><i></i>${enabled?"ENABLED":"DISABLED"}</span></div></div>
-        <button class="source-toggle" role="switch" aria-checked="${enabled}" aria-label="${enabled?"Disable":"Enable"} ${escapeHTML(source.name)}" data-toggle-source="${source.id}"></button>
-      </article>`;
-    }).join(""):`<div class="empty-state"><div class="empty-symbol">⌕</div><h2>No compatible sample sources match.</h2><p>Change the search term or language filter.</p></div>`;
+      const query=sourceQuery.trim();
+      const searchHref=source.id==="mangaplus"&&!query?source.searchUrl:source.searchUrl+encodeURIComponent(query);
+      return '<article class="source-card" data-source-card="'+escapeHTML(source.id)+'"><div class="source-card-icon">'+escapeHTML(source.symbol)+'</div><div class="source-card-main"><div class="source-card-title"><strong>'+escapeHTML(source.name)+'</strong><span class="source-type">'+source.categories.join(" / ").toUpperCase()+'</span></div><p>'+escapeHTML(source.description)+'</p><div class="source-card-meta"><span>'+escapeHTML(source.languageLabel)+'</span><span>•</span><span>OFFICIAL PLATFORM</span></div><div class="source-card-actions"><a class="secondary-button" href="'+escapeHTML(source.url)+'" target="_blank" rel="noopener noreferrer">Open platform</a><a class="primary-button" href="'+escapeHTML(searchHref)+'" target="_blank" rel="noopener noreferrer">'+(query?"Search title":"Browse catalogue")+'</a></div></div></article>';
+    }).join(""):'<div class="empty-state"><div class="empty-symbol">⌕</div><h2>No official platforms match.</h2><p>Try another category or search term.</p></div>';
     $("#sourceCount").textContent=String(sourceSeed.length).padStart(2,"0");
-    $("#embeddedStatus").textContent=sources.length+" SAMPLE "+(sources.length===1?"CONNECTOR":"CONNECTORS");
-    $("#embeddedAddress").textContent="soryvyn://source-network/"+sourceTab;
-    $("#embeddedTitle").textContent=sourceTab==="trending"?"A pulse on the pages.":sourceTab==="new"?"Recently added to the network.":"Choose a source. Find a story.";
+    $("#embeddedStatus").textContent=sources.length+" OFFICIAL "+(sources.length===1?"PLATFORM":"PLATFORMS");
+    $("#embeddedAddress").textContent="soryvyn://official-sources/"+sourceTab;
+    const titles={discover:"Read with official publishers.",manga:"Official manga publishers.",manhwa:"Official manhwa platforms.",manhua:"Platforms carrying manga, manhwa and manhua."};
+    $("#embeddedTitle").textContent=titles[sourceTab]||titles.discover;
     $$(".embedded-tab").forEach(button=>button.classList.toggle("is-active",button.dataset.sourceTab===sourceTab));
   }
 
@@ -917,7 +906,7 @@
   }
 
   function navigateEmbedded(tab, record=true){
-    if(!["discover","trending","new"].includes(tab))return;
+    if(!["discover","manga","manhwa","manhua"].includes(tab))return;
     if(record){
       embeddedHistory=embeddedHistory.slice(0,embeddedHistoryIndex+1);
       embeddedHistory.push(tab);
@@ -1028,7 +1017,7 @@
     if(embeddedHistoryIndex<embeddedHistory.length-1){embeddedHistoryIndex++;navigateEmbedded(embeddedHistory[embeddedHistoryIndex],false);}
     else toast("No further source preview page.");
   });
-  $("#embeddedReload").addEventListener("click",()=>{renderSources();toast("Demo catalogue refreshed.");});
+  $("#embeddedReload").addEventListener("click",()=>{renderSources();toast("Official source directory refreshed.");});
   $("#embeddedHome").addEventListener("click",()=>navigateEmbedded("discover"));
   $("#profileButton").addEventListener("click",()=>toast("Local demo profile. Account sync is not part of Chunk 01."));
   $("#profileTop").addEventListener("click",()=>toast("SORYVYN preview · local browser storage only."));
