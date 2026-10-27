@@ -238,7 +238,7 @@ const hubSchemaOpen='<script type="application/ld+json">',hubSchemaStart=hub.ind
 must(hubSchemaStart>=0&&hubSchemaEnd>hubSchemaStart,'project directory schema script is bounded');
 const hubSchema=JSON.parse(hub.slice(hubSchemaStart+hubSchemaOpen.length,hubSchemaEnd));
 const hubItems=hubSchema.mainEntity&&hubSchema.mainEntity.itemListElement||[];
-must(hubSchema['@type']==='CollectionPage'&&hubItems.length===15,'project directory schema describes fifteen curated projects');
+must(hubSchema['@type']==='CollectionPage'&&hubItems.length===17,'project directory schema describes seventeen curated projects');
 must(hubItems.every(item=>knownSchemaIds.has(item.item&&item.item['@id'])),'project directory items reference defined project entities');
 const recorderPage=read('projects/trss-sample-recorder/index.html');
 must(recorderPage.includes('TrSS Sample')&&recorderPage.includes('120-second')&&recorderPage.includes('23 MiB'),'TrSS Sample Recorder page documents warm-up and bounded JSON chunks');
