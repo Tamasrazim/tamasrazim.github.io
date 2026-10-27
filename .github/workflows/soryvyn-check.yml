@@ -42,6 +42,9 @@ jobs:
           }
           assert.ok(html.includes('id="readerModal"'), '3D reader markup is missing');
           assert.ok(html.includes('id="importImagesFile"'), 'Local image import control is missing');
+          assert.ok(html.includes('id="importArchiveFile"'), 'CBZ/ZIP archive import control is missing');
+          assert.ok(app.includes('async function extractZipImageFiles(file)'), 'CBZ/ZIP archive parser is missing');
+          assert.ok(app.includes('async function inflateZipEntry(compressed,limit)'), 'Bounded ZIP decompression is missing');
           assert.ok(html.includes('id="readerBookmark"'), 'Spread bookmark control is missing');
           assert.ok(app.includes('function renderSources()'), 'Official source directory is missing');
           for (const host of ['mangaplus.shueisha.co.jp', 'webtoons.com', 'viz.com', 'kodansha.us', 'tapas.io', 'globalcomix.com']) {
