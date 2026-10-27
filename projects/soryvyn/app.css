@@ -918,3 +918,12 @@ dialog{color:var(--text)}
   .bookmark-row-main{flex-basis:calc(100% - 55px)}
   .bookmark-row-actions{flex:1 1 100%;padding-left:53px}
 }
+
+/* Official source actions and genuine empty states */
+.source-card-actions,.empty-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+.source-card-actions .secondary-button,.source-card-actions .primary-button,.empty-actions .secondary-button,.empty-actions .primary-button{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 12px;text-decoration:none;font-size:9px;letter-spacing:.02em}
+.collection-empty{margin:20px 0 28px;padding:34px 20px}
+.collection-empty .empty-actions{justify-content:center;margin-top:18px}
+.source-card-main{overflow-wrap:anywhere}
+.source-card-actions a:focus-visible,.empty-actions button:focus-visible{outline:2px solid #e8e9e4;outline-offset:3px}
+@media(max-width:560px){.source-card-actions{gap:6px}.source-card-actions .secondary-button,.source-card-actions .primary-button{flex:1}.collection-empty{padding:26px 14px}}
