@@ -284,7 +284,7 @@
     try{
       const parsed = JSON.parse(await file.text());
       const restored = normalizeBackupState(parsed);
-      if(!window.confirm("Restore this SORYVYN backup and replace the current local preview state?")){
+      if(!window.confirm("Restore this SORYVYN backup and replace the current local library state?")){
         toast("Backup restore cancelled.");
         return;
       }
@@ -590,7 +590,7 @@
   function openTitleModalRefresh(id){
     const item=titleById(id);if(!item)return;
     const currentScroll=$("#titleModal").scrollTop;
-    $("#titleModalContent").innerHTML=`<div class="modal-title-layout">${renderCover(item,"modal-title-cover")}<div class="modal-title-copy"><div class="eyebrow">${item.category.toUpperCase()} <span>·</span> ${item.language.toUpperCase()}</div><h2 id="modalTitle">${escapeHTML(item.title)}</h2><p>${escapeHTML(item.description)}</p><div class="modal-tags">${item.tags.map(tag=>`<span>${escapeHTML(tag)}</span>`).join("")}</div><div class="modal-actions"><button class="primary-button" data-reader-open="${item.id}">Read preview <span>→</span></button><button class="secondary-button" data-save-title="${item.id}">${isSaved(id)?"Saved ✓":"Save to library"}</button><button class="secondary-button" data-favorite-title="${item.id}">${isFavorite(id)?"Favorited ✓":"♡ Favorite"}</button></div></div></div><div class="modal-bottom-meta"><span>${escapeHTML(item.creator)}</span><span>${item.chaptersLabel.toUpperCase()}</span><span>★ ${item.rating.toFixed(1)}</span></div>`;
+    $("#titleModalContent").innerHTML=`<div class="modal-title-layout">${renderCover(item,"modal-title-cover")}<div class="modal-title-copy"><div class="eyebrow">${item.category.toUpperCase()} <span>·</span> ${item.language.toUpperCase()}</div><h2 id="modalTitle">${escapeHTML(item.title)}</h2><p>${escapeHTML(item.description)}</p><div class="modal-tags">${item.tags.map(tag=>`<span>${escapeHTML(tag)}</span>`).join("")}</div><div class="modal-actions"><button class="primary-button" data-reader-open="${item.id}">Read in book <span>→</span></button><button class="secondary-button" data-save-title="${item.id}">${isSaved(id)?"Saved ✓":"Save to library"}</button><button class="secondary-button" data-favorite-title="${item.id}">${isFavorite(id)?"Favorited ✓":"♡ Favorite"}</button></div></div></div><div class="modal-bottom-meta"><span>${escapeHTML(item.creator)}</span><span>${item.chaptersLabel.toUpperCase()}</span><span>★ ${item.rating.toFixed(1)}</span></div>`;
     $("#titleModal").scrollTop=currentScroll;
   }
 
@@ -979,6 +979,7 @@
   $("#librarySearch").addEventListener("input",event=>{libraryQuery=event.target.value;renderLibrary();});
   $("#exportBackupButton").addEventListener("click",exportBackup);
   $("#importImagesButton").addEventListener("click",()=>$("#importImagesFile").click());
+  $("#downloadsImportButton").addEventListener("click",()=>$("#importImagesFile").click());
   $("#heroImportButton").addEventListener("click",()=>$("#importImagesFile").click());
   $("#discoverImportButton").addEventListener("click",()=>$("#importImagesFile").click());
   $("#importImagesFile").addEventListener("change",event=>{
