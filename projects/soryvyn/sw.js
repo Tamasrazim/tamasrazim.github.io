@@ -1,5 +1,5 @@
 /* SORYVYN PWA service worker — Chunk 01 */
-const CACHE_VERSION = "soryvyn-shell-v5";
+const CACHE_VERSION = "soryvyn-shell-v6";
 const APP_SHELL = [
   "./",
   "./index.html",
