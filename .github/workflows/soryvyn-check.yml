@@ -52,7 +52,7 @@ jobs:
           }
           assert.equal(manifest.start_url, './');
           assert.equal(manifest.scope, './');
-          assert.match(sw, /CACHE_VERSION\s*=\s*"soryvyn-shell-v9"/);
+          assert.match(sw, /CACHE_VERSION\s*=\s*"soryvyn-shell-v10"/);
           assert.ok(!app.includes('The Quiet Between Stars'), 'Fictional seed title must not return');
           assert.ok(!app.includes('Northstar Index'), 'Fictional source connector must not return');
           console.log('SORYVYN PWA structure and official-source allowlist validated.');
