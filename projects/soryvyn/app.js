@@ -1057,6 +1057,11 @@
   $("#librarySearch").addEventListener("input",event=>{libraryQuery=event.target.value;renderLibrary();});
   $("#exportBackupButton").addEventListener("click",exportBackup);
   $("#importImagesButton").addEventListener("click",()=>$("#importImagesFile").click());
+  $("#importArchiveButton").addEventListener("click",()=>$("#importArchiveFile").click());
+  $("#heroArchiveButton").addEventListener("click",()=>$("#importArchiveFile").click());
+  $("#discoverArchiveButton").addEventListener("click",()=>$("#importArchiveFile").click());
+  $("#downloadsArchiveButton").addEventListener("click",()=>$("#importArchiveFile").click());
+  $("#importArchiveFile").addEventListener("change",event=>{const file=event.target.files&&event.target.files[0];event.target.value="";void importImageArchive(file);});
   $("#downloadsImportButton").addEventListener("click",()=>$("#importImagesFile").click());
   $("#heroImportButton").addEventListener("click",()=>$("#importImagesFile").click());
   $("#discoverImportButton").addEventListener("click",()=>$("#importImagesFile").click());
