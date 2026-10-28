@@ -11953,6 +11953,345 @@ function reindent() {
   $('#stMsg').textContent = 'reindented ' + out.length + ' lines — nothing else was touched';
 }
 
+
+/* ---------------- inspect-frame image format encoders ---------------- */
+function trilyvaInspectCanvasBlob(canvas, mime, quality) {
+  return new Promise(function (resolve, reject) {
+    try {
+      canvas.toBlob(function (blob) {
+        if (!blob) { reject(new Error('The browser could not encode this image format.')); return; }
+        if (String(blob.type || '').toLowerCase() !== mime.toLowerCase()) {
+          reject(new Error(mime.toUpperCase() + ' encoding is not supported by this browser. Try PNG, BMP, TIFF, or another format.'));
+          return;
+        }
+        resolve(blob);
+      }, mime, quality);
+    } catch (error) { reject(error); }
+  });
+}
+function trilyvaInspectReadPixels(canvas) {
+  return canvas.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, canvas.width, canvas.height);
+}
+function trilyvaInspectOpaqueRGB(pixels, index) {
+  var a = pixels.data[index + 3] / 255;
+  return [
+    Math.round(pixels.data[index] * a + 255 * (1 - a)),
+    Math.round(pixels.data[index + 1] * a + 255 * (1 - a)),
+    Math.round(pixels.data[index + 2] * a + 255 * (1 - a))
+  ];
+}
+function trilyvaInspectU16(value) { return [value & 255, (value >>> 8) & 255]; }
+function trilyvaInspectU32BE(value) {
+  return [(value >>> 24) & 255, (value >>> 16) & 255, (value >>> 8) & 255, value & 255];
+}
+function trilyvaInspectBase64(bytes) {
+  var chunks = [];
+  for (var i = 0; i < bytes.length; i += 0x8000) chunks.push(String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + 0x8000, bytes.length))));
+  return btoa(chunks.join(''));
+}
+function trilyvaInspectBMP(canvas) {
+  var w = canvas.width, h = canvas.height, pixels = trilyvaInspectReadPixels(canvas);
+  var rowBytes = Math.ceil((w * 3) / 4) * 4, imageBytes = rowBytes * h;
+  if (imageBytes + 54 > 0xffffffff) throw new Error('BMP is limited to a 32-bit file size. Try PNG or TIFF.');
+  var out = new Uint8Array(54 + imageBytes), view = new DataView(out.buffer);
+  out[0] = 66; out[1] = 77; view.setUint32(2, out.length, true); view.setUint32(10, 54, true);
+  view.setUint32(14, 40, true); view.setInt32(18, w, true); view.setInt32(22, h, true);
+  view.setUint16(26, 1, true); view.setUint16(28, 24, true); view.setUint32(34, imageBytes, true);
+  view.setInt32(38, 2835, true); view.setInt32(42, 2835, true);
+  for (var y = 0; y < h; y++) {
+    var dest = 54 + (h - 1 - y) * rowBytes;
+    for (var x = 0; x < w; x++) {
+      var s = (y * w + x) * 4, rgb = trilyvaInspectOpaqueRGB(pixels, s);
+      out[dest++] = rgb[2]; out[dest++] = rgb[1]; out[dest++] = rgb[0];
+    }
+  }
+  return new Blob([out], { type: 'image/bmp' });
+}
+function trilyvaInspectTIFF(canvas) {
+  var w = canvas.width, h = canvas.height, pixels = trilyvaInspectReadPixels(canvas);
+  var rgb = new Uint8Array(w * h * 3), p = 0;
+  for (var i = 0; i < pixels.data.length; i += 4) {
+    var a = pixels.data[i + 3] / 255;
+    rgb[p++] = Math.round(pixels.data[i] * a + 255 * (1 - a));
+    rgb[p++] = Math.round(pixels.data[i + 1] * a + 255 * (1 - a));
+    rgb[p++] = Math.round(pixels.data[i + 2] * a + 255 * (1 - a));
+  }
+  var nTags = 10, ifdStart = 8, bitsOffset = 8 + 2 + nTags * 12 + 4, pixelOffset = bitsOffset + 6;
+  var out = new Uint8Array(pixelOffset + rgb.length), view = new DataView(out.buffer);
+  out[0] = 73; out[1] = 73; view.setUint16(2, 42, true); view.setUint32(4, ifdStart, true);
+  view.setUint16(ifdStart, nTags, true);
+  var pos = ifdStart + 2;
+  function tag(id, type, entries, value, inlineShort) {
+    view.setUint16(pos, id, true); view.setUint16(pos + 2, type, true); view.setUint32(pos + 4, entries, true);
+    if (inlineShort) view.setUint16(pos + 8, value, true); else view.setUint32(pos + 8, value, true);
+    pos += 12;
+  }
+  tag(256, 4, 1, w, false); tag(257, 4, 1, h, false); tag(258, 3, 3, bitsOffset, false);
+  tag(259, 3, 1, 1, true); tag(262, 3, 1, 2, true); tag(273, 4, 1, pixelOffset, false);
+  tag(277, 3, 1, 3, true); tag(278, 4, 1, h, false); tag(279, 4, 1, rgb.length, false);
+  tag(284, 3, 1, 1, true); view.setUint32(pos, 0, true);
+  view.setUint16(bitsOffset, 8, true); view.setUint16(bitsOffset + 2, 8, true); view.setUint16(bitsOffset + 4, 8, true);
+  out.set(rgb, pixelOffset);
+  return new Blob([out], { type: 'image/tiff' });
+}
+function trilyvaInspectTGA(canvas) {
+  var w = canvas.width, h = canvas.height;
+  if (w > 65535 || h > 65535) throw new Error('TGA dimensions cannot exceed 65535 × 65535 pixels.');
+  var pixels = trilyvaInspectReadPixels(canvas), out = new Uint8Array(18 + w * h * 3), view = new DataView(out.buffer);
+  out[2] = 2; view.setUint16(12, w, true); view.setUint16(14, h, true); out[16] = 24; out[17] = 0x20;
+  var p = 18;
+  for (var i = 0; i < pixels.data.length; i += 4) {
+    var a = pixels.data[i + 3] / 255;
+    out[p++] = Math.round(pixels.data[i + 2] * a + 255 * (1 - a));
+    out[p++] = Math.round(pixels.data[i + 1] * a + 255 * (1 - a));
+    out[p++] = Math.round(pixels.data[i] * a + 255 * (1 - a));
+  }
+  return new Blob([out], { type: 'image/x-tga' });
+}
+function trilyvaInspectGIF(canvas) {
+  var w = canvas.width, h = canvas.height;
+  if (w > 65535 || h > 65535) throw new Error('GIF dimensions cannot exceed 65535 × 65535 pixels.');
+  var pixels = trilyvaInspectReadPixels(canvas), n = w * h, palette = new Uint8Array(768);
+  for (var c = 0; c < 256; c++) {
+    palette[c * 3] = Math.round(((c >> 5) & 7) * 255 / 7);
+    palette[c * 3 + 1] = Math.round(((c >> 2) & 7) * 255 / 7);
+    palette[c * 3 + 2] = (c & 3) * 85;
+  }
+  var packed = new Uint8Array(Math.ceil((n + Math.ceil(n / 100) + 2) * 9 / 8) + 16);
+  var written = 0, bitBuffer = 0, bitCount = 0;
+  function emit(code) {
+    bitBuffer |= code << bitCount; bitCount += 9;
+    while (bitCount >= 8) { packed[written++] = bitBuffer & 255; bitBuffer >>>= 8; bitCount -= 8; }
+  }
+  emit(256);
+  for (var i = 0; i < n; i++) {
+    if (i && i % 100 === 0) emit(256);
+    var q = i * 4, alpha = pixels.data[q + 3] / 255;
+    var r = Math.round(pixels.data[q] * alpha + 255 * (1 - alpha));
+    var g = Math.round(pixels.data[q + 1] * alpha + 255 * (1 - alpha));
+    var b = Math.round(pixels.data[q + 2] * alpha + 255 * (1 - alpha));
+    emit(((r >> 5) << 5) | ((g >> 5) << 2) | (b >> 6));
+  }
+  emit(257);
+  if (bitCount) packed[written++] = bitBuffer & 255;
+  var parts = [
+    new Uint8Array([71,73,70,56,57,97].concat(trilyvaInspectU16(w), trilyvaInspectU16(h), [0xF7,0,0])),
+    palette,
+    new Uint8Array([0x2C,0,0,0,0].concat(trilyvaInspectU16(w), trilyvaInspectU16(h), [0,8]))
+  ];
+  for (var off = 0; off < written; off += 255) {
+    var size = Math.min(255, written - off);
+    parts.push(new Uint8Array([size]), packed.subarray(off, off + size));
+  }
+  parts.push(new Uint8Array([0, 0x3B]));
+  return new Blob(parts, { type: 'image/gif' });
+}
+function trilyvaInspectQOI(canvas) {
+  var w = canvas.width, h = canvas.height, pixels = trilyvaInspectReadPixels(canvas), n = w * h;
+  if (n > Math.floor((0xffffffff - 22) / 5)) throw new Error('QOI output would exceed its 32-bit file limit.');
+  var out = new Uint8Array(14 + n * 5 + 8), p = 0;
+  out.set([113,111,105,102], p); p += 4; out.set(trilyvaInspectU32BE(w), p); p += 4;
+  out.set(trilyvaInspectU32BE(h), p); p += 4; out[p++] = 4; out[p++] = 0;
+  var index = new Array(64);
+  for (var ix = 0; ix < 64; ix++) index[ix] = [0,0,0,0];
+  var pr = 0, pg = 0, pb = 0, pa = 255, run = 0;
+  function emit(v) { out[p++] = v & 255; }
+  for (var i = 0; i < n; i++) {
+    var s = i * 4, r = pixels.data[s], g = pixels.data[s + 1], b = pixels.data[s + 2], a = pixels.data[s + 3];
+    if (r === pr && g === pg && b === pb && a === pa) {
+      run++;
+      if (run === 62 || i === n - 1) { emit(0xC0 | (run - 1)); run = 0; }
+      continue;
+    }
+    if (run) { emit(0xC0 | (run - 1)); run = 0; }
+    var hash = (r * 3 + g * 5 + b * 7 + a * 11) % 64, old = index[hash];
+    if (old[0] === r && old[1] === g && old[2] === b && old[3] === a) emit(hash);
+    else {
+      index[hash] = [r,g,b,a];
+      if (a === pa) {
+        var dr = r - pr, dg = g - pg, db = b - pb;
+        if (dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1) emit(0x40 | ((dr + 2) << 4) | ((dg + 2) << 2) | (db + 2));
+        else {
+          var drdg = dr - dg, dbdg = db - dg;
+          if (dg >= -32 && dg <= 31 && drdg >= -8 && drdg <= 7 && dbdg >= -8 && dbdg <= 7) {
+            emit(0x80 | (dg + 32)); emit(((drdg + 8) << 4) | (dbdg + 8));
+          } else { emit(0xFE); emit(r); emit(g); emit(b); }
+        }
+      } else { emit(0xFF); emit(r); emit(g); emit(b); emit(a); }
+    }
+    pr = r; pg = g; pb = b; pa = a;
+  }
+  out.set([0,0,0,0,0,0,0,1], p); p += 8;
+  return new Blob([out.subarray(0, p)], { type: 'image/qoi' });
+}
+function trilyvaInspectPortableMap(canvas, format) {
+  var w = canvas.width, h = canvas.height, pixels = trilyvaInspectReadPixels(canvas);
+  if (format === 'pam') {
+    return new Blob(['P7\nWIDTH ' + w + '\nHEIGHT ' + h + '\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGB_ALPHA\nENDHDR\n', pixels.data], { type: 'image/x-portable-arbitrarymap' });
+  }
+  if (format === 'ppm') {
+    var rgb = new Uint8Array(w * h * 3), p = 0;
+    for (var i = 0; i < pixels.data.length; i += 4) {
+      var a = pixels.data[i + 3] / 255;
+      rgb[p++] = Math.round(pixels.data[i] * a + 255 * (1 - a));
+      rgb[p++] = Math.round(pixels.data[i + 1] * a + 255 * (1 - a));
+      rgb[p++] = Math.round(pixels.data[i + 2] * a + 255 * (1 - a));
+    }
+    return new Blob(['P6\n' + w + ' ' + h + '\n255\n', rgb], { type: 'image/x-portable-pixmap' });
+  }
+  if (format === 'pgm') {
+    var gray = new Uint8Array(w * h), gp = 0;
+    for (var g = 0; g < pixels.data.length; g += 4) {
+      var ga = pixels.data[g + 3] / 255;
+      var rr = pixels.data[g] * ga + 255 * (1 - ga), gg = pixels.data[g + 1] * ga + 255 * (1 - ga), bb = pixels.data[g + 2] * ga + 255 * (1 - ga);
+      gray[gp++] = Math.round(0.2126 * rr + 0.7152 * gg + 0.0722 * bb);
+    }
+    return new Blob(['P5\n' + w + ' ' + h + '\n255\n', gray], { type: 'image/x-portable-graymap' });
+  }
+  var rowBytes = Math.ceil(w / 8), bits = new Uint8Array(rowBytes * h);
+  for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+    var q = (y * w + x) * 4, al = pixels.data[q + 3] / 255;
+    var lum = 0.2126 * (pixels.data[q] * al + 255 * (1 - al)) + 0.7152 * (pixels.data[q + 1] * al + 255 * (1 - al)) + 0.0722 * (pixels.data[q + 2] * al + 255 * (1 - al));
+    if (lum < 128) bits[y * rowBytes + (x >> 3)] |= 1 << (7 - (x & 7));
+  }
+  return new Blob(['P4\n' + w + ' ' + h + '\n', bits], { type: 'image/x-portable-bitmap' });
+}
+function trilyvaInspectXBM(canvas) {
+  var w = canvas.width, h = canvas.height, pixels = trilyvaInspectReadPixels(canvas);
+  var rowBytes = Math.ceil(w / 8), bytes = new Uint8Array(rowBytes * h);
+  for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+    var q = (y * w + x) * 4, a = pixels.data[q + 3] / 255;
+    var lum = 0.2126 * (pixels.data[q] * a + 255 * (1 - a)) + 0.7152 * (pixels.data[q + 1] * a + 255 * (1 - a)) + 0.0722 * (pixels.data[q + 2] * a + 255 * (1 - a));
+    if (lum < 128) bytes[y * rowBytes + (x >> 3)] |= 1 << (x & 7);
+  }
+  var out = '#define trilyva_frame_width ' + w + '\n#define trilyva_frame_height ' + h + '\nstatic unsigned char trilyva_frame_bits[] = {\n';
+  for (var i = 0; i < bytes.length; i++) {
+    if (i % 12 === 0) out += '  ';
+    out += '0x' + bytes[i].toString(16).padStart(2, '0') + (i === bytes.length - 1 ? '' : ', ');
+    if (i % 12 === 11 || i === bytes.length - 1) out += '\n';
+  }
+  return new Blob([out + '};\n'], { type: 'image/x-xbitmap' });
+}
+function trilyvaInspectXPM(canvas) {
+  var w = canvas.width, h = canvas.height, pixels = trilyvaInspectReadPixels(canvas);
+  var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+-./:;<=>@[]^_{|}~';
+  var base = alphabet.length, palette = [], i, x, y;
+  for (i = 0; i < 256; i++) {
+    var r = Math.round(((i >> 5) & 7) * 255 / 7), g = Math.round(((i >> 2) & 7) * 255 / 7), b = (i & 3) * 85;
+    palette.push({ key: alphabet[Math.floor(i / base)] + alphabet[i % base], hex: '#' + [r,g,b].map(function (v) { return v.toString(16).padStart(2,'0'); }).join('') });
+  }
+  var lines = ['! XPM2', w + ' ' + h + ' 256 2'];
+  for (i = 0; i < palette.length; i++) lines.push(palette[i].key + ' c ' + palette[i].hex);
+  for (y = 0; y < h; y++) {
+    var line = '';
+    for (x = 0; x < w; x++) {
+      var q = (y * w + x) * 4, a = pixels.data[q + 3] / 255;
+      var r = Math.round(pixels.data[q] * a + 255 * (1 - a)), g = Math.round(pixels.data[q + 1] * a + 255 * (1 - a)), b = Math.round(pixels.data[q + 2] * a + 255 * (1 - a));
+      line += palette[((r >> 5) << 5) | ((g >> 5) << 2) | (b >> 6)].key;
+    }
+    lines.push(line);
+  }
+  return new Blob([lines.join('\n') + '\n'], { type: 'image/x-xpixmap' });
+}
+function trilyvaInspectEPS(canvas) {
+  var w = canvas.width, h = canvas.height, pixels = trilyvaInspectReadPixels(canvas), hex = '0123456789ABCDEF';
+  var parts = ['%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 ' + w + ' ' + h + '\n%%LanguageLevel: 2\n%%EndComments\n' + w + ' ' + h + ' 8\n[' + w + ' 0 0 -' + h + ' 0 ' + h + ']\n{currentfile ' + (w * 3) + ' string readhexstring pop}\nfalse 3 colorimage\n'];
+  var group = [], line = '';
+  function flushGroup() { if (group.length) { parts.push(group.join('')); group = []; } }
+  for (var y = 0; y < h; y++) {
+    for (var x = 0; x < w; x++) {
+      var q = (y * w + x) * 4, a = pixels.data[q + 3] / 255;
+      var r = Math.round(pixels.data[q] * a + 255 * (1 - a)), g = Math.round(pixels.data[q + 1] * a + 255 * (1 - a)), b = Math.round(pixels.data[q + 2] * a + 255 * (1 - a));
+      line += hex[r >> 4] + hex[r & 15] + hex[g >> 4] + hex[g & 15] + hex[b >> 4] + hex[b & 15];
+      if (line.length >= 120) { group.push(line + '\n'); line = ''; }
+      if (group.length >= 1500) flushGroup();
+    }
+    if (line) { group.push(line + '\n'); line = ''; }
+    if (group.length >= 1500) flushGroup();
+  }
+  flushGroup(); parts.push('\n%%EOF\n');
+  return new Blob(parts, { type: 'application/postscript' });
+}
+async function trilyvaInspectICO(canvas) {
+  var w = canvas.width, h = canvas.height, size = Math.min(1, 256 / Math.max(w, h)), pngCanvas = canvas;
+  if (size < 1) {
+    pngCanvas = document.createElement('canvas'); pngCanvas.width = Math.max(1, Math.round(w * size)); pngCanvas.height = Math.max(1, Math.round(h * size));
+    var pc = pngCanvas.getContext('2d'); pc.imageSmoothingEnabled = true; pc.imageSmoothingQuality = 'high';
+    pc.drawImage(canvas, 0, 0, pngCanvas.width, pngCanvas.height);
+  }
+  var png = await trilyvaInspectCanvasBlob(pngCanvas, 'image/png'), bytes = new Uint8Array(await png.arrayBuffer());
+  var header = new Uint8Array(22), view = new DataView(header.buffer);
+  view.setUint16(0, 0, true); view.setUint16(2, 1, true);
+  header[6] = pngCanvas.width >= 256 ? 0 : pngCanvas.width; header[7] = pngCanvas.height >= 256 ? 0 : pngCanvas.height;
+  view.setUint16(10, 1, true); view.setUint16(12, 32, true); view.setUint32(14, bytes.length, true); view.setUint32(18, 22, true);
+  return new Blob([header, bytes], { type: 'image/x-icon' });
+}
+async function trilyvaInspectSVG(canvas) {
+  var png = await trilyvaInspectCanvasBlob(canvas, 'image/png'), bytes = new Uint8Array(await png.arrayBuffer());
+  var data = trilyvaInspectBase64(bytes), w = canvas.width, h = canvas.height;
+  return new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '"><image width="' + w + '" height="' + h + '" href="data:image/png;base64,' + data + '"/></svg>'], { type: 'image/svg+xml;charset=utf-8' });
+}
+async function trilyvaInspectEncode(canvas, format) {
+  if (format === 'png') return trilyvaInspectCanvasBlob(canvas, 'image/png');
+  if (format === 'webp') return trilyvaInspectCanvasBlob(canvas, 'image/webp', 0.94);
+  if (format === 'avif') return trilyvaInspectCanvasBlob(canvas, 'image/avif', 0.9);
+  if (format === 'jpg') {
+    var jpegCanvas = document.createElement('canvas'); jpegCanvas.width = canvas.width; jpegCanvas.height = canvas.height;
+    var jctx = jpegCanvas.getContext('2d'); jctx.fillStyle = '#fff'; jctx.fillRect(0, 0, jpegCanvas.width, jpegCanvas.height); jctx.drawImage(canvas, 0, 0);
+    return trilyvaInspectCanvasBlob(jpegCanvas, 'image/jpeg', 0.94);
+  }
+  if (format === 'bmp') return trilyvaInspectBMP(canvas);
+  if (format === 'tiff') return trilyvaInspectTIFF(canvas);
+  if (format === 'tga') return trilyvaInspectTGA(canvas);
+  if (format === 'gif') return trilyvaInspectGIF(canvas);
+  if (format === 'qoi') return trilyvaInspectQOI(canvas);
+  if (format === 'ppm' || format === 'pgm' || format === 'pbm' || format === 'pam') return trilyvaInspectPortableMap(canvas, format);
+  if (format === 'xbm') return trilyvaInspectXBM(canvas);
+  if (format === 'xpm') return trilyvaInspectXPM(canvas);
+  if (format === 'svg') return trilyvaInspectSVG(canvas);
+  if (format === 'eps') return trilyvaInspectEPS(canvas);
+  if (format === 'ico') return trilyvaInspectICO(canvas);
+  throw new Error('The selected image format is not available.');
+}
+function trilyvaInspectFormatPicker(canvas, frame) {
+  var body = el('div'), label = el('label');
+  label.textContent = 'IMAGE FORMAT';
+  label.style.cssText = 'display:grid;gap:8px;color:var(--ink-2);font:10px var(--mono);letter-spacing:.09em';
+  var select = document.createElement('select');
+  select.style.cssText = 'width:100%;min-width:220px;padding:10px;background:var(--panel);color:var(--ink);border:1px solid var(--rule-hi);border-radius:4px;font:12px var(--mono)';
+  var groups = [
+    { title: 'WEB / STANDARD', options: [['png','PNG — lossless, transparency'],['jpg','JPEG / JPG — compressed, white background for transparency'],['webp','WebP — browser encoder required'],['avif','AVIF — browser encoder required']]},
+    { title: 'RASTER / LEGACY', options: [['bmp','BMP — 24-bit bitmap'],['tiff','TIFF — uncompressed RGB'],['gif','GIF — one still frame, 256 colours'],['ico','ICO — icon (maximum 256 px per side)'],['tga','TGA — 24-bit true-colour'],['qoi','QOI — lossless RGBA']]},
+    { title: 'VECTOR CONTAINERS', options: [['svg','SVG — embedded PNG image'],['eps','EPS — raster PostScript image']]},
+    { title: 'PORTABLE / SCIENTIFIC', options: [['ppm','PPM — portable pixmap'],['pgm','PGM — portable graymap'],['pbm','PBM — monochrome portable bitmap'],['pam','PAM — RGBA portable arbitrary map']]},
+    { title: 'OLD-SCHOOL PIXMAPS', options: [['xbm','XBM — monochrome X bitmap'],['xpm','XPM — indexed-colour pixmap']]}
+  ];
+  groups.forEach(function (group) {
+    var optgroup = document.createElement('optgroup'); optgroup.label = group.title;
+    group.options.forEach(function (item) {
+      var option = document.createElement('option'); option.value = item[0]; option.textContent = item[1]; optgroup.appendChild(option);
+    });
+    select.appendChild(optgroup);
+  });
+  label.appendChild(select); body.appendChild(label);
+  body.appendChild(el('p', 'note', 'Choose a format, then download this exact inspected frame. WebP and AVIF depend on the browser encoder. BMP, TIFF, GIF, TGA, QOI, portable maps and XBM/XPM are encoded locally. SVG embeds the frame as a PNG; EPS is raster-based, not editable vector paths. Some legacy formats quantise colours or flatten transparency.'));
+  openModal('SAVE FRAME AS', body, [
+    { label: 'Download frame', solid: true, fn: function () {
+      var format = select.value; closeModal(); $('#stMsg').textContent = 'encoding inspected frame as ' + format.toUpperCase() + '…';
+      trilyvaInspectEncode(canvas, format).then(function (blob) {
+        var extensions = { png:'png', jpg:'jpg', webp:'webp', avif:'avif', bmp:'bmp', tiff:'tiff', gif:'gif', ico:'ico', tga:'tga', qoi:'qoi', svg:'svg', eps:'eps', ppm:'ppm', pgm:'pgm', pbm:'pbm', pam:'pam', xbm:'xbm', xpm:'xpm' };
+        download(blob, slugify(S.name) + '_' + ('000000' + frame).slice(-6) + '.' + extensions[format]);
+        $('#stMsg').textContent = 'frame ' + frame + ' saved as ' + format.toUpperCase() + ' · ' + canvas.width + '×' + canvas.height;
+      }).catch(function (error) {
+        var message = String(error && error.message || error); $('#stMsg').textContent = 'frame export failed: ' + message;
+        var errorBody = el('div'); errorBody.appendChild(el('p', 'note', message));
+        openModal('IMAGE EXPORT FAILED', errorBody, [{ label: 'Close', solid: true, fn: closeModal }]);
+      });
+    }},
+    { label: 'Cancel', fn: closeModal }
+  ]);
+}
+
 function inspectFrame() {
   withCompiled().then(function (ok) {
     if (!ok) return;
@@ -11986,8 +12325,8 @@ function inspectFrame() {
       body.appendChild(elHTML(h));
       openModal('FRAME ' + f, body, [
         {
-          label: 'Save this frame as PNG', solid: true, fn: function () {
-            cv.toBlob(function (b) { download(b, slugify(S.name) + '_' + ('000000' + f).slice(-6) + '.png'); }, 'image/png');
+          label: 'Save this frame as', solid: true, fn: function () {
+            trilyvaInspectFormatPicker(cv, f);
           }
         },
         { label: 'Close', fn: closeModal }
