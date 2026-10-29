@@ -1,88 +1,73 @@
-# TRILYVA — Tamasrazim
+# TRILYVA — Browser Animation Workspace
 
-Browser-first deterministic code-driven animation workspace.
+TRILYVA is a browser-based, code-driven animation workspace built around deterministic frame timing, editable JavaScript source, preview, and frame-by-frame rendering.
 
-## Canonical routes
+## Current routes
 
-Project page:
+- Project overview: https://tamasrazim.github.io/projects/trilyva/
+- Documentation: https://tamasrazim.github.io/projects/trilyva/docs.html
+- Step-by-step field guide: https://tamasrazim.github.io/projects/trilyva/tutorial.html
+- Workspace: https://tamasrazim.github.io/projects/code-motion/renderer/
 
-`https://tamasrazim.github.io/projects/code-motion/`
+The active workspace entry point in this repository is **renderer/index.html**. The overview and documentation are separate from the working renderer.
 
-Workspace:
+## Editing and source files
 
-`https://tamasrazim.github.io/projects/code-motion/renderer/`
+The animation editor accepts JavaScript built around the renderer's **window.renderFrame(time, frame, fps, ctx, width, height)** contract. The editor provides lightweight syntax highlighting for language keywords, strings, numbers, comments, functions, properties, and recognised renderer/browser APIs. Highlighting is visual guidance, not a substitute for parsing or runtime validation.
 
-The workspace entry is:
+In the **ANIMATION SOURCE** toolbar:
 
-`projects/code-motion/renderer/index.html`
+- **Copy** copies the current animation source.
+- **Save → .tmotion** downloads the project package with the animation source and project composition/settings.
+- **Save → .js** downloads only the current JavaScript animation source.
 
-## Project files
+The main project **Save** action is separate: it stores a local project in browser storage. Download a file backup when work needs to survive clearing browser data or moving to another browser/device.
 
-- `index.html` — project landing page.
-- `renderer/index.html` — canonical KYNESTRA workspace.
-- `renderer/media-stack.js` — media capability and container/codec descriptors.
-- `renderer/manifest.webmanifest` — workspace PWA manifest.
-- `renderer/sw.js` — workspace service worker.
-- `renderer/icons/` — workspace icon assets.
-- `legacy-renderer.html` — archived previous renderer build.
+## Library source downloads
 
-## Compatibility URLs
+The Library tab's **DOWNLOAD FROM LIBRARY** section provides two source-oriented actions:
 
-Older inbound links are preserved through:
+- **DOWNLOAD JS** downloads one selected animation as a JavaScript file.
+- **DOWNLOAD LIBRARY (.ZIP)** packages the selected built-in or local library's JavaScript files with **library-manifest.json** and **README.txt**; source paths are retained where available.
 
-- `/code-motion-tamasrazim.html`
-- `/code-motion-tamasrazim2.html`
+These controls are separate from full-library rendering, which exports media such as videos, still frames, and metadata. A source ZIP contains animation code; it is not a rendered-media archive.
 
-Both redirect to the current KYNESTRA workspace.
+## Frame and render model
 
-The archived `legacy-renderer.html` is not used by normal navigation.
+Animation time is evaluated from the requested frame:
 
-## Render model
+**time = frame / fps**
 
-The workspace evaluates animation time from the requested frame:
+The preview is for interactive inspection and may lag at demanding settings. Export processing requests frames against the chosen timeline instead of recording the live preview. This does not guarantee that every device can encode every requested combination: output depends on browser codec support, hardware, memory, storage, and operating-system limitations.
 
-`time = frame / fps`
+## Export and compatibility
 
-Preview playback is separate from export timing. Export requests output frames explicitly and uses the browser/device's available encoding capabilities.
+The current workspace includes browser-side video paths where compatible H.264/AVC or VP8/VP9 configurations are available. Still-image controls can offer PNG, JPG, SVG, and EPS depending on the current build; vector output is limited by the operations the vector recorder can represent. Directory/file destination pickers depend on browser support.
 
-## Output
+The interface exposes high output targets, including up to 16K, 240 fps, and a 2,000 Mbps (2 Gbps) bitrate target. These are configuration ceilings, not guaranteed real-world performance or a promise that all settings can be combined successfully on every machine. Test with a short render and inspect the result before production use.
 
-Supported browser-side paths include:
+## Repository map
 
-- MP4 / ISO-BMFF with H.264 / AVC where a compatible WebCodecs configuration is available.
-- WebM with browser-supported VP8/VP9 paths.
-- PNG frame export, including preferred-frame ZIP export.
-- Local generation without a backend, subscription, Electron runtime, or required FFmpeg installation.
+- **index.html** — the project entry page for this folder.
+- **renderer/index.html** — main browser workspace.
+- **renderer/media-stack.js** — media capability and codec/container descriptors.
+- **renderer/movie-finalizer.js** — local movie finalization support.
+- **renderer/manifest.webmanifest** — workspace web-app manifest.
+- **renderer/sw.js** — service worker and cache version.
+- **renderer/library/** — bundled animation libraries and library metadata.
+- **renderer/icons/** — workspace icons.
+- **legacy-renderer.html** — archived previous renderer build.
+- **LICENSE.md** and **THIRD-PARTY-NOTICES.md** — licensing and third-party notices.
 
-## Development
+Older inbound URLs remain as compatibility routes. The archived renderer is not used by normal navigation.
 
-The project page is the entry point for the project.
+## Recommended workflow
 
-Open the workspace through:
+1. Start with a library example or a small scene.
+2. Use **time** to derive motion so frame output is reproducible.
+3. Preview and inspect transitions at several frame indices.
+4. Save a **.tmotion** project backup and/or export a **.js** source copy.
+5. Test the intended resolution, FPS, codec, and destination with a short render.
+6. Render the final job and inspect dimensions, duration, frame sequence, colour, and transparency.
 
-`/projects/code-motion/renderer/`
-
-The workspace is intentionally an `index.html` application directory rather than a standalone `.html` route.
-
-
-## Flower Batch Lab
-
-The batch surface is available at `batch/index.html`. It discovers the current Prism flower studies, builds deterministic idea combinations, prepares the fixed 3840×2160 / 60 FPS / 10 second contract, stages Core render jobs, and exposes the KYNESTRA-native ZIP packaging workflow.
-
-## Dot Mesh library
-
-TRILYVA includes 50 unique procedural dot-mesh designs. Click **Dot Mesh → Folder** directly above **Finish Movie**: the browser asks you to choose a save folder, then the renderer exports every design into its own subfolder without building a huge ZIP in memory.
-
-Each completed design folder contains:
-- One 12-second 3840×2160, 60 FPS MP4 using H.264 at a 20 Mbps encoder target.
-- One static transparent 3840×2160 SVG still from frame zero (not an animated SVG).
-- `metadata.json` and `metadata.csv`.
-
-The selected folder also receives `DOT-MESH-CATALOG.csv`, `BATCH-MANIFEST.json`, and `README.txt`. Progress is shown in TRILYVA, cancellation is available, and outputs already written to the folder remain there if the batch stops. The manifest records actual verification and average bitrate where available. The 20 Mbps figure is the encoder target; the measured average can differ.
-
-The browser must support the File System Access API and H.264 at 3840×2160 / 60 FPS. Open the HTTPS GitHub Pages renderer in a current Chromium-based browser.
-
-## XYZ animation library
-
-TRILYVA's renderer includes the **XYZ** library with 50 distinct procedural animations. Each entry uses its own Canvas drawing structure and motion logic, exposes an editable `renderFrame` function, and loops deterministically over 12 seconds at the composition's frame rate. The library is self-contained and has no external runtime dependencies.
-
+For user-facing instructions, use the linked TRILYVA documentation and field guide. Update this README when workspace controls or supported output routes change.
