@@ -189,42 +189,20 @@
 
 <section class="tu-wrap tu-section" id="downloads">
   <div class="tu-section-head">
-    <h2>Downloads</h2>
-    <p>Select an exact operating-system/package variation. The download action only opens a matching asset from a published TRILYVA release; it does not point to another project's installer.</p>
+    <h2>Desktop downloads</h2>
+    <p>Desktop installers are not currently available from this page. A package will be listed only after the application build and output have been checked.</p>
   </div>
   <div class="tu-download-layout">
     <div class="tu-download-card">
-      <div class="tu-panel-label">SELECT PLATFORM PACKAGE</div>
-      <label class="tu-field-label" for="packageChoice">Operating system / package</label>
-      <select class="tu-select" id="packageChoice" name="packageChoice">
-        <option value="windows-x64-installer">Windows 10 / 11 · x64 installer (.exe / .msi)</option>
-        <option value="windows-x64-portable">Windows · x64 portable (.zip)</option>
-        <option value="windows-arm64-installer">Windows · ARM64 installer</option>
-        <option value="linux-x64-appimage">Linux · x86_64 AppImage</option>
-        <option value="linux-x64-deb">Linux · x86_64 DEB package</option>
-        <option value="linux-arm64-appimage">Linux · ARM64 AppImage</option>
-        <option value="macos-arm64">macOS · Apple Silicon</option>
-        <option value="macos-x64">macOS · Intel</option>
-        <option value="macos-universal">macOS · Universal package</option>
-      </select>
-      <button class="tu-download-button" id="downloadButton" type="button"><span id="downloadButtonText">Check selected build</span><span aria-hidden="true">↗</span></button>
-      <div class="tu-download-note" id="downloadNote" role="status" aria-live="polite">Checking public TRILYVA releases. If no matching package has been published, this control will explain that instead of offering a broken or unrelated download.</div>
-      <p class="tu-small" style="margin-top:14px">For now, the browser workspace is the available option. No desktop installer is currently listed as published.</p>
-      <a class="tu-link" href="/projects/code-motion/renderer/">Open the browser workspace →</a>
+      <div class="tu-panel-label">CURRENTLY AVAILABLE</div>
+      <div class="tu-status-line"><strong>Browser workspace</strong><span class="tu-pill">AVAILABLE</span></div>
+      <p class="tu-copy">Use TRILYVA in a compatible browser for the current animation, preview, render and export workflow.</p>
+      <a class="v3-button primary" href="/projects/code-motion/renderer/">Open TRILYVA workspace</a>
     </div>
     <div class="tu-download-card">
-      <div class="tu-panel-label">RELEASE CHECK</div>
-      <div class="tu-status-line"><strong id="assetSummary">No desktop package detected</strong><span class="tu-pill" id="assetCount">0 ASSETS</span></div>
-      <p class="tu-copy" id="assetDescription">This page checks public repository releases for a TRILYVA-specific release and platform-matching assets. Builds from other projects are deliberately excluded.</p>
-      <div class="tu-os-list" style="margin-top:22px">
-        <div class="tu-os-row"><div><strong>Windows</strong><small>Installer / portable archive</small></div><span class="tu-badge" id="osWindowsBadge">Awaiting build</span></div>
-        <div class="tu-os-row"><div><strong>Linux</strong><small>AppImage / DEB / archive</small></div><span class="tu-badge" id="osLinuxBadge">Awaiting build</span></div>
-        <div class="tu-os-row"><div><strong>macOS</strong><small>Apple Silicon / Intel</small></div><span class="tu-badge" id="osMacBadge">Awaiting build</span></div>
-      </div>
-      <div class="tu-actions">
-        <a class="v3-button secondary" id="releasesLink" href="https://github.com/Tamasrazim/tamasrazim.github.io/releases" target="_blank" rel="noopener noreferrer">All repository releases</a>
-        <button class="v3-button secondary" id="refreshReleases" type="button">Check again</button>
-      </div>
+      <div class="tu-panel-label">DESKTOP EDITION</div>
+      <div class="tu-status-line"><strong>No installer published</strong><span class="tu-pill">IN DEVELOPMENT</span></div>
+      <p class="tu-copy">Windows, Linux and macOS remain intended targets. A target platform is not an available download until its package has been built and verified.</p>
     </div>
   </div>
 </section>
@@ -247,15 +225,14 @@
 <section class="tu-wrap tu-section" id="releases">
   <div class="tu-section-head">
     <h2>Release notes & updates</h2>
-    <p>This list is populated from public GitHub releases associated with TRILYVA. The site will not invent a version number or display another project's release as a TRILYVA update.</p>
+    <p>The desktop edition is still in development. This page will describe published versions and tested platform support when downloadable packages are ready.</p>
   </div>
   <div id="releaseList" aria-live="polite">
-    <article class="tu-release"><h3>Checking releases…</h3><p>Loading public release information from GitHub.</p></article>
+    <article class="tu-release"><h3>No public desktop release</h3><p>The browser workspace remains available. Desktop packages and version notes have not been published here yet.</p><a href="/projects/code-motion/renderer/">Open the browser workspace</a></article>
   </div>
   <div class="tu-actions">
-    <a class="v3-button primary" href="https://github.com/Tamasrazim/tamasrazim.github.io" target="_blank" rel="noopener noreferrer">Project repository</a>
-    <a class="v3-button secondary" href="https://github.com/Tamasrazim/tamasrazim.github.io/issues" target="_blank" rel="noopener noreferrer">Issues & feedback</a>
     <a class="v3-button secondary" href="/projects/trilyva/">Back to TRILYVA overview</a>
+    <a class="v3-button secondary" href="/projects/">All projects</a>
   </div>
 </section>
 </main>
@@ -264,240 +241,6 @@
   <span><a href="/projects/trilyva/">PROJECT OVERVIEW ↑</a> · <a href="/projects/">PROJECT DIRECTORY ↑</a></span>
   <a href="/licences/" style="font:9px/1.6 monospace;letter-spacing:.08em;text-decoration:none;white-space:nowrap">LICENCES</a>
 </footer>
-<div class="tu-toast" id="toast" role="status" aria-live="polite"></div>
-<script>
-(() => {
-  "use strict";
-  const API = "https://api.github.com/repos/Tamasrazim/tamasrazim.github.io/releases?per_page=100";
-  const ALL_RELEASES = "https://github.com/Tamasrazim/tamasrazim.github.io/releases";
-  const select = document.getElementById("packageChoice");
-  const downloadButton = document.getElementById("downloadButton");
-  const downloadButtonText = document.getElementById("downloadButtonText");
-  const downloadNote = document.getElementById("downloadNote");
-  const releaseSummary = document.getElementById("releaseSummary");
-  const currentStatus = document.getElementById("currentStatus");
-  const lastCheck = document.getElementById("lastCheck");
-  const assetSummary = document.getElementById("assetSummary");
-  const assetCount = document.getElementById("assetCount");
-  const assetDescription = document.getElementById("assetDescription");
-  const releaseList = document.getElementById("releaseList");
-  const toast = document.getElementById("toast");
-  let trilyvaReleases = [];
-  let isLoading = false;
-  let toastTimer;
 
-  function showToast(message) {
-    toast.textContent = message;
-    toast.classList.add("is-visible");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove("is-visible"), 4800);
-  }
-
-  function norm(value) {
-    return String(value || "").toLowerCase().replace(/_/g, "-").replace(/\s+/g, "-");
-  }
-
-  function isTrilyvaRelease(release) {
-    const title = norm(release.name);
-    const tag = norm(release.tag_name);
-    const body = norm(release.body);
-    return !release.draft && Boolean(release.published_at) &&
-      (title.includes("trilyva") || tag.includes("trilyva") ||
-       (title.includes("trilyva desktop")) || (body.includes("[trilyva-release]")));
-  }
-
-  function hasAny(text, patterns) {
-    return patterns.some((pattern) => pattern.test(text));
-  }
-
-  function matchesAsset(asset, choice) {
-    const name = norm(asset.name);
-    const hasArchArm = hasAny(name, [/-arm64\b/, /-aarch64\b/, /-armv8\b/, /apple-silicon/]);
-    const hasArchX64 = hasAny(name, [/-x64\b/, /-x86-64\b/, /-x86_64\b/, /-amd64\b/, /-intel\b/]);
-    const isWin = hasAny(name, [/windows/, /(^|\W)win(32|64)?(\W|$)/]);
-    const isLinux = name.includes("linux");
-    const isMac = hasAny(name, [/macos/, /mac-os/, /darwin/, /osx/, /\.dmg$/, /\.pkg$/]);
-    const isInstaller = /\.(exe|msi)$/.test(name) && !name.includes("portable");
-    const isPortable = name.endsWith(".zip") && name.includes("portable");
-    const isAppImage = name.endsWith(".appimage");
-    const isDeb = name.endsWith(".deb");
-    const isDmgPkgZip = /\.(dmg|pkg|zip)$/.test(name);
-    const hasUniversal = name.includes("universal");
-
-    switch (choice) {
-      case "windows-x64-installer":
-        return isWin && isInstaller && !hasArchArm && (!hasArchX64 || name.includes("x64") || name.includes("amd64"));
-      case "windows-x64-portable":
-        return isWin && isPortable && !hasArchArm;
-      case "windows-arm64-installer":
-        return isWin && isInstaller && hasArchArm;
-      case "linux-x64-appimage":
-        return isLinux && isAppImage && !hasArchArm;
-      case "linux-x64-deb":
-        return isLinux && isDeb && !hasArchArm;
-      case "linux-arm64-appimage":
-        return isLinux && isAppImage && hasArchArm;
-      case "macos-arm64":
-        return isMac && isDmgPkgZip && (hasArchArm || hasUniversal);
-      case "macos-x64":
-        return isMac && isDmgPkgZip && (hasArchX64 || hasUniversal);
-      case "macos-universal":
-        return isMac && isDmgPkgZip && hasUniversal;
-      default:
-        return false;
-    }
-  }
-
-  function selectedAsset() {
-    for (const release of trilyvaReleases) {
-      const assets = Array.isArray(release.assets) ? release.assets : [];
-      const match = assets.find(asset => matchesAsset(asset, select.value));
-      if (match) return { release, asset: match };
-    }
-    return null;
-  }
-
-  function renderReleaseList() {
-    if (!trilyvaReleases.length) {
-      releaseList.innerHTML =
-        '<article class="tu-release"><h3>No public TRILYVA desktop release yet</h3><p>No published release explicitly associated with TRILYVA was found. That is expected while desktop builds are being prepared. The browser workspace remains available.</p><a href="' + ALL_RELEASES + '" target="_blank" rel="noopener noreferrer">Browse repository releases →</a></article>';
-      return;
-    }
-    releaseList.innerHTML = "";
-    trilyvaReleases.slice(0, 6).forEach(release => {
-      const article = document.createElement("article");
-      article.className = "tu-release";
-      const heading = document.createElement("h3");
-      heading.textContent = release.name || release.tag_name || "TRILYVA release";
-      const info = document.createElement("p");
-      const date = release.published_at ? new Date(release.published_at).toLocaleDateString(undefined, {year:"numeric",month:"short",day:"numeric"}) : "Date unavailable";
-      const assets = Array.isArray(release.assets) ? release.assets.length : 0;
-      info.textContent = date + " · " + assets + " downloadable asset" + (assets === 1 ? "" : "s") + (release.prerelease ? " · pre-release" : "");
-      const link = document.createElement("a");
-      link.href = release.html_url || ALL_RELEASES;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.textContent = "Release details →";
-      article.append(heading, info, link);
-      releaseList.appendChild(article);
-    });
-  }
-
-  function setText(id, value) {
-    const element = document.getElementById(id);
-    if (element) element.textContent = value;
-  }
-
-  function hasAssetFor(choice) {
-    return trilyvaReleases.some(release =>
-      (Array.isArray(release.assets) ? release.assets : []).some(asset => matchesAsset(asset, choice))
-    );
-  }
-
-  function updatePlatformStatuses() {
-    const windowsX64 = hasAssetFor("windows-x64-installer") || hasAssetFor("windows-x64-portable");
-    const windowsArm64 = hasAssetFor("windows-arm64-installer");
-    const linuxX64 = hasAssetFor("linux-x64-appimage") || hasAssetFor("linux-x64-deb");
-    const linuxArm64 = hasAssetFor("linux-arm64-appimage");
-    const macArm64 = hasAssetFor("macos-arm64");
-    const macX64 = hasAssetFor("macos-x64");
-    setText("statusWindowsX64", windowsX64 ? "DESKTOP / PACKAGE AVAILABLE" : "DESKTOP / AWAITING RELEASE");
-    setText("statusWindowsArm64", windowsArm64 ? "DESKTOP / PACKAGE AVAILABLE" : "DESKTOP / AWAITING RELEASE");
-    setText("statusLinuxX64", linuxX64 ? "DESKTOP / PACKAGE AVAILABLE" : "DESKTOP / AWAITING RELEASE");
-    setText("statusLinuxArm64", linuxArm64 ? "DESKTOP / PACKAGE AVAILABLE" : "DESKTOP / AWAITING RELEASE");
-    setText("statusMacArm64", macArm64 ? "APPLE SILICON / PACKAGE AVAILABLE" : "APPLE SILICON / AWAITING RELEASE");
-    setText("statusMacX64", macX64 ? "INTEL BUILD / PACKAGE AVAILABLE" : "INTEL BUILD / AWAITING RELEASE");
-    const windows = windowsX64 || windowsArm64;
-    const linux = linuxX64 || linuxArm64;
-    setText("osWindowsBadge", windows ? "Package available" : "Awaiting build");
-    setText("osLinuxBadge", linux ? "Package available" : "Awaiting build");
-    setText("osMacBadge", macArm64 || macX64 ? "Package available" : "Awaiting build");
-  }
-
-  function updateSelectionStatus() {
-    const match = selectedAsset();
-    if (match) {
-      downloadButtonText.textContent = "Download " + match.asset.name;
-      downloadNote.textContent = "Ready: " + match.asset.name + " · " + match.release.tag_name + ". The file comes from a published TRILYVA release.";
-      const sizeMb = match.asset.size ? (match.asset.size / 1048576).toFixed(1) + " MB" : "Size not reported";
-      assetSummary.textContent = match.asset.name;
-      assetCount.textContent = sizeMb.toUpperCase();
-      assetDescription.textContent = "Version " + match.release.tag_name + " · published " + new Date(match.release.published_at).toLocaleDateString() + ".";
-    } else {
-      downloadButtonText.textContent = "Check selected build";
-      const choice = select.options[select.selectedIndex]?.textContent || "selected platform";
-      downloadNote.textContent = "No published TRILYVA package currently matches: " + choice + ". This target is not available for download yet. Check the release page for future builds, or open the browser workspace now.";
-      assetSummary.textContent = "No matching package";
-      assetCount.textContent = "NOT FOUND";
-      assetDescription.textContent = trilyvaReleases.length
-        ? "A TRILYVA release exists, but it does not include an asset matching this operating-system/package selection."
-        : "No published TRILYVA desktop release has been detected yet. Other projects' assets are excluded intentionally.";
-    }
-  }
-
-  async function loadReleases() {
-    if (isLoading) return;
-    isLoading = true;
-    lastCheck.textContent = "Refreshing…";
-    try {
-      const response = await fetch(API, {headers: {"Accept":"application/vnd.github+json"}, cache:"no-store"});
-      if (!response.ok) throw new Error("GitHub returned HTTP " + response.status);
-      const releases = await response.json();
-      if (!Array.isArray(releases)) throw new Error("Unexpected release response");
-      trilyvaReleases = releases.filter(isTrilyvaRelease).sort((a,b) => new Date(b.published_at) - new Date(a.published_at));
-      lastCheck.textContent = new Date().toLocaleString();
-      const assetTotal = trilyvaReleases.reduce((sum, release) => sum + (Array.isArray(release.assets) ? release.assets.length : 0), 0);
-      if (trilyvaReleases.length) {
-        currentStatus.textContent = "TRILYVA release detected";
-        releaseSummary.textContent = trilyvaReleases.length + " published TRILYVA release(s) found. Select a package below to see whether a matching asset is available.";
-        assetSummary.textContent = "Release found";
-        assetCount.textContent = assetTotal + " ASSETS";
-      } else {
-        currentStatus.textContent = "Desktop builds not published";
-        releaseSummary.textContent = "No published TRILYVA desktop release was detected. Desktop packages will appear here only after they have been uploaded as release assets.";
-        assetSummary.textContent = "No desktop package detected";
-        assetCount.textContent = "0 ASSETS";
-      }
-      renderReleaseList();
-      updateSelectionStatus();
-      updatePlatformStatuses();
-    } catch (error) {
-      lastCheck.textContent = "Could not refresh";
-      releaseSummary.textContent = "The public release check failed. This does not indicate a build is available; use the repository release page to check manually.";
-      releaseList.innerHTML = "";
-      const article = document.createElement("article");
-      article.className = "tu-release";
-      const heading = document.createElement("h3");
-      heading.textContent = "Release check unavailable";
-      const p = document.createElement("p");
-      p.textContent = "GitHub's release data could not be loaded in this browser. Try again or open the repository releases page directly.";
-      const link = document.createElement("a");
-      link.href = ALL_RELEASES;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.textContent = "Open GitHub releases →";
-      article.append(heading, p, link);
-      releaseList.appendChild(article);
-      downloadNote.textContent = "The release check failed. No download can be confirmed right now; please check GitHub Releases.";
-      showToast("Couldn't check GitHub Releases. Try again or open the release page.");
-    } finally {
-      isLoading = false;
-    }
-  }
-
-  downloadButton.addEventListener("click", () => {
-    const match = selectedAsset();
-    if (match && match.asset.browser_download_url) {
-      window.location.assign(match.asset.browser_download_url);
-      return;
-    }
-    showToast("No downloadable TRILYVA build matches this selection yet.");
-    downloadNote.innerHTML = 'No package has been published for this selection yet. <a href="' + ALL_RELEASES + '" target="_blank" rel="noopener noreferrer">Check GitHub Releases</a> or <a href="/projects/code-motion/renderer/">use the browser workspace</a>.';
-  });
-  select.addEventListener("change", updateSelectionStatus);
-  document.getElementById("refreshReleases").addEventListener("click", loadReleases);
-  loadReleases();
-})();
-</script>
 </body>
 </html>
