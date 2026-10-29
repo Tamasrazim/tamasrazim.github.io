@@ -1488,7 +1488,7 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
         <button data-act="analyzeSource">Analyze</button>
         <button data-act="pasteSource">Paste</button>
         <button data-act="copySource" title="Copy the complete animation source">Copy</button>
-        <button data-act="save" title="Save the current TRILYVA project">Save</button>
+        <button data-act="saveSourceOptions" title="Choose to download the current animation source as .tmotion or .js">Save</button>
         <button data-act="clearSource">Clear</button>
       </div>
       <div id="find" class="hide">
@@ -12090,6 +12090,32 @@ function exportProject() {
   download(new Blob([data], { type: 'application/json' }), slugify(S.name) + '.tmotion');
   $('#stMsg').textContent = 'exported ' + slugify(S.name) + '.tmotion';
 }
+function exportSourceJs() {
+  var code = String(Ed.ta ? Ed.ta.value : '');
+  if (!code.trim()) {
+    $('#stMsg').textContent = 'cannot export an empty JavaScript source';
+    return;
+  }
+  var filename = slugify(S.name) + '.js';
+  download(new Blob([code], { type: 'text/javascript;charset=utf-8' }), filename);
+  $('#stMsg').textContent = 'exported JavaScript source · ' + filename;
+}
+function openSourceSaveFormatPicker() {
+  var body = el('div');
+  body.style.cssText = 'display:flex;flex-direction:column;gap:10px;min-width:0;';
+  body.appendChild(el('p', 'note', 'Choose the file format for the current animation. .tmotion includes the source code and project composition/settings; .js contains only the JavaScript animation source.'));
+  openModal('TRILYVA / SAVE AS', body, [
+    { label: 'Download .tmotion', solid: true, fn: function () {
+      closeModal();
+      exportProject();
+    }},
+    { label: 'Download .js', fn: function () {
+      closeModal();
+      exportSourceJs();
+    }},
+    { label: 'Cancel', fn: closeModal }
+  ]);
+}
 function importProject(file) {
   var fr = new FileReader();
   fr.onload = function () {
@@ -13283,6 +13309,7 @@ var ACTS = {
   clearSource: clearSource,
   pasteSource: pasteSource,
   copySource: copySource,
+  saveSourceOptions: openSourceSaveFormatPicker,
   analyzeLoop: analyseLoop,
   testMenu: testMenu,
   queueAdd: queueAdd,
