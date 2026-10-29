@@ -1422,6 +1422,35 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
 .hdr-acts button.prompt-action::after{transform:scaleX(1);opacity:.4}
 .hdr-acts button.prompt-action:hover::after{opacity:1}
 @media (max-width:860px){.hdr-acts button.prompt-action{padding-inline:6px;font-size:10px;letter-spacing:.04em}}
+
+/* Centered preview transport and live playback controls */
+#pvctl{
+  flex:0 0 auto;min-height:58px;height:auto;display:flex;align-items:center;
+  justify-content:center;flex-wrap:wrap;gap:9px 22px;padding:9px 14px;
+  border-top:1px solid rgba(255,255,255,.07);background:rgba(9,9,11,.94);
+}
+.pv-transport{display:flex;align-items:center;justify-content:center;gap:4px;flex:0 0 auto}
+.pv-transport .ib{width:32px;height:30px;border-radius:8px}
+.pv-transport .pv-play{width:36px;height:32px;border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.07);color:#fff}
+.pv-transport .pv-play:hover{background:rgba(255,255,255,.14)}
+.pv-transport .pv-loop.on{background:rgba(255,255,255,.13);color:#fff;opacity:1}
+.pv-adjustments{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px 14px}
+.pv-control{display:flex;align-items:center;gap:7px;white-space:nowrap;font:9px/1.2 var(--mono);letter-spacing:.09em;color:var(--mut)}
+.pv-control input[type=range]{width:88px;max-width:22vw;margin:0;accent-color:#fff;cursor:pointer}
+.pv-control output{min-width:40px;text-align:right;color:#f1f1f3;font:10px/1 var(--mono);letter-spacing:0}
+.pv-auto{height:25px;min-width:36px;padding:0 7px;border:1px solid var(--rule-hi);border-radius:7px;color:var(--mut);font:9px/1 var(--mono);letter-spacing:.08em;transition:background var(--t-fast),color var(--t-fast),border-color var(--t-fast)}
+.pv-auto:hover{color:#fff;border-color:#777}
+.pv-auto.on{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35);color:#fff}
+@media(max-width:560px){
+  #pvctl{gap:8px 10px;padding:9px 8px}
+  .pv-transport{gap:2px}
+  .pv-transport .ib{width:30px;height:29px}
+  .pv-adjustments{gap:9px 10px}
+  .pv-control{gap:5px;font-size:8px}
+  .pv-control input[type=range]{width:72px;max-width:24vw}
+  .pv-control output{min-width:34px;font-size:9px}
+}
+
 </style>
   <script type="application/ld+json">
 {
@@ -1568,20 +1597,23 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
         </div>
         <div id="stageMsg" role="alert"></div>
       </div>
-      <div id="pvctl">
-        <button class="ib fill" data-act="toStart" title="Jump to start (Home)" aria-label="Jump to start"><svg viewBox="0 0 16 16"><path d="M4 3v10M13 3L6 8l7 5z"/></svg></button>
-        <button class="ib fill" data-act="stepBack" title="Previous frame (←)" aria-label="Previous frame"><svg viewBox="0 0 16 16"><path d="M11 3L4 8l7 5z"/></svg></button>
-        <button class="ib fill" data-act="play" id="playBtn" title="Play / pause (Space)" aria-label="Play"><svg viewBox="0 0 16 16"><path d="M4 3l9 5-9 5z"/></svg></button>
-        <button class="ib fill" data-act="stepFwd" title="Next frame (→)" aria-label="Next frame"><svg viewBox="0 0 16 16"><path d="M5 3l7 5-7 5z"/></svg></button>
-        <button class="ib fill" data-act="toEnd" title="Jump to end (End)" aria-label="Jump to end"><svg viewBox="0 0 16 16"><path d="M12 3v10M3 3l7 5-7 5z"/></svg></button>
-        <button class="ib" data-act="loop" id="loopBtn" title="Loop playback" aria-label="Loop playback"><svg viewBox="0 0 16 16"><path d="M2 6h10l-2.5-2.5M14 10H4l2.5 2.5"/></svg></button>
-        <span class="sp"></span>
-        <span class="rd">PREVIEW SCALE</span>
-        <select class="mini" id="pvScale" aria-label="Preview scale">
-          <option value="auto">auto</option><option value="1">100%</option><option value="0.5">50%</option>
-          <option value="0.25">25%</option><option value="0.125">12.5%</option>
-        </select>
-        <span class="rd">SPEED <b id="rdSpeed">1×</b></span>
+      <div id="pvctl" aria-label="Preview playback and scaling controls">
+        <div class="pv-transport" role="group" aria-label="Playback controls">
+          <button class="ib fill" data-act="toStart" title="First frame (Home)" aria-label="First frame"><svg viewBox="0 0 16 16"><path d="M4 3v10M13 3L6 8l7 5z"/></svg></button>
+          <button class="ib fill" data-act="stepBack" title="Previous frame (Left Arrow)" aria-label="Previous frame"><svg viewBox="0 0 16 16"><path d="M11 3L4 8l7 5z"/></svg></button>
+          <button class="ib fill pv-play" data-act="play" id="playBtn" title="Play / pause (Space)" aria-label="Play"><svg viewBox="0 0 16 16"><path d="M4 3l9 5-9 5z"/></svg></button>
+          <button class="ib fill" data-act="stepFwd" title="Next frame (Right Arrow)" aria-label="Next frame"><svg viewBox="0 0 16 16"><path d="M5 3l7 5-7 5z"/></svg></button>
+          <button class="ib fill" data-act="toEnd" title="Last frame (End)" aria-label="Last frame"><svg viewBox="0 0 16 16"><path d="M12 3v10M3 3l7 5-7 5z"/></svg></button>
+          <button class="ib pv-loop" data-act="loop" id="loopBtn" title="Loop playback on/off" aria-label="Loop playback" aria-pressed="true"><svg viewBox="0 0 16 16"><path d="M2 6h10l-2.5-2.5M14 10H4l2.5 2.5"/></svg></button>
+        </div>
+        <div class="pv-adjustments" role="group" aria-label="Preview scale and playback speed">
+          <label class="pv-control" for="pvScaleBar"><span>PREVIEW SCALE</span><input type="range" id="pvScaleBar" min="12.5" max="100" step="12.5" value="100" aria-label="Preview scale from 12.5 to 100 percent"><output id="pvScaleValue" for="pvScaleBar">AUTO</output></label>
+          <button class="pv-auto on" id="pvScaleAuto" type="button" title="Fit preview to the available space" aria-pressed="true">FIT</button>
+          <label class="pv-control" for="playSpeedBar"><span>PLAYBACK SPEED</span><input type="range" id="playSpeedBar" min="0.25" max="4" step="0.25" value="1" aria-label="Preview playback speed from 0.25 to 4 times"><output id="playSpeedValue" for="playSpeedBar">1×</output></label>
+          <select class="mini" id="pvScale" aria-label="Internal preview raster scale" aria-hidden="true" tabindex="-1" style="display:none">
+            <option value="auto">auto</option><option value="1">100%</option><option value="0.875">87.5%</option><option value="0.75">75%</option><option value="0.625">62.5%</option><option value="0.5">50%</option><option value="0.375">37.5%</option><option value="0.25">25%</option><option value="0.125">12.5%</option>
+          </select>
+        </div>
       </div>
     </section>
 
@@ -9419,7 +9451,7 @@ window.addEventListener("trilyva:export-dotmesh-folder", openDotMeshFolderPicker
 var S = {
   id: null, name: 'Untitled', version: 1, dirty: false,
   code: '', comp: null, meta: null, assets: [],
-  frame: 0, playing: false, loopPlayback: true,
+  frame: 0, playing: false, loopPlayback: true, previewSpeed: 1,
   compiled: false, lastError: null, hash: '',
   previewBusy: false, previewFps: 0, previewRaster: { w: 0, h: 0, s: 1 },
   compareMode: false, compareSplit: 0.5, compareBitmap: null,
@@ -9778,7 +9810,9 @@ function sizeCanvasFrame() {
   var stage = $('#stage').getBoundingClientRect();
   var availW = Math.max(60, stage.width - 36), availH = Math.max(40, stage.height - 36);
   var fit = Math.min(availW / c.width, availH / c.height);
-  var dw = Math.max(20, Math.round(c.width * fit)), dh = Math.max(20, Math.round(c.height * fit));
+  var scaleSel = $('#pvScale').value;
+  var displayScale = scaleSel === 'auto' ? 1 : Math.max(0.125, Math.min(1, parseFloat(scaleSel) || 1));
+  var dw = Math.max(20, Math.round(c.width * fit * displayScale)), dh = Math.max(20, Math.round(c.height * fit * displayScale));
   var f = $('#canvasFrame');
   f.style.width = dw + 'px'; f.style.height = dh + 'px';
   view.style.width = dw + 'px'; view.style.height = dh + 'px';
@@ -9862,7 +9896,7 @@ function tick() {
   if (!S.playing) return;
   var c = S.comp;
   var elapsed = (performance.now() - playAnchor) / 1000;
-  var f = playFrom + Math.floor(elapsed * c.fps);
+  var f = playFrom + Math.floor(elapsed * c.fps * S.previewSpeed);
   var r = S.loopPlayback ? loopRange() : { a: 0, b: c.frameCount };
   if (f >= r.b) {
     if (S.loopPlayback) { f = r.a + ((f - r.a) % Math.max(1, r.b - r.a)); }
@@ -10105,6 +10139,17 @@ var DUR_PRESETS = [4, 10, 15, 20, 30, 60];
 var LOOPDUR_PRESETS = [2, 4, 5, 6, 8, 10, 15, 20, 30, 60];
 var SPEED_PRESETS = [0.25, 0.5, 1, 2, 4];
 
+function syncPreviewScaleControls() {
+  var select = $('#pvScale');
+  var value = select.value;
+  var scale = value === 'auto' ? (S.previewRaster && S.previewRaster.s || 1) : parseFloat(value);
+  if (!isFinite(scale) || scale <= 0) scale = 1;
+  var percent = Math.max(12.5, Math.min(100, Math.round(scale * 100 / 12.5) * 12.5));
+  $('#pvScaleBar').value = String(percent);
+  $('#pvScaleValue').textContent = value === 'auto' ? 'AUTO' : percent + '%';
+  $('#pvScaleAuto').classList.toggle('on', value === 'auto');
+  $('#pvScaleAuto').setAttribute('aria-pressed', value === 'auto' ? 'true' : 'false');
+}
 function initComp() {
   buildSeg($('#segRes'), RES_PRESETS, function (v) {
     var p = v.split('x');
@@ -10141,7 +10186,26 @@ function initComp() {
   numField('#cSeed', 'seed', {});
   $('#cBgColor').addEventListener('change', function () { applyComp({ background: $('#cBgColor').value.trim() || '#000000' }); });
   $('#cReverse').addEventListener('change', function () { applyComp({ reverse: $('#cReverse').checked }); });
-  $('#pvScale').addEventListener('change', function () { computeRaster(); sizeCanvasFrame(); requestPreview(true); });
+  $('#pvScale').addEventListener('change', function () { syncPreviewScaleControls(); computeRaster(); sizeCanvasFrame(); requestPreview(true); });
+  $('#pvScaleBar').addEventListener('input', function () {
+    var scale = Math.max(0.125, Math.min(1, Number(this.value) / 100));
+    $('#pvScale').value = String(scale);
+    syncPreviewScaleControls();
+    computeRaster(); sizeCanvasFrame(); requestPreview(true);
+  });
+  $('#pvScaleAuto').addEventListener('click', function () {
+    $('#pvScale').value = 'auto';
+    syncPreviewScaleControls();
+    computeRaster(); sizeCanvasFrame(); requestPreview(true);
+  });
+  $('#playSpeedBar').addEventListener('input', function () {
+    var speed = Math.max(0.25, Math.min(4, Number(this.value)));
+    S.previewSpeed = speed;
+    $('#playSpeedValue').textContent = speed.toFixed(2).replace(/\.?0+$/, '') + '×';
+    if (S.playing) { playFrom = S.frame; playAnchor = performance.now(); }
+  });
+  syncPreviewScaleControls();
+  $('#playSpeedValue').textContent = S.previewSpeed.toFixed(2).replace(/\.?0+$/, '') + '×';
 }
 
 function applyComp(patch) {
