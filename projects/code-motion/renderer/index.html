@@ -8,7 +8,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<meta name="description" content="Use the TRILYVA browser-based JavaScript animation renderer to write procedural motion, preview frames, and run frame-driven rendering and export workflows.">
+<meta name="description" content="TRILYVA is a browser-based JavaScript animation renderer with deterministic frame timing, MP4/WebM export where supported, library batch rendering, metadata, and an 18-format still-frame picker.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Tamasrazim"><meta property="og:title" content="TRILYVA — JavaScript Animation Renderer"><meta property="og:description" content="Write procedural JavaScript animation, inspect exact frames, render verified output where supported, manage libraries, and save inspected frames in 18 formats."><meta property="og:url" content="https://tamasrazim.github.io/projects/code-motion/renderer/"><meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg"><meta name="twitter:card" content="summary_large_image">
 <title>Trilyva — JavaScript Animation Renderer</title>
 
 <link rel="canonical" href="https://tamasrazim.github.io/projects/code-motion/renderer/">
@@ -1423,11 +1425,12 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
 </style>
   <script type="application/ld+json">
 {
+  "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "@id": "https://tamasrazim.github.io/projects/code-motion/renderer/#application",
   "name": "TRILYVA Renderer",
   "url": "https://tamasrazim.github.io/projects/code-motion/renderer/",
-  "description": "The TRILYVA browser workspace for procedural animation editing, exact-frame preview and capability-checked video rendering.",
+  "description": "The TRILYVA browser workspace for deterministic JavaScript animation editing, exact-frame preview, browser-capability-checked video rendering, project and library delivery, metadata diagnostics, and 18-format inspected-frame export.",
   "applicationCategory": "MultimediaApplication",
   "operatingSystem": "Web Browser",
   "isAccessibleForFree": true,
@@ -1436,7 +1439,20 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
   },
   "isPartOf": {
     "@id": "https://tamasrazim.github.io/#trilyva"
-  }
+  },
+  "featureList": [
+    "JavaScript animation source editor with syntax highlighting, find/replace, reindent, undo/redo, analysis, examples, and prompt copying",
+    "Frame-driven render function window.renderFrame(time, frame, fps, ctx, width, height)",
+    "Composition controls for output dimensions up to a 16K preset, frame rates up to 240 fps, duration, background transparency, seed, loop analysis, retiming, and reverse",
+    "Interactive preview with timeline seeking, frame stepping, inspect-frame view, export comparison, and fullscreen",
+    "Pre-flight analysis, test renders, quality presets, configurable bitrate, encoder diagnostics, frame fingerprints, and completed-output verification",
+    "MP4/H.264 and WebM/VP8/VP9 output only where supported by the current browser/device configuration",
+    "Project save/open in browser storage, .tmotion import/export, JavaScript source export, metadata JSON receipt, and SHA-256 source fingerprint",
+    "Built-in and local animation libraries, folder/ZIP/JS import, library source downloads, and batch render to folder or ZIP",
+    "Inspect-frame image formats: PNG, JPEG/JPG, WebP, AVIF, BMP, TIFF, GIF, ICO, TGA, QOI, SVG, EPS, PPM, PGM, PBM, PAM, XBM, XPM",
+    "Automatic still-image export for standard render and library batch workflows in PNG, JPG, SVG, and EPS",
+    "Heuristic frame-intelligence keyword suggestions"
+  ]
 }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13098,7 +13114,30 @@ var DOCS = [
 
   '<h5>RENDER ONE ANIMATION / SAVE STILL FRAMES</h5>',
   '<p>Open <b>RENDER</b> and set the still-frame index. Frame numbers are zero-based: <code>0</code> is the first frame. Select any combination of <b>PNG</b>, <b>JPG</b>, <b>SVG</b> and <b>EPS</b>; PNG is selected by default. A normal successful render automatically downloads the chosen still formats for that frame as well as the selected video output. Change the frame index before rendering to save a different moment.</p>',
-  '<p>PNG is raster and can preserve transparency. JPG is raster and does not preserve transparency. SVG and EPS use the vector scene recorder, so they work only for supported drawing operations; if the animation uses unsupported canvas features, the vector file can be incomplete or fail. The app reports a warning rather than treating a failed vector export as a successful file.</p>',
+  '<p>PNG is raster and can preserve transparency. JPG is raster and does not preserve transparency. SVG and EPS use a separate vector scene recorder for supported drawing operations; unsupported canvas features can make an output incomplete or cause it to fail.</p>',
+  '<h5>INSPECT FRAME / SAVE THIS FRAME AS — 18 IMAGE FORMATS</h5>',
+  '<p>For a single inspected frame, use <b>Inspect frame</b> → <b>Save this frame as</b>. The picker contains 18 formats: PNG, JPEG/JPG, WebP, AVIF, BMP, TIFF, GIF, ICO, TGA, QOI, SVG, EPS, PPM, PGM, PBM, PAM, XBM and XPM. WebP and AVIF require browser canvas-encoder support; the other listed formats are encoded locally.</p>',
+  '<table><tr><th>Format</th><th>What is written</th></tr>',
+  '<tr><td>PNG</td><td>Lossless raster with alpha transparency.</td></tr>',
+  '<tr><td>JPEG / JPG</td><td>Lossy raster flattened against white; no alpha.</td></tr>',
+  '<tr><td>WebP</td><td>Modern web raster; browser encoder required.</td></tr>',
+  '<tr><td>AVIF</td><td>Modern compressed raster; browser encoder required.</td></tr>',
+  '<tr><td>BMP</td><td>24-bit bitmap raster.</td></tr>',
+  '<tr><td>TIFF</td><td>Uncompressed RGB raster, often large.</td></tr>',
+  '<tr><td>GIF</td><td>One still frame with up to 256 colours, not an animated GIF.</td></tr>',
+  '<tr><td>ICO</td><td>Icon image, maximum 256 pixels per side.</td></tr>',
+  '<tr><td>TGA</td><td>24-bit true-colour raster.</td></tr>',
+  '<tr><td>QOI</td><td>Lossless RGBA raster.</td></tr>',
+  '<tr><td>SVG</td><td>SVG document embedding a PNG image; not editable vector paths.</td></tr>',
+  '<tr><td>EPS</td><td>PostScript/EPS wrapper around raster image data; not editable vector paths.</td></tr>',
+  '<tr><td>PPM</td><td>Portable pixmap colour image.</td></tr>',
+  '<tr><td>PGM</td><td>Portable grayscale image.</td></tr>',
+  '<tr><td>PBM</td><td>Portable monochrome bitmap.</td></tr>',
+  '<tr><td>PAM</td><td>Portable arbitrary map with RGBA data.</td></tr>',
+  '<tr><td>XBM</td><td>Monochrome X bitmap.</td></tr>',
+  '<tr><td>XPM</td><td>Indexed-colour pixmap.</td></tr>',
+  '</table>',
+  '<p>In the inspected-frame picker, SVG and EPS are raster-backed wrappers. The separate Render panel and full-library batch settings offer PNG, JPG, SVG and EPS; their SVG/EPS output uses a vector recorder for supported operations.</p>',
 
   '<h5>RENDER FULL LIBRARY</h5>',
   '<p>Use <b>RENDER FULL LIBRARY</b> to export every animation in a selected built-in or locally imported library. Choose <b>SAVE TO FOLDER</b> to pick a destination directory, or <b>SAVE AS ZIP</b> to pick the ZIP file location. Each library item gets its own output folder, with MP4, the selected still formats, and metadata/manifest files. Choose formats and the zero-based still-frame index in the batch settings before starting.</p>',
@@ -13147,7 +13186,7 @@ var DOCS = [
   '<tr><td>WebM (VP9 / VP8)</td><td>Real. Frames go to the browser\'s WebCodecs encoder one at a time with timestamps derived from the frame index, and the Matroska container is written here — clusters, cues, duration and tags.</td></tr>',
   '<tr><td>PNG sequence → ZIP</td><td>Real. Every frame encoded losslessly, stored in a ZIP written here, with <code>manifest.json</code> and a README carrying the frame rate and an ffmpeg line. 4 GB ceiling.</td></tr>',
   '<tr><td>PNG sequence → folder</td><td>Real where the File System Access API exists. Frames are written straight to disk, so size is limited only by the drive.</td></tr>',
-  '<tr><td>GIF</td><td>Not available. A real GIF needs quantisation and dithering that would change your pixels without telling you.</td></tr>',
+  '<tr><td>Animated GIF output</td><td>Not available as a moving-video export. The inspected-frame picker can save one still image as GIF with a 256-colour palette.</td></tr>',
   '<tr><td>Transparent WebM or MP4</td><td>Not available. Neither muxer writes an alpha plane, so a transparent composition must be exported as PNG.</td></tr>',
   '<tr><td>MediaRecorder capture</td><td>Used only by Finish Movie to combine an already-rendered local video with audio in real time. It is separate from the deterministic frame exporter and may drop frames under load.</td></tr>',
   '</table>',
