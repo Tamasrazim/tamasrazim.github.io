@@ -55,6 +55,10 @@ The interface exposes high output targets, including up to 16K, 240 fps, and a 2
 - Play, pause, scrub, seek to the first/last frame, step one frame, inspect an exact rendered frame, compare the preview with the export path, and use fullscreen preview.
 - Work with deterministic frame timing: `time = frame / fps`. The seeded helpers and noise/easing/loop API help animations reproduce the same requested frame when it is evaluated out of order.
 
+### Centered preview playback bar
+
+The preview pane has a centered transport bar with first frame, previous frame, play/pause, next frame, last frame, and loop toggle. **Preview Scale** controls the display size and raster density; **FIT** returns the frame to the available space. **Playback Speed** changes interactive preview playback from 0.25× to 4× without changing the render FPS. **Time Rate** is a separate animation-time remapping control.
+
 ### Composition, timing, and rendering
 
 - Choose resolution presets from 720p up to a 16K preset and custom dimensions up to 16,384 pixels per side.
