@@ -6,7 +6,9 @@
 <meta name="theme-color" content="#050505">
 <meta name="color-scheme" content="dark">
 <meta name="author" content="Robiul Rumman Razim">
-<meta name="description" content="TRILYVA documentation for animation source files, .tmotion projects, JavaScript exports, library downloads, frame-driven rendering, and browser-dependent output limits.">
+<meta name="description" content="TRILYVA documentation for animation code, rendering, .tmotion projects, library exports, and all 18 inspected-frame image formats.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article"><meta property="og:site_name" content="Tamasrazim"><meta property="og:title" content="TRILYVA Documentation — Animation, Rendering & Image Formats"><meta property="og:description" content="TRILYVA documentation for animation code, rendering, .tmotion projects, library exports, and all 18 inspected-frame image formats."><meta property="og:url" content="https://tamasrazim.github.io/projects/trilyva/docs.html"><meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg"><meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://tamasrazim.github.io/projects/trilyva/docs.html">
 <title>TRILYVA Documentation — Tamasrazim</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,6 +27,68 @@ footer{border-top:1px solid var(--line);padding:23px 0 34px;display:flex;justify
 @media(max-width:480px){.toc{grid-template-columns:1fr}.wrap{width:calc(100% - 28px)}.flow span{font-size:9px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
 </style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://tamasrazim.github.io/projects/trilyva/docs.html#article",
+      "headline": "TRILYVA Documentation — Animation, Rendering & Image Formats",
+      "name": "TRILYVA Documentation — Animation, Rendering & Image Formats",
+      "description": "TRILYVA documentation for animation code, rendering, .tmotion projects, library exports, and all 18 inspected-frame image formats.",
+      "url": "https://tamasrazim.github.io/projects/trilyva/docs.html",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://tamasrazim.github.io/projects/trilyva/docs.html"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Robiul Rumman Razim",
+        "url": "https://tamasrazim.github.io/about/"
+      },
+      "dateModified": "2026-10-30",
+      "inLanguage": "en",
+      "about": {
+        "@id": "https://tamasrazim.github.io/#trilyva"
+      },
+      "isPartOf": {
+        "@type": "WebPage",
+        "@id": "https://tamasrazim.github.io/projects/trilyva/",
+        "name": "TRILYVA project overview"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://tamasrazim.github.io/projects/trilyva/docs.html#breadcrumbs",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://tamasrazim.github.io/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Projects",
+          "item": "https://tamasrazim.github.io/projects/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "TRILYVA",
+          "item": "https://tamasrazim.github.io/projects/trilyva/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "TRILYVA Documentation — Animation, Rendering & Image Formats",
+          "item": "https://tamasrazim.github.io/projects/trilyva/docs.html"
+        }
+      ]
+    }
+  ]
+}</script>
 </head>
 <body>
 <header class="wrap top">
@@ -104,10 +168,13 @@ footer{border-top:1px solid var(--line);padding:23px 0 34px;display:flex;justify
 <div class="grid"><article class="card"><small>PREVIEW</small><h3>Interactive inspection</h3><p>Use playback, scrubbing, and frame inspection to evaluate motion and composition. Preview speed can vary with the scene and hardware.</p></article><article class="card"><small>EXPORT</small><h3>Configured output</h3><p>Use a short test and check the resulting file. For important deliveries, verify duration, dimensions, frame rate, colour, transparency, and continuity after export.</p></article></div>
 </section>
 <section class="doc" id="stills">
-<div class="eyebrow">07 / STILL-FRAME EXPORTS</div><h2>Export an individual frame.</h2>
-<p>The still-frame controls expose supported formats in the current interface, including raster and vector options where available. Raster export can include PNG and JPG; the vector recorder can offer SVG and EPS for supported drawing operations. The actual options are determined by the renderer build and how the animation draws.</p>
-<ul><li><strong>PNG</strong> is useful for raster images and can preserve transparency.</li><li><strong>JPG</strong> is a raster format and does not preserve alpha transparency.</li><li><strong>SVG / EPS</strong> are vector-oriented exports. Canvas operations that cannot be represented by the vector recorder may be omitted or reported as unsupported.</li></ul>
-<p>Frame indices start at zero in the standard frame-inspection workflow. Inspect the downloaded file before using it in a production pipeline, especially when the scene includes transparency, gradients, filters, or complex Canvas operations.</p>
+<div class="eyebrow">07 / STILL-FRAME EXPORTS</div><h2>Export an individual frame in 18 formats.</h2>
+<p>Open <strong>Inspect frame → Save this frame as</strong> to export the exact inspected frame. Its format picker contains 18 choices. The output is encoded locally except WebP and AVIF, which depend on the browser exposing a compatible canvas encoder. An unsupported browser encoder produces an export error instead of a successful file.</p>
+<div class="callout">Do not confuse the two still-image paths. The <strong>Inspect Frame</strong> picker below has 18 formats. The Render panel and full-library render settings separately offer PNG, JPG, SVG and EPS for automatic still-frame output.</div>
+<div class="table-wrap"><table><thead><tr><th scope="col">FORMAT</th><th scope="col">DETAILS / LIMITS</th></tr></thead><tbody><tr><th scope="row">PNG</th><td>Lossless raster image; supports alpha transparency and is a strong default for compositing.</td></tr><tr><th scope="row">JPEG / JPG</th><td>Lossy compressed raster image; exported against a white background, so transparency is flattened.</td></tr><tr><th scope="row">WebP</th><td>Modern web raster format; encoding depends on the browser's canvas encoder and may fail if unsupported.</td></tr><tr><th scope="row">AVIF</th><td>Highly compressed modern raster format; requires browser canvas-encoder support for AVIF output.</td></tr><tr><th scope="row">BMP</th><td>24-bit bitmap raster; simple and broadly understood but usually larger than compressed formats.</td></tr><tr><th scope="row">TIFF</th><td>Uncompressed RGB raster output; useful for interchange but can create large files.</td></tr><tr><th scope="row">GIF</th><td>One still image using a palette of up to 256 colours; this export is not an animated GIF.</td></tr><tr><th scope="row">ICO</th><td>Icon output limited to 256 pixels per side.</td></tr><tr><th scope="row">TGA</th><td>24-bit true-colour raster image; not an alpha-preserving option in this picker.</td></tr><tr><th scope="row">QOI</th><td>Lossless Quite OK Image raster; retains RGBA pixel data.</td></tr><tr><th scope="row">SVG</th><td>An SVG document with the frame embedded as a PNG image; it is not a set of editable vector paths.</td></tr><tr><th scope="row">EPS</th><td>A raster image wrapped in Encapsulated PostScript; it does not produce editable vector paths.</td></tr><tr><th scope="row">PPM</th><td>Portable pixmap colour image, intended for simple image processing and interchange.</td></tr><tr><th scope="row">PGM</th><td>Portable graymap grayscale image.</td></tr><tr><th scope="row">PBM</th><td>Portable bitmap monochrome image.</td></tr><tr><th scope="row">PAM</th><td>Portable arbitrary map; this encoder writes RGBA image data.</td></tr><tr><th scope="row">XBM</th><td>Monochrome X bitmap, a simple legacy bitmap format.</td></tr><tr><th scope="row">XPM</th><td>Indexed-colour pixmap format, commonly used by legacy X Window System tools.</td></tr></tbody></table></div>
+<h3>Raster-backed SVG and EPS</h3>
+<p>In the Inspect Frame picker, SVG wraps an embedded PNG image, and EPS wraps raster image data in a PostScript container. They do not contain editable vector paths. In standard-render and full-library still exports, SVG/EPS use a separate vector recorder that can represent supported drawing operations; unsupported Canvas operations may be missing or reported. Check the actual file before relying on it in a production pipeline.</p>
+<p>PNG is lossless and can preserve transparency. JPG is flattened onto a white background and has no alpha channel. Legacy and scientific formats may reduce colour range or use specialised encodings. Frame indices start at zero; inspect the downloaded file and compare it with the rendered preview.</p>
 </section>
 <section class="doc" id="limits">
 <div class="eyebrow">08 / CAPABILITY LIMITS</div><h2>Settings are not device guarantees.</h2>
