@@ -35,7 +35,7 @@ a{transition:opacity .2s ease,color .2s ease,border-color .2s ease}
 <body>
 <header class="wrap top">
 <a class="brand" href="/projects/trilyva/" aria-label="TRILYVA project home"><img src="/assets/brand/trilyva/T.svg" alt="TRILYVA T icon"><span>TRILYVA / COMPLETE FIELD GUIDE</span></a>
-<nav aria-label="Tutorial navigation"><a href="#contents">CONTENTS</a><a href="#first">FIRST PROJECT</a><a href="#motion">MOTION</a><a href="#export">EXPORT</a><a href="#fixes">FIXES</a></nav>
+<nav aria-label="Tutorial navigation"><a href="#contents">CONTENTS</a><a href="/projects/trilyva/docs.html">DOCS</a><a href="#first">FIRST PROJECT</a><a href="#motion">MOTION</a><a href="#export">EXPORT</a><a href="#fixes">FIXES</a></nav>
 </header>
 <main>
 <section class="wrap hero" id="start">
@@ -143,13 +143,14 @@ const p = Math.max(0, Math.min(
 <section class="wrap section" id="export">
 <div class="section-head"><div><div class="eyebrow">07 / RENDER AND EXPORT</div><h2>Use a safe render sequence.</h2></div><p class="muted">Do not begin with the biggest possible job. Validate the idea, validate the settings, then render the complete output.</p></div>
 <div class="steps">
-<div class="step"><div class="n">01</div><div><h3>Save or copy your source</h3><p>Keep a known-good copy of the animation before changing the composition or attempting a large render.</p></div></div>
+<div class="step"><div class="n">01</div><div><h3>Save source in the right format</h3><p>In the ANIMATION SOURCE toolbar, Copy copies the JavaScript and Save opens a format picker. Choose .tmotion to download the source together with project composition/settings, or .js for the source alone. The main project Save action is separate and keeps a local project in browser storage.</p></div></div>
 <div class="step"><div class="n">02</div><div><h3>Analyse the job</h3><p>Use the available analysis/diagnostics controls to check the selected dimensions, frame rate, duration, and browser-supported output path.</p></div></div>
 <div class="step"><div class="n">03</div><div><h3>Run a short test render</h3><p>Render a short duration or test range if the workspace provides it. Confirm that the result plays, has the correct framing, and contains the intended background.</p></div></div>
 <div class="step"><div class="n">04</div><div><h3>Render the complete job</h3><p>Keep the tab open and avoid closing the workspace while it is processing. Large jobs can take a long time and require significant memory or storage.</p></div></div>
 <div class="step"><div class="n">05</div><div><h3>Inspect the output</h3><p>Play the exported file or inspect the downloaded image sequence. Check the beginning, middle, and end, and confirm the dimensions and duration before delivery.</p></div></div>
 <div class="step"><div class="n">06</div><div><h3>Save a still frame</h3><p>In the workspace Render panel, choose a frame index and select PNG, JPG, SVG, or EPS. Frame indices start at zero; the default is frame 0 and PNG. After a successful standard render, the selected still formats are exported automatically. Change the frame index to save another moment.</p></div></div>
-<div class="step"><div class="n">07</div><div><h3>Render a full library</h3><p>Choose Render Full Library, select a built-in or imported library, then choose Save to Folder or Save as ZIP. Set the still formats and frame index first. The output includes each animation’s MP4, selected stills, and metadata; video encoder availability and vector-operation support still depend on the current browser and renderer.</p></div></div>
+<div class="step"><div class="n">07</div><div><h3>Render a full library</h3><p>Choose Render Full Library, select a built-in or imported library, then choose Save to Folder or Save as ZIP. Set the still formats and frame index first. The output includes each animation’s rendered media and metadata; video encoder availability and vector-operation support still depend on the current browser and renderer.</p></div></div>
+<div class="step"><div class="n">08</div><div><h3>Download animation source from Library</h3><p>In the Library tab, use DOWNLOAD FROM LIBRARY. DOWNLOAD JS exports one selected animation as a .js file; DOWNLOAD LIBRARY (.ZIP) packages the selected library's JavaScript sources with library-manifest.json and README.txt. These source downloads are separate from Render Full Library, which creates media outputs.</p></div></div>
 </div>
 </section>
 <section class="wrap section" id="loops">
@@ -190,7 +191,10 @@ const y = height * 0.5 + Math.sin(angle) * height * 0.1;</code></pre>
 <tr><td>PNG image sequence</td><td>Lossless frames, compositing, and transparency.</td><td>Many frames can require a lot of storage; archive/ZIP support may have limits.</td></tr>
 <tr><td>Still frame: PNG / JPG</td><td>Export a chosen frame as a raster image; PNG is suitable for transparency.</td><td>JPG has no alpha channel. Frame numbering starts at zero; the default is frame 0.</td></tr>
 <tr><td>Still frame: SVG / EPS</td><td>Vector-oriented still export for supported drawing operations.</td><td>The vector recorder cannot translate every possible Canvas 2D operation; inspect the output and any warning.</td></tr>
-<tr><td>Full library: folder / ZIP</td><td>Batch-export a chosen library with MP4, selected still frames, and metadata.</td><td>Folder/ZIP destination pickers need supported browser file access. Video and vector output still have capability limits.</td></tr>
+<tr><td>Project: .tmotion</td><td>Keep animation source plus project composition/settings for later import.</td><td>Use ANIMATION SOURCE → Save; this is different from the browser-local project Save action.</td></tr>
+<tr><td>Animation source: .js</td><td>Keep or share only the current JavaScript animation source.</td><td>Use ANIMATION SOURCE → Save, then choose .js.</td></tr>
+<tr><td>Library source: ZIP</td><td>Download a library's JavaScript files, manifest, and README.</td><td>Use Library → DOWNLOAD FROM LIBRARY → DOWNLOAD LIBRARY (.ZIP); this does not render video.</td></tr>
+<tr><td>Full library: folder / ZIP</td><td>Batch-export a chosen library with rendered media, selected still frames, and metadata.</td><td>Folder/ZIP destination pickers need supported browser file access. Video and vector output still have capability limits.</td></tr>
 </tbody></table>
 <div class="callout">Related TRILYVA tools can have their own export capabilities. Do not assume an option available in a separate vector or audio tool is automatically available in the animation renderer.</div>
 </section>
@@ -216,7 +220,7 @@ const y = height * 0.5 + Math.sin(angle) * height * 0.1;</code></pre>
 <div class="step"><div class="n">04</div><div><h3>Preview and diagnose</h3><p>Scrub through transitions, inspect exact frames, and remove flicker or unintended jumps.</p></div></div>
 <div class="step"><div class="n">05</div><div><h3>Test, render, verify</h3><p>Use a manageable test export first, then the final settings. Inspect the resulting file before sharing or editing it further.</p></div></div>
 </div>
-<div class="actions"><a class="btn primary" href="/projects/code-motion/renderer/">START MAKING IN TRILYVA ↗</a><a class="btn" href="/projects/trilyva/">PROJECT OVERVIEW ↗</a><a class="btn" href="#start">BACK TO TOP ↑</a></div>
+<div class="actions"><a class="btn primary" href="/projects/code-motion/renderer/">START MAKING IN TRILYVA</a><a class="btn" href="/projects/trilyva/docs.html">OPEN DOCUMENTATION</a><a class="btn" href="/projects/trilyva/">PROJECT OVERVIEW</a><a class="btn" href="#start">BACK TO TOP</a></div>
 </section>
 </main>
 <footer class="wrap"><span>ROBIUL RUMMAN RAZIM — TAMASRAZIM / TRILYVA</span><span><a href="/projects/">PROJECTS</a> · <a href="/">MAIN SITE</a></span></footer>
