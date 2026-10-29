@@ -12,7 +12,9 @@
 <meta name="color-scheme" content="dark">
 
 <meta name="author" content="Robiul Rumman Razim">
-<meta name="description" content="The complete TRILYVA tutorial: learn the workspace, write animations, work with frames and time, design motion, configure output, render, export, and troubleshoot.">
+<meta name="description" content="TRILYVA tutorial for JavaScript animation, frame-driven rendering, project and library exports, looping, diagnostics, and all 18 still-frame image formats.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article"><meta property="og:site_name" content="Tamasrazim"><meta property="og:title" content="TRILYVA Tutorial — Complete Animation & Export Guide"><meta property="og:description" content="TRILYVA tutorial for JavaScript animation, frame-driven rendering, project and library exports, looping, diagnostics, and all 18 still-frame image formats."><meta property="og:url" content="https://tamasrazim.github.io/projects/trilyva/tutorial.html"><meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg"><meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://tamasrazim.github.io/projects/trilyva/tutorial.html">
 <title>TRILYVA Tutorial — The Complete Field Guide</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,6 +33,68 @@ a{transition:opacity .2s ease,color .2s ease,border-color .2s ease}
 @media(prefers-reduced-motion:no-preference){.hero{animation:fieldGuideRise .65s cubic-bezier(.16,.84,.28,1) both}.section{animation:fieldGuideRise .55s cubic-bezier(.16,.84,.28,1) both}}
 @media(prefers-reduced-motion:reduce){.card,.step,.callout,a,.hero,.section{animation:none!important;transition:none!important;transform:none!important}}
 </style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://tamasrazim.github.io/projects/trilyva/tutorial.html#article",
+      "headline": "TRILYVA Tutorial — Complete Animation & Export Guide",
+      "name": "TRILYVA Tutorial — Complete Animation & Export Guide",
+      "description": "TRILYVA tutorial for JavaScript animation, frame-driven rendering, project and library exports, looping, diagnostics, and all 18 still-frame image formats.",
+      "url": "https://tamasrazim.github.io/projects/trilyva/tutorial.html",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://tamasrazim.github.io/projects/trilyva/tutorial.html"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Robiul Rumman Razim",
+        "url": "https://tamasrazim.github.io/about/"
+      },
+      "dateModified": "2026-10-30",
+      "inLanguage": "en",
+      "about": {
+        "@id": "https://tamasrazim.github.io/#trilyva"
+      },
+      "isPartOf": {
+        "@type": "WebPage",
+        "@id": "https://tamasrazim.github.io/projects/trilyva/",
+        "name": "TRILYVA project overview"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://tamasrazim.github.io/projects/trilyva/tutorial.html#breadcrumbs",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://tamasrazim.github.io/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Projects",
+          "item": "https://tamasrazim.github.io/projects/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "TRILYVA",
+          "item": "https://tamasrazim.github.io/projects/trilyva/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "TRILYVA Tutorial — Complete Animation & Export Guide",
+          "item": "https://tamasrazim.github.io/projects/trilyva/tutorial.html"
+        }
+      ]
+    }
+  ]
+}</script>
 </head>
 <body>
 <header class="wrap top">
@@ -41,7 +105,7 @@ a{transition:opacity .2s ease,color .2s ease,border-color .2s ease}
 <section class="wrap hero" id="start">
 <div class="eyebrow">TRILYVA / THE COMPLETE TUTORIAL</div>
 <h1>From first frame<br><span>to final export.</span></h1>
-<p class="lead">A full practical guide to using TRILYVA: understand the workspace, write a working animation, shape the motion, choose a composition, test the browser's capabilities, render, export, and diagnose common problems. It also covers full-library folder/ZIP batches and saving a chosen frame as PNG, JPG, SVG, or EPS.</p>
+<p class="lead">A full practical guide to using TRILYVA: understand the workspace, write a working animation, shape the motion, choose a composition, test the browser's capabilities, render, export, and diagnose common problems. It also covers full-library folder/ZIP batches and the Inspect Frame picker with 18 image formats, including PNG, JPEG, WebP, AVIF, BMP, TIFF, GIF, ICO, TGA, QOI, SVG, EPS, PPM, PGM, PBM, PAM, XBM and XPM.</p>
 <p class="muted">This is a complete written tutorial, not a fixed 60-second animation or promo. Follow it at your own pace; there is no time limit. Duration, frame rate, resolution, and output format are choices for your project and depend on the options available in the running browser.</p>
 <div class="actions"><a class="btn primary" href="/projects/code-motion/renderer/">OPEN TRILYVA WORKSPACE ↗</a><a class="btn" href="/projects/trilyva/">ABOUT TRILYVA ↗</a></div>
 <div class="callout"><strong>Before you begin:</strong> this guide includes explanatory diagrams rather than fake screenshots. The workspace is the source of truth for the current controls and capability indicators; labels and export options can change as the project evolves.</div>
@@ -190,12 +254,18 @@ const y = height * 0.5 + Math.sin(angle) * height * 0.1;</code></pre>
 <tr><td>WebM / VP8 or VP9</td><td>Web playback and supported browser workflows.</td><td>Actual codec/profile support varies by browser and device.</td></tr>
 <tr><td>PNG image sequence</td><td>Lossless frames, compositing, and transparency.</td><td>Many frames can require a lot of storage; archive/ZIP support may have limits.</td></tr>
 <tr><td>Still frame: PNG / JPG</td><td>Export a chosen frame as a raster image; PNG is suitable for transparency.</td><td>JPG has no alpha channel. Frame numbering starts at zero; the default is frame 0.</td></tr>
-<tr><td>Still frame: SVG / EPS</td><td>Vector-oriented still export for supported drawing operations.</td><td>The vector recorder cannot translate every possible Canvas 2D operation; inspect the output and any warning.</td></tr>
+<tr><td>Inspect-frame SVG / EPS</td><td>SVG embeds a PNG image; EPS wraps raster image data.</td><td>These inspector outputs are not editable vector paths. The Render panel's separate SVG/EPS batch path uses a vector recorder for supported drawing operations.</td></tr>
 <tr><td>Project: .tmotion</td><td>Keep animation source plus project composition/settings for later import.</td><td>Use ANIMATION SOURCE → Save; this is different from the browser-local project Save action.</td></tr>
 <tr><td>Animation source: .js</td><td>Keep or share only the current JavaScript animation source.</td><td>Use ANIMATION SOURCE → Save, then choose .js.</td></tr>
 <tr><td>Library source: ZIP</td><td>Download a library's JavaScript files, manifest, and README.</td><td>Use Library → DOWNLOAD FROM LIBRARY → DOWNLOAD LIBRARY (.ZIP); this does not render video.</td></tr>
 <tr><td>Full library: folder / ZIP</td><td>Batch-export a chosen library with rendered media, selected still frames, and metadata.</td><td>Folder/ZIP destination pickers need supported browser file access. Video and vector output still have capability limits.</td></tr>
 </tbody></table>
+<div class="format-details" id="still-image-formats">
+<h3>All 18 still-image formats in “Save this frame as”</h3>
+<p>The <strong>Inspect frame → Save this frame as</strong> picker exposes these 18 outputs. WebP and AVIF require a browser encoder that can produce that MIME type; if the browser cannot encode the selected format, TRILYVA reports an export error rather than making a valid-looking file with the wrong contents. The other listed formats are encoded locally by TRILYVA.</p>
+<table class="table"><thead><tr><th scope="col">FORMAT</th><th scope="col">WHAT TRILYVA WRITES AND WHEN TO USE IT</th></tr></thead><tbody><tr><th scope="row">PNG</th><td>Lossless raster image; supports alpha transparency and is a strong default for compositing.</td></tr><tr><th scope="row">JPEG / JPG</th><td>Lossy compressed raster image; exported against a white background, so transparency is flattened.</td></tr><tr><th scope="row">WebP</th><td>Modern web raster format; encoding depends on the browser's canvas encoder and may fail if unsupported.</td></tr><tr><th scope="row">AVIF</th><td>Highly compressed modern raster format; requires browser canvas-encoder support for AVIF output.</td></tr><tr><th scope="row">BMP</th><td>24-bit bitmap raster; simple and broadly understood but usually larger than compressed formats.</td></tr><tr><th scope="row">TIFF</th><td>Uncompressed RGB raster output; useful for interchange but can create large files.</td></tr><tr><th scope="row">GIF</th><td>One still image using a palette of up to 256 colours; this export is not an animated GIF.</td></tr><tr><th scope="row">ICO</th><td>Icon output limited to 256 pixels per side.</td></tr><tr><th scope="row">TGA</th><td>24-bit true-colour raster image; not an alpha-preserving option in this picker.</td></tr><tr><th scope="row">QOI</th><td>Lossless Quite OK Image raster; retains RGBA pixel data.</td></tr><tr><th scope="row">SVG</th><td>An SVG document with the frame embedded as a PNG image; it is not a set of editable vector paths.</td></tr><tr><th scope="row">EPS</th><td>A raster image wrapped in Encapsulated PostScript; it does not produce editable vector paths.</td></tr><tr><th scope="row">PPM</th><td>Portable pixmap colour image, intended for simple image processing and interchange.</td></tr><tr><th scope="row">PGM</th><td>Portable graymap grayscale image.</td></tr><tr><th scope="row">PBM</th><td>Portable bitmap monochrome image.</td></tr><tr><th scope="row">PAM</th><td>Portable arbitrary map; this encoder writes RGBA image data.</td></tr><tr><th scope="row">XBM</th><td>Monochrome X bitmap, a simple legacy bitmap format.</td></tr><tr><th scope="row">XPM</th><td>Indexed-colour pixmap format, commonly used by legacy X Window System tools.</td></tr></tbody></table>
+<div class="callout"><strong>Important distinction:</strong> the one-frame inspector's SVG and EPS files contain raster image data, not editable vector paths. The Render panel's automated still-image selections for standard renders and full-library batches are a separate path and currently offer PNG, JPG, SVG and EPS; the batch vector recorder may represent supported drawing operations as vector content. Neither vector route can promise fidelity for every Canvas operation.</div>
+</div>
 <div class="callout">Related TRILYVA tools can have their own export capabilities. Do not assume an option available in a separate vector or audio tool is automatically available in the animation renderer.</div>
 </section>
 <section class="wrap section" id="fixes">
