@@ -124,7 +124,7 @@
       "@id": "https://tamasrazim.github.io/#trilyva",
       "name": "TRILYVA",
       "url": "https://tamasrazim.github.io/projects/trilyva/",
-      "description": "A deterministic browser-based animation workspace for writing procedural motion, previewing frames, and testing browser-supported video exports.",
+      "description": "A browser-based JavaScript animation workspace for frame-driven motion, browser-capability-checked MP4/WebM rendering, project and library exports, metadata receipts, and individual-frame export to 18 image formats.",
       "applicationCategory": "MultimediaApplication",
       "operatingSystem": "Web Browser",
       "isAccessibleForFree": true,
@@ -138,12 +138,22 @@
         "@id": "https://tamasrazim.github.io/projects/trilyva/#page"
       },
       "featureList": [
-        "Frame-index-driven deterministic animation",
-        "Live procedural preview and code editing",
-        "Configurable output duration, resolution, and frame rate",
-        "Browser capability checks for available encoders and containers",
-        "Local MP4 and WebM rendering paths",
-        "Batch and vector-oriented motion workflows"
+        "Frame-index-driven JavaScript animation using time = frame / fps",
+        "Live preview, timeline scrubbing, exact-frame inspection, fullscreen preview, and preview/export comparison",
+        "Code editor with syntax highlighting, find and replace, reindent, undo, redo, source analysis, examples, and animation prompt copying",
+        "Composition controls for dimensions, frame rate, duration, background, deterministic random seed, looping, time remapping, and reverse",
+        "Configuration targets up to 16K resolution, 240 fps, and 2,000 Mbps bitrate; these are not universal performance guarantees",
+        "Browser capability checks and frame-count/container verification for supported video export paths",
+        "MP4/H.264 and WebM/VP8/VP9 rendering where the browser and device support the selected configuration",
+        "Queue jobs with frozen source, composition, loop, metadata, and output settings",
+        "Project save/import/export using local browser storage and .tmotion packages; JavaScript source export as .js",
+        "Project metadata fields, source SHA-256, copied JSON metadata receipt, and render diagnostics",
+        "Built-in and locally imported JavaScript libraries from .js, folders, and ZIP files",
+        "Download one library animation as JavaScript or a source ZIP with a manifest and README",
+        "Batch render full libraries to folder or ZIP with media and per-item metadata",
+        "Individual inspected-frame export to 18 formats: PNG, JPEG, WebP, AVIF, BMP, TIFF, GIF, ICO, TGA, QOI, SVG, EPS, PPM, PGM, PBM, PAM, XBM, and XPM",
+        "Separate automatic still-frame export for standard renders and library batches in PNG, JPG, SVG, and EPS",
+        "Frame-intelligence suggestions using a heuristic visual analysis workflow"
       ]
     },
     {
