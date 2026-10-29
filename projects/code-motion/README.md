@@ -42,9 +42,63 @@ The preview is for interactive inspection and may lag at demanding settings. Exp
 
 ## Export and compatibility
 
-The current workspace includes browser-side video paths where compatible H.264/AVC or VP8/VP9 configurations are available. Still-image controls can offer PNG, JPG, SVG, and EPS depending on the current build; vector output is limited by the operations the vector recorder can represent. Directory/file destination pickers depend on browser support.
+The current workspace offers browser-side MP4/H.264 and WebM/VP8/VP9 paths where compatible encoder configurations are available. Inspect Frame has a separate **Save this frame as** picker with 18 individual-frame formats, detailed below. The Render panel and full-library batch render have a separate automatic still-image selection of PNG, JPG, SVG, and EPS. For that batch path, SVG/EPS use a vector recorder and are limited to operations it can represent. Directory/file destination pickers depend on browser support.
 
 The interface exposes high output targets, including up to 16K, 240 fps, and a 2,000 Mbps (2 Gbps) bitrate target. These are configuration ceilings, not guaranteed real-world performance or a promise that all settings can be combined successfully on every machine. Test with a short render and inspect the result before production use.
+
+## Capability map
+
+### Animation authoring and preview
+
+- Edit JavaScript that implements `window.renderFrame(time, frame, fps, ctx, width, height)`; the renderer supplies a Canvas 2D context and composition dimensions.
+- Use syntax colours, find/replace, reindent, undo/redo, source analysis, paste, copy, clear, examples, and the Copy Prompt helper.
+- Play, pause, scrub, seek to the first/last frame, step one frame, inspect an exact rendered frame, compare the preview with the export path, and use fullscreen preview.
+- Work with deterministic frame timing: `time = frame / fps`. The seeded helpers and noise/easing/loop API help animations reproduce the same requested frame when it is evaluated out of order.
+
+### Composition, timing, and rendering
+
+- Choose resolution presets from 720p up to a 16K preset and custom dimensions up to 16,384 pixels per side.
+- Choose frame rates from 1 to 240 fps, common presets through 240 fps, and a custom duration from 0.05 seconds up to one hour.
+- Configure opaque or transparent background, background colour, random seed, loop length, seam analysis, retiming, and reverse.
+- Run pre-flight analysis and test renders; select Draft, Standard, High, or Maximum quality, set a target bitrate up to 2,000 Mbps, inspect encoder diagnostics, and optionally enable frame fingerprints.
+- The local video path supports MP4/H.264 and WebM/VP8/VP9 only when the current browser and device accept the selected configuration. Completed output is checked against the requested frame/sample count and container structure. These checks do not guarantee that the visual result matches the creator's intent.
+- The 16K, 240 fps, and 2 Gbps values are configuration ceilings, not a promise that all can be combined on every computer.
+
+### Projects, metadata, and libraries
+
+- Save projects to browser storage; import or export the `.tmotion` project package, or export the animation source as `.js`.
+- Record project name, creator, composition, description, and language. The source panel reports source-line count and SHA-256; metadata can be copied as a JSON receipt.
+- Use bundled libraries or import one JavaScript file, a folder containing JS files, or a ZIP as a separate local library. Imported libraries stay in this browser's local storage.
+- Download one library animation as `.js` or download the library source ZIP with `library-manifest.json` and `README.txt`.
+- Render a full selected library to a folder or ZIP with per-animation video, selected automatic still frames, and metadata. Folder saving requires browser file-system access support.
+- Frame-intelligence suggestions are heuristic stock-keyword/category ideas; review these suggestions instead of treating them as verified image facts.
+
+## The 18 Inspect Frame image formats
+
+Use **Preview → Inspect frame → Save this frame as**. WebP and AVIF depend on a compatible browser canvas encoder. The other formats are encoded locally. The single-frame inspector's SVG and EPS are raster-backed wrappers, not editable vector artwork.
+
+| Format | What it writes and its limits |
+| --- | --- |
+| PNG | Lossless raster image; supports alpha transparency. |
+| JPEG / JPG | Lossy raster image; transparency is flattened against white. |
+| WebP | Modern web raster; requires browser canvas-encoder support. |
+| AVIF | Modern compressed raster; requires browser canvas-encoder support. |
+| BMP | 24-bit bitmap raster. |
+| TIFF | Uncompressed RGB raster; file sizes can be large. |
+| GIF | Single still image with up to 256 colours; not animated GIF output. |
+| ICO | Icon image, maximum 256 pixels per side. |
+| TGA | 24-bit true-colour raster. |
+| QOI | Lossless RGBA raster. |
+| SVG | SVG wrapper embedding a PNG image; not editable vector paths in the inspector output. |
+| EPS | EPS/PostScript wrapper containing raster image data; not editable vector paths in the inspector output. |
+| PPM | Portable pixmap colour image. |
+| PGM | Portable graymap grayscale image. |
+| PBM | Portable monochrome bitmap. |
+| PAM | Portable arbitrary map with RGBA data. |
+| XBM | Monochrome X bitmap. |
+| XPM | Indexed-colour pixmap. |
+
+**Important distinction:** the Render panel and full-library still settings currently provide four automatic formats: PNG, JPG, SVG, and EPS. That four-format output is not the same as the 18-format picker for one inspected frame. Batch SVG/EPS uses a separate vector recorder and can omit drawing operations it cannot represent.
 
 ## Repository map
 
