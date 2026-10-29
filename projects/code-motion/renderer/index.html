@@ -9941,12 +9941,18 @@ function syncFrameUI() {
   $('#tTc').textContent = timecode(f, c.fps);
   $('#tAnim').textContent = t.toFixed(3);
   var seek = $('#pvSeek');
-  var totalSeconds = c.frameCount / c.fps;
-  var currentSeconds = f / c.fps;
-  var maxFrame = Math.max(1, c.frameCount - 1);
+  // Use the same effective range as playback: time-remapped loops may span
+  // fewer composition frames (for example, 2× speed uses half the frames).
+  var activeRange = S.loopPlayback ? loopRange() : { a: 0, b: c.frameCount };
+  var rangeFrames = Math.max(1, activeRange.b - activeRange.a);
+  var maxFrame = Math.max(1, rangeFrames - 1);
+  var displayFrame = Math.max(activeRange.a, Math.min(f, activeRange.b - 1));
+  var rangePosition = displayFrame - activeRange.a;
+  var totalSeconds = rangeFrames / c.fps;
+  var currentSeconds = rangePosition / c.fps;
   seek.max = String(maxFrame);
-  seek.value = String(f);
-  seek.style.setProperty('--progress', (f / maxFrame * 100) + '%');
+  seek.value = String(rangePosition);
+  seek.style.setProperty('--progress', (rangePosition / maxFrame * 100) + '%');
   seek.setAttribute('aria-valuetext', formatPlaybackTime(currentSeconds) + ' of ' + formatPlaybackTime(totalSeconds));
   $('#pvCurrentTime').textContent = formatPlaybackTime(currentSeconds);
   $('#pvDuration').textContent = formatPlaybackTime(totalSeconds);
@@ -10188,7 +10194,10 @@ function initComp() {
   $('#cBgColor').addEventListener('change', function () { applyComp({ background: $('#cBgColor').value.trim() || '#000000' }); });
   $('#cReverse').addEventListener('change', function () { applyComp({ reverse: $('#cReverse').checked }); });
   $('#pvScale').addEventListener('change', function () { computeRaster(); sizeCanvasFrame(); requestPreview(true); });
-  $('#pvSeek').addEventListener('input', function () { setFrame(Number(this.value)); });
+  $('#pvSeek').addEventListener('input', function () {
+    var range = S.loopPlayback ? loopRange() : { a: 0, b: S.comp.frameCount };
+    setFrame(range.a + Number(this.value));
+  });
 }
 
 function applyComp(patch) {
