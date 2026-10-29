@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark">
+<meta name="author" content="Robiul Rumman Razim">
+<meta name="description" content="TRILYVA documentation for animation source files, .tmotion projects, JavaScript exports, library downloads, frame-driven rendering, and browser-dependent output limits.">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/trilyva/docs.html">
+<title>TRILYVA Documentation — Tamasrazim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site-v3.css?v=20261010-3">
+<style>
+:root{color-scheme:dark;--bg:#050505;--panel:rgba(255,255,255,.035);--line:rgba(241,241,237,.14);--muted:#a4a49e;--ink:#f1f1ed;--mono:"JetBrains Mono",monospace;--display:"Unbounded",sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;background:radial-gradient(ellipse at 80% 0%,rgba(255,255,255,.075),transparent 34%),var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif}.wrap{width:min(1120px,calc(100% - 36px));margin-inline:auto}
+.top{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:76px;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:11px;color:inherit;text-decoration:none;font:10px var(--mono);letter-spacing:.1em}.brand img{width:45px;height:45px;object-fit:contain}.nav{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font:10px var(--mono)}.nav a{color:var(--muted);text-decoration:none}.nav a:hover{color:var(--ink)}
+.hero{padding:clamp(54px,8vw,96px) 0 55px;border-bottom:1px solid var(--line)}.eyebrow{font:10px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}h1{font:700 clamp(42px,8vw,88px)/1.02 var(--display);letter-spacing:-.075em;margin:22px 0}h1 span{color:#878781}.lead{max-width:780px;font-size:clamp(17px,2.2vw,22px);line-height:1.8;color:#d5d5cf}.muted{color:var(--muted);line-height:1.9;font-size:13px}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 14px;border:1px solid var(--line);border-radius:7px;text-decoration:none;color:var(--ink);font:10px var(--mono);background:rgba(255,255,255,.03)}.btn.primary{background:var(--ink);color:#050505;border-color:var(--ink)}
+.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:32px;padding:38px 0 70px}.toc{align-self:start;position:sticky;top:20px;border:1px solid var(--line);background:rgba(255,255,255,.018);padding:15px}.toc b{display:block;font:10px var(--mono);letter-spacing:.13em;color:#d9d9d3;margin:0 0 12px}.toc a{display:block;padding:9px 3px;border-top:1px solid rgba(255,255,255,.06);font:10px/1.6 var(--mono);color:var(--muted);text-decoration:none}.toc a:hover{color:var(--ink)}
+section.doc{padding:0 0 36px;margin:0 0 34px;border-bottom:1px solid var(--line);scroll-margin-top:24px}.doc h2{font:600 clamp(23px,3.6vw,35px)/1.2 var(--display);letter-spacing:-.06em;margin:12px 0 15px}.doc h3{font:500 15px/1.5 var(--display);margin:24px 0 8px}.doc p,.doc li{font-size:13px;line-height:1.9;color:#c8c8c1}.doc ul,.doc ol{padding-left:21px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{min-width:0;border:1px solid var(--line);padding:17px;background:linear-gradient(145deg,rgba(255,255,255,.045),transparent 66%)}.card small{font:9px var(--mono);letter-spacing:.12em;color:var(--muted)}.card h3{margin:11px 0 6px}.card p{margin:0}.callout{margin:16px 0;padding:13px 15px;border-left:2px solid #efefe9;background:rgba(255,255,255,.035);font-size:13px;line-height:1.9;color:#d2d2cb}.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0}.flow span{padding:12px;border:1px solid var(--line);font:10px/1.7 var(--mono);color:#deded8;text-align:center}.code{overflow:auto;border:1px solid var(--line);background:#080808;padding:16px;font:12px/1.9 var(--mono);color:#e8e8e2;white-space:pre}.token{display:inline-block;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:1px 7px;font:10px var(--mono)}.keyword{color:#c586c0}.string{color:#ce9178}.number{color:#b5cea8}.comment{color:#6a9955}.function{color:#dcdcaa}.api{color:#4fc1ff}.property{color:#9cdcfe}.literal{color:#569cd6}.table-wrap{overflow:auto;border:1px solid var(--line)}table{width:100%;border-collapse:collapse;min-width:540px}th,td{text-align:left;vertical-align:top;padding:12px 13px;border-bottom:1px solid var(--line);font-size:12px;line-height:1.8}th{font:9px var(--mono);letter-spacing:.1em;color:var(--muted)}td{color:#c9c9c2}tr:last-child td{border-bottom:0}.tag{display:inline-block;font:9px var(--mono);letter-spacing:.08em;color:#d6d6cf;border:1px solid var(--line);padding:5px 7px;margin:2px 3px 2px 0}
+footer{border-top:1px solid var(--line);padding:23px 0 34px;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;color:var(--muted);font:9px var(--mono)}footer a{color:inherit;text-decoration:none}
+@media(max-width:780px){.layout{grid-template-columns:1fr;gap:24px}.toc{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0}.toc b{grid-column:1/-1}.flow{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column;padding:14px 0}.nav{gap:12px}}
+@media(max-width:480px){.toc{grid-template-columns:1fr}.wrap{width:calc(100% - 28px)}.flow span{font-size:9px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="wrap top">
+<a class="brand" href="/projects/trilyva/" aria-label="TRILYVA project overview"><img src="/assets/brand/trilyva/T.svg" alt=""><span>TRILYVA / DOCUMENTATION</span></a>
+<nav class="nav" aria-label="Documentation navigation"><a href="/projects/trilyva/">PROJECT</a><a href="/projects/trilyva/tutorial.html">TUTORIAL</a><a href="/projects/code-motion/renderer/">WORKSPACE</a></nav>
+</header>
+<main>
+<section class="wrap hero" id="top">
+<div class="eyebrow">REFERENCE / BROWSER WORKSPACE</div>
+<h1>TRILYVA<span>.</span> Docs</h1>
+<p class="lead">A practical reference for animation source, project files, library downloads, frame-driven rendering, and the limits imposed by your browser and hardware.</p>
+<p class="muted">This documentation describes the browser workspace linked below. Control names can change as the project evolves; use the current interface and diagnostics as the final authority for available options.</p>
+<div class="actions"><a class="btn primary" href="/projects/code-motion/renderer/">Open TRILYVA workspace</a><a class="btn" href="/projects/trilyva/tutorial.html">Read the step-by-step tutorial</a><a class="btn" href="https://github.com/Tamasrazim/Trilyva">GitHub repository</a></div>
+</section>
+<div class="wrap layout">
+<aside class="toc" aria-label="Documentation contents">
+<b>ON THIS PAGE</b>
+<a href="#start">01 / Get started</a><a href="#animation">02 / Animation function</a><a href="#editor">03 / Editor and syntax colours</a><a href="#save">04 / Save source and projects</a><a href="#library">05 / Download from Library</a><a href="#render">06 / Render model</a><a href="#stills">07 / Still-frame exports</a><a href="#limits">08 / Capability limits</a><a href="#troubleshoot">09 / Troubleshooting</a>
+</aside>
+<div>
+<section class="doc" id="start">
+<div class="eyebrow">01 / GET STARTED</div><h2>Open, edit, preview, render.</h2>
+<p>Open the workspace in a current browser, select an example or library animation, and edit its JavaScript source in the <strong>ANIMATION SOURCE</strong> area. The preview is for checking composition and motion. For delivery, configure the composition and use the renderer's export controls.</p>
+<div class="flow" aria-label="Typical workflow"><span>01 / CODE</span><span>02 / PREVIEW</span><span>03 / CONFIGURE</span><span>04 / RENDER</span></div>
+<div class="callout">Start with a short, low-resolution test. High frame rates, large canvases, complex drawing, and high target bitrates can substantially increase memory use, processing time, and output size.</div>
+</section>
+<section class="doc" id="animation">
+<div class="eyebrow">02 / ANIMATION FUNCTION</div><h2>Make the frame a function of time.</h2>
+<p>The renderer's animation contract is <strong>window.renderFrame(time, frame, fps, ctx, width, height)</strong>. Keep the drawing logic deterministic: the same inputs should produce the same frame. Derive motion from <strong>time</strong>, not from a mutable per-frame increment.</p>
+<div class="code"><span class="keyword">window</span>.renderFrame = <span class="keyword">function</span> (time, frame, fps, ctx, width, height) {
+  ctx.fillStyle = <span class="string">'#000'</span>;
+  ctx.fillRect(<span class="number">0</span>, <span class="number">0</span>, width, height);
+
+  <span class="keyword">const</span> x = width * <span class="number">0.5</span> + Math.cos(time * <span class="number">2</span>) * <span class="number">200</span>;
+  ctx.fillStyle = <span class="string">'#fff'</span>;
+  ctx.beginPath();
+  ctx.arc(x, height * <span class="number">0.5</span>, <span class="number">40</span>, <span class="number">0</span>, Math.PI * <span class="number">2</span>);
+  ctx.fill();
+};</div>
+<p class="muted">This is a small working reference, not a finished visual. The render system provides the Canvas context and dimensions. Avoid timers, DOM manipulation, requestAnimationFrame, network dependencies, and random values that change independently between frames.</p>
+</section>
+<section class="doc" id="editor">
+<div class="eyebrow">03 / EDITOR AND SYNTAX COLOURS</div><h2>Read code faster with colour groups.</h2>
+<p>The editor uses syntax highlighting to distinguish common JavaScript structures. Colour is only an aid for scanning; it does not validate the program or guarantee that the source will run.</p>
+<div class="grid">
+<article class="card"><small>LANGUAGE STRUCTURE</small><h3><span class="token keyword">Keywords</span></h3><p>Control words and declarations use purple, helping separate statements such as <strong>const</strong>, <strong>function</strong>, and <strong>return</strong> from drawing operations.</p></article>
+<article class="card"><small>VALUES</small><h3><span class="token string">Strings</span> <span class="token number">Numbers</span></h3><p>Strings use orange, while numeric constants use pale green. Comments are green and are ignored by JavaScript execution.</p></article>
+<article class="card"><small>CALLABLES</small><h3><span class="token function">Functions</span></h3><p>Recognised function names use yellow. Use descriptive helper functions to keep complex scenes organised.</p></article>
+<article class="card"><small>RENDER API</small><h3><span class="token api">Canvas/API</span> <span class="token property">Properties</span></h3><p>Recognised renderer and browser APIs use cyan, properties use light blue, and selected literals use blue. The editor is a lightweight highlighter, not a full language server.</p></article>
+</div>
+</section>
+<section class="doc" id="save">
+<div class="eyebrow">04 / SAVE SOURCE AND PROJECTS</div><h2>Choose the file that fits the job.</h2>
+<p>The <strong>Save</strong> button inside the <strong>ANIMATION SOURCE</strong> toolbar opens a format picker. It is intentionally different from the main project Save action.</p>
+<div class="grid">
+<article class="card"><small>PROJECT PACKAGE</small><h3>.tmotion</h3><p>Exports the current TRILYVA project package, including the animation source together with composition and project settings. Use this when you want to preserve the project setup for later import.</p></article>
+<article class="card"><small>PORTABLE SOURCE</small><h3>.js</h3><p>Exports only the current JavaScript animation source. Use it to edit the source elsewhere, archive the code, or share the animation function without the rest of the project configuration.</p></article>
+</div>
+<h3>Other source actions</h3>
+<ul><li><strong>Copy</strong> copies the current animation source to the clipboard.</li><li>The main application <strong>Save</strong> stores a local project in the browser's project storage. It is not the same as downloading a source file; use the toolbar's format picker when you need a file.</li><li>Keep a backup of important work outside the browser. Browser storage can be cleared, unavailable in some privacy modes, or limited by the device.</li></ul>
+</section>
+<section class="doc" id="library">
+<div class="eyebrow">05 / DOWNLOAD FROM LIBRARY</div><h2>Export source files separately from rendered media.</h2>
+<p>The Library tab includes a <strong>DOWNLOAD FROM LIBRARY</strong> area. These actions download animation source code; they are different from rendering a library into videos and still images.</p>
+<div class="grid">
+<article class="card"><small>SINGLE FILE</small><h3>DOWNLOAD JS</h3><p>Select a built-in or local library and download one JavaScript animation as a .js file.</p></article>
+<article class="card"><small>COLLECTION</small><h3>DOWNLOAD LIBRARY (.ZIP)</h3><p>Select a library to download its JavaScript files in a ZIP archive. The archive includes library-manifest.json and README.txt, and preserves source paths where available.</p></article>
+</div>
+<h3>Imported libraries</h3>
+<p>A local library may come from supported JavaScript imports or an imported folder/ZIP, depending on the current Library controls. The selection dialog chooses which library to package; it does not execute a remote library or upload your files to a server.</p>
+<div class="callout">Use <strong>DOWNLOAD LIBRARY (.ZIP)</strong> for source backups. Use the renderer's full-library render action when your goal is to export video or still-frame media for each animation. These are separate workflows.</div>
+</section>
+<section class="doc" id="render">
+<div class="eyebrow">06 / RENDER MODEL</div><h2>Preview responsiveness is not export timing.</h2>
+<p>The requested frame time is calculated from the frame index and frame rate:</p><div class="code">time = frame / fps</div>
+<p>The live preview may become less responsive at demanding settings. The export process requests frames against the selected timeline rather than treating the preview as a real-time screen recording. Rendering every requested frame still does not mean every codec, resolution, or device combination is guaranteed to succeed; the encoder and system must support the configuration.</p>
+<div class="grid"><article class="card"><small>PREVIEW</small><h3>Interactive inspection</h3><p>Use playback, scrubbing, and frame inspection to evaluate motion and composition. Preview speed can vary with the scene and hardware.</p></article><article class="card"><small>EXPORT</small><h3>Configured output</h3><p>Use a short test and check the resulting file. For important deliveries, verify duration, dimensions, frame rate, colour, transparency, and continuity after export.</p></article></div>
+</section>
+<section class="doc" id="stills">
+<div class="eyebrow">07 / STILL-FRAME EXPORTS</div><h2>Export an individual frame.</h2>
+<p>The still-frame controls expose supported formats in the current interface, including raster and vector options where available. Raster export can include PNG and JPG; the vector recorder can offer SVG and EPS for supported drawing operations. The actual options are determined by the renderer build and how the animation draws.</p>
+<ul><li><strong>PNG</strong> is useful for raster images and can preserve transparency.</li><li><strong>JPG</strong> is a raster format and does not preserve alpha transparency.</li><li><strong>SVG / EPS</strong> are vector-oriented exports. Canvas operations that cannot be represented by the vector recorder may be omitted or reported as unsupported.</li></ul>
+<p>Frame indices start at zero in the standard frame-inspection workflow. Inspect the downloaded file before using it in a production pipeline, especially when the scene includes transparency, gradients, filters, or complex Canvas operations.</p>
+</section>
+<section class="doc" id="limits">
+<div class="eyebrow">08 / CAPABILITY LIMITS</div><h2>Settings are not device guarantees.</h2>
+<p>TRILYVA exposes high-end configuration targets, including up to 16K output resolution, 240 fps, and a target bitrate of up to 2,000 Mbps (2 Gbps). These are upper settings limits, not a guarantee that all combinations are supported or practical on a given machine. Available dimensions, frame rates, codecs, and file destinations depend on browser capabilities, hardware, system memory, and storage.</p>
+<div class="table-wrap"><table><thead><tr><th>AREA</th><th>WHAT AFFECTS IT</th><th>RECOMMENDED CHECK</th></tr></thead><tbody><tr><td>Video encoder</td><td>Browser, codec, profile, hardware and pixel count.</td><td>Run the current capability/diagnostics check and test the intended codec with a short export.</td></tr><tr><td>Memory and speed</td><td>Canvas dimensions, scene complexity, frame rate, duration and concurrent tasks.</td><td>Lower settings for the first test; close unrelated heavy tabs.</td></tr><tr><td>File destinations</td><td>Browser support for download and directory/file pickers.</td><td>Use a current supported browser and confirm the browser's save prompt or permission.</td></tr><tr><td>Vector stills</td><td>Canvas methods and drawing features used by the animation.</td><td>Open the resulting SVG/EPS and compare it with the inspected frame.</td></tr></tbody></table></div>
+</section>
+<section class="doc" id="troubleshoot">
+<div class="eyebrow">09 / TROUBLESHOOTING</div><h2>Diagnose by reducing the job.</h2>
+<ul><li><strong>Source will not run:</strong> check the browser console or the renderer's status message; confirm the expected renderFrame function exists and the code parses.</li><li><strong>Preview is slow:</strong> temporarily lower the preview resolution or complexity. Preview load is not the same as final-render completion.</li><li><strong>Export is unavailable:</strong> choose a configuration supported by the current browser and device; do not rely only on the requested width or frame rate.</li><li><strong>The downloaded file is unexpected:</strong> confirm whether you chose .tmotion, .js, a source-library ZIP, or rendered media. Each contains different material.</li><li><strong>Library ZIP is incomplete:</strong> confirm the intended library was selected and inspect library-manifest.json and README.txt inside the archive.</li><li><strong>A vector still differs:</strong> the vector recorder may not support every drawing operation. Try a supported raster format when visual fidelity is more important than editability.</li></ul>
+<div class="actions"><a class="btn primary" href="/projects/code-motion/renderer/">Open the workspace</a><a class="btn" href="/projects/trilyva/tutorial.html">Open the complete tutorial</a><a class="btn" href="/projects/trilyva/">Back to project overview</a></div>
+</section>
+</div>
+</div>
+</main>
+<footer class="wrap"><span>ROBIUL RUMMAN RAZIM — TAMASRAZIM / TRILYVA</span><span><a href="/projects/trilyva/">PROJECT</a> · <a href="/projects/">PROJECT DIRECTORY</a></span></footer>
+</body>
+</html>
