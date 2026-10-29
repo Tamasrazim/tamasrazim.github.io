@@ -7878,6 +7878,241 @@ function trilyvaSelectFullRenderLibrary(selection){
   }
   return TRILYVA_SELECTED_RENDER_LIBRARY;
 }
+function trilyvaDownloadSafeJsName(value) {
+  var base = String(value || 'animation').replace(/\\/g, '/').split('/').pop();
+  base = base.replace(/\.js$/i, '').replace(/[<>:"|?*\x00-\x1f]/g, '-')
+    .replace(/\s+/g, ' ').replace(/^\.+|\.+$/g, '').trim().slice(0, 120);
+  return (base || 'animation') + '.js';
+}
+function trilyvaDownloadSafeArchivePath(value) {
+  var parts = String(value || 'animation.js').replace(/\\/g, '/').split('/');
+  parts = parts.filter(function (part) { return part && part !== '.' && part !== '..'; })
+    .map(function (part) {
+      return part.replace(/[<>:"|?*\x00-\x1f]/g, '-').replace(/[. ]+$/g, '').slice(0, 120);
+    }).filter(Boolean);
+  if (!parts.length) parts = ['animation.js'];
+  var last = parts[parts.length - 1];
+  if (!/\.js$/i.test(last)) parts[parts.length - 1] = last.replace(/\.[^.]*$/, '') + '.js';
+  return parts.join('/');
+}
+function trilyvaUniqueArchivePath(path, used) {
+  var clean = trilyvaDownloadSafeArchivePath(path);
+  var bits = clean.split('/'), file = bits.pop(), dot = file.toLowerCase().lastIndexOf('.js');
+  var stem = dot >= 0 ? file.slice(0, dot) : file, ext = '.js', candidate = clean, n = 2;
+  while (used[candidate.toLowerCase()]) {
+    bits = clean.split('/'); file = bits.pop();
+    candidate = bits.concat([stem + '-' + n + ext]).join('/');
+    n++;
+  }
+  used[candidate.toLowerCase()] = true;
+  return candidate;
+}
+function trilyvaLibraryDownloadSelections(all) {
+  return (all.builtIns || []).concat(all.local || []).map(function (lib) {
+    return { key: String(lib.key || (lib.kind + ':' + lib.id)), id: String(lib.id), title: String(lib.title || lib.id), kind: lib.kind };
+  });
+}
+function trilyvaDownloadJsFile(item, libraryTitle, statusNode) {
+  try {
+    var code = String(item && item.code || '');
+    if (!code.trim()) throw new Error('This library item has no JavaScript source.');
+    var filename = trilyvaDownloadSafeJsName(item.name || item.fileName || item.title || item.id);
+    download(new Blob([code], { type: 'text/javascript;charset=utf-8' }), filename);
+    var message = 'Downloaded ' + filename + (libraryTitle ? ' from ' + libraryTitle : '');
+    if (statusNode) statusNode.textContent = message;
+    $('#stMsg').textContent = message;
+  } catch (error) {
+    var message = 'JavaScript download failed · ' + String(error && error.message || error);
+    if (statusNode) statusNode.textContent = message;
+    $('#stMsg').textContent = message;
+  }
+}
+async function trilyvaDownloadLibraryZip(selection, statusNode) {
+  try {
+    if (!ENC || typeof ENC.ZipWriter !== 'function' || typeof ENC.crc32 !== 'function' || typeof ENC.crc32Final !== 'function') {
+      throw new Error('The ZIP writer is unavailable. Reload TRILYVA and try again.');
+    }
+    if (!selection) throw new Error('Choose a library first.');
+    if (statusNode) statusNode.textContent = 'Preparing ' + selection.title + '…';
+    var lib = await trilyvaResolveRenderLibrary(selection);
+    var items = trilyvaNormaliseLibraryItems(lib.items || []);
+    if (!items.length) throw new Error('This library contains no downloadable JavaScript files.');
+    if (items.length >= 65530) throw new Error('This library exceeds the supported classic ZIP file-count limit.');
+
+    var zip = new ENC.ZipWriter();
+    var root = slugify(lib.title || lib.id || 'trilyva-library');
+    var used = Object.create(null);
+    var files = [];
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      var rawPath = item.path || item.name || item.fileName || item.title || ('animation-' + (i + 1) + '.js');
+      var safePath = trilyvaUniqueArchivePath(rawPath, used);
+      var archivePath = root + '/' + safePath;
+      var code = String(item.code || '');
+      var blob = new Blob([code], { type: 'text/javascript;charset=utf-8' });
+      var bytes = new Uint8Array(await blob.arrayBuffer());
+      var crc = ENC.crc32Final(ENC.crc32(bytes));
+      zip.add(archivePath, blob, crc, bytes.length);
+      files.push({
+        file: safePath,
+        title: String(item.title || item.name || item.id || ('Animation ' + (i + 1))),
+        id: String(item.id || ''),
+        description: String(item.description || ''),
+        bytes: bytes.length
+      });
+      if (statusNode) statusNode.textContent = 'Adding JavaScript files · ' + (i + 1) + ' / ' + items.length;
+    }
+
+    var manifest = {
+      format: 'TRILYVA_LIBRARY_EXPORT',
+      version: 1,
+      title: lib.title,
+      libraryId: lib.id,
+      libraryKind: lib.kind,
+      source: String(lib.source || lib.description || ''),
+      exportedAt: new Date().toISOString(),
+      itemCount: files.length,
+      files: files
+    };
+    var manifestText = JSON.stringify(manifest, null, 2);
+    var manifestBlob = new Blob([manifestText], { type: 'application/json;charset=utf-8' });
+    var manifestBytes = new Uint8Array(await manifestBlob.arrayBuffer());
+    zip.add(root + '/library-manifest.json', manifestBlob, ENC.crc32Final(ENC.crc32(manifestBytes)), manifestBytes.length);
+    var readme = 'TRILYVA LIBRARY EXPORT\r\n' +
+      'Library: ' + String(lib.title || lib.id) + '\r\n' +
+      'Exported: ' + manifest.exportedAt + '\r\n' +
+      'JavaScript files: ' + files.length + '\r\n\r\n' +
+      'Each .js file contains the original animation source. library-manifest.json lists the exported files and their metadata.\r\n' +
+      'This ZIP was created locally by TRILYVA. No upload is performed.\r\n';
+    var readmeBlob = new Blob([readme], { type: 'text/plain;charset=utf-8' });
+    var readmeBytes = new Uint8Array(await readmeBlob.arrayBuffer());
+    zip.add(root + '/README.txt', readmeBlob, ENC.crc32Final(ENC.crc32(readmeBytes)), readmeBytes.length);
+
+    var archive = zip.finish();
+    var filename = root + '-library.zip';
+    download(archive, filename);
+    var done = 'Downloaded ' + lib.title + ' as ZIP · ' + files.length + ' JavaScript file(s) · ' + fmtBytes(archive.size);
+    if (statusNode) statusNode.textContent = done;
+    $('#stMsg').textContent = done;
+    return true;
+  } catch (error) {
+    var message = 'Library ZIP download failed · ' + String(error && error.message || error);
+    if (statusNode) statusNode.textContent = message;
+    $('#stMsg').textContent = message;
+    return false;
+  }
+}
+async function openTrilyvaDownloadJsChooser() {
+  var body = el('div');
+  body.style.cssText = 'display:flex;flex-direction:column;gap:10px;min-height:0;';
+  var help = el('p', 'note', 'Choose a built-in or local library, then download any individual animation as a .js file.');
+  var select = document.createElement('select');
+  select.style.cssText = 'width:100%;padding:10px;background:var(--panel);color:var(--ink);border:1px solid var(--rule-hi);border-radius:4px;font:11px var(--mono);';
+  var status = el('p', 'note', 'Loading libraries…');
+  status.style.cssText = 'margin:0;min-height:1.3em;overflow-wrap:anywhere;';
+  var list = el('div');
+  list.style.cssText = 'display:flex;flex-direction:column;gap:6px;max-height:42vh;overflow:auto;';
+  body.append(help, select, status, list);
+  openModal('TRILYVA / DOWNLOAD JAVASCRIPT', body, [
+    { label: 'Back to Library', fn: function () { closeModal(); openProtectedTrilyvaLibrary(); } },
+    { label: 'Close', fn: closeModal }
+  ]);
+
+  var optionsByKey = Object.create(null), activeToken = 0;
+  async function renderItems() {
+    var token = ++activeToken, chosen = optionsByKey[select.value];
+    list.replaceChildren();
+    if (!chosen) { status.textContent = 'No library selected.'; return; }
+    status.textContent = 'Loading ' + chosen.title + '…';
+    try {
+      var resolved = await trilyvaResolveRenderLibrary(chosen);
+      if (token !== activeToken) return;
+      var items = trilyvaNormaliseLibraryItems(resolved.items || []);
+      if (!items.length) { status.textContent = 'This library has no JavaScript files.'; return; }
+      status.textContent = items.length + ' JavaScript file(s) · choose one to download.';
+      items.forEach(function (item, index) {
+        var row = el('div', 'it');
+        row.style.cssText = 'display:flex;align-items:center;gap:9px;padding:9px;min-width:0;';
+        var label = el('div');
+        label.style.cssText = 'flex:1;min-width:0;overflow-wrap:anywhere;';
+        label.appendChild(el('h5', null, String(item.name || item.title || ('animation-' + (index + 1) + '.js'))));
+        if (item.title) label.appendChild(el('p', null, String(item.title)));
+        var btn = el('button', 'btn solid', 'DOWNLOAD JS');
+        btn.type = 'button';
+        btn.style.cssText = 'width:auto;margin:0;padding:7px 9px;font-size:9px;flex:0 0 auto;';
+        btn.addEventListener('click', function () { trilyvaDownloadJsFile(item, resolved.title, status); });
+        row.append(label, btn);
+        list.appendChild(row);
+      });
+    } catch (error) {
+      if (token !== activeToken) return;
+      status.textContent = 'Could not load library · ' + String(error && error.message || error);
+    }
+  }
+  try {
+    var all = await trilyvaGetRenderableLibraries();
+    var choices = trilyvaLibraryDownloadSelections(all);
+    select.replaceChildren();
+    choices.forEach(function (choice) {
+      optionsByKey[choice.key] = choice;
+      var option = document.createElement('option');
+      option.value = choice.key;
+      option.textContent = choice.title + (choice.kind === 'local' ? ' · LOCAL' : ' · BUILT-IN');
+      select.appendChild(option);
+    });
+    if (!choices.length) {
+      select.disabled = true;
+      status.textContent = 'No libraries are available.';
+      return;
+    }
+    select.value = choices[0].key;
+    select.addEventListener('change', renderItems);
+    renderItems();
+  } catch (error) {
+    status.textContent = 'Could not list libraries · ' + String(error && error.message || error);
+  }
+}
+async function openTrilyvaDownloadLibraryChooser() {
+  var body = el('div');
+  body.style.cssText = 'display:flex;flex-direction:column;gap:10px;min-height:0;';
+  body.appendChild(el('p', 'note', 'Choose any built-in or locally imported library. TRILYVA always downloads the entire selected library as a ZIP archive.'));
+  var select = document.createElement('select');
+  select.style.cssText = 'width:100%;padding:10px;background:var(--panel);color:var(--ink);border:1px solid var(--rule-hi);border-radius:4px;font:11px var(--mono);';
+  var status = el('p', 'note', 'Loading libraries…');
+  status.style.cssText = 'margin:0;min-height:1.3em;overflow-wrap:anywhere;';
+  body.append(select, status);
+  openModal('TRILYVA / DOWNLOAD LIBRARY ZIP', body, [
+    { label: 'Back to Library', fn: function () { closeModal(); openProtectedTrilyvaLibrary(); } },
+    { label: 'Download ZIP', solid: true, fn: function () {
+      var selected = choicesByKey[select.value];
+      if (!selected) { status.textContent = 'Choose a library first.'; return; }
+      trilyvaDownloadLibraryZip(selected, status);
+    }},
+    { label: 'Close', fn: closeModal }
+  ]);
+  var choicesByKey = Object.create(null);
+  try {
+    var all = await trilyvaGetRenderableLibraries();
+    var choices = trilyvaLibraryDownloadSelections(all);
+    select.replaceChildren();
+    choices.forEach(function (choice) {
+      choicesByKey[choice.key] = choice;
+      var option = document.createElement('option');
+      option.value = choice.key;
+      option.textContent = choice.title + (choice.kind === 'local' ? ' · LOCAL' : ' · BUILT-IN');
+      select.appendChild(option);
+    });
+    if (!choices.length) {
+      select.disabled = true;
+      status.textContent = 'No libraries are available.';
+      return;
+    }
+    status.textContent = choices.length + ' library/libraries available. The output will always be .zip.';
+  } catch (error) {
+    status.textContent = 'Could not list libraries · ' + String(error && error.message || error);
+  }
+}
+
 function openTrilyvaLibrary(){
   var body=document.createElement('div');
   body.style.cssText='display:flex;flex-direction:column;gap:10px;min-height:0;';
@@ -7891,6 +8126,15 @@ function openTrilyvaLibrary(){
   var uploadFolderZip=el('button','btn','UPLOAD FOLDER / ZIP');
   [uploadJs,uploadFolderZip].forEach(function(b){b.type='button';b.style.cssText+=';margin:0;min-width:0;padding:10px 6px;font-size:10px;'});
   importButtons.append(uploadJs,uploadFolderZip);
+
+  var downloadHeading=el('h4',null,'DOWNLOAD FROM LIBRARY');
+  downloadHeading.style.cssText='font:9px var(--mono);letter-spacing:.18em;color:var(--mut);margin:0 0 2px;';
+  var downloadButtons=el('div');
+  downloadButtons.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;';
+  var downloadJs=el('button','btn solid','DOWNLOAD JS');
+  var downloadLibrary=el('button','btn','DOWNLOAD LIBRARY (.ZIP)');
+  [downloadJs,downloadLibrary].forEach(function(b){b.type='button';b.style.cssText+=';margin:0;min-width:0;padding:10px 6px;font-size:10px;'});
+  downloadButtons.append(downloadJs,downloadLibrary);
 
   var chooseSource=el('div');
   chooseSource.style.cssText='display:none;grid-template-columns:1fr 1fr auto;gap:7px;';
@@ -7919,13 +8163,15 @@ function openTrilyvaLibrary(){
   var zipPicker=document.createElement('input');
   zipPicker.type='file';zipPicker.accept='.zip,application/zip';zipPicker.multiple=true;zipPicker.style.display='none';
 
-  body.replaceChildren(importHeading,importButtons,chooseSource,help,importStatus,localHeading,localList,builtInHeading,builtInArea,jsPicker,folderPicker,zipPicker);
+  body.replaceChildren(downloadHeading,downloadButtons,importHeading,importButtons,chooseSource,help,importStatus,localHeading,localList,builtInHeading,builtInArea,jsPicker,folderPicker,zipPicker);
 
   function refreshLocal(){renderLocalBatchLibraries(localList,localHeading);}
   function reportError(label,error){
     importStatus.textContent=label+' · '+String(error&&error.message||error);
     $('#stMsg').textContent=importStatus.textContent;
   }
+  downloadJs.onclick=function(){openTrilyvaDownloadJsChooser();};
+  downloadLibrary.onclick=function(){openTrilyvaDownloadLibraryChooser();};
   uploadJs.onclick=function(){jsPicker.value='';jsPicker.click();};
   uploadFolderZip.onclick=function(){chooseSource.style.display=chooseSource.style.display==='grid'?'none':'grid';};
   cancelChoose.onclick=function(){chooseSource.style.display='none';};
