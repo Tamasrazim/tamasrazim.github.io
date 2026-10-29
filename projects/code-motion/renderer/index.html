@@ -187,13 +187,17 @@ kbd{font-family:var(--mono);font-size:9px;color:var(--mut-2);margin-left:6px}
 #ta{position:relative;display:block;width:100%;min-height:100%;background:transparent;color:transparent;caret-color:#fff;
   resize:none;outline:none;overflow:hidden}
 #ta::selection{background:rgba(255,255,255,.22);color:transparent}
-.tk-key{color:#fff;font-weight:600}
-.tk-str{color:#c7c7cf}
-.tk-num{color:#e6e6ea}
-.tk-com{color:#55555d;font-style:italic}
-.tk-fn{color:#fff}
-.tk-api{color:#fff;border-bottom:1px solid #35353c}
-.tk-pun{color:#6f6f78}
+/* VS Code Dark+ inspired JavaScript syntax palette */
+.tk-key{color:#c586c0;font-weight:500}
+.tk-str{color:#ce9178}
+.tk-num{color:#b5cea8}
+.tk-com{color:#6a9955;font-style:italic}
+.tk-fn{color:#dcdcaa}
+.tk-api{color:#4fc1ff}
+.tk-prop{color:#9cdcfe}
+.tk-lit{color:#569cd6}
+.tk-pun{color:#c8c8c8}
+.tk-op{color:#d4d4d4}
 #edstat{flex:0 0 auto;height:22px;display:flex;align-items:center;gap:14px;padding:0 10px;border-top:1px solid var(--rule);
   font-family:var(--mono);font-size:9.5px;color:var(--mut-2);background:#09090b}
 #edstat .sp{flex:1}
@@ -9205,7 +9209,9 @@ var Ed = {
 
 var KEYWORDS = /^(const|let|var|function|return|if|else|for|while|do|break|continue|new|class|extends|super|typeof|instanceof|of|in|null|undefined|true|false|this|switch|case|default|try|catch|finally|throw|yield|async|await|delete|void|static|get|set)$/;
 var APIWORDS = /^(motion|ctx|TAU|PI|Math|lerp|clamp|map|mix|smoothstep|smootherstep|ease|easings|spring|noise|fbm|random|randomRange|randomInt|pick|wrap|pingpong|renderFrame|setup|window)$/;
-var TOKEN = /(\/\*[\s\S]*?(?:\*\/|$)|\/\/[^\n]*)|("(?:[^"\\\n]|\\.)*"?|'(?:[^'\\\n]|\\.)*'?|`(?:[^`\\]|\\.)*`?)|(\b0[xX][0-9a-fA-F]+\b|\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b)|([A-Za-z_$][\w$]*)(\s*\()?|([{}()[\];,.:+\-*/%<>=!&|?~^]+)/g;
+var TOKEN = /(\/\*[\s\S]*?(?:\*\/|$)|\/\/[^\n]*)|("(?:[^"\\\n]|\\.)*"?|'(?:[^'\\\n]|\\.)*'?|`(?:[^`\\]|\\.)*`?)|(\b0[xX][0-9a-fA-F]+\b|\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b)|([A-Za-z_$][\w$]*)(\s*\()?|([{}()[\];,.:]+)|([+\-*\/%<>=!&|?~^]+)/g;
+
+var LITERALS = /^(true|false|null|undefined|NaN|Infinity)$/;
 
 function highlight(code) {
   var out = '', last = 0, m;
@@ -9216,10 +9222,18 @@ function highlight(code) {
     else if (m[2]) out += '<span class="tk-str">' + esc(m[2]) + '</span>';
     else if (m[3]) out += '<span class="tk-num">' + esc(m[3]) + '</span>';
     else if (m[4]) {
-      var w = m[4], cls = KEYWORDS.test(w) ? 'tk-key' : APIWORDS.test(w) ? 'tk-api' : (m[5] ? 'tk-fn' : '');
+      var w = m[4], cls = '';
+      var before = code.slice(0, m.index).trimEnd();
+      var after = code.slice(m.index + m[0].length);
+      if (LITERALS.test(w)) cls = 'tk-lit';
+      else if (KEYWORDS.test(w)) cls = 'tk-key';
+      else if (m[5]) cls = 'tk-fn';
+      else if (APIWORDS.test(w)) cls = 'tk-api';
+      else if (before.charAt(before.length - 1) === '.' || /^\s*:/.test(after)) cls = 'tk-prop';
       out += (cls ? '<span class="' + cls + '">' + esc(w) + '</span>' : esc(w)) + (m[5] ? esc(m[5]) : '');
     }
     else if (m[6]) out += '<span class="tk-pun">' + esc(m[6]) + '</span>';
+    else if (m[7]) out += '<span class="tk-op">' + esc(m[7]) + '</span>';
     last = m.index + m[0].length;
   }
   out += esc(code.slice(last));
