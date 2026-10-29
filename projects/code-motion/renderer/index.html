@@ -1488,7 +1488,7 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
         <button data-act="analyzeSource">Analyze</button>
         <button data-act="pasteSource">Paste</button>
         <button data-act="copySource" title="Copy the complete animation source">Copy</button>
-        <button data-act="saveToLibrary" title="Save this animation to an existing local library or create a new one">Save to Library</button>
+        <button data-act="save" title="Save the current TRILYVA project">Save</button>
         <button data-act="clearSource">Clear</button>
       </div>
       <div id="find" class="hide">
@@ -9383,148 +9383,6 @@ function copySource() {
   }
   copyText(code, 'animation source copied to clipboard · ' + code.length + ' characters');
 }
-async function saveSourceToLibrary() {
-  if (!Ed.ta) return;
-  var code = String(Ed.ta.value || '');
-  if (!code.trim()) {
-    $('#stMsg').textContent = 'cannot save an empty animation source';
-    Ed.ta.focus();
-    return;
-  }
-  if (new Blob([code]).size > 8 * 1024 * 1024) {
-    $('#stMsg').textContent = 'animation source exceeds the 8 MB library item limit';
-    return;
-  }
-
-  try {
-    await openBatchLibraryDB();
-    var libraries = await idbAsk(batchLibraryStore('readonly').getAll());
-    libraries.sort(function (a, b) {
-      return String(b.modified || b.created || '').localeCompare(String(a.modified || a.created || ''));
-    });
-
-    var currentName = String($('#projName').value || S.name || 'animation').trim()
-      .replace(/\.js$/i, '') || 'animation';
-    var body = el('div');
-    body.style.cssText = 'display:flex;flex-direction:column;gap:12px;min-width:0;';
-    body.appendChild(el('p', 'note', 'Save the current editor code as a reusable JavaScript animation. You can add it to a local library already stored in this browser or create a new library. Built-in libraries remain unchanged.'));
-
-    function makeField(caption, control) {
-      var wrap = el('div');
-      wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;min-width:0;';
-      var label = el('label', null, caption);
-      label.style.cssText = 'color:var(--mut);font:9px var(--mono);letter-spacing:.12em;';
-      wrap.append(label, control);
-      return wrap;
-    }
-    function styleInput(input) {
-      input.style.cssText = 'width:100%;min-width:0;padding:10px;background:var(--panel);color:var(--ink);border:1px solid var(--rule-hi);border-radius:4px;font:12px var(--mono);';
-      return input;
-    }
-
-    var filename = styleInput(document.createElement('input'));
-    filename.type = 'text';
-    filename.autocomplete = 'off';
-    filename.spellcheck = false;
-    filename.value = currentName + '.js';
-
-    var destination = styleInput(document.createElement('select'));
-    var createOption = document.createElement('option');
-    createOption.value = '__new__';
-    createOption.textContent = 'CREATE A NEW LIBRARY';
-    destination.appendChild(createOption);
-    libraries.forEach(function (lib) {
-      var option = document.createElement('option');
-      option.value = lib.id;
-      option.textContent = String(lib.title || lib.id) + ' · ' + (Array.isArray(lib.items) ? lib.items.length : 0) + ' item(s)';
-      destination.appendChild(option);
-    });
-
-    var newLibraryName = styleInput(document.createElement('input'));
-    newLibraryName.type = 'text';
-    newLibraryName.autocomplete = 'off';
-    newLibraryName.spellcheck = false;
-    newLibraryName.value = currentName + ' Library';
-    var newLibraryWrap = makeField('NEW LIBRARY NAME', newLibraryName);
-    newLibraryWrap.style.display = 'flex';
-    destination.addEventListener('change', function () {
-      newLibraryWrap.style.display = destination.value === '__new__' ? 'flex' : 'none';
-    });
-
-    body.appendChild(makeField('ANIMATION FILE NAME', filename));
-    body.appendChild(makeField('SAVE DESTINATION', destination));
-    body.appendChild(newLibraryWrap);
-    body.appendChild(el('p', 'note', 'Local libraries stay on this device and are available from TRILYVA’s Library panel.'));
-
-    var saving = false;
-    openModal('TRILYVA / SAVE SOURCE TO LIBRARY', body, [
-      { label: 'Save to Library', solid: true, fn: async function () {
-        if (saving) return;
-        var baseName = String(filename.value || '').trim()
-          .replace(/\.js$/i, '')
-          .replace(/[\\/:*?"<>|]/g, '-')
-          .replace(/\s+/g, ' ')
-          .replace(/^\.+|\.+$/g, '')
-          .slice(0, 120);
-        if (!baseName) {
-          $('#stMsg').textContent = 'enter an animation filename';
-          filename.focus();
-          return;
-        }
-        var itemName = baseName + '.js';
-        var item = { name: itemName, path: itemName, code: code, size: new Blob([code]).size };
-        saving = true;
-        try {
-          if (destination.value === '__new__') {
-            var libraryName = String(newLibraryName.value || '').trim();
-            if (!libraryName) {
-              saving = false;
-              $('#stMsg').textContent = 'enter a name for the new library';
-              newLibraryName.focus();
-              return;
-            }
-            var created = await saveLocalTrilyvaLibrary(libraryName, 'Created from the TRILYVA source editor', [item]);
-            closeModal();
-            $('#stMsg').textContent = 'created local library "' + created.title + '" and saved ' + itemName;
-            return;
-          }
-
-          var lib = await idbAsk(batchLibraryStore('readonly').get(destination.value));
-          if (!lib) throw new Error('That local library no longer exists. Reopen Save to Library and choose another destination.');
-          var items = Array.isArray(lib.items) ? lib.items.slice() : [];
-          var matching = -1;
-          for (var i = 0; i < items.length; i++) {
-            if (String(items[i].name || items[i].path || '').toLowerCase() === itemName.toLowerCase()) {
-              matching = i;
-              break;
-            }
-          }
-          if (matching >= 0) {
-            if (!window.confirm('"' + itemName + '" already exists in "' + lib.title + '". Replace its code with the current editor source?')) {
-              saving = false;
-              return;
-            }
-            items[matching] = item;
-          } else {
-            items.push(item);
-          }
-          lib.items = items;
-          lib.count = items.length;
-          lib.modified = new Date().toISOString();
-          await idbAsk(batchLibraryStore('readwrite').put(lib));
-          closeModal();
-          $('#stMsg').textContent = (matching >= 0 ? 'updated ' : 'added ') + itemName + ' in local library "' + lib.title + '"';
-        } catch (error) {
-          saving = false;
-          $('#stMsg').textContent = 'save to library failed · ' + String(error && error.message || error);
-        }
-      }},
-      { label: 'Cancel', fn: closeModal }
-    ]);
-  } catch (error) {
-    $('#stMsg').textContent = 'could not open local library storage · ' + String(error && error.message || error);
-  }
-}
 function initEditor() {
   Ed.ta = $('#ta'); Ed.hl = $('#hl'); Ed.gutter = $('#gutter');
   Ed.gutter.innerHTML = '';
@@ -13179,7 +13037,6 @@ var ACTS = {
   clearSource: clearSource,
   pasteSource: pasteSource,
   copySource: copySource,
-  saveToLibrary: saveSourceToLibrary,
   analyzeLoop: analyseLoop,
   testMenu: testMenu,
   queueAdd: queueAdd,
