@@ -2279,6 +2279,9 @@ function createRuntime() {
     function applyFor(id,fn,draw,transform){
       var edit=edits&&edits[id],base=bounds&&bounds[id];
       if(!edit)return fn();
+      if(base && Number(edit.x)===Number(base.x) && Number(edit.y)===Number(base.y) &&
+        Number(edit.width)===Number(base.width) && Number(edit.height)===Number(base.height) &&
+        !(Number(edit.rotation)||0) && (edit.opacity===undefined||Number(edit.opacity)===1)) return fn();
       var needsOpacity=draw&&edit.opacity!==undefined;
       var local=null;
       if(transform&&base){
@@ -10042,7 +10045,11 @@ function detectCodeVectors(force) {
       : 'No supported path or rectangle objects were detected at frame ' + S.frame + '.';
     syncMediaEditorUI();
     drawMediaStage();
-    return syncVectorRuntime().then(function(){return objects;});
+    return syncVectorRuntime().then(function(){
+      refreshMediaPreview();
+      drawMediaStage();
+      return objects;
+    });
   } catch (error) {
     var statusNode = $('#vectorDetectionStatus');
     if (statusNode) statusNode.textContent = 'Vector detection could not trace this frame: ' + String(error && error.message || error);
