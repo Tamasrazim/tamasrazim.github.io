@@ -367,6 +367,8 @@ const cinematicProjectPages = new Set([
 const standaloneProjectPages = new Set([
   'projects/phasebreak/index.html',
   'projects/hollow-texture-lab/index.html',
+  'projects/fracture/index.html',
+  'projects/soryvyn/index.html',
   'projects/trss-sample-recorder/index.html',
   'projects/trss/index.html'
 ]);
