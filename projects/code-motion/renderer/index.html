@@ -3804,7 +3804,7 @@ return { run: run, sampleTiming: sampleTiming, loopSeam: loopSeam, pad6: pad6 };
 var cancelled = false;
 var previewCanvas = null, previewCtx = null;
 var rt = MotionCore.createRuntime();
-var assets = {};
+var assets = {}, layers = {};
 
 function mk(w, h) {
   var c = new OffscreenCanvas(w, h);
@@ -3842,9 +3842,38 @@ self.onmessage = function (ev) {
         });
         break;
 
+      case 'layers':
+        Promise.all((m.layers || []).map(function (layer) {
+          var base = {};
+          Object.keys(layer).forEach(function (key) { if (key !== 'blob') base[key] = layer[key]; });
+          if (layer.kind === 'video' || !layer.blob) return Promise.resolve(base);
+          return createImageBitmap(layer.blob).then(function (bitmap) { base.bitmap = bitmap; return base; })
+            .catch(function () { return null; });
+        })).then(function (loaded) {
+          Object.keys(layers).forEach(function (key) {
+            var oldLayer = layers[key];
+            if (oldLayer && oldLayer.bitmap && oldLayer.bitmap.close) oldLayer.bitmap.close();
+          });
+          layers = {};
+          loaded.filter(Boolean).forEach(function (layer) { layers[layer.id] = layer; });
+          rt.setLayers(Object.keys(layers).map(function (key) { return layers[key]; }));
+          send({ type: 'layers', id: id, count: Object.keys(layers).length });
+        });
+        break;
+
+      case 'layerProps':
+        (m.layers || []).forEach(function (change) {
+          var layer = layers[change.id];
+          if (layer) Object.keys(change).forEach(function (key) { if (key !== 'blob') layer[key] = change[key]; });
+        });
+        rt.setLayers(Object.keys(layers).map(function (key) { return layers[key]; }));
+        send({ type: 'layerProps', id: id, count: Object.keys(layers).length });
+        break;
+
       case 'compile':
         rt.setComposition(m.composition);
         rt.setAssets(assets);
+        rt.setLayers(Object.keys(layers).map(function (key) { return layers[key]; }));
         send({ type: 'compile', id: id, result: rt.compile(m.code) });
         break;
 
@@ -3895,7 +3924,7 @@ self.onmessage = function (ev) {
         } : null;
         var existing = m.existing || null;
         MotionExport.run({
-          env: ENV, job: m.job, from: m.from || 0, assets: assets, existing: existing, writeFile: writeFile,
+          env: ENV, job: m.job, from: m.from || 0, assets: assets, layers: Object.keys(layers).map(function (key) { return layers[key]; }), existing: existing, writeFile: writeFile,
           isCancelled: function () { return cancelled; },
           onLog: function (msg) { send({ type: 'log', id: id, message: msg }); },
           onProgress: function (p) { send({ type: 'progress', id: id, progress: p }); }
@@ -7547,7 +7576,7 @@ function buildLocal() {
 }
 
 function mainEngine() {
-  var rt = CORE.createRuntime(), assets = {}, cancelled = false;
+  var rt = CORE.createRuntime(), assets = {}, cancelled = false, mediaLayers = [], mediaLayerSources = [];
   function mk(w, h) {
     var c = document.createElement('canvas'); c.width = w; c.height = h;
     return { canvas: c, ctx: c.getContext('2d', { alpha: true }) };
@@ -7574,6 +7603,105 @@ function mainEngine() {
     toBlob: function (canvas, type) { return new Promise(function (r) { canvas.toBlob(r, type); }); }
   };
   var pv = null;
+  function disposeLayers(list) {
+    (list || []).forEach(function (layer) {
+      if (layer.bitmap && layer.bitmap.close) { try { layer.bitmap.close(); } catch (_) {} }
+      if (layer.video) { try { layer.video.pause(); layer.video.removeAttribute('src'); layer.video.load(); } catch (_) {} }
+      if (layer.videoUrl) { try { URL.revokeObjectURL(layer.videoUrl); } catch (_) {} }
+    });
+  }
+  function loadVideoLayer(source, base) {
+    return new Promise(function (resolve, reject) {
+      var video = document.createElement('video'), url = URL.createObjectURL(source.blob), settled = false;
+      var timer = setTimeout(function () { finish(new Error('Video metadata timed out for "' + source.name + '".')); }, 15000);
+      function finish(error) {
+        if (settled) return;
+        settled = true; clearTimeout(timer);
+        video.removeEventListener('loadedmetadata', loaded);
+        video.removeEventListener('error', failed);
+        if (error) { URL.revokeObjectURL(url); reject(error); return; }
+        base.video = video; base.videoUrl = url;
+        base.duration = Number(video.duration) || 0;
+        base.sourceWidth = video.videoWidth || 0; base.sourceHeight = video.videoHeight || 0;
+        resolve(base);
+      }
+      function loaded() { finish(null); }
+      function failed() { finish(new Error('This browser cannot decode "' + source.name + '".')); }
+      video.preload = 'auto'; video.muted = true; video.playsInline = true;
+      video.addEventListener('loadedmetadata', loaded);
+      video.addEventListener('error', failed);
+      video.src = url; video.load();
+    });
+  }
+  function setLayerSet(list) {
+    var sources = (list || []).map(function (layer) { return Object.assign({}, layer); });
+    return Promise.all(sources.map(function (source) {
+      var base = {};
+      Object.keys(source).forEach(function (key) { if (key !== 'blob') base[key] = source[key]; });
+      if (source.kind === 'video') return loadVideoLayer(source, base);
+      if (!source.blob) return Promise.resolve(base);
+      return createImageBitmap(source.blob).then(function (bitmap) { base.bitmap = bitmap; return base; });
+    })).then(function (loaded) {
+      disposeLayers(mediaLayers);
+      mediaLayerSources = sources;
+      mediaLayers = loaded;
+      rt.setLayers(mediaLayers);
+      return mediaLayers;
+    });
+  }
+  function updateLayerProps(list) {
+    var updates = {};
+    (list || []).forEach(function (layer) { updates[layer.id] = layer; });
+    mediaLayers.forEach(function (layer) {
+      var update = updates[layer.id];
+      if (update) Object.keys(update).forEach(function (key) { if (key !== 'blob') layer[key] = update[key]; });
+    });
+    mediaLayerSources = mediaLayerSources.map(function (layer) {
+      return Object.assign({}, layer, updates[layer.id] || {});
+    });
+    rt.setLayers(mediaLayers);
+    return Promise.resolve(mediaLayers);
+  }
+  function seekVideo(video, time) {
+    return new Promise(function (resolve, reject) {
+      if (!video || video.readyState < 1) { reject(new Error('A video layer is not ready to seek.')); return; }
+      if (video.readyState >= 2 && Math.abs(video.currentTime - time) < 0.0005) { resolve(); return; }
+      var timer = setTimeout(function () { cleanup(); reject(new Error('Timed out decoding a requested video frame.')); }, 12000);
+      function cleanup() {
+        clearTimeout(timer); video.removeEventListener('seeked', done); video.removeEventListener('error', failed);
+      }
+      function done() { cleanup(); resolve(); }
+      function failed() { cleanup(); reject(new Error('The browser failed to decode a video frame.')); }
+      video.addEventListener('seeked', done); video.addEventListener('error', failed);
+      try { video.currentTime = time; } catch (error) { cleanup(); reject(error); }
+    });
+  }
+  function prepareVideoFrames(frame, comp) {
+    var requests = [], fps = comp.fps || 60;
+    mediaLayers.forEach(function (layer) {
+      if (layer.kind !== 'video' || layer.visible === false) return;
+      var start = Math.max(0, Math.floor(Number(layer.startFrame) || 0));
+      var end = Math.max(start + 1, Math.floor(Number(layer.endFrame) || comp.frameCount));
+      if (frame < start || frame >= end) return;
+      var trim = Math.max(0, Number(layer.trimIn) || 0);
+      var rate = Math.max(0.01, Number(layer.playbackRate) || 1);
+      var sourceTime = trim + ((frame - start) / fps) * rate;
+      var duration = Number(layer.duration) || 0;
+      if (duration > 0) sourceTime = Math.min(sourceTime, Math.max(0, duration - 0.001));
+      requests.push(seekVideo(layer.video, sourceTime).then(function () {
+        return createImageBitmap(layer.video).then(function (bitmap) { return [layer.id, bitmap]; });
+      }));
+    });
+    return Promise.all(requests).then(function (pairs) {
+      var frames = {};
+      pairs.forEach(function (pair) { frames[pair[0]] = pair[1]; });
+      return frames;
+    });
+  }
+  function closeVideoFrames(frames) {
+    if (!frames) return;
+    Object.keys(frames).forEach(function (key) { if (frames[key] && frames[key].close) frames[key].close(); });
+  }
   return {
     mode: 'main',
     setAssets: function (list) {
@@ -7584,17 +7712,27 @@ function mainEngine() {
         rt.setAssets(assets); return assets;
       });
     },
+    setLayers: setLayerSet,
+    updateLayers: updateLayerProps,
     compile: function (code, comp) { rt.setComposition(comp); rt.setAssets(assets); return Promise.resolve(rt.compile(code)); },
     setComposition: function (comp) { rt.setComposition(comp); return Promise.resolve(); },
     preview: function (frame, w, h, scale) {
       if (!pv || pv.canvas.width !== w || pv.canvas.height !== h) pv = mk(w, h);
-      var r = rt.renderInto(pv.ctx, frame, { rasterScale: scale });
-      return Promise.resolve(r.ok ? { ok: true, canvas: pv.canvas, frame: frame, ms: r.ms } : { ok: false, error: r.error, frame: frame });
+      return prepareVideoFrames(frame, rt.comp).then(function (videoFrames) {
+        var r;
+        try { r = rt.renderInto(pv.ctx, frame, { rasterScale: scale, videoFrames: videoFrames }); }
+        finally { closeVideoFrames(videoFrames); }
+        return r.ok ? { ok: true, canvas: pv.canvas, frame: frame, ms: r.ms } : { ok: false, error: r.error, frame: frame };
+      });
     },
     renderOne: function (frame, w, h) {
       var o = mk(w, h);
-      var r = rt.renderInto(o.ctx, frame, { isExport: true, rasterScale: w / rt.comp.width });
-      return Promise.resolve(r.ok ? { ok: true, canvas: o.canvas, ms: r.ms } : { ok: false, error: r.error });
+      return prepareVideoFrames(frame, rt.comp).then(function (videoFrames) {
+        var r;
+        try { r = rt.renderInto(o.ctx, frame, { isExport: true, rasterScale: w / rt.comp.width, videoFrames: videoFrames }); }
+        finally { closeVideoFrames(videoFrames); }
+        return r.ok ? { ok: true, canvas: o.canvas, ms: r.ms } : { ok: false, error: r.error };
+      });
     },
     timing: function (job, n) { return EXP.sampleTiming(ENVI, job, n); },
     loopSeam: function (job) { return EXP.loopSeam(ENVI, job); },
@@ -7606,9 +7744,19 @@ function mainEngine() {
           .then(function (fh) { return fh.createWritable(); })
           .then(function (ws) { return ws.write(blob).then(function () { return ws.close(); }); });
       } : null;
-      return EXP.run({
-        env: ENVI, job: job, from: from, assets: assets, existing: existing, writeFile: writeFile,
-        isCancelled: function () { return cancelled; }, onLog: onLog, onProgress: onProgress
+      var restoreLayers = mediaLayerSources.map(function (layer) { return Object.assign({}, layer); });
+      var targetLayers = Array.isArray(job.layers) ? job.layers : restoreLayers;
+      var exportComp = CORE.composition(job.composition);
+      return setLayerSet(targetLayers).then(function () {
+        return EXP.run({
+          env: ENVI, job: job, from: from, assets: assets, layers: mediaLayers, existing: existing, writeFile: writeFile,
+          prepareFrame: function (frame) { return prepareVideoFrames(frame, exportComp); },
+          isCancelled: function () { return cancelled; }, onLog: onLog, onProgress: onProgress
+        });
+      }).then(function (result) {
+        return setLayerSet(restoreLayers).then(function () { return result; });
+      }, function (error) {
+        return setLayerSet(restoreLayers).then(function () { throw error; });
       });
     }
   };
@@ -7620,6 +7768,7 @@ function workerEngine() {
   var w = new Worker(url);
   var pending = {};
   var seq = 0;
+  var activeLayers = [];
   w.onmessage = function (ev) {
     var m = ev.data, p = pending[m.id];
     if (m.type === 'ready') return;
@@ -7640,6 +7789,16 @@ function workerEngine() {
   return {
     mode: 'worker', raw: w, call: call,
     setAssets: function (list) { return call({ type: 'assets', assets: list }); },
+    setLayers: function (list) {
+      activeLayers = (list || []).map(function (layer) { return Object.assign({}, layer); });
+      return call({ type: 'layers', layers: activeLayers });
+    },
+    updateLayers: function (list) {
+      var changes = {};
+      (list || []).forEach(function (layer) { changes[layer.id] = layer; });
+      activeLayers = activeLayers.map(function (layer) { return Object.assign({}, layer, changes[layer.id] || {}); });
+      return call({ type: 'layerProps', layers: list || [] });
+    },
     compile: function (code, comp) { return call({ type: 'compile', code: code, composition: comp }).then(function (m) { return m.result; }); },
     setComposition: function (comp) { return call({ type: 'composition', composition: comp }); },
     preview: function (frame, rw, rh, scale) { return call({ type: 'preview', frame: frame, rasterW: rw, rasterH: rh, scale: scale }); },
@@ -7648,8 +7807,19 @@ function workerEngine() {
     loopSeam: function (job) { return call({ type: 'loopSeam', job: job }).then(function (m) { return m.result; }); },
     cancel: function () { w.postMessage({ type: 'cancel' }); },
     exportJob: function (job, from, dirHandle, existing, onLog, onProgress) {
-      return call({ type: 'export', job: job, from: from, dirHandle: dirHandle || null, existing: existing || null }, [], onLog, onProgress)
-        .then(function (m) { return m.result; });
+      var restoreLayers = activeLayers.map(function (layer) { return Object.assign({}, layer); });
+      var targetLayers = Array.isArray(job.layers) ? job.layers : restoreLayers;
+      function setLayerSnapshot(list) {
+        activeLayers = (list || []).map(function (layer) { return Object.assign({}, layer); });
+        return call({ type: 'layers', layers: activeLayers });
+      }
+      return setLayerSnapshot(targetLayers).then(function () {
+        return call({ type: 'export', job: job, from: from, dirHandle: dirHandle || null, existing: existing || null }, [], onLog, onProgress);
+      }).then(function (m) {
+        return setLayerSnapshot(restoreLayers).then(function () { return m.result; });
+      }, function (error) {
+        return setLayerSnapshot(restoreLayers).then(function () { throw error; });
+      });
     }
   };
 }
