@@ -9743,7 +9743,7 @@ window.addEventListener("trilyva:export-dotmesh-folder", openDotMeshFolderPicker
    ============================================================ */
 var S = {
   id: null, name: 'Untitled', version: 1, dirty: false,
-  code: '', comp: null, meta: null, assets: [], layers: [], selectedLayerId: null, canvasEditorOpen: false, mediaDrag: null,
+  code: '', comp: null, meta: null, assets: [], layers: [], selectedLayerId: null, canvasEditorOpen: false, mediaDrag: null, layers: [], selectedLayerId: null, canvasEditorOpen: false, mediaDrag: null,
   frame: 0, playing: false, loopPlayback: true,
   compiled: false, lastError: null, hash: '',
   previewBusy: false, previewFps: 0, previewRaster: { w: 0, h: 0, s: 1 },
@@ -11274,6 +11274,7 @@ function buildJob(over) {
     quality: S.quality, timebase: S.timebase, checksums: S.checksums,
     bitrate: ENC.sanitiseBitrate(requestedBitrate(comp.width, comp.height, comp.fps), comp.width, comp.height, comp.fps),
     tags: buildTags(comp, meta),
+    layers: mediaLayerDescriptors(true),
     createdAt: new Date().toISOString(),
     test: over.test || null
   };
@@ -11546,7 +11547,11 @@ function startRender(job, opts) {
       var prefs=trilyvaReadStillPrefs();
       var composition=CORE.composition(merge({},job.composition));
       var frame=Math.min(prefs.frame,Math.max(0,composition.frameCount-1));
-      var built=await trilyvaBuildStillAssets(job.code,composition,frame,prefs.formats);
+      var currentLayers = mediaLayerDescriptors(true);
+      var built;
+      await Engine.api.setLayers(job.layers || currentLayers);
+      try { built = await trilyvaBuildStillAssets(job.code,composition,frame,prefs.formats); }
+      finally { await Engine.api.setLayers(currentLayers); }
       var saved=[],errors=built.errors.slice();
       for(var i=0;i<prefs.formats.length;i++){
         var fmt=prefs.formats[i],blob=built.assets[fmt];
@@ -12559,7 +12564,7 @@ function uid(prefix) { return prefix + '-' + Date.now().toString(36) + '-' + Mat
 function projectRecord() {
   return {
     id: S.id, name: S.name, version: S.version,
-    code: Ed.ta.value, comp: S.comp, meta: S.meta,
+    code: Ed.ta.value, comp: S.comp, meta: S.meta, layers: mediaLayerDescriptors(true),
     exportPrefs: { format: S.exportFormat, quality: S.quality, timebase: S.timebase, checksums: S.checksums, customBitrateMbps: S.customBitrateMbps },
     created: S.created, modified: new Date().toISOString()
   };
@@ -12613,6 +12618,8 @@ function loadProjectRecord(rec) {
   S.created = rec.created || new Date().toISOString();
   S.meta = merge(defaultMeta(), rec.meta || {});
   S.comp = CORE.composition(rec.comp || {});
+  S.layers = Array.isArray(rec.layers) ? rec.layers.map(function (layer) { return Object.assign({}, layer); }) : [];
+  S.selectedLayerId = S.layers.length ? S.layers[S.layers.length - 1].id : null;
   var p = rec.exportPrefs || {};
   S.exportFormat = p.format || 'webm';
   S.quality = p.quality || 'standard';
@@ -12631,7 +12638,7 @@ function loadProjectRecord(rec) {
   applyComp({});
   syncMetaUI();
   markDirty(false);
-  return run();
+  return syncMediaLayers().then(function () { syncMediaEditorUI(); return run(); });
 }
 function openProjectDialog() {
   if (!DB.db) { $('#stMsg').textContent = 'IndexedDB is unavailable — import a .tmotion file instead'; return; }
@@ -12689,6 +12696,7 @@ function versionDialog(rec) {
 }
 function newProject(sampleId) {
   S.id = null; S.version = 1; S.created = new Date().toISOString();
+  S.layers = []; S.selectedLayerId = null;
   S.name = 'Untitled';
   S.meta = defaultMeta();
   S.results = S.results || [];
@@ -12716,15 +12724,43 @@ function newProject(sampleId) {
   applyComp({});
   syncMetaUI();
   markDirty(false);
-  return run();
+  return syncMediaLayers().then(function () { syncMediaEditorUI(); return run(); });
 }
 
 /* ---------------- .tmotion ---------------- */
-function toTmotion() {
-  var c = S.comp;
+function blobToDataUrl(blob) {
+  return new Promise(function (resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function () { resolve(String(reader.result || '')); };
+    reader.onerror = function () { reject(reader.error || new Error('Could not read media for project export.')); };
+    reader.readAsDataURL(blob);
+  });
+}
+function dataUrlToBlob(dataUrl, fallbackType) {
+  var value = String(dataUrl || ''), comma = value.indexOf(',');
+  if (value.slice(0, 5) !== 'data:' || comma < 0) throw new Error('A media attachment in this .tmotion file is malformed.');
+  var header = value.slice(5, comma), type = header.split(';')[0] || fallbackType || 'application/octet-stream';
+  var bytes, payload = value.slice(comma + 1);
+  if (header.indexOf(';base64') >= 0) {
+    var binary = atob(payload); bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  } else {
+    bytes = new TextEncoder().encode(decodeURIComponent(payload));
+  }
+  return new Blob([bytes], { type: type });
+}
+async function toTmotion() {
+  var c = S.comp, media = [];
+  for (var i = 0; i < S.layers.length; i++) {
+    var layer = S.layers[i], item = {};
+    Object.keys(layer).forEach(function (key) { if (key !== 'blob') item[key] = layer[key]; });
+    item.mime = layer.type || (layer.blob && layer.blob.type) || 'application/octet-stream';
+    item.data = await blobToDataUrl(layer.blob);
+    media.push(item);
+  }
   return {
     format: 'tmotion',
-    formatVersion: 1,
+    formatVersion: 2,
     app: { name: SOFTWARE, version: APP_VERSION },
     project: { id: S.id, name: S.name, version: S.version, created: S.created, modified: new Date().toISOString() },
     source: { language: 'javascript', code: Ed.ta.value, sha256: S.hash || null },
@@ -12736,14 +12772,17 @@ function toTmotion() {
     loop: { enabled: !!c.loop, duration: c.loopDuration },
     timeRemap: { rate: c.speed, reverse: !!c.reverse },
     metadata: S.meta,
+    mediaLayers: media,
     exportPrefs: { format: S.exportFormat, quality: S.quality, timebase: S.timebase, checksums: S.checksums, customBitrateMbps: S.customBitrateMbps },
     frameModel: 'frameCount = round(duration * fps); frames 0..frameCount-1; time = frame / fps * rate'
   };
 }
 function exportProject() {
-  var data = JSON.stringify(toTmotion(), null, 2);
-  download(new Blob([data], { type: 'application/json' }), slugify(S.name) + '.tmotion');
-  $('#stMsg').textContent = 'exported ' + slugify(S.name) + '.tmotion';
+  return toTmotion().then(function (project) {
+    var data = JSON.stringify(project, null, 2);
+    download(new Blob([data], { type: 'application/json' }), slugify(S.name) + '.tmotion');
+    $('#stMsg').textContent = 'exported ' + slugify(S.name) + '.tmotion with ' + S.layers.length + ' media layer(s)';
+  });
 }
 function exportSourceJs() {
   var code = String(Ed.ta ? Ed.ta.value : '');
@@ -12795,6 +12834,12 @@ function importProject(file) {
       modified: new Date().toISOString(),
       code: (d.source && d.source.code) || '',
       meta: d.metadata || defaultMeta(),
+      layers: (d.mediaLayers || []).map(function (item) {
+        var layer = {};
+        Object.keys(item).forEach(function (key) { if (key !== 'data' && key !== 'mime') layer[key] = item[key]; });
+        layer.blob = dataUrlToBlob(item.data, item.mime);
+        return layer;
+      }),
       comp: merge(c, {
         loop: d.loop ? !!d.loop.enabled : false,
         loopDuration: d.loop ? d.loop.duration : c.duration,
@@ -13748,6 +13793,9 @@ var DOCS = [
 
   '<h5>QUICK START</h5>',
   '<p>Write a function, press Run, scrub the timeline, press Render. Open <b>Examples</b> for ten complete animations to read or take apart. Use <b>Copy Prompt</b> in the workspace header to copy a prompt designed for this renderer contract and frame-by-frame export.</p>',
+  '<h5>CANVAS EDITOR / MEDIA LAYERS</h5>',
+  '<p>Click <b>Canvas Edit</b> beside the animation-source toolbar to replace the code panel with a visual media editor. Use <b>Add media</b> to place browser-supported images, video files, or SVG vector artwork on the composition. Select a layer to edit its X/Y position, width, height, rotation, opacity, blend mode, visibility, and stacking order. Drag a selected object to move it; drag its corner to resize it. Click <b>Code</b> to return to JavaScript editing.</p>',
+  '<p>Media layers are composited after <code>renderFrame</code> and included in requested output frames. Videos are sought to the source time for every requested project frame rather than screen-recorded in real time. Video projects use the main-thread media decoder, so preview and export may be slower. Portable <code>.tmotion</code> files embed media; local projects store the original blobs in IndexedDB. SVG imports are rasterised for compositing.</p>',
   '<pre>window.renderFrame = function (time, frame, fps, ctx, width, height) {\n  ctx.fillStyle = "#000";\n  ctx.fillRect(0, 0, width, height);\n  var x = width * 0.5 + Math.cos(time * 2) * 200;\n  ctx.fillStyle = "#fff";\n  ctx.beginPath();\n  ctx.arc(x, height * 0.5, 40, 0, Math.PI * 2);\n  ctx.fill();\n};</pre>',
   '<p>Fewer arguments are fine — <code>function (time, frame, fps, ctx, width, height)</code> is the full contract, and you can declare only the ones you need. An optional <code>window.setup(ctx, width, height)</code> runs once per compile.</p>',
 
@@ -13958,6 +14006,12 @@ function copyAnimationPrompt() {
    Actions
    ============================================================ */
 var ACTS = {
+  toggleCanvasEditor: function () { toggleCanvasEditor(); },
+  addMedia: addMediaDialog,
+  removeMedia: removeSelectedMedia,
+  duplicateMedia: duplicateSelectedMedia,
+  mediaForward: function () { moveSelectedMedia(1); },
+  mediaBackward: function () { moveSelectedMedia(-1); },
   'new': function () {
     askDiscard('Start a new project?', function () { newProject('sample-starter'); });
   },
@@ -14128,6 +14182,7 @@ function boot() {
     initCursor();
     initShortcuts();
     initDispatch();
+    initMediaEditor();
     $('#loopBtn').classList.toggle('on', S.loopPlayback);
     renderQueue();
     renderResults();
