@@ -8801,6 +8801,57 @@ var BatchVector = (function () {
       return 'Z';
     }).join(' ');
   }
+  function detectFromCode(code,W,H,frame,time,loopProgress,fps){
+    var scene=sceneForCode(code,W,H,frame,time,loopProgress,fps),groups={},ids=[];
+    scene.ops.forEach(function(op){
+      var id=Number(op.id);
+      if(!Number.isFinite(id))return;
+      if(!groups[id]){
+        groups[id]={id:id,ops:[],points:[],fill:op.fill||null,stroke:op.stroke||null,strokeWidth:0,opacity:op.opacity==null?1:op.opacity};
+        ids.push(id);
+      }
+      var group=groups[id];
+      group.ops.push(op);
+      if(op.fill)group.fill=op.fill;
+      if(op.stroke)group.stroke=op.stroke;
+      group.strokeWidth=Math.max(group.strokeWidth,Number(op.width)||0);
+      var commands=transformCommands(commandsForOp(op),op.m||identity()),current=null;
+      commands.forEach(function(command){
+        if(command[0]==='M'||command[0]==='L'){
+          current=[command[1],command[2]];
+          group.points.push(current);
+        }else if(command[0]==='C'&&current){
+          var x0=current[0],y0=current[1],x1=command[1],y1=command[2],x2=command[3],y2=command[4],x3=command[5],y3=command[6];
+          for(var step=1;step<=16;step++){
+            var t=step/16,u=1-t;
+            group.points.push([
+              u*u*u*x0+3*u*u*t*x1+3*u*t*t*x2+t*t*t*x3,
+              u*u*u*y0+3*u*u*t*y1+3*u*t*t*y2+t*t*t*y3
+            ]);
+          }
+          current=[x3,y3];
+        }
+      });
+    });
+    return ids.map(function(id,index){
+      var g=groups[id];
+      if(!g.points.length)return null;
+      var xs=g.points.map(function(p){return p[0];}),ys=g.points.map(function(p){return p[1];});
+      var pad=Math.max(0,g.strokeWidth/2);
+      var x=Math.min.apply(Math,xs)-pad,y=Math.min.apply(Math,ys)-pad;
+      var right=Math.max.apply(Math,xs)+pad,bottom=Math.max.apply(Math,ys)+pad;
+      var width=Math.max(1,right-x),height=Math.max(1,bottom-y);
+      if(!Number.isFinite(x)||!Number.isFinite(y)||!Number.isFinite(width)||!Number.isFinite(height))return null;
+      return {
+        id:id,label:'Vector '+String(index+1).padStart(2,'0'),
+        type:g.ops.some(function(op){return op.t==='rect';})?'rectangle':'path',
+        x:x,y:y,width:width,height:height,rotation:0,opacity:Math.max(0,Math.min(1,Number(g.opacity)||0)),
+        fill:g.fill,stroke:g.stroke,strokeWidth:g.strokeWidth,operations:g.ops.length,
+        isBackground:x<=1&&y<=1&&width>=W*.92&&height>=H*.92
+      };
+    }).filter(Boolean);
+  }
+
   function svgGradient(defs,g,id){
     if(g.kind==='radial'){
       var a=g.args;
@@ -8871,7 +8922,7 @@ var BatchVector = (function () {
     return out.join('\n');
   }
 
-  return {sceneForCode:sceneForCode,stripBackground:stripBackground,svg:svg,eps:eps};
+  return {sceneForCode:sceneForCode,detectFromCode:detectFromCode,stripBackground:stripBackground,svg:svg,eps:eps};
 })();
 
 function trilyvaStockMetadata(item, stem, assets, outputFileName){
