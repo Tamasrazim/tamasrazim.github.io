@@ -9743,7 +9743,7 @@ window.addEventListener("trilyva:export-dotmesh-folder", openDotMeshFolderPicker
    ============================================================ */
 var S = {
   id: null, name: 'Untitled', version: 1, dirty: false,
-  code: '', comp: null, meta: null, assets: [],
+  code: '', comp: null, meta: null, assets: [], layers: [], selectedLayerId: null, canvasEditorOpen: false, mediaDrag: null,
   frame: 0, playing: false, loopPlayback: true,
   compiled: false, lastError: null, hash: '',
   previewBusy: false, previewFps: 0, previewRaster: { w: 0, h: 0, s: 1 },
@@ -9774,6 +9774,292 @@ function setStage(name, err) {
   }
 }
 
+function mediaLayerDescriptors(includeBlob) {
+  return (S.layers || []).map(function (layer) {
+    var copy = {};
+    Object.keys(layer).forEach(function (key) { if (key === 'blob' && !includeBlob) return; copy[key] = layer[key]; });
+    return copy;
+  });
+}
+function mediaLayerById(id) {
+  return (S.layers || []).find(function (layer) { return layer.id === id; }) || null;
+}
+function selectedMediaLayer() { return mediaLayerById(S.selectedLayerId); }
+function syncMediaLayers() {
+  if (!Engine.api || typeof Engine.api.setLayers !== 'function') return Promise.resolve(false);
+  var hasVideo = (S.layers || []).some(function (layer) { return layer.kind === 'video'; });
+  if (hasVideo && Engine.mode === 'worker') {
+    try { if (Engine.api.raw) Engine.api.raw.terminate(); } catch (_) {}
+    Engine.api = mainEngine();
+    Engine.mode = 'main';
+    Engine.bootNote = 'Video media uses the browser main-thread decoder; all media stays local to this project.';
+    S.previewBusy = false; S.pendingPaint = false; S.lastPainted = -1;
+    var engine = $('#stEngine'), isolation = $('#stIso');
+    if (engine) engine.textContent = 'main-thread media engine';
+    if (isolation) isolation.textContent = 'SHARED THREAD · LOCAL MEDIA';
+  }
+  return Engine.api.setLayers(mediaLayerDescriptors(true)).then(function () { return true; });
+}
+function refreshMediaPreview() {
+  if (!S.compiled) return;
+  S.lastPainted = -1;
+  if (S.previewBusy) { S.pendingPaint = true; return; }
+  requestPreview(true);
+}
+function updateMediaLayerRuntime() {
+  if (!Engine.api || typeof Engine.api.updateLayers !== 'function') return Promise.resolve();
+  return Engine.api.updateLayers(mediaLayerDescriptors(false)).then(function () {
+    markDirty(); refreshMediaPreview(); drawMediaStage();
+  });
+}
+function selectMediaLayer(id) {
+  S.selectedLayerId = id || null;
+  syncMediaEditorUI(); drawMediaStage();
+}
+function syncMediaEditorUI() {
+  var list = $('#mediaLayers');
+  if (!list) return;
+  list.innerHTML = '';
+  (S.layers || []).slice().reverse().forEach(function (layer) {
+    var button = el('button', layer.id === S.selectedLayerId ? 'on' : '');
+    button.type = 'button';
+    button.appendChild(el('span', null, layer.name || 'Untitled media'));
+    button.appendChild(el('em', null, String(layer.kind || 'image').toUpperCase()));
+    button.addEventListener('click', function () { selectMediaLayer(layer.id); });
+    list.appendChild(button);
+  });
+  if (!S.layers.length) list.innerHTML = '<div class="media-layer-empty">No media layers.</div>';
+  $('#mediaLayerCount').textContent = String(S.layers.length);
+  $('#mediaEmpty').hidden = S.layers.length > 0;
+  var layer = selectedMediaLayer();
+  $('#mediaNoSelection').hidden = !!layer;
+  $('#mediaInspectorFields').hidden = !layer;
+  $('#mediaVideoFields').hidden = !layer || layer.kind !== 'video';
+  $('#mediaStageInfo').textContent = S.comp.width + ' × ' + S.comp.height;
+  if (!layer) return;
+  $('#mediaX').value = Math.round(layer.x);
+  $('#mediaY').value = Math.round(layer.y);
+  $('#mediaWidth').value = Math.round(layer.width);
+  $('#mediaHeight').value = Math.round(layer.height);
+  $('#mediaRotation').value = Number(layer.rotation || 0);
+  $('#mediaOpacity').value = Number(layer.opacity === undefined ? 1 : layer.opacity);
+  $('#mediaBlend').value = layer.blend || 'source-over';
+  $('#mediaVisible').checked = layer.visible !== false;
+  $('#mediaStart').value = Number(layer.startFrame || 0);
+  $('#mediaEnd').value = Number(layer.endFrame || S.comp.frameCount);
+  $('#mediaTrim').value = Number(layer.trimIn || 0);
+  $('#mediaRate').value = Number(layer.playbackRate || 1);
+}
+function drawMediaStage() {
+  if (!S.canvasEditorOpen) return;
+  var canvas = $('#mediaStage'), source = $('#view');
+  if (!canvas || !source || !canvas.getContext || !source.width || !source.height) return;
+  if (canvas.width !== source.width) canvas.width = source.width;
+  if (canvas.height !== source.height) canvas.height = source.height;
+  var ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+  var layer = selectedMediaLayer();
+  if (!layer || layer.visible === false) return;
+  var sx = canvas.width / S.comp.width, sy = canvas.height / S.comp.height;
+  var w = Number(layer.width) || 1, h = Number(layer.height) || 1;
+  ctx.save();
+  ctx.translate((Number(layer.x) + w / 2) * sx, (Number(layer.y) + h / 2) * sy);
+  ctx.rotate((Number(layer.rotation) || 0) * Math.PI / 180);
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = Math.max(1, canvas.width / 900);
+  ctx.setLineDash([7 * sx, 4 * sx]);
+  ctx.strokeRect(-w * sx / 2, -h * sy / 2, w * sx, h * sy);
+  ctx.setLineDash([]);
+  var handle = Math.max(7, canvas.width / 90);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(w * sx / 2 - handle / 2, h * sy / 2 - handle / 2, handle, handle);
+  ctx.restore();
+}
+function mediaStagePoint(ev) {
+  var rect = $('#mediaStage').getBoundingClientRect();
+  return {
+    x: (ev.clientX - rect.left) / Math.max(1, rect.width) * S.comp.width,
+    y: (ev.clientY - rect.top) / Math.max(1, rect.height) * S.comp.height
+  };
+}
+function mediaLocalPoint(layer, point) {
+  var w = Number(layer.width) || 1, h = Number(layer.height) || 1;
+  var dx = point.x - (Number(layer.x) + w / 2), dy = point.y - (Number(layer.y) + h / 2);
+  var angle = -(Number(layer.rotation) || 0) * Math.PI / 180;
+  return { x: dx * Math.cos(angle) - dy * Math.sin(angle) + w / 2, y: dx * Math.sin(angle) + dy * Math.cos(angle) + h / 2 };
+}
+function mediaLayerHit(layer, point) {
+  if (!layer || layer.visible === false) return false;
+  var local = mediaLocalPoint(layer, point);
+  return local.x >= 0 && local.y >= 0 && local.x <= layer.width && local.y <= layer.height;
+}
+function initMediaStageInput() {
+  var canvas = $('#mediaStage');
+  canvas.addEventListener('pointerdown', function (ev) {
+    if (!S.canvasEditorOpen) return;
+    var point = mediaStagePoint(ev), hit = null;
+    for (var i = S.layers.length - 1; i >= 0; i--) if (mediaLayerHit(S.layers[i], point)) { hit = S.layers[i]; break; }
+    if (!hit) { selectMediaLayer(null); return; }
+    if (hit.id !== S.selectedLayerId) selectMediaLayer(hit.id);
+    var local = mediaLocalPoint(hit, point), w = Number(hit.width) || 1, h = Number(hit.height) || 1;
+    var resize = Math.sqrt((local.x - w) * (local.x - w) + (local.y - h) * (local.y - h)) < Math.max(18, w * 0.025);
+    S.mediaDrag = { id: hit.id, mode: resize ? 'resize' : 'move', point: point, x: Number(hit.x), y: Number(hit.y), width: w, height: h, ratio: w / Math.max(1, h) };
+    try { canvas.setPointerCapture(ev.pointerId); } catch (_) {}
+    ev.preventDefault();
+  });
+  canvas.addEventListener('pointermove', function (ev) {
+    var drag = S.mediaDrag;
+    if (!drag) return;
+    var layer = mediaLayerById(drag.id);
+    if (!layer) return;
+    var point = mediaStagePoint(ev), dx = point.x - drag.point.x, dy = point.y - drag.point.y;
+    if (drag.mode === 'move') {
+      layer.x = Math.round(drag.x + dx); layer.y = Math.round(drag.y + dy);
+    } else {
+      var width = Math.max(2, drag.width + dx);
+      if ($('#mediaLockRatio').checked) { layer.width = width; layer.height = Math.max(2, width / drag.ratio); }
+      else { layer.width = width; layer.height = Math.max(2, drag.height + dy); }
+    }
+    updateMediaLayerRuntime(); syncMediaEditorUI(); drawMediaStage(); ev.preventDefault();
+  });
+  function endDrag() {
+    if (!S.mediaDrag) return;
+    S.mediaDrag = null; markDirty(); syncMediaEditorUI();
+  }
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', endDrag);
+}
+function mediaInspectorInput(ev) {
+  var input = ev.target, prop = input && input.dataset && input.dataset.mediaProp;
+  if (!prop) return;
+  var layer = selectedMediaLayer();
+  if (!layer) return;
+  if (prop === 'visible') layer.visible = !!input.checked;
+  else if (prop === 'blend') layer.blend = input.value;
+  else {
+    if (input.value === '') return;
+    var value = Number(input.value);
+    if (!Number.isFinite(value)) return;
+    if (prop === 'opacity') value = Math.max(0, Math.min(1, value));
+    if (prop === 'playbackRate') value = Math.max(0.01, Math.min(8, value));
+    if (prop === 'trimIn') value = Math.max(0, value);
+    if (prop === 'startFrame') value = Math.max(0, Math.min(S.comp.frameCount - 1, Math.floor(value)));
+    if (prop === 'endFrame') value = Math.max((Number(layer.startFrame) || 0) + 1, Math.min(S.comp.frameCount, Math.floor(value)));
+    if (prop === 'width' || prop === 'height') value = Math.max(2, Math.min(32768, value));
+    if (prop === 'rotation') value = value % 360;
+    var ratio = Number(layer.aspectRatio) || (layer.width / Math.max(1, layer.height));
+    layer[prop] = value;
+    if (prop === 'width' && $('#mediaLockRatio').checked) layer.height = value / ratio;
+    if (prop === 'height' && $('#mediaLockRatio').checked) layer.width = value * ratio;
+    if (prop === 'width' || prop === 'height') layer.aspectRatio = layer.width / Math.max(1, layer.height);
+  }
+  if (prop === 'startFrame' && layer.endFrame <= layer.startFrame) layer.endFrame = Math.min(S.comp.frameCount, layer.startFrame + 1);
+  syncMediaEditorUI(); updateMediaLayerRuntime();
+}
+function readVideoInfo(file) {
+  return new Promise(function (resolve, reject) {
+    var video = document.createElement('video'), url = URL.createObjectURL(file), settled = false;
+    var timer = setTimeout(function () { finish(new Error('Video metadata timed out.')); }, 15000);
+    function finish(error) {
+      if (settled) return;
+      settled = true; clearTimeout(timer);
+      video.removeEventListener('loadedmetadata', loaded); video.removeEventListener('error', failed);
+      var info = { width: video.videoWidth || 0, height: video.videoHeight || 0, duration: Number(video.duration) || 0 };
+      try { video.pause(); video.removeAttribute('src'); video.load(); } catch (_) {}
+      URL.revokeObjectURL(url);
+      if (error) reject(error); else resolve(info);
+    }
+    function loaded() { finish(null); }
+    function failed() { finish(new Error('This browser cannot read the selected video format.')); }
+    video.preload = 'metadata'; video.muted = true; video.playsInline = true;
+    video.addEventListener('loadedmetadata', loaded); video.addEventListener('error', failed);
+    video.src = url; video.load();
+  });
+}
+function readImageInfo(file) {
+  if (typeof createImageBitmap !== 'function') return Promise.reject(new Error('This browser cannot decode local image files.'));
+  return createImageBitmap(file).then(function (bitmap) {
+    var info = { width: bitmap.width, height: bitmap.height };
+    if (bitmap.close) bitmap.close();
+    return info;
+  });
+}
+function importMediaFiles(files) {
+  var selected = Array.prototype.slice.call(files || []);
+  if (!selected.length) return Promise.resolve();
+  return selected.reduce(function (chain, file) {
+    return chain.then(function () {
+      var name = String(file.name || 'media').toLowerCase(), ext = name.split('.').pop();
+      var kind = (file.type && file.type.indexOf('video/') === 0) || /^(mp4|webm|mov|m4v|ogv)$/.test(ext) ? 'video'
+        : ext === 'svg' || file.type === 'image/svg+xml' ? 'vector'
+        : (file.type && file.type.indexOf('image/') === 0) || /^(png|jpe?g|gif|webp|avif|bmp)$/.test(ext) ? 'image' : null;
+      if (!kind) throw new Error('Unsupported media: ' + file.name + '. Choose a browser-supported image, video, or SVG.');
+      if (file.size > 200 * 1024 * 1024) throw new Error(file.name + ' is larger than the 200 MB per-file limit.');
+      return (kind === 'video' ? readVideoInfo(file) : readImageInfo(file)).then(function (info) {
+        if (!info.width || !info.height) throw new Error('The selected media has no readable dimensions: ' + file.name);
+        var scale = Math.min((S.comp.width * 0.68) / info.width, (S.comp.height * 0.68) / info.height, 1);
+        var width = Math.max(2, info.width * scale), height = Math.max(2, info.height * scale);
+        var layer = {
+          id: uid('layer'), name: file.name, kind: kind, type: file.type || (kind === 'vector' ? 'image/svg+xml' : ''),
+          blob: file, sourceWidth: info.width, sourceHeight: info.height,
+          width: width, height: height, x: (S.comp.width - width) / 2, y: (S.comp.height - height) / 2,
+          rotation: 0, opacity: 1, visible: true, blend: 'source-over',
+          startFrame: 0, endFrame: kind === 'video' ? Math.min(S.comp.frameCount, Math.max(1, Math.ceil((info.duration || 1) * S.comp.fps))) : S.comp.frameCount,
+          trimIn: 0, playbackRate: 1, duration: Number(info.duration) || 0, aspectRatio: width / Math.max(1, height)
+        };
+        S.layers.push(layer); S.selectedLayerId = layer.id;
+      });
+    });
+  }, Promise.resolve()).then(function () {
+    return syncMediaLayers();
+  }).then(function () {
+    markDirty(); toggleCanvasEditor(true); syncMediaEditorUI();
+    return run();
+  }).then(function () {
+    $('#stMsg').textContent = 'Media added to the canvas. Position and adjust it in Canvas Edit.';
+  }).catch(function (error) {
+    $('#stMsg').textContent = 'Media import failed: ' + String(error && error.message || error);
+    logLine('MEDIA IMPORT FAILED — ' + String(error && error.message || error), true);
+  });
+}
+function toggleCanvasEditor(force) {
+  S.canvasEditorOpen = force === undefined ? !S.canvasEditorOpen : !!force;
+  $('#paneCode').classList.toggle('canvas-edit-mode', S.canvasEditorOpen);
+  $('#canvasEditMode').hidden = !S.canvasEditorOpen;
+  $('#canvasModeBtn').textContent = S.canvasEditorOpen ? 'Code' : 'Canvas Edit';
+  $('#canvasModeBtn').classList.toggle('on', S.canvasEditorOpen);
+  if (S.canvasEditorOpen) { syncMediaEditorUI(); drawMediaStage(); }
+}
+function addMediaDialog() { $('#mediaPick').click(); }
+function removeSelectedMedia() {
+  var index = S.layers.findIndex(function (layer) { return layer.id === S.selectedLayerId; });
+  if (index < 0) return;
+  S.layers.splice(index, 1);
+  S.selectedLayerId = S.layers.length ? S.layers[Math.min(index, S.layers.length - 1)].id : null;
+  syncMediaLayers().then(function () { syncMediaEditorUI(); markDirty(); return run(); });
+}
+function duplicateSelectedMedia() {
+  var layer = selectedMediaLayer();
+  if (!layer) return;
+  var copy = Object.assign({}, layer, { id: uid('layer'), name: layer.name + ' copy', x: Number(layer.x) + 24, y: Number(layer.y) + 24 });
+  S.layers.push(copy); S.selectedLayerId = copy.id;
+  syncMediaLayers().then(function () { syncMediaEditorUI(); markDirty(); return run(); });
+}
+function moveSelectedMedia(direction) {
+  var index = S.layers.findIndex(function (layer) { return layer.id === S.selectedLayerId; });
+  var next = index + direction;
+  if (index < 0 || next < 0 || next >= S.layers.length) return;
+  var item = S.layers.splice(index, 1)[0];
+  S.layers.splice(next, 0, item);
+  syncMediaLayers().then(function () { syncMediaEditorUI(); markDirty(); refreshMediaPreview(); });
+}
+function initMediaEditor() {
+  $('#mediaPick').addEventListener('change', function () { importMediaFiles(this.files); this.value = ''; });
+  $('#mediaInspectorFields').addEventListener('change', mediaInspectorInput);
+  initMediaStageInput(); syncMediaEditorUI();
+}
 function markDirty(v) {
   S.dirty = v !== false;
   $('#projWrap').classList.toggle('dirty', S.dirty);
@@ -10128,6 +10414,7 @@ function paintResult(r) {
   fpsWin.push(t);
   while (fpsWin.length && t - fpsWin[0] > 1000) fpsWin.shift();
   S.previewFps = fpsWin.length;
+  drawMediaStage();
 }
 
 function requestPreview(force) {
