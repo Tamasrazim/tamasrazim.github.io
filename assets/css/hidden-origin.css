@@ -1,5 +1,6 @@
 /* Hidden Origin cinematic sequence — isolated from the site's normal layout. */
 #secretReveal.ho-overlay[hidden]{display:none!important}
+#secretReveal.ho-overlay:fullscreen,#secretReveal.ho-overlay:-webkit-full-screen{position:fixed;inset:0;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border:0}
 #secretReveal.ho-overlay:not([hidden]){
   position:fixed;inset:0;z-index:99999;display:block;overflow:hidden;
   background:#030303;color:#f4f4f4;font-family:"JetBrains Mono",monospace;
