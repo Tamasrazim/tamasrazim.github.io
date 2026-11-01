@@ -8707,7 +8707,7 @@ var BatchVector = (function () {
 
   function Scene(W,H){this.W=W;this.H=H;this.ops=[];}
   function Recorder(scene,W,H){
-    this.s=scene;this.canvas={width:W,height:H};this.m=identity();this.stack=[];this.path=[];
+    this.s=scene;this.canvas={width:W,height:H};this.m=identity();this.stack=[];this.path=[];this.nextVectorId=0;this.pathId=0;
     this.fillStyle='#000';this.strokeStyle='#000';this.lineWidth=1;this.globalAlpha=1;
     this.globalCompositeOperation='source-over';this.filter='none';
   }
@@ -8718,7 +8718,18 @@ var BatchVector = (function () {
   Recorder.prototype.scale=function(x,y){x=+x||0;y=y==null?x:+y||0;this.m=mul(this.m,[x,0,0,y,0,0]);};
   Recorder.prototype.transform=function(a,b,c,d,e,f){this.m=mul(this.m,[+a||0,+b||0,+c||0,+d||0,+e||0,+f||0]);};
   Recorder.prototype.setTransform=function(a,b,c,d,e,f){this.m=[+a||0,+b||0,+c||0,+d||0,+e||0,+f||0];};
-  Recorder.prototype.beginPath=function(){this.path=[];};
+  Recorder.prototype.beginPath=function(){this.path=[];this.pathId=this.nextVectorId++;};
+  Recorder.prototype.rect=function(x,y,w,h){this.path.push(['M',+x||0,+y||0],['L',(+x||0)+(+w||0),+y||0],['L',(+x||0)+(+w||0),(+y||0)+(+h||0)],['L',+x||0,(+y||0)+(+h||0)],['Z']);};
+  Recorder.prototype.arcTo=function(x1,y1,x2,y2){this.lineTo(x1,y1);this.lineTo(x2,y2);};
+  Recorder.prototype.clip=function(){};
+  Recorder.prototype.setLineDash=function(){};
+  Recorder.prototype.getLineDash=function(){return[];};
+  Recorder.prototype.fillText=function(){};
+  Recorder.prototype.strokeText=function(){};
+  Recorder.prototype.drawImage=function(){};
+  Recorder.prototype.putImageData=function(){};
+  Recorder.prototype.getTransform=function(){return this.m.slice();};
+  Recorder.prototype.measureText=function(text){return{width:String(text||'').length*8};};
   Recorder.prototype.moveTo=function(x,y){this.path.push(['M',+x||0,+y||0]);};
   Recorder.prototype.lineTo=function(x,y){this.path.push(['L',+x||0,+y||0]);};
   Recorder.prototype.bezierCurveTo=function(x1,y1,x2,y2,x3,y3){this.path.push(['C',+x1||0,+y1||0,+x2||0,+y2||0,+x3||0,+y3||0]);};
@@ -8753,10 +8764,10 @@ var BatchVector = (function () {
   Recorder.prototype.createLinearGradient=function(a,b,c,d){return new Gradient('linear',[a,b,c,d]);};
   Recorder.prototype.createRadialGradient=function(a,b,c,d,e,f){return new Gradient('radial',[a,b,c,d,e,f]);};
   Recorder.prototype.clearRect=function(){/* transparent/no-op for still-vector capture */};
-  Recorder.prototype.fillRect=function(x,y,w,h){this.s.ops.push({t:'rect',x:+x||0,y:+y||0,w:+w||0,h:+h||0,fill:this.fillStyle,stroke:null,width:0,opacity:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter,m:this.m.slice()});};
-  Recorder.prototype.strokeRect=function(x,y,w,h){this.s.ops.push({t:'rect',x:+x||0,y:+y||0,w:+w||0,h:+h||0,fill:null,stroke:this.strokeStyle,width:+this.lineWidth||1,opacity:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter,m:this.m.slice()});};
-  Recorder.prototype.fill=function(){if(this.path.length)this.s.ops.push({t:'path',commands:this.path.slice(),fill:this.fillStyle,stroke:null,width:0,opacity:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter,m:this.m.slice()});};
-  Recorder.prototype.stroke=function(){if(this.path.length)this.s.ops.push({t:'path',commands:this.path.slice(),fill:null,stroke:this.strokeStyle,width:+this.lineWidth||1,opacity:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter,m:this.m.slice()});};
+  Recorder.prototype.fillRect=function(x,y,w,h){this.s.ops.push({id:this.nextVectorId++,t:'rect',x:+x||0,y:+y||0,w:+w||0,h:+h||0,fill:this.fillStyle,stroke:null,width:0,opacity:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter,m:this.m.slice()});};
+  Recorder.prototype.strokeRect=function(x,y,w,h){this.s.ops.push({id:this.nextVectorId++,t:'rect',x:+x||0,y:+y||0,w:+w||0,h:+h||0,fill:null,stroke:this.strokeStyle,width:+this.lineWidth||1,opacity:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter,m:this.m.slice()});};
+  Recorder.prototype.fill=function(){if(this.path.length)this.s.ops.push({id:this.pathId,t:'path',commands:this.path.slice(),fill:this.fillStyle,stroke:null,width:0,opacity:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter,m:this.m.slice()});};
+  Recorder.prototype.stroke=function(){if(this.path.length)this.s.ops.push({id:this.pathId,t:'path',commands:this.path.slice(),fill:null,stroke:this.strokeStyle,width:+this.lineWidth||1,opacity:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter,m:this.m.slice()});};
 
   function sceneForCode(code,W,H,frame,time,loopProgress,fps){
     var scene=new Scene(W,H),ctx=new Recorder(scene,W,H);
