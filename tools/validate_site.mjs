@@ -243,7 +243,9 @@ must(hubItems.every(item=>knownSchemaIds.has(item.item&&item.item['@id'])),'proj
 const recorderPage=read('projects/trss-sample-recorder/index.html');
 must(recorderPage.includes('TrSS Sample')&&recorderPage.includes('120-second')&&recorderPage.includes('23 MiB'),'TrSS Sample Recorder page documents warm-up and bounded JSON chunks');
 const trssProjectPage=read('projects/trss/index.html');
-must(trssProjectPage.includes('IN DEVELOPMENT')&&trssProjectPage.includes('aria-valuenow="75"')&&trssProjectPage.includes('Arc B580'),'TrSS page identifies active development and labels the roadmap estimate');
+must(trssProjectPage.includes('IN DEVELOPMENT')&&trssProjectPage.includes('NATIVE RR PIPELINE / CI VERIFIED')&&trssProjectPage.includes('20-CHANNEL MODEL INPUT')&&trssProjectPage.includes('Arc B580'),'TrSS page documents the native reconstruction milestone and hardware target');
+must(trssProjectPage.includes('TrSSRRProcessLatestFrameV1')&&trssProjectPage.includes('synchronous')&&trssProjectPage.includes('physical Arc B580'),'TrSS page explains the cooperative frame boundary and validation limits');
+must(!trssProjectPage.includes('aria-valuenow="75"'),'TrSS page does not display the retired percentage estimate');
 for(const ref of ['href="/projects/trilyva/"','href="/projects/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"','href="/projects/webedyts/"','href="/projects/qalyvyron/"','href="/projects/trss-sample-recorder/"','href="/projects/trss/"'])must(hub.includes(ref),'project directory exposes '+ref);
 must(!hub.includes('href="/projects/code-motion/renderer/">Open workspace'),'project directory links to the TRILYVA overview first');
 must(!hub.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!hub.includes('Source files ')&&!hub.includes('SVG source ')&&!hub.includes('EPS source '),'project directory omits direct source links');
