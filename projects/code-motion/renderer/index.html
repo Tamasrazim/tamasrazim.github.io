@@ -10009,12 +10009,12 @@ function syncVectorRuntime() {
 function detectCodeVectors(force) {
   if (!S.comp || !Ed.ta || !window.BatchVector || typeof BatchVector.detectFromCode !== 'function') return Promise.resolve([]);
   var code = String(Ed.ta.value || '');
-  if (S.vectorSourceCode !== code) {
+  if (S.vectorSourceCode !== null && S.vectorSourceCode !== code) {
     S.vectorEdits = {};
     S.selectedVectorId = null;
-    S.vectorSourceCode = code;
     S.vectorDetectionKey = null;
   }
+  S.vectorSourceCode = code;
   var key = code + '\n' + S.comp.width + 'x' + S.comp.height + ':' + S.frame;
   if (!force && S.vectorDetectionKey === key) return Promise.resolve(S.vectorObjects);
   try {
@@ -10394,7 +10394,10 @@ function toggleCanvasEditor(force) {
   $('#canvasEditMode').hidden = !S.canvasEditorOpen;
   $('#canvasModeBtn').textContent = S.canvasEditorOpen ? 'Code' : 'Canvas Edit';
   $('#canvasModeBtn').classList.toggle('on', S.canvasEditorOpen);
-  if (S.canvasEditorOpen) { syncMediaEditorUI(); drawMediaStage(); }
+  if (S.canvasEditorOpen) {
+    return detectCodeVectors(true).then(function () { syncMediaEditorUI(); drawMediaStage(); requestPreview(true); });
+  }
+  return Promise.resolve();
 }
 function addMediaDialog() { $('#mediaPick').click(); }
 function removeSelectedMedia() {
@@ -10422,6 +10425,7 @@ function moveSelectedMedia(direction) {
 function initMediaEditor() {
   $('#mediaPick').addEventListener('change', function () { importMediaFiles(this.files); this.value = ''; });
   $('#mediaInspectorFields').addEventListener('change', mediaInspectorInput);
+  $('#vectorInspectorFields').addEventListener('change', vectorInspectorInput);
   initMediaStageInput(); syncMediaEditorUI();
 }
 function markDirty(v) {
@@ -14374,6 +14378,7 @@ var ACTS = {
   addMedia: addMediaDialog,
   removeMedia: removeSelectedMedia,
   duplicateMedia: duplicateSelectedMedia,
+  detectVectors: function () { return detectCodeVectors(true); },
   mediaForward: function () { moveSelectedMedia(1); },
   mediaBackward: function () { moveSelectedMedia(-1); },
   'new': function () {
