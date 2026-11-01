@@ -106,7 +106,7 @@ footer{border-top:1px solid var(--line);padding:23px 0 34px;display:flex;justify
 <div class="wrap layout">
 <aside class="toc" aria-label="Documentation contents">
 <b>ON THIS PAGE</b>
-<a href="#start">01 / Get started</a><a href="#animation">02 / Animation function</a><a href="#editor">03 / Editor and syntax colours</a><a href="#save">04 / Save source and projects</a><a href="#library">05 / Download from Library</a><a href="#render">06 / Render model</a><a href="#stills">07 / Still-frame exports</a><a href="#limits">08 / Capability limits</a><a href="#troubleshoot">09 / Troubleshooting</a>
+<a href="#start">01 / Get started</a><a href="#animation">02 / Animation function</a><a href="#editor">03 / Editor and syntax colours</a><a href="#canvas-editor">04 / Visual canvas editor</a><a href="#save">04 / Save source and projects</a><a href="#library">05 / Download from Library</a><a href="#render">06 / Render model</a><a href="#stills">07 / Still-frame exports</a><a href="#limits">08 / Capability limits</a><a href="#troubleshoot">09 / Troubleshooting</a>
 </aside>
 <div>
 <section class="doc" id="start">
@@ -139,6 +139,17 @@ footer{border-top:1px solid var(--line);padding:23px 0 34px;display:flex;justify
 <article class="card"><small>CALLABLES</small><h3><span class="token function">Functions</span></h3><p>Recognised function names use yellow. Use descriptive helper functions to keep complex scenes organised.</p></article>
 <article class="card"><small>RENDER API</small><h3><span class="token api">Canvas/API</span> <span class="token property">Properties</span></h3><p>Recognised renderer and browser APIs use cyan, properties use light blue, and selected literals use blue. The editor is a lightweight highlighter, not a full language server.</p></article>
 </div>
+</section>
+<section class="doc" id="canvas-editor">
+<div class="eyebrow">04 / VISUAL CANVAS EDITOR</div><h2>Place media without writing drawing code.</h2>
+<p>In the <strong>ANIMATION SOURCE</strong> toolbar, click <strong>Canvas Edit</strong>. The code area is replaced by a visual composition editor; click <strong>Code</strong> to return to the JavaScript source without losing your edits.</p>
+<div class="grid">
+<article class="card"><small>IMPORT</small><h3>Images, video and SVG</h3><p>Use <strong>Add media</strong> to import browser-supported image files, local video files, or SVG artwork. Files are added as separate layers and initially placed near the centre of the composition. Each file is limited to 200 MB; supported codecs and image formats depend on the browser.</p></article>
+<article class="card"><small>TRANSFORM</small><h3>Position and adjust</h3><p>Select a layer in the list or tap it on the canvas. Drag to move it and drag the corner handle to resize it. The inspector provides X/Y, width/height, aspect-ratio lock, rotation, opacity, blend mode and visibility controls.</p></article>
+<article class="card"><small>LAYERS</small><h3>Organise objects</h3><p>Duplicate or delete the selected layer, and use Bring forward / Send backward to change stacking order. Video layers also have start/end frames, trim-in and playback-rate controls.</p></article>
+<article class="card"><small>RENDERING</small><h3>Frame-aware media</h3><p>Images and SVG layers are composited with the animation in preview and raster/video exports. Videos are decoded by seeking to the time requested for each output frame, so video compositions can preview and render more slowly. Imported SVG files are rasterised for composition.</p></article>
+</div>
+<div class="callout">SVG/EPS still-image exports use the separate vector recorder and do not yet include placed media layers. Use PNG/JPG or video output when the final composition must contain the imported image/video/SVG layers.</div>
 </section>
 <section class="doc" id="save">
 <div class="eyebrow">04 / SAVE SOURCE AND PROJECTS</div><h2>Choose the file that fits the job.</h2>
