@@ -3647,6 +3647,7 @@ function run(cfg) {
   rt.setComposition(comp);
   if (cfg.assets) rt.setAssets(cfg.assets);
   if (cfg.layers) rt.setLayers(cfg.layers);
+  if (cfg.vectorEdits) rt.setVectorState(cfg.vectorEdits,cfg.vectorBounds || {});
   var c = rt.compile(job.code);
   if (!c.ok) return Promise.resolve({ ok: false, stage: 'validate', error: c.error });
   cfg.onLog('contract valid; renderFrame accepts ' + c.arity + ' argument' + (c.arity === 1 ? '' : 's'));
@@ -3861,7 +3862,7 @@ return { run: run, sampleTiming: sampleTiming, loopSeam: loopSeam, pad6: pad6 };
 var cancelled = false;
 var previewCanvas = null, previewCtx = null;
 var rt = MotionCore.createRuntime();
-var assets = {}, layers = {};
+var assets = {}, layers = {}, vectorEdits = {}, vectorBounds = {};
 
 function mk(w, h) {
   var c = new OffscreenCanvas(w, h);
@@ -3927,10 +3928,18 @@ self.onmessage = function (ev) {
         send({ type: 'layerProps', id: id, count: Object.keys(layers).length });
         break;
 
+      case 'vectorState':
+        vectorEdits = m.edits || {};
+        vectorBounds = m.bounds || {};
+        rt.setVectorState(vectorEdits,vectorBounds);
+        send({ type: 'vectorState', id: id, count: Object.keys(vectorEdits).length });
+        break;
+
       case 'compile':
         rt.setComposition(m.composition);
         rt.setAssets(assets);
         rt.setLayers(Object.keys(layers).map(function (key) { return layers[key]; }));
+        rt.setVectorState(vectorEdits,vectorBounds);
         send({ type: 'compile', id: id, result: rt.compile(m.code) });
         break;
 
@@ -3981,7 +3990,7 @@ self.onmessage = function (ev) {
         } : null;
         var existing = m.existing || null;
         MotionExport.run({
-          env: ENV, job: m.job, from: m.from || 0, assets: assets, layers: Object.keys(layers).map(function (key) { return layers[key]; }), existing: existing, writeFile: writeFile,
+          env: ENV, job: m.job, from: m.from || 0, assets: assets, layers: Object.keys(layers).map(function (key) { return layers[key]; }), vectorEdits: vectorEdits, vectorBounds: vectorBounds, existing: existing, writeFile: writeFile,
           isCancelled: function () { return cancelled; },
           onLog: function (msg) { send({ type: 'log', id: id, message: msg }); },
           onProgress: function (p) { send({ type: 'progress', id: id, progress: p }); }
@@ -7633,7 +7642,7 @@ function buildLocal() {
 }
 
 function mainEngine() {
-  var rt = CORE.createRuntime(), assets = {}, cancelled = false, mediaLayers = [], mediaLayerSources = [];
+  var rt = CORE.createRuntime(), assets = {}, cancelled = false, mediaLayers = [], mediaLayerSources = [], vectorEdits = {}, vectorBounds = {};
   function mk(w, h) {
     var c = document.createElement('canvas'); c.width = w; c.height = h;
     return { canvas: c, ctx: c.getContext('2d', { alpha: true }) };
@@ -7771,6 +7780,11 @@ function mainEngine() {
     },
     setLayers: setLayerSet,
     updateLayers: updateLayerProps,
+    setVectorState: function(edits,bounds){
+      vectorEdits = edits || {}; vectorBounds = bounds || {};
+      rt.setVectorState(vectorEdits,vectorBounds);
+      return Promise.resolve(true);
+    },
     compile: function (code, comp) { rt.setComposition(comp); rt.setAssets(assets); return Promise.resolve(rt.compile(code)); },
     setComposition: function (comp) { rt.setComposition(comp); return Promise.resolve(); },
     preview: function (frame, w, h, scale) {
@@ -7803,16 +7817,24 @@ function mainEngine() {
       } : null;
       var restoreLayers = mediaLayerSources.map(function (layer) { return Object.assign({}, layer); });
       var targetLayers = Array.isArray(job.layers) ? job.layers : restoreLayers;
+      var restoreVectorEdits = vectorEdits, restoreVectorBounds = vectorBounds;
+      var targetVectorEdits = job.vectorEdits || restoreVectorEdits, targetVectorBounds = job.vectorBounds || restoreVectorBounds;
       var exportComp = CORE.composition(job.composition);
       return setLayerSet(targetLayers).then(function () {
+        rt.setVectorState(targetVectorEdits,targetVectorBounds);
+        vectorEdits = targetVectorEdits; vectorBounds = targetVectorBounds;
         return EXP.run({
-          env: ENVI, job: job, from: from, assets: assets, layers: mediaLayers, existing: existing, writeFile: writeFile,
+          env: ENVI, job: job, from: from, assets: assets, layers: mediaLayers, vectorEdits: vectorEdits, vectorBounds: vectorBounds, existing: existing, writeFile: writeFile,
           prepareFrame: function (frame) { return prepareVideoFrames(frame, exportComp); },
           isCancelled: function () { return cancelled; }, onLog: onLog, onProgress: onProgress
         });
       }).then(function (result) {
+        vectorEdits = restoreVectorEdits; vectorBounds = restoreVectorBounds;
+        rt.setVectorState(vectorEdits,vectorBounds);
         return setLayerSet(restoreLayers).then(function () { return result; });
       }, function (error) {
+        vectorEdits = restoreVectorEdits; vectorBounds = restoreVectorBounds;
+        rt.setVectorState(vectorEdits,vectorBounds);
         return setLayerSet(restoreLayers).then(function () { throw error; });
       });
     }
@@ -7826,6 +7848,7 @@ function workerEngine() {
   var pending = {};
   var seq = 0;
   var activeLayers = [];
+  var activeVectorState = {edits:{},bounds:{}};
   w.onmessage = function (ev) {
     var m = ev.data, p = pending[m.id];
     if (m.type === 'ready') return;
@@ -7856,6 +7879,10 @@ function workerEngine() {
       activeLayers = activeLayers.map(function (layer) { return Object.assign({}, layer, changes[layer.id] || {}); });
       return call({ type: 'layerProps', layers: list || [] });
     },
+    setVectorState: function(edits,bounds){
+      activeVectorState = {edits:edits || {},bounds:bounds || {}};
+      return call({type:'vectorState',edits:activeVectorState.edits,bounds:activeVectorState.bounds});
+    },
     compile: function (code, comp) { return call({ type: 'compile', code: code, composition: comp }).then(function (m) { return m.result; }); },
     setComposition: function (comp) { return call({ type: 'composition', composition: comp }); },
     preview: function (frame, rw, rh, scale) { return call({ type: 'preview', frame: frame, rasterW: rw, rasterH: rh, scale: scale }); },
@@ -7866,16 +7893,22 @@ function workerEngine() {
     exportJob: function (job, from, dirHandle, existing, onLog, onProgress) {
       var restoreLayers = activeLayers.map(function (layer) { return Object.assign({}, layer); });
       var targetLayers = Array.isArray(job.layers) ? job.layers : restoreLayers;
+      var restoreVectorState = activeVectorState;
+      var targetVectorState = {edits:job.vectorEdits || restoreVectorState.edits,bounds:job.vectorBounds || restoreVectorState.bounds};
+      function setVectorSnapshot(state) {
+        activeVectorState = state;
+        return call({type:'vectorState',edits:state.edits,bounds:state.bounds});
+      }
       function setLayerSnapshot(list) {
         activeLayers = (list || []).map(function (layer) { return Object.assign({}, layer); });
         return call({ type: 'layers', layers: activeLayers });
       }
-      return setLayerSnapshot(targetLayers).then(function () {
+      return setLayerSnapshot(targetLayers).then(function () { return setVectorSnapshot(targetVectorState); }).then(function () {
         return call({ type: 'export', job: job, from: from, dirHandle: dirHandle || null, existing: existing || null }, [], onLog, onProgress);
       }).then(function (m) {
-        return setLayerSnapshot(restoreLayers).then(function () { return m.result; });
+        return setLayerSnapshot(restoreLayers).then(function () { return setVectorSnapshot(restoreVectorState); }).then(function () { return m.result; });
       }, function (error) {
-        return setLayerSnapshot(restoreLayers).then(function () { throw error; });
+        return setLayerSnapshot(restoreLayers).then(function () { return setVectorSnapshot(restoreVectorState); }).then(function () { throw error; });
       });
     }
   };
@@ -8816,7 +8849,7 @@ var BatchVector = (function () {
   };
   Recorder.prototype.roundRect=function(x,y,w,h,r){
     r=Math.min(Math.abs(r||0),Math.abs(w)/2,Math.abs(h)/2);
-    this.beginPath();this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.lineTo(x+w,y+r);this.lineTo(x+w,y+h-r);this.lineTo(x+w-r,y+h);this.lineTo(x+r,y+h);this.lineTo(x,y+h-r);this.lineTo(x,y+r);this.closePath();
+    this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.lineTo(x+w,y+r);this.lineTo(x+w,y+h-r);this.lineTo(x+w-r,y+h);this.lineTo(x+r,y+h);this.lineTo(x,y+h-r);this.lineTo(x,y+r);this.closePath();
   };
   Recorder.prototype.createLinearGradient=function(a,b,c,d){return new Gradient('linear',[a,b,c,d]);};
   Recorder.prototype.createRadialGradient=function(a,b,c,d,e,f){return new Gradient('radial',[a,b,c,d,e,f]);};
