@@ -1482,6 +1482,45 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&display=swap" rel="stylesheet">
 <!-- Keep the shell dark, but preserve true colors in the preview and export surfaces. -->
 
+<style id="media-layer-editor-styles">
+#paneCode.canvas-edit-mode #edwrap,#paneCode.canvas-edit-mode #edstat{display:none!important}
+#paneCode.canvas-edit-mode #canvasEditMode{display:flex}
+#paneCode.canvas-edit-mode .phead>button:not(#canvasModeBtn){display:none}
+#canvasEditMode[hidden]{display:none!important}
+#canvasEditMode{flex:1;min-height:0;flex-direction:column;overflow:hidden;background:#09090b}
+.media-editor-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.media-editor-title{display:flex;flex-direction:column;gap:4px;min-width:180px}
+.media-editor-title b{font:600 10px var(--mono);letter-spacing:.15em;color:#fff}
+.media-editor-title span,.media-hint{font:10px var(--mono);color:var(--mut)}
+.media-editor-actions,.media-order-actions{display:flex;gap:6px;flex-wrap:wrap}
+.media-editor-actions .btn,.media-order-actions .btn{min-height:32px}
+.media-editor-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,275px);min-height:0;flex:1}
+.media-editor-stage-column{display:flex;flex-direction:column;min-width:0;min-height:0;padding:12px;gap:8px;border-right:1px solid var(--rule)}
+.media-editor-stage-head{display:flex;align-items:center;gap:10px;min-height:20px;font:9px var(--mono);letter-spacing:.13em;color:var(--mut)}
+#mediaEditorStageBox{position:relative;display:flex;align-items:center;justify-content:center;min-height:150px;flex:1;overflow:auto;background-color:#101012;background-image:linear-gradient(45deg,#1a1a1d 25%,transparent 25%),linear-gradient(-45deg,#1a1a1d 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#1a1a1d 75%),linear-gradient(-45deg,transparent 75%,#1a1a1d 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0}
+#mediaStage{display:block;width:min(100%,1000px);height:auto;max-height:100%;object-fit:contain;touch-action:none;cursor:crosshair;box-shadow:0 0 0 1px rgba(255,255,255,.16);background:transparent}
+#mediaEmpty{position:absolute;pointer-events:none;padding:8px 12px;background:rgba(0,0,0,.72);border:1px solid var(--rule);font:10px var(--mono);color:var(--mut)}
+.media-editor-stage-column>.note{margin:0;max-width:760px}
+.media-inspector{min-width:0;min-height:0;overflow:auto;padding:10px 12px;background:#0d0d0f}
+.media-inspector-section{padding:6px 0 12px;border-bottom:1px solid var(--rule);margin-bottom:10px}
+.media-inspector-section h4{display:flex;align-items:center;justify-content:space-between;margin:0 0 9px;font:600 9px var(--mono);letter-spacing:.15em;color:var(--mut)}
+.media-layer-list{display:flex;flex-direction:column;gap:4px;max-height:180px;overflow:auto}
+.media-layer-list button{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:34px;padding:6px 8px;text-align:left;background:#151517;border:1px solid var(--rule);color:var(--ink-2);font:10px var(--mono);cursor:pointer}
+.media-layer-list button.on{border-color:#fff;color:#fff;background:#202023}
+.media-layer-list button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.media-layer-list button em{font-style:normal;font-size:8px;color:var(--mut)}
+.media-layer-empty,.media-no-selection{padding:10px;border:1px dashed var(--rule);font:10px/1.6 var(--mono);color:var(--mut)}
+.media-order-actions{margin-top:6px}
+.media-order-actions .btn{flex:1;font-size:8px;padding:0 5px}
+.media-prop-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.media-prop-grid label,.media-field{display:flex;flex-direction:column;gap:4px;font:9px var(--mono);color:var(--mut)}
+.media-prop-grid input,.media-field select{width:100%;min-width:0;min-height:32px;padding:5px 7px;border:1px solid var(--rule);background:#151517;color:#fff;font:11px var(--mono);border-radius:0}
+.media-check{display:flex;align-items:center;gap:7px;margin-top:9px;font:9px var(--mono);color:var(--ink-2)}
+.media-check input{accent-color:#fff}
+.media-field{margin-top:10px}
+@media(max-width:850px){.media-editor-layout{grid-template-columns:minmax(0,1fr)}.media-editor-stage-column{min-height:260px;border-right:0;border-bottom:1px solid var(--rule)}.media-inspector{max-height:310px}}
+@media(max-width:520px){.media-editor-top{align-items:flex-start}.media-editor-actions{width:100%}.media-editor-actions .btn{flex:1}.media-editor-stage-head .media-hint{display:none}}
+</style>
 </head>
 <body>
 <div id="grain" aria-hidden="true"></div>
@@ -1528,6 +1567,7 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
         <button data-act="copySource" title="Copy the complete animation source">Copy</button>
         <button data-act="saveSourceOptions" title="Choose to download the current animation source as .tmotion or .js">Save</button>
         <button data-act="clearSource">Clear</button>
+        <button data-act="toggleCanvasEditor" id="canvasModeBtn">Canvas Edit</button>
       </div>
       <div id="find" class="hide">
         <input id="findQ" placeholder="find" spellcheck="false" aria-label="Find">
@@ -1558,6 +1598,67 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
         <span class="sp"></span>
         <span id="edHl">highlight on</span>
         <span id="edState">not run</span>
+      </div>
+      <div id="canvasEditMode" hidden>
+        <div class="media-editor-top">
+          <div class="media-editor-title"><b>CANVAS OBJECTS</b><span>Place media directly in the composition. Select a layer to edit it.</span></div>
+          <div class="media-editor-actions">
+            <button class="btn solid" data-act="addMedia">Add media</button>
+            <button class="btn" data-act="duplicateMedia">Duplicate</button>
+            <button class="btn" data-act="removeMedia">Delete</button>
+          </div>
+        </div>
+        <div class="media-editor-layout">
+          <div class="media-editor-stage-column">
+            <div class="media-editor-stage-head"><span>COMPOSITION</span><span id="mediaStageInfo" class="num">960 × 540</span><span class="sp"></span><span class="media-hint">Drag to move · drag corner to resize</span></div>
+            <div id="mediaEditorStageBox">
+              <canvas id="mediaStage" width="960" height="540" aria-label="Media editing canvas"></canvas>
+              <div id="mediaEmpty">Add an image, video, or SVG to begin.</div>
+            </div>
+            <p class="note">Media layers are composited after your animation and included in frame-based exports. SVG is rasterised by the browser at render resolution.</p>
+          </div>
+          <aside class="media-inspector">
+            <div class="media-inspector-section">
+              <h4>LAYERS <span id="mediaLayerCount" class="num">0</span></h4>
+              <div id="mediaLayers" class="media-layer-list"><div class="media-layer-empty">No media layers.</div></div>
+              <div class="media-order-actions">
+                <button class="btn" data-act="mediaBackward">Send backward</button>
+                <button class="btn" data-act="mediaForward">Bring forward</button>
+              </div>
+            </div>
+            <div id="mediaNoSelection" class="media-no-selection">Select a layer to edit its position, size, rotation, opacity, and timing.</div>
+            <div id="mediaInspectorFields" hidden>
+              <div class="media-inspector-section">
+                <h4>TRANSFORM</h4>
+                <div class="media-prop-grid">
+                  <label>X<input type="number" id="mediaX" data-media-prop="x" step="1"></label>
+                  <label>Y<input type="number" id="mediaY" data-media-prop="y" step="1"></label>
+                  <label>Width<input type="number" id="mediaWidth" data-media-prop="width" min="1" step="1"></label>
+                  <label>Height<input type="number" id="mediaHeight" data-media-prop="height" min="1" step="1"></label>
+                  <label>Rotation<input type="number" id="mediaRotation" data-media-prop="rotation" step="1"></label>
+                  <label>Opacity<input type="number" id="mediaOpacity" data-media-prop="opacity" min="0" max="1" step="0.01"></label>
+                </div>
+                <label class="media-check"><input id="mediaLockRatio" type="checkbox" checked> Lock aspect ratio</label>
+                <label class="media-check"><input id="mediaVisible" type="checkbox" data-media-prop="visible" checked> Visible</label>
+                <label class="media-field">Blend mode
+                  <select id="mediaBlend" data-media-prop="blend">
+                    <option value="source-over">Normal</option><option value="multiply">Multiply</option><option value="screen">Screen</option><option value="overlay">Overlay</option><option value="darken">Darken</option><option value="lighten">Lighten</option><option value="lighter">Add</option>
+                  </select>
+                </label>
+              </div>
+              <div class="media-inspector-section" id="mediaVideoFields" hidden>
+                <h4>VIDEO TIMING</h4>
+                <div class="media-prop-grid">
+                  <label>Start frame<input type="number" id="mediaStart" data-media-prop="startFrame" min="0" step="1"></label>
+                  <label>End frame<input type="number" id="mediaEnd" data-media-prop="endFrame" min="1" step="1"></label>
+                  <label>Trim in (s)<input type="number" id="mediaTrim" data-media-prop="trimIn" min="0" step="0.01"></label>
+                  <label>Playback rate<input type="number" id="mediaRate" data-media-prop="playbackRate" min="0.01" max="8" step="0.01"></label>
+                </div>
+                <p class="note">Video sources are sought to the requested project frame before compositing. Video projects use the browser's main-thread media decoder.</p>
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
     </section>
 
@@ -1863,6 +1964,7 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
 </div>
 
 <input type="file" id="filePick" accept=".tmotion,.json,application/json" class="hide">
+<input type="file" id="mediaPick" accept="image/*,video/*,.svg,image/svg+xml" multiple class="hide">
 
 <script type="text/js-source" id="src-runtime">
 /* ============================================================
@@ -2066,7 +2168,7 @@ function createRuntime() {
   var rt = {
     compiled: null, fn: null, setupFn: null, code: '', hash: '',
     comp: composition({}), rng: mulberry32(1), noise: makeNoise(1),
-    sims: {}, assets: {}, motion: null, lastError: null, generation: 0
+    sims: {}, assets: {}, layers: [], motion: null, lastError: null, generation: 0
   };
 
   function buildMotion() {
@@ -2128,6 +2230,7 @@ function createRuntime() {
 
   rt.setComposition = function (c) { rt.comp = composition(c); rt.noise = makeNoise(rt.comp.seed | 0); rt.sims = {}; };
   rt.setAssets = function (a) { rt.assets = a || {}; rt.motion.assets = rt.assets; };
+  rt.setLayers = function (a) { rt.layers = Array.isArray(a) ? a : []; };
 
   rt.compile = function (code) {
     rt.generation++;
@@ -2219,6 +2322,20 @@ function createRuntime() {
     var t0 = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     try {
       rt.fn(t, frame, c.fps, ctx, c.width, c.height);
+      (rt.layers || []).forEach(function (layer) {
+        if (!layer || layer.visible === false) return;
+        var image = layer.kind === 'video' ? (opts.videoFrames && opts.videoFrames[layer.id]) : layer.bitmap;
+        if (!image) return;
+        var x = Number(layer.x) || 0, y = Number(layer.y) || 0;
+        var w = Math.max(0.01, Number(layer.width) || 1), h = Math.max(0.01, Number(layer.height) || 1);
+        ctx.save();
+        ctx.globalAlpha = clamp(layer.opacity === undefined ? 1 : Number(layer.opacity), 0, 1);
+        ctx.globalCompositeOperation = layer.blend || 'source-over';
+        ctx.translate(x + w / 2, y + h / 2);
+        ctx.rotate((Number(layer.rotation) || 0) * Math.PI / 180);
+        ctx.drawImage(image, -w / 2, -h / 2, w, h);
+        ctx.restore();
+      });
     } catch (e) {
       ctx.restore(); ctx.setTransform(1, 0, 0, 1, 0, 0);
       var d = describeError(e, opts.isExport ? 'render' : 'preview');
@@ -3137,25 +3254,33 @@ function runFrames(cfg) {
     if (i >= cfg.to) return Promise.resolve({ ok: true });
     if (cfg.isCancelled()) return Promise.resolve({ ok: false, cancelled: true });
     var t0 = now();
-    var r = rt.renderInto(out.ctx, i, { isExport: true });
-    if (!r.ok) return Promise.resolve({ ok: false, error: r.error, atFrame: i });
-    if (cfg.checksums) checksums.push(checksumOf(env, out.canvas, comp, thumbHolder));
-    durations.push(now() - t0);
-    return Promise.resolve(cfg.sink(i, out.canvas)).then(function (sr) {
-      if (sr && sr.error) return { ok: false, error: sr.error, atFrame: i };
-      var done = i - cfg.from + 1;
-      var el = now() - started;
-      if (el - lastPost > 120 || i === cfg.to - 1) {
-        lastPost = el;
-        cfg.onProgress({
-          frame: i, done: done + cfg.skipped, total: cfg.total,
-          elapsedMs: el, renderFps: done / (el / 1000),
-          msPerFrame: el / done, bytes: cfg.bytes()
+    var prepared = cfg.prepareFrame ? cfg.prepareFrame(i) : null;
+    return Promise.resolve(prepared).then(function (videoFrames) {
+      var r;
+      try { r = rt.renderInto(out.ctx, i, { isExport: true, videoFrames: videoFrames || null }); }
+      finally {
+        if (videoFrames) Object.keys(videoFrames).forEach(function (key) {
+          var bitmap = videoFrames[key];
+          if (bitmap && bitmap.close) bitmap.close();
         });
       }
-      i++;
-      /* yield so cancellation, progress and (on the fallback path) the UI can breathe */
-      return sleep(0).then(step);
+      if (!r.ok) return { ok: false, error: r.error, atFrame: i };
+      if (cfg.checksums) checksums.push(checksumOf(env, out.canvas, comp, thumbHolder));
+      durations.push(now() - t0);
+      return Promise.resolve(cfg.sink(i, out.canvas)).then(function (sr) {
+        if (sr && sr.error) return { ok: false, error: sr.error, atFrame: i };
+        var done = i - cfg.from + 1, elapsed = now() - started;
+        if (elapsed - lastPost > 120 || i === cfg.to - 1) {
+          lastPost = elapsed;
+          cfg.onProgress({
+            frame: i, done: done + cfg.skipped, total: cfg.total,
+            elapsedMs: elapsed, renderFps: done / (elapsed / 1000),
+            msPerFrame: elapsed / done, bytes: cfg.bytes()
+          });
+        }
+        i++;
+        return sleep(0).then(step);
+      });
     });
   }
   return step().then(function (res) {
@@ -3226,7 +3351,7 @@ function exportWebM(cfg) {
     }
     return runFrames({
       env: env, rt: cfg.rt, comp: comp, canvas: out, from: cfg.from, to: comp.frameCount,
-      total: comp.frameCount, skipped: 0, checksums: job.checksums,
+      total: comp.frameCount, skipped: 0, checksums: job.checksums, prepareFrame: cfg.prepareFrame,
       isCancelled: cfg.isCancelled, onProgress: cfg.onProgress,
       bytes: function () { return encodedBytes; },
       sink: function (i, canvas) {
@@ -3335,7 +3460,7 @@ function exportMP4(cfg) {
     }
     return runFrames({
       env: env, rt: cfg.rt, comp: comp, canvas: out, from: cfg.from, to: comp.frameCount,
-      total: comp.frameCount, skipped: 0, checksums: job.checksums,
+      total: comp.frameCount, skipped: 0, checksums: job.checksums, prepareFrame: cfg.prepareFrame,
       isCancelled: cfg.isCancelled, onProgress: cfg.onProgress,
       bytes: function () { return encodedBytes; },
       sink: function (i, canvas) {
@@ -3426,7 +3551,7 @@ function exportPNG(cfg) {
   }
   return runFrames({
     env: env, rt: cfg.rt, comp: comp, canvas: out, from: cfg.from, to: comp.frameCount,
-    total: comp.frameCount, skipped: 0, checksums: job.checksums,
+    total: comp.frameCount, skipped: 0, checksums: job.checksums, prepareFrame: cfg.prepareFrame,
     isCancelled: cfg.isCancelled, onProgress: cfg.onProgress,
     bytes: function () { return bytes; },
     sink: writeOne
@@ -3464,6 +3589,7 @@ function run(cfg) {
   var rt = core.createRuntime();
   rt.setComposition(comp);
   if (cfg.assets) rt.setAssets(cfg.assets);
+  if (cfg.layers) rt.setLayers(cfg.layers);
   var c = rt.compile(job.code);
   if (!c.ok) return Promise.resolve({ ok: false, stage: 'validate', error: c.error });
   cfg.onLog('contract valid; renderFrame accepts ' + c.arity + ' argument' + (c.arity === 1 ? '' : 's'));
@@ -3471,7 +3597,7 @@ function run(cfg) {
   if (!probe.ok) return Promise.resolve({ ok: false, stage: 'validate', error: probe.error });
   cfg.onLog('frame ' + (cfg.from || 0) + ' evaluated without error');
 
-  var sub = { env: env, rt: rt, comp: comp, job: job, from: cfg.from || 0, onLog: cfg.onLog, onProgress: cfg.onProgress, isCancelled: cfg.isCancelled, writeFile: cfg.writeFile, existing: cfg.existing };
+  var sub = { env: env, rt: rt, comp: comp, job: job, from: cfg.from || 0, onLog: cfg.onLog, onProgress: cfg.onProgress, isCancelled: cfg.isCancelled, writeFile: cfg.writeFile, existing: cfg.existing, prepareFrame: cfg.prepareFrame };
   var started = Date.now();
   var task = job.format === 'webm' ? exportWebM(sub)
     : job.format === 'mp4' ? exportMP4(sub)
