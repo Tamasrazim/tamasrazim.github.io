@@ -2168,7 +2168,7 @@ function createRuntime() {
   var rt = {
     compiled: null, fn: null, setupFn: null, code: '', hash: '',
     comp: composition({}), rng: mulberry32(1), noise: makeNoise(1),
-    sims: {}, assets: {}, layers: [], motion: null, lastError: null, generation: 0
+    sims: {}, assets: {}, layers: [], vectorEdits: {}, vectorBounds: {}, motion: null, lastError: null, generation: 0
   };
 
   function buildMotion() {
@@ -2231,6 +2231,62 @@ function createRuntime() {
   rt.setComposition = function (c) { rt.comp = composition(c); rt.noise = makeNoise(rt.comp.seed | 0); rt.sims = {}; };
   rt.setAssets = function (a) { rt.assets = a || {}; rt.motion.assets = rt.assets; };
   rt.setLayers = function (a) { rt.layers = Array.isArray(a) ? a : []; };
+  rt.setVectorState = function (edits,bounds) { rt.vectorEdits = edits || {}; rt.vectorBounds = bounds || {}; };
+
+  function vectorMatrix(edit,bounds,scale){
+    if(!edit||!bounds)return null;
+    var bw=Math.max(.001,Number(bounds.width)||1),bh=Math.max(.001,Number(bounds.height)||1);
+    var ew=Math.max(.001,Number(edit.width)||bw),eh=Math.max(.001,Number(edit.height)||bh);
+    var sx=ew/bw,sy=eh/bh,angle=(Number(edit.rotation)||0)*Math.PI/180,co=Math.cos(angle),si=Math.sin(angle);
+    var a=co*sx,b=si*sx,c=-si*sy,d=co*sy;
+    var cx=Number(bounds.x)+bw/2,cy=Number(bounds.y)+bh/2,nx=Number(edit.x)+ew/2,ny=Number(edit.y)+eh/2;
+    return[a,b,c,d,nx-a*cx-c*cy,ny-b*cx-d*cy];
+  }
+  function matrixMultiply(a,b){return[
+    a[0]*b[0]+a[2]*b[1],a[1]*b[0]+a[3]*b[1],
+    a[0]*b[2]+a[2]*b[3],a[1]*b[2]+a[3]*b[3],
+    a[0]*b[4]+a[2]*b[5]+a[4],a[1]*b[4]+a[3]*b[5]+a[5]
+  ];}
+  function matrixInverse(m){
+    var det=m[0]*m[3]-m[1]*m[2];if(Math.abs(det)<1e-12)return null;
+    return[m[3]/det,-m[1]/det,-m[2]/det,m[0]/det,(m[2]*m[5]-m[3]*m[4])/det,(m[1]*m[4]-m[0]*m[5])/det];
+  }
+  function vectorContext(ctx,edits,bounds,scale){
+    var nextId=0,pathId=0;
+    var pathMethods={moveTo:1,lineTo:1,bezierCurveTo:1,quadraticCurveTo:1,arc:1,ellipse:1,rect:1,roundRect:1,arcTo:1,closePath:1};
+    function applyFor(id,fn,draw,transform){
+      var edit=edits&&edits[id],base=bounds&&bounds[id];
+      if(!edit)return fn();
+      var needsOpacity=draw&&edit.opacity!==undefined;
+      var local=null;
+      if(transform&&base){
+        var world=vectorMatrix(edit,base,scale);
+        if(world){
+          world[4]*=scale;world[5]*=scale;
+          var current=ctx.getTransform(),cm=[current.a,current.b,current.c,current.d,current.e,current.f],inv=matrixInverse(cm);
+          if(inv)local=matrixMultiply(matrixMultiply(inv,world),cm);
+        }
+      }
+      if(!local&&!needsOpacity)return fn();
+      ctx.save();
+      try{
+        if(local)ctx.transform(local[0],local[1],local[2],local[3],local[4],local[5]);
+        if(needsOpacity)ctx.globalAlpha*=Math.max(0,Math.min(1,Number(edit.opacity)||0));
+        return fn();
+      }finally{ctx.restore();}
+    }
+    return new Proxy(ctx,{
+      get:function(target,key){
+        var value=target[key];
+        if(key==='beginPath')return function(){pathId=nextId++;return target.beginPath();};
+        if(pathMethods[key])return function(){var args=arguments;return applyFor(pathId,function(){return target[key].apply(target,args);},false,true);};
+        if(key==='fillRect'||key==='strokeRect')return function(){var id=nextId++,args=arguments;return applyFor(id,function(){return target[key].apply(target,args);},true,true);};
+        if(key==='fill'||key==='stroke')return function(){var args=arguments;return applyFor(pathId,function(){return target[key].apply(target,args);},true,false);};
+        return typeof value==='function'?value.bind(target):value;
+      },
+      set:function(target,key,value){target[key]=value;return true;}
+    });
+  }
 
   rt.compile = function (code) {
     rt.generation++;
@@ -2321,7 +2377,8 @@ function createRuntime() {
     ctx.clip();
     var t0 = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     try {
-      rt.fn(t, frame, c.fps, ctx, c.width, c.height);
+      var userCtx = rt.vectorEdits && Object.keys(rt.vectorEdits).length ? vectorContext(ctx,rt.vectorEdits,rt.vectorBounds,s) : ctx;
+      rt.fn(t, frame, c.fps, userCtx, c.width, c.height);
       (rt.layers || []).forEach(function (layer) {
         if (!layer || layer.visible === false) return;
         var image = layer.kind === 'video' ? (opts.videoFrames && opts.videoFrames[layer.id]) : layer.bitmap;
