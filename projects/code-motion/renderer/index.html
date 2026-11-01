@@ -11643,6 +11643,8 @@ function buildJob(over) {
     bitrate: ENC.sanitiseBitrate(requestedBitrate(comp.width, comp.height, comp.fps), comp.width, comp.height, comp.fps),
     tags: buildTags(comp, meta),
     layers: mediaLayerDescriptors(true),
+    vectorEdits: JSON.parse(JSON.stringify(S.vectorEdits || {})),
+    vectorBounds: JSON.parse(JSON.stringify(S.vectorBounds || {})),
     createdAt: new Date().toISOString(),
     test: over.test || null
   };
@@ -11916,10 +11918,15 @@ function startRender(job, opts) {
       var composition=CORE.composition(merge({},job.composition));
       var frame=Math.min(prefs.frame,Math.max(0,composition.frameCount-1));
       var currentLayers = mediaLayerDescriptors(true);
+      var currentVectorEdits = S.vectorEdits || {}, currentVectorBounds = S.vectorBounds || {};
       var built;
       await Engine.api.setLayers(job.layers || currentLayers);
+      await Engine.api.setVectorState(job.vectorEdits || currentVectorEdits, job.vectorBounds || currentVectorBounds);
       try { built = await trilyvaBuildStillAssets(job.code,composition,frame,prefs.formats); }
-      finally { await Engine.api.setLayers(currentLayers); }
+      finally {
+        await Engine.api.setLayers(currentLayers);
+        await Engine.api.setVectorState(currentVectorEdits,currentVectorBounds);
+      }
       var saved=[],errors=built.errors.slice();
       for(var i=0;i<prefs.formats.length;i++){
         var fmt=prefs.formats[i],blob=built.assets[fmt];
@@ -12933,6 +12940,7 @@ function projectRecord() {
   return {
     id: S.id, name: S.name, version: S.version,
     code: Ed.ta.value, comp: S.comp, meta: S.meta, layers: mediaLayerDescriptors(true),
+    vectorEdits: S.vectorEdits,
     exportPrefs: { format: S.exportFormat, quality: S.quality, timebase: S.timebase, checksums: S.checksums, customBitrateMbps: S.customBitrateMbps },
     created: S.created, modified: new Date().toISOString()
   };
@@ -12988,6 +12996,12 @@ function loadProjectRecord(rec) {
   S.comp = CORE.composition(rec.comp || {});
   S.layers = Array.isArray(rec.layers) ? rec.layers.map(function (layer) { return Object.assign({}, layer); }) : [];
   S.selectedLayerId = S.layers.length ? S.layers[S.layers.length - 1].id : null;
+  S.vectorEdits = rec.vectorEdits || {};
+  S.vectorBounds = {};
+  S.vectorSourceCode = null;
+  S.vectorDetectionKey = null;
+  S.vectorObjects = [];
+  S.selectedVectorId = null;
   var p = rec.exportPrefs || {};
   S.exportFormat = p.format || 'webm';
   S.quality = p.quality || 'standard';
@@ -13006,7 +13020,9 @@ function loadProjectRecord(rec) {
   applyComp({});
   syncMetaUI();
   markDirty(false);
-  return syncMediaLayers().then(function () { syncMediaEditorUI(); return run(); });
+  return syncMediaLayers().then(function () { syncMediaEditorUI(); return run(); }).then(function () {
+    return detectCodeVectors(true);
+  });
 }
 function openProjectDialog() {
   if (!DB.db) { $('#stMsg').textContent = 'IndexedDB is unavailable — import a .tmotion file instead'; return; }
@@ -13065,6 +13081,7 @@ function versionDialog(rec) {
 function newProject(sampleId) {
   S.id = null; S.version = 1; S.created = new Date().toISOString();
   S.layers = []; S.selectedLayerId = null;
+  S.vectorObjects = []; S.vectorEdits = {}; S.vectorBounds = {}; S.vectorSourceCode = null; S.vectorDetectionKey = null; S.selectedVectorId = null;
   S.name = 'Untitled';
   S.meta = defaultMeta();
   S.results = S.results || [];
@@ -13092,7 +13109,9 @@ function newProject(sampleId) {
   applyComp({});
   syncMetaUI();
   markDirty(false);
-  return syncMediaLayers().then(function () { syncMediaEditorUI(); return run(); });
+  return syncMediaLayers().then(function () { syncMediaEditorUI(); return run(); }).then(function () {
+    return detectCodeVectors(true);
+  });
 }
 
 /* ---------------- .tmotion ---------------- */
@@ -13141,6 +13160,7 @@ async function toTmotion() {
     timeRemap: { rate: c.speed, reverse: !!c.reverse },
     metadata: S.meta,
     mediaLayers: media,
+    vectorEdits: S.vectorEdits,
     exportPrefs: { format: S.exportFormat, quality: S.quality, timebase: S.timebase, checksums: S.checksums, customBitrateMbps: S.customBitrateMbps },
     frameModel: 'frameCount = round(duration * fps); frames 0..frameCount-1; time = frame / fps * rate'
   };
@@ -13202,6 +13222,7 @@ function importProject(file) {
       modified: new Date().toISOString(),
       code: (d.source && d.source.code) || '',
       meta: d.metadata || defaultMeta(),
+      vectorEdits: d.vectorEdits || {},
       layers: (d.mediaLayers || []).map(function (item) {
         var layer = {};
         Object.keys(item).forEach(function (key) { if (key !== 'data' && key !== 'mime') layer[key] = item[key]; });
