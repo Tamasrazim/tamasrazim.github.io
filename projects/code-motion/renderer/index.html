@@ -9917,7 +9917,8 @@ window.addEventListener("trilyva:export-dotmesh-folder", openDotMeshFolderPicker
    ============================================================ */
 var S = {
   id: null, name: 'Untitled', version: 1, dirty: false,
-  code: '', comp: null, meta: null, assets: [], layers: [], selectedLayerId: null, canvasEditorOpen: false, mediaDrag: null, layers: [], selectedLayerId: null, canvasEditorOpen: false, mediaDrag: null,
+  code: '', comp: null, meta: null, assets: [], layers: [], selectedLayerId: null, canvasEditorOpen: false, mediaDrag: null,
+  vectorObjects: [], selectedVectorId: null, vectorEdits: {}, vectorBounds: {}, vectorSourceCode: null, vectorDetectionKey: null,
   frame: 0, playing: false, loopPlayback: true,
   compiled: false, lastError: null, hash: '',
   previewBusy: false, previewFps: 0, previewRaster: { w: 0, h: 0, s: 1 },
@@ -9986,11 +9987,124 @@ function updateMediaLayerRuntime() {
     markDirty(); refreshMediaPreview(); drawMediaStage();
   });
 }
+function vectorObjectById(id) {
+  return (S.vectorObjects || []).find(function (object) { return String(object.id) === String(id); }) || null;
+}
+function selectedVectorObject() { return vectorObjectById(S.selectedVectorId); }
+function vectorDisplayRect(object) {
+  var edit = S.vectorEdits[String(object.id)] || object;
+  return {
+    x: Number(edit.x === undefined ? object.x : edit.x),
+    y: Number(edit.y === undefined ? object.y : edit.y),
+    width: Math.max(1, Number(edit.width === undefined ? object.width : edit.width)),
+    height: Math.max(1, Number(edit.height === undefined ? object.height : edit.height)),
+    rotation: Number(edit.rotation || 0),
+    opacity: Math.max(0, Math.min(1, Number(edit.opacity === undefined ? 1 : edit.opacity)))
+  };
+}
+function syncVectorRuntime() {
+  if (!Engine.api || typeof Engine.api.setVectorState !== 'function') return Promise.resolve(false);
+  return Engine.api.setVectorState(S.vectorEdits, S.vectorBounds);
+}
+function detectCodeVectors(force) {
+  if (!S.comp || !Ed.ta || !window.BatchVector || typeof BatchVector.detectFromCode !== 'function') return Promise.resolve([]);
+  var code = String(Ed.ta.value || '');
+  if (S.vectorSourceCode !== code) {
+    S.vectorEdits = {};
+    S.selectedVectorId = null;
+    S.vectorSourceCode = code;
+    S.vectorDetectionKey = null;
+  }
+  var key = code + '\n' + S.comp.width + 'x' + S.comp.height + ':' + S.frame;
+  if (!force && S.vectorDetectionKey === key) return Promise.resolve(S.vectorObjects);
+  try {
+    var time = CORE.frameToTime(S.comp, S.frame);
+    var loopProgress = S.comp.loop
+      ? (((time % Math.max(.000001, S.comp.loopDuration)) + Math.max(.000001, S.comp.loopDuration)) % Math.max(.000001, S.comp.loopDuration)) / Math.max(.000001, S.comp.loopDuration)
+      : Math.max(0, Math.min(1, time / Math.max(.000001, S.comp.duration)));
+    var objects = BatchVector.detectFromCode(code, S.comp.width, S.comp.height, S.frame, time, loopProgress, S.comp.fps);
+    var bounds = {};
+    objects.forEach(function (object) {
+      bounds[String(object.id)] = {x:object.x,y:object.y,width:object.width,height:object.height};
+      if (!S.vectorEdits[String(object.id)]) {
+        S.vectorEdits[String(object.id)] = {
+          x:object.x,y:object.y,width:object.width,height:object.height,rotation:0,opacity:1
+        };
+      }
+    });
+    S.vectorObjects = objects;
+    S.vectorBounds = bounds;
+    S.vectorDetectionKey = key;
+    if (S.selectedVectorId !== null && !vectorObjectById(S.selectedVectorId)) S.selectedVectorId = null;
+    var status = $('#vectorDetectionStatus');
+    if (status) status.textContent = objects.length
+      ? objects.length + ' code-drawn vector object(s) detected at frame ' + S.frame + '. Select an outline or a list item to edit it.'
+      : 'No supported path or rectangle objects were detected at frame ' + S.frame + '.';
+    syncMediaEditorUI();
+    drawMediaStage();
+    return syncVectorRuntime().then(function(){return objects;});
+  } catch (error) {
+    var statusNode = $('#vectorDetectionStatus');
+    if (statusNode) statusNode.textContent = 'Vector detection could not trace this frame: ' + String(error && error.message || error);
+    S.vectorObjects = [];
+    S.vectorBounds = {};
+    syncMediaEditorUI();
+    drawMediaStage();
+    return Promise.resolve([]);
+  }
+}
+function updateVectorRuntime() {
+  return syncVectorRuntime().then(function () {
+    markDirty();
+    refreshMediaPreview();
+    syncMediaEditorUI();
+    drawMediaStage();
+  });
+}
+function selectVectorObject(id) {
+  S.selectedVectorId = id === undefined ? null : id;
+  S.selectedLayerId = null;
+  syncMediaEditorUI();
+  drawMediaStage();
+}
 function selectMediaLayer(id) {
   S.selectedLayerId = id || null;
-  syncMediaEditorUI(); drawMediaStage();
+  S.selectedVectorId = null;
+  syncMediaEditorUI();
+  drawMediaStage();
 }
+function mediaLayerById(id) {
+  return (S.layers || []).find(function (layer) { return layer.id === id; }) || null;
+}
+function selectedMediaLayer() { return mediaLayerById(S.selectedLayerId); }
 function syncMediaEditorUI() {
+  var vectorList = $('#vectorObjects');
+  if (vectorList) {
+    vectorList.innerHTML = '';
+    (S.vectorObjects || []).slice().reverse().forEach(function (object) {
+      var button = el('button', String(object.id) === String(S.selectedVectorId) ? 'on' : '');
+      button.type = 'button';
+      button.appendChild(el('span', null, object.label || ('Vector ' + object.id)));
+      button.appendChild(el('em', null, String(object.type || 'path').toUpperCase()));
+      button.addEventListener('click', function () { selectVectorObject(object.id); });
+      vectorList.appendChild(button);
+    });
+    if (!S.vectorObjects.length) vectorList.innerHTML = '<div class="media-layer-empty">No code vectors detected.</div>';
+    $('#vectorCount').textContent = String(S.vectorObjects.length);
+  }
+  var vector = selectedVectorObject();
+  $('#vectorNoSelection').hidden = !!vector;
+  $('#vectorInspectorFields').hidden = !vector;
+  if (vector) {
+    var rect = vectorDisplayRect(vector);
+    $('#vectorX').value = Math.round(rect.x);
+    $('#vectorY').value = Math.round(rect.y);
+    $('#vectorWidth').value = Math.round(rect.width);
+    $('#vectorHeight').value = Math.round(rect.height);
+    $('#vectorRotation').value = rect.rotation;
+    $('#vectorOpacity').value = rect.opacity;
+  }
+
   var list = $('#mediaLayers');
   if (!list) return;
   list.innerHTML = '';
@@ -10024,6 +10138,24 @@ function syncMediaEditorUI() {
   $('#mediaTrim').value = Number(layer.trimIn || 0);
   $('#mediaRate').value = Number(layer.playbackRate || 1);
 }
+function drawVectorOutline(ctx, object, selected, sx, sy) {
+  var r = vectorDisplayRect(object);
+  var w = r.width * sx, h = r.height * sy;
+  ctx.save();
+  ctx.translate((r.x + r.width / 2) * sx, (r.y + r.height / 2) * sy);
+  ctx.rotate(r.rotation * Math.PI / 180);
+  ctx.strokeStyle = selected ? '#fff' : 'rgba(255,255,255,.55)';
+  ctx.lineWidth = selected ? Math.max(1.5, ctx.canvas.width / 700) : Math.max(1, ctx.canvas.width / 1200);
+  ctx.setLineDash(selected ? [7 * sx, 4 * sx] : [3 * sx, 5 * sx]);
+  ctx.strokeRect(-w / 2, -h / 2, w, h);
+  if (selected) {
+    ctx.setLineDash([]);
+    var handle = Math.max(7, ctx.canvas.width / 90);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(w / 2 - handle / 2, h / 2 - handle / 2, handle, handle);
+  }
+  ctx.restore();
+}
 function drawMediaStage() {
   if (!S.canvasEditorOpen) return;
   var canvas = $('#mediaStage'), source = $('#view');
@@ -10035,14 +10167,18 @@ function drawMediaStage() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+  var sx = canvas.width / S.comp.width, sy = canvas.height / S.comp.height;
+  (S.vectorObjects || []).forEach(function (object) {
+    drawVectorOutline(ctx, object, String(object.id) === String(S.selectedVectorId), sx, sy);
+  });
   var layer = selectedMediaLayer();
   if (!layer || layer.visible === false) return;
-  var sx = canvas.width / S.comp.width, sy = canvas.height / S.comp.height;
   var w = Number(layer.width) || 1, h = Number(layer.height) || 1;
   ctx.save();
   ctx.translate((Number(layer.x) + w / 2) * sx, (Number(layer.y) + h / 2) * sy);
   ctx.rotate((Number(layer.rotation) || 0) * Math.PI / 180);
-  ctx.strokeStyle = '#fff'; ctx.lineWidth = Math.max(1, canvas.width / 900);
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = Math.max(1, canvas.width / 900);
   ctx.setLineDash([7 * sx, 4 * sx]);
   ctx.strokeRect(-w * sx / 2, -h * sy / 2, w * sx, h * sy);
   ctx.setLineDash([]);
@@ -10069,38 +10205,76 @@ function mediaLayerHit(layer, point) {
   var local = mediaLocalPoint(layer, point);
   return local.x >= 0 && local.y >= 0 && local.x <= layer.width && local.y <= layer.height;
 }
+function vectorLayerHit(object, point) {
+  var r = vectorDisplayRect(object);
+  var local = mediaLocalPoint(r, point);
+  return local.x >= 0 && local.y >= 0 && local.x <= r.width && local.y <= r.height;
+}
 function initMediaStageInput() {
   var canvas = $('#mediaStage');
   canvas.addEventListener('pointerdown', function (ev) {
     if (!S.canvasEditorOpen) return;
     var point = mediaStagePoint(ev), hit = null;
-    for (var i = S.layers.length - 1; i >= 0; i--) if (mediaLayerHit(S.layers[i], point)) { hit = S.layers[i]; break; }
-    if (!hit) { selectMediaLayer(null); return; }
-    if (hit.id !== S.selectedLayerId) selectMediaLayer(hit.id);
-    var local = mediaLocalPoint(hit, point), w = Number(hit.width) || 1, h = Number(hit.height) || 1;
-    var resize = Math.sqrt((local.x - w) * (local.x - w) + (local.y - h) * (local.y - h)) < Math.max(18, w * 0.025);
-    S.mediaDrag = { id: hit.id, mode: resize ? 'resize' : 'move', point: point, x: Number(hit.x), y: Number(hit.y), width: w, height: h, ratio: w / Math.max(1, h) };
+    for (var i = S.layers.length - 1; i >= 0; i--) {
+      if (mediaLayerHit(S.layers[i], point)) { hit = S.layers[i]; break; }
+    }
+    if (hit) {
+      if (hit.id !== S.selectedLayerId) selectMediaLayer(hit.id);
+      var local = mediaLocalPoint(hit, point), mw = Number(hit.width) || 1, mh = Number(hit.height) || 1;
+      var resize = Math.sqrt((local.x - mw) * (local.x - mw) + (local.y - mh) * (local.y - mh)) < Math.max(18, mw * 0.025);
+      S.mediaDrag = {kind:'media',id:hit.id,mode:resize?'resize':'move',point:point,x:Number(hit.x),y:Number(hit.y),width:mw,height:mh,ratio:mw/Math.max(1,mh)};
+    } else {
+      var vectorHit = null;
+      for (var j = S.vectorObjects.length - 1; j >= 0; j--) {
+        if (vectorLayerHit(S.vectorObjects[j], point)) { vectorHit = S.vectorObjects[j]; break; }
+      }
+      if (!vectorHit) {
+        selectMediaLayer(null);
+        selectVectorObject(null);
+        return;
+      }
+      selectVectorObject(vectorHit.id);
+      var vr = vectorDisplayRect(vectorHit), vlocal = mediaLocalPoint(vr, point);
+      var vresize = Math.sqrt((vlocal.x - vr.width) * (vlocal.x - vr.width) + (vlocal.y - vr.height) * (vlocal.y - vr.height)) < Math.max(18, vr.width * 0.025);
+      S.mediaDrag = {kind:'vector',id:vectorHit.id,mode:vresize?'resize':'move',point:point,x:vr.x,y:vr.y,width:vr.width,height:vr.height,rotation:vr.rotation,local:vlocal};
+    }
     try { canvas.setPointerCapture(ev.pointerId); } catch (_) {}
     ev.preventDefault();
   });
   canvas.addEventListener('pointermove', function (ev) {
     var drag = S.mediaDrag;
     if (!drag) return;
-    var layer = mediaLayerById(drag.id);
-    if (!layer) return;
     var point = mediaStagePoint(ev), dx = point.x - drag.point.x, dy = point.y - drag.point.y;
-    if (drag.mode === 'move') {
-      layer.x = Math.round(drag.x + dx); layer.y = Math.round(drag.y + dy);
+    if (drag.kind === 'media') {
+      var layer = mediaLayerById(drag.id);
+      if (!layer) return;
+      if (drag.mode === 'move') {
+        layer.x = Math.round(drag.x + dx); layer.y = Math.round(drag.y + dy);
+      } else {
+        var mw = Math.max(2, drag.width + dx);
+        if ($('#mediaLockRatio').checked) { layer.width = mw; layer.height = Math.max(2, mw / drag.ratio); }
+        else { layer.width = mw; layer.height = Math.max(2, drag.height + dy); }
+      }
+      updateMediaLayerRuntime();
     } else {
-      var width = Math.max(2, drag.width + dx);
-      if ($('#mediaLockRatio').checked) { layer.width = width; layer.height = Math.max(2, width / drag.ratio); }
-      else { layer.width = width; layer.height = Math.max(2, drag.height + dy); }
+      var object = vectorObjectById(drag.id), edit = S.vectorEdits[String(drag.id)];
+      if (!object || !edit) return;
+      if (drag.mode === 'move') {
+        edit.x = Math.round(drag.x + dx); edit.y = Math.round(drag.y + dy);
+      } else {
+        var currentLocal = mediaLocalPoint({x:drag.x,y:drag.y,width:drag.width,height:drag.height,rotation:drag.rotation},point);
+        edit.width = Math.max(2, Math.round(drag.width + currentLocal.x - drag.local.x));
+        edit.height = Math.max(2, Math.round(drag.height + currentLocal.y - drag.local.y));
+      }
+      updateVectorRuntime();
     }
-    updateMediaLayerRuntime(); syncMediaEditorUI(); drawMediaStage(); ev.preventDefault();
+    syncMediaEditorUI(); drawMediaStage(); ev.preventDefault();
   });
   function endDrag() {
     if (!S.mediaDrag) return;
-    S.mediaDrag = null; markDirty(); syncMediaEditorUI();
+    S.mediaDrag = null;
+    markDirty();
+    syncMediaEditorUI();
   }
   canvas.addEventListener('pointerup', endDrag);
   canvas.addEventListener('pointercancel', endDrag);
@@ -10131,6 +10305,22 @@ function mediaInspectorInput(ev) {
   }
   if (prop === 'startFrame' && layer.endFrame <= layer.startFrame) layer.endFrame = Math.min(S.comp.frameCount, layer.startFrame + 1);
   syncMediaEditorUI(); updateMediaLayerRuntime();
+}
+function vectorInspectorInput(ev) {
+  var input = ev.target, prop = input && input.dataset && input.dataset.vectorProp;
+  if (!prop || input.value === '') return;
+  var object = selectedVectorObject();
+  if (!object) return;
+  var edit = S.vectorEdits[String(object.id)] || (S.vectorEdits[String(object.id)] = {
+    x:object.x,y:object.y,width:object.width,height:object.height,rotation:0,opacity:1
+  });
+  var value = Number(input.value);
+  if (!Number.isFinite(value)) return;
+  if (prop === 'width' || prop === 'height') value = Math.max(2,Math.min(32768,value));
+  if (prop === 'opacity') value = Math.max(0,Math.min(1,value));
+  if (prop === 'rotation') value = value % 360;
+  edit[prop] = value;
+  updateVectorRuntime();
 }
 function readVideoInfo(file) {
   return new Promise(function (resolve, reject) {
