@@ -8882,10 +8882,10 @@ var BatchVector = (function () {
   Recorder.prototype.stroke=function(){if(this.path.length)this.s.ops.push({id:this.pathId,t:'path',commands:this.path.slice(),fill:null,stroke:this.strokeStyle,width:+this.lineWidth||1,opacity:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter,m:this.m.slice()});};
 
   function sceneForCode(code,W,H,frame,time,loopProgress,fps){
-    var scene=new Scene(W,H),ctx=new Recorder(scene,W,H);
+    var scene=new Scene(W,H),ctx=new Recorder(scene,W,H),win={};
     var renderFps=Number(fps)>0?Number(fps):60;
-    var fn=new Function('time','frame','fps','ctx','width','height','motion','TAU',code+'\nif(typeof renderFrame==="function"){renderFrame(time,frame,fps,ctx,width,height,motion,TAU);}');
-    fn(time,frame,renderFps,ctx,W,H,{loopProgress:loopProgress,scale:1},Math.PI*2);
+    var fn=new Function('time','frame','fps','ctx','width','height','motion','TAU','window',String(code)+'\nif(typeof renderFrame==="function"){renderFrame(time,frame,fps,ctx,width,height,motion,TAU);}else if(window.renderFrame){window.renderFrame(time,frame,fps,ctx,width,height,motion,TAU);}');
+    fn(time,frame,renderFps,ctx,W,H,{loopProgress:loopProgress,scale:1},Math.PI*2,win);
     return scene;
   }
   function stripBackground(code){
