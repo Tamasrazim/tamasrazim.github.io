@@ -15,6 +15,7 @@
     dialog.dataset.hoReady = 'true';
 
     var isOpen = false;
+    var enteredFullscreen = false;
     var timers = [];
     var returnFocus = null;
     var previousOverflow = '';
@@ -222,6 +223,61 @@
       });
     }
 
+    function requestCinemaFullscreen() {
+      // The call stays inside the trigger's click gesture so browsers allow fullscreen.
+      if (document.fullscreenElement || document.webkitFullscreenElement) return;
+
+      var request;
+      try {
+        if (typeof dialog.requestFullscreen === 'function') {
+          request = dialog.requestFullscreen({ navigationUI: 'hide' });
+        } else if (typeof dialog.webkitRequestFullscreen === 'function') {
+          dialog.webkitRequestFullscreen();
+          enteredFullscreen = true;
+          return;
+        }
+      } catch (error) {
+        return; // The fixed overlay remains a full-viewport fallback.
+      }
+
+      if (request && typeof request.then === 'function') {
+        request.then(function () {
+          if (document.fullscreenElement !== dialog) return;
+          if (!isOpen) {
+            var exitRequest = document.exitFullscreen();
+            if (exitRequest && typeof exitRequest.catch === 'function') {
+              exitRequest.catch(function () {});
+            }
+          } else {
+            enteredFullscreen = true;
+          }
+        }).catch(function () {
+          // Fullscreen can be unavailable in embedded or restricted browsers.
+        });
+      }
+    }
+
+    function releaseCinemaFullscreen() {
+      if (!enteredFullscreen) return;
+      enteredFullscreen = false;
+
+      try {
+        var exitRequest;
+        if (document.fullscreenElement === dialog && typeof document.exitFullscreen === 'function') {
+          exitRequest = document.exitFullscreen();
+        } else if (document.webkitFullscreenElement === dialog &&
+                   typeof document.webkitExitFullscreen === 'function') {
+          document.webkitExitFullscreen();
+          return;
+        }
+        if (exitRequest && typeof exitRequest.catch === 'function') {
+          exitRequest.catch(function () {});
+        }
+      } catch (error) {
+        // Closing the sequence must still work if fullscreen exit is blocked.
+      }
+    }
+
     function openDialog() {
       if (isOpen) return;
       isOpen = true;
@@ -229,6 +285,7 @@
       previousOverflow = document.body.style.overflow;
       previousBodyLock = document.body.classList.contains('is-locked');
       dialog.hidden = false;
+      requestCinemaFullscreen();
       document.body.style.overflow = 'hidden';
       document.body.classList.add('is-locked');
       trigger.setAttribute('aria-expanded', 'true');
@@ -245,6 +302,7 @@
       if (!isOpen) return;
       isOpen = false;
       clearTimers();
+      releaseCinemaFullscreen();
       dialog.classList.remove('is-open');
       trigger.setAttribute('aria-expanded', 'false');
       document.body.style.overflow = previousOverflow;
