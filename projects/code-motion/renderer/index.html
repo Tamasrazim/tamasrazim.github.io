@@ -1510,6 +1510,7 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
 .media-layer-list button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .media-layer-list button em{font-style:normal;font-size:8px;color:var(--mut)}
 .media-layer-empty,.media-no-selection{padding:10px;border:1px dashed var(--rule);font:10px/1.6 var(--mono);color:var(--mut)}
+.media-vector-status{margin:8px 0;font:9px/1.5 var(--mono);color:var(--mut)}
 .media-order-actions{margin-top:6px}
 .media-order-actions .btn{flex:1;font-size:8px;padding:0 5px}
 .media-prop-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -1619,7 +1620,28 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
           </div>
           <aside class="media-inspector">
             <div class="media-inspector-section">
-              <h4>LAYERS <span id="mediaLayerCount" class="num">0</span></h4>
+              <h4>CODE VECTORS <span id="vectorCount" class="num">0</span></h4>
+              <button class="btn solid" data-act="detectVectors">Detect from code</button>
+              <div id="vectorDetectionStatus" class="media-vector-status">Run detection at the current frame to find code-drawn paths and rectangles.</div>
+              <div id="vectorObjects" class="media-layer-list"><div class="media-layer-empty">No vectors detected.</div></div>
+            </div>
+            <div id="vectorNoSelection" class="media-no-selection">Select a detected vector to move, resize, rotate or change its opacity.</div>
+            <div id="vectorInspectorFields" hidden>
+              <div class="media-inspector-section">
+                <h4>VECTOR TRANSFORM</h4>
+                <div class="media-prop-grid">
+                  <label>X<input type="number" id="vectorX" data-vector-prop="x" step="1"></label>
+                  <label>Y<input type="number" id="vectorY" data-vector-prop="y" step="1"></label>
+                  <label>Width<input type="number" id="vectorWidth" data-vector-prop="width" min="1" step="1"></label>
+                  <label>Height<input type="number" id="vectorHeight" data-vector-prop="height" min="1" step="1"></label>
+                  <label>Rotation<input type="number" id="vectorRotation" data-vector-prop="rotation" step="1"></label>
+                  <label>Opacity<input type="number" id="vectorOpacity" data-vector-prop="opacity" min="0" max="1" step="0.01"></label>
+                </div>
+                <p class="note">These transforms are applied to the detected drawing calls while the animation code runs. The source code stays editable and unchanged.</p>
+              </div>
+            </div>
+            <div class="media-inspector-section">
+              <h4>MEDIA LAYERS <span id="mediaLayerCount" class="num">0</span></h4>
               <div id="mediaLayers" class="media-layer-list"><div class="media-layer-empty">No media layers.</div></div>
               <div class="media-order-actions">
                 <button class="btn" data-act="mediaBackward">Send backward</button>
