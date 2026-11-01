@@ -257,7 +257,7 @@ must(trilyvaPage.includes('Open TRILYVA workspace')&&trilyvaPage.includes('deter
 must(read('projects/code-motion/index.html').includes('location.replace(target)'),'legacy TRILYVA URL performs a clean replace redirect');
 const trilyvaRenderer=read('projects/code-motion/renderer/index.html');
 must(!/sample-lumi-lost-firefly|sample-niko-clockwork-bird|data-act="queueAdd"|data-act="startRender"/i.test(trilyvaRenderer),'TRILYVA excludes cartoon samples and redundant render buttons');
-must(trilyvaRenderer.includes('data-act="render"')&&trilyvaRenderer.includes('data-act="renderAll"')&&trilyvaRenderer.includes('data-act="renderAllDotMesh"'),'TRILYVA retains current render, render all and dot-mesh batch actions');
+must(trilyvaRenderer.includes('data-act="render"')&&trilyvaRenderer.includes('renderAll: function () { openRenderAllLibrary(); }')&&trilyvaRenderer.includes('renderAllDotMesh: function () { openDotMeshFolderPicker(); }'),'TRILYVA retains current render, full-library render and dot-mesh batch actions');
 const trilyvaPrismData=read('projects/code-motion/renderer/library/prism-data.js');
 const trilyvaRendererSw=read('projects/code-motion/renderer/sw.js');
 must(exists('projects/code-to-eps/prism-library.json'),'the shared Prism dataset exists at its canonical local path');
