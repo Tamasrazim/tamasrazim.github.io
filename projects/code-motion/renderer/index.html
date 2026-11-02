@@ -10059,7 +10059,16 @@ function detectCodeVectors(force) {
     var loopProgress = S.comp.loop
       ? (((time % Math.max(.000001, S.comp.loopDuration)) + Math.max(.000001, S.comp.loopDuration)) % Math.max(.000001, S.comp.loopDuration)) / Math.max(.000001, S.comp.loopDuration)
       : Math.max(0, Math.min(1, time / Math.max(.000001, S.comp.duration)));
-    var objects = BatchVector.detectFromCode(code, S.comp.width, S.comp.height, S.frame, time, loopProgress, S.comp.fps);
+    var motionData = {
+      time:time,frame:S.frame,fps:S.comp.fps,width:S.comp.width,height:S.comp.height,
+      duration:S.comp.duration,frameCount:S.comp.frameCount,
+      progress:S.comp.frameCount>1?S.frame/(S.comp.frameCount-1):0,
+      sourceTime:CORE.frameToSourceTime(S.comp,S.frame),loop:!!S.comp.loop,
+      loopDuration:S.comp.loopDuration,loopProgress:loopProgress,seed:S.comp.seed|0,
+      scale:S.comp.height/1080,aspect:S.comp.width/Math.max(1,S.comp.height),
+      isExport:false,quality:'preview'
+    };
+    var objects = BatchVector.detectFromCode(code, S.comp.width, S.comp.height, S.frame, time, loopProgress, S.comp.fps, motionData);
     var bounds = {};
     objects.forEach(function (object) {
       bounds[String(object.id)] = {x:object.x,y:object.y,width:object.width,height:object.height};
