@@ -195,6 +195,9 @@ h1 span{display:block;color:#898983}
     location.replace(allowed ? from : "/projects/trilyva/");
   }
 
+  var timer = null;
+  var redirectScheduled = false;
+
   function update() {
     var now = Date.now();
     var date = new Date(now);
@@ -233,13 +236,16 @@ h1 span{display:block;color:#898983}
     if (remaining <= 0) {
       $("statusText").textContent = "MAINTENANCE COMPLETE";
       $("progressText").textContent = "100% COMPLETE";
-      window.clearInterval(timer);
-      window.setTimeout(redirectAfterMaintenance, 900);
+      if (timer !== null) window.clearInterval(timer);
+      if (!redirectScheduled) {
+        redirectScheduled = true;
+        window.setTimeout(redirectAfterMaintenance, 900);
+      }
     }
   }
 
   update();
-  var timer = window.setInterval(update, 250);
+  if (!redirectScheduled) timer = window.setInterval(update, 250);
 })();
 </script>
 </body>
