@@ -1,6 +1,7 @@
-// What this does: Caches the renderer's files so the Code Motion workspace can reopen more reliably when the network is unavailable.
+// What this does: Caches the TRILYVA renderer and enforces the scheduled maintenance window for open renderer tabs.
 
-const CACHE = 'tamasrazim-trilyva-pwa-v154';
+const CACHE = 'tamasrazim-trilyva-pwa-v155';
+const MAINTENANCE_ENDS_AT = Date.parse('2026-11-05T05:28:00+06:00');
 const CORE = [
   './',
   './index.html',
@@ -42,6 +43,23 @@ self.addEventListener('activate', function (event) {
         );
       })
       .then(function () { return self.clients.claim(); })
+      .then(function () {
+        if (Date.now() >= MAINTENANCE_ENDS_AT) return;
+        return self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+          .then(function (clients) {
+            var navigations = clients.map(function (client) {
+              var url = new URL(client.url);
+              if (url.origin !== self.location.origin ||
+                  url.pathname.indexOf('/projects/code-motion/renderer/') !== 0) {
+                return Promise.resolve();
+              }
+              var returnPath = url.pathname + url.search + url.hash;
+              var destination = '/maintenance/?from=' + encodeURIComponent(returnPath);
+              return client.navigate(destination).catch(function () {});
+            });
+            return Promise.all(navigations);
+          });
+      })
   );
 });
 
