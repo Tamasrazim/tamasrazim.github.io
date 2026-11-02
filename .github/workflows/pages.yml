@@ -37,8 +37,8 @@ jobs:
       - name: Validate routes, markup, metadata, and runtime scripts
         run: node tools/validate_site.mjs
 
-      - name: Validate TRILYVA render controls
-        run: node tools/validate_trilyva_renderers.mjs
+      - name: Validate TRILYVA state (maintenance-aware) state (maintenance-aware)
+        run: node tools/validate_trilyva_maintenance.mjs
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
