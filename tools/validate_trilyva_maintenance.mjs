@@ -16,8 +16,8 @@ const END_AT = Date.parse(END_ISO);
 
 if (Date.now() < END_AT) {
   const maintenance = read('maintenance/index.html');
-  const startMatch = maintenance.match(/var START_AT = Date\\.parse\\("([^"]+)"\\)/);
-  const endMatch = maintenance.match(/var END_AT = Date\\.parse\\("([^"]+)"\\)/);
+  const startMatch = maintenance.match(/var START_AT = Date\.parse\("([^"]+)"\)/);
+  const endMatch = maintenance.match(/var END_AT = Date\.parse\("([^"]+)"\)/);
   must(Boolean(startMatch && endMatch), 'maintenance page declares its scheduled start and end');
   const startAt = Date.parse(startMatch[1]);
   const endAt = Date.parse(endMatch[1]);
@@ -29,7 +29,7 @@ if (Date.now() < END_AT) {
   must(maintenance.includes('Asia/Dhaka') && maintenance.includes('DHAKA / UTC+06'), 'clock displays Bangladesh local time');
   must(maintenance.includes('NORMAL ACCESS RESUMES AUTOMATICALLY'), 'maintenance page explains automatic restoration');
 
-  const pageScripts = [...maintenance.matchAll(/<script>([\\s\\S]*?)<\\/script>/gi)].map(match => match[1]);
+  const pageScripts = [...maintenance.matchAll(/<script>([\s\S]*?)<\/script>/gi)].map(match => match[1]);
   must(pageScripts.length > 0, 'maintenance page has its live clock script');
   for (const [index, source] of pageScripts.entries()) {
     new Function(source);
@@ -56,14 +56,14 @@ if (Date.now() < END_AT) {
     must(markerIndex >= 0 && markerIndex < html.indexOf('</head>'), file + ' blocks the route before page content loads');
     must(html.includes(END_ISO), file + ' uses the same maintenance expiry');
 
-    const gateScript = html.slice(markerIndex).match(/<script>([\\s\\S]*?)<\\/script>/i)?.[1];
+    const gateScript = html.slice(markerIndex).match(/<script>([\s\S]*?)<\/script>/i)?.[1];
     must(Boolean(gateScript), file + ' includes its route guard script');
     new Function(gateScript);
     must(true, file + ' route guard JavaScript parses');
   }
 
   const serviceWorker = read('projects/code-motion/renderer/sw.js');
-  must(/const CACHE = 'tamasrazim-trilyva-pwa-v\\d+'/.test(serviceWorker), 'renderer service worker cache version is refreshed');
+  must(/const CACHE = 'tamasrazim-trilyva-pwa-v\d+'/.test(serviceWorker), 'renderer service worker cache version is refreshed');
   must(serviceWorker.includes(END_ISO) && serviceWorker.includes('client.navigate(destination)'), 'service worker redirects existing renderer tabs during maintenance');
   new Function(serviceWorker);
   must(true, 'renderer service worker JavaScript parses');
