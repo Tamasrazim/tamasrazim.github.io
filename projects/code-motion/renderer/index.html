@@ -1640,6 +1640,7 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
                   <label>Stroke<input type="color" id="vectorStroke" data-vector-prop="stroke"></label>
                   <label>Stroke width<input type="number" id="vectorStrokeWidth" data-vector-prop="strokeWidth" min="0.1" step="0.5"></label>
                 </div>
+                <label class="media-check"><input type="checkbox" id="vectorLockRatio" checked> Lock aspect ratio while resizing</label>
                 <label class="media-check"><input type="checkbox" id="vectorFillOverride" data-vector-override="fill"> Override fill colour</label>
                 <label class="media-check"><input type="checkbox" id="vectorStrokeOverride" data-vector-override="stroke"> Override stroke colour</label>
                 <div class="media-order-actions">
@@ -10319,7 +10320,7 @@ function initMediaStageInput() {
       selectVectorObject(vectorHit.id);
       var vr = vectorDisplayRect(vectorHit), vlocal = mediaLocalPoint(vr, point);
       var vresize = Math.sqrt((vlocal.x - vr.width) * (vlocal.x - vr.width) + (vlocal.y - vr.height) * (vlocal.y - vr.height)) < Math.max(18, vr.width * 0.025);
-      S.mediaDrag = {kind:'vector',id:vectorHit.id,mode:vresize?'resize':'move',point:point,x:vr.x,y:vr.y,width:vr.width,height:vr.height,rotation:vr.rotation,local:vlocal};
+      S.mediaDrag = {kind:'vector',id:vectorHit.id,mode:vresize?'resize':'move',point:point,x:vr.x,y:vr.y,width:vr.width,height:vr.height,ratio:vr.width/Math.max(1,vr.height),rotation:vr.rotation,local:vlocal};
     }
     try { canvas.setPointerCapture(ev.pointerId); } catch (_) {}
     ev.preventDefault();
@@ -10346,8 +10347,17 @@ function initMediaStageInput() {
         edit.x = Math.round(drag.x + dx); edit.y = Math.round(drag.y + dy);
       } else {
         var currentLocal = mediaLocalPoint({x:drag.x,y:drag.y,width:drag.width,height:drag.height,rotation:drag.rotation},point);
-        edit.width = Math.max(2, Math.round(drag.width + currentLocal.x - drag.local.x));
-        edit.height = Math.max(2, Math.round(drag.height + currentLocal.y - drag.local.y));
+        var dw = currentLocal.x - drag.local.x, dh = currentLocal.y - drag.local.y;
+        if ($('#vectorLockRatio').checked) {
+          var nextWidth = Math.abs(dw) >= Math.abs(dh * drag.ratio)
+            ? drag.width + dw
+            : (drag.height + dh) * drag.ratio;
+          edit.width = Math.max(2, Math.round(nextWidth));
+          edit.height = Math.max(2, edit.width / Math.max(.0001, drag.ratio));
+        } else {
+          edit.width = Math.max(2, Math.round(drag.width + dw));
+          edit.height = Math.max(2, Math.round(drag.height + dh));
+        }
       }
       updateVectorRuntime();
     }
