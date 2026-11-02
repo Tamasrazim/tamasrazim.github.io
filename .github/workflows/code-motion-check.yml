@@ -28,5 +28,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate TRILYVA
-        run: node tools/validate_code_motion.mjs
+      - name: Validate TRILYVA state (maintenance-aware)
+        run: node tools/validate_trilyva_maintenance.mjs
