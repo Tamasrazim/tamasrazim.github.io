@@ -8930,7 +8930,7 @@ var BatchVector = (function () {
     var scope=CORE.SCOPE||Object.keys(values);
     var names=['time','frame','fps','ctx','width','height'].concat(scope);
     var args=[time,frame,renderFps,ctx,W,H].concat(scope.map(function(name){return values[name];}));
-    var body=String(code)+'\\nif(typeof setup==="function"){setup(motion);}'+'\\nif(typeof renderFrame==="function"){renderFrame(time,frame,fps,ctx,width,height,motion,Math.PI*2);}else if(window.renderFrame){window.renderFrame(time,frame,fps,ctx,width,height,motion,Math.PI*2);}';
+    var body=String(code)+'\nif(typeof setup==="function"){setup(motion);}'+'\nif(typeof renderFrame==="function"){renderFrame(time,frame,fps,ctx,width,height,motion,Math.PI*2);}else if(window.renderFrame){window.renderFrame(time,frame,fps,ctx,width,height,motion,Math.PI*2);}';
     var fn=new Function(names.concat([body]).join(','));
     fn.apply(null,args);
     return scene;
