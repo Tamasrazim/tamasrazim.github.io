@@ -28,4 +28,4 @@ jobs:
         with:
           node-version: 22
       - name: Validate canonical TRILYVA renderer
-        run: node tools/validate_code_motion.mjs
+        run: node tools/validate_trilyva_maintenance.mjs
