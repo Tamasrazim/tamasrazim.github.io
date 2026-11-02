@@ -6,41 +6,241 @@
 <meta name="theme-color" content="#050505">
 <meta name="color-scheme" content="dark">
 <meta name="robots" content="noindex,nofollow">
-<meta name="description" content="The TRILYVA workspace is temporarily unavailable while maintenance is in progress.">
+<meta name="description" content="TRILYVA is temporarily offline for a scheduled two-day maintenance window. A live analog clock and countdown show the planned return time.">
 <link rel="canonical" href="https://tamasrazim.github.io/maintenance/">
 <link rel="icon" type="image/svg+xml" href="/assets/brand/trilyva/T.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<title>TRILYVA Is in Maintenance — Tamasrazim</title>
+<title>TRILYVA — Scheduled Maintenance</title>
 <style>
-:root{color-scheme:dark;--bg:#050505;--ink:#f2f2ee;--muted:#969690;--line:#292929;--mono:"JetBrains Mono",ui-monospace,monospace;--display:"Unbounded",system-ui,sans-serif}
-*{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 76% 24%,#171717 0,transparent 34%),var(--bg);color:var(--ink);font:14px/1.7 system-ui,-apple-system,"Segoe UI",sans-serif;display:grid;place-items:center;padding:clamp(18px,4vw,54px)}
-a{color:inherit;text-decoration:none}.shell{position:relative;isolation:isolate;width:min(1100px,100%);min-height:min(760px,calc(100svh - 36px));padding:clamp(22px,5vw,58px);border:1px solid var(--line);background:linear-gradient(135deg,rgba(14,14,14,.97),rgba(5,5,5,.98));overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
-.shell:before{content:"";position:absolute;z-index:-1;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:32px 32px;mask-image:linear-gradient(135deg,#000,transparent 74%);pointer-events:none}
-.top{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:20px;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:12px;font:10px/1.5 var(--mono);letter-spacing:.12em}.brand img{width:40px;height:40px;object-fit:contain;border:1px solid var(--line)}.brand b{display:block}.brand span{display:block;color:var(--muted);font-size:9px}
-.status{display:inline-flex;align-items:center;gap:9px;border:1px solid #373737;padding:8px 11px;color:#c9c9c2;font:9px var(--mono);letter-spacing:.1em;text-transform:uppercase}.dot{width:7px;height:7px;border-radius:50%;background:#e6e6e0;box-shadow:0 0 0 4px #ffffff10;animation:pulse 1.8s ease-in-out infinite}
-.content{display:grid;grid-template-columns:minmax(0,1fr) minmax(200px,.56fr);gap:clamp(28px,6vw,84px);align-items:center;padding:clamp(48px,8vw,96px) 0}
-.kicker{font:10px var(--mono);letter-spacing:.18em;color:var(--muted);text-transform:uppercase}h1{font:700 clamp(43px,8.1vw,100px)/.99 var(--display);letter-spacing:-.085em;margin:27px 0 24px;overflow-wrap:anywhere}h1 span{color:#777}
-.lead{max-width:54ch;font-size:clamp(15px,1.7vw,19px);line-height:1.85;color:#c9c9c2}.note{max-width:58ch;margin-top:16px;color:var(--muted);font-size:12px;line-height:1.9}
-.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}.button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border:1px solid #3a3a3a;color:var(--ink);font:10px var(--mono);transition:background .2s,border-color .2s,transform .2s}.button.primary{background:var(--ink);color:#050505;border-color:var(--ink)}.button:hover{transform:translateY(-2px);border-color:#f2f2ee}
-.instrument{position:relative;justify-self:center;width:min(100%,310px);aspect-ratio:1;border:1px solid var(--line);display:grid;place-items:center;background:radial-gradient(circle,#161616 0,#080808 63%,#050505 75%);overflow:hidden}.instrument:before,.instrument:after{content:"";position:absolute;inset:12%;border:1px solid #ffffff17;border-radius:50%;animation:orbit 28s linear infinite}.instrument:after{inset:24%;border-style:dashed;animation-direction:reverse;animation-duration:19s}.core{width:34%;aspect-ratio:1;border:1px solid #bdbdb5;display:grid;place-items:center;transform:rotate(45deg);box-shadow:0 0 50px #ffffff09;animation:core 7s ease-in-out infinite}.core:after{content:"";width:43%;height:43%;background:#e8e8e2}.orbit-label{position:absolute;left:14px;right:14px;display:flex;justify-content:space-between;gap:10px;color:#777;font:8px var(--mono);letter-spacing:.1em}.orbit-label.top{top:13px}.orbit-label.bottom{bottom:13px}
-.telemetry{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);margin-top:10px}.metric{padding:14px 16px;min-width:0}.metric+.metric{border-left:1px solid var(--line)}.metric b{display:block;font:10px var(--mono);letter-spacing:.08em;overflow-wrap:anywhere}.metric span{display:block;margin-top:5px;color:var(--muted);font:8px/1.6 var(--mono);letter-spacing:.08em;text-transform:uppercase}
-.footer{display:flex;justify-content:space-between;align-items:end;gap:18px;padding-top:19px;border-top:1px solid var(--line);color:#686862;font:9px/1.7 var(--mono);letter-spacing:.04em}
-@keyframes pulse{50%{opacity:.3;box-shadow:0 0 0 8px #ffffff05}}@keyframes orbit{to{transform:rotate(360deg)}}@keyframes core{0%,100%{transform:rotate(45deg) scale(.94)}50%{transform:rotate(135deg) scale(1.06)}}
-@media(max-width:720px){.shell{min-height:calc(100svh - 36px)}.content{grid-template-columns:1fr;padding:48px 0;gap:35px}.instrument{width:min(68vw,255px);grid-row:1}.copy{grid-row:2}.telemetry{grid-template-columns:1fr}.metric+.metric{border-left:0;border-top:1px solid var(--line)}.metric{display:flex;justify-content:space-between;align-items:center;gap:14px}.metric span{margin:0;text-align:right}.top{align-items:flex-start}.status{font-size:8px;padding:7px}.footer{align-items:flex-start;flex-direction:column}.footer span:last-child{text-align:left}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+:root{color-scheme:dark;--bg:#050505;--panel:#090909;--ink:#f2f2ee;--muted:#91918b;--dim:#666660;--line:#292929;--line2:#41413c;--mono:"JetBrains Mono",ui-monospace,monospace;--display:"Unbounded",system-ui,sans-serif}
+*{box-sizing:border-box}
+html{min-height:100%;background:var(--bg);-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;color:var(--ink);font:14px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(ellipse at 23% 48%,#151515 0,transparent 38%),radial-gradient(ellipse at 91% 10%,#111 0,transparent 32%),var(--bg);padding:clamp(14px,3vw,42px);display:grid;place-items:center}
+a{color:inherit;text-decoration:none}
+.shell{width:min(1280px,100%);min-height:min(850px,calc(100vh - 2 * clamp(14px,3vw,42px)));border:1px solid var(--line);background:linear-gradient(140deg,rgba(13,13,13,.97),rgba(5,5,5,.985));position:relative;isolation:isolate;overflow:hidden;padding:clamp(20px,4.5vw,56px);display:flex;flex-direction:column;justify-content:space-between}
+.shell:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:36px 36px;mask-image:linear-gradient(115deg,#000,transparent 72%)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:13px;min-width:0;font:9px/1.6 var(--mono);letter-spacing:.15em;color:#aaa}
+.brand img{width:43px;height:43px;object-fit:contain;border:1px solid var(--line);padding:5px}
+.brand strong{display:block;color:var(--ink);font-size:10px;font-weight:600;letter-spacing:.18em}
+.status{display:flex;align-items:center;gap:9px;border:1px solid var(--line2);padding:9px 12px;color:#c7c7c0;font:9px var(--mono);letter-spacing:.12em;white-space:nowrap}
+.status i{width:7px;height:7px;background:#eee;border-radius:50%;box-shadow:0 0 0 4px #ffffff12;animation:pulse 1.8s ease-in-out infinite}
+.hero{flex:1;display:grid;grid-template-columns:minmax(0,1.12fr) minmax(280px,.88fr);align-items:center;gap:clamp(28px,6vw,90px);padding:clamp(36px,6vw,72px) 0}
+.clock-column{min-width:0;display:flex;flex-direction:column;align-items:center}
+.clock-wrap{width:min(100%,560px);position:relative;aspect-ratio:1;display:grid;place-items:center}
+.clock-wrap:before{content:"";position:absolute;inset:4%;border-radius:50%;border:1px solid #ffffff0a;box-shadow:0 0 110px #ffffff08,inset 0 0 80px #ffffff04}
+.clock-svg{width:100%;height:100%;overflow:visible}
+.clock-face{fill:#080808;stroke:#353535;stroke-width:1.2}
+.clock-inner{fill:none;stroke:#ffffff12;stroke-width:1}
+.clock-ticks line{stroke:#666660;stroke-width:1.3;stroke-linecap:round}
+.clock-ticks line.major{stroke:#e4e4dc;stroke-width:2}
+.clock-numbers{fill:#d9d9d2;font-family:var(--mono);font-size:18px;letter-spacing:.02em}
+.hand{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.hour-hand{stroke:#f2f2ee;stroke-width:8}
+.minute-hand{stroke:#d8d8d1;stroke-width:5}
+.second-hand{stroke:#92928b;stroke-width:2}
+.clock-pin{fill:#f2f2ee;stroke:#080808;stroke-width:4}
+.progress-track{fill:none;stroke:#282828;stroke-width:2}
+.progress-ring{fill:none;stroke:#e8e8e2;stroke-width:2;stroke-linecap:round;transform:rotate(-90deg);transform-origin:250px 250px;transition:stroke-dashoffset .35s linear}
+.clock-labels{display:flex;align-items:center;justify-content:space-between;width:min(100%,520px);padding:3px 10px 0;color:var(--dim);font:9px var(--mono);letter-spacing:.12em}
+.clock-labels strong{color:#cfcfc8;font-weight:500}
+.live-time{font:clamp(18px,2.4vw,25px)/1.4 var(--mono);letter-spacing:.08em;color:var(--ink);margin-top:12px;font-variant-numeric:tabular-nums}
+.copy{max-width:480px;min-width:0}
+.kicker{font:10px var(--mono);letter-spacing:.2em;color:#999;margin-bottom:20px}
+h1{font:700 clamp(42px,5.5vw,76px)/.99 var(--display);letter-spacing:-.075em;margin:0 0 25px;max-width:580px}
+h1 span{display:block;color:#898983}
+.lead{max-width:430px;color:#c6c6bf;font-size:15px;line-height:1.85;margin:0}
+.detail{max-width:430px;color:#777770;font-size:12px;line-height:1.8;margin:10px 0 0}
+.countdown{margin-top:34px;padding-top:21px;border-top:1px solid var(--line);max-width:460px}
+.count-label{font:9px var(--mono);letter-spacing:.16em;color:#92928b;margin-bottom:14px}
+.count-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.count-cell{min-width:0}
+.count-cell b{display:block;font:500 clamp(25px,3.2vw,41px)/1.1 var(--mono);letter-spacing:-.06em;font-variant-numeric:tabular-nums}
+.count-cell span{display:block;margin-top:7px;font:8px var(--mono);letter-spacing:.13em;color:#777770;text-transform:uppercase}
+.return-time{margin-top:24px;display:flex;flex-direction:column;gap:5px;font:9px/1.7 var(--mono);letter-spacing:.08em;color:#777770}
+.return-time strong{font-weight:500;color:#d2d2cb}
+.progress-copy{display:flex;justify-content:space-between;gap:15px;margin-top:20px;color:#777770;font:8px var(--mono);letter-spacing:.1em}
+.progress-bar{height:2px;background:#252525;margin-top:9px;overflow:hidden}
+.progress-bar span{display:block;height:100%;width:0;background:#e8e8e2;transition:width .35s linear}
+.footer{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;border-top:1px solid var(--line);padding-top:17px;color:#696962;font:8px/1.8 var(--mono);letter-spacing:.08em}
+.footer span:last-child{text-align:right}
+@keyframes pulse{50%{opacity:.35;box-shadow:0 0 0 7px #ffffff05}}
+@media(max-width:900px){.hero{grid-template-columns:minmax(0,1fr);gap:34px;padding:38px 0}.clock-wrap{width:min(100%,450px)}.copy{max-width:650px;margin:0 auto}.countdown{max-width:none}.clock-labels{width:min(100%,450px)}h1{font-size:clamp(42px,8vw,68px)}}
+@media(max-width:540px){body{padding:0}.shell{min-height:100vh;border:0;padding:18px 17px 16px}.top{align-items:flex-start}.brand img{width:36px;height:36px}.brand{font-size:8px}.status{font-size:7px;padding:8px 9px;letter-spacing:.07em}.hero{padding:34px 0;gap:29px}.clock-wrap{width:min(100%,390px)}.clock-labels{padding-inline:0;font-size:8px}.live-time{font-size:21px}.kicker{font-size:9px;margin-bottom:14px}h1{font-size:clamp(39px,11vw,58px);margin-bottom:18px}.lead{font-size:13px}.countdown{margin-top:26px;padding-top:17px}.count-grid{gap:6px}.count-cell b{font-size:clamp(23px,7.5vw,34px)}.count-cell span{font-size:7px}.footer{font-size:7px;align-items:flex-start}.footer span:last-child{max-width:45%}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <main class="shell">
-<header class="top"><a class="brand" href="/" aria-label="Tamasrazim homepage"><img src="/assets/brand/trilyva/T.svg" width="40" height="40" alt=""><span><b>TAMASRAZIM</b><span>BY ROBIUL RUMMAN RAZIM</span></span></a><div class="status"><span class="dot" aria-hidden="true"></span><span>Maintenance in progress</span></div></header>
-<section class="content">
-<div class="copy"><div class="kicker">TRILYVA / temporary interruption</div><h1>TRILYVA IS IN MAINTENANCE<span>.</span></h1><p class="lead">The TRILYVA workspace is temporarily unavailable while maintenance is in progress.</p><p class="note">Please check back soon. Normal access will return when maintenance is complete.</p><div class="actions"><a class="button primary" href="/">Return home</a></div></div>
-<div class="instrument" aria-hidden="true"><div class="orbit-label top"><span>TAMASRAZIM / SYS</span><span>PAUSED</span></div><div class="core"></div><div class="orbit-label bottom"><span>PUBLIC ROUTES</span><span>STANDBY</span></div></div>
-</section>
-<section class="telemetry" aria-label="Maintenance notice"><div class="metric"><b>01 / SERVICE</b><span>TRILYVA workspace</span></div><div class="metric"><b>02 / STATUS</b><span>Maintenance in progress</span></div><div class="metric"><b>03 / NEXT STEP</b><span>Check back soon</span></div></section>
-<footer class="footer"><span>Robiul Rumman Razim — Tamasrazim</span><span>MAINTENANCE / PUBLIC STATUS</span></footer>
+  <header class="top">
+    <a class="brand" href="/" aria-label="Return to Tamasrazim home">
+      <img src="/assets/brand/trilyva/T.svg" width="43" height="43" alt="">
+      <span><strong>TRILYVA</strong>TAMASRAZIM / CREATIVE SYSTEMS</span>
+    </a>
+    <div class="status"><i aria-hidden="true"></i><span id="statusText">SCHEDULED MAINTENANCE</span></div>
+  </header>
+
+  <section class="hero">
+    <div class="clock-column">
+      <div class="clock-wrap">
+        <svg class="clock-svg" viewBox="0 0 500 500" role="img" aria-labelledby="clockTitle clockDesc">
+          <title id="clockTitle">Live analog clock</title>
+          <desc id="clockDesc">A live analog clock showing the current time in Dhaka, Bangladesh.</desc>
+          <circle class="progress-track" cx="250" cy="250" r="241"></circle>
+          <circle class="progress-ring" id="progressRing" cx="250" cy="250" r="241"></circle>
+          <circle class="clock-face" cx="250" cy="250" r="226"></circle>
+          <circle class="clock-inner" cx="250" cy="250" r="190"></circle>
+          <g class="clock-ticks" id="clockTicks"></g>
+          <g class="clock-numbers" id="clockNumbers"></g>
+          <g id="hourHandGroup"><line class="hand hour-hand" x1="250" y1="250" x2="250" y2="131"></line></g>
+          <g id="minuteHandGroup"><line class="hand minute-hand" x1="250" y1="250" x2="250" y2="83"></line></g>
+          <g id="secondHandGroup"><line class="hand second-hand" x1="250" y1="272" x2="250" y2="65"></line></g>
+          <circle cx="250" cy="250" r="10" class="clock-pin"></circle>
+        </svg>
+      </div>
+      <div class="clock-labels"><span>LIVE CLOCK</span><strong>DHAKA / UTC+06</strong></div>
+      <div class="live-time" id="liveTime">05:28:00</div>
+    </div>
+
+    <div class="copy">
+      <div class="kicker">TRILYVA / TEMPORARY SERVICE PAUSE</div>
+      <h1>BACK IN<br><span>TWO DAYS.</span></h1>
+      <p class="lead">TRILYVA is temporarily offline while we carry out scheduled maintenance and prepare the next update.</p>
+      <p class="detail">The workspace, renderer, batch tools and downloads are paused during this window. Your existing projects and local files are not affected.</p>
+
+      <div class="countdown" role="timer" aria-label="Time remaining until TRILYVA maintenance ends">
+        <div class="count-label">TIME UNTIL NORMAL ACCESS RETURNS</div>
+        <div class="count-grid">
+          <div class="count-cell"><b id="days">02</b><span>Days</span></div>
+          <div class="count-cell"><b id="hours">00</b><span>Hours</span></div>
+          <div class="count-cell"><b id="minutes">00</b><span>Minutes</span></div>
+          <div class="count-cell"><b id="seconds">00</b><span>Seconds</span></div>
+        </div>
+      </div>
+
+      <div class="progress-copy"><span>MAINTENANCE WINDOW</span><span id="progressText">00% COMPLETE</span></div>
+      <div class="progress-bar" aria-hidden="true"><span id="progressBar"></span></div>
+      <div class="return-time">
+        <span>EXPECTED RETURN</span>
+        <strong>05 NOV 2026 / 05:28 / UTC+06</strong>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>ROBIUL RUMMAN RAZIM — TAMASRAZIM</span>
+    <span>48-HOUR MAINTENANCE WINDOW / NORMAL ACCESS RESUMES AUTOMATICALLY</span>
+  </footer>
 </main>
+<script>
+(function () {
+  "use strict";
+  var START_AT = Date.parse("2026-11-03T05:28:00+06:00");
+  var END_AT = Date.parse("2026-11-05T05:28:00+06:00");
+  var CIRCUMFERENCE = 2 * Math.PI * 241;
+  var zone = "Asia/Dhaka";
+  var partsFormatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: zone, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
+  });
+  var dateFormatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: zone, weekday: "long", day: "2-digit", month: "long", year: "numeric"
+  });
+  var $ = function (id) { return document.getElementById(id); };
+  var pad = function (value) { return String(value).padStart(2, "0"); };
+
+  var tickGroup = $("clockTicks");
+  var numberGroup = $("clockNumbers");
+  for (var i = 0; i < 60; i++) {
+    var angle = (i * 6 - 90) * Math.PI / 180;
+    var major = i % 5 === 0;
+    var innerRadius = major ? 198 : 211;
+    var x1 = 250 + Math.cos(angle) * innerRadius;
+    var y1 = 250 + Math.sin(angle) * innerRadius;
+    var x2 = 250 + Math.cos(angle) * 219;
+    var y2 = 250 + Math.sin(angle) * 219;
+    var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", x1.toFixed(2));
+    line.setAttribute("y1", y1.toFixed(2));
+    line.setAttribute("x2", x2.toFixed(2));
+    line.setAttribute("y2", y2.toFixed(2));
+    if (major) line.setAttribute("class", "major");
+    tickGroup.appendChild(line);
+  }
+
+  for (var n = 1; n <= 12; n++) {
+    var numberAngle = (n * 30 - 90) * Math.PI / 180;
+    var text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("x", (250 + Math.cos(numberAngle) * 173).toFixed(2));
+    text.setAttribute("y", (250 + Math.sin(numberAngle) * 173 + 1).toFixed(2));
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("dominant-baseline", "middle");
+    text.textContent = String(n).padStart(2, "0");
+    numberGroup.appendChild(text);
+  }
+
+  var ring = $("progressRing");
+  ring.style.strokeDasharray = CIRCUMFERENCE.toFixed(2);
+  ring.style.strokeDashoffset = CIRCUMFERENCE.toFixed(2);
+
+  function redirectAfterMaintenance() {
+    var from = new URLSearchParams(location.search).get("from") || "/projects/trilyva/";
+    var allowed = from.charAt(0) === "/" && from.indexOf("//") !== 0 &&
+      (from.indexOf("/projects/trilyva/") === 0 ||
+       from.indexOf("/projects/code-motion/") === 0 ||
+       from.indexOf("/renderer/") === 0 ||
+       from === "/code-motion-tamasrazim.html" ||
+       from === "/code-motion-tamasrazim2.html");
+    location.replace(allowed ? from : "/projects/trilyva/");
+  }
+
+  function update() {
+    var now = Date.now();
+    var date = new Date(now);
+    var parts = {};
+    partsFormatter.formatToParts(date).forEach(function (part) {
+      if (part.type !== "literal") parts[part.type] = part.value;
+    });
+    var hour = Number(parts.hour);
+    var minute = Number(parts.minute);
+    var second = Number(parts.second);
+    var fraction = date.getMilliseconds() / 1000;
+
+    $("hourHandGroup").setAttribute("transform", "rotate(" + ((hour % 12 + minute / 60 + (second + fraction) / 3600) * 30) + " 250 250)");
+    $("minuteHandGroup").setAttribute("transform", "rotate(" + ((minute + (second + fraction) / 60) * 6) + " 250 250)");
+    $("secondHandGroup").setAttribute("transform", "rotate(" + ((second + fraction) * 6) + " 250 250)");
+    $("liveTime").textContent = pad(hour) + ":" + pad(minute) + ":" + pad(second);
+    $("clockDesc").textContent = "The current time in Dhaka, Bangladesh is " + pad(hour) + ":" + pad(minute) + ":" + pad(second) + ".";
+    $("clockTitle").textContent = "Live analog clock — " + pad(hour) + ":" + pad(minute) + ":" + pad(second);
+
+    var remaining = Math.max(0, END_AT - now);
+    var totalSeconds = Math.ceil(remaining / 1000);
+    var days = Math.floor(totalSeconds / 86400);
+    var hours = Math.floor((totalSeconds % 86400) / 3600);
+    var minutes = Math.floor((totalSeconds % 3600) / 60);
+    var seconds = totalSeconds % 60;
+    $("days").textContent = pad(days);
+    $("hours").textContent = pad(hours);
+    $("minutes").textContent = pad(minutes);
+    $("seconds").textContent = pad(seconds);
+
+    var progress = Math.max(0, Math.min(1, (now - START_AT) / (END_AT - START_AT)));
+    ring.style.strokeDashoffset = (CIRCUMFERENCE * (1 - progress)).toFixed(2);
+    $("progressBar").style.width = (progress * 100).toFixed(2) + "%";
+    $("progressText").textContent = Math.floor(progress * 100) + "% COMPLETE";
+
+    if (remaining <= 0) {
+      $("statusText").textContent = "MAINTENANCE COMPLETE";
+      $("progressText").textContent = "100% COMPLETE";
+      window.clearInterval(timer);
+      window.setTimeout(redirectAfterMaintenance, 900);
+    }
+  }
+
+  update();
+  var timer = window.setInterval(update, 250);
+})();
+</script>
 </body>
 </html>
