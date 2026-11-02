@@ -1518,7 +1518,7 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
 .media-prop-grid input,.media-field select{width:100%;min-width:0;min-height:32px;padding:5px 7px;border:1px solid var(--rule);background:#151517;color:#fff;font:11px var(--mono);border-radius:0}
 .media-check{display:flex;align-items:center;gap:7px;margin-top:9px;font:9px var(--mono);color:var(--ink-2)}
 .media-check input{accent-color:#fff}
-.media-field{margin-top:10px}
+.media-field{margin-top:10px} .vector-editor-section{margin-top:6px}.vector-editor-section .media-order-actions .btn{font-size:8px}.vector-editor-section input[type=color]{min-height:32px;padding:3px}.media-vector-status{font:10px/1.5 var(--mono);color:var(--mut);margin:6px 0 10px}
 @media(max-width:850px){.media-editor-layout{grid-template-columns:minmax(0,1fr)}.media-editor-stage-column{min-height:260px;border-right:0;border-bottom:1px solid var(--rule)}.media-inspector{max-height:310px}}
 @media(max-width:520px){.media-editor-top{align-items:flex-start}.media-editor-actions{width:100%}.media-editor-actions .btn{flex:1}.media-editor-stage-head .media-hint{display:none}}
 </style>
@@ -1636,8 +1636,17 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
                   <label>Height<input type="number" id="vectorHeight" data-vector-prop="height" min="1" step="1"></label>
                   <label>Rotation<input type="number" id="vectorRotation" data-vector-prop="rotation" step="1"></label>
                   <label>Opacity<input type="number" id="vectorOpacity" data-vector-prop="opacity" min="0" max="1" step="0.01"></label>
+                  <label>Fill<input type="color" id="vectorFill" data-vector-prop="fill"></label>
+                  <label>Stroke<input type="color" id="vectorStroke" data-vector-prop="stroke"></label>
+                  <label>Stroke width<input type="number" id="vectorStrokeWidth" data-vector-prop="strokeWidth" min="0.1" step="0.5"></label>
                 </div>
-                <p class="note">These transforms are applied to the detected drawing calls while the animation code runs. The source code stays editable and unchanged.</p>
+                <label class="media-check"><input type="checkbox" id="vectorFillOverride" data-vector-override="fill"> Override fill colour</label>
+                <label class="media-check"><input type="checkbox" id="vectorStrokeOverride" data-vector-override="stroke"> Override stroke colour</label>
+                <div class="media-order-actions">
+                  <button class="btn" data-act="hideVector">Hide selected vector</button>
+                  <button class="btn" data-act="resetVectorEdits">Reset vector edits</button>
+                </div>
+                <p class="note">Transforms and solid fill/stroke overrides are applied at render time. The original JavaScript draw calls remain unchanged.</p>
               </div>
             </div>
             <div class="media-inspector-section">
@@ -10127,6 +10136,22 @@ function mediaLayerById(id) {
   return (S.layers || []).find(function (layer) { return layer.id === id; }) || null;
 }
 function selectedMediaLayer() { return mediaLayerById(S.selectedLayerId); }
+function vectorPickerColor(value) {
+  if (typeof value !== 'string') return '#ffffff';
+  var canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
+  if (!ctx) return '#ffffff';
+  ctx.fillStyle = '#ffffff';
+  try { ctx.fillStyle = value; } catch (_) { return '#ffffff'; }
+  var css = String(ctx.fillStyle), hex = css.match(/^#([0-9a-f]{3,8})$/i);
+  if (hex) {
+    var h = hex[1];
+    if (h.length === 3 || h.length === 4) h = h.slice(0,3).split('').map(function(c){return c+c;}).join('');
+    if (h.length >= 6) return '#' + h.slice(0,6);
+  }
+  var rgb = css.match(/^rgba?\(\s*([0-9.]+)[,\s]+([0-9.]+)[,\s]+([0-9.]+)/i);
+  if (rgb) return '#' + rgb.slice(1,4).map(function(v){return Math.max(0,Math.min(255,Math.round(Number(v)||0))).toString(16).padStart(2,'0');}).join('');
+  return '#ffffff';
+}
 function syncMediaEditorUI() {
   var vectorList = $('#vectorObjects');
   if (vectorList) {
@@ -10134,7 +10159,7 @@ function syncMediaEditorUI() {
     (S.vectorObjects || []).slice().reverse().forEach(function (object) {
       var button = el('button', String(object.id) === String(S.selectedVectorId) ? 'on' : '');
       button.type = 'button';
-      button.appendChild(el('span', null, object.label || ('Vector ' + object.id)));
+      button.appendChild(el('span', null, object.isBackground ? 'Background' : (object.label || ('Vector ' + object.id))));
       button.appendChild(el('em', null, String(object.type || 'path').toUpperCase()));
       button.addEventListener('click', function () { selectVectorObject(object.id); });
       vectorList.appendChild(button);
@@ -10146,15 +10171,23 @@ function syncMediaEditorUI() {
   $('#vectorNoSelection').hidden = !!vector;
   $('#vectorInspectorFields').hidden = !vector;
   if (vector) {
-    var rect = vectorDisplayRect(vector);
+    var rect = vectorDisplayRect(vector), edit = S.vectorEdits[String(vector.id)] || {};
     $('#vectorX').value = Math.round(rect.x);
     $('#vectorY').value = Math.round(rect.y);
     $('#vectorWidth').value = Math.round(rect.width);
     $('#vectorHeight').value = Math.round(rect.height);
     $('#vectorRotation').value = rect.rotation;
     $('#vectorOpacity').value = rect.opacity;
+    $('#vectorFill').value = vectorPickerColor(edit.fill === undefined ? vector.fill : edit.fill);
+    $('#vectorStroke').value = vectorPickerColor(edit.stroke === undefined ? vector.stroke : edit.stroke);
+    $('#vectorFillOverride').checked = edit.fill !== undefined;
+    $('#vectorStrokeOverride').checked = edit.stroke !== undefined;
+    $('#vectorStrokeWidth').value = Number(edit.strokeWidth === undefined ? (vector.strokeWidth || 1) : edit.strokeWidth);
   }
-
+  var removeButton = $('[data-act="removeMedia"]');
+  if (removeButton) removeButton.textContent = S.selectedVectorId !== null ? 'Hide vector' : 'Delete';
+  var duplicateButton = $('[data-act="duplicateMedia"]');
+  if (duplicateButton) duplicateButton.disabled = S.selectedVectorId !== null;
   var list = $('#mediaLayers');
   if (!list) return;
   list.innerHTML = '';
@@ -10358,18 +10391,50 @@ function mediaInspectorInput(ev) {
 }
 function vectorInspectorInput(ev) {
   var input = ev.target, prop = input && input.dataset && input.dataset.vectorProp;
-  if (!prop || input.value === '') return;
+  var override = input && input.dataset && input.dataset.vectorOverride;
   var object = selectedVectorObject();
   if (!object) return;
   var edit = S.vectorEdits[String(object.id)] || (S.vectorEdits[String(object.id)] = {
     x:object.x,y:object.y,width:object.width,height:object.height,rotation:0,opacity:1
   });
+  if (override) {
+    var colorInput = override === 'fill' ? $('#vectorFill') : $('#vectorStroke');
+    if (input.checked) edit[override] = colorInput.value;
+    else delete edit[override];
+    updateVectorRuntime();
+    return;
+  }
+  if (!prop || input.value === '') return;
+  if (prop === 'fill' || prop === 'stroke') {
+    edit[prop] = input.value;
+    $('#' + (prop === 'fill' ? 'vectorFillOverride' : 'vectorStrokeOverride')).checked = true;
+    updateVectorRuntime();
+    return;
+  }
   var value = Number(input.value);
   if (!Number.isFinite(value)) return;
   if (prop === 'width' || prop === 'height') value = Math.max(2,Math.min(32768,value));
   if (prop === 'opacity') value = Math.max(0,Math.min(1,value));
   if (prop === 'rotation') value = value % 360;
+  if (prop === 'strokeWidth') value = Math.max(.1,Math.min(1000,value));
   edit[prop] = value;
+  updateVectorRuntime();
+}
+function hideSelectedVector() {
+  var object = selectedVectorObject();
+  if (!object) return;
+  var edit = S.vectorEdits[String(object.id)] || (S.vectorEdits[String(object.id)] = {
+    x:object.x,y:object.y,width:object.width,height:object.height,rotation:0,opacity:1
+  });
+  edit.opacity = 0;
+  updateVectorRuntime();
+}
+function resetVectorEdits() {
+  (S.vectorObjects || []).forEach(function(object) {
+    S.vectorEdits[String(object.id)] = {
+      x:object.x,y:object.y,width:object.width,height:object.height,rotation:0,opacity:1
+    };
+  });
   updateVectorRuntime();
 }
 function readVideoInfo(file) {
@@ -10451,6 +10516,7 @@ function toggleCanvasEditor(force) {
 }
 function addMediaDialog() { $('#mediaPick').click(); }
 function removeSelectedMedia() {
+  if (S.selectedVectorId !== null) { hideSelectedVector(); return; }
   var index = S.layers.findIndex(function (layer) { return layer.id === S.selectedLayerId; });
   if (index < 0) return;
   S.layers.splice(index, 1);
@@ -10458,6 +10524,7 @@ function removeSelectedMedia() {
   syncMediaLayers().then(function () { syncMediaEditorUI(); markDirty(); return run(); });
 }
 function duplicateSelectedMedia() {
+  if (S.selectedVectorId !== null) { $('#stMsg').textContent = 'Code vectors are source-driven. Duplicate their drawing calls in Animation Source.'; return; }
   var layer = selectedMediaLayer();
   if (!layer) return;
   var copy = Object.assign({}, layer, { id: uid('layer'), name: layer.name + ' copy', x: Number(layer.x) + 24, y: Number(layer.y) + 24 });
@@ -14450,6 +14517,8 @@ var ACTS = {
   removeMedia: removeSelectedMedia,
   duplicateMedia: duplicateSelectedMedia,
   detectVectors: function () { return detectCodeVectors(true); },
+  hideVector: hideSelectedVector,
+  resetVectorEdits: resetVectorEdits,
   mediaForward: function () { moveSelectedMedia(1); },
   mediaBackward: function () { moveSelectedMedia(-1); },
   'new': function () {
