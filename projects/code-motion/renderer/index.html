@@ -2276,13 +2276,13 @@ function createRuntime() {
   function vectorContext(ctx,edits,bounds,scale){
     var nextId=0,pathId=0;
     var pathMethods={moveTo:1,lineTo:1,bezierCurveTo:1,quadraticCurveTo:1,arc:1,ellipse:1,rect:1,roundRect:1,arcTo:1,closePath:1};
-    function applyFor(id,fn,draw,transform){
+    function applyFor(id,fn,draw,transform,paintType){
       var edit=edits&&edits[id],base=bounds&&bounds[id];
       if(!edit)return fn();
       if(base && Number(edit.x)===Number(base.x) && Number(edit.y)===Number(base.y) &&
         Number(edit.width)===Number(base.width) && Number(edit.height)===Number(base.height) &&
-        !(Number(edit.rotation)||0) && (edit.opacity===undefined||Number(edit.opacity)===1)) return fn();
-      var needsOpacity=draw&&edit.opacity!==undefined;
+        !(Number(edit.rotation)||0) && (edit.opacity===undefined||Number(edit.opacity)===1) && edit.fill===undefined && edit.stroke===undefined && edit.strokeWidth===undefined) return fn();
+      var needsOpacity=draw&&edit.opacity!==undefined,hasPaintOverride=(paintType==='fill'&&edit.fill!==undefined)||(paintType==='stroke'&&(edit.stroke!==undefined||edit.strokeWidth!==undefined));
       var local=null;
       if(transform&&base){
         var world=vectorMatrix(edit,base,scale);
@@ -2292,11 +2292,14 @@ function createRuntime() {
           if(inv)local=matrixMultiply(matrixMultiply(inv,world),cm);
         }
       }
-      if(!local&&!needsOpacity)return fn();
+      if(!local&&!needsOpacity&&!hasPaintOverride)return fn();
       ctx.save();
       try{
         if(local)ctx.transform(local[0],local[1],local[2],local[3],local[4],local[5]);
         if(needsOpacity)ctx.globalAlpha*=Math.max(0,Math.min(1,Number(edit.opacity)||0));
+        if(paintType==='fill'&&edit.fill!==undefined)ctx.fillStyle=edit.fill;
+        if(paintType==='stroke'&&edit.stroke!==undefined)ctx.strokeStyle=edit.stroke;
+        if(paintType==='stroke'&&edit.strokeWidth!==undefined)ctx.lineWidth=Math.max(0.1,Number(edit.strokeWidth)||1);
         return fn();
       }finally{ctx.restore();}
     }
@@ -2305,8 +2308,8 @@ function createRuntime() {
         var value=target[key];
         if(key==='beginPath')return function(){pathId=nextId++;return target.beginPath();};
         if(pathMethods[key])return function(){var args=arguments;return applyFor(pathId,function(){return target[key].apply(target,args);},false,true);};
-        if(key==='fillRect'||key==='strokeRect')return function(){var id=nextId++,args=arguments;return applyFor(id,function(){return target[key].apply(target,args);},true,true);};
-        if(key==='fill'||key==='stroke')return function(){var args=arguments;return applyFor(pathId,function(){return target[key].apply(target,args);},true,false);};
+        if(key==='fillRect'||key==='strokeRect')return function(){var id=nextId++,args=arguments;return applyFor(id,function(){return target[key].apply(target,args);},true,true,key==='fillRect'?'fill':'stroke');};
+        if(key==='fill'||key==='stroke')return function(){var args=arguments;return applyFor(pathId,function(){return target[key].apply(target,args);},true,false,key);};
         return typeof value==='function'?value.bind(target):value;
       },
       set:function(target,key,value){target[key]=value;return true;}
@@ -8884,11 +8887,43 @@ var BatchVector = (function () {
   Recorder.prototype.fill=function(){if(this.path.length)this.s.ops.push({id:this.pathId,t:'path',commands:this.path.slice(),fill:this.fillStyle,stroke:null,width:0,opacity:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter,m:this.m.slice()});};
   Recorder.prototype.stroke=function(){if(this.path.length)this.s.ops.push({id:this.pathId,t:'path',commands:this.path.slice(),fill:null,stroke:this.strokeStyle,width:+this.lineWidth||1,opacity:this.globalAlpha,comp:this.globalCompositeOperation,filter:this.filter,m:this.m.slice()});};
 
-  function sceneForCode(code,W,H,frame,time,loopProgress,fps){
+  function sceneForCode(code,W,H,frame,time,loopProgress,fps,motionInput){
     var scene=new Scene(W,H),ctx=new Recorder(scene,W,H),win={};
     var renderFps=Number(fps)>0?Number(fps):60;
-    var fn=new Function('time','frame','fps','ctx','width','height','motion','TAU','window',String(code)+'\nif(typeof renderFrame==="function"){renderFrame(time,frame,fps,ctx,width,height,motion,TAU);}else if(window.renderFrame){window.renderFrame(time,frame,fps,ctx,width,height,motion,TAU);}');
-    fn(time,frame,renderFps,ctx,W,H,{loopProgress:loopProgress,scale:1},Math.PI*2,win);
+    var seed=motionInput&&Number.isFinite(Number(motionInput.seed))?(Number(motionInput.seed)|0):1;
+    var rng=CORE.mulberry32(seed),noiseFn=CORE.makeNoise(seed),helpers=CORE.helpers||{};
+    var motion=Object.assign({
+      time:Number(time)||0,frame:Number(frame)||0,fps:renderFps,width:W,height:H,
+      duration:0,frameCount:0,progress:0,sourceTime:Number(time)||0,
+      loop:false,loopDuration:0,loopProgress:Number(loopProgress)||0,
+      seed:seed,scale:H/1080,aspect:W/Math.max(1,H),isExport:false,quality:'preview'
+    },motionInput||{});
+    motion.random=motion.random||function(){return rng();};
+    motion.randomRange=motion.randomRange||function(a,b){return a+rng()*(b-a);};
+    motion.randomInt=motion.randomInt||function(a,b){return Math.floor(a+rng()*(b-a+1));};
+    motion.pick=motion.pick||function(list){return list&&list.length?list[Math.floor(rng()*list.length)]:undefined;};
+    motion.gaussian=motion.gaussian||function(mu,sd){var u=1-rng(),v=rng();return (mu||0)*(1)+(sd===undefined?1:sd)*Math.sqrt(-2*Math.log(u))*Math.cos(Math.PI*2*v);};
+    motion.noise=motion.noise||noiseFn;
+    motion.fbm=motion.fbm||noiseFn.fbm||function(){return 0;};
+    motion.setSeed=motion.setSeed||function(next){seed=Number(next)|0;rng=CORE.mulberry32(seed);noiseFn=CORE.makeNoise(seed);motion.seed=seed;motion.noise=noiseFn;motion.fbm=noiseFn.fbm||function(){return 0;};};
+    motion.asset=motion.asset||function(){return null;};
+    motion.assets=motion.assets||{};
+    var values={
+      motion:motion,window:win,self:undefined,globalThis:undefined,document:undefined,parent:undefined,top:undefined,frames:undefined,
+      lerp:helpers.lerp,clamp:helpers.clamp,map:helpers.map,mix:helpers.mix||function(a,b,t){return a+(b-a)*t;},
+      smoothstep:helpers.smoothstep,smootherstep:helpers.smootherstep,ease:helpers.ease,easings:helpers.easings,spring:helpers.spring,
+      noise:motion.noise,fbm:motion.fbm,random:motion.random,randomRange:motion.randomRange,randomInt:motion.randomInt,pick:motion.pick,
+      wrap:helpers.wrap,pingpong:helpers.pingpong,TAU:Math.PI*2,PI:Math.PI,
+      fetch:undefined,XMLHttpRequest:undefined,WebSocket:undefined,EventSource:undefined,importScripts:undefined,
+      postMessage:undefined,indexedDB:undefined,localStorage:undefined,sessionStorage:undefined,caches:undefined,
+      Worker:undefined,SharedWorker:undefined,close:undefined,open:undefined,location:undefined,history:undefined
+    };
+    var scope=CORE.SCOPE||Object.keys(values);
+    var names=['time','frame','fps','ctx','width','height'].concat(scope);
+    var args=[time,frame,renderFps,ctx,W,H].concat(scope.map(function(name){return values[name];}));
+    var body=String(code)+'\\nif(typeof setup==="function"){setup(motion);}'+'\\nif(typeof renderFrame==="function"){renderFrame(time,frame,fps,ctx,width,height,motion,Math.PI*2);}else if(window.renderFrame){window.renderFrame(time,frame,fps,ctx,width,height,motion,Math.PI*2);}';
+    var fn=new Function(names.concat([body]).join(','));
+    fn.apply(null,args);
     return scene;
   }
   function stripBackground(code){
@@ -8916,8 +8951,7 @@ var BatchVector = (function () {
       return 'Z';
     }).join(' ');
   }
-  function detectFromCode(code,W,H,frame,time,loopProgress,fps){
-    var scene=sceneForCode(code,W,H,frame,time,loopProgress,fps),groups={},ids=[];
+  function detectFromCode(code,W,H,frame,time,loopProgress,fps,motionData){ var scene=sceneForCode(code,W,H,frame,time,loopProgress,fps,motionData),groups={},ids=[];
     scene.ops.forEach(function(op){
       var id=Number(op.id);
       if(!Number.isFinite(id))return;
