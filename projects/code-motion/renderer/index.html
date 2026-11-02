@@ -11542,6 +11542,7 @@ function buildTags(comp, meta) {
    Compile / run
    ============================================================ */
 function run() {
+  var vectorSourceChanged = S.vectorSourceCode !== null && S.vectorSourceCode !== Ed.ta.value;
   var cmp=$('#cmp'); if(cmp){var cc=cmp.getContext('2d'); if(cc) cc.clearRect(0,0,cmp.width,cmp.height);}
 
   S.code = Ed.ta.value;
@@ -11560,6 +11561,10 @@ function run() {
     S.compiled = true;
     S.lastError = null;
     hideStageMsg();
+    if (vectorSourceChanged && S.canvasEditorOpen) {
+      S.vectorDetectionKey = null;
+      detectCodeVectors(true);
+    }
     $('#stContract').textContent = 'VALID · ' + res.arity + ' arg' + (res.arity === 1 ? '' : 's');
     $('#edState').textContent = 'compiled · ' + new Date().toLocaleTimeString();
     setStage('IDLE');
