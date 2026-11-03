@@ -14762,8 +14762,8 @@ else boot();
 function renderFrame(time, frame, fps, ctx, width, height) {
   if (!ctx || !width || !height) return;
   var W=1920,H=1080,D=430,TAU=Math.PI*2;
-  var t=Math.max(0,Math.min(D-0.0001,Number.isFinite(time)?time:(frame||0)/(fps||32)));
-  var F=fps>0?fps:32;
+  var t=Math.max(0,Math.min(D-0.0001,Number.isFinite(time)?time:(frame||0)/(fps||60)));
+  var F=fps>0?fps:60;
   var S=Math.min(width/W,height/H);
   var ox=(width-W*S)/2,oy=(height-H*S)/2;
   var clamp=function(v,a,b){return Math.max(a,Math.min(b,v));};
