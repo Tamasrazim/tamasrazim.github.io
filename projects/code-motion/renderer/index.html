@@ -14750,35 +14750,22 @@ else boot();
 <script type="module" src="./firebase-analytics.js?v=20261022-1"></script>
 
 
-<script type="text/plain" id="sample-dont-wait-too-late" data-title="Don't Wait Until It's Too Late — Story Film" data-desc="A seven-minute-ten-second deterministic vector story film with Turo-San narration, a pink and black faceless couple, animated phone conversations, silence, habituation metaphor, hospital, prayer hall, historic cemetery and sentence-by-sentence kinetic typography." data-loop="0" data-dur="430" data-width="1920" data-height="1080" data-fps="60">
-/*
- * DON'T WAIT UNTIL IT'S TOO LATE
- * Complete animated story film — TRILYVA Example
- * 7 minutes 10 seconds / 1920x1080 / 60 fps
- * Deterministic Canvas 2D. No DOM, timers, external assets or random state.
- * Story scenes, characters, cemetery, phone UI and kinetic typography are
- * all generated as editable vector drawing commands.
+<script type="text/plain" id="sample-dont-wait-too-late" data-title="Don't Wait Until It's Too Late — Story Film" data-desc="A minimal 60 FPS presenter film: Turo-San stays on screen while the complete story appears as animated, word-by-word kinetic text. No cemetery, hospital, prayer hall or couple scenes." data-loop="0" data-dur="430" data-width="1920" data-height="1080" data-fps="60">/*
+ * DON'T WAIT UNTIL IT'S TOO LATE — TURO-SAN TEXT EDITION
+ * 1920x1080 / 60 FPS / 430 seconds
+ * Minimal deterministic presenter film: Turo-San + animated story text.
  */
 function renderFrame(time, frame, fps, ctx, width, height) {
   if (!ctx || !width || !height) return;
   var W=1920,H=1080,D=430,TAU=Math.PI*2;
   var t=Math.max(0,Math.min(D-0.0001,Number.isFinite(time)?time:(frame||0)/(fps||60)));
-  var F=fps>0?fps:60;
-  var S=Math.min(width/W,height/H);
-  var ox=(width-W*S)/2,oy=(height-H*S)/2;
+  var S=Math.min(width/W,height/H),ox=(width-W*S)/2,oy=(height-H*S)/2;
   var clamp=function(v,a,b){return Math.max(a,Math.min(b,v));};
-  var mix=function(a,b,p){return a+(b-a)*p;};
   var ease=function(p){p=clamp(p,0,1);return p*p*(3-2*p);};
-  var pop=function(p){p=clamp(p,0,1);return 1+Math.sin(p*Math.PI)*0.10;};
-  var hash=function(n){var x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x);};
-  var rect=function(c,x,y,w,h,fill){c.fillStyle=fill;c.fillRect(x,y,w,h);};
-  var rr=function(c,x,y,w,h,r,fill,stroke,lw){
-    c.beginPath();c.roundRect(x,y,w,h,r);if(fill){c.fillStyle=fill;c.fill();}
-    if(stroke){c.strokeStyle=stroke;c.lineWidth=lw||2;c.stroke();}
-  };
+  var rect=function(c,x,y,w,h,color){c.fillStyle=color;c.fillRect(x,y,w,h);};
   var line=function(c,x1,y1,x2,y2,color,lw){
     c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.strokeStyle=color;
-    c.lineWidth=lw||3;c.lineCap="round";c.lineJoin="round";c.stroke();
+    c.lineWidth=lw||3;c.lineCap="round";c.stroke();
   };
   var ellipse=function(c,x,y,rx,ry,color){
     c.beginPath();c.ellipse(x,y,rx,ry,0,0,TAU);c.fillStyle=color;c.fill();
@@ -14789,16 +14776,15 @@ function renderFrame(time, frame, fps, ctx, width, height) {
     c.closePath();if(fill){c.fillStyle=fill;c.fill();}
     if(stroke){c.strokeStyle=stroke;c.lineWidth=lw||2;c.stroke();}
   };
+  var rr=function(c,x,y,w,h,r,fill,stroke,lw){
+    c.beginPath();c.roundRect(x,y,w,h,r);
+    if(fill){c.fillStyle=fill;c.fill();}
+    if(stroke){c.strokeStyle=stroke;c.lineWidth=lw||2;c.stroke();}
+  };
   var text=function(c,str,x,y,font,color,align){
     c.font=font;c.textAlign=align||"center";c.textBaseline="middle";
     c.fillStyle=color;c.fillText(str,x,y);
   };
-  var gradient=function(c,x0,y0,x1,y1,stops){
-    var g=c.createLinearGradient(x0,y0,x1,y1);
-    stops.forEach(function(s){g.addColorStop(s[0],s[1]);});return g;
-  };
-
-  // Full narration. Each line is a timed story beat, not a generic subtitle.
   var lines=[
     [2,7,"Have you ever noticed something strange about human beings?"],
     [8,14,"There are tears in hospitals that you will never hear in a celebration."],
@@ -14851,241 +14837,10 @@ function renderFrame(time, frame, fps, ctx, width, height) {
     [408,415,"Sometimes it is having something valuable every day..."],
     [418,426,"and never realising its worth until it is too late."]
   ];
-
   function lineAt(T){
     for(var i=0;i<lines.length;i++)if(T>=lines[i][0]&&T<lines[i][1])return lines[i];
     return null;
   }
-
-  function sceneAt(T){
-    if(T<34)return "opening";
-    if(T<70)return "opening";
-    if(T<154)return "couple";
-    if(T<180)return "argument";
-    if(T<254)return "silence";
-    if(T<318)return "habituation";
-    if(T<358)return "reflection";
-    return "ending";
-  }
-
-  function drawSky(c,top,bottom){
-    c.fillStyle=gradient(c,0,0,0,H,[[0,top],[1,bottom]]);
-    c.fillRect(0,0,W,H);
-  }
-
-  // ---- cemetery architecture: varied monuments, no flowers ----
-  var stone=["#aaa69c","#858b8a","#77736d","#b8b2a6","#777b78"];
-  function headstone(c,x,y,s,k){
-    c.save();c.translate(x,y);c.scale(s,s);
-    var col=stone[k%stone.length],dark="#4a4b48",edge="#d0c9bc";
-    ellipse(c,0,4,60,10,"rgba(0,0,0,.25)");
-    c.beginPath();
-    if(k%4===0){c.moveTo(-38,0);c.lineTo(-38,-100);c.quadraticCurveTo(-38,-132,0,-132);c.quadraticCurveTo(38,-132,38,-100);c.lineTo(38,0);}
-    else if(k%4===1){c.moveTo(-38,0);c.lineTo(-38,-105);c.lineTo(0,-145);c.lineTo(38,-105);c.lineTo(38,0);}
-    else if(k%4===2){c.moveTo(-42,0);c.lineTo(-42,-98);c.lineTo(-28,-98);c.lineTo(-28,-120);c.quadraticCurveTo(0,-145,28,-120);c.lineTo(28,-98);c.lineTo(42,-98);c.lineTo(42,0);}
-    else{c.rect(-38,-125,76,125);}
-    c.closePath();c.fillStyle=col;c.fill();c.strokeStyle=dark;c.lineWidth=4;c.stroke();
-    poly(c,[[38,-112],[46,-107],[46,0],[38,0]],"#555650");
-    c.strokeStyle=edge;c.lineWidth=1.5;c.strokeRect(-27,-112,54,91);
-    text(c,"IN MEMORY",0,-91,"bold 8px Georgia","#454640");
-    text(c,["ELENA MORRIS","JAMES WILSON","ANNA CLARKE","THOMAS REED"][k%4],0,-70,"bold 9px Georgia","#454640");
-    text(c,["1882 — 1941","1875 — 1938","1891 — 1954","1878 — 1947"][k%4],0,-51,"8px Georgia","#454640");
-    rr(c,-46,-3,92,8,2,"#555650");
-    c.restore();
-  }
-  function crossStone(c,x,y,s,k){
-    c.save();c.translate(x,y);c.scale(s,s);
-    var col=stone[k%stone.length];
-    ellipse(c,0,3,54,9,"rgba(0,0,0,.25)");
-    poly(c,[[-11,0],[-11,-83],[-34,-83],[-34,-105],[-11,-105],[-11,-143],[11,-143],[11,-105],[34,-105],[34,-83],[11,-83],[11,0]],col,"#4b4c48",3);
-    line(c,-5,-136,-5,-90,"#d4cec1",2);
-    rr(c,-34,5,68,10,2,"#595a54");
-    text(c,"IN MEMORY",0,31,"8px Georgia","#41423e");
-    text(c,"19— / 19—",0,43,"7px Georgia","#41423e");
-    c.restore();
-  }
-  function chestTomb(c,x,y,s,k){
-    c.save();c.translate(x,y);c.scale(s,s);
-    var col=stone[k%stone.length];
-    ellipse(c,0,5,92,13,"rgba(0,0,0,.25)");
-    poly(c,[[-72,-60],[70,-60],[70,0],[-72,0]],col,"#4c4d49",3);
-    poly(c,[[70,-60],[88,-72],[88,-12],[70,0]],"#555650");
-    poly(c,[[-84,-68],[58,-68],[88,-82],[-54,-82]],"#c3bdae","#555650",3);
-    rr(c,-54,-49,108,37,2,null,"#66645e",1.5);
-    text(c,"IN LOVING MEMORY",0,-35,"bold 9px Georgia","#454640");
-    text(c,"THE MORRIS FAMILY",0,-20,"8px Georgia","#454640");
-    c.restore();
-  }
-  function ledger(c,x,y,s,k){
-    c.save();c.translate(x,y);c.scale(s,s);
-    poly(c,[[-75,-24],[58,-35],[82,-12],[-56,0]],stone[k%stone.length],"#4c4d49",3);
-    poly(c,[[-56,0],[82,-12],[82,-3],[-56,9]],"#595a54");
-    text(c,"IN MEMORY",4,-18,"bold 8px Georgia","#454640");
-    text(c,"1880 — 1940",4,-7,"7px Georgia","#454640");
-    c.restore();
-  }
-  function chapel(c){
-    rect(c,95,325,350,210,"#535b5b");
-    poly(c,[[65,325],[270,205],[475,325]],"#343c40");
-    rect(c,230,135,82,190,"#646a66");
-    poly(c,[[215,135],[271,45],[327,135]],"#343b3e");
-    line(c,271,23,271,67,"#c1bdb1",5);line(c,257,39,285,39,"#c1bdb1",5);
-    for(var i=0;i<3;i++){
-      var x=135+i*112;c.beginPath();c.moveTo(x,500);c.lineTo(x,405);
-      c.quadraticCurveTo(x+28,354,x+56,405);c.lineTo(x+56,500);c.closePath();
-      c.fillStyle="#252d31";c.fill();c.strokeStyle="#92958c";c.lineWidth=4;c.stroke();
-    }
-    rect(c,245,430,53,105,"#222726");
-  }
-  function tree(c,x,y,s,T,id){
-    c.save();c.translate(x,y);c.scale(s,s);
-    poly(c,[[-15,0],[-8,-245],[10,-245],[18,0]],"#282b27");
-    line(c,0,-165,-95,-270,"#282b27",14);
-    line(c,3,-205,92,-295,"#282b27",13);
-    line(c,0,-225,-15,-330,"#282b27",11);
-    var sway=Math.sin(T*.32+id)*3;
-    [[-90,-290,75,65],[-30,-345,95,83],[58,-335,100,80],[120,-280,75,65],[0,-260,100,80]].forEach(function(a,i){
-      ellipse(c,a[0]+sway,a[1],a[2],a[3],i%2?"#354237":"#2e3b32");
-    });
-    c.restore();
-  }
-  function cemetery(c,T,close){
-    drawSky(c,"#17212d","#778078");
-    ellipse(c,1510,155,47,47,"#c8c5b7");ellipse(c,1526,143,44,44,"#27313c");
-    poly(c,[[0,500],[0,430],[350,405],[620,465],[1000,390],[1320,455],[1660,402],[1920,450],[1920,1080],[0,1080]],"#3d493f");
-    var grd=gradient(c,0,545,0,1080,[[0,"#66705c"],[.5,"#414d3e"],[1,"#202a24"]]);
-    c.fillStyle=grd;c.fillRect(0,545,W,535);
-    chapel(c);
-    rect(c,0,535,W,39,"#565c52");rect(c,0,527,W,8,"#85877b");
-    tree(c,35,565,1.1,T,1);tree(c,710,570,.9,T,2);tree(c,1840,570,1.15,T,3);
-    // Far rows use mixed monument types and scale with perspective.
-    for(var row=0;row<3;row++)for(var i=0;i<19;i++){
-      var x=18+i*108+(row%2)*42,y=630+row*43,s=.28+row*.12,k=i+row*7;
-      var type=(i*3+row)%5;
-      if(type===0)crossStone(c,x,y,s,k);
-      else if(type===1)headstone(c,x,y,s,k);
-      else if(type===2)ledger(c,x,y,s,k);
-      else if(type===3)chestTomb(c,x,y,s*.75,k);
-      else headstone(c,x,y,s,k+2);
-    }
-    // Main pathway
-    poly(c,[[760,1080],[1110,1080],[1000,570],[920,570]],"#77776d");
-    line(c,760,1080,920,570,"#a19c8e",3);line(c,1110,1080,1000,570,"#a19c8e",3);
-    if(close){
-      crossStone(c,285,970,1.2,4);headstone(c,510,920,1.15,2);
-      chestTomb(c,730,985,1.2,3);ledger(c,990,1000,1.25,1);
-      headstone(c,1250,940,1.1,6);crossStone(c,1575,970,1.25,8);
-      chestTomb(c,1780,980,1.0,2);
-    }else{
-      for(var j=0;j<120;j++){
-        var gx=hash(j)*W,gy=820+hash(j+300)*250;
-        line(c,gx,gy,gx+Math.sin(T*.8+j)*2,gy-8-hash(j+50)*12,"#657257",1.4);
-      }
-    }
-    // Low fog bands move smoothly with time.
-    for(var f=0;f<5;f++){
-      var fx=((T*8+f*430)%2500)-300,fy=690+f*55;
-      var fg=c.createRadialGradient(fx,fy,4,fx,fy,280);
-      fg.addColorStop(0,"rgba(218,220,215,.12)");fg.addColorStop(1,"rgba(218,220,215,0)");
-      c.fillStyle=fg;c.fillRect(fx-280,fy-100,560,200);
-    }
-    var vg=c.createRadialGradient(960,530,220,960,530,1100);
-    vg.addColorStop(0,"rgba(0,0,0,0)");vg.addColorStop(1,"rgba(0,0,0,.4)");
-    c.fillStyle=vg;c.fillRect(0,0,W,H);
-  }
-
-  // ---- hospital and quiet place of prayer ----
-  function hospital(c,T){
-    drawSky(c,"#18212d","#777c80");
-    rect(c,0,690,W,390,"#343c43");
-    rr(c,430,190,1060,550,8,"#b7b8b5","#e0ded6",5);
-    rect(c,500,285,920,455,"#858d91");
-    for(var i=0;i<7;i++){
-      var x=545+i*130;rr(c,x,350,92,130,5,"#27333d","#c6c6be",4);
-      line(c,x+46,350,x+46,480,"#657078",3);
-    }
-    rr(c,780,570,390,105,8,"#e1dfd7","#7b8180",4);
-    rect(c,820,530,115,50,"#d8d7d0");
-    // patient silhouette and chair-side visitor
-    ellipse(c,920,515,27,27,"#262b30");line(c,920,540,920,620,"#262b30",17);
-    line(c,920,565,875,600,"#262b30",10);line(c,920,565,963,600,"#262b30",10);
-    ellipse(c,1160,590,22,22,"#1b2229");line(c,1160,615,1160,735,"#1b2229",14);
-    line(c,1160,640,1110,680,"#1b2229",8);
-    rr(c,1125,690,70,9,4,"#555d62");
-    text(c,"HOSPITAL ROOM",960,130,"bold 17px Arial","#e6e5df");
-  }
-  function prayerHall(c,T){
-    drawSky(c,"#202631","#747b7b");
-    rect(c,0,720,W,360,"#333a3d");
-    poly(c,[[250,720],[960,170],[1670,720]],"#454d4d");
-    poly(c,[[400,720],[960,300],[1520,720]],"#252e32");
-    for(var i=0;i<5;i++){
-      var x=570+i*205;
-      line(c,x,400,x,790,"#a6a49a",8);
-      ellipse(c,x,790,36,12,"#252b2c");
-      // bowed praying figure
-      ellipse(c,x,690,22,22,"#181d20");
-      line(c,x,710,x,770,"#181d20",13);
-      line(c,x,730,x-25,748,"#181d20",8);
-      line(c,x,730,x+25,748,"#181d20",8);
-    }
-    text(c,"A QUIET PLACE",960,110,"bold 16px Arial","#e1dfd7");
-  }
-
-  // ---- simple faceless couple, pink and black ----
-  function stickFigure(c,x,y,s,color,pose,T,phone){
-    c.save();c.translate(x,y);c.scale(s,s);
-    var walk=Math.sin(T*5)*4,lean=pose==="lean"?.18:pose==="slump"?-.16:0;
-    ellipse(c,0,5,34,8,"rgba(0,0,0,.2)");
-    c.save();c.rotate(lean);
-    // head intentionally has no face
-    ellipse(c,0,-132,24,24,color);
-    line(c,0,-107,0,-48,color,13);
-    if(pose==="phone"){
-      line(c,-3,-92,-30,-62,color,8);line(c,2,-92,28,-78,color,8);
-    }else if(pose==="wave"){
-      line(c,-3,-92,-30,-62,color,8);line(c,2,-92,35,-125,color,8);
-    }else if(pose==="slump"){
-      line(c,-3,-91,-30,-67,color,8);line(c,2,-91,25,-63,color,8);
-    }else{
-      line(c,-3,-92,-29,-67+walk,color,8);line(c,3,-92,30,-66-walk,color,8);
-    }
-    line(c,0,-48,-21,-3+walk,color,10);line(c,0,-48,22,-3-walk,color,10);
-    c.restore();
-    if(phone){
-      rr(c,22,-94,34,57,5,"#17191d","#b8b8b8",2);
-      rr(c,26,-88,26,43,3,"#66727b");
-      ellipse(c,39,-50,2,2,"#d9d9d9");
-    }
-    c.restore();
-  }
-  function phoneUI(c,x,y,s,variant,T){
-    c.save();c.translate(x,y);c.scale(s,s);
-    rr(c,0,0,330,570,35,"#17191f","#aeb3b8",7);
-    rr(c,14,20,302,530,22,"#e7e8eb");
-    rr(c,116,9,98,18,9,"#17191f");
-    rect(c,14,20,302,54,"#f8f8fa");
-    ellipse(c,42,47,15,15,"#d5a2ad");
-    text(c,variant==="pink"?"Alex":"Mia",72,47,"bold 18px Arial","#24262a","left");
-    line(c,14,74,316,74,"#c8cbd0",1);
-    var msgs=variant==="pink"?[
-      ["Did you eat?",1],["Look at this street!",1],["I thought of you.",1],["Are you free later?",1]
-    ]:[
-      ["Yeah, later.",0],["I'm busy right now.",0],["Okay.",0],["Sorry, I fell asleep.",0]
-    ];
-    for(var i=0;i<msgs.length;i++){
-      var yy=110+i*88;
-      var shown=clamp((T-(i*.8))/0.45,0,1);
-      if(shown<=0)continue;
-      c.globalAlpha=shown;
-      rr(c,msgs[i][1]?22:112,yy,msgs[i][1]?188:190,54,15,msgs[i][1]?"#ffffff":"#a9d9a9");
-      text(c,msgs[i][0],msgs[i][1]?34:124,yy+27,"15px Arial","#25282b","left");
-      c.globalAlpha=1;
-    }
-    c.restore();
-  }
-
-  // ---- Turo-San adapted from the supplied CHARACTER V1 paths ----
   function turo(c,x,y,s,T,gesture,speaking){
     c.save();c.translate(x,y);c.scale(s,s);
     var bob=Math.sin(T*2.1)*3;
@@ -15119,195 +14874,85 @@ function renderFrame(time, frame, fps, ctx, width, height) {
     }else line(c,-13,3,13,7,ink,3);
     c.restore();
   }
-
-  // ---- cinematic kinetic text, each word separately animated ----
   function wordColor(w){
     var q=w.toLowerCase().replace(/[^a-z']/g,"");
     if(["love","care","thought","listen","thank","precious","together","ordinary"].indexOf(q)>=0)return "#f0c6d2";
-    if(["silence","quiet","missing","graveyard","hospital","tomorrow","memory","late"].indexOf(q)>=0)return "#9fc1d8";
+    if(["silence","quiet","missing","hospital","tomorrow","memory","late"].indexOf(q)>=0)return "#9fc1d8";
     if(["ignore","forgot","busy","argued","alone"].indexOf(q)>=0)return "#e5a18c";
     if(["value","appreciate","chance","remember","important"].indexOf(q)>=0)return "#e7d28d";
-    return "#f1f0ec";
+    return "#f4f2ed";
   }
-  function kineticText(c,T){
+  function drawStoryText(c,T){
     var L=lineAt(T);if(!L)return;
     var p=clamp((T-L[0])/(L[1]-L[0]),0,1);
-    var words=L[2].split(" ");
-    var reveal=Math.max(1,Math.ceil(p*(words.length+2)));
-    var visible=words.slice(0,reveal).join(" ");
-    var fade=Math.min(1,p*7,(1-p)*7);
-    var scale=1+Math.sin(p*Math.PI)*.035;
-    c.save();c.globalAlpha=clamp(fade,0,1);
-    // dark soft text plate, not a flattened subtitle
-    rr(c,165,830,1590,145,18,"rgba(8,10,14,.76)","rgba(255,255,255,.12)",1);
-    c.translate(W/2,900);c.scale(scale,scale);
-    var fontSize=visible.length>72?38:visible.length>54?43:49;
-    var font="600 "+fontSize+"px Georgia";
-    c.font=font;
-    var max=1510,measured=c.measureText(visible).width;
-    if(measured>max){fontSize*=max/measured;c.font="600 "+fontSize+"px Georgia";}
-    // Each word gets its own colour and entrance.
-    var widths=words.slice(0,reveal).map(function(w){return c.measureText(w+" ").width;});
-    var total=widths.reduce(function(a,b){return a+b;},0);
-    var xx=-total/2;
-    words.slice(0,reveal).forEach(function(w,i){
-      var local=clamp(p*(words.length+2)-i,0,1);
-      var a=ease(local);
-      c.save();c.globalAlpha=a;
-      c.translate(xx+widths[i]/2,12+(1-a)*24);
-      c.scale(pop(local),pop(local));
-      text(c,w,0,0,c.font,wordColor(w));
-      c.restore();xx+=widths[i];
+    var words=L[2].split(/\s+/),fontSize=52,maxW=1190,space;
+    var rows=[],row=[],rowW=0;
+    c.font="600 "+fontSize+"px Georgia";space=c.measureText(" ").width;
+    words.forEach(function(w){
+      var ww=c.measureText(w).width;
+      if(row.length&&rowW+space+ww>maxW){rows.push(row);row=[];rowW=0;}
+      if(row.length)rowW+=space;
+      row.push({word:w,width:ww});rowW+=ww;
+    });
+    if(row.length)rows.push(row);
+    if(rows.length>3)fontSize=43;else if(rows.length===3)fontSize=47;
+    c.font="600 "+fontSize+"px Georgia";space=c.measureText(" ").width;
+    rows=[];row=[];rowW=0;
+    words.forEach(function(w){
+      var ww=c.measureText(w).width;
+      if(row.length&&rowW+space+ww>maxW){rows.push(row);row=[];rowW=0;}
+      if(row.length)rowW+=space;
+      row.push({word:w,width:ww});rowW+=ww;
+    });
+    if(row.length)rows.push(row);
+    var reveal=Math.max(1,Math.ceil(p*(words.length+1)));
+    var startY=875-(rows.length-1)*34;
+    c.save();c.globalAlpha=clamp(Math.min(p*8,(1-p)*8),0,1);
+    rr(c,75,720,1300,280,26,"rgba(8,10,14,.84)","rgba(255,255,255,.18)",2);
+    var index=0;
+    rows.forEach(function(r,ri){
+      var full=r.reduce(function(a,b){return a+b.width;},0)+space*(r.length-1);
+      var x=725-full/2,y=startY+ri*70;
+      r.forEach(function(item){
+        var n=index++,local=clamp(p*(words.length+1)-n,0,1);
+        if(n<reveal){
+          var a=ease(local);
+          c.save();c.globalAlpha*=a;
+          c.translate(x+item.width/2,y+(1-a)*24);
+          c.scale(1+Math.sin(local*Math.PI)*.045,1+Math.sin(local*Math.PI)*.045);
+          text(c,item.word,0,0,"600 "+fontSize+"px Georgia",wordColor(item.word));
+          c.restore();
+        }
+        x+=item.width+space;
+      });
     });
     c.restore();
   }
-
-  // ---- scene compositions ----
-  function opening(c,T){
-    if(T<13)hospital(c,T);
-    else if(T<22)prayerHall(c,T);
-    else cemetery(c,T,true);
-    if(T<34){
-      turo(c,1550,670,1.12,T,"open",!!lineAt(T));
-      // slow camera atmosphere
-      var a=c.createRadialGradient(960,450,100,960,450,1000);
-      a.addColorStop(0,"rgba(255,255,255,0)");a.addColorStop(1,"rgba(0,0,0,.25)");
-      c.fillStyle=a;c.fillRect(0,0,W,H);
+  function backdrop(c,T){
+    var g=c.createLinearGradient(0,0,W,H);
+    g.addColorStop(0,"#090b10");g.addColorStop(.55,"#171d25");g.addColorStop(1,"#080a0e");
+    c.fillStyle=g;c.fillRect(0,0,W,H);
+    var x=350+Math.sin(T*.12)*100,y=300+Math.cos(T*.09)*65;
+    var glow=c.createRadialGradient(x,y,10,x,y,620);
+    glow.addColorStop(0,"rgba(130,155,180,.12)");
+    glow.addColorStop(1,"rgba(130,155,180,0)");
+    c.fillStyle=glow;c.fillRect(0,0,W,H);
+    for(var i=0;i<3;i++){
+      var yy=180+i*260+Math.sin(T*.35+i)*10;
+      line(c,90,yy,1830,yy,"rgba(255,255,255,.035)",1);
     }
   }
-  function couple(c,T){
-    drawSky(c,"#111a29","#69717b");
-    rect(c,0,700,W,380,"#343b3c");
-    // apartment / evening window
-    rr(c,190,130,1540,650,8,"#242a30","#59636a",6);
-    rr(c,300,205,520,390,3,"#354958","#86939a",4);
-    line(c,560,205,560,595,"#8a9292",5);line(c,300,400,820,400,"#8a9292",5);
-    ellipse(c,720,285,42,42,"#d1c7a9");
-    // separate halves: girl pink, boy black
-    stickFigure(c,620,810,1.3,"#e7a9c1","phone",T,true);
-    stickFigure(c,1370,810,1.3,"#111214","stand",T,false);
-    // girl's phone and messages
-    phoneUI(c,690,245,.78,"pink",T-72);
-    // boy phone glows when notifications arrive
-    rr(c,1270,690,62,100,9,"#17191d","#8d9297",3);
-    rr(c,1277,700,48,78,4,"#91a6b4");
-    var ping=Math.pow(Math.max(0,Math.sin((T-88)*Math.PI*1.1)),12);
-    ellipse(c,1301,709,5+ping*8,5+ping*8,"#f0c6d2");
-    if(T>112&&T<150){
-      rr(c,1010,300,380,75,18,"rgba(246,247,249,.94)");
-      text(c,"Did you eat?",1200,337,"bold 28px Arial","#31343a");
-    }
-    turo(c,1700,700,.78,T,"point",!!lineAt(T));
-  }
-  function argument(c,T){
-    drawSky(c,"#20212a","#55565b");
-    rect(c,0,720,W,360,"#292c30");
-    // split composition and visible emotional distance
-    line(c,960,120,960,850,"rgba(220,220,220,.15)",2);
-    stickFigure(c,580,820,1.45,"#e7a9c1","slump",T,false);
-    stickFigure(c,1330,820,1.45,"#111214","slump",T,false);
-    rr(c,770,300,380,92,18,"rgba(20,22,26,.9)","#777b80",2);
-    text(c,"...",960,346,"bold 58px Georgia","#d7d7d7");
-    // phones turn face down
-    rr(c,1260,700,80,125,12,"#16181c","#9ca0a2",3);
-    line(c,1273,720,1327,720,"#6d7276",2);
-    turo(c,1690,710,.76,T,"still",!!lineAt(T));
-  }
-  function silence(c,T){
-    drawSky(c,"#111a27","#48535d");
-    rect(c,0,720,W,360,"#30373a");
-    // time progression through window
-    rr(c,250,145,1420,560,8,"#242b33","#5c656c",5);
-    rect(c,285,180,1350,480,"#263747");
-    var day=clamp((T-180)/74,0,1);
-    ellipse(c,mix(1300,550,day),mix(270,230,day),52,52,day>.5?"#d4d0bf":"#aeb9c1");
-    line(c,960,180,960,660,"#858a89",5);line(c,285,430,1635,430,"#858a89",5);
-    stickFigure(c,1330,850,1.25,"#111214","phone",T,false);
-    // empty pink side as an intentional absence
-    ellipse(c,510,845,80,13,"rgba(0,0,0,.18)");
-    phoneUI(c,730,235,.68,"pink",T-204);
-    // no incoming messages: old conversation remains
-    if(T>212){
-      rr(c,300,735,540,80,12,"rgba(245,245,245,.95)");
-      text(c,"Last seen · yesterday",570,775,"20px Arial","#4c5258");
-    }
-    turo(c,1690,705,.78,T,"open",!!lineAt(T));
-  }
-  function habituation(c,T){
-    drawSky(c,"#1c2530","#697178");
-    rect(c,0,710,W,370,"#343a3b");
-    // clock as a visual metaphor
-    ellipse(c,960,470,235,235,"#c6c5bd");
-    ellipse(c,960,470,211,211,"#e5e2d9");
-    for(var i=0;i<12;i++){
-      var a=i*TAU/12-Math.PI/2;
-      line(c,960+Math.cos(a)*180,470+Math.sin(a)*180,960+Math.cos(a)*195,470+Math.sin(a)*195,"#4c5050",5);
-      text(c,String(i||12),960+Math.cos(a)*153,470+Math.sin(a)*153,"bold 24px Arial","#343a3b");
-    }
-    var a1=(T*TAU/12)-Math.PI/2;
-    line(c,960,470,960+Math.cos(a1)*130,470+Math.sin(a1)*130,"#343a3b",8);
-    line(c,960,470,960+Math.cos(a1*3)*88,470+Math.sin(a1*3)*88,"#9c5656",5);
-    ellipse(c,960,470,12,12,"#343a3b");
-    // repeated message notifications fade into the room
-    for(var i=0;i<5;i++){
-      var alpha=clamp(1-(T-(264+i*7))/28,0,1)*.7;
-      if(alpha>0){
-        c.globalAlpha=alpha;
-        rr(c,280+i*280,760-(i%2)*90,230,64,16,"#f2f0ea");
-        text(c,"A message arrived",395+i*280,792-(i%2)*90,"17px Arial","#31363b");
-        c.globalAlpha=1;
-      }
-    }
-    turo(c,1600,700,.88,T,"open",!!lineAt(T));
-  }
-  function reflection(c,T){
-    if(T<338)hospital(c,T);
-    else if(T<348)prayerHall(c,T);
-    else cemetery(c,T,true);
-    turo(c,1580,700,1.0,T,"open",!!lineAt(T));
-  }
-  function ending(c,T){
-    drawSky(c,"#10151d","#48545d");
-    rect(c,0,730,W,350,"#252d30");
-    // two figures meet and reconnect; no tragic death implied
-    var p=clamp((T-358)/35,0,1);
-    stickFigure(c,mix(540,820,ease(p)),830,1.25,"#e7a9c1","wave",T,false);
-    stickFigure(c,mix(1380,1080,ease(p)),830,1.25,"#111214","wave",T,false);
-    if(T>378){
-      rr(c,760,360,400,90,20,"rgba(247,247,244,.94)");
-      text(c,"Can we talk?",960,405,"bold 29px Georgia","#33383d");
-    }
-    turo(c,1600,700,.88,T,"open",!!lineAt(T));
-    if(T>398){
-      var glow=clamp((T-398)/12,0,1);
-      var g=c.createRadialGradient(960,460,30,960,460,650);
-      g.addColorStop(0,"rgba(255,255,255,"+(glow*.13)+")");
-      g.addColorStop(1,"rgba(255,255,255,0)");
-      c.fillStyle=g;c.fillRect(0,0,W,H);
-    }
-  }
-
-  // ---- render frame ----
-  ctx.save();
-  ctx.clearRect(0,0,width,height);
+  ctx.save();ctx.clearRect(0,0,width,height);
   ctx.translate(ox,oy);ctx.scale(S,S);
-  var scene=sceneAt(t);
-  if(scene==="opening")opening(ctx,t);
-  else if(scene==="couple")couple(ctx,t);
-  else if(scene==="argument")argument(ctx,t);
-  else if(scene==="silence")silence(ctx,t);
-  else if(scene==="habituation")habituation(ctx,t);
-  else if(scene==="reflection")reflection(ctx,t);
-  else ending(ctx,t);
-
-  // subtle camera drift and cinematic edge treatment
-  kineticText(ctx,t);
-  var fadeIn=clamp(t/1.5,0,1),fadeOut=clamp((D-t)/2,0,1);
-  ctx.globalAlpha=1-Math.min(1,fadeIn,fadeOut);
-  ctx.fillStyle="#05070a";ctx.fillRect(0,0,W,H);
-  ctx.globalAlpha=1;
+  backdrop(ctx,t);
+  var L=lineAt(t),gesture=L?((Math.floor(t/9)%3===0)?"open":(Math.floor(t/9)%3===1)?"point":"still"):"open";
+  turo(ctx,1580,735,1.12,t,gesture,!!L);
+  text(ctx,"TURO-SAN",1580,1000,"bold 18px Arial","rgba(255,255,255,.48)");
+  drawStoryText(ctx,t);
+  var fadeIn=clamp(t/1.2,0,1),fadeOut=clamp((D-t)/1.8,0,1);
+  ctx.globalAlpha=1-Math.min(fadeIn,fadeOut);
+  rect(ctx,0,0,W,H,"#05070a");ctx.globalAlpha=1;
   ctx.restore();
-}
-</script>
+}</script>
 </body>
 </html>
