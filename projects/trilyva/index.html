@@ -9,7 +9,7 @@
 
 <meta name="author" content="Robiul Rumman Razim"><meta name="robots" content="index,follow,max-image-preview:large">
 <title>TRILYVA — Browser Animation Renderer and 18 Image Formats</title>
-<meta name="description" content="TRILYVA is a browser-based JavaScript animation renderer for frame-driven motion, project and library management, metadata, and 18 still-frame image formats.">
+<meta name="description" content="TRILYVA is a browser-based procedural animation renderer for frame-driven motion, project and library management, metadata, and 18 still-frame image formats. It has no built-in AI integration; external JavaScript must be copied and pasted manually.">
 <link rel="canonical" href="https://tamasrazim.github.io/projects/trilyva/">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Tamasrazim"><meta property="og:title" content="TRILYVA — Browser Animation Renderer and 18 Image Formats">
 <meta property="og:description" content="TRILYVA is a browser-based JavaScript animation renderer for frame-driven motion, project and library management, metadata, and 18 still-frame image formats.">
@@ -188,7 +188,7 @@
 <section class="tri-wrap tri-section" id="feature-index">
 <div class="tri-head"><h2>Complete capability index</h2><p>A practical reference to the current browser workspace. These are the features implemented in the browser renderer; operating-system, memory, browser encoder, and file-picker capabilities still set the real limits.</p></div>
 <div class="tri-grid">
-<article class="tri-card"><span>AUTHORING / JAVASCRIPT</span><h3>Code-driven animation</h3><p>Write a complete animation using <code>window.renderFrame(time, frame, fps, ctx, width, height)</code>. The editor includes syntax colours, find/replace, reindent, undo/redo, source analysis, paste, copy, clear, examples, and a copyable animation prompt. The renderer supplies a Canvas 2D context and composition dimensions.</p></article>
+<article class="tri-card"><span>AUTHORING / JAVASCRIPT</span><h3>Code-driven animation</h3><p>Write a complete animation using <code>window.renderFrame(time, frame, fps, ctx, width, height)</code>. The editor includes syntax colours, find/replace, reindent, undo/redo, source analysis, paste, copy, clear, examples, and a copyable animation prompt for use with external tools. The prompt is plain text only: TRILYVA does not connect to an AI service. Any code written elsewhere must be copied and pasted into the editor manually. The renderer supplies a Canvas 2D context and composition dimensions.</p></article>
 <article class="tri-card"><span>VISUAL CANVAS / MEDIA LAYERS</span><h3>Place and edit external media</h3><p>Switch the animation-source panel between Code and Canvas Edit. Import browser-supported images, local video clips, or SVG artwork as separate layers; drag to move, resize from the corner, adjust X/Y, dimensions, rotation, opacity, blend mode and visibility, and manage layer order. Video layers include frame range, trim and playback-rate controls. Video uses frame-aware browser decoding and may render more slowly; SVG media is rasterised for composition.</p></article>
 <article class="tri-card"><span>VISUAL CANVAS / AUDIO TRACKS</span><h3>Edit and mix local audio clips</h3><p>Canvas Edit includes separate audio lanes with 120-bin waveform previews. Import browser-decodable local audio, move/trim/split clips on the shared frame timeline, adjust clip volume, mute, set fade-in/fade-out frames, and preview audio with play, seek, and loop wrap. Store unique audio sources in local projects and <code>.tmotion v5</code> (with v4 import compatibility); export a 48 kHz, 16-bit stereo WAV mix (up to five minutes) for use with Finish Movie. Direct audio mux is not yet part of the deterministic frame exporter.</p></article>
 <article class="tri-card"><span>VISUAL CANVAS / CODE VECTORS</span><h3>Select and restyle source-drawn shapes</h3><p>Use <strong>Detect from code</strong> to identify supported Canvas 2D paths and rectangle draw calls in the current frame. Select an object from the vector list or click its outline, then adjust position, size, rotation, opacity, fill colour, stroke colour and stroke width. Hide a selected object or reset all detected vector edits. The detector is frame-specific and follows recorded drawing operations; text, images drawn with <code>drawImage()</code>, <code>Path2D</code>, clipping and other raster operations are not separate editable objects. Style overrides use solid colours.</p></article>
@@ -227,14 +227,29 @@
 <section class="tri-wrap tri-section" id="faq" aria-labelledby="faq-title">
   <div class="tri-head">
     <h2 id="faq-title">Frequently asked questions</h2>
-    <p>Clear answers about TRILYVA's procedural rendering workflow and how it differs from neural visual generation.</p>
+    <p>How TRILYVA handles procedural rendering, external coding tools, and stock-media workflows.</p>
   </div>
   <div class="tri-faq">
     <details open>
+      <summary>Does TRILYVA have built-in AI integration with ChatGPT, Gemini, or another model?</summary>
+      <div class="tri-faq-answer">
+        <p>No. TRILYVA has no built-in AI assistant, LLM connection, model API, or automatic prompt-to-animation service. It does not send prompts or animation source to an AI provider.</p>
+        <p>ChatGPT, Gemini, and other AI tools are separate third-party services. When you choose to use one, you must get the JavaScript code there, copy it yourself, and paste it into TRILYVA's Animation Source editor. There is no direct connection between TRILYVA and those services.</p>
+      </div>
+    </details>
+    <details>
+      <summary>Can I use JavaScript written with an external AI coding tool?</summary>
+      <div class="tri-faq-answer">
+        <p>Yes. You can ask an external tool to help write or explain JavaScript, then manually copy and paste that code into TRILYVA. The code is authored outside the application; TRILYVA does not generate it or automatically import it.</p>
+        <p>After you paste it, the browser executes the JavaScript as animation instructions. TRILYVA evaluates the requested frames and draws the result through its procedural rendering pipeline.</p>
+      </div>
+    </details>
+    <details>
       <summary>Does using an LLM to write TRILYVA's JavaScript make the exported video Generative AI content?</summary>
       <div class="tri-faq-answer">
-        <p>If you use an LLM (like ChatGPT or Gemini) to <strong>write the JavaScript code</strong> for TRILYVA, the code itself is technically generated by AI. However, what you are uploading to the stock platforms is the <em>rendered visual output</em> of that code. Because the resulting video is entirely the product of deterministic equations executed in the browser—rather than a neural network diffusing an image—it remains outside the "Generative AI" tracking loop.</p>
-        <p class="tri-faq-note">This describes TRILYVA's rendering process: AI may assist with source-code authoring, but the browser renderer creates the submitted frames procedurally. Stock marketplaces set their own contributor declarations and acceptance rules, so always follow the current guidance of the platform receiving the asset.</p>
+        <p>If you use an LLM such as ChatGPT or Gemini to write the JavaScript code, the code itself is technically AI-generated or AI-assisted. However, the stock asset you export is the rendered visual output of that code. TRILYVA executes the JavaScript in the browser and draws each requested frame using deterministic equations and rendering operations; the export is not produced by a neural network generating or diffusing the visual frames.</p>
+        <p>That is the distinction: an external tool may have assisted with source-code authoring, but TRILYVA itself is a procedural animation workspace, not a neural image or video generator. Its renderer does not call an AI model during preview or export.</p>
+        <p class="tri-faq-note">This technical distinction does not override a stock marketplace's own definitions or disclosure rules. Review the current contributor policy of the platform receiving the asset and answer its declarations accurately.</p>
       </div>
     </details>
   </div>
