@@ -14750,13 +14750,13 @@ else boot();
 <script type="module" src="./firebase-analytics.js?v=20261022-1"></script>
 
 
-<script type="text/plain" id="sample-dont-wait-too-late" data-title="Don't Wait Until It's Too Late — Story Film" data-desc="A minimal 60 FPS presenter film: Turo-San stays on screen while the complete story appears as animated, word-by-word kinetic text. No cemetery, hospital, prayer hall or couple scenes." data-loop="0" data-dur="430" data-width="1920" data-height="1080" data-fps="60">/*
- * DON'T WAIT UNTIL IT'S TOO LATE — TURO-SAN TEXT EDITION
+<script type="text/plain" id="sample-dont-wait-too-late" data-title="Don't Wait Until It's Too Late — Story Film" data-desc="Turo-San drawn from the supplied TRILYVA Path2D character source, without a headband, chest emblem or side receiver, alongside cinematic word-by-word story typography." data-loop="0" data-dur="430" data-width="1920" data-height="1080" data-fps="60">/*
+ * DON'T WAIT UNTIL IT'S TOO LATE — TURO-SAN CINEMATIC TEXT EDITION
  * 1920x1080 / 60 FPS / 430 seconds
- * Minimal deterministic presenter film: Turo-San + animated story text.
+ * Original TRILYVA Path2D character source, no headband, chest mark or side receiver.
  */
 function renderFrame(time, frame, fps, ctx, width, height) {
-  if (!ctx || !width || !height) return;
+  if (!ctx || typeof ctx.save !== "function" || !width || !height) return;
   var W=1920,H=1080,D=430,TAU=Math.PI*2;
   var t=Math.max(0,Math.min(D-0.0001,Number.isFinite(time)?time:(frame||0)/(fps||60)));
   var S=Math.min(width/W,height/H),ox=(width-W*S)/2,oy=(height-H*S)/2;
@@ -14764,26 +14764,8 @@ function renderFrame(time, frame, fps, ctx, width, height) {
   var ease=function(p){p=clamp(p,0,1);return p*p*(3-2*p);};
   var rect=function(c,x,y,w,h,color){c.fillStyle=color;c.fillRect(x,y,w,h);};
   var line=function(c,x1,y1,x2,y2,color,lw){
-    c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.strokeStyle=color;
-    c.lineWidth=lw||3;c.lineCap="round";c.stroke();
-  };
-  var ellipse=function(c,x,y,rx,ry,color){
-    c.beginPath();c.ellipse(x,y,rx,ry,0,0,TAU);c.fillStyle=color;c.fill();
-  };
-  var poly=function(c,pts,fill,stroke,lw){
-    c.beginPath();c.moveTo(pts[0][0],pts[0][1]);
-    for(var i=1;i<pts.length;i++)c.lineTo(pts[i][0],pts[i][1]);
-    c.closePath();if(fill){c.fillStyle=fill;c.fill();}
-    if(stroke){c.strokeStyle=stroke;c.lineWidth=lw||2;c.stroke();}
-  };
-  var rr=function(c,x,y,w,h,r,fill,stroke,lw){
-    c.beginPath();c.roundRect(x,y,w,h,r);
-    if(fill){c.fillStyle=fill;c.fill();}
-    if(stroke){c.strokeStyle=stroke;c.lineWidth=lw||2;c.stroke();}
-  };
-  var text=function(c,str,x,y,font,color,align){
-    c.font=font;c.textAlign=align||"center";c.textBaseline="middle";
-    c.fillStyle=color;c.fillText(str,x,y);
+    c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);
+    c.strokeStyle=color;c.lineWidth=lw||2;c.lineCap="round";c.stroke();
   };
   var lines=[
     [2,7,"Have you ever noticed something strange about human beings?"],
@@ -14841,119 +14823,262 @@ function renderFrame(time, frame, fps, ctx, width, height) {
     for(var i=0;i<lines.length;i++)if(T>=lines[i][0]&&T<lines[i][1])return lines[i];
     return null;
   }
-  function turo(c,x,y,s,T,gesture,speaking){
-    c.save();c.translate(x,y);c.scale(s,s);
-    var bob=Math.sin(T*2.1)*3;
-    c.translate(0,bob);
-    var ink="#171717",mid="#a8a8a8",light="#f7f7f7";
-    // legs and boots
-    line(c,-17,65,-43,178,ink,8);line(c,17,65,43,178,ink,8);
-    ellipse(c,-62,184,36,12,mid);ellipse(c,62,184,36,12,mid);
-    // body
-    rr(c,-30,-38,60,112,22,mid,ink,6);
-    // arms with presenter gestures
-    var swing=Math.sin(T*1.7)*.05;
-    line(c,-25,-22,-65,40+(gesture==="point"?-38:0)+Math.sin(T*2)*4,ink,8);
-    line(c,25,-22,65,38+(gesture==="open"?-38:0)+swing*40,ink,8);
-    ellipse(c,-65,40+(gesture==="point"?-38:0),10,10,mid);
-    ellipse(c,65,38+(gesture==="open"?-38:0)+swing*40,10,10,mid);
-    // head shape based on supplied vector silhouette
-    c.beginPath();c.moveTo(0,-170);c.bezierCurveTo(70,-177,126,-130,136,-72);
-    c.bezierCurveTo(147,-15,103,26,47,38);c.bezierCurveTo(-10,52,-93,18,-119,-28);
-    c.bezierCurveTo(-148,-78,-113,-141,-54,-162);c.bezierCurveTo(-35,-170,-17,-172,0,-170);
-    c.closePath();c.fillStyle=mid;c.fill();c.strokeStyle=ink;c.lineWidth=6;c.stroke();
-    // antenna from original design
-    line(c,0,-170,3,-198,ink,5);ellipse(c,3,-205,8,8,mid);
-    // Red cloth headband tied around the head, labelled in white.
-    poly(c,[[-105,-139],[82,-139],[112,-124],[91,-105],[-101,-111]],"#c62828",ink,3);
-    poly(c,[[82,-139],[128,-154],[112,-124]],"#a91f25",ink,2);
-    text(c,"TURO-SAN",-8,-124,"bold 15px Arial","#ffffff");
-    // eyes and pupils, no added ear or chest emblem
-    ellipse(c,-48,-83,28,36,light);ellipse(c,48,-72,26,34,light);
-    ellipse(c,-38,-76,7,13,ink);ellipse(c,44,-67,6,11,ink);
-    // mouth movement follows speaking state
-    if(speaking){
-      var mouth=3+Math.abs(Math.sin(T*13))*9;
-      c.beginPath();c.ellipse(0,4,13,mouth,0,0,TAU);c.fillStyle=ink;c.fill();
-    }else line(c,-13,3,13,7,ink,3);
-    c.restore();
+    const INK = "#171717";
+  const MID = "#A8A8A8";
+  const LIGHT = "#F7F7F7";
+  const SHADE = "#777777";
+
+  // Reusable vector paths in the character's 512 × 640 design coordinate space.
+  const P = {
+    legLeft: new Path2D("M239 389 C235 429 224 474 211 530"),
+    legRight: new Path2D("M273 389 C279 435 285 478 298 530"),
+    bootLeft: new Path2D("M207 518 C183 508 146 510 119 523 C96 535 79 553 83 568 C86 583 112 591 150 590 L211 582 C229 579 239 565 232 550 C227 537 218 526 207 518 Z"),
+    bootRight: new Path2D("M298 521 C322 508 362 512 391 526 C416 538 434 555 430 571 C426 586 400 592 365 590 L300 583 C281 581 270 567 277 551 C281 538 288 527 298 521 Z"),
+    bootLineLeft: new Path2D("M112 568 C140 578 183 576 216 565"),
+    bootLineRight: new Path2D("M293 563 C326 577 382 580 409 567"),
+
+    armLeft: new Path2D("M228 294 C205 324 185 363 170 408"),
+    armRight: new Path2D("M282 294 C305 329 326 371 350 410"),
+    handLeft: new Path2D("M164 399 C149 397 132 410 123 426 C111 448 119 465 139 472 C159 480 180 469 188 450 C196 431 184 405 164 399 Z"),
+    handRight: new Path2D("M345 402 C360 396 380 403 392 416 C405 431 398 447 381 452 C363 458 342 449 335 435 C328 421 332 408 345 402 Z"),
+    handLineLeft: new Path2D("M151 416 C157 411 164 410 170 414"),
+    handLineRight: new Path2D("M350 414 C361 410 372 415 379 423"),
+
+    torso: new Path2D("M235 278 C218 306 209 343 212 377 C214 405 230 424 254 427 C279 430 297 411 300 384 C304 347 291 306 274 278 C263 283 247 283 235 278 Z"),
+    torsoLine: new Path2D("M238 294 C248 301 266 302 278 294"),
+
+    antenna: new Path2D("M257 67 L260 43"),
+    head: new Path2D("M255 67 C319 61 377 101 394 158 C411 215 381 267 330 286 C282 305 213 291 168 260 C124 229 112 174 135 126 C157 82 204 65 255 67 Z"),
+    eyeLeft: new Path2D("M174 145 C163 150 155 168 157 190 C160 219 179 242 207 248 C229 253 249 240 254 221 C256 211 248 202 237 191 L188 148 C183 144 179 143 174 145 Z"),
+    eyeRight: new Path2D("M300 164 C315 147 340 150 353 169 C366 189 358 222 339 239 C323 253 303 245 294 225 C284 205 286 180 300 164 Z"),
+    mouth: new Path2D("M218 262 C230 270 243 274 255 274"),
+    cheekLine: new Path2D("M171 258 C179 264 187 267 195 269"),
+    antennaBall: new Path2D("M269 34 A8 8 0 1 1 253 34 A8 8 0 1 1 269 34 Z"),
+    antennaDot: new Path2D("M263.3 34 A2.3 2.3 0 1 1 258.7 34 A2.3 2.3 0 1 1 263.3 34 Z"),
+  };
+
+  function fillShape(ctx, path, fill, stroke = INK, lineWidth = 5.5) {
+    ctx.fillStyle = fill;
+    ctx.fill(path);
+    if (stroke) {
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = lineWidth;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.stroke(path);
+    }
   }
-  function wordColor(w){
-    var q=w.toLowerCase().replace(/[^a-z']/g,"");
-    if(["love","care","thought","listen","thank","precious","together","ordinary"].indexOf(q)>=0)return "#f0c6d2";
-    if(["silence","quiet","missing","hospital","tomorrow","memory","late"].indexOf(q)>=0)return "#9fc1d8";
-    if(["ignore","forgot","busy","argued","alone"].indexOf(q)>=0)return "#e5a18c";
-    if(["value","appreciate","chance","remember","important"].indexOf(q)>=0)return "#e7d28d";
-    return "#f4f2ed";
+
+  function strokeShape(ctx, path, stroke = INK, lineWidth = 3) {
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = lineWidth;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.stroke(path);
   }
-  function drawStoryText(c,T){
+
+  function blinkAmount(t) {
+    // Two brief blinks in a repeating 4.6-second loop.
+    const phase = ((t % 4.6) + 4.6) % 4.6;
+    const pulse = (center, halfWidth) => {
+      const u = 1 - Math.abs(phase - center) / halfWidth;
+      return u > 0 ? Math.sin((Math.PI * 0.5) * u) : 0;
+    };
+    return Math.max(pulse(1.55, 0.105), pulse(1.78, 0.09));
+  }
+
+  function drawLegs(ctx) {
+    strokeShape(ctx, P.legLeft, INK, 7);
+    strokeShape(ctx, P.legRight, INK, 7);
+    fillShape(ctx, P.bootLeft, MID, INK, 5.5);
+    fillShape(ctx, P.bootRight, MID, INK, 5.5);
+    strokeShape(ctx, P.bootLineLeft, SHADE, 3);
+    strokeShape(ctx, P.bootLineRight, SHADE, 3);
+  }
+
+  function drawLeftArm(ctx, angle) {
+    ctx.save();
+    ctx.translate(228, 294);
+    ctx.rotate(angle);
+    ctx.translate(-228, -294);
+    strokeShape(ctx, P.armLeft, INK, 7);
+    fillShape(ctx, P.handLeft, MID, INK, 5.5);
+    strokeShape(ctx, P.handLineLeft, SHADE, 3);
+    ctx.restore();
+  }
+
+  function drawRightArm(ctx, angle) {
+    ctx.save();
+    ctx.translate(282, 294);
+    ctx.rotate(angle);
+    ctx.translate(-282, -294);
+    strokeShape(ctx, P.armRight, INK, 7);
+    fillShape(ctx, P.handRight, MID, INK, 5.5);
+    strokeShape(ctx, P.handLineRight, SHADE, 3);
+    ctx.restore();
+  }
+
+  function drawBody(ctx) {
+    fillShape(ctx, P.torso, MID, INK, 5.5);
+    strokeShape(ctx, P.torsoLine, SHADE, 3.5);
+  }
+
+  function drawHead(ctx, t, speaking) {
+    const tilt = Math.sin(t * 1.15) * 0.018;
+    const blink = blinkAmount(t);
+    const eyeScaleY = 1 - blink * 0.88;
+    const lookX = Math.sin(t * 0.72) * 2.2;
+    const lookY = Math.sin(t * 0.49 + 0.7) * 1.1;
+
+    ctx.save();
+    ctx.translate(256, 190);
+    ctx.rotate(tilt);
+    ctx.translate(-256, -190);
+
+    // Antenna and head silhouette.
+    strokeShape(ctx, P.antenna, INK, 5);
+    fillShape(ctx, P.antennaBall, MID, INK, 5.5);
+    ctx.fillStyle = INK;
+    ctx.fill(P.antennaDot);
+
+    fillShape(ctx, P.head, MID, INK, 5.5);
+
+    // Eyes compress vertically during a blink; pupils make tiny deterministic glances.
+    ctx.save();
+    ctx.translate(256, 200);
+    ctx.scale(1, Math.max(0.12, eyeScaleY));
+    ctx.translate(-256, -200);
+    fillShape(ctx, P.eyeLeft, LIGHT, INK, 5.5);
+    fillShape(ctx, P.eyeRight, LIGHT, INK, 5.5);
+    ctx.save();
+    ctx.translate(lookX, lookY);
+    ctx.beginPath();
+    ctx.ellipse(202, 205, 8, 17, 5 * Math.PI / 180, 0, Math.PI * 2);
+    ctx.fillStyle = INK;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(317, 213, 6.5, 11, 18 * Math.PI / 180, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    ctx.restore();
+
+    if (speaking) {
+      ctx.beginPath();
+      ctx.ellipse(237, 269, 10, 3 + Math.abs(Math.sin(t * 12.5)) * 8, -0.08, 0, Math.PI * 2);
+      ctx.fillStyle = INK;
+      ctx.fill();
+    } else {
+      strokeShape(ctx, P.mouth, INK, 3.5);
+    }
+    strokeShape(ctx, P.cheekLine, SHADE, 2.5);
+    ctx.restore();
+  }
+
+
+  function wordColor(word){
+    var w=word.toLowerCase().replace(/[^a-z']/g,"");
+    if(["love","care","thought","listen","thank","precious","together","ordinary","presence"].indexOf(w)>=0)return "#f1c4d2";
+    if(["silence","quiet","missing","hospital","tomorrow","memory","late","voice","graveyard"].indexOf(w)>=0)return "#a9c9e2";
+    if(["ignore","forgot","busy","argued","alone","tears","wishing"].indexOf(w)>=0)return "#e8a28e";
+    if(["value","appreciate","chance","remember","important","promise","worth"].indexOf(w)>=0)return "#ead48e";
+    return "#f4f1eb";
+  }
+  function heroWord(word){
+    return ["strange","tears","chance","graves","ordinary","presence","tomorrow","promise","message","listen","precious","habituation","memory","value","voice","worth","care","silence"].indexOf(word.toLowerCase().replace(/[^a-z']/g,""))>=0;
+  }
+  function drawKineticText(c,T){
     var L=lineAt(T);if(!L)return;
     var p=clamp((T-L[0])/(L[1]-L[0]),0,1);
-    var words=L[2].split(/\s+/),fontSize=52,maxW=1190,space;
-    var rows=[],row=[],rowW=0;
-    c.font="600 "+fontSize+"px Georgia";space=c.measureText(" ").width;
-    words.forEach(function(w){
-      var ww=c.measureText(w).width;
-      if(row.length&&rowW+space+ww>maxW){rows.push(row);row=[];rowW=0;}
-      if(row.length)rowW+=space;
-      row.push({word:w,width:ww});rowW+=ww;
+    var words=L[2].split(/\s+/),base=words.length>13?43:49,maxW=1130,space=13;
+    var items=words.map(function(word,index){
+      var hero=heroWord(word),size=base+(hero?13:0);
+      var font=(hero?"italic 700 ":"600 ")+size+"px "+(hero?"Georgia":"Arial");
+      c.font=font;
+      return {word:word,index:index,size:size,font:font,width:c.measureText(word).width,hero:hero};
+    });
+    var rows=[],row=[],rowWidth=0;
+    items.forEach(function(item){
+      var gap=row.length?space:0;
+      if(row.length&&rowWidth+gap+item.width>maxW){rows.push(row);row=[];rowWidth=0;}
+      if(row.length)rowWidth+=space;
+      row.push(item);rowWidth+=item.width;
     });
     if(row.length)rows.push(row);
-    if(rows.length>3)fontSize=43;else if(rows.length===3)fontSize=47;
-    c.font="600 "+fontSize+"px Georgia";space=c.measureText(" ").width;
-    rows=[];row=[];rowW=0;
-    words.forEach(function(w){
-      var ww=c.measureText(w).width;
-      if(row.length&&rowW+space+ww>maxW){rows.push(row);row=[];rowW=0;}
-      if(row.length)rowW+=space;
-      row.push({word:w,width:ww});rowW+=ww;
-    });
-    if(row.length)rows.push(row);
-    var reveal=Math.max(1,Math.ceil(p*(words.length+1)));
-    var startY=875-(rows.length-1)*34;
-    c.save();c.globalAlpha=clamp(Math.min(p*8,(1-p)*8),0,1);
-    rr(c,75,720,1300,280,26,"rgba(8,10,14,.84)","rgba(255,255,255,.18)",2);
-    var index=0;
+    if(rows.length>3){
+      items.forEach(function(item){item.size-=5;item.font=(item.hero?"italic 700 ":"600 ")+item.size+"px "+(item.hero?"Georgia":"Arial");c.font=item.font;item.width=c.measureText(item.word).width;});
+      rows=[];row=[];rowWidth=0;
+      items.forEach(function(item){
+        var gap=row.length?space:0;
+        if(row.length&&rowWidth+gap+item.width>maxW){rows.push(row);row=[];rowWidth=0;}
+        if(row.length)rowWidth+=space;
+        row.push(item);rowWidth+=item.width;
+      });
+      if(row.length)rows.push(row);
+    }
+    var reveal=Math.ceil(p*(items.length+1));
+    var alpha=clamp(Math.min(p*7,(1-p)*7),0,1);
+    var lineHeight=88,startY=540-(rows.length-1)*lineHeight/2;
+    c.save();c.globalAlpha=alpha;
+    var wash=c.createLinearGradient(45,0,1320,0);
+    wash.addColorStop(0,"rgba(4,7,12,.68)");
+    wash.addColorStop(.78,"rgba(4,7,12,.24)");
+    wash.addColorStop(1,"rgba(4,7,12,0)");
+    rect(c,35,250,1310,600,wash);
+    var track=c.createLinearGradient(80,0,1260,0);
+    track.addColorStop(0,"rgba(241,196,210,.85)");
+    track.addColorStop(.55,"rgba(169,201,226,.85)");
+    track.addColorStop(1,"rgba(234,212,142,.85)");
+    line(c,88,350,88+1160*p,350,track,3);
+    var idx=0;
     rows.forEach(function(r,ri){
-      var full=r.reduce(function(a,b){return a+b.width;},0)+space*(r.length-1);
-      var x=725-full/2,y=startY+ri*70;
+      var x=94,y=startY+ri*lineHeight;
       r.forEach(function(item){
-        var n=index++,local=clamp(p*(words.length+1)-n,0,1);
+        var n=idx++,local=clamp(p*(items.length+1)-n,0,1);
         if(n<reveal){
-          var a=ease(local);
-          c.save();c.globalAlpha*=a;
-          c.translate(x+item.width/2,y+(1-a)*24);
-          c.scale(1+Math.sin(local*Math.PI)*.045,1+Math.sin(local*Math.PI)*.045);
-          text(c,item.word,0,0,"600 "+fontSize+"px Georgia",wordColor(item.word));
+          var a=ease(local),lift=(1-a)*36,scale=.82+.18*a;
+          c.save();c.globalAlpha=alpha*a;
+          c.translate(x,y+lift);c.rotate((1-a)*(n%2===0?-.045:.045));c.scale(scale,scale);
+          c.font=item.font;c.textAlign="left";c.textBaseline="middle";
+          c.shadowColor=wordColor(item.word);c.shadowBlur=item.hero?24*a:12*a;
+          c.fillStyle=wordColor(item.word);c.fillText(item.word,0,0);
+          if(item.hero&&a>.82){c.globalAlpha=alpha*(a-.82)*.45;c.shadowBlur=0;c.fillStyle="#ffffff";c.fillText(item.word,0,-2);}
           c.restore();
         }
-        x+=item.width+space;
+        c.font=item.font;x+=c.measureText(item.word).width+space;
       });
     });
     c.restore();
   }
   function backdrop(c,T){
     var g=c.createLinearGradient(0,0,W,H);
-    g.addColorStop(0,"#090b10");g.addColorStop(.55,"#171d25");g.addColorStop(1,"#080a0e");
+    g.addColorStop(0,"#080b11");g.addColorStop(.48,"#18212b");g.addColorStop(1,"#080a0f");
     c.fillStyle=g;c.fillRect(0,0,W,H);
-    var x=350+Math.sin(T*.12)*100,y=300+Math.cos(T*.09)*65;
-    var glow=c.createRadialGradient(x,y,10,x,y,620);
-    glow.addColorStop(0,"rgba(130,155,180,.12)");
-    glow.addColorStop(1,"rgba(130,155,180,0)");
+    var x=370+Math.sin(T*.105)*115,y=390+Math.cos(T*.075)*95;
+    var glow=c.createRadialGradient(x,y,10,x,y,780);
+    glow.addColorStop(0,"rgba(130,160,190,.16)");
+    glow.addColorStop(.55,"rgba(90,120,150,.055)");
+    glow.addColorStop(1,"rgba(70,90,110,0)");
     c.fillStyle=glow;c.fillRect(0,0,W,H);
-    for(var i=0;i<3;i++){
-      var yy=180+i*260+Math.sin(T*.35+i)*10;
-      line(c,90,yy,1830,yy,"rgba(255,255,255,.035)",1);
-    }
+    for(var i=0;i<5;i++){var yy=120+i*220+Math.sin(T*.24+i)*14;line(c,0,yy,W,yy,"rgba(255,255,255,.025)",1);}
+    var vignette=c.createRadialGradient(960,510,240,960,510,1100);
+    vignette.addColorStop(0,"rgba(0,0,0,0)");vignette.addColorStop(1,"rgba(0,0,0,.48)");
+    c.fillStyle=vignette;c.fillRect(0,0,W,H);
+  }
+  function drawTuro(c,T,speaking){
+    var bob=Math.sin(T*2.1)*2.1,gesture=Math.sin(T*.78)*.12;
+    c.save();c.translate(1585,590);c.scale(.91,.91);c.translate(-256,-320+bob);
+    drawLegs(c);
+    drawLeftArm(c,Math.sin(T*1.7+.4)*.035-gesture*.45);
+    drawRightArm(c,Math.sin(T*1.7+2.1)*.035+gesture);
+    drawBody(c);drawHead(c,T,speaking);
+    c.restore();
   }
   ctx.save();ctx.clearRect(0,0,width,height);
   ctx.translate(ox,oy);ctx.scale(S,S);
   backdrop(ctx,t);
-  var L=lineAt(t),gesture=L?((Math.floor(t/9)%3===0)?"open":(Math.floor(t/9)%3===1)?"point":"still"):"open";
-  turo(ctx,1580,735,1.12,t,gesture,!!L);
-  text(ctx,"TURO-SAN",1580,1000,"bold 18px Arial","rgba(255,255,255,.48)");
-  drawStoryText(ctx,t);
-  var fadeIn=clamp(t/1.2,0,1),fadeOut=clamp((D-t)/1.8,0,1);
+  drawTuro(ctx,t,!!lineAt(t));
+  drawKineticText(ctx,t);
+  var fadeIn=clamp(t/1.3,0,1),fadeOut=clamp((D-t)/2,0,1);
   ctx.globalAlpha=1-Math.min(fadeIn,fadeOut);
   rect(ctx,0,0,W,H,"#05070a");ctx.globalAlpha=1;
   ctx.restore();
