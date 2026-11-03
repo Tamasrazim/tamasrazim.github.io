@@ -27,7 +27,7 @@ const routes = [
 for (const file of routes) {
   const html = read(file);
   must(!html.includes('TRILYVA scheduled maintenance gate'), file + ' is open (no maintenance gate)');
-  must(!/location\\.replace\\(["']\\/maintenance\\//.test(html), file + ' does not redirect to maintenance');
+  must(!html.includes('location.replace("/maintenance/') && !html.includes('content="0;url=/maintenance/'), file + ' does not redirect to maintenance');
 }
 
 const renderer = read('projects/code-motion/renderer/index.html');
