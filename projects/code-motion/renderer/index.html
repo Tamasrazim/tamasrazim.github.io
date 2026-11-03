@@ -14753,7 +14753,7 @@ else boot();
 <script type="text/plain" id="sample-dont-wait-too-late" data-title="Don't Wait Until It's Too Late — Story Film" data-desc="Turo-San drawn from the supplied TRILYVA Path2D character source, without a headband, chest emblem or side receiver, alongside cinematic word-by-word story typography." data-loop="0" data-dur="430" data-width="1920" data-height="1080" data-fps="60">/*
  * DON'T WAIT UNTIL IT'S TOO LATE — TURO-SAN CINEMATIC TEXT EDITION
  * 1920x1080 / 60 FPS / 430 seconds
- * Original TRILYVA Path2D character source, no headband, chest mark or side receiver.
+ * Original supplied TRILYVA Path2D character source; no added accessories.
  */
 function renderFrame(time, frame, fps, ctx, width, height) {
   if (!ctx || typeof ctx.save !== "function" || !width || !height) return;
@@ -15044,7 +15044,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
           if(item.hero&&a>.82){c.globalAlpha=alpha*(a-.82)*.45;c.shadowBlur=0;c.fillStyle="#ffffff";c.fillText(item.word,0,-2);}
           c.restore();
         }
-        c.font=item.font;x+=c.measureText(item.word).width+space;
+        x+=item.width+space;
       });
     });
     c.restore();
