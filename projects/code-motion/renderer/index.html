@@ -14864,6 +14864,10 @@ function renderFrame(time, frame, fps, ctx, width, height) {
     c.closePath();c.fillStyle=mid;c.fill();c.strokeStyle=ink;c.lineWidth=6;c.stroke();
     // antenna from original design
     line(c,0,-170,3,-198,ink,5);ellipse(c,3,-205,8,8,mid);
+    // Red cloth headband tied around the head, labelled in white.
+    poly(c,[[-105,-139],[82,-139],[112,-124],[91,-105],[-101,-111]],"#c62828",ink,3);
+    poly(c,[[82,-139],[128,-154],[112,-124]],"#a91f25",ink,2);
+    text(c,"TURO-SAN",-8,-124,"bold 15px Arial","#ffffff");
     // eyes and pupils, no added ear or chest emblem
     ellipse(c,-48,-83,28,36,light);ellipse(c,48,-72,26,34,light);
     ellipse(c,-38,-76,7,13,ink);ellipse(c,44,-67,6,11,ink);
