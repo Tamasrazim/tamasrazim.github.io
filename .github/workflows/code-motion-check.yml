@@ -7,14 +7,14 @@ on:
     paths:
       - 'code-motion-tamasrazim.html'
       - 'projects/code-motion/**'
-      - 'tools/validate_code_motion.mjs'
+      - 'tools/validate_trilyva_availability.mjs'
       - '.github/workflows/code-motion-check.yml'
   pull_request:
     paths:
       - 'code-motion-tamasrazim.html'
       - 'code-motion-tamasrazim2.html'
       - 'projects/code-motion/**'
-      - 'tools/validate_code_motion.mjs'
+      - 'tools/validate_trilyva_availability.mjs'
       - '.github/workflows/code-motion-check.yml'
 
 permissions:
@@ -28,5 +28,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate TRILYVA state (maintenance-aware)
-        run: node tools/validate_trilyva_maintenance.mjs
+      - name: Validate TRILYVA availability
+        run: node tools/validate_trilyva_availability.mjs
