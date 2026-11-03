@@ -14750,7 +14750,7 @@ else boot();
 <script type="module" src="./firebase-analytics.js?v=20261022-1"></script>
 
 
-<script type="text/plain" id="sample-dont-wait-too-late" data-title="Don't Wait Until It's Too Late — Story Film" data-desc="A five-minute deterministic vector story film with Turo-San narration, a pink and black faceless couple, animated phone conversations, silence, habituation metaphor, hospital, prayer hall, historic cemetery and sentence-by-sentence kinetic typography." data-loop="0" data-dur="300" data-width="1920" data-height="1080" data-fps="32">
+<script type="text/plain" id="sample-dont-wait-too-late" data-title="Don't Wait Until It's Too Late — Story Film" data-desc="A seven-minute-ten-second deterministic vector story film with Turo-San narration, a pink and black faceless couple, animated phone conversations, silence, habituation metaphor, hospital, prayer hall, historic cemetery and sentence-by-sentence kinetic typography." data-loop="0" data-dur="430" data-width="1920" data-height="1080" data-fps="32">
 /*
  * DON'T WAIT UNTIL IT'S TOO LATE
  * Complete animated story film — TRILYVA Example
@@ -14761,7 +14761,7 @@ else boot();
  */
 function renderFrame(time, frame, fps, ctx, width, height) {
   if (!ctx || !width || !height) return;
-  var W=1920,H=1080,D=300,TAU=Math.PI*2;
+  var W=1920,H=1080,D=430,TAU=Math.PI*2;
   var t=Math.max(0,Math.min(D-0.0001,Number.isFinite(time)?time:(frame||0)/(fps||32)));
   var F=fps>0?fps:32;
   var S=Math.min(width/W,height/H);
