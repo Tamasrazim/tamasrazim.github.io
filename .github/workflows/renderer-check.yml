@@ -6,12 +6,12 @@ on:
   push:
     paths:
       - "projects/code-motion/**"
-      - "tools/validate_code_motion.mjs"
+      - "tools/validate_trilyva_availability.mjs"
       - ".github/workflows/renderer-check.yml"
   pull_request:
     paths:
       - "projects/code-motion/**"
-      - "tools/validate_code_motion.mjs"
+      - "tools/validate_trilyva_availability.mjs"
       - ".github/workflows/renderer-check.yml"
 
 permissions:
@@ -27,5 +27,5 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate canonical TRILYVA renderer
-        run: node tools/validate_trilyva_maintenance.mjs
+      - name: Validate TRILYVA availability
+        run: node tools/validate_trilyva_availability.mjs
