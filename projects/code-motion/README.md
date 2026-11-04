@@ -56,6 +56,7 @@ A 2 GB file-size cap is not a 2 Gbps bitrate, and playback does not ordinarily r
 - Use syntax colours, find/replace, reindent, undo/redo, source analysis, paste, copy, clear, examples, and the Copy Prompt helper.
 - Play, pause, scrub, seek to the first/last frame, step one frame, inspect an exact rendered frame, compare the preview with the export path, and use fullscreen preview.
 - Work with deterministic frame timing: `time = frame / fps`. The seeded helpers and noise/easing/loop API help animations reproduce the same requested frame when it is evaluated out of order.
+- The 8×8 contract probe uses a disposable runtime. TRILYVA rebuilds the production runtime before export, so validation cannot consume one-shot setup state and frame 0 renders at the full composition dimensions.
 
 ### Preview timeline and scrubbing
 
