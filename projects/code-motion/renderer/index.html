@@ -1861,9 +1861,10 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
             <div class="row"><label for="oQuality">Quality</label>
               <select id="oQuality"><option value="draft">Draft</option><option value="standard">Standard</option><option value="high">High</option><option value="max">Maximum</option></select></div>
             <div class="row"><label for="oBitrate">Custom bitrate</label>
-              <input type="number" id="oBitrate" min="0" max="2000" step="0.1" value="25" inputmode="decimal">
+              <input type="number" id="oBitrate" min="20" max="2000" step="0.1" value="25" inputmode="decimal">
               <span class="num" style="font-size:10px;color:var(--mut)">Mbps</span></div>
-            <p class="note">0 = automatic quality bitrate. Any positive value overrides the quality preset and is passed to the encoder probe and final render.</p>
+            <p class="note">Video bitrate: minimum 20 Mbps · default 25 Mbps · maximum 2,000 Mbps. Video exports have a strict 2,000,000,000-byte (2 GB) file-size cap. TRILYVA never lowers bitrate, resolution, frame rate, or quality to fit the cap.</p>
+            <div class="warnbox"><b>MEMORY / LARGE EXPORTS</b>2 GB is the output file-size limit, not a 2 Gbps bitrate. The current browser muxer retains encoded chunks and container/index data during finalisation. A near-limit export may need substantially more than 2 GB of free memory; some desktop/browser combinations may not have enough available memory. A 2 GB file does not automatically mean a media player loads the entire file into RAM.</div>
             <div class="row"><label for="oTimebase">WebM timebase</label>
               <select id="oTimebase"><option value="ms">1 ms (compatible)</option><option value="exact">Exact 1/fps tick</option></select></div>
             <div class="row"><label for="oChecksum">Frame checksums</label>
@@ -3265,13 +3266,16 @@ function probeH264(width, height, fps, bitrate) {
   }
   return Promise.resolve().then(next);
 }
-/* A bitrate that reaches VideoEncoder must be a finite, sane, positive integer. */
+/* Video export policy: 20 Mbps minimum, 25 Mbps UI default, 2 Gbps target ceiling. */
+var MIN_TARGET_BITRATE_BPS = 20000000;
+var MAX_TARGET_BITRATE_BPS = 2000000000;
+var MAX_VIDEO_FILE_BYTES = 2000000000;
 function sanitiseBitrate(v, width, height, fps) {
   var n = Number(v);
-  if (!isFinite(n) || n <= 0) n = bitrateFor(width, height, fps, 'standard');
+  if (!isFinite(n) || n <= 0) n = 25000000;
   n = Math.round(n);
-  if (n < 100000) n = 100000;
-  if (n > 2000000000) n = 2000000000;
+  if (n < MIN_TARGET_BITRATE_BPS) n = MIN_TARGET_BITRATE_BPS;
+  if (n > MAX_TARGET_BITRATE_BPS) n = MAX_TARGET_BITRATE_BPS;
   return n;
 }
 
@@ -3308,7 +3312,10 @@ return {
   crc32: crc32, crc32Final: crc32Final, fnv1a: fnv1a, utf8: utf8,
   probeEncoders: probeEncoders, bitrateFor: bitrateFor, CODECS: CODECS,
   MP4Muxer: MP4Muxer, parseMP4: parseMP4, probeH264: probeH264,
-  sanitiseBitrate: sanitiseBitrate, H264_CANDIDATES: H264_CANDIDATES
+  sanitiseBitrate: sanitiseBitrate, H264_CANDIDATES: H264_CANDIDATES,
+  MIN_TARGET_BITRATE_BPS: MIN_TARGET_BITRATE_BPS,
+  MAX_TARGET_BITRATE_BPS: MAX_TARGET_BITRATE_BPS,
+  MAX_VIDEO_FILE_BYTES: MAX_VIDEO_FILE_BYTES
 };
 })();
 </script>
@@ -3392,6 +3399,17 @@ function analyseDurations(d) {
   for (var i = 0; i < d.length; i++) { t += d[i]; if (d[i] < mn) mn = d[i]; if (d[i] > mx) mx = d[i]; }
   return { avg: t / d.length, min: mn, max: mx, total: t };
 }
+function maxEncodedPayloadBytes(enc, frameCount) {
+  var reserve = Math.max(4 * 1024 * 1024, Math.ceil(frameCount * 64) + 65536);
+  return Math.max(0, enc.MAX_VIDEO_FILE_BYTES - reserve);
+}
+function videoSizeLimitError() {
+  return {
+    name: 'OutputSizeLimitError',
+    message: 'The encoded video reached TRILYVA’s strict 2 GB file-size limit.',
+    detail: 'No bitrate, resolution, frame rate, or frame quality was reduced. No oversized video will be delivered. Shorten the composition or render it as separate segments, then join the verified segments in a suitable video editor.'
+  };
+}
 function dupRuns(cs) {
   var n = 0;
   for (var i = 1; i < cs.length; i++) if (cs[i] === cs[i - 1]) n++;
@@ -3418,11 +3436,13 @@ function exportWebM(cfg) {
     });
     mux.start();
     var out = env.makeCanvas(comp.width, comp.height);
-    var encodedBytes = 0, outputs = 0, hardError = null, seenTs = [];
+    var encodedBytes = 0, outputs = 0, hardError = null, sizeLimitHit = false, seenTs = [];
+    var maxPayload = maxEncodedPayloadBytes(enc, comp.frameCount);
     var encoder = new VideoEncoder({
       output: function (chunk) {
         var buf = new Uint8Array(chunk.byteLength);
         chunk.copyTo(buf);
+        if (encodedBytes + buf.length > maxPayload) { sizeLimitHit = true; return; }
         var idx = Math.round(chunk.timestamp * comp.fps / 1e6);
         seenTs.push(chunk.timestamp);
         mux.addFrame(buf, idx, chunk.type === 'key');
@@ -3440,6 +3460,7 @@ function exportWebM(cfg) {
     cfg.onLog('encoder configured: ' + codec.label + ' (' + codec.id + ') @ ' + Math.round(enc.sanitiseBitrate(job.bitrate, comp.width, comp.height, comp.fps) / 1000) + ' kbps');
 
     function drain(limit) {
+      if (sizeLimitHit) return Promise.reject(new Error('OUTPUT_SIZE_LIMIT'));
       if (hardError) return Promise.reject(hardError);
       if (encoder.encodeQueueSize <= limit) return Promise.resolve();
       return sleep(4).then(function () { return drain(limit); });
@@ -3450,22 +3471,30 @@ function exportWebM(cfg) {
       isCancelled: cfg.isCancelled, onProgress: cfg.onProgress,
       bytes: function () { return encodedBytes; },
       sink: function (i, canvas) {
+        if (sizeLimitHit) return { error: videoSizeLimitError() };
         if (hardError) return { error: { name: 'EncoderError', message: String(hardError.message || hardError), detail: 'The browser video encoder rejected the stream at frame ' + i + '.' } };
         var vf = new VideoFrame(canvas, { timestamp: Math.round(i * 1e6 / comp.fps), duration: Math.round(1e6 / comp.fps) });
         try { encoder.encode(vf, { keyFrame: (i % gop) === 0 }); }
         finally { vf.close(); }
-        return drain(3).catch(function (e) { return { error: { name: 'EncoderError', message: String(e.message || e) } }; });
+        return drain(3).then(function () {
+          return sizeLimitHit ? { error: videoSizeLimitError() } : null;
+        }).catch(function (e) {
+          return sizeLimitHit ? { error: videoSizeLimitError() } : { error: { name: 'EncoderError', message: String(e.message || e) } };
+        });
       }
     }).then(function (res) {
       if (!res.ok) { try { encoder.close(); } catch (e) { } return res; }
       cfg.onLog('flushing encoder');
       return encoder.flush().then(function () {
         try { encoder.close(); } catch (e) { }
+        if (sizeLimitHit) return { ok: false, error: videoSizeLimitError() };
         if (hardError) throw hardError;
         var fin = mux.finish(comp.frameCount);
+        if (fin.blob.size > enc.MAX_VIDEO_FILE_BYTES) return { ok: false, error: videoSizeLimitError() };
         cfg.onLog('muxed ' + fin.frames + ' blocks into ' + (fin.blob.size / 1048576).toFixed(2) + ' MB');
         return { ok: true, blob: fin.blob, muxed: fin, encodedOutputs: outputs, res: res, codec: codec };
       }).catch(function (e) {
+        if (sizeLimitHit || String(e && e.message || e) === 'OUTPUT_SIZE_LIMIT') return { ok: false, error: videoSizeLimitError() };
         return { ok: false, error: { name: 'EncoderError', message: String(e.message || e), detail: 'The encoder failed while finishing the stream. No file was produced.' } };
       });
     });
@@ -3515,7 +3544,8 @@ function exportMP4(cfg) {
     var out = (env.makeExportCanvas || env.makeCanvas)(comp.width, comp.height);
     function release() { if (env.releaseExportCanvas) { try { env.releaseExportCanvas(out); } catch (e) { } } }
 
-    var encodedBytes = 0, outputs = 0, hardError = null, muxError = null, gotDesc = false;
+    var encodedBytes = 0, outputs = 0, hardError = null, muxError = null, sizeLimitHit = false, gotDesc = false;
+    var maxPayload = maxEncodedPayloadBytes(enc, comp.frameCount);
     var encoder = new VideoEncoder({
       output: function (chunk, metadata) {
         try {
@@ -3525,6 +3555,7 @@ function exportMP4(cfg) {
           }
           var buf = new Uint8Array(chunk.byteLength);
           chunk.copyTo(buf);
+          if (encodedBytes + buf.length > maxPayload) { sizeLimitHit = true; return; }
           mux.addSample(buf, chunk.type === 'key', chunk.timestamp);
           encodedBytes += buf.length;
           outputs++;
@@ -3549,6 +3580,7 @@ function exportMP4(cfg) {
 
     var gop = Math.max(1, Math.round(comp.fps * 2));
     function drain(limit) {
+      if (sizeLimitHit) return Promise.reject(new Error('OUTPUT_SIZE_LIMIT'));
       if (hardError) return Promise.reject(hardError);
       if (encoder.encodeQueueSize <= limit) return Promise.resolve();
       return sleep(4).then(function () { return drain(limit); });
@@ -3559,6 +3591,7 @@ function exportMP4(cfg) {
       isCancelled: cfg.isCancelled, onProgress: cfg.onProgress,
       bytes: function () { return encodedBytes; },
       sink: function (i, canvas) {
+        if (sizeLimitHit) return { error: videoSizeLimitError() };
         if (hardError) return { error: { name: 'H264 ENCODER ERROR', layer: 'h264', message: String(hardError.message || hardError), detail: 'The browser H.264 encoder rejected the stream at frame ' + i + '.' } };
         if (muxError) return { error: { name: 'MP4 MUXER ERROR', layer: 'mux', message: String(muxError.message || muxError), detail: 'The muxer failed while taking the encoded sample for frame ' + i + '.' } };
         var vf;
@@ -3573,7 +3606,10 @@ function exportMP4(cfg) {
         try { encoder.encode(vf, { keyFrame: (i % gop) === 0 }); }
         catch (e) { vf.close(); return { error: { name: 'H264 ENCODER ERROR', layer: 'h264', message: 'encode() threw at frame ' + i + '.', detail: String(e && e.message || e) } }; }
         vf.close();
-        return drain(3).catch(function (e) {
+        return drain(3).then(function () {
+          return sizeLimitHit ? { error: videoSizeLimitError() } : null;
+        }).catch(function (e) {
+          if (sizeLimitHit || String(e && e.message || e) === 'OUTPUT_SIZE_LIMIT') return { error: videoSizeLimitError() };
           return { error: { name: 'H264 ENCODER ERROR', layer: 'h264', message: String(e && e.message || e), detail: 'The encoder reported a fatal error while frames were queued.' } };
         });
       }
@@ -3587,6 +3623,7 @@ function exportMP4(cfg) {
       return encoder.flush().then(function () {
         try { encoder.close(); } catch (e) { }
         release();
+        if (sizeLimitHit) return { ok: false, stage: 'size-limit', error: videoSizeLimitError() };
         if (hardError) throw hardError;
         if (muxError) {
           return { ok: false, stage: 'mux', error: { name: 'MP4 MUXER ERROR', layer: 'mux', message: String(muxError.message || muxError), detail: 'A sample could not be added to the MP4.' } };
@@ -3605,6 +3642,7 @@ function exportMP4(cfg) {
         if (!fin.ok) {
           return { ok: false, stage: 'mux', error: { name: 'MP4 MUXER ERROR', layer: 'mux', message: fin.reason, detail: 'The H.264 stream was produced but could not be described in an MP4 sample table, so no file was written.' } };
         }
+        if (fin.blob.size > enc.MAX_VIDEO_FILE_BYTES) return { ok: false, stage: 'size-limit', error: videoSizeLimitError() };
         cfg.onLog('muxed ' + fin.samples + ' AVC samples into ftyp + mdat + moov — ' + (fin.blob.size / 1048576).toFixed(2) + ' MB');
         return {
           ok: true, blob: fin.blob, muxed: fin, encodedOutputs: outputs, res: res,
@@ -11606,10 +11644,17 @@ var FMT = [
   { label: 'PNG\u00B7ZIP', value: 'zip', title: 'Every frame as a PNG inside one archive' },
   { label: 'PNG\u00B7DIR', value: 'dir', title: 'Every frame written straight to a folder you choose' }
 ];
+function estimateVideoFileBytes(job) {
+  if (!job || (job.format !== 'mp4' && job.format !== 'webm')) return null;
+  var c = job.composition || {};
+  var fps = Number(c.fps), frames = Number(c.frameCount), bitrate = Number(job.bitrate);
+  if (!(fps > 0) || !(frames > 0) || !(bitrate > 0)) return null;
+  return Math.ceil((bitrate * (frames / fps) / 8) * 1.08 + 1024 * 1024);
+}
 function requestedBitrate(width, height, fps) {
   var custom = Number(S.customBitrateMbps);
-  if (isFinite(custom) && custom > 0) return custom * 1000000;
-  return ENC.bitrateFor(width, height, fps, S.quality);
+  if (!isFinite(custom) || custom <= 0) custom = 25;
+  return Math.max(20, Math.min(2000, custom)) * 1000000;
 }
 function initRenderPanel() {
   var dirOk = typeof window.showDirectoryPicker === 'function';
@@ -11626,13 +11671,14 @@ function initRenderPanel() {
   $('#oQuality').value = S.quality;
   $('#oTimebase').value = S.timebase;
   $('#oChecksum').value = S.checksums ? 'on' : 'off';
-  $('#oBitrate').value = S.customBitrateMbps;
-  $('#oBitrate').value = Number.isFinite(Number(S.customBitrateMbps)) ? S.customBitrateMbps : 25;
+  $('#oBitrate').value = Math.max(20, Math.min(2000,
+    Number.isFinite(Number(S.customBitrateMbps)) ? Number(S.customBitrateMbps) : 25));
+  S.customBitrateMbps = Number($('#oBitrate').value);
   $('#oQuality').addEventListener('change', function () { S.quality = $('#oQuality').value; refreshMedia(); markDirty(); });
   $('#oBitrate').addEventListener('change', function () {
     var v = parseFloat($('#oBitrate').value);
-    if (!isFinite(v) || v < 0) v = 0;
-    v = Math.min(2000, v);
+    if (!isFinite(v)) v = 25;
+    v = Math.max(20, Math.min(2000, v));
     S.customBitrateMbps = v;
     $('#oBitrate').value = v;
     refreshMedia(); markDirty();
@@ -11678,7 +11724,7 @@ function refreshMedia() {
     mediaRow(fmt === 'mp4' ? 'MP4' : 'WEBM', 'CHECKING', 'busy') +
     '<small>probing ' + c.width + ' \u00D7 ' + c.height + ' / ' + c.fps + ' fps against this browser\u2026</small>';
   if (fmt === 'webm') {
-    ENC.probeEncoders(c.width, c.height, c.fps).then(function (p) {
+    ENC.probeEncoders(c.width, c.height, c.fps, requestedBitrate(c.width, c.height, c.fps)).then(function (p) {
       if (seq !== mediaSeq) return;
       box.innerHTML = mediaRow('VP9 / VP8', p.available ? 'READY' : 'UNAVAILABLE', p.available ? 'ok' : 'no') +
         mediaRow('WEBM', p.available ? 'READY' : 'UNAVAILABLE', p.available ? 'ok' : 'no') +
@@ -11809,7 +11855,7 @@ function analyseJob() {
     setStage('ANALYSING');
     var probeTask = job.format === 'mp4'
       ? ENC.probeH264(c.width, c.height, c.fps, job.bitrate)
-      : ENC.probeEncoders(c.width, c.height, c.fps);
+      : ENC.probeEncoders(c.width, c.height, c.fps, job.bitrate);
     return probeTask.then(function (probe) {
       return Engine.api.timing(job, Math.min(8, c.frameCount)).then(function (t) {
         setStage('IDLE');
@@ -11824,6 +11870,17 @@ function analyseJob() {
         rows.push(['Background', c.transparent ? 'transparent (alpha kept)' : c.background]);
         rows.push(['Output', job.format === 'mp4' ? 'MP4 (ISO-BMFF) with an H.264 track'
           : job.format === 'webm' ? 'WebM' : (job.target === 'dir' ? 'PNG frames → folder' : 'PNG frames → ZIP')]);
+        var estimatedVideoBytes = estimateVideoFileBytes(job);
+        if (estimatedVideoBytes !== null) {
+          rows.push(['Estimated video size', '≈ ' + fmtBytes(estimatedVideoBytes) + ' at the selected target bitrate']);
+          rows.push(['Hard output cap', fmtBytes(ENC.MAX_VIDEO_FILE_BYTES) + ' (2,000,000,000 bytes)']);
+          if (estimatedVideoBytes > ENC.MAX_VIDEO_FILE_BYTES) {
+            warn.push('The estimated file size exceeds the 2 GB cap. No bitrate, resolution, frame rate, or quality will be reduced automatically. Shorten the job or render separate segments; continuing may stop before a final video is delivered.');
+          }
+          if (estimatedVideoBytes > ENC.MAX_VIDEO_FILE_BYTES * 0.75) {
+            warn.push('This is a near-limit video export. The browser muxer retains compressed chunks and index data during finalisation, so the tab may need substantially more free memory than the final file size. A 2 GB file does not mean a player must load the whole file into RAM, but some desktop/browser combinations may still run out of memory while TRILYVA is building it.');
+          }
+        }
         rows.push(['Render contract', 'VALID']);
         rows.push(['Engine', Engine.mode === 'worker' ? 'worker + OffscreenCanvas' : 'main thread (fallback)']);
         rows.push(['Worker', typeof Worker !== 'undefined' ? 'SUPPORTED' : 'MISSING']);
@@ -11945,12 +12002,16 @@ function renderStat(p, job) {
 function renderPreflight(job) {
   if (!job || job.format === 'png') return Promise.resolve({ ok: true });
   var c = job.composition;
+  var estimate = estimateVideoFileBytes(job);
+  var sizeWarning = estimate !== null && estimate > ENC.MAX_VIDEO_FILE_BYTES
+    ? 'The estimated video size is ' + fmtBytes(estimate) + ', above the strict 2 GB (2,000,000,000-byte) cap. TRILYVA will not reduce bitrate or visual quality. Continuing may stop without delivering a video if the actual encoded output reaches the cap. Consider shortening the composition or rendering separate segments.'
+    : '';
   var task = job.format === 'mp4'
     ? ENC.probeH264(c.width, c.height, c.fps, job.bitrate)
     : ENC.probeEncoders(c.width, c.height, c.fps, job.bitrate);
   return task.then(function (p) {
     if (job.format === 'mp4') S.h264 = p;
-    if (p && p.available) return { ok: true, probe: p };
+    if (p && p.available) return { ok: true, probe: p, sizeWarning: sizeWarning };
     var label = job.format === 'mp4' ? 'H.264 / AVC' : 'VP9 / VP8';
     var reason = p && p.reason ? p.reason : ('No accepted ' + label + ' configuration was found.');
     return {
@@ -12003,6 +12064,22 @@ function startRenderBase(job, opts) {
     if (!pre.ok) {
       if (!opts.batch) showPreflightFailure(job, pre);
       return { ok: false, stage: 'validate', error: pre.error, probe: pre.probe || null };
+    }
+    if (pre.sizeWarning && !opts.acceptVideoSizeWarning) {
+      var accepted = typeof window.confirm === 'function' && window.confirm(
+        'TRILYVA EXPORT SIZE WARNING\n\n' + pre.sizeWarning +
+        '\n\nContinue without changing bitrate, resolution, frame rate, or quality?'
+      );
+      if (!accepted) {
+        var declined = {
+          name: 'OutputSizeWarningDeclined',
+          message: 'The export was not started because the estimated video size exceeds 2 GB.',
+          detail: 'Shorten the composition or render separate segments. TRILYVA will not silently lower quality to fit the file-size cap.'
+        };
+        if (!opts.batch) showPreflightFailure(job, { error: declined });
+        return { ok: false, stage: 'size-warning-declined', error: declined };
+      }
+      opts.acceptVideoSizeWarning = true;
     }
     /* Guard synchronous startup exceptions too. A thrown DOM/setup error must
        never leave S.rendering stuck and silently invalidate every later item. */
@@ -14399,6 +14476,9 @@ var DOCS = [
   '<tr><td>MediaRecorder capture</td><td>Used only by Finish Movie to combine an already-rendered local video with audio in real time. It is separate from the deterministic frame exporter and may drop frames under load.</td></tr>',
   '</table>',
 
+  '<h5>VIDEO SIZE LIMIT AND MEMORY</h5>',
+  '<p>MP4 and WebM outputs have a strict 2,000,000,000-byte (2 GB) file-size cap. The target bitrate is at least 20 Mbps, defaults to 25 Mbps, and can be set up to 2,000 Mbps. The exporter estimates the target size before rendering, warns when the estimate exceeds the cap, and asks before proceeding. During encoding it enforces the cap against actual compressed samples and refuses to deliver an oversized file. It never silently lowers bitrate, resolution, frame rate, or quality. Shorten the composition or render separate segments when the estimate is too large.</p>',
+  '<p>A 2 GB output is a file-size limit, not a bitrate, and it does not mean a playback application must load the entire file into RAM. However, this browser exporter keeps compressed samples plus muxer/index data during finalisation; browser storage behaviour varies, and the export tab may need substantially more available memory than the final file size. Near-limit exports can fail on ordinary desktop systems with insufficient free memory. This is a real browser-side limitation, not a reason to degrade the frames.</p>',
   '<h5>THE MP4 PATH</h5>',
   '<p>H.264 support is a runtime fact, not an assumption. Before anything is rendered the app asks the browser about the real composition \u2014 width, height, frame rate and the validated bitrate \u2014 walking High, Main and Constrained Baseline at descending levels through <code>VideoEncoder.isConfigSupported</code>. The first configuration the browser actually accepts is the one used, and its exact codec string is shown in the Render panel and in Diagnostics. If nothing is accepted, the panel says so with the resolution and frame rate that were refused, and offers only the alternatives it has just confirmed on this machine.</p>',
   '<p>Each frame is drawn to the export render target \u2014 <code>canvas#render-target</code> on the main-thread path, an OffscreenCanvas inside the worker \u2014 and a <code>VideoFrame</code> is built from that canvas, never from the document, an iframe or any other DOM node. Its timestamp is <code>round(frame \u00D7 1000000 / fps)</code>, so no rounded milliseconds are ever accumulated. The frame is closed immediately after <code>encode()</code>: only the compressed samples are kept, never 1800 bitmaps.</p>',
