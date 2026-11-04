@@ -3729,7 +3729,23 @@ function run(cfg) {
   cfg.onLog('contract valid; renderFrame accepts ' + c.arity + ' argument' + (c.arity === 1 ? '' : 's'));
   var probe = rt.renderInto(env.makeCanvas(8, 8).ctx, cfg.from || 0, { isExport: true, rasterScale: 8 / comp.width });
   if (!probe.ok) return Promise.resolve({ ok: false, stage: 'validate', error: probe.error });
-  cfg.onLog('frame ' + (cfg.from || 0) + ' evaluated without error');
+  cfg.onLog('validation frame evaluated in a disposable runtime; export runtime will start clean');
+
+  /*
+   * The validation render above deliberately uses an 8×8 canvas. Never reuse
+   * that runtime for production frames: renderFrame code may initialise caches,
+   * consume one-shot state, or retain canvas-dependent values on its first call.
+   * Compile a fresh runtime so output frame 0 is the first real renderFrame call
+   * at the composition's full export dimensions.
+   */
+  rt = core.createRuntime();
+  rt.setComposition(comp);
+  if (cfg.assets) rt.setAssets(cfg.assets);
+  if (cfg.layers) rt.setLayers(cfg.layers);
+  if (cfg.vectorEdits) rt.setVectorState(cfg.vectorEdits, cfg.vectorBounds || {});
+  c = rt.compile(job.code);
+  if (!c.ok) return Promise.resolve({ ok: false, stage: 'validate', error: c.error });
+  cfg.onLog('fresh export runtime initialised; frame 0 will render at full composition resolution');
 
   var sub = { env: env, rt: rt, comp: comp, job: job, from: cfg.from || 0, onLog: cfg.onLog, onProgress: cfg.onProgress, isCancelled: cfg.isCancelled, writeFile: cfg.writeFile, existing: cfg.existing, prepareFrame: cfg.prepareFrame };
   var started = Date.now();
