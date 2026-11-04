@@ -18,6 +18,9 @@
   var videoUrl = '', audioUrl = '', outputUrl = '';
   var sourceVideoStream = null, sourceAudioStream = null, mixedStream = null;
   var startedAt = 0, pollTimer = null;
+  var recordedBytes = 0;
+  var MIN_FINAL_VIDEO_BITRATE_BPS = 20000000;
+  var MAX_FINAL_VIDEO_FILE_BYTES = 2000000000;
 
   function $(id) { return document.getElementById(id); }
   function setStatus(message, kind) {
@@ -158,7 +161,7 @@
       '<section class="tmf-card"><label class="tmf-label" for="tmfVideoFile">01 / Rendered video or stock clip</label><input id="tmfVideoFile" type="file" accept="video/*,.mp4,.webm,.mov,.m4v"><div class="tmf-meta" id="tmfVideoInfo">No video selected.</div><p class="tmf-note">Choose the video exported from TRILYVA. Common browser-decodable MP4 and WebM sources are supported. The source video duration determines the final length.</p></section>',
       '<section class="tmf-card"><label class="tmf-label" for="tmfAudioFile">02 / Dialogue, music, or soundtrack (optional)</label><input id="tmfAudioFile" type="file" accept="audio/*,.wav,.mp3,.m4a,.ogg,.webm"><div class="tmf-meta" id="tmfAudioInfo">No audio selected — video-only output.</div><div class="tmf-actions" style="padding:10px 0 0"><button class="tmf-btn" id="tmfClearAudio">Video only</button></div><p class="tmf-note">Import any local audio track. Audio begins at 00:00; if it is shorter than the video, the remainder is silent.</p></section>',
       '<section class="tmf-card"><label class="tmf-label" for="tmfFormat">03 / Delivery format</label><select id="tmfFormat"><option value="auto" selected>Automatic - MP4 where supported</option><option value="mp4">MP4 only - H.264 / AAC where available</option><option value="webm">WebM only - VP9 / Opus where available</option></select><div class="tmf-meta">Browser codec support decides which formats can be recorded.</div><p class="tmf-note">For stock delivery, choose the container and codec required by the target marketplace. Automatic prefers MP4 and falls back to WebM when necessary.</p></section>',
-      '<section class="tmf-card"><label class="tmf-label" for="tmfQuality">04 / Video bitrate</label><select id="tmfQuality"><option value="8">Standard · 8 Mbps</option><option value="16" selected>High · 16 Mbps</option><option value="28">Very high · 28 Mbps</option><option value="45">4K / high motion · 45 Mbps</option><option value="65">Maximum · 65 Mbps</option></select><div class="tmf-meta">Automatic mode prefers MP4 when this browser supports it.</div><p class="tmf-note">Available bitrate and resolution are bounded by the browser, source file, and hardware encoder. This finalizer preserves the decoded source dimensions; it does not upscale the clip.</p></section>',
+      '<section class="tmf-card"><label class="tmf-label" for="tmfQuality">04 / Video bitrate</label><select id="tmfQuality"><option value="20">Standard · 20 Mbps</option><option value="25" selected>High · 25 Mbps</option><option value="35">Very high · 35 Mbps</option><option value="45">4K / high motion · 45 Mbps</option><option value="65">Maximum · 65 Mbps</option></select><div class="tmf-meta">Default 25 Mbps · minimum 20 Mbps · local encoding only.</div><p class="tmf-note">MP4/WebM output is capped at 2,000,000,000 bytes (2 GB). The finalizer never reduces the selected bitrate to fit. It checks the estimated size before recording and stops/discards the recording if actual chunks would exceed the cap. A near-limit export may need substantially more free memory than its final file size while the browser assembles it.</p><p class="tmf-note">Available bitrate and resolution are bounded by the browser, source file, and hardware encoder. This finalizer preserves the decoded source dimensions; it does not upscale the clip.</p></section>',
       '<section class="tmf-card"><label class="tmf-label">05 / Render method</label><div class="tmf-meta">Real-time media capture</div><p class="tmf-note">The browser plays the source video at normal speed while recording its video stream and the selected audio. A five-minute source therefore takes about five minutes to finalize. Keep this tab open while recording.</p><p class="tmf-note">This is fully local but re-encodes the video. For lossless stock delivery, keep your original render and use a separate validated muxing workflow where available.</p></section>',
       '</div>',
       '<div class="tmf-actions"><button class="tmf-btn primary" id="tmfStart" disabled>Create finished movie</button><button class="tmf-btn" id="tmfCancel" disabled>Cancel render</button></div>',
@@ -288,10 +291,26 @@
       setStatus('No compatible MP4 or WebM MediaRecorder codec is available in this browser.', 'error');
       return;
     }
+    var bitrate = Math.max(MIN_FINAL_VIDEO_BITRATE_BPS,
+      Math.min(65000000, Math.round((Number(qualityEl.value) || 25) * 1000000)));
+    var estimatedMovieBytes = Math.ceil(
+      ((bitrate + (audioBlob ? 192000 : 0)) * videoEl.duration / 8) * 1.08 + 1024 * 1024
+    );
+    if (estimatedMovieBytes > MAX_FINAL_VIDEO_FILE_BYTES) {
+      var proceed = typeof window.confirm === 'function' && window.confirm(
+        'TRILYVA MOVIE SIZE WARNING\n\nThe estimated finished movie is ' + formatBytes(estimatedMovieBytes) +
+        ', above the strict 2 GB (2,000,000,000-byte) cap. TRILYVA will not lower bitrate or visual quality. If actual recorded chunks reach the cap, the incomplete movie will be discarded. Trim the source or prepare shorter segments for a reliable result.\n\nContinue at the selected bitrate?'
+      );
+      if (!proceed) {
+        setStatus('Finalization not started. Trim the source or prepare shorter segments; quality settings were not changed.', 'warn');
+        return;
+      }
+    }
     cancelled = false;
     recordingError = '';
     working = true;
     chunks = [];
+    recordedBytes = 0;
     updateButtons();
     setProgress(0);
     startBtn.disabled = true;
@@ -326,12 +345,19 @@
         tracks = tracks.concat(audioTracks);
       }
       mixedStream = new MediaStream(tracks);
-      var bitrate = Math.round(Number(qualityEl.value) * 1000000);
       var config = { mimeType: mime, videoBitsPerSecond: bitrate };
       if (audioBlob) config.audioBitsPerSecond = 192000;
       recorder = new MediaRecorder(mixedStream, config);
       recorder.ondataavailable = function (e) {
-        if (e.data && e.data.size) chunks.push(e.data);
+        if (recordingError || !e.data || !e.data.size) return;
+        if (recordedBytes + e.data.size > MAX_FINAL_VIDEO_FILE_BYTES) {
+          recordingError = 'The finished movie reached the strict 2 GB (2,000,000,000-byte) output limit. No bitrate or visual quality was reduced.';
+          setStatus(recordingError + ' Discarding the incomplete movie…', 'error');
+          try { if (recorder && recorder.state !== 'inactive') recorder.stop(); } catch (_) {}
+          return;
+        }
+        chunks.push(e.data);
+        recordedBytes += e.data.size;
       };
       recorder.onerror = function (e) {
         var error = e.error || new Error('MediaRecorder reported an unknown error.');
@@ -408,6 +434,7 @@
     updateButtons();
     if (wasCancelled || recordingError) {
       chunks = [];
+      recordedBytes = 0;
       setProgress(0);
       if (recordingError) setStatus('Recording failed. The incomplete movie was discarded: ' + recordingError, 'error');
       else setStatus('Cancelled. The incomplete movie was discarded.', 'warn');
@@ -420,6 +447,11 @@
     }
     var blob = new Blob(chunks, { type: recordedMime });
     chunks = [];
+    recordedBytes = 0;
+    if (blob.size > MAX_FINAL_VIDEO_FILE_BYTES) {
+      setStatus('The finished movie exceeded the strict 2 GB file-size cap. No file was downloaded and no quality setting was reduced.', 'error');
+      return;
+    }
     if (blob.size < 1024) {
       setStatus('The recording is unexpectedly small (' + blob.size + ' bytes); no file was downloaded.', 'error');
       return;
