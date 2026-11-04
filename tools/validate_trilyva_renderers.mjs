@@ -15,6 +15,7 @@ must(renderer.includes('data-act="render"'),'header retains the current Render a
 must(renderer.includes('id="oBitrate" min="20" max="2000"') && renderer.includes('value="25"'),'video bitrate control enforces 20 Mbps minimum and 25 Mbps default');
 must(renderer.includes('MAX_VIDEO_FILE_BYTES = 2000000000') && renderer.includes('MAX_VIDEO_FILE_BYTES: MAX_VIDEO_FILE_BYTES'),'video exporter exposes the strict decimal 2 GB file-size cap');
 must(renderer.includes('function maxEncodedPayloadBytes') && renderer.includes('OutputSizeLimitError'),'MP4/WebM muxers guard encoded output size without quality reduction');
+ must(renderer.includes('validation frame evaluated in a disposable runtime') && renderer.includes('frame 0 will render at full composition resolution'),'low-resolution validation cannot mutate the production frame-zero runtime');
 must(renderer.includes('function estimateVideoFileBytes') && renderer.includes('acceptVideoSizeWarning'),'oversize video estimates warn and require confirmation before rendering');
 must(renderer.includes('A 2 GB output is a file-size limit, not a bitrate'),'in-app docs distinguish file size from bitrate and explain memory behaviour');
 must(docs.includes('2,000,000,000-byte (2 GB) output-file cap'),'public docs disclose the 2 GB video output cap');
@@ -52,7 +53,7 @@ must(tutorial.includes('/assets/brand/trilyva/T.svg'),'tutorial uses the TRILYVA
 for(const section of ['id="workspace"','id="first"','id="code"','id="motion"','id="composition"','id="preview"','id="export"','id="loops"','id="quality"','id="formats"','id="fixes"','id="workflow"']) must(tutorial.includes(section),'full tutorial includes '+section);
 must(tutorial.includes('not a fixed 60-second animation or promo'),'tutorial explains it is not tied to a fixed video length');
 must(overview.includes('/projects/trilyva/tutorial.html'),'TRILYVA overview links to the complete tutorial');
-must(serviceWorker.includes('tamasrazim-trilyva-pwa-v160'),'renderer service worker cache version is bumped');
+must(serviceWorker.includes('tamasrazim-trilyva-pwa-v161'),'renderer service worker cache version is bumped');
 must(!/chatgpt-motion-loop|chatgpt-30s-seamless-loop|trilyva-60s-motion-edit/i.test(serviceWorker),'promotional animation assets are removed from offline cache');
 must(!/chatgpt-motion-loop|chatgpt-30s-seamless-loop|trilyva-60s-motion-edit/i.test(overview),'TRILYVA overview no longer links to fixed-length promo animations');
 must(!/story-films|cartoon/i.test(manifest),'cartoon collection is absent from the library manifest');
