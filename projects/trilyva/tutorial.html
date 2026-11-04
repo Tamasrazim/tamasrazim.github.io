@@ -245,7 +245,7 @@ const y = height * 0.5 + Math.sin(angle) * height * 0.1;</code></pre>
 <section class="wrap section" id="quality">
 <div class="section-head"><div><div class="eyebrow">09 / QUALITY CHECK</div><h2>Preflight your animation.</h2></div></div>
 <ul class="checklist">
-<li>The first frame looks intentional and doesn't flash unexpectedly.</li>
+<li>The first frame looks intentional and doesn't flash unexpectedly; the export runtime starts fresh and renders frame 0 at the requested output resolution.</li>
 <li>Text is readable at the final dimensions and stays inside safe margins.</li>
 <li>Motion values come from the current time/frame rather than accumulated state.</li>
 <li>Random elements use a stable seed or deterministic formula.</li>
