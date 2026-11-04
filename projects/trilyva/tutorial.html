@@ -253,14 +253,16 @@ const y = height * 0.5 + Math.sin(angle) * height * 0.1;</code></pre>
 <li>Background and alpha behaviour match the selected output format.</li>
 <li>A short test render has been checked before the full job.</li>
 <li>The exported file opens and the duration, dimensions, and frame rate are correct.</li>
+<li>The selected video bitrate is at least 20 Mbps (25 Mbps by default), and the estimated MP4/WebM size fits within 2 GB.</li>
+<li>For near-limit exports, the browser has enough free memory for muxing/finalisation; do not assume a 2 GB output needs only 2 GB of RAM.</li>
 <li>The first and last moments have been inspected if the animation is intended to loop.</li>
 </ul>
 </section>
 <section class="wrap section" id="formats">
 <div class="section-head"><div><div class="eyebrow">10 / FORMATS AND LIMITS</div><h2>Choose a format that fits.</h2></div></div>
 <table class="table"><thead><tr><th>OUTPUT PATH</th><th>GOOD FOR</th><th>CHECK FIRST</th></tr></thead><tbody>
-<tr><td>MP4 / H.264</td><td>Common playback and sharing.</td><td>Browser/device encoder availability; typical MP4 output does not carry alpha transparency.</td></tr>
-<tr><td>WebM / VP8 or VP9</td><td>Web playback and supported browser workflows.</td><td>Actual codec/profile support varies by browser and device.</td></tr>
+<tr><td>MP4 / H.264</td><td>Common playback and sharing.</td><td>Browser/device encoder availability; 2 GB maximum output file size; typical MP4 output does not carry alpha transparency.</td></tr>
+<tr><td>WebM / VP8 or VP9</td><td>Web playback and supported browser workflows.</td><td>Actual codec/profile support varies by browser and device; 2 GB maximum output file size.</td></tr>
 <tr><td>PNG image sequence</td><td>Lossless frames, compositing, and transparency.</td><td>Many frames can require a lot of storage; archive/ZIP support may have limits.</td></tr>
 <tr><td>Still frame: PNG / JPG</td><td>Export a chosen frame as a raster image; PNG is suitable for transparency.</td><td>JPG has no alpha channel. Frame numbering starts at zero; the default is frame 0.</td></tr>
 <tr><td>Inspect-frame SVG / EPS</td><td>SVG embeds a PNG image; EPS wraps raster image data.</td><td>These inspector outputs are not editable vector paths. The Render panel's separate SVG/EPS batch path uses a vector recorder for supported drawing operations.</td></tr>
@@ -269,6 +271,7 @@ const y = height * 0.5 + Math.sin(angle) * height * 0.1;</code></pre>
 <tr><td>Library source: ZIP</td><td>Download a library's JavaScript files, manifest, and README.</td><td>Use Library → DOWNLOAD FROM LIBRARY → DOWNLOAD LIBRARY (.ZIP); this does not render video.</td></tr>
 <tr><td>Full library: folder / ZIP</td><td>Batch-export a chosen library with rendered media, selected still frames, and metadata.</td><td>Folder/ZIP destination pickers need supported browser file access. Video and vector output still have capability limits.</td></tr>
 </tbody></table>
+<p class="callout">Video output bitrate: 20 Mbps minimum, 25 Mbps default, 2,000 Mbps maximum. MP4 and WebM exports stop at 2,000,000,000 bytes (2 GB). TRILYVA does not lower quality to fit. A 2 GB file is not a 2 Gbps bitrate; the current browser muxer buffers encoded samples and index data, so near-limit exports may need substantially more free memory than the output file size. Shorten the composition or render separate segments when the estimate is too large.</p>
 <div class="format-details" id="still-image-formats">
 <h3>All 18 still-image formats in “Save this frame as”</h3>
 <p>The <strong>Inspect frame → Save this frame as</strong> picker exposes these 18 outputs. WebP and AVIF require a browser encoder that can produce that MIME type; if the browser cannot encode the selected format, TRILYVA reports an export error rather than making a valid-looking file with the wrong contents. The other listed formats are encoded locally by TRILYVA.</p>
