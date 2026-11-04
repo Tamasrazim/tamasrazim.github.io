@@ -85,6 +85,13 @@
 .tri-dash{stroke-dasharray:2 9;animation:tri-dash 9s linear infinite}
 .tri-art-meta{position:absolute;left:14px;right:14px;display:flex;justify-content:space-between;gap:8px;font:8px var(--v3-mono);letter-spacing:.1em;color:#999}
 .tri-art-meta.top{top:13px}.tri-art-meta.bottom{bottom:13px}
+.tri-reference-frame{border:1px solid rgba(241,241,237,.18);background:#050505;overflow:hidden}
+.tri-reference-frame a{display:block;line-height:0}
+.tri-reference-frame img{display:block;width:100%;height:auto;max-width:100%;object-fit:contain}
+.tri-reference-caption{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:13px 15px;border-top:1px solid rgba(241,241,237,.14);font:9px/1.8 var(--v3-mono);letter-spacing:.04em;color:var(--v3-muted)}
+.tri-reference-caption strong{display:block;color:var(--v3-ink);font-weight:500;letter-spacing:.1em}
+.tri-reference-caption a{color:var(--v3-ink);text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+@media(max-width:600px){.tri-reference-caption{flex-direction:column;gap:7px}}
 @keyframes tri-spin{to{transform:rotate(360deg)}}
 @keyframes tri-dash{to{stroke-dashoffset:-110}}
 .tri-section{padding:clamp(55px,8vw,90px) 0;border-bottom:1px solid rgba(241,241,237,.14)}
@@ -167,6 +174,19 @@
 <g class="tri-orbit reverse"><ellipse cx="350" cy="350" rx="160" ry="278" fill="none" stroke="#fff" stroke-opacity=".34"/><ellipse cx="350" cy="350" rx="210" ry="70" fill="none" stroke="#fff" stroke-opacity=".3"/><path class="tri-dash" d="M350 45 C472 180 537 249 505 350 S450 548 350 652 S168 474 194 350 S250 152 350 45Z" fill="none" stroke="#fff" stroke-opacity=".62"/></g>
 <circle cx="350" cy="350" r="70" fill="none" stroke="#fff" stroke-opacity=".44"/><circle cx="350" cy="350" r="45" fill="none" stroke="#fff" stroke-opacity=".2" stroke-dasharray="2 6"/><path d="M350 250V450M250 350H450" stroke="#fff" stroke-opacity=".18"/><circle cx="350" cy="350" r="4" fill="#fff"/>
 </svg><div class="tri-art-meta top"><span>TRILYVA / MOTION SYSTEM</span><span>FIELD 001</span></div><div class="tri-art-meta bottom"><span>FRAME → TIME</span><span>PROCEDURAL / 360°</span></div></div></div></section>
+
+<section class="tri-wrap tri-section" id="renderer-reference" aria-labelledby="renderer-reference-title">
+<div class="tri-head">
+<div><p class="tri-kicker">RENDERER REFERENCE / 001</p><h2 id="renderer-reference-title">Inside the TRILYVA workspace</h2></div>
+<p>A real workspace capture showing the JavaScript source editor, live preview, composition controls, and frame timeline together. This is a visual reference for the browser renderer, not a mock-up.</p>
+</div>
+<figure class="tri-reference-frame">
+<a href="https://d2ol7oe51mr4n9.cloudfront.net/user_3JjQ2WNhSz4pcpdIPCwGxVn24im/8554d996-e226-4cf6-ad87-49624db8392e.png" target="_blank" rel="noopener noreferrer" aria-label="Open the full-resolution TRILYVA renderer screenshot">
+<img src="https://d2ol7oe51mr4n9.cloudfront.net/user_3JjQ2WNhSz4pcpdIPCwGxVn24im/8554d996-e226-4cf6-ad87-49624db8392e.png" width="1919" height="1079" alt="TRILYVA Aurora Loop workspace: JavaScript animation source on the left, live preview in the centre, 1920 by 1080 composition controls on the right, and the frame navigation timeline below." loading="lazy" decoding="async">
+</a>
+<figcaption class="tri-reference-caption"><span><strong>AURORA LOOP / BROWSER RENDERER</strong>1920 × 1080 export composition · 60 fps · 10-second loop</span><a href="/projects/code-motion/renderer/">OPEN THE RENDERER</a></figcaption>
+</figure>
+</section>
 
 <section class="tri-wrap tri-section" id="capabilities"><div class="tri-head"><h2>How TRILYVA works</h2><p>TRILYVA uses the browser's real media and encoding support. Available exports depend on your browser and the settings it can handle.</p></div>
 <div class="tri-grid">
