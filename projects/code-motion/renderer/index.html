@@ -12048,6 +12048,18 @@ function showPreflightFailure(job, pre) {
     '</div>';
   $('#stMsg').textContent = pre.error.message;
 }
+function confirmVideoSizeWarning(message) {
+  return new Promise(function (resolve) {
+    var body = el('div');
+    body.appendChild(el('p', 'note', message));
+    body.appendChild(el('div', 'warnbox',
+      'TRILYVA will not lower bitrate, resolution, frame rate, or frame quality. If the actual encoded video reaches 2 GB, rendering stops and no oversized file is delivered.'));
+    openModal('VIDEO SIZE WARNING', body, [
+      { label: 'Continue at requested quality', solid: true, fn: function () { closeModal(); resolve(true); } },
+      { label: 'Cancel export', fn: function () { closeModal(); resolve(false); } }
+    ]);
+  });
+}
 function startRenderBase(job, opts) {
   opts = opts || {};
   if (S.rendering) {
@@ -12066,46 +12078,45 @@ function startRenderBase(job, opts) {
       if (!opts.batch) showPreflightFailure(job, pre);
       return { ok: false, stage: 'validate', error: pre.error, probe: pre.probe || null };
     }
-    if (pre.sizeWarning && !opts.acceptVideoSizeWarning) {
-      var accepted = typeof window.confirm === 'function' && window.confirm(
-        'TRILYVA EXPORT SIZE WARNING\n\n' + pre.sizeWarning +
-        '\n\nContinue without changing bitrate, resolution, frame rate, or quality?'
-      );
+    var confirmation = pre.sizeWarning && !opts.acceptVideoSizeWarning
+      ? confirmVideoSizeWarning(pre.sizeWarning)
+      : Promise.resolve(true);
+    return confirmation.then(function (accepted) {
       if (!accepted) {
         var declined = {
           name: 'OutputSizeWarningDeclined',
-          message: 'The export was not started because the estimated video size exceeds 2 GB.',
+          message: 'The export was not started because its estimated video size exceeds 2 GB.',
           detail: 'Shorten the composition or render separate segments. TRILYVA will not silently lower quality to fit the file-size cap.'
         };
         if (!opts.batch) showPreflightFailure(job, { error: declined });
         return { ok: false, stage: 'size-warning-declined', error: declined };
       }
-      opts.acceptVideoSizeWarning = true;
-    }
-    /* Guard synchronous startup exceptions too. A thrown DOM/setup error must
-       never leave S.rendering stuck and silently invalidate every later item. */
-    return Promise.resolve().then(function () {
-      return startRenderNow(job, opts);
-    }).catch(function (e) {
-      if (S.activeJob === job) {
-        S.rendering = false;
-        S.activeJob = null;
-        try { $('#cancelBtn').disabled = true; } catch (_) {}
-        try {
-          $$('[data-act=startRender], [data-act=renderAll], [data-act=queueRun]').forEach(function (b) { b.disabled = false; });
-        } catch (_) {}
-        try { $('#stDot').className = 'dot'; } catch (_) {}
-        try { $('#stMsg').textContent = 'Render startup failed: ' + String(e && e.message || e); } catch (_) {}
-      }
-      return {
-        ok: false,
-        stage: 'startup',
-        error: {
-          name: e && e.name || 'RenderStartupError',
-          message: String(e && e.message || e),
-          detail: 'TRILYVA caught a synchronous render-startup exception and reset the render state so the remaining batch items can continue.'
+      if (pre.sizeWarning) opts.acceptVideoSizeWarning = true;
+      /* Guard synchronous startup exceptions too. A thrown DOM/setup error must
+         never leave S.rendering stuck and silently invalidate every later item. */
+      return Promise.resolve().then(function () {
+        return startRenderNow(job, opts);
+      }).catch(function (e) {
+        if (S.activeJob === job) {
+          S.rendering = false;
+          S.activeJob = null;
+          try { $('#cancelBtn').disabled = true; } catch (_) {}
+          try {
+            $$('[data-act=startRender], [data-act=renderAll], [data-act=queueRun]').forEach(function (b) { b.disabled = false; });
+          } catch (_) {}
+          try { $('#stDot').className = 'dot'; } catch (_) {}
+          try { $('#stMsg').textContent = 'Render startup failed: ' + String(e && e.message || e); } catch (_) {}
         }
-      };
+        return {
+          ok: false,
+          stage: 'startup',
+          error: {
+            name: e && e.name || 'RenderStartupError',
+            message: String(e && e.message || e),
+            detail: 'TRILYVA caught a synchronous render-startup exception and reset the render state so the remaining batch items can continue.'
+          }
+        };
+      });
     });
   }).catch(function (e) {
     return {
