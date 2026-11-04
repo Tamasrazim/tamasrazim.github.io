@@ -55,6 +55,9 @@ must(tutorial.includes('/assets/brand/trilyva/T.svg'),'tutorial uses the TRILYVA
 for(const section of ['id="workspace"','id="first"','id="code"','id="motion"','id="composition"','id="preview"','id="export"','id="loops"','id="quality"','id="formats"','id="fixes"','id="workflow"']) must(tutorial.includes(section),'full tutorial includes '+section);
 must(tutorial.includes('not a fixed 60-second animation or promo'),'tutorial explains it is not tied to a fixed video length');
 must(overview.includes('/projects/trilyva/tutorial.html'),'TRILYVA overview links to the complete tutorial');
+must(overview.includes('id="renderer-reference"') && overview.includes('RENDERER REFERENCE / 001'),'TRILYVA overview includes a dedicated renderer-reference section');
+must(overview.includes('8554d996-e226-4cf6-ad87-49624db8392e.png') && overview.includes('alt="TRILYVA Aurora Loop workspace:'),'renderer reference uses the uploaded Aurora Loop screenshot with descriptive alt text');
+must(overview.includes('OPEN THE RENDERER') && overview.includes('loading="lazy"'),'renderer reference links to the live workspace and lazy-loads its screenshot');
 must(serviceWorker.includes('tamasrazim-trilyva-pwa-v162'),'renderer service worker cache version is bumped');
 must(!/chatgpt-motion-loop|chatgpt-30s-seamless-loop|trilyva-60s-motion-edit/i.test(serviceWorker),'promotional animation assets are removed from offline cache');
 must(!/chatgpt-motion-loop|chatgpt-30s-seamless-loop|trilyva-60s-motion-edit/i.test(overview),'TRILYVA overview no longer links to fixed-length promo animations');
