@@ -113,7 +113,7 @@ footer{border-top:1px solid var(--line);padding:23px 0 34px;display:flex;justify
 <div class="eyebrow">01 / GET STARTED</div><h2>Open, edit, preview, render.</h2>
 <p>Open the workspace in a current browser, select an example or library animation, and edit its JavaScript source in the <strong>ANIMATION SOURCE</strong> area. The preview is for checking composition and motion. For delivery, configure the composition and use the renderer's export controls.</p>
 <div class="flow" aria-label="Typical workflow"><span>01 / CODE</span><span>02 / PREVIEW</span><span>03 / CONFIGURE</span><span>04 / RENDER</span></div>
-<div class="callout">Start with a short test. MP4 and WebM exports use a minimum 20 Mbps target bitrate (25 Mbps by default) and have a strict 2,000,000,000-byte (2 GB) output-file cap. TRILYVA warns when the estimated file is too large; it never silently lowers bitrate, resolution, frame rate, or frame quality.</div>
+<div class="callout">Start with a short test. The low-resolution validation probe runs in a disposable runtime; the production runtime is freshly initialised so frame 0 is rendered first at the full selected output resolution. MP4 and WebM exports use a minimum 20 Mbps target bitrate (25 Mbps by default) and have a strict 2,000,000,000-byte (2 GB) output-file cap. TRILYVA warns when the estimated file is too large; it never silently lowers bitrate, resolution, frame rate, or frame quality.</div>
 </section>
 <section class="doc" id="animation">
 <div class="eyebrow">02 / ANIMATION FUNCTION</div><h2>Make the frame a function of time.</h2>
