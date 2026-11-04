@@ -44,7 +44,9 @@ The preview is for interactive inspection and may lag at demanding settings. Exp
 
 The current workspace offers browser-side MP4/H.264 and WebM/VP8/VP9 paths where compatible encoder configurations are available. Inspect Frame has a separate **Save this frame as** picker with 18 individual-frame formats, detailed below. The Render panel and full-library batch render have a separate automatic still-image selection of PNG, JPG, SVG, and EPS. For that batch path, SVG/EPS use a vector recorder and are limited to operations it can represent. Directory/file destination pickers depend on browser support.
 
-The interface exposes high output targets, including up to 16K, 240 fps, and a 2,000 Mbps (2 Gbps) bitrate target. These are configuration ceilings, not guaranteed real-world performance or a promise that all settings can be combined successfully on every machine. Test with a short render and inspect the result before production use.
+The interface exposes high output targets, including up to 16K, 240 fps, and a 2,000 Mbps (2 Gbps) bitrate ceiling. Video export bitrate is constrained to 20 Mbps minimum and 25 Mbps by default. MP4 and WebM outputs have a strict 2,000,000,000-byte (2 GB) file-size cap. TRILYVA estimates the target size, warns and requests confirmation when the estimate exceeds the cap, and stops if the actual encoded stream reaches the cap. It never silently reduces bitrate, resolution, frame rate, or frame quality. Shorten the job or render separate segments when required.
+
+A 2 GB file-size cap is not a 2 Gbps bitrate, and playback does not ordinarily require loading the whole file into RAM. The browser-side muxers do retain compressed sample data and container/index structures during finalisation, however, so a near-limit export may require substantially more free memory than the finished file size. Failure depends on browser, operating system, hardware and available memory.
 
 ## Capability map
 
@@ -64,9 +66,9 @@ The existing transport controls provide first/previous/play-pause/next/last/loop
 - Choose resolution presets from 720p up to a 16K preset and custom dimensions up to 16,384 pixels per side.
 - Choose frame rates from 1 to 240 fps, common presets through 240 fps, and a custom duration from 0.05 seconds up to one hour.
 - Configure opaque or transparent background, background colour, random seed, loop length, seam analysis, retiming, and reverse.
-- Run pre-flight analysis and test renders; select Draft, Standard, High, or Maximum quality, set a target bitrate up to 2,000 Mbps, inspect encoder diagnostics, and optionally enable frame fingerprints.
+- Run pre-flight analysis and test renders; set a video target bitrate from 20 Mbps minimum (25 Mbps default) up to 2,000 Mbps, inspect encoder diagnostics, and optionally enable frame fingerprints. MP4/WebM files are capped at 2 GB.
 - The local video path supports MP4/H.264 and WebM/VP8/VP9 only when the current browser and device accept the selected configuration. Completed output is checked against the requested frame/sample count and container structure. These checks do not guarantee that the visual result matches the creator's intent.
-- The 16K, 240 fps, and 2 Gbps values are configuration ceilings, not a promise that all can be combined on every computer.
+- The 16K, 240 fps, and 2 Gbps values are configuration ceilings, not a promise that all can be combined on every computer. The strict 2 GB output cap never triggers an automatic quality reduction; over-limit jobs must be shortened or split into segments.
 
 ### Projects, metadata, and libraries
 
