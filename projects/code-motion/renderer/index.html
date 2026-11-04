@@ -9697,7 +9697,8 @@ async function dotMeshFolderRestoreWorkspace(saved) {
   S.comp=saved.comp ? CORE.composition(saved.comp) : CORE.composition({});
   S.meta=saved.meta ? merge({},saved.meta) : defaultMeta();
   S.frame=saved.frame || 0; S.hash=saved.hash || "";
-  S.customBitrateMbps=saved.customBitrateMbps;
+  S.customBitrateMbps=Number.isFinite(Number(saved.customBitrateMbps))
+     ? Math.max(20, Math.min(2000, Number(saved.customBitrateMbps))) : 25;
   S.exportFormat=saved.exportFormat; S.quality=saved.quality;
   S.timebase=saved.timebase; S.checksums=saved.checksums;
   S.queueStop=false; S.lastError=saved.lastError || null;
@@ -13216,8 +13217,8 @@ function loadProjectRecord(rec) {
   S.quality = p.quality || 'standard';
   S.timebase = p.timebase || 'ms';
   S.checksums = p.checksums !== false;
-  S.customBitrateMbps = isFinite(Number(p.customBitrateMbps)) && Number(p.customBitrateMbps) >= 0 ? Math.min(2000, Number(p.customBitrateMbps)) : 25;
-  S.customBitrateMbps = isFinite(Number(p.customBitrateMbps)) && Number(p.customBitrateMbps) >= 0 ? Math.min(2000, Number(p.customBitrateMbps)) : 25;
+  S.customBitrateMbps = isFinite(Number(p.customBitrateMbps))
+    ? Math.max(20, Math.min(2000, Number(p.customBitrateMbps))) : 25;
   S.code = rec.code || '';
   edSetValue(S.code);
   $('#projName').value = S.name;
