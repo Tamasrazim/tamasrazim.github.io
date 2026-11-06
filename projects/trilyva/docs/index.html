@@ -8,8 +8,8 @@
 <meta name="author" content="Robiul Rumman Razim">
 <meta name="description" content="TRILYVA documentation for animation code, rendering, .tmotion projects, library exports, and all 18 inspected-frame image formats.">
 <meta name="robots" content="index,follow,max-image-preview:large">
-<meta property="og:type" content="article"><meta property="og:site_name" content="Tamasrazim"><meta property="og:title" content="TRILYVA Documentation — Animation, Rendering & Image Formats"><meta property="og:description" content="TRILYVA documentation for animation code, rendering, .tmotion projects, library exports, and all 18 inspected-frame image formats."><meta property="og:url" content="https://tamasrazim.github.io/projects/trilyva/docs.html"><meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg"><meta name="twitter:card" content="summary_large_image">
-<link rel="canonical" href="https://tamasrazim.github.io/projects/trilyva/docs.html">
+<meta property="og:type" content="article"><meta property="og:site_name" content="Tamasrazim"><meta property="og:title" content="TRILYVA Documentation — Animation, Rendering & Image Formats"><meta property="og:description" content="TRILYVA documentation for animation code, rendering, .tmotion projects, library exports, and all 18 inspected-frame image formats."><meta property="og:url" content="https://tamasrazim.github.io/projects/trilyva/docs/"><meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg"><meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/trilyva/docs/">
 <title>TRILYVA Documentation — Tamasrazim</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,14 +32,14 @@ footer{border-top:1px solid var(--line);padding:23px 0 34px;display:flex;justify
   "@graph": [
     {
       "@type": "TechArticle",
-      "@id": "https://tamasrazim.github.io/projects/trilyva/docs.html#article",
+      "@id": "https://tamasrazim.github.io/projects/trilyva/docs/#article",
       "headline": "TRILYVA Documentation — Animation, Rendering & Image Formats",
       "name": "TRILYVA Documentation — Animation, Rendering & Image Formats",
       "description": "TRILYVA documentation for animation code, rendering, .tmotion projects, library exports, and all 18 inspected-frame image formats.",
-      "url": "https://tamasrazim.github.io/projects/trilyva/docs.html",
+      "url": "https://tamasrazim.github.io/projects/trilyva/docs/",
       "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "https://tamasrazim.github.io/projects/trilyva/docs.html"
+        "@id": "https://tamasrazim.github.io/projects/trilyva/docs/"
       },
       "author": {
         "@type": "Person",
@@ -59,7 +59,7 @@ footer{border-top:1px solid var(--line);padding:23px 0 34px;display:flex;justify
     },
     {
       "@type": "BreadcrumbList",
-      "@id": "https://tamasrazim.github.io/projects/trilyva/docs.html#breadcrumbs",
+      "@id": "https://tamasrazim.github.io/projects/trilyva/docs/#breadcrumbs",
       "itemListElement": [
         {
           "@type": "ListItem",
@@ -83,7 +83,7 @@ footer{border-top:1px solid var(--line);padding:23px 0 34px;display:flex;justify
           "@type": "ListItem",
           "position": 4,
           "name": "TRILYVA Documentation — Animation, Rendering & Image Formats",
-          "item": "https://tamasrazim.github.io/projects/trilyva/docs.html"
+          "item": "https://tamasrazim.github.io/projects/trilyva/docs/"
         }
       ]
     }
@@ -93,7 +93,7 @@ footer{border-top:1px solid var(--line);padding:23px 0 34px;display:flex;justify
 <body>
 <header class="wrap top">
 <a class="brand" href="/projects/trilyva/" aria-label="TRILYVA project overview"><img src="/assets/brand/trilyva/T.svg" alt=""><span>TRILYVA / DOCUMENTATION</span></a>
-<nav class="nav" aria-label="Documentation navigation"><a href="/projects/trilyva/">PROJECT</a><a href="/projects/trilyva/tutorial.html">TUTORIAL</a><a href="/projects/code-motion/renderer/">WORKSPACE</a></nav>
+<nav class="nav" aria-label="Documentation navigation"><a href="/projects/trilyva/">PROJECT</a><a href="/projects/trilyva/tutorial/">TUTORIAL</a><a href="/projects/code-motion/renderer/">WORKSPACE</a></nav>
 </header>
 <main>
 <section class="wrap hero" id="top">
@@ -101,7 +101,7 @@ footer{border-top:1px solid var(--line);padding:23px 0 34px;display:flex;justify
 <h1>TRILYVA<span>.</span> Docs</h1>
 <p class="lead">A practical reference for animation source, project files, library downloads, frame-driven rendering, and the limits imposed by your browser and hardware.</p>
 <p class="muted">This documentation describes the browser workspace linked below. Control names can change as the project evolves; use the current interface and diagnostics as the final authority for available options.</p>
-<div class="actions"><a class="btn primary" href="/projects/code-motion/renderer/">Open TRILYVA workspace</a><a class="btn" href="/projects/trilyva/tutorial.html">Read the step-by-step tutorial</a><a class="btn" href="/projects/trilyva/">Back to project overview</a></div>
+<div class="actions"><a class="btn primary" href="/projects/code-motion/renderer/">Open TRILYVA workspace</a><a class="btn" href="/projects/trilyva/tutorial/">Read the step-by-step tutorial</a><a class="btn" href="/projects/trilyva/">Back to project overview</a></div>
 </section>
 <div class="wrap layout">
 <aside class="toc" aria-label="Documentation contents">
@@ -201,7 +201,7 @@ footer{border-top:1px solid var(--line);padding:23px 0 34px;display:flex;justify
 <section class="doc" id="troubleshoot">
 <div class="eyebrow">10 / TROUBLESHOOTING</div><h2>Diagnose by reducing the job.</h2>
 <ul><li><strong>Source will not run:</strong> check the browser console or the renderer's status message; confirm the expected renderFrame function exists and the code parses.</li><li><strong>Preview is slow:</strong> temporarily lower the preview resolution or complexity. Preview load is not the same as final-render completion.</li><li><strong>Export is unavailable:</strong> choose a configuration supported by the current browser and device; do not rely only on the requested width or frame rate.</li><li><strong>The downloaded file is unexpected:</strong> confirm whether you chose .tmotion, .js, a source-library ZIP, or rendered media. Each contains different material.</li><li><strong>Library ZIP is incomplete:</strong> confirm the intended library was selected and inspect library-manifest.json and README.txt inside the archive.</li><li><strong>Audio import fails:</strong> the browser may not decode that file type, or the decoded source may exceed the waveform-analysis limit. Try a browser-supported file under the documented duration/memory limits.</li><li><strong>Audio is missing from the deterministic video:</strong> export a WAV mix from Canvas Edit and use Finish Movie. The deterministic frame exporter does not currently mux audio.</li><li><strong>A vector still differs:</strong> the vector recorder may not support every drawing operation. Try a supported raster format when visual fidelity is more important than editability.</li></ul>
-<div class="actions"><a class="btn primary" href="/projects/code-motion/renderer/">Open the workspace</a><a class="btn" href="/projects/trilyva/tutorial.html">Open the complete tutorial</a><a class="btn" href="/projects/trilyva/">Back to project overview</a></div>
+<div class="actions"><a class="btn primary" href="/projects/code-motion/renderer/">Open the workspace</a><a class="btn" href="/projects/trilyva/tutorial/">Open the complete tutorial</a><a class="btn" href="/projects/trilyva/">Back to project overview</a></div>
 </section>
 </div>
 </div>

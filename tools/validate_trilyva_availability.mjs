@@ -13,7 +13,8 @@ const must = (ok, message) => {
 
 const routes = [
   'projects/trilyva/index.html',
-  'projects/trilyva/tutorial.html',
+  'projects/trilyva/docs/index.html',
+  'projects/trilyva/tutorial/index.html',
   'projects/trilyva/updates/index.html',
   'projects/code-motion/index.html',
   'projects/code-motion/renderer/index.html',

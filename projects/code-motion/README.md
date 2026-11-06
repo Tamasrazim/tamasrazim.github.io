@@ -5,8 +5,8 @@ TRILYVA is a browser-based, code-driven animation workspace built around determi
 ## Current routes
 
 - Project overview: https://tamasrazim.github.io/projects/trilyva/
-- Documentation: https://tamasrazim.github.io/projects/trilyva/docs.html
-- Step-by-step field guide: https://tamasrazim.github.io/projects/trilyva/tutorial.html
+- Documentation: https://tamasrazim.github.io/projects/trilyva/docs/
+- Step-by-step field guide: https://tamasrazim.github.io/projects/trilyva/tutorial/
 - Workspace: https://tamasrazim.github.io/projects/code-motion/renderer/
 
 The active workspace entry point in this repository is **renderer/index.html**. The overview and documentation are separate from the working renderer.
