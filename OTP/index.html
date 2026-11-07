@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080808">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="A temporary A4 print layout containing 11 sheets and 33 photographs.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<title>OTP — One Time Page</title>
+<style>
+  * { box-sizing: border-box; }
+  html { background: #080808; }
+  body {
+    margin: 0;
+    color: #f2f2ee;
+    background: #080808;
+    font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+  .toolbar {
+    width: min(100% - 32px, 900px);
+    margin: 0 auto;
+    padding: 28px 0 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .brand { min-width: 0; }
+  .brand strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: .16em;
+  }
+  .brand span {
+    display: block;
+    margin-top: 7px;
+    color: #858585;
+    font-size: 10px;
+    line-height: 1.7;
+    letter-spacing: .06em;
+  }
+  .print-button {
+    flex: 0 0 auto;
+    min-height: 42px;
+    padding: 0 16px;
+    border: 1px solid #deded8;
+    border-radius: 0;
+    color: #080808;
+    background: #f2f2ee;
+    font: 600 10px/1 "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+    letter-spacing: .08em;
+    cursor: pointer;
+  }
+  .print-button:hover { background: #fff; }
+  .print-button:disabled { opacity: .55; cursor: wait; }
+  .status {
+    width: min(100% - 32px, 900px);
+    margin: -8px auto 18px;
+    min-height: 14px;
+    color: #8b8b8b;
+    font-size: 9px;
+    line-height: 1.6;
+  }
+  .sheets {
+    display: grid;
+    justify-items: center;
+    gap: 24px;
+    padding: 0 0 48px;
+  }
+  .sheet {
+    position: relative;
+    display: grid;
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    gap: 4mm;
+    width: min(210mm, calc(100vw - 28px));
+    height: auto;
+    aspect-ratio: 210 / 297;
+    padding: 8mm;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 16px 60px #0009;
+  }
+  .photo {
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #fff;
+  }
+  .photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+  @media (max-width: 520px) {
+    .toolbar { align-items: flex-start; }
+    .brand span { max-width: 190px; }
+    .print-button { padding-inline: 11px; font-size: 9px; }
+  }
+  @page { size: A4 portrait; margin: 0; }
+  @media print {
+    html, body {
+      width: 210mm;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #fff !important;
+      color: #000 !important;
+    }
+    .toolbar, .status { display: none !important; }
+    .sheets {
+      display: block;
+      width: 210mm;
+      margin: 0;
+      padding: 0;
+    }
+    .sheet {
+      width: 210mm;
+      height: 297mm;
+      aspect-ratio: auto;
+      margin: 0;
+      padding: 8mm;
+      gap: 4mm;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      break-inside: avoid;
+      page-break-inside: avoid;
+      break-after: page;
+      page-break-after: always;
+    }
+    .sheet:last-child {
+      break-after: auto;
+      page-break-after: auto;
+    }
+  }
+</style>
+</head>
+<body>
+<header class="toolbar">
+  <div class="brand">
+    <strong>OTP / ONE TIME PAGE</strong>
+    <span>11 A4 SHEETS &nbsp;·&nbsp; 33 PHOTOGRAPHS &nbsp;·&nbsp; PORTRAIT</span>
+  </div>
+  <button class="print-button" id="printButton" type="button">PRINT ALL 11 PAGES</button>
+</header>
+<p class="status" id="status" role="status" aria-live="polite">Preparing print layout · 33 images · 3 per sheet</p>
+<main class="sheets" id="sheets" aria-label="Eleven A4 print pages"></main>
+<script>
+(() => {
+  "use strict";
+  const totalImages = 33;
+  const imagesPerPage = 3;
+  const sheetsRoot = document.getElementById("sheets");
+  const status = document.getElementById("status");
+  const printButton = document.getElementById("printButton");
+
+  for (let start = 1; start <= totalImages; start += imagesPerPage) {
+    const sheetNumber = Math.floor((start - 1) / imagesPerPage) + 1;
+    const sheet = document.createElement("section");
+    sheet.className = "sheet";
+    sheet.setAttribute("aria-label", "A4 page " + sheetNumber + " of 11");
+
+    for (let number = start; number < start + imagesPerPage; number++) {
+      const frame = document.createElement("div");
+      frame.className = "photo";
+      const img = document.createElement("img");
+      img.src = "../" + number + ".jpg";
+      img.alt = "Photograph " + number;
+      img.draggable = false;
+      img.loading = "eager";
+      img.decoding = "async";
+      frame.appendChild(img);
+      sheet.appendChild(frame);
+    }
+    sheetsRoot.appendChild(sheet);
+  }
+
+  const allImages = Array.from(sheetsRoot.querySelectorAll("img"));
+  const updateStatus = () => {
+    const loaded = allImages.filter(img => img.complete && img.naturalWidth > 0).length;
+    const failed = allImages.filter(img => img.complete && img.naturalWidth === 0).length;
+    status.textContent = failed
+      ? loaded + " of 33 images loaded · " + failed + " image(s) could not be loaded"
+      : loaded + " of 33 images loaded · 11 A4 pages";
+  };
+  allImages.forEach(img => {
+    img.addEventListener("load", updateStatus);
+    img.addEventListener("error", updateStatus);
+  });
+  updateStatus();
+
+  printButton.addEventListener("click", async () => {
+    printButton.disabled = true;
+    printButton.textContent = "PREPARING…";
+    status.textContent = "Checking all photographs before printing…";
+    await Promise.all(allImages.map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise(resolve => {
+        img.addEventListener("load", resolve, { once: true });
+        img.addEventListener("error", resolve, { once: true });
+      });
+    }));
+    const missing = allImages.filter(img => !img.naturalWidth);
+    if (missing.length) {
+      status.textContent = missing.length + " image(s) failed to load. Check the connection and reload before printing.";
+      printButton.disabled = false;
+      printButton.textContent = "PRINT ALL 11 PAGES";
+      return;
+    }
+    await Promise.all(allImages.map(img => img.decode().catch(() => undefined)));
+    printButton.textContent = "OPENING PRINT…";
+    window.print();
+    printButton.disabled = false;
+    printButton.textContent = "PRINT ALL 11 PAGES";
+    updateStatus();
+  });
+})();
+</script>
+</body>
+</html>
