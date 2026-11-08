@@ -357,3 +357,196 @@ html { scrollbar-color: #77756f #090909; scrollbar-width: thin; }
 ::-webkit-scrollbar-track { background: #090909; }
 ::-webkit-scrollbar-thumb { background: #55534f; border: 2px solid #090909; }
 ::-webkit-scrollbar-thumb:hover { background: #8d8a82; }
+
+
+/* MOTION DIRECTION / 2026 — procedural signal, not decorative noise */
+:root {
+  --motion-ink: rgba(242,241,236,.92);
+  --motion-muted: rgba(210,208,199,.28);
+  --motion-ease: cubic-bezier(.22,1,.36,1);
+}
+.home-hero {
+  position: relative;
+  isolation: isolate;
+}
+.hero-canvas {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: .82;
+}
+.home-hero > .hero-copy,
+.home-hero > .signal-card {
+  position: relative;
+  z-index: 1;
+}
+.hero-copy {
+  animation: hero-copy-in .9s var(--motion-ease) both;
+}
+.hero-title {
+  perspective: 900px;
+}
+.hero-line {
+  display: block;
+  overflow: hidden;
+  padding-block: .08em;
+  margin-block: -.08em;
+}
+.hero-line > span {
+  display: block;
+  transform-origin: 50% 100%;
+  animation: hero-type-in 1.12s var(--motion-ease) both;
+}
+.hero-line:nth-child(2) > span { animation-delay: .13s; }
+.hero-lede { animation: hero-copy-in .85s .36s var(--motion-ease) both; }
+.hero-actions { animation: hero-copy-in .85s .48s var(--motion-ease) both; }
+.hero-note { animation: hero-copy-in .8s .58s var(--motion-ease) both; }
+.signal-card {
+  animation: hero-panel-in 1.05s .18s var(--motion-ease) both;
+  transform-origin: 65% 50%;
+}
+.signal-origin::after {
+  animation: signal-core-spin 18s linear infinite;
+}
+.signal-origin {
+  animation: signal-core-breathe 5.5s ease-in-out infinite;
+}
+.signal-path.route {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.signal-card.is-awake .signal-path.route {
+  animation: signal-route-draw 1.05s var(--motion-ease) forwards;
+}
+.signal-card.is-awake .signal-path.route[data-route="trilyva"] { animation-delay: .08s; }
+.signal-card.is-awake .signal-path.route[data-route="trss"] { animation-delay: .18s; }
+.signal-card.is-awake .signal-path.route[data-route="kynestra"] { animation-delay: .28s; }
+.signal-card.is-awake .signal-path.route[data-route="neo"] { animation-delay: .38s; }
+.signal-card.is-awake .signal-path.route.is-active { animation-name: signal-route-active; }
+.signal-node {
+  transition: border-color .3s ease, background .3s ease, transform .5s var(--motion-ease), box-shadow .4s ease;
+}
+.signal-node.is-active {
+  box-shadow: 0 0 0 1px rgba(242,241,236,.08), 0 0 32px rgba(242,241,236,.055);
+}
+.signal-detail h2 { transition: opacity .18s ease, transform .3s var(--motion-ease); }
+.signal-detail:has(.text-link:focus-visible) { border-top-color: #77756f; }
+
+@keyframes hero-type-in {
+  0% { opacity: 0; transform: translate3d(0,112%,0) rotateX(-12deg); }
+  70% { opacity: 1; }
+  100% { opacity: 1; transform: translate3d(0,0,0) rotateX(0); }
+}
+@keyframes hero-copy-in {
+  from { opacity: 0; translate: 0 18px; }
+  to { opacity: 1; translate: 0 0; }
+}
+@keyframes hero-panel-in {
+  from { opacity: 0; transform: translate3d(0,24px,0) scale(.985); }
+  to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
+}
+@keyframes signal-core-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes signal-core-breathe {
+  0%,100% { box-shadow: 0 0 0 11px rgba(255,255,255,.025), 0 0 0 23px rgba(255,255,255,.018); }
+  50% { box-shadow: 0 0 0 15px rgba(255,255,255,.035), 0 0 0 31px rgba(255,255,255,.012); }
+}
+@keyframes signal-route-draw {
+  from { stroke-dashoffset: 1; opacity: .04; }
+  to { stroke-dashoffset: 0; opacity: .72; }
+}
+@keyframes signal-route-active {
+  from { stroke-dashoffset: 1; opacity: .1; }
+  to { stroke-dashoffset: 0; opacity: 1; }
+}
+
+/* Scroll choreography: only transform and opacity change. */
+.motion-reveal {
+  opacity: 0;
+  translate: 0 28px;
+  transition:
+    opacity .82s var(--motion-ease) var(--reveal-delay, 0ms),
+    translate .92s var(--motion-ease) var(--reveal-delay, 0ms);
+}
+.motion-reveal.is-visible {
+  opacity: 1;
+  translate: 0 0;
+}
+.project-art { perspective: 900px; }
+.project-art .art-svg {
+  transform-origin: 50% 50%;
+  transition: transform 1s var(--motion-ease);
+}
+.project-card:hover .art-svg {
+  transform: scale(1.045) rotateX(2deg) rotateY(-2deg);
+}
+.project-card .art-svg .bright {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.project-card.is-visible .art-svg .bright {
+  animation: diagram-resolve 1.45s var(--motion-ease) both;
+}
+.project-card:nth-child(2).is-visible .art-svg .bright { animation-delay: .11s; }
+.project-card:nth-child(3).is-visible .art-svg .bright { animation-delay: .18s; }
+.project-card:nth-child(4).is-visible .art-svg .bright { animation-delay: .25s; }
+@keyframes diagram-resolve {
+  from { stroke-dashoffset: 1; opacity: .22; }
+  to { stroke-dashoffset: 0; opacity: 1; }
+}
+
+/* Persistent progress is orientation, not scroll replacement. */
+.reading-progress {
+  position: fixed;
+  z-index: 110;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  pointer-events: none;
+  background: rgba(242,241,236,.07);
+}
+.reading-progress > span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: var(--paper);
+  box-shadow: 0 0 12px rgba(242,241,236,.28);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .project-card { transform-style: preserve-3d; }
+  .signal-node:hover { box-shadow: 0 0 26px rgba(242,241,236,.07); }
+}
+@media (max-width: 760px) {
+  .hero-canvas { opacity: .52; }
+  .signal-origin { animation: none; }
+  .signal-origin::after { animation: none; }
+  .project-card:hover .art-svg { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-line > span,
+  .hero-copy,
+  .hero-lede,
+  .hero-actions,
+  .hero-note,
+  .signal-card,
+  .signal-origin,
+  .signal-origin::after,
+  .signal-card.is-awake .signal-path.route,
+  .project-card.is-visible .art-svg .bright {
+    animation: none !important;
+  }
+  .hero-line > span { transform: none !important; }
+  .motion-reveal, .motion-reveal.is-visible {
+    opacity: 1 !important;
+    translate: none !important;
+    transition: none !important;
+  }
+}
