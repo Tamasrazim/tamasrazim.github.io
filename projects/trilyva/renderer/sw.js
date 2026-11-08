@@ -1,7 +1,7 @@
 // What this does: Caches the TRILYVA renderer's application files and serves them when the network is unavailable.
-// Cache version bumped for informational measured-bitrate reporting.
+// Cache version bumped for configurable full-library batch output settings.
 
-const CACHE = 'tamasrazim-trilyva-pwa-v168';
+const CACHE = 'tamasrazim-trilyva-pwa-v169';
 const CORE = [
   './',
   './index.html',
