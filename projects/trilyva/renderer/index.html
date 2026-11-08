@@ -1863,7 +1863,7 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
             <div class="row"><label for="oBitrate">Custom bitrate</label>
               <input type="number" id="oBitrate" min="20" max="2000" step="0.1" value="25" inputmode="decimal">
               <span class="num" style="font-size:10px;color:var(--mut)">Mbps</span></div>
-            <p class="note">Video bitrate: minimum 20 Mbps · default 25 Mbps · maximum 2,000 Mbps. Video exports have a strict 2,000,000,000-byte (2 GB) file-size cap. TRILYVA never lowers bitrate, resolution, frame rate, or quality to fit the cap.</p>
+            <p class="note">Video bitrate target: minimum 20 Mbps · default 25 Mbps · maximum 2,000 Mbps · CBR requested. Actual average can vary with content and browser encoder implementation; low-complexity scenes may use less. TRILYVA reports the measured rate without failing an otherwise valid render. Video exports have a strict 2,000,000,000-byte (2 GB) file-size cap. No automatic bitrate, resolution, frame-rate or quality reduction is made to fit the cap.</p>
             <div class="warnbox"><b>MEMORY / LARGE EXPORTS</b>2 GB is the output file-size limit, not a 2 Gbps bitrate. The current browser muxer retains encoded chunks and container/index data during finalisation. A near-limit export may need substantially more than 2 GB of free memory; some desktop/browser combinations may not have enough available memory. A 2 GB file does not automatically mean a media player loads the entire file into RAM.</div>
             <div class="row"><label for="oTimebase">WebM timebase</label>
               <select id="oTimebase"><option value="ms">1 ms (compatible)</option><option value="exact">Exact 1/fps tick</option></select></div>
@@ -3418,22 +3418,16 @@ function dupRuns(cs) {
 
 /* Verify the completed elementary video stream instead of trusting the requested encoder setting.
    WebCodecs defaults to variable bitrate unless constant mode is explicitly selected. */
-function verifyEncodedVideoBitrate(encodedBytes, comp, requestedBitrate, codecLabel) {
+function verifyEncodedVideoBitrate(encodedBytes, comp, requestedBitrate) {
   var duration = Number(comp.frameCount) / Number(comp.fps);
   var measuredBps = duration > 0 ? Math.round((encodedBytes * 8) / duration) : 0;
   var requiredBps = Math.max(20000000, Math.ceil(Number(requestedBitrate) * 0.95));
-  if (!Number.isFinite(measuredBps) || measuredBps < requiredBps) {
-    return {
-      ok: false,
-      measuredBps: measuredBps,
-      error: {
-        name: 'BitrateVerificationError',
-        message: codecLabel + ' encoded ' + (measuredBps / 1000000).toFixed(2) + ' Mbps; TRILYVA requires at least ' + (requiredBps / 1000000).toFixed(2) + ' Mbps for this export.',
-        detail: 'The encoder was configured for constant bitrate, but its completed video stream did not meet the required rate. TRILYVA has rejected the output; no low-bitrate file will be muxed or downloaded. Use a browser/codec that accepts constant-bitrate WebCodecs configurations. Do not lower the requested quality.'
-      }
-    };
-  }
-  return { ok: true, measuredBps: measuredBps, requiredBps: requiredBps };
+  return {
+    ok: true,
+    measuredBps: measuredBps,
+    requiredBps: requiredBps,
+    meetsTarget: Number.isFinite(measuredBps) && measuredBps >= requiredBps
+  };
 }
 
 /* ---------------- WebM ---------------- */
@@ -3446,8 +3440,6 @@ function exportWebM(cfg) {
     return Promise.resolve({ ok: false, error: { name: 'CompositionError', message: 'VP8/VP9 need even pixel dimensions. Current composition is ' + comp.width + '×' + comp.height + '.', detail: 'Round the width and height to even numbers in the Composition panel.' } });
   }
   var targetBitrate = enc.sanitiseBitrate(job.bitrate, comp.width, comp.height, comp.fps);
-  var requestedBitrate = enc.sanitiseBitrate(cfg.requestedBitrate || targetBitrate, comp.width, comp.height, comp.fps);
-  var bitrateRetry = Number(cfg.bitrateRetry || 0);
   return enc.probeEncoders(comp.width, comp.height, comp.fps, targetBitrate).then(function (probe) {
     if (!probe.available) return { ok: false, error: { name: 'CapabilityError', message: probe.reason, detail: 'Render a PNG sequence instead.' } };
     var codec = probe.supported[0];
@@ -3512,23 +3504,14 @@ function exportWebM(cfg) {
         try { encoder.close(); } catch (e) { }
         if (sizeLimitHit) return { ok: false, error: videoSizeLimitError() };
         if (hardError) throw hardError;
-        var bitrateCheck = verifyEncodedVideoBitrate(encodedBytes, comp, requestedBitrate, codec.label);
-        if (!bitrateCheck.ok && bitrateRetry < 2 && bitrateCheck.measuredBps > 0) {
-          var compensatedBitrate = Math.min(enc.MAX_TARGET_BITRATE_BPS,
-            Math.ceil(targetBitrate * (requestedBitrate / bitrateCheck.measuredBps) * 1.12));
-          if (compensatedBitrate > targetBitrate) {
-            cfg.onLog('CBR under-delivery: ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) +
-              ' Mbps measured against ' + (requestedBitrate / 1000000).toFixed(2) +
-              ' Mbps requested. Retrying at ' + (compensatedBitrate / 1000000).toFixed(2) + ' Mbps; output remains subject to the 2 GB cap.');
-            var retryJob = Object.assign({}, job, { bitrate: compensatedBitrate });
-            var retryCfg = Object.assign({}, cfg, { job: retryJob,
-              requestedBitrate: requestedBitrate, bitrateRetry: bitrateRetry + 1 });
-            if (env.releaseExportCanvas) { try { env.releaseExportCanvas(out); } catch (_) {} }
-            return run(retryCfg);
-          }
+        var bitrateCheck = verifyEncodedVideoBitrate(encodedBytes, comp, targetBitrate);
+        if (!bitrateCheck.meetsTarget) {
+          cfg.onLog('BITRATE NOTE · ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) +
+            ' Mbps measured against the ' + (targetBitrate / 1000000).toFixed(2) +
+            ' Mbps CBR target. Low-complexity content and browser encoder rate control can produce a lower average. Keeping the completed render; no quality failure is inferred from bitrate alone.');
+        } else {
+          cfg.onLog('verified encoded video payload: ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) + ' Mbps average');
         }
-        if (!bitrateCheck.ok) return { ok: false, error: bitrateCheck.error };
-        cfg.onLog('verified encoded video payload: ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) + ' Mbps average');
         var fin = mux.finish(comp.frameCount);
         if (fin.blob.size > enc.MAX_VIDEO_FILE_BYTES) return { ok: false, error: videoSizeLimitError() };
         cfg.onLog('muxed ' + fin.frames + ' blocks into ' + (fin.blob.size / 1048576).toFixed(2) + ' MB');
@@ -3564,8 +3547,6 @@ function exportMP4(cfg) {
       'Round the width and height to even numbers in the Composition panel.');
   }
   var wanted = enc.sanitiseBitrate(job.bitrate || enc.bitrateFor(comp.width, comp.height, comp.fps, job.quality), comp.width, comp.height, comp.fps);
-  var requestedBitrate = enc.sanitiseBitrate(cfg.requestedBitrate || wanted, comp.width, comp.height, comp.fps);
-  var bitrateRetry = Number(cfg.bitrateRetry || 0);
   return enc.probeH264(comp.width, comp.height, comp.fps, wanted).then(function (probe) {
     if (!probe.available) {
       return {
@@ -3681,22 +3662,14 @@ function exportMP4(cfg) {
             }
           };
         }
-        var bitrateCheck = verifyEncodedVideoBitrate(encodedBytes, comp, requestedBitrate, 'H.264');
-        if (!bitrateCheck.ok && bitrateRetry < 2 && bitrateCheck.measuredBps > 0) {
-          var compensatedBitrate = Math.min(enc.MAX_TARGET_BITRATE_BPS,
-            Math.ceil(sel.config.bitrate * (requestedBitrate / bitrateCheck.measuredBps) * 1.12));
-          if (compensatedBitrate > sel.config.bitrate) {
-            cfg.onLog('CBR under-delivery: ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) +
-              ' Mbps measured against ' + (requestedBitrate / 1000000).toFixed(2) +
-              ' Mbps requested. Retrying at ' + (compensatedBitrate / 1000000).toFixed(2) + ' Mbps; output remains subject to the 2 GB cap.');
-            var retryJob = Object.assign({}, job, { bitrate: compensatedBitrate });
-            var retryCfg = Object.assign({}, cfg, { job: retryJob,
-              requestedBitrate: requestedBitrate, bitrateRetry: bitrateRetry + 1 });
-            return run(retryCfg);
-          }
+        var bitrateCheck = verifyEncodedVideoBitrate(encodedBytes, comp, sel.config.bitrate);
+        if (!bitrateCheck.meetsTarget) {
+          cfg.onLog('BITRATE NOTE · ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) +
+            ' Mbps measured against the ' + (sel.config.bitrate / 1000000).toFixed(2) +
+            ' Mbps CBR target. Low-complexity content and browser encoder rate control can produce a lower average. Keeping the completed render; no quality failure is inferred from bitrate alone.');
+        } else {
+          cfg.onLog('verified encoded video payload: ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) + ' Mbps average');
         }
-        if (!bitrateCheck.ok) return { ok: false, stage: 'bitrate-verification', error: bitrateCheck.error };
-        cfg.onLog('verified encoded video payload: ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) + ' Mbps average');
         var fin = mux.finish();
         if (!fin.ok) {
           return { ok: false, stage: 'mux', error: { name: 'MP4 MUXER ERROR', layer: 'mux', message: fin.reason, detail: 'The H.264 stream was produced but could not be described in an MP4 sample table, so no file was written.' } };
@@ -3807,7 +3780,7 @@ function run(cfg) {
   if (!c.ok) return Promise.resolve({ ok: false, stage: 'validate', error: c.error });
   cfg.onLog('fresh export runtime initialised; frame 0 will render at full composition resolution');
 
-  var sub = { env: env, rt: rt, comp: comp, job: job, from: cfg.from || 0, onLog: cfg.onLog, onProgress: cfg.onProgress, isCancelled: cfg.isCancelled, writeFile: cfg.writeFile, existing: cfg.existing, prepareFrame: cfg.prepareFrame, assets: cfg.assets, layers: cfg.layers, vectorEdits: cfg.vectorEdits, vectorBounds: cfg.vectorBounds, requestedBitrate: cfg.requestedBitrate, bitrateRetry: cfg.bitrateRetry };
+  var sub = { env: env, rt: rt, comp: comp, job: job, from: cfg.from || 0, onLog: cfg.onLog, onProgress: cfg.onProgress, isCancelled: cfg.isCancelled, writeFile: cfg.writeFile, existing: cfg.existing, prepareFrame: cfg.prepareFrame, assets: cfg.assets, layers: cfg.layers, vectorEdits: cfg.vectorEdits, vectorBounds: cfg.vectorBounds };
   var started = Date.now();
   var task = job.format === 'webm' ? exportWebM(sub)
     : job.format === 'mp4' ? exportMP4(sub)
@@ -14566,7 +14539,7 @@ var DOCS = [
   '</table>',
 
   '<h5>VIDEO SIZE LIMIT AND MEMORY</h5>',
-  '<p>MP4 and WebM outputs have a strict 2,000,000,000-byte (2 GB) file-size cap. The target bitrate is at least 20 Mbps, defaults to 25 Mbps, and can be set up to 2,000 Mbps. The exporter estimates the target size before rendering, warns when the estimate exceeds the cap, and asks before proceeding. During encoding it enforces the cap against actual compressed samples and refuses to deliver an oversized file. It never silently lowers bitrate, resolution, frame rate, or quality. Shorten the composition or render separate segments when the estimate is too large.</p>',
+  '<p>MP4 and WebM outputs have a strict 2,000,000,000-byte (2 GB) file-size cap. The encoder bitrate target ranges from 20 Mbps minimum to 2,000 Mbps maximum, with 25 Mbps as the default, and TRILYVA requests constant-bitrate mode. The actual average can still vary by content and browser/codec implementation; low-complexity scenes may produce a lower measured average. TRILYVA records and reports that measured rate but does not fail an otherwise valid render on bitrate alone. The exporter refuses to deliver an oversized file and never silently lowers resolution, frame rate or quality to fit.</p>',
   '<p>A 2 GB output is a file-size limit, not a bitrate, and it does not mean a playback application must load the entire file into RAM. However, this browser exporter keeps compressed samples plus muxer/index data during finalisation; browser storage behaviour varies, and the export tab may need substantially more available memory than the final file size. Near-limit exports can fail on ordinary desktop systems with insufficient free memory. This is a real browser-side limitation, not a reason to degrade the frames.</p>',
   '<h5>THE MP4 PATH</h5>',
   '<p>H.264 support is a runtime fact, not an assumption. Before anything is rendered the app asks the browser about the real composition \u2014 width, height, frame rate and the validated bitrate \u2014 walking High, Main and Constrained Baseline at descending levels through <code>VideoEncoder.isConfigSupported</code>. The first configuration the browser actually accepts is the one used, and its exact codec string is shown in the Render panel and in Diagnostics. If nothing is accepted, the panel says so with the resolution and frame rate that were refused, and offers only the alternatives it has just confirmed on this machine.</p>',
