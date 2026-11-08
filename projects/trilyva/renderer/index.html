@@ -3418,14 +3418,13 @@ function dupRuns(cs) {
 
 /* Verify the completed elementary video stream instead of trusting the requested encoder setting.
    WebCodecs defaults to variable bitrate unless constant mode is explicitly selected. */
-function verifyEncodedVideoBitrate(encodedBytes, comp, requestedBitrate) {
+function measureEncodedVideoBitrate(encodedBytes, comp, requestedBitrate) {
   var duration = Number(comp.frameCount) / Number(comp.fps);
   var measuredBps = duration > 0 ? Math.round((encodedBytes * 8) / duration) : 0;
   var requiredBps = Math.max(20000000, Math.ceil(Number(requestedBitrate) * 0.95));
   return {
-    ok: true,
     measuredBps: measuredBps,
-    requiredBps: requiredBps,
+    targetBps: requiredBps,
     meetsTarget: Number.isFinite(measuredBps) && measuredBps >= requiredBps
   };
 }
@@ -3504,7 +3503,7 @@ function exportWebM(cfg) {
         try { encoder.close(); } catch (e) { }
         if (sizeLimitHit) return { ok: false, error: videoSizeLimitError() };
         if (hardError) throw hardError;
-        var bitrateCheck = verifyEncodedVideoBitrate(encodedBytes, comp, targetBitrate);
+        var bitrateCheck = measureEncodedVideoBitrate(encodedBytes, comp, targetBitrate);
         if (!bitrateCheck.meetsTarget) {
           cfg.onLog('BITRATE NOTE · ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) +
             ' Mbps measured against the ' + (targetBitrate / 1000000).toFixed(2) +
@@ -3662,7 +3661,7 @@ function exportMP4(cfg) {
             }
           };
         }
-        var bitrateCheck = verifyEncodedVideoBitrate(encodedBytes, comp, sel.config.bitrate);
+        var bitrateCheck = measureEncodedVideoBitrate(encodedBytes, comp, sel.config.bitrate);
         if (!bitrateCheck.meetsTarget) {
           cfg.onLog('BITRATE NOTE · ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) +
             ' Mbps measured against the ' + (sel.config.bitrate / 1000000).toFixed(2) +
