@@ -20,6 +20,7 @@ must(renderer.includes('id="oBitrate" min="20" max="2000"') && renderer.includes
 must(renderer.includes('MAX_VIDEO_FILE_BYTES = 2000000000') && renderer.includes('MAX_VIDEO_FILE_BYTES: MAX_VIDEO_FILE_BYTES'),'video exporter exposes the strict decimal 2 GB file-size cap');
 must(renderer.includes('function maxEncodedPayloadBytes') && renderer.includes('OutputSizeLimitError'),'MP4/WebM muxers guard encoded output size without quality reduction');
 must(renderer.includes("bitrateMode: 'constant'") && renderer.includes('function verifyEncodedVideoBitrate'),'MP4/WebM probes and encoders explicitly request constant-bitrate mode');
+must(renderer.includes('Math.max(20000000, Math.min(requested, auto * 4))'),'H.264 fallback never exposes a target below the 20 Mbps minimum');
 must(renderer.includes('measuredBitrateBps') && renderer.includes('BitrateVerificationError') && renderer.includes('no low-bitrate file will be muxed or downloaded'),'completed encoded video payload is measured and rejected when it misses the required bitrate');
  must(renderer.includes('validation frame evaluated in a disposable runtime') && renderer.includes('frame 0 will render at full composition resolution'),'low-resolution validation cannot mutate the production frame-zero runtime');
 must(renderer.includes('function estimateVideoFileBytes') && renderer.includes('acceptVideoSizeWarning'),'oversize video estimates warn and require confirmation before rendering');
