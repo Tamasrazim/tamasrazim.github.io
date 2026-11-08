@@ -3590,7 +3590,13 @@ function exportMP4(cfg) {
       },
       error: function (e) { hardError = e; }
     });
-    try { encoder.configure(sel.config); }
+    try {
+      var encoderConfig = Object.assign({}, sel.config);
+      if (job.contentHint === 'detail' || job.contentHint === 'motion' || job.contentHint === 'text') {
+        encoderConfig.contentHint = job.contentHint;
+      }
+      encoder.configure(encoderConfig);
+    }
     catch (e) {
       release();
       return {
@@ -9699,7 +9705,7 @@ async function renderAllLibrary(lib,items,settings,destination){
 /* ============================================================
    Dot Mesh Folder Export — 50 static SVG stills + 4K60 MP4s + metadata
    ============================================================ */
-var DOT_MESH_FOLDER_SETTINGS = { width:3840, height:2160, fps:60, duration:12, bitrate:20000000 };
+var DOT_MESH_FOLDER_SETTINGS = { width:3840, height:2160, fps:60, duration:12, bitrate:25000000 };
 var dotMeshFolderActive = false;
 var dotMeshFolderCancelRequested = false;
 
@@ -9761,7 +9767,7 @@ function dotMeshFolderMetadata(item, job, result, stem, svgName) {
       targetBitrateMbps: DOT_MESH_FOLDER_SETTINGS.bitrate / 1000000,
       measuredFileAverageBitrateBps: measuredFileAverageBps,
       measuredFileAverageBitrateMbps: measuredFileAverageBps == null ? null : Number((measuredFileAverageBps / 1000000).toFixed(3)),
-      bitrateNote: "20 Mbps is the encoder target. Measured file-average bitrate is computed from the MP4 file size and parsed duration, including container overhead.",
+      bitrateNote: "25 Mbps is the requested encoder target. The measured file-average bitrate is computed from the saved MP4 size and parsed duration, including container overhead.",
       bytes: result.blob ? result.blob.size : null,
       verification: result.verify ? result.verify.status : "UNKNOWN",
       sourceHash: job.metadata.sourceHash || null
@@ -9791,7 +9797,7 @@ function dotMeshFolderCsvRowFor(item, meta) {
     enc.container || "MP4", enc.codec || "H.264 / AVC",
     enc.width || 3840, enc.height || 2160, enc.fps || 60,
     enc.durationSeconds || 12, enc.frames || 720,
-    enc.targetBitrateMbps || 20, enc.measuredFileAverageBitrateMbps == null ? "" : enc.measuredFileAverageBitrateMbps,
+    enc.targetBitrateMbps || 25, enc.measuredFileAverageBitrateMbps == null ? "" : enc.measuredFileAverageBitrateMbps,
     enc.verification || "UNKNOWN",
     meta.exports && meta.exports.video || "",
     meta.exports && meta.exports.vectorStill && meta.exports.vectorStill.filename || ""
@@ -9892,7 +9898,7 @@ function openDotMeshFolderPicker() {
   });
 }
 async function prepareDotMeshFolderExport(directoryHandle) {
-  var prepBody = elHTML('<div class="verified"><b>DOT MESH / PREPARING</b><span>50 DESIGNS</span><span>4K60 · 20 Mbps</span></div><p class="note">Save folder selected. Loading the Dot Mesh library and checking the browser encoder. Rendering will start automatically after validation.</p>');
+  var prepBody = elHTML('<div class="verified"><b>DOT MESH / PREPARING</b><span>50 DESIGNS</span><span>4K60 · 25 Mbps TARGET</span></div><p class="note">Save folder selected. Loading the Dot Mesh library and checking the browser encoder. Rendering will start automatically after validation.</p>');
   openModal("TRILYVA / DOT MESH · PREPARING", prepBody, [{
     label:"Cancel", fn:function(){ dotMeshFolderCancelRequested=true; closeModal(); }
   }]);
@@ -9913,9 +9919,10 @@ async function prepareDotMeshFolderExport(directoryHandle) {
     var originalBitrate = S.customBitrateMbps;
     var probe;
     try {
-      S.customBitrateMbps = 20;
+      S.customBitrateMbps = 25;
       var job = buildJob({ exportFormat: "mp4", composition: dotMeshFolderTargetComposition(S.comp) });
       job.bitrate = DOT_MESH_FOLDER_SETTINGS.bitrate;
+      job.contentHint = "detail";
       probe = await renderPreflight(job);
     } finally { S.customBitrateMbps = originalBitrate; }
     if (dotMeshFolderCancelRequested) { closeModal(); return; }
@@ -9937,7 +9944,7 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
   var body = document.createElement("div");
   body.style.cssText = "display:flex;flex-direction:column;gap:9px;min-height:0;";
   var head = document.createElement("div");
-  head.innerHTML = '<div class="verified"><b>DOT MESH / FLAT FOLDER EXPORT</b><span id="dmzPos">0 / 50</span><span>4K60 · 20 Mbps TARGET</span></div>';
+  head.innerHTML = '<div class="verified"><b>DOT MESH / FLAT FOLDER EXPORT</b><span id="dmzPos">0 / 50</span><span>4K60 · 25 Mbps TARGET</span></div>';
   var status = el("div", "note", "Rendering all 50 Dot Mesh videos directly into the selected folder. One combined metadata CSV will be written at the end.");
   var bar = el("div", "prog"); bar.innerHTML = '<i style="width:0%"></i>';
   var log = el("div", "list"); log.style.cssText = "max-height:40vh;overflow:auto;";
@@ -9984,6 +9991,7 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
         S.comp = target;
         var job = buildJob({ exportFormat:"mp4", composition:target });
         job.bitrate = DOT_MESH_FOLDER_SETTINGS.bitrate;
+        job.contentHint = "detail";
         job.label = stockTitle;
         job.metadata.title = stockTitle;
         job.metadata.description = String(item.description || "");
@@ -10075,7 +10083,7 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
   var report = document.createElement("div");
   report.innerHTML = '<div class="verified"><b>'+(complete?"FOLDER EXPORT COMPLETE":"FOLDER EXPORT PARTIAL")+'</b><span>'+completed.length+' / 50 VIDEOS</span><span>'+failed.length+' FAILED</span>'+(cancelled?'<span>CANCELLED</span>':'')+'</div>'+
     '<p class="note">All MP4 files are saved directly in <code>'+esc(directoryHandle.name||"selected folder")+'</code> — no per-design subfolders. One combined <code>Dot Mesh Metadata.csv</code> contains one row for each successfully saved video.</p>'+
-    '<p class="note">Expected complete folder: 50 MP4 videos + 1 metadata CSV. Video target: 3840×2160, 60 FPS, 12 seconds, H.264, 20 Mbps encoder target.</p>';
+    '<p class="note">Expected complete folder: 50 MP4 videos + 1 metadata CSV. Video target: 3840×2160, 60 FPS, 12 seconds, H.264, 25 Mbps encoder target.</p>';
   if (csvError) report.appendChild(el("p","note","CSV SAVE FAILED: "+String(csvError.message||csvError)));
   if (fatalError) report.appendChild(el("p","note","Batch issue: "+String(fatalError.message||fatalError)));
   if (failed.length) report.appendChild(el("p","note",failed.length+" design(s) failed. The CSV lists only videos successfully saved."));
