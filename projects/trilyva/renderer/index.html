@@ -1887,7 +1887,11 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
           </div>
           <div class="sec">
             <h4>RENDER</h4>
-            <div class="btn-row"><button class="btn" data-act="renderFullLibrary" id="renderFullLibraryBtn" title="Render every item in the selected library to a folder or ZIP">RENDER FULL LIBRARY</button></div>
+            <div class="btn-row">
+              <button class="btn" data-act="renderFullLibrary" id="renderFullLibraryBtn" title="Render every item in the selected library to a folder or ZIP">RENDER FULL LIBRARY</button>
+              <button class="btn solid" data-act="exportDotMesh50" id="exportDotMesh50Btn" title="Render all 50 built-in Dot Mesh designs as 4K60 MP4 files and one combined metadata CSV">EXPORT DOT MESH · 50 VIDEOS</button>
+            </div>
+            <p class="note">Dedicated Dot Mesh batch export: renders all 50 built-in designs at 3840×2160, 60 FPS, 12 seconds each, then saves the MP4 files and one combined metadata CSV directly into the folder you choose.</p>
             
             <div class="row"><label for="stillFrameIndex">Still frame</label><input id="stillFrameIndex" type="number" min="0" step="1" value="0" style="max-width:100px" aria-describedby="stillExportNote"></div><div id="stillExportFormats" style="display:flex;flex-wrap:wrap;gap:8px 12px;margin:6px 0 2px;font:10px var(--mono);color:var(--ink-2)"><label><input type="checkbox" id="stillFmtPng" checked> PNG</label><label><input type="checkbox" id="stillFmtJpg"> JPG</label><label><input type="checkbox" id="stillFmtSvg"> SVG</label><label><input type="checkbox" id="stillFmtEps"> EPS</label></div><p class="note" id="stillExportNote">Frame numbers start at 0. After a successful render, TRILYVA also saves the selected still formats for this frame. PNG is the default.</p><p class="note">Renders the code currently in the editor using the selected composition, frame rate, duration, format and quality settings.</p>
             <div class="btn-row">
@@ -7631,7 +7635,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 'use strict';
 
 var SELF_SOURCE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-var APP_VERSION = '1.2.8';
+var APP_VERSION = '1.2.9';
 var SOFTWARE = 'TRILYVA — Tamasrazim';
 
 var libraryModulePromise = null;
