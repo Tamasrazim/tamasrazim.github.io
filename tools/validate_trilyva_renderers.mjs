@@ -19,6 +19,8 @@ must(renderer.includes('data-act="render"'),'header retains the current Render a
 must(renderer.includes('id="oBitrate" min="20" max="2000"') && renderer.includes('value="25"'),'video bitrate control enforces 20 Mbps minimum and 25 Mbps default');
 must(renderer.includes('MAX_VIDEO_FILE_BYTES = 2000000000') && renderer.includes('MAX_VIDEO_FILE_BYTES: MAX_VIDEO_FILE_BYTES'),'video exporter exposes the strict decimal 2 GB file-size cap');
 must(renderer.includes('function maxEncodedPayloadBytes') && renderer.includes('OutputSizeLimitError'),'MP4/WebM muxers guard encoded output size without quality reduction');
+must(renderer.includes("bitrateMode: 'constant'") && renderer.includes('function verifyEncodedVideoBitrate'),'MP4/WebM probes and encoders explicitly request constant-bitrate mode');
+must(renderer.includes('measuredBitrateBps') && renderer.includes('BitrateVerificationError') && renderer.includes('no low-bitrate file will be muxed or downloaded'),'completed encoded video payload is measured and rejected when it misses the required bitrate');
  must(renderer.includes('validation frame evaluated in a disposable runtime') && renderer.includes('frame 0 will render at full composition resolution'),'low-resolution validation cannot mutate the production frame-zero runtime');
 must(renderer.includes('function estimateVideoFileBytes') && renderer.includes('acceptVideoSizeWarning'),'oversize video estimates warn and require confirmation before rendering');
 must(renderer.includes('A 2 GB output is a file-size limit, not a bitrate'),'in-app docs distinguish file size from bitrate and explain memory behaviour');
