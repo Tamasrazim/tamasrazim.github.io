@@ -11828,7 +11828,7 @@ function suggestH264(c) {
   function fallbackBitrate(w, h, fps) {
     var auto = ENC.bitrateFor(w, h, fps, S.quality);
     var requested = requestedBitrate(w, h, fps);
-    return Math.min(H264_L62_MAX_BITRATE, Math.max(500000, Math.min(requested, auto * 4)));
+    return Math.min(H264_L62_MAX_BITRATE, Math.max(20000000, Math.min(requested, auto * 4)));
   }
   return Promise.all(tries.map(function (t) {
     return ENC.probeH264(t.w, t.h, t.fps, fallbackBitrate(t.w, t.h, t.fps))
