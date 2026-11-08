@@ -25,6 +25,7 @@ must(renderer.includes('measuredBitrateBps') && renderer.includes('BitrateVerifi
 must(renderer.includes('bitrateRetry < 2') && renderer.includes('compensatedBitrate') && renderer.includes('Retrying at '),'MP4/WebM automatically retry with a compensated bitrate when the encoder undershoots');
 must(renderer.includes('requestedBitrate: requestedBitrate, bitrateRetry: bitrateRetry + 1'),'automatic retries preserve the original user-requested bitrate for final verification');
 must(renderer.includes('return run(retryCfg)') && renderer.includes('requestedBitrate: cfg.requestedBitrate, bitrateRetry: cfg.bitrateRetry'),'compensation retries rebuild a fresh render runtime and preserve retry state');
+must(renderer.includes('assets: cfg.assets, layers: cfg.layers, vectorEdits: cfg.vectorEdits, vectorBounds: cfg.vectorBounds'),'fresh retry runtime preserves imported assets, layers and vector edits');
  must(renderer.includes('validation frame evaluated in a disposable runtime') && renderer.includes('frame 0 will render at full composition resolution'),'low-resolution validation cannot mutate the production frame-zero runtime');
 must(renderer.includes('function estimateVideoFileBytes') && renderer.includes('acceptVideoSizeWarning'),'oversize video estimates warn and require confirmation before rendering');
 must(renderer.includes('A 2 GB output is a file-size limit, not a bitrate'),'in-app docs distinguish file size from bitrate and explain memory behaviour');
@@ -68,7 +69,7 @@ must(overview.includes('/projects/trilyva/tutorial/index.html'),'TRILYVA overvie
 must(overview.includes('id="renderer-reference"') && overview.includes('RENDERER REFERENCE / 001'),'TRILYVA overview includes a dedicated renderer-reference section');
 must(overview.includes('8554d996-e226-4cf6-ad87-49624db8392e.png') && overview.includes('alt="TRILYVA Aurora Loop workspace:'),'renderer reference uses the uploaded Aurora Loop screenshot with descriptive alt text');
 must(overview.includes('OPEN THE RENDERER') && overview.includes('loading="lazy"'),'renderer reference links to the live workspace and lazy-loads its screenshot');
-must(serviceWorker.includes('tamasrazim-trilyva-pwa-v166'),'renderer service worker cache version is bumped');
+must(serviceWorker.includes('tamasrazim-trilyva-pwa-v167'),'renderer service worker cache version is bumped');
 must(!/chatgpt-motion-loop|chatgpt-30s-seamless-loop|trilyva-60s-motion-edit/i.test(serviceWorker),'promotional animation assets are removed from offline cache');
 must(!/chatgpt-motion-loop|chatgpt-30s-seamless-loop|trilyva-60s-motion-edit/i.test(overview),'TRILYVA overview no longer links to fixed-length promo animations');
 must(!/story-films|cartoon/i.test(manifest),'cartoon collection is absent from the library manifest');
@@ -93,7 +94,7 @@ const xyzSource = read('projects/trilyva/renderer/library/xyz-library.js');
 const xyzModule = await import('data:text/javascript;charset=utf-8,' + encodeURIComponent(xyzSource));
 const xyzItems = await xyzModule.default.load();
 must(manifest.libraries.includes('./xyz-library.js'), 'XYZ is registered in the TRILYVA library manifest');
-must(serviceWorker.includes('tamasrazim-trilyva-pwa-v166') && serviceWorker.includes('./library/xyz-library.js'), 'XYZ module is included in the bumped offline cache');
+must(serviceWorker.includes('tamasrazim-trilyva-pwa-v167') && serviceWorker.includes('./library/xyz-library.js'), 'XYZ module is included in the bumped offline cache');
 must(xyzItems.length === 50, 'XYZ library contains 50 distinct editable animations');
 must(new Set(xyzItems.map(item => item.title)).size === 50, 'XYZ animation titles are all unique');
 must(xyzItems.every(item => item.code.includes('function renderFrame') && item.code.length > 250), 'all XYZ animations contain editable renderFrame source');
