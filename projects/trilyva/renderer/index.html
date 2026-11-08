@@ -9424,22 +9424,37 @@ function openRenderAllConfirm(lib,items){
     wrapper.append(input,document.createTextNode(label));parent.appendChild(wrapper);return input;
   }
   var videoRow=el('p','note','Every animation in this batch will use the output settings below. Each item keeps its own stored duration and loop settings.');
-  var batchGrid=el('div');
-  batchGrid.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:9px;';
   function batchNumberField(label,value,min,max,step){
-    var wrap=el('label');
-    wrap.style.cssText='display:flex;flex-direction:column;gap:5px;font:10px var(--mono);color:var(--ink-2);min-width:0;';
-    var caption=el('span',null,label);
-    var input=document.createElement('input');
+    var wrap=el('label');wrap.style.cssText='display:flex;flex-direction:column;gap:5px;font:10px var(--mono);color:var(--ink-2);min-width:0;';
+    var caption=el('span',null,label),input=document.createElement('input');
     input.type='number';input.value=String(value);input.min=String(min);input.max=String(max);input.step=String(step);
     input.style.cssText='width:100%;min-width:0;padding:9px 8px;border:1px solid var(--rule-hi);border-radius:4px;background:var(--raise);color:var(--ink);font:12px var(--mono);';
-    wrap.append(caption,input);batchGrid.appendChild(wrap);
-    return input;
+    wrap.append(caption,input);return {wrap:wrap,input:input};
   }
-  var batchWidth=batchNumberField('WIDTH · PX',S.comp.width,2,16384,2);
-  var batchHeight=batchNumberField('HEIGHT · PX',S.comp.height,2,16384,2);
-  var batchFps=batchNumberField('FRAME RATE · FPS',S.comp.fps,1,240,1);
-  var batchBitrate=batchNumberField('CBR TARGET · Mbps',S.customBitrateMbps||25,20,800,0.1);
+  function batchSection(title){var section=el('div','sec');section.appendChild(el('h4',null,title));body.appendChild(section);return section;}
+  var resSection=batchSection('RESOLUTION');
+  var batchResSeg=el('div','seg');resSection.appendChild(batchResSeg);
+  var batchW=batchNumberField('Width',S.comp.width,2,16384,2),batchH=batchNumberField('Height',S.comp.height,2,16384,2);
+  var batchWH=el('div');batchWH.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:9px;';
+  batchWH.append(batchW.wrap,batchH.wrap);resSection.appendChild(batchWH);
+  var batchAspectRow=el('div','row');batchAspectRow.append(el('span','lb','Aspect'),el('span','val dim',''));var batchAspect=batchAspectRow.lastChild;resSection.appendChild(batchAspectRow);
+  var batchMpRow=el('div','row');batchMpRow.append(el('span','lb','Megapixels'),el('span','val dim',''));var batchMp=batchMpRow.lastChild;resSection.appendChild(batchMpRow);
+  function updateBatchResolution(){
+    var w=Number(batchW.input.value),h=Number(batchH.input.value);
+    if(w>0&&h>0){var g=gcd(Math.round(w),Math.round(h))||1;batchAspect.textContent=(Math.round(w)/g)+':'+(Math.round(h)/g)+' · '+(w/h).toFixed(4);batchMp.textContent=(w*h/1e6).toFixed(2)+' MP';}
+    segMark(batchResSeg,batchW.input.value+'x'+batchH.input.value);
+  }
+  buildSeg(batchResSeg,RES_PRESETS,function(v){var p=v.split('x');batchW.input.value=p[0];batchH.input.value=p[1];updateBatchResolution();});
+  batchW.input.addEventListener('input',updateBatchResolution);batchH.input.addEventListener('input',updateBatchResolution);
+  updateBatchResolution();
+  var fpsSection=batchSection('FRAME RATE');
+  var batchFpsSeg=el('div','seg');fpsSection.appendChild(batchFpsSeg);
+  var batchFpsField=batchNumberField('Custom fps',S.comp.fps,1,240,1);fpsSection.appendChild(batchFpsField.wrap);
+  buildSeg(batchFpsSeg,FPS_PRESETS.map(function(f){return {label:String(f),value:f};}),function(v){batchFpsField.input.value=v;segMark(batchFpsSeg,v);});
+  batchFpsField.input.addEventListener('input',function(){segMark(batchFpsSeg,batchFpsField.input.value);});
+  var bitrateSection=batchSection('VIDEO BITRATE');
+  var batchBitrateField=batchNumberField('CBR target · Mbps',S.customBitrateMbps||25,20,800,0.1);bitrateSection.appendChild(batchBitrateField.wrap);
+  var batchWidth=batchW.input,batchHeight=batchH.input,batchFps=batchFpsField.input,batchBitrate=batchBitrateField.input;
   var batchNote=el('p','note','Bitrate target: 20 Mbps minimum · 25 Mbps default · 800 Mbps maximum. CBR is requested; low-complexity scenes or browser encoders may deliver a lower measured average, which TRILYVA reports without rejecting an otherwise valid render. Each MP4 has a separate 2 GB file-size cap. Settings are never silently reduced.');
   var stillHeading=el('h4',null,'STILL OUTPUTS · ONE FRAME PER ITEM');
   var stillRow=el('div');stillRow.style.cssText='display:flex;flex-wrap:wrap;gap:10px 16px;';
@@ -9450,7 +9465,7 @@ function openRenderAllConfirm(lib,items){
   var frameInput=document.createElement('input');frameInput.type='number';frameInput.min='0';frameInput.step='1';frameInput.value=String(prefs.frame);frameInput.style.maxWidth='120px';frameRow.appendChild(frameInput);
   var details=el('div','note','Library: '+lib.title+' · '+items.length+' animations. Each selected video format renders the full composition. PNG/JPG/SVG/EPS export the selected frame; frame 0 is the first frame. Files will be written into a timestamped library folder, or into a ZIP archive you choose.');
   var warning=el('p','note','SVG and EPS use TRILYVA’s editable vector recorder; code that uses unsupported Canvas features may still render to video/PNG/JPG while its vector still is marked as failed.');
-  body.append(el('h4',null,'VIDEO OUTPUT SETTINGS'),videoRow,batchGrid,batchNote,stillHeading,stillRow,frameRow,details,warning);
+  body.append(el('h4',null,'VIDEO OUTPUT SETTINGS'),videoRow,batchNote,stillHeading,stillRow,frameRow,details,warning);
   function collectSettings(){
     var videoFormats=['mp4'];
     var stillFormats=['png','jpg','svg','eps'].filter(function(fmt){return stillChecks[fmt].checked;});
