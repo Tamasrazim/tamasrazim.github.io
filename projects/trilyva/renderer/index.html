@@ -3446,6 +3446,8 @@ function exportWebM(cfg) {
     return Promise.resolve({ ok: false, error: { name: 'CompositionError', message: 'VP8/VP9 need even pixel dimensions. Current composition is ' + comp.width + '×' + comp.height + '.', detail: 'Round the width and height to even numbers in the Composition panel.' } });
   }
   var targetBitrate = enc.sanitiseBitrate(job.bitrate, comp.width, comp.height, comp.fps);
+  var requestedBitrate = enc.sanitiseBitrate(cfg.requestedBitrate || targetBitrate, comp.width, comp.height, comp.fps);
+  var bitrateRetry = Number(cfg.bitrateRetry || 0);
   return enc.probeEncoders(comp.width, comp.height, comp.fps, targetBitrate).then(function (probe) {
     if (!probe.available) return { ok: false, error: { name: 'CapabilityError', message: probe.reason, detail: 'Render a PNG sequence instead.' } };
     var codec = probe.supported[0];
@@ -3510,7 +3512,21 @@ function exportWebM(cfg) {
         try { encoder.close(); } catch (e) { }
         if (sizeLimitHit) return { ok: false, error: videoSizeLimitError() };
         if (hardError) throw hardError;
-        var bitrateCheck = verifyEncodedVideoBitrate(encodedBytes, comp, targetBitrate, codec.label);
+        var bitrateCheck = verifyEncodedVideoBitrate(encodedBytes, comp, requestedBitrate, codec.label);
+        if (!bitrateCheck.ok && bitrateRetry < 2 && bitrateCheck.measuredBps > 0) {
+          var compensatedBitrate = Math.min(enc.MAX_TARGET_BITRATE_BPS,
+            Math.ceil(targetBitrate * (requestedBitrate / bitrateCheck.measuredBps) * 1.12));
+          if (compensatedBitrate > targetBitrate) {
+            cfg.onLog('CBR under-delivery: ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) +
+              ' Mbps measured against ' + (requestedBitrate / 1000000).toFixed(2) +
+              ' Mbps requested. Retrying at ' + (compensatedBitrate / 1000000).toFixed(2) + ' Mbps; output remains subject to the 2 GB cap.');
+            var retryJob = Object.assign({}, job, { bitrate: compensatedBitrate });
+            var retryCfg = Object.assign({}, cfg, { job: retryJob,
+              requestedBitrate: requestedBitrate, bitrateRetry: bitrateRetry + 1 });
+            if (env.releaseExportCanvas) { try { env.releaseExportCanvas(out); } catch (_) {} }
+            return exportWebM(retryCfg);
+          }
+        }
         if (!bitrateCheck.ok) return { ok: false, error: bitrateCheck.error };
         cfg.onLog('verified encoded video payload: ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) + ' Mbps average');
         var fin = mux.finish(comp.frameCount);
@@ -3548,6 +3564,8 @@ function exportMP4(cfg) {
       'Round the width and height to even numbers in the Composition panel.');
   }
   var wanted = enc.sanitiseBitrate(job.bitrate || enc.bitrateFor(comp.width, comp.height, comp.fps, job.quality), comp.width, comp.height, comp.fps);
+  var requestedBitrate = enc.sanitiseBitrate(cfg.requestedBitrate || wanted, comp.width, comp.height, comp.fps);
+  var bitrateRetry = Number(cfg.bitrateRetry || 0);
   return enc.probeH264(comp.width, comp.height, comp.fps, wanted).then(function (probe) {
     if (!probe.available) {
       return {
@@ -3663,7 +3681,20 @@ function exportMP4(cfg) {
             }
           };
         }
-        var bitrateCheck = verifyEncodedVideoBitrate(encodedBytes, comp, sel.config.bitrate, 'H.264');
+        var bitrateCheck = verifyEncodedVideoBitrate(encodedBytes, comp, requestedBitrate, 'H.264');
+        if (!bitrateCheck.ok && bitrateRetry < 2 && bitrateCheck.measuredBps > 0) {
+          var compensatedBitrate = Math.min(enc.MAX_TARGET_BITRATE_BPS,
+            Math.ceil(sel.config.bitrate * (requestedBitrate / bitrateCheck.measuredBps) * 1.12));
+          if (compensatedBitrate > sel.config.bitrate) {
+            cfg.onLog('CBR under-delivery: ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) +
+              ' Mbps measured against ' + (requestedBitrate / 1000000).toFixed(2) +
+              ' Mbps requested. Retrying at ' + (compensatedBitrate / 1000000).toFixed(2) + ' Mbps; output remains subject to the 2 GB cap.');
+            var retryJob = Object.assign({}, job, { bitrate: compensatedBitrate });
+            var retryCfg = Object.assign({}, cfg, { job: retryJob,
+              requestedBitrate: requestedBitrate, bitrateRetry: bitrateRetry + 1 });
+            return exportMP4(retryCfg);
+          }
+        }
         if (!bitrateCheck.ok) return { ok: false, stage: 'bitrate-verification', error: bitrateCheck.error };
         cfg.onLog('verified encoded video payload: ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) + ' Mbps average');
         var fin = mux.finish();
