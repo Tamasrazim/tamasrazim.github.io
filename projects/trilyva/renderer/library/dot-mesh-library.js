@@ -4,56 +4,56 @@
 
 const TAU = Math.PI * 2;
 const DESIGN_DEFINITIONS = [
-  ["Meridian Wave Grid", "wave", "Wave Fields"],
-  ["Ripple Lattice", "contour", "Wave Fields"],
-  ["Diagonal Tide", "diagonal", "Wave Fields"],
-  ["Interference Field", "moire", "Wave Fields"],
-  ["Cellular Drift", "fold", "Wave Fields"],
-  ["Helix Columns", "spiral", "Spiral Forms"],
-  ["Twin Spiral Array", "spiral", "Spiral Forms"],
-  ["Orbit Rosette", "radial", "Radial Systems"],
-  ["Polar Burst Mesh", "radial", "Radial Systems"],
-  ["Saturn Rings", "orbit", "Radial Systems"],
-  ["Hex Current", "hex", "Lattice Geometries"],
-  ["Honeycomb Pulse", "hex", "Lattice Geometries"],
-  ["Offset Crystal Field", "hex", "Lattice Geometries"],
-  ["Triangular Mesh", "diagonal", "Lattice Geometries"],
-  ["Isometric Cascade", "terrain", "Lattice Geometries"],
-  ["Diamond Envelope", "diagonal", "Lattice Geometries"],
-  ["Folded Grid", "fold", "Lattice Geometries"],
-  ["Wave Crest Matrix", "wave", "Wave Fields"],
-  ["Checker Sine", "moire", "Interference Studies"],
-  ["Ribbon Undulation", "wave", "Interference Studies"],
-  ["Vortex Field", "vortex", "Vortex Studies"],
-  ["Double Vortex", "vortex", "Vortex Studies"],
-  ["Turbine Dots", "radial", "Vortex Studies"],
-  ["Eddy Network", "vortex", "Vortex Studies"],
-  ["Gravity Well", "contour", "Vortex Studies"],
-  ["Lissajous Cage", "lissajous", "Harmonic Forms"],
-  ["Harmonic Loop", "lissajous", "Harmonic Forms"],
-  ["Mobius Mesh", "fold", "Harmonic Forms"],
-  ["Knotline Points", "lissajous", "Harmonic Forms"],
-  ["Flower of Harmonics", "harmonic", "Harmonic Forms"],
-  ["Radial Contour", "contour", "Radial Systems"],
-  ["Orbit Bands", "orbit", "Radial Systems"],
-  ["Eclipse Mesh", "orbit", "Radial Systems"],
-  ["Nested Spheres", "sphere", "Spherical Systems"],
-  ["Perspective Tunnel", "tunnel", "Perspective Fields"],
-  ["Horizon Convergence", "tunnel", "Perspective Fields"],
-  ["Vanishing-Point Grid", "tunnel", "Perspective Fields"],
-  ["Folding Corridor", "tunnel", "Perspective Fields"],
-  ["Parallax Columns", "tunnel", "Perspective Fields"],
-  ["Terrain Contour", "terrain", "Terrain Studies"],
-  ["Ridgefield", "terrain", "Terrain Studies"],
-  ["Mountain Mesh", "terrain", "Terrain Studies"],
-  ["Valley Scan", "terrain", "Terrain Studies"],
-  ["Seismic Surface", "terrain", "Terrain Studies"],
-  ["Dot Sphere", "sphere", "Spherical Systems"],
-  ["Spherical Lattice", "sphere", "Spherical Systems"],
-  ["Breathing Orb", "sphere", "Spherical Systems"],
-  ["Orbital Shell", "sphere", "Spherical Systems"],
-  ["Geodesic Halo", "sphere", "Spherical Systems"],
-  ["Pinwheel Coordinates", "pinwheel", "Radial Systems"]
+  ["Meridian Wave Grid", "wave", "Wave Fields", "Abstract Flowing Wave Grid of Connected White Dots"],
+  ["Ripple Lattice", "contour", "Wave Fields", "Abstract Concentric Ripple Pattern of Connected White Dots"],
+  ["Diagonal Tide", "diagonal", "Wave Fields", "Diagonal Flowing Geometric Wave Grid of White Dots"],
+  ["Interference Field", "moire", "Wave Fields", "Abstract Moire Interference Pattern of Connected Dots"],
+  ["Cellular Drift", "fold", "Wave Fields", "Abstract Cellular Wave Surface of Connected White Dots"],
+  ["Helix Columns", "spiral", "Spiral Forms", "Abstract Twisting Helix Columns Made of White Dots"],
+  ["Twin Spiral Array", "spiral", "Spiral Forms", "Abstract Twin Spiral Motion of Connected White Dots"],
+  ["Orbit Rosette", "radial", "Radial Systems", "Abstract Radial Orbit Rosette of White Dots"],
+  ["Polar Burst Mesh", "radial", "Radial Systems", "Abstract Radial Burst Pattern of Connected White Dots"],
+  ["Saturn Rings", "orbit", "Radial Systems", "Abstract Saturn Ring Orbit Pattern Made of White Dots"],
+  ["Hex Current", "hex", "Lattice Geometries", "Abstract Hexagonal Flowing Dot Grid Pattern"],
+  ["Honeycomb Pulse", "hex", "Lattice Geometries", "Abstract Pulsating Honeycomb Grid of White Dots"],
+  ["Offset Crystal Field", "hex", "Lattice Geometries", "Abstract Geometric Crystal Grid of Connected Dots"],
+  ["Triangular Mesh", "diagonal", "Lattice Geometries", "Abstract Triangular Geometric Dot Mesh Pattern"],
+  ["Isometric Cascade", "terrain", "Lattice Geometries", "Abstract Isometric Cascading Dot Grid Landscape"],
+  ["Diamond Envelope", "diagonal", "Lattice Geometries", "Abstract Diamond Shaped Wave Grid of White Dots"],
+  ["Folded Grid", "fold", "Lattice Geometries", "Abstract Folding Geometric Grid of Connected Dots"],
+  ["Wave Crest Matrix", "wave", "Wave Fields", "Abstract Flowing Crest Wave Matrix of White Dots"],
+  ["Checker Sine", "moire", "Interference Studies", "Abstract Checkerboard Moire Pattern of White Dots"],
+  ["Ribbon Undulation", "wave", "Interference Studies", "Abstract Undulating Ribbon Waves Made of Dots"],
+  ["Vortex Field", "vortex", "Vortex Studies", "Abstract Swirling Vortex Field of Connected White Dots"],
+  ["Double Vortex", "vortex", "Vortex Studies", "Abstract Double Vortex Spiral Pattern of White Dots"],
+  ["Turbine Dots", "radial", "Vortex Studies", "Abstract Radial Turbine Motion Made of White Dots"],
+  ["Eddy Network", "vortex", "Vortex Studies", "Abstract Flowing Eddy Network of Connected Dots"],
+  ["Gravity Well", "contour", "Vortex Studies", "Abstract Gravitational Well Ripple Pattern of White Dots"],
+  ["Lissajous Cage", "lissajous", "Harmonic Forms", "Abstract Lissajous Harmonic Cage of Connected Dots"],
+  ["Harmonic Loop", "lissajous", "Harmonic Forms", "Abstract Flowing Harmonic Loop Pattern of White Dots"],
+  ["Mobius Mesh", "fold", "Harmonic Forms", "Abstract Twisted Mobius Strip Dot Mesh"],
+  ["Knotline Points", "lissajous", "Harmonic Forms", "Abstract Lissajous Knot Pattern of Connected White Dots"],
+  ["Flower of Harmonics", "harmonic", "Harmonic Forms", "Abstract Harmonic Flower Pattern Made of White Dots"],
+  ["Radial Contour", "contour", "Radial Systems", "Abstract Radial Contour Rings of Connected White Dots"],
+  ["Orbit Bands", "orbit", "Radial Systems", "Abstract Concentric Orbit Bands Made of White Dots"],
+  ["Eclipse Mesh", "orbit", "Radial Systems", "Abstract Eclipse Orbit Pattern of Connected White Dots"],
+  ["Nested Spheres", "sphere", "Spherical Systems", "Abstract Nested Spherical Rings of White Dots"],
+  ["Perspective Tunnel", "tunnel", "Perspective Fields", "Abstract Futuristic Perspective Tunnel of White Dots"],
+  ["Horizon Convergence", "tunnel", "Perspective Fields", "Abstract Converging Horizon Grid of Connected Dots"],
+  ["Vanishing-Point Grid", "tunnel", "Perspective Fields", "Abstract Vanishing Point Perspective Dot Grid"],
+  ["Folding Corridor", "tunnel", "Perspective Fields", "Abstract Folding Geometric Corridor of White Dots"],
+  ["Parallax Columns", "tunnel", "Perspective Fields", "Abstract Parallax Perspective Columns Made of Dots"],
+  ["Terrain Contour", "terrain", "Terrain Studies", "Abstract Flowing Terrain Contour Lines of White Dots"],
+  ["Ridgefield", "terrain", "Terrain Studies", "Abstract Mountain Ridge Contour Dot Landscape"],
+  ["Mountain Mesh", "terrain", "Terrain Studies", "Abstract Animated Mountain Mesh of Connected White Dots"],
+  ["Valley Scan", "terrain", "Terrain Studies", "Abstract Valley Contour Scan Made of White Dots"],
+  ["Seismic Surface", "terrain", "Terrain Studies", "Abstract Seismic Wave Surface of Connected White Dots"],
+  ["Dot Sphere", "sphere", "Spherical Systems", "Abstract Rotating Three Dimensional Dot Sphere"],
+  ["Spherical Lattice", "sphere", "Spherical Systems", "Abstract Spherical Lattice Grid of Connected White Dots"],
+  ["Breathing Orb", "sphere", "Spherical Systems", "Abstract Breathing Orb Made of Connected White Dots"],
+  ["Orbital Shell", "sphere", "Spherical Systems", "Abstract Orbital Shell Pattern of White Dots"],
+  ["Geodesic Halo", "sphere", "Spherical Systems", "Abstract Geodesic Halo Sphere Made of White Dots"],
+  ["Pinwheel Coordinates", "pinwheel", "Radial Systems", "Abstract Radial Pinwheel Pattern of Connected White Dots"]
 ];
 
 function meshPoint(s, row, col, a, cols, rows) {
@@ -325,6 +325,7 @@ function makeDefinition(definition, index) {
   var columns = family === "sphere" || family === "radial" || family === "spiral" || family === "orbit" || family === "pinwheel" ? 38 : 34;
   var rows = family === "sphere" || family === "radial" || family === "spiral" || family === "orbit" || family === "pinwheel" ? 20 : 18;
   var title = definition[0];
+  var stockTitle = definition[3] || title;
   var id = "dotmesh-" + String(index + 1).padStart(3, "0");
   var description = title + " uses a " + family.replace(/-/g, " ") +
     " coordinate system with a distinct animated point field and connected vector mesh.";
@@ -339,7 +340,8 @@ function makeDefinition(definition, index) {
   var metadata = {
     schema: "trilyva.dot-mesh/1.0",
     id: id,
-    title: title,
+    title: stockTitle,
+    internalName: title,
     description: description,
     creator: "Tamasrazim",
     software: "TRILYVA",
@@ -358,7 +360,7 @@ function makeDefinition(definition, index) {
     tags: tags
   };
   return {
-    id: id, title: title, category: definition[2], description: description,
+    id: id, title: title, stockTitle: stockTitle, category: definition[2], description: description,
     duration: 12, loop: true, loopDuration: 12, fps: 60,
     width: 1920, height: 1080, transparent: true, seed: seed,
     code: sourceFor(spec),
@@ -377,7 +379,7 @@ function csvCell(value) {
 function catalogCsv() {
   var rows = [["id", "title", "description", "category", "design_family", "duration_seconds", "fps", "loop", "seamless", "background", "creator"]];
   items.forEach(function (item) {
-    rows.push([item.id, item.title, item.description, item.category, item.metadata.designFamily, 12, 60, "true", "true", "transparent", "Tamasrazim"]);
+    rows.push([item.id, item.stockTitle || item.metadata.title || item.title, item.description, item.category, item.metadata.designFamily, 12, 60, "true", "true", "transparent", "Tamasrazim"]);
   });
   return "\uFEFF" + rows.map(function (row) { return row.map(csvCell).join(","); }).join("\r\n") + "\r\n";
 }
