@@ -67,7 +67,7 @@
 
     <aside class="signal-card" aria-label="Interactive project index">
       <div class="signal-top mono"><span>01 / Work signal map</span><span class="status">Select a node</span></div>
-      <div class="signal-map" data-signal-map>
+      <div class="signal-map" data-signal-map role="group" aria-label="Choose a featured project">
         <svg class="signal-lines" viewBox="0 0 620 460" preserveAspectRatio="none" aria-hidden="true">
           <path class="signal-path" d="M310 230 C238 173 174 132 96 104"/>
           <path class="signal-path" d="M310 230 C382 173 446 132 524 104"/>
@@ -79,18 +79,18 @@
           <path class="signal-path route" data-route="neo" pathLength="1" d="M310 230 C382 287 446 328 524 356"/>
         </svg>
         <div class="signal-origin" aria-hidden="true">T / R</div>
-        <a class="signal-node is-active" href="/web2/trilyva/" data-signal="trilyva" aria-label="TRILYVA, procedural motion project">
+        <button class="signal-node is-active" type="button" data-signal="trilyva" aria-label="Select TRILYVA, procedural motion project" aria-pressed="true">
           <span class="node-no">01</span><span><span class="node-name">TRILYVA</span><span class="node-kind">Motion / Browser</span></span>
-        </a>
-        <a class="signal-node" href="/web2/trss/" data-signal="trss" aria-label="TrSS, Intel Arc graphics research">
+        </button>
+        <button class="signal-node" type="button" data-signal="trss" aria-label="Select TrSS, Intel Arc graphics research" aria-pressed="false">
           <span class="node-no">02</span><span><span class="node-name">TrSS</span><span class="node-kind">Graphics / Research</span></span>
-        </a>
-        <a class="signal-node" href="/web2/kynestra/" data-signal="kynestra" aria-label="KYNESTRA, modular desktop software">
+        </button>
+        <button class="signal-node" type="button" data-signal="kynestra" aria-label="Select KYNESTRA, modular desktop software" aria-pressed="false">
           <span class="node-no">03</span><span><span class="node-name">KYNESTRA</span><span class="node-kind">Desktop / Rust</span></span>
-        </a>
-        <a class="signal-node" href="/web2/neo/" data-signal="neo" aria-label="NEO, Windows puzzle game">
+        </button>
+        <button class="signal-node" type="button" data-signal="neo" aria-label="Select NEO, Windows puzzle game" aria-pressed="false">
           <span class="node-no">04</span><span><span class="node-name">NEO</span><span class="node-kind">Game / Windows</span></span>
-        </a>
+        </button>
       </div>
       <div class="signal-detail">
         <div class="signal-detail-copy" aria-live="polite">

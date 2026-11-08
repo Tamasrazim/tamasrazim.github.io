@@ -75,11 +75,19 @@ p { text-wrap: pretty; }
 .signal-map::before { content: ""; position: absolute; inset: 0; opacity: .4; background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px); background-size: 38px 38px; mask-image: linear-gradient(to bottom, #000, transparent 94%); }
 .signal-lines { position: absolute; inset: 0; width: 100%; height: 100%; }
 .signal-path { fill: none; stroke: rgba(242,241,236,.24); stroke-width: 1.35; vector-effect: non-scaling-stroke; }
-.signal-path.route { stroke: #f2f1ec; stroke-width: 1.9; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; transition: stroke-dashoffset .7s var(--ease), opacity .25s ease; }
+.signal-path.route { stroke: #f2f1ec; stroke-width: 1.9; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; }
 .signal-path.route.is-active { stroke-dashoffset: 0; opacity: 1; }
+.signal-card.is-awake .signal-path.route { animation: signal-draw .78s var(--ease) both; }
+.signal-card.is-awake .signal-path.route[data-route="trilyva"] { animation-delay: .04s; }
+.signal-card.is-awake .signal-path.route[data-route="trss"] { animation-delay: .12s; }
+.signal-card.is-awake .signal-path.route[data-route="kynestra"] { animation-delay: .20s; }
+.signal-card.is-awake .signal-path.route[data-route="neo"] { animation-delay: .28s; }
+.signal-card.is-awake .signal-path.route.is-active { animation-name: signal-draw-active; }
+@keyframes signal-draw { from { stroke-dashoffset: 1; opacity: .04; } to { stroke-dashoffset: 0; opacity: .58; } }
+@keyframes signal-draw-active { from { stroke-dashoffset: 1; opacity: .12; } to { stroke-dashoffset: 0; opacity: 1; } }
 .signal-origin { position: absolute; left: 50%; top: 50%; width: 78px; height: 78px; display: grid; place-items: center; transform: translate(-50%,-50%); border: 1px solid rgba(242,241,236,.65); border-radius: 50%; background: #0d0d0d; color: var(--paper); font: 10px var(--mono); letter-spacing: .1em; box-shadow: 0 0 0 11px rgba(255,255,255,.025), 0 0 0 23px rgba(255,255,255,.018); }
 .signal-origin::after { content: ""; position: absolute; inset: 8px; border: 1px dashed rgba(242,241,236,.22); border-radius: 50%; }
-.signal-node { position: absolute; width: 170px; min-height: 62px; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid #66645d; background: rgba(12,12,12,.96); transition: border-color var(--base) var(--ease), background var(--base) var(--ease), transform var(--base) var(--ease); }
+.signal-node { position: absolute; width: 170px; min-height: 62px; display: flex; align-items: center; gap: 12px; padding: 10px 12px; appearance: none; color: var(--paper); font: inherit; text-align: left; cursor: pointer; border: 1px solid #66645d; background: rgba(12,12,12,.96); transition: border-color var(--base) var(--ease), background var(--base) var(--ease), transform var(--base) var(--ease); }
 .signal-node::before { content: ""; position: absolute; width: 5px; height: 5px; border: 1px solid #aaa8a1; border-radius: 50%; background: var(--bg); }
 .signal-node[data-signal="trilyva"] { left: 4%; top: 10%; }
 .signal-node[data-signal="trss"] { right: 4%; top: 10%; }
@@ -302,6 +310,8 @@ p { text-wrap: pretty; }
   .neo-floor-map { inset-inline: 10%; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .signal-card.is-awake .signal-path.route, .signal-card.is-awake .signal-path.route.is-active { animation: none !important; }
+
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; }
