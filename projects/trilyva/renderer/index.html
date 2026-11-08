@@ -3807,7 +3807,7 @@ function run(cfg) {
   if (!c.ok) return Promise.resolve({ ok: false, stage: 'validate', error: c.error });
   cfg.onLog('fresh export runtime initialised; frame 0 will render at full composition resolution');
 
-  var sub = { env: env, rt: rt, comp: comp, job: job, from: cfg.from || 0, onLog: cfg.onLog, onProgress: cfg.onProgress, isCancelled: cfg.isCancelled, writeFile: cfg.writeFile, existing: cfg.existing, prepareFrame: cfg.prepareFrame, requestedBitrate: cfg.requestedBitrate, bitrateRetry: cfg.bitrateRetry };
+  var sub = { env: env, rt: rt, comp: comp, job: job, from: cfg.from || 0, onLog: cfg.onLog, onProgress: cfg.onProgress, isCancelled: cfg.isCancelled, writeFile: cfg.writeFile, existing: cfg.existing, prepareFrame: cfg.prepareFrame, assets: cfg.assets, layers: cfg.layers, vectorEdits: cfg.vectorEdits, vectorBounds: cfg.vectorBounds, requestedBitrate: cfg.requestedBitrate, bitrateRetry: cfg.bitrateRetry };
   var started = Date.now();
   var task = job.format === 'webm' ? exportWebM(sub)
     : job.format === 'mp4' ? exportMP4(sub)
