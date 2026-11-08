@@ -3524,7 +3524,7 @@ function exportWebM(cfg) {
             var retryCfg = Object.assign({}, cfg, { job: retryJob,
               requestedBitrate: requestedBitrate, bitrateRetry: bitrateRetry + 1 });
             if (env.releaseExportCanvas) { try { env.releaseExportCanvas(out); } catch (_) {} }
-            return exportWebM(retryCfg);
+            return run(retryCfg);
           }
         }
         if (!bitrateCheck.ok) return { ok: false, error: bitrateCheck.error };
@@ -3692,7 +3692,7 @@ function exportMP4(cfg) {
             var retryJob = Object.assign({}, job, { bitrate: compensatedBitrate });
             var retryCfg = Object.assign({}, cfg, { job: retryJob,
               requestedBitrate: requestedBitrate, bitrateRetry: bitrateRetry + 1 });
-            return exportMP4(retryCfg);
+            return run(retryCfg);
           }
         }
         if (!bitrateCheck.ok) return { ok: false, stage: 'bitrate-verification', error: bitrateCheck.error };
@@ -3807,7 +3807,7 @@ function run(cfg) {
   if (!c.ok) return Promise.resolve({ ok: false, stage: 'validate', error: c.error });
   cfg.onLog('fresh export runtime initialised; frame 0 will render at full composition resolution');
 
-  var sub = { env: env, rt: rt, comp: comp, job: job, from: cfg.from || 0, onLog: cfg.onLog, onProgress: cfg.onProgress, isCancelled: cfg.isCancelled, writeFile: cfg.writeFile, existing: cfg.existing, prepareFrame: cfg.prepareFrame };
+  var sub = { env: env, rt: rt, comp: comp, job: job, from: cfg.from || 0, onLog: cfg.onLog, onProgress: cfg.onProgress, isCancelled: cfg.isCancelled, writeFile: cfg.writeFile, existing: cfg.existing, prepareFrame: cfg.prepareFrame, requestedBitrate: cfg.requestedBitrate, bitrateRetry: cfg.bitrateRetry };
   var started = Date.now();
   var task = job.format === 'webm' ? exportWebM(sub)
     : job.format === 'mp4' ? exportMP4(sub)
