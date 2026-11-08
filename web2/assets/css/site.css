@@ -48,7 +48,7 @@ img, svg { display: block; max-width: 100%; }
 .site-nav { display: flex; align-items: center; gap: clamp(16px, 2.8vw, 39px); }
 .site-nav a { display: inline-flex; align-items: center; min-height: 44px; color: var(--muted); font: 10px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; transition: color var(--fast) ease; }
 .site-nav a:hover, .site-nav a[aria-current="page"] { color: var(--paper); }
-.site-nav .nav-contact { min-height: 40px; padding: 0 15px; border: 1px solid #66645f; color: var(--paper); }
+.site-nav .nav-contact { min-height: 44px; padding: 0 15px; border: 1px solid #66645f; color: var(--paper); }
 .site-nav .nav-contact:hover { background: var(--paper); border-color: var(--paper); color: var(--bg); }
 main { overflow: clip; }
 h1, h2, h3, p { margin-top: 0; }
@@ -252,7 +252,7 @@ p { text-wrap: pretty; }
   .site-header { height: 70px; }
   .site-nav { gap: 12px; }
   .site-nav a { font-size: 9px; letter-spacing: .06em; }
-  .site-nav .nav-contact { min-height: 38px; padding-inline: 10px; }
+  .site-nav .nav-contact { min-height: 44px; padding-inline: 10px; }
   .home-hero { min-height: auto; grid-template-columns: 1fr; gap: 44px; padding-block: 76px 84px; }
   .hero-title { font-size: clamp(52px,11.7vw,80px); }
   .hero-lede { max-width: 620px; }
@@ -309,6 +309,28 @@ p { text-wrap: pretty; }
   .module-cell { font-size: 8px; }
   .neo-floor-map { inset-inline: 10%; }
 }
+
+@media (max-width: 360px) {
+  .header-inner { gap: 7px; }
+  .wordmark { gap: 6px; font-size: 8px; letter-spacing: .09em; }
+  .wordmark-mark { width: 9px; height: 9px; }
+  .site-nav { gap: 5px; }
+  .site-nav a { font-size: 7px; letter-spacing: .02em; }
+  .site-nav .nav-contact { min-height: 44px; padding-inline: 6px; }
+  .hero-title { font-size: clamp(38px, 11.6vw, 43px); }
+  .page-hero h1 { font-size: clamp(36px, 10.5vw, 43px); }
+  .signal-map { padding: 10px; gap: 7px; }
+  .signal-node, .signal-node[data-signal="trilyva"], .signal-node[data-signal="trss"], .signal-node[data-signal="kynestra"], .signal-node[data-signal="neo"] {
+    min-height: 78px;
+    gap: 6px;
+    padding: 7px;
+  }
+  .signal-node .node-no { font-size: 7px; }
+  .signal-node .node-name { font-size: 8px; }
+  .signal-node .node-kind { font-size: 7px; letter-spacing: .04em; }
+  .signal-detail { padding: 14px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .signal-card.is-awake .signal-path.route, .signal-card.is-awake .signal-path.route.is-active { animation: none !important; }
 
