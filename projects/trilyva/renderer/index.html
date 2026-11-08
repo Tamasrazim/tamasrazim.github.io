@@ -9792,7 +9792,7 @@ async function dotMeshFolderRestoreWorkspace(saved) {
   S.meta=saved.meta ? merge({},saved.meta) : defaultMeta();
   S.frame=saved.frame || 0; S.hash=saved.hash || "";
   S.customBitrateMbps=Number.isFinite(Number(saved.customBitrateMbps))
-     ? Math.max(20, Math.min(800), Number(saved.customBitrateMbps))) : 25;
+     ? Math.max(20, Math.min(800, Number(saved.customBitrateMbps))) : 25;
   S.exportFormat=saved.exportFormat; S.quality=saved.quality;
   S.timebase=saved.timebase; S.checksums=saved.checksums;
   S.queueStop=false; S.lastError=saved.lastError || null;
@@ -11749,7 +11749,7 @@ function estimateVideoFileBytes(job) {
 function requestedBitrate(width, height, fps) {
   var custom = Number(S.customBitrateMbps);
   if (!isFinite(custom) || custom <= 0) custom = 25;
-  return Math.max(20, Math.min(800), custom)) * 1000000;
+  return Math.max(20, Math.min(800, custom)) * 1000000;
 }
 function initRenderPanel() {
   var dirOk = typeof window.showDirectoryPicker === 'function';
@@ -11766,14 +11766,14 @@ function initRenderPanel() {
   $('#oQuality').value = S.quality;
   $('#oTimebase').value = S.timebase;
   $('#oChecksum').value = S.checksums ? 'on' : 'off';
-  $('#oBitrate').value = Math.max(20, Math.min(800),
+  $('#oBitrate').value = Math.max(20, Math.min(800,
     Number.isFinite(Number(S.customBitrateMbps)) ? Number(S.customBitrateMbps) : 25));
   S.customBitrateMbps = Number($('#oBitrate').value);
   $('#oQuality').addEventListener('change', function () { S.quality = $('#oQuality').value; refreshMedia(); markDirty(); });
   $('#oBitrate').addEventListener('change', function () {
     var v = parseFloat($('#oBitrate').value);
     if (!isFinite(v)) v = 25;
-    v = Math.max(20, Math.min(800), v));
+    v = Math.max(20, Math.min(800, v));
     S.customBitrateMbps = v;
     $('#oBitrate').value = v;
     refreshMedia(); markDirty();
@@ -13323,7 +13323,7 @@ function loadProjectRecord(rec) {
   S.timebase = p.timebase || 'ms';
   S.checksums = p.checksums !== false;
   S.customBitrateMbps = isFinite(Number(p.customBitrateMbps))
-    ? Math.max(20, Math.min(800), Number(p.customBitrateMbps))) : 25;
+    ? Math.max(20, Math.min(800, Number(p.customBitrateMbps))) : 25;
   S.code = rec.code || '';
   edSetValue(S.code);
   $('#projName').value = S.name;
