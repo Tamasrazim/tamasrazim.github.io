@@ -7641,7 +7641,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 'use strict';
 
 var SELF_SOURCE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-var APP_VERSION = '1.2.9';
+var APP_VERSION = '1.3.0';
 var SOFTWARE = 'TRILYVA — Tamasrazim';
 
 var libraryModulePromise = null;
@@ -9965,7 +9965,7 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
   try {
     S.queueStop = false;
     if (S.playing) pause();
-    S.customBitrateMbps = 20;
+    S.customBitrateMbps = 25;
     for (var i = 0; i < items.length; i++) {
       if (dotMeshFolderCancelRequested) { cancelled = true; break; }
       var item = items[i];
