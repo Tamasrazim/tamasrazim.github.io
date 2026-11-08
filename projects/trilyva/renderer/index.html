@@ -3248,7 +3248,7 @@ function probeH264(width, height, fps, bitrate) {
     var c = H264_CANDIDATES[i++];
     var cfg = {
       codec: c.id, width: w, height: h, bitrate: br, framerate: fps,
-      latencyMode: 'quality', avc: { format: 'avc' }
+      bitrateMode: 'constant', latencyMode: 'quality', avc: { format: 'avc' }
     };
     return VideoEncoder.isConfigSupported(cfg).then(function (r) {
       var ok = !!(r && r.supported);
@@ -3288,11 +3288,11 @@ function probeEncoders(width, height, fps, bitrate) {
     return Promise.resolve({ available: false, reason: 'VideoEncoder (WebCodecs) is not implemented in this browser.', supported: [] });
   }
   var w = Math.max(2, width - (width % 2)), h = Math.max(2, height - (height % 2));
-  var probeBitrate = sanitiseBitrate(bitrate === undefined ? 6000000 : bitrate, w, h, fps);
+  var probeBitrate = sanitiseBitrate(bitrate === undefined ? 25000000 : bitrate, w, h, fps);
   var tests = CODECS.map(function (c) {
     return VideoEncoder.isConfigSupported({
       codec: c.id, width: w, height: h, bitrate: probeBitrate,
-      framerate: fps, latencyMode: 'quality'
+      framerate: fps, bitrateMode: 'constant', latencyMode: 'quality'
     }).then(function (r) { return { codec: c, supported: !!r.supported }; })
       .catch(function () { return { codec: c, supported: false }; });
   });
@@ -3416,6 +3416,26 @@ function dupRuns(cs) {
   return n;
 }
 
+/* Verify the completed elementary video stream instead of trusting the requested encoder setting.
+   WebCodecs defaults to variable bitrate unless constant mode is explicitly selected. */
+function verifyEncodedVideoBitrate(encodedBytes, comp, requestedBitrate, codecLabel) {
+  var duration = Number(comp.frameCount) / Number(comp.fps);
+  var measuredBps = duration > 0 ? Math.round((encodedBytes * 8) / duration) : 0;
+  var requiredBps = Math.max(20000000, Math.ceil(Number(requestedBitrate) * 0.95));
+  if (!Number.isFinite(measuredBps) || measuredBps < requiredBps) {
+    return {
+      ok: false,
+      measuredBps: measuredBps,
+      error: {
+        name: 'BitrateVerificationError',
+        message: codecLabel + ' encoded ' + (measuredBps / 1000000).toFixed(2) + ' Mbps; TRILYVA requires at least ' + (requiredBps / 1000000).toFixed(2) + ' Mbps for this export.',
+        detail: 'The encoder was configured for constant bitrate, but its completed video stream did not meet the required rate. TRILYVA has rejected the output; no low-bitrate file will be muxed or downloaded. Use a browser/codec that accepts constant-bitrate WebCodecs configurations. Do not lower the requested quality.'
+      }
+    };
+  }
+  return { ok: true, measuredBps: measuredBps, requiredBps: requiredBps };
+}
+
 /* ---------------- WebM ---------------- */
 function exportWebM(cfg) {
   var env = cfg.env, enc = env.enc, comp = cfg.comp, job = cfg.job;
@@ -3425,7 +3445,8 @@ function exportWebM(cfg) {
   if (comp.width % 2 || comp.height % 2) {
     return Promise.resolve({ ok: false, error: { name: 'CompositionError', message: 'VP8/VP9 need even pixel dimensions. Current composition is ' + comp.width + '×' + comp.height + '.', detail: 'Round the width and height to even numbers in the Composition panel.' } });
   }
-  return enc.probeEncoders(comp.width, comp.height, comp.fps, job.bitrate).then(function (probe) {
+  var targetBitrate = enc.sanitiseBitrate(job.bitrate, comp.width, comp.height, comp.fps);
+  return enc.probeEncoders(comp.width, comp.height, comp.fps, targetBitrate).then(function (probe) {
     if (!probe.available) return { ok: false, error: { name: 'CapabilityError', message: probe.reason, detail: 'Render a PNG sequence instead.' } };
     var codec = probe.supported[0];
     var scale = job.timebase === 'exact' ? Math.round(1e9 / comp.fps) : 1000000;
@@ -3454,10 +3475,10 @@ function exportWebM(cfg) {
     var gop = Math.max(1, Math.round(comp.fps * 2));
     encoder.configure({
       codec: codec.id, width: comp.width, height: comp.height,
-      bitrate: enc.sanitiseBitrate(job.bitrate, comp.width, comp.height, comp.fps),
-      framerate: comp.fps, latencyMode: 'quality'
+      bitrate: targetBitrate,
+      framerate: comp.fps, bitrateMode: 'constant', latencyMode: 'quality'
     });
-    cfg.onLog('encoder configured: ' + codec.label + ' (' + codec.id + ') @ ' + Math.round(enc.sanitiseBitrate(job.bitrate, comp.width, comp.height, comp.fps) / 1000) + ' kbps');
+    cfg.onLog('encoder configured: ' + codec.label + ' (' + codec.id + ') @ ' + Math.round(targetBitrate / 1000) + ' kbps · CBR');
 
     function drain(limit) {
       if (sizeLimitHit) return Promise.reject(new Error('OUTPUT_SIZE_LIMIT'));
@@ -3489,10 +3510,14 @@ function exportWebM(cfg) {
         try { encoder.close(); } catch (e) { }
         if (sizeLimitHit) return { ok: false, error: videoSizeLimitError() };
         if (hardError) throw hardError;
+        var bitrateCheck = verifyEncodedVideoBitrate(encodedBytes, comp, targetBitrate, codec.label);
+        if (!bitrateCheck.ok) return { ok: false, error: bitrateCheck.error };
+        cfg.onLog('verified encoded video payload: ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) + ' Mbps average');
         var fin = mux.finish(comp.frameCount);
         if (fin.blob.size > enc.MAX_VIDEO_FILE_BYTES) return { ok: false, error: videoSizeLimitError() };
         cfg.onLog('muxed ' + fin.frames + ' blocks into ' + (fin.blob.size / 1048576).toFixed(2) + ' MB');
-        return { ok: true, blob: fin.blob, muxed: fin, encodedOutputs: outputs, res: res, codec: codec };
+        return { ok: true, blob: fin.blob, muxed: fin, encodedOutputs: outputs, res: res, codec: codec,
+          bitrate: targetBitrate, measuredBitrateBps: bitrateCheck.measuredBps };
       }).catch(function (e) {
         if (sizeLimitHit || String(e && e.message || e) === 'OUTPUT_SIZE_LIMIT') return { ok: false, error: videoSizeLimitError() };
         return { ok: false, error: { name: 'EncoderError', message: String(e.message || e), detail: 'The encoder failed while finishing the stream. No file was produced.' } };
@@ -3638,6 +3663,9 @@ function exportMP4(cfg) {
             }
           };
         }
+        var bitrateCheck = verifyEncodedVideoBitrate(encodedBytes, comp, sel.config.bitrate, 'H.264');
+        if (!bitrateCheck.ok) return { ok: false, stage: 'bitrate-verification', error: bitrateCheck.error };
+        cfg.onLog('verified encoded video payload: ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) + ' Mbps average');
         var fin = mux.finish();
         if (!fin.ok) {
           return { ok: false, stage: 'mux', error: { name: 'MP4 MUXER ERROR', layer: 'mux', message: fin.reason, detail: 'The H.264 stream was produced but could not be described in an MP4 sample table, so no file was written.' } };
@@ -3646,7 +3674,8 @@ function exportMP4(cfg) {
         cfg.onLog('muxed ' + fin.samples + ' AVC samples into ftyp + mdat + moov — ' + (fin.blob.size / 1048576).toFixed(2) + ' MB');
         return {
           ok: true, blob: fin.blob, muxed: fin, encodedOutputs: outputs, res: res,
-          codec: { label: sel.label, id: sel.id }, bitrate: sel.config.bitrate, probe: probe
+          codec: { label: sel.label, id: sel.id }, bitrate: sel.config.bitrate,
+          measuredBitrateBps: bitrateCheck.measuredBps, probe: probe
         };
       }).catch(function (e) {
         try { encoder.close(); } catch (e2) { }
@@ -3766,6 +3795,7 @@ function run(cfg) {
         renderMs: stats, totalRenderMs: r.res.elapsedMs,
         avgProcessFps: r.res.durations.length / (r.res.elapsedMs / 1000),
         bytes: r.blob ? r.blob.size : (r.bytes || 0),
+        measuredBitrateBps: r.measuredBitrateBps || null,
         checksums: r.res.checksums,
         duplicateNeighbours: dupRuns(r.res.checksums),
         framesEncoded: (r.encodedOutputs === undefined ? null : r.encodedOutputs),
