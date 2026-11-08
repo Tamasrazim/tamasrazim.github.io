@@ -235,7 +235,7 @@ h1{font-size:clamp(28px,4vw,54px);line-height:.95;margin:8px 0 0;font-weight:600
 
   async function loadFlowerLibrary() {
     try {
-      const response = await fetch('../renderer/index.html', { cache: 'no-store' });
+      const response = await fetch('/projects/trilyva/renderer/index.html', { cache: 'no-store' });
       if (!response.ok) throw new Error('Renderer library request failed: '+response.status);
       const source = await response.text();
       const doc = new DOMParser().parseFromString(source, 'text/html');
@@ -359,12 +359,12 @@ h1{font-size:clamp(28px,4vw,54px);line-height:.95;margin:8px 0 0;font-weight:600
     }
     await invoke('start_render_job', {projectPath:state.projectPath, jobId:next.job_id});
     const q = new URLSearchParams({projectPath:state.projectPath,jobId:next.job_id});
-    location.href = '../renderer/index.html?'+q.toString();
+    location.href = '/projects/trilyva/renderer/index.html?'+q.toString();
   }
 
   function openRenderer() {
     const q = state.projectPath ? '?'+new URLSearchParams({projectPath:state.projectPath}).toString() : '';
-    location.href = '../renderer/index.html'+q;
+    location.href = '/projects/trilyva/renderer/index.html'+q;
   }
 
   async function packageRenderedFiles() {
@@ -401,7 +401,7 @@ h1{font-size:clamp(28px,4vw,54px);line-height:.95;margin:8px 0 0;font-weight:600
   $('manifestBtn').addEventListener('click', exportManifest);
   $('packageBtn').addEventListener('click', packageRenderedFiles);
   $('backBtn').addEventListener('click', () => {
-    location.href = projectPath ? '../renderer/index.html?'+new URLSearchParams({projectPath:projectPath}).toString() : '../renderer/index.html';
+    location.href = projectPath ? '/projects/trilyva/renderer/index.html?'+new URLSearchParams({projectPath:projectPath}).toString() : '/projects/trilyva/renderer/index.html';
   });
   $('search').addEventListener('input', renderCards);
   $('cards').addEventListener('change', event => {

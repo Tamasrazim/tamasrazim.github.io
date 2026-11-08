@@ -6,11 +6,11 @@ on:
   push:
     paths:
       - "KYNESTRA/**"
-      - "projects/code-motion/renderer/**"
+      - "projects/trilyva/renderer/**"
   pull_request:
     paths:
       - "KYNESTRA/**"
-      - "projects/code-motion/renderer/**"
+      - "projects/trilyva/renderer/**"
   workflow_dispatch:
 
 jobs:

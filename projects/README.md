@@ -4,7 +4,7 @@ This directory contains a curated set of first-party browser tools, native appli
 
 ## Featured project families
 
-- **TRILYVA** — browser-based procedural motion workspace. Start at `/projects/trilyva/` for the overview; launch the actual editor at `/projects/code-motion/renderer/`. The former `/projects/code-motion/` URL redirects to the overview.
+- **TRILYVA** — browser-based procedural motion workspace. Start at `/projects/trilyva/` for the overview; launch the actual editor at `/projects/trilyva/renderer/`. The former `/projects/code-motion/` URL redirects to the overview.
 - **Vector tooling** — CODE → SVG and CODE → EPS.
 - **NEO** — native Windows x64 first-person puzzle game.
 - **TUNRUN** — native C++20 procedural 3D tunnel-flight game in development; its project page documents prototype systems, controls, ships, resources, saves, status and roadmap separately from planned features.

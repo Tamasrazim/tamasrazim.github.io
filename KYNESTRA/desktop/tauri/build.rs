@@ -15,7 +15,7 @@ fn main() {
 // The renderer loads many local modules at runtime, so copy its whole folder—not just index.html.
 fn sync_c2m_assets() -> Result<(), Box<dyn std::error::Error>> {
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR")?);
-    let source = manifest_dir.join("../../../projects/code-motion/renderer");
+    let source = manifest_dir.join("../../../projects/trilyva/renderer");
     let target = manifest_dir.join("../shell/modules/c2m/renderer");
 
     if target.exists() {

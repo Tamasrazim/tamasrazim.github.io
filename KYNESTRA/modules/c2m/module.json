@@ -21,7 +21,7 @@
     "render.failed"
   ],
   "boundaries": {
-    "productionCopy": "projects/code-motion/renderer",
+    "productionCopy": "projects/trilyva/renderer",
     "kynestraCopy": "KYNESTRA/modules/c2m/renderer"
   },
   "handoffCommand": "ingest_module_output"

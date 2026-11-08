@@ -25,7 +25,7 @@ jobs:
           from pathlib import Path
           import re, gzip, json
 
-          root = Path("projects/code-motion/renderer/keyword-library")
+          root = Path("projects/trilyva/renderer/keyword-library")
           root.mkdir(parents=True, exist_ok=True)
 
           categories = [
@@ -145,6 +145,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add projects/code-motion/renderer/keyword-library
+          git add projects/trilyva/renderer/keyword-library
           git commit -m "TRILYVA: add 5M unique stock keyword research corpus" || exit 0
           git push

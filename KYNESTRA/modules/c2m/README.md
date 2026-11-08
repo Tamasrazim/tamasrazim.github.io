@@ -6,7 +6,7 @@ C2M bundles the TRILYVA animation runtime inside KYNESTRA.
 
 The canonical renderer source is:
 
-`/projects/code-motion/renderer/`
+`/projects/trilyva/renderer/`
 
 It includes the main editor, renderer modules, icons, service worker, manifests, local libraries, and large keyword data files.
 

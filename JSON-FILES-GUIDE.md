@@ -32,7 +32,7 @@ A `.webmanifest` file tells a browser about a web app's name, icons, launch beha
 - `projects/bncagrocare/catalog/manifest.webmanifest` — install and launch information for the BNC product catalog.
 - `projects/bncagrocare/invoice/manifest.webmanifest` — install and launch information for the BNC invoice tool.
 - `projects/bncagrocare/manifest.webmanifest` — install and launch information for the main BNC Agrocare app.
-- `projects/code-motion/renderer/manifest.webmanifest` — install and launch information for the Code Motion renderer.
+- `projects/trilyva/renderer/manifest.webmanifest` — install and launch information for the TRILYVA renderer.
 - `projects/code-to-eps/code-to-eps.webmanifest` — browser app metadata for Code to EPS.
 - `projects/code-to-eps/workspace/code-to-eps.webmanifest` — browser app metadata for the embedded Code to EPS workspace.
 - `projects/code-to-svg/code-to-svg.webmanifest` — browser app metadata for Code to SVG.
@@ -42,9 +42,9 @@ A `.webmanifest` file tells a browser about a web app's name, icons, launch beha
 
 ## Libraries and generated data
 
-- `projects/code-motion/renderer/keyword-library/MANIFEST.json` — indexes the keyword-library data available to the renderer.
-- `projects/code-motion/renderer/library/manifest.json` — lists the animation-library modules that the renderer loads.
-- `projects/code-motion/renderer/library/prism-web-icons.json` — stores prism-style web-icon data used by the renderer.
+- `projects/trilyva/renderer/keyword-library/MANIFEST.json` — indexes the keyword-library data available to the renderer.
+- `projects/trilyva/renderer/library/manifest.json` — lists the animation-library modules that the renderer loads.
+- `projects/trilyva/renderer/library/prism-web-icons.json` — stores prism-style web-icon data used by the renderer.
 - `projects/code-to-eps/prism-library.json` — stores the prism vector library used by Code to EPS.
 - `projects/code-to-eps/workspace/prism-library.json` — the prism vector library for the embedded Code to EPS workspace.
 - `projects/repo-token-meter/repo-manifest.json` — lists the repository files the Token Meter reads and presents.

@@ -12,7 +12,7 @@ The former mass-generated one-page utility collection has been removed so the si
 
 | Project | Public page |
 | --- | --- |
-| TRILYVA motion workspace | [Project overview](https://tamasrazim.github.io/projects/trilyva/) · [Open workspace](https://tamasrazim.github.io/projects/code-motion/renderer/) |
+| TRILYVA motion workspace | [Project overview](https://tamasrazim.github.io/projects/trilyva/) · [Open workspace](https://tamasrazim.github.io/projects/trilyva/renderer/) |
 | NEO native Windows game | [Game page](https://tamasrazim.github.io/projects/neo/) · [Downloads](https://tamasrazim.github.io/projects/neo/download/) |
 | TUNRUN C++ game in development | [Project page](https://tamasrazim.github.io/projects/tunrun/) · [Build and test status](https://github.com/Tamasrazim/TUNRUN/actions) |
 | CODE → SVG | [Project page](https://tamasrazim.github.io/projects/code-to-svg/) · [Workspace](https://tamasrazim.github.io/projects/code-to-svg/workspace/) |

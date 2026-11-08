@@ -22,7 +22,7 @@ This is the maintained architecture for the Tamasrazim GitHub Pages repository. 
 
 - `/projects/trilyva/` — canonical TRILYVA project overview linked from the homepage and project directory.
 - `/projects/code-motion/` — legacy TRILYVA route with a branded redirect to the overview.
-- `/projects/code-motion/renderer/` — the actual TRILYVA editor and renderer.
+- `/projects/trilyva/renderer/` — the actual TRILYVA editor and renderer.
 - `/projects/code-to-svg/` and `/projects/code-to-eps/` — vector project overview pages.
 - Their `/workspace/` routes hold the interactive applications.
 - `/projects/neo/` — NEO project information and release entry point.

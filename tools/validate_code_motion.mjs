@@ -7,9 +7,9 @@ const must = (ok, msg) => {
   console.log('PASS', msg);
 };
 
-const renderer = fs.readFileSync('projects/code-motion/renderer/index.html', 'utf8');
+const renderer = fs.readFileSync('projects/trilyva/renderer/index.html', 'utf8');
 const project = fs.readFileSync('projects/code-motion/index.html', 'utf8');
-const media = fs.readFileSync('projects/code-motion/renderer/media-stack.js', 'utf8');
+const media = fs.readFileSync('projects/trilyva/renderer/media-stack.js', 'utf8');
 
 must(renderer.includes('<title>TRILYVA — Tamasrazim</title>'), 'current TRILYVA title exists');
 
@@ -84,10 +84,10 @@ must(media.includes("containers: ['mp4', 'webm']"), 'media descriptor exposes cu
 must(media.includes("videoCodecs: ['avc', 'vp9', 'vp8']"), 'media descriptor exposes current codec layers');
 must(!media.includes('installBatchLink')&&!media.includes('FLOWER BATCH'),'media descriptor does not inject the removed Flower Batch tab');
 must(renderer.includes("const PRISM_LIBRARY_URL='./library/prism-library.json'")&&renderer.includes("const TRILYVA_PRISM_LIBRARY_URL='./library/prism-library.json'"),'both TRILYVA Prism loaders use the self-contained local dataset');
-const prismData = fs.readFileSync('projects/code-motion/renderer/library/prism-data.js', 'utf8');
-must(fs.existsSync('projects/code-motion/renderer/library/prism-library.json')&&prismData.includes('./prism-library.json')&&prismData.includes('export default data;'),'the protected Prism module loads its bundled sibling dataset');
+const prismData = fs.readFileSync('projects/trilyva/renderer/library/prism-data.js', 'utf8');
+must(fs.existsSync('projects/trilyva/renderer/library/prism-library.json')&&prismData.includes('./prism-library.json')&&prismData.includes('export default data;'),'the protected Prism module loads its bundled sibling dataset');
 const kynestraBuild = fs.readFileSync('KYNESTRA/desktop/tauri/build.rs', 'utf8');
-must(kynestraBuild.includes('manifest_dir.join("../../../projects/code-motion/renderer")')&&kynestraBuild.includes('fn copy_directory'),'KYNESTRA stages every renderer dependency from the canonical runtime');
+must(kynestraBuild.includes('manifest_dir.join("../../../projects/trilyva/renderer")')&&kynestraBuild.includes('fn copy_directory'),'KYNESTRA stages every renderer dependency from the canonical runtime');
 
 try {
   new Function(media);

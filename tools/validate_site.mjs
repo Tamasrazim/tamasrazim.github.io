@@ -73,7 +73,7 @@ const htmlFiles=[
   'projects/trilyva/index.html',
   'asset-vault/index.html',
   'projects/code-motion/index.html',
-  'projects/code-motion/renderer/index.html',
+  'projects/trilyva/renderer/index.html',
   'projects/bncagrocare/index.html',
   'projects/bncagrocare/catalog/index.html',
   'projects/bncagrocare/invoice/index.html',
@@ -130,13 +130,13 @@ for(const file of [
   'assets/js/boot.js',
   'assets/js/site.js',
   'assets/js/motion-core.js',
-  'projects/code-motion/renderer/media-stack.js',
+  'projects/trilyva/renderer/media-stack.js',
   'asset-vault/js/app.js',
   'projects/bncagrocare/invoice/js/app.js'
 ]) checkScript(file);
 
 for(const file of [
-  'projects/code-motion/renderer/manifest.webmanifest',
+  'projects/trilyva/renderer/manifest.webmanifest',
   'asset-vault/manifest.webmanifest',
   'projects/bncagrocare/invoice/manifest.webmanifest'
 ]){
@@ -159,7 +159,7 @@ const rootSchema=JSON.parse(site.slice(schemaStart+schemaOpen.length,schemaEnd))
 must(rootSchema['@context']==='https://schema.org'&&Array.isArray(rootSchema['@graph']),'homepage schema graph parses');
 must(rootSchema['@graph'].some(n=>n['@type']==='Person'&&n['@id']==='https://tamasrazim.github.io/#person'),'schema identifies person');
 must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length===15,'schema includes fifteen documented software applications');
-must(rootSchema['@graph'].some(n=>n['@id']==='https://tamasrazim.github.io/projects/code-motion/renderer/#application'&&n.name==='TRILYVA Renderer'),'schema identifies renderer as a separate tool route');
+must(rootSchema['@graph'].some(n=>n['@id']==='https://tamasrazim.github.io/projects/trilyva/renderer/#application'&&n.name==='TRILYVA Renderer'),'schema identifies renderer as a separate tool route');
 must(rootSchema['@graph'].some(n=>n['@id']==='https://tamasrazim.github.io/#trilyva'&&n.url==='https://tamasrazim.github.io/projects/trilyva/'),'TRILYVA schema points to the project overview, not the renderer');
 must(rootSchema['@graph'].some(n=>n['@type']==='SoftwareApplication'&&n.name==='KYNESTRA'&&/Windows/.test(n.operatingSystem)),'schema identifies KYNESTRA as Windows desktop software');
 must(rootSchema['@graph'].some(n=>n['@type']==='SoftwareApplication'&&n.name==='QALYVYRON'&&n.url==='https://tamasrazim.github.io/projects/qalyvyron/'),'schema identifies the QALYVYRON desktop 3D studio');
@@ -176,7 +176,7 @@ must(workPage.includes('11 SELECTED PROJECTS')&&!workPage.includes('13 SELECTED 
 must((workPage.match(/class="v3-project-card v2-project-card v2-reveal v3-reveal"/g)||[]).length===11,'dedicated Work page contains the same eleven selected project cards');
 must(!site.includes('PRO_TOOL_MANIFEST'),'homepage omits the generated micro-tool catalogue');
 for(const ref of ['href="/projects/trilyva/"','href="/projects/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"','href="/projects/webedyts/"','href="/projects/qalyvyron/"'])must(site.includes(ref),'homepage exposes '+ref);
-must(!site.includes('href="/projects/code-motion/renderer/">Open workspace'),'homepage does not send the TRILYVA card straight to the renderer');
+must(!site.includes('href="/projects/trilyva/renderer/">Open workspace'),'homepage does not send the TRILYVA card straight to the renderer');
 const visibleHomeMarkup=schemaStart>=0&&schemaEnd>schemaStart?site.slice(0,schemaStart)+site.slice(schemaEnd+'</script>'.length):site;
 must(!visibleHomeMarkup.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!visibleHomeMarkup.includes('Source files ')&&!visibleHomeMarkup.includes('SVG source ')&&!visibleHomeMarkup.includes('EPS source '),'homepage omits direct source links in visible markup');
 must(site.includes('href="/projects/tunrun/"')&&!site.includes('href="https://github.com/Tamasrazim/TUNRUN"'),'homepage links to TUNRUN project page');
@@ -220,7 +220,7 @@ for(const route of ['/', '/work/', '/about/', '/approach/', '/projects/', '/proj
   must(sitemapUrls.has('https://tamasrazim.github.io'+route),'sitemap includes '+route);
 }
 must(!sitemapUrls.has('https://tamasrazim.github.io/renderer/')&&!sitemapUrls.has('https://tamasrazim.github.io/projects/code-motion/'),'sitemap excludes legacy redirect-only routes');
-must(read('renderer/index.html').includes('location.replace("../projects/code-motion/renderer/"+location.search+location.hash)'),'legacy renderer route redirects directly to the canonical workspace and preserves query/hash');
+must(read('renderer/index.html').includes('location.replace("../projects/trilyva/renderer/"+location.search+location.hash)'),'legacy renderer route redirects directly to the canonical workspace and preserves query/hash');
 
 for(const removedPage of ['projects/trilyva/niko-and-the-clockwork-bird.html','projects/trilyva/the-last-star-train.html']) must(!exists(removedPage),removedPage+' removed');
 
@@ -247,7 +247,7 @@ must(trssProjectPage.includes('IN DEVELOPMENT')&&trssProjectPage.includes('NATIV
 must(trssProjectPage.includes('TrSSRRProcessLatestFrameV1')&&trssProjectPage.includes('synchronous')&&trssProjectPage.includes('physical Arc B580'),'TrSS page explains the cooperative frame boundary and validation limits');
 must(!trssProjectPage.includes('aria-valuenow="75"'),'TrSS page does not display the retired percentage estimate');
 for(const ref of ['href="/projects/trilyva/"','href="/projects/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"','href="/projects/webedyts/"','href="/projects/qalyvyron/"','href="/projects/trss-sample-recorder/"','href="/projects/trss/"'])must(hub.includes(ref),'project directory exposes '+ref);
-must(!hub.includes('href="/projects/code-motion/renderer/">Open workspace'),'project directory links to the TRILYVA overview first');
+must(!hub.includes('href="/projects/trilyva/renderer/">Open workspace'),'project directory links to the TRILYVA overview first');
 must(!hub.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!hub.includes('Source files ')&&!hub.includes('SVG source ')&&!hub.includes('EPS source '),'project directory omits direct source links');
 must(hub.includes('href="/projects/tunrun/"')&&!hub.includes('href="https://github.com/Tamasrazim/TUNRUN"'),'project directory links to TUNRUN project page');
 const tunrunPage=read('projects/tunrun/index.html');
@@ -255,20 +255,20 @@ must(tunrunPage.includes("TUNRUN")&&tunrunPage.includes("Four generated aperture
 const trilyvaPage=read('projects/trilyva/index.html');
 must(trilyvaPage.includes('Open TRILYVA workspace')&&trilyvaPage.includes('deterministic'),'TRILYVA project page describes the frame model and links to the renderer');
 must(read('projects/code-motion/index.html').includes('location.replace(target)'),'legacy TRILYVA URL performs a clean replace redirect');
-const trilyvaRenderer=read('projects/code-motion/renderer/index.html');
+const trilyvaRenderer=read('projects/trilyva/renderer/index.html');
 must(!/sample-lumi-lost-firefly|sample-niko-clockwork-bird|data-act="queueAdd"|data-act="startRender"/i.test(trilyvaRenderer),'TRILYVA excludes cartoon samples and redundant render buttons');
 must(trilyvaRenderer.includes('data-act="render"')&&trilyvaRenderer.includes('renderAll: function () { openRenderAllLibrary(); }')&&trilyvaRenderer.includes('renderAllDotMesh: function () { openDotMeshFolderPicker(); }'),'TRILYVA retains current render, full-library render and dot-mesh batch actions');
-const trilyvaPrismData=read('projects/code-motion/renderer/library/prism-data.js');
-const trilyvaRendererSw=read('projects/code-motion/renderer/sw.js');
+const trilyvaPrismData=read('projects/trilyva/renderer/library/prism-data.js');
+const trilyvaRendererSw=read('projects/trilyva/renderer/sw.js');
 must(exists('projects/code-to-eps/prism-library.json'),'the shared Prism dataset exists at its canonical local path');
-must(exists('projects/code-motion/renderer/library/prism-library.json'),'TRILYVA bundles the Prism dataset next to its renderer modules');
-must(read('projects/code-motion/renderer/library/prism-library.json')===read('projects/code-to-eps/prism-library.json'),'the renderer-local Prism data stays identical to the canonical dataset');
+must(exists('projects/trilyva/renderer/library/prism-library.json'),'TRILYVA bundles the Prism dataset next to its renderer modules');
+must(read('projects/trilyva/renderer/library/prism-library.json')===read('projects/code-to-eps/prism-library.json'),'the renderer-local Prism data stays identical to the canonical dataset');
 must(trilyvaRenderer.includes("const PRISM_LIBRARY_URL='./library/prism-library.json'")&&trilyvaRenderer.includes("const TRILYVA_PRISM_LIBRARY_URL='./library/prism-library.json'"),'both TRILYVA Prism loaders use the self-contained local dataset');
 must(trilyvaPrismData.includes('./prism-library.json')&&trilyvaPrismData.includes('export default data;'),'the protected Prism module loads and exports its sibling JSON data');
 must(/const CACHE = 'tamasrazim-trilyva-pwa-v\d+'/.test(trilyvaRendererSw)&&trilyvaRendererSw.includes("'./library/prism-library.json'"),'TRILYVA offline cache uses a versioned cache and includes the local Prism dataset');
 const kynestraBuild=read('KYNESTRA/desktop/tauri/build.rs');
-must(kynestraBuild.includes('manifest_dir.join("../../../projects/code-motion/renderer")')&&kynestraBuild.includes('fn copy_directory'),'KYNESTRA packages the full canonical renderer runtime with its local dependencies');
-const trilyvaMediaStack=read('projects/code-motion/renderer/media-stack.js');
+must(kynestraBuild.includes('manifest_dir.join("../../../projects/trilyva/renderer")')&&kynestraBuild.includes('fn copy_directory'),'KYNESTRA packages the full canonical renderer runtime with its local dependencies');
+const trilyvaMediaStack=read('projects/trilyva/renderer/media-stack.js');
 const kynestraMediaStack=read('KYNESTRA/modules/c2m/renderer/media-stack.js');
 must(!trilyvaMediaStack.includes('FLOWER BATCH')&&!trilyvaMediaStack.includes('installBatchLink')&&!kynestraMediaStack.includes('FLOWER BATCH')&&!kynestraMediaStack.includes('installBatchLink'),'renderer does not inject the removed Flower Batch tab');
 const neoPage=read('projects/neo/index.html');

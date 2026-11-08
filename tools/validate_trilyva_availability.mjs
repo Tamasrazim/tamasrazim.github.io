@@ -17,7 +17,7 @@ const routes = [
   'projects/trilyva/tutorial/index.html',
   'projects/trilyva/updates/index.html',
   'projects/code-motion/index.html',
-  'projects/code-motion/renderer/index.html',
+  'projects/trilyva/renderer/index.html',
   'projects/code-motion/batch/index.html',
   'projects/code-motion/legacy-renderer.html',
   'renderer/index.html',
@@ -31,14 +31,14 @@ for (const file of routes) {
   must(!html.includes('location.replace("/maintenance/') && !html.includes('content="0;url=/maintenance/'), file + ' does not redirect to maintenance');
 }
 
-const renderer = read('projects/code-motion/renderer/index.html');
+const renderer = read('projects/trilyva/renderer/index.html');
 must(renderer.includes('<title>Trilyva — JavaScript Animation Renderer</title>') ||
      renderer.includes('<title>TRILYVA — Tamasrazim</title>') ||
      renderer.includes('<title>Trilyva — JavaScript Animation Renderer</title>'),
      'canonical renderer title is present');
 must(renderer.includes('function renderFrame('), 'renderer keeps its frame-rendering contract');
 
-const worker = read('projects/code-motion/renderer/sw.js');
+const worker = read('projects/trilyva/renderer/sw.js');
 must(/const CACHE = 'tamasrazim-trilyva-pwa-v162'/.test(worker), 'offline cache version is refreshed');
 must(!worker.includes('MAINTENANCE_ENDS_AT') && !worker.includes("'/maintenance/"), 'service worker no longer forces maintenance navigation');
 new Function(worker);

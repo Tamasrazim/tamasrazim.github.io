@@ -4,7 +4,7 @@ import path from 'node:path';
 const ROOT=process.cwd();
 const read=file=>fs.readFileSync(path.join(ROOT,file),'utf8');
 const must=(condition,message)=>{if(!condition)throw new Error(message);console.log('PASS',message);};
-const renderer=read('projects/code-motion/renderer/index.html');
+const renderer=read('projects/trilyva/renderer/index.html');
 const overview=read('projects/trilyva/index.html');
 const docs=read('projects/trilyva/docs/index.html');
 const tutorial=read('projects/trilyva/tutorial/index.html');
@@ -12,9 +12,9 @@ must(docs.includes('href="/projects/trilyva/tutorial/"'), 'documentation links t
 must(tutorial.includes('href="/projects/trilyva/docs/"'), 'tutorial links to the documentation directory route');
 must(overview.includes('/projects/trilyva/docs/') && overview.includes('/projects/trilyva/tutorial/'), 'TRILYVA overview links to the directory-based docs and tutorial routes');
 must(!fs.existsSync(path.join(ROOT,'projects/trilyva','docs'+'.html')) && !fs.existsSync(path.join(ROOT,'projects/trilyva','tutorial'+'.html')), 'legacy flat docs and tutorial files are removed');
-const manifest=read('projects/code-motion/renderer/library/manifest.json');
-const serviceWorker=read('projects/code-motion/renderer/sw.js');
-const movieFinalizer=read('projects/code-motion/renderer/movie-finalizer.js');
+const manifest=read('projects/trilyva/renderer/library/manifest.json');
+const serviceWorker=read('projects/trilyva/renderer/sw.js');
+const movieFinalizer=read('projects/trilyva/renderer/movie-finalizer.js');
 must(renderer.includes('data-act="render"'),'header retains the current Render action');
 must(renderer.includes('id="oBitrate" min="20" max="2000"') && renderer.includes('value="25"'),'video bitrate control enforces 20 Mbps minimum and 25 Mbps default');
 must(renderer.includes('MAX_VIDEO_FILE_BYTES = 2000000000') && renderer.includes('MAX_VIDEO_FILE_BYTES: MAX_VIDEO_FILE_BYTES'),'video exporter exposes the strict decimal 2 GB file-size cap');
@@ -69,21 +69,21 @@ must(!/story-films|cartoon/i.test(manifest),'cartoon collection is absent from t
 must(!/niko-and-the-clockwork-bird|the-last-star-train|lumi-and-the-lost-firefly|voice-studio|story-films/i.test(serviceWorker),'cartoon files are absent from offline cache');
 must(!/Watch The Last Star Train|cartoon|Niko and the Clockwork Bird/i.test(overview),'TRILYVA overview has no cartoon promotion');
 for(const file of [
-  'projects/code-motion/renderer/examples/chatgpt-motion-loop.html',
-  'projects/code-motion/renderer/examples/chatgpt-30s-seamless-loop.js',
-  'projects/code-motion/renderer/examples/trilyva-60s-motion-edit.html',
-  'projects/code-motion/renderer/examples/trilyva-60s-motion-edit.js',
+  'projects/trilyva/renderer/examples/chatgpt-motion-loop.html',
+  'projects/trilyva/renderer/examples/chatgpt-30s-seamless-loop.js',
+  'projects/trilyva/renderer/examples/trilyva-60s-motion-edit.html',
+  'projects/trilyva/renderer/examples/trilyva-60s-motion-edit.js',
   'projects/trilyva/niko-and-the-clockwork-bird.html',
   'projects/trilyva/the-last-star-train.html',
-  'projects/code-motion/renderer/niko-and-the-clockwork-bird.js',
-  'projects/code-motion/renderer/the-last-star-train.js',
-  'projects/code-motion/renderer/library/story-films.js',
-  'projects/code-motion/renderer/voice-studio.js'
+  'projects/trilyva/renderer/niko-and-the-clockwork-bird.js',
+  'projects/trilyva/renderer/the-last-star-train.js',
+  'projects/trilyva/renderer/library/story-films.js',
+  'projects/trilyva/renderer/voice-studio.js'
 ]) must(!fs.existsSync(path.join(ROOT,file)),file+' removed');
 
 must(renderer.includes('id="sample-starfall-phonk-cut"') && renderer.includes('data-title="Starfall Fist — Phonk Character Edit"') && renderer.includes('data-dur="30"') && renderer.includes('data-fps="60"'), 'Examples includes the 30-second Starfall Fist phonk character edit');
 
-const xyzSource = read('projects/code-motion/renderer/library/xyz-library.js');
+const xyzSource = read('projects/trilyva/renderer/library/xyz-library.js');
 const xyzModule = await import('data:text/javascript;charset=utf-8,' + encodeURIComponent(xyzSource));
 const xyzItems = await xyzModule.default.load();
 must(manifest.libraries.includes('./xyz-library.js'), 'XYZ is registered in the TRILYVA library manifest');

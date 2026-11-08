@@ -12,7 +12,7 @@
 
 - `/projects/trilyva/` — TRILYVA project overview and official entry point.
 - `/projects/code-motion/` — legacy URL with a branded redirect to the TRILYVA overview.
-- `/projects/code-motion/renderer/` — the actual TRILYVA editing/rendering workspace.
+- `/projects/trilyva/renderer/` — the actual TRILYVA editing/rendering workspace.
 - `/projects/code-to-svg/` — CODE → SVG project overview.
 - `/projects/code-to-svg/workspace/` — browser SVG workspace.
 - `/projects/code-to-eps/` — CODE → EPS project overview.

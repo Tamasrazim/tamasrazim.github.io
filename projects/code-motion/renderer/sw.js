@@ -1,65 +1,11 @@
-// What this does: Caches the TRILYVA renderer's application files and serves them when the network is unavailable.
-
-const CACHE = 'tamasrazim-trilyva-pwa-v162';
-const CORE = [
-  './',
-  './index.html',
-  '/assets/brand/trilyva/T.svg',
-  './media-stack.js',
-  './movie-finalizer.js',
-  './firebase-analytics.js',
-  './manifest.webmanifest',
-  './library/library.js',
-  './library/dot-mesh-library.js',
-  './library/manifest.json',
-  './library/prismflower.js',
-  './library/photorealistic-rose.js',
-  './library/living-emojis.js',
-  './library/motion-backgrounds.js',
-  './library/green-screen-overlays.js',
-  './library/prism-data.js',
-  './library/prism-library.json',
-  './library/prism-web-icons.json',
-  './library/xyz-001-abyssal-tide.js',
-  './library/xyz-library.js'
-];
-
+// Retire the previous TRILYVA renderer service worker after the workspace folder move.
+const LEGACY_CACHE = 'tamasrazim-trilyva-pwa-v162';
 self.addEventListener('install', function (event) {
-  event.waitUntil(
-    caches.open(CACHE)
-      .then(function (cache) { return cache.addAll(CORE); })
-      .then(function () { return self.skipWaiting(); })
-  );
+  event.waitUntil(self.skipWaiting());
 });
-
 self.addEventListener('activate', function (event) {
-  event.waitUntil(
-    caches.keys()
-      .then(function (keys) {
-        return Promise.all(
-          keys.filter(function (key) { return key !== CACHE; })
-            .map(function (key) { return caches.delete(key); })
-        );
-      })
-      .then(function () { return self.clients.claim(); })
-  );
-});
-
-self.addEventListener('fetch', function (event) {
-  if (event.request.method !== 'GET') return;
-
-  event.respondWith(
-    caches.match(event.request)
-      .then(function (cached) {
-        return cached || fetch(event.request)
-          .then(function (response) {
-            var copy = response.clone();
-            caches.open(CACHE).then(function (cache) {
-              cache.put(event.request, copy);
-            });
-            return response;
-          })
-          .catch(function () { return cached; });
-      })
-  );
+  event.waitUntil((async function () {
+    try { await caches.delete(LEGACY_CACHE); } catch (_) {}
+    try { await self.registration.unregister(); } catch (_) {}
+  })());
 });
