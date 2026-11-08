@@ -3,25 +3,34 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#080808">
+<meta name="theme-color" content="#090909">
 <meta name="color-scheme" content="dark">
 <meta name="author" content="Robiul Rumman Razim">
-<meta name="description" content="TrSS is independent research into renderer-guided image reconstruction and neural rendering for Intel Arc, including dataset tools and a Windows frame pipeline.">
+<meta name="description" content="TrSS is first-party neural-rendering research for Intel Arc, exploring guide-conditioned reconstruction, temporal stability, dataset tooling and a cooperative D3D11-to-OpenVINO pipeline.">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <link rel="canonical" href="https://tamasrazim.github.io/web2/trss/">
+<link rel="icon" type="image/svg+xml" href="/web2/assets/icons/mark.svg">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Tamasrazim">
 <meta property="og:title" content="TrSS — Neural Rendering Research for Intel Arc">
-<meta property="og:description" content="TrSS is independent research into renderer-guided image reconstruction and neural rendering for Intel Arc, including dataset tools and a Windows frame pipeline.">
+<meta property="og:description" content="TrSS is first-party neural-rendering research for Intel Arc, exploring guide-conditioned reconstruction, temporal stability, dataset tooling and a cooperative D3D11-to-OpenVINO pipeline.">
 <meta property="og:url" content="https://tamasrazim.github.io/web2/trss/">
 <meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg">
+<meta property="og:image:alt" content="Tamasrazim — Robiul Rumman Razim">
 <meta name="twitter:card" content="summary_large_image">
-<title>TrSS — Neural Rendering Research for Intel Arc</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23080808'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23f1f0eb' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23f1f0eb'/%3E%3C/svg%3E">
+<meta name="twitter:title" content="TrSS — Neural Rendering Research for Intel Arc">
+<meta name="twitter:description" content="TrSS is first-party neural-rendering research for Intel Arc, exploring guide-conditioned reconstruction, temporal stability, dataset tooling and a cooperative D3D11-to-OpenVINO pipeline.">
+<meta name="twitter:image" content="https://tamasrazim.github.io/og-image.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Unbounded:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/web2/assets/css/site.css">
 <script defer src="/web2/assets/js/site.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CreativeWork","name":"TrSS — Tamasrazim’s Real-time Scene Synthesis","url":"https://tamasrazim.github.io/web2/trss/","creator":{"@type":"Person","name":"Robiul Rumman Razim"},"description":"Independent neural-rendering research for Intel Arc."}</script>
+<title>TrSS — Neural Rendering Research for Intel Arc</title>
 </head>
 <body>
+
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="shell header-inner">
@@ -34,33 +43,76 @@
     </nav>
   </div>
 </header>
-<main id="main"><div class="shell page-top"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="/web2/">Home</a><span>/</span><a href="/web2/work/">Work</a><span>/</span><span>TrSS</span></nav></div>
+<main id="main"><div class="shell page-top"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="/web2/">Home</a><span class="slash">/</span><a href="/web2/work/">Work</a><span class="slash">/</span><span>TrSS</span></nav></div>
 <div class="shell">
   <section class="page-hero">
-    <div><p class="eyebrow">02 / Graphics research</p><h1>Reconstruction<br>guided by the<br><span class="stroke">renderer.</span></h1><div class="page-meta"><span class="tag">Intel Arc</span><span class="tag">Neural rendering</span><span class="tag">Research</span></div></div>
-    <p class="page-hero-copy">TrSS explores a renderer-guided reconstruction pipeline for Intel Arc. It brings together a guide-conditioned model, dataset tools and a cooperative Windows frame-processing path.</p>
+    <div><p class="eyebrow">02 / Independent neural graphics research</p><h1>Reconstruct<br>with more than<br><span class="outline">pixels.</span></h1><div class="page-meta"><span class="tag">Intel Arc B580 target</span><span class="tag">D3D11 / OpenVINO</span><span class="tag">Research</span></div></div>
+    <p class="page-hero-copy">TrSS — Tamasrazim’s Real-time Scene Synthesis — explores guide-conditioned frame reconstruction and temporal stability. The long-term goal is a low-latency neural-rendering stage that complements a game’s existing renderer.</p>
   </section>
-  <div class="page-visual art-trss" role="img" aria-label="Abstract reconstruction geometry with nested square forms"><span class="art-caption mono">TrSS / Reconstruction study</span><span class="art-core" aria-hidden="true"></span><span class="art-index mono">INPUT / GUIDES / OUTPUT</span></div>
+  <figure class="project-figure">
+    <figcaption class="art-caption mono">TrSS / Cooperative reconstruction path</figcaption>
+    <div class="trss-pipeline" aria-hidden="true">
+      <div class="pipeline-box"><strong>INPUT</strong><span>RGB + GUIDE DATA</span><div class="channel-dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      <div class="pipeline-box"><strong>MODEL</strong><span>20-CHANNEL INPUT<br>OPENVINO INFERENCE</span><div class="channel-dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      <div class="pipeline-box"><strong>OUTPUT</strong><span>LINEAR RGB<br>HOST TEXTURE</span></div>
+    </div>
+    <span class="art-index mono">GUIDES / HISTORY / INFERENCE</span>
+  </figure>
   <section class="content-section">
-    <div class="content-grid" data-reveal><div class="content-aside"><p class="section-index">01 / Research question</p><h2>Use more than the image.</h2></div><div class="content-main"><p>The project investigates whether rendering context and guide signals can help a reconstruction model recover useful detail while respecting the structure of the source frame. The work is targeted at Intel Arc hardware, with the Arc B580 serving as the primary development target.</p><p>This is independent research, not a released drop-in upscaler or a claim of compatibility with every game. Model quality, latency, integration and visual stability all need direct evaluation.</p></div></div>
+    <div class="content-grid">
+      <div class="content-aside"><p class="section-index">01 / Research question</p><h2>Use the renderer’s context.</h2></div>
+      <div class="content-main">
+        <p>A screenshot does not contain every useful signal available to a renderer. TrSS investigates whether guide buffers and temporal context can help a reconstruction model recover detail while respecting the structure of the source frame.</p>
+        <p>The primary development target is an Intel Arc B580. That target is a research constraint, not evidence that the current implementation has been validated on the physical GPU or integrated into a released game.</p>
+      </div>
+    </div>
   </section>
   <section class="content-section">
-    <div class="content-grid" data-reveal><div class="content-aside"><p class="section-index">02 / Current structure</p><h2>Several pieces, one pipeline.</h2></div><div class="content-main"><div class="detail-list"><div class="detail-row"><span class="label">Model path</span><p>A guide-conditioned reconstruction model and its inference interface.</p></div><div class="detail-row"><span class="label">Data</span><p>Dataset and sample-recording tools for collecting and preparing training or evaluation material.</p></div><div class="detail-row"><span class="label">Runtime</span><p>A cooperative Windows D3D11-to-OpenVINO frame pipeline under active engineering.</p></div><div class="detail-row"><span class="label">Target</span><p>Intel Arc, with the Arc B580 12GB as the main test device.</p></div></div></div></div>
+    <div class="content-grid">
+      <div class="content-aside"><p class="section-index">02 / Input contract</p><h2>Twenty channels of context.</h2></div>
+      <div class="content-main">
+        <p>The guide-conditioned model input combines noisy linear radiance, diffuse and specular albedo, normals, roughness, linear view depth, motion vectors, reprojected history RGB and a history-validity mask. Coordinate spaces and motion conventions are checked explicitly.</p>
+        <div class="detail-list">
+          <div class="detail-row"><span class="label">Model graph</span><p>A 20-channel guide-conditioned reconstruction graph with a four-channel residual/temporal-gate output head.</p></div>
+          <div class="detail-row"><span class="label">Baseline</span><p>A separate trainable 2× baseline reconstruction model.</p></div>
+          <div class="detail-row"><span class="label">Composition</span><p>The native backend composes the model residual with the current frame using the history-validity gate.</p></div>
+        </div>
+      </div>
+    </div>
   </section>
   <section class="content-section">
-    <div class="content-grid" data-reveal><div class="content-aside"><p class="section-index">03 / What remains</p><h2>Research still has unknowns.</h2></div><div class="content-main"><p>Model training, image quality, frame-time cost, memory use and application integration are separate problems. A working component does not establish that the complete path is ready for in-game use. The next steps are driven by tests on the existing implementation rather than by replacing the architecture with a new prototype.</p><div class="link-row"><a href="https://github.com/Tamasrazim/TrSS" target="_blank" rel="noopener noreferrer">Explore the TrSS repository ↗</a><a href="https://tamasrazim.github.io/projects/trss/" target="_blank" rel="noopener noreferrer">Open the current project page ↗</a></div></div></div>
+    <div class="content-grid">
+      <div class="content-aside"><p class="section-index">03 / Native handoff</p><h2>Cooperative, not automatic.</h2></div>
+      <div class="content-main">
+        <p>The C++17 host SDK exposes a D3D11 bridge. A host submits frame resources and calls model-independent validation before processing the retained frame. The processing path packs the guide channels, runs the supplied OpenVINO model and uploads linear RGB into a host-owned RGBA32F shader-resource texture.</p>
+        <p>The bridge and host SDK have WARP integration tests using a deterministic synthetic CPU model. That verifies the cooperative API and its handoff, not a production model, an engine-specific plugin, automatic Present interception or physical Arc B580 performance. The diagnostic preflight and inference path currently use synchronous GPU-to-CPU readback.</p>
+      </div>
+    </div>
+  </section>
+  <section class="content-section">
+    <div class="content-grid">
+      <div class="content-aside"><p class="section-index">04 / What remains</p><h2>Research still has unknowns.</h2></div>
+      <div class="content-main">
+        <div class="detail-list">
+          <div class="detail-row"><span class="label">Training</span><p>No trained production checkpoint is bundled. Representative game-renderer training data is still missing.</p></div>
+          <div class="detail-row"><span class="label">Runtime</span><p>The current DXGI Present hook handles selected flip-model back buffers and conventional post-processing, but it does not call the new reconstruction bridge or upload reconstructed output into a game's presentation chain.</p></div>
+          <div class="detail-row"><span class="label">Integration</span><p>This is not yet a game-specific plugin, automatic game interception path or finished live-game renderer.</p></div>
+          <div class="detail-row"><span class="label">Validation</span><p>Visual quality, end-to-end latency and performance on the physical Arc B580 remain to be validated.</p></div>
+        </div>
+        <div class="link-row"><a href="https://github.com/Tamasrazim/TrSS" target="_blank" rel="noopener noreferrer">Explore the TrSS repository ↗</a><a href="https://tamasrazim.github.io/projects/trss/" target="_blank" rel="noopener noreferrer">Current project page ↗</a></div>
+      </div>
+    </div>
   </section>
 </div></main>
+
 <footer class="site-footer">
   <div class="shell footer-inner">
     <span>© 2026 Robiul Rumman Razim</span>
-    <div class="footer-links">
-      <a href="/web2/">Home</a>
-      <a href="/web2/work/">Work</a>
-      <a href="/web2/about/">About</a>
+    <nav class="footer-links" aria-label="Footer navigation">
+      <a href="/web2/">Home</a><a href="/web2/work/">Work</a><a href="/web2/about/">About</a><a href="/web2/approach/">Approach</a>
       <a href="https://github.com/Tamasrazim" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
-    </div>
-    <span>DESIGNED TO KEEP MOVING</span>
+    </nav>
+    <span>INDEPENDENT PRACTICE / 2026</span>
   </div>
 </footer>
 </body>

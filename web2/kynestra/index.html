@@ -3,25 +3,34 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#080808">
+<meta name="theme-color" content="#090909">
 <meta name="color-scheme" content="dark">
 <meta name="author" content="Robiul Rumman Razim">
-<meta name="description" content="KYNESTRA is a modular desktop creative-software project built around a Rust core, local project data, render-task handling and asset-management modules.">
+<meta name="description" content="KYNESTRA is a Windows desktop alpha with a shared Rust core, local SQLite project metadata, module registration, render-task handling and asset-management workflows.">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <link rel="canonical" href="https://tamasrazim.github.io/web2/kynestra/">
+<link rel="icon" type="image/svg+xml" href="/web2/assets/icons/mark.svg">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Tamasrazim">
-<meta property="og:title" content="KYNESTRA — Modular Desktop Software">
-<meta property="og:description" content="KYNESTRA is a modular desktop creative-software project built around a Rust core, local project data, render-task handling and asset-management modules.">
+<meta property="og:title" content="KYNESTRA — Modular Desktop Creative Software">
+<meta property="og:description" content="KYNESTRA is a Windows desktop alpha with a shared Rust core, local SQLite project metadata, module registration, render-task handling and asset-management workflows.">
 <meta property="og:url" content="https://tamasrazim.github.io/web2/kynestra/">
 <meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg">
+<meta property="og:image:alt" content="Tamasrazim — Robiul Rumman Razim">
 <meta name="twitter:card" content="summary_large_image">
-<title>KYNESTRA — Modular Desktop Software</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23080808'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23f1f0eb' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23f1f0eb'/%3E%3C/svg%3E">
+<meta name="twitter:title" content="KYNESTRA — Modular Desktop Creative Software">
+<meta name="twitter:description" content="KYNESTRA is a Windows desktop alpha with a shared Rust core, local SQLite project metadata, module registration, render-task handling and asset-management workflows.">
+<meta name="twitter:image" content="https://tamasrazim.github.io/og-image.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Unbounded:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/web2/assets/css/site.css">
 <script defer src="/web2/assets/js/site.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"KYNESTRA","applicationCategory":"DesktopApplication","operatingSystem":"Windows x64","url":"https://tamasrazim.github.io/web2/kynestra/","creator":{"@type":"Person","name":"Robiul Rumman Razim"},"description":"A modular desktop creative-software alpha with a shared Rust core and local project data."}</script>
+<title>KYNESTRA — Modular Desktop Creative Software</title>
 </head>
 <body>
+
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="shell header-inner">
@@ -34,33 +43,63 @@
     </nav>
   </div>
 </header>
-<main id="main"><div class="shell page-top"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="/web2/">Home</a><span>/</span><a href="/web2/work/">Work</a><span>/</span><span>KYNESTRA</span></nav></div>
+<main id="main"><div class="shell page-top"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="/web2/">Home</a><span class="slash">/</span><a href="/web2/work/">Work</a><span class="slash">/</span><span>KYNESTRA</span></nav></div>
 <div class="shell">
   <section class="page-hero">
-    <div><p class="eyebrow">03 / Desktop software</p><h1>A workspace<br>for <span class="stroke">creative systems.</span></h1><div class="page-meta"><span class="tag">Rust core</span><span class="tag">Local projects</span><span class="tag">In development</span></div></div>
-    <p class="page-hero-copy">KYNESTRA is a modular desktop creative-software project. Its direction is a connected workspace for project data, assets and production tasks, with a native core beneath the interface.</p>
+    <div><p class="eyebrow">03 / Native software / Windows x64</p><h1>Creative work,<br>shared <span class="outline">systems.</span></h1><div class="page-meta"><span class="tag">Rust core</span><span class="tag">Tauri / SQLite</span><span class="tag">Alpha</span></div></div>
+    <p class="page-hero-copy">KYNESTRA brings projects, task records, render jobs and creative modules around one shared Rust core. The aim is to make separate workflows work together without each keeping its own isolated state.</p>
   </section>
-  <div class="page-visual art-kynestra" role="img" aria-label="Modular arrangement of interconnected rectangular panels"><span class="art-caption mono">KYNESTRA / Module study</span><span class="art-core" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="art-index mono">CORE / MODULES / PROJECT</span></div>
+  <figure class="project-figure">
+    <figcaption class="art-caption mono">KYNESTRA / Module architecture</figcaption>
+    <div class="kynestra-architecture" aria-hidden="true">
+      <div class="module-cell">FILE WORK</div><div class="module-cell core">RUST CORE</div><div class="module-cell">ASSET INTAKE</div>
+      <div class="module-cell">PROJECT DATA</div><div class="module-cell">TASK RECORDS</div><div class="module-cell">RENDER JOBS</div>
+    </div>
+    <span class="art-index mono">CORE / MODULE CONTRACTS / LOCAL DATA</span>
+  </figure>
   <section class="content-section">
-    <div class="content-grid" data-reveal><div class="content-aside"><p class="section-index">01 / Structure</p><h2>Small systems, connected.</h2></div><div class="content-main"><p>The project is organized around a Rust core, local project data, render-task handling and asset-management modules. The goal is to make the working parts understandable and composable instead of hiding every operation behind one large interface.</p><p>Its current public description is a project direction, not a claim that every planned module is complete or production-ready.</p></div></div>
+    <div class="content-grid">
+      <div class="content-aside"><p class="section-index">01 / Shared core</p><h2>One place for project state.</h2></div>
+      <div class="content-main">
+        <p>The Rust core keeps project state and task records together, stores local metadata in SQLite and defines how modules register and exchange events. The idea is to make the working parts understandable and composable instead of hiding every operation behind one large interface.</p>
+        <div class="detail-list">
+          <div class="detail-row"><span class="label">Core</span><p>Shared Rust application core.</p></div>
+          <div class="detail-row"><span class="label">Storage</span><p>Local SQLite metadata.</p></div>
+          <div class="detail-row"><span class="label">Application</span><p>Windows x64 desktop application built with Tauri.</p></div>
+        </div>
+      </div>
+    </div>
   </section>
   <section class="content-section">
-    <div class="content-grid" data-reveal><div class="content-aside"><p class="section-index">02 / Design intent</p><h2>Keep the work local and legible.</h2></div><div class="content-main text-columns"><article class="text-card"><h3>Project data</h3><p>Keep projects and their state understandable and locally managed.</p></article><article class="text-card"><h3>Production tasks</h3><p>Give longer-running work a clear task model and visible state.</p></article><article class="text-card"><h3>Assets</h3><p>Make the inputs and resources of a project easier to organize.</p></article><article class="text-card"><h3>Modules</h3><p>Separate responsibilities so the software can evolve without losing its structure.</p></article></div></div>
+    <div class="content-grid">
+      <div class="content-aside"><p class="section-index">02 / Creative modules</p><h2>Small tools, connected.</h2></div>
+      <div class="content-main text-columns">
+        <article class="text-card"><h3>File work</h3><p>Tools for working with project files and moving resources through the workflow.</p></article>
+        <article class="text-card"><h3>Render jobs</h3><p>Render-task handling and task records within the shared project model.</p></article>
+        <article class="text-card"><h3>Asset intake</h3><p>Asset-management workflows, including duplicate detection and handoff between stages.</p></article>
+        <article class="text-card"><h3>Packages</h3><p>The .tamasrazim package workflow checks required files and SHA-256 hashes before trusting a project package.</p></article>
+      </div>
+    </div>
   </section>
   <section class="content-section">
-    <div class="content-grid" data-reveal><div class="content-aside"><p class="section-index">03 / Further reading</p><h2>Project record.</h2></div><div class="content-main"><p>The existing project page contains the current public description and details.</p><div class="link-row"><a href="https://tamasrazim.github.io/projects/kynestra/" target="_blank" rel="noopener noreferrer">Open KYNESTRA project page ↗</a></div></div></div>
+    <div class="content-grid">
+      <div class="content-aside"><p class="section-index">03 / Status</p><h2>Alpha means unfinished.</h2></div>
+      <div class="content-main">
+        <p>KYNESTRA is still in alpha. The core and module contracts are taking shape; platform integrations, broader testing and stable v1.0 packaging remain work in progress. Its current release page is the place to check the available Windows x64 package and release information.</p>
+        <div class="link-row"><a href="https://tamasrazim.github.io/projects/kynestra/" target="_blank" rel="noopener noreferrer">Current project page ↗</a><a href="https://tamasrazim.github.io/projects/kynestra/download/" target="_blank" rel="noopener noreferrer">Download and release information ↗</a></div>
+      </div>
+    </div>
   </section>
 </div></main>
+
 <footer class="site-footer">
   <div class="shell footer-inner">
     <span>© 2026 Robiul Rumman Razim</span>
-    <div class="footer-links">
-      <a href="/web2/">Home</a>
-      <a href="/web2/work/">Work</a>
-      <a href="/web2/about/">About</a>
+    <nav class="footer-links" aria-label="Footer navigation">
+      <a href="/web2/">Home</a><a href="/web2/work/">Work</a><a href="/web2/about/">About</a><a href="/web2/approach/">Approach</a>
       <a href="https://github.com/Tamasrazim" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
-    </div>
-    <span>DESIGNED TO KEEP MOVING</span>
+    </nav>
+    <span>INDEPENDENT PRACTICE / 2026</span>
   </div>
 </footer>
 </body>

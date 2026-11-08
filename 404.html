@@ -1,7 +1,39 @@
 <!doctype html>
-<!--
-  What this does:
-  Shows a clear not-found page when someone opens a website address that does not exist.
---><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#050505"><meta name="color-scheme" content="dark"><meta name="robots" content="noindex"><title>404 — Tamasrazim</title>
-<style>:root{color-scheme:dark;--bg:#050505;--fg:#f2f2ee;--muted:#9b9b95;--line:#292929}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg)}body{font:14px/1.7 system-ui,-apple-system,"Segoe UI",sans-serif;display:grid;place-items:center;padding:24px}main{width:min(760px,100%);padding:clamp(28px,6vw,72px);border:1px solid var(--line);background:linear-gradient(135deg,#0b0b0b,#050505)}.kicker{font:10px ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}h1{font:700 clamp(90px,19vw,175px)/.82 Arial,sans-serif;letter-spacing:-.1em;margin:32px 0}p{color:var(--muted);max-width:55ch}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:30px}a{display:inline-flex;padding:12px 15px;border:1px solid var(--line);text-decoration:none;color:var(--fg)}a.primary{background:var(--fg);color:var(--bg);border-color:var(--fg)}a:hover{transform:translateY(-2px)}small{display:block;margin-top:45px;color:#676761;font:10px ui-monospace,monospace}</style><link rel="stylesheet" href="/assets/css/monochrome.css?v=20261010-1">
-</head><body><main><div class="kicker">TAMASRAZIM / ROUTE NOT FOUND</div><h1>404<span>.</span></h1><p>This route is not part of the maintained project directory, or its address has changed.</p><div class="actions"><a class="primary" href="/">Return home</a><a href="/projects/">Browse selected projects</a></div><small>Robiul Rumman Razim — Tamasrazim</small></main></body></html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090909"><meta name="robots" content="noindex">
+<title>404 — Tamasrazim</title>
+<style>
+:root{color-scheme:dark;--bg:#090909;--fg:#f2f1ec;--muted:#b2b0a9;--line:#30302e}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg)}
+body{min-height:100svh;display:grid;place-items:center;padding:24px;font:16px/1.7 Arial,sans-serif}
+main{width:min(780px,100%);padding:clamp(28px,6vw,74px);border:1px solid var(--line);background:#101010}
+.kicker{font:10px/1.6 monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:500 clamp(92px,18vw,180px)/.84 Arial,sans-serif;letter-spacing:-.1em;margin:31px 0}
+p{max-width:55ch;color:var(--muted)}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;border:1px solid #66645f;color:var(--fg);text-decoration:none;font:10px monospace;letter-spacing:.08em;text-transform:uppercase}
+a.primary{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+a:focus-visible{outline:2px solid var(--fg);outline-offset:5px}
+small{display:block;margin-top:45px;color:#85837d;font:10px monospace;letter-spacing:.1em;text-transform:uppercase}
+</style></head>
+<body><main>
+<div class="kicker" id="error-kicker">TAMASRAZIM / ROUTE NOT FOUND</div>
+<h1>404.</h1>
+<p id="error-copy">This address is not part of the maintained project directory, or its route has changed.</p>
+<div class="actions"><a class="primary" id="home-link" href="/">Return home</a><a id="work-link" href="/projects/">Browse projects</a></div>
+<small>Robiul Rumman Razim — Tamasrazim</small>
+</main>
+<script>
+(() => {
+  if (location.pathname.startsWith("/web2/")) {
+    document.title = "404 — Tamasrazim";
+    document.getElementById("error-kicker").textContent = "TAMASRAZIM / WEB / ROUTE NOT FOUND";
+    document.getElementById("error-copy").textContent = "This page does not exist in the Web section. Check the address or return to the new home page.";
+    document.getElementById("home-link").href = "/web2/";
+    document.getElementById("home-link").textContent = "Return to Web home";
+    document.getElementById("work-link").href = "/web2/work/";
+    document.getElementById("work-link").textContent = "Browse Web projects";
+  }
+})();
+</script></body></html>

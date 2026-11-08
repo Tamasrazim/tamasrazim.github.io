@@ -3,25 +3,34 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#080808">
+<meta name="theme-color" content="#090909">
 <meta name="color-scheme" content="dark">
 <meta name="author" content="Robiul Rumman Razim">
-<meta name="description" content="TRILYVA is a browser-based procedural animation renderer built around JavaScript frame functions, frame-by-frame rendering and local creative workflows.">
+<meta name="description" content="TRILYVA is a browser-based procedural animation renderer for frame-driven motion, sequential video rendering, library batch exports and still-frame formats.">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <link rel="canonical" href="https://tamasrazim.github.io/web2/trilyva/">
+<link rel="icon" type="image/svg+xml" href="/web2/assets/icons/mark.svg">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Tamasrazim">
 <meta property="og:title" content="TRILYVA — Procedural Animation Workspace">
-<meta property="og:description" content="TRILYVA is a browser-based procedural animation renderer built around JavaScript frame functions, frame-by-frame rendering and local creative workflows.">
+<meta property="og:description" content="TRILYVA is a browser-based procedural animation renderer for frame-driven motion, sequential video rendering, library batch exports and still-frame formats.">
 <meta property="og:url" content="https://tamasrazim.github.io/web2/trilyva/">
 <meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg">
+<meta property="og:image:alt" content="Tamasrazim — Robiul Rumman Razim">
 <meta name="twitter:card" content="summary_large_image">
-<title>TRILYVA — Procedural Animation Workspace</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23080808'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23f1f0eb' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23f1f0eb'/%3E%3C/svg%3E">
+<meta name="twitter:title" content="TRILYVA — Procedural Animation Workspace">
+<meta name="twitter:description" content="TRILYVA is a browser-based procedural animation renderer for frame-driven motion, sequential video rendering, library batch exports and still-frame formats.">
+<meta name="twitter:image" content="https://tamasrazim.github.io/og-image.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Unbounded:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/web2/assets/css/site.css">
 <script defer src="/web2/assets/js/site.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"TRILYVA","applicationCategory":"MultimediaApplication","operatingSystem":"Web browser","url":"https://tamasrazim.github.io/web2/trilyva/","creator":{"@type":"Person","name":"Robiul Rumman Razim"},"description":"A browser-based procedural animation renderer built around a deterministic JavaScript frame function."}</script>
+<title>TRILYVA — Procedural Animation Workspace</title>
 </head>
 <body>
+
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="shell header-inner">
@@ -34,33 +43,76 @@
     </nav>
   </div>
 </header>
-<main id="main"><div class="shell page-top"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="/web2/">Home</a><span>/</span><a href="/web2/work/">Work</a><span>/</span><span>TRILYVA</span></nav></div>
+<main id="main"><div class="shell page-top"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="/web2/">Home</a><span class="slash">/</span><a href="/web2/work/">Work</a><span class="slash">/</span><span>TRILYVA</span></nav></div>
 <div class="shell">
   <section class="page-hero">
-    <div><p class="eyebrow">01 / Procedural motion workspace</p><h1>Motion,<br>measured in<br><span class="stroke">frames.</span></h1><div class="page-meta"><span class="tag">Browser-based</span><span class="tag">JavaScript source</span><span class="tag">In development</span></div></div>
-    <p class="page-hero-copy">TRILYVA is a procedural animation workspace built around explicit frame output. Write a renderer, inspect the motion, configure an export and work through each frame as a real unit of production.</p>
+    <div><p class="eyebrow">01 / Creative software / Browser runtime</p><h1>Motion,<br>measured in<br><span class="outline">frames.</span></h1><div class="page-meta"><span class="tag">Browser-based</span><span class="tag">JavaScript renderer</span><span class="tag">In development</span></div></div>
+    <p class="page-hero-copy">TRILYVA turns code into frame-driven motion. Write an animation, inspect it in the browser, configure an export and render the frames in sequence. The project is built around the idea that preview playback and final output are two different jobs.</p>
   </section>
-  <div class="page-visual art-trilyva" role="img" aria-label="Abstract frame paths and intersecting guide lines representing procedural motion"><span class="art-caption mono">TRILYVA / Frame study</span><span class="art-core" aria-hidden="true"></span><span class="art-index mono">TIME → FRAME → OUTPUT</span></div>
+  <figure class="project-figure">
+    <figcaption class="art-caption mono">TRILYVA / Frame sequence study</figcaption>
+    <div class="trilyva-timeline" aria-hidden="true"><i class="trilyva-frame"></i><i class="trilyva-frame"></i><i class="trilyva-frame"></i><i class="trilyva-frame"></i><i class="trilyva-frame"></i><i class="trilyva-frame"></i></div>
+    <span class="art-index mono">TIME → FRAME → OUTPUT</span>
+  </figure>
   <section class="content-section">
-    <div class="content-grid" data-reveal><div class="content-aside"><p class="section-index">01 / The model</p><h2>One function. One frame.</h2></div><div class="content-main"><p>TRILYVA uses a deterministic JavaScript rendering contract: <code>window.renderFrame(time, frame, fps, ctx, width, height)</code>. The function receives the frame context and draws the requested image. That makes the source explicit and gives the renderer a consistent way to request frames.</p><p>Preview playback is useful for iteration, but it is not the same as a completed export. The export path is designed around sequential frame requests rather than skipping ahead to keep a preview smooth.</p></div></div>
+    <div class="content-grid">
+      <div class="content-aside"><p class="section-index">01 / Rendering model</p><h2>One function. One frame.</h2></div>
+      <div class="content-main">
+        <p>TRILYVA uses a deterministic JavaScript rendering contract: <code>window.renderFrame(time, frame, fps, ctx, width, height)</code>. The renderer requests a specific frame, and the supplied function draws that frame into the provided canvas context.</p>
+        <p>The export path processes the requested sequence by frame index and checks the resulting sample count. Preview playback is for iteration; it can lag at demanding settings without determining the final export sequence. Verification checks frame-count consistency, not visual correctness of every animation.</p>
+        <div class="detail-list">
+          <div class="detail-row"><span class="label">Source</span><p>JavaScript renderer supplied or edited by the user.</p></div>
+          <div class="detail-row"><span class="label">Preview</span><p>Live canvas preview; performance depends on the complexity of the scene and the device.</p></div>
+          <div class="detail-row"><span class="label">Export</span><p>Sequential frame rendering followed by browser-supported media encoding.</p></div>
+        </div>
+      </div>
+    </div>
   </section>
   <section class="content-section">
-    <div class="content-grid" data-reveal><div class="content-aside"><p class="section-index">02 / The workflow</p><h2>From source to deliverable.</h2></div><div class="content-main"><div class="detail-list"><div class="detail-row"><span class="label">Author</span><p>Write or paste a JavaScript frame renderer.</p></div><div class="detail-row"><span class="label">Inspect</span><p>Preview the animation and adjust the source before committing to a full render.</p></div><div class="detail-row"><span class="label">Configure</span><p>Set timing, dimensions and output options around the intended delivery.</p></div><div class="detail-row"><span class="label">Render</span><p>Generate frames in order, then assemble and verify the output.</p></div></div></div></div>
+    <div class="content-grid">
+      <div class="content-aside"><p class="section-index">02 / Output constraints</p><h2>Settings with real limits.</h2></div>
+      <div class="content-main">
+        <p>The current settings include output targets up to 16K resolution, 240 frames per second and 800 Mbps. These are configuration ceilings, not a guarantee that every browser, codec, device or profile can encode every combination.</p>
+        <div class="detail-list">
+          <div class="detail-row"><span class="label">Bitrate target</span><p>20 Mbps minimum and 25 Mbps default. CBR is requested, but measured average bitrate may vary with scene complexity and the browser’s encoder implementation. Simple scenes can measure lower; TRILYVA reports the measured rate rather than failing a valid render on bitrate alone.</p></div>
+          <div class="detail-row"><span class="label">H.264 reference</span><p>800 Mbps is the H.264 Level 6.2 reference maximum. Profile constraints and browser/device support may impose lower limits.</p></div>
+          <div class="detail-row"><span class="label">File size</span><p>Each MP4/WebM output is capped at 2,000,000,000 bytes. Jobs projected to exceed the cap are blocked rather than silently reducing resolution, frame rate or quality.</p></div>
+          <div class="detail-row"><span class="label">Encoding</span><p>H.264/AVC and VP8/VP9 options are offered where the browser reports support. Actual output depends on the available media APIs.</p></div>
+        </div>
+      </div>
+    </div>
   </section>
   <section class="content-section">
-    <div class="content-grid" data-reveal><div class="content-aside"><p class="section-index">03 / Boundaries</p><h2>Deterministic, not generative.</h2></div><div class="content-main"><p>TRILYVA does not include a built-in AI integration. It runs the JavaScript supplied to its renderer; any code produced elsewhere must be copied into the workspace manually. The output is determined by the renderer code and frame inputs, not by a generative model inside the application.</p><p>Rendering speed, memory use, browser limits and codec behavior still depend on the device and browser. Export settings must be checked against the actual file produced rather than treated as a promise based on configuration alone.</p><div class="link-row"><a href="https://tamasrazim.github.io/projects/trilyva/" target="_blank" rel="noopener noreferrer">Open the current TRILYVA project page ↗</a><a href="https://tamasrazim.github.io/projects/trilyva/renderer/" target="_blank" rel="noopener noreferrer">Renderer workspace ↗</a></div></div></div>
+    <div class="content-grid">
+      <div class="content-aside"><p class="section-index">03 / More than video</p><h2>A wider creative workflow.</h2></div>
+      <div class="content-main text-columns">
+        <article class="text-card"><h3>Library batch</h3><p>Choose a built-in or imported JavaScript library and package each item’s video, selected still frames and metadata into a folder or ZIP.</p></article>
+        <article class="text-card"><h3>Still-frame formats</h3><p>The frame inspector lists PNG, JPEG, WebP, AVIF, BMP, TIFF, GIF, ICO, TGA, QOI, SVG, EPS, PPM, PGM, PBM, PAM, XBM and XPM. Some formats depend on browser encoder support; SVG/EPS inspector exports contain raster image data.</p></article>
+        <article class="text-card"><h3>Offline Voice Studio</h3><p>A formant-synthesis voice tool for timed dialogue, procedural soundscapes, PCM WAV output and subtitle cues. The voice is synthetic rather than a neural voice clone.</p></article>
+        <article class="text-card"><h3>Local Movie Finalizer</h3><p>Combines a video or stock clip with a browser-decodable audio file. It captures and re-encodes in real time, so it is not a lossless muxer.</p></article>
+      </div>
+    </div>
+  </section>
+  <section class="content-section">
+    <div class="content-grid">
+      <div class="content-aside"><p class="section-index">04 / Boundaries</p><h2>Deterministic, not generative.</h2></div>
+      <div class="content-main">
+        <p>TRILYVA has no built-in AI integration. It executes the JavaScript supplied to its renderer; code produced elsewhere must be copied into the workspace manually. The output is determined by the renderer function and its frame inputs, not by a generative model inside the application.</p>
+        <p>The browser remains part of the runtime. Memory availability, file-system pickers, codecs and media encoders vary between browsers and devices. The project is designed around those APIs rather than promising identical behavior on every platform.</p>
+        <div class="link-row"><a href="https://tamasrazim.github.io/projects/trilyva/" target="_blank" rel="noopener noreferrer">Current project page ↗</a><a href="https://tamasrazim.github.io/projects/trilyva/renderer/" target="_blank" rel="noopener noreferrer">Open renderer ↗</a><a href="https://tamasrazim.github.io/projects/trilyva/docs/" target="_blank" rel="noopener noreferrer">Documentation ↗</a><a href="https://tamasrazim.github.io/projects/trilyva/tutorial/" target="_blank" rel="noopener noreferrer">Tutorial ↗</a></div>
+      </div>
+    </div>
   </section>
 </div></main>
+
 <footer class="site-footer">
   <div class="shell footer-inner">
     <span>© 2026 Robiul Rumman Razim</span>
-    <div class="footer-links">
-      <a href="/web2/">Home</a>
-      <a href="/web2/work/">Work</a>
-      <a href="/web2/about/">About</a>
+    <nav class="footer-links" aria-label="Footer navigation">
+      <a href="/web2/">Home</a><a href="/web2/work/">Work</a><a href="/web2/about/">About</a><a href="/web2/approach/">Approach</a>
       <a href="https://github.com/Tamasrazim" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
-    </div>
-    <span>DESIGNED TO KEEP MOVING</span>
+    </nav>
+    <span>INDEPENDENT PRACTICE / 2026</span>
   </div>
 </footer>
 </body>

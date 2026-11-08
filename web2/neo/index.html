@@ -3,25 +3,34 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#080808">
+<meta name="theme-color" content="#090909">
 <meta name="color-scheme" content="dark">
 <meta name="author" content="Robiul Rumman Razim">
-<meta name="description" content="NEO is a native Windows first-person puzzle-game project built around deterministic floors and persistent progression.">
+<meta name="description" content="NEO is a native Windows C++ first-person puzzle game with 100 deterministic floors, ten difficulty and theme tiers, six objective types and saved progression.">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <link rel="canonical" href="https://tamasrazim.github.io/web2/neo/">
+<link rel="icon" type="image/svg+xml" href="/web2/assets/icons/mark.svg">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Tamasrazim">
-<meta property="og:title" content="NEO — First-Person Puzzle Game">
-<meta property="og:description" content="NEO is a native Windows first-person puzzle-game project built around deterministic floors and persistent progression.">
+<meta property="og:title" content="NEO — Native Windows First-Person Puzzle Game">
+<meta property="og:description" content="NEO is a native Windows C++ first-person puzzle game with 100 deterministic floors, ten difficulty and theme tiers, six objective types and saved progression.">
 <meta property="og:url" content="https://tamasrazim.github.io/web2/neo/">
 <meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg">
+<meta property="og:image:alt" content="Tamasrazim — Robiul Rumman Razim">
 <meta name="twitter:card" content="summary_large_image">
-<title>NEO — First-Person Puzzle Game</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23080808'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23f1f0eb' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23f1f0eb'/%3E%3C/svg%3E">
+<meta name="twitter:title" content="NEO — Native Windows First-Person Puzzle Game">
+<meta name="twitter:description" content="NEO is a native Windows C++ first-person puzzle game with 100 deterministic floors, ten difficulty and theme tiers, six objective types and saved progression.">
+<meta name="twitter:image" content="https://tamasrazim.github.io/og-image.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Unbounded:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/web2/assets/css/site.css">
 <script defer src="/web2/assets/js/site.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"NEO","gamePlatform":"Windows","applicationCategory":"Game","url":"https://tamasrazim.github.io/web2/neo/","creator":{"@type":"Person","name":"Robiul Rumman Razim"},"description":"A native first-person puzzle game with 100 deterministic floors and saved progression."}</script>
+<title>NEO — Native Windows First-Person Puzzle Game</title>
 </head>
 <body>
+
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="shell header-inner">
@@ -34,30 +43,67 @@
     </nav>
   </div>
 </header>
-<main id="main"><div class="shell page-top"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="/web2/">Home</a><span>/</span><a href="/web2/work/">Work</a><span>/</span><span>NEO</span></nav></div>
+<main id="main"><div class="shell page-top"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="/web2/">Home</a><span class="slash">/</span><a href="/web2/work/">Work</a><span class="slash">/</span><span>NEO</span></nav></div>
 <div class="shell">
   <section class="page-hero">
-    <div><p class="eyebrow">04 / Game project</p><h1>Space to think.<br><span class="stroke">Systems to solve.</span></h1><div class="page-meta"><span class="tag">Windows x64</span><span class="tag">First-person puzzle</span><span class="tag">Game project</span></div></div>
-    <p class="page-hero-copy">NEO is a native Windows first-person puzzle-game project built around structured floors, repeatable layouts and persistent progression.</p>
+    <div><p class="eyebrow">04 / Native game / Windows</p><h1>Space to think.<br><span class="outline">Systems to solve.</span></h1><div class="page-meta"><span class="tag">Windows x64</span><span class="tag">C++ / CMake</span><span class="tag">100 floors</span></div></div>
+    <p class="page-hero-copy">NEO is a first-person puzzle game for Windows. Its structure is built around deterministic floors and a progression system that remembers the player’s run.</p>
   </section>
-  <div class="page-visual art-neo" role="img" aria-label="Nested geometric maze forms representing a puzzle space"><span class="art-caption mono">NEO / Spatial study</span><span class="art-core" aria-hidden="true"></span><span class="art-index mono">SPACE / LOGIC / PROGRESSION</span></div>
+  <figure class="project-figure">
+    <figcaption class="art-caption mono">NEO / 100-floor structure</figcaption>
+    <div class="neo-floor-map" aria-hidden="true">
+      <svg viewBox="0 0 500 300">
+        <defs><pattern id="floorPattern" width="25" height="25" patternUnits="userSpaceOnUse"><rect x="1" y="1" width="21" height="21" fill="#171715" stroke="#69675f" stroke-width=".7"/></pattern></defs>
+        <rect class="floor-grid" x="15" y="15" width="250" height="250"/>
+        <path class="floor-path" d="M27 40h48v25h50v50h50v-25h50v50h-50v50h-50v25h-50v-25H27"/>
+        <circle class="floor-start" cx="27" cy="40" r="5"/><circle class="floor-end" cx="27" cy="240" r="5"/>
+        <g fill="#8a8880" font-family="monospace" font-size="10"><text x="310" y="75">10 TIERS</text><text x="310" y="105">100 FLOORS</text><text x="310" y="135">06 OBJECTIVES</text><text x="310" y="165">SAVED RUN</text></g>
+      </svg>
+    </div>
+    <span class="art-index mono">FLOORS / RULES / PROGRESSION</span>
+  </figure>
   <section class="content-section">
-    <div class="content-grid" data-reveal><div class="content-aside"><p class="section-index">01 / The idea</p><h2>A puzzle space with memory.</h2></div><div class="content-main"><p>NEO is a first-person puzzle-game concept where the structure of each floor matters and progression persists between visits. Its design focus is on readable spaces, clear rules and the satisfaction of understanding how a system behaves.</p></div></div>
+    <div class="content-grid">
+      <div class="content-aside"><p class="section-index">01 / Floor structure</p><h2>One hundred repeatable spaces.</h2></div>
+      <div class="content-main">
+        <p>The game is organized around 100 deterministic floors, arranged across ten difficulty and theme tiers. A floor selector gives the player a way to revisit the structure, while progression tracks what has been unlocked and completed.</p>
+        <div class="detail-list">
+          <div class="detail-row"><span class="label">Floors</span><p>100 deterministic floors across ten tiers.</p></div>
+          <div class="detail-row"><span class="label">Objectives</span><p>Six objective types.</p></div>
+          <div class="detail-row"><span class="label">Progress</span><p>Unlocks, three-star ratings and saved progress.</p></div>
+        </div>
+      </div>
+    </div>
   </section>
   <section class="content-section">
-    <div class="content-grid" data-reveal><div class="content-aside"><p class="section-index">02 / Project direction</p><h2>Build the rules first.</h2></div><div class="content-main"><p>Deterministic floor behavior gives the game a repeatable foundation. Persistent progression provides continuity across those spaces. The project page and build status should be treated as the source for current implementation details as development continues.</p><div class="link-row"><a href="https://tamasrazim.github.io/projects/neo/" target="_blank" rel="noopener noreferrer">Open the current NEO project page ↗</a></div></div></div>
+    <div class="content-grid">
+      <div class="content-aside"><p class="section-index">02 / Controls and options</p><h2>Built for desktop play.</h2></div>
+      <div class="content-main">
+        <div class="detail-list">
+          <div class="detail-row"><span class="label">View</span><p>First-person mouse-look with cursor release and pause behavior.</p></div>
+          <div class="detail-row"><span class="label">Display</span><p>Windowed, borderless and fullscreen modes.</p></div>
+          <div class="detail-row"><span class="label">Settings</span><p>Audio, hints, field of view, sensitivity and performance settings.</p></div>
+          <div class="detail-row"><span class="label">Build</span><p>Native Windows application written in C++ with a CMake build path.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="content-section">
+    <div class="content-grid">
+      <div class="content-aside"><p class="section-index">03 / Current build</p><h2>Check the release record.</h2></div>
+      <div class="content-main"><p>The project is a native Windows game with its own build and release path. The existing project page and download page provide the current build status and available files.</p><div class="link-row"><a href="https://tamasrazim.github.io/projects/neo/" target="_blank" rel="noopener noreferrer">Current NEO project page ↗</a><a href="https://tamasrazim.github.io/projects/neo/download/" target="_blank" rel="noopener noreferrer">Build and download information ↗</a></div></div>
+    </div>
   </section>
 </div></main>
+
 <footer class="site-footer">
   <div class="shell footer-inner">
     <span>© 2026 Robiul Rumman Razim</span>
-    <div class="footer-links">
-      <a href="/web2/">Home</a>
-      <a href="/web2/work/">Work</a>
-      <a href="/web2/about/">About</a>
+    <nav class="footer-links" aria-label="Footer navigation">
+      <a href="/web2/">Home</a><a href="/web2/work/">Work</a><a href="/web2/about/">About</a><a href="/web2/approach/">Approach</a>
       <a href="https://github.com/Tamasrazim" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
-    </div>
-    <span>DESIGNED TO KEEP MOVING</span>
+    </nav>
+    <span>INDEPENDENT PRACTICE / 2026</span>
   </div>
 </footer>
 </body>
