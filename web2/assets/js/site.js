@@ -46,7 +46,7 @@
     nodes.forEach(node => {
       const active = node.dataset.signal === id;
       node.classList.toggle("is-active", active);
-      node.setAttribute("aria-current", active ? "true" : "false");
+      node.toggleAttribute("data-active", active);
     });
     routes.forEach(route => route.classList.toggle("is-active", route.dataset.route === id));
     if (detail.kicker) detail.kicker.textContent = item.kicker;
