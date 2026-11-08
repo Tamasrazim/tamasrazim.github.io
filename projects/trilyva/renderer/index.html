@@ -1861,10 +1861,10 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
             <div class="row"><label for="oQuality">Quality</label>
               <select id="oQuality"><option value="draft">Draft</option><option value="standard">Standard</option><option value="high">High</option><option value="max">Maximum</option></select></div>
             <div class="row"><label for="oBitrate">Custom bitrate</label>
-              <input type="number" id="oBitrate" min="20" max="2000" step="0.1" value="25" inputmode="decimal">
+              <input type="number" id="oBitrate" min="20" max="800" step="0.1" value="25" inputmode="decimal">
               <span class="num" style="font-size:10px;color:var(--mut)">Mbps</span></div>
-            <p class="note">Video bitrate target: minimum 20 Mbps · default 25 Mbps · maximum 2,000 Mbps · CBR requested. Actual average can vary with content and browser encoder implementation; low-complexity scenes may use less. TRILYVA reports the measured rate without failing an otherwise valid render. Video exports have a strict 2,000,000,000-byte (2 GB) file-size cap. No automatic bitrate, resolution, frame-rate or quality reduction is made to fit the cap.</p>
-            <div class="warnbox"><b>MEMORY / LARGE EXPORTS</b>2 GB is the output file-size limit, not a 2 Gbps bitrate. The current browser muxer retains encoded chunks and container/index data during finalisation. A near-limit export may need substantially more than 2 GB of free memory; some desktop/browser combinations may not have enough available memory. A 2 GB file does not automatically mean a media player loads the entire file into RAM.</div>
+            <p class="note">Video bitrate target: minimum 20 Mbps · default 25 Mbps · maximum 800 Mbps · CBR requested. Actual average can vary with content and browser encoder implementation; low-complexity scenes may use less. TRILYVA reports the measured rate without failing an otherwise valid render. Video exports have a strict 2,000,000,000-byte (2 GB) file-size cap. No automatic bitrate, resolution, frame-rate or quality reduction is made to fit the cap.</p>
+            <div class="warnbox"><b>MEMORY / LARGE EXPORTS</b>The 2 GB file-size cap is separate from the 800 Mbps maximum encoder target. The current browser muxer retains encoded chunks and container/index data during finalisation. A near-limit export may need substantially more than 2 GB of free memory; some desktop/browser combinations may not have enough available memory. A 2 GB file does not automatically mean a media player loads the entire file into RAM.</div>
             <div class="row"><label for="oTimebase">WebM timebase</label>
               <select id="oTimebase"><option value="ms">1 ms (compatible)</option><option value="exact">Exact 1/fps tick</option></select></div>
             <div class="row"><label for="oChecksum">Frame checksums</label>
@@ -3266,9 +3266,9 @@ function probeH264(width, height, fps, bitrate) {
   }
   return Promise.resolve().then(next);
 }
-/* Video export policy: 20 Mbps minimum, 25 Mbps UI default, 2 Gbps target ceiling. */
+/* Video export policy: 20 Mbps minimum, 25 Mbps UI default, 800 Mbps target ceiling. */
 var MIN_TARGET_BITRATE_BPS = 20000000;
-var MAX_TARGET_BITRATE_BPS = 2000000000;
+var MAX_TARGET_BITRATE_BPS = 800000000;
 var MAX_VIDEO_FILE_BYTES = 2000000000;
 function sanitiseBitrate(v, width, height, fps) {
   var n = Number(v);
@@ -9423,7 +9423,24 @@ function openRenderAllConfirm(lib,items){
     var input=document.createElement('input');input.type='checkbox';input.id=id;input.checked=!!checked;
     wrapper.append(input,document.createTextNode(label));parent.appendChild(wrapper);return input;
   }
-  var videoRow=el('p','note','Each library item is rendered as a full MP4 video using the current resolution, frame rate, duration, quality and bitrate settings.');
+  var videoRow=el('p','note','Every animation in this batch will use the output settings below. Each item keeps its own stored duration and loop settings.');
+  var batchGrid=el('div');
+  batchGrid.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:9px;';
+  function batchNumberField(label,value,min,max,step){
+    var wrap=el('label');
+    wrap.style.cssText='display:flex;flex-direction:column;gap:5px;font:10px var(--mono);color:var(--ink-2);min-width:0;';
+    var caption=el('span',null,label);
+    var input=document.createElement('input');
+    input.type='number';input.value=String(value);input.min=String(min);input.max=String(max);input.step=String(step);
+    input.style.cssText='width:100%;min-width:0;padding:9px 8px;border:1px solid var(--rule-hi);border-radius:4px;background:var(--raise);color:var(--ink);font:12px var(--mono);';
+    wrap.append(caption,input);batchGrid.appendChild(wrap);
+    return input;
+  }
+  var batchWidth=batchNumberField('WIDTH · PX',S.comp.width,2,16384,2);
+  var batchHeight=batchNumberField('HEIGHT · PX',S.comp.height,2,16384,2);
+  var batchFps=batchNumberField('FRAME RATE · FPS',S.comp.fps,1,240,1);
+  var batchBitrate=batchNumberField('CBR TARGET · Mbps',S.customBitrateMbps||25,20,800,0.1);
+  var batchNote=el('p','note','Bitrate target: 20 Mbps minimum · 25 Mbps default · 800 Mbps maximum. CBR is requested; low-complexity scenes or browser encoders may deliver a lower measured average, which TRILYVA reports without rejecting an otherwise valid render. Each MP4 has a separate 2 GB file-size cap. Settings are never silently reduced.');
   var stillHeading=el('h4',null,'STILL OUTPUTS · ONE FRAME PER ITEM');
   var stillRow=el('div');stillRow.style.cssText='display:flex;flex-wrap:wrap;gap:10px 16px;';
   var prefs=trilyvaReadStillPrefs();
@@ -9433,13 +9450,31 @@ function openRenderAllConfirm(lib,items){
   var frameInput=document.createElement('input');frameInput.type='number';frameInput.min='0';frameInput.step='1';frameInput.value=String(prefs.frame);frameInput.style.maxWidth='120px';frameRow.appendChild(frameInput);
   var details=el('div','note','Library: '+lib.title+' · '+items.length+' animations. Each selected video format renders the full composition. PNG/JPG/SVG/EPS export the selected frame; frame 0 is the first frame. Files will be written into a timestamped library folder, or into a ZIP archive you choose.');
   var warning=el('p','note','SVG and EPS use TRILYVA’s editable vector recorder; code that uses unsupported Canvas features may still render to video/PNG/JPG while its vector still is marked as failed.');
-  body.append(el('h4',null,'VIDEO FORMATS'),videoRow,stillHeading,stillRow,frameRow,details,warning);
+  body.append(el('h4',null,'VIDEO OUTPUT SETTINGS'),videoRow,batchGrid,batchNote,stillHeading,stillRow,frameRow,details,warning);
   function collectSettings(){
     var videoFormats=['mp4'];
     var stillFormats=['png','jpg','svg','eps'].filter(function(fmt){return stillChecks[fmt].checked;});
     if(!stillFormats.length){stillFormats=['png'];stillChecks.png.checked=true;}
+    function readInteger(input,label,min,max,even){
+      var value=Number(input.value);
+      if(!Number.isInteger(value)||value<min||value>max||(even&&value%2!==0)){
+        throw new Error(label+' must be '+(even?'an even ':'')+'integer from '+min+' to '+max+'.');
+      }
+      return value;
+    }
+    var width=readInteger(batchWidth,'Width',2,16384,true);
+    var height=readInteger(batchHeight,'Height',2,16384,true);
+    var fps=readInteger(batchFps,'Frame rate',1,240,false);
+    var bitrateMbps=Number(batchBitrate.value);
+    if(!Number.isFinite(bitrateMbps)||bitrateMbps<20||bitrateMbps>800){
+      throw new Error('CBR target must be between 20 and 800 Mbps.');
+    }
     var frame=Math.max(0,Math.floor(Number(frameInput.value)||0));
-    var settings={videoFormats:videoFormats,stillFormats:stillFormats,frame:frame};
+    var settings={
+      videoFormats:videoFormats,stillFormats:stillFormats,frame:frame,
+      width:width,height:height,fps:fps,bitrateMbps:bitrateMbps,
+      quality:S.quality,timebase:S.timebase,checksums:S.checksums
+    };
     trilyvaApplyStillPrefs({frame:frame,formats:stillFormats});
     return settings;
   }
@@ -9495,7 +9530,7 @@ async function renderAllLibrary(lib,items,settings,destination){
   TRILYVA_FULL_LIBRARY_ACTIVE=true;S.queueStop=false;
   var startedAt=new Date().toISOString(),completed=[],failures=[],cancelled=false,zipWriter=destination.mode==='zip'?new ENC.ZipWriter():null;
   var body=el('div');body.style.cssText='display:flex;flex-direction:column;gap:8px;min-height:0;';
-  var head=el('div');head.innerHTML='<div class="verified"><b>RENDER FULL LIBRARY</b><span id="fullLibPos">0 / '+items.length+'</span><span>'+settings.videoFormats.map(function(x){return x.toUpperCase();}).join(' + ')+'</span><span>'+esc(lib.title)+'</span></div>';
+  var head=el('div');head.innerHTML='<div class="verified"><b>RENDER FULL LIBRARY</b><span id="fullLibPos">0 / '+items.length+'</span><span>'+settings.width+'×'+settings.height+' · '+settings.fps+' FPS · '+settings.bitrateMbps+' Mbps CBR</span><span>'+esc(lib.title)+'</span></div>';
   var status=el('p','note','Preparing the first animation…');
   var bar=el('div','prog');bar.innerHTML='<i style="width:0%"></i>';
   var log=el('div','list');log.style.cssText='max-height:40vh;overflow:auto;';
@@ -9529,6 +9564,9 @@ async function renderAllLibrary(lib,items,settings,destination){
         var loaded=await trilyvaLoadLibraryCode(itemName,item.code,item,{keepModal:true});
         if(!loaded||!loaded.ok)throw new Error(loaded&&loaded.error?String(loaded.error.message||loaded.error):'Animation code did not compile.');
         var itemComp=merge({},S.comp);
+        itemComp.width=settings.width;
+        itemComp.height=settings.height;
+        itemComp.fps=settings.fps;
         if(Number(item.duration)>0)itemComp.duration=Number(item.duration);
         if(Number(item.loopDuration)>0)itemComp.loopDuration=Number(item.loopDuration);
         if(typeof item.loop==='boolean')itemComp.loop=item.loop;
@@ -9560,6 +9598,11 @@ async function renderAllLibrary(lib,items,settings,destination){
           var job=buildJob({exportFormat:videoFmt,composition:itemComp});
           job.code=item.code;job.label=itemName;job.metadata.title=itemName;
           job.metadata.description=String(item.description||job.metadata.description||'');
+          job.quality=settings.quality||S.quality;
+          job.timebase=settings.timebase||S.timebase;
+          job.checksums=settings.checksums!==false;
+          job.bitrate=ENC.sanitiseBitrate(Math.round(settings.bitrateMbps*1000000),W,H,F);
+          job.bitrateMode='constant';
           job.fileName=base+'.'+videoFmt;
           status.textContent='Rendering '+videoFmt.toUpperCase()+' · '+itemName+' · '+W+'×'+H+' · '+F+' fps';
           var result=await startRender(job,{silent:true,batch:true});
@@ -9598,10 +9641,12 @@ async function renderAllLibrary(lib,items,settings,destination){
     format:'TRILYVA_FULL_LIBRARY_EXPORT',version:1,libraryId:lib.id,libraryTitle:lib.title,librarySource:lib.source||lib.kind,
     startedAt:startedAt,finishedAt:new Date().toISOString(),requestedItems:items.length,completedItems:completed.length,
     failureCount:failures.length,cancelled:cancelled,videoFormats:settings.videoFormats,stillFormats:settings.stillFormats,
-    stillFrameRequested:settings.frame,assetSet:settings.videoFormats.concat(settings.stillFormats),resolution:{width:S.comp.width,height:S.comp.height},fps:S.comp.fps,
+    stillFrameRequested:settings.frame,assetSet:settings.videoFormats.concat(settings.stillFormats),
+    resolution:{width:settings.width,height:settings.height},fps:settings.fps,
+    bitrate:{targetMbps:settings.bitrateMbps,mode:'constant'},quality:settings.quality,
     destination:destination.mode,completed:completed,failures:failures
   };
-  var readme='TRILYVA — Full Library Export\r\nLibrary: '+lib.title+'\r\nCreated: '+startedAt+'\r\nVideo formats: '+settings.videoFormats.join(', ')+'\r\nStill formats: '+settings.stillFormats.join(', ')+'\r\nSelected frame: '+settings.frame+' (0-based)\r\nCompleted items: '+completed.length+'\r\nIssues: '+failures.length+'\r\n';
+  var readme='TRILYVA — Full Library Export\r\nLibrary: '+lib.title+'\r\nCreated: '+startedAt+'\r\nResolution: '+settings.width+'x'+settings.height+'\r\nFrame rate: '+settings.fps+' fps\r\nCBR target: '+settings.bitrateMbps+' Mbps\r\nQuality: '+settings.quality+'\r\nVideo formats: '+settings.videoFormats.join(', ')+'\r\nStill formats: '+settings.stillFormats.join(', ')+'\r\nSelected frame: '+settings.frame+' (0-based)\r\nCompleted items: '+completed.length+'\r\nIssues: '+failures.length+'\r\n';
   try{
     if(destination.mode==='folder'){
       await dotMeshWriteFile(destination.root,'BATCH-MANIFEST.json',JSON.stringify(manifest,null,2),'application/json;charset=utf-8');
@@ -9747,7 +9792,7 @@ async function dotMeshFolderRestoreWorkspace(saved) {
   S.meta=saved.meta ? merge({},saved.meta) : defaultMeta();
   S.frame=saved.frame || 0; S.hash=saved.hash || "";
   S.customBitrateMbps=Number.isFinite(Number(saved.customBitrateMbps))
-     ? Math.max(20, Math.min(2000, Number(saved.customBitrateMbps))) : 25;
+     ? Math.max(20, Math.min(800), Number(saved.customBitrateMbps))) : 25;
   S.exportFormat=saved.exportFormat; S.quality=saved.quality;
   S.timebase=saved.timebase; S.checksums=saved.checksums;
   S.queueStop=false; S.lastError=saved.lastError || null;
@@ -11704,7 +11749,7 @@ function estimateVideoFileBytes(job) {
 function requestedBitrate(width, height, fps) {
   var custom = Number(S.customBitrateMbps);
   if (!isFinite(custom) || custom <= 0) custom = 25;
-  return Math.max(20, Math.min(2000, custom)) * 1000000;
+  return Math.max(20, Math.min(800), custom)) * 1000000;
 }
 function initRenderPanel() {
   var dirOk = typeof window.showDirectoryPicker === 'function';
@@ -11721,14 +11766,14 @@ function initRenderPanel() {
   $('#oQuality').value = S.quality;
   $('#oTimebase').value = S.timebase;
   $('#oChecksum').value = S.checksums ? 'on' : 'off';
-  $('#oBitrate').value = Math.max(20, Math.min(2000,
+  $('#oBitrate').value = Math.max(20, Math.min(800),
     Number.isFinite(Number(S.customBitrateMbps)) ? Number(S.customBitrateMbps) : 25));
   S.customBitrateMbps = Number($('#oBitrate').value);
   $('#oQuality').addEventListener('change', function () { S.quality = $('#oQuality').value; refreshMedia(); markDirty(); });
   $('#oBitrate').addEventListener('change', function () {
     var v = parseFloat($('#oBitrate').value);
     if (!isFinite(v)) v = 25;
-    v = Math.max(20, Math.min(2000, v));
+    v = Math.max(20, Math.min(800), v));
     S.customBitrateMbps = v;
     $('#oBitrate').value = v;
     refreshMedia(); markDirty();
@@ -13278,7 +13323,7 @@ function loadProjectRecord(rec) {
   S.timebase = p.timebase || 'ms';
   S.checksums = p.checksums !== false;
   S.customBitrateMbps = isFinite(Number(p.customBitrateMbps))
-    ? Math.max(20, Math.min(2000, Number(p.customBitrateMbps))) : 25;
+    ? Math.max(20, Math.min(800), Number(p.customBitrateMbps))) : 25;
   S.code = rec.code || '';
   edSetValue(S.code);
   $('#projName').value = S.name;
@@ -14538,7 +14583,7 @@ var DOCS = [
   '</table>',
 
   '<h5>VIDEO SIZE LIMIT AND MEMORY</h5>',
-  '<p>MP4 and WebM outputs have a strict 2,000,000,000-byte (2 GB) file-size cap. The encoder bitrate target ranges from 20 Mbps minimum to 2,000 Mbps maximum, with 25 Mbps as the default, and TRILYVA requests constant-bitrate mode. The actual average can still vary by content and browser/codec implementation; low-complexity scenes may produce a lower measured average. TRILYVA records and reports that measured rate but does not fail an otherwise valid render on bitrate alone. The exporter refuses to deliver an oversized file and never silently lowers resolution, frame rate or quality to fit.</p>',
+  '<p>MP4 and WebM outputs have a strict 2,000,000,000-byte (2 GB) file-size cap. The encoder bitrate target ranges from 20 Mbps minimum to 800 Mbps maximum, with 25 Mbps as the default, and TRILYVA requests constant-bitrate mode. The actual average can still vary by content and browser/codec implementation; low-complexity scenes may produce a lower measured average. TRILYVA records and reports that measured rate but does not fail an otherwise valid render on bitrate alone. The exporter refuses to deliver an oversized file and never silently lowers resolution, frame rate or quality to fit.</p>',
   '<p>A 2 GB output is a file-size limit, not a bitrate, and it does not mean a playback application must load the entire file into RAM. However, this browser exporter keeps compressed samples plus muxer/index data during finalisation; browser storage behaviour varies, and the export tab may need substantially more available memory than the final file size. Near-limit exports can fail on ordinary desktop systems with insufficient free memory. This is a real browser-side limitation, not a reason to degrade the frames.</p>',
   '<h5>THE MP4 PATH</h5>',
   '<p>H.264 support is a runtime fact, not an assumption. Before anything is rendered the app asks the browser about the real composition \u2014 width, height, frame rate and the validated bitrate \u2014 walking High, Main and Constrained Baseline at descending levels through <code>VideoEncoder.isConfigSupported</code>. The first configuration the browser actually accepts is the one used, and its exact codec string is shown in the Render panel and in Diagnostics. If nothing is accepted, the panel says so with the resolution and frame rate that were refused, and offers only the alternatives it has just confirmed on this machine.</p>',
