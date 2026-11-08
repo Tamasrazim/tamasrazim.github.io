@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#080808">
+<meta name="color-scheme" content="dark">
+<meta name="author" content="Robiul Rumman Razim">
+<meta name="description" content="TrSS is independent research into renderer-guided image reconstruction and neural rendering for Intel Arc, including dataset tools and a Windows frame pipeline.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://tamasrazim.github.io/web2/trss/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tamasrazim">
+<meta property="og:title" content="TrSS — Neural Rendering Research for Intel Arc">
+<meta property="og:description" content="TrSS is independent research into renderer-guided image reconstruction and neural rendering for Intel Arc, including dataset tools and a Windows frame pipeline.">
+<meta property="og:url" content="https://tamasrazim.github.io/web2/trss/">
+<meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<title>TrSS — Neural Rendering Research for Intel Arc</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23080808'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23f1f0eb' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23f1f0eb'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/web2/assets/css/site.css">
+<script defer src="/web2/assets/js/site.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="shell header-inner">
+    <a class="wordmark" href="/web2/" aria-label="Tamasrazim home"><span class="wordmark-mark" aria-hidden="true"></span><span>TAMASRAZIM</span></a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="/web2/work/" aria-current="page">Work</a>
+      <a href="/web2/about/" >About</a>
+      <a href="/web2/approach/" >Approach</a>
+      <a class="nav-contact" href="mailto:admin@tamasrazim.anonaddy.com">Contact</a>
+    </nav>
+  </div>
+</header>
+<main id="main"><div class="shell page-top"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="/web2/">Home</a><span>/</span><a href="/web2/work/">Work</a><span>/</span><span>TrSS</span></nav></div>
+<div class="shell">
+  <section class="page-hero">
+    <div><p class="eyebrow">02 / Graphics research</p><h1>Reconstruction<br>guided by the<br><span class="stroke">renderer.</span></h1><div class="page-meta"><span class="tag">Intel Arc</span><span class="tag">Neural rendering</span><span class="tag">Research</span></div></div>
+    <p class="page-hero-copy">TrSS explores a renderer-guided reconstruction pipeline for Intel Arc. It brings together a guide-conditioned model, dataset tools and a cooperative Windows frame-processing path.</p>
+  </section>
+  <div class="page-visual art-trss" role="img" aria-label="Abstract reconstruction geometry with nested square forms"><span class="art-caption mono">TrSS / Reconstruction study</span><span class="art-core" aria-hidden="true"></span><span class="art-index mono">INPUT / GUIDES / OUTPUT</span></div>
+  <section class="content-section">
+    <div class="content-grid" data-reveal><div class="content-aside"><p class="section-index">01 / Research question</p><h2>Use more than the image.</h2></div><div class="content-main"><p>The project investigates whether rendering context and guide signals can help a reconstruction model recover useful detail while respecting the structure of the source frame. The work is targeted at Intel Arc hardware, with the Arc B580 serving as the primary development target.</p><p>This is independent research, not a released drop-in upscaler or a claim of compatibility with every game. Model quality, latency, integration and visual stability all need direct evaluation.</p></div></div>
+  </section>
+  <section class="content-section">
+    <div class="content-grid" data-reveal><div class="content-aside"><p class="section-index">02 / Current structure</p><h2>Several pieces, one pipeline.</h2></div><div class="content-main"><div class="detail-list"><div class="detail-row"><span class="label">Model path</span><p>A guide-conditioned reconstruction model and its inference interface.</p></div><div class="detail-row"><span class="label">Data</span><p>Dataset and sample-recording tools for collecting and preparing training or evaluation material.</p></div><div class="detail-row"><span class="label">Runtime</span><p>A cooperative Windows D3D11-to-OpenVINO frame pipeline under active engineering.</p></div><div class="detail-row"><span class="label">Target</span><p>Intel Arc, with the Arc B580 12GB as the main test device.</p></div></div></div></div>
+  </section>
+  <section class="content-section">
+    <div class="content-grid" data-reveal><div class="content-aside"><p class="section-index">03 / What remains</p><h2>Research still has unknowns.</h2></div><div class="content-main"><p>Model training, image quality, frame-time cost, memory use and application integration are separate problems. A working component does not establish that the complete path is ready for in-game use. The next steps are driven by tests on the existing implementation rather than by replacing the architecture with a new prototype.</p><div class="link-row"><a href="https://github.com/Tamasrazim/TrSS" target="_blank" rel="noopener noreferrer">Explore the TrSS repository ↗</a><a href="https://tamasrazim.github.io/projects/trss/" target="_blank" rel="noopener noreferrer">Open the current project page ↗</a></div></div></div>
+  </section>
+</div></main>
+<footer class="site-footer">
+  <div class="shell footer-inner">
+    <span>© 2026 Robiul Rumman Razim</span>
+    <div class="footer-links">
+      <a href="/web2/">Home</a>
+      <a href="/web2/work/">Work</a>
+      <a href="/web2/about/">About</a>
+      <a href="https://github.com/Tamasrazim" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    </div>
+    <span>DESIGNED TO KEEP MOVING</span>
+  </div>
+</footer>
+</body>
+</html>

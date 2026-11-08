@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#080808">
+<meta name="color-scheme" content="dark">
+<meta name="author" content="Robiul Rumman Razim">
+<meta name="description" content="TRILYVA is a browser-based procedural animation renderer built around JavaScript frame functions, frame-by-frame rendering and local creative workflows.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://tamasrazim.github.io/web2/trilyva/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tamasrazim">
+<meta property="og:title" content="TRILYVA — Procedural Animation Workspace">
+<meta property="og:description" content="TRILYVA is a browser-based procedural animation renderer built around JavaScript frame functions, frame-by-frame rendering and local creative workflows.">
+<meta property="og:url" content="https://tamasrazim.github.io/web2/trilyva/">
+<meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<title>TRILYVA — Procedural Animation Workspace</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23080808'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23f1f0eb' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23f1f0eb'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/web2/assets/css/site.css">
+<script defer src="/web2/assets/js/site.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="shell header-inner">
+    <a class="wordmark" href="/web2/" aria-label="Tamasrazim home"><span class="wordmark-mark" aria-hidden="true"></span><span>TAMASRAZIM</span></a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="/web2/work/" aria-current="page">Work</a>
+      <a href="/web2/about/" >About</a>
+      <a href="/web2/approach/" >Approach</a>
+      <a class="nav-contact" href="mailto:admin@tamasrazim.anonaddy.com">Contact</a>
+    </nav>
+  </div>
+</header>
+<main id="main"><div class="shell page-top"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="/web2/">Home</a><span>/</span><a href="/web2/work/">Work</a><span>/</span><span>TRILYVA</span></nav></div>
+<div class="shell">
+  <section class="page-hero">
+    <div><p class="eyebrow">01 / Procedural motion workspace</p><h1>Motion,<br>measured in<br><span class="stroke">frames.</span></h1><div class="page-meta"><span class="tag">Browser-based</span><span class="tag">JavaScript source</span><span class="tag">In development</span></div></div>
+    <p class="page-hero-copy">TRILYVA is a procedural animation workspace built around explicit frame output. Write a renderer, inspect the motion, configure an export and work through each frame as a real unit of production.</p>
+  </section>
+  <div class="page-visual art-trilyva" role="img" aria-label="Abstract frame paths and intersecting guide lines representing procedural motion"><span class="art-caption mono">TRILYVA / Frame study</span><span class="art-core" aria-hidden="true"></span><span class="art-index mono">TIME → FRAME → OUTPUT</span></div>
+  <section class="content-section">
+    <div class="content-grid" data-reveal><div class="content-aside"><p class="section-index">01 / The model</p><h2>One function. One frame.</h2></div><div class="content-main"><p>TRILYVA uses a deterministic JavaScript rendering contract: <code>window.renderFrame(time, frame, fps, ctx, width, height)</code>. The function receives the frame context and draws the requested image. That makes the source explicit and gives the renderer a consistent way to request frames.</p><p>Preview playback is useful for iteration, but it is not the same as a completed export. The export path is designed around sequential frame requests rather than skipping ahead to keep a preview smooth.</p></div></div>
+  </section>
+  <section class="content-section">
+    <div class="content-grid" data-reveal><div class="content-aside"><p class="section-index">02 / The workflow</p><h2>From source to deliverable.</h2></div><div class="content-main"><div class="detail-list"><div class="detail-row"><span class="label">Author</span><p>Write or paste a JavaScript frame renderer.</p></div><div class="detail-row"><span class="label">Inspect</span><p>Preview the animation and adjust the source before committing to a full render.</p></div><div class="detail-row"><span class="label">Configure</span><p>Set timing, dimensions and output options around the intended delivery.</p></div><div class="detail-row"><span class="label">Render</span><p>Generate frames in order, then assemble and verify the output.</p></div></div></div></div>
+  </section>
+  <section class="content-section">
+    <div class="content-grid" data-reveal><div class="content-aside"><p class="section-index">03 / Boundaries</p><h2>Deterministic, not generative.</h2></div><div class="content-main"><p>TRILYVA does not include a built-in AI integration. It runs the JavaScript supplied to its renderer; any code produced elsewhere must be copied into the workspace manually. The output is determined by the renderer code and frame inputs, not by a generative model inside the application.</p><p>Rendering speed, memory use, browser limits and codec behavior still depend on the device and browser. Export settings must be checked against the actual file produced rather than treated as a promise based on configuration alone.</p><div class="link-row"><a href="https://tamasrazim.github.io/projects/trilyva/" target="_blank" rel="noopener noreferrer">Open the current TRILYVA project page ↗</a><a href="https://tamasrazim.github.io/projects/trilyva/renderer/" target="_blank" rel="noopener noreferrer">Renderer workspace ↗</a></div></div></div>
+  </section>
+</div></main>
+<footer class="site-footer">
+  <div class="shell footer-inner">
+    <span>© 2026 Robiul Rumman Razim</span>
+    <div class="footer-links">
+      <a href="/web2/">Home</a>
+      <a href="/web2/work/">Work</a>
+      <a href="/web2/about/">About</a>
+      <a href="https://github.com/Tamasrazim" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    </div>
+    <span>DESIGNED TO KEEP MOVING</span>
+  </div>
+</footer>
+</body>
+</html>

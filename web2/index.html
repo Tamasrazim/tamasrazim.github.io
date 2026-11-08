@@ -6,235 +6,108 @@
 <meta name="theme-color" content="#080808">
 <meta name="color-scheme" content="dark">
 <meta name="author" content="Robiul Rumman Razim">
-<meta name="description" content="Tamasrazim — independent software, graphics, game and motion experiments by Robiul Rumman Razim.">
+<meta name="description" content="Independent work in software, motion, graphics and interactive systems by Robiul Rumman Razim, known as Tamasrazim.">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <link rel="canonical" href="https://tamasrazim.github.io/web2/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Tamasrazim">
-<meta property="og:title" content="Tamasrazim — Independent work in software and motion">
-<meta property="og:description" content="Software, graphics, games and motion experiments by Robiul Rumman Razim.">
+<meta property="og:title" content="Tamasrazim — Independent software, motion and experiments">
+<meta property="og:description" content="Independent work in software, motion, graphics and interactive systems by Robiul Rumman Razim, known as Tamasrazim.">
 <meta property="og:url" content="https://tamasrazim.github.io/web2/">
 <meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<title>Tamasrazim — Web 02</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-:root{color-scheme:dark;--bg:#080808;--panel:#101010;--paper:#f1f0eb;--muted:#92918c;--line:#292929;--mono:"JetBrains Mono",ui-monospace,monospace;--display:"Unbounded",system-ui,sans-serif;--gutter:clamp(22px,5vw,76px);--max:1440px}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth;background:var(--bg)}
-body{margin:0;background:var(--bg);color:var(--paper);font-family:Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
-a{color:inherit;text-decoration:none}
-a:focus-visible,button:focus-visible{outline:2px solid var(--paper);outline-offset:5px}
-::selection{background:var(--paper);color:var(--bg)}
-.shell{width:calc(100% - var(--gutter) - var(--gutter));max-width:var(--max);margin-inline:auto}
-.mono{font:11px/1.5 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
-header{height:78px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
-.wordmark{font:600 13px var(--mono);letter-spacing:.04em}
-.wordmark span{color:var(--muted)}
-nav{display:flex;gap:clamp(18px,3vw,42px);align-items:center}
-nav a{font:11px var(--mono);color:#b7b6b0;transition:color .2s}
-nav a:hover{color:#fff}
-.nav-index{color:var(--muted);margin-right:7px}
-.hero{min-height:min(820px,calc(100svh - 78px));display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);align-items:center;gap:5vw;padding-block:clamp(70px,10vh,130px) 90px;position:relative}
-.hero-copy{position:relative;z-index:2}
-.eyebrow{display:flex;align-items:center;gap:12px;margin:0 0 34px}
-.eyebrow:before{content:"";width:27px;height:1px;background:var(--paper)}
-h1{font:500 clamp(44px,7.3vw,112px)/.99 var(--display);letter-spacing:-.085em;margin:0;max-width:900px}
-h1 .outline{color:transparent;-webkit-text-stroke:1px #777}
-.hero-lede{font-size:clamp(15px,1.35vw,18px);line-height:1.7;color:#aaa9a3;max-width:480px;margin:34px 0 0}
-.hero-links{display:flex;gap:25px;align-items:center;margin-top:42px;flex-wrap:wrap}
-.text-link{font:11px var(--mono);text-transform:uppercase;letter-spacing:.08em;padding-bottom:8px;border-bottom:1px solid #777;transition:border-color .2s,color .2s}
-.text-link:hover{color:#fff;border-color:#fff}
-.visual{height:min(590px,62vw);min-height:360px;position:relative;overflow:hidden;background:#0d0d0d;border:1px solid #242424;isolation:isolate}
-.visual:before{content:"";position:absolute;inset:0;background:linear-gradient(145deg,transparent 45%,rgba(255,255,255,.035));z-index:-1}
-#field{position:absolute;inset:0;width:100%;height:100%;display:block}
-.visual-label{position:absolute;left:22px;top:20px;z-index:2}
-.visual-coord{position:absolute;right:22px;bottom:19px;text-align:right;z-index:2}
-.visual-mark{position:absolute;left:50%;top:50%;width:46%;aspect-ratio:1;transform:translate(-50%,-50%);border:1px solid rgba(255,255,255,.13);border-radius:50%;pointer-events:none}
-.visual-mark:before,.visual-mark:after{content:"";position:absolute;inset:12%;border:1px solid rgba(255,255,255,.1);border-radius:50%}
-.visual-mark:after{inset:28%}
-.section{padding-block:clamp(82px,12vw,160px);border-top:1px solid var(--line)}
-.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;margin-bottom:54px}
-.section-title{font:500 clamp(30px,4vw,54px)/1.08 var(--display);letter-spacing:-.07em;margin:12px 0 0}
-.section-note{max-width:270px;color:var(--muted);font-size:13px;line-height:1.7;margin:0}
-.work-list{border-top:1px solid var(--line)}
-.work-item{display:grid;grid-template-columns:70px minmax(0,1fr) minmax(180px,.6fr) 24px;gap:22px;align-items:center;padding:27px 0;border-bottom:1px solid var(--line);transition:padding .25s}
-.work-item:hover{padding-inline:12px}
-.work-no{font:11px var(--mono);color:#666}
-.work-name{font:500 clamp(20px,2.6vw,34px) var(--display);letter-spacing:-.055em}
-.work-desc{font-size:13px;line-height:1.6;color:var(--muted);max-width:380px}
-.work-meta{font:10px var(--mono);color:#777;text-transform:uppercase;letter-spacing:.07em;margin-top:7px}
-.work-arrow{font:20px var(--mono);color:#777;transition:transform .2s,color .2s}
-.work-item:hover .work-arrow{transform:translate(3px,-3px);color:#fff}
-.statement{display:grid;grid-template-columns:.55fr 1.45fr;gap:8vw}
-.statement-copy{font:500 clamp(24px,3.5vw,48px)/1.25 var(--display);letter-spacing:-.065em;max-width:850px}
-.statement-copy em{font-style:normal;color:#777}
-.statement-detail{max-width:560px;color:#aaa9a3;font-size:14px;line-height:1.9;margin-top:28px}
-.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:8vw}
-.about-grid h2{font:500 clamp(30px,4vw,52px)/1.08 var(--display);letter-spacing:-.07em;margin:12px 0}
-.about-grid p{color:#aaa9a3;font-size:14px;line-height:1.85;max-width:520px}
-.about-links{display:flex;flex-wrap:wrap;gap:12px 24px;margin-top:28px}
-.about-links a{font:10px var(--mono);text-transform:uppercase;color:#d0cfca;border-bottom:1px solid #555;padding-bottom:5px}
-footer{border-top:1px solid var(--line);padding:26px 0 38px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
-footer .mono{font-size:10px}
-footer a:hover{color:#fff}
-.reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
-.reveal.is-visible{opacity:1;transform:none}
-@media(max-width:760px){
- header{height:68px}nav{gap:15px}nav a{font-size:10px}.nav-index{display:none}
- .hero{grid-template-columns:1fr;gap:42px;min-height:auto;padding-block:78px 80px}
- h1{font-size:clamp(43px,11vw,76px)}.visual{height:78vw;min-height:300px;max-height:480px}
- .section-head{display:block}.section-note{margin-top:22px}.work-item{grid-template-columns:32px 1fr 20px;gap:12px;padding:22px 0}.work-desc{grid-column:2;max-width:unset}.work-arrow{grid-column:3;grid-row:1}
- .statement,.about-grid{grid-template-columns:1fr;gap:35px}.statement-copy{max-width:unset}
-}
-@media(max-width:420px){.shell{width:calc(100% - 36px)}.wordmark{font-size:11px}nav{gap:12px}nav a{font-size:9px}.hero-links{gap:18px}.visual-label,.visual-coord{font-size:9px}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.reveal{opacity:1;transform:none}}
-</style>
+<title>Tamasrazim — Independent software, motion and experiments</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23080808'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23f1f0eb' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23f1f0eb'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/web2/assets/css/site.css">
+<script defer src="/web2/assets/js/site.js"></script>
 </head>
 <body>
-<div class="shell">
-<header>
-<a class="wordmark" href="/web2/" aria-label="Tamasrazim home">TAMASRAZIM<span> / WEB 02</span></a>
-<nav aria-label="Main navigation">
-<a href="#work"><span class="nav-index">01</span>Work</a>
-<a href="#about"><span class="nav-index">02</span>About</a>
-<a href="/"><span class="nav-index">↗</span>Original site</a>
-</nav>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="shell header-inner">
+    <a class="wordmark" href="/web2/" aria-label="Tamasrazim home"><span class="wordmark-mark" aria-hidden="true"></span><span>TAMASRAZIM</span></a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="/web2/work/" >Work</a>
+      <a href="/web2/about/" >About</a>
+      <a href="/web2/approach/" >Approach</a>
+      <a class="nav-contact" href="mailto:admin@tamasrazim.anonaddy.com">Contact</a>
+    </nav>
+  </div>
 </header>
-<main>
-<section class="hero" aria-labelledby="hero-title">
-<div class="hero-copy">
-<p class="mono eyebrow">Independent work / 2026</p>
-<h1 id="hero-title">Ideas into<br><span class="outline">working</span><br>things.</h1>
-<p class="hero-lede">I’m Robiul Rumman Razim — Tamasrazim. I work across software, graphics, games and motion, turning experiments into things people can explore and use.</p>
-<div class="hero-links"><a class="text-link" href="#work">Explore selected work ↓</a><a class="text-link" href="/about/">A little about me ↗</a></div>
+<main id="main"><div class="shell">
+  <section class="hero" aria-labelledby="home-title">
+    <div class="hero-copy">
+      <p class="eyebrow">Independent practice / Software &amp; creative technology</p>
+      <h1 id="home-title">Experiments,<br><span class="stroke">made</span><br>tangible.</h1>
+      <p class="hero-lede">I’m Robiul Rumman Razim — Tamasrazim. I explore software, motion, graphics and interactive systems, then work through the details that turn an idea into something real.</p>
+      <div class="hero-actions">
+        <a class="text-link" href="/web2/work/">Explore selected work <span class="arrow">↗</span></a>
+        <a class="text-link" href="/web2/about/">Meet the person <span class="arrow">↗</span></a>
+      </div>
+      <p class="hero-note">Learning in public. Building with intent.</p>
+    </div>
+    <div class="field-panel" role="img" aria-label="A responsive geometric field of connected points that bends around the pointer.">
+      <canvas id="signal-field" aria-hidden="true"></canvas>
+      <span class="field-ring" aria-hidden="true"></span>
+      <span class="field-center" aria-hidden="true"></span>
+      <span class="field-label mono">Signal study / 001</span>
+      <span class="field-coord mono" id="field-coordinates" aria-live="off">FIELD / AT REST</span>
+    </div>
+  </section>
 </div>
-<div class="visual" role="img" aria-label="Interactive field of connected points. Move the pointer across it to influence the pattern.">
-<canvas id="field" aria-hidden="true"></canvas>
-<div class="visual-mark" aria-hidden="true"></div>
-<div class="visual-label mono">Field study / 001</div>
-<div class="visual-coord mono" id="coordinates">X 00.00<br>Y 00.00</div>
-</div>
+<section class="section" aria-labelledby="work-title">
+  <div class="shell">
+    <div class="section-head" data-reveal>
+      <div><p class="section-index">01 / Selected work</p><h2 class="section-title" id="work-title">Different problems.<br>One curiosity.</h2></div>
+      <p class="section-note">A focused selection of software and creative experiments. Each page explains what the project is, what exists, and what remains in progress.</p>
+    </div>
+    <div class="project-grid">
+      <a class="project-card" href="/web2/trilyva/" data-reveal>
+        <div class="project-art art-trilyva"><span class="art-caption mono">Motion / 001</span><span class="art-core" aria-hidden="true"></span><span class="art-index mono">TR / 01</span></div>
+        <div class="card-copy"><div class="card-topline"><span class="tag">Procedural animation</span><span class="card-arrow">↗</span></div><h3>TRILYVA</h3><p>A frame-driven workspace for creating, previewing and rendering procedural motion from JavaScript.</p></div>
+      </a>
+      <a class="project-card" href="/web2/trss/" data-reveal>
+        <div class="project-art art-trss"><span class="art-caption mono">Graphics research / 002</span><span class="art-core" aria-hidden="true"></span><span class="art-index mono">TR / 02</span></div>
+        <div class="card-copy"><div class="card-topline"><span class="tag">Intel Arc / Research</span><span class="card-arrow">↗</span></div><h3>TrSS</h3><p>Independent research into renderer-guided reconstruction and neural rendering for Intel Arc.</p></div>
+      </a>
+      <a class="project-card" href="/web2/kynestra/" data-reveal>
+        <div class="project-art art-kynestra"><span class="art-caption mono">Desktop systems / 003</span><span class="art-core" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="art-index mono">KY / 03</span></div>
+        <div class="card-copy"><div class="card-topline"><span class="tag">Modular software</span><span class="card-arrow">↗</span></div><h3>KYNESTRA</h3><p>A modular desktop-software project built around local project data, task handling and creative workflows.</p></div>
+      </a>
+      <a class="project-card" href="/web2/neo/" data-reveal>
+        <div class="project-art art-neo"><span class="art-caption mono">Game systems / 004</span><span class="art-core" aria-hidden="true"></span><span class="art-index mono">NE / 04</span></div>
+        <div class="card-copy"><div class="card-topline"><span class="tag">Windows / Puzzle game</span><span class="card-arrow">↗</span></div><h3>NEO</h3><p>A first-person puzzle-game project shaped around deterministic floors and persistent progression.</p></div>
+      </a>
+    </div>
+    <div class="link-row"><a href="/web2/work/">View the full work index ↗</a></div>
+  </div>
 </section>
-<section class="section" id="work" aria-labelledby="work-title">
-<div class="section-head reveal">
-<div><p class="mono">01 / Selected work</p><h2 class="section-title" id="work-title">Built, tested<br>and in progress.</h2></div>
-<p class="section-note">A small index of software and creative experiments. Each project page is the source of truth for its current status.</p>
-</div>
-<div class="work-list">
-<a class="work-item reveal" href="/projects/trilyva/"><span class="work-no">01</span><span><span class="work-name">TRILYVA</span><span class="work-meta">Procedural motion / Browser workspace</span></span><span class="work-desc">A frame-driven animation workspace for authoring, previewing and rendering motion from JavaScript.</span><span class="work-arrow" aria-hidden="true">↗</span></a>
-<a class="work-item reveal" href="/projects/trss/"><span class="work-no">02</span><span><span class="work-name">TrSS</span><span class="work-meta">Graphics research / Intel Arc</span></span><span class="work-desc">An experimental graphics project exploring image reconstruction and neural-rendering approaches.</span><span class="work-arrow" aria-hidden="true">↗</span></a>
-<a class="work-item reveal" href="/projects/kynestra/"><span class="work-no">03</span><span><span class="work-name">KYNESTRA</span><span class="work-meta">Native software / Creative tools</span></span><span class="work-desc">A modular desktop software project bringing together local-first creative and production workflows.</span><span class="work-arrow" aria-hidden="true">↗</span></a>
-<a class="work-item reveal" href="/projects/neo/"><span class="work-no">04</span><span><span class="work-name">NEO</span><span class="work-meta">Game / Windows</span></span><span class="work-desc">A native first-person puzzle game built around deterministic floors and persistent progression.</span><span class="work-arrow" aria-hidden="true">↗</span></a>
-<a class="work-item reveal" href="/projects/"><span class="work-no">05</span><span><span class="work-name">More experiments</span><span class="work-meta">Projects index</span></span><span class="work-desc">Browse the wider archive of tools, games, prototypes and ongoing work.</span><span class="work-arrow" aria-hidden="true">↗</span></a>
-</div>
+<section class="section" aria-labelledby="principle-title">
+  <div class="shell statement-grid" data-reveal>
+    <p class="section-index">02 / The principle</p>
+    <div>
+      <h2 class="statement-copy" id="principle-title">The prototype is a beginning. <em>The details make it believable.</em></h2>
+      <p class="statement-detail">I care about what happens after the first exciting result: the interaction, the edge cases, the performance, the export, the documentation and the proof that a feature behaves as described. Not every project is finished, and I keep that distinction visible.</p>
+    </div>
+  </div>
 </section>
-<section class="section reveal" aria-labelledby="principle-title">
-<div class="statement">
-<p class="mono">02 / Working principle</p>
-<div><h2 class="statement-copy" id="principle-title">A good idea is only the beginning. <em>The details decide whether it works.</em></h2><p class="statement-detail">I care about the part after the first exciting prototype: the interface, the edge cases, the export, the documentation and the proof that a feature does what it says. Not everything here is finished, and I try to make that distinction clear.</p></div>
-</div>
-</section>
-<section class="section" id="about" aria-labelledby="about-title">
-<div class="about-grid reveal">
-<div><p class="mono">03 / About</p><h2 id="about-title">Robiul Rumman Razim<br><span style="color:#777">— Tamasrazim</span></h2></div>
-<div><p>I’m learning and experimenting across computer science, software, visual systems and interactive media. This page is an alternate front door to a larger archive of work — not a claim that every experiment is a finished product.</p><div class="about-links"><a href="/about/">About</a><a href="/approach/">Approach</a><a href="/work/">Work archive</a><a href="/elsewere/">Elsewhere</a><a href="/licences/">Licences</a><a href="https://github.com/Tamasrazim" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div></div>
-</div>
-</section>
-</main>
-<footer><span class="mono">© <span id="year">2026</span> Robiul Rumman Razim</span><span class="mono">TAMASRAZIM / WEB 02</span><a class="mono" href="/">Return to the original site ↑</a></footer>
-</div>
-<script>
-(() => {
-  const canvas = document.getElementById('field');
-  const label = document.getElementById('coordinates');
-  const ctx = canvas.getContext('2d', { alpha: true });
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const points = [];
-  const pointer = { x: -1000, y: -1000, active: false };
-  let width = 0, height = 0, dpr = 1, raf = 0, frame = 0;
-  const cols = 13, rows = 17;
-  function resize() {
-    const rect = canvas.getBoundingClientRect();
-    width = rect.width; height = rect.height;
-    dpr = Math.min(devicePixelRatio || 1, 1.5);
-    canvas.width = Math.round(width * dpr);
-    canvas.height = Math.round(height * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    points.length = 0;
-    for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
-      points.push({ x: (x + .5) / cols * width, y: (y + .5) / rows * height, phase: (x * 7 + y * 13) * .17 });
-    }
-    draw();
-  }
-  function draw() {
-    ctx.clearRect(0, 0, width, height);
-    const moved = pointer.active;
-    const displaced = points.map(p => {
-      const wave = reduce ? 0 : Math.sin(frame * .012 + p.phase) * 2.2;
-      let dx = p.x, dy = p.y + wave;
-      if (moved) {
-        const vx = dx - pointer.x, vy = dy - pointer.y;
-        const distance = Math.hypot(vx, vy);
-        if (distance < 145) {
-          const force = (1 - distance / 145) * 19;
-          dx += (vx / (distance || 1)) * force;
-          dy += (vy / (distance || 1)) * force;
-        }
-      }
-      return { x: dx, y: dy };
-    });
-    ctx.lineWidth = .65;
-    for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
-      const i = y * cols + x, p = displaced[i];
-      if (x < cols - 1) line(p, displaced[i + 1]);
-      if (y < rows - 1) line(p, displaced[i + cols]);
-      if (x < cols - 1 && y < rows - 1 && (x + y) % 3 === 0) line(p, displaced[i + cols + 1]);
-    }
-    displaced.forEach((p, i) => {
-      const hot = moved ? Math.max(0, 1 - Math.hypot(p.x-pointer.x,p.y-pointer.y)/145) : 0;
-      ctx.fillStyle = `rgba(235,234,228,${.22 + hot * .7})`;
-      ctx.beginPath(); ctx.arc(p.x, p.y, 1 + hot * 1.3, 0, Math.PI * 2); ctx.fill();
-    });
-    function line(a,b) {
-      const near = moved ? Math.max(0, 1 - Math.min(Math.hypot(a.x-pointer.x,a.y-pointer.y),Math.hypot(b.x-pointer.x,b.y-pointer.y))/145) : 0;
-      ctx.strokeStyle = `rgba(210,209,202,${.045 + near * .28})`;
-      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
-    }
-    if (!reduce) frame++;
-    if (!reduce && !document.hidden) raf = requestAnimationFrame(draw);
-  }
-  function start() { cancelAnimationFrame(raf); draw(); }
-  canvas.addEventListener('pointermove', e => {
-    const r = canvas.getBoundingClientRect();
-    pointer.x = e.clientX - r.left; pointer.y = e.clientY - r.top; pointer.active = true;
-    label.innerHTML = `X ${(pointer.x/width*100).toFixed(2)}<br>Y ${(pointer.y/height*100).toFixed(2)}`;
-    if (reduce) draw();
-  });
-  canvas.addEventListener('pointerleave', () => { pointer.active = false; pointer.x = pointer.y = -1000; if (reduce) draw(); });
-  addEventListener('resize', resize, { passive: true });
-  document.addEventListener('visibilitychange', () => document.hidden ? cancelAnimationFrame(raf) : start());
-  resize();
-  const observer = new IntersectionObserver(entries => {
-    const visible = entries[0].isIntersecting;
-    if (visible && !document.hidden && !reduce) start();
-    else cancelAnimationFrame(raf);
-  });
-  observer.observe(canvas);
-})();
-(() => {
-  const nodes = document.querySelectorAll('.reveal');
-  if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    nodes.forEach(n => n.classList.add('is-visible')); return;
-  }
-  const io = new IntersectionObserver(entries => entries.forEach(entry => {
-    if (entry.isIntersecting) { entry.target.classList.add('is-visible'); io.unobserve(entry.target); }
-  }), { threshold: .12 });
-  nodes.forEach(n => io.observe(n));
-  document.getElementById('year').textContent = new Date().getFullYear();
-})();
-</script>
+<section class="cta-band">
+  <div class="shell cta-inner" data-reveal>
+    <div><p class="section-index">03 / About this practice</p><h2>Still learning.<br>Still making.</h2></div>
+    <div><p>Computer science, software, visual systems and the satisfaction of making complicated things understandable.</p><div class="link-row"><a href="/web2/about/">Read the about page ↗</a></div></div>
+  </div>
+</section></main>
+<footer class="site-footer">
+  <div class="shell footer-inner">
+    <span>© 2026 Robiul Rumman Razim</span>
+    <div class="footer-links">
+      <a href="/web2/">Home</a>
+      <a href="/web2/work/">Work</a>
+      <a href="/web2/about/">About</a>
+      <a href="https://github.com/Tamasrazim" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    </div>
+    <span>DESIGNED TO KEEP MOVING</span>
+  </div>
+</footer>
 </body>
 </html>
