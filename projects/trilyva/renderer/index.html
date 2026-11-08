@@ -9733,7 +9733,8 @@ function dotMeshFolderMetadata(item, job, result, stem, svgName) {
   return merge(original, {
     schema: "trilyva.dot-mesh.delivery/1.0",
     id: item.id,
-    title: item.title,
+    title: item.stockTitle || original.title || item.title,
+    internalName: item.title,
     description: item.description,
     creator: "Tamasrazim",
     software: "TRILYVA",
@@ -9959,6 +9960,7 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
       if (dotMeshFolderCancelRequested) { cancelled = true; break; }
       var item = items[i];
       var title = String(item.title || item.id || ("Dot Mesh " + (i + 1)));
+      var stockTitle = String(item.stockTitle || (item.metadata && item.metadata.title) || title);
       var folderName = "Dot-Mesh-" + String(i + 1).padStart(3, "0") + "-" + dotMeshFolderSlug(title);
       status.textContent = "Preparing " + (i + 1) + " / 50 · " + title;
       document.getElementById("dmzPos").textContent = i + " / " + items.length;
@@ -9976,12 +9978,11 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
       try {
         var target = dotMeshFolderTargetComposition(S.comp);
         S.comp = target;
-        var stem = "dot-mesh-" + String(i + 1).padStart(3, "0") + "-" + dotMeshFolderSlug(title);
-        var videoName = stem + "_3840x2160_60fps_20mbps_12s.mp4";
-        var svgName = stem + "_3840x2160_static.svg";
+        var videoName = stockTitle + ".mp4";
+        var svgName = stockTitle + " Static Vector.svg";
         var job = buildJob({ exportFormat:"mp4", composition:target });
         job.bitrate = DOT_MESH_FOLDER_SETTINGS.bitrate;
-        job.label = title; job.metadata.title = title;
+        job.label = title; job.metadata.title = stockTitle;
         job.metadata.description = String(item.description || "");
         job.fileName = videoName;
         status.textContent = "Rendering " + (i+1) + " / 50 · " + title + " · 4K60 · 20 Mbps target";
