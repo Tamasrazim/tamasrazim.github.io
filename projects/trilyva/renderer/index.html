@@ -1863,7 +1863,7 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
             <div class="row"><label for="oBitrate">Custom bitrate</label>
               <input type="number" id="oBitrate" min="20" max="800" step="0.1" value="25" inputmode="decimal">
               <span class="num" style="font-size:10px;color:var(--mut)">Mbps</span></div>
-            <p class="note">Video bitrate target: minimum 20 Mbps · default 25 Mbps · maximum 800 Mbps · CBR requested. Actual average can vary with content and browser encoder implementation; low-complexity scenes may use less. TRILYVA reports the measured rate without failing an otherwise valid render. Video exports have a strict 2,000,000,000-byte (2 GB) file-size cap. No automatic bitrate, resolution, frame-rate or quality reduction is made to fit the cap.</p>
+            <p class="note">Video bitrate target: minimum 20 Mbps · default 25 Mbps · maximum 800 Mbps · H.264 MP4 enforces the selected per-frame bitrate floor with standards-compliant filler_data NAL units when the browser encoder emits smaller samples. Filler data does not change decoded pixels or add visual noise. Complex frames may exceed the floor; under-rate MP4s are blocked. Video exports have a strict 2,000,000,000-byte (2 GB) file-size cap. No automatic bitrate, resolution, frame-rate or quality reduction is made to fit the cap.</p>
             <div class="warnbox"><b>MEMORY / LARGE EXPORTS</b>The 2 GB file-size cap is separate from the 800 Mbps maximum encoder target. The current browser muxer retains encoded chunks and container/index data during finalisation. A near-limit export may need substantially more than 2 GB of free memory; some desktop/browser combinations may not have enough available memory. A 2 GB file does not automatically mean a media player loads the entire file into RAM.</div>
             <div class="row"><label for="oTimebase">WebM timebase</label>
               <select id="oTimebase"><option value="ms">1 ms (compatible)</option><option value="exact">Exact 1/fps tick</option></select></div>
@@ -3422,10 +3422,13 @@ function dupRuns(cs) {
 
 /* Verify the completed elementary video stream instead of trusting the requested encoder setting.
    WebCodecs defaults to variable bitrate unless constant mode is explicitly selected. */
-function measureEncodedVideoBitrate(encodedBytes, comp, requestedBitrate) {
+function measureEncodedVideoBitrate(encodedBytes, comp, requestedBitrate, enforceFullTarget) {
   var duration = Number(comp.frameCount) / Number(comp.fps);
   var measuredBps = duration > 0 ? Math.round((encodedBytes * 8) / duration) : 0;
-  var requiredBps = Math.max(20000000, Math.ceil(Number(requestedBitrate) * 0.95));
+  var requested = Number(requestedBitrate);
+  var requiredBps = enforceFullTarget
+    ? Math.max(20000000, Math.ceil(requested))
+    : Math.max(20000000, Math.ceil(requested * 0.95));
   return {
     measuredBps: measuredBps,
     targetBps: requiredBps,
@@ -3528,6 +3531,77 @@ function exportWebM(cfg) {
   });
 }
 
+/* H.264 AVC sample-rate floor enforcement.
+   WebCodecs constant mode is only a target; encoder implementations may emit
+   smaller access units for simple imagery. AVC filler_data NAL units (type 12)
+   add legal, decoder-ignored payload bytes without changing decoded pixels. */
+function avcNalLengthSizeFromConfig(description) {
+  var bytes;
+  if (description instanceof ArrayBuffer) bytes = new Uint8Array(description);
+  else if (ArrayBuffer.isView(description)) bytes = new Uint8Array(description.buffer, description.byteOffset, description.byteLength);
+  else throw new Error('The H.264 encoder did not provide an AVC decoder configuration record.');
+  if (bytes.length < 5 || bytes[0] !== 1) throw new Error('The H.264 AVC decoder configuration record is invalid.');
+  return (bytes[4] & 3) + 1;
+}
+function appendAvcFillerToSample(sample, targetBytes, lengthSize) {
+  if (!(sample instanceof Uint8Array)) throw new TypeError('H.264 access unit is not a byte array.');
+  if (!Number.isInteger(lengthSize) || lengthSize < 1 || lengthSize > 4) throw new Error('Unsupported AVC NAL length-field size: ' + lengthSize + '.');
+
+  // Validate WebCodecs' AVCC length-prefixed access unit before modifying it.
+  var offset = 0, nalCount = 0;
+  while (offset < sample.length) {
+    if (offset + lengthSize > sample.length) throw new Error('Malformed AVC access unit: truncated NAL length field.');
+    var nalBytes = 0;
+    for (var i = 0; i < lengthSize; i++) nalBytes = nalBytes * 256 + sample[offset + i];
+    if (nalBytes < 1 || offset + lengthSize + nalBytes > sample.length) {
+      throw new Error('Malformed AVC access unit: NAL length exceeds the encoded sample.');
+    }
+    offset += lengthSize + nalBytes;
+    nalCount++;
+  }
+  if (!nalCount || offset !== sample.length) throw new Error('Malformed AVC access unit: no complete NAL units were found.');
+
+  var gap = Math.ceil(targetBytes) - sample.length;
+  if (gap <= 0) return { bytes: sample, fillerBytes: 0, fillerNals: 0 };
+
+  // A filler_data RBSP needs one NAL header byte and one rbsp_trailing_bits byte.
+  // Use multiple NALs when the avcC record specifies a short length field.
+  var minimumUnitBytes = lengthSize + 2;
+  var totalFillerBytes = Math.max(gap, minimumUnitBytes);
+  var maxNalBytes = Math.pow(256, lengthSize) - 1;
+  var maxUnitBytes = maxNalBytes + lengthSize;
+  var units = [];
+  while (totalFillerBytes > 0) {
+    var unitBytes = Math.min(totalFillerBytes, maxUnitBytes);
+    var remainder = totalFillerBytes - unitBytes;
+    if (remainder > 0 && remainder < minimumUnitBytes) {
+      unitBytes -= minimumUnitBytes - remainder;
+      remainder = minimumUnitBytes;
+    }
+    if (unitBytes < minimumUnitBytes) throw new Error('Could not form a valid H.264 filler_data NAL unit.');
+    units.push(unitBytes);
+    totalFillerBytes -= unitBytes;
+  }
+
+  var addedBytes = units.reduce(function (sum, value) { return sum + value; }, 0);
+  var out = new Uint8Array(sample.length + addedBytes);
+  out.set(sample);
+  var cursor = sample.length;
+  units.forEach(function (unitBytes) {
+    var nalSize = unitBytes - lengthSize;
+    for (var j = lengthSize - 1; j >= 0; j--) {
+      out[cursor + j] = nalSize & 255;
+      nalSize = Math.floor(nalSize / 256);
+    }
+    // nal_unit_type = 12 (filler_data), nal_ref_idc = 0.
+    out[cursor + lengthSize] = 0x0C;
+    out.fill(0xFF, cursor + lengthSize + 1, cursor + unitBytes - 1);
+    out[cursor + unitBytes - 1] = 0x80; // rbsp_trailing_bits
+    cursor += unitBytes;
+  });
+  return { bytes: out, fillerBytes: addedBytes, fillerNals: units.length };
+}
+
 /* ---------------- MP4 / H.264 — the direct video path ----------------
    Frames come from the renderer's own export canvas (the render target),
    never from a DOM node: VideoFrame is constructed from that canvas only.
@@ -3572,16 +3646,24 @@ function exportMP4(cfg) {
     function release() { if (env.releaseExportCanvas) { try { env.releaseExportCanvas(out); } catch (e) { } } }
 
     var encodedBytes = 0, outputs = 0, hardError = null, muxError = null, sizeLimitHit = false, gotDesc = false;
+    var nalLengthSize = 0, fillerBytesAdded = 0, fillerNalUnitsAdded = 0;
+    var targetSampleBytes = Math.ceil(sel.config.bitrate / (8 * comp.fps));
     var maxPayload = maxEncodedPayloadBytes(enc, comp.frameCount);
     var encoder = new VideoEncoder({
       output: function (chunk, metadata) {
         try {
           if (!gotDesc && metadata && metadata.decoderConfig && metadata.decoderConfig.description) {
             mux.setDescription(metadata.decoderConfig.description);
+            nalLengthSize = avcNalLengthSizeFromConfig(metadata.decoderConfig.description);
             gotDesc = true;
           }
+          if (!gotDesc || !nalLengthSize) throw new Error('The H.264 encoder did not expose its AVC sample format before output.');
           var buf = new Uint8Array(chunk.byteLength);
           chunk.copyTo(buf);
+          var padded = appendAvcFillerToSample(buf, targetSampleBytes, nalLengthSize);
+          buf = padded.bytes;
+          fillerBytesAdded += padded.fillerBytes;
+          fillerNalUnitsAdded += padded.fillerNals;
           if (encodedBytes + buf.length > maxPayload) { sizeLimitHit = true; return; }
           mux.addSample(buf, chunk.type === 'key', chunk.timestamp);
           encodedBytes += buf.length;
@@ -3671,14 +3753,20 @@ function exportMP4(cfg) {
             }
           };
         }
-        var bitrateCheck = measureEncodedVideoBitrate(encodedBytes, comp, sel.config.bitrate);
+        var bitrateCheck = measureEncodedVideoBitrate(encodedBytes, comp, sel.config.bitrate, true);
         if (!bitrateCheck.meetsTarget) {
-          cfg.onLog('BITRATE NOTE · ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) +
-            ' Mbps measured against the ' + (sel.config.bitrate / 1000000).toFixed(2) +
-            ' Mbps CBR target. Low-complexity content and browser encoder rate control can produce a lower average. Keeping the completed render; no quality failure is inferred from bitrate alone.');
-        } else {
-          cfg.onLog('verified encoded video payload: ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) + ' Mbps average');
+          cfg.onLog('BITRATE FLOOR FAILED · ' + (bitrateCheck.measuredBps / 1000000).toFixed(3) +
+            ' Mbps delivered; ' + (bitrateCheck.targetBps / 1000000).toFixed(3) + ' Mbps required. No under-rate MP4 will be delivered.');
+          return { ok: false, stage: 'bitrate-floor', error: {
+            name: 'BitrateFloorError',
+            message: 'H.264 output remained below the requested bitrate floor after filler-data enforcement.',
+            detail: 'TRILYVA stopped this export rather than silently delivering an MP4 below the selected bitrate floor.'
+          } };
         }
+        cfg.onLog('CBR FLOOR VERIFIED · ' + (bitrateCheck.measuredBps / 1000000).toFixed(3) +
+          ' Mbps H.264 payload rate against ' + (bitrateCheck.targetBps / 1000000).toFixed(3) + ' Mbps required.');
+        if (fillerBytesAdded) cfg.onLog('H.264 filler_data inserted: ' + (fillerBytesAdded / 1048576).toFixed(2) +
+          ' MiB across ' + fillerNalUnitsAdded + ' NAL units. Decoded picture data was not changed.');
         var fin = mux.finish();
         if (!fin.ok) {
           return { ok: false, stage: 'mux', error: { name: 'MP4 MUXER ERROR', layer: 'mux', message: fin.reason, detail: 'The H.264 stream was produced but could not be described in an MP4 sample table, so no file was written.' } };
@@ -7641,7 +7729,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 'use strict';
 
 var SELF_SOURCE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-var APP_VERSION = '1.3.0';
+var APP_VERSION = '1.3.1';
 var SOFTWARE = 'TRILYVA — Tamasrazim';
 
 var libraryModulePromise = null;
@@ -9465,7 +9553,7 @@ function openRenderAllConfirm(lib,items){
   var bitrateSection=batchSection('VIDEO BITRATE');
   var batchBitrateField=batchNumberField('CBR target · Mbps',S.customBitrateMbps||25,20,800,0.1);bitrateSection.appendChild(batchBitrateField.wrap);
   var batchWidth=batchW.input,batchHeight=batchH.input,batchFps=batchFpsField.input,batchBitrate=batchBitrateField.input;
-  var batchNote=el('p','note','Bitrate target: 20 Mbps minimum · 25 Mbps default · 800 Mbps maximum. CBR is requested; low-complexity scenes or browser encoders may deliver a lower measured average, which TRILYVA reports without rejecting an otherwise valid render. Each MP4 has a separate 2 GB file-size cap. Settings are never silently reduced.');
+  var batchNote=el('p','note','Bitrate target: 20 Mbps minimum · 25 Mbps default · 800 Mbps maximum. H.264 MP4 enforces the selected per-frame bitrate floor with standards-compliant filler_data NAL units when needed. This does not change decoded pixels; under-rate MP4s are blocked. Each MP4 has a separate 2 GB file-size cap. Settings are never silently reduced.');
   var stillHeading=el('h4',null,'STILL OUTPUTS · ONE FRAME PER ITEM');
   var stillRow=el('div');stillRow.style.cssText='display:flex;flex-wrap:wrap;gap:10px 16px;';
   var prefs=trilyvaReadStillPrefs();
