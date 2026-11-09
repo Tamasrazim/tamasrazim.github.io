@@ -458,7 +458,7 @@ function csvCell(value) {
 function catalogCsv() {
   var rows = [[
     "Filename", "Description", "Keywords", "Categories",
-    "Illustration", "Mature Content", "Editorial"
+    "Editorial", "Mature content", "illustration"
   ]];
   items.forEach(function (item) {
     rows.push([
@@ -466,9 +466,9 @@ function catalogCsv() {
       item.description,
       (item.metadata.tags || item.tags || []).join(", "),
       (item.metadata.categories || item.categories || ["Abstract", "Backgrounds/Textures"]).join(", "),
-      item.metadata.illustration || "No",
-      item.metadata.matureContent || "No",
-      item.metadata.editorial || "No"
+      String(item.metadata.editorial || "no").toLowerCase(),
+      String(item.metadata.matureContent || "no").toLowerCase(),
+      String(item.metadata.illustration || "no").toLowerCase()
     ]);
   });
   return "\uFEFF" + rows.map(function (row) { return row.map(csvCell).join(","); }).join("\r\n") + "\r\n";
