@@ -1339,7 +1339,7 @@
           const width = Math.max(r.width, right - r.left);
           const height = Math.max(r.height, lhPx(cs));
           const root = document.createElement("div");
-          root.setAttribute("style", rootStyle(cs, true, parent) + "white-space:pre-wrap;overflow:visible;");
+          root.setAttribute("style", rootStyle(cs, true, parent) + "text-align:left!important;overflow:visible;");
           root.textContent = current.data;
 
           const fallbackKey = (zTop || 0) * 1e7 + (posd ? 5e6 : 0) + fallbackOrder++;
@@ -1551,7 +1551,8 @@
       delete target.node;
     }
 
-    return { items, tasks, groups, guides, docW, docH, backdrops, portKey, clickTargets };
+    const textCount = items.reduce((count, item) => count + (item.kind === "text" ? 1 : 0), 0);
+    return { items, tasks, groups, guides, docW, docH, backdrops, portKey, clickTargets, textCount, fallbackTextCount };
   }
 
   // -------------------------------------------------------------- text reveal
