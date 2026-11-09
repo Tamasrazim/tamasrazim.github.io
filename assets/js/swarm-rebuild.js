@@ -490,6 +490,7 @@
     const docW = Math.max(env.scrollWidth(), vw);
     const docH = Math.min(Math.max(env.scrollHeight(), vh), MAX_WORLD_H);
     const items = [];
+    const clickTargets = [];
     const roots = [];
     let order = 0;
     const csCache = new Map();
@@ -537,6 +538,24 @@
       it.mode = "own";
       items.push(it);
       return it;
+    }
+
+    function isInteractive(el) {
+      const tag = el.localName;
+      const role = (el.getAttribute("role") || "").toLowerCase();
+      if (el.disabled || el.getAttribute("aria-disabled") === "true" || el.closest("[inert]")) return false;
+      if ((tag === "a" || tag === "area") && (el.hasAttribute("href") || el.hasAttribute("onclick"))) return true;
+      if (tag === "button" || tag === "summary") return true;
+      if (tag === "input") return /^(button|submit|reset|checkbox|radio|image)$/i.test(el.type || "");
+      if (["button", "link", "menuitem", "tab", "checkbox", "radio", "switch"].includes(role)) return true;
+      return el.hasAttribute("onclick") || (el.hasAttribute("tabindex") && el.tabIndex >= 0);
+    }
+
+    function actionLabel(el) {
+      const imageAlt = el.querySelector && el.querySelector("img[alt]")?.getAttribute("alt");
+      const raw = el.getAttribute("aria-label") || el.getAttribute("title") || imageAlt ||
+        el.textContent || el.getAttribute("href") || el.localName;
+      return String(raw).replace(/\s+/g, " ").trim().slice(0, 140) || "Open page control";
     }
 
     function allInline(el) {
@@ -1090,6 +1109,18 @@
       };
       (parent ? parent.kids : roots).push(node);
 
+      if (isInteractive(el) && visible && sized && intersect(ltrb(r), clip) && inDoc(box, layer)) {
+        clickTargets.push({
+          el,
+          b: box,
+          layer,
+          key: keyFn(),
+          area: box.w * box.h,
+          label: actionLabel(el),
+          node,
+        });
+      }
+
       if (REPLACED.has(tag) || FORMS.has(tag)) {
         if (emit) {
           if (FORMS.has(tag)) emitForm(el, cs, r, { ...ctx, layer, clip, op }, keyFn());
@@ -1380,7 +1411,13 @@
         if (!covered) backdrops.push({ x: b.r.left, y: b.r.top, w: b.r.width, h: b.r.height, key: b.key, color: pageBg.color });
       }
 
-    return { items, tasks, groups, guides, docW, docH, backdrops, portKey };
+    for (const target of clickTargets) {
+      const node = target.node;
+      target.items = node ? items.slice(node.start, node.end) : [];
+      delete target.node;
+    }
+
+    return { items, tasks, groups, guides, docW, docH, backdrops, portKey, clickTargets };
   }
 
   // -------------------------------------------------------------- text reveal
@@ -1502,6 +1539,9 @@
 .caret{display:inline-block;width:1.5px;height:1.1em;margin-left:1px;margin-right:-2.5px;vertical-align:text-bottom;background:currentColor;animation:blink 1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
 .sa{background-color:rgba(13,153,255,.28)!important}
+.hotspots{position:absolute;inset:0;pointer-events:none;overflow:visible}
+.hotspot{appearance:none;position:absolute;display:block;box-sizing:border-box;margin:0;padding:0;border:0;border-radius:0;background:transparent;opacity:0;pointer-events:none;cursor:pointer;touch-action:auto}
+.hotspot:not(:disabled){pointer-events:auto}
 .ov{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .badges,.cursors{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .badge{position:absolute;transform:translate(-50%);padding:1px 4px;border-radius:2px;color:#fff;font:600 11px/16px Inter,system-ui,-apple-system,"Segoe UI",sans-serif;white-space:nowrap;font-variant-numeric:tabular-nums}
@@ -1597,6 +1637,7 @@
 <div class="layer under"></div>
 <div class="port"><div class="world"></div></div>
 <div class="layer over"></div>
+<div class="hotspots"></div>
 <svg class="ov"></svg>
 <div class="badges"></div>
 <div class="cursors"></div>
@@ -1609,6 +1650,7 @@
       this.port = $(".port");
       this.world = $(".world");
       this.ov = $(".ov");
+      this.hotspots = $(".hotspots");
       this.badges = $(".badges");
       this.cursorsEl = $(".cursors");
       this.rulers = $(".rulers");
@@ -1694,6 +1736,62 @@
         return d;
       });
       this.bdStart = this.env.geom().sy;
+      this.mountHotspots(model.clickTargets || []);
+    }
+
+    mountHotspots(targets) {
+      const ordered = [...targets]
+        .filter((target) => target.el && target.items && target.items.length && target.b.w >= 2 && target.b.h >= 2)
+        .sort((a, b) => a.key - b.key || b.area - a.area);
+
+      this.clickTargets = [];
+      for (const target of ordered) {
+        const zone = document.createElement("button");
+        zone.type = "button";
+        zone.className = "hotspot";
+        zone.disabled = true;
+        zone.tabIndex = -1;
+        zone.setAttribute("aria-hidden", "true");
+        zone.setAttribute("aria-label", target.label || "Open page control");
+        zone.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const source = target.el;
+          if (!source || !source.isConnected || source.disabled || source.getAttribute("aria-disabled") === "true") return;
+          // Invoke the original DOM control so native href redirects, target=_blank,
+          // download attributes, and site click handlers keep their normal behavior.
+          try {
+            source.click();
+          } catch (error) {
+            console.error("[swarm-rebuild] native control activation failed", error);
+          }
+        });
+        target.zone = zone;
+        this.hotspots.appendChild(zone);
+        this.clickTargets.push(target);
+      }
+    }
+
+    syncHotspots(vp) {
+      for (const target of this.clickTargets || []) {
+        const b = target.b;
+        const x = target.layer === "world" ? b.x - vp.sx + vp.ox : b.x;
+        const y = target.layer === "world" ? b.y - vp.sy + vp.oy : b.y;
+        const left = f1(x) + "px";
+        const top = f1(y) + "px";
+        const width = f1(b.w) + "px";
+        const height = f1(b.h) + "px";
+        const zone = target.zone;
+        if (zone.style.left !== left) zone.style.left = left;
+        if (zone.style.top !== top) zone.style.top = top;
+        if (zone.style.width !== width) zone.style.width = width;
+        if (zone.style.height !== height) zone.style.height = height;
+
+        const built = target.items.some((it) =>
+          it.done && it.vis && !it.__swarmErased && it.node && it.node.style.display !== "none"
+        );
+        if (zone.disabled === built) zone.disabled = !built;
+      }
     }
 
     makeNode(it) {
@@ -2013,6 +2111,7 @@
         }
       }
       if (E.items) for (const it of E.items) this.renderItem(it);
+      this.syncHotspots(E.vp);
       this.renderOverlay(E);
       this.renderCursors(E);
       this.renderRulers(E);
