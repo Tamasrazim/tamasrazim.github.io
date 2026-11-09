@@ -12,10 +12,7 @@
   "use strict";
 
   const KEY = "__swarmRebuild";
-  if (window[KEY]) {
-    window[KEY].toggle();
-    return;
-  }
+  if (window[KEY]) return;
 
   // ---------------------------------------------------------------- constants
 
@@ -1477,61 +1474,83 @@
   // ------------------------------------------------------------------ styles
 
   const STYLE = `
+:host{all:initial}
+*{box-sizing:border-box}
+.bg{position:absolute;inset:0;opacity:0;transition:opacity .5s ease}
+.bg.on{opacity:1}
+.layer,.port{position:absolute;overflow:hidden;pointer-events:none}
+.layer{inset:0}
+.world{position:absolute;left:0;top:0;will-change:transform}
+.it{position:absolute;left:0;top:0;transform-origin:0 0}
+.it.settle{transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.it.swarm-erased{opacity:0!important;filter:blur(5px);transition:opacity .34s ease,filter .34s ease;pointer-events:none}
+.r{background-color:var(--ph,#D9D9D9);transition:background-color .22s ease,border-radius .22s ease}
+.r.st{background-color:transparent}
+.r>.f{position:absolute;inset:0;opacity:0;transition:opacity .22s ease,background-color .35s ease,border-radius .35s ease,box-shadow .35s ease,border-color .35s ease}
+.r.st>.f{opacity:1}
+.m{background-color:var(--ph,#D9D9D9);overflow:hidden}
+.m>.ph{position:absolute;left:50%;top:50%;width:22px;height:22px;transform:translate(-50%,-50%);opacity:.7;transition:opacity .2s}
+.m>.md{position:absolute;inset:0;width:100%;height:100%;opacity:0;clip-path:inset(0 0 100% 0);transition:opacity .35s ease,clip-path .6s cubic-bezier(.2,.75,.2,1)}
+.m.st{background-color:transparent;transition:background-color .3s ease .3s}
+.m.st>.ph{opacity:0}
+.m.st>.md{opacity:1;clip-path:inset(0 0 0 0)}
+.m>.md.swap{animation:swap .45s ease}
+@keyframes swap{from{opacity:0;filter:blur(6px)}}
+.m>.fr{position:absolute;inset:0;pointer-events:none}
+.l svg{position:absolute;left:0;top:0;overflow:visible}
+.bd{position:absolute;opacity:0;-webkit-backdrop-filter:saturate(180%) blur(14px);backdrop-filter:saturate(180%) blur(14px);box-shadow:0 1px 0 rgba(0,0,0,.06);pointer-events:none}
+.caret{display:inline-block;width:1.5px;height:1.1em;margin-left:1px;margin-right:-2.5px;vertical-align:text-bottom;background:currentColor;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.sa{background-color:rgba(13,153,255,.28)!important}
+.ov{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.badges,.cursors{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.badge{position:absolute;transform:translate(-50%);padding:1px 4px;border-radius:2px;color:#fff;font:600 11px/16px Inter,system-ui,-apple-system,"Segoe UI",sans-serif;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cursor{position:absolute;left:0;top:0;will-change:transform}
+.cursor svg{position:absolute;overflow:visible;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.28))}
+.rulers{position:absolute;inset:0;pointer-events:none}
+.ruler{position:absolute;background:#2c2c2c;pointer-events:none}
+.ruler svg{display:block}
+.ruler-top{top:0;left:0;right:0;height:20px;border-bottom:1px solid #3a3a3a}
+.ruler-left{top:0;left:0;bottom:0;width:20px;border-right:1px solid #3a3a3a}
+.ruler-corner{position:absolute;top:0;left:0;width:20px;height:20px;background:#2c2c2c}
+.rtext{font:500 9px Inter,system-ui,-apple-system,sans-serif;fill:#8c8c8c}
+.rsel{fill:#0d99ff}
 .intro{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.94);opacity:0;transition:opacity .45s ease,transform .55s cubic-bezier(.2,.8,.2,1);pointer-events:none;display:grid;justify-items:center;gap:12px}
 .intro.on{opacity:1;transform:translate(-50%,-50%)}
 .intro.gone{opacity:0;transform:translate(-50%,-50%) scale(.9)}
 .intro img{display:block;width:58px;height:58px;object-fit:contain;filter:grayscale(1);opacity:.76;border-radius:0;padding:10px;border:1px solid rgba(255,255,255,.2);background:rgba(8,8,8,.18)}
 .intro .mono{width:58px;height:58px;border-radius:0;background:rgba(8,8,8,.82);border:1px solid rgba(255,255,255,.28);color:#fff;font:700 28px/58px ui-monospace,SFMono-Regular,Consolas,monospace;text-align:center}
 .intro:after{content:"SWARM / PAGE RECONSTRUCTION";color:rgba(255,255,255,.72);font:500 9px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.22em;white-space:nowrap;text-shadow:0 1px 8px rgba(0,0,0,.55)}
-.hud{position:absolute;right:24px;bottom:24px;left:auto;top:auto;width:320px;display:grid;gap:15px;padding:16px;background:rgba(8,8,8,.86);-webkit-backdrop-filter:blur(24px) saturate(0);backdrop-filter:blur(24px) saturate(0);color:#f4f4f1;border:1px solid rgba(255,255,255,.2);border-radius:3px;box-shadow:0 18px 55px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.08);font:500 11px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace;pointer-events:auto;opacity:0;transform:translateY(12px);transition:opacity .45s ease,transform .45s cubic-bezier(.2,.8,.2,1);user-select:none;z-index:5}
+.hud{position:absolute;right:20px;bottom:20px;left:auto;top:auto;width:276px;display:grid;gap:12px;padding:13px 14px;background:rgba(8,8,8,.78);-webkit-backdrop-filter:blur(20px) saturate(0);backdrop-filter:blur(20px) saturate(0);color:#f4f4f1;border:1px solid rgba(255,255,255,.18);border-radius:2px;box-shadow:0 16px 48px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.07);font:500 10px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace;pointer-events:none;opacity:0;transform:translateY(10px);transition:opacity .45s ease,transform .45s cubic-bezier(.2,.8,.2,1);user-select:none;z-index:5}
 .hud.on{opacity:1;transform:translateY(0)}
-.hud-head{display:flex;align-items:center;gap:12px;min-width:0;padding-bottom:13px;border-bottom:1px solid rgba(255,255,255,.14)}
-.hud-brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.hud-head{display:flex;align-items:center;gap:10px;min-width:0;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.13)}
+.hud-brand{display:flex;align-items:center;gap:9px;min-width:0;flex:1}
 .hud-mark{display:grid;grid-template-columns:repeat(3,4px);gap:2px;width:16px;height:16px;align-content:center;justify-content:center;transform:rotate(45deg)}
 .hud-mark i{display:block;width:4px;height:4px;background:#f4f4f1}
 .hud-mark i:nth-child(2),.hud-mark i:nth-child(4){opacity:.55}
 .hud-brand-copy{display:grid;gap:3px}
-.hud-brand-copy strong{font:700 13px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.18em}
+.hud-brand-copy strong{font:700 12px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.18em}
 .hud-brand-copy small{color:#858585;font:500 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em}
 .hud-live{display:flex;align-items:center;gap:6px;color:#aaa;font-size:8px;letter-spacing:.12em}
 .hud-live i{width:5px;height:5px;border-radius:50%;background:#f4f4f1;box-shadow:0 0 0 3px rgba(255,255,255,.08);animation:swarmSignal 1.8s ease-in-out infinite}
 @keyframes swarmSignal{50%{opacity:.3;box-shadow:0 0 0 5px rgba(255,255,255,.025)}}
-.hud .hud-info{display:grid;gap:9px}
+.hud .hud-info{display:grid;gap:8px}
 .hud .eyebrow,.hud .agent-label,.hud .progress-caption{color:#777;font:500 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase}
-.hud .txt{min-height:24px;display:flex;align-items:center;color:#c8c8c8;font-size:10px;line-height:1.55}
+.hud .txt{min-height:22px;display:flex;align-items:center;color:#c8c8c8;font-size:9px;line-height:1.55}
 .hud .status{display:flex;align-items:center;flex-wrap:wrap;gap:5px;color:#c8c8c8;font-variant-numeric:tabular-nums}
 .hud .status b{color:#fff;font-weight:700}
 .hud .sep{width:1px;height:10px;background:#555;margin:0 3px}
 .hud .agent-row{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid rgba(255,255,255,.1)}
 .hud .dots{display:flex;align-items:center;gap:4px;min-height:9px}
 .hud .dots i{display:block;width:7px;height:7px;border:1px solid rgba(255,255,255,.35);background:#eee;border-radius:0;opacity:.9}
-.hud .progress-wrap{display:grid;gap:8px}
+.hud .dots i[data-role="eraser"]{background:transparent;border-color:#fff}
+.hud .progress-wrap{display:grid;gap:7px}
 .hud .progress-caption{display:flex;align-items:center;justify-content:space-between}
 .hud .progress-value{color:#eee;font-size:9px;letter-spacing:.08em}
 .hud .bar{height:2px;background:#393939;overflow:hidden}
 .hud .bar i{display:block;width:0;height:100%;background:#f4f4f1;transition:width .3s ease}
-.hud .hud-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
-.hud button{all:unset;box-sizing:border-box;min-width:0;min-height:39px;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 9px;border:1px solid rgba(255,255,255,.18);border-radius:2px;background:rgba(255,255,255,.035);color:#eee;font:500 9px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.04em;cursor:pointer;transition:background .18s ease,color .18s ease,border-color .18s ease,transform .18s ease}
-.hud button:hover{background:#f4f4f1;color:#080808;border-color:#f4f4f1;transform:translateY(-1px)}
-.hud button:focus-visible{outline:2px solid #f4f4f1;outline-offset:3px}
-.hud .action-code{color:#777;font-size:8px}
-.hud .action-name{flex:1}
-.hud .action-state{color:#888;font-size:8px}
-.hud button.on{background:#f4f4f1;color:#080808;border-color:#f4f4f1}
-.hud button.on .action-code,.hud button.on .action-state{color:#555}
-.hud .hud-footer{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-.hud .hud-footer button{justify-content:center;min-height:35px;background:#f4f4f1;color:#080808;border-color:#f4f4f1;font-weight:700;letter-spacing:.12em}
-.hud .hud-footer button:hover{background:#fff}
-.hud button[hidden]{display:none}
-.hud .x{width:25px;min-height:25px;justify-content:center;padding:0;border-color:transparent;background:transparent;color:#aaa;font:400 16px/1 ui-monospace,SFMono-Regular,Consolas,monospace}
-.hud .x:hover{background:#f4f4f1;color:#080808}
-.hud button.snd{justify-content:center;gap:6px;padding:0 6px}
-.hud button.snd svg{width:14px;height:14px;flex:none;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.hud .snd-label{font-size:8px;letter-spacing:.05em}
-.hud button.snd.off{color:#858585}
-.hud button.snd.tap{background:#f4f4f1;color:#080808;animation:none}
-@media(max-width:600px){.hud{left:12px;right:12px;bottom:12px;width:auto;gap:12px;padding:13px}.hud-brand-copy small{display:none}.hud button{min-height:36px;padding:0 7px;font-size:8px}.hud .hud-actions{gap:4px}.hud .hud-footer button{min-height:34px}}
-@media(prefers-reduced-motion:reduce){.hud,.intro,.hud-live i,.hud button{transition:none;animation:none}}
+@media(max-width:600px){.hud{right:10px;bottom:10px;width:min(240px,calc(100vw - 20px));gap:10px;padding:11px 12px}.hud-brand-copy small{display:none}}
+@media(prefers-reduced-motion:reduce){.hud,.intro,.hud-live i{transition:none;animation:none}}
 
 `;
 
@@ -1628,32 +1647,22 @@
 <div class="badges"></div>
 <div class="cursors"></div>
 <div class="rulers"></div>
-<div class="hud">
+<div class="hud" aria-live="polite">
   <div class="hud-head">
     <div class="hud-brand">
       <span class="hud-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-      <span class="hud-brand-copy"><strong>SWARM</strong><small>PAGE RECONSTRUCTION</small></span>
+      <span class="hud-brand-copy"><strong>SWARM</strong><small>LIVE PAGE RECONSTRUCTION</small></span>
     </div>
-    <span class="hud-live"><i></i>RUNNING</span>
-    <button data-a="close" class="x" title="Exit (Esc)" aria-label="Exit Swarm">×</button>
+    <span class="hud-live"><i></i>LIVE</span>
   </div>
   <div class="hud-info">
     <span class="eyebrow">CURRENT ACTIVITY</span>
-    <div class="txt"><span class="status">Scanning page…</span></div>
+    <div class="txt"><span class="status">Preparing agents…</span></div>
     <div class="agent-row"><span class="agent-label">ACTIVE AGENTS</span><span class="dots" aria-label="Active agents"></span></div>
   </div>
   <div class="progress-wrap">
-    <div class="progress-caption"><span>RECONSTRUCTION</span><span class="progress-value">0%</span></div>
+    <div class="progress-caption"><span>PAGE CONSTRUCTION</span><span class="progress-value">0%</span></div>
     <div class="bar"><i></i></div>
-  </div>
-  <div class="hud-actions">
-    <button data-a="tour" title="Auto-scroll while the swarm builds"><span class="action-code">01</span><span class="action-name" data-label>Tour</span><span class="action-state" data-state>OFF</span></button>
-    <button data-a="speed" title="Build speed"><span class="action-code">02</span><span class="action-name" data-label>Speed</span><span class="action-state" data-state>1×</span></button>
-    <button data-a="sound" class="snd" title="Sound (M)" aria-label="Toggle Swarm sound"></button>
-  </div>
-  <div class="hud-footer">
-    <button data-a="live" hidden title="Fade back to the real page">RETURN TO PAGE</button>
-    <button data-a="replay" hidden title="Wipe and rebuild again">RESTART</button>
   </div>
 </div>`;
       const $ = (s) => root.querySelector(s);
@@ -2131,6 +2140,7 @@
       this.retired = 0;
       this.doneCount = 0;
       this.waitCount = 0;
+      this.buildTotal = 0;
       const vp = this.vp;
       for (let n = 0; n < INTRO_AGENTS; n++) {
         const side = n % 2 === 0;
@@ -2148,6 +2158,7 @@
       this.guides = m.guides;
       this.guideDeps = new Map(m.guides.map((g) => [g, g.deps || []]));
       this.waitCount = m.tasks.length;
+      this.buildTotal = m.tasks.length;
       this.ready = true;
     }
 
@@ -2156,6 +2167,7 @@
       const fast = Math.random() < 0.25;
       return {
         id, x, y, home,
+        role: id % 4 === 0 ? "eraser" : "builder",
         name: NAMES[id % NAMES.length],
         color: COLORS[id % COLORS.length],
         shape: "arrow", press: 0, task: null, gen: null, ov: null,
@@ -2262,6 +2274,31 @@
       );
     }
 
+    queueErasers(vp) {
+      const top = vp.sy + 6;
+      const bandBottom = vp.sy + Math.max(88, vp.vh * 0.22);
+      for (const it of this.items || []) {
+        if (it.layer !== "world" || !it.node || it.__swarmEraseQueued || it.__swarmErased) continue;
+        if (it.node.style.display === "none") continue;
+        const finalTasks = it.final || (it.task ? [it.task] : []);
+        if (!finalTasks.length || !finalTasks.every((task) => task.state === "done")) continue;
+        const b = this.bounds(it);
+        if (b.y > bandBottom || b.y + Math.max(2, b.h) < top) continue;
+        it.__swarmEraseQueued = true;
+        this.tasks.push({
+          id: this.tasks.length,
+          y: clamp(b.y + Math.min(b.h * 0.5, 22), top, bandBottom),
+          spec: { type: "erase", it },
+          deps: [],
+          state: "wait",
+          doneAt: 0,
+          layer: "world",
+          gate: 0,
+          auxiliary: true,
+        });
+      }
+    }
+
     available() {
       const out = [];
       for (const t of this.tasks) {
@@ -2279,6 +2316,9 @@
     }
 
     pick(c, list) {
+      const erasures = list.filter((t) => t.auxiliary);
+      if (c.role === "eraser" && erasures.length) list = erasures;
+      else list = list.filter((t) => !t.auxiliary);
       let best = null;
       let bestS = Infinity;
       const top = this.viewTop - 40;
@@ -2307,10 +2347,15 @@
       dt = Math.min(dt, 0.05);
       this.time += dt;
       const vp = (this.vp = this.view.vp);
-      const sv = Math.abs(vp.sy - (this.lastScroll == null ? vp.sy : this.lastScroll)) / Math.max(dt, 0.001);
+      const previousScroll = this.lastScroll == null ? vp.sy : this.lastScroll;
+      const scrollDelta = vp.sy - previousScroll;
+      const sv = Math.abs(scrollDelta) / Math.max(dt, 0.001);
       this.lastScroll = vp.sy;
       this.vel = Math.max(this.vel * Math.exp(-dt * 1.2), this.vel * 0.7 + sv * 0.3);
-      if (this.started) this.frontier = Math.max(this.frontier, this.viewBot);
+      if (this.started) {
+        this.frontier = Math.max(this.frontier, this.viewBot);
+        if (scrollDelta > 0.8) this.queueErasers(vp);
+      }
       const avail = this.started ? this.available() : [];
       this.tempo = clamp(2.1 + this.vel / 900 + (avail.length / Math.max(1, this.cursors.length)) * 0.5, 2.1, 4.5) * this.speed;
 
@@ -2331,7 +2376,8 @@
         }
       }
 
-      if (!this.flocking && this.started && this.waitCount === 0) {
+      const erasePending = this.tasks.some((task) => task.auxiliary && task.state !== "done");
+      if (!this.flocking && this.started && this.waitCount === 0 && !erasePending) {
         for (const c of this.cursors)
           if (!c.task && !c.follow) {
             c.follow = true;
@@ -2378,7 +2424,7 @@
         if (!t) continue;
         avail.splice(avail.indexOf(t), 1);
         t.state = "active";
-        this.waitCount--;
+        if (!t.auxiliary) this.waitCount--;
         c.task = t;
         c.worked = true;
         c.idleFor = 0;
@@ -2406,7 +2452,8 @@
           if (c.task) {
             c.task.state = "done";
             c.task.doneAt = this.time;
-            this.doneCount++;
+            if (!c.task.auxiliary) this.doneCount++;
+            else c.task.spec.it.__swarmErased = true;
             c.task = null;
             c.ov = null;
             if (c.sticky) {
@@ -2667,6 +2714,8 @@
         case "restyle":
         case "swap":
           return this.restyle(c, s.it);
+        case "erase":
+          return this.eraseItem(c, s.it);
       }
       return this.wait(0.1);
     }
@@ -2680,6 +2729,25 @@
       const x = it.x + it.w > right - 16 ? Math.max(it.x + Math.min(it.w, 40), right - 30) : it.x + it.w;
       const y = it.y + it.h > bot - 16 ? Math.max(it.y + Math.min(it.h, 40), bot - 40) : it.y + it.h;
       return { x: Math.min(x, it.x + it.w), y: Math.min(y, it.y + it.h) };
+    }
+
+    *eraseItem(c, it) {
+      if (!it.node || it.__swarmErased) return;
+      const b = this.bounds(it);
+      const vp = this.vp;
+      const x = clamp(b.x + Math.min(Math.max(12, b.w * 0.35), Math.max(12, b.w - 8)), vp.sx + 8, vp.sx + vp.vw - 8);
+      const y = clamp(b.y + Math.min(Math.max(8, b.h * 0.45), 24), vp.sy + 8, vp.sy + vp.vh - 8);
+      c.shape = "cross";
+      c.ov = () => [{ t: "box", b: this.bounds(it), handles: false, rulerLines: false, badge: "" }];
+      yield* this.moveTo(c, { x, y }, { speed: 1.25, bend: 0.05 });
+      yield* this.click(c);
+      it.node.classList.add("swarm-erased");
+      yield* this.wait(0.38);
+      it.node.style.display = "none";
+      it.__swarmErased = true;
+      bump(it);
+      c.ov = null;
+      c.shape = "arrow";
     }
 
     *drawBox(c, it, isImg) {
@@ -3472,11 +3540,6 @@
     constructor() {
       this.dead = false;
       this.t0 = performance.now();
-      this.tour = false;
-      this.tourV = 0;
-      this.tourAcc = 0;
-      this.speeds = [1, 2, 3];
-      this.speedIx = 0;
       this.complete = false;
       this.timing = {};
     }
@@ -3610,30 +3673,7 @@
           this.env.scroller.scrollBy({ top: e.deltaY, left: e.deltaX, behavior: "instant" });
         }, { passive: false });
       }
-      on(this.view.hud, "click", (e) => {
-        const b = e.target.closest("button");
-        if (!b) return;
-        const a = b.dataset.a;
-        if (a === "close") stop(false);
-        else if (a === "live") stop(true);
-        else if (a === "replay") restart();
-        else if (a === "tour") {
-          this.tour = !this.tour;
-          b.classList.toggle("on", this.tour);
-          const state = b.querySelector("[data-state]");
-          if (state) state.textContent = this.tour ? "ON" : "OFF";
-          if (this.tour) this.engine.start();
-        } else if (a === "sound") {
-          if (this.sfx.on && this.sfx.blocked) this.sfx.resume();
-          else this.sfx.setOn(!this.sfx.on);
-          setTimeout(() => this.renderSoundBtn(), 60);
-        } else if (a === "speed") {
-          this.speedIx = (this.speedIx + 1) % this.speeds.length;
-          this.engine.speed = this.speeds[this.speedIx];
-          const state = b.querySelector("[data-state]");
-          if (state) state.textContent = this.speeds[this.speedIx] + "×";
-        }
-      });
+      // Passive visitor experience: scrolling drives construction and cleanup.
     }
 
     unlockSound() {
@@ -3664,7 +3704,6 @@
       this.last = now;
       try {
         this.engine.step(dt);
-        if (this.tour) this.tourStep(dt);
         this.view.render(this.engine);
         if (!this._hudT || now - this._hudT > 200) {
           this._hudT = now;
@@ -3677,42 +3716,20 @@
       this.raf = requestAnimationFrame((t) => this.frame(t));
     }
 
-    tourStep(dt) {
-      const E = this.engine;
-      if (!E.started) return;
-      const g = this.env.geom();
-      const maxY = this.env.scrollHeight() - g.vh;
-      if (g.sy >= maxY - 1) {
-        this.tourV = 0;
-        return;
-      }
-      const crew = Math.max(MIN_AGENTS, E.cursors.filter((c) => !c.leaving).length);
-      const backlog = E.backlog();
-      const target = backlog <= Math.max(4, crew * 0.6) ? 230 : backlog <= crew * 1.5 ? 80 : 0;
-      this.tourV += (target - this.tourV) * Math.min(1, dt * 2.5);
-      this.tourAcc += this.tourV * dt;
-      if (this.tourAcc >= 1) {
-        const d = Math.floor(this.tourAcc);
-        this.tourAcc -= d;
-        this.env.scrollBy(d);
-      }
-    }
-
     updateHud() {
       const E = this.engine;
       const v = this.view;
       if (!E.ready) return;
       const workers = E.cursors.filter((c) => c.worked).length + E.retired;
-      const total = E.tasks.length;
+      const total = E.buildTotal;
       const done = E.doneCount;
+      const clearing = E.cursors.filter((c) => c.task && c.task.auxiliary).length;
       if (this.complete) return;
       if (!E.started) v.status.innerHTML = `<b>${E.cursors.length}</b> agents ready<span class="sep"></span>${total.toLocaleString()} layers`;
       else {
-        const pend = E.tasks.length - done;
-        const below = E.tasks.some((t) => t.state === "wait" && t.layer === "world" && t.gate > E.frontier);
         v.status.innerHTML =
           `<b>${workers}</b> agents<span class="sep"></span><b>${done.toLocaleString()}</b> / ${total.toLocaleString()} layers` +
-          (below && pend && !this.tour && E.backlog() === 0 ? `<span class="sep"></span>scroll to keep building` : "");
+          (clearing ? `<span class="sep"></span><b>${clearing}</b> clearing top` : "");
       }
       const progress = total ? Math.min(100, Math.round((done / total) * 100)) : 0;
       v.barFill.style.width = progress + "%";
@@ -3721,7 +3738,7 @@
       const key = busy.map((c) => c.id).join(",");
       if (key !== this._dots) {
         this._dots = key;
-        v.dots.innerHTML = busy.map((c) => `<i title="${c.name}"></i>`).join("");
+        v.dots.innerHTML = busy.map((c) => `<i data-role="${c.role}" title="${c.name} / ${c.role}"></i>`).join("");
       }
     }
 
@@ -3732,15 +3749,10 @@
       const v = this.view;
       const workers = E.cursors.filter((c) => c.worked).length + E.retired;
       const secs = (E.endTime - E.startTime).toFixed(1);
-      v.status.innerHTML = `Rebuilt by <b>${workers}</b> agents in <b>${secs}s</b>`;
+      v.status.innerHTML = `Completed by <b>${workers}</b> agents in <b>${secs}s</b>`;
       v.barFill.style.width = "100%";
       v.progressValue.textContent = "100%";
       v.dots.innerHTML = "";
-      v.root.querySelector('[data-a="live"]').hidden = false;
-      v.root.querySelector('[data-a="replay"]').hidden = false;
-      v.root.querySelector('[data-a="tour"]').hidden = true;
-      v.root.querySelector('[data-a="speed"]').hidden = true;
-      this.tour = false;
     }
 
     destroy(reveal) {
