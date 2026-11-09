@@ -2131,6 +2131,7 @@
       this.time = 0;
       this.rulers = { want: 0, t: 0, lastNeed: -10 };
       this.lastScroll = null;
+      this.scrollDirection = 0;
       this.nextId = 0;
       this.spawnCooldown = 0;
       this.flocking = false;
@@ -2283,6 +2284,7 @@
         const finalTasks = it.final || (it.task ? [it.task] : []);
         if (!finalTasks.length || !finalTasks.every((task) => task.state === "done")) continue;
         const b = this.bounds(it);
+        if (b.x + b.w < vp.sx || b.x > vp.sx + vp.vw) continue;
         if (b.y > bandBottom || b.y + Math.max(2, b.h) < top) continue;
         it.__swarmEraseQueued = true;
         this.tasks.push({
@@ -2351,10 +2353,12 @@
       const scrollDelta = vp.sy - previousScroll;
       const sv = Math.abs(scrollDelta) / Math.max(dt, 0.001);
       this.lastScroll = vp.sy;
+      if (scrollDelta > 0.8) this.scrollDirection = 1;
+      else if (scrollDelta < -0.8) this.scrollDirection = -1;
       this.vel = Math.max(this.vel * Math.exp(-dt * 1.2), this.vel * 0.7 + sv * 0.3);
       if (this.started) {
         this.frontier = Math.max(this.frontier, this.viewBot);
-        if (scrollDelta > 0.8) this.queueErasers(vp);
+        if (this.scrollDirection > 0) this.queueErasers(vp);
       }
       const avail = this.started ? this.available() : [];
       this.tempo = clamp(2.1 + this.vel / 900 + (avail.length / Math.max(1, this.cursors.length)) * 0.5, 2.1, 4.5) * this.speed;
