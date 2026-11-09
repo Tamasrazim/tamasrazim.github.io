@@ -1477,71 +1477,62 @@
   // ------------------------------------------------------------------ styles
 
   const STYLE = `
-:host{all:initial}
-*{box-sizing:border-box}
-.bg{position:absolute;inset:0;opacity:0;transition:opacity .5s ease}
-.bg.on{opacity:1}
-.layer,.port{position:absolute;overflow:hidden;pointer-events:none}
-.layer{inset:0}
-.world{position:absolute;left:0;top:0;will-change:transform}
-.it{position:absolute;left:0;top:0;transform-origin:0 0}
-.it.settle{transition:transform .3s cubic-bezier(.2,.8,.2,1)}
-.r{background-color:var(--ph,#D9D9D9);transition:background-color .22s ease,border-radius .22s ease}
-.r.st{background-color:transparent}
-.r>.f{position:absolute;inset:0;opacity:0;transition:opacity .22s ease,background-color .35s ease,border-radius .35s ease,box-shadow .35s ease,border-color .35s ease}
-.r.st>.f{opacity:1}
-.m{background-color:var(--ph,#D9D9D9);overflow:hidden}
-.m>.ph{position:absolute;left:50%;top:50%;width:22px;height:22px;transform:translate(-50%,-50%);opacity:.7;transition:opacity .2s}
-.m>.md{position:absolute;inset:0;width:100%;height:100%;opacity:0;clip-path:inset(0 0 100% 0);transition:opacity .35s ease,clip-path .6s cubic-bezier(.2,.75,.2,1)}
-.m.st{background-color:transparent;transition:background-color .3s ease .3s}
-.m.st>.ph{opacity:0}
-.m.st>.md{opacity:1;clip-path:inset(0 0 0 0)}
-.m>.md.swap{animation:swap .45s ease}
-@keyframes swap{from{opacity:0;filter:blur(6px)}}
-.m>.fr{position:absolute;inset:0;pointer-events:none}
-.l svg{position:absolute;left:0;top:0;overflow:visible}
-.bd{position:absolute;opacity:0;-webkit-backdrop-filter:saturate(180%) blur(14px);backdrop-filter:saturate(180%) blur(14px);box-shadow:0 1px 0 rgba(0,0,0,.06);pointer-events:none}
-.caret{display:inline-block;width:1.5px;height:1.1em;margin-left:1px;margin-right:-2.5px;vertical-align:text-bottom;background:currentColor;animation:blink 1s steps(1) infinite}
-@keyframes blink{50%{opacity:0}}
-.sa{background-color:rgba(13,153,255,.28)!important}
-.ov{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none}
-.badges,.cursors{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.badge{position:absolute;transform:translate(-50%);padding:1px 4px;border-radius:2px;color:#fff;font:600 11px/16px Inter,system-ui,-apple-system,"Segoe UI",sans-serif;white-space:nowrap;font-variant-numeric:tabular-nums}
-.cursor{position:absolute;left:0;top:0;will-change:transform}
-.cursor svg{position:absolute;overflow:visible;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.28))}
-.rulers{position:absolute;inset:0;pointer-events:none}
-.ruler{position:absolute;background:#2c2c2c;pointer-events:none}
-.ruler svg{display:block}
-.ruler-top{top:0;left:0;right:0;height:20px;border-bottom:1px solid #3a3a3a}
-.ruler-left{top:0;left:0;bottom:0;width:20px;border-right:1px solid #3a3a3a}
-.ruler-corner{position:absolute;top:0;left:0;width:20px;height:20px;background:#2c2c2c}
-.rtext{font:500 9px Inter,system-ui,-apple-system,sans-serif;fill:#8c8c8c}
-.rsel{fill:#0d99ff}
-.intro{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.92);opacity:0;transition:opacity .35s ease,transform .45s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.intro{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.94);opacity:0;transition:opacity .45s ease,transform .55s cubic-bezier(.2,.8,.2,1);pointer-events:none;display:grid;justify-items:center;gap:12px}
 .intro.on{opacity:1;transform:translate(-50%,-50%)}
 .intro.gone{opacity:0;transform:translate(-50%,-50%) scale(.9)}
-.intro img{display:block;width:60px;height:60px;object-fit:contain;filter:grayscale(1);opacity:.42;border-radius:14px}
-.intro .mono{width:60px;height:60px;border-radius:16px;background:#D7DADE;color:#fff;font:700 30px/60px Inter,system-ui,sans-serif;text-align:center}
-.hud{position:absolute;left:50%;bottom:20px;transform:translate(-50%,18px);opacity:0;display:flex;align-items:center;gap:10px;padding:6px 6px 6px 10px;background:rgba(30,30,30,.94);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.28),inset 0 0 0 1px rgba(255,255,255,.07);font:500 12px/1 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;pointer-events:auto;transition:opacity .45s ease,transform .45s cubic-bezier(.2,.8,.2,1);white-space:nowrap;user-select:none;z-index:5}
-.hud.on{opacity:1;transform:translate(-50%,0)}
-.hud .dots{display:flex;padding-left:5px}
-.hud .dots i{display:block;width:18px;height:18px;margin-left:-5px;border-radius:50%;border:2px solid #1e1e1e;font:700 9px/14px Inter,system-ui,sans-serif;font-style:normal;text-align:center;color:#fff;transition:background .3s}
-.hud .txt,.hud .status{display:flex;align-items:center;gap:7px;color:#cfcfcf;font-variant-numeric:tabular-nums}
-.hud .txt b{color:#fff;font-weight:600}
-.hud .sep{width:1px;height:12px;background:#444}
-.hud .bar{width:64px;height:3px;border-radius:2px;background:#3a3a3a;overflow:hidden}
-.hud .bar i{display:block;height:100%;width:0;background:#0D99FF;transition:width .35s ease}
-.hud button{all:unset;cursor:pointer;padding:7px 10px;border-radius:8px;background:#2c2c2c;color:#fff;font:500 12px/1 Inter,system-ui,-apple-system,sans-serif;transition:background .15s}
-.hud button:hover{background:#3a3a3a}
-.hud button.pri{background:#0D99FF}
-.hud button.pri:hover{background:#2aa6ff}
-.hud button.on{background:rgba(13,153,255,.22);color:#8fd0ff}
+.intro img{display:block;width:58px;height:58px;object-fit:contain;filter:grayscale(1);opacity:.76;border-radius:0;padding:10px;border:1px solid rgba(255,255,255,.2);background:rgba(8,8,8,.18)}
+.intro .mono{width:58px;height:58px;border-radius:0;background:rgba(8,8,8,.82);border:1px solid rgba(255,255,255,.28);color:#fff;font:700 28px/58px ui-monospace,SFMono-Regular,Consolas,monospace;text-align:center}
+.intro:after{content:"SWARM / PAGE RECONSTRUCTION";color:rgba(255,255,255,.72);font:500 9px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.22em;white-space:nowrap;text-shadow:0 1px 8px rgba(0,0,0,.55)}
+.hud{position:absolute;right:24px;bottom:24px;left:auto;top:auto;width:320px;display:grid;gap:15px;padding:16px;background:rgba(8,8,8,.86);-webkit-backdrop-filter:blur(24px) saturate(0);backdrop-filter:blur(24px) saturate(0);color:#f4f4f1;border:1px solid rgba(255,255,255,.2);border-radius:3px;box-shadow:0 18px 55px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.08);font:500 11px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace;pointer-events:auto;opacity:0;transform:translateY(12px);transition:opacity .45s ease,transform .45s cubic-bezier(.2,.8,.2,1);user-select:none;z-index:5}
+.hud.on{opacity:1;transform:translateY(0)}
+.hud-head{display:flex;align-items:center;gap:12px;min-width:0;padding-bottom:13px;border-bottom:1px solid rgba(255,255,255,.14)}
+.hud-brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.hud-mark{display:grid;grid-template-columns:repeat(3,4px);gap:2px;width:16px;height:16px;align-content:center;justify-content:center;transform:rotate(45deg)}
+.hud-mark i{display:block;width:4px;height:4px;background:#f4f4f1}
+.hud-mark i:nth-child(2),.hud-mark i:nth-child(4){opacity:.55}
+.hud-brand-copy{display:grid;gap:3px}
+.hud-brand-copy strong{font:700 13px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.18em}
+.hud-brand-copy small{color:#858585;font:500 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em}
+.hud-live{display:flex;align-items:center;gap:6px;color:#aaa;font-size:8px;letter-spacing:.12em}
+.hud-live i{width:5px;height:5px;border-radius:50%;background:#f4f4f1;box-shadow:0 0 0 3px rgba(255,255,255,.08);animation:swarmSignal 1.8s ease-in-out infinite}
+@keyframes swarmSignal{50%{opacity:.3;box-shadow:0 0 0 5px rgba(255,255,255,.025)}}
+.hud .hud-info{display:grid;gap:9px}
+.hud .eyebrow,.hud .agent-label,.hud .progress-caption{color:#777;font:500 8px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase}
+.hud .txt{min-height:24px;display:flex;align-items:center;color:#c8c8c8;font-size:10px;line-height:1.55}
+.hud .status{display:flex;align-items:center;flex-wrap:wrap;gap:5px;color:#c8c8c8;font-variant-numeric:tabular-nums}
+.hud .status b{color:#fff;font-weight:700}
+.hud .sep{width:1px;height:10px;background:#555;margin:0 3px}
+.hud .agent-row{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid rgba(255,255,255,.1)}
+.hud .dots{display:flex;align-items:center;gap:4px;min-height:9px}
+.hud .dots i{display:block;width:7px;height:7px;border:1px solid rgba(255,255,255,.35);background:#eee;border-radius:0;opacity:.9}
+.hud .progress-wrap{display:grid;gap:8px}
+.hud .progress-caption{display:flex;align-items:center;justify-content:space-between}
+.hud .progress-value{color:#eee;font-size:9px;letter-spacing:.08em}
+.hud .bar{height:2px;background:#393939;overflow:hidden}
+.hud .bar i{display:block;width:0;height:100%;background:#f4f4f1;transition:width .3s ease}
+.hud .hud-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.hud button{all:unset;box-sizing:border-box;min-width:0;min-height:39px;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 9px;border:1px solid rgba(255,255,255,.18);border-radius:2px;background:rgba(255,255,255,.035);color:#eee;font:500 9px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.04em;cursor:pointer;transition:background .18s ease,color .18s ease,border-color .18s ease,transform .18s ease}
+.hud button:hover{background:#f4f4f1;color:#080808;border-color:#f4f4f1;transform:translateY(-1px)}
+.hud button:focus-visible{outline:2px solid #f4f4f1;outline-offset:3px}
+.hud .action-code{color:#777;font-size:8px}
+.hud .action-name{flex:1}
+.hud .action-state{color:#888;font-size:8px}
+.hud button.on{background:#f4f4f1;color:#080808;border-color:#f4f4f1}
+.hud button.on .action-code,.hud button.on .action-state{color:#555}
+.hud .hud-footer{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.hud .hud-footer button{justify-content:center;min-height:35px;background:#f4f4f1;color:#080808;border-color:#f4f4f1;font-weight:700;letter-spacing:.12em}
+.hud .hud-footer button:hover{background:#fff}
 .hud button[hidden]{display:none}
-.hud .x{padding:7px 9px;color:#aaa}
-.hud button.snd{display:flex;align-items:center;gap:6px;padding:6px 8px}
-.hud button.snd.off{color:#8a8a8a}
-.hud button.snd.tap{background:#0D99FF;animation:hudpulse 1.6s ease-in-out infinite}
-@keyframes hudpulse{50%{box-shadow:0 0 0 4px rgba(13,153,255,.28)}}
+.hud .x{width:25px;min-height:25px;justify-content:center;padding:0;border-color:transparent;background:transparent;color:#aaa;font:400 16px/1 ui-monospace,SFMono-Regular,Consolas,monospace}
+.hud .x:hover{background:#f4f4f1;color:#080808}
+.hud button.snd{justify-content:center;gap:6px;padding:0 6px}
+.hud button.snd svg{width:14px;height:14px;flex:none;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.hud .snd-label{font-size:8px;letter-spacing:.05em}
+.hud button.snd.off{color:#858585}
+.hud button.snd.tap{background:#f4f4f1;color:#080808;animation:none}
+@media(max-width:600px){.hud{left:12px;right:12px;bottom:12px;width:auto;gap:12px;padding:13px}.hud-brand-copy small{display:none}.hud button{min-height:36px;padding:0 7px;font-size:8px}.hud .hud-actions{gap:4px}.hud .hud-footer button{min-height:34px}}
+@media(prefers-reduced-motion:reduce){.hud,.intro,.hud-live i,.hud button{transition:none;animation:none}}
+
 `;
 
   // -------------------------------------------------------------------- env
@@ -1638,15 +1629,32 @@
 <div class="cursors"></div>
 <div class="rulers"></div>
 <div class="hud">
-  <div class="dots"></div>
-  <div class="txt"><span class="status">Scanning page…</span></div>
-  <div class="bar"><i></i></div>
-  <button data-a="tour" title="Auto-scroll while the swarm builds">Tour</button>
-  <button data-a="speed" title="Build speed">1×</button>
-  <button data-a="sound" class="snd" title="Sound (M)"></button>
-  <button data-a="live" class="pri" hidden title="Fade back to the real page">Go live</button>
-  <button data-a="replay" hidden title="Wipe and rebuild again">Replay</button>
-  <button data-a="close" class="x" title="Exit (Esc)">✕</button>
+  <div class="hud-head">
+    <div class="hud-brand">
+      <span class="hud-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <span class="hud-brand-copy"><strong>SWARM</strong><small>PAGE RECONSTRUCTION</small></span>
+    </div>
+    <span class="hud-live"><i></i>RUNNING</span>
+    <button data-a="close" class="x" title="Exit (Esc)" aria-label="Exit Swarm">×</button>
+  </div>
+  <div class="hud-info">
+    <span class="eyebrow">CURRENT ACTIVITY</span>
+    <div class="txt"><span class="status">Scanning page…</span></div>
+    <div class="agent-row"><span class="agent-label">ACTIVE AGENTS</span><span class="dots" aria-label="Active agents"></span></div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-caption"><span>RECONSTRUCTION</span><span class="progress-value">0%</span></div>
+    <div class="bar"><i></i></div>
+  </div>
+  <div class="hud-actions">
+    <button data-a="tour" title="Auto-scroll while the swarm builds"><span class="action-code">01</span><span class="action-name" data-label>Tour</span><span class="action-state" data-state>OFF</span></button>
+    <button data-a="speed" title="Build speed"><span class="action-code">02</span><span class="action-name" data-label>Speed</span><span class="action-state" data-state>1×</span></button>
+    <button data-a="sound" class="snd" title="Sound (M)" aria-label="Toggle Swarm sound"></button>
+  </div>
+  <div class="hud-footer">
+    <button data-a="live" hidden title="Fade back to the real page">RETURN TO PAGE</button>
+    <button data-a="replay" hidden title="Wipe and rebuild again">RESTART</button>
+  </div>
 </div>`;
       const $ = (s) => root.querySelector(s);
       this.bg = $(".bg");
@@ -1662,6 +1670,7 @@
       this.hud = $(".hud");
       this.status = $(".status");
       this.barFill = $(".bar i");
+      this.progressValue = $(".progress-value");
       this.dots = $(".dots");
       this.cursorEls = new Map();
       this._ovS = "";
@@ -3611,7 +3620,8 @@
         else if (a === "tour") {
           this.tour = !this.tour;
           b.classList.toggle("on", this.tour);
-          b.textContent = this.tour ? "Touring" : "Tour";
+          const state = b.querySelector("[data-state]");
+          if (state) state.textContent = this.tour ? "ON" : "OFF";
           if (this.tour) this.engine.start();
         } else if (a === "sound") {
           if (this.sfx.on && this.sfx.blocked) this.sfx.resume();
@@ -3620,7 +3630,8 @@
         } else if (a === "speed") {
           this.speedIx = (this.speedIx + 1) % this.speeds.length;
           this.engine.speed = this.speeds[this.speedIx];
-          b.textContent = this.speeds[this.speedIx] + "×";
+          const state = b.querySelector("[data-state]");
+          if (state) state.textContent = this.speeds[this.speedIx] + "×";
         }
       });
     }
@@ -3642,7 +3653,8 @@
       b.classList.toggle("tap", tap);
       const waves = '<path d="M11 5.5a3.5 3.5 0 0 1 0 5M12.8 3.6a6 6 0 0 1 0 8.8"/>';
       const mute = '<path d="M11 6l4 4M15 6l-4 4"/>';
-      b.innerHTML = `${SPK_ICON}${key === "off" ? mute : waves}</svg>${tap ? "<span>Tap for sound</span>" : ""}`;
+      b.innerHTML = `${SPK_ICON}${key === "off" ? mute : waves}</svg><span class="snd-label">${tap ? "TAP FOR SOUND" : key === "off" ? "SOUND OFF" : "SOUND ON"}</span>`;
+      b.setAttribute("aria-label", tap ? "Tap to enable sound" : key === "off" ? "Enable Swarm sound" : "Disable Swarm sound");
       b.title = key === "off" ? "Sound off (M)" : "Sound on (M)";
     }
 
@@ -3702,12 +3714,14 @@
           `<b>${workers}</b> agents<span class="sep"></span><b>${done.toLocaleString()}</b> / ${total.toLocaleString()} layers` +
           (below && pend && !this.tour && E.backlog() === 0 ? `<span class="sep"></span>scroll to keep building` : "");
       }
-      v.barFill.style.width = total ? `${(done / total) * 100}%` : "0%";
+      const progress = total ? Math.min(100, Math.round((done / total) * 100)) : 0;
+      v.barFill.style.width = progress + "%";
+      v.progressValue.textContent = progress + "%";
       const busy = E.cursors.filter((c) => c.task).slice(-5);
       const key = busy.map((c) => c.id).join(",");
       if (key !== this._dots) {
         this._dots = key;
-        v.dots.innerHTML = busy.map((c) => `<i style="background:${c.color}" title="${c.name}">${c.name[0]}</i>`).join("");
+        v.dots.innerHTML = busy.map((c) => `<i title="${c.name}"></i>`).join("");
       }
     }
 
@@ -3720,6 +3734,7 @@
       const secs = (E.endTime - E.startTime).toFixed(1);
       v.status.innerHTML = `Rebuilt by <b>${workers}</b> agents in <b>${secs}s</b>`;
       v.barFill.style.width = "100%";
+      v.progressValue.textContent = "100%";
       v.dots.innerHTML = "";
       v.root.querySelector('[data-a="live"]').hidden = false;
       v.root.querySelector('[data-a="replay"]').hidden = false;
