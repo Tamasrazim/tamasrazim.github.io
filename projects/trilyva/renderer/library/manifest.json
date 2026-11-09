@@ -1,5 +1,5 @@
 {
-  "version": 10,
+  "version": 11,
   "libraries": [
     "./dot-mesh-library.js",
     "./green-screen-overlays.js",
