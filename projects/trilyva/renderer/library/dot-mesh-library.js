@@ -370,22 +370,9 @@ function makeDefinition(definition, index) {
 }
 var items = DESIGN_DEFINITIONS.map(makeDefinition);
 
-function csvCell(value) {
-  var text = Array.isArray(value) ? value.join("; ") : String(value == null ? "" : value);
-  return '"' + text.replace(/"/g, '""') + '"';
-}
-function catalogCsv() {
-  var rows = [["id", "title", "description", "category", "design_family", "duration_seconds", "fps", "loop", "seamless", "background", "creator"]];
-  items.forEach(function (item) {
-    rows.push([item.id, item.title, item.description, item.category, item.metadata.designFamily, 12, 60, "true", "true", "transparent", "Tamasrazim"]);
-  });
-  return "\uFEFF" + rows.map(function (row) { return row.map(csvCell).join(","); }).join("\r\n") + "\r\n";
-}
-
 export default {
   id: "dot-mesh",
   title: "DOT MESH · 50",
-  description: "50 distinct seamless dot-mesh animations. Load editable renderer code, export animated SVG, or download JSON metadata and the complete CSV catalog.",
+  description: "50 distinct seamless dot-mesh animations. Load editable renderer code or export animated SVG."
   async load() { return items.slice(); },
-  catalogCsv: catalogCsv
 };
