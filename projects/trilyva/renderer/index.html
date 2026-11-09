@@ -7729,7 +7729,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 'use strict';
 
 var SELF_SOURCE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-var APP_VERSION = '1.3.1';
+var APP_VERSION = '1.3.2';
 var SOFTWARE = 'TRILYVA — Tamasrazim';
 
 var libraryModulePromise = null;
@@ -10107,23 +10107,8 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
           title:stockTitle,
           description:item.description || meta.description || "",
           keywords:meta.tags || item.tags || [],
-          category:meta.category || item.category || "",
-          designFamily:meta.designFamily || "",
-          creator:"Tamasrazim",
-          software:"TRILYVA",
-          filename:videoName,
-          container:"MP4",
-          codec:parsed.codec || (result.stats && result.stats.codec) || "H.264 / AVC",
-          width:parsed.width,
-          height:parsed.height,
-          fps:DOT_MESH_FOLDER_SETTINGS.fps,
-          durationSeconds:actualDuration,
-          frames:parsed.samples,
-          targetBitrateMbps:DOT_MESH_FOLDER_SETTINGS.bitrate / 1000000,
-          measuredFileAverageBitrateMbps:Number((measuredBps / 1000000).toFixed(3)),
-          bytes:result.blob.size,
-          verification:verification,
-          generatedAt:new Date().toISOString()
+          categories:(meta.categories || item.categories || ["Backgrounds/Textures"]).join(", "),
+          filename:videoName
         });
         addLine(stockTitle, true, "SAVED · " + videoName + " · " + verification);
         status.textContent = "Saved " + completed.length + " / 50 · " + stockTitle;
@@ -10142,18 +10127,15 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
 
   cancelled = cancelled || dotMeshFolderCancelRequested;
   S.customBitrateMbps = savedBitrate;
-  var header = [
-    "ID","Title","Description","Keywords","Category","Design family","Creator","Software",
-    "Filename","Container","Codec","Width","Height","FPS","Duration seconds","Frame count",
-    "Target bitrate Mbps","Measured file-average bitrate Mbps","File size bytes","Verification","Generated at"
-  ];
+  // Shutterstock Submit CSV contract: exact required headers and four fields only.
+  var header = ["Filename", "Description", "Keywords", "Categories"];
   var rows = [header];
   completed.forEach(function(row) {
     rows.push([
-      row.id,row.title,row.description,(row.keywords || []).join("; "),row.category,row.designFamily,
-      row.creator,row.software,row.filename,row.container,row.codec,row.width,row.height,row.fps,
-      row.durationSeconds,row.frames,row.targetBitrateMbps,row.measuredFileAverageBitrateMbps,
-      row.bytes,row.verification,row.generatedAt
+      row.filename,
+      row.description,
+      (row.keywords || []).join(", "),
+      row.categories
     ]);
   });
   var csvError = null;
