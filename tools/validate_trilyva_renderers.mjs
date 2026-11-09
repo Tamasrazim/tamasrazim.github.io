@@ -13,6 +13,7 @@ must(tutorial.includes('href="/projects/trilyva/docs/"'), 'tutorial links to the
 must(overview.includes('/projects/trilyva/docs/') && overview.includes('/projects/trilyva/tutorial/'), 'TRILYVA overview links to the directory-based docs and tutorial routes');
 must(!fs.existsSync(path.join(ROOT,'projects/trilyva','docs'+'.html')) && !fs.existsSync(path.join(ROOT,'projects/trilyva','tutorial'+'.html')), 'legacy flat docs and tutorial files are removed');
 const manifest=read('projects/trilyva/renderer/library/manifest.json');
+const dotMeshLibrary=read('projects/trilyva/renderer/library/dot-mesh-library.js');
 const serviceWorker=read('projects/trilyva/renderer/sw.js');
 const movieFinalizer=read('projects/trilyva/renderer/movie-finalizer.js');
 must(renderer.includes('data-act="render"'),'header retains the current Render action');
@@ -41,7 +42,9 @@ must(movieFinalizer.includes('MIN_FINAL_VIDEO_BITRATE_BPS = 20000000') && movieF
 must(movieFinalizer.includes('recordedBytes + e.data.size > MAX_FINAL_VIDEO_FILE_BYTES') && movieFinalizer.includes('High · 25 Mbps'),'Movie Finalizer enforces the size cap and defaults to 25 Mbps');
 must(docs.includes('2,000,000,000-byte (2 GB) cap'),'public docs disclose the 2 GB video output cap');
 must(overview.includes('2,000,000,000-byte (2 GB) file-size cap'),'overview discloses the 2 GB video output cap');
-must(renderer.includes('renderAllDotMesh: function () { openDotMeshFolderPicker(); }'),'renderer retains its Dot Mesh folder-export action');
+must(!renderer.includes('openDotMeshFolderPicker')&&!renderer.includes('renderAllDotMesh:')&&!renderer.includes('exportDotMesh50:')&&!renderer.includes('trilyva:export-dotmesh-folder'),'dedicated Dot Mesh 50-video folder exporter is removed');
+must(!renderer.includes("catalog.textContent='CATALOG CSV'")&&!dotMeshLibrary.includes('catalogCsv'),'Dot Mesh catalog CSV download control is removed');
+must(manifest.includes('"version": 10')&&serviceWorker.includes('tamasrazim-trilyva-pwa-v163-no-dotmesh-export'),'cache and library versions are refreshed after removing Dot Mesh export controls');
 const renderPanel=renderer.slice(renderer.indexOf('id="p-render"'),renderer.indexOf('id="toyWrap"'));
 must(renderPanel.includes('data-act="renderFullLibrary"')&&renderPanel.includes('id="stillFrameIndex"')&&renderPanel.includes('id="stillExportFormats"'),'Render panel retains full-library and still-frame export controls');
 must(!renderer.includes("renderAllDotMesh.textContent='RENDER ALL DOT MESH'")&&!renderer.includes("renderAllDotMesh.style.display=active&&active.id==='dot-mesh'"),'duplicate Dot Mesh batch shortcut is absent from the Library dialog');
@@ -64,8 +67,6 @@ must(renderer.includes('trilyva-gate-animation')&&renderer.includes('Trilyva.')&
 must(renderer.includes('font-family="Unbounded, sans-serif"')&&renderer.includes('dur="2s" calcMode="linear" fill="freeze"')&&renderer.includes('#f00000'),'SVG uses Unbounded, the exact two-second metallic sweep and red-on-black accents');
 must(renderer.includes('keySplines=".2 .75 .15 1"')&&renderer.includes('values="5;0" dur=".42s" fill="freeze"'),'SVG uses the matching soft fade, blur and easing reveal');
 for(const stop of ['#626262','#e5e5e5','#858585','#f7f7f7','#555','#c9c9c9']) must(renderer.includes('stop-color="'+stop+'"'),'site-intro metallic gradient stop '+stop+' is preserved');
-must(renderer.includes('speed: 1')&&renderer.includes('reverse: false')&&renderer.includes('seed: 12345'),'Dot Mesh batch overrides stale speed, reverse and seed settings');
-must(renderer.includes('renderAllDotMesh: function () { openDotMeshFolderPicker(); }'),'Render panel Dot Mesh action opens the direct-folder exporter');
 must(!movieFinalizer.includes('trilyva:download-dotmesh-zip')&&!movieFinalizer.includes('trilyvaDownloadDotMeshZip'),'obsolete ZIP shortcut is absent');
 must(renderer.includes('data-act="cancelRender"'),'render panel retains Cancel');
 must(!/data-act="queueAdd"|data-act="startRender"/i.test(renderer),'duplicate queue/current-render buttons are removed');
