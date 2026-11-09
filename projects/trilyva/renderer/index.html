@@ -7730,7 +7730,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 'use strict';
 
 var SELF_SOURCE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-var APP_VERSION = '1.3.6';
+var APP_VERSION = '1.3.7';
 var SOFTWARE = 'TRILYVA — Tamasrazim';
 
 var libraryModulePromise = null;
@@ -10078,7 +10078,7 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
       var item = items[i];
       var internalTitle = String(item.title || item.id || ("Dot Mesh " + (i + 1)));
       var stockTitle = String(item.stockTitle || (item.metadata && item.metadata.title) || internalTitle);
-      var videoName = stockTitle + ".mp4";
+      var videoName = String(item.filename || (stockTitle + ".mp4"));
       status.textContent = "Preparing " + (i + 1) + " / " + items.length + " · " + stockTitle;
       document.getElementById("dmzPos").textContent = i + " / " + items.length;
       bar.querySelector("i").style.width = ((i / items.length) * 100).toFixed(2) + "%";
