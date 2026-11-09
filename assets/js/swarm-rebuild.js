@@ -3722,13 +3722,13 @@
       const workers = E.cursors.filter((c) => c.worked).length + E.retired;
       const total = E.buildTotal;
       const done = E.doneCount;
+      const building = E.cursors.filter((c) => c.task && !c.task.auxiliary).length;
       const clearing = E.cursors.filter((c) => c.task && c.task.auxiliary).length;
       if (this.complete) return;
       if (!E.started) v.status.innerHTML = `<b>${E.cursors.length}</b> agents ready<span class="sep"></span>${total.toLocaleString()} layers`;
       else {
         v.status.innerHTML =
-          `<b>${workers}</b> agents<span class="sep"></span><b>${done.toLocaleString()}</b> / ${total.toLocaleString()} layers` +
-          (clearing ? `<span class="sep"></span><b>${clearing}</b> clearing top` : "");
+          `<b>${building}</b> building bottom<span class="sep"></span><b>${clearing}</b> clearing top<span class="sep"></span><b>${done.toLocaleString()}</b> / ${total.toLocaleString()}`;
       }
       const progress = total ? Math.min(100, Math.round((done / total) * 100)) : 0;
       v.barFill.style.width = progress + "%";
