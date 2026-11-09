@@ -7730,7 +7730,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 'use strict';
 
 var SELF_SOURCE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-var APP_VERSION = '1.3.5';
+var APP_VERSION = '1.3.6';
 var SOFTWARE = 'TRILYVA — Tamasrazim';
 
 var libraryModulePromise = null;
@@ -9295,10 +9295,10 @@ function trilyvaStockMetadata(item, stem, assets, outputFileName){
   var desc='Seamless 12-second procedural motion background with flowing geometric movement, luminous linework and a clean dark composition, created for video, design and digital projects.';
   function csv(v){v=String(v==null?'':v);return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
   var row=[
-    String(outputFileName|| (stem+'.mp4')),title,desc,keywords.join(','),
-    'Backgrounds/Textures', 'Yes','No','No'
+    String(outputFileName|| (stem+'.mp4')),desc,keywords.join(','),
+    'Backgrounds/Textures', 'no','no','no'
   ].map(csv).join(',');
-  return 'Filename,Title,Description,Keywords,Categories,Illustration,Mature Content,Editorial\r\n'+row+'\r\n';
+  return 'Filename,Description,Keywords,Categories,Editorial,Mature content,illustration\r\n'+row+'\r\n';
 }
 
 async function renderTransparentStill(item){
@@ -9883,9 +9883,9 @@ function dotMeshFolderCsvRowFor(item, meta) {
     meta.description || item.description || "",
     (meta.tags || item.tags || []).join(", "),
     (meta.categories || item.categories || ["Abstract", "Backgrounds/Textures"]).join(", "),
-    meta.illustration || "No",
-    meta.matureContent || "No",
-    meta.editorial || "No"
+    String(meta.editorial || "no").toLowerCase(),
+    String(meta.matureContent || "no").toLowerCase(),
+    String(meta.illustration || "no").toLowerCase()
   ]);
 }
 function dotMeshFolderSnapshotWorkspace() {
@@ -10149,8 +10149,8 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
 
   cancelled = cancelled || dotMeshFolderCancelRequested;
   S.customBitrateMbps = savedBitrate;
-  // Shutterstock Submit CSV contract: exact seven-column header order.
-  var header = ["Filename", "Description", "Keywords", "Categories", "Illustration", "Mature Content", "Editorial"];
+  // Match Assets/shutterstock_content_upload.csv exactly.
+  var header = ["Filename", "Description", "Keywords", "Categories", "Editorial", "Mature content", "illustration"];
   var rows = [header];
   completed.forEach(function(row) {
     rows.push([
@@ -10158,9 +10158,9 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
       row.description,
       (row.keywords || []).join(", "),
       row.categories,
-      row.illustration || "No",
-      row.matureContent || "No",
-      row.editorial || "No"
+      String(row.editorial || "no").toLowerCase(),
+      String(row.matureContent || "no").toLowerCase(),
+      String(row.illustration || "no").toLowerCase()
     ]);
   });
   var csvError = null;
