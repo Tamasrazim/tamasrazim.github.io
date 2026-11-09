@@ -440,3 +440,21 @@
     drawProjects();
   }
 })();
+
+/* Website-native Swarm Rebuild launcher. The renderer is loaded only on demand. */
+(function () {
+  "use strict";
+  function loadSwarmLauncher() {
+    if (document.querySelector('script[data-swarm-launcher]')) return;
+    var script = document.createElement("script");
+    script.src = "/assets/js/swarm-launcher.js?v=20261109-1";
+    script.async = true;
+    script.dataset.swarmLauncher = "true";
+    (document.head || document.documentElement).appendChild(script);
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadSwarmLauncher, { once: true });
+  } else {
+    loadSwarmLauncher();
+  }
+})();
