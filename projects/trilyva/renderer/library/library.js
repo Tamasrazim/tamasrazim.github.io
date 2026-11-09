@@ -29,7 +29,10 @@ window.TRILYVA_LIBRARY.ready = (async function () {
     throw new Error("Library manifest is invalid.");
   }
 
-  const version = encodeURIComponent(String(manifest.version || 1));
+  // Include the renderer build in each module URL. This keeps changed library
+  // modules fresh even when a generated manifest retains the same schema version.
+  const shellBuild = new URL(import.meta.url).searchParams.get("v") || "dev";
+  const version = encodeURIComponent(String(manifest.version || 1) + "-" + shellBuild);
   for (const path of manifest.libraries) {
     const separator = path.indexOf("?") >= 0 ? "&" : "?";
     const mod = await import(path + separator + "v=" + version);
