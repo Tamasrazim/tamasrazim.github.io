@@ -2320,7 +2320,13 @@
     pick(c, list) {
       const erasures = list.filter((t) => t.auxiliary);
       if (c.role === "eraser" && erasures.length) list = erasures;
-      else list = list.filter((t) => !t.auxiliary);
+      else {
+        list = list.filter((t) => !t.auxiliary);
+        if (this.scrollDirection > 0) {
+          const lowerViewport = list.filter((t) => this.taskY(t) >= this.viewTop + this.vp.vh * 0.55);
+          if (lowerViewport.length) list = lowerViewport;
+        }
+      }
       let best = null;
       let bestS = Infinity;
       const top = this.viewTop - 40;
