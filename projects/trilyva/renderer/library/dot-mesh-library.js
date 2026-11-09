@@ -3,133 +3,57 @@
 // No external dependencies, fonts, images, APIs, or runtime libraries are required.
 
 const TAU = Math.PI * 2;
-function makeShutterstockDescription(internalTitle, family) {
-  var details = {
-    wave: "flowing wave contours",
-    contour: "concentric ripple paths",
-    diagonal: "angled grid lines",
-    moire: "overlapping moire waves",
-    fold: "folded cellular surfaces",
-    spiral: "twisting spiral paths",
-    radial: "radiating curved lines",
-    orbit: "elliptical orbit bands",
-    hex: "repeating hexagonal cells",
-    terrain: "rising topographic contours",
-    vortex: "swirling point formations",
-    lissajous: "intersecting harmonic curves",
-    harmonic: "repeating harmonic loops",
-    sphere: "layered spherical lattices",
-    tunnel: "converging perspective lines",
-    pinwheel: "rotating radial spokes"
-  };
-  var detail = details[family] || "flowing geometric lines";
-  return "A dark field features " + String(internalTitle || "geometric dot mesh").toLowerCase() +
-    " made from white dots and fine lines. The seamless monochrome motion reveals " + detail +
-    ", creating an abstract backdrop for digital projects.";
-}
-const SHUTTERSTOCK_CATEGORIES = ["Abstract", "Backgrounds/Textures"];
-const SHUTTERSTOCK_COMMON = [
-  "abstract background","animated background","seamless loop","looping animation",
-  "motion graphics","geometric pattern","monochrome","dark background",
-  "white dots","connected dots","dot grid","digital background",
-  "abstract motion","moving pattern","black and white"
-];
-const SHUTTERSTOCK_FAMILY = {
- wave:["flowing wave","wave pattern","wave grid","undulating surface","curved lines","ripple effect","fluid motion","sine wave","contour wave","mesh surface","flowing mesh","organic geometry","abstract waves","point network","moving lattice","wave motion","rolling surface","rippled grid"],
- contour:["concentric circles","ripple rings","contour lines","circular pattern","expanding rings","radial contours","circular motion","topographic pattern","line field","concentric pattern","radial wave","pulse effect","curved grid","circular mesh","ring animation","nested circles","contour geometry","ripple motion"],
- diagonal:["diagonal geometry","angled grid","linear mesh","slanted pattern","geometric lattice","grid distortion","flowing lines","repeating grid","point matrix","connected lattice","abstract geometry","wireframe pattern","line structure","angular mesh","diagonal lines","bent grid","linear pattern","triangular forms"],
- moire:["interference pattern","moire effect","optical pattern","repeating texture","overlapping waves","visual interference","fine line texture","wave interference","optical geometry","pattern distortion","grid texture","frequency pattern","digital interference","line matrix","geometric overlay","checker pattern","optical illusion","interference lines"],
- fold:["folded surface","folding geometry","warped grid","curved lattice","layered surface","surface topology","point connections","fluid lattice","deformed surface","geometric waves","mesh deformation","network surface","rippled structure","moving folds","folded lines","bending surface","curved mesh","layered geometry"],
- spiral:["spiral geometry","twisting form","rotating curves","coiled structure","helical motion","curved strands","intertwined lines","winding pattern","circular paths","rotating mesh","looped geometry","mathematical curves","spiral motion","twisted paths","curved network","helix form","turning strands","coiling lines"],
- radial:["radial geometry","circular symmetry","curved spokes","radial pattern","orbiting points","centered design","circular network","spoke pattern","radial motion","symmetrical design","circular arrangement","radial lines","flower geometry","rotational form","point arrangement","radial structure","radiating lines","spoke arrangement"],
- orbit:["orbital paths","elliptical rings","celestial pattern","space concept","orbiting dots","planetary motion","astronomy visual","circular revolution","layered orbit","orbital motion","ring system","cosmic design","planetary rings","space background","celestial geometry","ellipse pattern","orbital bands","rotating rings"],
- hex:["hexagonal grid","hexagon pattern","honeycomb geometry","staggered lattice","hexagonal mesh","geometric tiling","connected lattice","cellular grid","network geometry","modular pattern","point matrix","geometric network","lattice surface","repeating cells","six sided grid","hexagon cells","cell structure","geometric tessellation"],
- terrain:["topographic lines","rolling terrain","elevation pattern","contour surface","geographic map","height field","landform geometry","terrain visualization","surface relief","mapping concept","landscape pattern","geoscience visual","contour map","digital terrain","elevation lines","mountain contours","ridge pattern","valley form"],
- vortex:["swirling field","spiral flow","rotating points","central whirl","curved flow","twisting mesh","circular motion","whirlpool pattern","rotational geometry","flow lines","swirl effect","converging paths","dynamic spiral","energy flow","vortex motion","eddy currents","rotating field","curved streams"],
- lissajous:["harmonic curves","intersecting curves","mathematical pattern","frequency curves","oscillation paths","wave geometry","curve network","mathematical forms","crossing lines","harmonic motion","complex curves","periodic motion","abstract mathematics","looping curves","lissajous curve","frequency design","curved lattice","math visualization"],
- harmonic:["harmonic pattern","periodic motion","oscillating lines","wave loop","frequency pattern","mathematical curves","loop geometry","curved path","repeating motion","sine curve","continuous motion","mathematics visual","abstract curve","flower geometry","radial symmetry","harmonic form","repeating curves","cyclic motion"],
- sphere:["spherical geometry","rotating globe","geometric orb","round structure","connected lattice","spatial object","globe pattern","rotational motion","sphere surface","digital globe","network sphere","three dimensional form","curved surface","point structure","geometric shell","spherical mesh","round lattice","spherical form"],
- tunnel:["perspective grid","vanishing point","receding lines","depth illusion","tunnel geometry","converging lines","spatial perspective","digital corridor","futuristic passage","central perspective","depth field","linear perspective","geometric depth","virtual space","perspective motion","receding grid","converging points","infinite corridor"],
- pinwheel:["radial pinwheel","rotating spokes","central axis","curved spokes","spinning geometry","radial sweep","circular pattern","rotational symmetry","pinwheel motion","geometric rotation","moving spokes","radial design","abstract movement","curved paths","spoke geometry","turning pattern","circular motion","centered rotation"]
-};
-const SHUTTERSTOCK_EXTRA = [
-  "particle field","point pattern","line art","wireframe","digital art",
-  "abstract design","visual texture","geometric motion","animated pattern",
-  "minimal background","fine lines","connected mesh","repeating pattern",
-  "futuristic design","spatial geometry","visual effect"
-];
-function shutterstockKeywords(family, stockTitle) {
-  var words = String(stockTitle || "").toLowerCase().replace(/^abstract\s+/, "")
-    .replace(/\bof\b|\bmade\b|\bconnected\b|\bwhite\b|\bdots?\b|\bpattern\b/g, " ")
-    .replace(/[^a-z0-9 ]/g, " ").trim().split(/\s+/).filter(Boolean);
-  var titleTerms = [];
-  for (var i=0; i<words.length-1 && titleTerms.length<8; i++) {
-    var phrase = words[i] + " " + words[i+1];
-    if (titleTerms.indexOf(phrase)<0) titleTerms.push(phrase);
-  }
-  var pool = ["dot mesh", "point field", "animated vector", "procedural", "seamless loop", String(family || "abstract").toLowerCase(), "trilyva"]
-    .concat(SHUTTERSTOCK_COMMON)
-    .concat(SHUTTERSTOCK_FAMILY[family] || [])
-    .concat(titleTerms).concat(SHUTTERSTOCK_EXTRA);
-  var result=[];
-  pool.forEach(function(word){
-    word=String(word||"").trim().toLowerCase();
-    if(word && result.indexOf(word)<0 && result.length<50) result.push(word);
-  });
-  return result;
-}
-
 const DESIGN_DEFINITIONS = [
-  ["Meridian Wave Grid", "wave", "Wave Fields", "Abstract Flowing Wave Grid of Connected White Dots", "A dark field of white points forms a broad wave grid, with fine connecting lines bending across the surface. The seamless monochrome loop adds depth to technology titles and digital backdrops.", "Abstract Flowing Wave Grid of Connected White Dots.mp4"],
-  ["Ripple Lattice", "contour", "Wave Fields", "Abstract Concentric Ripple Pattern of Connected White Dots", "Concentric rings of connected white dots ripple outward in a gently undulating pattern. This minimal monochrome loop creates clear expanding motion for abstract backgrounds and transitions.", "Abstract Concentric Ripple Pattern of Connected White Dots.mp4"],
-  ["Diagonal Tide", "diagonal", "Wave Fields", "Diagonal Flowing Geometric Wave Grid of White Dots", "Rows of white dots form a diagonal geometric grid that bends into flowing wave contours. The clean monochrome animation suits presentation backdrops, interface visuals and modern design.", "Diagonal Flowing Geometric Wave Grid of White Dots.mp4"],
-  ["Interference Field", "moire", "Wave Fields", "Abstract Moire Interference Pattern of Connected Dots", "Overlapping wave patterns create a fine moire field of connected white dots. Shifting geometric interference adds visual rhythm to technology themes, motion design and digital backgrounds.", "Abstract Moire Interference Pattern of Connected Dots.mp4"],
-  ["Cellular Drift", "fold", "Wave Fields", "Abstract Cellular Wave Surface of Connected White Dots", "A flexible grid of white points folds into a softly rippling cellular surface. Fine connecting lines reveal a fluid abstract structure for science visuals and technology presentations.", "Abstract Cellular Wave Surface of Connected White Dots.mp4"],
-  ["Helix Columns", "spiral", "Spiral Forms", "Abstract Twisting Helix Columns Made of White Dots", "White dots trace tall twisting helix columns that wind around one another in a repeating spiral. The monochrome loop evokes molecular forms, data structures and scientific concepts.", "Abstract Twisting Helix Columns Made of White Dots.mp4"],
-  ["Twin Spiral Array", "spiral", "Spiral Forms", "Abstract Twin Spiral Motion of Connected White Dots", "Two spiral systems of connected white points rotate through a shared abstract field. Their intertwined paths create balanced geometric motion for science and technology backgrounds.", "Abstract Twin Spiral Motion of Connected White Dots.mp4"],
-  ["Orbit Rosette", "radial", "Radial Systems", "Abstract Radial Orbit Rosette of White Dots", "A radial arrangement of white dots forms a delicate rosette of orbiting curved paths. Its symmetrical monochrome motion suits science graphics, technology concepts and clean transitions.", "Abstract Radial Orbit Rosette of White Dots.mp4"],
-  ["Polar Burst Mesh", "radial", "Radial Systems", "Abstract Radial Burst Pattern of Connected White Dots", "White points spread from a central area into a radiating burst of connected geometric lines. This high-contrast abstract loop adds energy to technology backgrounds and title sequences.", "Abstract Radial Burst Pattern of Connected White Dots.mp4"],
-  ["Saturn Rings", "orbit", "Radial Systems", "Abstract Saturn Ring Orbit Pattern Made of White Dots", "Elliptical rings of white dots circle a central space in layered orbital paths. The monochrome animation suggests planetary motion for astronomy themes and science presentations.", "Abstract Saturn Ring Orbit Pattern Made of White Dots.mp4"],
-  ["Hex Current", "hex", "Lattice Geometries", "Abstract Hexagonal Flowing Dot Grid Pattern", "A staggered hexagonal grid of white dots flows across the frame in a repeating geometric wave. Its precise lattice structure suits technology visuals and data presentations.", "Abstract Hexagonal Flowing Dot Grid Pattern.mp4"],
-  ["Honeycomb Pulse", "hex", "Lattice Geometries", "Abstract Pulsating Honeycomb Grid of White Dots", "A connected honeycomb field of white dots gently expands and contracts in a rhythmic pulse. The geometric loop fits science themes, interface backgrounds and modern motion design.", "Abstract Pulsating Honeycomb Grid of White Dots.mp4"],
-  ["Offset Crystal Field", "hex", "Lattice Geometries", "Abstract Geometric Crystal Grid of Connected Dots", "An offset hexagonal arrangement creates a crystalline field of connected white points. Subtle movement across the lattice gives this abstract loop a refined technological look.", "Abstract Geometric Crystal Grid of Connected Dots.mp4"],
-  ["Triangular Mesh", "diagonal", "Lattice Geometries", "Abstract Triangular Geometric Dot Mesh Pattern", "White dots form a repeating triangular mesh whose connecting lines shift in a geometric wave. The structured monochrome animation suits engineering concepts and digital presentations.", "Abstract Triangular Geometric Dot Mesh Pattern.mp4"],
-  ["Isometric Cascade", "terrain", "Lattice Geometries", "Abstract Isometric Cascading Dot Grid Landscape", "An isometric field of connected white dots rises and falls like a cascading landscape. The layered grid adds depth to technology presentations and data visualization.", "Abstract Isometric Cascading Dot Grid Landscape.mp4"],
-  ["Diamond Envelope", "diagonal", "Lattice Geometries", "Abstract Diamond Shaped Wave Grid of White Dots", "A diamond-shaped arrangement of connected white dots bends into a flowing geometric envelope. This minimal monochrome loop suits technology titles and abstract presentation backgrounds.", "Abstract Diamond Shaped Wave Grid of White Dots.mp4"],
-  ["Folded Grid", "fold", "Lattice Geometries", "Abstract Folding Geometric Grid of Connected Dots", "A connected grid of white points bends and folds into layered geometric waves. The shifting surface creates a clean abstract backdrop for digital products and technology visuals.", "Abstract Folding Geometric Grid of Connected Dots.mp4"],
-  ["Wave Crest Matrix", "wave", "Wave Fields", "Abstract Flowing Crest Wave Matrix of White Dots", "Curved rows of white dots form a flowing crest that travels across a connected mesh. This restrained monochrome wave provides a polished background for technology visuals and motion design.", "Abstract Flowing Crest Wave Matrix of White Dots.mp4"],
-  ["Checker Sine", "moire", "Interference Studies", "Abstract Checkerboard Moire Pattern of White Dots", "A checkerboard field of connected white dots creates a shifting moire effect. Repeating geometric interference adds texture to digital backgrounds, titles and abstract transitions.", "Abstract Checkerboard Moire Pattern of White Dots.mp4"],
-  ["Ribbon Undulation", "wave", "Interference Studies", "Abstract Undulating Ribbon Waves Made of Dots", "Several ribbon-like waves emerge from rows of connected white dots. Their layered undulation creates a monochrome motion texture for technology visuals, transitions and titles.", "Abstract Undulating Ribbon Waves Made of Dots.mp4"],
-  ["Vortex Field", "vortex", "Vortex Studies", "Abstract Swirling Vortex Field of Connected White Dots", "A connected field of white points twists into a swirling vortex around a central region. The flowing monochrome pattern suggests motion and energy for science and technology backgrounds.", "Abstract Swirling Vortex Field of Connected White Dots.mp4"],
-  ["Double Vortex", "vortex", "Vortex Studies", "Abstract Double Vortex Spiral Pattern of White Dots", "Two connected vortex forms rotate through a shared field of white dots, creating a balanced double spiral. This abstract loop suits science graphics and technology presentations.", "Abstract Double Vortex Spiral Pattern of White Dots.mp4"],
-  ["Turbine Dots", "radial", "Vortex Studies", "Abstract Radial Turbine Motion Made of White Dots", "White dots form a radial turbine arrangement with curved spokes around a central point. The rotating geometric pattern adds movement to engineering concepts and technology backgrounds.", "Abstract Radial Turbine Motion Made of White Dots.mp4"],
-  ["Eddy Network", "vortex", "Vortex Studies", "Abstract Flowing Eddy Network of Connected Dots", "Connected white points drift through a network of curved eddies and flowing turns. The fluid monochrome field works as an abstract background for science and technology themes.", "Abstract Flowing Eddy Network of Connected Dots.mp4"],
-  ["Gravity Well", "contour", "Vortex Studies", "Abstract Gravitational Well Ripple Pattern of White Dots", "Concentric dotted contours bend around a central well, suggesting a deep gravitational field. This monochrome loop suits physics concepts, space themes and scientific visuals.", "Abstract Gravitational Well Ripple Pattern of White Dots.mp4"],
-  ["Lissajous Cage", "lissajous", "Harmonic Forms", "Abstract Lissajous Harmonic Cage of Connected Dots", "A dense cage of connected white points forms intersecting harmonic curves across the frame. The precise abstract geometry suits mathematics, science and futuristic backgrounds.", "Abstract Lissajous Harmonic Cage of Connected Dots.mp4"],
-  ["Harmonic Loop", "lissajous", "Harmonic Forms", "Abstract Flowing Harmonic Loop Pattern of White Dots", "A continuous harmonic curve travels through connected white dots to form a flowing loop. The minimal monochrome animation complements mathematics themes and technology visuals.", "Abstract Flowing Harmonic Loop Pattern of White Dots.mp4"],
-  ["Mobius Mesh", "fold", "Harmonic Forms", "Abstract Twisted Mobius Strip Dot Mesh", "A connected dotted surface twists into a folded strip with a continuous looping form. Its abstract geometric motion suits mathematics, science and modern digital presentations.", "Abstract Twisted Mobius Strip Dot Mesh.mp4"],
-  ["Knotline Points", "lissajous", "Harmonic Forms", "Abstract Lissajous Knot Pattern of Connected White Dots", "Interlaced harmonic paths create a knot-like pattern traced by connected white dots. This intricate monochrome loop offers a mathematical visual for science and technology content.", "Abstract Lissajous Knot Pattern of Connected White Dots.mp4"],
-  ["Flower of Harmonics", "harmonic", "Harmonic Forms", "Abstract Harmonic Flower Pattern Made of White Dots", "White points trace a flower-like radial arrangement of repeating harmonic curves. The symmetrical abstract animation brings a scientific geometric feel to digital backgrounds.", "Abstract Harmonic Flower Pattern Made of White Dots.mp4"],
-  ["Radial Contour", "contour", "Radial Systems", "Abstract Radial Contour Rings of Connected White Dots", "Layered rings of connected white dots create a radial contour pattern that expands and contracts. The clean monochrome motion suits scientific diagrams and technology backgrounds.", "Abstract Radial Contour Rings of Connected White Dots.mp4"],
-  ["Orbit Bands", "orbit", "Radial Systems", "Abstract Concentric Orbit Bands Made of White Dots", "Multiple elliptical bands of white points form a layered orbital composition around an open center. This space-inspired loop works for astronomy visuals and science presentations.", "Abstract Concentric Orbit Bands Made of White Dots.mp4"],
-  ["Eclipse Mesh", "orbit", "Radial Systems", "Abstract Eclipse Orbit Pattern of Connected White Dots", "Overlapping orbital paths of connected white dots create an eclipse-inspired arrangement. The restrained monochrome animation suits astronomy themes, science content and technology visuals.", "Abstract Eclipse Orbit Pattern of Connected White Dots.mp4"],
-  ["Nested Spheres", "sphere", "Spherical Systems", "Abstract Nested Spherical Rings of White Dots", "Nested spherical rings made from connected white dots create a layered three-dimensional form. This abstract monochrome loop works for astronomy, science and digital backgrounds.", "Abstract Nested Spherical Rings of White Dots.mp4"],
-  ["Perspective Tunnel", "tunnel", "Perspective Fields", "Abstract Futuristic Perspective Tunnel of White Dots", "A field of white dots recedes toward a central vanishing point, forming a deep geometric tunnel. This futuristic monochrome loop suits technology presentations and sci-fi backgrounds.", "Abstract Futuristic Perspective Tunnel of White Dots.mp4"],
-  ["Horizon Convergence", "tunnel", "Perspective Fields", "Abstract Converging Horizon Grid of Connected Dots", "Connected white points converge toward a distant horizon, creating a perspective grid with a strong sense of depth. The abstract animation fits digital environments and technology visuals.", "Abstract Converging Horizon Grid of Connected Dots.mp4"],
-  ["Vanishing-Point Grid", "tunnel", "Perspective Fields", "Abstract Vanishing Point Perspective Dot Grid", "A geometric grid of white dots narrows toward a central vanishing point to create a perspective illusion. The minimal monochrome motion suits futuristic scenes and technology themes.", "Abstract Vanishing Point Perspective Dot Grid.mp4"],
-  ["Folding Corridor", "tunnel", "Perspective Fields", "Abstract Folding Geometric Corridor of White Dots", "Rows of connected white dots fold inward to form a geometric corridor with shifting perspective. This monochrome loop adds depth to digital environments and technology presentations.", "Abstract Folding Geometric Corridor of White Dots.mp4"],
-  ["Parallax Columns", "tunnel", "Perspective Fields", "Abstract Parallax Perspective Columns Made of Dots", "Vertical columns of white points recede through a layered perspective field, creating a subtle parallax effect. The futuristic monochrome animation suits interface visuals and digital backgrounds.", "Abstract Parallax Perspective Columns Made of Dots.mp4"],
-  ["Terrain Contour", "terrain", "Terrain Studies", "Abstract Flowing Terrain Contour Lines of White Dots", "Flowing contour lines made from connected white dots shape a rolling abstract terrain. The monochrome surface suggests elevation and movement for topographic visuals and data displays.", "Abstract Flowing Terrain Contour Lines of White Dots.mp4"],
-  ["Ridgefield", "terrain", "Terrain Studies", "Abstract Mountain Ridge Contour Dot Landscape", "White points trace layered mountain-like ridges across an abstract contour landscape. This clean geometric animation suits mapping concepts, topographic visuals and science content.", "Abstract Mountain Ridge Contour Dot Landscape.mp4"],
-  ["Mountain Mesh", "terrain", "Terrain Studies", "Abstract Animated Mountain Mesh of Connected White Dots", "A connected mesh of white dots rises into a moving mountain-like surface with visible peaks and valleys. The abstract loop fits terrain visualization and scientific presentations.", "Abstract Animated Mountain Mesh of Connected White Dots.mp4"],
-  ["Valley Scan", "terrain", "Terrain Studies", "Abstract Valley Contour Scan Made of White Dots", "Curved rows of white points descend into a valley-shaped contour pattern. Subtle motion across the connected surface creates a visual for mapping, geography and science topics.", "Abstract Valley Contour Scan Made of White Dots.mp4"],
-  ["Seismic Surface", "terrain", "Terrain Studies", "Abstract Seismic Wave Surface of Connected White Dots", "A connected field of white dots moves across a terrain-like surface in seismic wave patterns. This monochrome animation suits geoscience topics and scientific data visualization.", "Abstract Seismic Wave Surface of Connected White Dots.mp4"],
-  ["Dot Sphere", "sphere", "Spherical Systems", "Abstract Rotating Three Dimensional Dot Sphere", "A three-dimensional sphere formed from connected white dots rotates as a clean geometric object. The monochrome loop suits astronomy, science and technology presentations.", "Abstract Rotating Three Dimensional Dot Sphere.mp4"],
-  ["Spherical Lattice", "sphere", "Spherical Systems", "Abstract Spherical Lattice Grid of Connected White Dots", "A spherical lattice of connected white points creates a precise geometric shell with visible depth. This minimal monochrome animation works for science concepts and network visuals.", "Abstract Spherical Lattice Grid of Connected White Dots.mp4"],
-  ["Breathing Orb", "sphere", "Spherical Systems", "Abstract Breathing Orb Made of Connected White Dots", "A connected dotted sphere gently expands and contracts to create a breathing orbital form. The restrained abstract loop suits science presentations and minimal digital backgrounds.", "Abstract Breathing Orb Made of Connected White Dots.mp4"],
-  ["Orbital Shell", "sphere", "Spherical Systems", "Abstract Orbital Shell Pattern of White Dots", "Layered orbital shells of white dots wrap around a central spherical form. This abstract monochrome animation evokes scientific structures, astronomy themes and technology visuals.", "Abstract Orbital Shell Pattern of White Dots.mp4"],
-  ["Geodesic Halo", "sphere", "Spherical Systems", "Abstract Geodesic Halo Sphere Made of White Dots", "A geodesic spherical halo is traced by connected white dots in a balanced geometric arrangement. The seamless monochrome loop suits science, space and technology presentations.", "Abstract Geodesic Halo Sphere Made of White Dots.mp4"],
-  ["Pinwheel Coordinates", "pinwheel", "Radial Systems", "Abstract Radial Pinwheel Pattern of Connected White Dots", "White dots sweep around a central axis in a radial pinwheel arrangement, forming curved connected spokes. This abstract monochrome loop adds motion to digital titles and technology backgrounds.", "Abstract Radial Pinwheel Pattern of Connected White Dots.mp4"]
+  ["Meridian Wave Grid", "wave", "Wave Fields"],
+  ["Ripple Lattice", "contour", "Wave Fields"],
+  ["Diagonal Tide", "diagonal", "Wave Fields"],
+  ["Interference Field", "moire", "Wave Fields"],
+  ["Cellular Drift", "fold", "Wave Fields"],
+  ["Helix Columns", "spiral", "Spiral Forms"],
+  ["Twin Spiral Array", "spiral", "Spiral Forms"],
+  ["Orbit Rosette", "radial", "Radial Systems"],
+  ["Polar Burst Mesh", "radial", "Radial Systems"],
+  ["Saturn Rings", "orbit", "Radial Systems"],
+  ["Hex Current", "hex", "Lattice Geometries"],
+  ["Honeycomb Pulse", "hex", "Lattice Geometries"],
+  ["Offset Crystal Field", "hex", "Lattice Geometries"],
+  ["Triangular Mesh", "diagonal", "Lattice Geometries"],
+  ["Isometric Cascade", "terrain", "Lattice Geometries"],
+  ["Diamond Envelope", "diagonal", "Lattice Geometries"],
+  ["Folded Grid", "fold", "Lattice Geometries"],
+  ["Wave Crest Matrix", "wave", "Wave Fields"],
+  ["Checker Sine", "moire", "Interference Studies"],
+  ["Ribbon Undulation", "wave", "Interference Studies"],
+  ["Vortex Field", "vortex", "Vortex Studies"],
+  ["Double Vortex", "vortex", "Vortex Studies"],
+  ["Turbine Dots", "radial", "Vortex Studies"],
+  ["Eddy Network", "vortex", "Vortex Studies"],
+  ["Gravity Well", "contour", "Vortex Studies"],
+  ["Lissajous Cage", "lissajous", "Harmonic Forms"],
+  ["Harmonic Loop", "lissajous", "Harmonic Forms"],
+  ["Mobius Mesh", "fold", "Harmonic Forms"],
+  ["Knotline Points", "lissajous", "Harmonic Forms"],
+  ["Flower of Harmonics", "harmonic", "Harmonic Forms"],
+  ["Radial Contour", "contour", "Radial Systems"],
+  ["Orbit Bands", "orbit", "Radial Systems"],
+  ["Eclipse Mesh", "orbit", "Radial Systems"],
+  ["Nested Spheres", "sphere", "Spherical Systems"],
+  ["Perspective Tunnel", "tunnel", "Perspective Fields"],
+  ["Horizon Convergence", "tunnel", "Perspective Fields"],
+  ["Vanishing-Point Grid", "tunnel", "Perspective Fields"],
+  ["Folding Corridor", "tunnel", "Perspective Fields"],
+  ["Parallax Columns", "tunnel", "Perspective Fields"],
+  ["Terrain Contour", "terrain", "Terrain Studies"],
+  ["Ridgefield", "terrain", "Terrain Studies"],
+  ["Mountain Mesh", "terrain", "Terrain Studies"],
+  ["Valley Scan", "terrain", "Terrain Studies"],
+  ["Seismic Surface", "terrain", "Terrain Studies"],
+  ["Dot Sphere", "sphere", "Spherical Systems"],
+  ["Spherical Lattice", "sphere", "Spherical Systems"],
+  ["Breathing Orb", "sphere", "Spherical Systems"],
+  ["Orbital Shell", "sphere", "Spherical Systems"],
+  ["Geodesic Halo", "sphere", "Spherical Systems"],
+  ["Pinwheel Coordinates", "pinwheel", "Radial Systems"]
 ];
 
 function meshPoint(s, row, col, a, cols, rows) {
@@ -287,7 +211,7 @@ function buildSvg(spec, thumbnail, animated, ultraHd) {
   if (!thumbnail) {
     out.push('<metadata>' + escXml(JSON.stringify({
       id: spec.id, title: spec.title, creator: "Tamasrazim", software: "TRILYVA",
-      durationSeconds: 12, fps: 60, loop: true, seamless: true, animated: !!animated, background: "#050506",
+      durationSeconds: 12, fps: 60, loop: true, seamless: true, animated: !!animated, background: "transparent",
       width: width, height: height, designFamily: spec.family, category: spec.category, tags: spec.tags
     })) + '</metadata>');
   }
@@ -401,12 +325,10 @@ function makeDefinition(definition, index) {
   var columns = family === "sphere" || family === "radial" || family === "spiral" || family === "orbit" || family === "pinwheel" ? 38 : 34;
   var rows = family === "sphere" || family === "radial" || family === "spiral" || family === "orbit" || family === "pinwheel" ? 20 : 18;
   var title = definition[0];
-  var stockTitle = definition[3] || title;
-  var filename = String(definition[5] || (stockTitle + ".mp4"));
   var id = "dotmesh-" + String(index + 1).padStart(3, "0");
-  var description = String(definition[4] || makeShutterstockDescription(title, family));
-  var tags = shutterstockKeywords(family, stockTitle);
-  var stockCategories = SHUTTERSTOCK_CATEGORIES.slice();
+  var description = title + " uses a " + family.replace(/-/g, " ") +
+    " coordinate system with a distinct animated point field and connected vector mesh.";
+  var tags = ["dot mesh", "point field", "animated vector", "procedural", "seamless loop", family.replace(/-/g, " "), "TRILYVA"];
   var spec = {
     id: id, title: title, category: definition[2], family: family, seed: seed,
     columns: columns, rows: rows, amplitude: Number(amp.toFixed(4)),
@@ -417,18 +339,12 @@ function makeDefinition(definition, index) {
   var metadata = {
     schema: "trilyva.dot-mesh/1.0",
     id: id,
-    title: stockTitle,
-    filename: filename,
-    internalName: title,
+    title: title,
     description: description,
     creator: "Tamasrazim",
     software: "TRILYVA",
     assetType: "Procedural dot-mesh design",
-    category: stockCategories[0],
-    categories: stockCategories,
-    illustration: "No",
-    matureContent: "No",
-    editorial: "No",
+    category: definition[2],
     designFamily: family,
     durationSeconds: 12,
     fps: 60,
@@ -442,8 +358,7 @@ function makeDefinition(definition, index) {
     tags: tags
   };
   return {
-    id: id, title: title, stockTitle: stockTitle, filename: filename, category: definition[2], description: description,
-    tags: tags, categories: stockCategories,
+    id: id, title: title, category: definition[2], description: description,
     duration: 12, loop: true, loopDuration: 12, fps: 60,
     width: 1920, height: 1080, transparent: true, seed: seed,
     code: sourceFor(spec),
@@ -456,24 +371,13 @@ function makeDefinition(definition, index) {
 var items = DESIGN_DEFINITIONS.map(makeDefinition);
 
 function csvCell(value) {
-  var text = String(value == null ? "" : value);
+  var text = Array.isArray(value) ? value.join("; ") : String(value == null ? "" : value);
   return '"' + text.replace(/"/g, '""') + '"';
 }
 function catalogCsv() {
-  var rows = [[
-    "Filename", "Description", "Keywords", "Categories",
-    "Editorial", "Mature content", "illustration"
-  ]];
+  var rows = [["id", "title", "description", "category", "design_family", "duration_seconds", "fps", "loop", "seamless", "background", "creator"]];
   items.forEach(function (item) {
-    rows.push([
-      item.filename || ((item.stockTitle || item.metadata.title || item.title) + ".mp4"),
-      item.description,
-      (item.metadata.tags || item.tags || []).join(", "),
-      (item.metadata.categories || item.categories || ["Abstract", "Backgrounds/Textures"]).join(", "),
-      String(item.metadata.editorial || "no").toLowerCase(),
-      String(item.metadata.matureContent || "no").toLowerCase(),
-      String(item.metadata.illustration || "no").toLowerCase()
-    ]);
+    rows.push([item.id, item.title, item.description, item.category, item.metadata.designFamily, 12, 60, "true", "true", "transparent", "Tamasrazim"]);
   });
   return "\uFEFF" + rows.map(function (row) { return row.map(csvCell).join(","); }).join("\r\n") + "\r\n";
 }

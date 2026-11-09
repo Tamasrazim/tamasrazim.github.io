@@ -10,10 +10,10 @@
 <meta name="color-scheme" content="dark">
 <meta name="description" content="TRILYVA is a browser-based JavaScript animation renderer with deterministic frame timing, MP4/WebM export where supported, library batch rendering, metadata, and an 18-format still-frame picker.">
 <meta name="robots" content="index,follow,max-image-preview:large">
-<meta property="og:type" content="website"><meta property="og:site_name" content="Tamasrazim"><meta property="og:title" content="TRILYVA — JavaScript Animation Renderer"><meta property="og:description" content="Write procedural JavaScript animation, inspect exact frames, render verified output where supported, manage libraries, and save inspected frames in 18 formats."><meta property="og:url" content="https://tamasrazim.github.io/projects/trilyva/renderer/"><meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg"><meta name="twitter:card" content="summary_large_image">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Tamasrazim"><meta property="og:title" content="TRILYVA — JavaScript Animation Renderer"><meta property="og:description" content="Write procedural JavaScript animation, inspect exact frames, render verified output where supported, manage libraries, and save inspected frames in 18 formats."><meta property="og:url" content="https://tamasrazim.github.io/projects/code-motion/renderer/"><meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg"><meta name="twitter:card" content="summary_large_image">
 <title>Trilyva — JavaScript Animation Renderer</title>
 
-<link rel="canonical" href="https://tamasrazim.github.io/projects/trilyva/renderer/">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/code-motion/renderer/">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
 <style>
@@ -1449,9 +1449,9 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "@id": "https://tamasrazim.github.io/projects/trilyva/renderer/#application",
+  "@id": "https://tamasrazim.github.io/projects/code-motion/renderer/#application",
   "name": "TRILYVA Renderer",
-  "url": "https://tamasrazim.github.io/projects/trilyva/renderer/",
+  "url": "https://tamasrazim.github.io/projects/code-motion/renderer/",
   "description": "The TRILYVA browser workspace for deterministic JavaScript animation editing, exact-frame preview, browser-capability-checked video rendering, project and library delivery, metadata diagnostics, and 18-format inspected-frame export.",
   "applicationCategory": "MultimediaApplication",
   "operatingSystem": "Web Browser",
@@ -1861,10 +1861,10 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
             <div class="row"><label for="oQuality">Quality</label>
               <select id="oQuality"><option value="draft">Draft</option><option value="standard">Standard</option><option value="high">High</option><option value="max">Maximum</option></select></div>
             <div class="row"><label for="oBitrate">Custom bitrate</label>
-              <input type="number" id="oBitrate" min="20" max="800" step="0.1" value="25" inputmode="decimal">
+              <input type="number" id="oBitrate" min="20" max="2000" step="0.1" value="25" inputmode="decimal">
               <span class="num" style="font-size:10px;color:var(--mut)">Mbps</span></div>
-            <p class="note">Video bitrate target: minimum 20 Mbps · default 25 Mbps · maximum 800 Mbps · H.264 MP4 enforces the selected per-frame bitrate floor with standards-compliant filler_data NAL units when the browser encoder emits smaller samples. Filler data does not change decoded pixels or add visual noise. Complex frames may exceed the floor; under-rate MP4s are blocked. Video exports have a strict 2,000,000,000-byte (2 GB) file-size cap. No automatic bitrate, resolution, frame-rate or quality reduction is made to fit the cap.</p>
-            <div class="warnbox"><b>MEMORY / LARGE EXPORTS</b>The 2 GB file-size cap is separate from the 800 Mbps maximum encoder target. The current browser muxer retains encoded chunks and container/index data during finalisation. A near-limit export may need substantially more than 2 GB of free memory; some desktop/browser combinations may not have enough available memory. A 2 GB file does not automatically mean a media player loads the entire file into RAM.</div>
+            <p class="note">Video bitrate: minimum 20 Mbps · default 25 Mbps · maximum 2,000 Mbps. Video exports have a strict 2,000,000,000-byte (2 GB) file-size cap. TRILYVA never lowers bitrate, resolution, frame rate, or quality to fit the cap.</p>
+            <div class="warnbox"><b>MEMORY / LARGE EXPORTS</b>2 GB is the output file-size limit, not a 2 Gbps bitrate. The current browser muxer retains encoded chunks and container/index data during finalisation. A near-limit export may need substantially more than 2 GB of free memory; some desktop/browser combinations may not have enough available memory. A 2 GB file does not automatically mean a media player loads the entire file into RAM.</div>
             <div class="row"><label for="oTimebase">WebM timebase</label>
               <select id="oTimebase"><option value="ms">1 ms (compatible)</option><option value="exact">Exact 1/fps tick</option></select></div>
             <div class="row"><label for="oChecksum">Frame checksums</label>
@@ -1887,12 +1887,7 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
           </div>
           <div class="sec">
             <h4>RENDER</h4>
-            <div class="btn-row">
-              <button class="btn" data-act="renderFullLibrary" id="renderFullLibraryBtn" title="Render every item in the selected library to a folder or ZIP">RENDER FULL LIBRARY</button>
-              <button class="btn solid" data-act="exportDotMesh50" id="exportDotMesh50Btn" title="Render all 50 built-in Dot Mesh designs as 4K60 MP4 files and one combined metadata CSV">EXPORT DOT MESH · 50 VIDEOS</button>
-              <button class="btn" data-act="downloadDotMeshMetadata" id="downloadDotMeshMetadataBtn" title="Download the Shutterstock-ready metadata CSV for the 50 Dot Mesh MP4 filenames without rendering again">DOWNLOAD SHUTTERSTOCK CSV</button>
-            </div>
-            <p class="note">Dedicated Dot Mesh batch export: renders all 50 built-in designs at 3840×2160, 60 FPS, 12 seconds each, then saves the MP4 files and one combined metadata CSV directly into the folder you choose.</p>
+            <div class="btn-row"><button class="btn" data-act="renderFullLibrary" id="renderFullLibraryBtn" title="Render every item in the selected library to a folder or ZIP">RENDER FULL LIBRARY</button></div>
             
             <div class="row"><label for="stillFrameIndex">Still frame</label><input id="stillFrameIndex" type="number" min="0" step="1" value="0" style="max-width:100px" aria-describedby="stillExportNote"></div><div id="stillExportFormats" style="display:flex;flex-wrap:wrap;gap:8px 12px;margin:6px 0 2px;font:10px var(--mono);color:var(--ink-2)"><label><input type="checkbox" id="stillFmtPng" checked> PNG</label><label><input type="checkbox" id="stillFmtJpg"> JPG</label><label><input type="checkbox" id="stillFmtSvg"> SVG</label><label><input type="checkbox" id="stillFmtEps"> EPS</label></div><p class="note" id="stillExportNote">Frame numbers start at 0. After a successful render, TRILYVA also saves the selected still formats for this frame. PNG is the default.</p><p class="note">Renders the code currently in the editor using the selected composition, frame rate, duration, format and quality settings.</p>
             <div class="btn-row">
@@ -3253,7 +3248,7 @@ function probeH264(width, height, fps, bitrate) {
     var c = H264_CANDIDATES[i++];
     var cfg = {
       codec: c.id, width: w, height: h, bitrate: br, framerate: fps,
-      bitrateMode: 'constant', latencyMode: 'quality', avc: { format: 'avc' }
+      latencyMode: 'quality', avc: { format: 'avc' }
     };
     return VideoEncoder.isConfigSupported(cfg).then(function (r) {
       var ok = !!(r && r.supported);
@@ -3271,9 +3266,9 @@ function probeH264(width, height, fps, bitrate) {
   }
   return Promise.resolve().then(next);
 }
-/* Video export policy: 20 Mbps minimum, 25 Mbps UI default, 800 Mbps target ceiling. */
+/* Video export policy: 20 Mbps minimum, 25 Mbps UI default, 2 Gbps target ceiling. */
 var MIN_TARGET_BITRATE_BPS = 20000000;
-var MAX_TARGET_BITRATE_BPS = 800000000;
+var MAX_TARGET_BITRATE_BPS = 2000000000;
 var MAX_VIDEO_FILE_BYTES = 2000000000;
 function sanitiseBitrate(v, width, height, fps) {
   var n = Number(v);
@@ -3293,11 +3288,11 @@ function probeEncoders(width, height, fps, bitrate) {
     return Promise.resolve({ available: false, reason: 'VideoEncoder (WebCodecs) is not implemented in this browser.', supported: [] });
   }
   var w = Math.max(2, width - (width % 2)), h = Math.max(2, height - (height % 2));
-  var probeBitrate = sanitiseBitrate(bitrate === undefined ? 25000000 : bitrate, w, h, fps);
+  var probeBitrate = sanitiseBitrate(bitrate === undefined ? 6000000 : bitrate, w, h, fps);
   var tests = CODECS.map(function (c) {
     return VideoEncoder.isConfigSupported({
       codec: c.id, width: w, height: h, bitrate: probeBitrate,
-      framerate: fps, bitrateMode: 'constant', latencyMode: 'quality'
+      framerate: fps, latencyMode: 'quality'
     }).then(function (r) { return { codec: c, supported: !!r.supported }; })
       .catch(function () { return { codec: c, supported: false }; });
   });
@@ -3421,22 +3416,6 @@ function dupRuns(cs) {
   return n;
 }
 
-/* Verify the completed elementary video stream instead of trusting the requested encoder setting.
-   WebCodecs defaults to variable bitrate unless constant mode is explicitly selected. */
-function measureEncodedVideoBitrate(encodedBytes, comp, requestedBitrate, enforceFullTarget) {
-  var duration = Number(comp.frameCount) / Number(comp.fps);
-  var measuredBps = duration > 0 ? Math.round((encodedBytes * 8) / duration) : 0;
-  var requested = Number(requestedBitrate);
-  var requiredBps = enforceFullTarget
-    ? Math.max(20000000, Math.ceil(requested))
-    : Math.max(20000000, Math.ceil(requested * 0.95));
-  return {
-    measuredBps: measuredBps,
-    targetBps: requiredBps,
-    meetsTarget: Number.isFinite(measuredBps) && measuredBps >= requiredBps
-  };
-}
-
 /* ---------------- WebM ---------------- */
 function exportWebM(cfg) {
   var env = cfg.env, enc = env.enc, comp = cfg.comp, job = cfg.job;
@@ -3446,8 +3425,7 @@ function exportWebM(cfg) {
   if (comp.width % 2 || comp.height % 2) {
     return Promise.resolve({ ok: false, error: { name: 'CompositionError', message: 'VP8/VP9 need even pixel dimensions. Current composition is ' + comp.width + '×' + comp.height + '.', detail: 'Round the width and height to even numbers in the Composition panel.' } });
   }
-  var targetBitrate = enc.sanitiseBitrate(job.bitrate, comp.width, comp.height, comp.fps);
-  return enc.probeEncoders(comp.width, comp.height, comp.fps, targetBitrate).then(function (probe) {
+  return enc.probeEncoders(comp.width, comp.height, comp.fps, job.bitrate).then(function (probe) {
     if (!probe.available) return { ok: false, error: { name: 'CapabilityError', message: probe.reason, detail: 'Render a PNG sequence instead.' } };
     var codec = probe.supported[0];
     var scale = job.timebase === 'exact' ? Math.round(1e9 / comp.fps) : 1000000;
@@ -3476,10 +3454,10 @@ function exportWebM(cfg) {
     var gop = Math.max(1, Math.round(comp.fps * 2));
     encoder.configure({
       codec: codec.id, width: comp.width, height: comp.height,
-      bitrate: targetBitrate,
-      framerate: comp.fps, bitrateMode: 'constant', latencyMode: 'quality'
+      bitrate: enc.sanitiseBitrate(job.bitrate, comp.width, comp.height, comp.fps),
+      framerate: comp.fps, latencyMode: 'quality'
     });
-    cfg.onLog('encoder configured: ' + codec.label + ' (' + codec.id + ') @ ' + Math.round(targetBitrate / 1000) + ' kbps · CBR');
+    cfg.onLog('encoder configured: ' + codec.label + ' (' + codec.id + ') @ ' + Math.round(enc.sanitiseBitrate(job.bitrate, comp.width, comp.height, comp.fps) / 1000) + ' kbps');
 
     function drain(limit) {
       if (sizeLimitHit) return Promise.reject(new Error('OUTPUT_SIZE_LIMIT'));
@@ -3511,96 +3489,16 @@ function exportWebM(cfg) {
         try { encoder.close(); } catch (e) { }
         if (sizeLimitHit) return { ok: false, error: videoSizeLimitError() };
         if (hardError) throw hardError;
-        var bitrateCheck = measureEncodedVideoBitrate(encodedBytes, comp, targetBitrate);
-        if (!bitrateCheck.meetsTarget) {
-          cfg.onLog('BITRATE NOTE · ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) +
-            ' Mbps measured against the ' + (targetBitrate / 1000000).toFixed(2) +
-            ' Mbps CBR target. Low-complexity content and browser encoder rate control can produce a lower average. Keeping the completed render; no quality failure is inferred from bitrate alone.');
-        } else {
-          cfg.onLog('verified encoded video payload: ' + (bitrateCheck.measuredBps / 1000000).toFixed(2) + ' Mbps average');
-        }
         var fin = mux.finish(comp.frameCount);
         if (fin.blob.size > enc.MAX_VIDEO_FILE_BYTES) return { ok: false, error: videoSizeLimitError() };
         cfg.onLog('muxed ' + fin.frames + ' blocks into ' + (fin.blob.size / 1048576).toFixed(2) + ' MB');
-        return { ok: true, blob: fin.blob, muxed: fin, encodedOutputs: outputs, res: res, codec: codec,
-          bitrate: targetBitrate, measuredBitrateBps: bitrateCheck.measuredBps };
+        return { ok: true, blob: fin.blob, muxed: fin, encodedOutputs: outputs, res: res, codec: codec };
       }).catch(function (e) {
         if (sizeLimitHit || String(e && e.message || e) === 'OUTPUT_SIZE_LIMIT') return { ok: false, error: videoSizeLimitError() };
         return { ok: false, error: { name: 'EncoderError', message: String(e.message || e), detail: 'The encoder failed while finishing the stream. No file was produced.' } };
       });
     });
   });
-}
-
-/* H.264 AVC sample-rate floor enforcement.
-   WebCodecs constant mode is only a target; encoder implementations may emit
-   smaller access units for simple imagery. AVC filler_data NAL units (type 12)
-   add legal, decoder-ignored payload bytes without changing decoded pixels. */
-function avcNalLengthSizeFromConfig(description) {
-  var bytes;
-  if (description instanceof ArrayBuffer) bytes = new Uint8Array(description);
-  else if (ArrayBuffer.isView(description)) bytes = new Uint8Array(description.buffer, description.byteOffset, description.byteLength);
-  else throw new Error('The H.264 encoder did not provide an AVC decoder configuration record.');
-  if (bytes.length < 5 || bytes[0] !== 1) throw new Error('The H.264 AVC decoder configuration record is invalid.');
-  return (bytes[4] & 3) + 1;
-}
-function appendAvcFillerToSample(sample, targetBytes, lengthSize) {
-  if (!(sample instanceof Uint8Array)) throw new TypeError('H.264 access unit is not a byte array.');
-  if (!Number.isInteger(lengthSize) || lengthSize < 1 || lengthSize > 4) throw new Error('Unsupported AVC NAL length-field size: ' + lengthSize + '.');
-
-  // Validate WebCodecs' AVCC length-prefixed access unit before modifying it.
-  var offset = 0, nalCount = 0;
-  while (offset < sample.length) {
-    if (offset + lengthSize > sample.length) throw new Error('Malformed AVC access unit: truncated NAL length field.');
-    var nalBytes = 0;
-    for (var i = 0; i < lengthSize; i++) nalBytes = nalBytes * 256 + sample[offset + i];
-    if (nalBytes < 1 || offset + lengthSize + nalBytes > sample.length) {
-      throw new Error('Malformed AVC access unit: NAL length exceeds the encoded sample.');
-    }
-    offset += lengthSize + nalBytes;
-    nalCount++;
-  }
-  if (!nalCount || offset !== sample.length) throw new Error('Malformed AVC access unit: no complete NAL units were found.');
-
-  var gap = Math.ceil(targetBytes) - sample.length;
-  if (gap <= 0) return { bytes: sample, fillerBytes: 0, fillerNals: 0 };
-
-  // A filler_data RBSP needs one NAL header byte and one rbsp_trailing_bits byte.
-  // Use multiple NALs when the avcC record specifies a short length field.
-  var minimumUnitBytes = lengthSize + 2;
-  var totalFillerBytes = Math.max(gap, minimumUnitBytes);
-  var maxNalBytes = Math.pow(256, lengthSize) - 1;
-  var maxUnitBytes = maxNalBytes + lengthSize;
-  var units = [];
-  while (totalFillerBytes > 0) {
-    var unitBytes = Math.min(totalFillerBytes, maxUnitBytes);
-    var remainder = totalFillerBytes - unitBytes;
-    if (remainder > 0 && remainder < minimumUnitBytes) {
-      unitBytes -= minimumUnitBytes - remainder;
-      remainder = minimumUnitBytes;
-    }
-    if (unitBytes < minimumUnitBytes) throw new Error('Could not form a valid H.264 filler_data NAL unit.');
-    units.push(unitBytes);
-    totalFillerBytes -= unitBytes;
-  }
-
-  var addedBytes = units.reduce(function (sum, value) { return sum + value; }, 0);
-  var out = new Uint8Array(sample.length + addedBytes);
-  out.set(sample);
-  var cursor = sample.length;
-  units.forEach(function (unitBytes) {
-    var nalSize = unitBytes - lengthSize;
-    for (var j = lengthSize - 1; j >= 0; j--) {
-      out[cursor + j] = nalSize & 255;
-      nalSize = Math.floor(nalSize / 256);
-    }
-    // nal_unit_type = 12 (filler_data), nal_ref_idc = 0.
-    out[cursor + lengthSize] = 0x0C;
-    out.fill(0xFF, cursor + lengthSize + 1, cursor + unitBytes - 1);
-    out[cursor + unitBytes - 1] = 0x80; // rbsp_trailing_bits
-    cursor += unitBytes;
-  });
-  return { bytes: out, fillerBytes: addedBytes, fillerNals: units.length };
 }
 
 /* ---------------- MP4 / H.264 — the direct video path ----------------
@@ -3647,24 +3545,16 @@ function exportMP4(cfg) {
     function release() { if (env.releaseExportCanvas) { try { env.releaseExportCanvas(out); } catch (e) { } } }
 
     var encodedBytes = 0, outputs = 0, hardError = null, muxError = null, sizeLimitHit = false, gotDesc = false;
-    var nalLengthSize = 0, fillerBytesAdded = 0, fillerNalUnitsAdded = 0;
-    var targetSampleBytes = Math.ceil(sel.config.bitrate / (8 * comp.fps));
     var maxPayload = maxEncodedPayloadBytes(enc, comp.frameCount);
     var encoder = new VideoEncoder({
       output: function (chunk, metadata) {
         try {
           if (!gotDesc && metadata && metadata.decoderConfig && metadata.decoderConfig.description) {
             mux.setDescription(metadata.decoderConfig.description);
-            nalLengthSize = avcNalLengthSizeFromConfig(metadata.decoderConfig.description);
             gotDesc = true;
           }
-          if (!gotDesc || !nalLengthSize) throw new Error('The H.264 encoder did not expose its AVC sample format before output.');
           var buf = new Uint8Array(chunk.byteLength);
           chunk.copyTo(buf);
-          var padded = appendAvcFillerToSample(buf, targetSampleBytes, nalLengthSize);
-          buf = padded.bytes;
-          fillerBytesAdded += padded.fillerBytes;
-          fillerNalUnitsAdded += padded.fillerNals;
           if (encodedBytes + buf.length > maxPayload) { sizeLimitHit = true; return; }
           mux.addSample(buf, chunk.type === 'key', chunk.timestamp);
           encodedBytes += buf.length;
@@ -3673,13 +3563,7 @@ function exportMP4(cfg) {
       },
       error: function (e) { hardError = e; }
     });
-    try {
-      var encoderConfig = Object.assign({}, sel.config);
-      if (job.contentHint === 'detail' || job.contentHint === 'motion' || job.contentHint === 'text') {
-        encoderConfig.contentHint = job.contentHint;
-      }
-      encoder.configure(encoderConfig);
-    }
+    try { encoder.configure(sel.config); }
     catch (e) {
       release();
       return {
@@ -3754,20 +3638,6 @@ function exportMP4(cfg) {
             }
           };
         }
-        var bitrateCheck = measureEncodedVideoBitrate(encodedBytes, comp, sel.config.bitrate, true);
-        if (!bitrateCheck.meetsTarget) {
-          cfg.onLog('BITRATE FLOOR FAILED · ' + (bitrateCheck.measuredBps / 1000000).toFixed(3) +
-            ' Mbps delivered; ' + (bitrateCheck.targetBps / 1000000).toFixed(3) + ' Mbps required. No under-rate MP4 will be delivered.');
-          return { ok: false, stage: 'bitrate-floor', error: {
-            name: 'BitrateFloorError',
-            message: 'H.264 output remained below the requested bitrate floor after filler-data enforcement.',
-            detail: 'TRILYVA stopped this export rather than silently delivering an MP4 below the selected bitrate floor.'
-          } };
-        }
-        cfg.onLog('CBR FLOOR VERIFIED · ' + (bitrateCheck.measuredBps / 1000000).toFixed(3) +
-          ' Mbps H.264 payload rate against ' + (bitrateCheck.targetBps / 1000000).toFixed(3) + ' Mbps required.');
-        if (fillerBytesAdded) cfg.onLog('H.264 filler_data inserted: ' + (fillerBytesAdded / 1048576).toFixed(2) +
-          ' MiB across ' + fillerNalUnitsAdded + ' NAL units. Decoded picture data was not changed.');
         var fin = mux.finish();
         if (!fin.ok) {
           return { ok: false, stage: 'mux', error: { name: 'MP4 MUXER ERROR', layer: 'mux', message: fin.reason, detail: 'The H.264 stream was produced but could not be described in an MP4 sample table, so no file was written.' } };
@@ -3776,8 +3646,7 @@ function exportMP4(cfg) {
         cfg.onLog('muxed ' + fin.samples + ' AVC samples into ftyp + mdat + moov — ' + (fin.blob.size / 1048576).toFixed(2) + ' MB');
         return {
           ok: true, blob: fin.blob, muxed: fin, encodedOutputs: outputs, res: res,
-          codec: { label: sel.label, id: sel.id }, bitrate: sel.config.bitrate,
-          measuredBitrateBps: bitrateCheck.measuredBps, probe: probe
+          codec: { label: sel.label, id: sel.id }, bitrate: sel.config.bitrate, probe: probe
         };
       }).catch(function (e) {
         try { encoder.close(); } catch (e2) { }
@@ -3878,7 +3747,7 @@ function run(cfg) {
   if (!c.ok) return Promise.resolve({ ok: false, stage: 'validate', error: c.error });
   cfg.onLog('fresh export runtime initialised; frame 0 will render at full composition resolution');
 
-  var sub = { env: env, rt: rt, comp: comp, job: job, from: cfg.from || 0, onLog: cfg.onLog, onProgress: cfg.onProgress, isCancelled: cfg.isCancelled, writeFile: cfg.writeFile, existing: cfg.existing, prepareFrame: cfg.prepareFrame, assets: cfg.assets, layers: cfg.layers, vectorEdits: cfg.vectorEdits, vectorBounds: cfg.vectorBounds };
+  var sub = { env: env, rt: rt, comp: comp, job: job, from: cfg.from || 0, onLog: cfg.onLog, onProgress: cfg.onProgress, isCancelled: cfg.isCancelled, writeFile: cfg.writeFile, existing: cfg.existing, prepareFrame: cfg.prepareFrame };
   var started = Date.now();
   var task = job.format === 'webm' ? exportWebM(sub)
     : job.format === 'mp4' ? exportMP4(sub)
@@ -3897,7 +3766,6 @@ function run(cfg) {
         renderMs: stats, totalRenderMs: r.res.elapsedMs,
         avgProcessFps: r.res.durations.length / (r.res.elapsedMs / 1000),
         bytes: r.blob ? r.blob.size : (r.bytes || 0),
-        measuredBitrateBps: r.measuredBitrateBps || null,
         checksums: r.res.checksums,
         duplicateNeighbours: dupRuns(r.res.checksums),
         framesEncoded: (r.encodedOutputs === undefined ? null : r.encodedOutputs),
@@ -7730,7 +7598,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 'use strict';
 
 var SELF_SOURCE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-var APP_VERSION = '1.3.7';
+var APP_VERSION = '1.2.8';
 var SOFTWARE = 'TRILYVA — Tamasrazim';
 
 var libraryModulePromise = null;
@@ -9295,10 +9163,10 @@ function trilyvaStockMetadata(item, stem, assets, outputFileName){
   var desc='Seamless 12-second procedural motion background with flowing geometric movement, luminous linework and a clean dark composition, created for video, design and digital projects.';
   function csv(v){v=String(v==null?'':v);return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
   var row=[
-    String(outputFileName|| (stem+'.mp4')),desc,keywords.join(','),
-    'Backgrounds/Textures', 'no','no','no'
+    String(outputFileName|| (stem+'.mp4')),title,desc,keywords.join(','),
+    'Backgrounds/Textures', 'Yes','No','No'
   ].map(csv).join(',');
-  return 'Filename,Description,Keywords,Categories,Editorial,Mature content,illustration\r\n'+row+'\r\n';
+  return 'Filename,Title,Description,Keywords,Categories,Illustration,Mature Content,Editorial\r\n'+row+'\r\n';
 }
 
 async function renderTransparentStill(item){
@@ -9522,39 +9390,7 @@ function openRenderAllConfirm(lib,items){
     var input=document.createElement('input');input.type='checkbox';input.id=id;input.checked=!!checked;
     wrapper.append(input,document.createTextNode(label));parent.appendChild(wrapper);return input;
   }
-  var videoRow=el('p','note','Every animation in this batch will use the output settings below. Each item keeps its own stored duration and loop settings.');
-  function batchNumberField(label,value,min,max,step){
-    var wrap=el('label');wrap.style.cssText='display:flex;flex-direction:column;gap:5px;font:10px var(--mono);color:var(--ink-2);min-width:0;';
-    var caption=el('span',null,label),input=document.createElement('input');
-    input.type='number';input.value=String(value);input.min=String(min);input.max=String(max);input.step=String(step);
-    input.style.cssText='width:100%;min-width:0;padding:9px 8px;border:1px solid var(--rule-hi);border-radius:4px;background:var(--raise);color:var(--ink);font:12px var(--mono);';
-    wrap.append(caption,input);return {wrap:wrap,input:input};
-  }
-  function batchSection(title){var section=el('div','sec');section.appendChild(el('h4',null,title));body.appendChild(section);return section;}
-  var resSection=batchSection('RESOLUTION');
-  var batchResSeg=el('div','seg');resSection.appendChild(batchResSeg);
-  var batchW=batchNumberField('Width',S.comp.width,2,16384,2),batchH=batchNumberField('Height',S.comp.height,2,16384,2);
-  var batchWH=el('div');batchWH.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:9px;';
-  batchWH.append(batchW.wrap,batchH.wrap);resSection.appendChild(batchWH);
-  var batchAspectRow=el('div','row');batchAspectRow.append(el('span','lb','Aspect'),el('span','val dim',''));var batchAspect=batchAspectRow.lastChild;resSection.appendChild(batchAspectRow);
-  var batchMpRow=el('div','row');batchMpRow.append(el('span','lb','Megapixels'),el('span','val dim',''));var batchMp=batchMpRow.lastChild;resSection.appendChild(batchMpRow);
-  function updateBatchResolution(){
-    var w=Number(batchW.input.value),h=Number(batchH.input.value);
-    if(w>0&&h>0){var g=gcd(Math.round(w),Math.round(h))||1;batchAspect.textContent=(Math.round(w)/g)+':'+(Math.round(h)/g)+' · '+(w/h).toFixed(4);batchMp.textContent=(w*h/1e6).toFixed(2)+' MP';}
-    segMark(batchResSeg,batchW.input.value+'x'+batchH.input.value);
-  }
-  buildSeg(batchResSeg,RES_PRESETS,function(v){var p=v.split('x');batchW.input.value=p[0];batchH.input.value=p[1];updateBatchResolution();});
-  batchW.input.addEventListener('input',updateBatchResolution);batchH.input.addEventListener('input',updateBatchResolution);
-  updateBatchResolution();
-  var fpsSection=batchSection('FRAME RATE');
-  var batchFpsSeg=el('div','seg');fpsSection.appendChild(batchFpsSeg);
-  var batchFpsField=batchNumberField('Custom fps',S.comp.fps,1,240,1);fpsSection.appendChild(batchFpsField.wrap);
-  buildSeg(batchFpsSeg,FPS_PRESETS.map(function(f){return {label:String(f),value:f};}),function(v){batchFpsField.input.value=v;segMark(batchFpsSeg,v);});
-  batchFpsField.input.addEventListener('input',function(){segMark(batchFpsSeg,batchFpsField.input.value);});
-  var bitrateSection=batchSection('VIDEO BITRATE');
-  var batchBitrateField=batchNumberField('CBR target · Mbps',S.customBitrateMbps||25,20,800,0.1);bitrateSection.appendChild(batchBitrateField.wrap);
-  var batchWidth=batchW.input,batchHeight=batchH.input,batchFps=batchFpsField.input,batchBitrate=batchBitrateField.input;
-  var batchNote=el('p','note','Bitrate target: 20 Mbps minimum · 25 Mbps default · 800 Mbps maximum. H.264 MP4 enforces the selected per-frame bitrate floor with standards-compliant filler_data NAL units when needed. This does not change decoded pixels; under-rate MP4s are blocked. Each MP4 has a separate 2 GB file-size cap. Settings are never silently reduced.');
+  var videoRow=el('p','note','Each library item is rendered as a full MP4 video using the current resolution, frame rate, duration, quality and bitrate settings.');
   var stillHeading=el('h4',null,'STILL OUTPUTS · ONE FRAME PER ITEM');
   var stillRow=el('div');stillRow.style.cssText='display:flex;flex-wrap:wrap;gap:10px 16px;';
   var prefs=trilyvaReadStillPrefs();
@@ -9564,31 +9400,13 @@ function openRenderAllConfirm(lib,items){
   var frameInput=document.createElement('input');frameInput.type='number';frameInput.min='0';frameInput.step='1';frameInput.value=String(prefs.frame);frameInput.style.maxWidth='120px';frameRow.appendChild(frameInput);
   var details=el('div','note','Library: '+lib.title+' · '+items.length+' animations. Each selected video format renders the full composition. PNG/JPG/SVG/EPS export the selected frame; frame 0 is the first frame. Files will be written into a timestamped library folder, or into a ZIP archive you choose.');
   var warning=el('p','note','SVG and EPS use TRILYVA’s editable vector recorder; code that uses unsupported Canvas features may still render to video/PNG/JPG while its vector still is marked as failed.');
-  body.append(el('h4',null,'VIDEO OUTPUT SETTINGS'),videoRow,batchNote,stillHeading,stillRow,frameRow,details,warning);
+  body.append(el('h4',null,'VIDEO FORMATS'),videoRow,stillHeading,stillRow,frameRow,details,warning);
   function collectSettings(){
     var videoFormats=['mp4'];
     var stillFormats=['png','jpg','svg','eps'].filter(function(fmt){return stillChecks[fmt].checked;});
     if(!stillFormats.length){stillFormats=['png'];stillChecks.png.checked=true;}
-    function readInteger(input,label,min,max,even){
-      var value=Number(input.value);
-      if(!Number.isInteger(value)||value<min||value>max||(even&&value%2!==0)){
-        throw new Error(label+' must be '+(even?'an even ':'')+'integer from '+min+' to '+max+'.');
-      }
-      return value;
-    }
-    var width=readInteger(batchWidth,'Width',2,16384,true);
-    var height=readInteger(batchHeight,'Height',2,16384,true);
-    var fps=readInteger(batchFps,'Frame rate',1,240,false);
-    var bitrateMbps=Number(batchBitrate.value);
-    if(!Number.isFinite(bitrateMbps)||bitrateMbps<20||bitrateMbps>800){
-      throw new Error('CBR target must be between 20 and 800 Mbps.');
-    }
     var frame=Math.max(0,Math.floor(Number(frameInput.value)||0));
-    var settings={
-      videoFormats:videoFormats,stillFormats:stillFormats,frame:frame,
-      width:width,height:height,fps:fps,bitrateMbps:bitrateMbps,
-      quality:S.quality,timebase:S.timebase,checksums:S.checksums
-    };
+    var settings={videoFormats:videoFormats,stillFormats:stillFormats,frame:frame};
     trilyvaApplyStillPrefs({frame:frame,formats:stillFormats});
     return settings;
   }
@@ -9644,7 +9462,7 @@ async function renderAllLibrary(lib,items,settings,destination){
   TRILYVA_FULL_LIBRARY_ACTIVE=true;S.queueStop=false;
   var startedAt=new Date().toISOString(),completed=[],failures=[],cancelled=false,zipWriter=destination.mode==='zip'?new ENC.ZipWriter():null;
   var body=el('div');body.style.cssText='display:flex;flex-direction:column;gap:8px;min-height:0;';
-  var head=el('div');head.innerHTML='<div class="verified"><b>RENDER FULL LIBRARY</b><span id="fullLibPos">0 / '+items.length+'</span><span>'+settings.width+'×'+settings.height+' · '+settings.fps+' FPS · '+settings.bitrateMbps+' Mbps CBR</span><span>'+esc(lib.title)+'</span></div>';
+  var head=el('div');head.innerHTML='<div class="verified"><b>RENDER FULL LIBRARY</b><span id="fullLibPos">0 / '+items.length+'</span><span>'+settings.videoFormats.map(function(x){return x.toUpperCase();}).join(' + ')+'</span><span>'+esc(lib.title)+'</span></div>';
   var status=el('p','note','Preparing the first animation…');
   var bar=el('div','prog');bar.innerHTML='<i style="width:0%"></i>';
   var log=el('div','list');log.style.cssText='max-height:40vh;overflow:auto;';
@@ -9678,9 +9496,6 @@ async function renderAllLibrary(lib,items,settings,destination){
         var loaded=await trilyvaLoadLibraryCode(itemName,item.code,item,{keepModal:true});
         if(!loaded||!loaded.ok)throw new Error(loaded&&loaded.error?String(loaded.error.message||loaded.error):'Animation code did not compile.');
         var itemComp=merge({},S.comp);
-        itemComp.width=settings.width;
-        itemComp.height=settings.height;
-        itemComp.fps=settings.fps;
         if(Number(item.duration)>0)itemComp.duration=Number(item.duration);
         if(Number(item.loopDuration)>0)itemComp.loopDuration=Number(item.loopDuration);
         if(typeof item.loop==='boolean')itemComp.loop=item.loop;
@@ -9712,11 +9527,6 @@ async function renderAllLibrary(lib,items,settings,destination){
           var job=buildJob({exportFormat:videoFmt,composition:itemComp});
           job.code=item.code;job.label=itemName;job.metadata.title=itemName;
           job.metadata.description=String(item.description||job.metadata.description||'');
-          job.quality=settings.quality||S.quality;
-          job.timebase=settings.timebase||S.timebase;
-          job.checksums=settings.checksums!==false;
-          job.bitrate=ENC.sanitiseBitrate(Math.round(settings.bitrateMbps*1000000),W,H,F);
-          job.bitrateMode='constant';
           job.fileName=base+'.'+videoFmt;
           status.textContent='Rendering '+videoFmt.toUpperCase()+' · '+itemName+' · '+W+'×'+H+' · '+F+' fps';
           var result=await startRender(job,{silent:true,batch:true});
@@ -9755,12 +9565,10 @@ async function renderAllLibrary(lib,items,settings,destination){
     format:'TRILYVA_FULL_LIBRARY_EXPORT',version:1,libraryId:lib.id,libraryTitle:lib.title,librarySource:lib.source||lib.kind,
     startedAt:startedAt,finishedAt:new Date().toISOString(),requestedItems:items.length,completedItems:completed.length,
     failureCount:failures.length,cancelled:cancelled,videoFormats:settings.videoFormats,stillFormats:settings.stillFormats,
-    stillFrameRequested:settings.frame,assetSet:settings.videoFormats.concat(settings.stillFormats),
-    resolution:{width:settings.width,height:settings.height},fps:settings.fps,
-    bitrate:{targetMbps:settings.bitrateMbps,mode:'constant'},quality:settings.quality,
+    stillFrameRequested:settings.frame,assetSet:settings.videoFormats.concat(settings.stillFormats),resolution:{width:S.comp.width,height:S.comp.height},fps:S.comp.fps,
     destination:destination.mode,completed:completed,failures:failures
   };
-  var readme='TRILYVA — Full Library Export\r\nLibrary: '+lib.title+'\r\nCreated: '+startedAt+'\r\nResolution: '+settings.width+'x'+settings.height+'\r\nFrame rate: '+settings.fps+' fps\r\nCBR target: '+settings.bitrateMbps+' Mbps\r\nQuality: '+settings.quality+'\r\nVideo formats: '+settings.videoFormats.join(', ')+'\r\nStill formats: '+settings.stillFormats.join(', ')+'\r\nSelected frame: '+settings.frame+' (0-based)\r\nCompleted items: '+completed.length+'\r\nIssues: '+failures.length+'\r\n';
+  var readme='TRILYVA — Full Library Export\r\nLibrary: '+lib.title+'\r\nCreated: '+startedAt+'\r\nVideo formats: '+settings.videoFormats.join(', ')+'\r\nStill formats: '+settings.stillFormats.join(', ')+'\r\nSelected frame: '+settings.frame+' (0-based)\r\nCompleted items: '+completed.length+'\r\nIssues: '+failures.length+'\r\n';
   try{
     if(destination.mode==='folder'){
       await dotMeshWriteFile(destination.root,'BATCH-MANIFEST.json',JSON.stringify(manifest,null,2),'application/json;charset=utf-8');
@@ -9794,7 +9602,7 @@ async function renderAllLibrary(lib,items,settings,destination){
 /* ============================================================
    Dot Mesh Folder Export — 50 static SVG stills + 4K60 MP4s + metadata
    ============================================================ */
-var DOT_MESH_FOLDER_SETTINGS = { width:3840, height:2160, fps:60, duration:12, bitrate:25000000 };
+var DOT_MESH_FOLDER_SETTINGS = { width:3840, height:2160, fps:60, duration:12, bitrate:20000000 };
 var dotMeshFolderActive = false;
 var dotMeshFolderCancelRequested = false;
 
@@ -9832,8 +9640,7 @@ function dotMeshFolderMetadata(item, job, result, stem, svgName) {
   return merge(original, {
     schema: "trilyva.dot-mesh.delivery/1.0",
     id: item.id,
-    title: item.stockTitle || original.title || item.title,
-    internalName: item.title,
+    title: item.title,
     description: item.description,
     creator: "Tamasrazim",
     software: "TRILYVA",
@@ -9856,7 +9663,7 @@ function dotMeshFolderMetadata(item, job, result, stem, svgName) {
       targetBitrateMbps: DOT_MESH_FOLDER_SETTINGS.bitrate / 1000000,
       measuredFileAverageBitrateBps: measuredFileAverageBps,
       measuredFileAverageBitrateMbps: measuredFileAverageBps == null ? null : Number((measuredFileAverageBps / 1000000).toFixed(3)),
-      bitrateNote: "25 Mbps is the requested encoder target. The measured file-average bitrate is computed from the saved MP4 size and parsed duration, including container overhead.",
+      bitrateNote: "20 Mbps is the encoder target. Measured file-average bitrate is computed from the MP4 file size and parsed duration, including container overhead.",
       bytes: result.blob ? result.blob.size : null,
       verification: result.verify ? result.verify.status : "UNKNOWN",
       sourceHash: job.metadata.sourceHash || null
@@ -9878,14 +9685,18 @@ function dotMeshFolderMetadata(item, job, result, stem, svgName) {
   });
 }
 function dotMeshFolderCsvRowFor(item, meta) {
+  var enc = meta.encoding || {};
   return dotMeshFolderCsvRow([
-    meta.exports && meta.exports.video ? meta.exports.video + ".mp4" : (meta.title || item.stockTitle || item.title) + ".mp4",
-    meta.description || item.description || "",
-    (meta.tags || item.tags || []).join(", "),
-    (meta.categories || item.categories || ["Abstract", "Backgrounds/Textures"]).join(", "),
-    String(meta.editorial || "no").toLowerCase(),
-    String(meta.matureContent || "no").toLowerCase(),
-    String(meta.illustration || "no").toLowerCase()
+    meta.id, meta.title, meta.description, (meta.tags || []).join("; "),
+    meta.category || "", meta.designFamily || "",
+    meta.creator || "Tamasrazim", meta.software || "TRILYVA",
+    enc.container || "MP4", enc.codec || "H.264 / AVC",
+    enc.width || 3840, enc.height || 2160, enc.fps || 60,
+    enc.durationSeconds || 12, enc.frames || 720,
+    enc.targetBitrateMbps || 20, enc.measuredFileAverageBitrateMbps == null ? "" : enc.measuredFileAverageBitrateMbps,
+    enc.verification || "UNKNOWN",
+    meta.exports && meta.exports.video || "",
+    meta.exports && meta.exports.vectorStill && meta.exports.vectorStill.filename || ""
   ]);
 }
 function dotMeshFolderSnapshotWorkspace() {
@@ -9903,7 +9714,7 @@ async function dotMeshFolderRestoreWorkspace(saved) {
   S.meta=saved.meta ? merge({},saved.meta) : defaultMeta();
   S.frame=saved.frame || 0; S.hash=saved.hash || "";
   S.customBitrateMbps=Number.isFinite(Number(saved.customBitrateMbps))
-     ? Math.max(20, Math.min(800, Number(saved.customBitrateMbps))) : 25;
+     ? Math.max(20, Math.min(2000, Number(saved.customBitrateMbps))) : 25;
   S.exportFormat=saved.exportFormat; S.quality=saved.quality;
   S.timebase=saved.timebase; S.checksums=saved.checksums;
   S.queueStop=false; S.lastError=saved.lastError || null;
@@ -9940,28 +9751,6 @@ function dotMeshFolderSlug(text) {
 function dotMeshFolderMessage(title, message) {
   openModal(title, elHTML('<div class="warnbox"><b>'+esc(title)+'</b><p>'+esc(message)+'</p></div>'),
     [{ label: "Close", fn: closeModal }]);
-}
-async function downloadDotMeshShutterstockCsv() {
-  var button = $('#downloadDotMeshMetadataBtn');
-  if (button) button.disabled = true;
-  try {
-    if (!window.TRILYVA_LIBRARY) await loadProtectedLibraryModule();
-    var registry = window.TRILYVA_LIBRARY;
-    if (!registry) throw new Error("The built-in library registry did not initialize.");
-    await registry.ready;
-    var library = registry.get("dot-mesh");
-    if (!library || typeof library.catalogCsv !== "function") {
-      throw new Error("The Dot Mesh Shutterstock metadata catalog is unavailable. Refresh TRILYVA and retry.");
-    }
-    var csv = library.catalogCsv();
-    if (typeof csv !== "string" || !csv.trim()) throw new Error("The Shutterstock CSV was empty.");
-    download(new Blob([csv], { type: "text/csv;charset=utf-8" }), "Dot Mesh Shutterstock Metadata.csv");
-    $('#stMsg').textContent = "Downloaded Shutterstock metadata CSV · 50 Dot Mesh clips";
-  } catch (error) {
-    dotMeshFolderMessage("SHUTTERSTOCK METADATA DOWNLOAD FAILED", String(error && error.message || error));
-  } finally {
-    if (button) button.disabled = false;
-  }
 }
 function openDotMeshFolderPicker() {
   if (dotMeshFolderActive || S.rendering) {
@@ -10005,7 +9794,7 @@ function openDotMeshFolderPicker() {
   });
 }
 async function prepareDotMeshFolderExport(directoryHandle) {
-  var prepBody = elHTML('<div class="verified"><b>DOT MESH / PREPARING</b><span>50 DESIGNS</span><span>4K60 · 25 Mbps TARGET</span></div><p class="note">Save folder selected. Loading the Dot Mesh library and checking the browser encoder. Rendering will start automatically after validation.</p>');
+  var prepBody = elHTML('<div class="verified"><b>DOT MESH / PREPARING</b><span>50 DESIGNS</span><span>4K60 · 20 Mbps</span></div><p class="note">Save folder selected. Loading the Dot Mesh library and checking the browser encoder. Rendering will start automatically after validation.</p>');
   openModal("TRILYVA / DOT MESH · PREPARING", prepBody, [{
     label:"Cancel", fn:function(){ dotMeshFolderCancelRequested=true; closeModal(); }
   }]);
@@ -10026,10 +9815,9 @@ async function prepareDotMeshFolderExport(directoryHandle) {
     var originalBitrate = S.customBitrateMbps;
     var probe;
     try {
-      S.customBitrateMbps = 25;
+      S.customBitrateMbps = 20;
       var job = buildJob({ exportFormat: "mp4", composition: dotMeshFolderTargetComposition(S.comp) });
       job.bitrate = DOT_MESH_FOLDER_SETTINGS.bitrate;
-      job.contentHint = "detail";
       probe = await renderPreflight(job);
     } finally { S.customBitrateMbps = originalBitrate; }
     if (dotMeshFolderCancelRequested) { closeModal(); return; }
@@ -10051,8 +9839,8 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
   var body = document.createElement("div");
   body.style.cssText = "display:flex;flex-direction:column;gap:9px;min-height:0;";
   var head = document.createElement("div");
-  head.innerHTML = '<div class="verified"><b>DOT MESH / FLAT FOLDER EXPORT</b><span id="dmzPos">0 / 50</span><span>4K60 · 25 Mbps TARGET</span></div>';
-  var status = el("div", "note", "Rendering all 50 Dot Mesh videos directly into the selected folder. One combined metadata CSV will be written at the end.");
+  head.innerHTML = '<div class="verified"><b>DOT MESH / SAVE TO FOLDER</b><span id="dmzPos">0 / 50</span><span>4K60 · 20 Mbps</span></div>';
+  var status = el("div", "note", "Selected folder is ready. Preparing the first design…");
   var bar = el("div", "prog"); bar.innerHTML = '<i style="width:0%"></i>';
   var log = el("div", "list"); log.style.cssText = "max-height:40vh;overflow:auto;";
   body.append(head, status, bar, log);
@@ -10067,79 +9855,104 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
     if (S.rendering && Engine.api) Engine.api.cancel();
     status.textContent = "Cancellation requested. Stopping the active render safely…";
   }
-  openModal("TRILYVA / DOT MESH · RENDERING 50 VIDEOS", body, [{ label: "Cancel Batch", fn: cancelBatch }]);
+  openModal("TRILYVA / DOT MESH · SAVING TO FOLDER", body, [{ label: "Cancel Batch", fn: cancelBatch }]);
 
   try {
+    // A prior cancelled queue must not silently short-circuit this fresh batch.
     S.queueStop = false;
     if (S.playing) pause();
-    S.customBitrateMbps = 25;
+    S.customBitrateMbps = 20;
     for (var i = 0; i < items.length; i++) {
       if (dotMeshFolderCancelRequested) { cancelled = true; break; }
       var item = items[i];
-      var internalTitle = String(item.title || item.id || ("Dot Mesh " + (i + 1)));
-      var stockTitle = String(item.stockTitle || (item.metadata && item.metadata.title) || internalTitle);
-      var videoName = String(item.filename || (stockTitle + ".mp4"));
-      status.textContent = "Preparing " + (i + 1) + " / " + items.length + " · " + stockTitle;
+      var title = String(item.title || item.id || ("Dot Mesh " + (i + 1)));
+      var folderName = "Dot-Mesh-" + String(i + 1).padStart(3, "0") + "-" + dotMeshFolderSlug(title);
+      status.textContent = "Preparing " + (i + 1) + " / 50 · " + title;
       document.getElementById("dmzPos").textContent = i + " / " + items.length;
       bar.querySelector("i").style.width = ((i / items.length) * 100).toFixed(2) + "%";
-
+      var folder = await directoryHandle.getDirectoryHandle(folderName, { create: true });
       var loaded;
-      try { loaded = await trilyvaLoadLibraryCode(internalTitle, item.code, item, { keepModal: true }); }
+      try { loaded = await trilyvaLoadLibraryCode(title, item.code, item, { keepModal: true }); }
       catch (error) { loaded = { ok: false, error: error }; }
       if (!loaded || !loaded.ok) {
-        failed.push({ index:i+1, id:item.id, title:stockTitle, stage:"compile", reason:loaded && loaded.error ? String(loaded.error.message || loaded.error) : "Compile failed" });
-        addLine(stockTitle, false, "Compile failed; no video saved.");
+        failed.push({ index:i+1, id:item.id, title:title, stage:"compile", reason:loaded && loaded.error ? String(loaded.error.message || loaded.error) : "Compile failed" });
+        addLine(title, false, "Compile failed; see TRILYVA render status.");
         bar.querySelector("i").style.width = (((i+1)/items.length)*100).toFixed(2) + "%";
         continue;
       }
-
       try {
         var target = dotMeshFolderTargetComposition(S.comp);
         S.comp = target;
+        var stem = "dot-mesh-" + String(i + 1).padStart(3, "0") + "-" + dotMeshFolderSlug(title);
+        var videoName = stem + "_3840x2160_60fps_20mbps_12s.mp4";
+        var svgName = stem + "_3840x2160_static.svg";
         var job = buildJob({ exportFormat:"mp4", composition:target });
         job.bitrate = DOT_MESH_FOLDER_SETTINGS.bitrate;
-        job.contentHint = "detail";
-        job.label = stockTitle;
-        job.metadata.title = stockTitle;
+        job.label = title; job.metadata.title = title;
         job.metadata.description = String(item.description || "");
         job.fileName = videoName;
-        status.textContent = "Rendering " + (i+1) + " / " + items.length + " · " + stockTitle + " · 4K60";
+        status.textContent = "Rendering " + (i+1) + " / 50 · " + title + " · 4K60 · 20 Mbps target";
         var result = await startRender(job, { silent:true, batch:true });
         if (dotMeshFolderCancelRequested || (result && result.cancelled)) { cancelled = true; break; }
         if (!result || !result.ok || !result.blob) throw new Error(result && result.error ? String(result.error.message || result.error) : "MP4 render failed.");
         if (!result.parsed) throw new Error("MP4 output could not be parsed for verification; refusing to save an unverified video.");
-        if (result.parsed.width !== DOT_MESH_FOLDER_SETTINGS.width || result.parsed.height !== DOT_MESH_FOLDER_SETTINGS.height) {
+        if (result.parsed.width !== 3840 || result.parsed.height !== 2160) {
           throw new Error("Encoder produced " + result.parsed.width + "×" + result.parsed.height + ", not 3840×2160.");
         }
-        if (result.parsed.samples !== DOT_MESH_FOLDER_SETTINGS.fps * DOT_MESH_FOLDER_SETTINGS.duration) {
-          throw new Error("MP4 contains " + result.parsed.samples + " samples; expected 720.");
+        if (result.parsed.samples !== 720) {
+          throw new Error("MP4 contains " + result.parsed.samples + " samples; expected 720. No files for this design were accepted.");
         }
 
-        status.textContent = "Saving " + videoName + " directly into " + (directoryHandle.name || "selected folder") + "…";
-        await dotMeshWriteFile(directoryHandle, videoName, result.blob, "video/mp4");
-        var parsed = result.parsed || {}, actualDuration = Number(parsed.durationSec) > 0 ? Number(parsed.durationSec) : 12;
-        var measuredBps = Math.round(result.blob.size * 8 / actualDuration);
-        var meta = item.metadata || {};
-        var verification = result.verify && result.verify.status || "UNKNOWN";
+        // Save the verified-size MP4 before generating secondary assets. If SVG or
+        // metadata generation fails, the expensive video render is still preserved.
+        status.textContent = "Writing MP4 to " + folderName + "…";
+        await dotMeshWriteFile(folder, videoName, result.blob, "video/mp4");
+        var verificationStatus = result.verify && result.verify.status || "UNKNOWN";
+        if (verificationStatus !== "VALID") {
+          addLine(title, false, "MP4 saved, but verification is " + verificationStatus + "; inspect the manifest before publishing.");
+        }
+        var svg = typeof item.staticSvg === "function" ? item.staticSvg() : "";
+        if (typeof svg !== "string" || !svg.startsWith("<svg")) throw new Error("Static SVG generation failed.");
+        if (/<animate[\s>]/i.test(svg)) throw new Error("Static SVG unexpectedly contains animation.");
+        await dotMeshWriteFile(folder, svgName, svg, "image/svg+xml;charset=utf-8");
+
+        var metadata = dotMeshFolderMetadata(item, job, result, videoName, svgName);
+        metadata.exports.folder = folderName;
+        var jsonText = JSON.stringify(metadata, null, 2) + "\n";
+        var csvHeader = ["ID","Title","Description","Keywords","Category","Design family","Creator","Software","Container","Codec","Width","Height","FPS","Duration seconds","Frame count","Target bitrate Mbps","Measured file-average bitrate Mbps","Verification","Video filename","Static SVG filename"];
+        var csvText = "\uFEFF" + dotMeshFolderCsvRow(csvHeader) + "\r\n" + dotMeshFolderCsvRowFor(item, metadata) + "\r\n";
+        await dotMeshWriteFile(folder, "metadata.json", jsonText, "application/json;charset=utf-8");
+        await dotMeshWriteFile(folder, "metadata.csv", csvText, "text/csv;charset=utf-8");
+
         completed.push({
-          id:item.id,
-          title:stockTitle,
-          description:item.description || meta.description || "",
-          keywords:meta.tags || item.tags || [],
-          categories:(meta.categories || item.categories || ["Abstract", "Backgrounds/Textures"]).join(", "),
-          illustration:meta.illustration || "No",
-          matureContent:meta.matureContent || "No",
-          editorial:meta.editorial || "No",
-          filename:videoName
+          index:i+1, id:item.id, title:title, folder:folderName,
+          files:[folderName+"/"+videoName,folderName+"/"+svgName,folderName+"/metadata.json",folderName+"/metadata.csv"],
+          videoBytes:result.blob.size, svgBytes:ENC.utf8(svg).length,
+          metadataBytes:ENC.utf8(jsonText).length+ENC.utf8(csvText).length,
+          verification:result.verify?result.verify.status:"UNKNOWN",
+          actual:{
+            width:result.parsed&&result.parsed.width||null,
+            height:result.parsed&&result.parsed.height||null,
+            frames:result.parsed&&result.parsed.samples||null,
+            durationSeconds:result.parsed&&result.parsed.durationSec||null,
+            averageBitrateBps:Math.round(result.blob.size*8/((result.parsed&&result.parsed.durationSec>0)?result.parsed.durationSec:12)),
+            averageBitrateMbps:Number((result.blob.size*8/((result.parsed&&result.parsed.durationSec>0)?result.parsed.durationSec:12)/1000000).toFixed(3))
+          }
         });
-        addLine(stockTitle, true, "SAVED · " + videoName + " · " + verification);
-        status.textContent = "Saved " + completed.length + " / 50 · " + stockTitle;
+        addLine(title, true, "SAVED · MP4 + static SVG + JSON + CSV · verification " + verificationStatus);
+        status.textContent = "Saved " + completed.length + " / 50 · " + title;
       } catch (error) {
         var reason = String(error && error.message || error);
-        failed.push({index:i+1,id:item.id,title:stockTitle,stage:"render-or-save",reason:reason});
-        addLine(stockTitle, false, "FAILED · " + reason);
+        var partialVideo = false;
+        try {
+          var expectedVideo = await folder.getFileHandle(videoName);
+          var partialFile = await expectedVideo.getFile();
+          partialVideo = partialFile.size > 0;
+        } catch (_) {}
+        failed.push({index:i+1,id:item.id,title:title,folder:folderName,stage:"render-or-save",reason:reason,mp4Preserved:partialVideo});
+        addLine(title, false, (partialVideo ? "MP4 SAVED; secondary asset/save step failed: " : "FAILED: ") + reason);
       }
-      bar.querySelector("i").style.width = (((i+1)/items.length)*100).toFixed(2) + "%";
+      bar.querySelector("i").style.width = (((i+1)/items.length)*100).toFixed(2)+"%";
       await new Promise(function(resolve){setTimeout(resolve,0);});
     }
   } catch (error) {
@@ -10149,39 +9962,51 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
 
   cancelled = cancelled || dotMeshFolderCancelRequested;
   S.customBitrateMbps = savedBitrate;
-  // Match Assets/shutterstock_content_upload.csv exactly.
-  var header = ["Filename", "Description", "Keywords", "Categories", "Editorial", "Mature content", "illustration"];
+  var header = ["ID","Title","Description","Keywords","Category","Design family","Creator","Software","Container","Codec","Width","Height","FPS","Duration seconds","Frame count","Target bitrate Mbps","Measured file-average bitrate Mbps","Verification","Video path","Static SVG path"];
   var rows = [header];
-  completed.forEach(function(row) {
+  completed.forEach(function(row){
+    var item = items[row.index-1] || {}, meta = item.metadata || {};
     rows.push([
-      row.filename,
-      row.description,
-      (row.keywords || []).join(", "),
-      row.categories,
-      String(row.editorial || "no").toLowerCase(),
-      String(row.matureContent || "no").toLowerCase(),
-      String(row.illustration || "no").toLowerCase()
+      row.id,row.title,meta.description||item.description||"",(meta.tags||[]).join("; "),
+      meta.category||item.category||"",meta.designFamily||"","Tamasrazim","TRILYVA",
+      "MP4","H.264 / AVC",3840,2160,60,12,720,20,row.actual.averageBitrateMbps,row.verification,row.files[0],row.files[1]
     ]);
   });
-  var csvError = null;
+  var manifest = {
+    format:"TRILYVA_DOT_MESH_FOLDER_DELIVERY",version:1,libraryId:"dot-mesh",libraryTitle:"DOT MESH · 50",
+    destinationFolder:directoryHandle.name||"",startedAt:startedAt,finishedAt:new Date().toISOString(),
+    requestedItems:items.length,completedItems:completed.length,failedItems:failed.length,cancelled:cancelled,
+    videoTarget:{container:"MP4",codec:"H.264 / AVC",width:3840,height:2160,fps:60,durationSeconds:12,frames:720,targetBitrateBps:20000000,targetBitrateMbps:20,bitrateNote:"20 Mbps is the encoder target; actual average bitrate can differ."},
+    vectorStill:{format:"SVG",width:3840,height:2160,animated:false,frame:0,background:"transparent"},
+    assetsPerDesign:["12-second 4K60 MP4","static transparent 4K SVG still","metadata.json","metadata.csv"],
+    completed:completed,failures:failed,fatalError:fatalError?String(fatalError.message||fatalError):null
+  };
+  var rootWriteError = null;
   try {
-    await dotMeshWriteFile(directoryHandle, "Dot Mesh Metadata.csv",
-      "\uFEFF" + rows.map(dotMeshFolderCsvRow).join("\r\n") + "\r\n",
-      "text/csv;charset=utf-8");
-  } catch (error) { csvError = error; }
+    await dotMeshWriteFile(directoryHandle,"DOT-MESH-CATALOG.csv","\uFEFF"+rows.map(dotMeshFolderCsvRow).join("\r\n")+"\r\n","text/csv;charset=utf-8");
+    await dotMeshWriteFile(directoryHandle,"BATCH-MANIFEST.json",JSON.stringify(manifest,null,2)+"\n","application/json;charset=utf-8");
+    await dotMeshWriteFile(directoryHandle,"README.txt",
+      "TRILYVA DOT MESH — DIRECT-TO-FOLDER DELIVERY\r\n"+
+      "Destination: "+(directoryHandle.name||"selected folder")+"\r\n"+
+      "Completed designs: "+completed.length+" / "+items.length+"\r\nFailed designs: "+failed.length+"\r\nCancelled: "+(cancelled?"yes":"no")+"\r\n\r\n"+
+      "Each completed design folder contains one MP4 (3840x2160, 60 FPS, 12 s, H.264, 20 Mbps target), one static transparent 4K SVG still from frame zero (NOT animated SVG), metadata.json and metadata.csv.\r\n"+
+      "Root files: DOT-MESH-CATALOG.csv and BATCH-MANIFEST.json. The manifest records verification, actual file details and failures.\r\n"+
+      "20 Mbps is an encoder target; measured average bitrate depends on the encoder and content.\r\n","text/plain;charset=utf-8");
+  } catch(error) { rootWriteError = error; }
 
   try { closeModal(); } catch (_) {}
   try { await dotMeshFolderRestoreWorkspace(saved); } catch(error) { if (!fatalError) fatalError = error; }
   dotMeshFolderActive = false;
 
-  var complete = completed.length === 50 && failed.length === 0 && !cancelled && !csvError;
-  var report = document.createElement("div");
-  report.innerHTML = '<div class="verified"><b>'+(complete?"FOLDER EXPORT COMPLETE":"FOLDER EXPORT PARTIAL")+'</b><span>'+completed.length+' / 50 VIDEOS</span><span>'+failed.length+' FAILED</span>'+(cancelled?'<span>CANCELLED</span>':'')+'</div>'+
-    '<p class="note">All MP4 files are saved directly in <code>'+esc(directoryHandle.name||"selected folder")+'</code> — no per-design subfolders. One combined <code>Dot Mesh Metadata.csv</code> contains one row for each successfully saved video.</p>'+
-    '<p class="note">Expected complete folder: 50 MP4 videos + 1 metadata CSV. Video target: 3840×2160, 60 FPS, 12 seconds, H.264, 25 Mbps encoder target.</p>';
-  if (csvError) report.appendChild(el("p","note","CSV SAVE FAILED: "+String(csvError.message||csvError)));
+  if (rootWriteError) {
+    dotMeshFolderMessage("ROOT MANIFEST SAVE FAILED",completed.length+" videos were saved. The catalog or manifest could not be completed: "+String(rootWriteError.message||rootWriteError)+". Already-written design files remain in the selected folder.");
+    return;
+  }
+  var report = el("div");
+  report.innerHTML = '<div class="verified"><b>'+(completed.length===50&&failed.length===0&&!cancelled?"FOLDER EXPORT COMPLETE":"FOLDER EXPORT PARTIAL")+'</b><span>'+completed.length+' / 50 VIDEOS</span><span>'+failed.length+' FAILED</span>'+(cancelled?'<span>CANCELLED</span>':'')+'</div>'+
+    '<p class="note">Saved directly into <code>'+esc(directoryHandle.name||"selected folder")+'</code>. Each completed design has its own folder with MP4 + static SVG + metadata JSON + CSV. The root catalog, manifest and README are also saved there.</p>'+
+    '<p class="note">BATCH-MANIFEST.json reports output verification, measured average bitrate where available, and any failures.</p>';
   if (fatalError) report.appendChild(el("p","note","Batch issue: "+String(fatalError.message||fatalError)));
-  if (failed.length) report.appendChild(el("p","note",failed.length+" design(s) failed. The CSV lists only videos successfully saved."));
   openModal("TRILYVA / DOT MESH · FOLDER EXPORT",report,[{label:"Close",fn:closeModal}]);
 }
 window.trilyvaExportDotMeshFolder = function () {
@@ -11846,7 +11671,7 @@ function estimateVideoFileBytes(job) {
 function requestedBitrate(width, height, fps) {
   var custom = Number(S.customBitrateMbps);
   if (!isFinite(custom) || custom <= 0) custom = 25;
-  return Math.max(20, Math.min(800, custom)) * 1000000;
+  return Math.max(20, Math.min(2000, custom)) * 1000000;
 }
 function initRenderPanel() {
   var dirOk = typeof window.showDirectoryPicker === 'function';
@@ -11863,14 +11688,14 @@ function initRenderPanel() {
   $('#oQuality').value = S.quality;
   $('#oTimebase').value = S.timebase;
   $('#oChecksum').value = S.checksums ? 'on' : 'off';
-  $('#oBitrate').value = Math.max(20, Math.min(800,
+  $('#oBitrate').value = Math.max(20, Math.min(2000,
     Number.isFinite(Number(S.customBitrateMbps)) ? Number(S.customBitrateMbps) : 25));
   S.customBitrateMbps = Number($('#oBitrate').value);
   $('#oQuality').addEventListener('change', function () { S.quality = $('#oQuality').value; refreshMedia(); markDirty(); });
   $('#oBitrate').addEventListener('change', function () {
     var v = parseFloat($('#oBitrate').value);
     if (!isFinite(v)) v = 25;
-    v = Math.max(20, Math.min(800, v));
+    v = Math.max(20, Math.min(2000, v));
     S.customBitrateMbps = v;
     $('#oBitrate').value = v;
     refreshMedia(); markDirty();
@@ -11973,7 +11798,7 @@ function suggestH264(c) {
   function fallbackBitrate(w, h, fps) {
     var auto = ENC.bitrateFor(w, h, fps, S.quality);
     var requested = requestedBitrate(w, h, fps);
-    return Math.min(H264_L62_MAX_BITRATE, Math.max(20000000, Math.min(requested, auto * 4)));
+    return Math.min(H264_L62_MAX_BITRATE, Math.max(500000, Math.min(requested, auto * 4)));
   }
   return Promise.all(tries.map(function (t) {
     return ENC.probeH264(t.w, t.h, t.fps, fallbackBitrate(t.w, t.h, t.fps))
@@ -13420,7 +13245,7 @@ function loadProjectRecord(rec) {
   S.timebase = p.timebase || 'ms';
   S.checksums = p.checksums !== false;
   S.customBitrateMbps = isFinite(Number(p.customBitrateMbps))
-    ? Math.max(20, Math.min(800, Number(p.customBitrateMbps))) : 25;
+    ? Math.max(20, Math.min(2000, Number(p.customBitrateMbps))) : 25;
   S.code = rec.code || '';
   edSetValue(S.code);
   $('#projName').value = S.name;
@@ -14680,7 +14505,7 @@ var DOCS = [
   '</table>',
 
   '<h5>VIDEO SIZE LIMIT AND MEMORY</h5>',
-  '<p>MP4 and WebM outputs have a strict 2,000,000,000-byte (2 GB) file-size cap. The encoder bitrate target ranges from 20 Mbps minimum to 800 Mbps maximum, with 25 Mbps as the default, and TRILYVA requests constant-bitrate mode. The actual average can still vary by content and browser/codec implementation; low-complexity scenes may produce a lower measured average. TRILYVA records and reports that measured rate but does not fail an otherwise valid render on bitrate alone. The exporter refuses to deliver an oversized file and never silently lowers resolution, frame rate or quality to fit.</p>',
+  '<p>MP4 and WebM outputs have a strict 2,000,000,000-byte (2 GB) file-size cap. The target bitrate is at least 20 Mbps, defaults to 25 Mbps, and can be set up to 2,000 Mbps. The exporter estimates the target size before rendering, warns when the estimate exceeds the cap, and asks before proceeding. During encoding it enforces the cap against actual compressed samples and refuses to deliver an oversized file. It never silently lowers bitrate, resolution, frame rate, or quality. Shorten the composition or render separate segments when the estimate is too large.</p>',
   '<p>A 2 GB output is a file-size limit, not a bitrate, and it does not mean a playback application must load the entire file into RAM. However, this browser exporter keeps compressed samples plus muxer/index data during finalisation; browser storage behaviour varies, and the export tab may need substantially more available memory than the final file size. Near-limit exports can fail on ordinary desktop systems with insufficient free memory. This is a real browser-side limitation, not a reason to degrade the frames.</p>',
   '<h5>THE MP4 PATH</h5>',
   '<p>H.264 support is a runtime fact, not an assumption. Before anything is rendered the app asks the browser about the real composition \u2014 width, height, frame rate and the validated bitrate \u2014 walking High, Main and Constrained Baseline at descending levels through <code>VideoEncoder.isConfigSupported</code>. The first configuration the browser actually accepts is the one used, and its exact codec string is shown in the Render panel and in Diagnostics. If nothing is accepted, the panel says so with the resolution and frame rate that were refused, and offers only the alternatives it has just confirmed on this machine.</p>',
@@ -14840,7 +14665,6 @@ var ACTS = {
   resetDefaults: openRenderAllLibrary,
   renderAllDotMesh: function () { openDotMeshFolderPicker(); },
   exportDotMesh50: function () { openDotMeshFolderPicker(); },
-  downloadDotMeshMetadata: function () { downloadDotMeshShutterstockCsv(); },
   startRender: function () { withCompiled().then(function (ok) { if (ok) startRender(buildJob()); }); },
   cancelRender: cancelRender,
   analyze: analyseJob,
