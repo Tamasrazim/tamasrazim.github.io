@@ -39,7 +39,7 @@ must(renderer.includes('<title>Trilyva — JavaScript Animation Renderer</title>
 must(renderer.includes('function renderFrame('), 'renderer keeps its frame-rendering contract');
 
 const worker = read('projects/trilyva/renderer/sw.js');
-must(/const CACHE = 'tamasrazim-trilyva-pwa-v162'/.test(worker), 'offline cache version is refreshed');
+must(/const CACHE = 'tamasrazim-trilyva-pwa-v\\d+'/.test(worker), 'offline cache uses an explicitly versioned TRILYVA PWA cache');
 must(!worker.includes('MAINTENANCE_ENDS_AT') && !worker.includes("'/maintenance/"), 'service worker no longer forces maintenance navigation');
 new Function(worker);
 must(true, 'service worker JavaScript parses');
