@@ -4,7 +4,7 @@
   if (window.__swarmLauncherInstalled) return;
   window.__swarmLauncherInstalled = true;
 
-  const SWARM_SRC = "/assets/js/swarm-rebuild.js?v=20261109-1";
+  const SWARM_SRC = "/assets/js/swarm-rebuild.js?v=20261109-2";
   const host = document.createElement("swarm-launcher");
   host.setAttribute("aria-label", "Swarm Rebuild launcher");
   host.style.cssText = [
@@ -23,56 +23,71 @@
       :host { all: initial; }
       button {
         appearance: none;
-        display: inline-flex;
+        box-sizing: border-box;
+        display: flex;
         align-items: center;
-        gap: 10px;
-        min-height: 42px;
-        padding: 0 14px;
-        border: 1px solid rgba(255,255,255,.34);
-        border-radius: 3px;
-        background: rgba(5,5,5,.92);
+        gap: 12px;
+        min-width: 222px;
+        min-height: 54px;
+        padding: 8px 12px;
+        border: 1px solid rgba(255,255,255,.24);
+        border-radius: 2px;
+        background: rgba(7,7,7,.9);
         color: #f4f4f1;
-        box-shadow: 0 8px 30px rgba(0,0,0,.26);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        font: 600 10px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
-        letter-spacing: .12em;
-        text-transform: uppercase;
+        box-shadow: 0 16px 44px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.08);
+        backdrop-filter: blur(22px) saturate(0);
+        -webkit-backdrop-filter: blur(22px) saturate(0);
+        font: 500 10px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+        text-align: left;
         cursor: pointer;
-        transition: background .18s ease, color .18s ease, border-color .18s ease, transform .18s ease;
+        transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease;
       }
-      button::before {
-        content: "";
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: #f4f4f1;
-        box-shadow: 0 0 0 3px rgba(255,255,255,.1);
+      .mark {
+        display: grid;
+        grid-template-columns: repeat(3,4px);
+        gap: 2px;
+        align-content: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        flex: none;
+        transform: rotate(45deg);
       }
+      .mark i { display: block; width: 4px; height: 4px; background: currentColor; }
+      .mark i:nth-child(2), .mark i:nth-child(4) { opacity: .5; }
+      .copy { display: grid; gap: 5px; flex: 1; min-width: 0; }
+      .copy b { font: 700 10px/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .15em; }
+      .copy small { color: #858585; font: 500 8px/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .08em; white-space: nowrap; }
+      .shortcut { color: #777; font: 500 8px/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .04em; white-space: nowrap; }
       button:hover { background: #f4f4f1; color: #050505; border-color: #f4f4f1; transform: translateY(-2px); }
-      button:hover::before { background: #050505; box-shadow: 0 0 0 3px rgba(0,0,0,.1); }
-      button[aria-pressed="true"] { border-color: #f4f4f1; }
-      button[aria-pressed="true"]::before { background: #7bd7a4; box-shadow: 0 0 0 3px rgba(123,215,164,.16); }
+      button:hover .copy small, button:hover .shortcut { color: #666; }
+      button[aria-pressed="true"] { border-color: rgba(255,255,255,.68); }
+      button[aria-pressed="true"] .mark i { animation: markPulse 1.8s ease-in-out infinite; }
       button:focus-visible { outline: 2px solid #f4f4f1; outline-offset: 4px; }
       button:disabled { opacity: .62; cursor: wait; transform: none; }
+      @keyframes markPulse { 50% { opacity: .28; } }
       @media (max-width: 600px) {
-        button { min-height: 38px; padding: 0 11px; font-size: 9px; }
+        button { min-width: 0; min-height: 48px; padding: 7px 10px; gap: 9px; }
+        .shortcut { display: none; }
       }
       @media (prefers-reduced-motion: reduce) {
-        button { transition: none; }
+        button, .mark i { transition: none; animation: none !important; }
       }
     </style>
     <button type="button" aria-pressed="false" aria-label="Start Swarm Rebuild. Shortcut Alt Shift S">
-      SWARM REBUILD
+      <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <span class="copy"><b data-label>SWARM REBUILD</b><small>PAGE RECONSTRUCTION</small></span>
+      <span class="shortcut">ALT SHIFT S</span>
     </button>
   `;
 
   const button = root.querySelector("button");
+  const label = root.querySelector("[data-label]");
   let loading = false;
 
   function sync() {
     const running = !!(window.__swarmRebuild && window.__swarmRebuild.app);
-    button.textContent = running ? "SWARM ACTIVE" : "SWARM REBUILD";
+    label.textContent = running ? "SWARM ACTIVE" : "SWARM REBUILD";
     button.setAttribute("aria-pressed", String(running));
     button.setAttribute(
       "aria-label",
@@ -90,7 +105,7 @@
 
     loading = true;
     button.disabled = true;
-    button.textContent = "SWARM LOADING";
+    label.textContent = "INITIALIZING";
 
     const script = document.createElement("script");
     script.src = SWARM_SRC;
@@ -103,7 +118,7 @@
     script.onerror = function () {
       loading = false;
       button.disabled = false;
-      button.textContent = "SWARM ERROR";
+      label.textContent = "LOAD FAILED";
       button.setAttribute("aria-pressed", "false");
       window.setTimeout(sync, 2200);
       console.error("[swarm-rebuild] Could not load the website renderer:", SWARM_SRC);
