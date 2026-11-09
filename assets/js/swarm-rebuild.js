@@ -2195,8 +2195,10 @@
     }
 
     queueErasers(vp) {
-      const top = vp.sy + 6;
-      const bandBottom = vp.sy + Math.max(88, vp.vh * 0.22);
+      const down = this.scrollDirection > 0;
+      const top = down ? vp.sy + 6 : vp.sy + vp.vh * 0.78;
+      const bottom = down ? vp.sy + Math.max(88, vp.vh * 0.22) : vp.sy + vp.vh - 6;
+      const edge = down ? "top" : "bottom";
       for (const it of this.items || []) {
         if (it.layer !== "world" || !it.node || it.__swarmEraseQueued || it.__swarmErased) continue;
         if (it.node.style.display === "none") continue;
@@ -2204,11 +2206,11 @@
         if (!finalTasks.length || !finalTasks.every((task) => task.state === "done")) continue;
         const b = this.bounds(it);
         if (b.x + b.w < vp.sx || b.x > vp.sx + vp.vw) continue;
-        if (b.y > bandBottom || b.y + Math.max(2, b.h) < top) continue;
+        if (b.y > bottom || b.y + Math.max(2, b.h) < top) continue;
         it.__swarmEraseQueued = true;
         this.tasks.push({
           id: this.tasks.length,
-          y: clamp(b.y + Math.min(b.h * 0.5, 22), top, bandBottom),
+          y: clamp(b.y + Math.min(b.h * 0.5, 22), top, bottom),
           spec: { type: "erase", it },
           deps: [],
           state: "wait",
@@ -2216,6 +2218,33 @@
           layer: "world",
           gate: 0,
           auxiliary: true,
+          auxKind: "erase",
+          edge,
+        });
+      }
+    }
+
+    queueRestorers(vp) {
+      const top = vp.sy + 6;
+      const bottom = vp.sy + Math.max(88, vp.vh * 0.22);
+      for (const it of this.items || []) {
+        if (it.layer !== "world" || !it.node || !it.__swarmErased || it.__swarmRestoreQueued) continue;
+        const b = this.bounds(it);
+        if (b.x + b.w < vp.sx || b.x > vp.sx + vp.vw) continue;
+        if (b.y > bottom || b.y + Math.max(2, b.h) < top) continue;
+        it.__swarmRestoreQueued = true;
+        this.tasks.push({
+          id: this.tasks.length,
+          y: clamp(b.y + Math.min(b.h * 0.5, 22), top, bottom),
+          spec: { type: "restore", it },
+          deps: [],
+          state: "wait",
+          doneAt: 0,
+          layer: "world",
+          gate: 0,
+          auxiliary: true,
+          auxKind: "restore",
+          edge: "top",
         });
       }
     }
@@ -2237,13 +2266,18 @@
     }
 
     pick(c, list) {
-      const erasures = list.filter((t) => t.auxiliary);
+      const erasures = list.filter((t) => t.auxKind === "erase");
+      const restorers = list.filter((t) => t.auxKind === "restore");
       if (c.role === "eraser" && erasures.length) list = erasures;
+      else if (this.scrollDirection < 0 && c.role === "builder" && restorers.length) list = restorers;
       else {
         list = list.filter((t) => !t.auxiliary);
         if (this.scrollDirection > 0) {
           const lowerViewport = list.filter((t) => this.taskY(t) >= this.viewTop + this.vp.vh * 0.55);
           if (lowerViewport.length) list = lowerViewport;
+        } else if (this.scrollDirection < 0) {
+          const upperViewport = list.filter((t) => this.taskY(t) <= this.viewTop + this.vp.vh * 0.45);
+          if (upperViewport.length) list = upperViewport;
         }
       }
       let best = null;
@@ -2278,12 +2312,37 @@
       const scrollDelta = vp.sy - previousScroll;
       const sv = Math.abs(scrollDelta) / Math.max(dt, 0.001);
       this.lastScroll = vp.sy;
+      const priorDirection = this.scrollDirection;
       if (scrollDelta > 0.8) this.scrollDirection = 1;
       else if (scrollDelta < -0.8) this.scrollDirection = -1;
       this.vel = Math.max(this.vel * Math.exp(-dt * 1.2), this.vel * 0.7 + sv * 0.3);
       if (this.started) {
         this.frontier = Math.max(this.frontier, this.viewBot);
-        if (this.scrollDirection > 0) this.queueErasers(vp);
+        if (this.scrollDirection !== 0) {
+          this.queueErasers(vp);
+          if (this.scrollDirection < 0) this.queueRestorers(vp);
+        }
+      }
+      if (priorDirection !== this.scrollDirection && this.scrollDirection !== 0) {
+        const keepEdge = this.scrollDirection > 0 ? "top" : "bottom";
+        for (const task of this.tasks) {
+          if (task.state !== "wait" || !task.auxiliary) continue;
+          const invalid = task.auxKind === "restore" ? this.scrollDirection > 0 : task.edge !== keepEdge;
+          if (!invalid) continue;
+          task.state = "done";
+          if (task.auxKind === "erase") task.spec.it.__swarmEraseQueued = false;
+          else task.spec.it.__swarmRestoreQueued = false;
+        }
+      }
+      const newEdgeWork = this.tasks.some((task) => task.auxiliary && task.state === "wait");
+      if (this.flocking && newEdgeWork) {
+        this.flocking = false;
+        for (const c of this.cursors) {
+          c.follow = false;
+          c.gen = null;
+          c.leaving = false;
+          c.idleFor = 0;
+        }
       }
       const avail = this.started ? this.available() : [];
       this.tempo = clamp(2.1 + this.vel / 900 + (avail.length / Math.max(1, this.cursors.length)) * 0.5, 2.1, 4.5) * this.speed;
@@ -2382,7 +2441,14 @@
             c.task.state = "done";
             c.task.doneAt = this.time;
             if (!c.task.auxiliary) this.doneCount++;
-            else c.task.spec.it.__swarmErased = true;
+            else if (c.task.auxKind === "erase") {
+              c.task.spec.it.__swarmErased = true;
+              c.task.spec.it.__swarmRestoreQueued = false;
+            } else if (c.task.auxKind === "restore") {
+              c.task.spec.it.__swarmErased = false;
+              c.task.spec.it.__swarmEraseQueued = false;
+              c.task.spec.it.__swarmRestoreQueued = false;
+            }
             c.task = null;
             c.ov = null;
             if (c.sticky) {
@@ -2645,6 +2711,8 @@
           return this.restyle(c, s.it);
         case "erase":
           return this.eraseItem(c, s.it);
+        case "restore":
+          return this.restoreItem(c, s.it);
       }
       return this.wait(0.1);
     }
@@ -2674,6 +2742,27 @@
       yield* this.wait(0.38);
       it.node.style.display = "none";
       it.__swarmErased = true;
+      bump(it);
+      c.ov = null;
+      c.shape = "arrow";
+    }
+
+    *restoreItem(c, it) {
+      if (!it.node || !it.__swarmErased) return;
+      const b = this.bounds(it);
+      const vp = this.vp;
+      const x = clamp(b.x + Math.max(8, Math.min(b.w * 0.5, b.w - 8)), vp.sx + 8, vp.sx + vp.vw - 8);
+      const y = clamp(b.y + Math.max(8, Math.min(b.h * 0.5, b.h - 8)), vp.sy + 8, vp.sy + vp.vh - 8);
+      c.shape = "cross";
+      c.ov = () => [{ t: "box", b: this.bounds(it), handles: false, rulerLines: false, badge: "" }];
+      yield* this.moveTo(c, { x, y }, { speed: 1.25, bend: 0.05 });
+      yield* this.click(c);
+      it.node.style.display = "";
+      it.node.classList.remove("swarm-erased");
+      yield* this.wait(0.22);
+      it.__swarmErased = false;
+      it.__swarmEraseQueued = false;
+      it.__swarmRestoreQueued = false;
       bump(it);
       c.ov = null;
       c.shape = "arrow";
