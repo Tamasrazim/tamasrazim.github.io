@@ -3,20 +3,31 @@
 // No external dependencies, fonts, images, APIs, or runtime libraries are required.
 
 const TAU = Math.PI * 2;
-function makeShutterstockDescription(internalTitle) {
-  return "White dots and fine lines form the " + internalTitle +
-    " on a dark background. This seamless monochrome loop creates a geometric abstract backdrop for digital design and motion graphics.";
+function makeShutterstockDescription(internalTitle, family) {
+  var details = {
+    wave: "flowing wave contours",
+    contour: "concentric ripple paths",
+    diagonal: "angled grid lines",
+    moire: "overlapping moire waves",
+    fold: "folded cellular surfaces",
+    spiral: "twisting spiral paths",
+    radial: "radiating curved lines",
+    orbit: "elliptical orbit bands",
+    hex: "repeating hexagonal cells",
+    terrain: "rising topographic contours",
+    vortex: "swirling point formations",
+    lissajous: "intersecting harmonic curves",
+    harmonic: "repeating harmonic loops",
+    sphere: "layered spherical lattices",
+    tunnel: "converging perspective lines",
+    pinwheel: "rotating radial spokes"
+  };
+  var detail = details[family] || "flowing geometric lines";
+  return "A dark field features " + String(internalTitle || "geometric dot mesh").toLowerCase() +
+    " made from white dots and fine lines. The seamless monochrome motion reveals " + detail +
+    ", creating an abstract backdrop for digital projects.";
 }
-const SHUTTERSTOCK_CATEGORIES = {
-  wave:["Backgrounds/Textures","Technology"], contour:["Backgrounds/Textures","Science"],
-  diagonal:["Backgrounds/Textures","Technology"], moire:["Backgrounds/Textures","Technology"],
-  fold:["Backgrounds/Textures","Technology"], spiral:["Backgrounds/Textures","Science"],
-  radial:["Backgrounds/Textures","Science"], orbit:["Backgrounds/Textures","Science"],
-  hex:["Backgrounds/Textures","Technology"], terrain:["Backgrounds/Textures","Science"],
-  vortex:["Backgrounds/Textures","Science"], lissajous:["Backgrounds/Textures","Science"],
-  harmonic:["Backgrounds/Textures","Science"], sphere:["Backgrounds/Textures","Science"],
-  tunnel:["Backgrounds/Textures","Technology"], pinwheel:["Backgrounds/Textures","Technology"]
-};
+const SHUTTERSTOCK_CATEGORIES = ["Abstract", "Backgrounds/Textures"];
 const SHUTTERSTOCK_COMMON = [
   "abstract background","animated background","seamless loop","looping animation",
   "motion graphics","geometric pattern","monochrome","dark background",
@@ -390,9 +401,9 @@ function makeDefinition(definition, index) {
   var title = definition[0];
   var stockTitle = definition[3] || title;
   var id = "dotmesh-" + String(index + 1).padStart(3, "0");
-  var description = makeShutterstockDescription(title);
+  var description = makeShutterstockDescription(title, family);
   var tags = shutterstockKeywords(family, stockTitle);
-  var stockCategories = SHUTTERSTOCK_CATEGORIES[family] || ["Backgrounds/Textures"];
+  var stockCategories = SHUTTERSTOCK_CATEGORIES.slice();
   var spec = {
     id: id, title: title, category: definition[2], family: family, seed: seed,
     columns: columns, rows: rows, amplitude: Number(amp.toFixed(4)),
@@ -411,6 +422,9 @@ function makeDefinition(definition, index) {
     assetType: "Procedural dot-mesh design",
     category: stockCategories[0],
     categories: stockCategories,
+    illustration: "No",
+    matureContent: "No",
+    editorial: "No",
     designFamily: family,
     durationSeconds: 12,
     fps: 60,
@@ -438,17 +452,23 @@ function makeDefinition(definition, index) {
 var items = DESIGN_DEFINITIONS.map(makeDefinition);
 
 function csvCell(value) {
-  var text = Array.isArray(value) ? value.join(", ") : String(value == null ? "" : value);
+  var text = String(value == null ? "" : value);
   return '"' + text.replace(/"/g, '""') + '"';
 }
 function catalogCsv() {
-  var rows = [["Filename", "Description", "Keywords", "Categories"]];
+  var rows = [[
+    "Filename", "Description", "Keywords", "Categories",
+    "Illustration", "Mature Content", "Editorial"
+  ]];
   items.forEach(function (item) {
     rows.push([
       (item.stockTitle || item.metadata.title || item.title) + ".mp4",
       item.description,
       (item.metadata.tags || item.tags || []).join(", "),
-      (item.metadata.categories || item.categories || ["Backgrounds/Textures"]).join(", ")
+      (item.metadata.categories || item.categories || ["Abstract", "Backgrounds/Textures"]).join(", "),
+      item.metadata.illustration || "No",
+      item.metadata.matureContent || "No",
+      item.metadata.editorial || "No"
     ]);
   });
   return "\uFEFF" + rows.map(function (row) { return row.map(csvCell).join(","); }).join("\r\n") + "\r\n";
