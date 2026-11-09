@@ -491,6 +491,7 @@
     const docH = Math.min(Math.max(env.scrollHeight(), vh), MAX_WORLD_H);
     const items = [];
     const clickTargets = [];
+    const capturedTextNodes = new WeakSet();
     const roots = [];
     let order = 0;
     const csCache = new Map();
@@ -583,8 +584,58 @@
       return v;
     }
 
-    function rootStyle(cs, isRun) {
+    function textPaintStyle(cs, sourceEl) {
       let s = styleString(cs, TEXT_PROPS);
+      const fill = cs.getPropertyValue("-webkit-text-fill-color") || cs.color;
+      const fillInvisible = alphaOf(fill) <= 0.01 || alphaOf(cs.color) <= 0.01;
+      const clip = cs.getPropertyValue("-webkit-background-clip") || cs.backgroundClip || "";
+      const hasTextGradient = /text/i.test(clip) && cs.backgroundImage && cs.backgroundImage !== "none";
+      const stroke = parseFloat(cs.getPropertyValue("-webkit-text-stroke-width")) || 0;
+
+      if (hasTextGradient) {
+        s += styleString(cs, [
+          "background-image", "background-size", "background-position",
+          "background-repeat", "background-origin", "background-clip",
+          "-webkit-background-clip",
+        ]);
+        s += "background-clip:text;-webkit-background-clip:text;";
+      } else if (fillInvisible && stroke <= 0.01) {
+        let fallback = cs.color;
+        for (let p = sourceEl && sourceEl.parentElement; p; p = p.parentElement) {
+          const candidate = getComputedStyle(p).color;
+          if (alphaOf(candidate) > 0.05) {
+            fallback = candidate;
+            break;
+          }
+        }
+        if (alphaOf(fallback) <= 0.05) {
+          const rgb = (pageBg.color.match(/[\\d.]+/g) || [0, 0, 0]).map(Number);
+          const luminance = (0.2126 * (rgb[0] || 0) + 0.7152 * (rgb[1] || 0) + 0.0722 * (rgb[2] || 0)) / 255;
+          fallback = luminance > 0.55 ? "rgb(18,18,18)" : "rgb(245,245,245)";
+        }
+        s += `color:${fallback}!important;-webkit-text-fill-color:${fallback}!important;`;
+      }
+      return s;
+    }
+
+    function markTextTree(root) {
+      const stack = [root];
+      const seen = new WeakSet();
+      while (stack.length) {
+        const current = stack.pop();
+        if (!current || seen.has(current)) continue;
+        seen.add(current);
+        if (current.nodeType === 3) {
+          capturedTextNodes.add(current);
+          continue;
+        }
+        if (current.nodeType !== 1 && current.nodeType !== 11) continue;
+        for (const child of kidsOf(current)) stack.push(child);
+      }
+    }
+
+    function rootStyle(cs, isRun, sourceEl) {
+      let s = textPaintStyle(cs, sourceEl);
       if (isRun) return s + "display:block;padding:0;margin:0;box-sizing:border-box;width:100%;height:100%;position:relative;";
       const pad = (side) =>
         (parseFloat(cs.getPropertyValue(`padding-${side}`)) || 0) + (parseFloat(cs.getPropertyValue(`border-${side}-width`)) || 0);
@@ -628,7 +679,8 @@
 
     function emitLeaf(el, cs, r, ctx, key) {
       const root = document.createElement("div");
-      root.setAttribute("style", rootStyle(cs, false));
+      root.setAttribute("style", rootStyle(cs, false, el));
+      markTextTree(el);
       const clone = inert().importNode(el, true);
       cloneDescendantsStyled(el, clone);
       while (clone.firstChild) root.appendChild(clone.firstChild);
@@ -676,7 +728,8 @@
       if (r.width < 1 || r.height < 1) return;
       if (!intersect(ltrb(r), ctx.clip)) return;
       const root = document.createElement("div");
-      root.setAttribute("style", rootStyle(cs, true));
+      root.setAttribute("style", rootStyle(cs, true, el));
+      for (const source of run) markTextTree(source);
       const single = r.height < lhPx(cs) * 1.6;
       if (single) root.style.whiteSpace = "nowrap";
       for (const n of run) {
@@ -1236,6 +1289,87 @@
     const rootClip = env.isRoot ? fullClip : viewClip;
     walk(html, { op: 1, layer: rootLayer, clip: rootClip, zTop: null, posd: false, boxItem: null }, null);
 
+    function captureUnrepresentedText() {
+      const visited = new WeakSet();
+      const stack = [html];
+      let fallbackOrder = order;
+      let added = 0;
+
+      while (stack.length && items.length < MAX_ITEMS) {
+        const current = stack.pop();
+        if (!current || visited.has(current)) continue;
+        visited.add(current);
+
+        if (current.nodeType === 3) {
+          if (capturedTextNodes.has(current) || !/\\S/.test(current.data)) continue;
+          const parent = current.parentElement;
+          if (!parent) continue;
+
+          let hidden = false;
+          let opacity = 1;
+          let layer = rootLayer;
+          let zTop = null;
+          let posd = false;
+          for (let p = parent; p && p !== html.parentElement; p = p.parentElement) {
+            const pcs = getComputedStyle(p);
+            if (pcs.display === "none" || pcs.visibility !== "visible" || pcs.contentVisibility === "hidden") {
+              hidden = true;
+              break;
+            }
+            opacity *= Math.max(0, parseFloat(pcs.opacity) || 0);
+            if (pcs.position === "fixed") layer = "over";
+            if (pcs.position !== "static") {
+              if (pcs.zIndex !== "auto") zTop = parseInt(pcs.zIndex, 10) || 0;
+              else posd = true;
+            }
+          }
+          if (hidden || opacity <= 0.03) continue;
+
+          const range = document.createRange();
+          range.selectNodeContents(current);
+          const r = range.getBoundingClientRect();
+          if (!(r.width > 0.2 && r.height > 0.2)) continue;
+
+          const box = conv(r, layer);
+          if (!inDoc(box, layer)) continue;
+
+          const cs = getComputedStyle(parent);
+          const parentRect = parent.getBoundingClientRect();
+          const right = Math.max(r.right, Math.min(parentRect.right, layer === "world" ? ox + docW - sx : innerWidth));
+          const width = Math.max(r.width, right - r.left);
+          const height = Math.max(r.height, lhPx(cs));
+          const root = document.createElement("div");
+          root.setAttribute("style", rootStyle(cs, true, parent) + "white-space:pre-wrap;overflow:visible;");
+          root.textContent = current.data;
+
+          const fallbackKey = (zTop || 0) * 1e7 + (posd ? 5e6 : 0) + fallbackOrder++;
+          textItem(
+            {
+              x: box.x, y: box.y, w: width, h: height,
+              layer, key: fallbackKey, op: opacity, clip: null,
+              parentBox: null, blend: cs.mixBlendMode !== "normal" ? cs.mixBlendMode : "",
+              fallbackText: true,
+            },
+            root,
+            { x: box.x, y: box.y, w: width, h: height },
+            cs,
+            layer,
+          );
+          capturedTextNodes.add(current);
+          added++;
+          continue;
+        }
+
+        if (current.nodeType !== 1 && current.nodeType !== 11) continue;
+        if (current.nodeType === 1 && (SKIP.has(current.localName) || current === env.host)) continue;
+        for (const child of kidsOf(current)) stack.push(child);
+      }
+
+      return added;
+    }
+
+    const fallbackTextCount = captureUnrepresentedText();
+
     // --------------------------------------------- repeated components (dup)
     const groups = [];
     const kindsSig = (n) => {
@@ -1520,6 +1654,7 @@
 .world{position:absolute;left:0;top:0;will-change:transform}
 .it{position:absolute;left:0;top:0;transform-origin:0 0}
 .it.settle{transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.t{display:block;overflow:visible;line-height:normal;text-rendering:geometricPrecision}
 .it.swarm-erased{opacity:0!important;filter:blur(5px);transition:opacity .34s ease,filter .34s ease;pointer-events:none}
 .r{background-color:var(--ph,#D9D9D9);transition:background-color .22s ease,border-radius .22s ease}
 .r.st{background-color:transparent}
@@ -2363,7 +2498,8 @@
       for (const t of list) {
         const y = this.taskY(t);
         const u = y >= top && y <= bot ? 0 : y < top ? 1 : 2;
-        const s = u * 1e6 + (u === 1 ? top - y : y) * 0.6 + Math.abs(y - cy) * 0.4 - (t.spec.type === "guide" ? 5e5 : 0);
+        const textPriority = t.spec.type === "text" || t.spec.type === "edit" ? 18000 : 0;
+        const s = u * 1e6 + (u === 1 ? top - y : y) * 0.6 + Math.abs(y - cy) * 0.4 - (t.spec.type === "guide" ? 5e5 : 0) - textPriority;
         if (s < bestS) {
           bestS = s;
           best = t;
@@ -2716,7 +2852,7 @@
 
     *type(it, c) {
       const N = it.total;
-      const k = clamp(70 / Math.max(1, N), 0.06, 1);
+      const k = clamp(52 / Math.max(52, N), 0.62, 1);
       let budget = 0;
       let i = it.shown;
       while (i < N) {
