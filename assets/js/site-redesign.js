@@ -448,7 +448,7 @@
   function loadSwarmRebuild() {
     if (window.__swarmRebuild || document.querySelector("script[data-swarm-rebuild]")) return;
     var script = document.createElement("script");
-    script.src = "/assets/js/swarm-rebuild.js?v=20261109-clickable-1";
+    script.src = "/assets/js/swarm-rebuild.js?v=20261109-textfix-1";
     script.async = true;
     script.dataset.swarmRebuild = "true";
     script.onerror = function () {
