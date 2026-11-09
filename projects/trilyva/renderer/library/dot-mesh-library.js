@@ -3,6 +3,69 @@
 // No external dependencies, fonts, images, APIs, or runtime libraries are required.
 
 const TAU = Math.PI * 2;
+function makeShutterstockDescription(internalTitle) {
+  return "White dots and fine lines form the " + internalTitle +
+    " on a dark background. This seamless monochrome loop creates a geometric abstract backdrop for digital design and motion graphics.";
+}
+const SHUTTERSTOCK_CATEGORIES = {
+  wave:["Backgrounds/Textures","Technology"], contour:["Backgrounds/Textures","Science"],
+  diagonal:["Backgrounds/Textures","Technology"], moire:["Backgrounds/Textures","Technology"],
+  fold:["Backgrounds/Textures","Technology"], spiral:["Backgrounds/Textures","Science"],
+  radial:["Backgrounds/Textures","Science"], orbit:["Backgrounds/Textures","Science"],
+  hex:["Backgrounds/Textures","Technology"], terrain:["Backgrounds/Textures","Science"],
+  vortex:["Backgrounds/Textures","Science"], lissajous:["Backgrounds/Textures","Science"],
+  harmonic:["Backgrounds/Textures","Science"], sphere:["Backgrounds/Textures","Science"],
+  tunnel:["Backgrounds/Textures","Technology"], pinwheel:["Backgrounds/Textures","Technology"]
+};
+const SHUTTERSTOCK_COMMON = [
+  "abstract background","animated background","seamless loop","looping animation",
+  "motion graphics","geometric pattern","monochrome","dark background",
+  "white dots","connected dots","dot grid","digital background",
+  "abstract motion","moving pattern","black and white"
+];
+const SHUTTERSTOCK_FAMILY = {
+ wave:["flowing wave","wave pattern","wave grid","undulating surface","curved lines","ripple effect","fluid motion","sine wave","contour wave","mesh surface","flowing mesh","organic geometry","abstract waves","point network","moving lattice","wave motion","rolling surface","rippled grid"],
+ contour:["concentric circles","ripple rings","contour lines","circular pattern","expanding rings","radial contours","circular motion","topographic pattern","line field","concentric pattern","radial wave","pulse effect","curved grid","circular mesh","ring animation","nested circles","contour geometry","ripple motion"],
+ diagonal:["diagonal geometry","angled grid","linear mesh","slanted pattern","geometric lattice","grid distortion","flowing lines","repeating grid","point matrix","connected lattice","abstract geometry","wireframe pattern","line structure","angular mesh","diagonal lines","bent grid","linear pattern","triangular forms"],
+ moire:["interference pattern","moire effect","optical pattern","repeating texture","overlapping waves","visual interference","fine line texture","wave interference","optical geometry","pattern distortion","grid texture","frequency pattern","digital interference","line matrix","geometric overlay","checker pattern","optical illusion","interference lines"],
+ fold:["folded surface","folding geometry","warped grid","curved lattice","layered surface","surface topology","point connections","fluid lattice","deformed surface","geometric waves","mesh deformation","network surface","rippled structure","moving folds","folded lines","bending surface","curved mesh","layered geometry"],
+ spiral:["spiral geometry","twisting form","rotating curves","coiled structure","helical motion","curved strands","intertwined lines","winding pattern","circular paths","rotating mesh","looped geometry","mathematical curves","spiral motion","twisted paths","curved network","helix form","turning strands","coiling lines"],
+ radial:["radial geometry","circular symmetry","curved spokes","radial pattern","orbiting points","centered design","circular network","spoke pattern","radial motion","symmetrical design","circular arrangement","radial lines","flower geometry","rotational form","point arrangement","radial structure","radiating lines","spoke arrangement"],
+ orbit:["orbital paths","elliptical rings","celestial pattern","space concept","orbiting dots","planetary motion","astronomy visual","circular revolution","layered orbit","orbital motion","ring system","cosmic design","planetary rings","space background","celestial geometry","ellipse pattern","orbital bands","rotating rings"],
+ hex:["hexagonal grid","hexagon pattern","honeycomb geometry","staggered lattice","hexagonal mesh","geometric tiling","connected lattice","cellular grid","network geometry","modular pattern","point matrix","geometric network","lattice surface","repeating cells","six sided grid","hexagon cells","cell structure","geometric tessellation"],
+ terrain:["topographic lines","rolling terrain","elevation pattern","contour surface","geographic map","height field","landform geometry","terrain visualization","surface relief","mapping concept","landscape pattern","geoscience visual","contour map","digital terrain","elevation lines","mountain contours","ridge pattern","valley form"],
+ vortex:["swirling field","spiral flow","rotating points","central whirl","curved flow","twisting mesh","circular motion","whirlpool pattern","rotational geometry","flow lines","swirl effect","converging paths","dynamic spiral","energy flow","vortex motion","eddy currents","rotating field","curved streams"],
+ lissajous:["harmonic curves","intersecting curves","mathematical pattern","frequency curves","oscillation paths","wave geometry","curve network","mathematical forms","crossing lines","harmonic motion","complex curves","periodic motion","abstract mathematics","looping curves","lissajous curve","frequency design","curved lattice","math visualization"],
+ harmonic:["harmonic pattern","periodic motion","oscillating lines","wave loop","frequency pattern","mathematical curves","loop geometry","curved path","repeating motion","sine curve","continuous motion","mathematics visual","abstract curve","flower geometry","radial symmetry","harmonic form","repeating curves","cyclic motion"],
+ sphere:["spherical geometry","rotating globe","geometric orb","round structure","connected lattice","spatial object","globe pattern","rotational motion","sphere surface","digital globe","network sphere","three dimensional form","curved surface","point structure","geometric shell","spherical mesh","round lattice","spherical form"],
+ tunnel:["perspective grid","vanishing point","receding lines","depth illusion","tunnel geometry","converging lines","spatial perspective","digital corridor","futuristic passage","central perspective","depth field","linear perspective","geometric depth","virtual space","perspective motion","receding grid","converging points","infinite corridor"],
+ pinwheel:["radial pinwheel","rotating spokes","central axis","curved spokes","spinning geometry","radial sweep","circular pattern","rotational symmetry","pinwheel motion","geometric rotation","moving spokes","radial design","abstract movement","curved paths","spoke geometry","turning pattern","circular motion","centered rotation"]
+};
+const SHUTTERSTOCK_EXTRA = [
+  "particle field","point pattern","line art","wireframe","digital art",
+  "abstract design","visual texture","geometric motion","animated pattern",
+  "minimal background","fine lines","connected mesh","repeating pattern",
+  "futuristic design","spatial geometry","visual effect"
+];
+function shutterstockKeywords(family, stockTitle) {
+  var words = String(stockTitle || "").toLowerCase().replace(/^abstract\\s+/, "")
+    .replace(/\\bof\\b|\\bmade\\b|\\bconnected\\b|\\bwhite\\b|\\bdots?\\b|\\bpattern\\b/g, " ")
+    .replace(/[^a-z0-9 ]/g, " ").trim().split(/\\s+/).filter(Boolean);
+  var titleTerms = [];
+  for (var i=0; i<words.length-1 && titleTerms.length<8; i++) {
+    var phrase = words[i] + " " + words[i+1];
+    if (titleTerms.indexOf(phrase)<0) titleTerms.push(phrase);
+  }
+  var pool = SHUTTERSTOCK_COMMON.concat(SHUTTERSTOCK_FAMILY[family] || [])
+    .concat(titleTerms).concat(SHUTTERSTOCK_EXTRA);
+  var result=[];
+  pool.forEach(function(word){
+    word=String(word||"").trim().toLowerCase();
+    if(word && result.indexOf(word)<0 && result.length<50) result.push(word);
+  });
+  return result;
+}
+
 const DESIGN_DEFINITIONS = [
   ["Meridian Wave Grid", "wave", "Wave Fields", "Abstract Flowing Wave Grid of Connected White Dots", "An abstract field of white points forms a broad flowing wave, with connected lines bending across the surface. This seamless monochrome motion suits technology visuals, title backgrounds and."],
   ["Ripple Lattice", "contour", "Wave Fields", "Abstract Concentric Ripple Pattern of Connected White Dots", "Concentric rings of connected white dots ripple outward in a softly undulating pattern. This minimal abstract loop creates expanding motion for technology backgrounds, transitions and motion graphics."],
@@ -327,9 +390,9 @@ function makeDefinition(definition, index) {
   var title = definition[0];
   var stockTitle = definition[3] || title;
   var id = "dotmesh-" + String(index + 1).padStart(3, "0");
-  var description = definition[4] || (title + " uses a " + family.replace(/-/g, " ") +
-    " coordinate system with a distinct animated point field and connected vector mesh.");
-  var tags = ["dot mesh", "point field", "animated vector", "procedural", "seamless loop", family.replace(/-/g, " "), "TRILYVA"];
+  var description = makeShutterstockDescription(title);
+  var tags = shutterstockKeywords(family, stockTitle);
+  var stockCategories = SHUTTERSTOCK_CATEGORIES[family] || ["Backgrounds/Textures"];
   var spec = {
     id: id, title: title, category: definition[2], family: family, seed: seed,
     columns: columns, rows: rows, amplitude: Number(amp.toFixed(4)),
@@ -346,7 +409,8 @@ function makeDefinition(definition, index) {
     creator: "Tamasrazim",
     software: "TRILYVA",
     assetType: "Procedural dot-mesh design",
-    category: definition[2],
+    category: stockCategories[0],
+    categories: stockCategories,
     designFamily: family,
     durationSeconds: 12,
     fps: 60,
@@ -361,6 +425,7 @@ function makeDefinition(definition, index) {
   };
   return {
     id: id, title: title, stockTitle: stockTitle, category: definition[2], description: description,
+    tags: tags, categories: stockCategories,
     duration: 12, loop: true, loopDuration: 12, fps: 60,
     width: 1920, height: 1080, transparent: true, seed: seed,
     code: sourceFor(spec),
@@ -373,13 +438,18 @@ function makeDefinition(definition, index) {
 var items = DESIGN_DEFINITIONS.map(makeDefinition);
 
 function csvCell(value) {
-  var text = Array.isArray(value) ? value.join("; ") : String(value == null ? "" : value);
+  var text = Array.isArray(value) ? value.join(", ") : String(value == null ? "" : value);
   return '"' + text.replace(/"/g, '""') + '"';
 }
 function catalogCsv() {
-  var rows = [["id", "title", "description", "category", "design_family", "duration_seconds", "fps", "loop", "seamless", "background", "creator"]];
+  var rows = [["Filename", "Description", "Keywords", "Categories"]];
   items.forEach(function (item) {
-    rows.push([item.id, item.stockTitle || item.metadata.title || item.title, item.description, item.category, item.metadata.designFamily, 12, 60, "true", "true", "transparent", "Tamasrazim"]);
+    rows.push([
+      (item.stockTitle || item.metadata.title || item.title) + ".mp4",
+      item.description,
+      (item.metadata.tags || item.tags || []).join(", "),
+      (item.metadata.categories || item.categories || ["Backgrounds/Textures"]).join(", ")
+    ]);
   });
   return "\uFEFF" + rows.map(function (row) { return row.map(csvCell).join(","); }).join("\r\n") + "\r\n";
 }
