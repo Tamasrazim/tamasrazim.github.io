@@ -7730,7 +7730,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 'use strict';
 
 var SELF_SOURCE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-var APP_VERSION = '1.3.3';
+var APP_VERSION = '1.3.4';
 var SOFTWARE = 'TRILYVA — Tamasrazim';
 
 var libraryModulePromise = null;
@@ -9878,18 +9878,14 @@ function dotMeshFolderMetadata(item, job, result, stem, svgName) {
   });
 }
 function dotMeshFolderCsvRowFor(item, meta) {
-  var enc = meta.encoding || {};
   return dotMeshFolderCsvRow([
-    meta.id, meta.title, meta.description, (meta.tags || []).join("; "),
-    meta.category || "", meta.designFamily || "",
-    meta.creator || "Tamasrazim", meta.software || "TRILYVA",
-    enc.container || "MP4", enc.codec || "H.264 / AVC",
-    enc.width || 3840, enc.height || 2160, enc.fps || 60,
-    enc.durationSeconds || 12, enc.frames || 720,
-    enc.targetBitrateMbps || 25, enc.measuredFileAverageBitrateMbps == null ? "" : enc.measuredFileAverageBitrateMbps,
-    enc.verification || "UNKNOWN",
-    meta.exports && meta.exports.video || "",
-    meta.exports && meta.exports.vectorStill && meta.exports.vectorStill.filename || ""
+    meta.exports && meta.exports.video ? meta.exports.video + ".mp4" : (meta.title || item.stockTitle || item.title) + ".mp4",
+    meta.description || item.description || "",
+    (meta.tags || item.tags || []).join(", "),
+    (meta.categories || item.categories || ["Abstract", "Backgrounds/Textures"]).join(", "),
+    meta.illustration || "No",
+    meta.matureContent || "No",
+    meta.editorial || "No"
   ]);
 }
 function dotMeshFolderSnapshotWorkspace() {
@@ -10130,7 +10126,10 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
           title:stockTitle,
           description:item.description || meta.description || "",
           keywords:meta.tags || item.tags || [],
-          categories:(meta.categories || item.categories || ["Backgrounds/Textures"]).join(", "),
+          categories:(meta.categories || item.categories || ["Abstract", "Backgrounds/Textures"]).join(", "),
+          illustration:meta.illustration || "No",
+          matureContent:meta.matureContent || "No",
+          editorial:meta.editorial || "No",
           filename:videoName
         });
         addLine(stockTitle, true, "SAVED · " + videoName + " · " + verification);
@@ -10150,15 +10149,18 @@ async function runDotMeshFolderBatch(directoryHandle, lib, items) {
 
   cancelled = cancelled || dotMeshFolderCancelRequested;
   S.customBitrateMbps = savedBitrate;
-  // Shutterstock Submit CSV contract: exact required headers and four fields only.
-  var header = ["Filename", "Description", "Keywords", "Categories"];
+  // Shutterstock Submit CSV contract: exact seven-column header order.
+  var header = ["Filename", "Description", "Keywords", "Categories", "Illustration", "Mature Content", "Editorial"];
   var rows = [header];
   completed.forEach(function(row) {
     rows.push([
       row.filename,
       row.description,
       (row.keywords || []).join(", "),
-      row.categories
+      row.categories,
+      row.illustration || "No",
+      row.matureContent || "No",
+      row.editorial || "No"
     ]);
   });
   var csvError = null;
