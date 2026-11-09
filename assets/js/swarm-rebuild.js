@@ -6,7 +6,7 @@
  * multiplayer cursors rebuild it on a canvas: crosshair-drawn rects, typed
  * text, pen-tool lines, ruler guides with snapping, alt-drag duplicates.
  *
- * Website build: loaded on-demand by the Tamasrazim site launcher; no extension required.
+ * Website build: starts after the site's Welcome → Tamasrazim intro; scrolling drives the build / erase cycle.
  */
 (() => {
   "use strict";
