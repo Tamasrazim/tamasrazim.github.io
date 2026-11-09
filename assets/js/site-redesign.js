@@ -441,20 +441,23 @@
   }
 })();
 
-/* Website-native Swarm Rebuild launcher. The renderer is loaded only on demand. */
+/* Website-native Swarm: start automatically after the page has landed. */
 (function () {
   "use strict";
-  function loadSwarmLauncher() {
-    if (document.querySelector('script[data-swarm-launcher]')) return;
+  function loadSwarmRebuild() {
+    if (window.__swarmRebuild || document.querySelector("script[data-swarm-rebuild]")) return;
     var script = document.createElement("script");
-    script.src = "/assets/js/swarm-launcher.js?v=20261109-1";
+    script.src = "/assets/js/swarm-rebuild.js?v=20261109-scroll-1";
     script.async = true;
-    script.dataset.swarmLauncher = "true";
+    script.dataset.swarmRebuild = "true";
+    script.onerror = function () {
+      console.warn("[swarm-rebuild] The page animation could not be loaded.");
+    };
     (document.head || document.documentElement).appendChild(script);
   }
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", loadSwarmLauncher, { once: true });
+    document.addEventListener("DOMContentLoaded", loadSwarmRebuild, { once: true });
   } else {
-    loadSwarmLauncher();
+    loadSwarmRebuild();
   }
 })();
