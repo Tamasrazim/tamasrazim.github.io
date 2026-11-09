@@ -48,9 +48,9 @@ const SHUTTERSTOCK_EXTRA = [
   "futuristic design","spatial geometry","visual effect"
 ];
 function shutterstockKeywords(family, stockTitle) {
-  var words = String(stockTitle || "").toLowerCase().replace(/^abstract\\s+/, "")
-    .replace(/\\bof\\b|\\bmade\\b|\\bconnected\\b|\\bwhite\\b|\\bdots?\\b|\\bpattern\\b/g, " ")
-    .replace(/[^a-z0-9 ]/g, " ").trim().split(/\\s+/).filter(Boolean);
+  var words = String(stockTitle || "").toLowerCase().replace(/^abstract\s+/, "")
+    .replace(/\bof\b|\bmade\b|\bconnected\b|\bwhite\b|\bdots?\b|\bpattern\b/g, " ")
+    .replace(/[^a-z0-9 ]/g, " ").trim().split(/\s+/).filter(Boolean);
   var titleTerms = [];
   for (var i=0; i<words.length-1 && titleTerms.length<8; i++) {
     var phrase = words[i] + " " + words[i+1];
@@ -274,7 +274,7 @@ function buildSvg(spec, thumbnail, animated, ultraHd) {
   if (!thumbnail) {
     out.push('<metadata>' + escXml(JSON.stringify({
       id: spec.id, title: spec.title, creator: "Tamasrazim", software: "TRILYVA",
-      durationSeconds: 12, fps: 60, loop: true, seamless: true, animated: !!animated, background: "transparent",
+      durationSeconds: 12, fps: 60, loop: true, seamless: true, animated: !!animated, background: "#050506",
       width: width, height: height, designFamily: spec.family, category: spec.category, tags: spec.tags
     })) + '</metadata>');
   }
