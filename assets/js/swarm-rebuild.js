@@ -1574,16 +1574,6 @@
       },
       scrollHeight: () => (isRoot ? Math.max(se.scrollHeight, document.body ? document.body.scrollHeight : 0) : scroller.scrollHeight),
       scrollWidth: () => (isRoot ? se.scrollWidth : scroller.scrollWidth),
-      scrollTo(y, x) {
-        const opts = { top: y, behavior: "instant" };
-        if (x != null) opts.left = x;
-        if (isRoot) window.scrollTo(opts);
-        else scroller.scrollTo(opts);
-      },
-      scrollBy(dy) {
-        if (isRoot) window.scrollBy({ top: dy, behavior: "instant" });
-        else scroller.scrollBy({ top: dy, behavior: "instant" });
-      },
     };
     return env;
   }
@@ -3128,10 +3118,8 @@
     }
 
     async loadShot() {
-      let src = window.__swarmShot;
+      const src = window.__swarmShot;
       window.__swarmShot = null;
-      if (src) lastShot = { src, at: this.env.geom() };
-      else if (lastShot) src = lastShot.src; // Replay reuses the click-time screenshot
       if (!src) return null;
       const img = new Image();
       img.src = src;
@@ -3140,7 +3128,7 @@
       } catch (_) {
         return null;
       }
-      const g = lastShot && lastShot.src === src ? lastShot.at : this.env.geom();
+      const g = this.env.geom();
       return { img, sx: g.sx, sy: g.sy, scale: img.naturalWidth / innerWidth, valid: false };
     }
 
@@ -3275,7 +3263,6 @@
   }
 
   let app = null;
-  let lastShot = null;
 
   function announceState() {
     try {
@@ -3298,20 +3285,6 @@
     app = null;
     announceState();
     a.destroy(reveal);
-  }
-
-  function restart() {
-    if (app) {
-      const a = app;
-      app = null;
-      a.dead = true;
-      cancelAnimationFrame(a.raf);
-      for (const u of a.unbinds || []) u();
-      a.view.host.remove();
-      // rebuild from where the first run started so screenshot crops line up again
-      if (lastShot) a.env.scrollTo(lastShot.at.sy, lastShot.at.sx);
-    }
-    start();
   }
 
   window[KEY] = {
