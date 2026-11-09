@@ -2114,23 +2114,10 @@
       return t.layer === "world" ? t.y : this.viewTop + t.y;
     }
 
-    // screen position of a cursor / an item (for panning and loudness)
+    // screen position of a cursor or an item
     scr(c) {
       const vp = this.vp;
       return c.sticky ? { x: c.x, y: c.y } : { x: c.x - vp.sx + vp.ox, y: c.y - vp.sy + vp.oy };
-    }
-
-    sfxPlace(kind, it, b) {
-      if (!this.sfx) return;
-      const vp = this.vp;
-      b = b || this.bounds(it);
-      let x = b.x + b.w / 2;
-      let y = b.y + b.h / 2;
-      if (!it || it.layer === "world") {
-        x += vp.ox - vp.sx;
-        y += vp.oy - vp.sy;
-      }
-      this.sfx.place(kind, x, y, b.w, b.h, vp.vw, vp.vh, (it && it.fs) || 0);
     }
 
     start() {
@@ -2142,7 +2129,6 @@
         c.gen = null;
         c.angle = ((((c.angle + 180) % 360) + 360) % 360) - 180;
       }
-      if (this.sfx) this.sfx.start();
       if (this.onStart) this.onStart();
     }
 
@@ -2636,7 +2622,6 @@
 
     *click(c) {
       c.press = 1;
-      if (this.sfx) this.sfx.press(this.scr(c).x, this.vp.vw);
       yield* this.wait(0.07);
     }
 
@@ -2656,7 +2641,6 @@
           budget -= d * k;
           i++;
         }
-        if (c && this.sfx && i > it.shown) this.sfx.key(this.scr(c).x, this.vp.vw, c.id, i - it.shown, /\s/.test(it.seq.slice(it.shown, i)) ? 1 : 0);
         it.shown = i;
         bump(it);
       }
@@ -2804,7 +2788,6 @@
       yield* this.wait(rand(0.18, 0.3));
       it.styled = true;
       bump(it);
-      this.sfxPlace(isImg ? "image" : "rect", it);
       yield* this.wait(isImg ? 0.5 : 0.35);
       c.ov = null;
       it.done = true;
@@ -2837,7 +2820,6 @@
       this.editLines.delete(it);
       it.done = true;
       bump(it);
-      this.sfxPlace("line", it);
     }
 
     *drawText(c, it, guide, grow) {
@@ -2886,7 +2868,6 @@
       yield* this.wait(0.12);
       it.editing = false;
       bump(it);
-      this.sfxPlace("text", it);
       c.shape = "arrow";
       c.ov = () => [this.selection(it)];
       if (grow) {
@@ -2896,7 +2877,6 @@
           yield* this.wait(0.06);
           it.scale = s / it.fs;
           bump(it);
-          if (this.sfx) this.sfx.grow(k++, this.scr(c).x, this.vp.vw);
         }
         it.scale = 1;
         bump(it);
@@ -2923,14 +2903,12 @@
           let v = c.y - p.y;
           if (guide.axis === "x" && Math.abs(h) < 9) {
             if (h !== 0 && it.dx !== 0) {
-              if (guide.flash < 0.5 && this.sfx) this.sfx.snap(this.scr(c).x, this.vp.vw);
               guide.flash = 1;
             }
             h = 0;
           }
           if (guide.axis === "y" && Math.abs(v) < 9) {
             if (v !== 0 && it.dy !== 0) {
-              if (guide.flash < 0.5 && this.sfx) this.sfx.snap(this.scr(c).x, this.vp.vw);
               guide.flash = 1;
             }
             v = 0;
@@ -2994,10 +2972,6 @@
         yield* this.moveTo(c, to, { speed: 0.55, drag: true, onStep: upd });
         g.cur = g.pos;
         g.dragging = false;
-        if (this.sfx) {
-          const p = this.scr(c);
-          this.sfx.place("guide", p.x, p.y, 1, 1, this.vp.vw, this.vp.vh, 0);
-        }
         c.shape = "arrow";
         yield* this.wait(0.25);
       } finally {
@@ -3059,7 +3033,6 @@
           }
         },
       });
-      this.sfxPlace("dup", dst.items[0], this.unionBounds(dst.items));
       for (const it of dst.items) {
         it.dx = 0;
         it.dy = 0;
@@ -3122,7 +3095,6 @@
       bump(it);
       c.shape = "arrow";
       c.ov = () => [this.selection(it)];
-      this.sfxPlace("edit", it);
       yield* this.wait(0.3);
       c.ov = null;
       it.done = true;
@@ -3138,7 +3110,6 @@
       yield* this.wait(rand(0.15, 0.3));
       it.mode = "own";
       bump(it);
-      this.sfxPlace(it.kind === "image" ? "image" : "restyle", it);
       yield* this.wait(0.4);
       c.ov = null;
       it.done = true;
