@@ -1,0 +1,27 @@
+{
+  "version": "bteb-diploma-2022-6th-2026-04-28-demo-v1",
+  "publication": {
+    "board": "Bangladesh Technical Education Board",
+    "curriculum": "Diploma in Engineering",
+    "regulation": "2022 Regulation",
+    "semester": "6th Semester",
+    "publishedDate": "2026-04-28",
+    "totalStudents": 35325,
+    "passed": 14264,
+    "failed": 21049,
+    "expelled": 12,
+    "passRate": 40.38,
+    "totalInstitutes": 408,
+    "datasetInstitutes": 6,
+    "sourcePage": "https://btebresultszone.com/latest-results/28-4-2026/RESULT_6th_2022_Regulation.pdf",
+    "officialPortal": "https://result.bteb.gov.bd/"
+  },
+  "institutes": [
+    {"id":"2026-04-28-dhaka-govt-polytechnic","publicationId":"bteb-2026-04-28-6th","name":"Dhaka Govt. Polytechnic Institute","location":"Dhaka","publicationLabel":"2022 Regulation · 6th Semester · 28 Apr 2026","total":1711,"passed":733,"failed":978,"passRate":42.8},
+    {"id":"2026-04-28-mymensingh-polytechnic","publicationId":"bteb-2026-04-28-6th","name":"Mymensingh Polytechnic Institute","location":"Mymensingh","publicationLabel":"2022 Regulation · 6th Semester · 28 Apr 2026","total":1344,"passed":823,"failed":521,"passRate":61.2},
+    {"id":"2026-04-28-rangpur-polytechnic","publicationId":"bteb-2026-04-28-6th","name":"Rangpur Polytechnic Institute","location":"Rangpur","publicationLabel":"2022 Regulation · 6th Semester · 28 Apr 2026","total":1084,"passed":580,"failed":null,"passRate":53.5},
+    {"id":"2026-04-28-pabna-polytechnic","publicationId":"bteb-2026-04-28-6th","name":"Pabna Polytechnic Institute","location":"Pabna","publicationLabel":"2022 Regulation · 6th Semester · 28 Apr 2026","total":984,"passed":496,"failed":488,"passRate":50.4},
+    {"id":"2026-04-28-bogura-polytechnic","publicationId":"bteb-2026-04-28-6th","name":"Bogura Polytechnic Institute","location":"Bogura","publicationLabel":"2022 Regulation · 6th Semester · 28 Apr 2026","total":921,"passed":515,"failed":406,"passRate":55.9},
+    {"id":"2026-04-28-dinajpur-govt-polytechnic","publicationId":"bteb-2026-04-28-6th","name":"Dinajpur Govt. Polytechnic Institute","location":"Dinajpur","publicationLabel":"2022 Regulation · 6th Semester · 28 Apr 2026","total":897,"passed":463,"failed":434,"passRate":51.6}
+  ]
+}
