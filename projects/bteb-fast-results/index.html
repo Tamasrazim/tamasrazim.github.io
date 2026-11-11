@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505"><meta name="description" content="BTEB result cache demo using IndexedDB.">
+<title>BTEB Fast Results — IndexedDB Demo</title>
+<link rel="canonical" href="https://tamasrazim.github.io/projects/bteb-fast-results/">
+<style>
+:root{color-scheme:dark;--bg:#050505;--panel:#0d0d0d;--line:#292929;--muted:#999;--text:#f5f5f5;--mono:ui-monospace,SFMono-Regular,Consolas,monospace;--sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.55}a{color:inherit}button,input{font:inherit}.wrap{width:min(1060px,calc(100% - 32px));margin:auto}
+header{border-bottom:1px solid var(--line);background:#080808}.top{height:72px;display:flex;align-items:center;justify-content:space-between}.brand{font-weight:800;letter-spacing:-.04em;text-decoration:none}.brand small{display:block;color:var(--muted);font:10px var(--mono);letter-spacing:.12em}.badge{font:10px var(--mono);color:var(--muted);letter-spacing:.1em}
+.hero{padding:56px 0 30px}.eyebrow{font:11px var(--mono);text-transform:uppercase;letter-spacing:.13em;color:#aaa}h1{font-size:clamp(42px,7vw,72px);line-height:.98;letter-spacing:-.075em;margin:16px 0}h2{font-size:22px;letter-spacing:-.04em;margin:0}.hero p{max-width:680px;color:#b8b8b8;font-size:16px}.notice{border:1px solid #493c25;background:#100e0a;color:#d8c9a8;padding:13px 15px;margin-top:20px;font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:22px 0 38px}.stat,.panel,.card{border:1px solid var(--line);background:var(--panel)}.stat{padding:16px}.stat span{display:block;font:10px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}.stat strong{display:block;font:700 27px var(--mono);margin-top:8px;letter-spacing:-.06em}
+.head{display:flex;justify-content:space-between;align-items:end;gap:15px;margin:34px 0 12px}.sub{font-size:12px;color:var(--muted);margin:4px 0}.cache{font:11px var(--mono);color:var(--muted)}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#777;margin-right:7px}.dot.ready{background:#c9f4d3}
+.panel{padding:18px}.tabs{display:flex;gap:6px;margin-bottom:16px}.tab,.btn{border:1px solid #444;background:transparent;color:#eee;padding:10px 14px;font-size:12px;cursor:pointer}.tab[aria-selected=true],.btn.primary{background:#eee;color:#050505;border-color:#eee;font-weight:700}.row{display:flex;gap:8px}.row input{flex:1}input{width:100%;min-width:0;padding:13px;background:#060606;border:1px solid #393939;color:#fff;outline:none}input:focus{border-color:#aaa}.result{border:1px solid var(--line);background:#080808;padding:16px;margin-top:10px}.result h3{margin:0 0 3px;font-size:16px}.muted{color:var(--muted);font-size:11px}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px}.metric{border-top:1px solid var(--line);padding-top:8px}.metric span{display:block;font:10px var(--mono);color:var(--muted);text-transform:uppercase}.metric strong{display:block;font:600 16px var(--mono);margin-top:4px}.rate{font:700 22px var(--mono);float:right}.empty{border:1px dashed #444;padding:24px;text-align:center;color:var(--muted);font-size:13px;margin-top:12px}.hidden{display:none!important}.source{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:13px;margin-top:18px;color:var(--muted);font-size:11px}.source a{color:#eee}.import{margin-top:12px;padding:15px;border:1px solid var(--line);background:#080808}.import p{font-size:12px;color:var(--muted)}.file{display:inline-block;border:1px solid #555;padding:10px 13px;font-size:12px;cursor:pointer}.file input{display:none}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#050505;border:1px solid var(--line);padding:12px;color:#ddd;font:11px/1.6 var(--mono)}footer{border-top:1px solid var(--line);margin-top:48px;padding:20px 0 36px;color:#777;font:10px var(--mono);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+@media(max-width:650px){.stats{grid-template-columns:repeat(2,1fr)}.head{align-items:start;flex-direction:column}.row{flex-direction:column}.row .btn{width:100%}.badge{display:none}}@media(max-width:380px){.panel{padding:12px}.metrics{gap:5px}.metric strong{font-size:14px}}
+</style>
+</head>
+<body>
+<header><div class="wrap top"><a class="brand" href="./">BTEB FAST RESULTS<small>INDEXEDDB CACHE DEMO</small></a><span class="badge">STATIC FRONTEND / NO API SERVER</span></div></header>
+<main class="wrap">
+<section class="hero">
+<div class="eyebrow">Result-day speed experiment · v0.1</div>
+<h1>Results,<br>already nearby.</h1>
+<p>This prototype caches a published BTEB result snapshot inside the visitor's browser. Once cached, repeated searches read from IndexedDB instead of repeatedly contacting a remote result server.</p>
+<div class="notice"><strong>Data scope:</strong> the bundled real dataset is a historical institute-level summary from the 28 April 2026 Diploma in Engineering 6th-semester publication. It is not a current individual-roll database. No fictional student records are included.</div>
+</section>
+<section class="stats" aria-label="Publication statistics">
+<div class="stat"><span>Students</span><strong id="total">—</strong></div><div class="stat"><span>Passed</span><strong id="passed">—</strong></div><div class="stat"><span>Pass rate</span><strong id="rate">—</strong></div><div class="stat"><span>Institutes in source</span><strong id="count">—</strong></div>
+</section>
+<div class="head"><div><h2>Search cached result data</h2><p class="sub">The institute search uses genuine published figures stored in IndexedDB.</p></div><div class="cache"><i class="dot" id="dot"></i><span id="cacheStatus">Opening database…</span></div></div>
+<section class="panel">
+<div class="tabs"><button class="tab" id="institutesTab" aria-selected="true">Institute results</button><button class="tab" id="rollTab" aria-selected="false">Individual roll</button></div>
+<div id="institutesPane">
+<div class="row"><input id="instituteQuery" type="search" placeholder="Search institute, e.g. Bogura Polytechnic Institute"><button class="btn primary" id="searchInstitute">Search cache</button></div>
+<div id="instituteResults" aria-live="polite"><div class="empty">Loading cached publication…</div></div>
+<div class="source"><span>2022 Regulation · 6th Semester · 28 April 2026</span><a href="https://btebresultszone.com/latest-results/28-4-2026/RESULT_6th_2022_Regulation.pdf" target="_blank" rel="noopener">Open source publication</a></div>
+</div>
+<div id="rollPane" class="hidden">
+<div class="row"><input id="rollQuery" inputmode="numeric" placeholder="Enter a roll number"><button class="btn primary" id="searchRoll">Search IndexedDB</button></div>
+<div id="rollResults"><div class="empty">No individual-roll dataset is bundled. Import a verified roll-level dataset below to enable personal result lookup.</div></div>
+</div>
+</section>
+<div class="head"><div><h2>Import individual results</h2><p class="sub">JSON/CSV rows are saved locally in this browser's IndexedDB.</p></div></div>
+<section class="panel">
+<p class="muted">This app does not fabricate student results or scrape the official portal during searches. It displays only roll-level records explicitly imported from a verified dataset.</p>
+<div class="import">
+<label class="file">Choose JSON / CSV <input id="file" type="file" accept=".json,.csv,application/json,text/csv"></label>
+<button class="btn" id="export">Export cached roll records</button>
+<button class="btn" id="template">Download JSON template</button>
+<p id="importStatus" aria-live="polite">No individual dataset imported.</p>
+<details><summary>Expected JSON format</summary><pre>[
+  {
+    "roll": "YOUR_ROLL",
+    "curriculum": "Diploma in Engineering",
+    "exam": "2025",
+    "semester": "6th Semester",
+    "gpa": "3.50",
+    "status": "Pass",
+    "subjects": [
+      { "code": "XXXX", "name": "Subject name", "grade": "A" }
+    ]
+  }
+]</pre></details>
+</div>
+<div class="source"><span>Official BTEB result portal</span><a href="https://result.bteb.gov.bd/" target="_blank" rel="noopener">result.bteb.gov.bd</a></div>
+</section>
+<div class="head"><div><h2>What this proves</h2><p class="sub">Static hosting can still provide a persistent local database.</p></div></div>
+<section class="panel">
+<div class="metrics"><div class="metric"><span>First visit</span><strong>Fetch snapshot</strong></div><div class="metric"><span>Cache layer</span><strong>IndexedDB</strong></div><div class="metric"><span>Repeat search</span><strong>Local lookup</strong></div></div>
+<p class="muted" style="margin-top:15px">This prototype includes six institute rows from a 408-institute publication. A production release needs the complete preprocessed dataset, reliable PDF ingestion, version checks, and a privacy review before distributing individual-level records. It is an independent project, not affiliated with BTEB.</p>
+</section>
+</main>
+<footer class="wrap"><span>BTEB FAST RESULTS · INDEXEDDB DEMO</span><span>Independent prototype · Not affiliated with BTEB</span></footer>
+<script>
+(function(){
+"use strict";
+var DB="bteb-fast-results",VERSION=1,db=null,rows=[];
+function el(id){return document.getElementById(id);}
+function text(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function num(v){return new Intl.NumberFormat("en-US").format(Number(v||0));}
+function openDB(){return new Promise(function(resolve,reject){var q=indexedDB.open(DB,VERSION);q.onupgradeneeded=function(){var d=q.result;if(!d.objectStoreNames.contains("institutes"))d.createObjectStore("institutes",{keyPath:"id"});if(!d.objectStoreNames.contains("students")){var s=d.createObjectStore("students",{keyPath:"id"});s.createIndex("roll","roll",{unique:false});}if(!d.objectStoreNames.contains("meta"))d.createObjectStore("meta",{keyPath:"key"});};q.onsuccess=function(){resolve(q.result);};q.onerror=function(){reject(q.error);};});}
+function req(r){return new Promise(function(resolve,reject){r.onsuccess=function(){resolve(r.result);};r.onerror=function(){reject(r.error);};});}
+function done(t){return new Promise(function(resolve,reject){t.oncomplete=resolve;t.onerror=function(){reject(t.error);};t.onabort=function(){reject(t.error);};});}
+async function all(store){var t=db.transaction(store,"readonly"),a=await req(t.objectStore(store).getAll());await done(t);return a;}
+async function meta(key){var t=db.transaction("meta","readonly"),v=await req(t.objectStore("meta").get(key));await done(t);return v||null;}
+function card(r){return '<article class="result"><span class="rate">'+Number(r.passRate).toFixed(1)+'%</span><h3>'+text(r.name)+'</h3><div class="muted">'+text(r.location)+' · '+text(r.publicationLabel)+'</div><div class="metrics"><div class="metric"><span>Students</span><strong>'+num(r.total)+'</strong></div><div class="metric"><span>Passed</span><strong>'+num(r.passed)+'</strong></div><div class="metric"><span>Failed</span><strong>'+(r.failed==null?"—":num(r.failed))+'</strong></div></div></article>';}
+function renderInstitutes(query){var q=String(query||"").trim().toLowerCase(),found=rows.filter(function(r){return !q||(r.name+" "+r.location).toLowerCase().indexOf(q)>=0;});el("instituteResults").innerHTML=found.length?'<p class="muted">'+found.length+' cached row(s) · '+rows.length+' included in this demo</p>'+found.map(card).join(""):'<div class="empty">No institute matched that search in the local cache.</div>';}
+async function seed(){var data=null;try{var response=await fetch("./data/results.json",{cache:"no-cache"});if(!response.ok)throw Error("HTTP "+response.status);data=await response.json();var old=await meta("version");if(!old||old.value!==data.version){var t=db.transaction(["institutes","meta"],"readwrite"),s=t.objectStore("institutes");s.clear();data.institutes.forEach(function(r){s.put(r);});t.objectStore("meta").put({key:"version",value:data.version});t.objectStore("meta").put({key:"publication",value:data.publication});await done(t);}el("cacheStatus").textContent="Cached in this browser";el("dot").classList.add("ready");}catch(e){var oldRows=await all("institutes");if(oldRows.length){el("cacheStatus").textContent="Offline · saved cache";el("dot").classList.add("ready");}else{el("cacheStatus").textContent="Dataset unavailable";el("instituteResults").innerHTML='<div class="empty">Could not load the static dataset. Open this page through GitHub Pages or a local web server.</div>';}}
+rows=await all("institutes");var publication=data?data.publication:(await meta("publication"));publication=publication&&publication.value?publication.value:publication;if(publication){el("total").textContent=num(publication.totalStudents);el("passed").textContent=num(publication.passed);el("rate").textContent=Number(publication.passRate).toFixed(2)+"%";el("count").textContent=num(publication.totalInstitutes);}renderInstitutes(el("instituteQuery").value);}
+async function searchRoll(){var roll=el("rollQuery").value.trim();if(!roll){el("rollResults").innerHTML='<div class="empty">Enter a roll number.</div>';return;}var t=db.transaction("students","readonly"),found=await req(t.objectStore("students").index("roll").getAll(roll));await done(t);if(!found.length){el("rollResults").innerHTML='<div class="empty">No individual result for roll '+text(roll)+' is stored in this browser. The bundled source contains institute summaries only. Import a verified individual dataset to enable roll search.</div>';return;}el("rollResults").innerHTML=found.map(function(r){var subjects=Array.isArray(r.subjects)?r.subjects:[];var s=subjects.map(function(x){return '<div class="source"><span>'+text(x.code)+' · '+text(x.name)+'</span><strong>'+text(x.grade)+'</strong></div>';}).join("");return '<article class="result"><span class="rate">'+text(r.gpa||"—")+'</span><h3>Roll '+text(r.roll)+'</h3><div class="muted">'+text(r.curriculum)+' · '+text(r.exam)+' · '+text(r.semester)+'</div><div class="metrics"><div class="metric"><span>Status</span><strong>'+text(r.status||"—")+'</strong></div><div class="metric"><span>Subjects</span><strong>'+num(subjects.length)+'</strong></div><div class="metric"><span>Storage</span><strong>IndexedDB</strong></div></div>'+s+'</article>';}).join("");}
+function normalize(r){var roll=String(r.roll||r.rollNumber||r.Roll||"").trim();if(!/^[0-9]{4,15}$/.test(roll))return null;var curriculum=String(r.curriculum||"BTEB"),exam=String(r.exam||r.examYear||""),semester=String(r.semester||"");return{id:[curriculum,exam,semester,roll].join("|"),roll:roll,curriculum:curriculum,exam:exam,semester:semester,gpa:String(r.gpa||r.GPA||""),status:String(r.status||r.Status||""),subjects:Array.isArray(r.subjects)?r.subjects:[]};}
+function parseCSV(source){var lines=source.trim().split(/\r?\n/);if(lines.length<2)return[];var headers=lines.shift().split(",").map(function(x){return x.trim();});return lines.map(function(line){var values=line.split(","),o={};headers.forEach(function(h,i){o[h]=(values[i]||"").trim();});return o;});}
+async function importData(file){var source=await file.text(),data=file.name.toLowerCase().endsWith(".csv")?parseCSV(source):JSON.parse(source),list=Array.isArray(data)?data:(data.students||[]),clean=list.map(normalize).filter(Boolean);if(!clean.length)throw Error("No valid student rows. Each row needs a 4–15 digit roll.");var t=db.transaction("students","readwrite"),s=t.objectStore("students");clean.forEach(function(r){s.put(r);});await done(t);el("importStatus").textContent=clean.length+" individual record(s) saved to IndexedDB.";}
+async function exportData(){var list=await all("students"),blob=new Blob([JSON.stringify({students:list},null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="bteb-indexeddb-students.json";a.click();URL.revokeObjectURL(url);}
+function downloadTemplate(){var sample=[{roll:"YOUR_ROLL",curriculum:"Diploma in Engineering",exam:"2025",semester:"6th Semester",gpa:"3.50",status:"Pass",subjects:[{code:"XXXX",name:"Subject name",grade:"A"}]}],blob=new Blob([JSON.stringify(sample,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="bteb-import-template.json";a.click();URL.revokeObjectURL(url);}
+function bind(){el("institutesTab").onclick=function(){el("institutesTab").setAttribute("aria-selected","true");el("rollTab").setAttribute("aria-selected","false");el("institutesPane").classList.remove("hidden");el("rollPane").classList.add("hidden");};el("rollTab").onclick=function(){el("institutesTab").setAttribute("aria-selected","false");el("rollTab").setAttribute("aria-selected","true");el("institutesPane").classList.add("hidden");el("rollPane").classList.remove("hidden");};el("searchInstitute").onclick=function(){renderInstitutes(el("instituteQuery").value);};el("instituteQuery").oninput=function(){renderInstitutes(this.value);};el("searchRoll").onclick=searchRoll;el("rollQuery").onkeydown=function(e){if(e.key==="Enter")searchRoll();};el("file").onchange=async function(){var f=this.files&&this.files[0];if(!f)return;try{await importData(f);}catch(e){el("importStatus").textContent="Import failed: "+e.message;}this.value="";};el("export").onclick=exportData;el("template").onclick=downloadTemplate;}
+async function start(){try{if(!window.indexedDB)throw Error("IndexedDB is not supported.");db=await openDB();bind();await seed();var students=await all("students");el("importStatus").textContent=students.length?students.length+" individual row(s) already cached.":"No individual dataset imported.";}catch(e){el("cacheStatus").textContent="IndexedDB unavailable";el("instituteResults").innerHTML='<div class="empty">'+text(e.message)+'</div>';}}
+start();
+})();
+</script>
+</body>
+</html>
