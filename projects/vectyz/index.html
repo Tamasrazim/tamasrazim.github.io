@@ -1,87 +1,46 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#090909">
-  <meta name="description" content="Vectyz — local, offline-first raster-to-vector and vector-to-raster conversion in your browser.">
-  <title>Vectyz — Local Vectorization Workspace</title>
-  <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./styles.css">
-</head>
-<body>
-  <div class="app-shell">
-    <header class="topbar">
-      <a class="brand" href="./" aria-label="Vectyz home"><span class="brand-mark">V</span><span>vectyz</span></a>
-      <div class="topbar-center"><span class="local-indicator"></span><span>LOCAL WORKSPACE</span></div>
-      <div class="topbar-actions"><span id="storage-label" class="storage-label">Local storage</span><button id="persist-button" class="quiet-button" type="button">Keep data</button></div>
-    </header>
-
-    <div class="workspace">
-      <aside class="rail" aria-label="Workspace modes">
-        <button class="rail-item active" data-mode="vectorize" type="button"><span class="rail-symbol">V</span><span>Vectorize</span></button>
-        <button class="rail-item" data-mode="rasterize" type="button"><span class="rail-symbol">R</span><span>Rasterize</span></button>
-        <div class="rail-divider"></div>
-        <button id="library-toggle" class="rail-item" type="button"><span class="rail-symbol">L</span><span>Library</span></button>
-        <div class="rail-bottom"><span class="rail-version">0.3.0</span><span class="rail-local">OFFLINE READY</span></div>
-      </aside>
-
-      <main class="workbench">
-        <section id="canvas-column" class="canvas-column">
-          <div class="workbench-heading">
-            <div><p class="eyebrow" id="mode-eyebrow">RASTER TO VECTOR</p><h1 id="page-title">Vectorize image</h1><p id="page-description" class="subheading">Convert pixels into editable paths. Processing stays on this device.</p></div>
-            <div class="heading-actions"><button id="open-button" class="secondary-button" type="button">Open image</button><button id="clear-button" class="icon-button" type="button" aria-label="Clear workspace" title="Clear workspace">×</button></div>
-            <input id="file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" hidden>
-          </div>
-
-          <div id="dropzone" class="dropzone">
-            <div class="dropzone-inner"><div class="drop-icon"><span></span></div><h2>Drop an image here</h2><p>or choose a file from your device</p><button id="browse-button" class="primary-button" type="button">Browse files</button><div id="drop-formats" class="drop-formats">PNG · JPEG · WEBP · GIF · BMP</div></div>
-          </div>
-
-          <section id="preview-panel" class="preview-panel" hidden>
-            <div class="asset-bar"><div class="asset-details"><span id="asset-name" class="asset-name">image.png</span><span id="asset-meta" class="asset-meta"></span></div><div class="view-switch" id="vector-view-switch"><button class="view-button active" data-view="vector" type="button">Vector</button><button class="view-button" data-view="original" type="button">Original</button></div><div id="raster-badge" class="result-badge" hidden>RASTERIZED</div></div>
-            <div id="preview-stage" class="preview-stage"><div class="checkerboard"></div><img id="preview-image" alt="Current Vectyz preview" draggable="false"><div id="empty-result" class="empty-result" hidden>Run vectorization to see the result.</div><div class="preview-tools" role="group" aria-label="Preview zoom"><button type="button" data-preview-action="fit" title="Fit preview">Fit</button><button type="button" data-preview-action="one-to-one" title="View at native pixel size">1:1</button><button type="button" data-preview-action="out" aria-label="Zoom out" title="Zoom out">−</button><output id="zoom-level" aria-live="polite">100%</output><button type="button" data-preview-action="in" aria-label="Zoom in" title="Zoom in">+</button></div></div>
-            <div class="preview-footer"><span id="preview-caption">Vector preview</span><span id="preview-dimensions"></span></div>
-          </section>
-
-          <section id="progress-panel" class="progress-panel" hidden><div class="progress-top"><span id="progress-phase">Preparing image</span><span id="progress-value">0%</span></div><div class="progress-track"><span id="progress-fill"></span></div><p id="progress-note" class="progress-note">Processing locally in a background worker.</p></section>
-          <div id="message" class="message" role="status" aria-live="polite" hidden></div>
-
-          <section id="library-panel" class="library-panel" hidden><div class="library-heading"><div><p class="eyebrow">ON THIS DEVICE</p><h2>Saved projects</h2></div><span id="library-count" class="library-count">0 projects</span></div><div id="library-list" class="library-list"></div></section>
-        </section>
-
-        <aside class="settings-column">
-          <div class="settings-header"><div><p class="eyebrow">CONFIGURATION</p><h2 id="settings-title">Vector settings</h2></div><button id="reset-settings" class="text-button" type="button">Reset</button></div>
-          <div id="vector-settings" class="settings-body">
-            <div class="setting-block"><div class="setting-line"><label for="colors">Maximum colors</label><output id="colors-value">16</output></div><input id="colors" type="range" min="2" max="64" step="1" value="16"><div class="range-ends"><span>2</span><span>64</span></div></div>
-            <div class="setting-block"><div class="setting-line"><label for="detail">Path detail</label><output id="detail-value">1.00</output></div><input id="detail" type="range" min="0.05" max="4" step="0.05" value="1"><div class="range-ends"><span>More detail</span><span>Simpler paths</span></div></div>
-            <div class="setting-block"><div class="setting-line"><label for="min-area">Minimum area</label><output id="min-area-value">2 px²</output></div><input id="min-area" type="range" min="0" max="80" step="1" value="2"><div class="range-ends"><span>Keep small regions</span><span>Remove noise</span></div></div>
-            <div class="setting-block"><label for="curve" class="field-label">Path construction</label><select id="curve" class="select-control"><option value="smooth">Corner-aware curves</option><option value="polygon">Straight segments</option></select></div>
-            <div class="setting-block"><div class="setting-line"><label for="corner-angle">Corner sensitivity</label><output id="corner-angle-value">65°</output></div><input id="corner-angle" type="range" min="20" max="150" step="1" value="65"></div>
-            <div class="setting-block"><div class="setting-line"><label for="alpha-bins">Transparency levels</label><output id="alpha-bins-value">1</output></div><input id="alpha-bins" type="range" min="1" max="8" step="1" value="1"><p class="field-help">More levels preserve translucency but create more regions.</p></div>
-            <div class="setting-block"><div class="setting-line"><label for="threshold">Transparent threshold</label><output id="threshold-value">4</output></div><input id="threshold" type="range" min="0" max="64" step="1" value="4"></div>
-            <div class="settings-separator"></div>
-            <div class="setting-line output-heading"><span>Output</span><span class="output-format">SVG</span></div>
-            <p class="field-help">The export contains editable vector paths, not an embedded source image.</p>
-            <button id="process-button" class="run-button" type="button" disabled><span>Vectorize image</span><span class="run-arrow">→</span></button>
-            <button id="download-button" class="download-button" type="button" disabled>Export SVG</button>
-          </div>
-          <div id="raster-settings" class="settings-body" hidden>
-            <div class="setting-block"><label for="raster-width" class="field-label">Output width</label><input id="raster-width" class="number-control" type="number" min="1" max="16000" value="2400"></div>
-            <div class="setting-block"><label for="raster-height" class="field-label">Output height</label><input id="raster-height" class="number-control" type="number" min="1" max="16000" value="2400"></div>
-            <div class="setting-block"><label for="raster-format" class="field-label">Raster format</label><select id="raster-format" class="select-control"><option value="image/png">PNG</option><option value="image/jpeg">JPEG</option><option value="image/webp">WEBP</option></select></div>
-            <div class="setting-block"><label class="check-line"><input id="keep-ratio" type="checkbox" checked><span>Preserve aspect ratio</span></label></div>
-            <p class="field-help">SVG input is sanitized before rendering. Scripts and external resources are removed.</p>
-            <button id="rasterize-button" class="run-button" type="button" disabled><span>Rasterize SVG</span><span class="run-arrow">→</span></button>
-            <button id="raster-download-button" class="download-button" type="button" disabled>Export raster</button>
-          </div>
-          <div class="stats-panel" id="stats-panel" hidden><p class="eyebrow">LAST RESULT</p><div class="stats-grid"><div><strong id="stat-colors">—</strong><span>Colors</span></div><div><strong id="stat-paths">—</strong><span>Paths</span></div><div><strong id="stat-time">—</strong><span>Time</span></div><div><strong id="stat-size">—</strong><span>File size</span></div></div></div>
-          <div class="settings-foot"><span class="privacy-dot"></span><span>Files stay in this browser. No upload endpoint.</span></div>
-        </aside>
-      </main>
-    </div>
-  </div>
-  <script type="module" src="./app.js"></script>
-</body>
-</html>
+<html lang="en" data-theme="dark"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050506"><meta name="color-scheme" content="dark">
+<meta name="description" content="Vectyz is a local-first raster-to-vector and vector-to-raster workspace. Reconstruct editable SVG paths, inspect geometry and rasterize SVG files in your browser.">
+<meta name="robots" content="index,follow"><title>Vectyz — Vector Studio</title>
+<link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="manifest" href="./manifest.webmanifest"><link rel="stylesheet" href="./styles.css">
+</head><body><div id="app" class="app-shell">
+<header id="hdr" class="topbar">
+<a class="brand" href="./" aria-label="Vectyz home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 36 36"><path d="M7 8h6l5 14 5-14h6L20 29h-4L7 8Z"/><path d="M25 25h5v5h-5z"/></svg></span><span class="brand-copy"><strong>VECTYZ</strong><small>VECTOR STUDIO</small></span></a>
+<div class="project-name"><span class="project-state"></span><span id="project-label">UNTITLED PROJECT</span><span class="version-tag">0.4.0</span></div>
+<div class="topbar-actions"><span id="storage-label" class="storage-label">Local storage</span><button id="persist-button" class="quiet-button" type="button" title="Request persistent browser storage">Keep data</button><span class="action-divider"></span><button id="open-button" class="header-button" type="button"><span class="button-plus">+</span> Open file <kbd>Ctrl O</kbd></button></div>
+</header>
+<div id="strip" class="state-strip"><div class="strip-left"><span class="local-pulse"></span><span>LOCAL PROCESSING</span><span class="strip-separator"></span><span>NO UPLOAD ENDPOINT</span></div><div class="strip-right"><span>WEB WORKSPACE</span><span class="strip-separator"></span><span>OFFLINE READY</span></div></div>
+<div class="workspace">
+<aside class="rail" aria-label="Workspace navigation"><div class="rail-group">
+<button class="rail-item active" data-mode="vectorize" type="button" aria-label="Vectorize" title="Raster to vector"><span class="rail-icon"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"/><path d="M14 17h6M17 14v6"/></svg></span><span>Vectorize</span></button>
+<button class="rail-item" data-mode="rasterize" type="button" aria-label="Rasterize" title="Vector to raster"><span class="rail-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="m4 16 5-5 4 4 3-3 4 4"/></svg></span><span>Rasterize</span></button>
+</div><div class="rail-rule"></div><button id="library-toggle" class="rail-item" type="button" aria-label="Project library" title="Saved projects"><span class="rail-icon"><svg viewBox="0 0 24 24"><path d="M4 5.5h6l2 2h8v11H4z"/><path d="M4 9h16"/></svg></span><span>Library</span></button><div class="rail-bottom"><span class="rail-version">0.4.0</span><span class="rail-local">LOCAL</span></div></aside>
+<main class="workbench"><section id="canvas-column" class="canvas-column">
+<div class="workbench-heading"><div class="heading-copy"><p class="eyebrow" id="mode-eyebrow">RASTER TO VECTOR</p><h1 id="page-title">Vectorize image</h1><p id="page-description" class="subheading">Reconstruct editable paths from raster artwork.</p></div><div class="heading-actions"><button id="clear-button" class="icon-button" type="button" aria-label="Clear workspace" title="Clear workspace">×</button><input id="file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" hidden></div></div>
+<div id="dropzone" class="dropzone"><div class="dropzone-art" aria-hidden="true"><svg viewBox="0 0 260 190"><defs><linearGradient id="dropStroke" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".78"/><stop offset="1" stop-color="#fff" stop-opacity=".16"/></linearGradient></defs><path d="M38 45 130 12l92 33v100l-92 33-92-33z" fill="none" stroke="#ffffff" stroke-opacity=".12"/><path d="m68 63 62-23 62 23v66l-62 23-62-23z" fill="none" stroke="url(#dropStroke)" stroke-width="1.2"/><path d="m68 63 62 24 62-24M130 87v65" fill="none" stroke="#fff" stroke-opacity=".38"/><path d="m92 73 38 14 38-14M92 115l38 15 38-15" fill="none" stroke="#fff" stroke-opacity=".3"/><circle cx="130" cy="87" r="4" fill="#fff"/><circle cx="68" cy="63" r="3" fill="#fff"/><circle cx="192" cy="63" r="3" fill="#fff"/></svg></div><div class="dropzone-inner"><p class="eyebrow">START A NEW PROJECT</p><h2>Bring artwork into Vectyz.</h2><p>Drop a raster image or choose a file from your device.</p><button id="browse-button" class="primary-button" type="button">Choose image <span>↗</span></button><div id="drop-formats" class="drop-formats">PNG · JPEG · WEBP · GIF · BMP <i>·</i> 12 MP MAX</div><div class="drop-hint">Files are processed locally in your browser.</div></div></div>
+<section id="preview-panel" class="preview-panel" hidden>
+<div class="asset-bar"><div class="asset-details"><span id="asset-name" class="asset-name">image.png</span><span id="asset-meta" class="asset-meta"></span></div><div class="asset-bar-actions"><div class="view-switch" id="vector-view-switch" role="group" aria-label="Preview mode"><button class="view-button" data-view="original" type="button">Original</button><button class="view-button active" data-view="vector" type="button">Vector</button><button class="view-button" data-view="compare" type="button" disabled>Compare</button></div><div id="raster-badge" class="result-badge" hidden>RASTER OUTPUT</div></div></div>
+<div id="preview-stage" class="preview-stage"><div class="checkerboard"></div><div class="stage-grid"></div><img id="preview-image" alt="Current Vectyz preview" draggable="false"><img id="compare-image" alt="" draggable="false" hidden><div id="compare-divider" class="compare-divider" hidden></div><div id="empty-result" class="empty-result" hidden>Run vectorization to see the result.</div>
+<div class="preview-tools" role="group" aria-label="Preview zoom"><button type="button" data-preview-action="fit" title="Fit preview">FIT</button><button type="button" data-preview-action="one-to-one" title="View at native pixel size">1:1</button><span class="tool-divider"></span><button type="button" data-preview-action="out" aria-label="Zoom out" title="Zoom out">−</button><output id="zoom-level" aria-live="polite">100%</output><button type="button" data-preview-action="in" aria-label="Zoom in" title="Zoom in">+</button></div>
+<div id="compare-control" class="compare-control" hidden><span>ORIGINAL</span><input id="compare-range" type="range" min="0" max="100" step="1" value="50" aria-label="Compare original and vector output"><span>VECTOR</span></div><div class="stage-corner stage-corner-tl"></div><div class="stage-corner stage-corner-br"></div></div>
+<div class="preview-footer"><span id="preview-caption">Vector preview</span><span id="preview-dimensions"></span></div></section>
+<section id="progress-panel" class="progress-panel" hidden><div class="progress-top"><span id="progress-phase">Preparing image</span><span id="progress-value">0%</span></div><div class="progress-track"><span id="progress-fill"></span></div><div class="progress-bottom"><p id="progress-note" class="progress-note">Processing locally in a background worker.</p><button id="cancel-process" type="button" hidden>Cancel</button></div></section>
+<div id="message" class="message" role="status" aria-live="polite" hidden></div>
+<section id="library-panel" class="library-panel" hidden><div class="library-heading"><div><p class="eyebrow">ON THIS DEVICE</p><h2>Project library</h2></div><span id="library-count" class="library-count">0 projects</span></div><div id="library-list" class="library-list"></div></section>
+</section>
+<aside class="settings-column"><div class="settings-header"><div><p class="eyebrow">INSPECTOR</p><h2 id="settings-title">Vector settings</h2></div><button id="reset-settings" class="text-button" type="button">Reset</button></div>
+<div id="vector-settings" class="settings-body">
+<section class="inspector-section"><div class="section-heading"><span>RECONSTRUCTION PRESET</span><i></i></div><div class="setting-block"><label for="preset-select" class="field-label">Starting point</label><select id="preset-select" class="select-control"><option value="balanced">Balanced</option><option value="logo">Crisp logo</option><option value="illustration">Illustration</option><option value="detail">Fine detail</option><option value="photo">Photographic palette</option><option value="custom">Custom settings</option></select><p class="field-help">Presets set a starting point. Every control remains editable.</p></div></section>
+<section class="inspector-section"><div class="section-heading"><span>COLOUR & REGIONS</span><i></i></div><div class="setting-block"><div class="setting-line"><label for="colors">Maximum colors</label><output id="colors-value">16</output></div><input id="colors" type="range" min="2" max="64" step="1" value="16"><div class="range-ends"><span>2</span><span>64</span></div></div><div class="setting-block"><div class="setting-line"><label for="min-area">Minimum region area</label><output id="min-area-value">2 px²</output></div><input id="min-area" type="range" min="0" max="80" step="1" value="2"><div class="range-ends"><span>Keep small</span><span>Remove noise</span></div></div></section>
+<section class="inspector-section"><div class="section-heading"><span>PATH GEOMETRY</span><i></i></div><div class="setting-block"><label for="curve" class="field-label">Path construction</label><select id="curve" class="select-control"><option value="smooth">Corner-aware curves</option><option value="polygon">Straight segments</option></select></div><div class="setting-block"><div class="setting-line"><label for="detail">Simplification</label><output id="detail-value">1.00</output></div><input id="detail" type="range" min="0.05" max="4" step="0.05" value="1"><div class="range-ends"><span>High detail</span><span>Smoother paths</span></div></div><div class="setting-block"><div class="setting-line"><label for="corner-angle">Corner sensitivity</label><output id="corner-angle-value">65°</output></div><input id="corner-angle" type="range" min="20" max="150" step="1" value="65"></div></section>
+<section class="inspector-section"><div class="section-heading"><span>TRANSPARENCY</span><i></i></div><div class="setting-block"><div class="setting-line"><label for="alpha-bins">Opacity levels</label><output id="alpha-bins-value">1</output></div><input id="alpha-bins" type="range" min="1" max="8" step="1" value="1"><p class="field-help">More levels retain translucency but can create more regions.</p></div><div class="setting-block"><div class="setting-line"><label for="threshold">Transparent threshold</label><output id="threshold-value">4</output></div><input id="threshold" type="range" min="0" max="64" step="1" value="4"></div></section>
+<section class="output-section"><div class="section-heading"><span>VECTOR OUTPUT</span><span class="output-format">SVG</span></div><p class="field-help">Exports editable paths. The source bitmap is not embedded in the result.</p><button id="process-button" class="run-button" type="button" disabled><span>Build vector paths</span><span class="run-arrow">↗</span></button><button id="download-button" class="download-button" type="button" disabled>Export SVG</button></section>
+</div>
+<div id="raster-settings" class="settings-body" hidden><section class="inspector-section"><div class="section-heading"><span>CANVAS SIZE</span><i></i></div><div class="setting-block"><label for="raster-width" class="field-label">Output width</label><input id="raster-width" class="number-control" type="number" min="1" max="16000" value="2400"></div><div class="setting-block"><label for="raster-height" class="field-label">Output height</label><input id="raster-height" class="number-control" type="number" min="1" max="16000" value="2400"></div><label class="check-line"><input id="keep-ratio" type="checkbox" checked><span>Preserve aspect ratio</span></label></section><section class="inspector-section"><div class="section-heading"><span>RASTER FORMAT</span><i></i></div><div class="setting-block"><label for="raster-format" class="field-label">Export format</label><select id="raster-format" class="select-control"><option value="image/png">PNG — lossless</option><option value="image/jpeg">JPEG — compressed</option><option value="image/webp">WebP — efficient</option></select></div><p class="field-help">SVG scripts and external resources are removed before rendering. JPEG output is composited against white.</p><button id="rasterize-button" class="run-button" type="button" disabled><span>Render raster</span><span class="run-arrow">↗</span></button><button id="raster-download-button" class="download-button" type="button" disabled>Export raster</button></section></div>
+<div class="stats-panel" id="stats-panel" hidden><div class="section-heading"><span>LAST RESULT</span><i></i></div><div class="stats-grid"><div><strong id="stat-colors">—</strong><span>Colors</span></div><div><strong id="stat-paths">—</strong><span>Paths</span></div><div><strong id="stat-time">—</strong><span>Time</span></div><div><strong id="stat-size">—</strong><span>File size</span></div></div></div>
+<div class="settings-foot"><span class="privacy-dot"></span><span>Source files and results stay in this browser.</span></div></aside>
+</main></div>
+<footer id="status" class="statusbar"><span><i class="status-dot"></i>LOCAL</span><span id="app-status">Ready</span><span class="status-spacer"></span><span>12 MP INPUT LIMIT</span><span class="status-separator"></span><span>CTRL + O OPEN</span><span class="status-separator"></span><span>CTRL + ENTER PROCESS</span></footer></div>
+<script type="module" src="./app.js"></script></body></html>

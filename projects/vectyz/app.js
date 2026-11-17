@@ -18,6 +18,7 @@ const state = {
   dragging: false,
   pointerX: 0,
   pointerY: 0,
+  comparePercentage: 50,
 };
 
 const defaultSettings = {
@@ -87,6 +88,8 @@ function notify(message, type = 'info') {
   element.textContent = message;
   element.className = type === 'error' ? 'message error' : 'message';
   element.hidden = false;
+  const status = $('app-status');
+  if (status) status.textContent = message;
 }
 
 function clearMessage() {
@@ -121,6 +124,13 @@ function resetWorkspace() {
   $('raster-download-button').disabled = true;
   $('preview-image').removeAttribute('src');
   $('preview-image').style.maxWidth = '';
+  $('compare-image').removeAttribute('src');
+  $('compare-image').removeAttribute('data-object-url');
+  $('compare-image').hidden = true;
+  $('compare-control').hidden = true;
+  $('compare-divider').hidden = true;
+  $('cancel-process').hidden = true;
+  $('project-label').textContent = 'UNTITLED PROJECT';
   resetPreviewTransform();
   $('library-panel').hidden = true;
   $('library-toggle').classList.remove('active');
@@ -135,8 +145,8 @@ function updateModeUi() {
   $('mode-eyebrow').textContent = vector ? 'RASTER TO VECTOR' : 'VECTOR TO RASTER';
   $('page-title').textContent = vector ? 'Vectorize image' : 'Rasterize SVG';
   $('page-description').textContent = vector
-    ? 'Convert pixels into editable paths. Processing stays on this device.'
-    : 'Render an SVG into a bitmap. Scripts and external resources are stripped.';
+    ? 'Reconstruct editable paths from raster artwork. Processing stays on this device.'
+    : 'Render a sanitized SVG into a high-resolution bitmap.';
   $('file-input').accept = vector
     ? 'image/png,image/jpeg,image/webp,image/gif,image/bmp,.png,.jpg,.jpeg,.webp,.gif,.bmp'
     : '.svg,image/svg+xml';
@@ -176,7 +186,9 @@ function updatePreviewTransform() {
     state.panY = clampPreview(state.panY, -maxY, maxY);
   }
 
-  image.style.transform = 'translate3d(' + state.panX + 'px, ' + state.panY + 'px, 0) scale(' + state.zoom + ')';
+  const transform = 'translate3d(' + state.panX + 'px, ' + state.panY + 'px, 0) scale(' + state.zoom + ')';
+  image.style.transform = transform;
+  $('compare-image').style.transform = transform;
   $('zoom-level').textContent = Math.round(state.zoom * 100) + '%';
   stage.classList.toggle('can-pan', state.zoom > 1.001);
 }
@@ -189,6 +201,13 @@ function resetPreviewTransform() {
   const stage = $('preview-stage');
   if (stage) stage.classList.remove('is-panning');
   updatePreviewTransform();
+}
+
+function updateCompareReveal() {
+  const percent = Math.max(0, Math.min(100, Number($('compare-range').value) || 50));
+  state.comparePercentage = percent;
+  $('compare-image').style.clipPath = 'inset(0 ' + (100 - percent) + '% 0 0)';
+  $('compare-divider').style.left = percent + '%';
 }
 
 function setPreviewZoom(value) {
@@ -220,14 +239,18 @@ function setPreview(blob, view) {
 }
 
 function showPreviewView() {
+  const compare = state.mode === 'vectorize' && state.view === 'compare' && Boolean(state.resultUrl);
   if (state.mode === 'rasterize') {
+    $('compare-image').hidden = true;
+    $('compare-control').hidden = true;
+    $('compare-divider').hidden = true;
     if (state.resultUrl) {
       $('preview-image').src = state.resultUrl;
       $('empty-result').hidden = true;
       $('preview-caption').textContent = 'Raster output';
     } else {
       $('preview-image').removeAttribute('src');
-      $('empty-result').textContent = 'SVG source is stored locally and will be sanitized before rendering.';
+      $('empty-result').textContent = 'SVG source is ready to render.';
       $('empty-result').hidden = false;
       $('preview-caption').textContent = 'SVG source';
     }
@@ -235,12 +258,22 @@ function showPreviewView() {
     updatePreviewTransform();
     return;
   }
-  const useOriginal = state.view === 'original' || !state.resultUrl;
+  const useOriginal = state.view === 'original' || !state.resultUrl || compare;
   $('empty-result').hidden = true;
   $('preview-image').src = useOriginal ? state.sourceUrl : state.resultUrl;
-  $('preview-caption').textContent = useOriginal ? 'Original image' : 'Vector preview';
+  $('preview-caption').textContent = compare ? 'Before / after comparison' : (useOriginal ? 'Original image' : 'Vector preview');
+  $('compare-image').hidden = !compare;
+  $('compare-divider').hidden = !compare;
+  $('compare-control').hidden = !compare;
+  if (compare && $('compare-image').dataset.objectUrl !== state.resultUrl) {
+    $('compare-image').src = state.resultUrl;
+    $('compare-image').dataset.objectUrl = state.resultUrl;
+  }
+  $('compare-range').value = String(state.comparePercentage);
+  updateCompareReveal();
   document.querySelectorAll('.view-button').forEach((button) => {
     button.classList.toggle('active', button.dataset.view === state.view);
+    if (button.dataset.view === 'compare') button.disabled = !state.resultUrl;
   });
   updatePreviewTransform();
 }
@@ -276,6 +309,7 @@ async function handleFile(file) {
   $('dropzone').hidden = true;
   $('preview-panel').hidden = false;
   $('asset-name').textContent = file.name;
+  $('project-label').textContent = file.name.replace(/\.[^.]+$/, '').toUpperCase();
   $('asset-meta').textContent = formatBytes(file.size);
   $('preview-dimensions').textContent = '';
   if (state.mode === 'vectorize') {
@@ -349,6 +383,7 @@ async function runVectorization() {
   clearMessage();
   $('process-button').disabled = true;
   $('download-button').disabled = true;
+  $('cancel-process').hidden = false;
   $('progress-panel').hidden = false;
   $('stats-panel').hidden = true;
   updateProgress('Starting background worker', 0.02);
@@ -368,6 +403,7 @@ async function runVectorization() {
     worker.terminate();
     state.worker = null;
     $('progress-panel').hidden = true;
+    $('cancel-process').hidden = true;
     $('process-button').disabled = false;
     if (message.type === 'error') {
       notify(message.message, 'error');
@@ -396,6 +432,17 @@ async function runVectorization() {
     notify(event.message || 'The vector worker stopped unexpectedly.', 'error');
   };
   worker.postMessage({ type: 'vectorize', jobId, file: state.file, settings: getSettings() });
+}
+
+function cancelVectorization() {
+  if (!state.worker) return;
+  state.jobId += 1;
+  state.worker.terminate();
+  state.worker = null;
+  $('progress-panel').hidden = true;
+  $('cancel-process').hidden = true;
+  $('process-button').disabled = !state.file;
+  notify('Vectorization cancelled.');
 }
 
 function sanitizeSvgText(source) {
@@ -441,6 +488,7 @@ async function runRasterization() {
   if (!state.file || state.mode !== 'rasterize') return;
   clearMessage();
   $('rasterize-button').disabled = true;
+  $('cancel-process').hidden = true;
   $('progress-panel').hidden = false;
   updateProgress('Reading SVG', 0.08);
   try {
@@ -522,6 +570,7 @@ async function openProject(id) {
     resetWorkspace();
     setMode(saved.project.type === 'rasterize' ? 'rasterize' : 'vectorize');
     state.projectId = id;
+    $('project-label').textContent = saved.project.name.replace(/\.[^.]+$/, '').toUpperCase();
     state.file = new File([saved.source], saved.project.name, { type: saved.source.type || 'application/octet-stream' });
     state.sourceUrl = URL.createObjectURL(state.file);
     state.resultBlob = saved.result;
@@ -631,6 +680,7 @@ async function enablePersistentStorage() {
 
 function showLibrary() {
   $('library-panel').hidden = false;
+  $('app-status').textContent = 'Project library';
   $('dropzone').hidden = true;
   $('preview-panel').hidden = true;
   $('progress-panel').hidden = true;
@@ -650,7 +700,22 @@ function bindEvents() {
   $('rasterize-button').addEventListener('click', runRasterization);
   $('raster-download-button').addEventListener('click', () => downloadBlob(state.rasterBlob, filenameWithExtension(state.file?.name || 'vectyz', state.rasterBlob?.type === 'image/jpeg' ? '.jpg' : state.rasterBlob?.type === 'image/webp' ? '.webp' : '.png')));
   $('persist-button').addEventListener('click', enablePersistentStorage);
-  $('reset-settings').addEventListener('click', () => applySettings(defaultSettings));
+  $('cancel-process').addEventListener('click', cancelVectorization);
+  $('reset-settings').addEventListener('click', () => {
+    $('preset-select').value = 'balanced';
+    applySettings(defaultSettings);
+  });
+  $('preset-select').addEventListener('change', () => {
+    const presets = {
+      balanced: defaultSettings,
+      logo: { colors: 8, detail: 0.55, minArea: 1, curve: 'polygon', cornerAngle: 55, alphaBins: 1, transparentThreshold: 4 },
+      illustration: { colors: 24, detail: 0.65, minArea: 1, curve: 'smooth', cornerAngle: 65, alphaBins: 4, transparentThreshold: 3 },
+      detail: { colors: 48, detail: 0.25, minArea: 0, curve: 'smooth', cornerAngle: 75, alphaBins: 8, transparentThreshold: 0 },
+      photo: { colors: 32, detail: 0.45, minArea: 3, curve: 'smooth', cornerAngle: 85, alphaBins: 8, transparentThreshold: 5 },
+    };
+    const preset = presets[$('preset-select').value];
+    if (preset) applySettings(preset);
+  });
   $('library-toggle').addEventListener('click', showLibrary);
   document.querySelectorAll('.rail-item[data-mode]').forEach((button) => button.addEventListener('click', () => setMode(button.dataset.mode)));
   document.querySelectorAll('.view-button').forEach((button) => button.addEventListener('click', () => {
@@ -666,7 +731,7 @@ function bindEvents() {
   }));
   const previewStage = $('preview-stage');
   previewStage.addEventListener('wheel', (event) => {
-    if ($('preview-panel').hidden || (event.target.closest && event.target.closest('.preview-tools'))) return;
+    if ($('preview-panel').hidden || (event.target.closest && event.target.closest('.preview-tools, .compare-control'))) return;
     event.preventDefault();
     setPreviewZoom(state.zoom * (event.deltaY < 0 ? 1.12 : 1 / 1.12));
   }, { passive: false });
@@ -697,7 +762,11 @@ function bindEvents() {
   previewStage.addEventListener('pointercancel', stopPreviewPan);
   $('preview-image').addEventListener('load', updatePreviewTransform);
   window.addEventListener('resize', updatePreviewTransform);
-  ['colors', 'detail', 'min-area', 'corner-angle', 'alpha-bins', 'threshold', 'curve'].forEach((id) => $(id).addEventListener('input', updateSettingLabels));
+  ['colors', 'detail', 'min-area', 'corner-angle', 'alpha-bins', 'threshold', 'curve'].forEach((id) => $(id).addEventListener('input', () => {
+    $('preset-select').value = 'custom';
+    updateSettingLabels();
+  }));
+  $('compare-range').addEventListener('input', updateCompareReveal);
   $('keep-ratio').addEventListener('change', () => { $('raster-height').disabled = $('keep-ratio').checked; });
   $('raster-width').addEventListener('input', () => {
     if ($('keep-ratio').checked) $('raster-height').dataset.edited = 'false';
@@ -713,15 +782,42 @@ function bindEvents() {
   }));
   dropzone.addEventListener('drop', (event) => handleFile(event.dataTransfer.files[0]));
   document.addEventListener('keydown', (event) => {
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'o') {
+    const command = event.ctrlKey || event.metaKey;
+    if (command && event.key.toLowerCase() === 'o') {
       event.preventDefault();
       $('file-input').click();
+    } else if (command && event.key === 'Enter') {
+      event.preventDefault();
+      if (state.mode === 'vectorize') runVectorization();
+      else runRasterization();
+    } else if (event.key === 'Escape' && state.worker) {
+      cancelVectorization();
     }
+  });
+  const stage = $('preview-stage');
+  [stage, $('dropzone')].forEach((target) => {
+    ['dragenter', 'dragover'].forEach((name) => target.addEventListener(name, (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      $('dropzone').classList.add('dragover');
+      stage.classList.add('dragover');
+    }));
+    ['dragleave', 'drop'].forEach((name) => target.addEventListener(name, (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      $('dropzone').classList.remove('dragover');
+      stage.classList.remove('dragover');
+    }));
+    target.addEventListener('drop', (event) => {
+      const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+      if (file) handleFile(file);
+    });
   });
 }
 
 async function initialize() {
   applySettings(readSettings());
+  $('preset-select').value = 'custom';
   bindEvents();
   updateModeUi();
   $('raster-height').disabled = true;

@@ -1,4 +1,4 @@
-const CACHE = 'vectyz-shell-v3';
+const CACHE = 'vectyz-shell-v4';
 const FILES = ['./', './index.html', './styles.css', './app.js', './db.js', './vector-engine.js', './vector-worker.js', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {
