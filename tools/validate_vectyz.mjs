@@ -36,7 +36,7 @@ for (const id of [
 
 must(html.includes('id="geometry-editor"') && html.includes('id="geometry-overlay"') && html.includes('id="path-list"'), 'Vectyz exposes selectable SVG path layers and an interactive geometry overlay');
 must(app.includes('function applyPathTransform()') && app.includes('function removeSelectedPath()') && app.includes('function resetAllGeometry()'), 'Vectyz supports path transforms, removal and geometry reset');
-must(html.includes('id="palette-editor"') && html.includes('id="palette-list"') && app.includes('function recolorSvg') && app.includes('function resetPalette'), 'Vectyz exposes a live, resettable SVG palette editor');
+must(html.includes('id="palette-editor"') && html.includes('id="palette-list"') && app.includes('function applyPaletteOverrides()') && app.includes('function resetPalette()'), 'Vectyz exposes a live, resettable SVG palette editor');
 must(html.includes('data-view="compare"') && html.includes('data-preview-action="one-to-one"'),
   'Vectyz exposes comparison and native-pixel preview controls');
 must(html.includes('id="compare-control"') && html.includes('id="compare-range"'),
