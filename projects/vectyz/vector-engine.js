@@ -292,7 +292,7 @@ function contourPath(rawPoints, settings) {
   return commands.join(' ');
 }
 
-function traceClass(classes, width, height, targetClass, settings) {
+function traceClass(classes, width, height, targetClass, pixelIndices, settings) {
   const stride = width + 1;
   const vertexCount = stride * (height + 1);
   const head = new Int32Array(vertexCount);
@@ -326,15 +326,28 @@ function traceClass(classes, width, height, targetClass, settings) {
     edgeCount += 1;
   }
 
-  for (let y = 0; y < height; y += 1) {
-    const row = y * width;
-    for (let x = 0; x < width; x += 1) {
-      const index = row + x;
-      if (classes[index] !== targetClass) continue;
-      if (y === 0 || classes[index - width] !== targetClass) addEdge(x, y, 0);
-      if (x === width - 1 || classes[index + 1] !== targetClass) addEdge(x + 1, y, 1);
-      if (y === height - 1 || classes[index + width] !== targetClass) addEdge(x + 1, y + 1, 2);
-      if (x === 0 || classes[index - 1] !== targetClass) addEdge(x, y + 1, 3);
+  function addPixelEdges(index, x, y) {
+    if (y === 0 || classes[index - width] !== targetClass) addEdge(x, y, 0);
+    if (x === width - 1 || classes[index + 1] !== targetClass) addEdge(x + 1, y, 1);
+    if (y === height - 1 || classes[index + width] !== targetClass) addEdge(x + 1, y + 1, 2);
+    if (x === 0 || classes[index - 1] !== targetClass) addEdge(x, y + 1, 3);
+  }
+
+  if (pixelIndices) {
+    // Pixel indices are stored in row-major order, so edge insertion remains deterministic.
+    for (let i = 0; i < pixelIndices.length; i += 1) {
+      const index = pixelIndices[i];
+      const y = Math.floor(index / width);
+      addPixelEdges(index, index - y * width, y);
+    }
+  } else {
+    // Avoid the indexing allocation when only one visible class exists.
+    for (let y = 0; y < height; y += 1) {
+      const row = y * width;
+      for (let x = 0; x < width; x += 1) {
+        const index = row + x;
+        if (classes[index] === targetClass) addPixelEdges(index, x, y);
+      }
     }
   }
   if (!edgeCount) return { paths: [], removed: 0 };
@@ -382,28 +395,62 @@ function traceClass(classes, width, height, targetClass, settings) {
 }
 
 export function vectorizeImageData(imageData, inputSettings = {}, onProgress = function () {}) {
+  if (!imageData) throw new TypeError('A valid ImageData object is required.');
   const width = imageData.width;
   const height = imageData.height;
+  if (!Number.isSafeInteger(width) || !Number.isSafeInteger(height) || width < 1 || height < 1) {
+    throw new TypeError('ImageData dimensions must be positive integers.');
+  }
+  const pixelCount = width * height;
+  if (!Number.isSafeInteger(pixelCount) || pixelCount > 12000000) {
+    throw new Error('This image is too large for the browser engine (maximum 12 megapixels in this build).');
+  }
+  if (!imageData.data || imageData.data.length !== pixelCount * 4) {
+    throw new TypeError('ImageData pixel data does not match its dimensions.');
+  }
+  const finite = (value, fallback) => Number.isFinite(Number(value)) ? Number(value) : fallback;
   const settings = {
-    colors: clamp(Math.round(inputSettings.colors ?? 16), 2, 64),
-    detail: clamp(Number(inputSettings.detail ?? 1), 0.05, 20),
-    minArea: Math.max(0, Number(inputSettings.minArea ?? 2)),
+    colors: clamp(Math.round(finite(inputSettings.colors ?? 16, 16)), 2, 64),
+    detail: clamp(finite(inputSettings.detail ?? 1, 1), 0.05, 20),
+    minArea: Math.max(0, finite(inputSettings.minArea ?? 2, 2)),
     curve: inputSettings.curve === 'polygon' ? 'polygon' : 'smooth',
-    cornerAngle: clamp(Number(inputSettings.cornerAngle ?? 65), 10, 170),
-    alphaBins: clamp(Math.round(inputSettings.alphaBins ?? 1), 1, 8),
-    transparentThreshold: clamp(Math.round(inputSettings.transparentThreshold ?? 4), 0, 254),
+    cornerAngle: clamp(finite(inputSettings.cornerAngle ?? 65, 65), 10, 170),
+    alphaBins: clamp(Math.round(finite(inputSettings.alphaBins ?? 1, 1)), 1, 8),
+    transparentThreshold: clamp(Math.round(finite(inputSettings.transparentThreshold ?? 4, 4)), 0, 254),
   };
   const started = performance.now();
   onProgress({ phase: 'Learning palette', progress: 0.12 });
   const quantized = quantize(imageData.data, settings.transparentThreshold, settings.colors, settings.alphaBins);
   const classIds = [];
   for (let i = 0; i < quantized.counts.length; i += 1) if (quantized.counts[i]) classIds.push(i);
+
+  // The old tracer rescanned the complete pixel buffer once per palette/opacity
+  // class. Build compact row-major pixel lists once so multi-colour images cost
+  // O(pixels + boundary edges), rather than O(pixels × active classes).
+  let classPixels = null;
+  if (classIds.length > 1) {
+    onProgress({ phase: 'Indexing color regions', progress: 0.15 });
+    classPixels = new Array(quantized.counts.length);
+    const positions = new Uint32Array(quantized.counts.length);
+    for (const classId of classIds) {
+      classPixels[classId] = new Uint32Array(quantized.counts[classId]);
+    }
+    for (let index = 0; index < quantized.classes.length; index += 1) {
+      const classId = quantized.classes[index];
+      if (classId !== TRANSPARENT) {
+        classPixels[classId][positions[classId]] = index;
+        positions[classId] += 1;
+      }
+    }
+  }
+
   const grouped = new Map();
   let removed = 0;
   for (let i = 0; i < classIds.length; i += 1) {
     const classId = classIds[i];
-    onProgress({ phase: 'Tracing regions', progress: 0.16 + 0.78 * (i / Math.max(1, classIds.length)), current: i + 1, total: classIds.length });
-    const traced = traceClass(quantized.classes, width, height, classId, settings);
+    onProgress({ phase: 'Tracing regions', progress: 0.18 + 0.76 * (i / Math.max(1, classIds.length)), current: i + 1, total: classIds.length });
+    const traced = traceClass(quantized.classes, width, height, classId, classPixels ? classPixels[classId] : null, settings);
+    if (classPixels) classPixels[classId] = null;
     removed += traced.removed;
     if (!traced.paths.length) continue;
     const paletteIndex = Math.floor(classId / settings.alphaBins);
