@@ -3,6 +3,7 @@
 "use strict";
 var body=document.body;
 if(!body||!body.classList.contains("home-v4"))return;
+body.classList.add("kinetic-ready");
 
 var menu=document.querySelector(".kinetic-menu");
 var nav=document.querySelector(".kinetic-nav");
