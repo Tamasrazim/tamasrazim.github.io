@@ -24,7 +24,7 @@
         <button class="rail-item" data-mode="rasterize" type="button"><span class="rail-symbol">R</span><span>Rasterize</span></button>
         <div class="rail-divider"></div>
         <button id="library-toggle" class="rail-item" type="button"><span class="rail-symbol">L</span><span>Library</span></button>
-        <div class="rail-bottom"><span class="rail-version">0.2.0</span><span class="rail-local">OFFLINE READY</span></div>
+        <div class="rail-bottom"><span class="rail-version">0.3.0</span><span class="rail-local">OFFLINE READY</span></div>
       </aside>
 
       <main class="workbench">
@@ -41,7 +41,7 @@
 
           <section id="preview-panel" class="preview-panel" hidden>
             <div class="asset-bar"><div class="asset-details"><span id="asset-name" class="asset-name">image.png</span><span id="asset-meta" class="asset-meta"></span></div><div class="view-switch" id="vector-view-switch"><button class="view-button active" data-view="vector" type="button">Vector</button><button class="view-button" data-view="original" type="button">Original</button></div><div id="raster-badge" class="result-badge" hidden>RASTERIZED</div></div>
-            <div id="preview-stage" class="preview-stage"><div class="checkerboard"></div><img id="preview-image" alt="Current Vectyz preview"><div id="empty-result" class="empty-result" hidden>Run vectorization to see the result.</div></div>
+            <div id="preview-stage" class="preview-stage"><div class="checkerboard"></div><img id="preview-image" alt="Current Vectyz preview" draggable="false"><div id="empty-result" class="empty-result" hidden>Run vectorization to see the result.</div><div class="preview-tools" role="group" aria-label="Preview zoom"><button type="button" data-preview-action="fit" title="Fit preview">Fit</button><button type="button" data-preview-action="one-to-one" title="View at native pixel size">1:1</button><button type="button" data-preview-action="out" aria-label="Zoom out" title="Zoom out">−</button><output id="zoom-level" aria-live="polite">100%</output><button type="button" data-preview-action="in" aria-label="Zoom in" title="Zoom in">+</button></div></div>
             <div class="preview-footer"><span id="preview-caption">Vector preview</span><span id="preview-dimensions"></span></div>
           </section>
 
