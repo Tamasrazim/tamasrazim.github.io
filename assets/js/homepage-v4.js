@@ -90,11 +90,13 @@ if(stage&&canvas&&ctx){
   if("ResizeObserver"in window){var ro=new ResizeObserver(resize);ro.observe(stage);}
   else window.addEventListener("resize",resize,{passive:true});
   resize();
-  var visibilityObserver=new IntersectionObserver(function(entries){
-    simVisible=entries[0].isIntersecting;
-    if(!simVisible)accumulator=0;
-  },{threshold:0});
-  visibilityObserver.observe(stage);
+  if("IntersectionObserver"in window){
+    var visibilityObserver=new IntersectionObserver(function(entries){
+      simVisible=entries[0].isIntersecting;
+      if(!simVisible)accumulator=0;
+    },{threshold:0});
+    visibilityObserver.observe(stage);
+  }
   stage.addEventListener("pointermove",function(e){
     var r=stage.getBoundingClientRect();
     pointer.x=e.clientX-r.left;
@@ -146,6 +148,22 @@ function stepPhysics(dt){
     var f=link.k*(dist-link.rest)+link.d*relative;
     var fx=f*nx,fy=f*ny;
     aNode.fx+=fx;aNode.fy+=fy;bNode.fx-=fx;bNode.fy-=fy;
+  }
+
+  // Soft particle contacts prevent the spring lattice from passing through itself.
+  for(var ci=0;ci<nodes.length;ci++){
+    var ca=nodes[ci];
+    for(var cj=ci+1;cj<nodes.length;cj++){
+      var cb=nodes[cj],cdx=cb.x-ca.x,cdy=cb.y-ca.y,cd=Math.hypot(cdx,cdy)||.0001;
+      var contact=(ca.size+cb.size)*2.8;
+      if(cd<contact){
+        var cnx=cdx/cd,cny=cdy/cd;
+        var closing=(cb.vx-ca.vx)*cnx+(cb.vy-ca.vy)*cny;
+        var contactForce=(contact-cd)*38+Math.max(0,-closing)*1.6;
+        var cfx=cnx*contactForce,cfy=cny*contactForce;
+        ca.fx-=cfx;ca.fy-=cfy;cb.fx+=cfx;cb.fy+=cfy;
+      }
+    }
   }
   for(var p=0;p<nodes.length;p++){
     var node=nodes[p];
