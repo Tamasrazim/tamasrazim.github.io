@@ -428,6 +428,7 @@ async function runVectorization() {
     worker.terminate();
     state.worker = null;
     $('progress-panel').hidden = true;
+    $('cancel-process').hidden = true;
     $('process-button').disabled = false;
     notify(event.message || 'The vector worker stopped unexpectedly.', 'error');
   };
