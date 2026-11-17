@@ -14,7 +14,7 @@ var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce
 var reveals=Array.prototype.slice.call(document.querySelectorAll("[data-home-reveal]"));
 if("IntersectionObserver"in window&&!reduce){var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.add("is-visible");observer.unobserve(entry.target);}});},{threshold:.12});reveals.forEach(function(el){observer.observe(el);});}
 else{reveals.forEach(function(el){el.classList.add("is-visible");});}
-var portrait=document.querySelector(".home-portrait-wrap"),cursor=document.querySelector(".home-cursor");
+var portrait=document.querySelector(".home-hero-art"),cursor=document.querySelector(".home-cursor");
 var pointerFine=window.matchMedia&&window.matchMedia("(pointer: fine)").matches;
 if(pointerFine&&!reduce){
 var targetX=0,targetY=0,currentX=0,currentY=0,last=0,frame=0,cursorX=-100,cursorY=-100;
