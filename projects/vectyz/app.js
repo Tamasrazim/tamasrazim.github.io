@@ -12,6 +12,12 @@ const state = {
   view: 'vector',
   projectId: null,
   rasterBlob: null,
+  zoom: 1,
+  panX: 0,
+  panY: 0,
+  dragging: false,
+  pointerX: 0,
+  pointerY: 0,
 };
 
 const defaultSettings = {
@@ -62,7 +68,7 @@ function updateSettingLabels() {
   $('corner-angle-value').textContent = $('corner-angle').value + '°';
   $('alpha-bins-value').textContent = $('alpha-bins').value;
   $('threshold-value').textContent = $('threshold').value;
-  localStorage.setItem('vectyz-settings', JSON.stringify(getSettings()));
+  try { localStorage.setItem('vectyz-settings', JSON.stringify(getSettings())); } catch { /* Settings remain usable for this session when storage is unavailable. */ }
 }
 
 function formatBytes(bytes) {
@@ -115,6 +121,7 @@ function resetWorkspace() {
   $('raster-download-button').disabled = true;
   $('preview-image').removeAttribute('src');
   $('preview-image').style.maxWidth = '';
+  resetPreviewTransform();
   $('library-panel').hidden = true;
   $('library-toggle').classList.remove('active');
   clearMessage();
@@ -150,8 +157,63 @@ function setMode(mode) {
   updateModeUi();
 }
 
+function clampPreview(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function updatePreviewTransform() {
+  const image = $('preview-image');
+  const stage = $('preview-stage');
+  if (!image || !stage) return;
+
+  if (state.zoom <= 1.001) {
+    state.panX = 0;
+    state.panY = 0;
+  } else {
+    const maxX = Math.max(0, (image.clientWidth * state.zoom - stage.clientWidth) / 2);
+    const maxY = Math.max(0, (image.clientHeight * state.zoom - stage.clientHeight) / 2);
+    state.panX = clampPreview(state.panX, -maxX, maxX);
+    state.panY = clampPreview(state.panY, -maxY, maxY);
+  }
+
+  image.style.transform = 'translate3d(' + state.panX + 'px, ' + state.panY + 'px, 0) scale(' + state.zoom + ')';
+  $('zoom-level').textContent = Math.round(state.zoom * 100) + '%';
+  stage.classList.toggle('can-pan', state.zoom > 1.001);
+}
+
+function resetPreviewTransform() {
+  state.zoom = 1;
+  state.panX = 0;
+  state.panY = 0;
+  state.dragging = false;
+  const stage = $('preview-stage');
+  if (stage) stage.classList.remove('is-panning');
+  updatePreviewTransform();
+}
+
+function setPreviewZoom(value) {
+  state.zoom = clampPreview(value, 1, 32);
+  if (state.zoom === 1) {
+    state.panX = 0;
+    state.panY = 0;
+  }
+  updatePreviewTransform();
+}
+
+function zoomPreviewToOneToOne() {
+  const image = $('preview-image');
+  const stage = $('preview-stage');
+  if (!image.naturalWidth || !image.naturalHeight || !stage.clientWidth || !stage.clientHeight) {
+    setPreviewZoom(1);
+    return;
+  }
+  const fitScale = Math.min(stage.clientWidth / image.naturalWidth, stage.clientHeight / image.naturalHeight, 1);
+  setPreviewZoom(1 / Math.max(fitScale, 1 / 32));
+}
+
 function setPreview(blob, view) {
   if (state.resultUrl) URL.revokeObjectURL(state.resultUrl);
+  resetPreviewTransform();
   state.resultUrl = blob ? URL.createObjectURL(blob) : null;
   state.view = view;
   showPreviewView();
@@ -170,6 +232,7 @@ function showPreviewView() {
       $('preview-caption').textContent = 'SVG source';
     }
     $('vector-view-switch').hidden = true;
+    updatePreviewTransform();
     return;
   }
   const useOriginal = state.view === 'original' || !state.resultUrl;
@@ -179,6 +242,7 @@ function showPreviewView() {
   document.querySelectorAll('.view-button').forEach((button) => {
     button.classList.toggle('active', button.dataset.view === state.view);
   });
+  updatePreviewTransform();
 }
 
 async function readDimensions(file) {
@@ -228,6 +292,7 @@ async function handleFile(file) {
         return;
       }
     } catch (error) {
+      if (state.file !== file) return;
       notify('The browser could not decode this image: ' + error.message, 'error');
       resetWorkspace();
       return;
@@ -275,6 +340,7 @@ async function saveCurrentProject(resultBlob, details) {
   };
   await saveProject(project, state.file, resultBlob);
   await renderLibrary();
+  await updateStorageLabel();
   return project;
 }
 
@@ -555,8 +621,12 @@ async function enablePersistentStorage() {
     notify('Persistent storage is not available in this browser.', 'error');
     return;
   }
-  const granted = await navigator.storage.persist();
-  notify(granted ? 'The browser will protect Vectyz data from automatic storage cleanup.' : 'The browser did not grant persistent storage. Saved projects remain subject to browser storage policy.');
+  try {
+    const granted = await navigator.storage.persist();
+    notify(granted ? 'The browser will protect Vectyz data from automatic storage cleanup.' : 'The browser did not grant persistent storage. Saved projects remain subject to browser storage policy.');
+  } catch (error) {
+    notify('Could not request persistent storage: ' + error.message, 'error');
+  }
 }
 
 function showLibrary() {
@@ -587,6 +657,46 @@ function bindEvents() {
     state.view = button.dataset.view;
     showPreviewView();
   }));
+  document.querySelectorAll('[data-preview-action]').forEach((button) => button.addEventListener('click', () => {
+    const action = button.dataset.previewAction;
+    if (action === 'fit') setPreviewZoom(1);
+    else if (action === 'one-to-one') zoomPreviewToOneToOne();
+    else if (action === 'in') setPreviewZoom(state.zoom * 1.25);
+    else if (action === 'out') setPreviewZoom(state.zoom / 1.25);
+  }));
+  const previewStage = $('preview-stage');
+  previewStage.addEventListener('wheel', (event) => {
+    if ($('preview-panel').hidden || (event.target.closest && event.target.closest('.preview-tools'))) return;
+    event.preventDefault();
+    setPreviewZoom(state.zoom * (event.deltaY < 0 ? 1.12 : 1 / 1.12));
+  }, { passive: false });
+  previewStage.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0 || state.zoom <= 1.001 || (event.target.closest && event.target.closest('.preview-tools'))) return;
+    state.dragging = true;
+    state.pointerX = event.clientX;
+    state.pointerY = event.clientY;
+    previewStage.classList.add('is-panning');
+    previewStage.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  });
+  previewStage.addEventListener('pointermove', (event) => {
+    if (!state.dragging) return;
+    state.panX += event.clientX - state.pointerX;
+    state.panY += event.clientY - state.pointerY;
+    state.pointerX = event.clientX;
+    state.pointerY = event.clientY;
+    updatePreviewTransform();
+  });
+  const stopPreviewPan = (event) => {
+    if (!state.dragging) return;
+    state.dragging = false;
+    previewStage.classList.remove('is-panning');
+    if (previewStage.hasPointerCapture(event.pointerId)) previewStage.releasePointerCapture(event.pointerId);
+  };
+  previewStage.addEventListener('pointerup', stopPreviewPan);
+  previewStage.addEventListener('pointercancel', stopPreviewPan);
+  $('preview-image').addEventListener('load', updatePreviewTransform);
+  window.addEventListener('resize', updatePreviewTransform);
   ['colors', 'detail', 'min-area', 'corner-angle', 'alpha-bins', 'threshold', 'curve'].forEach((id) => $(id).addEventListener('input', updateSettingLabels));
   $('keep-ratio').addEventListener('change', () => { $('raster-height').disabled = $('keep-ratio').checked; });
   $('raster-width').addEventListener('input', () => {
