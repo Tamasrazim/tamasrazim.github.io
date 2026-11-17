@@ -77,7 +77,7 @@ body.home-v4 ::selection{background:var(--k-fg);color:var(--k-bg)}
 .kinetic-feature:hover .kinetic-feature-link{gap:36px}
 .kinetic-feature-link b{font-size:15px;font-weight:400}
 .kinetic-project-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin-top:42px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.13)}
-.kinetic-project-card{position:relative;min-height:340px;background:#090909;display:flex;flex-direction:column;transform-style:preserve-3d;will-change:transform;transition:background .25s;overflow:hidden}
+.kinetic-project-card{transform:perspective(1200px) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg));position:relative;min-height:340px;background:#090909;display:flex;flex-direction:column;transform-style:preserve-3d;will-change:transform;transition:background .25s;overflow:hidden}
 .kinetic-project-card:hover{background:#101010}
 .kinetic-card-art{height:154px;position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 55%,rgba(255,255,255,.095),transparent 58%),linear-gradient(135deg,#111,#080808);border-bottom:1px solid rgba(255,255,255,.09);transform:translateZ(18px)}
 .kinetic-card-art:before,.kinetic-card-art:after,.kinetic-card-art span,.kinetic-card-art i{content:"";position:absolute;left:50%;top:50%;border:1px solid rgba(255,255,255,.36);border-radius:50%;transform:translate(-50%,-50%) rotate(-25deg) scaleY(.42);pointer-events:none}
@@ -144,6 +144,7 @@ body.home-v4 ::selection{background:var(--k-fg);color:var(--k-bg)}
 .home-secret-node .ring-b{inset:1px;animation-delay:1.5s}
 .home-secret-node .secret-node-spark{position:absolute;top:1px;left:14px;width:2px;height:2px;background:#fff}
 @keyframes kinetic-secret-pulse{0%,100%{transform:scale(.75);opacity:.25}50%{transform:scale(1.2);opacity:.85}}
+body.home-v4:not(.kinetic-ready) [data-kinetic-reveal]{opacity:1;transform:none}
 [data-kinetic-reveal]{opacity:0;--reveal-y:46px;--reveal-scale:.985;transform:translate3d(0,var(--reveal-y),0) scale(var(--reveal-scale));will-change:transform,opacity}
 [data-kinetic-reveal].is-kinetic-visible{will-change:auto}
 .kinetic-project-card:focus-visible,.kinetic-feature:focus-visible,.kinetic-nav a:focus-visible,.kinetic-socials a:focus-visible,.kinetic-contact-inner>a:focus-visible{outline:1px solid #fff;outline-offset:5px}
