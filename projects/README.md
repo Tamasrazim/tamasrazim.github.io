@@ -13,7 +13,7 @@ This directory contains a curated set of first-party browser tools, native appli
 - **WEBEDYTS** — native desktop visual website editor in development; its project page separates current editor-source capabilities from release gates. No public download is available yet.
 - **QALYVYRON** — native C++/Qt 6 3D creation and offline-rendering studio in active development. Its project page links to the source, verified CI history, current capabilities, and remaining gaps.
 - **Business software** — BNC AgroCare catalogue and invoice workflow.
-- **Browser tools** — Format Forge, Repo Token Meter, and Stock Asset Vault.
+- **Browser tools** — Format Forge, Repo Token Meter, Stock Asset Vault, and Vectyz (local raster-to-vector conversion).
 
 ## Project rule
 
@@ -30,3 +30,5 @@ Established routes for retained projects are public URLs. The former generated o
 Featured project routes are information pages first. Browser applications and exports live under their dedicated `workspace/` routes where applicable. KYNESTRA uses `/projects/kynestra/` for the overview and `/projects/kynestra/download/` for its Windows installer. Stock Asset Vault's overview is under `/projects/asset-vault/`; its working app remains under `/asset-vault/`. BNC AgroCare's project page links to the catalogue and separate invoice workspace.
 
 - **HOLLOW Texture Lab** — an original offline procedural material workshop with 16 material families, 1,024 deterministic recipes, and export options up to 8K at `/projects/hollow-texture-lab/`. No external texture assets or runtime libraries are used.
+
+- **Vectyz** — a browser-first raster/vector conversion workspace at `/projects/vectyz/`. It processes images in a Web Worker and keeps project data in IndexedDB; it has no processing backend.
