@@ -20,6 +20,9 @@ const state = {
   pointerY: 0,
   comparePercentage: 50,
   svgSourceText: null,
+  editorDoc: null,
+  selectedPath: -1,
+  paletteOverrides: new Map(),
 };
 
 const defaultSettings = {
@@ -113,6 +116,13 @@ function resetWorkspace() {
   state.file = null;
   state.resultBlob = null;
   state.svgSourceText = null;
+  state.editorDoc = null;
+  state.selectedPath = -1;
+  state.paletteOverrides.clear();
+  $('geometry-editor').hidden = true;
+  $('geometry-overlay').hidden = true;
+  $('geometry-overlay').replaceChildren();
+  $('path-list').replaceChildren();
   state.rasterBlob = null;
   $('palette-editor').hidden = true;
   $('palette-list').replaceChildren();
@@ -193,6 +203,7 @@ function updatePreviewTransform() {
   const transform = 'translate3d(' + state.panX + 'px, ' + state.panY + 'px, 0) scale(' + state.zoom + ')';
   image.style.transform = transform;
   $('compare-image').style.transform = transform;
+  $('geometry-overlay').style.transform = transform;
   $('zoom-level').textContent = Math.round(state.zoom * 100) + '%';
   stage.classList.toggle('can-pan', state.zoom > 1.001);
 }
@@ -263,10 +274,14 @@ function showPreviewView() {
     return;
   }
   const useOriginal = state.view === 'original' || !state.resultUrl || compare;
+  const editVector = state.view === 'vector' && Boolean(state.editorDoc);
+  $('geometry-overlay').hidden = !editVector;
+  $('preview-image').style.visibility = editVector ? 'hidden' : 'visible';
   $('empty-result').hidden = true;
   $('preview-image').src = useOriginal ? state.sourceUrl : state.resultUrl;
   $('preview-caption').textContent = compare ? 'Before / after comparison' : (useOriginal ? 'Original image' : 'Vector preview');
   $('compare-image').hidden = !compare;
+  if (editVector) renderGeometryOverlay();
   $('compare-divider').hidden = !compare;
   $('compare-control').hidden = !compare;
   if (compare && $('compare-image').dataset.objectUrl !== state.resultUrl) {
@@ -280,6 +295,7 @@ function showPreviewView() {
     if (button.dataset.view === 'compare') button.disabled = !state.resultUrl;
   });
   updatePreviewTransform();
+  renderGeometryOverlay();
 }
 
 async function readDimensions(file) {
@@ -352,6 +368,164 @@ function updateProgress(phase, progress) {
   $('progress-fill').style.width = value + '%';
 }
 
+function createEditorDocument(svgText) {
+  const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
+  if (doc.querySelector('parsererror') || doc.documentElement.localName !== 'svg') throw new Error('The SVG geometry could not be loaded.');
+  for (const path of Array.from(doc.documentElement.children).filter((node) => node.localName === 'path')) {
+    const fill = path.getAttribute('fill');
+    if (fill) path.setAttribute('data-vectyz-original-fill', fill);
+  }
+  return doc;
+}
+
+function getEditorPaths() {
+  return state.editorDoc ? Array.from(state.editorDoc.documentElement.children).filter((node) => node.localName === 'path') : [];
+}
+
+function renderGeometryEditor() {
+  const paths = getEditorPaths();
+  const section = $('geometry-editor');
+  section.hidden = paths.length === 0;
+  $('path-count').textContent = paths.length + (paths.length === 1 ? ' PATH' : ' PATHS');
+  const list = $('path-list');
+  list.replaceChildren();
+  paths.forEach((path, index) => {
+    path.dataset.editorIndex = String(index);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'path-layer' + (index === state.selectedPath ? ' selected' : '');
+    button.dataset.pathIndex = String(index);
+    const swatch = document.createElement('i');
+    swatch.className = 'path-layer-swatch';
+    swatch.style.background = path.getAttribute('fill') || '#888888';
+    const name = document.createElement('span');
+    name.textContent = 'Path ' + String(index + 1).padStart(2, '0');
+    const meta = document.createElement('small');
+    meta.textContent = (path.getAttribute('fill') || 'none').toUpperCase();
+    button.append(swatch, name, meta);
+    list.append(button);
+  });
+  updateGeometrySelection();
+  renderGeometryOverlay();
+}
+
+function renderGeometryOverlay() {
+  const overlay = $('geometry-overlay');
+  const doc = state.editorDoc;
+  if (!doc || state.mode !== 'vectorize' || state.view !== 'vector' || $('preview-panel').hidden) {
+    overlay.hidden = true;
+    return;
+  }
+  const root = doc.documentElement;
+  overlay.setAttribute('viewBox', root.getAttribute('viewBox') || '0 0 100 100');
+  overlay.setAttribute('preserveAspectRatio', root.getAttribute('preserveAspectRatio') || 'xMidYMid meet');
+  overlay.innerHTML = root.innerHTML;
+  overlay.querySelectorAll('path').forEach((path, index) => {
+    path.dataset.pathIndex = String(index);
+    path.classList.toggle('is-selected', index === state.selectedPath);
+    path.setAttribute('pointer-events', 'visiblePainted');
+  });
+  overlay.hidden = false;
+}
+
+function updateGeometrySelection() {
+  const paths = getEditorPaths();
+  const selected = paths[state.selectedPath];
+  $('path-list').querySelectorAll('.path-layer').forEach((button) => {
+    button.classList.toggle('selected', Number(button.dataset.pathIndex) === state.selectedPath);
+  });
+  const active = Boolean(selected);
+  ['path-x', 'path-y', 'path-scale', 'path-rotation', 'path-reset', 'path-delete'].forEach((id) => { $(id).disabled = !active; });
+  $('selected-path-label').textContent = active ? 'PATH ' + String(state.selectedPath + 1).padStart(2, '0') : 'NO SELECTION';
+  if (active) {
+    const transform = selected.getAttribute('data-vectyz-transform');
+    let values = { x: 0, y: 0, scale: 1, rotation: 0 };
+    if (transform) { try { values = { ...values, ...JSON.parse(transform) }; } catch { /* Invalid metadata is ignored. */ } }
+    $('path-x').value = values.x;
+    $('path-y').value = values.y;
+    $('path-scale').value = values.scale;
+    $('path-rotation').value = values.rotation;
+  }
+  renderGeometryOverlay();
+}
+
+function selectGeometryPath(index) {
+  const paths = getEditorPaths();
+  if (!Number.isInteger(index) || index < 0 || index >= paths.length) return;
+  state.selectedPath = index;
+  updateGeometrySelection();
+}
+
+function applyPathTransform() {
+  const paths = getEditorPaths();
+  const path = paths[state.selectedPath];
+  if (!path) return;
+  const x = Math.max(-100000, Math.min(100000, Number($('path-x').value) || 0));
+  const y = Math.max(-100000, Math.min(100000, Number($('path-y').value) || 0));
+  const scale = Math.max(0.05, Math.min(20, Number($('path-scale').value) || 1));
+  const rotation = Math.max(-360, Math.min(360, Number($('path-rotation').value) || 0));
+  const renderedPath = $('geometry-overlay').querySelector('[data-path-index="' + state.selectedPath + '"]');
+  let box = { x: 0, y: 0, width: 0, height: 0 };
+  try { if (renderedPath) box = renderedPath.getBBox(); } catch { /* Fall back to the SVG origin when geometry bounds are unavailable. */ }
+  const cx = box.x + box.width / 2, cy = box.y + box.height / 2;
+  path.setAttribute('transform', 'translate(' + x + ' ' + y + ') translate(' + cx + ' ' + cy + ') rotate(' + rotation + ') scale(' + scale + ') translate(' + (-cx) + ' ' + (-cy) + ')');
+  path.setAttribute('data-vectyz-transform', JSON.stringify({ x, y, scale, rotation }));
+  publishEditorDocument();
+}
+
+function resetSelectedTransform() {
+  const path = getEditorPaths()[state.selectedPath];
+  if (!path) return;
+  path.removeAttribute('transform');
+  path.removeAttribute('data-vectyz-transform');
+  updateGeometrySelection();
+  publishEditorDocument();
+}
+
+function removeSelectedPath() {
+  const paths = getEditorPaths();
+  const path = paths[state.selectedPath];
+  if (!path) return;
+  path.remove();
+  state.selectedPath = Math.min(state.selectedPath, getEditorPaths().length - 1);
+  renderGeometryEditor();
+  publishEditorDocument();
+}
+
+function resetAllGeometry() {
+  if (!state.svgSourceText) return;
+  state.editorDoc = createEditorDocument(state.svgSourceText);
+  state.selectedPath = -1;
+  applyPaletteOverrides();
+  renderGeometryEditor();
+  publishEditorDocument();
+}
+
+function applyPaletteOverrides() {
+  if (!state.editorDoc) return;
+  for (const path of getEditorPaths()) {
+    const sourceFill = path.getAttribute('data-vectyz-original-fill');
+    if (!sourceFill) continue;
+    path.setAttribute('fill', state.paletteOverrides.get(sourceFill) || sourceFill);
+  }
+}
+
+async function publishEditorDocument() {
+  if (!state.editorDoc) return;
+  const svg = new XMLSerializer().serializeToString(state.editorDoc.documentElement);
+  state.resultBlob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>\\n' + svg], { type: 'image/svg+xml;charset=utf-8' });
+  setPreview(state.resultBlob, 'vector');
+  renderGeometryEditor();
+  $('download-button').disabled = false;
+  $('stat-size').textContent = formatBytes(state.resultBlob.size);
+  try {
+    await saveCurrentProject(state.resultBlob, null);
+    $('app-status').textContent = 'Vector geometry updated · saved locally';
+  } catch (error) {
+    notify('Geometry changed, but local saving failed: ' + error.message, 'error');
+  }
+}
+
 function parseSvgPalette(svgText) {
   const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
   if (doc.querySelector('parsererror')) throw new Error('The generated SVG could not be inspected.');
@@ -384,41 +558,23 @@ function renderPaletteEditor(svgText) {
     const count = document.createElement('span');
     count.className = 'palette-regions';
     count.textContent = regions + (regions === 1 ? ' GROUP' : ' GROUPS');
-    swatch.addEventListener('input', () => recolorSvg(swatch.dataset.original, swatch.value, code));
+    swatch.addEventListener('input', () => {
+      state.paletteOverrides.set(swatch.dataset.original, swatch.value);
+      code.textContent = swatch.value.toUpperCase();
+      applyPaletteOverrides();
+      publishEditorDocument();
+    });
     row.append(swatch, code, count);
     list.append(row);
   }
 }
 
-async function recolorSvg(original, replacement, codeLabel) {
-  if (!state.svgSourceText) return;
-  const doc = new DOMParser().parseFromString(state.svgSourceText, 'image/svg+xml');
-  const palette = new Map(Array.from($('palette-list').querySelectorAll('input[type=color]'), (input) => [input.dataset.original, input.value]));
-  for (const path of doc.querySelectorAll('path[fill]')) {
-    const fill = path.getAttribute('fill');
-    if (palette.has(fill)) path.setAttribute('fill', palette.get(fill));
-  }
-  const serialized = new XMLSerializer().serializeToString(doc.documentElement);
-  state.resultBlob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>\\n' + serialized], { type: 'image/svg+xml;charset=utf-8' });
-  codeLabel.textContent = replacement.toUpperCase();
-  setPreview(state.resultBlob, 'vector');
-  $('download-button').disabled = false;
-  $('stat-size').textContent = formatBytes(state.resultBlob.size);
-  try {
-    await saveCurrentProject(state.resultBlob, null);
-    $('app-status').textContent = 'Palette updated · saved locally';
-  } catch (error) {
-    notify('Palette changed, but local saving failed: ' + error.message, 'error');
-  }
-}
-
 function resetPalette() {
-  if (!state.svgSourceText) return;
-  state.resultBlob = new Blob([state.svgSourceText], { type: 'image/svg+xml;charset=utf-8' });
+  if (!state.editorDoc) return;
+  state.paletteOverrides.clear();
+  applyPaletteOverrides();
   renderPaletteEditor(state.svgSourceText);
-  setPreview(state.resultBlob, 'vector');
-  $('stat-size').textContent = formatBytes(state.resultBlob.size);
-  saveCurrentProject(state.resultBlob, null).catch((error) => notify('Could not save palette reset: ' + error.message, 'error'));
+  publishEditorDocument();
 }
 
 function showStats(stats, blobSize) {
@@ -485,7 +641,11 @@ async function runVectorization() {
     const svgBlob = new Blob([message.result.svg], { type: 'image/svg+xml;charset=utf-8' });
     state.resultBlob = svgBlob;
     state.svgSourceText = message.result.svg;
+    state.editorDoc = createEditorDocument(state.svgSourceText);
+    state.paletteOverrides.clear();
+    state.selectedPath = -1;
     renderPaletteEditor(state.svgSourceText);
+    renderGeometryEditor();
     setPreview(svgBlob, 'vector');
     $('download-button').disabled = false;
     $('preview-panel').hidden = false;
@@ -651,7 +811,10 @@ async function openProject(id) {
     state.sourceUrl = URL.createObjectURL(state.file);
     state.resultBlob = saved.result;
     state.svgSourceText = saved.project.type === 'vectorize' && saved.result ? await saved.result.text() : null;
-    if (state.svgSourceText) renderPaletteEditor(state.svgSourceText);
+    state.editorDoc = state.svgSourceText ? createEditorDocument(state.svgSourceText) : null;
+    state.paletteOverrides.clear();
+    state.selectedPath = -1;
+    if (state.svgSourceText) { renderPaletteEditor(state.svgSourceText); renderGeometryEditor(); }
     state.rasterBlob = saved.project.type === 'rasterize' ? saved.result : null;
     $('dropzone').hidden = true;
     $('preview-panel').hidden = false;
@@ -776,6 +939,18 @@ function bindEvents() {
   $('process-button').addEventListener('click', runVectorization);
   $('download-button').addEventListener('click', () => downloadBlob(state.resultBlob, filenameWithExtension(state.file?.name || 'vectyz', '.svg')));
   $('palette-reset').addEventListener('click', resetPalette);
+  $('path-list').addEventListener('click', (event) => {
+    const button = event.target.closest('.path-layer');
+    if (button) selectGeometryPath(Number(button.dataset.pathIndex));
+  });
+  $('geometry-overlay').addEventListener('click', (event) => {
+    const path = event.target.closest('path[data-path-index]');
+    if (path) { event.stopPropagation(); selectGeometryPath(Number(path.dataset.pathIndex)); }
+  });
+  ['path-x', 'path-y', 'path-scale', 'path-rotation'].forEach((id) => $(id).addEventListener('change', applyPathTransform));
+  $('path-reset').addEventListener('click', resetSelectedTransform);
+  $('path-delete').addEventListener('click', removeSelectedPath);
+  $('geometry-reset').addEventListener('click', resetAllGeometry);
   $('rasterize-button').addEventListener('click', runRasterization);
   $('raster-download-button').addEventListener('click', () => downloadBlob(state.rasterBlob, filenameWithExtension(state.file?.name || 'vectyz', state.rasterBlob?.type === 'image/jpeg' ? '.jpg' : state.rasterBlob?.type === 'image/webp' ? '.webp' : '.png')));
   $('persist-button').addEventListener('click', enablePersistentStorage);

@@ -6,14 +6,14 @@ Vectyz has two local runtimes: a browser workspace for day-to-day conversion and
 
 ## Browser workspace
 
-The browser GUI is a static, offline-first application (workspace release 0.5.0). Its processing engine runs inside a Web Worker; IndexedDB stores source files, SVG/raster outputs and project metadata on the current browser origin.
+The browser GUI is a static, offline-first application (workspace release 0.6.0). Its processing engine runs inside a Web Worker; IndexedDB stores source files, SVG/raster outputs and project metadata on the current browser origin.
 
 - No Python API server, Node backend, cloud processing, login or external JavaScript dependencies.
 - Palette quantization, contour extraction and SVG generation run locally in the browser.
 - Web Workers keep the main interface responsive while an image is processed.
 - IndexedDB stores original files and generated results as binary Blobs.
 - The service worker caches the application shell for offline launches after the first visit.
-- SVG rasterization removes scripts, embedded HTML, CSS stylesheets and external resource references before rendering.\n- The 0.5.0 workspace adds original/vector comparison, synchronized zoom and pan, reconstruction presets, cancellable vectorization jobs, keyboard shortcuts, a responsive studio layout and a live SVG palette editor. Palette edits are applied to generated SVG fill groups and saved locally.
+- SVG rasterization removes scripts, embedded HTML, CSS stylesheets and external resource references before rendering.\n- The 0.5.0 workspace adds original/vector comparison, synchronized zoom and pan, reconstruction presets, cancellable vectorization jobs, keyboard shortcuts, a responsive studio layout and a live SVG palette editor and selectable path-layer geometry editor. Individual generated fill paths can be selected, translated, scaled, rotated or removed; edits and palette changes are saved locally.
 
 ### Run locally
 
@@ -28,7 +28,7 @@ Choose **Keep data** in the top bar to ask the browser for persistent storage. T
 ### Browser engine limits in this build
 
 - Raster vectorization is limited to 12 megapixels per image to keep memory use bounded.
-- The browser engine supports up to 64 palette colors, 1–8 transparency levels, contour simplification and corner-aware cubic paths.
+- The geometry inspector exposes each generated fill-group path as a selectable layer with non-destructive transform controls and removal/reset actions. It edits the generated SVG paths directly; it is not yet a per-node Bézier handle editor. The browser engine supports up to 64 palette colors, 1–8 transparency levels, contour simplification and corner-aware cubic paths.
 - Browser export currently includes recolorable SVG fill groups for vector output and PNG, JPEG or WebP for SVG rasterization.
 - Browser PDF/EPS export, folder batch processing, native WASM acceleration and full parameter parity with the Python engine are not implemented yet.
 - The original bitmap is not embedded in vector output; the browser engine writes real SVG path geometry.
