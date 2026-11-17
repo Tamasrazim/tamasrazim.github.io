@@ -19,6 +19,7 @@ const state = {
   pointerX: 0,
   pointerY: 0,
   comparePercentage: 50,
+  svgSourceText: null,
 };
 
 const defaultSettings = {
@@ -111,7 +112,10 @@ function resetWorkspace() {
   state.worker = null;
   state.file = null;
   state.resultBlob = null;
+  state.svgSourceText = null;
   state.rasterBlob = null;
+  $('palette-editor').hidden = true;
+  $('palette-list').replaceChildren();
   state.projectId = null;
   $('file-input').value = '';
   $('dropzone').hidden = false;
@@ -348,6 +352,75 @@ function updateProgress(phase, progress) {
   $('progress-fill').style.width = value + '%';
 }
 
+function parseSvgPalette(svgText) {
+  const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
+  if (doc.querySelector('parsererror')) throw new Error('The generated SVG could not be inspected.');
+  const groups = new Map();
+  for (const path of doc.querySelectorAll('path[fill]')) {
+    const fill = path.getAttribute('fill');
+    if (!/^#[0-9a-f]{6}$/i.test(fill)) continue;
+    groups.set(fill, (groups.get(fill) || 0) + 1);
+  }
+  return groups;
+}
+
+function renderPaletteEditor(svgText) {
+  const groups = parseSvgPalette(svgText);
+  const list = $('palette-list');
+  list.replaceChildren();
+  $('palette-count').textContent = groups.size + ' COLORS';
+  $('palette-editor').hidden = groups.size === 0;
+  for (const [color, regions] of groups) {
+    const row = document.createElement('label');
+    row.className = 'palette-row';
+    const swatch = document.createElement('input');
+    swatch.type = 'color';
+    swatch.value = color;
+    swatch.dataset.original = color;
+    swatch.setAttribute('aria-label', 'Change ' + color + ' region color');
+    const code = document.createElement('span');
+    code.className = 'palette-hex';
+    code.textContent = color.toUpperCase();
+    const count = document.createElement('span');
+    count.className = 'palette-regions';
+    count.textContent = regions + (regions === 1 ? ' GROUP' : ' GROUPS');
+    swatch.addEventListener('input', () => recolorSvg(swatch.dataset.original, swatch.value, code));
+    row.append(swatch, code, count);
+    list.append(row);
+  }
+}
+
+async function recolorSvg(original, replacement, codeLabel) {
+  if (!state.svgSourceText) return;
+  const doc = new DOMParser().parseFromString(state.svgSourceText, 'image/svg+xml');
+  const palette = new Map(Array.from($('palette-list').querySelectorAll('input[type=color]'), (input) => [input.dataset.original, input.value]));
+  for (const path of doc.querySelectorAll('path[fill]')) {
+    const fill = path.getAttribute('fill');
+    if (palette.has(fill)) path.setAttribute('fill', palette.get(fill));
+  }
+  const serialized = new XMLSerializer().serializeToString(doc.documentElement);
+  state.resultBlob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>\\n' + serialized], { type: 'image/svg+xml;charset=utf-8' });
+  codeLabel.textContent = replacement.toUpperCase();
+  setPreview(state.resultBlob, 'vector');
+  $('download-button').disabled = false;
+  $('stat-size').textContent = formatBytes(state.resultBlob.size);
+  try {
+    await saveCurrentProject(state.resultBlob, null);
+    $('app-status').textContent = 'Palette updated · saved locally';
+  } catch (error) {
+    notify('Palette changed, but local saving failed: ' + error.message, 'error');
+  }
+}
+
+function resetPalette() {
+  if (!state.svgSourceText) return;
+  state.resultBlob = new Blob([state.svgSourceText], { type: 'image/svg+xml;charset=utf-8' });
+  renderPaletteEditor(state.svgSourceText);
+  setPreview(state.resultBlob, 'vector');
+  $('stat-size').textContent = formatBytes(state.resultBlob.size);
+  saveCurrentProject(state.resultBlob, null).catch((error) => notify('Could not save palette reset: ' + error.message, 'error'));
+}
+
 function showStats(stats, blobSize) {
   $('stats-panel').hidden = false;
   $('stat-colors').textContent = stats.colorsUsed ?? '—';
@@ -370,7 +443,7 @@ async function saveCurrentProject(resultBlob, details) {
     sourceSize: state.file.size,
     resultSize: resultBlob.size,
     settings: state.mode === 'vectorize' ? getSettings() : null,
-    details: details || null,
+    details: details || previous?.details || null,
   };
   await saveProject(project, state.file, resultBlob);
   await renderLibrary();
@@ -411,6 +484,8 @@ async function runVectorization() {
     }
     const svgBlob = new Blob([message.result.svg], { type: 'image/svg+xml;charset=utf-8' });
     state.resultBlob = svgBlob;
+    state.svgSourceText = message.result.svg;
+    renderPaletteEditor(state.svgSourceText);
     setPreview(svgBlob, 'vector');
     $('download-button').disabled = false;
     $('preview-panel').hidden = false;
@@ -575,6 +650,8 @@ async function openProject(id) {
     state.file = new File([saved.source], saved.project.name, { type: saved.source.type || 'application/octet-stream' });
     state.sourceUrl = URL.createObjectURL(state.file);
     state.resultBlob = saved.result;
+    state.svgSourceText = saved.project.type === 'vectorize' && saved.result ? await saved.result.text() : null;
+    if (state.svgSourceText) renderPaletteEditor(state.svgSourceText);
     state.rasterBlob = saved.project.type === 'rasterize' ? saved.result : null;
     $('dropzone').hidden = true;
     $('preview-panel').hidden = false;
@@ -698,6 +775,7 @@ function bindEvents() {
   $('clear-button').addEventListener('click', resetWorkspace);
   $('process-button').addEventListener('click', runVectorization);
   $('download-button').addEventListener('click', () => downloadBlob(state.resultBlob, filenameWithExtension(state.file?.name || 'vectyz', '.svg')));
+  $('palette-reset').addEventListener('click', resetPalette);
   $('rasterize-button').addEventListener('click', runRasterization);
   $('raster-download-button').addEventListener('click', () => downloadBlob(state.rasterBlob, filenameWithExtension(state.file?.name || 'vectyz', state.rasterBlob?.type === 'image/jpeg' ? '.jpg' : state.rasterBlob?.type === 'image/webp' ? '.webp' : '.png')));
   $('persist-button').addEventListener('click', enablePersistentStorage);

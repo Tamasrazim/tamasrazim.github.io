@@ -34,6 +34,7 @@ for (const id of [
   must(ids.includes(id), 'Vectyz workspace exposes #' + id);
 }
 
+must(html.includes('id="palette-editor"') && html.includes('id="palette-list"') && app.includes('function recolorSvg') && app.includes('function resetPalette'), 'Vectyz exposes a live, resettable SVG palette editor');
 must(html.includes('data-view="compare"') && html.includes('data-preview-action="one-to-one"'),
   'Vectyz exposes comparison and native-pixel preview controls');
 must(html.includes('id="compare-control"') && html.includes('id="compare-range"'),
@@ -50,7 +51,7 @@ must(engine.includes('Indexing color regions') && engine.includes('function trac
   'Vectyz uses the indexed browser contour engine');
 must(css.includes('.preview-tools') && css.includes('.compare-control') && css.includes('@media(max-width:860px)'),
   'Vectyz styles comparison tools and responsive layouts');
-must(sw.includes("const CACHE = 'vectyz-shell-v4'"),
+must(sw.includes("const CACHE = 'vectyz-shell-v5'"),
   'Vectyz service worker uses the current offline cache version');
 must(manifest.name && manifest.short_name, 'Vectyz PWA manifest is valid');
 
