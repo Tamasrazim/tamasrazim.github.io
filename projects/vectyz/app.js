@@ -385,10 +385,16 @@ function getEditorPaths() {
 function renderGeometryEditor() {
   const paths = getEditorPaths();
   const section = $('geometry-editor');
-  section.hidden = paths.length === 0;
+  section.hidden = !state.editorDoc;
   $('path-count').textContent = paths.length + (paths.length === 1 ? ' PATH' : ' PATHS');
   const list = $('path-list');
   list.replaceChildren();
+  if (!paths.length) {
+    const empty = document.createElement('p');
+    empty.className = 'field-help';
+    empty.textContent = 'No paths remain. Reset all geometry to restore the original vector layers.';
+    list.append(empty);
+  }
   paths.forEach((path, index) => {
     path.dataset.editorIndex = String(index);
     const button = document.createElement('button');
