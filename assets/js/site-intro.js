@@ -24,10 +24,6 @@
       });
     }
 
-    function announceComplete() {
-      window.dispatchEvent(new CustomEvent('tamasrazim:site-intro-complete'));
-    }
-
     function finish() {
       if (finished) return;
       finished = true;
@@ -36,13 +32,11 @@
       intro.classList.add('is-leaving');
       window.setTimeout(function () {
         intro.hidden = true;
-        announceComplete();
       }, reduceMotion ? 0 : 740);
     }
 
     if (reduceMotion) {
       intro.hidden = true;
-      announceComplete();
       return;
     }
 
