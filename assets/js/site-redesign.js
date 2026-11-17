@@ -440,38 +440,3 @@
     drawProjects();
   }
 })();
-
-/* Website-native Swarm: let the site's own welcome animation finish first. */
-(function () {
-  "use strict";
-
-  function loadSwarmRebuild() {
-    if (window.__swarmRebuild || document.querySelector("script[data-swarm-rebuild]")) return;
-    var script = document.createElement("script");
-    script.src = "/assets/js/swarm-rebuild.js?v=20261109-textfix-2";
-    script.async = true;
-    script.dataset.swarmRebuild = "true";
-    script.onerror = function () {
-      console.warn("[swarm-rebuild] The page animation could not be loaded.");
-    };
-    (document.head || document.documentElement).appendChild(script);
-  }
-
-  function beginAfterLanding() {
-    // The homepage has the full-screen Welcome → To → Tamasrazim sequence.
-    // The renderer must wait until that exact animation has left the screen.
-    if (document.getElementById("siteIntro")) {
-      window.addEventListener("tamasrazim:site-intro-complete", loadSwarmRebuild, { once: true });
-      return;
-    }
-
-    // Secondary pages have no welcome overlay; let their layout settle first.
-    window.setTimeout(loadSwarmRebuild, 420);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", beginAfterLanding, { once: true });
-  } else {
-    beginAfterLanding();
-  }
-})();
