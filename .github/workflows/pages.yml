@@ -1,4 +1,4 @@
-# Publishes the website to GitHub Pages after the required checks pass.
+# Publishes the website to GitHub Pages after the checks relevant to the changed scope pass.
 
 name: Deploy static site to GitHub Pages
 
@@ -28,16 +28,47 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect Vectyz-only changes
+        id: scope
+        if: github.event_name == 'push'
+        env:
+          BASE_SHA: ${{ github.event.before }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          vectyz_only=true
+          while IFS= read -r file; do
+            case "$file" in
+              projects/vectyz/*|.github/workflows/pages.yml|.github/workflows/site-check.yml|tools/validate_vectyz.mjs) ;;
+              *) vectyz_only=false; break ;;
+            esac
+          done < <(git diff --name-only "$BASE_SHA" "$GITHUB_SHA")
+          echo "vectyz_only=$vectyz_only" >> "$GITHUB_OUTPUT"
 
       - name: Set up Node.js for repository validation
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
+      - name: Validate Vectyz browser workspace
+        if: steps.scope.outputs.vectyz_only == 'true'
+        run: |
+          node --check projects/vectyz/app.js
+          node --check projects/vectyz/db.js
+          node --check projects/vectyz/vector-engine.js
+          node --check projects/vectyz/vector-worker.js
+          node --check projects/vectyz/sw.js
+          node tools/validate_vectyz.mjs
+
       - name: Validate routes, markup, metadata, and runtime scripts
+        if: steps.scope.outputs.vectyz_only != 'true'
         run: node tools/validate_site.mjs
 
       - name: Validate TRILYVA availability
+        if: steps.scope.outputs.vectyz_only != 'true'
         run: node tools/validate_trilyva_availability.mjs
 
       - name: Configure Pages
