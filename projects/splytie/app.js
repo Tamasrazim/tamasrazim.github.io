@@ -125,7 +125,12 @@ function buildAdvancedCommand(inputPath,plan,mode,extension,format){
  args.push("part_%03d."+extension);return args;
 }
 function setWorkspaceMode(mode){
- state.workspaceMode=mode==="advanced"?"advanced":"normal";
+ const nextMode=mode==="advanced"?"advanced":"normal";
+ if(state.workspaceMode==="advanced")persistActivePlanSettings();
+ else state.globalPlanSettings=readPlanSettings();
+ state.workspaceMode=nextMode;
+ if(nextMode==="normal"){if(state.globalPlanSettings)writePlanSettings(state.globalPlanSettings);}
+ else{const entry=selectedTimelineEntry();if(entry){state.timelineFileId=entry.id;loadPlanSettingsForEntry(entry);}else if(state.globalPlanSettings)writePlanSettings(state.globalPlanSettings);}
  document.querySelectorAll("[data-workspace-mode]").forEach(button=>{
   const active=button.dataset.workspaceMode===state.workspaceMode;
   button.classList.toggle("active",active);button.setAttribute("aria-pressed",String(active));
