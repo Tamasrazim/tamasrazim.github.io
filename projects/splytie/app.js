@@ -190,6 +190,9 @@ function updateControls(){
   els.fileInput.disabled = state.running;
   els.browseFiles.disabled = state.running;
   els.addDuration.disabled = state.running;
+  els.includeLast.disabled = state.running;
+  els.advancedPlan.disabled = state.running;
+  [els.rangeStart, els.rangeEnd, els.equalParts, els.manualCuts].forEach((control) => { control.disabled = state.running; });
   els.selectedCount.textContent = state.profiles.length + " selected";
   els.startSplit.querySelector("span").textContent = state.running ? "Splitting…" : "Split videos";
 }
