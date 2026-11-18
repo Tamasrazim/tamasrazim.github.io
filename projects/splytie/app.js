@@ -3,8 +3,8 @@ const $ = (selector) => document.querySelector(selector);
 const state = {
   files: [], profiles: [30], mode: "fast", includeLast: true,
   workspaceMode: "normal", advancedPlan: "duration", timelineFileId: null, timelineDrag: null,
-  running: false, cancelled: false, ffmpeg: null, JSZip: null,
-  zipUrl: null, previewUrl: null, currentTask: 0, totalTasks: 0, taskProgress: 0
+  running: false, packaging: false, cancelled: false, ffmpeg: null, JSZip: null,
+  zipUrl: null, previewUrl: null, previewClipUrl: null, clips: [], zipDirty: true, currentTask: 0, totalTasks: 0, taskProgress: 0
 };
 
 const els = {
@@ -23,6 +23,8 @@ const els = {
   resultsPanel: $("#resultsPanel"), resultsTitle: $("#resultsTitle"),
   resultsDetail: $("#resultsDetail"), resultStats: $("#resultStats"),
   failureList: $("#failureList"), downloadZip: $("#downloadZip"), newBatch: $("#newBatch"),
+  clipManager: $("#clipManager"), clipList: $("#clipList"), clipSummary: $("#clipSummary"), createZip: $("#createZip"),
+  previewDialog: $("#clipPreviewDialog"), previewClip: $("#previewClip"), previewClipTitle: $("#previewClipTitle"), closeClipPreview: $("#closeClipPreview"),
   advancedSettings: $("#advancedSettings"), durationSettings: $("#durationSettings"),
   advancedPlan: $("#advancedPlan"), rangeStart: $("#rangeStart"), rangeEnd: $("#rangeEnd"),
   equalParts: $("#equalParts"), manualCuts: $("#manualCuts"),
@@ -269,9 +271,60 @@ function updateTimelineDuringDrag(duration,activeHandle){
  els.timelineStartLabel.textContent=formatTimecode(start);els.timelineEndLabel.textContent=formatTimecode(end);
 }
 
+
+function clipMime(ext){return ({mp4:"video/mp4",m4v:"video/mp4",mov:"video/quicktime",webm:"video/webm",mkv:"video/x-matroska",avi:"video/x-msvideo",ts:"video/mp2t",mpg:"video/mpeg",mpeg:"video/mpeg",flv:"video/x-flv","3gp":"video/3gpp"})[ext]||"application/octet-stream";}
+function clearArchive(){if(state.zipUrl)URL.revokeObjectURL(state.zipUrl);state.zipUrl=null;state.zipDirty=true;if(els.downloadZip){els.downloadZip.hidden=true;els.downloadZip.removeAttribute("href");}}
+function invalidateArchive(){clearArchive();if(els.createZip)els.createZip.textContent="Create ZIP";}
+function clearClipOutput(){
+ if(state.previewClipUrl)URL.revokeObjectURL(state.previewClipUrl);state.previewClipUrl=null;
+ if(els.previewDialog?.open)els.previewDialog.close();
+ if(els.previewClip){els.previewClip.pause();els.previewClip.removeAttribute("src");els.previewClip.load();}
+ state.clips=[];clearArchive();if(els.clipManager)els.clipManager.hidden=true;
+}
+function renderClipManager(){
+ const clips=state.clips,bytes=clips.reduce((n,c)=>n+c.size,0);els.clipManager.hidden=!clips.length;
+ els.clipSummary.textContent=clips.length+" clips · "+formatBytes(bytes)+" · included in export";
+ const groups=new Map();clips.forEach(c=>{const k=c.sourceFolder+"|"+c.jobLabel;if(!groups.has(k))groups.set(k,{source:c.sourceName,job:c.jobLabel,items:[]});groups.get(k).items.push(c);});
+ els.clipList.innerHTML=[...groups.values()].map(g=>'<section class="clip-group"><header><div><strong>'+escapeHTML(g.source)+'</strong><span>'+escapeHTML(g.job)+'</span></div><small>'+g.items.length+' clips</small></header>'+g.items.map(c=>'<article class="clip-row"><div class="clip-row-main"><strong>'+escapeHTML(c.name)+'</strong><small>'+formatBytes(c.size)+' · '+(Number.isFinite(c.duration)?c.duration.toFixed(2)+' sec'+(state.mode==='fast'?' approx.':''):'Duration n/a')+' · '+escapeHTML(c.extension.toUpperCase())+'</small></div><div class="clip-row-actions"><button data-action="preview" data-id="'+c.id+'">Preview</button><button data-action="download" data-id="'+c.id+'">Download</button><button data-action="remove" data-id="'+c.id+'">Remove</button></div><div class="clip-row-rename"><input data-rename="'+c.id+'" value="'+escapeHTML(c.name)+'" aria-label="Output filename"><button data-action="rename" data-id="'+c.id+'">Rename</button></div></article>').join('')+'</section>').join('');
+ const warning=els.clipManager.querySelector('.clip-memory-warning');if(warning)warning.hidden=bytes<1024*1024*1024;
+ els.createZip.textContent=state.zipDirty?'Create ZIP':'Rebuild ZIP';els.createZip.disabled=state.packaging||!clips.length;updateControls();
+}
+function findClip(id){return state.clips.find(c=>c.id===id);}
+function renameClip(id,value){
+ const c=findClip(id);if(!c)return;let name=String(value||'').trim().replace(/[\\/]/g,'_'),suffix='.'+c.extension;
+ if(name.toLowerCase().endsWith(suffix.toLowerCase()))name=name.slice(0,-suffix.length);
+ name=safeName(name)+suffix;const folder=c.archivePath.slice(0,c.archivePath.lastIndexOf('/')+1),base=name.slice(0,-suffix.length);let candidate=name,n=2;
+ while(state.clips.some(x=>x.id!==id&&x.archivePath.toLowerCase()===(folder+candidate).toLowerCase()))candidate=base+'_'+n+++suffix;
+ c.name=candidate;c.archivePath=folder+candidate;invalidateArchive();renderClipManager();
+}
+function removeClip(id){
+ const c=findClip(id);if(!c)return;
+ if(state.previewClip?.dataset.clipId===id){if(state.previewClipUrl)URL.revokeObjectURL(state.previewClipUrl);state.previewClipUrl=null;els.previewDialog.close();els.previewClip.pause();els.previewClip.removeAttribute('src');els.previewClip.load();}
+ state.clips=state.clips.filter(x=>x.id!==id);invalidateArchive();renderClipManager();
+ els.resultsTitle.textContent=state.clips.length?'Review your clips':'No clips left in the export queue.';
+}
+function previewClip(id){
+ const c=findClip(id);if(!c)return;if(state.previewClipUrl)URL.revokeObjectURL(state.previewClipUrl);
+ state.previewClipUrl=URL.createObjectURL(c.blob);els.previewClip.dataset.clipId=id;els.previewClipTitle.textContent=c.name;
+ els.previewClip.src=state.previewClipUrl;els.previewDialog.showModal();els.previewClip.play().catch(()=>{});
+}
+function downloadClip(id){
+ const c=findClip(id);if(!c)return;const url=URL.createObjectURL(c.blob),a=document.createElement('a');a.href=url;a.download=c.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+}
+async function createZip(){
+ if(state.packaging||!state.clips.length)return;state.packaging=true;updateControls();showProgress('Creating your ZIP archive','Packaging '+state.clips.length+' reviewed clips…');
+ try{const zip=new state.JSZip();state.clips.forEach(c=>zip.file(c.archivePath,c.blob,{binary:true,compression:'STORE'}));
+ const blob=await zip.generateAsync({type:'blob',compression:'STORE'},m=>setProgress(m.percent,'Creating ZIP','Packaging reviewed clips…'));
+ clearArchive();state.zipUrl=URL.createObjectURL(blob);state.zipDirty=false;els.downloadZip.href=state.zipUrl;els.downloadZip.download='Splytie_Export.zip';els.downloadZip.hidden=false;
+ els.progressTitle.textContent='ZIP archive ready';els.progressMessage.textContent='Your reviewed clips are packaged and ready to download.';setProgress(100,'Complete','ZIP created · '+state.clips.length+' clips');
+ }catch(e){els.progressTitle.textContent='ZIP creation failed';els.progressMessage.textContent=friendlyError(e);setProgress(0,'Failed','Your clips are still available.');}
+ finally{state.packaging=false;updateControls();renderClipManager();}
+}
+
 function updateControls(){
  let settingsReady=true;try{getSplitJobs();}catch(_){settingsReady=false;}
- const ready=state.files.length>0&&settingsReady&&!state.running;
+ const busy=state.running||state.packaging;
+ const ready=state.files.length>0&&settingsReady&&!busy;
   els.startSplit.disabled = !ready;
   els.clearFiles.disabled = state.files.length === 0 || state.running;
   els.fileInput.disabled = state.running;
@@ -283,7 +336,9 @@ function updateControls(){
   if(els.timelineSource)els.timelineSource.disabled=state.running;
   if(els.timelineTrack)els.timelineTrack.querySelectorAll("button").forEach(button=>button.disabled=state.running);
   els.selectedCount.textContent = state.profiles.length + " selected";
-  els.startSplit.querySelector("span").textContent = state.running ? "Splitting…" : "Split videos";
+  els.startSplit.querySelector("span").textContent = state.running ? "Splitting…" : state.packaging ? "Packaging…" : "Split videos";
+  if(els.createZip)els.createZip.disabled=busy||!state.clips.length;
+  if(els.clipList)els.clipList.querySelectorAll("button,input").forEach(control=>control.disabled=busy);
 }
 function renderProfiles() {
   els.durationPresets.querySelectorAll("[data-seconds]").forEach((button) => {
@@ -368,6 +423,7 @@ function addFiles(fileList) {
   }
   renderQueue();
   updatePreview();
+  if(added.length){clearClipOutput();els.resultsPanel.hidden=true;els.progressPanel.hidden=true;}
   added.forEach(readMetadata);
 }
 function updateEstimate(){
@@ -527,7 +583,7 @@ async function runBatch(){
   try {
     await loadEngine();
     const ffmpeg = state.ffmpeg;
-    const zip = new state.JSZip();
+    clearClipOutput();
     const splitJobs=jobs;
 
     for (let fileIndex = 0; fileIndex < state.files.length; fileIndex += 1) {
@@ -565,12 +621,16 @@ async function runBatch(){
         const job=splitJobs[jobIndex];
         updateTaskProgress(completedTasks,state.totalTasks,entry.file.name,job.label);
         const output=state.mode==="precise"?{format:"mp4",extension:"mp4"}:fastContainer(entry.file.name);
-        let command=null;
+        let command=null,expectedClipDurations=[];
         try{
           if(state.workspaceMode==="advanced"){
             const plan=buildAdvancedPlan(duration,job);
-            if(plan)command=buildAdvancedCommand(inputPath,plan,state.mode,output.extension,output.format);
-          }else command=buildCommand(inputPath,job.seconds,state.mode,state.includeLast,duration,output.extension,output.format);
+            if(plan){command=buildAdvancedCommand(inputPath,plan,state.mode,output.extension,output.format);const points=[0,...plan.splitTimes,plan.duration];expectedClipDurations=points.slice(1).map((point,index)=>point-points[index]);}
+          }else{
+            command=buildCommand(inputPath,job.seconds,state.mode,state.includeLast,duration,output.extension,output.format);
+            const effective=state.includeLast?duration:Math.floor(duration/job.seconds)*job.seconds;
+            for(let offset=0;offset<effective-0.000001;offset+=job.seconds)expectedClipDurations.push(Math.min(job.seconds,effective-offset));
+          }
         }catch(error){failures.push(entry.file.name+" · "+job.label+": "+friendlyError(error));completedTasks+=1;continue;}
         if(!command){failures.push(entry.file.name+" · "+job.label+": no clips fit the selected range with the current final-clip setting.");completedTasks+=1;continue;}
         try{
@@ -583,8 +643,10 @@ async function runBatch(){
             const outputName = names[part];
             const fileData = await ffmpeg.readFile(outputName);
             const segment = fileData instanceof Uint8Array ? fileData : new Uint8Array(fileData);
-            const archivePath=sourceFolder+"/"+job.folder+"/"+baseName+"_part_"+String(part+1).padStart(3,"0")+"."+output.extension;
-            zip.file(archivePath, segment, { binary: true, compression: "STORE" });
+            const filename=baseName+"_part_"+String(part+1).padStart(3,"0")+"."+output.extension;
+            const archivePath=sourceFolder+"/"+job.folder+"/"+filename;
+            const blob=new Blob([segment],{type:clipMime(output.extension)});
+            state.clips.push({id:"c"+Date.now().toString(36)+Math.random().toString(36).slice(2,8),sourceName:entry.file.name,sourceFolder,jobLabel:job.label,name:filename,archivePath,extension:output.extension,blob,size:segment.byteLength,duration:expectedClipDurations[part]??null});
             outputCount += 1;
             outputBytes += segment.byteLength;
             await removeIfPresent(ffmpeg, outputName);
@@ -605,40 +667,15 @@ async function runBatch(){
 
     if (state.cancelled) throw new Error("Cancelled");
     if (outputCount === 0) throw new Error(failures.length ? failures.join(" ") : "No segments were produced.");
-    els.progressTitle.textContent = "Packaging your clips";
-    els.progressMessage.textContent = "Building one ZIP archive from " + outputCount + " segments…";
-    setProgress(95, "Creating ZIP", "Packaging video segments…");
-    const blob = await zip.generateAsync({ type: "blob", compression: "STORE" },
-      (metadata) => setProgress(95 + metadata.percent * .05, "Creating ZIP", "Packaging video segments…"));
-
-    if (state.zipUrl) URL.revokeObjectURL(state.zipUrl);
-    state.zipUrl = URL.createObjectURL(blob);
-    els.downloadZip.href = state.zipUrl;
-    els.downloadZip.download = "Splytie_Export.zip";
-    els.resultsTitle.textContent = failures.length ? "Your batch is ready with some skips." : "Your clips are ready.";
-    els.resultsDetail.textContent = failures.length
-      ? "Successful clips are packaged below. Review the skipped jobs before using the archive."
-      : "All segments have been packaged into one ZIP archive.";
-    els.resultStats.innerHTML =
-      '<span class="result-stat">' + outputCount + ' clips</span>' +
-      '<span class="result-stat">' + state.files.length + ' source videos</span>' +
-      '<span class="result-stat">' + formatBytes(outputBytes) + ' video data</span>' +
-      '<span class="result-stat">' + (state.mode === "fast" ? "Original streams" : "H.264 MP4") + '</span>' +
-      (state.workspaceMode === "advanced" ? '<span class="result-stat">Advanced split plan</span>' : '');
-    if (failures.length) {
-      els.failureList.hidden = false;
-      els.failureList.innerHTML = "<strong>" + failures.length + " skipped job" + (failures.length === 1 ? "" : "s") + "</strong><br>" +
-        failures.slice(0, 8).map(escapeHTML).join("<br>") + (failures.length > 8 ? "<br>…and " + (failures.length - 8) + " more." : "");
-    } else {
-      els.failureList.hidden = true;
-      els.failureList.textContent = "";
-    }
-    els.progressTitle.textContent = "Batch complete";
-    els.progressMessage.textContent = "Your archive is ready to download.";
-    setProgress(100, "Complete", "Archive created · " + outputCount + " clips");
-    els.cancelSplit.hidden = true;
-    els.resultsPanel.hidden = false;
-    els.resultsPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    els.progressTitle.textContent="Clip review ready";els.progressMessage.textContent="Inspect your clips before creating the ZIP archive.";
+    setProgress(100,"Review","Ready · "+outputCount+" clips · "+formatBytes(outputBytes));
+    els.resultsTitle.textContent=failures.length?"Review your clips. Some jobs were skipped.":"Review your clips.";
+    els.resultsDetail.textContent="Preview, rename, download or remove individual clips before creating the ZIP.";
+    els.resultStats.innerHTML='<span class="result-stat">'+outputCount+' clips</span><span class="result-stat">'+state.files.length+' source videos</span><span class="result-stat">'+formatBytes(outputBytes)+' video data</span><span class="result-stat">'+(state.mode==="fast"?"Original streams":"H.264 MP4")+'</span>'+(state.workspaceMode==="advanced"?'<span class="result-stat">Advanced split plan</span>':'');
+    if(failures.length){els.failureList.hidden=false;els.failureList.innerHTML="<strong>"+failures.length+" skipped job"+(failures.length===1?"":"s")+"</strong><br>"+failures.slice(0,8).map(escapeHTML).join("<br>")+(failures.length>8?"<br>…and "+(failures.length-8)+" more.":"");}
+    else{els.failureList.hidden=true;els.failureList.textContent="";}
+    els.downloadZip.hidden=true;renderClipManager();els.progressPanel.hidden=true;els.resultsPanel.hidden=false;
+    els.resultsPanel.scrollIntoView({behavior:"smooth",block:"nearest"});
   } catch (error) {
     if (state.cancelled || error.message === "Cancelled") {
       els.progressTitle.textContent = "Batch cancelled";
@@ -661,6 +698,7 @@ async function runBatch(){
 function resetBatch() {
   if (state.running) return;
   state.files = [];
+  clearClipOutput();
   state.profiles=[30];state.includeLast=true;state.advancedPlan="duration";
   els.advancedPlan.value="duration";els.rangeStart.value="00:00:00.000";els.rangeEnd.value="";
   els.equalParts.value="4";els.manualCuts.value="";els.includeLast.checked=true;
@@ -670,7 +708,6 @@ function resetBatch() {
   els.progressPanel.hidden = true;
   els.resultsPanel.hidden = true;
   els.failureList.hidden = true;
-  if (state.zipUrl) { URL.revokeObjectURL(state.zipUrl); state.zipUrl = null; }
   updatePreview();
   renderQueue();
   renderProfiles();
@@ -746,6 +783,10 @@ els.includeLast.addEventListener("change", () => { state.includeLast = els.inclu
 els.startSplit.addEventListener("click", runBatch);
 els.cancelSplit.addEventListener("click", cancelBatch);
 els.newBatch.addEventListener("click",resetBatch);
+els.createZip.addEventListener("click",createZip);
+els.clipList.addEventListener("click",event=>{const b=event.target.closest("[data-action]");if(!b||state.running||state.packaging)return;const id=b.dataset.id,action=b.dataset.action;if(action==="preview")previewClip(id);else if(action==="download")downloadClip(id);else if(action==="remove")removeClip(id);else if(action==="rename"){const input=els.clipList.querySelector("[data-rename=\""+CSS.escape(id)+"\"]");if(input)renameClip(id,input.value);}});
+els.closeClipPreview.addEventListener("click",()=>els.previewDialog.close());
+els.previewDialog.addEventListener("close",()=>{els.previewClip.pause();els.previewClip.removeAttribute("src");els.previewClip.load();if(state.previewClipUrl)URL.revokeObjectURL(state.previewClipUrl);state.previewClipUrl=null;});
 document.querySelectorAll("[data-workspace-mode]").forEach(button=>button.addEventListener("click",()=>{if(!state.running)setWorkspaceMode(button.dataset.workspaceMode);}));
 els.advancedPlan.addEventListener("change",()=>{state.advancedPlan=els.advancedPlan.value;renderAdvancedOptions();});
 
