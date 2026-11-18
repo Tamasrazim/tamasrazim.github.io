@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090a0b">
-<meta name="description" content="Splytie splits one video or an entire batch into timed clips. Select multiple durations, process locally in your browser, and export one ZIP."><link rel="canonical" href="https://tamasrazim.github.io/projects/splytie/"><meta property="og:type" content="website"><meta property="og:title" content="Splytie — Batch video splitter"><meta property="og:description" content="Split videos into timed clips. Batch-select durations and export one ZIP, with local browser processing."><meta property="og:url" content="https://tamasrazim.github.io/projects/splytie/">
+<meta name="description" content="Split one video or a batch of videos into timed clips in your browser.">
 <title>Splytie — Video splitter</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23090a0b'/%3E%3Cpath d='M16 17h13v30H16zm19 0h13v30H35z' fill='none' stroke='%23f3f3f0' stroke-width='5'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="./styles.css"><script type="module" src="./app.js"></script>
@@ -126,7 +126,11 @@
 
   <section class="results-panel" id="resultsPanel" hidden aria-live="polite">
     <div class="results-icon">✓</div><div class="results-copy"><span class="kicker">EXPORT READY</span><h3 id="resultsTitle">Your clips are ready.</h3><p id="resultsDetail">All clips have been packaged into one archive.</p><div class="result-stats" id="resultStats"></div><div class="failure-list" id="failureList" hidden></div></div>
-    <div class="result-actions"><a class="button button-primary download-button" id="downloadZip" href="#" download="Splytie_Export.zip">Download ZIP <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0 5-5m-5 5-5-5M4 20h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a><button class="text-button" id="newBatch" type="button">Start another batch</button></div>
+    <div class="result-actions"><button class="text-button" id="newBatch" type="button">Start another batch</button></div>
+<div class="clip-manager" id="clipManager" hidden>
+<div class="clip-manager-top"><div><span class="kicker">CLIP REVIEW</span><h4>Export queue</h4><p id="clipSummary">0 clips</p></div><button class="button button-quiet clip-create-zip" id="createZip" type="button">Create ZIP</button></div>
+<div class="clip-memory-warning" hidden><strong>Large export</strong><span>These clips exceed 1 GB. ZIP creation may need additional browser memory. Close other tabs before packaging.</span></div>
+<div class="clip-list" id="clipList"></div><div class="clip-manager-footer"><span>Rename or remove clips before packaging. Any change invalidates the previous ZIP.</span><a class="button button-primary download-button" id="downloadZip" href="#" download="Splytie_Export.zip" hidden>Download ZIP</a></div></div>
   </section>
 </section>
 
@@ -139,5 +143,6 @@
 </section>
 <section class="privacy-section"><div class="privacy-symbol">◈</div><div><h3>Your source files stay yours.</h3><p>Splytie uses browser-based FFmpeg processing. Your videos are not sent to a Splytie server. The processing engine and ZIP library are loaded from a public CDN when needed.</p></div><span class="privacy-status"><i></i> LOCAL PROCESSING</span></section>
 </main>
+<dialog class="clip-preview-dialog" id="clipPreviewDialog"><div class="clip-preview-head"><div><span class="kicker">CLIP PREVIEW</span><h3 id="previewClipTitle">Preview</h3></div><button class="button button-quiet" id="closeClipPreview" type="button">Close</button></div><video id="previewClip" controls playsinline preload="metadata"></video></dialog>
 <footer class="footer"><a class="brand footer-brand" href="./"><span class="brand-mark"><svg viewBox="0 0 32 32" fill="none"><path d="M5 7h9v18H5zM18 7h9v18h-9zM14 11h4M14 21h4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></span><span>Splytie</span></a><span>Video splitting, kept simple.</span></footer>
 </body></html>
