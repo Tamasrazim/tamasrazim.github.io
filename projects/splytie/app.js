@@ -2,6 +2,7 @@ const $ = (selector) => document.querySelector(selector);
 
 const state = {
   files: [], profiles: [30], mode: "fast", includeLast: true,
+  workspaceMode: "normal", advancedPlan: "duration",
   running: false, cancelled: false, ffmpeg: null, JSZip: null,
   zipUrl: null, previewUrl: null, currentTask: 0, totalTasks: 0, taskProgress: 0
 };
@@ -21,7 +22,13 @@ const els = {
   progressPercent: $("#progressPercent"), cancelSplit: $("#cancelSplit"),
   resultsPanel: $("#resultsPanel"), resultsTitle: $("#resultsTitle"),
   resultsDetail: $("#resultsDetail"), resultStats: $("#resultStats"),
-  failureList: $("#failureList"), downloadZip: $("#downloadZip"), newBatch: $("#newBatch")
+  failureList: $("#failureList"), downloadZip: $("#downloadZip"), newBatch: $("#newBatch"),
+  advancedSettings: $("#advancedSettings"), durationSettings: $("#durationSettings"),
+  advancedPlan: $("#advancedPlan"), rangeStart: $("#rangeStart"), rangeEnd: $("#rangeEnd"),
+  equalParts: $("#equalParts"), manualCuts: $("#manualCuts"),
+  advancedEqualSettings: $("#advancedEqualSettings"), advancedManualSettings: $("#advancedManualSettings"),
+  advancedValidation: $("#advancedValidation"), partialSetting: $("#partialSetting"),
+  partialTitle: $("#partialTitle"), partialCopy: $("#partialCopy")
 };
 
 const FILE_ICON = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3.5h8l4 4V20H6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 3.5V8h4M9 12h6M9 15.5h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
@@ -76,8 +83,108 @@ function fastContainer(fileName) {
   return { format: choice[0], extension: choice[1] };
 }
 
-function updateControls() {
-  const ready = state.files.length > 0 && state.profiles.length > 0 && !state.running;
+function parseTimecode(value){
+ const input=String(value??"").trim();if(!input)return null;
+ if(/^\d+(?:\.\d+)?$/.test(input))return Number(input);
+ const parts=input.split(":");if(parts.length!==2&&parts.length!==3)return null;
+ if(parts.some(part=>part.trim()===""||!/^\d+(?:\.\d+)?$/.test(part.trim())))return null;
+ const nums=parts.map(Number),seconds=nums[nums.length-1],minutes=nums[nums.length-2];
+ if(seconds>=60||(parts.length===3&&minutes>=60))return null;
+ return parts.length===3?nums[0]*3600+minutes*60+seconds:minutes*60+seconds;
+}
+function secondsText(value){return Number(value.toFixed(6)).toString();}
+function getSplitJobs(){
+ const profiles=state.profiles.slice().sort((a,b)=>a-b);
+ if(state.workspaceMode!=="advanced"||state.advancedPlan==="duration"){
+  if(!profiles.length)throw new Error("Select at least one clip duration.");
+  return profiles.map(seconds=>({type:"duration",seconds,label:formatDuration(seconds),folder:durationFolder(seconds)}));
+ }
+ if(state.advancedPlan==="equal"){
+  const parts=Number(els.equalParts.value);
+  if(!Number.isInteger(parts)||parts<2||parts>200)throw new Error("Choose between 2 and 200 equal parts.");
+  return [{type:"equal",parts,label:parts+" equal parts",folder:"equal-parts-"+parts}];
+ }
+ const lines=els.manualCuts.value.split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
+ if(!lines.length)throw new Error("Enter at least one manual cut timestamp.");
+ if(lines.length>500)throw new Error("Use no more than 500 manual cut timestamps per plan.");
+ const cuts=lines.map(parseTimecode);
+ if(cuts.some(time=>!Number.isFinite(time)||time<0))throw new Error("A manual cut timestamp is invalid. Use HH:MM:SS.mmm, MM:SS.mmm, or seconds.");
+ for(let i=1;i<cuts.length;i++)if(cuts[i]<=cuts[i-1])throw new Error("Manual cut timestamps must be in strictly ascending order.");
+ return [{type:"manual",cuts,label:cuts.length+" manual cut points",folder:"manual-cuts"}];
+}
+function getAdvancedRange(duration){
+ const start=parseTimecode(els.rangeStart.value||"0"),endInput=els.rangeEnd.value.trim(),end=endInput?parseTimecode(endInput):duration;
+ if(!Number.isFinite(start)||start<0)throw new Error("The source range start time is invalid.");
+ if(!Number.isFinite(end)||end<=start)throw new Error("The source range end must be later than its start.");
+ if(end>duration+0.05)throw new Error("The selected source range extends beyond the video duration ("+formatTime(duration)+").");
+ return {start,end:Math.min(end,duration)};
+}
+function buildAdvancedPlan(duration,job){
+ const range=getAdvancedRange(duration),rangeLength=range.end-range.start;
+ if(rangeLength<=0.02)throw new Error("The selected source range is too short.");
+ let effectiveDuration=rangeLength,splitTimes=[];
+ if(job.type==="duration"){
+  if(!state.includeLast)effectiveDuration=Math.floor((rangeLength+0.000001)/job.seconds)*job.seconds;
+  if(effectiveDuration<=0.02)return null;
+  for(let time=job.seconds;time<effectiveDuration-0.000001;time+=job.seconds)splitTimes.push(Number(time.toFixed(6)));
+ }else if(job.type==="equal"){
+  for(let part=1;part<job.parts;part++)splitTimes.push(Number((rangeLength*part/job.parts).toFixed(6)));
+ }else{
+  for(const cut of job.cuts)if(cut<=range.start+0.001||cut>=range.end-0.001)throw new Error("Every manual cut must fall strictly inside the selected source range.");
+  const relativeCuts=job.cuts.map(cut=>Number((cut-range.start).toFixed(6)));
+  if(state.includeLast)splitTimes=relativeCuts;
+  else{effectiveDuration=relativeCuts[relativeCuts.length-1];splitTimes=relativeCuts.slice(0,-1);}
+  if(effectiveDuration<=0.02)return null;
+ }
+ return {start:range.start,duration:effectiveDuration,splitTimes,clipCount:splitTimes.length+1};
+}
+function buildAdvancedCommand(inputPath,plan,mode,extension,format){
+ const args=[];if(plan.start>0)args.push("-ss",secondsText(plan.start));
+ args.push("-i",inputPath,"-t",secondsText(plan.duration),"-map","0:v:0","-map","0:a?");
+ if(mode==="fast")args.push("-c","copy");
+ else{
+  args.push("-c:v","libx264","-preset","veryfast","-crf","19","-pix_fmt","yuv420p","-sc_threshold","0","-c:a","aac","-b:a","192k");
+  if(plan.splitTimes.length)args.push("-force_key_frames",plan.splitTimes.map(secondsText).join(","));
+ }
+ args.push("-f","segment","-reset_timestamps","1","-segment_format",format);
+ if(plan.splitTimes.length)args.push("-segment_times",plan.splitTimes.map(secondsText).join(","));
+ else args.push("-segment_time",secondsText(plan.duration+1));
+ if(mode==="precise")args.push("-segment_format_options","movflags=+faststart");
+ args.push("part_%03d."+extension);return args;
+}
+function setWorkspaceMode(mode){
+ state.workspaceMode=mode==="advanced"?"advanced":"normal";
+ document.querySelectorAll("[data-workspace-mode]").forEach(button=>{
+  const active=button.dataset.workspaceMode===state.workspaceMode;
+  button.classList.toggle("active",active);button.setAttribute("aria-pressed",String(active));
+ });
+ els.advancedSettings.hidden=state.workspaceMode!=="advanced";renderAdvancedOptions();
+}
+function renderAdvancedOptions(){
+ const advanced=state.workspaceMode==="advanced",plan=state.advancedPlan;
+ els.durationSettings.hidden=advanced&&plan!=="duration";
+ els.advancedEqualSettings.hidden=!advanced||plan!=="equal";
+ els.advancedManualSettings.hidden=!advanced||plan!=="manual";
+ els.partialSetting.hidden=advanced&&plan==="equal";
+ if(advanced&&plan==="manual"){els.partialTitle.textContent="Include final remainder";els.partialCopy.textContent="Keep the footage after the last manual cut point.";}
+ else{els.partialTitle.textContent="Last partial clip";els.partialCopy.textContent="Keep the remaining footage when the video does not divide evenly.";}
+ if(!advanced)els.advancedValidation.textContent="Advanced controls are off in Normal Mode.";
+ else{
+  try{
+   const jobs=getSplitJobs();let issue="";
+   for(const entry of state.files)if(Number.isFinite(entry.duration)&&entry.duration>0){
+    for(const job of jobs){try{buildAdvancedPlan(entry.duration,job);}catch(error){issue=error.message;break;}}
+    if(issue)break;
+   }
+   els.advancedValidation.textContent=issue||("Advanced split plan ready. "+(state.mode==="fast"?"Fast split":"Precise split")+" will be used.");
+  }catch(error){els.advancedValidation.textContent=error.message;}
+ }
+ updateControls();updateEstimate();
+}
+
+function updateControls(){
+ let settingsReady=true;try{getSplitJobs();}catch(_){settingsReady=false;}
+ const ready=state.files.length>0&&settingsReady&&!state.running;
   els.startSplit.disabled = !ready;
   els.clearFiles.disabled = state.files.length === 0 || state.running;
   els.fileInput.disabled = state.running;
@@ -171,31 +278,28 @@ function addFiles(fileList) {
   updatePreview();
   added.forEach(readMetadata);
 }
-function updateEstimate() {
-  if (!state.files.length) {
-    els.estimateCount.textContent = "Ready for your videos";
-    els.estimateDetail.textContent = "Add files to calculate the estimated number of clips.";
-    return;
+function updateEstimate(){
+ if(!state.files.length){els.estimateCount.textContent="Ready for your videos";els.estimateDetail.textContent="Add files to calculate the estimated number of clips.";return;}
+ if(state.workspaceMode==="advanced"){
+  let jobs;try{jobs=getSplitJobs();}catch(error){els.estimateCount.textContent="Check advanced settings";els.estimateDetail.textContent=error.message;return;}
+  let total=0,known=0,unknown=0,invalid=0;
+  for(const entry of state.files){
+   if(!Number.isFinite(entry.duration)||entry.duration<=0){unknown++;continue;}known++;
+   for(const job of jobs){try{const plan=buildAdvancedPlan(entry.duration,job);if(plan)total+=plan.clipCount;}catch(_){invalid++;}}
   }
-  if (!state.profiles.length) {
-    els.estimateCount.textContent = "Choose a duration";
-    els.estimateDetail.textContent = "Select at least one clip duration to continue.";
-    return;
-  }
-  let total = 0, known = 0, unknown = 0;
-  for (const entry of state.files) {
-    if (!Number.isFinite(entry.duration)) { unknown += 1; continue; }
-    known += 1;
-    for (const duration of state.profiles) {
-      const count = state.includeLast ? Math.ceil(entry.duration / duration) : Math.floor(entry.duration / duration);
-      total += Math.max(0, count);
-    }
-  }
-  const tasks = state.files.length * state.profiles.length;
-  els.estimateCount.textContent = total + (unknown ? "+ estimated clips" : " estimated clips");
-  els.estimateDetail.textContent = unknown
-    ? known + " of " + state.files.length + " video durations read · " + tasks + " split jobs"
-    : state.files.length + " videos × " + state.profiles.length + " duration profiles";
+  if(invalid){els.estimateCount.textContent="Review source range or cut points";els.estimateDetail.textContent=invalid+" plan"+(invalid===1?"":"s")+" do not fit one or more source videos.";return;}
+  els.estimateCount.textContent=total+(unknown?"+ estimated clips":" estimated clips");
+  els.estimateDetail.textContent=unknown?known+" of "+state.files.length+" video durations read · "+(state.files.length*jobs.length)+" split jobs":state.files.length+" videos × "+jobs.length+" split plan"+(jobs.length===1?"":"s");return;
+ }
+ if(!state.profiles.length){els.estimateCount.textContent="Choose a duration";els.estimateDetail.textContent="Select at least one clip duration to continue.";return;}
+ let total=0,known=0,unknown=0;
+ for(const entry of state.files){
+  if(!Number.isFinite(entry.duration)){unknown++;continue;}known++;
+  for(const duration of state.profiles){const count=state.includeLast?Math.ceil(entry.duration/duration):Math.floor(entry.duration/duration);total+=Math.max(0,count);}
+ }
+ const tasks=state.files.length*state.profiles.length;
+ els.estimateCount.textContent=total+(unknown?"+ estimated clips":" estimated clips");
+ els.estimateDetail.textContent=unknown?known+" of "+state.files.length+" video durations read · "+tasks+" split jobs":state.files.length+" videos × "+state.profiles.length+" duration profiles";
 }
 function setMode(mode) {
   state.mode = mode;
@@ -301,18 +405,22 @@ function friendlyError(error) {
   return message.length > 260 ? message.slice(0, 257) + "…" : message;
 }
 
-function updateTaskProgress(index, total, fileName, profile) {
-  state.currentTask = index;
-  state.taskProgress = 0;
-  setProgress((index / Math.max(1, total)) * 94, "Split job " + (index + 1) + " of " + total,
-    fileName + " · " + formatDuration(profile));
+function updateTaskProgress(index,total,fileName,label){
+ state.currentTask=index;state.taskProgress=0;
+ setProgress((index/Math.max(1,total))*94,"Split job "+(index+1)+" of "+total,fileName+" · "+label);
 }
 
-async function runBatch() {
-  if (state.running || !state.files.length || !state.profiles.length) return;
-  state.running = true;
-  state.cancelled = false;
-  state.totalTasks = state.files.length * state.profiles.length;
+async function runBatch(){
+ if(state.running||!state.files.length)return;
+ let jobs;
+ try{
+  jobs=getSplitJobs();
+  if(state.workspaceMode==="advanced")for(const entry of state.files){
+   if(!Number.isFinite(entry.duration)||entry.duration<=0)continue;
+   for(const job of jobs)buildAdvancedPlan(entry.duration,job);
+  }
+ }catch(error){els.advancedValidation.textContent=error.message;els.advancedValidation.scrollIntoView({behavior:"smooth",block:"nearest"});return;}
+ state.running=true;state.cancelled=false;state.totalTasks=state.files.length*jobs.length;
   state.currentTask = 0;
   state.taskProgress = 0;
   updateControls();
@@ -328,7 +436,7 @@ async function runBatch() {
     await loadEngine();
     const ffmpeg = state.ffmpeg;
     const zip = new state.JSZip();
-    const profiles = state.profiles.slice().sort((a, b) => a - b);
+    const splitJobs=jobs;
 
     for (let fileIndex = 0; fileIndex < state.files.length; fileIndex += 1) {
       if (state.cancelled) throw new Error("Cancelled");
@@ -344,7 +452,7 @@ async function runBatch() {
         await ffmpeg.writeFile(inputPath, new Uint8Array(buffer));
       } catch (error) {
         failures.push(entry.file.name + ": could not load this source file (" + error.message + ").");
-        completedTasks += profiles.length;
+        completedTasks += jobs.length;
         continue;
       }
 
@@ -353,28 +461,28 @@ async function runBatch() {
       if (!Number.isFinite(duration) || duration <= 0) {
         failures.push(entry.file.name + ": the video duration could not be read.");
         await removeIfPresent(ffmpeg, inputPath);
-        completedTasks += profiles.length;
+        completedTasks += jobs.length;
         continue;
       }
       entry.duration = duration;
       const baseName = safeName(entry.file.name);
       const sourceFolder = String(fileIndex + 1).padStart(2, "0") + "_" + baseName;
 
-      for (let profileIndex = 0; profileIndex < profiles.length; profileIndex += 1) {
-        if (state.cancelled) throw new Error("Cancelled");
-        const seconds = profiles[profileIndex];
-        updateTaskProgress(completedTasks, state.totalTasks, entry.file.name, seconds);
-        const output = state.mode === "precise" ? { format: "mp4", extension: "mp4" } : fastContainer(entry.file.name);
-        const command = buildCommand(inputPath, seconds, state.mode, state.includeLast, duration, output.extension, output.format);
-
-        if (!command) {
-          failures.push(entry.file.name + " · " + formatDuration(seconds) + ": shorter than the selected duration; final partial clip is disabled.");
-          completedTasks += 1;
-          continue;
-        }
-
-        try {
-          const exitCode = await ffmpeg.exec(command);
+      for(let jobIndex=0;jobIndex<splitJobs.length;jobIndex+=1){
+        if(state.cancelled)throw new Error("Cancelled");
+        const job=splitJobs[jobIndex];
+        updateTaskProgress(completedTasks,state.totalTasks,entry.file.name,job.label);
+        const output=state.mode==="precise"?{format:"mp4",extension:"mp4"}:fastContainer(entry.file.name);
+        let command=null;
+        try{
+          if(state.workspaceMode==="advanced"){
+            const plan=buildAdvancedPlan(duration,job);
+            if(plan)command=buildAdvancedCommand(inputPath,plan,state.mode,output.extension,output.format);
+          }else command=buildCommand(inputPath,job.seconds,state.mode,state.includeLast,duration,output.extension,output.format);
+        }catch(error){failures.push(entry.file.name+" · "+job.label+": "+friendlyError(error));completedTasks+=1;continue;}
+        if(!command){failures.push(entry.file.name+" · "+job.label+": no clips fit the selected range with the current final-clip setting.");completedTasks+=1;continue;}
+        try{
+          const exitCode=await ffmpeg.exec(command);
           if (exitCode !== 0) throw new Error("FFmpeg exited with code " + exitCode);
           const names = getOutputNames(await ffmpeg.listDir("/"), output.extension);
           if (!names.length) throw new Error("No output segments were produced.");
@@ -383,8 +491,7 @@ async function runBatch() {
             const outputName = names[part];
             const fileData = await ffmpeg.readFile(outputName);
             const segment = fileData instanceof Uint8Array ? fileData : new Uint8Array(fileData);
-            const archivePath = sourceFolder + "/" + durationFolder(seconds) + "/" +
-              baseName + "_part_" + String(part + 1).padStart(3, "0") + "." + output.extension;
+            const archivePath=sourceFolder+"/"+job.folder+"/"+baseName+"_part_"+String(part+1).padStart(3,"0")+"."+output.extension;
             zip.file(archivePath, segment, { binary: true, compression: "STORE" });
             outputCount += 1;
             outputBytes += segment.byteLength;
@@ -392,14 +499,14 @@ async function runBatch() {
           }
         } catch (error) {
           if (state.cancelled) throw error;
-          failures.push(entry.file.name + " · " + formatDuration(seconds) + ": " + friendlyError(error));
+          failures.push(entry.file.name + " · " + job.label + ": " + friendlyError(error));
           const leftovers = getOutputNames(await ffmpeg.listDir("/"), output.extension);
           for (const path of leftovers) await removeIfPresent(ffmpeg, path);
         }
         completedTasks += 1;
         setProgress((completedTasks / Math.max(1, state.totalTasks)) * 94,
           "Split job " + completedTasks + " of " + state.totalTasks,
-          "Processed " + entry.file.name + " · " + formatDuration(seconds));
+          "Processed " + entry.file.name + " · " + job.label);
       }
       await removeIfPresent(ffmpeg, inputPath);
     }
@@ -424,7 +531,8 @@ async function runBatch() {
       '<span class="result-stat">' + outputCount + ' clips</span>' +
       '<span class="result-stat">' + state.files.length + ' source videos</span>' +
       '<span class="result-stat">' + formatBytes(outputBytes) + ' video data</span>' +
-      '<span class="result-stat">' + (state.mode === "fast" ? "Original streams" : "H.264 MP4") + '</span>';
+      '<span class="result-stat">' + (state.mode === "fast" ? "Original streams" : "H.264 MP4") + '</span>' +
+      (state.workspaceMode === "advanced" ? '<span class="result-stat">Advanced split plan</span>' : '');
     if (failures.length) {
       els.failureList.hidden = false;
       els.failureList.innerHTML = "<strong>" + failures.length + " skipped job" + (failures.length === 1 ? "" : "s") + "</strong><br>" +
@@ -453,16 +561,18 @@ async function runBatch() {
   } finally {
     state.running = false;
     updateControls();
-    els.startSplit.disabled = state.files.length === 0 || state.profiles.length === 0;
+    let settingsReady=true;try{getSplitJobs();}catch(_){settingsReady=false;}
+    els.startSplit.disabled=state.files.length===0||!settingsReady;
   }
 }
 
 function resetBatch() {
   if (state.running) return;
   state.files = [];
-  state.profiles = [30];
-  state.includeLast = true;
-  els.includeLast.checked = true;
+  state.profiles=[30];state.includeLast=true;state.advancedPlan="duration";
+  els.advancedPlan.value="duration";els.rangeStart.value="00:00:00.000";els.rangeEnd.value="";
+  els.equalParts.value="4";els.manualCuts.value="";els.includeLast.checked=true;
+  setWorkspaceMode("normal");
   els.customMinutes.value = "0";
   els.customSeconds.value = "20";
   els.progressPanel.hidden = true;
@@ -543,9 +653,16 @@ document.querySelectorAll(".mode-option").forEach((button) => button.addEventLis
 els.includeLast.addEventListener("change", () => { state.includeLast = els.includeLast.checked; updateEstimate(); });
 els.startSplit.addEventListener("click", runBatch);
 els.cancelSplit.addEventListener("click", cancelBatch);
-els.newBatch.addEventListener("click", resetBatch);
+els.newBatch.addEventListener("click",resetBatch);
+document.querySelectorAll("[data-workspace-mode]").forEach(button=>button.addEventListener("click",()=>{if(!state.running)setWorkspaceMode(button.dataset.workspaceMode);}));
+els.advancedPlan.addEventListener("change",()=>{state.advancedPlan=els.advancedPlan.value;renderAdvancedOptions();});
+[els.rangeStart,els.rangeEnd,els.equalParts,els.manualCuts].forEach(control=>{
+ control.addEventListener("input",()=>{if(state.workspaceMode==="advanced")renderAdvancedOptions();});
+ control.addEventListener("change",()=>{if(state.workspaceMode==="advanced")renderAdvancedOptions();});
+});
 
 renderProfiles();
 renderQueue();
+setWorkspaceMode("normal");
 setMode("fast");
 els.cancelSplit.hidden = true;
