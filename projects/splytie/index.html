@@ -88,6 +88,21 @@
           <label class="advanced-field"><span>Cut timestamps</span><textarea id="manualCuts" rows="5" spellcheck="false" placeholder="00:00:12.500&#10;00:00:28.000&#10;00:01:04.250"></textarea></label>
           <p>Enter one source timestamp per line, in ascending order. Each timestamp creates a cut. Supports HH:MM:SS.mmm, MM:SS.mmm, or seconds.</p>
         </div>
+        <div class="advanced-timeline" id="advancedTimeline" hidden>
+          <div class="advanced-timeline-head"><div><span class="advanced-kicker">VISUAL TIMELINE</span><p>Drag the range edges to set the source range. Manual cut markers can be dragged independently.</p></div>
+            <label class="timeline-source"><span>Preview source</span><select id="timelineSource"></select></label>
+          </div>
+          <div class="timeline-readout"><span id="timelineStartLabel">00:00:00.000</span><span id="timelineEndLabel">Duration pending</span></div>
+          <div class="timeline-track" id="timelineTrack" role="group" aria-label="Video split timeline">
+            <div class="timeline-track-base"></div><div class="timeline-range" id="timelineRange"></div>
+            <button class="timeline-handle timeline-handle-start" type="button" data-range-handle="start" style="left:0%" aria-label="Selected range start. Use left and right arrow keys to adjust."></button>
+            <button class="timeline-handle timeline-handle-end" type="button" data-range-handle="end" style="left:100%" aria-label="Selected range end. Use left and right arrow keys to adjust."></button>
+            <div class="timeline-markers" id="timelineMarkers"></div>
+          </div>
+          <div class="timeline-scale"><span>00:00</span><span>50%</span><span>Video end</span></div>
+          <div class="timeline-legend"><span><i class="legend-range"></i>Selected range</span><span><i class="legend-cut"></i>Planned cut</span><span>Full source duration</span></div>
+          <div class="timeline-status" id="timelineStatus" role="status" aria-live="polite">Add a video to build its timeline.</div>
+        </div>
         <div class="advanced-validation" id="advancedValidation" role="status" aria-live="polite">Advanced controls are off in Normal Mode.</div>
       </div>
       <div class="divider"></div>
