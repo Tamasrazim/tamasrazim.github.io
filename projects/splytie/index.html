@@ -69,6 +69,11 @@
       </div>
       <div class="advanced-settings" id="advancedSettings" hidden>
         <div class="advanced-settings-head"><div><span class="advanced-kicker">ADVANCED CONTROLS</span><h4>Custom split plan</h4><p>Set a source range, divide it evenly, or define exact cut timestamps.</p></div><span class="advanced-badge">OPTIONAL</span></div>
+        <div class="per-video-plan">
+          <div class="per-video-plan-copy"><span class="advanced-kicker">SOURCE-SPECIFIC PLAN</span><p>Apply one shared plan to the batch, or give the selected video its own split rules.</p></div>
+          <label class="advanced-field per-video-mode"><span>Plan for selected video</span><select id="perVideoMode"><option value="inherit">Use global plan</option><option value="custom">Custom plan for this video</option></select></label>
+          <div class="per-video-status" id="perVideoStatus" role="status" aria-live="polite">All videos currently inherit the global plan.</div>
+        </div>
         <label class="advanced-field plan-field"><span>Split plan</span>
           <select id="advancedPlan">
             <option value="duration">Duration profiles</option>
