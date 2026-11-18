@@ -2,7 +2,7 @@ const $ = (selector) => document.querySelector(selector);
 
 const state = {
   files: [], profiles: [30], mode: "fast", includeLast: true,
-  workspaceMode: "normal", advancedPlan: "duration",
+  workspaceMode: "normal", advancedPlan: "duration", timelineFileId: null, timelineDrag: null,
   running: false, cancelled: false, ffmpeg: null, JSZip: null,
   zipUrl: null, previewUrl: null, currentTask: 0, totalTasks: 0, taskProgress: 0
 };
@@ -27,7 +27,10 @@ const els = {
   advancedPlan: $("#advancedPlan"), rangeStart: $("#rangeStart"), rangeEnd: $("#rangeEnd"),
   equalParts: $("#equalParts"), manualCuts: $("#manualCuts"),
   advancedEqualSettings: $("#advancedEqualSettings"), advancedManualSettings: $("#advancedManualSettings"),
-  advancedValidation: $("#advancedValidation"), partialSetting: $("#partialSetting"),
+  advancedValidation: $("#advancedValidation"), timeline: $("#advancedTimeline"), timelineSource: $("#timelineSource"),
+  timelineTrack: $("#timelineTrack"), timelineRange: $("#timelineRange"), timelineMarkers: $("#timelineMarkers"),
+  timelineStartLabel: $("#timelineStartLabel"), timelineEndLabel: $("#timelineEndLabel"), timelineStatus: $("#timelineStatus"),
+  partialSetting: $("#partialSetting"),
   partialTitle: $("#partialTitle"), partialCopy: $("#partialCopy")
 };
 
@@ -179,7 +182,91 @@ function renderAdvancedOptions(){
    els.advancedValidation.textContent=issue||("Advanced split plan ready. "+(state.mode==="fast"?"Fast split":"Precise split")+" will be used.");
   }catch(error){els.advancedValidation.textContent=error.message;}
  }
- updateControls();updateEstimate();
+ renderAdvancedTimeline();updateControls();updateEstimate();
+}
+
+
+function formatTimecode(seconds){
+ const safe=Math.max(0,Number(seconds)||0),whole=Math.floor(safe),millis=Math.round((safe-whole)*1000);
+ const total=whole+(millis===1000?1:0),ms=millis===1000?0:millis;
+ const h=Math.floor(total/3600),m=Math.floor((total%3600)/60),s=total%60;
+ return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")+"."+String(ms).padStart(3,"0");
+}
+function selectedTimelineEntry(){return state.files.find(entry=>entry.id===state.timelineFileId)||state.files[0]||null;}
+function timelinePercent(time,duration){return duration>0?Math.max(0,Math.min(100,(time/duration)*100)):0;}
+function updateTimelineGeometry(duration){
+ if(!els.timelineRange||!duration)return;
+ const parsedStart=parseTimecode(els.rangeStart.value||"0"),parsedEnd=els.rangeEnd.value.trim()?parseTimecode(els.rangeEnd.value):duration;
+ const start=Number.isFinite(parsedStart)?Math.max(0,Math.min(duration,parsedStart)):0,end=Number.isFinite(parsedEnd)?Math.max(start,Math.min(duration,parsedEnd)):duration;
+ const left=timelinePercent(start,duration),right=timelinePercent(end,duration);
+ els.timelineRange.style.left=left+"%";els.timelineRange.style.width=Math.max(0,right-left)+"%";
+ const startHandle=els.timelineTrack.querySelector('[data-range-handle="start"]'),endHandle=els.timelineTrack.querySelector('[data-range-handle="end"]');
+ if(startHandle)startHandle.style.left=left+"%";if(endHandle)endHandle.style.left=right+"%";
+}
+function renderAdvancedTimeline(){
+ if(!els.timeline)return;
+ const advanced=state.workspaceMode==="advanced"&&state.files.length>0;
+ els.timeline.hidden=!advanced;if(!advanced)return;
+ els.timelineSource.innerHTML=state.files.map(entry=>'<option value="'+escapeHTML(entry.id)+'">'+escapeHTML(entry.file.name)+(Number.isFinite(entry.duration)?" · "+escapeHTML(formatTime(entry.duration)):" · reading…")+"</option>").join("");
+ const entry=selectedTimelineEntry();if(!entry){els.timelineStatus.textContent="Add a video to build its timeline.";return;}
+ state.timelineFileId=entry.id;els.timelineSource.value=entry.id;
+ if(!Number.isFinite(entry.duration)||entry.duration<=0){
+  els.timelineStartLabel.textContent="00:00:00.000";els.timelineEndLabel.textContent="Duration pending";
+  els.timelineMarkers.innerHTML="";els.timelineRange.style.left="0%";els.timelineRange.style.width="100%";
+  els.timelineTrack.querySelectorAll("[data-range-handle]").forEach(handle=>handle.style.left=handle.dataset.rangeHandle==="start"?"0%":"100%");
+  els.timelineStatus.textContent="Reading source duration. The timeline will become interactive when metadata is available.";return;
+ }
+ const duration=entry.duration;let start=0,end=duration,rangeError="";
+ try{const range=getAdvancedRange(duration);start=range.start;end=range.end;}
+ catch(error){
+  rangeError=error.message;const parsedStart=parseTimecode(els.rangeStart.value||"0"),parsedEnd=els.rangeEnd.value.trim()?parseTimecode(els.rangeEnd.value):duration;
+  start=Number.isFinite(parsedStart)?Math.max(0,Math.min(duration,parsedStart)):0;
+  end=Number.isFinite(parsedEnd)?Math.max(start,Math.min(duration,parsedEnd)):duration;
+  if(end-start<0.02){start=0;end=duration;}
+ }
+ els.timelineStartLabel.textContent=formatTimecode(start);els.timelineEndLabel.textContent=formatTimecode(end);updateTimelineGeometry(duration);
+ const markers=[];
+ if(!rangeError){try{for(const job of getSplitJobs()){
+  const plan=buildAdvancedPlan(duration,job);if(!plan)continue;
+  for(const relative of plan.splitTimes){const absolute=plan.start+relative,cutIndex=job.type==="manual"?job.cuts.findIndex(value=>Math.abs(value-absolute)<0.002):-1;
+   markers.push({time:absolute,label:job.label,cutIndex,draggable:job.type==="manual"});}
+ }}catch(_){}}
+ markers.sort((a,b)=>a.time-b.time);
+ els.timelineMarkers.innerHTML=markers.map(marker=>{
+  const position=timelinePercent(marker.time,duration),label=escapeHTML(marker.label+" · "+formatTimecode(marker.time));
+  if(marker.draggable)return '<button class="timeline-cut-marker is-draggable" type="button" data-cut-index="'+marker.cutIndex+'" style="left:'+position+'%" title="'+label+'" aria-label="Manual cut at '+formatTimecode(marker.time)+'. Drag to adjust."></button>';
+  return '<span class="timeline-cut-marker" style="left:'+position+'%" title="'+label+'" aria-label="'+label+'"></span>';
+ }).join("");
+ els.timelineStatus.textContent=rangeError?rangeError+" Adjust the range fields or drag the range handles."
+  :(markers.length?markers.length+" planned cut"+(markers.length===1?"":"s")+" shown. "+(state.advancedPlan==="manual"?"Drag a cut marker to adjust its timestamp.":"Split markers are preview-only; the range edges are draggable."):"No internal cuts for this plan. Drag the range edges to change the source range.");
+ els.timelineTrack.setAttribute("aria-label","Video timeline from zero to "+formatTimecode(duration)+", selected range "+formatTimecode(start)+" to "+formatTimecode(end));
+}
+function setTimelineControlTime(type,edge,index,duration,value){
+ const time=Math.max(0,Math.min(duration,value));
+ if(type==="range"){
+  const currentStart=parseTimecode(els.rangeStart.value||"0")??0,currentEnd=els.rangeEnd.value.trim()?parseTimecode(els.rangeEnd.value):duration;
+  if(edge==="start")els.rangeStart.value=formatTimecode(Math.max(0,Math.min(currentEnd-0.02,time)));
+  else els.rangeEnd.value=formatTimecode(Math.max(currentStart+0.02,Math.min(duration,time)));
+ }else if(type==="cut"){
+  const lines=els.manualCuts.value.split(/\r?\n/).map(line=>line.trim()).filter(Boolean),cuts=lines.map(parseTimecode);
+  if(index<0||index>=cuts.length)return;
+  const rangeStart=parseTimecode(els.rangeStart.value||"0")??0,rangeEnd=els.rangeEnd.value.trim()?parseTimecode(els.rangeEnd.value):duration;
+  const min=index===0?rangeStart+0.002:cuts[index-1]+0.002,max=index===cuts.length-1?rangeEnd-0.002:cuts[index+1]-0.002;
+  if(max<=min)return;
+  cuts[index]=Math.max(min,Math.min(max,time));els.manualCuts.value=cuts.map(formatTimecode).join("\n");
+ }
+}
+function timelineTimeFromPointer(event,duration){
+ const rect=els.timelineTrack.getBoundingClientRect();return rect.width?Math.max(0,Math.min(1,(event.clientX-rect.left)/rect.width))*duration:0;
+}
+function updateTimelineDuringDrag(duration,activeHandle){
+ updateTimelineGeometry(duration);
+ if(activeHandle&&activeHandle.dataset.cutIndex!==undefined){
+  const cuts=els.manualCuts.value.split(/\r?\n/).map(line=>parseTimecode(line.trim())).filter(Number.isFinite),index=Number(activeHandle.dataset.cutIndex),time=cuts[index];
+  if(Number.isFinite(time)){activeHandle.style.left=timelinePercent(time,duration)+"%";activeHandle.title="Manual cut · "+formatTimecode(time);}
+ }
+ const start=parseTimecode(els.rangeStart.value||"0")??0,end=els.rangeEnd.value.trim()?parseTimecode(els.rangeEnd.value):duration;
+ els.timelineStartLabel.textContent=formatTimecode(start);els.timelineEndLabel.textContent=formatTimecode(end);
 }
 
 function updateControls(){
@@ -193,6 +280,8 @@ function updateControls(){
   els.includeLast.disabled = state.running;
   els.advancedPlan.disabled = state.running;
   [els.rangeStart, els.rangeEnd, els.equalParts, els.manualCuts].forEach((control) => { control.disabled = state.running; });
+  if(els.timelineSource)els.timelineSource.disabled=state.running;
+  if(els.timelineTrack)els.timelineTrack.querySelectorAll("button").forEach(button=>button.disabled=state.running);
   els.selectedCount.textContent = state.profiles.length + " selected";
   els.startSplit.querySelector("span").textContent = state.running ? "Splitting…" : "Split videos";
 }
@@ -207,7 +296,7 @@ function renderProfiles() {
       '<span class="profile-tag">' + escapeHTML(formatDuration(seconds)) +
       '<button type="button" data-remove-duration="' + seconds + '" aria-label="Remove ' + seconds + ' seconds">×</button></span>'
     ).join("");
-  updateControls();
+  renderAdvancedTimeline();updateControls();
   updateEstimate();
 }
 function renderQueue() {
@@ -223,7 +312,7 @@ function renderQueue() {
       '<div class="file-meta"><span>' + formatBytes(entry.file.size) + '</span><span>' + escapeHTML(details) + '</span></div></div>' +
       '<button class="file-remove" type="button" data-remove-file="' + entry.id + '" aria-label="Remove ' + escapeHTML(entry.file.name) + '">×</button></div>';
   }).join("");
-  updateControls();
+  renderAdvancedTimeline();updateControls();
   updateEstimate();
 }
 function updatePreview() {
@@ -653,12 +742,39 @@ els.addDuration.addEventListener("click", () => {
 document.querySelectorAll(".mode-option").forEach((button) => button.addEventListener("click", () => {
   if (!state.running) setMode(button.dataset.mode);
 }));
-els.includeLast.addEventListener("change", () => { state.includeLast = els.includeLast.checked; updateEstimate(); });
+els.includeLast.addEventListener("change", () => { state.includeLast = els.includeLast.checked; updateEstimate();renderAdvancedTimeline(); });
 els.startSplit.addEventListener("click", runBatch);
 els.cancelSplit.addEventListener("click", cancelBatch);
 els.newBatch.addEventListener("click",resetBatch);
 document.querySelectorAll("[data-workspace-mode]").forEach(button=>button.addEventListener("click",()=>{if(!state.running)setWorkspaceMode(button.dataset.workspaceMode);}));
 els.advancedPlan.addEventListener("change",()=>{state.advancedPlan=els.advancedPlan.value;renderAdvancedOptions();});
+
+els.timelineSource.addEventListener("change",()=>{state.timelineFileId=els.timelineSource.value;renderAdvancedTimeline();});
+let timelinePointer=null;
+els.timelineTrack.addEventListener("pointerdown",event=>{
+ const target=event.target.closest("[data-range-handle],[data-cut-index]");if(!target||state.running)return;
+ const entry=selectedTimelineEntry();if(!entry||!Number.isFinite(entry.duration)||entry.duration<=0)return;
+ const type=target.dataset.rangeHandle!==undefined?"range":"cut";if(type==="cut"&&state.advancedPlan!=="manual")return;
+ timelinePointer={pointerId:event.pointerId,target,type,edge:target.dataset.rangeHandle||"",index:Number(target.dataset.cutIndex),duration:entry.duration};
+ try{target.setPointerCapture(event.pointerId);}catch(_){}event.preventDefault();
+});
+window.addEventListener("pointermove",event=>{
+ if(!timelinePointer||event.pointerId!==timelinePointer.pointerId)return;
+ const active=timelinePointer;setTimelineControlTime(active.type,active.edge,active.index,active.duration,timelineTimeFromPointer(event,active.duration));
+ updateTimelineDuringDrag(active.duration,active.target);
+});
+function finishTimelinePointer(event){if(!timelinePointer||event.pointerId!==timelinePointer.pointerId)return;timelinePointer=null;renderAdvancedOptions();}
+window.addEventListener("pointerup",finishTimelinePointer);window.addEventListener("pointercancel",finishTimelinePointer);
+els.timelineTrack.addEventListener("keydown",event=>{
+ const target=event.target.closest("[data-range-handle],[data-cut-index]");if(!target||!["ArrowLeft","ArrowRight"].includes(event.key)||state.running)return;
+ const entry=selectedTimelineEntry();if(!entry||!Number.isFinite(entry.duration)||entry.duration<=0)return;
+ const type=target.dataset.rangeHandle!==undefined?"range":"cut",index=Number(target.dataset.cutIndex);
+ const time=type==="range"?(target.dataset.rangeHandle==="start"?(parseTimecode(els.rangeStart.value||"0")??0):(els.rangeEnd.value.trim()?parseTimecode(els.rangeEnd.value):entry.duration))
+  :(els.manualCuts.value.split(/\r?\n/).map(line=>parseTimecode(line.trim())).filter(Number.isFinite)[index]);
+ if(!Number.isFinite(time))return;event.preventDefault();
+ setTimelineControlTime(type,target.dataset.rangeHandle||"",index,entry.duration,time+(event.key==="ArrowRight"?1:-1)*(event.shiftKey?1:0.1));renderAdvancedOptions();
+});
+
 [els.rangeStart,els.rangeEnd,els.equalParts,els.manualCuts].forEach(control=>{
  control.addEventListener("input",()=>{if(state.workspaceMode==="advanced")renderAdvancedOptions();});
  control.addEventListener("change",()=>{if(state.workspaceMode==="advanced")renderAdvancedOptions();});
