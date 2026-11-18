@@ -98,3 +98,5 @@ main{max-width:1240px;margin:auto;padding:0 30px}.hero{min-height:350px;display:
 .per-video-mode select{width:100%;height:34px;padding:0 9px;border:1px solid rgba(255,255,255,.12);border-radius:7px;background:#101113;color:#e3e4df;font-size:9px}
 .per-video-status{grid-column:1/-1;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);color:#858d8a;font-size:8px;line-height:1.5}
 @media(max-width:500px){.per-video-plan{grid-template-columns:1fr}.per-video-status{grid-column:auto}}
+
+.clip-memory-warning{display:flex;flex-direction:column;gap:5px;margin:12px 0;padding:12px 14px;border:1px solid rgba(225,184,126,.24);border-radius:10px;background:rgba(225,184,126,.055);color:#d5bd9e;font-size:10px;line-height:1.6}.clip-memory-warning strong{font-size:10px;font-weight:650;color:#e3c9a7}.clip-memory-warning span{color:#b8a58c}
