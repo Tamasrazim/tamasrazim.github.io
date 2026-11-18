@@ -243,6 +243,8 @@ function updateTimelineDuringDrag(duration,activeHandle){
 
 function clipMime(ext){return ({mp4:"video/mp4",m4v:"video/mp4",mov:"video/quicktime",webm:"video/webm",mkv:"video/x-matroska",avi:"video/x-msvideo",ts:"video/mp2t",mpg:"video/mpeg",mpeg:"video/mpeg",flv:"video/x-flv","3gp":"video/3gpp"})[ext]||"application/octet-stream";}
 function clearArchive(){if(state.zipUrl)URL.revokeObjectURL(state.zipUrl);state.zipUrl=null;state.zipDirty=true;if(els.downloadZip){els.downloadZip.hidden=true;els.downloadZip.removeAttribute("href");}}
+function getClipMemoryProfile(){const clipBytes=state.clips.reduce((sum,c)=>sum+c.size,0),largestSource=state.files.reduce((max,e)=>Math.max(max,e.file?.size||0),0);return {clipBytes,estimatedPeak:clipBytes*2+largestSource*2+128*1024*1024,heap:performance?.memory?.jsHeapSizeLimit||null};}
+function updateMemoryWarning(){const warning=els.clipManager.querySelector(".clip-memory-warning");if(!warning)return;const p=getClipMemoryProfile(),show=p.clipBytes>=512*1024*1024||p.estimatedPeak>=1024*1024*1024;warning.hidden=!show;if(show){warning.querySelector("strong").textContent=p.clipBytes>=1024*1024*1024?"High-memory export":"Memory estimate";warning.querySelector("span").textContent="Clip data: "+formatBytes(p.clipBytes)+". Rough ZIP working-set estimate: "+formatBytes(p.estimatedPeak)+" (not a guaranteed limit). Packaging may need additional browser memory. Download clips individually or split large batches if needed."+(p.heap?" Browser-reported JS heap limit: "+formatBytes(p.heap)+".":"");}}
 function invalidateArchive(){clearArchive();if(els.createZip)els.createZip.textContent="Create ZIP";}
 function clearClipOutput(){
  if(state.previewClipUrl)URL.revokeObjectURL(state.previewClipUrl);state.previewClipUrl=null;
@@ -255,7 +257,7 @@ function renderClipManager(){
  els.clipSummary.textContent=clips.length+" clips · "+formatBytes(bytes)+" · included in export";
  const groups=new Map();clips.forEach(c=>{const k=c.sourceFolder+"|"+c.jobLabel;if(!groups.has(k))groups.set(k,{source:c.sourceName,job:c.jobLabel,items:[]});groups.get(k).items.push(c);});
  els.clipList.innerHTML=[...groups.values()].map(g=>'<section class="clip-group"><header><div><strong>'+escapeHTML(g.source)+'</strong><span>'+escapeHTML(g.job)+'</span></div><small>'+g.items.length+' clips</small></header>'+g.items.map(c=>'<article class="clip-row"><div class="clip-row-main"><strong>'+escapeHTML(c.name)+'</strong><small>'+formatBytes(c.size)+' · '+(Number.isFinite(c.duration)?c.duration.toFixed(2)+' sec'+(state.mode==='fast'?' approx.':''):'Duration n/a')+' · '+escapeHTML(c.extension.toUpperCase())+'</small></div><div class="clip-row-actions"><button data-action="preview" data-id="'+c.id+'">Preview</button><button data-action="download" data-id="'+c.id+'">Download</button><button data-action="remove" data-id="'+c.id+'">Remove</button></div><div class="clip-row-rename"><input data-rename="'+c.id+'" value="'+escapeHTML(c.name)+'" aria-label="Output filename"><button data-action="rename" data-id="'+c.id+'">Rename</button></div></article>').join('')+'</section>').join('');
- const warning=els.clipManager.querySelector('.clip-memory-warning');if(warning)warning.hidden=bytes<1024*1024*1024;
+ updateMemoryWarning();
  els.createZip.textContent=state.zipDirty?'Create ZIP':'Rebuild ZIP';els.createZip.disabled=state.packaging||!clips.length;updateControls();
 }
 function findClip(id){return state.clips.find(c=>c.id===id);}
@@ -281,12 +283,14 @@ function downloadClip(id){
  const c=findClip(id);if(!c)return;const url=URL.createObjectURL(c.blob),a=document.createElement('a');a.href=url;a.download=c.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
 }
 async function createZip(){
- if(state.packaging||!state.clips.length)return;state.packaging=true;updateControls();showProgress('Creating your ZIP archive','Packaging '+state.clips.length+' reviewed clips…');
- try{const zip=new state.JSZip();state.clips.forEach(c=>zip.file(c.archivePath,c.blob,{binary:true,compression:'STORE'}));
- const blob=await zip.generateAsync({type:'blob',compression:'STORE'},m=>setProgress(m.percent,'Creating ZIP','Packaging reviewed clips…'));
- clearArchive();state.zipUrl=URL.createObjectURL(blob);state.zipDirty=false;els.downloadZip.href=state.zipUrl;els.downloadZip.download='Splytie_Export.zip';els.downloadZip.hidden=false;
- els.progressTitle.textContent='ZIP archive ready';els.progressMessage.textContent='Your reviewed clips are packaged and ready to download.';setProgress(100,'Complete','ZIP created · '+state.clips.length+' clips');
- }catch(e){els.progressTitle.textContent='ZIP creation failed';els.progressMessage.textContent=friendlyError(e);setProgress(0,'Failed','Your clips are still available.');}
+ if(state.packaging||!state.clips.length)return;const p=getClipMemoryProfile();
+ if(p.clipBytes>=512*1024*1024&&!window.confirm("This export contains "+formatBytes(p.clipBytes)+" of clips. ZIP packaging may temporarily require substantially more memory (rough estimate: "+formatBytes(p.estimatedPeak)+"). This is not a guarantee. Continue? You can download clips individually instead."))return;
+ state.packaging=true;updateControls();showProgress("Creating your ZIP archive","Preparing "+state.clips.length+" clips · "+formatBytes(p.clipBytes)+"…");
+ try{const zip=new state.JSZip();state.clips.forEach(c=>zip.file(c.archivePath,c.blob,{binary:true,compression:"STORE"}));
+ const blob=await zip.generateAsync({type:"blob",compression:"STORE"},m=>setProgress(m.percent,"Creating ZIP","Packaging reviewed clips…"));
+ clearArchive();state.zipUrl=URL.createObjectURL(blob);state.zipDirty=false;els.downloadZip.href=state.zipUrl;els.downloadZip.download="Splytie_Export.zip";els.downloadZip.hidden=false;
+ els.progressTitle.textContent="ZIP archive ready";els.progressMessage.textContent="Your reviewed clips are packaged and ready to download.";setProgress(100,"Complete","ZIP created · "+state.clips.length+" clips · "+formatBytes(blob.size));
+ }catch(e){els.progressTitle.textContent="ZIP creation failed";els.progressMessage.textContent=friendlyError(e);setProgress(0,"Failed","Your clips remain available for individual download.");}
  finally{state.packaging=false;els.progressPanel.hidden=true;els.resultsPanel.hidden=false;updateControls();renderClipManager();}
 }
 
@@ -554,10 +558,12 @@ async function runBatch(){
       setProgress((completedTasks / state.totalTasks) * 94, "Preparing source", entry.file.name);
 
       try {
-        const buffer = await entry.file.arrayBuffer();
+        let buffer = await entry.file.arrayBuffer();
         await ffmpeg.writeFile(inputPath, new Uint8Array(buffer));
+        new Uint8Array(buffer).fill(0);
+        buffer = null;
       } catch (error) {
-        failures.push(entry.file.name + ": could not load this source file (" + error.message + ").");
+        await removeIfPresent(ffmpeg,inputPath);failures.push(entry.file.name + ": could not load this source file (" + friendlyError(error) + ").");
         completedTasks += splitJobs.length;
         continue;
       }
@@ -567,7 +573,7 @@ async function runBatch(){
       if (!Number.isFinite(duration) || duration <= 0) {
         failures.push(entry.file.name + ": the video duration could not be read.");
         await removeIfPresent(ffmpeg, inputPath);
-        completedTasks += jobs.length;
+        completedTasks += splitJobs.length;
         continue;
       }
       entry.duration = duration;
@@ -599,14 +605,16 @@ async function runBatch(){
           for (let part = 0; part < names.length; part += 1) {
             if (state.cancelled) throw new Error("Cancelled");
             const outputName = names[part];
-            const fileData = await ffmpeg.readFile(outputName);
+            let fileData = await ffmpeg.readFile(outputName);
             const segment = fileData instanceof Uint8Array ? fileData : new Uint8Array(fileData);
+            const segmentSize=segment.byteLength;
             const filename=baseName+"_part_"+String(part+1).padStart(3,"0")+"."+output.extension;
             const archivePath=sourceFolder+"/"+job.folder+"/"+filename;
             const blob=new Blob([segment],{type:clipMime(output.extension)});
-            state.clips.push({id:"c"+Date.now().toString(36)+Math.random().toString(36).slice(2,8),sourceName:entry.file.name,sourceFolder,jobLabel:job.label,name:filename,archivePath,extension:output.extension,blob,size:segment.byteLength,duration:expectedClipDurations[part]??null});
+            segment.fill(0);fileData=null;
+            state.clips.push({id:"c"+Date.now().toString(36)+Math.random().toString(36).slice(2,8),sourceName:entry.file.name,sourceFolder,jobLabel:job.label,name:filename,archivePath,extension:output.extension,blob,size:segmentSize,duration:expectedClipDurations[part]??null});
             outputCount += 1;
-            outputBytes += segment.byteLength;
+            outputBytes += segmentSize;
             await removeIfPresent(ffmpeg, outputName);
           }
         } catch (error) {
