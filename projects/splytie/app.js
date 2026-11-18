@@ -3,6 +3,7 @@ const $ = (selector) => document.querySelector(selector);
 const state = {
   files: [], profiles: [30], mode: "fast", includeLast: true,
   workspaceMode: "normal", advancedPlan: "duration", timelineFileId: null, timelineDrag: null,
+  globalPlanSettings: null, perFilePlans: {},
   running: false, packaging: false, cancelled: false, ffmpeg: null, JSZip: null,
   zipUrl: null, previewUrl: null, previewClipUrl: null, clips: [], zipDirty: true, currentTask: 0, totalTasks: 0, taskProgress: 0
 };
@@ -29,7 +30,7 @@ const els = {
   advancedPlan: $("#advancedPlan"), rangeStart: $("#rangeStart"), rangeEnd: $("#rangeEnd"),
   equalParts: $("#equalParts"), manualCuts: $("#manualCuts"),
   advancedEqualSettings: $("#advancedEqualSettings"), advancedManualSettings: $("#advancedManualSettings"),
-  advancedValidation: $("#advancedValidation"), timeline: $("#advancedTimeline"), timelineSource: $("#timelineSource"),
+  advancedValidation: $("#advancedValidation"), perVideoMode: $("#perVideoMode"), perVideoStatus: $("#perVideoStatus"), timeline: $("#advancedTimeline"), timelineSource: $("#timelineSource"),
   timelineTrack: $("#timelineTrack"), timelineRange: $("#timelineRange"), timelineMarkers: $("#timelineMarkers"),
   timelineStartLabel: $("#timelineStartLabel"), timelineEndLabel: $("#timelineEndLabel"), timelineStatus: $("#timelineStatus"),
   partialSetting: $("#partialSetting"),
@@ -98,51 +99,17 @@ function parseTimecode(value){
  return parts.length===3?nums[0]*3600+minutes*60+seconds:minutes*60+seconds;
 }
 function secondsText(value){return Number(value.toFixed(6)).toString();}
-function getSplitJobs(){
- const profiles=state.profiles.slice().sort((a,b)=>a-b);
- if(state.workspaceMode!=="advanced"||state.advancedPlan==="duration"){
-  if(!profiles.length)throw new Error("Select at least one clip duration.");
-  return profiles.map(seconds=>({type:"duration",seconds,label:formatDuration(seconds),folder:durationFolder(seconds)}));
- }
- if(state.advancedPlan==="equal"){
-  const parts=Number(els.equalParts.value);
-  if(!Number.isInteger(parts)||parts<2||parts>200)throw new Error("Choose between 2 and 200 equal parts.");
-  return [{type:"equal",parts,label:parts+" equal parts",folder:"equal-parts-"+parts}];
- }
- const lines=els.manualCuts.value.split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
- if(!lines.length)throw new Error("Enter at least one manual cut timestamp.");
- if(lines.length>500)throw new Error("Use no more than 500 manual cut timestamps per plan.");
- const cuts=lines.map(parseTimecode);
- if(cuts.some(time=>!Number.isFinite(time)||time<0))throw new Error("A manual cut timestamp is invalid. Use HH:MM:SS.mmm, MM:SS.mmm, or seconds.");
- for(let i=1;i<cuts.length;i++)if(cuts[i]<=cuts[i-1])throw new Error("Manual cut timestamps must be in strictly ascending order.");
- return [{type:"manual",cuts,label:cuts.length+" manual cut points",folder:"manual-cuts"}];
-}
-function getAdvancedRange(duration){
- const start=parseTimecode(els.rangeStart.value||"0"),endInput=els.rangeEnd.value.trim(),end=endInput?parseTimecode(endInput):duration;
- if(!Number.isFinite(start)||start<0)throw new Error("The source range start time is invalid.");
- if(!Number.isFinite(end)||end<=start)throw new Error("The source range end must be later than its start.");
- if(end>duration+0.05)throw new Error("The selected source range extends beyond the video duration ("+formatTime(duration)+").");
- return {start,end:Math.min(end,duration)};
-}
-function buildAdvancedPlan(duration,job){
- const range=getAdvancedRange(duration),rangeLength=range.end-range.start;
- if(rangeLength<=0.02)throw new Error("The selected source range is too short.");
- let effectiveDuration=rangeLength,splitTimes=[];
- if(job.type==="duration"){
-  if(!state.includeLast)effectiveDuration=Math.floor((rangeLength+0.000001)/job.seconds)*job.seconds;
-  if(effectiveDuration<=0.02)return null;
-  for(let time=job.seconds;time<effectiveDuration-0.000001;time+=job.seconds)splitTimes.push(Number(time.toFixed(6)));
- }else if(job.type==="equal"){
-  for(let part=1;part<job.parts;part++)splitTimes.push(Number((rangeLength*part/job.parts).toFixed(6)));
- }else{
-  for(const cut of job.cuts)if(cut<=range.start+0.001||cut>=range.end-0.001)throw new Error("Every manual cut must fall strictly inside the selected source range.");
-  const relativeCuts=job.cuts.map(cut=>Number((cut-range.start).toFixed(6)));
-  if(state.includeLast)splitTimes=relativeCuts;
-  else{effectiveDuration=relativeCuts[relativeCuts.length-1];splitTimes=relativeCuts.slice(0,-1);}
-  if(effectiveDuration<=0.02)return null;
- }
- return {start:range.start,duration:effectiveDuration,splitTimes,clipCount:splitTimes.length+1};
-}
+function readPlanSettings(){return {plan:state.advancedPlan,rangeStart:els.rangeStart.value,rangeEnd:els.rangeEnd.value,equalParts:els.equalParts.value,manualCuts:els.manualCuts.value,profiles:state.profiles.slice(),includeLast:els.includeLast.checked};}
+function clonePlanSettings(settings){return JSON.parse(JSON.stringify(settings));}
+function writePlanSettings(settings){const value=settings||state.globalPlanSettings||{plan:"duration",rangeStart:"00:00:00.000",rangeEnd:"",equalParts:"4",manualCuts:"",profiles:[30],includeLast:true};state.advancedPlan=value.plan||"duration";els.advancedPlan.value=state.advancedPlan;els.rangeStart.value=value.rangeStart??"00:00:00.000";els.rangeEnd.value=value.rangeEnd??"";els.equalParts.value=String(value.equalParts??4);els.manualCuts.value=value.manualCuts??"";state.profiles=Array.isArray(value.profiles)?value.profiles.slice():[30];state.includeLast=value.includeLast!==false;els.includeLast.checked=state.includeLast;renderProfiles();}
+function persistActivePlanSettings(){const settings=readPlanSettings(),entry=state.files.find(file=>file.id===state.timelineFileId);if(state.workspaceMode==="advanced"&&entry&&els.perVideoMode?.value==="custom")state.perFilePlans[entry.id]=settings;else state.globalPlanSettings=settings;}
+function getPlanSettingsForEntry(entry){if(state.workspaceMode==="advanced"&&entry&&state.perFilePlans[entry.id])return state.perFilePlans[entry.id];return state.globalPlanSettings||readPlanSettings();}
+function loadPlanSettingsForEntry(entry){if(!entry){if(state.globalPlanSettings)writePlanSettings(state.globalPlanSettings);return;}const custom=state.perFilePlans[entry.id];els.perVideoMode.value=custom?"custom":"inherit";writePlanSettings(custom||state.globalPlanSettings||readPlanSettings());}
+function getSplitJobsFromSettings(settings){const profiles=(settings.profiles||[]).slice().sort((a,b)=>a-b);if(state.workspaceMode!=="advanced"||settings.plan==="duration"){if(!profiles.length)throw new Error("Select at least one clip duration.");return profiles.map(seconds=>({type:"duration",seconds,label:formatDuration(seconds),folder:durationFolder(seconds)}));}if(settings.plan==="equal"){const parts=Number(settings.equalParts);if(!Number.isInteger(parts)||parts<2||parts>200)throw new Error("Choose between 2 and 200 equal parts.");return [{type:"equal",parts,label:parts+" equal parts",folder:"equal-parts-"+parts}];}const lines=String(settings.manualCuts||"").split(/\r?\n/).map(line=>line.trim()).filter(Boolean);if(!lines.length)throw new Error("Enter at least one manual cut timestamp.");if(lines.length>500)throw new Error("Use no more than 500 manual cut timestamps per plan.");const cuts=lines.map(parseTimecode);if(cuts.some(time=>!Number.isFinite(time)||time<0))throw new Error("A manual cut timestamp is invalid. Use HH:MM:SS.mmm, MM:SS.mmm, or seconds.");for(let i=1;i<cuts.length;i++)if(cuts[i]<=cuts[i-1])throw new Error("Manual cut timestamps must be in strictly ascending order.");return [{type:"manual",cuts,label:cuts.length+" manual cut points",folder:"manual-cuts"}];}
+function getSplitJobs(){return getSplitJobsFromSettings(readPlanSettings());}
+function getSplitJobsForEntry(entry){return getSplitJobsFromSettings(getPlanSettingsForEntry(entry));}
+function getAdvancedRange(duration,settings=readPlanSettings()){const start=parseTimecode(settings.rangeStart||"0"),endInput=String(settings.rangeEnd||"").trim(),end=endInput?parseTimecode(endInput):duration;if(!Number.isFinite(start)||start<0)throw new Error("The source range start time is invalid.");if(!Number.isFinite(end)||end<=start)throw new Error("The source range end must be later than its start.");if(end>duration+0.05)throw new Error("The selected source range extends beyond the video duration ("+formatTime(duration)+").");return {start,end:Math.min(end,duration)};}
+function buildAdvancedPlan(duration,job,settings=readPlanSettings()){const range=getAdvancedRange(duration,settings),rangeLength=range.end-range.start;if(rangeLength<=0.02)throw new Error("The selected source range is too short.");let effectiveDuration=rangeLength,splitTimes=[];if(job.type==="duration"){if(!settings.includeLast)effectiveDuration=Math.floor((rangeLength+0.000001)/job.seconds)*job.seconds;if(effectiveDuration<=0.02)return null;for(let time=job.seconds;time<effectiveDuration-0.000001;time+=job.seconds)splitTimes.push(Number(time.toFixed(6)));}else if(job.type==="equal"){for(let part=1;part<job.parts;part++)splitTimes.push(Number((rangeLength*part/job.parts).toFixed(6)));}else{for(const cut of job.cuts)if(cut<=range.start+0.001||cut>=range.end-0.001)throw new Error("Every manual cut must fall strictly inside the selected source range.");const relativeCuts=job.cuts.map(cut=>Number((cut-range.start).toFixed(6)));if(settings.includeLast)splitTimes=relativeCuts;else{effectiveDuration=relativeCuts[relativeCuts.length-1];splitTimes=relativeCuts.slice(0,-1);}if(effectiveDuration<=0.02)return null;}return {start:range.start,duration:effectiveDuration,splitTimes,clipCount:splitTimes.length+1};}
 function buildAdvancedCommand(inputPath,plan,mode,extension,format){
  const args=[];if(plan.start>0)args.push("-ss",secondsText(plan.start));
  args.push("-i",inputPath,"-t",secondsText(plan.duration),"-map","0:v:0","-map","0:a?");
@@ -176,12 +143,9 @@ function renderAdvancedOptions(){
  if(!advanced)els.advancedValidation.textContent="Advanced controls are off in Normal Mode.";
  else{
   try{
-   const jobs=getSplitJobs();let issue="";
-   for(const entry of state.files)if(Number.isFinite(entry.duration)&&entry.duration>0){
-    for(const job of jobs){try{buildAdvancedPlan(entry.duration,job);}catch(error){issue=error.message;break;}}
-    if(issue)break;
-   }
-   els.advancedValidation.textContent=issue||("Advanced split plan ready. "+(state.mode==="fast"?"Fast split":"Precise split")+" will be used.");
+   let issue="";for(const entry of state.files){const jobs=getSplitJobsForEntry(entry),settings=getPlanSettingsForEntry(entry);if(Number.isFinite(entry.duration)&&entry.duration>0)for(const job of jobs){try{buildAdvancedPlan(entry.duration,job,settings);}catch(error){issue=entry.file.name+": "+error.message;break;}}if(issue)break;}
+   const customCount=state.files.filter(entry=>!!state.perFilePlans[entry.id]).length;els.perVideoStatus.textContent=customCount+" of "+state.files.length+" videos use custom plans; "+(state.files.length-customCount)+" inherit the global plan.";els.perVideoMode.disabled=state.files.length===0;
+   els.advancedValidation.textContent=issue||("Per-video plans validated. "+(state.mode==="fast"?"Fast split":"Precise split")+" will be used.");
   }catch(error){els.advancedValidation.textContent=error.message;}
  }
  renderAdvancedTimeline();updateControls();updateEstimate();
@@ -211,25 +175,25 @@ function renderAdvancedTimeline(){
  els.timeline.hidden=!advanced;if(!advanced)return;
  els.timelineSource.innerHTML=state.files.map(entry=>'<option value="'+escapeHTML(entry.id)+'">'+escapeHTML(entry.file.name)+(Number.isFinite(entry.duration)?" · "+escapeHTML(formatTime(entry.duration)):" · reading…")+"</option>").join("");
  const entry=selectedTimelineEntry();if(!entry){els.timelineStatus.textContent="Add a video to build its timeline.";return;}
- state.timelineFileId=entry.id;els.timelineSource.value=entry.id;
+ state.timelineFileId=entry.id;els.timelineSource.value=entry.id;if(els.perVideoMode)els.perVideoMode.value=state.perFilePlans[entry.id]?"custom":"inherit";
  if(!Number.isFinite(entry.duration)||entry.duration<=0){
   els.timelineStartLabel.textContent="00:00:00.000";els.timelineEndLabel.textContent="Duration pending";
   els.timelineMarkers.innerHTML="";els.timelineRange.style.left="0%";els.timelineRange.style.width="100%";
   els.timelineTrack.querySelectorAll("[data-range-handle]").forEach(handle=>handle.style.left=handle.dataset.rangeHandle==="start"?"0%":"100%");
   els.timelineStatus.textContent="Reading source duration. The timeline will become interactive when metadata is available.";return;
  }
- const duration=entry.duration;let start=0,end=duration,rangeError="";
- try{const range=getAdvancedRange(duration);start=range.start;end=range.end;}
+ const duration=entry.duration,settings=getPlanSettingsForEntry(entry);let start=0,end=duration,rangeError="";
+ try{const range=getAdvancedRange(duration,settings);start=range.start;end=range.end;}
  catch(error){
-  rangeError=error.message;const parsedStart=parseTimecode(els.rangeStart.value||"0"),parsedEnd=els.rangeEnd.value.trim()?parseTimecode(els.rangeEnd.value):duration;
+  rangeError=error.message;const parsedStart=parseTimecode(settings.rangeStart||"0"),parsedEnd=String(settings.rangeEnd||"").trim()?parseTimecode(settings.rangeEnd):duration;
   start=Number.isFinite(parsedStart)?Math.max(0,Math.min(duration,parsedStart)):0;
   end=Number.isFinite(parsedEnd)?Math.max(start,Math.min(duration,parsedEnd)):duration;
   if(end-start<0.02){start=0;end=duration;}
  }
  els.timelineStartLabel.textContent=formatTimecode(start);els.timelineEndLabel.textContent=formatTimecode(end);updateTimelineGeometry(duration);
  const markers=[];
- if(!rangeError){try{for(const job of getSplitJobs()){
-  const plan=buildAdvancedPlan(duration,job);if(!plan)continue;
+ if(!rangeError){try{for(const job of getSplitJobsForEntry(entry)){
+  const plan=buildAdvancedPlan(duration,job,settings);if(!plan)continue;
   for(const relative of plan.splitTimes){const absolute=plan.start+relative,cutIndex=job.type==="manual"?job.cuts.findIndex(value=>Math.abs(value-absolute)<0.002):-1;
    markers.push({time:absolute,label:job.label,cutIndex,draggable:job.type==="manual"});}
  }}catch(_){}}
@@ -240,7 +204,7 @@ function renderAdvancedTimeline(){
   return '<span class="timeline-cut-marker" style="left:'+position+'%" title="'+label+'" aria-label="'+label+'"></span>';
  }).join("");
  els.timelineStatus.textContent=rangeError?rangeError+" Adjust the range fields or drag the range handles."
-  :(markers.length?markers.length+" planned cut"+(markers.length===1?"":"s")+" shown. "+(state.advancedPlan==="manual"?"Drag a cut marker to adjust its timestamp.":"Split markers are preview-only; the range edges are draggable."):"No internal cuts for this plan. Drag the range edges to change the source range.");
+  :(markers.length?markers.length+" planned cut"+(markers.length===1?"":"s")+" shown. "+(settings.plan==="manual"?"Drag a cut marker to adjust its timestamp.":"Split markers are preview-only; the range edges are draggable."):"No internal cuts for this plan. Drag the range edges to change the source range.");
  els.timelineTrack.setAttribute("aria-label","Video timeline from zero to "+formatTimecode(duration)+", selected range "+formatTimecode(start)+" to "+formatTimecode(end));
 }
 function setTimelineControlTime(type,edge,index,duration,value){
@@ -429,15 +393,10 @@ function addFiles(fileList) {
 function updateEstimate(){
  if(!state.files.length){els.estimateCount.textContent="Ready for your videos";els.estimateDetail.textContent="Add files to calculate the estimated number of clips.";return;}
  if(state.workspaceMode==="advanced"){
-  let jobs;try{jobs=getSplitJobs();}catch(error){els.estimateCount.textContent="Check advanced settings";els.estimateDetail.textContent=error.message;return;}
-  let total=0,known=0,unknown=0,invalid=0;
-  for(const entry of state.files){
-   if(!Number.isFinite(entry.duration)||entry.duration<=0){unknown++;continue;}known++;
-   for(const job of jobs){try{const plan=buildAdvancedPlan(entry.duration,job);if(plan)total+=plan.clipCount;}catch(_){invalid++;}}
-  }
-  if(invalid){els.estimateCount.textContent="Review source range or cut points";els.estimateDetail.textContent=invalid+" plan"+(invalid===1?"":"s")+" do not fit one or more source videos.";return;}
-  els.estimateCount.textContent=total+(unknown?"+ estimated clips":" estimated clips");
-  els.estimateDetail.textContent=unknown?known+" of "+state.files.length+" video durations read · "+(state.files.length*jobs.length)+" split jobs":state.files.length+" videos × "+jobs.length+" split plan"+(jobs.length===1?"":"s");return;
+  let total=0,known=0,unknown=0,invalid=0,tasks=0,custom=0;
+  for(const entry of state.files){let jobs,settings;try{jobs=getSplitJobsForEntry(entry);settings=getPlanSettingsForEntry(entry);tasks+=jobs.length;}catch(_){invalid++;continue;}if(state.perFilePlans[entry.id])custom++;if(!Number.isFinite(entry.duration)||entry.duration<=0){unknown++;continue;}known++;for(const job of jobs){try{const plan=buildAdvancedPlan(entry.duration,job,settings);if(plan)total+=plan.clipCount;}catch(_){invalid++;}}}
+  if(invalid){els.estimateCount.textContent="Review per-video settings";els.estimateDetail.textContent=invalid+" invalid plan or source-range setting"+(invalid===1?"":"s")+". Check each video's plan.";return;}
+  els.estimateCount.textContent=total+(unknown?"+ estimated clips":" estimated clips");els.estimateDetail.textContent=unknown?known+" of "+state.files.length+" video durations read · "+tasks+" split jobs":state.files.length+" videos · "+tasks+" split jobs · "+custom+" custom plans";return;
  }
  if(!state.profiles.length){els.estimateCount.textContent="Choose a duration";els.estimateDetail.textContent="Select at least one clip duration to continue.";return;}
  let total=0,known=0,unknown=0;
@@ -560,15 +519,10 @@ function updateTaskProgress(index,total,fileName,label){
 
 async function runBatch(){
  if(state.running||!state.files.length)return;
- let jobs;
- try{
-  jobs=getSplitJobs();
-  if(state.workspaceMode==="advanced")for(const entry of state.files){
-   if(!Number.isFinite(entry.duration)||entry.duration<=0)continue;
-   for(const job of jobs)buildAdvancedPlan(entry.duration,job);
-  }
- }catch(error){els.advancedValidation.textContent=error.message;els.advancedValidation.scrollIntoView({behavior:"smooth",block:"nearest"});return;}
- state.running=true;state.cancelled=false;state.totalTasks=state.files.length*jobs.length;
+ let jobsByFile;
+ try{jobsByFile=state.files.map(entry=>getSplitJobsForEntry(entry));if(state.workspaceMode==="advanced")for(let i=0;i<state.files.length;i++){const entry=state.files[i],settings=getPlanSettingsForEntry(entry);if(!Number.isFinite(entry.duration)||entry.duration<=0)continue;for(const job of jobsByFile[i])buildAdvancedPlan(entry.duration,job,settings);}}
+ catch(error){els.advancedValidation.textContent=error.message;els.advancedValidation.scrollIntoView({behavior:"smooth",block:"nearest"});return;}
+ state.running=true;state.cancelled=false;state.totalTasks=jobsByFile.reduce((sum,jobs)=>sum+jobs.length,0);
   state.currentTask = 0;
   state.taskProgress = 0;
   updateControls();
@@ -584,11 +538,9 @@ async function runBatch(){
     await loadEngine();
     const ffmpeg = state.ffmpeg;
     clearClipOutput();
-    const splitJobs=jobs;
-
     for (let fileIndex = 0; fileIndex < state.files.length; fileIndex += 1) {
       if (state.cancelled) throw new Error("Cancelled");
-      const entry = state.files[fileIndex];
+      const entry = state.files[fileIndex],splitJobs=jobsByFile[fileIndex],entrySettings=getPlanSettingsForEntry(entry);
       const extension = fileExtension(entry.file.name);
       const inputPath = "input_" + fileIndex + "." + extension;
       els.progressTitle.textContent = "Splitting your videos";
@@ -600,7 +552,7 @@ async function runBatch(){
         await ffmpeg.writeFile(inputPath, new Uint8Array(buffer));
       } catch (error) {
         failures.push(entry.file.name + ": could not load this source file (" + error.message + ").");
-        completedTasks += jobs.length;
+        completedTasks += splitJobs.length;
         continue;
       }
 
@@ -624,7 +576,7 @@ async function runBatch(){
         let command=null,expectedClipDurations=[];
         try{
           if(state.workspaceMode==="advanced"){
-            const plan=buildAdvancedPlan(duration,job);
+            const plan=buildAdvancedPlan(duration,job,entrySettings);
             if(plan){command=buildAdvancedCommand(inputPath,plan,state.mode,output.extension,output.format);const points=[0,...plan.splitTimes,plan.duration];expectedClipDurations=points.slice(1).map((point,index)=>point-points[index]);}
           }else{
             command=buildCommand(inputPath,job.seconds,state.mode,state.includeLast,duration,output.extension,output.format);
@@ -690,16 +642,16 @@ async function runBatch(){
   } finally {
     state.running = false;
     updateControls();
-    let settingsReady=true;try{getSplitJobs();}catch(_){settingsReady=false;}
+    let settingsReady=true;try{state.files.forEach(entry=>getSplitJobsForEntry(entry));}catch(_){settingsReady=false;}
     els.startSplit.disabled=state.files.length===0||!settingsReady;
   }
 }
 
 function resetBatch() {
   if (state.running) return;
-  state.files = [];
+  state.files = [];state.perFilePlans={};state.globalPlanSettings=null;state.timelineFileId=null;
   clearClipOutput();
-  state.profiles=[30];state.includeLast=true;state.advancedPlan="duration";
+  state.profiles=[30];state.includeLast=true;state.advancedPlan="duration";state.perFilePlans={};state.globalPlanSettings=null;state.timelineFileId=null;
   els.advancedPlan.value="duration";els.rangeStart.value="00:00:00.000";els.rangeEnd.value="";
   els.equalParts.value="4";els.manualCuts.value="";els.includeLast.checked=true;
   setWorkspaceMode("normal");
@@ -738,26 +690,27 @@ els.dropzone.addEventListener("drop", (event) => {
 els.fileList.addEventListener("click", (event) => {
   const button = event.target.closest("[data-remove-file]");
   if (!button || state.running) return;
-  state.files = state.files.filter((entry) => entry.id !== button.dataset.removeFile);
+  state.files = state.files.filter((entry) => entry.id !== button.dataset.removeFile);delete state.perFilePlans[button.dataset.removeFile];
+  if(state.timelineFileId===button.dataset.removeFile)state.timelineFileId=state.files[0]?.id||null;
   renderQueue(); updatePreview();
 });
 els.clearFiles.addEventListener("click", () => {
   if (state.running) return;
-  state.files = []; renderQueue(); updatePreview();
+  state.files = [];state.perFilePlans={};state.timelineFileId=null;renderQueue(); updatePreview();
 });
 els.durationPresets.addEventListener("click", (event) => {
   const button = event.target.closest("[data-seconds]");
   if (!button || state.running) return;
   const value = Number(button.dataset.seconds);
   state.profiles = state.profiles.includes(value) ? state.profiles.filter((item) => item !== value) : state.profiles.concat(value);
-  renderProfiles();
+  persistActivePlanSettings();renderProfiles();
 });
 els.selectedProfiles.addEventListener("click", (event) => {
   const button = event.target.closest("[data-remove-duration]");
   if (!button || state.running) return;
   const value = Number(button.dataset.removeDuration);
   state.profiles = state.profiles.filter((item) => item !== value);
-  renderProfiles();
+  persistActivePlanSettings();renderProfiles();
 });
 els.addDuration.addEventListener("click", () => {
   if (state.running) return;
@@ -774,12 +727,12 @@ els.addDuration.addEventListener("click", () => {
   }
   els.customSeconds.setCustomValidity("");
   if (!state.profiles.includes(total)) state.profiles.push(total);
-  renderProfiles();
+  persistActivePlanSettings();renderProfiles();
 });
 document.querySelectorAll(".mode-option").forEach((button) => button.addEventListener("click", () => {
   if (!state.running) setMode(button.dataset.mode);
 }));
-els.includeLast.addEventListener("change", () => { state.includeLast = els.includeLast.checked; updateEstimate();renderAdvancedTimeline(); });
+els.includeLast.addEventListener("change", () => { state.includeLast = els.includeLast.checked;persistActivePlanSettings(); updateEstimate();renderAdvancedTimeline(); });
 els.startSplit.addEventListener("click", runBatch);
 els.cancelSplit.addEventListener("click", cancelBatch);
 els.newBatch.addEventListener("click",resetBatch);
@@ -788,9 +741,10 @@ els.clipList.addEventListener("click",event=>{const b=event.target.closest("[dat
 els.closeClipPreview.addEventListener("click",()=>els.previewDialog.close());
 els.previewDialog.addEventListener("close",()=>{els.previewClip.pause();els.previewClip.removeAttribute("src");els.previewClip.load();if(state.previewClipUrl)URL.revokeObjectURL(state.previewClipUrl);state.previewClipUrl=null;});
 document.querySelectorAll("[data-workspace-mode]").forEach(button=>button.addEventListener("click",()=>{if(!state.running)setWorkspaceMode(button.dataset.workspaceMode);}));
-els.advancedPlan.addEventListener("change",()=>{state.advancedPlan=els.advancedPlan.value;renderAdvancedOptions();});
+els.advancedPlan.addEventListener("change",()=>{state.advancedPlan=els.advancedPlan.value;persistActivePlanSettings();renderAdvancedOptions();});
 
-els.timelineSource.addEventListener("change",()=>{state.timelineFileId=els.timelineSource.value;renderAdvancedTimeline();});
+els.timelineSource.addEventListener("change",()=>{persistActivePlanSettings();state.timelineFileId=els.timelineSource.value;loadPlanSettingsForEntry(state.files.find(file=>file.id===state.timelineFileId));renderAdvancedOptions();});
+els.perVideoMode.addEventListener("change",()=>{const entry=state.files.find(file=>file.id===state.timelineFileId);if(!entry)return;if(els.perVideoMode.value==="custom"){if(!state.globalPlanSettings)state.globalPlanSettings=readPlanSettings();state.perFilePlans[entry.id]=clonePlanSettings(state.globalPlanSettings);}else delete state.perFilePlans[entry.id];loadPlanSettingsForEntry(entry);renderAdvancedOptions();});
 let timelinePointer=null;
 els.timelineTrack.addEventListener("pointerdown",event=>{
  const target=event.target.closest("[data-range-handle],[data-cut-index]");if(!target||state.running)return;
@@ -817,8 +771,8 @@ els.timelineTrack.addEventListener("keydown",event=>{
 });
 
 [els.rangeStart,els.rangeEnd,els.equalParts,els.manualCuts].forEach(control=>{
- control.addEventListener("input",()=>{if(state.workspaceMode==="advanced")renderAdvancedOptions();});
- control.addEventListener("change",()=>{if(state.workspaceMode==="advanced")renderAdvancedOptions();});
+ control.addEventListener("input",()=>{if(state.workspaceMode==="advanced"){persistActivePlanSettings();renderAdvancedOptions();}});
+ control.addEventListener("change",()=>{if(state.workspaceMode==="advanced"){persistActivePlanSettings();renderAdvancedOptions();}});
 });
 
 renderProfiles();
