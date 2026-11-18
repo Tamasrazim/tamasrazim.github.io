@@ -47,7 +47,14 @@
 
     <section class="panel settings-panel" aria-labelledby="settingsTitle">
       <div class="panel-heading"><div class="heading-title"><span class="panel-index">02</span><h3 id="settingsTitle">Split settings</h3></div><span class="multi-badge">BATCH READY</span></div>
-      <div class="setting-block">
+      <div class="workspace-mode-switch" role="group" aria-label="Workspace mode">
+        <div class="workspace-mode-copy"><strong>Workspace mode</strong><span>Normal keeps the current workflow. Advanced adds custom split controls.</span></div>
+        <div class="workspace-mode-buttons">
+          <button class="workspace-mode-button active" type="button" data-workspace-mode="normal" aria-pressed="true">Normal</button>
+          <button class="workspace-mode-button" type="button" data-workspace-mode="advanced" aria-pressed="false">Advanced</button>
+        </div>
+      </div>
+      <div class="setting-block" id="durationSettings">
         <div class="setting-title-row"><div><h4>Clip duration</h4><p>Select one or several durations. Every source video will be split using each selected duration.</p></div><span class="selected-count" id="selectedCount">1 selected</span></div>
         <div class="duration-presets" id="durationPresets">
           <button class="duration-chip" data-seconds="15" type="button">15 sec</button><button class="duration-chip active" data-seconds="30" type="button" aria-pressed="true">30 sec</button>
@@ -60,6 +67,29 @@
         </div><button class="button button-quiet" id="addDuration" type="button">Add duration</button></div>
         <div class="selected-profiles" id="selectedProfiles" aria-live="polite"><span class="profiles-label">Selected:</span><span class="profile-tag">30 sec</span></div>
       </div>
+      <div class="advanced-settings" id="advancedSettings" hidden>
+        <div class="advanced-settings-head"><div><span class="advanced-kicker">ADVANCED CONTROLS</span><h4>Custom split plan</h4><p>Set a source range, divide it evenly, or define exact cut timestamps.</p></div><span class="advanced-badge">OPTIONAL</span></div>
+        <label class="advanced-field plan-field"><span>Split plan</span>
+          <select id="advancedPlan">
+            <option value="duration">Duration profiles</option>
+            <option value="equal">Equal-length parts</option>
+            <option value="manual">Manual cut points</option>
+          </select>
+        </label>
+        <div class="advanced-range-grid">
+          <label class="advanced-field"><span>Start time</span><input id="rangeStart" type="text" value="00:00:00.000" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="00:00:00.000"><small>HH:MM:SS.mmm or seconds</small></label>
+          <label class="advanced-field"><span>End time</span><input id="rangeEnd" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="Video end"><small>Leave blank to use the full duration</small></label>
+        </div>
+        <div class="advanced-subpanel" id="advancedEqualSettings" hidden>
+          <label class="advanced-field"><span>Number of equal parts</span><input id="equalParts" type="number" min="2" max="200" step="1" value="4"></label>
+          <p>Each source video is divided into this many equal-duration clips inside the selected range.</p>
+        </div>
+        <div class="advanced-subpanel" id="advancedManualSettings" hidden>
+          <label class="advanced-field"><span>Cut timestamps</span><textarea id="manualCuts" rows="5" spellcheck="false" placeholder="00:00:12.500&#10;00:00:28.000&#10;00:01:04.250"></textarea></label>
+          <p>Enter one source timestamp per line, in ascending order. Each timestamp creates a cut. Supports HH:MM:SS.mmm, MM:SS.mmm, or seconds.</p>
+        </div>
+        <div class="advanced-validation" id="advancedValidation" role="status" aria-live="polite">Advanced controls are off in Normal Mode.</div>
+      </div>
       <div class="divider"></div>
       <div class="setting-block">
         <div class="setting-title-row"><div><h4>Cut method</h4><p>Choose between preserving the original streams or making cuts on encoded frame boundaries.</p></div></div>
@@ -70,7 +100,7 @@
         <div class="method-note" id="methodNote"><b>i</b><span>Fast split cuts at the nearest available keyframe. Clip lengths can be longer than your selected duration.</span></div>
       </div>
       <div class="divider"></div>
-      <div class="setting-block final-setting"><div><h4>Last partial clip</h4><p>Keep the remaining footage when the video does not divide evenly.</p></div><label class="switch" aria-label="Include last partial clip"><input id="includeLast" type="checkbox" checked><span></span></label></div>
+      <div class="setting-block final-setting" id="partialSetting"><div><h4 id="partialTitle">Last partial clip</h4><p id="partialCopy">Keep the remaining footage when the video does not divide evenly.</p></div><label class="switch" aria-label="Include last partial clip"><input id="includeLast" type="checkbox" checked><span></span></label></div>
       <div class="estimate-card"><div class="estimate-icon">≋</div><div class="estimate-copy"><strong id="estimateCount">Ready for your videos</strong><span id="estimateDetail">Add files to calculate the estimated number of clips.</span></div><span class="estimate-arrow">↗</span></div>
       <button class="button button-primary start-button" id="startSplit" type="button" disabled><span>Split videos</span><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <p class="engine-note">First run loads the video engine (about 30 MB). Processing happens in your browser.</p>
