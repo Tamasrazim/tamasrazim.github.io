@@ -14,12 +14,13 @@ The app is deployed as part of the Tamasrazim portfolio repository under `projec
 - Select several durations at once, including custom minute/second values.
 - **Normal Mode:** preserves the original duration-profile workflow.
 - **Advanced Mode:** trim a source time range, split into equal-length parts, or define manual cut timestamps (one timestamp per line).
+- **Per-video Advanced plans:** each source can inherit the global plan or use its own duration profiles, source range, equal-part count, or manual cut points. Select a source in the visual timeline to edit its plan; validation, estimates, and rendering use that source-specific configuration.
 - **Fast split:** copies the original streams without re-encoding. Segment boundaries depend on source keyframes, so actual clip lengths can exceed the selected duration.
 - **Precise split:** re-encodes to H.264/AAC MP4 and places boundaries on frame-aligned keyframes. This is slower and changes the source encoding.
 - Advanced timestamp plans use the same Fast (keyframe-dependent stream copy) or Precise (H.264 re-encode) cut method.
 - Optionally omit the final partial segment.
 - Review generated clips before export: preview, rename, download individually, or remove unwanted clips.
-- Create the final ZIP only after review; edits invalidate any previously generated archive. The archive preserves source/profile folders.
+- Create the final ZIP only after review; edits invalidate any previously generated archive. The archive preserves source and split-plan folders, including per-video plan differences.
 - No application server or account is required. Source files are processed locally in the browser.
 
 ## Run locally
