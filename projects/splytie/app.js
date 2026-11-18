@@ -298,6 +298,7 @@ function updateControls(){
   els.advancedPlan.disabled = state.running;
   [els.rangeStart, els.rangeEnd, els.equalParts, els.manualCuts].forEach((control) => { control.disabled = state.running; });
   if(els.timelineSource)els.timelineSource.disabled=state.running;
+  if(els.perVideoMode)els.perVideoMode.disabled=state.running||state.files.length===0;
   if(els.timelineTrack)els.timelineTrack.querySelectorAll("button").forEach(button=>button.disabled=state.running);
   els.selectedCount.textContent = state.profiles.length + " selected";
   els.startSplit.querySelector("span").textContent = state.running ? "Splitting…" : state.packaging ? "Packaging…" : "Split videos";
@@ -692,6 +693,7 @@ els.fileList.addEventListener("click", (event) => {
   if (!button || state.running) return;
   state.files = state.files.filter((entry) => entry.id !== button.dataset.removeFile);delete state.perFilePlans[button.dataset.removeFile];
   if(state.timelineFileId===button.dataset.removeFile)state.timelineFileId=state.files[0]?.id||null;
+  if(state.workspaceMode==="advanced"&&state.timelineFileId)loadPlanSettingsForEntry(state.files.find(entry=>entry.id===state.timelineFileId));
   renderQueue(); updatePreview();
 });
 els.clearFiles.addEventListener("click", () => {
