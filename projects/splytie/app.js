@@ -318,7 +318,7 @@ async function createZip(){
  clearArchive();state.zipUrl=URL.createObjectURL(blob);state.zipDirty=false;els.downloadZip.href=state.zipUrl;els.downloadZip.download='Splytie_Export.zip';els.downloadZip.hidden=false;
  els.progressTitle.textContent='ZIP archive ready';els.progressMessage.textContent='Your reviewed clips are packaged and ready to download.';setProgress(100,'Complete','ZIP created · '+state.clips.length+' clips');
  }catch(e){els.progressTitle.textContent='ZIP creation failed';els.progressMessage.textContent=friendlyError(e);setProgress(0,'Failed','Your clips are still available.');}
- finally{state.packaging=false;updateControls();renderClipManager();}
+ finally{state.packaging=false;els.progressPanel.hidden=true;els.resultsPanel.hidden=false;updateControls();renderClipManager();}
 }
 
 function updateControls(){
