@@ -18,7 +18,8 @@ The app is deployed as part of the Tamasrazim portfolio repository under `projec
 - **Precise split:** re-encodes to H.264/AAC MP4 and places boundaries on frame-aligned keyframes. This is slower and changes the source encoding.
 - Advanced timestamp plans use the same Fast (keyframe-dependent stream copy) or Precise (H.264 re-encode) cut method.
 - Optionally omit the final partial segment.
-- Package successful outputs into one ZIP, organized by source video and duration.
+- Review generated clips before export: preview, rename, download individually, or remove unwanted clips.
+- Create the final ZIP only after review; edits invalidate any previously generated archive. The archive preserves source/profile folders.
 - No application server or account is required. Source files are processed locally in the browser.
 
 ## Run locally
@@ -29,7 +30,7 @@ For example, run `python -m http.server 8000` in this directory, then open `http
 
 ## Processing and privacy
 
-Splytie does not upload source videos to a Splytie backend. The FFmpeg WebAssembly runtime and JSZip library are loaded from jsDelivr when needed. Processing and ZIP creation happen in the current browser tab.
+Splytie does not upload source videos to a Splytie backend. The FFmpeg WebAssembly runtime and JSZip library are loaded from jsDelivr when needed. Processing, clip review and ZIP creation happen in the current browser tab. Generated clips remain in browser memory while the review queue is open; close the batch when finished to release them.
 
 The browser still needs enough available memory for the active input, generated segments, and final archive. Very large batches may exceed browser memory limits. Process large sources in smaller batches when necessary. Advanced source-range and split-point controls do not change the local-only processing model.
 
