@@ -559,8 +559,10 @@ async function runBatch(){
 
       try {
         let buffer = await entry.file.arrayBuffer();
-        await ffmpeg.writeFile(inputPath, new Uint8Array(buffer));
-        new Uint8Array(buffer).fill(0);
+        let inputData = new Uint8Array(buffer);
+        await ffmpeg.writeFile(inputPath, inputData);
+        // Drop the temporary references; FFmpeg owns its virtual-filesystem copy.
+        inputData = null;
         buffer = null;
       } catch (error) {
         await removeIfPresent(ffmpeg,inputPath);failures.push(entry.file.name + ": could not load this source file (" + friendlyError(error) + ").");
