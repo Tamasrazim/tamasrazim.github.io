@@ -13,7 +13,7 @@ This directory contains a curated set of first-party browser tools, native appli
 - **WEBEDYTS** — native desktop visual website editor in development; its project page separates current editor-source capabilities from release gates. No public download is available yet.
 - **QALYVYRON** — native C++/Qt 6 3D creation and offline-rendering studio in active development. Its project page links to the source, verified CI history, current capabilities, and remaining gaps.
 - **Business software** — BNC AgroCare catalogue and invoice workflow.
-- **Browser tools** — Format Forge, Repo Token Meter, Stock Asset Vault, and Vectyz (local raster-to-vector conversion).
+- **Browser tools** — Format Forge, Repo Token Meter, Stock Asset Vault, Vectyz (local raster-to-vector conversion), and Splytie (batch video splitting).
 
 ## Project rule
 

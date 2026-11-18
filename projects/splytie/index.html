@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090a0b">
+<meta name="description" content="Splytie splits one video or an entire batch into timed clips. Select multiple durations, process locally in your browser, and export one ZIP."><link rel="canonical" href="https://tamasrazim.github.io/projects/splytie/"><meta property="og:type" content="website"><meta property="og:title" content="Splytie — Batch video splitter"><meta property="og:description" content="Split videos into timed clips. Batch-select durations and export one ZIP, with local browser processing."><meta property="og:url" content="https://tamasrazim.github.io/projects/splytie/">
+<title>Splytie — Video splitter</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23090a0b'/%3E%3Cpath d='M16 17h13v30H16zm19 0h13v30H35z' fill='none' stroke='%23f3f3f0' stroke-width='5'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="./styles.css"><script type="module" src="./app.js"></script>
+</head>
+<body>
+<div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+<header class="topbar">
+  <a class="brand" href="./" aria-label="Splytie home"><span class="brand-mark"><svg viewBox="0 0 32 32" fill="none"><path d="M5 7h9v18H5zM18 7h9v18h-9zM14 11h4M14 21h4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></span><span>Splytie</span></a>
+  <nav class="topnav"><a class="nav-active" href="#workspace">Splitter</a><a href="#how">How it works</a></nav>
+  <div class="privacy-pill"><i></i> Private processing</div>
+</header>
+<main>
+<section class="hero">
+  <div class="hero-copy"><div class="eyebrow"><span></span> VIDEO WORKSPACE</div>
+    <h1>One video in.<br><em>Every clip you need.</em></h1>
+    <p>Split one video or a whole batch into timed parts. Select several durations in one run, then download every result together.</p>
+    <div class="hero-features"><span><b>✓</b> No upload</span><span><b>✓</b> Batch processing</span><span><b>✓</b> ZIP export</span></div>
+  </div>
+  <div class="hero-visual" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+    <div class="visual-card"><div class="film-strip"><i></i><i></i><i></i><b></b><i></i><i></i></div><div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+    <span class="visual-label label-a">INPUT</span><span class="visual-label label-b">OUTPUT</span>
+  </div>
+</section>
+
+<section class="workspace" id="workspace">
+  <div class="workspace-heading"><div><span class="kicker">WORKSPACE</span><h2>Build your split</h2></div><div class="workspace-note"><span>▣</span> Files stay on this device</div></div>
+  <div class="work-grid">
+    <section class="panel source-panel" aria-labelledby="sourceTitle">
+      <div class="panel-heading"><div class="heading-title"><span class="panel-index">01</span><h3 id="sourceTitle">Source videos</h3></div><button class="text-button" id="clearFiles" type="button" disabled>Clear all</button></div>
+      <input id="fileInput" type="file" accept="video/*,.mkv,.avi,.mov,.mp4,.webm,.m4v,.mts,.m2ts,.ts" multiple hidden>
+      <div class="dropzone" id="dropzone" tabindex="0" role="region" aria-label="Drop video files or choose videos">
+        <div class="drop-icon"><svg viewBox="0 0 48 48" fill="none"><path d="M24 31V8m0 0-8 8m8-8 8 8M9 27v11a2 2 0 0 0 2 2h26a2 2 0 0 0 2-2V27" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <strong>Drop videos here</strong><span>or choose files from your device</span>
+        <button class="button button-secondary browse-button" id="browseFiles" type="button">Choose videos</button>
+        <small>Multiple files supported · Browser memory limits apply</small>
+      </div>
+      <div class="queue-heading"><span>FILE QUEUE</span><span id="fileCount">0 files</span></div>
+      <div class="empty-queue" id="emptyQueue"><span class="empty-mark">▶</span><span>Your videos will appear here.</span></div>
+      <div class="file-list" id="fileList" aria-live="polite"></div>
+      <div class="preview-wrap" id="previewWrap" hidden><div class="preview-head"><span>PREVIEW</span><span id="previewName"></span></div><video id="previewVideo" controls playsinline preload="metadata"></video></div>
+    </section>
+
+    <section class="panel settings-panel" aria-labelledby="settingsTitle">
+      <div class="panel-heading"><div class="heading-title"><span class="panel-index">02</span><h3 id="settingsTitle">Split settings</h3></div><span class="multi-badge">BATCH READY</span></div>
+      <div class="setting-block">
+        <div class="setting-title-row"><div><h4>Clip duration</h4><p>Select one or several durations. Every source video will be split using each selected duration.</p></div><span class="selected-count" id="selectedCount">1 selected</span></div>
+        <div class="duration-presets" id="durationPresets">
+          <button class="duration-chip" data-seconds="15" type="button">15 sec</button><button class="duration-chip active" data-seconds="30" type="button" aria-pressed="true">30 sec</button>
+          <button class="duration-chip" data-seconds="45" type="button">45 sec</button><button class="duration-chip" data-seconds="60" type="button">1 min</button>
+          <button class="duration-chip" data-seconds="120" type="button">2 min</button><button class="duration-chip" data-seconds="300" type="button">5 min</button>
+        </div>
+        <div class="custom-duration"><div class="custom-inputs">
+          <label><span>Minutes</span><input id="customMinutes" type="number" min="0" max="59" value="0" inputmode="numeric"></label><span class="time-colon">:</span>
+          <label><span>Seconds</span><input id="customSeconds" type="number" min="0" max="59" value="20" inputmode="numeric"></label>
+        </div><button class="button button-quiet" id="addDuration" type="button">Add duration</button></div>
+        <div class="selected-profiles" id="selectedProfiles" aria-live="polite"><span class="profiles-label">Selected:</span><span class="profile-tag">30 sec</span></div>
+      </div>
+      <div class="divider"></div>
+      <div class="setting-block">
+        <div class="setting-title-row"><div><h4>Cut method</h4><p>Choose between preserving the original streams or making cuts on encoded frame boundaries.</p></div></div>
+        <div class="mode-options" role="group" aria-label="Cut method">
+          <button class="mode-option active" type="button" data-mode="fast" aria-pressed="true"><span class="mode-radio"></span><span class="mode-copy"><strong>Fast split</strong><small>No re-encoding · Original quality</small></span><span class="mode-tag">FASTER</span></button>
+          <button class="mode-option" type="button" data-mode="precise" aria-pressed="false"><span class="mode-radio"></span><span class="mode-copy"><strong>Precise split</strong><small>Re-encode · Frame-aligned cuts</small></span><span class="mode-tag">MP4</span></button>
+        </div>
+        <div class="method-note" id="methodNote"><b>i</b><span>Fast split cuts at the nearest available keyframe. Clip lengths can be longer than your selected duration.</span></div>
+      </div>
+      <div class="divider"></div>
+      <div class="setting-block final-setting"><div><h4>Last partial clip</h4><p>Keep the remaining footage when the video does not divide evenly.</p></div><label class="switch" aria-label="Include last partial clip"><input id="includeLast" type="checkbox" checked><span></span></label></div>
+      <div class="estimate-card"><div class="estimate-icon">≋</div><div class="estimate-copy"><strong id="estimateCount">Ready for your videos</strong><span id="estimateDetail">Add files to calculate the estimated number of clips.</span></div><span class="estimate-arrow">↗</span></div>
+      <button class="button button-primary start-button" id="startSplit" type="button" disabled><span>Split videos</span><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <p class="engine-note">First run loads the video engine (about 30 MB). Processing happens in your browser.</p>
+    </section>
+  </div>
+
+  <section class="progress-panel" id="progressPanel" hidden aria-live="polite"><div class="progress-top"><div><span class="kicker">PROCESSING</span><h3 id="progressTitle">Preparing your videos</h3><p id="progressMessage">Loading the video engine…</p></div><button class="button button-quiet cancel-button" id="cancelSplit" type="button">Cancel</button></div><div class="progress-track"><span id="progressBar"></span></div><div class="progress-meta"><span id="progressStage">Preparing</span><strong id="progressPercent">0%</strong></div></section>
+
+  <section class="results-panel" id="resultsPanel" hidden aria-live="polite">
+    <div class="results-icon">✓</div><div class="results-copy"><span class="kicker">EXPORT READY</span><h3 id="resultsTitle">Your clips are ready.</h3><p id="resultsDetail">All clips have been packaged into one archive.</p><div class="result-stats" id="resultStats"></div><div class="failure-list" id="failureList" hidden></div></div>
+    <div class="result-actions"><a class="button button-primary download-button" id="downloadZip" href="#" download="Splytie_Export.zip">Download ZIP <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0 5-5m-5 5-5-5M4 20h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a><button class="text-button" id="newBatch" type="button">Start another batch</button></div>
+  </section>
+</section>
+
+<section class="how-section" id="how"><div class="how-heading"><span class="kicker">STRAIGHTFORWARD BY DESIGN</span><h2>From one file to a full batch.</h2></div>
+  <div class="how-grid">
+    <article class="how-card"><span class="how-number">01</span><div class="how-icon">↑</div><h3>Add your videos</h3><p>Drop in multiple source files. They stay on your device throughout the process.</p></article>
+    <article class="how-card"><span class="how-number">02</span><div class="how-icon">≋</div><h3>Choose durations</h3><p>Select multiple clip lengths in one go. Each video gets a separate set for every duration.</p></article>
+    <article class="how-card"><span class="how-number">03</span><div class="how-icon">↓</div><h3>Download the batch</h3><p>Every segment is named and sorted into folders inside one ZIP archive.</p></article>
+  </div>
+</section>
+<section class="privacy-section"><div class="privacy-symbol">◈</div><div><h3>Your source files stay yours.</h3><p>Splytie uses browser-based FFmpeg processing. Your videos are not sent to a Splytie server. The processing engine and ZIP library are loaded from a public CDN when needed.</p></div><span class="privacy-status"><i></i> LOCAL PROCESSING</span></section>
+</main>
+<footer class="footer"><a class="brand footer-brand" href="./"><span class="brand-mark"><svg viewBox="0 0 32 32" fill="none"><path d="M5 7h9v18H5zM18 7h9v18h-9zM14 11h4M14 21h4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></span><span>Splytie</span></a><span>Video splitting, kept simple.</span></footer>
+</body></html>
