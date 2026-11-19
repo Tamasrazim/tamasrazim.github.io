@@ -362,6 +362,7 @@ const standaloneProjectPages = new Set([
   'projects/soryvyn/index.html',
   'projects/trss-sample-recorder/index.html',
   'projects/trss/index.html',
+  'projects/bteb-fast-results/index.html',
   'projects/splytie/index.html',
   'projects/typing-lesson/index.html',
   'projects/vectyz/index.html'
