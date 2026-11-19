@@ -124,7 +124,7 @@ function render(now){
       faces.push({a:a,b:b,c:c,d:d,z:avg,light:light});
     }
   }
-  faces.sort(function(a,b){return a.z-b.z;});
+  faces.sort(function(a,b){return b.z-a.z;});
   for(var f=0;f<faces.length;f++){
     var face=faces[f],shade=clamp(.16+face.light*.43+(face.z+1.3)*.035,.12,.66);
     ctx.beginPath();
