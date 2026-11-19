@@ -8008,7 +8008,7 @@ function mainEngine() {
       rt.setVectorState(vectorEdits,vectorBounds);
       return Promise.resolve(true);
     },
-    compile: function (code, comp) { rt.setComposition(comp); rt.setAssets(assets); return Promise.resolve(rt.compile(code)); },
+    compile: function (code, comp) { rt.setComposition(comp); rt.setAssets(assets); return Promise.resolve(rt.compile(code)).then(function (result) { if (result && result.ok && rt.gpu) result.gpu = { active: false, backend: 'Canvas 2D fallback', reason: 'The main-thread compatibility renderer does not execute WGSL. Use the dedicated worker with WebGPU support.' }; return result; }); },
     setComposition: function (comp) { rt.setComposition(comp); return Promise.resolve(); },
     preview: function (frame, w, h, scale) {
       if (!pv || pv.canvas.width !== w || pv.canvas.height !== h) pv = mk(w, h);
@@ -8389,7 +8389,30 @@ function installCode(code){$('#ta').value=code;syncEditor();S.compiled=null;S.fr
 function newProject(){if(!confirmDiscard())return;S.name='untitled';$('#projName').value=S.name;installCode(DEFAULT_CODE);}
 function confirmDiscard(){return !S.dirty || window.confirm('Current changes are unsaved. Continue without saving?');}
 function loadSample(s){if(!confirmDiscard())return;S.name=s.title.toLowerCase().replace(/[^a-z0-9]+/g,'-');$('#projName').value=S.name;installCode(s.code);markDirty(true);}
-function sampleCards(){const box=$('#sampleList');box.innerHTML='';samples.forEach(s=>{const n=document.createElement('div');n.className='sample';n.innerHTML='<h5>'+s.title+'</h5><p>'+s.desc+'</p>';n.addEventListener('click',()=>loadSample(s));box.appendChild(n);});}
+function sampleCards(){
+  const box=$('#sampleList');
+  box.innerHTML='';
+  samples.forEach(s=>{
+    const n=document.createElement('div');n.className='sample';
+    n.innerHTML='<h5>'+s.title+'</h5><p>'+s.desc+'</p>';
+    n.addEventListener('click',()=>loadSample(s));box.appendChild(n);
+  });
+  const gpuCard=document.createElement('div');
+  gpuCard.className='sample';
+  gpuCard.innerHTML='<h5>Singularity Protocol — WebGPU</h5><p>GPU raymarching stress scene · Mandelbulb, gyroscopic rings, metallic lighting, shadows and bounded reflections.</p>';
+  gpuCard.addEventListener('click',async()=>{
+    if(!confirmDiscard())return;
+    try{
+      const response=await fetch('./examples/singularity-protocol-webgpu.js',{cache:'no-cache'});
+      if(!response.ok)throw new Error('Example source request failed: '+response.status);
+      const code=await response.text();
+      S.name='singularity-protocol-webgpu';$('#projName').value=S.name;
+      installCode(code);markDirty(true);
+      $('#stMsg').textContent='Singularity Protocol loaded. Compile to initialise the WebGPU shader.';
+    }catch(error){showError('EXAMPLE LOAD FAILED',String(error&&error.message||error));}
+  });
+  box.appendChild(gpuCard);
+}
 const PRISM_LIBRARY_URL='./library/prism-library.json';
 let prismLibraryCache=null;
 const PRISM_EXTRA_LIBRARY=[
@@ -9739,7 +9762,7 @@ var S = {
   code: '', comp: null, meta: null, assets: [], layers: [], selectedLayerId: null, canvasEditorOpen: false, mediaDrag: null,
   vectorObjects: [], selectedVectorId: null, vectorEdits: {}, vectorBounds: {}, vectorSourceCode: null, vectorDetectionKey: null,
   frame: 0, playing: false, loopPlayback: true,
-  compiled: false, lastError: null, hash: '',
+  compiled: false, lastError: null, hash: '', gpuBackend: null,
   previewBusy: false, previewFps: 0, previewRaster: { w: 0, h: 0, s: 1 },
   compareMode: false, compareSplit: 0.5, compareBitmap: null,
   rendering: false, queue: [], results: [], caps: {}, stage: 'IDLE',
@@ -10692,6 +10715,7 @@ function requestPreview(force) {
   var want = S.frame;
   Engine.api.preview(want, r.w, r.h, r.s).then(function (res) {
     S.previewBusy = false;
+    if (res && res.gpuBackend) S.gpuBackend = res.gpuBackend;
     if (!res.ok) { showRuntimeError(res.error); return; }
     hideStageMsg();
     S.lastPainted = want;
@@ -11341,6 +11365,7 @@ function run() {
       return res;
     }
     S.compiled = true;
+    S.gpuBackend = res.gpu || null;
     S.lastError = null;
     hideStageMsg();
     if (vectorSourceChanged && S.canvasEditorOpen) {
@@ -11349,6 +11374,8 @@ function run() {
     }
     $('#stContract').textContent = 'VALID · ' + res.arity + ' arg' + (res.arity === 1 ? '' : 's');
     $('#edState').textContent = 'compiled · ' + new Date().toLocaleTimeString();
+    if (res.gpu) $('#stMsg').textContent = res.gpu.active ? 'WebGPU active · ' + (res.gpu.adapter || 'high-performance adapter') : 'WebGPU fallback · ' + (res.gpu.reason || 'Canvas 2D renderer active');
+    else $('#stMsg').textContent = 'Canvas 2D renderer active';
     setStage('IDLE');
     S.lastPainted = -1;
     requestPreview(true);
@@ -11937,7 +11964,11 @@ function startRenderNow(job, opts) {
     if (/flushing encoder/.test(msg)) setStage('ENCODING');
     if (/^muxed /.test(msg)) setStage('FINALISING');
   }
-  function onProgress(p) {
+  function onProgress(p, gpuBackend) {
+    if (gpuBackend) {
+      S.gpuBackend = gpuBackend;
+      if (!gpuBackend.active && gpuBackend.reason) $('#stMsg').textContent = 'WebGPU fallback · ' + gpuBackend.reason;
+    }
     if (!sawFirstFrame) { sawFirstFrame = true; setStage('RENDERING'); prog.classList.remove('scan'); }
     S.lastProgress = p;
     renderStat(p, job);
@@ -12802,6 +12833,8 @@ function refreshDiag() {
   yesNo(dl, 'Secure context', c.secure);
   yesNo(dl, 'WebGL2', c.webgl2, 'SUPPORTED — usable from your code via a second canvas', 'NOT AVAILABLE');
   yesNo(dl, 'WebGPU', c.webgpu);
+  if (S.gpuBackend) kvRow(dl, 'Frame backend', S.gpuBackend.active ? 'WebGPU · ' + (S.gpuBackend.adapter || 'adapter ready') : (S.gpuBackend.backend || 'Canvas 2D fallback') + ' · ' + (S.gpuBackend.reason || 'shader not active'), S.gpuBackend.active ? 'ok' : 'warn');
+  else kvRow(dl, 'Frame backend', 'Not initialised · compile a WGSL animation to test', 'warn');
   kvRow(dl, 'Logical cores', c.cores ? String(c.cores) : 'not reported');
   kvRow(dl, 'Device memory', c.memoryGB ? c.memoryGB + ' GB (browser estimate)' : 'not reported');
   kvRow(dl, 'Device pixel ratio', c.dpr.toFixed(2));
