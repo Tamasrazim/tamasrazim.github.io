@@ -1,12 +1,14 @@
 // What this does: Caches the TRILYVA renderer's application files and serves them when the network is unavailable.
 
-const CACHE = 'tamasrazim-trilyva-pwa-v163-no-dotmesh-export';
+const CACHE = 'tamasrazim-trilyva-pwa-v164-webgpu';;
 const CORE = [
   './',
   './index.html',
   '/assets/brand/trilyva/T.svg',
   './media-stack.js',
   './movie-finalizer.js',
+  './webgpu-renderer.js',
+  './examples/singularity-protocol-webgpu.js',
   './firebase-analytics.js',
   './manifest.webmanifest',
   './library/library.js',
