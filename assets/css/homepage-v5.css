@@ -18,7 +18,7 @@ body.home-v5 button{font:inherit}
 body.home-v5 ::selection{background:var(--v5-ink);color:var(--v5-paper)}
 .v5-skip{position:fixed;z-index:1000;top:12px;left:12px;padding:10px 14px;background:var(--v5-ink);color:var(--v5-paper)!important;transform:translateY(-150%)}
 .v5-skip:focus{transform:translateY(0)}
-.v5-progress{position:fixed;z-index:500;top:0;left:0;width:100%;height:3px;background:var(--v5-ink);transform:scaleX(0);transform-origin:left;pointer-events:none}
+.v5-progress{position:fixed;z-index:500;top:0;left:0;width:100%;height:3px;background:#fff;mix-blend-mode:difference;transform:scaleX(0);transform-origin:left;pointer-events:none}
 .v5-header{height:82px;position:sticky;top:0;z-index:300;display:flex;align-items:center;justify-content:space-between;gap:34px;padding:0 max(38px,calc((100vw - 1540px)/2));background:rgba(233,232,226,.88);border-bottom:1px solid rgba(9,9,9,.15);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
 .v5-brand,.v5-footer-brand{font:700 19px/1 var(--v5-display);letter-spacing:-.09em;white-space:nowrap}
 .v5-brand span,.v5-footer-brand span{color:#85857d}
