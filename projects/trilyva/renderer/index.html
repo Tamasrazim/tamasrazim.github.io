@@ -3964,6 +3964,79 @@ var cancelled = false;
 var previewCanvas = null, previewCtx = null;
 var rt = MotionCore.createRuntime();
 var assets = {}, layers = {}, vectorEdits = {}, vectorBounds = {};
+var gpuRenderer = self.TRILYVAWebGPU && self.TRILYVAWebGPU.createRenderer ? self.TRILYVAWebGPU.createRenderer() : null;
+var gpuUnavailableReason = self.TRILYVAWebGPUImportError || null;
+var gpuBackendStatus = { active: false, backend: 'Canvas 2D', reason: gpuUnavailableReason || 'No WGSL shader declared.' };
+
+function gpuFrameInput(frame, comp) {
+  return {
+    time: MotionCore.frameToTime(comp, frame), frame: frame, fps: comp.fps,
+    duration: comp.duration, frameCount: comp.frameCount, seed: comp.seed,
+    loopDuration: comp.loopDuration, loop: !!comp.loop, speed: comp.speed,
+    reverse: !!comp.reverse
+  };
+}
+function renderGPUFrame(frame, comp, w, h) {
+  if (!rt.gpu || !gpuRenderer || gpuUnavailableReason) return Promise.resolve(null);
+  return gpuRenderer.render(rt.gpu, gpuFrameInput(frame, comp), w || comp.width, h || comp.height).then(function (bitmap) {
+    gpuBackendStatus = gpuRenderer.status();
+    return bitmap;
+  }).catch(function (error) {
+    gpuUnavailableReason = String(error && error.message || error);
+    gpuBackendStatus = { active: false, backend: 'Canvas 2D fallback', reason: gpuUnavailableReason };
+    return null;
+  });
+}
+function gpuSampleTiming(job, count) {
+  var comp = MotionCore.composition(job.composition);
+  var n = Math.max(1, Math.min(Math.floor(Number(count) || 6), comp.frameCount));
+  var picks = [], times = [], k = 0, started = performance.now();
+  for (var i = 0; i < n; i++) picks.push(Math.floor(i * (comp.frameCount - 1) / Math.max(1, n - 1)));
+  function step() {
+    if (k >= picks.length) {
+      var sum = times.reduce(function (a, b) { return a + b; }, 0);
+      return Promise.resolve({ ok: true, times: times, sampled: times.length, avgMs: sum / times.length, minMs: Math.min.apply(Math, times), maxMs: Math.max.apply(Math, times), backend: 'WebGPU', adapter: gpuBackendStatus.adapter || 'high-performance adapter' });
+    }
+    var frame = picks[k], startedFrame = performance.now();
+    return renderGPUFrame(frame, comp, comp.width, comp.height).then(function (bitmap) {
+      if (bitmap && bitmap.close) bitmap.close();
+      if (!bitmap) throw new Error(gpuBackendStatus.reason || 'WebGPU timing fell back to Canvas 2D.');
+      times.push(performance.now() - startedFrame); k++;
+      return new Promise(function (resolve) { setTimeout(resolve, 0); }).then(step);
+    });
+  }
+  return step();
+}
+function gpuLoopSeam(job) {
+  var comp = MotionCore.composition(job.composition);
+  var w = 160, h = Math.max(1, Math.round(w * comp.height / comp.width));
+  var loopFrames = Math.round(comp.loopDuration * comp.fps / comp.speed);
+  var wrapFrame = comp.loop ? loopFrames : comp.frameCount;
+  var a = new OffscreenCanvas(w, h), b = new OffscreenCanvas(w, h);
+  var ac = a.getContext('2d', { willReadFrequently: true });
+  var bc = b.getContext('2d', { willReadFrequently: true });
+  function sample(canvas, context, frame) {
+    return renderGPUFrame(frame, comp, w, h).then(function (bitmap) {
+      if (!bitmap) throw new Error(gpuBackendStatus.reason || 'WebGPU loop test fell back to Canvas 2D.');
+      context.clearRect(0, 0, w, h); context.drawImage(bitmap, 0, 0, w, h);
+      if (bitmap.close) bitmap.close();
+      return context.getImageData(0, 0, w, h).data;
+    });
+  }
+  function diff(p, q) {
+    var sum = 0;
+    for (var i = 0; i < p.length; i += 4) sum += Math.abs(p[i] - q[i]) + Math.abs(p[i + 1] - q[i + 1]) + Math.abs(p[i + 2] - q[i + 2]) + Math.abs(p[i + 3] - q[i + 3]);
+    return sum / (p.length * 255);
+  }
+  return sample(a, ac, 0).then(function (first) {
+    return sample(b, bc, wrapFrame).then(function (wrapped) {
+      return sample(b, bc, Math.max(0, wrapFrame - 1)).then(function (previous) {
+        var seam = diff(first, wrapped);
+        return { ok: true, wrapFrame: wrapFrame, loopFrames: loopFrames, seamDiff: seam, neighbourDiff: diff(previous, first), verdict: seam < 0.002 ? 'MATCH' : seam < 0.02 ? 'CLOSE' : 'MISMATCH', backend: 'WebGPU' };
+      });
+    });
+  });
+}
 
 function mk(w, h) {
   var c = new OffscreenCanvas(w, h);
@@ -4036,13 +4109,36 @@ self.onmessage = function (ev) {
         send({ type: 'vectorState', id: id, count: Object.keys(vectorEdits).length });
         break;
 
-      case 'compile':
+      case 'compile': {
         rt.setComposition(m.composition);
         rt.setAssets(assets);
         rt.setLayers(Object.keys(layers).map(function (key) { return layers[key]; }));
         rt.setVectorState(vectorEdits,vectorBounds);
-        send({ type: 'compile', id: id, result: rt.compile(m.code) });
+        gpuUnavailableReason = self.TRILYVAWebGPUImportError || null;
+        var compileResult = rt.compile(m.code);
+        if (!compileResult.ok || !rt.gpu) {
+          gpuBackendStatus = { active: false, backend: rt.gpu ? 'Canvas 2D fallback' : 'Canvas 2D', reason: rt.gpu ? (gpuUnavailableReason || 'WGSL renderer is unavailable.') : 'No WGSL shader declared.' };
+          if (rt.gpu) compileResult.gpu = gpuBackendStatus;
+          send({ type: 'compile', id: id, result: compileResult });
+        } else if (!gpuRenderer) {
+          gpuUnavailableReason = gpuUnavailableReason || 'The WebGPU helper did not load in the render worker.';
+          gpuBackendStatus = { active: false, backend: 'Canvas 2D fallback', reason: gpuUnavailableReason };
+          compileResult.gpu = gpuBackendStatus;
+          send({ type: 'compile', id: id, result: compileResult });
+        } else {
+          gpuRenderer.prepare(rt.gpu).then(function (gpuInfo) {
+            gpuBackendStatus = gpuInfo;
+            compileResult.gpu = gpuInfo;
+            send({ type: 'compile', id: id, result: compileResult });
+          }).catch(function (error) {
+            gpuUnavailableReason = String(error && error.message || error);
+            gpuBackendStatus = { active: false, backend: 'Canvas 2D fallback', reason: gpuUnavailableReason };
+            compileResult.gpu = gpuBackendStatus;
+            send({ type: 'compile', id: id, result: compileResult });
+          });
+        }
         break;
+      }
 
       case 'composition':
         rt.setComposition(m.composition);
@@ -4055,28 +4151,48 @@ self.onmessage = function (ev) {
           previewCanvas = new OffscreenCanvas(w, h);
           previewCtx = previewCanvas.getContext('2d', { alpha: true });
         }
-        var r = rt.renderInto(previewCtx, m.frame, { rasterScale: m.scale });
-        if (!r.ok) { send({ type: 'preview', id: id, ok: false, error: r.error, frame: m.frame }); break; }
-        var bmp = previewCanvas.transferToImageBitmap();
-        send({ type: 'preview', id: id, ok: true, frame: m.frame, ms: r.ms, bitmap: bmp }, [bmp]);
+        renderGPUFrame(m.frame, rt.comp, w, h).then(function (gpuBitmap) {
+          var r;
+          try { r = rt.renderInto(previewCtx, m.frame, { rasterScale: m.scale, gpuBitmap: gpuBitmap || null }); }
+          finally { if (gpuBitmap && gpuBitmap.close) gpuBitmap.close(); }
+          if (!r.ok) { send({ type: 'preview', id: id, ok: false, error: r.error, frame: m.frame }); return; }
+          var bmp = previewCanvas.transferToImageBitmap();
+          send({ type: 'preview', id: id, ok: true, frame: m.frame, ms: r.ms, gpuBackend: gpuBackendStatus, bitmap: bmp }, [bmp]);
+        }).catch(function (error) {
+          send({ type: 'preview', id: id, ok: false, error: { name: error.name || 'PreviewError', message: String(error.message || error), stage: 'preview' }, frame: m.frame });
+        });
         break;
       }
 
       case 'renderOne': {
         var o = mk(m.width, m.height);
-        var rr = rt.renderInto(o.ctx, m.frame, { isExport: true, rasterScale: m.width / rt.comp.width });
-        if (!rr.ok) { send({ type: 'renderOne', id: id, ok: false, error: rr.error }); break; }
-        var b2 = o.canvas.transferToImageBitmap();
-        send({ type: 'renderOne', id: id, ok: true, ms: rr.ms, bitmap: b2 }, [b2]);
+        renderGPUFrame(m.frame, rt.comp, m.width, m.height).then(function (gpuBitmap) {
+          var rr;
+          try { rr = rt.renderInto(o.ctx, m.frame, { isExport: true, rasterScale: m.width / rt.comp.width, gpuBitmap: gpuBitmap || null }); }
+          finally { if (gpuBitmap && gpuBitmap.close) gpuBitmap.close(); }
+          if (!rr.ok) { send({ type: 'renderOne', id: id, ok: false, error: rr.error }); return; }
+          var b2 = o.canvas.transferToImageBitmap();
+          send({ type: 'renderOne', id: id, ok: true, ms: rr.ms, gpuBackend: gpuBackendStatus, bitmap: b2 }, [b2]);
+        }).catch(function (error) {
+          send({ type: 'renderOne', id: id, ok: false, error: { name: error.name || 'RenderError', message: String(error.message || error), stage: 'render' } });
+        });
         break;
       }
 
       case 'timing':
-        MotionExport.sampleTiming(ENV, m.job, m.frames || 6).then(function (r) { send({ type: 'timing', id: id, result: r }); });
+        (rt.gpu && gpuRenderer && !gpuUnavailableReason ? gpuSampleTiming(m.job, m.frames || 6) : MotionExport.sampleTiming(ENV, m.job, m.frames || 6)).then(function (r) { send({ type: 'timing', id: id, result: r }); }).catch(function (error) {
+          gpuUnavailableReason = String(error && error.message || error);
+          gpuBackendStatus = { active: false, backend: 'Canvas 2D fallback', reason: gpuUnavailableReason };
+          MotionExport.sampleTiming(ENV, m.job, m.frames || 6).then(function (r) { r.backend = 'Canvas 2D fallback'; r.gpuFallbackReason = gpuUnavailableReason; send({ type: 'timing', id: id, result: r }); });
+        });
         break;
 
       case 'loopSeam':
-        MotionExport.loopSeam(ENV, m.job).then(function (r) { send({ type: 'loopSeam', id: id, result: r }); });
+        (rt.gpu && gpuRenderer && !gpuUnavailableReason ? gpuLoopSeam(m.job) : MotionExport.loopSeam(ENV, m.job)).then(function (r) { send({ type: 'loopSeam', id: id, result: r }); }).catch(function (error) {
+          gpuUnavailableReason = String(error && error.message || error);
+          gpuBackendStatus = { active: false, backend: 'Canvas 2D fallback', reason: gpuUnavailableReason };
+          MotionExport.loopSeam(ENV, m.job).then(function (r) { r.backend = 'Canvas 2D fallback'; r.gpuFallbackReason = gpuUnavailableReason; send({ type: 'loopSeam', id: id, result: r }); });
+        });
         break;
 
       case 'cancel': cancelled = true; break;
@@ -4090,11 +4206,17 @@ self.onmessage = function (ev) {
             .then(function (ws) { return ws.write(blob).then(function () { return ws.close(); }); });
         } : null;
         var existing = m.existing || null;
+        var exportComp = MotionCore.composition(m.job.composition);
         MotionExport.run({
           env: ENV, job: m.job, from: m.from || 0, assets: assets, layers: Object.keys(layers).map(function (key) { return layers[key]; }), vectorEdits: vectorEdits, vectorBounds: vectorBounds, existing: existing, writeFile: writeFile,
+          prepareFrame: function (frame) {
+            return renderGPUFrame(frame, exportComp, exportComp.width, exportComp.height).then(function (bitmap) {
+              return bitmap ? { gpuBitmap: bitmap, release: function () { if (bitmap.close) bitmap.close(); } } : null;
+            });
+          },
           isCancelled: function () { return cancelled; },
           onLog: function (msg) { send({ type: 'log', id: id, message: msg }); },
-          onProgress: function (p) { send({ type: 'progress', id: id, progress: p }); }
+          onProgress: function (p) { send({ type: 'progress', id: id, progress: p, gpuBackend: gpuBackendStatus }); }
         }).then(function (r) {
           if (r.blob) send({ type: 'done', id: id, result: r });
           else send({ type: 'done', id: id, result: r });
@@ -7943,7 +8065,9 @@ function mainEngine() {
 }
 
 function workerEngine() {
-  var blob = new Blob([srcOf('src-runtime'), '\n', srcOf('src-encoders'), '\n', srcOf('src-export'), '\n', srcOf('src-worker')], { type: 'text/javascript' });
+  var gpuHelperUrl = new URL('./webgpu-renderer.js', document.baseURI).href;
+  var gpuImport = '\ntry { importScripts(' + JSON.stringify(gpuHelperUrl) + '); } catch (gpuImportError) { self.TRILYVAWebGPUImportError = String(gpuImportError && gpuImportError.message || gpuImportError); }\n';
+  var blob = new Blob([srcOf('src-runtime'), gpuImport, '\n', srcOf('src-encoders'), '\n', srcOf('src-export'), '\n', srcOf('src-worker')], { type: 'text/javascript' });
   var url = URL.createObjectURL(blob);
   var w = new Worker(url);
   var pending = {};
@@ -7955,7 +8079,7 @@ function workerEngine() {
     if (m.type === 'ready') return;
     if (!p) return;
     if (m.type === 'log') { p.onLog && p.onLog(m.message); return; }
-    if (m.type === 'progress') { p.onProgress && p.onProgress(m.progress); return; }
+    if (m.type === 'progress') { p.onProgress && p.onProgress(m.progress, m.gpuBackend || null); return; }
     delete pending[m.id];
     p.res(m);
   };
