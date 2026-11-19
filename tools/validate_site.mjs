@@ -361,7 +361,10 @@ const standaloneProjectPages = new Set([
   'projects/fracture/index.html',
   'projects/soryvyn/index.html',
   'projects/trss-sample-recorder/index.html',
-  'projects/trss/index.html'
+  'projects/trss/index.html',
+  'projects/splytie/index.html',
+  'projects/typing-lesson/index.html',
+  'projects/vectyz/index.html'
 ]);
 const topLevelProjectIndexes = fs.readdirSync(path.join(ROOT,'projects'),{withFileTypes:true})
   .filter(entry=>entry.isDirectory())
