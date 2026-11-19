@@ -1,186 +1,72 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#050505">
-  <meta name="color-scheme" content="dark">
-  <meta name="author" content="Robiul Rumman Razim">
-  <meta name="robots" content="index,follow,max-image-preview:large">
-  <title>Typing Lesson — Touch Typing Practice | Tamasrazim</title>
-  <meta name="description" content="A guided touch-typing course for the QWERTY keyboard. Learn key rows, build accuracy, and measure your typing speed with local browser practice.">
-  <link rel="canonical" href="https://tamasrazim.github.io/projects/typing-lesson/">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Tamasrazim">
-  <meta property="og:title" content="Typing Lesson — Touch Typing Practice">
-  <meta property="og:description" content="Learn the keyboard one row at a time, practise accuracy, and test your typing speed.">
-  <meta property="og:url" content="https://tamasrazim.github.io/projects/typing-lesson/">
-  <meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg">
-  <meta name="twitter:card" content="summary_large_image">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=20261119-1">
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "@id": "https://tamasrazim.github.io/projects/typing-lesson/#application",
-    "name": "Typing Lesson",
-    "url": "https://tamasrazim.github.io/projects/typing-lesson/",
-    "description": "A browser-based touch-typing course with guided keyboard-row lessons, accuracy feedback, local progress, and timed typing tests.",
-    "applicationCategory": "EducationalApplication",
-    "operatingSystem": "Any modern web browser",
-    "isAccessibleForFree": true,
-    "creator": {
-      "@id": "https://tamasrazim.github.io/#person"
-    },
-    "isPartOf": {
-      "@id": "https://tamasrazim.github.io/#website"
-    },
-    "featureList": [
-      "Guided QWERTY lessons from the home, top, and bottom rows",
-      "Live character-level accuracy and mistake feedback",
-      "Words-per-minute and elapsed-time measurement",
-      "30, 60, and 120-second typing tests",
-      "Local-only progress and best-speed records"
-    ]
-  }
-  </script>
-</head>
-<body>
-  <a class="skip-link" href="#practice">Skip to typing practice</a>
-
-  <header class="topbar">
-    <a class="brand" href="/" aria-label="Tamasrazim home">
-      <span class="brand-mark" aria-hidden="true">T</span>
-      <span>tamasrazim</span>
-    </a>
-    <nav class="top-nav" aria-label="Page navigation">
-      <a href="/projects/">All projects</a>
-      <a href="#lessons">Lessons</a>
-      <a href="#practice">Practice</a>
-    </nav>
-    <span class="top-status"><i></i> LOCAL PRACTICE</span>
-  </header>
-
-  <main>
-    <section class="hero shell">
-      <div class="hero-copy">
-        <p class="eyebrow">EDUCATIONAL TOOL <span>/</span> TOUCH TYPING</p>
-        <h1>Learn the keys.<br><em>Find your rhythm.</em></h1>
-        <p class="hero-intro">A guided typing lesson that starts with the home row, expands across the keyboard, and builds toward accurate, confident typing.</p>
-        <div class="hero-actions">
-          <a class="primary-link" href="#practice">Start practising <span aria-hidden="true">↘</span></a>
-          <span class="hero-note">No account. No upload. Your progress stays in this browser.</span>
-        </div>
-      </div>
-      <div class="hero-aside" aria-hidden="true">
-        <div class="orbit orbit-one"></div>
-        <div class="orbit orbit-two"></div>
-        <div class="orbit-core">Aa</div>
-        <span class="orbit-label orbit-label-top">ACCURACY</span>
-        <span class="orbit-label orbit-label-bottom">BEFORE SPEED</span>
-      </div>
-      <div class="hero-bottom">
-        <span>QWERTY / GUIDED CURRICULUM</span>
-        <span>LESSONS · PRACTICE · SPEED TEST</span>
-      </div>
-    </section>
-
-    <section class="shell workspace" id="practice" aria-label="Typing lesson workspace">
-      <aside class="lesson-panel" id="lessons">
-        <div class="panel-heading">
-          <p class="eyebrow">01 / CURRICULUM</p>
-          <h2>Choose a lesson</h2>
-          <p>Build muscle memory in a sensible order. You can revisit any lesson at any time.</p>
-        </div>
-        <div class="curriculum-progress">
-          <div class="progress-line"><span id="courseProgress"></span></div>
-          <div class="progress-caption"><span>Course progress</span><strong id="courseCount">0 / 10</strong></div>
-        </div>
-        <div class="lesson-list" id="lessonList" aria-label="Typing lessons"></div>
-        <button class="reset-progress" id="resetProgress" type="button">Reset local progress</button>
-      </aside>
-
-      <section class="practice-panel" aria-label="Current typing exercise">
-        <div class="practice-header">
-          <div>
-            <p class="eyebrow" id="lessonEyebrow">LESSON 01 / FOUNDATION</p>
-            <h2 id="lessonTitle">Find the F and J anchors</h2>
-            <p id="lessonDescription">Locate the small raised marks without looking down.</p>
-          </div>
-          <div class="test-control">
-            <label for="testDuration">TIMED TEST</label>
-            <div class="test-actions">
-              <select id="testDuration" aria-label="Timed test duration">
-                <option value="30">30 sec</option>
-                <option value="60" selected>60 sec</option>
-                <option value="120">120 sec</option>
-              </select>
-              <button id="startTest" type="button">Start test</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="metrics" aria-label="Live typing statistics">
-          <div class="metric"><span>WPM</span><strong id="wpm">0</strong><small>words / minute</small></div>
-          <div class="metric"><span>ACCURACY</span><strong id="accuracy">100%</strong><small>correct characters</small></div>
-          <div class="metric"><span>MISTAKES</span><strong id="mistakes">0</strong><small>incorrect positions</small></div>
-          <div class="metric"><span id="timeLabel">TIME</span><strong id="time">00:00</strong><small id="timeHint">starts with first key</small></div>
-        </div>
-
-        <div class="exercise">
-          <div class="exercise-meta">
-            <span id="modeBadge">GUIDED LESSON</span>
-            <span id="exerciseProgress">0% COMPLETE</span>
-          </div>
-          <div class="prompt-wrap">
-            <div class="prompt" id="prompt" aria-label="Text to type"></div>
-          </div>
-          <label class="typing-label" for="typingInput">
-            <span>TYPE HERE</span>
-            <span>Keep your eyes on the text above</span>
-          </label>
-          <textarea id="typingInput" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Type the lesson text here" placeholder="Click here and begin typing…" disabled></textarea>
-          <div class="exercise-footer">
-            <p id="liveStatus" role="status" aria-live="polite">Select a lesson to begin. Place your fingers on the home row.</p>
-            <div class="exercise-buttons">
-              <button class="quiet-button" id="restartLesson" type="button">Restart</button>
-              <button class="next-button" id="nextLesson" type="button" disabled>Next lesson <span aria-hidden="true">→</span></button>
-            </div>
-          </div>
-        </div>
-
-        <div class="keyboard-panel">
-          <div class="keyboard-heading">
-            <div><p class="eyebrow">02 / KEYBOARD MAP</p><h3>Follow the next key</h3></div>
-            <span>QWERTY / VISUAL GUIDE</span>
-          </div>
-          <div class="keyboard" id="keyboard" aria-hidden="true"></div>
-          <div class="keyboard-legend"><span><i class="legend-next"></i> Next key</span><span><i class="legend-done"></i> Correct</span><span>Use the physical keyboard to type</span></div>
-        </div>
-
-        <div class="lesson-tip">
-          <span class="tip-mark">TIP</span>
-          <p id="lessonTip">Rest your index fingers on F and J. Feel for the raised marks instead of searching visually.</p>
-          <span class="best-speed" id="bestSpeed">BEST —</span>
-        </div>
-      </section>
-    </section>
-
-    <section class="shell principles" aria-label="Typing practice principles">
-      <article><span>01</span><h3>Accuracy first</h3><p>Build the right movement before trying to type faster. Consistent, correct keystrokes are the foundation.</p></article>
-      <article><span>02</span><h3>Use every finger</h3><p>Return to the home row after each reach. Avoid teaching your hands to depend on a single finger.</p></article>
-      <article><span>03</span><h3>Practise in short sessions</h3><p>Repeat a lesson, take a break, and measure progress over time rather than chasing one unusually fast test.</p></article>
-    </section>
-  </main>
-
-  <footer class="footer shell">
-    <span>Robiul Rumman Razim — Tamasrazim</span>
-    <a href="/projects/">Return to projects</a>
-  </footer>
-
-  <script src="./app.js?v=20261119-1" defer></script>
-</body>
-</html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505"><meta name="color-scheme" content="dark"><meta name="author" content="Robiul Rumman Razim"><meta name="robots" content="index,follow,max-image-preview:large">
+<title>Typing Lesson — KEYRUN Typing Game | Tamasrazim</title>
+<meta name="description" content="Play KEYRUN, a keyboard training game. Clear ten touch-typing missions, build combos, earn XP, and improve your accuracy and words per minute.">
+<link rel="canonical" href="https://tamasrazim.github.io/projects/typing-lesson/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Tamasrazim"><meta property="og:title" content="KEYRUN — Typing Lesson Game"><meta property="og:description" content="Clear keyboard missions, build typing combos, earn XP, and master touch typing."><meta property="og:url" content="https://tamasrazim.github.io/projects/typing-lesson/"><meta property="og:image" content="https://tamasrazim.github.io/og-image.jpg"><meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css?v=20261119-game1">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","@id":"https://tamasrazim.github.io/projects/typing-lesson/#application","name":"KEYRUN — Typing Lesson","url":"https://tamasrazim.github.io/projects/typing-lesson/","description":"A browser-based keyboard training game with ten guided touch-typing missions, combo scoring, lives, XP progression, local records, and timed challenges.","applicationCategory":"GameApplication","operatingSystem":"Any modern web browser","isAccessibleForFree":true,"creator":{"@id":"https://tamasrazim.github.io/#person"},"isPartOf":{"@id":"https://tamasrazim.github.io/#website"},"featureList":["Ten progressive keyboard missions covering the home, top, and bottom rows","Real-time accuracy, WPM, combo, score, and lives","XP, mission medals, and locally saved progress","30, 60, and 120-second time-attack mode","Visual QWERTY keyboard with next-key guidance","Local-only browser storage"]}</script>
+</head><body>
+<a class="skip-link" href="#game">Skip to game</a>
+<header class="topbar">
+<a class="brand" href="/" aria-label="Tamasrazim home"><span class="brand-mark">T</span><span>tamasrazim</span></a>
+<nav class="top-nav" aria-label="Navigation"><a href="/projects/">Projects</a><a href="#campaign">Campaign</a><a href="#game">Play</a></nav>
+<div class="player-chip"><span class="player-dot"></span><span>PLAYER</span><strong id="playerLevel">LV. 01</strong></div>
+</header>
+<main class="shell" id="game">
+<section class="game-heading">
+<div><p class="eyebrow"><span class="live-dot"></span> KEYRUN / KEYBOARD TRAINING GAME</p><h1>TYPE <em>TO WIN.</em></h1><p class="heading-copy">A ten-mission campaign to train your fingers, sharpen your accuracy, and build real typing speed.</p></div>
+<div class="rank-card"><span class="rank-caption">CURRENT RANK</span><strong id="rankName">ROOKIE</strong><div class="rank-progress"><i id="rankProgress"></i></div><small id="xpLabel">0 / 100 XP TO NEXT LEVEL</small></div>
+</section>
+<section class="game-layout">
+<aside class="campaign-panel panel" id="campaign">
+<div class="panel-title"><div><span class="section-index">01</span><h2>CAMPAIGN</h2></div><span class="small-counter" id="campaignCount">00 / 10</span></div>
+<div class="campaign-intro"><span class="world-icon">⌘</span><div><strong>THE KEYBOARD</strong><small>WORLD 01 · QWERTY</small></div></div>
+<div class="campaign-progress"><span id="campaignProgress"></span></div>
+<div class="mission-list" id="missionList" aria-label="Campaign missions"></div>
+<div class="side-divider"></div>
+<div class="best-record"><span class="record-label">PERSONAL RECORD</span><strong id="recordScore">000000</strong><small>HIGHEST SCORE</small></div>
+<button class="reset-button" type="button" id="resetProgress">Reset game data</button>
+</aside>
+<section class="stage-column">
+<div class="stage-panel panel">
+<div class="stage-topline"><span id="stageCode">WORLD 01 <b>/</b> MISSION 01</span><span class="mode-tag" id="modeTag">CAMPAIGN MODE</span></div>
+<div class="stage-title-row"><div><p class="eyebrow" id="stageCategory">HOME ROW / FOUNDATION</p><h2 id="stageTitle">Find the F and J anchors</h2><p id="stageDescription">Locate the raised marks. Keep your eyes on the screen.</p></div><div class="mission-emblem" aria-hidden="true"><span id="emblemText">FJ</span><i></i><b></b></div></div>
+<div class="hud">
+<div class="hud-stat score-stat"><span>SCORE</span><strong id="score">000000</strong><small id="scoreGain">+0 THIS RUN</small></div>
+<div class="hud-stat"><span>COMBO</span><strong id="combo">× 0</strong><small id="comboLabel">BUILD A STREAK</small></div>
+<div class="hud-stat life-stat"><span>ENERGY</span><strong id="lives">♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥</strong><small>8 SHIELDS</small></div>
+<div class="hud-stat"><span id="clockLabel">TIME</span><strong id="clock">00:00</strong><small id="clockSub">MISSION TIMER</small></div>
+</div>
+<div class="target-area">
+<div class="target-header"><span>TYPE THE SEQUENCE</span><span id="targetPercent">0% CLEARED</span></div><div class="target-track"><i id="targetTrack"></i></div>
+<div class="target-text" id="targetText" aria-label="Typing target"></div>
+<div class="target-footer"><span id="targetHint">THE NEXT CHARACTER IS HIGHLIGHTED</span><span id="targetCount">0 / 0</span></div>
+</div>
+<div class="typing-zone">
+<div class="typing-zone-head"><label for="typingInput">YOUR KEYBOARD</label><span id="inputState">WAITING FOR START</span></div>
+<textarea id="typingInput" rows="2" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Press START MISSION to deploy…" disabled aria-label="Type the target sequence here"></textarea>
+<div class="game-controls"><p id="gameMessage" role="status" aria-live="polite">Select a mission. Press start, then type the highlighted sequence.</p><div class="control-actions"><button class="secondary-button" id="retryButton" type="button">RETRY</button><button class="primary-button" id="startButton" type="button">START MISSION <span>→</span></button><button class="primary-button next-button" id="nextButton" type="button" hidden>NEXT MISSION <span>→</span></button></div></div>
+</div>
+<div class="keyboard-section"><div class="keyboard-label"><div><span class="section-index">02</span><h3>KEY MAP</h3></div><span>FOLLOW THE WHITE KEY</span></div><div class="keyboard" id="keyboard" aria-hidden="true"></div><div class="keyboard-legend"><span><i class="legend-current"></i> NEXT</span><span><i class="legend-hit"></i> CORRECT</span><span>Keep fingers near the home row</span></div></div>
+<div class="tip-strip"><span class="tip-label">FIELD TIP</span><p id="tipText">Place your index fingers on F and J. Feel for the raised marks.</p><span class="best-medal" id="bestMedal">NO MEDAL</span></div>
+</div>
+<div class="quick-modes panel"><div><span class="section-index">03</span><div><strong>TIME ATTACK</strong><small>How much can you type before the clock runs out?</small></div></div><div class="attack-controls"><select id="attackDuration" aria-label="Time attack duration"><option value="30">30 SEC</option><option value="60" selected>60 SEC</option><option value="120">120 SEC</option></select><button type="button" id="attackButton">ENTER ARENA <span>→</span></button></div></div>
+</section>
+<aside class="intel-panel panel">
+<div class="panel-title"><div><span class="section-index">04</span><h2>MISSION INTEL</h2></div><span class="intel-mark">● LIVE</span></div>
+<div class="intel-block"><span class="intel-label">OBJECTIVE</span><p id="objectiveText">Complete the sequence while protecting your energy. Accuracy earns a higher medal.</p></div>
+<div class="intel-block"><span class="intel-label">TARGET KEYS</span><div class="target-keys" id="targetKeys"><span>F</span><span>J</span></div></div>
+<div class="intel-block"><span class="intel-label">RUN STATISTICS</span><div class="intel-stat"><span>WORDS / MIN</span><strong id="wpm">0</strong></div><div class="intel-stat"><span>ACCURACY</span><strong id="accuracy">100%</strong></div><div class="intel-stat"><span>MISTAKES</span><strong id="mistakes">0</strong></div></div>
+<div class="intel-block xp-block"><span class="intel-label">PLAYER XP</span><strong><b id="xpValue">0</b> XP</strong><div class="xp-track"><i id="xpTrack"></i></div><small>Earn XP by clearing missions.</small></div>
+<div class="intel-quote">“Slow is smooth.<br>Smooth becomes fast.”</div>
+</aside>
+</section>
+<div class="result-banner" id="resultBanner" hidden aria-live="polite"><div class="result-symbol" id="resultSymbol">S</div><div class="result-copy"><span id="resultKicker">MISSION CLEAR</span><strong id="resultTitle">PERFECT RUN</strong><small id="resultDescription">Accuracy secured. Your next mission is unlocked.</small></div><div class="result-reward"><span>REWARD</span><strong id="resultReward">+50 XP</strong></div></div>
+</main>
+<footer class="footer shell"><span>KEYRUN / A TYPING LESSON GAME</span><a href="/projects/">BACK TO PROJECTS</a><span>PROGRESS SAVED LOCALLY</span></footer>
+<script src="./app.js?v=20261119-game1" defer></script>
+</body></html>
