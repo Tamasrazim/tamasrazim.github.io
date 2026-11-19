@@ -145,14 +145,14 @@ for(const file of [
 }
 
 const site=read('index.html');
-const siteJs=read('assets/js/site-redesign.js');
-const siteCss=read('assets/css/site-redesign.css');
-const siteV3Css=read('assets/css/site-v3.css');
-must(site.includes('class="home-v2"'),'homepage uses redesigned visual system');
-must(site.includes('site-v3.css?v=')&&siteV3Css.includes('.v3-hero'),'homepage loads the rebuilt v3 design system');
-must(site.includes('class="id-card tilt reveal"'),'homepage preserves original ID-card markup');
+const siteJs=read('assets/js/homepage-v5.js');
+const siteCss=read('assets/css/homepage-v5.css');
+must(site.includes('<body class="home-v5">'),'homepage uses the current v5 visual system');
+must(site.includes('homepage-v5.css?v=20261119-editorial1')&&site.includes('homepage-v5.js?v=20261119-editorial1'),'homepage loads the v5 design and motion engine');
+must(!site.includes('homepage-v4.css')&&!site.includes('kinetic-story.css')&&!site.includes('homepage-v4.js'),'homepage does not load the retired orbital design system');
+must(site.includes('id="mobiusCanvas"')&&site.includes('id="heroObject"'),'homepage contains the interactive Möbius sculpture');
 must(site.includes('id="secretReveal"')&&site.includes('id="secretNode"'),'homepage retains the hidden footer story');
-must(site.includes('site-redesign.js?v=')&&site.includes('site-redesign.css?v='),'homepage loads redesign assets');
+must(site.includes('id="work"')&&site.includes('id="about"')&&site.includes('id="elsewhere"')&&site.includes('id="contact"'),'homepage retains all primary section anchors');
 const schemaOpen='<script type="application/ld+json">',schemaStart=site.indexOf(schemaOpen),schemaEnd=site.indexOf('</script>',schemaStart);
 must(schemaStart>=0&&schemaEnd>schemaStart,'homepage contains JSON-LD schema');
 const rootSchema=JSON.parse(site.slice(schemaStart+schemaOpen.length,schemaEnd));
@@ -169,42 +169,38 @@ const knownSchemaIds=new Set(rootSchema['@graph'].map(n=>n['@id']));
 const rootPerson=rootSchema['@graph'].find(n=>n['@type']==='Person');
 must(rootPerson.subjectOf.every(ref=>knownSchemaIds.has(ref['@id'])),'person schema references defined project entities');
 must(!site.includes('BOGURA')&&!site.includes('BANGLADESH'),'homepage omits unwanted location text');
-must((site.match(/class="v3-project-card v2-project-card v2-reveal v3-reveal"/g)||[]).length===13,'homepage has thirteen curated project cards');
-must(site.includes('13 SELECTED PROJECTS')&&!site.includes('12 SELECTED PROJECTS'),'homepage selected-work count matches its thirteen cards');
-const workPage=read('work/index.html');
-must(workPage.includes('11 SELECTED PROJECTS')&&!workPage.includes('13 SELECTED PROJECTS'),'dedicated Work page displays the correct selected-project count');
-must((workPage.match(/class="v3-project-card v2-project-card v2-reveal v3-reveal"/g)||[]).length===11,'dedicated Work page contains the same eleven selected project cards');
+must((site.match(/class="v5-project"/g)||[]).length===17,'homepage presents seventeen curated project cards');
 must(!site.includes('PRO_TOOL_MANIFEST'),'homepage omits the generated micro-tool catalogue');
-for(const ref of ['href="/projects/trilyva/"','href="/projects/asset-vault/"','href="/projects/bncagrocare/"','href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"','href="/projects/code-to-eps/"','href="/projects/webedyts/"','href="/projects/qalyvyron/"'])must(site.includes(ref),'homepage exposes '+ref);
+for(const ref of [
+  'href="/projects/trilyva/"','href="/projects/asset-vault/"','href="/projects/bncagrocare/"',
+  'href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"',
+  'href="/projects/code-to-eps/"','href="/projects/code-to-svg/"','href="/projects/webedyts/"',
+  'href="/projects/qalyvyron/"','href="/projects/keyrun/"','href="/projects/typing-lesson/"',
+  'href="/projects/trss-sample-recorder/"','href="/projects/trss/"'
+]) if(ref!=='href="/projects/keyrun/"') must(site.includes(ref),'homepage exposes '+ref);
 must(!site.includes('href="/projects/trilyva/renderer/">Open workspace'),'homepage does not send the TRILYVA card straight to the renderer');
 const visibleHomeMarkup=schemaStart>=0&&schemaEnd>schemaStart?site.slice(0,schemaStart)+site.slice(schemaEnd+'</script>'.length):site;
 must(!visibleHomeMarkup.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!visibleHomeMarkup.includes('Source files ')&&!visibleHomeMarkup.includes('SVG source ')&&!visibleHomeMarkup.includes('EPS source '),'homepage omits direct source links in visible markup');
 must(site.includes('href="/projects/tunrun/"')&&!site.includes('href="https://github.com/Tamasrazim/TUNRUN"'),'homepage links to TUNRUN project page');
-must(site.includes('I build software, games, and creative tools, from native Windows applications to browser workspaces and procedural motion.')&&!site.includes('build TUNRUN in C++'),'homepage introduction describes the broader software work without naming one project');
+must(site.includes('I build software, games, and creative tools.')&&!site.includes('build TUNRUN in C++'),'homepage introduction describes the broader work without centering one project');
 must(!site.includes('work on TUNRUN, a C++ game')&&!site.includes('TUNRUN, a C++ game in development'),'homepage metadata and About copy stay focused on the person');
 must(!site.includes('tamasrazim.dev'),'homepage does not claim a .dev domain');
 must(!site.includes('ProfessionalService')&&!site.includes('13650456762875223511'),'homepage schema avoids unsupported business-profile claims');
-must(siteCss.includes('prefers-reduced-motion:reduce')&&siteV3Css.includes('prefers-reduced-motion:reduce'),'redesign respects reduced-motion preferences');
-
-must(siteJs.includes('1000/60'),'background animation is capped at 60 FPS');
-must(siteJs.includes("event.key === 'Escape'")&&siteJs.includes("setMenuOpen(false, true)"),'mobile navigation closes on Escape and returns focus');
-must(siteJs.includes("menu.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation')"),'mobile navigation label tracks its expanded state');
-must(siteJs.includes("d.addEventListener('pointerdown'")&&siteJs.includes("nav.contains(event.target) || menu.contains(event.target)"),'mobile navigation closes on outside pointer input without toggling on the menu itself');
-must(siteJs.includes("w.innerWidth > 900"),'compact navigation closes only when returning to the full desktop layout');
-must(siteV3Css.includes('@media(max-width:900px)')&&siteV3Css.includes('.v3-nav.is-open{display:flex}'),'six-link navigation has a working tablet and mobile menu');
-for(const route of ['/projects/','/work/','/about/','/approach/','/elsewere/','/licences/']) must(site.includes('href="'+route+'"'),'main header links to '+route);
+must(siteCss.includes('prefers-reduced-motion:reduce'),'homepage stylesheet respects reduced-motion preferences');
+must(siteJs.includes('function surface(u,v)')&&siteJs.includes('Math.cos(u*.5)')&&siteJs.includes('Math.sin(u*.5)'),'homepage defines the continuous Möbius surface mathematically');
+must(siteJs.includes('faces.sort(function(a,b){return b.z-a.z;});'),'homepage draws the 3D surface from far to near');
+must(siteJs.includes('var stiffness=24,damping=9.2;'),'homepage camera response uses a damped spring');
+must(siteJs.includes('setPointerCapture')&&siteJs.includes('targetYaw=.25+(pointer.active?pointer.x*.62:0)'),'homepage sculpture supports pointer-driven camera and drag interaction');
+must(siteJs.includes('reduceQuery.addEventListener("change"')&&siteJs.includes('if(reduce){last=0;render(0);return;}'),'homepage motion respects runtime reduced-motion changes');
+must(siteJs.includes('requestAnimationFrame(tick)')&&siteJs.includes('document.hidden'),'homepage animation is frame-driven and checks page visibility');
+must(siteJs.includes('menu.getAttribute("aria-expanded")')&&siteJs.includes('e.key==="Escape"')&&siteJs.includes('menu.focus()'),'homepage navigation supports Escape and focus restoration');
+must(siteCss.includes('@media(max-width:820px)')&&siteCss.includes('@media(max-width:520px)'),'homepage layout has tablet and phone breakpoints');
+for(const route of ['href="#work"','href="#about"','href="/approach/"','href="#elsewhere"','href="/licences/"']) must(site.includes(route),'main header links to '+route);
 for(const page of ['work','about','approach']) {
   const pageHtml=read(page+'/index.html');
   must(pageHtml.includes('href="/'+page+'/" aria-current="page"'),'dedicated '+page+' page marks its current navigation route');
   for(const route of ['/projects/','/work/','/about/','/approach/','/elsewere/','/licences/']) must(pageHtml.includes('href="'+route+'"'),'dedicated '+page+' page links to '+route);
 }
-must(siteJs.includes('function scheduleProgress()')&&siteJs.includes('w.requestAnimationFrame(updateProgress)'),'scroll progress writes are coalesced with requestAnimationFrame');
-must(siteJs.includes('60000 - (now.getSeconds() * 1000) - now.getMilliseconds()'),'minute-resolution clock is scheduled on minute boundaries');
-must(siteJs.includes("d.addEventListener('visibilitychange', syncVisibility)")&&siteJs.includes('function stopOrbit()')&&siteJs.includes('function stopField()'),'decorative animation loops pause while the document is hidden');
-must(siteJs.includes("reduceQuery.addEventListener('change', onMotionPreferenceChange)"),'runtime reduced-motion changes are handled');
-must(siteJs.includes('custom cursor mouse-only')&&siteJs.includes('if (!fine || reduce) return;'),'custom cursor effects respect pointer type and reduced-motion settings');
-must(siteJs.includes("event.key !== 'Escape'")&&siteJs.includes('updateFilterButtons(active)'),'project search Escape key clears search and resets filters');
-must(siteV3Css.includes('left: -17px;')&&siteV3Css.includes('flex-direction: column;')&&siteV3Css.includes('align-items: flex-end;'),'mobile ID card retains its 17px left nudge and stacked Active/code status');
 const hub=read('projects/index.html');
 must(hub.includes('<title>Projects — Tamasrazim</title>'),'project directory uses simple title');
 must(!hub.includes('PRO_TOOL_MANIFEST')&&!hub.includes('tool-suite-health-console/'),'project directory omits generated catalogue');
@@ -312,16 +308,11 @@ must(!site.includes('data-cinematic-intro="home"')&&!site.includes('project-cine
 const hiddenOriginJs=read('assets/js/hidden-origin.js');
 must(hiddenOriginJs.includes('function alignOriginPaths()')&&hiddenOriginJs.includes("pathFrom(leftName, ['hoFlowA', 'hoFlowCoreA']")&&hiddenOriginJs.includes("pathFrom(rightName, ['hoFlowB', 'hoFlowCoreB']"),'hidden-origin flow paths align dynamically to the Razim and Tamanna text');
 must(site.includes('id="hoFlowA"')&&site.includes('id="hoFlowB"')&&site.includes('id="hoFlowCoreA"')&&site.includes('id="hoFlowCoreB"'),'hidden-origin SVG flow paths expose alignment targets');
-const identityCardCss=read('assets/css/site.css');
-const identityCardJs=read('assets/js/site.js');
-const identityCardStart=site.indexOf('<article class="id-card tilt reveal" data-reveal');
-const identityCardEnd=site.indexOf('</article>',identityCardStart)+10;
-const identityCardMarkup=identityCardStart>=0&&identityCardEnd>identityCardStart?site.slice(identityCardStart,identityCardEnd):'';
-must(identityCardMarkup.includes('src="./assets/images/tamanna-constellation.jpeg"')&&identityCardMarkup.includes('loading="eager"')&&identityCardMarkup.includes('fetchpriority="high"')&&identityCardMarkup.includes('id="idAlias"')&&identityCardMarkup.includes('Robiul Rumman Razim'),'homepage keeps the original ID artwork and prioritises its JPG for the intro');
-must(site.includes('rel="preload" as="image" href="./assets/images/tamanna-constellation.jpeg" fetchpriority="high"'),'homepage preloads the original constellation JPG before the cinematic intro');
-must(identityCardCss.includes('.id-card{')&&identityCardCss.includes('.id-constellation{')&&identityCardCss.includes('.id-image-scan{')&&identityCardCss.includes('.id-kicker,.id-online,.id-status'),'original identity-card CSS assets and their styles remain in place');
-must(identityCardJs.includes("var idAlias = q('#idAlias')")&&identityCardJs.includes("scrambleTo(idAlias,'TAMASRAZIM',260)"),'original identity-card JavaScript interaction remains in place');
-must(!site.includes('<body class="home-v2" data-cinematic-intro="home">')&&!site.includes('project-cinematic-intro.css?v=20261013-8')&&!site.includes('project-cinematic-intro.js?v=20261013-8'),'homepage stays clear of the removed identity-assembly intro assets');
+must(site.includes('class="v5-hero"')&&site.includes('class="v5-work"')&&site.includes('class="v5-about"'),'homepage uses the new editorial section system');
+must(site.includes('data-project-art="keyrun"')&&site.includes('/projects/typing-lesson/'),'homepage keeps KEYRUN in the selected project collection');
+must(site.includes('id="secretNode"')&&site.includes('id="secretReveal"'),'homepage still exposes the hidden-origin trigger and dialog');
+must(!site.includes('class="id-card tilt reveal"')&&!site.includes('id="idAlias"'),'homepage has retired the previous photo ID-card hero');
+must(!site.includes('project-cinematic-intro.css?v=')&&!site.includes('project-cinematic-intro.js?v='),'homepage does not load the project-page intro overlay');
 const cinematicProjectKeys=['tunrun','webedyts','qalyvyron','trilyva','neo','code-to-svg','code-to-eps','format-forge','asset-vault','kynestra','bncagrocare','repo-token-meter'];
 must(cinematicProjectKeys.every(key=>cinematicIntroJs.includes(key+': {')||cinematicIntroJs.includes('"'+key+'": {')),'cinematic intro has a dedicated animation profile for every featured project');
 must(cinematicIntroCss.includes('prefers-reduced-motion:reduce')&&cinematicIntroCss.includes('.pci-project--tunrun')&&cinematicIntroCss.includes('.pci-project--webedyts')&&cinematicIntroCss.includes('.pci-project--qalyvyron')&&cinematicIntroCss.includes('.pci-project--trilyva'),'cinematic intro has reduced-motion handling and project-specific themes');
