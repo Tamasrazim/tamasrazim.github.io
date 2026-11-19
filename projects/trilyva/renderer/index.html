@@ -2199,7 +2199,7 @@ var SCOPE = [
 
 function createRuntime() {
   var rt = {
-    compiled: null, fn: null, setupFn: null, code: '', hash: '',
+    compiled: null, fn: null, setupFn: null, gpu: null, code: '', hash: '',
     comp: composition({}), rng: mulberry32(1), noise: makeNoise(1),
     sims: {}, assets: {}, layers: [], vectorEdits: {}, vectorBounds: {}, motion: null, lastError: null, generation: 0
   };
@@ -2330,11 +2330,11 @@ function createRuntime() {
   rt.compile = function (code) {
     rt.generation++;
     rt.sims = {};
-    rt.fn = null; rt.setupFn = null; rt.lastError = null; rt.code = code;
+    rt.fn = null; rt.setupFn = null; rt.gpu = null; rt.lastError = null; rt.code = code;
     rt.noise = makeNoise(rt.comp.seed | 0);
     var win = {};
     var body = '"use strict";\n' + code +
-      '\n;return {r:(typeof renderFrame==="function")?renderFrame:null,s:(typeof setup==="function")?setup:null};';
+      '\n;return {r:(typeof renderFrame==="function")?renderFrame:null,s:(typeof setup==="function")?setup:null,g:(window&&window.renderFrameGPU)||((typeof renderFrameGPU!=="undefined")?renderFrameGPU:null)};';
     var factory;
     try {
       factory = Function.apply(null, SCOPE.concat([body]));
@@ -2365,6 +2365,7 @@ function createRuntime() {
     try { out = factory.apply(null, args); }
     catch (e2) { var d2 = describeError(e2, 'compile'); rt.lastError = d2; return { ok: false, error: d2 }; }
     var fn = (out && out.r) || win.renderFrame || null;
+    var gpu = (out && out.g) || (win && win.renderFrameGPU) || null;
     if (typeof fn !== 'function') {
       var d3 = {
         stage: 'contract', name: 'ContractError',
@@ -2375,12 +2376,13 @@ function createRuntime() {
       rt.lastError = d3; return { ok: false, error: d3 };
     }
     rt.fn = fn;
+    rt.gpu = (gpu && typeof gpu.wgsl === 'string') ? gpu : null;
     rt.setupFn = (out && out.s) || win.setup || null;
     if (rt.setupFn) {
       try { rt.rng = mulberry32(rt.comp.seed | 0); rt.setupFn(rt.motion); }
       catch (e3) { var d4 = describeError(e3, 'setup'); rt.lastError = d4; return { ok: false, error: d4 }; }
     }
-    return { ok: true, arity: fn.length, hasSetup: !!rt.setupFn };
+    return { ok: true, arity: fn.length, hasSetup: !!rt.setupFn, hasGPU: !!rt.gpu };
   };
 
   /* Draw one frame. rasterScale lets the preview rasterise smaller while the
@@ -2416,8 +2418,12 @@ function createRuntime() {
     ctx.clip();
     var t0 = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     try {
-      var userCtx = rt.vectorEdits && Object.keys(rt.vectorEdits).length ? vectorContext(ctx,rt.vectorEdits,rt.vectorBounds,s) : ctx;
-      rt.fn(t, frame, c.fps, userCtx, c.width, c.height);
+      if (opts.gpuBitmap) {
+        ctx.drawImage(opts.gpuBitmap, 0, 0, c.width, c.height);
+      } else {
+        var userCtx = rt.vectorEdits && Object.keys(rt.vectorEdits).length ? vectorContext(ctx,rt.vectorEdits,rt.vectorBounds,s) : ctx;
+        rt.fn(t, frame, c.fps, userCtx, c.width, c.height);
+      }
       (rt.layers || []).forEach(function (layer) {
         if (!layer || layer.visible === false) return;
         var image = layer.kind === 'video' ? (opts.videoFrames && opts.videoFrames[layer.id]) : layer.bitmap;
@@ -3357,11 +3363,14 @@ function runFrames(cfg) {
     if (cfg.isCancelled()) return Promise.resolve({ ok: false, cancelled: true });
     var t0 = now();
     var prepared = cfg.prepareFrame ? cfg.prepareFrame(i) : null;
-    return Promise.resolve(prepared).then(function (videoFrames) {
+    return Promise.resolve(prepared).then(function (framePayload) {
+      var videoFrames = framePayload && framePayload.videoFrames ? framePayload.videoFrames : (framePayload && framePayload.gpuBitmap ? null : framePayload);
+      var gpuBitmap = framePayload && framePayload.gpuBitmap ? framePayload.gpuBitmap : null;
       var r;
-      try { r = rt.renderInto(out.ctx, i, { isExport: true, videoFrames: videoFrames || null }); }
+      try { r = rt.renderInto(out.ctx, i, { isExport: true, videoFrames: videoFrames || null, gpuBitmap: gpuBitmap }); }
       finally {
-        if (videoFrames) Object.keys(videoFrames).forEach(function (key) {
+        if (framePayload && typeof framePayload.release === 'function') framePayload.release();
+        else if (videoFrames) Object.keys(videoFrames).forEach(function (key) {
           var bitmap = videoFrames[key];
           if (bitmap && bitmap.close) bitmap.close();
         });
