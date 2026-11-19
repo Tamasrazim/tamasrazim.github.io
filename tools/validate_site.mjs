@@ -204,7 +204,7 @@ for(const page of ['work','about','approach']) {
 const hub=read('projects/index.html');
 must(hub.includes('<title>Projects — Tamasrazim</title>'),'project directory uses simple title');
 must(!hub.includes('PRO_TOOL_MANIFEST')&&!hub.includes('tool-suite-health-console/'),'project directory omits generated catalogue');
-must((hub.match(/class="pi-card v3-index-card"/g)||[]).length===17,'project directory has seventeen curated cards');
+must((hub.match(/class="pi-card v3-index-card"/g)||[]).length===20,'project directory has twenty curated cards');
 
 const hubCategories=[...hub.matchAll(/<article\b[^>]*class="[^"]*\bpi-card\b[^"]*"[^>]*data-category="([^"]+)"/g)].map(match=>match[1]);
 const hubFilters=new Set([...hub.matchAll(/data-filter="([^"]+)"/g)].map(match=>match[1]));
@@ -234,7 +234,7 @@ const hubSchemaOpen='<script type="application/ld+json">',hubSchemaStart=hub.ind
 must(hubSchemaStart>=0&&hubSchemaEnd>hubSchemaStart,'project directory schema script is bounded');
 const hubSchema=JSON.parse(hub.slice(hubSchemaStart+hubSchemaOpen.length,hubSchemaEnd));
 const hubItems=hubSchema.mainEntity&&hubSchema.mainEntity.itemListElement||[];
-must(hubSchema['@type']==='CollectionPage'&&hubItems.length===17,'project directory schema describes seventeen curated projects');
+must(hubSchema['@type']==='CollectionPage'&&hubItems.length===20,'project directory schema describes twenty curated projects');
 must(hubItems.every(item=>knownSchemaIds.has(item.item&&item.item['@id'])),'project directory items reference defined project entities');
 const recorderPage=read('projects/trss-sample-recorder/index.html');
 must(recorderPage.includes('TrSS Sample')&&recorderPage.includes('120-second')&&recorderPage.includes('23 MiB'),'TrSS Sample Recorder page documents warm-up and bounded JSON chunks');
