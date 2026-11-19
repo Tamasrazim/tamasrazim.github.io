@@ -676,3 +676,8 @@ for(const file of routeMenuPages){
 }
 
 console.log('Global site validation complete.');
+
+must(siteCss.includes('.v6-hero-scene{position:absolute;z-index:0;'),'homepage places the hero canvas above the dark gradient veil');
+must(siteCss.includes('#projectCanvas{position:absolute;z-index:0;'),'project spotlight canvas remains visible beneath its lighting overlay');
+must(siteJs.includes('time*.32*(r+1)')&&siteJs.includes('time*.22*(r+1)'),'3D orbital rings rotate at an observable rate');
+must(siteJs.includes('time*.24*(ring.index+1)')&&siteJs.includes('Math.sin(time*2.4)'),'moving highlight arcs and pulsing core provide visible animation cues');
