@@ -29,7 +29,7 @@ var frame=document.getElementById("heroObject");
 var ctx=canvas&&canvas.getContext?canvas.getContext("2d",{alpha:true,desynchronized:true}):null;
 var width=0,height=0,dpr=1,visible=true,last=0,time=0;
 var yaw=0.25,pitch=-0.32,roll=0,yawV=0,pitchV=0,rollV=0;
-var targetYaw=0.25,targetPitch=-0.32,pointerDown=false;
+var targetYaw=0.25,targetPitch=-0.32,pointerDown=false,dragYaw=0,dragPitch=0;
 var pointer={x:0,y:0,active:false};
 var scrollProgress=document.getElementById("scrollProgress");
 var year=document.getElementById("homeYear");
@@ -57,7 +57,7 @@ if(frame&&canvas&&ctx){
     pointer.x=clamp((e.clientX-r.left)/r.width,0,1)*2-1;
     pointer.y=clamp((e.clientY-r.top)/r.height,0,1)*2-1;
     pointer.active=true;
-    if(pointerDown){targetYaw+=e.movementX*.002;targetPitch+=e.movementY*.002;}
+    if(pointerDown){dragYaw+=e.movementX*.002;dragPitch+=e.movementY*.002;}
   },{passive:true});
   frame.addEventListener("pointerleave",function(){pointer.active=false;pointerDown=false;},{passive:true});
   frame.addEventListener("pointerdown",function(e){
@@ -191,17 +191,14 @@ document.querySelectorAll("[data-v5-card]").forEach(function(el){
   }
 });
 
-if(reduce){render(0);return;}
 function tick(now){
   var dt=last?Math.min(.035,(now-last)/1000):1/60;
   last=now;
   if(document.hidden){requestAnimationFrame(tick);return;}
+  if(reduce){last=0;render(0);return;}
   time+=dt;
-  targetYaw+=Math.sin(time*.22)*dt*.025;
-  if(pointer.active&&!pointerDown){
-    targetYaw+=pointer.x*dt*.11;
-    targetPitch+=pointer.y*dt*.045;
-  }
+  targetYaw=.25+(pointer.active?pointer.x*.62:0)+dragYaw+Math.sin(time*.22)*.045;
+  targetPitch=-.32+(pointer.active?pointer.y*.27:0)+dragPitch;
   targetYaw=clamp(targetYaw,-1.5,1.5);
   targetPitch=clamp(targetPitch,-1.15,.55);
   var stiffness=24,damping=9.2;
@@ -220,11 +217,13 @@ function tick(now){
   }
   requestAnimationFrame(tick);
 }
-requestAnimationFrame(tick);
+if(!reduce)requestAnimationFrame(tick);
 document.addEventListener("visibilitychange",function(){last=0;if(!document.hidden)updateProgress();});
 if(reduceQuery&&typeof reduceQuery.addEventListener==="function"){
   reduceQuery.addEventListener("change",function(e){
-    if(e.matches){render(0);cards.forEach(function(c){c.el.style.transform="none";});}
+    reduce=!!e.matches;
+    if(reduce){render(0);cards.forEach(function(c){c.el.style.transform="none";});}
+    else{last=0;requestAnimationFrame(tick);}
   });
 }
 })();
