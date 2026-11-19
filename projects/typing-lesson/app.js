@@ -1,425 +1,69 @@
-(function () {
-  "use strict";
-
-  var $ = function (selector) { return document.querySelector(selector); };
-  var progressKey = "tamasrazim.typing-lesson.progress.v1";
-  var bestKey = "tamasrazim.typing-lesson.best.v1";
-
-  var curriculum = [
-    {
-      group: "01 / HOME ROW",
-      lessons: [
-        {
-          id: "anchors", title: "Find the F and J anchors", level: "01",
-          description: "Locate the small raised marks without looking down.",
-          text: "fff jjj fff jjj fj jf ff jj fjf jfj f j f j ff jj",
-          tip: "Rest your index fingers on F and J. Feel for the raised marks instead of searching visually."
-        },
-        {
-          id: "home-row", title: "Build the home row", level: "02",
-          description: "Keep your fingers close to the keys they control.",
-          text: "asdf jkl; asdf jkl; sad lad; ask dad; fall; flask; all; salad.",
-          tip: "Return each finger to its home position after every reach. Keep your wrists relaxed."
-        },
-        {
-          id: "home-words", title: "Home-row words", level: "03",
-          description: "Turn familiar key patterns into complete words.",
-          text: "a sad lad asks dad; a flask falls; all lads ask; a salad is full.",
-          tip: "Aim for an even rhythm. Do not rush the next word while the current one is still inaccurate."
-        }
-      ]
-    },
-    {
-      group: "02 / TOP ROW",
-      lessons: [
-        {
-          id: "top-reach", title: "Reach to the top row", level: "04",
-          description: "Learn the keys above your home position.",
-          text: "qwer uiop qwer uiop ty ty ty re we op io qw er ui op",
-          tip: "Move from the home row with the assigned finger, then return. Avoid lifting your whole hand."
-        },
-        {
-          id: "top-words", title: "Top-row combinations", level: "05",
-          description: "Practise short words while keeping your hands anchored.",
-          text: "we were quite quiet; write your query; our power tower is ripe.",
-          tip: "Use the correct finger for each reach. Let your hands move as little as possible."
-        }
-      ]
-    },
-    {
-      group: "03 / BOTTOM ROW",
-      lessons: [
-        {
-          id: "bottom-reach", title: "Reach to the bottom row", level: "06",
-          description: "Build control over the lower letter row.",
-          text: "zxcv bnm, zxcv bnm, zx cv bn m, cvb nmb vcz",
-          tip: "Reach down from the home row without sliding your palms across the keyboard."
-        },
-        {
-          id: "bottom-words", title: "Bottom-row words", level: "07",
-          description: "Connect the lower keys into useful patterns.",
-          text: "mix, zoom, cave, van, box, minimum, civic, combine, zinc, max.",
-          tip: "Keep your fingers curved and use the nearest assigned finger for each key."
-        }
-      ]
-    },
-    {
-      group: "04 / FLUENCY",
-      lessons: [
-        {
-          id: "mixed-words", title: "Mixed-key words", level: "08",
-          description: "Move across all three letter rows.",
-          text: "the quick brown fox jumps over the lazy dog; pack my box with five dozen liquor jugs.",
-          tip: "Look ahead by a word, not by a letter. Let your fingers follow the text."
-        },
-        {
-          id: "punctuation", title: "Punctuation and spacing", level: "09",
-          description: "Practise commas, full stops, apostrophes, and capitals.",
-          text: "Slow down, stay accurate, and keep going. It's better to type well than to type fast!",
-          tip: "Use the opposite hand for Shift when possible. Pause briefly at punctuation without losing your rhythm."
-        },
-        {
-          id: "final-run", title: "Full-keyboard passage", level: "10",
-          description: "Bring the whole keyboard together in a short passage.",
-          text: "Good typing is a repeatable skill. Keep your fingers near the home row, use the right finger for every key, and let accuracy guide your speed. A steady practice routine will build confidence over time.",
-          tip: "Finish with control. When you make a mistake, correct it calmly and continue at a comfortable pace."
-        }
-      ]
-    }
-  ];
-
-  var allLessons = [];
-  curriculum.forEach(function (group) {
-    group.lessons.forEach(function (lesson) {
-      lesson.group = group.group;
-      allLessons.push(lesson);
-    });
-  });
-
-  var testText = [
-    "Good typing is not about rushing from one key to another. It is about finding a steady rhythm, using the correct fingers, and staying accurate as the words become longer.",
-    "Keep your hands relaxed and return to the home row after every reach. Look at the screen instead of watching your fingers. Small improvements become easier to notice with regular practice.",
-    "A clear sentence gives your hands a chance to move across the whole keyboard. Use commas, full stops, and spaces carefully. Accuracy makes speed more consistent over time."
-  ].join(" ");
-
-  var completed = new Set();
-  var bestScores = {};
-  var activeIndex = 0;
-  var activeLesson = null;
-  var mode = "lesson";
-  var targetText = "";
-  var duration = 60;
-  var startedAt = 0;
-  var finished = false;
-  var clockHandle = 0;
-
-  var lessonList = $("#lessonList");
-  var prompt = $("#prompt");
-  var input = $("#typingInput");
-  var liveStatus = $("#liveStatus");
-  var nextButton = $("#nextLesson");
-  var testDuration = $("#testDuration");
-
-  function readLocalState() {
-    try {
-      var saved = JSON.parse(localStorage.getItem(progressKey) || "[]");
-      if (Array.isArray(saved)) completed = new Set(saved);
-    } catch (error) { completed = new Set(); }
-    try {
-      bestScores = JSON.parse(localStorage.getItem(bestKey) || "{}") || {};
-    } catch (error) { bestScores = {}; }
-  }
-
-  function saveLocalState() {
-    try {
-      localStorage.setItem(progressKey, JSON.stringify(Array.from(completed)));
-      localStorage.setItem(bestKey, JSON.stringify(bestScores));
-    } catch (error) {
-      liveStatus.textContent = "Browser storage is unavailable. This session will still work, but progress may not be saved.";
-    }
-  }
-
-  function formatTime(seconds) {
-    var safe = Math.max(0, Math.floor(seconds));
-    var minutes = Math.floor(safe / 60);
-    var remaining = safe % 60;
-    return String(minutes).padStart(2, "0") + ":" + String(remaining).padStart(2, "0");
-  }
-
-  function elapsedSeconds() {
-    return startedAt ? Math.max(0, (performance.now() - startedAt) / 1000) : 0;
-  }
-
-  function typedMetrics() {
-    var typed = input.value;
-    var correct = 0;
-    var errors = 0;
-    var limit = Math.min(typed.length, targetText.length);
-    for (var i = 0; i < limit; i += 1) {
-      if (typed[i] === targetText[i]) correct += 1;
-      else errors += 1;
-    }
-    var accuracy = typed.length ? Math.round((correct / typed.length) * 100) : 100;
-    var seconds = elapsedSeconds();
-    var wpm = seconds > 0 ? Math.round((correct / 5) / (seconds / 60)) : 0;
-    return { typed: typed, correct: correct, errors: errors, accuracy: accuracy, seconds: seconds, wpm: wpm };
-  }
-
-  function renderPrompt() {
-    var typed = input.value;
-    var fragment = document.createDocumentFragment();
-    for (var i = 0; i < targetText.length; i += 1) {
-      var span = document.createElement("span");
-      var character = targetText[i];
-      span.textContent = character === " " ? "\u00a0" : character;
-      if (i < typed.length) {
-        span.className = typed[i] === character ? "is-correct" : "is-error";
-      } else if (i === typed.length && !finished) {
-        span.className = "is-current";
-      }
-      fragment.appendChild(span);
-    }
-    prompt.replaceChildren(fragment);
-    updateNextKey();
-  }
-
-  function renderKeyboard() {
-    var rows = ["1234567890-=", "qwertyuiop[]", "asdfghjkl;'", "zxcvbnm,./"];
-    var keyboard = $("#keyboard");
-    keyboard.replaceChildren();
-    rows.forEach(function (rowText) {
-      var row = document.createElement("div");
-      row.className = "key-row";
-      Array.from(rowText).forEach(function (key) {
-        var keyElement = document.createElement("span");
-        keyElement.className = "key";
-        keyElement.dataset.key = key.toLowerCase();
-        keyElement.textContent = key;
-        row.appendChild(keyElement);
-      });
-      keyboard.appendChild(row);
-    });
-    var spaceRow = document.createElement("div");
-    spaceRow.className = "space-row";
-    var space = document.createElement("span");
-    space.className = "key key-space";
-    space.dataset.key = " ";
-    space.textContent = "SPACE";
-    spaceRow.appendChild(space);
-    keyboard.appendChild(spaceRow);
-  }
-
-  function updateNextKey() {
-    var keys = document.querySelectorAll(".key");
-    keys.forEach(function (key) { key.classList.remove("is-next"); });
-    if (finished || input.disabled) return;
-    var next = targetText[input.value.length];
-    if (typeof next === "undefined") return;
-    var match = Array.from(keys).find(function (key) { return key.dataset.key === next.toLowerCase(); });
-    if (match) match.classList.add("is-next");
-  }
-
-  function renderLessonList() {
-    lessonList.replaceChildren();
-    curriculum.forEach(function (group) {
-      var groupElement = document.createElement("div");
-      groupElement.className = "lesson-group";
-      var heading = document.createElement("p");
-      heading.className = "lesson-group-title";
-      heading.textContent = group.group;
-      groupElement.appendChild(heading);
-      group.lessons.forEach(function (lesson) {
-        var button = document.createElement("button");
-        button.type = "button";
-        button.className = "lesson-choice";
-        button.dataset.lessonId = lesson.id;
-        button.setAttribute("aria-current", activeLesson && activeLesson.id === lesson.id ? "true" : "false");
-        var number = document.createElement("span");
-        number.className = "lesson-number";
-        number.textContent = lesson.level;
-        var title = document.createElement("span");
-        title.className = "lesson-name";
-        title.textContent = lesson.title;
-        var mark = document.createElement("span");
-        mark.className = "lesson-check";
-        mark.textContent = completed.has(lesson.id) ? "✓" : "";
-        button.append(number, title, mark);
-        button.addEventListener("click", function () { selectLesson(lesson.id); });
-        groupElement.appendChild(button);
-      });
-      lessonList.appendChild(groupElement);
-    });
-    var count = completed.size;
-    $("#courseCount").textContent = count + " / " + allLessons.length;
-    $("#courseProgress").style.width = ((count / allLessons.length) * 100) + "%";
-  }
-
-  function updateBestDisplay() {
-    if (mode === "lesson" && activeLesson) {
-      var best = bestScores[activeLesson.id];
-      $("#bestSpeed").textContent = best ? "BEST " + best + " WPM" : "BEST —";
-    } else {
-      $("#bestSpeed").textContent = "TIMED TEST";
-    }
-  }
-
-  function updateMetrics() {
-    var stats = typedMetrics();
-    $("#wpm").textContent = String(stats.wpm);
-    $("#accuracy").textContent = stats.accuracy + "%";
-    $("#mistakes").textContent = String(stats.errors);
-
-    if (mode === "test") {
-      var remaining = Math.max(0, duration - stats.seconds);
-      $("#timeLabel").textContent = "REMAINING";
-      $("#time").textContent = formatTime(startedAt ? remaining : duration);
-      $("#timeHint").textContent = startedAt ? "counting down" : "starts with first key";
-      if (startedAt && remaining <= 0 && !finished) finishTest();
-    } else {
-      $("#timeLabel").textContent = "TIME";
-      $("#time").textContent = formatTime(stats.seconds);
-      $("#timeHint").textContent = startedAt ? "session elapsed" : "starts with first key";
-    }
-
-    var percentage = targetText.length ? Math.min(100, (input.value.length / targetText.length) * 100) : 0;
-    $("#exerciseProgress").textContent = Math.round(percentage) + "% COMPLETE";
-  }
-
-  function resetSession() {
-    finished = false;
-    startedAt = 0;
-    input.value = "";
-    input.disabled = false;
-    if (mode === "test") {
-      targetText = testText + " " + testText;
-      input.maxLength = targetText.length;
-      $("#lessonEyebrow").textContent = "TIMED TEST / " + duration + " SECONDS";
-      $("#lessonTitle").textContent = "Find your natural pace";
-      $("#lessonDescription").textContent = "Type accurately for the full test. The clock starts with your first key.";
-      $("#modeBadge").textContent = "SPEED TEST / READY";
-      liveStatus.textContent = "Ready when you are. The timer starts with your first keystroke.";
-    } else {
-      input.maxLength = targetText.length;
-      $("#modeBadge").textContent = "GUIDED LESSON";
-      liveStatus.textContent = "Start typing when you are ready. Accuracy comes before speed.";
-    }
-    nextButton.disabled = true;
-    renderPrompt();
-    updateMetrics();
-    updateBestDisplay();
-  }
-
-  function selectLesson(id) {
-    var found = allLessons.find(function (lesson) { return lesson.id === id; });
-    if (!found) return;
-    mode = "lesson";
-    activeLesson = found;
-    activeIndex = allLessons.indexOf(found);
-    targetText = found.text;
-    $("#lessonEyebrow").textContent = "LESSON " + found.level + " / " + found.group.split(" / ")[1];
-    $("#lessonTitle").textContent = found.title;
-    $("#lessonDescription").textContent = found.description;
-    $("#lessonTip").textContent = found.tip;
-    renderLessonList();
-    resetSession();
-    input.focus({ preventScroll: true });
-  }
-
-  function startTest() {
-    mode = "test";
-    activeLesson = null;
-    duration = Number(testDuration.value) || 60;
-    targetText = testText + " " + testText;
-    $("#lessonTip").textContent = "Use your normal touch-typing technique. The final result is a snapshot of this timed session.";
-    renderLessonList();
-    resetSession();
-    input.focus({ preventScroll: true });
-  }
-
-  function completeLesson() {
-    if (finished) return;
-    finished = true;
-    input.disabled = true;
-    completed.add(activeLesson.id);
-    var stats = typedMetrics();
-    if (!bestScores[activeLesson.id] || stats.wpm > bestScores[activeLesson.id]) {
-      bestScores[activeLesson.id] = stats.wpm;
-    }
-    saveLocalState();
-    renderLessonList();
-    nextButton.disabled = false;
-    liveStatus.textContent = "Lesson complete. " + stats.accuracy + "% accuracy at " + stats.wpm + " WPM. Repeat it to improve your consistency, or continue to the next lesson.";
-    updateBestDisplay();
-    renderPrompt();
-  }
-
-  function finishTest() {
-    if (finished) return;
-    finished = true;
-    input.disabled = true;
-    var stats = typedMetrics();
-    liveStatus.textContent = "Test complete — " + stats.wpm + " WPM, " + stats.accuracy + "% accuracy, " + stats.errors + " mistakes. Restart to try again.";
-    $("#modeBadge").textContent = "TEST COMPLETE";
-    nextButton.disabled = true;
-    renderPrompt();
-    updateMetrics();
-  }
-
-  function nextLesson() {
-    if (mode !== "lesson" || !finished) return;
-    var nextIndex = (activeIndex + 1) % allLessons.length;
-    selectLesson(allLessons[nextIndex].id);
-  }
-
-  input.addEventListener("input", function () {
-    if (finished) return;
-    if (input.value.length && !startedAt) startedAt = performance.now();
-
-    if (mode === "test" && input.value.length > targetText.length - 300) {
-      targetText += " " + testText;
-      input.maxLength = targetText.length;
-    }
-
-    renderPrompt();
-    updateMetrics();
-
-    if (mode === "lesson" && input.value.length >= targetText.length) {
-      completeLesson();
-    } else if (mode === "test") {
-      liveStatus.textContent = "Keep a steady rhythm. Correct characters count toward your speed; mistakes remain visible above.";
-    }
-  });
-
-  input.addEventListener("keydown", function (event) {
-    var key = event.key === " " ? " " : event.key.toLowerCase();
-    var pressed = Array.from(document.querySelectorAll(".key")).find(function (element) {
-      return element.dataset.key === key;
-    });
-    if (pressed) pressed.classList.add("is-pressed");
-  });
-  input.addEventListener("keyup", function () {
-    document.querySelectorAll(".key.is-pressed").forEach(function (element) { element.classList.remove("is-pressed"); });
-  });
-
-  $("#startTest").addEventListener("click", startTest);
-  $("#restartLesson").addEventListener("click", resetSession);
-  $("#nextLesson").addEventListener("click", nextLesson);
-  $("#resetProgress").addEventListener("click", function () {
-    if (!window.confirm("Reset completed lessons and saved best speeds on this browser?")) return;
-    completed.clear();
-    bestScores = {};
-    saveLocalState();
-    renderLessonList();
-    updateBestDisplay();
-    liveStatus.textContent = "Local progress has been reset.";
-  });
-
-  renderKeyboard();
-  readLocalState();
-  renderLessonList();
-  selectLesson(allLessons[0].id);
-  clockHandle = window.setInterval(updateMetrics, 200);
-  window.addEventListener("pagehide", function () {
-    if (clockHandle) window.clearInterval(clockHandle);
-  });
+(function(){
+"use strict";
+var $=function(s){return document.querySelector(s);};
+var lessons=[
+{id:"anchors",group:"HOME ROW",name:"Find the F and J anchors",category:"HOME ROW / FOUNDATION",emblem:"FJ",description:"Find the raised marks. Keep your eyes on the screen.",tip:"Rest your index fingers on F and J. Feel the small raised marks instead of looking down.",objective:"Find your home position. Type the anchor sequence cleanly and keep your fingers relaxed.",keys:["F","J"],text:"fff jjj fff jjj fj jf ff jj fjf jfj f j f j ff jj"},
+{id:"home-row",group:"HOME ROW",name:"Build the home row",category:"HOME ROW / CONTROL",emblem:"AS",description:"Keep every finger close to its home key.",tip:"Return every finger to its home position after each reach. Keep your wrists relaxed.",objective:"Use all eight home-row keys. Build an even rhythm without lifting your hands.",keys:["A","S","D","F","J","K","L",";"],text:"asdf jkl; asdf jkl; sad lad; ask dad; fall; flask; all; salad."},
+{id:"home-words",group:"HOME ROW",name:"Home-row words",category:"HOME ROW / WORDS",emblem:"AS",description:"Turn familiar patterns into complete words.",tip:"Aim for an even rhythm. Do not rush the next word while the current one is still inaccurate.",objective:"Connect the home-row keys into short words and phrases.",keys:["A","S","D","F","J","K","L"],text:"a sad lad asks dad; a flask falls; all lads ask; a salad is full."},
+{id:"top-reach",group:"TOP ROW",name:"Reach to the top row",category:"TOP ROW / REACH",emblem:"QW",description:"Learn the keys above your home position.",tip:"Move from the home row with the assigned finger, then return. Avoid lifting your whole hand.",objective:"Reach upward without losing your hand position. Keep the movement small.",keys:["Q","W","E","R","T","Y","U","I","O","P"],text:"qwer uiop qwer uiop ty ty ty re we op io qw er ui op"},
+{id:"top-words",group:"TOP ROW",name:"Top-row combinations",category:"TOP ROW / WORDS",emblem:"UP",description:"Practise short words with controlled reaches.",tip:"Use the correct finger for each reach. Let your hands do the work, not your shoulders.",objective:"Read ahead and reach for the top-row keys with the correct fingers.",keys:["Q","W","E","R","T","Y","U","I","O","P"],text:"we were quite quiet; write your query; our power tower is ripe."},
+{id:"bottom-reach",group:"BOTTOM ROW",name:"Reach to the bottom row",category:"BOTTOM ROW / REACH",emblem:"ZX",description:"Build control over the lower letter row.",tip:"Reach down from the home row without sliding your palms across the keyboard.",objective:"Reach down while keeping your fingers curved and your wrists neutral.",keys:["Z","X","C","V","B","N","M"],text:"zxcv bnm, zxcv bnm, zx cv bn m, cvb nmb vcz"},
+{id:"bottom-words",group:"BOTTOM ROW",name:"Bottom-row words",category:"BOTTOM ROW / WORDS",emblem:"CV",description:"Connect the lower keys into useful patterns.",tip:"Keep your fingers curved and use the nearest assigned finger for each key.",objective:"Build confidence across the bottom row, one controlled movement at a time.",keys:["Z","X","C","V","B","N","M"],text:"mix, zoom, cave, van, box, minimum, civic, combine, zinc, max."},
+{id:"mixed-words",group:"FLUENCY",name:"Mixed-key words",category:"FLUENCY / ALL ROWS",emblem:"ABC",description:"Move across all three letter rows.",tip:"Look ahead by a word, not by a letter. Let your fingers follow the text.",objective:"Combine the whole keyboard in a continuous passage. Accuracy protects your combo.",keys:["Q","W","E","R","T","A","S","D","F","Z","X","C"],text:"the quick brown fox jumps over the lazy dog; pack my box with five dozen liquor jugs."},
+{id:"punctuation",group:"FLUENCY",name:"Punctuation and spacing",category:"FLUENCY / PRECISION",emblem:"!?;",description:"Practise commas, full stops, apostrophes, and capitals.",tip:"Use the opposite hand for Shift when possible. Pause briefly at punctuation without losing your rhythm.",objective:"Control punctuation, capitals, spaces, and sentence flow.",keys:["SHIFT",",",".","'","SPACE"],text:"Slow down, stay accurate, and keep going. It's better to type well than to type fast!"},
+{id:"final-run",group:"FINAL STAGE",name:"Full-keyboard passage",category:"FINAL STAGE / MASTERY",emblem:"10",description:"Bring the whole keyboard together in one final run.",tip:"Finish with control. Correct your mistakes calmly and keep a steady pace.",objective:"Complete the final passage. Earn an S rank by maintaining near-perfect accuracy.",keys:["ALL KEYS"],text:"Good typing is a repeatable skill. Keep your fingers near the home row, use the right finger for every key, and let accuracy guide your speed. A steady practice routine will build confidence over time."}
+];
+var passages=[
+"Good typing is not about rushing from one key to another. It is about finding a steady rhythm, using the correct fingers, and staying accurate as the words become longer.",
+"Keep your hands relaxed and return to the home row after every reach. Look at the screen instead of watching your fingers. Small improvements become easier to notice with regular practice.",
+"A clear sentence gives your hands a chance to move across the whole keyboard. Use commas, full stops, and spaces carefully. Accuracy makes speed more consistent over time."
+];
+var storageKey="tamasrazim.keyrun.v1",state={cleared:[],medals:{},xp:0,bestScore:0,bestWpm:0};
+var index=0,mode="campaign",target="",previousValue="",running=false,ended=false,startTime=0,elapsed=0,interval=0,attackSeconds=60;
+var score=0,combo=0,bestCombo=0,lives=8,mistakes=0,earned=0,runId=0;
+var input=$("#typingInput"),message=$("#gameMessage");
+function load(){try{var s=JSON.parse(localStorage.getItem(storageKey)||"{}");state.cleared=Array.isArray(s.cleared)?s.cleared:[];state.medals=s.medals||{};state.xp=Number(s.xp)||0;state.bestScore=Number(s.bestScore)||0;state.bestWpm=Number(s.bestWpm)||0;}catch(e){}}
+function save(){try{localStorage.setItem(storageKey,JSON.stringify(state));}catch(e){message.textContent="Browser storage is unavailable. This run will still work, but progress may not persist.";}}
+function pad(n){return String(Math.max(0,Math.floor(n))).padStart(6,"0");}
+function timeString(s){s=Math.max(0,Math.floor(s));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");}
+function seconds(){return running?Math.max(0,(performance.now()-startTime)/1000):elapsed;}
+function getStats(){var value=input.value,correct=0,wrong=0;for(var i=0;i<value.length;i++){if(value[i]===target[i])correct++;else wrong++;}var sec=Math.max(.1,seconds());return{correct:correct,wrong:wrong,accuracy:value.length?Math.round(correct/value.length*100):100,wpm:Math.round(correct/5/(sec/60)),seconds:sec};}
+function level(){return Math.floor(state.xp/100)+1;}
+function rank(){var n=level();return n>=10?"KEY MASTER":n>=7?"ACE":n>=4?"SPECIALIST":"ROOKIE";}
+function updateProfile(){var n=level(),xp=state.xp%100;$("#playerLevel").textContent="LV. "+String(n).padStart(2,"0");$("#rankName").textContent=rank();$("#rankProgress").style.width=xp+"%";$("#xpLabel").textContent=xp+" / 100 XP TO NEXT LEVEL";$("#xpValue").textContent=state.xp;$("#xpTrack").style.width=xp+"%";$("#recordScore").textContent=pad(state.bestScore);}
+function renderMissions(){
+var host=$("#missionList");host.replaceChildren();var groups=[];
+lessons.forEach(function(l,i){var g=groups.find(function(x){return x.name===l.group;});if(!g){g={name:l.group,items:[]};groups.push(g);}g.items.push({lesson:l,index:i});});
+groups.forEach(function(group){var wrap=document.createElement("div");wrap.className="mission-group";var label=document.createElement("p");label.className="mission-group-label";label.textContent=group.name;wrap.appendChild(label);
+group.items.forEach(function(item){var btn=document.createElement("button");btn.type="button";btn.className="mission-button"+(item.index===index&&mode==="campaign"?" is-active":"")+(state.cleared.includes(item.lesson.id)?" is-cleared":"");var unlocked=item.index===0||state.cleared.includes(lessons[item.index-1].id)||state.cleared.includes(item.lesson.id);btn.disabled=!unlocked;btn.setAttribute("aria-current",item.index===index&&mode==="campaign"?"true":"false");var no=document.createElement("span");no.className="mission-no";no.textContent=String(item.index+1).padStart(2,"0");var name=document.createElement("span");name.className="mission-name";name.textContent=item.lesson.name;var mark=document.createElement("span");mark.className="mission-mark";mark.textContent=state.medals[item.lesson.id]|| (state.cleared.includes(item.lesson.id)?"✓":"—");btn.append(no,name,mark);btn.addEventListener("click",function(){selectMission(item.index);});wrap.appendChild(btn);});host.appendChild(wrap);});
+var count=state.cleared.length;$("#campaignCount").textContent=String(count).padStart(2,"0")+" / 10";$("#campaignProgress").style.width=count/10*100+"%";
+}
+function renderKeyboard(){var rows=["1234567890-=","qwertyuiop[]","asdfghjkl;'","zxcvbnm,./"],host=$("#keyboard");host.replaceChildren();rows.forEach(function(txt){var row=document.createElement("div");row.className="key-row";Array.from(txt).forEach(function(k){var e=document.createElement("span");e.className="key";e.dataset.key=k.toLowerCase();e.textContent=k;row.appendChild(e);});host.appendChild(row);});var wrap=document.createElement("div");wrap.className="space-row";var sp=document.createElement("span");sp.className="key space";sp.dataset.key=" ";sp.textContent="SPACE";wrap.appendChild(sp);host.appendChild(wrap);}
+function paintKeyboard(){var next=target[input.value.length];document.querySelectorAll(".key").forEach(function(k){k.classList.toggle("next",!!next&&k.dataset.key===next.toLowerCase());});$("#targetHint").textContent=next===" "?"SPACE BAR NEXT":"THE NEXT CHARACTER IS HIGHLIGHTED";}
+function renderTarget(){var typed=input.value,frag=document.createDocumentFragment();for(var i=0;i<target.length;i++){var s=document.createElement("span");s.textContent=target[i]===" "?"\u00a0":target[i];if(i<typed.length)s.className=typed[i]===target[i]?"correct":"wrong";else if(i===typed.length&&!ended)s.className="current";frag.appendChild(s);}$("#targetText").replaceChildren(frag);paintKeyboard();}
+function updateHud(){var s=getStats(),sec=s.seconds;$("#score").textContent=pad(score);$("#scoreGain").textContent="+"+earned+" THIS RUN";$("#combo").textContent="× "+combo;$("#comboLabel").textContent=combo>=20?"ON FIRE":combo>=10?"KEEP IT GOING":combo>=5?"STREAK BUILDING":"BUILD A STREAK";$("#lives").innerHTML=Array.from({length:8},function(_,i){return i<lives?"♥":'<span class="lost">♥</span>';}).join(" ");$("#wpm").textContent=s.wpm;$("#accuracy").textContent=s.accuracy+"%";$("#mistakes").textContent=mistakes;
+if(mode==="attack"){var remain=Math.max(0,attackSeconds-sec);$("#clockLabel").textContent="REMAIN";$("#clock").textContent=timeString(remain);$("#clockSub").textContent="TIME ATTACK";if(running&&remain<=0)endRun("timeout");}else{$("#clockLabel").textContent="TIME";$("#clock").textContent=timeString(sec);$("#clockSub").textContent="MISSION TIMER";}
+var p=target.length?Math.min(100,input.value.length/target.length*100):0;$("#targetPercent").textContent=Math.round(p)+"% CLEARED";$("#targetCount").textContent=input.value.length+" / "+target.length;$("#targetTrack").style.width=p+"%";}
+function showResult(kicker,title,description,reward,mark){$("#resultBanner").hidden=false;$("#resultSymbol").textContent=mark;$("#resultKicker").textContent=kicker;$("#resultTitle").textContent=title;$("#resultDescription").textContent=description;$("#resultReward").textContent=reward;}
+function hideResult(){$("#resultBanner").hidden=true;}
+function updateButtons(){$("#startButton").hidden=running||ended;$("#retryButton").hidden=!ended&&!running;$("#nextButton").hidden=!(ended&&mode==="campaign"&&state.cleared.includes(lessons[index].id));$("#startButton").textContent=mode==="attack"?"START TIME ATTACK":"START MISSION";$("#startButton").querySelector("span").textContent="→";}
+function describeMission(){var l=lessons[index];$("#stageCode").innerHTML=mode==="attack"?"ARCADE <b>/</b> TIME ATTACK":"WORLD 01 <b>/</b> MISSION "+String(index+1).padStart(2,"0");$("#modeTag").textContent=mode==="attack"?"TIME ATTACK":"CAMPAIGN MODE";$("#stageCategory").textContent=mode==="attack"?"ARCADE / SURVIVAL":l.category;$("#stageTitle").textContent=mode==="attack"?"Endless typing run":l.name;$("#stageDescription").textContent=mode==="attack"?"Keep typing until the clock reaches zero. Every correct key adds to your score.":l.description;$("#emblemText").textContent=mode==="attack"?"∞":l.emblem;$("#objectiveText").textContent=mode==="attack"?"Keep your combo alive. Type as many accurate characters as possible before time expires.":l.objective;$("#targetKeys").replaceChildren();(mode==="attack"?["ALL","KEYS"]:l.keys).forEach(function(k){var s=document.createElement("span");s.textContent=k;$("#targetKeys").appendChild(s);});$("#tipText").textContent=mode==="attack"?"Stay relaxed, look ahead, and keep the rhythm. Accuracy keeps your combo alive.":l.tip;var medal=mode==="campaign"?state.medals[l.id]:"";$("#bestMedal").textContent=medal?"BEST MEDAL / "+medal:"NO MEDAL";}
+function stopClock(){if(interval){clearInterval(interval);interval=0;}}
+function selectMission(i){if(i<0||i>=lessons.length)return;stopClock();mode="campaign";index=i;target=lessons[i].text;describeMission();renderMissions();resetRun();message.textContent="Mission ready. Press START MISSION, then type the highlighted sequence.";}
+function resetRun(){stopClock();runId++;score=0;combo=0;bestCombo=0;lives=8;mistakes=0;earned=0;running=false;ended=false;elapsed=0;startTime=0;previousValue="";input.value="";input.disabled=true;$("#inputState").textContent="WAITING FOR START";hideResult();renderTarget();updateHud();updateButtons();describeMission();}
+function startRun(){if(running)return;if(ended)resetRun();running=true;ended=false;startTime=performance.now();elapsed=0;input.disabled=false;input.value="";previousValue="";$("#inputState").textContent="SYSTEM ONLINE";message.textContent="GO! Type the sequence. Correct keys build your combo; mistakes cost energy.";$("#startButton").hidden=true;$("#retryButton").hidden=false;$("#nextButton").hidden=true;updateHud();renderTarget();input.focus({preventScroll:true});var id=runId;interval=window.setInterval(function(){if(id===runId)updateHud();},100);}
+function awardChar(correct){if(correct){var multiplier=1+Math.min(2,Math.floor(combo/5)),points=10*multiplier;score+=points;earned+=points;combo++;bestCombo=Math.max(bestCombo,combo);if(combo>0&&combo%5===0)message.textContent="COMBO × "+combo+" — multiplier increased!";}else{mistakes++;lives=Math.max(0,lives-1);combo=0;score=Math.max(0,score-15);message.textContent="Wrong key. Energy −1. Reset your fingers and keep going.";}}
+function medalFor(s){if(s.accuracy>=99&&s.wpm>=20)return"S";if(s.accuracy>=97)return"A";if(s.accuracy>=92)return"B";return"C";}
+function endRun(reason){if(!running||ended)return;elapsed=Math.max(0,(performance.now()-startTime)/1000);running=false;ended=true;stopClock();input.disabled=true;$("#inputState").textContent=reason==="clear"?"MISSION COMPLETE":reason==="timeout"?"TIME EXPIRED":"OUT OF ENERGY";var s=getStats(),success=reason==="clear"||(reason==="timeout"&&mode==="attack");
+if(success){var medal=medalFor(s),xp=mode==="campaign"?50+(medal==="S"?30:medal==="A"?20:medal==="B"?10:0)+Math.min(20,Math.floor(s.wpm/5)):Math.max(5,Math.round(s.wpm/3));if(mode==="campaign"){var id=lessons[index].id;if(!state.cleared.includes(id))state.cleared.push(id);var old=state.medals[id],order={C:1,B:2,A:3,S:4};if(!old||order[medal]>order[old])state.medals[id]=medal;}state.xp+=xp;state.bestScore=Math.max(state.bestScore,score);state.bestWpm=Math.max(state.bestWpm,s.wpm);save();updateProfile();renderMissions();if(mode==="campaign"){showResult("MISSION CLEAR",medal==="S"?"S-RANK PERFORMANCE":medal+"-RANK CLEAR",s.accuracy+"% accuracy · "+s.wpm+" WPM · best combo ×"+bestCombo,"+"+xp+" XP",medal);message.textContent="Mission cleared. Your progress and reward have been saved on this device.";}else{showResult("TIME ATTACK COMPLETE","RUN COMPLETE",s.accuracy+"% accuracy · "+s.wpm+" WPM · score "+pad(score),"+"+xp+" XP","✓");message.textContent="Time attack finished. Your score and XP have been saved.";}}
+else{showResult("RUN FAILED",reason==="timeout"?"TIME RAN OUT":"OUT OF ENERGY",s.accuracy+"% accuracy · "+s.wpm+" WPM · score "+pad(score),"+0 XP","×");message.textContent=reason==="timeout"?"Time ran out. Retry the run and keep your rhythm.":"All energy used. Retry and focus on accuracy before speed.";}
+updateHud();updateButtons();renderTarget();}
+function processInput(){if(!running||ended)return;var value=input.value;if(value.length>previousValue.length){var added=value.slice(previousValue.length);for(var i=0;i<added.length;i++){var pos=previousValue.length+i;if(mode==="attack"&&pos>=target.length-180){target+=" "+passages[Math.floor(Math.random()*passages.length)];}awardChar(added[i]===target[pos]);if(lives<=0)break;}}previousValue=value;renderTarget();updateHud();if(lives<=0){endRun("energy");return;}if(mode==="campaign"&&input.value.length>=target.length)endRun("clear");}
+function startAttack(){stopClock();mode="attack";attackSeconds=Number($("#attackDuration").value)||60;target=passages.join(" ");describeMission();renderMissions();resetRun();$("#stageCode").innerHTML="ARCADE <b>/</b> TIME ATTACK";$("#stageCategory").textContent="ARCADE / SURVIVAL";$("#stageTitle").textContent="Endless typing run";$("#stageDescription").textContent="Keep typing until the clock reaches zero. Every correct key adds to your score.";$("#emblemText").textContent="∞";$("#modeTag").textContent="TIME ATTACK";$("#objectiveText").textContent="Keep your combo alive. Type as many accurate characters as possible before time expires.";$("#targetKeys").replaceChildren();["ALL","KEYS"].forEach(function(k){var s=document.createElement("span");s.textContent=k;$("#targetKeys").appendChild(s);});$("#tipText").textContent="Stay relaxed, look ahead, and keep the rhythm. Accuracy keeps your combo alive.";$("#bestMedal").textContent="PERSONAL BEST / "+state.bestWpm+" WPM";message.textContent="Time attack ready. Press START TIME ATTACK to begin.";$("#startButton").textContent="START TIME ATTACK";$("#startButton").querySelector("span").textContent="→";}
+function retry(){resetRun();message.textContent="Run reset. Press start when you're ready.";}
+function nextMission(){if(mode!=="campaign"||!state.cleared.includes(lessons[index].id))return;var next=index+1;if(next>=lessons.length){showResult("CAMPAIGN COMPLETE","KEYBOARD MASTERED","You cleared all ten missions. Replay any mission to improve your medal.","CAMPAIGN CLEAR","★");$("#nextButton").hidden=true;return;}selectMission(next);}
+input.addEventListener("input",processInput);input.addEventListener("paste",function(e){if(running)e.preventDefault();});input.addEventListener("drop",function(e){if(running)e.preventDefault();});input.addEventListener("keydown",function(e){if(!running)return;var key=e.key===" "?" ":e.key.toLowerCase(),el=Array.from(document.querySelectorAll(".key")).find(function(k){return k.dataset.key===key;});if(el)el.classList.add("pressed");});input.addEventListener("keyup",function(){document.querySelectorAll(".key.pressed").forEach(function(k){k.classList.remove("pressed");});});
+$("#startButton").addEventListener("click",startRun);$("#retryButton").addEventListener("click",retry);$("#nextButton").addEventListener("click",nextMission);$("#attackButton").addEventListener("click",startAttack);
+$("#resetProgress").addEventListener("click",function(){if(!window.confirm("Delete all locally saved KEYRUN progress, XP, medals, and records?"))return;state={cleared:[],medals:{},xp:0,bestScore:0,bestWpm:0};save();updateProfile();renderMissions();selectMission(0);});
+load();renderKeyboard();updateProfile();renderMissions();selectMission(0);window.addEventListener("pagehide",stopClock);
 })();
