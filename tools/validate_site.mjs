@@ -177,7 +177,7 @@ for(const ref of [
   'href="/projects/code-to-eps/"','href="/projects/code-to-svg/"','href="/projects/webedyts/"',
   'href="/projects/qalyvyron/"','href="/projects/keyrun/"','href="/projects/typing-lesson/"',
   'href="/projects/trss-sample-recorder/"','href="/projects/trss/"'
-]) if(ref!=='href="/projects/keyrun/"') must(site.includes(ref),'homepage exposes '+ref);
+]) must(site.includes(ref),'homepage exposes '+ref);
 must(!site.includes('href="/projects/trilyva/renderer/">Open workspace'),'homepage does not send the TRILYVA card straight to the renderer');
 const visibleHomeMarkup=schemaStart>=0&&schemaEnd>schemaStart?site.slice(0,schemaStart)+site.slice(schemaEnd+'</script>'.length):site;
 must(!visibleHomeMarkup.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!visibleHomeMarkup.includes('Source files ')&&!visibleHomeMarkup.includes('SVG source ')&&!visibleHomeMarkup.includes('EPS source '),'homepage omits direct source links in visible markup');
