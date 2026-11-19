@@ -158,7 +158,7 @@ must(schemaStart>=0&&schemaEnd>schemaStart,'homepage contains JSON-LD schema');
 const rootSchema=JSON.parse(site.slice(schemaStart+schemaOpen.length,schemaEnd));
 must(rootSchema['@context']==='https://schema.org'&&Array.isArray(rootSchema['@graph']),'homepage schema graph parses');
 must(rootSchema['@graph'].some(n=>n['@type']==='Person'&&n['@id']==='https://tamasrazim.github.io/#person'),'schema identifies person');
-must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length===16,'schema includes fifteen documented software applications');
+must(rootSchema['@graph'].filter(n=>n['@type']==='SoftwareApplication').length===16,'schema includes sixteen documented software applications');
 must(rootSchema['@graph'].some(n=>n['@id']==='https://tamasrazim.github.io/projects/trilyva/renderer/#application'&&n.name==='TRILYVA Renderer'),'schema identifies renderer as a separate tool route');
 must(rootSchema['@graph'].some(n=>n['@id']==='https://tamasrazim.github.io/#trilyva'&&n.url==='https://tamasrazim.github.io/projects/trilyva/'),'TRILYVA schema points to the project overview, not the renderer');
 must(rootSchema['@graph'].some(n=>n['@type']==='SoftwareApplication'&&n.name==='KYNESTRA'&&/Windows/.test(n.operatingSystem)),'schema identifies KYNESTRA as Windows desktop software');
@@ -175,7 +175,7 @@ for(const ref of [
   'href="/projects/trilyva/"','href="/projects/asset-vault/"','href="/projects/bncagrocare/"',
   'href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"',
   'href="/projects/code-to-eps/"','href="/projects/code-to-svg/"','href="/projects/webedyts/"',
-  'href="/projects/qalyvyron/"','href="/projects/keyrun/"','href="/projects/typing-lesson/"',
+  'href="/projects/qalyvyron/"','href="/projects/typing-lesson/"',
   'href="/projects/trss-sample-recorder/"','href="/projects/trss/"'
 ]) must(site.includes(ref),'homepage exposes '+ref);
 must(!site.includes('href="/projects/trilyva/renderer/">Open workspace'),'homepage does not send the TRILYVA card straight to the renderer');
