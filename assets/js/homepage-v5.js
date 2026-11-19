@@ -192,10 +192,11 @@ document.querySelectorAll("[data-v5-card]").forEach(function(el){
 });
 
 function tick(now){
+  if(document.hidden){last=0;requestAnimationFrame(tick);return;}
+  if(reduce){last=0;render(0);return;}
+  if(last&&now-last<1000/60){requestAnimationFrame(tick);return;}
   var dt=last?Math.min(.035,(now-last)/1000):1/60;
   last=now;
-  if(document.hidden){requestAnimationFrame(tick);return;}
-  if(reduce){last=0;render(0);return;}
   time+=dt;
   targetYaw=.25+(pointer.active?pointer.x*.62:0)+dragYaw+Math.sin(time*.22)*.045;
   targetPitch=-.32+(pointer.active?pointer.y*.27:0)+dragPitch;
@@ -222,7 +223,7 @@ document.addEventListener("visibilitychange",function(){last=0;if(!document.hidd
 if(reduceQuery&&typeof reduceQuery.addEventListener==="function"){
   reduceQuery.addEventListener("change",function(e){
     reduce=!!e.matches;
-    if(reduce){render(0);cards.forEach(function(c){c.el.style.transform="none";});}
+    if(reduce){revealElements.forEach(function(el){el.classList.add("is-v5-visible");});render(0);cards.forEach(function(c){c.el.style.transform="none";});}
     else{last=0;requestAnimationFrame(tick);}
   });
 }
