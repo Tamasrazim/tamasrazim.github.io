@@ -148,7 +148,7 @@ const site=read('index.html');
 const siteJs=read('assets/js/homepage-v6.js');
 const siteCss=read('assets/css/homepage-v6.css');
 must(site.includes('<body class="home-v6">'),'homepage uses the current v6 spatial visual system');
-must(site.includes('homepage-v6.css?v=20261119-spatial1')&&site.includes('homepage-v6.js?v=20261119-spatial1'),'homepage loads the v6 spatial design and interaction engine');
+must(site.includes('homepage-v6.css?v=20261119-spatial2')&&site.includes('homepage-v6.js?v=20261119-spatial2'),'homepage loads the v6 spatial design and interaction engine');
 must(!site.includes('homepage-v5.css')&&!site.includes('homepage-v5.js')&&!site.includes('homepage-v4.css')&&!site.includes('kinetic-story.css')&&!site.includes('homepage-v4.js'),'homepage does not load retired design systems');
 must(site.includes('id="heroCanvas"')&&site.includes('id="projectCanvas"')&&site.includes('id="projectSpotlight"'),'homepage contains both interactive spatial scenes and the project spotlight');
 must(site.includes('id="secretReveal"')&&site.includes('id="secretNode"'),'homepage retains the hidden footer story');
