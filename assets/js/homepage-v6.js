@@ -50,11 +50,11 @@ function drawOrbital(ctx,w,h,time,yaw,pitch,preset){
   ctx.fillStyle=backdrop;ctx.fillRect(0,0,w,h);
   var ringCount=3+(preset%3),rings=[];
   for(var r=0;r<ringCount;r++){
-    var rx=.42+r*.71+Math.sin(time*.17+r)*.055,ry=.26+r*.49+Math.cos(time*.13+r)*.07;
-    var rz=(r-ringCount*.5)*.36+time*(.025+(r%2)*.009),rad=(1.02+r*.13+((preset%4)*.025))*radiusScale,points=[];
+    var rx=.42+r*.71+Math.sin(time*.52+r)*.13,ry=.26+r*.49+Math.cos(time*.37+r)*.11;
+    var rz=(r-ringCount*.5)*.36+time*(.18+(r%2)*.075),rad=(1.02+r*.13+((preset%4)*.025))*radiusScale,points=[];
     for(var i=0;i<=180;i++){
       var a=(i/180)*Math.PI*2,local={x:rad*Math.cos(a),y:rad*Math.sin(a),z:.11*Math.sin(a*2+r)};
-      points.push(projectPoint(rotatePoint(local,rx+time*.05*(r+1),ry+time*.035*(r+1),rz),w,h,yaw,pitch,1));
+      points.push(projectPoint(rotatePoint(local,rx+time*.32*(r+1),ry+time*.22*(r+1),rz),w,h,yaw,pitch,1));
     }
     rings.push({points:points,index:r});
   }
@@ -63,21 +63,21 @@ function drawOrbital(ctx,w,h,time,yaw,pitch,preset){
   for(var ri=0;ri<rings.length;ri++){
     var ring=rings[ri],pts=ring.points;
     ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);for(var p=1;p<pts.length;p++)ctx.lineTo(pts[p].x,pts[p].y);
-    ctx.strokeStyle="rgba(242,242,236,"+(.2+ri*.035)+")";ctx.lineWidth=ri===Math.floor(rings.length/2)?1.35:.75;ctx.stroke();
-    var arcStart=Math.floor(((time*.055*(ring.index+1))%1)*180);
+    ctx.strokeStyle="rgba(242,242,236,"+(.34+ri*.055)+")";ctx.lineWidth=ri===Math.floor(rings.length/2)?1.35:.75;ctx.stroke();
+    var arcStart=Math.floor(((time*.24*(ring.index+1))%1)*180);
     ctx.beginPath();for(var q=0;q<=27;q++){var point=pts[(arcStart+q)%180];if(q===0)ctx.moveTo(point.x,point.y);else ctx.lineTo(point.x,point.y);}
-    ctx.strokeStyle="rgba(255,255,250,.68)";ctx.lineWidth=1.35;ctx.stroke();
+    ctx.strokeStyle="rgba(255,255,250,.92)";ctx.lineWidth=1.8;ctx.stroke();
     var satellite=pts[(arcStart+13)%180],glow=ctx.createRadialGradient(satellite.x,satellite.y,0,satellite.x,satellite.y,12*radiusScale);
     glow.addColorStop(0,"rgba(255,255,255,.8)");glow.addColorStop(1,"rgba(255,255,255,0)");
     ctx.fillStyle=glow;ctx.beginPath();ctx.arc(satellite.x,satellite.y,12*radiusScale,0,Math.PI*2);ctx.fill();
     ctx.fillStyle="#f4f3ed";ctx.beginPath();ctx.arc(satellite.x,satellite.y,2.1*radiusScale,0,Math.PI*2);ctx.fill();
   }
-  var core=ctx.createRadialGradient(cx-w*.025,cy-h*.035,1,cx,cy,Math.min(w,h)*.12);
+  var pulse=.86+.14*Math.sin(time*2.4),core=ctx.createRadialGradient(cx-w*.025,cy-h*.035,1,cx,cy,Math.min(w,h)*.14*pulse);
   core.addColorStop(0,"rgba(255,255,255,.48)");core.addColorStop(.2,"rgba(185,185,180,.17)");core.addColorStop(1,"rgba(255,255,255,0)");
-  ctx.fillStyle=core;ctx.beginPath();ctx.arc(cx,cy,Math.min(w,h)*.12,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.arc(cx,cy,Math.min(w,h)*.12,0,Math.PI*2);ctx.strokeStyle="rgba(255,255,255,.22)";ctx.lineWidth=.7;ctx.stroke();
+  ctx.fillStyle=core;ctx.beginPath();ctx.arc(cx,cy,Math.min(w,h)*.14*pulse,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(cx,cy,Math.min(w,h)*.14*pulse,0,Math.PI*2);ctx.strokeStyle="rgba(255,255,255,.22)";ctx.lineWidth=.7;ctx.stroke();
   for(var spoke=0;spoke<8;spoke++){
-    var angle=spoke*Math.PI/4+time*.008,x1=cx+Math.cos(angle)*Math.min(w,h)*.19,y1=cy+Math.sin(angle)*Math.min(w,h)*.19;
+    var angle=spoke*Math.PI/4+time*.24,x1=cx+Math.cos(angle)*Math.min(w,h)*.19,y1=cy+Math.sin(angle)*Math.min(w,h)*.19;
     var x2=cx+Math.cos(angle)*Math.min(w,h)*.37,y2=cy+Math.sin(angle)*Math.min(w,h)*.37;
     ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle="rgba(255,255,255,.07)";ctx.lineWidth=.6;ctx.stroke();
   }
