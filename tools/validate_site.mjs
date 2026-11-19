@@ -145,12 +145,12 @@ for(const file of [
 }
 
 const site=read('index.html');
-const siteJs=read('assets/js/homepage-v5.js');
-const siteCss=read('assets/css/homepage-v5.css');
-must(site.includes('<body class="home-v5">'),'homepage uses the current v5 visual system');
-must(site.includes('homepage-v5.css?v=20261119-editorial1')&&site.includes('homepage-v5.js?v=20261119-editorial1'),'homepage loads the v5 design and motion engine');
-must(!site.includes('homepage-v4.css')&&!site.includes('kinetic-story.css')&&!site.includes('homepage-v4.js'),'homepage does not load the retired orbital design system');
-must(site.includes('id="mobiusCanvas"')&&site.includes('id="heroObject"'),'homepage contains the interactive Möbius sculpture');
+const siteJs=read('assets/js/homepage-v6.js');
+const siteCss=read('assets/css/homepage-v6.css');
+must(site.includes('<body class="home-v6">'),'homepage uses the current v6 spatial visual system');
+must(site.includes('homepage-v6.css?v=20261119-spatial1')&&site.includes('homepage-v6.js?v=20261119-spatial1'),'homepage loads the v6 spatial design and interaction engine');
+must(!site.includes('homepage-v5.css')&&!site.includes('homepage-v5.js')&&!site.includes('homepage-v4.css')&&!site.includes('kinetic-story.css')&&!site.includes('homepage-v4.js'),'homepage does not load retired design systems');
+must(site.includes('id="heroCanvas"')&&site.includes('id="projectCanvas"')&&site.includes('id="projectSpotlight"'),'homepage contains both interactive spatial scenes and the project spotlight');
 must(site.includes('id="secretReveal"')&&site.includes('id="secretNode"'),'homepage retains the hidden footer story');
 must(site.includes('id="work"')&&site.includes('id="about"')&&site.includes('id="elsewhere"')&&site.includes('id="contact"'),'homepage retains all primary section anchors');
 const schemaOpen='<script type="application/ld+json">',schemaStart=site.indexOf(schemaOpen),schemaEnd=site.indexOf('</script>',schemaStart);
@@ -169,7 +169,7 @@ const knownSchemaIds=new Set(rootSchema['@graph'].map(n=>n['@id']));
 const rootPerson=rootSchema['@graph'].find(n=>n['@type']==='Person');
 must(rootPerson.subjectOf.every(ref=>knownSchemaIds.has(ref['@id'])),'person schema references defined project entities');
 must(!site.includes('BOGURA')&&!site.includes('BANGLADESH'),'homepage omits unwanted location text');
-must((site.match(/class="v5-project"/g)||[]).length===17,'homepage presents seventeen curated project cards');
+must((site.match(/class="v6-project-entry"/g)||[]).length===17,'homepage presents seventeen curated project index entries');
 must(!site.includes('PRO_TOOL_MANIFEST'),'homepage omits the generated micro-tool catalogue');
 for(const ref of [
   'href="/projects/trilyva/"','href="/projects/asset-vault/"','href="/projects/bncagrocare/"',
@@ -187,14 +187,13 @@ must(!site.includes('work on TUNRUN, a C++ game')&&!site.includes('TUNRUN, a C++
 must(!site.includes('tamasrazim.dev'),'homepage does not claim a .dev domain');
 must(!site.includes('ProfessionalService')&&!site.includes('13650456762875223511'),'homepage schema avoids unsupported business-profile claims');
 must(siteCss.includes('prefers-reduced-motion:reduce'),'homepage stylesheet respects reduced-motion preferences');
-must(siteJs.includes('function surface(u,v)')&&siteJs.includes('Math.cos(u*.5)')&&siteJs.includes('Math.sin(u*.5)'),'homepage defines the continuous Möbius surface mathematically');
-must(siteJs.includes('faces.sort(function(a,b){return b.z-a.z;});'),'homepage draws the 3D surface from far to near');
-must(siteJs.includes('var stiffness=24,damping=9.2;'),'homepage camera response uses a damped spring');
-must(siteJs.includes('setPointerCapture')&&siteJs.includes('targetYaw=.25+(pointer.active?pointer.x*.62:0)'),'homepage sculpture supports pointer-driven camera and drag interaction');
-must(siteJs.includes('reduceQuery.addEventListener("change"')&&siteJs.includes('if(reduce){last=0;render(0);return;}'),'homepage motion respects runtime reduced-motion changes');
+must(siteJs.includes('function drawOrbital(')&&siteJs.includes('function rotatePoint(')&&siteJs.includes('function projectPoint('),'homepage constructs a perspective-projected three-dimensional orbital sculpture');
+must(siteJs.includes('function criticalSpring(state,target,omega,dt)')&&siteJs.includes('Math.exp(-omega*dt)'),'homepage camera response uses an analytically integrated critically damped spring');
+must(siteJs.includes('setPointerCapture')&&siteJs.includes('pointer.dragYaw')&&siteJs.includes('pointer.dragPitch'),'homepage sculpture supports pointer-driven camera and drag interaction');
+must(siteJs.includes('reduceQuery.addEventListener("change"')&&siteJs.includes('setReducedMotion(true)'),'homepage motion respects runtime reduced-motion changes');
 must(siteJs.includes('requestAnimationFrame(tick)')&&siteJs.includes('document.hidden'),'homepage animation is frame-driven and checks page visibility');
 must(siteJs.includes('menu.getAttribute("aria-expanded")')&&siteJs.includes('e.key==="Escape"')&&siteJs.includes('menu.focus()'),'homepage navigation supports Escape and focus restoration');
-must(siteCss.includes('@media(max-width:820px)')&&siteCss.includes('@media(max-width:520px)'),'homepage layout has tablet and phone breakpoints');
+must(siteCss.includes('@media(max-width:900px)')&&siteCss.includes('@media(max-width:560px)'),'homepage layout has tablet and phone breakpoints');
 for(const route of ['href="#work"','href="#about"','href="/approach/"','href="#elsewhere"','href="/licences/"']) must(site.includes(route),'main header links to '+route);
 for(const page of ['work','about','approach']) {
   const pageHtml=read(page+'/index.html');
@@ -308,7 +307,7 @@ must(!site.includes('data-cinematic-intro="home"')&&!site.includes('project-cine
 const hiddenOriginJs=read('assets/js/hidden-origin.js');
 must(hiddenOriginJs.includes('function alignOriginPaths()')&&hiddenOriginJs.includes("pathFrom(leftName, ['hoFlowA', 'hoFlowCoreA']")&&hiddenOriginJs.includes("pathFrom(rightName, ['hoFlowB', 'hoFlowCoreB']"),'hidden-origin flow paths align dynamically to the Razim and Tamanna text');
 must(site.includes('id="hoFlowA"')&&site.includes('id="hoFlowB"')&&site.includes('id="hoFlowCoreA"')&&site.includes('id="hoFlowCoreB"'),'hidden-origin SVG flow paths expose alignment targets');
-must(site.includes('class="v5-hero"')&&site.includes('class="v5-work"')&&site.includes('class="v5-about"'),'homepage uses the new editorial section system');
+must(site.includes('class="v6-hero"')&&site.includes('class="v6-work"')&&site.includes('class="v6-about"'),'homepage uses the new spatial portfolio section system');
 must(site.includes('data-project-art="keyrun"')&&site.includes('/projects/typing-lesson/'),'homepage keeps KEYRUN in the selected project collection');
 must(site.includes('id="secretNode"')&&site.includes('id="secretReveal"'),'homepage still exposes the hidden-origin trigger and dialog');
 must(!site.includes('class="id-card tilt reveal"')&&!site.includes('id="idAlias"'),'homepage has retired the previous photo ID-card hero');
