@@ -1,0 +1,40 @@
+name: TRILYVA WebGPU renderer contract
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "projects/trilyva/renderer/index.html"
+      - "projects/trilyva/renderer/sw.js"
+      - "projects/trilyva/renderer/webgpu-renderer.js"
+      - "projects/trilyva/renderer/examples/singularity-protocol-webgpu.js"
+      - "projects/trilyva/renderer/tests/webgpu-frame-backend.test.mjs"
+      - ".github/workflows/trilyva-webgpu-renderer.yml"
+  push:
+    branches: [main]
+    paths:
+      - "projects/trilyva/renderer/index.html"
+      - "projects/trilyva/renderer/sw.js"
+      - "projects/trilyva/renderer/webgpu-renderer.js"
+      - "projects/trilyva/renderer/examples/singularity-protocol-webgpu.js"
+      - "projects/trilyva/renderer/tests/webgpu-frame-backend.test.mjs"
+      - ".github/workflows/trilyva-webgpu-renderer.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    name: Runtime, compositor and GPU submission contract
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate TRILYVA WebGPU backend
+        run: node projects/trilyva/renderer/tests/webgpu-frame-backend.test.mjs
