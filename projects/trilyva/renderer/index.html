@@ -8407,8 +8407,24 @@ function sampleCards(){
       if(!response.ok)throw new Error('Example source request failed: '+response.status);
       const code=await response.text();
       S.name='singularity-protocol-webgpu';$('#projName').value=S.name;
-      installCode(code);markDirty(true);
-      $('#stMsg').textContent='Singularity Protocol loaded. Compile to initialise the WebGPU shader.';
+      installCode(code);
+      applyComp({
+        width:3840,
+        height:2160,
+        fps:60,
+        duration:8,
+        loop:true,
+        loopDuration:8
+      });
+      S.exportFormat='mp4';
+      segMark($('#segFmt'),'mp4');
+      S.quality='max';
+      $('#oQuality').value='max';
+      S.customBitrateMbps=200;
+      $('#oBitrate').value='200';
+      refreshMedia();
+      markDirty(true);
+      $('#stMsg').textContent='Singularity Protocol loaded · 3840×2160 · 60 FPS · 8 s · 200 Mbps. Compile to initialise WebGPU; render only after the preview is ready.';
     }catch(error){showError('EXAMPLE LOAD FAILED',String(error&&error.message||error));}
   });
   box.appendChild(gpuCard);
