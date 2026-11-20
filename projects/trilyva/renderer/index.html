@@ -7779,7 +7779,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 'use strict';
 
 var SELF_SOURCE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-var APP_VERSION = '1.2.9';
+var APP_VERSION = '1.2.10';
 var SOFTWARE = 'TRILYVA — Tamasrazim';
 
 var libraryModulePromise = null;
@@ -12926,7 +12926,7 @@ function refreshDiag() {
   yesNo(dl, 'Secure context', c.secure);
   yesNo(dl, 'WebGL2', c.webgl2, 'SUPPORTED — usable from your code via a second canvas', 'NOT AVAILABLE');
   yesNo(dl, 'WebGPU', c.webgpu);
-  if (S.gpuBackend) kvRow(dl, 'Frame backend', S.gpuBackend.active ? 'WebGPU · ' + (S.gpuBackend.mode ? S.gpuBackend.mode + ' pipeline · ' : '') + (S.gpuBackend.adapter || 'adapter ready') : (S.gpuBackend.backend || 'Canvas 2D fallback') + ' · ' + (S.gpuBackend.reason || 'shader not active'), S.gpuBackend.active ? 'ok' : 'warn');
+  if (S.gpuBackend) kvRow(dl, 'Frame backend', S.gpuBackend.active ? 'WebGPU · ' + (S.gpuBackend.mode ? S.gpuBackend.mode + ' pipeline · ' : '') + (S.gpuBackend.adapter || 'adapter ready') + (S.gpuBackend.frameSource ? ' · ' + S.gpuBackend.frameSource : '') : (S.gpuBackend.backend || 'Canvas 2D fallback') + ' · ' + (S.gpuBackend.reason || 'shader not active'), S.gpuBackend.active ? 'ok' : 'warn');
   else kvRow(dl, 'Frame backend', 'Not initialised · compile a WGSL animation to test', 'warn');
   kvRow(dl, 'Logical cores', c.cores ? String(c.cores) : 'not reported');
   kvRow(dl, 'Device memory', c.memoryGB ? c.memoryGB + ' GB (browser estimate)' : 'not reported');
