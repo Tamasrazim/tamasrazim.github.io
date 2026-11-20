@@ -3364,21 +3364,34 @@ function runFrames(cfg) {
     var t0 = now();
     var prepared = cfg.prepareFrame ? cfg.prepareFrame(i) : null;
     return Promise.resolve(prepared).then(function (framePayload) {
-      var videoFrames = framePayload && framePayload.videoFrames ? framePayload.videoFrames : (framePayload && framePayload.gpuBitmap ? null : framePayload);
+      var directGpuCanvas = framePayload && framePayload.gpuCanvas ? framePayload.gpuCanvas : null;
+      var renderCanvas = directGpuCanvas || out.canvas;
+      var videoFrames = framePayload && framePayload.videoFrames
+        ? framePayload.videoFrames
+        : (framePayload && (framePayload.gpuBitmap || framePayload.gpuCanvas) ? null : framePayload);
       var gpuBitmap = framePayload && framePayload.gpuBitmap ? framePayload.gpuBitmap : null;
-      var r;
-      try { r = rt.renderInto(out.ctx, i, { isExport: true, videoFrames: videoFrames || null, gpuBitmap: gpuBitmap }); }
-      finally {
-        if (framePayload && typeof framePayload.release === 'function') framePayload.release();
-        else if (videoFrames) Object.keys(videoFrames).forEach(function (key) {
-          var bitmap = videoFrames[key];
-          if (bitmap && bitmap.close) bitmap.close();
-        });
+      var r = { ok: true };
+
+      if (!directGpuCanvas) {
+        try {
+          r = rt.renderInto(out.ctx, i, {
+            isExport: true,
+            videoFrames: videoFrames || null,
+            gpuBitmap: gpuBitmap
+          });
+        } finally {
+          if (framePayload && typeof framePayload.release === 'function') framePayload.release();
+          else if (videoFrames) Object.keys(videoFrames).forEach(function (key) {
+            var bitmap = videoFrames[key];
+            if (bitmap && bitmap.close) bitmap.close();
+          });
+        }
       }
+
       if (!r.ok) return { ok: false, error: r.error, atFrame: i };
-      if (cfg.checksums) checksums.push(checksumOf(env, out.canvas, comp, thumbHolder));
+      if (cfg.checksums) checksums.push(checksumOf(env, renderCanvas, comp, thumbHolder));
       durations.push(now() - t0);
-      return Promise.resolve(cfg.sink(i, out.canvas)).then(function (sr) {
+      return Promise.resolve(cfg.sink(i, renderCanvas)).then(function (sr) {
         if (sr && sr.error) return { ok: false, error: sr.error, atFrame: i };
         var done = i - cfg.from + 1, elapsed = now() - started;
         if (elapsed - lastPost > 120 || i === cfg.to - 1) {
@@ -3401,7 +3414,6 @@ function runFrames(cfg) {
     return res;
   });
 }
-
 function analyseDurations(d) {
   if (!d.length) return { avg: 0, min: 0, max: 0, total: 0 };
   var t = 0, mn = Infinity, mx = 0;
@@ -4207,9 +4219,47 @@ self.onmessage = function (ev) {
         } : null;
         var existing = m.existing || null;
         var exportComp = MotionCore.composition(m.job.composition);
+        var hasVisibleExportLayers = Object.keys(layers).some(function (key) {
+          return layers[key] && layers[key].visible !== false;
+        });
+        var hasVectorExportState = Object.keys(vectorEdits).length > 0 || Object.keys(vectorBounds).length > 0;
+        var directGpuCanvasEnabled = !!(
+          m.job && (m.job.format === 'mp4' || m.job.format === 'webm') &&
+          typeof VideoFrame !== 'undefined' && rt.gpu && gpuRenderer && !gpuUnavailableReason &&
+          !hasVisibleExportLayers && !hasVectorExportState
+        );
+        var directGpuCanvasProbe = null;
         MotionExport.run({
           env: ENV, job: m.job, from: m.from || 0, assets: assets, layers: Object.keys(layers).map(function (key) { return layers[key]; }), vectorEdits: vectorEdits, vectorBounds: vectorBounds, existing: existing, writeFile: writeFile,
           prepareFrame: function (frame) {
+            if (directGpuCanvasEnabled) {
+              return gpuRenderer.renderCanvas(rt.gpu, gpuFrameInput(frame, exportComp), exportComp.width, exportComp.height).then(function (gpuCanvas) {
+                if (!gpuCanvas) return null;
+                if (directGpuCanvasProbe === null) {
+                  try {
+                    var probeFrame = new VideoFrame(gpuCanvas, { timestamp: 0, duration: 1 });
+                    probeFrame.close();
+                    directGpuCanvasProbe = true;
+                  } catch (_) {
+                    directGpuCanvasProbe = false;
+                  }
+                }
+                if (directGpuCanvasProbe) {
+                  gpuBackendStatus = Object.assign({}, gpuRenderer.status(), {
+                    frameSource: 'WebGPU OffscreenCanvas → VideoFrame'
+                  });
+                  return { gpuCanvas: gpuCanvas };
+                }
+                return renderGPUFrame(frame, exportComp, exportComp.width, exportComp.height).then(function (bitmap) {
+                  return bitmap ? { gpuBitmap: bitmap, release: function () { if (bitmap.close) bitmap.close(); } } : null;
+                });
+              }).catch(function () {
+                directGpuCanvasEnabled = false;
+                return renderGPUFrame(frame, exportComp, exportComp.width, exportComp.height).then(function (bitmap) {
+                  return bitmap ? { gpuBitmap: bitmap, release: function () { if (bitmap.close) bitmap.close(); } } : null;
+                });
+              });
+            }
             return renderGPUFrame(frame, exportComp, exportComp.width, exportComp.height).then(function (bitmap) {
               return bitmap ? { gpuBitmap: bitmap, release: function () { if (bitmap.close) bitmap.close(); } } : null;
             });
