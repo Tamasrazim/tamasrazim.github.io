@@ -2388,6 +2388,41 @@ function createRuntime() {
   /* Draw one frame. rasterScale lets the preview rasterise smaller while the
      animation still receives composition-space dimensions, so preview and
      export are the same picture at different sample densities. */
+  rt.captureCanvas2D = function (frame, opts, recorder) {
+    opts = opts || {};
+    var c = rt.comp, m = rt.motion;
+    if (!rt.fn || !recorder || !recorder.context) {
+      return { ok: false, error: { name: 'ContractError', message: 'Canvas 2D GPU capture requires a compiled renderFrame() and a recorder.', stage: 'gpu-capture' } };
+    }
+    var t = frameToTime(c, frame);
+    m.time = t; m.frame = frame; m.fps = c.fps; m.width = c.width; m.height = c.height;
+    m.duration = c.duration; m.frameCount = c.frameCount; m.progress = frame / c.frameCount;
+    m.sourceTime = frameToSourceTime(c, frame);
+    m.loop = !!c.loop; m.loopDuration = c.loopDuration;
+    m.loopProgress = c.loop ? wrap(t / c.loopDuration, 1) : clamp(t / c.duration, 0, 1);
+    m.seed = c.seed | 0; m.aspect = c.aspect; m.scale = c.height / 1080;
+    m.isExport = !!opts.isExport; m.quality = opts.isExport ? 'export' : 'preview';
+    rt.rng = mulberry32(seedForFrame(frame));
+    var started = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    try {
+      rt.fn(t, frame, c.fps, recorder.context, c.width, c.height);
+    } catch (error) {
+      var afterError = recorder.finish();
+      if (!afterError.supported) {
+        return { ok: true, supported: false, reason: afterError.reason, ms: (typeof performance !== 'undefined' ? performance.now() : Date.now()) - started };
+      }
+      var detail = describeError(error, opts.isExport ? 'render' : 'preview');
+      detail.frame = frame; detail.time = t;
+      return { ok: false, error: detail };
+    }
+    var result = recorder.finish();
+    return {
+      ok: true, supported: result.supported, reason: result.reason,
+      commands: result.commands, count: result.count,
+      ms: (typeof performance !== 'undefined' ? performance.now() : Date.now()) - started
+    };
+  };
+
   rt.renderInto = function (ctx, frame, opts) {
     opts = opts || {};
     var c = rt.comp, s = opts.rasterScale || 1, m = rt.motion;
@@ -3362,7 +3397,7 @@ function runFrames(cfg) {
     if (i >= cfg.to) return Promise.resolve({ ok: true });
     if (cfg.isCancelled()) return Promise.resolve({ ok: false, cancelled: true });
     var t0 = now();
-    var prepared = cfg.prepareFrame ? cfg.prepareFrame(i) : null;
+    var prepared = cfg.prepareFrame ? cfg.prepareFrame(i, rt, comp) : null;
     return Promise.resolve(prepared).then(function (framePayload) {
       var directGpuCanvas = framePayload && framePayload.gpuCanvas ? framePayload.gpuCanvas : null;
       var renderCanvas = directGpuCanvas || out.canvas;
@@ -3999,6 +4034,43 @@ function renderGPUFrame(frame, comp, w, h) {
     return null;
   });
 }
+var gpuCanvas2DAutoUnavailable = null;
+function renderAutoCanvas2DFrame(runtime, frame, comp, width, height, rasterScale, isExport) {
+  if (!runtime || runtime.gpu || !gpuRenderer || gpuCanvas2DAutoUnavailable ||
+      !self.navigator || !self.navigator.gpu ||
+      typeof gpuRenderer.createCanvas2DRecorder !== 'function' ||
+      typeof gpuRenderer.renderCanvas2D !== 'function' ||
+      typeof runtime.captureCanvas2D !== 'function') return Promise.resolve(null);
+  if (runtime.vectorEdits && Object.keys(runtime.vectorEdits).length) return Promise.resolve(null);
+  var recorder = gpuRenderer.createCanvas2DRecorder(comp.width, comp.height);
+  var captured = runtime.captureCanvas2D(frame, { isExport: !!isExport }, recorder);
+  if (!captured.ok) return Promise.resolve(null);
+  if (!captured.supported) {
+    gpuBackendStatus = {
+      active: false, backend: 'Canvas 2D compatibility fallback',
+      mode: 'canvas2d-fallback',
+      reason: captured.reason || 'This frame used a Canvas 2D API outside the GPU compatibility subset.'
+    };
+    return Promise.resolve(null);
+  }
+  return gpuRenderer.renderCanvas2D(captured.commands, captured.count, width, height, rasterScale).then(function (bitmap) {
+    gpuBackendStatus = Object.assign({}, gpuRenderer.status(), {
+      active: true, backend: 'WebGPU Canvas 2D auto', mode: 'canvas2d-auto',
+      commands: captured.count,
+      frameSource: 'Canvas 2D calls → GPU primitive batches',
+      captureMs: captured.ms
+    });
+    return { bitmap: bitmap, ms: captured.ms, count: captured.count, transport: 'webgpu-canvas2d-primitives' };
+  }).catch(function (error) {
+    gpuCanvas2DAutoUnavailable = String(error && error.message || error);
+    gpuBackendStatus = {
+      active: false, backend: 'Canvas 2D compatibility fallback',
+      mode: 'canvas2d-fallback', reason: gpuCanvas2DAutoUnavailable
+    };
+    return null;
+  });
+}
+
 function canUseDirectGPUPreview(runtime) {
   if (!runtime || !runtime.gpu) return false;
   var composition = runtime.comp || {};
@@ -4182,10 +4254,10 @@ self.onmessage = function (ev) {
         var w = m.rasterW, h = m.rasterH;
         var directGPUPreview = canUseDirectGPUPreview(rt);
         var previewStarted = performance.now();
-        renderGPUFrame(m.frame, rt.comp, w, h).then(function (gpuBitmap) {
-          // GPU-only compositions can hand the renderer's ImageBitmap straight
-          // to the UI. This removes the intermediate 2D canvas draw + second
-          // ImageBitmap transfer from the interactive preview path.
+        var frameTask = rt.gpu
+          ? renderGPUFrame(m.frame, rt.comp, w, h)
+          : renderAutoCanvas2DFrame(rt, m.frame, rt.comp, w, h, m.scale, false).then(function (result) { return result && result.bitmap || null; });
+        frameTask.then(function (gpuBitmap) {
           if (directGPUPreview && gpuBitmap) {
             gpuBackendStatus = Object.assign({}, gpuRenderer.status(), {
               frameSource: 'WebGPU ImageBitmap → main-thread preview'
@@ -4203,7 +4275,6 @@ self.onmessage = function (ev) {
             }
             return;
           }
-
           if (!previewCanvas || previewCanvas.width !== w || previewCanvas.height !== h) {
             previewCanvas = new OffscreenCanvas(w, h);
             previewCtx = previewCanvas.getContext('2d', { alpha: true });
@@ -4226,7 +4297,10 @@ self.onmessage = function (ev) {
 
       case 'renderOne': {
         var o = mk(m.width, m.height);
-        renderGPUFrame(m.frame, rt.comp, m.width, m.height).then(function (gpuBitmap) {
+        var frameTask = rt.gpu
+          ? renderGPUFrame(m.frame, rt.comp, m.width, m.height)
+          : renderAutoCanvas2DFrame(rt, m.frame, rt.comp, m.width, m.height, m.width / rt.comp.width, true).then(function (result) { return result && result.bitmap || null; });
+        frameTask.then(function (gpuBitmap) {
           var rr;
           try { rr = rt.renderInto(o.ctx, m.frame, { isExport: true, rasterScale: m.width / rt.comp.width, gpuBitmap: gpuBitmap || null }); }
           finally { if (gpuBitmap && gpuBitmap.close) gpuBitmap.close(); }
@@ -4279,7 +4353,18 @@ self.onmessage = function (ev) {
         var directGpuCanvasProbe = null;
         MotionExport.run({
           env: ENV, job: m.job, from: m.from || 0, assets: assets, layers: Object.keys(layers).map(function (key) { return layers[key]; }), vectorEdits: vectorEdits, vectorBounds: vectorBounds, existing: existing, writeFile: writeFile,
-          prepareFrame: function (frame) {
+          prepareFrame: function (frame, exportRuntime, frameComposition) {
+            if (!directGpuCanvasEnabled && exportRuntime && !exportRuntime.gpu) {
+              return renderAutoCanvas2DFrame(
+                exportRuntime, frame, frameComposition,
+                frameComposition.width, frameComposition.height, 1, true
+              ).then(function (autoFrame) {
+                return autoFrame ? {
+                  gpuBitmap: autoFrame.bitmap,
+                  release: function () { if (autoFrame.bitmap && autoFrame.bitmap.close) autoFrame.bitmap.close(); }
+                } : null;
+              });
+            }
             if (directGpuCanvasEnabled) {
               return gpuRenderer.renderCanvas(rt.gpu, gpuFrameInput(frame, exportComp), exportComp.width, exportComp.height).then(function (gpuCanvas) {
                 if (!gpuCanvas) return null;
