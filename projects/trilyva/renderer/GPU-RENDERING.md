@@ -66,6 +66,7 @@ A GPU project still needs the normal `window.renderFrame` function. It is the fa
 window.renderFrameGPU = {
   mode: 'compute',
   label: 'My compute animation',
+  opaque: true, // Only when every output pixel has alpha 1.
   wgsl: String.raw`
     // WGSL module with FrameUniforms, bindings 0 and 1,
     // and @compute @workgroup_size(8, 8, 1) fn computeMain(...)
