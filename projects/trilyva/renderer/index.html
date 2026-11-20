@@ -7729,7 +7729,7 @@ function renderFrame(time, frame, fps, ctx, width, height) {
 'use strict';
 
 var SELF_SOURCE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-var APP_VERSION = '1.2.8';
+var APP_VERSION = '1.2.9';
 var SOFTWARE = 'TRILYVA — Tamasrazim';
 
 var libraryModulePromise = null;
@@ -8427,6 +8427,33 @@ function sampleCards(){
       $('#stMsg').textContent='Singularity Protocol loaded · 3840×2160 · 60 FPS · 8 s · 200 Mbps. Compile to initialise WebGPU; render only after the preview is ready.';
     }catch(error){showError('EXAMPLE LOAD FAILED',String(error&&error.message||error));}
   });
+  const computeCard=document.createElement('div');
+  computeCard.className='sample';
+  computeCard.innerHTML='<h5>Compute Interference — WebGPU</h5><p>8×8 compute dispatch · storage texture output · deterministic interference field.</p>';
+  computeCard.addEventListener('click',async()=>{
+    if(!confirmDiscard())return;
+    try{
+      const response=await fetch('./examples/compute-interference-webgpu.js',{cache:'no-cache'});
+      if(!response.ok)throw new Error('Compute example source request failed: '+response.status);
+      const code=await response.text();
+      S.name='compute-interference-webgpu';$('#projName').value=S.name;
+      installCode(code);
+      applyComp({
+        width:1920,
+        height:1080,
+        fps:60,
+        duration:8,
+        loop:true,
+        loopDuration:8
+      });
+      S.exportFormat='mp4';
+      segMark($('#segFmt'),'mp4');
+      refreshMedia();
+      markDirty(true);
+      $('#stMsg').textContent='Compute Interference loaded · 1920×1080 · 60 FPS · 8 s. Compile to initialise the WebGPU compute pipeline, then render to test the GPU export path.';
+    }catch(error){showError('COMPUTE EXAMPLE LOAD FAILED',String(error&&error.message||error));}
+  });
+  box.appendChild(computeCard);
   box.appendChild(gpuCard);
 }
 const PRISM_LIBRARY_URL='./library/prism-library.json';
@@ -11390,7 +11417,7 @@ function run() {
     }
     $('#stContract').textContent = 'VALID · ' + res.arity + ' arg' + (res.arity === 1 ? '' : 's');
     $('#edState').textContent = 'compiled · ' + new Date().toLocaleTimeString();
-    if (res.gpu) $('#stMsg').textContent = res.gpu.active ? 'WebGPU active · ' + (res.gpu.adapter || 'high-performance adapter') : 'WebGPU fallback · ' + (res.gpu.reason || 'Canvas 2D renderer active');
+    if (res.gpu) $('#stMsg').textContent = res.gpu.active ? 'WebGPU active · ' + (res.gpu.mode ? res.gpu.mode + ' pipeline · ' : '') + (res.gpu.adapter || 'high-performance adapter') : 'WebGPU fallback · ' + (res.gpu.reason || 'Canvas 2D renderer active');
     else $('#stMsg').textContent = 'Canvas 2D renderer active';
     setStage('IDLE');
     S.lastPainted = -1;
@@ -12849,7 +12876,7 @@ function refreshDiag() {
   yesNo(dl, 'Secure context', c.secure);
   yesNo(dl, 'WebGL2', c.webgl2, 'SUPPORTED — usable from your code via a second canvas', 'NOT AVAILABLE');
   yesNo(dl, 'WebGPU', c.webgpu);
-  if (S.gpuBackend) kvRow(dl, 'Frame backend', S.gpuBackend.active ? 'WebGPU · ' + (S.gpuBackend.adapter || 'adapter ready') : (S.gpuBackend.backend || 'Canvas 2D fallback') + ' · ' + (S.gpuBackend.reason || 'shader not active'), S.gpuBackend.active ? 'ok' : 'warn');
+  if (S.gpuBackend) kvRow(dl, 'Frame backend', S.gpuBackend.active ? 'WebGPU · ' + (S.gpuBackend.mode ? S.gpuBackend.mode + ' pipeline · ' : '') + (S.gpuBackend.adapter || 'adapter ready') : (S.gpuBackend.backend || 'Canvas 2D fallback') + ' · ' + (S.gpuBackend.reason || 'shader not active'), S.gpuBackend.active ? 'ok' : 'warn');
   else kvRow(dl, 'Frame backend', 'Not initialised · compile a WGSL animation to test', 'warn');
   kvRow(dl, 'Logical cores', c.cores ? String(c.cores) : 'not reported');
   kvRow(dl, 'Device memory', c.memoryGB ? c.memoryGB + ' GB (browser estimate)' : 'not reported');
