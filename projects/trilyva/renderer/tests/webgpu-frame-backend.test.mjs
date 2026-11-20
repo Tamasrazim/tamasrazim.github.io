@@ -78,7 +78,7 @@ assert.ok(simpleCapture.count >= 3, 'Runtime capture should emit background, rec
 const textRuntime = core.createRuntime();
 textRuntime.setComposition(core.composition({ width: 320, height: 180, fps: 30, duration: 2 }));
 assert.equal(textRuntime.compile("function renderFrame(time, frame, fps, ctx) { ctx.fillText('fallback', 5, 20); }").ok, true);
-const textRecorder = core.createCanvas2DRecorder(320, 180);
+const textRecorder = noGPUContext.self.TRILYVAWebGPU.createCanvas2DRecorder(320, 180);
 const textCapture = textRuntime.captureCanvas2D(0, {}, textRecorder);
 assert.equal(textCapture.ok, true);
 assert.equal(textCapture.supported, false, 'Unsupported Canvas 2D calls must be classified for CPU fallback');
@@ -113,7 +113,7 @@ assert.equal(typeof noGPURenderer.prepare, 'function');
 assert.equal(typeof noGPURenderer.render, 'function');
 
 // Automatic Canvas 2D recorder: supported commands become typed GPU primitives.
-const recorder = gpuContext.self.TRILYVAWebGPU.createCanvas2DRecorder(640, 360);
+const recorder = noGPUContext.self.TRILYVAWebGPU.createCanvas2DRecorder(640, 360);
 recorder.context.fillStyle = '#ff8040';
 recorder.context.globalAlpha = 0.75;
 recorder.context.fillRect(10, 20, 120, 80);
@@ -131,7 +131,7 @@ assert.ok(recorded.count > 1);
 assert.equal(recorded.commands.length, recorded.count * 20);
 assert.equal(recorded.commands[0], 0, 'fillRect is stored as a GPU rectangle command');
 assert.equal(recorded.commands[20], 5, 'Path strokes are stored as GPU line commands');
-const unsupportedRecorder = gpuContext.self.TRILYVAWebGPU.createCanvas2DRecorder(10, 10);
+const unsupportedRecorder = noGPUContext.self.TRILYVAWebGPU.createCanvas2DRecorder(10, 10);
 void unsupportedRecorder.context.fillText;
 assert.equal(unsupportedRecorder.finish().supported, false,
   'Text must use the native Canvas 2D fallback rather than claim GPU rendering');
@@ -210,7 +210,7 @@ for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
 assert.match(html, /importScripts\(/);
 assert.match(html, /renderGPUFrame\(/);
 assert.match(html, /gpuBitmap/);
-assert.match(serviceWorker, /tamasrazim-trilyva-pwa-v169-direct-gpu-preview/);
+assert.match(serviceWorker, /tamasrazim-trilyva-pwa-v170-auto-canvas2d-gpu/);
 assert.match(serviceWorker, /\.\/webgpu-renderer\.js/);
 assert.match(serviceWorker, /\.\/examples\/singularity-protocol-webgpu\.js/);
 
