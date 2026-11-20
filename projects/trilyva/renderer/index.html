@@ -3999,6 +3999,19 @@ function renderGPUFrame(frame, comp, w, h) {
     return null;
   });
 }
+function canUseDirectGPUPreview(runtime) {
+  if (!runtime || !runtime.gpu) return false;
+  var composition = runtime.comp || {};
+  // The direct surface can skip the Canvas 2D background pass only when the
+  // composition is transparent or the shader guarantees alpha=1 everywhere.
+  if (!composition.transparent && runtime.gpu.opaque !== true) return false;
+  var layers = runtime.layers || [];
+  for (var i = 0; i < layers.length; i++) {
+    if (layers[i] && layers[i].visible !== false) return false;
+  }
+  return !(runtime.vectorEdits && Object.keys(runtime.vectorEdits).length);
+}
+
 function gpuSampleTiming(job, count) {
   var comp = MotionCore.composition(job.composition);
   var n = Math.max(1, Math.min(Math.floor(Number(count) || 6), comp.frameCount));
@@ -4167,17 +4180,44 @@ self.onmessage = function (ev) {
 
       case 'preview': {
         var w = m.rasterW, h = m.rasterH;
-        if (!previewCanvas || previewCanvas.width !== w || previewCanvas.height !== h) {
-          previewCanvas = new OffscreenCanvas(w, h);
-          previewCtx = previewCanvas.getContext('2d', { alpha: true });
-        }
+        var directGPUPreview = canUseDirectGPUPreview(rt);
+        var previewStarted = performance.now();
         renderGPUFrame(m.frame, rt.comp, w, h).then(function (gpuBitmap) {
+          // GPU-only compositions can hand the renderer's ImageBitmap straight
+          // to the UI. This removes the intermediate 2D canvas draw + second
+          // ImageBitmap transfer from the interactive preview path.
+          if (directGPUPreview && gpuBitmap) {
+            gpuBackendStatus = Object.assign({}, gpuRenderer.status(), {
+              frameSource: 'WebGPU ImageBitmap → main-thread preview'
+            });
+            try {
+              send({
+                type: 'preview', id: id, ok: true, frame: m.frame,
+                ms: performance.now() - previewStarted,
+                gpuBackend: gpuBackendStatus, directGPUPreview: true,
+                bitmap: gpuBitmap
+              }, [gpuBitmap]);
+            } catch (transferError) {
+              if (gpuBitmap.close) { try { gpuBitmap.close(); } catch (_) {} }
+              throw transferError;
+            }
+            return;
+          }
+
+          if (!previewCanvas || previewCanvas.width !== w || previewCanvas.height !== h) {
+            previewCanvas = new OffscreenCanvas(w, h);
+            previewCtx = previewCanvas.getContext('2d', { alpha: true });
+          }
           var r;
           try { r = rt.renderInto(previewCtx, m.frame, { rasterScale: m.scale, gpuBitmap: gpuBitmap || null }); }
           finally { if (gpuBitmap && gpuBitmap.close) gpuBitmap.close(); }
           if (!r.ok) { send({ type: 'preview', id: id, ok: false, error: r.error, frame: m.frame }); return; }
           var bmp = previewCanvas.transferToImageBitmap();
-          send({ type: 'preview', id: id, ok: true, frame: m.frame, ms: r.ms, gpuBackend: gpuBackendStatus, bitmap: bmp }, [bmp]);
+          send({
+            type: 'preview', id: id, ok: true, frame: m.frame,
+            ms: r.ms, gpuBackend: gpuBackendStatus,
+            directGPUPreview: false, bitmap: bmp
+          }, [bmp]);
         }).catch(function (error) {
           send({ type: 'preview', id: id, ok: false, error: { name: error.name || 'PreviewError', message: String(error.message || error), stage: 'preview' }, frame: m.frame });
         });
