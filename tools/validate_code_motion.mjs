@@ -101,13 +101,14 @@ for (const token of [
 must(webgpu.includes("mode === 'compute'") && webgpu.includes("mode === 'fragment'"), 'WebGPU keeps compute and fragment paths separate');
 must(webgpu.includes('function renderCanvas(') && webgpu.includes('transferBitmap === false'), 'WebGPU exposes a serialized OffscreenCanvas render path');
 must(renderer.includes('gpuRenderer.renderCanvas(') && renderer.includes('new VideoFrame(gpuCanvas'), 'pure GPU exports can probe direct WebGPU canvas → VideoFrame input');
+must(renderer.includes('gpuCanvas.transferToImageBitmap()') && renderer.includes('WebGPU OffscreenCanvas → ImageBitmap fallback'), 'failed direct VideoFrame probes reuse the rendered frame without rendering twice');
 must(renderer.includes("frameSource: 'WebGPU OffscreenCanvas (direct path)'") && renderer.includes('function gpuSampleTiming(job, count)'), 'GPU timing measures the direct WebGPU canvas path');
 must(renderer.includes("frameSource: 'WebGPU OffscreenCanvas → VideoFrame'") && renderer.includes('hasVisibleExportLayers') && renderer.includes('hasVectorExportState'), 'direct GPU export reports its source and protects composite-required projects');
 
 must(computeExample.includes('mode: "compute"') && computeExample.includes('texture_storage_2d<rgba8unorm, write>') && computeExample.includes('@workgroup_size(8, 8, 1)'), 'compute example follows the storage-texture and 8×8 dispatch contract');
 must(renderer.includes('Compute Interference — WebGPU') && renderer.includes("./examples/compute-interference-webgpu.js"), 'compute verification scene is available in the sample library');
-must(renderer.includes("var APP_VERSION = '1.2.11';"), 'application version reflects the direct GPU video update');
-must(serviceWorker.includes('tamasrazim-trilyva-pwa-v167-gpu-timing') && serviceWorker.includes('./examples/compute-interference-webgpu.js'), 'PWA cache includes the compute example and direct-video renderer version');
+must(renderer.includes("var APP_VERSION = '1.2.12';"), 'application version reflects the direct GPU video update');
+must(serviceWorker.includes('tamasrazim-trilyva-pwa-v168-gpu-fallback') && serviceWorker.includes('./examples/compute-interference-webgpu.js'), 'PWA cache includes the compute example and direct-video renderer version');
 must(gpuDocs.includes('Fragment mode') && gpuDocs.includes('Compute mode') && gpuDocs.includes('does not automatically translate arbitrary JavaScript') && gpuDocs.includes('VideoFrame') && gpuDocs.includes('visible media layers'), 'GPU rendering documentation explains both paths, direct video input, and the JS boundary');
 
 try {
