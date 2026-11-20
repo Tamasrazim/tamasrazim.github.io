@@ -293,7 +293,7 @@
       d.queue.writeBuffer(uniformBuffer, 0, uniforms);
     }
 
-    async function renderNow(descriptor, frame, outputWidth, outputHeight) {
+    async function renderNow(descriptor, frame, outputWidth, outputHeight, transferBitmap) {
       var w = Math.floor(Number(outputWidth));
       var h = Math.floor(Number(outputHeight));
       if (!(w > 0) || !(h > 0)) {
@@ -372,17 +372,25 @@
 
       d.queue.submit([encoder.finish()]);
       if (d.queue.onSubmittedWorkDone) await d.queue.onSubmittedWorkDone();
-      return canvas.transferToImageBitmap();
+      return transferBitmap === false ? canvas : canvas.transferToImageBitmap();
     }
 
     var renderQueue = Promise.resolve();
 
-    function render(descriptor, frame, outputWidth, outputHeight) {
+    function enqueueRender(descriptor, frame, outputWidth, outputHeight, transferBitmap) {
       var task = renderQueue.then(function () {
-        return renderNow(descriptor, frame, outputWidth, outputHeight);
+        return renderNow(descriptor, frame, outputWidth, outputHeight, transferBitmap);
       });
       renderQueue = task.then(function () { return undefined; }, function () { return undefined; });
       return task;
+    }
+
+    function render(descriptor, frame, outputWidth, outputHeight) {
+      return enqueueRender(descriptor, frame, outputWidth, outputHeight, true);
+    }
+
+    function renderCanvas(descriptor, frame, outputWidth, outputHeight) {
+      return enqueueRender(descriptor, frame, outputWidth, outputHeight, false);
     }
 
     function status() {
@@ -421,6 +429,7 @@
     return {
       prepare: prepare,
       render: render,
+      renderCanvas: renderCanvas,
       status: status,
       dispose: dispose
     };
