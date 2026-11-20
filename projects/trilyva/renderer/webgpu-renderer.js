@@ -536,6 +536,7 @@
         active: !!(ready && device && !lost),
         backend: 'WebGPU',
         mode: activeMode,
+        canvas2DAuto: !!(device && canvas2DPipeline && canvas2DClearPipeline),
         adapter: adapterLabel,
         label: activeLabel,
         error: lost || null
