@@ -71,7 +71,7 @@ const simpleRuntime = core.createRuntime();
 simpleRuntime.setComposition(core.composition({ width: 320, height: 180, fps: 30, duration: 2 }));
 const simpleCompile = simpleRuntime.compile("function renderFrame(time, frame, fps, ctx, width, height) { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, width, height); ctx.beginPath(); ctx.arc(width / 2, height / 2, 30, 0, Math.PI * 2); ctx.fill(); }");
 assert.equal(simpleCompile.ok, true);
-const simpleCapture = simpleRuntime.captureCanvas2D(0, {}, core.createCanvas2DRecorder(320, 180));
+const simpleCapture = simpleRuntime.captureCanvas2D(0, {}, noGPUContext.self.TRILYVAWebGPU.createCanvas2DRecorder(320, 180));
 assert.equal(simpleCapture.ok, true);
 assert.equal(simpleCapture.supported, true);
 assert.ok(simpleCapture.count >= 3, 'Runtime capture should emit background, rectangle, and circle geometry through the GPU recorder');
