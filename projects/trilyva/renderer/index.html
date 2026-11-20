@@ -4007,12 +4007,20 @@ function gpuSampleTiming(job, count) {
   function step() {
     if (k >= picks.length) {
       var sum = times.reduce(function (a, b) { return a + b; }, 0);
-      return Promise.resolve({ ok: true, times: times, sampled: times.length, avgMs: sum / times.length, minMs: Math.min.apply(Math, times), maxMs: Math.max.apply(Math, times), backend: 'WebGPU', adapter: gpuBackendStatus.adapter || 'high-performance adapter' });
+      return Promise.resolve({
+        ok: true, times: times, sampled: times.length,
+        avgMs: sum / times.length, minMs: Math.min.apply(Math, times),
+        maxMs: Math.max.apply(Math, times), backend: 'WebGPU',
+        frameSource: 'WebGPU OffscreenCanvas (direct path)',
+        adapter: gpuBackendStatus.adapter || 'high-performance adapter'
+      });
     }
     var frame = picks[k], startedFrame = performance.now();
-    return renderGPUFrame(frame, comp, comp.width, comp.height).then(function (bitmap) {
-      if (bitmap && bitmap.close) bitmap.close();
-      if (!bitmap) throw new Error(gpuBackendStatus.reason || 'WebGPU timing fell back to Canvas 2D.');
+    return gpuRenderer.renderCanvas(rt.gpu, gpuFrameInput(frame, comp), comp.width, comp.height).then(function (gpuCanvas) {
+      if (!gpuCanvas) throw new Error(gpuBackendStatus.reason || 'WebGPU timing fell back to Canvas 2D.');
+      gpuBackendStatus = Object.assign({}, gpuRenderer.status(), {
+        frameSource: 'WebGPU OffscreenCanvas (direct path)'
+      });
       times.push(performance.now() - startedFrame); k++;
       return new Promise(function (resolve) { setTimeout(resolve, 0); }).then(step);
     });
