@@ -67,6 +67,21 @@ runtime.setComposition(core.composition({
   width: 640, height: 360, fps: 60, duration: 8,
   loop: true, loopDuration: 8
 }));
+const simpleRuntime = core.createRuntime();
+simpleRuntime.setComposition(core.composition({ width: 320, height: 180, fps: 30, duration: 2 }));
+const simpleCompile = simpleRuntime.compile("function renderFrame(time, frame, fps, ctx, width, height) { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, width, height); ctx.beginPath(); ctx.arc(width / 2, height / 2, 30, 0, Math.PI * 2); ctx.fill(); }");
+assert.equal(simpleCompile.ok, true);
+const simpleCapture = simpleRuntime.captureCanvas2D(0, {}, core.createCanvas2DRecorder(320, 180));
+assert.equal(simpleCapture.ok, true);
+assert.equal(simpleCapture.supported, true);
+assert.ok(simpleCapture.count >= 3, 'Runtime capture should emit background, rectangle, and circle geometry through the GPU recorder');
+const textRuntime = core.createRuntime();
+textRuntime.setComposition(core.composition({ width: 320, height: 180, fps: 30, duration: 2 }));
+assert.equal(textRuntime.compile("function renderFrame(time, frame, fps, ctx) { ctx.fillText('fallback', 5, 20); }").ok, true);
+const textRecorder = core.createCanvas2DRecorder(320, 180);
+const textCapture = textRuntime.captureCanvas2D(0, {}, textRecorder);
+assert.equal(textCapture.ok, true);
+assert.equal(textCapture.supported, false, 'Unsupported Canvas 2D calls must be classified for CPU fallback');
 const compile = runtime.compile(sample);
 assert.equal(compile.ok, true, compile.error && compile.error.message);
 assert.equal(compile.hasGPU, true);
@@ -97,13 +112,37 @@ assert.equal(noGPURenderer.status().active, false);
 assert.equal(typeof noGPURenderer.prepare, 'function');
 assert.equal(typeof noGPURenderer.render, 'function');
 
+// Automatic Canvas 2D recorder: supported commands become typed GPU primitives.
+const recorder = gpuContext.self.TRILYVAWebGPU.createCanvas2DRecorder(640, 360);
+recorder.context.fillStyle = '#ff8040';
+recorder.context.globalAlpha = 0.75;
+recorder.context.fillRect(10, 20, 120, 80);
+recorder.context.save();
+recorder.context.translate(200, 120);
+recorder.context.strokeStyle = 'rgba(255,255,255,0.9)';
+recorder.context.lineWidth = 4;
+recorder.context.beginPath();
+recorder.context.arc(0, 0, 40, 0, Math.PI * 2);
+recorder.context.stroke();
+recorder.context.restore();
+const recorded = recorder.finish();
+assert.equal(recorded.supported, true);
+assert.ok(recorded.count > 1);
+assert.equal(recorded.commands.length, recorded.count * 20);
+assert.equal(recorded.commands[0], 0, 'fillRect is stored as a GPU rectangle command');
+assert.equal(recorded.commands[20], 5, 'Path strokes are stored as GPU line commands');
+const unsupportedRecorder = gpuContext.self.TRILYVAWebGPU.createCanvas2DRecorder(10, 10);
+void unsupportedRecorder.context.fillText;
+assert.equal(unsupportedRecorder.finish().supported, false,
+  'Text must use the native Canvas 2D fallback rather than claim GPU rendering');
+
 // Deterministic mock adapter covers pipeline creation, uniforms, submission,
 // serialized frame rendering, and ImageBitmap handoff.
 const fakeDevice = {
   limits: { maxTextureDimension2D: 8192 },
   lost: new Promise(() => {}),
   queue: {
-    writeBuffer(buffer, offset, data) { assert.equal(data.byteLength, 48); },
+    writeBuffer(buffer, offset, data) { assert.ok(data.byteLength === 48 || data.byteLength === 16 || data.byteLength >= 80); },
     submit(commands) { assert.equal(commands.length, 1); },
     onSubmittedWorkDone() { return Promise.resolve(); }
   },
@@ -114,7 +153,7 @@ const fakeDevice = {
   createCommandEncoder() {
     return {
       beginRenderPass() {
-        return { setPipeline() {}, setBindGroup() {}, draw(n) { assert.equal(n, 3); }, end() {} };
+        return { setPipeline() {}, setBindGroup() {}, draw(n) { assert.ok(n === 3 || n === 6); }, end() {} };
       },
       finish() { return {}; }
     };
@@ -144,7 +183,7 @@ const gpuContext = {
     }
   },
   OffscreenCanvas: FakeOffscreenCanvas,
-  GPUBufferUsage: { UNIFORM: 64, COPY_DST: 8 }
+  GPUBufferUsage: { UNIFORM: 64, COPY_DST: 8, STORAGE: 128 }
 };
 vm.runInNewContext(helper, gpuContext);
 const gpuRenderer = gpuContext.self.TRILYVAWebGPU.createRenderer();
@@ -156,6 +195,10 @@ const gpuBitmap = await gpuRenderer.render(runtime.gpu, {
 }, 640, 360);
 assert.equal(gpuBitmap.width, 640);
 assert.equal(gpuBitmap.height, 360);
+const gpuCanvas2DBitmap = await gpuRenderer.renderCanvas2D(recorded.commands, recorded.count, 640, 360, 1);
+assert.equal(gpuCanvas2DBitmap.width, 640);
+assert.equal(gpuCanvas2DBitmap.height, 360);
+assert.equal(gpuRenderer.status().canvas2DAuto, true);
 gpuRenderer.dispose();
 
 // Parse the regular page scripts and all embedded runtime/worker modules.
