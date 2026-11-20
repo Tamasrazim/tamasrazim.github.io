@@ -25,6 +25,42 @@ function sourceBlock(id) {
 }
 
 const runtimeSource = sourceBlock('src-runtime');
+const workerSource = sourceBlock('src-worker');
+const directPreviewGate = workerSource.match(/function canUseDirectGPUPreview\(runtime\) \{[\s\S]*?\n\}/);
+assert.ok(directPreviewGate, 'Missing direct GPU preview safety gate');
+const canUseDirectGPUPreview = new Function(
+  directPreviewGate[0] + '\nreturn canUseDirectGPUPreview;'
+)();
+assert.equal(canUseDirectGPUPreview({
+  gpu: {}, comp: { transparent: true }, layers: [], vectorEdits: {}
+}), true, 'Transparent GPU-only compositions can skip the Canvas 2D compositor');
+assert.equal(canUseDirectGPUPreview({
+  gpu: { opaque: true }, comp: { transparent: false }, layers: [], vectorEdits: {}
+}), true, 'Explicitly opaque GPU-only compositions can use direct preview');
+assert.equal(canUseDirectGPUPreview({
+  gpu: {}, comp: { transparent: false }, layers: [], vectorEdits: {}
+}), false, 'A non-transparent composition needs its background compositor unless the shader is opaque');
+assert.equal(canUseDirectGPUPreview({
+  gpu: { opaque: true }, comp: { transparent: false },
+  layers: [{ visible: true }], vectorEdits: {}
+}), false, 'Visible media layers must retain the mixed-layer compositor');
+assert.equal(canUseDirectGPUPreview({
+  gpu: { opaque: true }, comp: { transparent: false },
+  layers: [{ visible: false }], vectorEdits: { vector1: { x: 0 } }
+}), false, 'Vector edits must retain the mixed-layer compositor');
+assert.equal(canUseDirectGPUPreview({
+  gpu: { opaque: true }, comp: { transparent: false },
+  layers: [{ visible: false }], vectorEdits: {}
+}), true, 'Hidden media layers do not block direct preview');
+assert.equal(canUseDirectGPUPreview({
+  comp: { transparent: true }, layers: [], vectorEdits: {}
+}), false, 'Canvas-only projects must use the existing compositor');
+assert.match(workerSource, /var directGPUPreview = canUseDirectGPUPreview\(rt\)/);
+assert.match(workerSource, /if \(directGPUPreview && gpuBitmap\)/);
+assert.match(workerSource, /directGPUPreview: true/);
+assert.match(workerSource, /frameSource: 'WebGPU ImageBitmap → main-thread preview'/);
+assert.match(workerSource, /previewCanvas\.transferToImageBitmap\(\)/,
+  'Mixed layers and Canvas fallback must keep the existing compositor path');
 const core = new Function(runtimeSource + String.fromCharCode(10) + 'return MotionCore;')();
 const runtime = core.createRuntime();
 runtime.setComposition(core.composition({
@@ -130,7 +166,7 @@ for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
 assert.match(html, /importScripts\(/);
 assert.match(html, /renderGPUFrame\(/);
 assert.match(html, /gpuBitmap/);
-assert.match(serviceWorker, /tamasrazim-trilyva-pwa-v164-webgpu/);
+assert.match(serviceWorker, /tamasrazim-trilyva-pwa-v169-direct-gpu-preview/);
 assert.match(serviceWorker, /\.\/webgpu-renderer\.js/);
 assert.match(serviceWorker, /\.\/examples\/singularity-protocol-webgpu\.js/);
 
