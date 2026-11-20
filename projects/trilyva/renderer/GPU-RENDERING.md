@@ -79,10 +79,14 @@ window.renderFrame = function (time, frame, fps, ctx, width, height) {
 
 The shader receives the frame time, frame index, composition FPS, dimensions, duration, frame count, seed, loop duration, loop flag, speed, and reverse flag through the uniform buffer. It should derive each output frame from these values rather than depending on hidden mutable state.
 
+The optional descriptor field `opaque: true` is a rendering guarantee: every output pixel must have alpha 1. Declare it only when the shader really writes an opaque frame. This allows TRILYVA to skip the Canvas 2D background/composition pass for eligible GPU-only previews. It does not alter shader output or disable alpha in the WebGPU surface.
+
 ## Execution and limits
 
 - Rendering is performed in a dedicated worker using `OffscreenCanvas`. WebGPU requests a high-performance adapter; the browser and operating system decide which available adapter is selected.
 - GPU frame requests are serialized. The renderer waits for submitted GPU work before returning the frame bitmap, preserving frame order for export.
+- **Direct GPU preview:** when the composition is transparent or the shader declares `opaque: true`, and there are no visible media layers or vector-edit overlays, the worker transfers the WebGPU renderer's `ImageBitmap` directly to the preview UI. It skips the intermediate Canvas 2D composition surface and its second `ImageBitmap` transfer.
+- Mixed compositions keep the normal Canvas 2D compositor so background colour, media transforms, blend modes, and vector edits are preserved. If WebGPU is unavailable, the existing `renderFrame()` fallback remains active.
 - The existing media-layer and output-encoding stages remain in place after the GPU frame is returned.
 
 - For MP4 and WebM, a pure GPU composition can take a direct route: the worker asks WebGPU for its `OffscreenCanvas` and probes whether the browser accepts that canvas as a `VideoFrame` source. When supported, each timestamped `VideoFrame` is created directly from the WebGPU canvas, avoiding the intermediate GPU bitmap → Canvas 2D composition → video-frame path.
