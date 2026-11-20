@@ -70,6 +70,7 @@ runtime.setComposition(core.composition({
 const compile = runtime.compile(sample);
 assert.equal(compile.ok, true, compile.error && compile.error.message);
 assert.equal(compile.hasGPU, true);
+assert.equal(runtime.gpu.opaque, true, 'The stress sample declares its fully opaque fragment output for direct preview');
 assert.equal(typeof runtime.gpu.wgsl, 'string');
 assert.match(runtime.gpu.wgsl, /@vertex\s+fn vsMain/);
 assert.match(runtime.gpu.wgsl, /@fragment\s+fn fsMain/);
