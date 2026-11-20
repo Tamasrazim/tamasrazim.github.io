@@ -4258,9 +4258,14 @@ self.onmessage = function (ev) {
                   });
                   return { gpuCanvas: gpuCanvas };
                 }
-                return renderGPUFrame(frame, exportComp, exportComp.width, exportComp.height).then(function (bitmap) {
-                  return bitmap ? { gpuBitmap: bitmap, release: function () { if (bitmap.close) bitmap.close(); } } : null;
+                var fallbackBitmap = gpuCanvas.transferToImageBitmap();
+                gpuBackendStatus = Object.assign({}, gpuRenderer.status(), {
+                  frameSource: 'WebGPU OffscreenCanvas → ImageBitmap fallback'
                 });
+                return {
+                  gpuBitmap: fallbackBitmap,
+                  release: function () { if (fallbackBitmap.close) fallbackBitmap.close(); }
+                };
               }).catch(function () {
                 directGpuCanvasEnabled = false;
                 return renderGPUFrame(frame, exportComp, exportComp.width, exportComp.height).then(function (bitmap) {
