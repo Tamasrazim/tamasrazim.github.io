@@ -1,6 +1,6 @@
 // What this does: Caches the TRILYVA renderer's application files and serves them when the network is unavailable.
 
-const CACHE = 'tamasrazim-trilyva-pwa-v168-gpu-fallback';
+const CACHE = 'tamasrazim-trilyva-pwa-v169-direct-gpu-preview';
 const CORE = [
   './',
   './index.html',
