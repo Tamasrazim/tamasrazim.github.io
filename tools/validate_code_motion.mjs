@@ -10,6 +10,10 @@ const must = (ok, msg) => {
 const renderer = fs.readFileSync('projects/trilyva/renderer/index.html', 'utf8');
 const project = fs.readFileSync('projects/code-motion/index.html', 'utf8');
 const media = fs.readFileSync('projects/trilyva/renderer/media-stack.js', 'utf8');
+const webgpu = fs.readFileSync('projects/trilyva/renderer/webgpu-renderer.js', 'utf8');
+const computeExample = fs.readFileSync('projects/trilyva/renderer/examples/compute-interference-webgpu.js', 'utf8');
+const serviceWorker = fs.readFileSync('projects/trilyva/renderer/sw.js', 'utf8');
+const gpuDocs = fs.readFileSync('projects/trilyva/renderer/GPU-RENDERING.md', 'utf8');
 
 must(renderer.includes('<title>TRILYVA — Tamasrazim</title>'), 'current TRILYVA title exists');
 
@@ -84,6 +88,35 @@ must(media.includes("containers: ['mp4', 'webm']"), 'media descriptor exposes cu
 must(media.includes("videoCodecs: ['avc', 'vp9', 'vp8']"), 'media descriptor exposes current codec layers');
 must(!media.includes('installBatchLink')&&!media.includes('FLOWER BATCH'),'media descriptor does not inject the removed Flower Batch tab');
 must(renderer.includes("const PRISM_LIBRARY_URL='./library/prism-library.json'")&&renderer.includes("const TRILYVA_PRISM_LIBRARY_URL='./library/prism-library.json'"),'both TRILYVA Prism loaders use the self-contained local dataset');
+
+for (const token of [
+  "createComputePipeline",
+  "dispatchWorkgroups",
+  "GPUTextureUsage.STORAGE_BINDING",
+  "TRILYVA compute output blit pipeline",
+  "computeBindGroup"
+]) {
+  must(webgpu.includes(token), 'WebGPU compute backend: ' + token);
+}
+must(webgpu.includes("mode === 'compute'") && webgpu.includes("mode === 'fragment'"), 'WebGPU keeps compute and fragment paths separate');
+must(computeExample.includes('mode: "compute"') && computeExample.includes('texture_storage_2d<rgba8unorm, write>') && computeExample.includes('@workgroup_size(8, 8, 1)'), 'compute example follows the storage-texture and 8×8 dispatch contract');
+must(renderer.includes('Compute Interference — WebGPU') && renderer.includes("./examples/compute-interference-webgpu.js"), 'compute verification scene is available in the sample library');
+must(renderer.includes("var APP_VERSION = '1.2.9';"), 'application version reflects the GPU compute update');
+must(serviceWorker.includes('tamasrazim-trilyva-pwa-v165-webgpu-compute') && serviceWorker.includes('./examples/compute-interference-webgpu.js'), 'PWA cache includes the compute example and refreshed version');
+must(gpuDocs.includes('Fragment mode') && gpuDocs.includes('Compute mode') && gpuDocs.includes('does not automatically translate arbitrary JavaScript'), 'GPU rendering documentation explains both paths and the JS boundary');
+
+try {
+  new Function(webgpu);
+  console.log('PASS WebGPU backend JavaScript parses');
+} catch (error) {
+  throw new Error('WebGPU backend syntax: ' + error.message);
+}
+try {
+  new Function(computeExample);
+  console.log('PASS compute example JavaScript parses');
+} catch (error) {
+  throw new Error('compute example syntax: ' + error.message);
+}
 const prismData = fs.readFileSync('projects/trilyva/renderer/library/prism-data.js', 'utf8');
 must(fs.existsSync('projects/trilyva/renderer/library/prism-library.json')&&prismData.includes('./prism-library.json')&&prismData.includes('export default data;'),'the protected Prism module loads its bundled sibling dataset');
 const kynestraBuild = fs.readFileSync('KYNESTRA/desktop/tauri/build.rs', 'utf8');
