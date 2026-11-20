@@ -84,6 +84,11 @@ The shader receives the frame time, frame index, composition FPS, dimensions, du
 - Rendering is performed in a dedicated worker using `OffscreenCanvas`. WebGPU requests a high-performance adapter; the browser and operating system decide which available adapter is selected.
 - GPU frame requests are serialized. The renderer waits for submitted GPU work before returning the frame bitmap, preserving frame order for export.
 - The existing media-layer and output-encoding stages remain in place after the GPU frame is returned.
+
+- For MP4 and WebM, a pure GPU composition can take a direct route: the worker asks WebGPU for its `OffscreenCanvas` and probes whether the browser accepts that canvas as a `VideoFrame` source. When supported, each timestamped `VideoFrame` is created directly from the WebGPU canvas, avoiding the intermediate GPU bitmap → Canvas 2D composition → video-frame path.
+- The direct route is enabled only when the export has no visible media layers or vector-edit overlays. Projects that need those compositing features continue through the regular composition canvas. PNG exports also keep the standard frame path.
+- The direct `VideoFrame` capability is checked at runtime rather than assumed. If the browser rejects the WebGPU canvas as a video-frame source, TRILYVA falls back to the established `ImageBitmap` → Canvas 2D composition path; the render resolution and quality are not reduced.
+- With frame checksums enabled, TRILYVA still samples the selected frame surface for its verification checksum. This is a small extra readback step; it does not change the pixels passed to the encoder.
 - TRILYVA does not automatically translate arbitrary JavaScript Canvas 2D code into WGSL. A `renderFrame` project without the optional GPU descriptor remains a CPU-side Canvas 2D animation, even though that work runs in a worker.
 - If WebGPU, the adapter, the shader, or the requested texture dimensions are unsupported, TRILYVA reports the reason and falls back to the regular Canvas 2D frame function. It does not silently lower resolution.
 - The adapter's maximum 2D texture dimension still applies. A 16K export is not guaranteed to fit every browser/adapter, even where the encoder accepts the dimensions.
