@@ -8,6 +8,7 @@
  */
 window.renderFrameGPU = {
   label: "SINGULARITY PROTOCOL / Mandelbulb + gyroscopic sanctuary",
+  opaque: true,
   wgsl: String.raw`
 struct FrameUniforms {
   resolution: vec2<f32>,
