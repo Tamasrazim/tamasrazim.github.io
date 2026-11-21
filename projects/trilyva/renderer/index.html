@@ -13352,8 +13352,8 @@ function refreshDiag() {
   kvRow(dl, 'Service worker', c.serviceWorker
     ? (S.swNote || 'available — but this page is served from a sandboxed artifact origin, so it cannot register one. Download the app and serve it yourself to get offline install.')
     : 'not supported by this browser', 'warn');
-  kvRow(dl, 'Offline use', 'The app is one HTML file with no network calls at runtime — save it and it works offline from the file system. PWA install needs your own origin.', 'warn');
-  kvRow(dl, 'Network', 'No backend, telemetry, or third-party runtime services. The worker loads the same-origin WebGPU renderer helper when it starts.', 'ok');
+  kvRow(dl, 'Offline use', 'The renderer shell is an HTML page with same-origin runtime helpers and library modules. Keep those companion files available or install/cache the project from its own secure origin; a saved HTML file alone is not a complete offline package.', 'warn');
+  kvRow(dl, 'Network', 'No rendering backend, telemetry, or third-party runtime services. Worker GPU code and TRILYVA library modules load from this same origin when needed.', 'ok');
 }
 
 /* ============================================================
