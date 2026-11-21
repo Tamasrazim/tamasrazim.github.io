@@ -8292,6 +8292,25 @@ function mainEngine() {
     if (!frames) return;
     Object.keys(frames).forEach(function (key) { if (frames[key] && frames[key].close) frames[key].close(); });
   }
+  function mainGpuStatus() {
+    var declared = !!rt.gpu;
+    return {
+      active: false,
+      backend: 'Canvas 2D',
+      mode: 'canvas2d-main',
+      webgpuAvailable: !!(navigator && navigator.gpu),
+      helperLoaded: false,
+      wgslDeclared: declared,
+      autoAvailable: false,
+      autoAttempted: false,
+      autoSupported: null,
+      deviceReady: false,
+      frameSource: 'Canvas 2D main-thread renderer',
+      reason: declared
+        ? 'A WGSL descriptor exists, but the main-thread fallback does not execute WebGPU. The worker engine is required for GPU rendering.'
+        : 'The main-thread fallback uses native Canvas 2D; the worker-only WebGPU compatibility renderer is not loaded.'
+    };
+  }
   return {
     mode: 'main',
     setAssets: function (list) {
@@ -8309,7 +8328,6 @@ function mainEngine() {
       rt.setVectorState(vectorEdits,vectorBounds);
       return Promise.resolve(true);
     },
-    getGPUStatus: function () { return Promise.resolve(mainGpuStatus()); },
     compile: function (code, comp) {
       rt.setComposition(comp); rt.setAssets(assets);
       return Promise.resolve(rt.compile(code)).then(function (result) {
