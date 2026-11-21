@@ -99,7 +99,7 @@ a{transition:opacity .2s ease,color .2s ease,border-color .2s ease}
 <body>
 <header class="wrap top">
 <a class="brand" href="/projects/trilyva/" aria-label="TRILYVA project home"><img src="/assets/brand/trilyva/T.svg" alt="TRILYVA T icon"><span>TRILYVA / COMPLETE FIELD GUIDE</span></a>
-<nav aria-label="Tutorial navigation"><a href="#contents">CONTENTS</a><a href="/projects/trilyva/docs/">DOCS</a><a href="#first">FIRST PROJECT</a><a href="#motion">MOTION</a><a href="#export">EXPORT</a><a href="#fixes">FIXES</a></nav>
+<nav aria-label="Tutorial navigation"><a href="#contents">CONTENTS</a><a href="/projects/trilyva/docs/">DOCS</a><a href="#first">FIRST PROJECT</a><a href="#motion">MOTION</a><a href="#export">EXPORT</a><a href="#gpu-diagnostics">GPU</a><a href="#fixes">FIXES</a></nav>
 </header>
 <main>
 <section class="wrap hero" id="start">
@@ -113,7 +113,7 @@ a{transition:opacity .2s ease,color .2s ease,border-color .2s ease}
 <section class="wrap section" id="contents">
 <div class="section-head"><div><div class="eyebrow">FIELD GUIDE / INDEX</div><h2>Choose a chapter.</h2></div><p class="muted">Start at chapter 01 if this is your first visit. Return to any chapter as a reference while working.</p></div>
 <div class="toc">
-<a href="#workspace">01 / Workspace tour</a><a href="#first">02 / First animation</a><a href="#code">03 / Understand the code</a><a href="#motion">04 / Build better motion</a><a href="#composition">05 / Composition settings</a><a href="#preview">06 / Preview and inspect</a><a href="#export">07 / Render and export</a><a href="#loops">08 / Seamless loops</a><a href="#quality">09 / Quality checklist</a><a href="#formats">10 / Formats and limits</a><a href="#still-image-formats">10a / All 18 still-image formats</a><a href="#fixes">11 / Troubleshooting</a><a href="#workflow">12 / Repeatable workflow</a>
+<a href="#workspace">01 / Workspace tour</a><a href="#first">02 / First animation</a><a href="#code">03 / Understand the code</a><a href="#motion">04 / Build better motion</a><a href="#composition">05 / Composition settings</a><a href="#preview">06 / Preview and inspect</a><a href="#export">07 / Render and export</a><a href="#loops">08 / Seamless loops</a><a href="#quality">09 / Quality checklist</a><a href="#formats">10 / Formats and limits</a><a href="#still-image-formats">10a / All 18 still-image formats</a><a href="#gpu-diagnostics">11 / GPU & diagnostics</a><a href="#fixes">12 / Troubleshooting</a><a href="#workflow">13 / Repeatable workflow</a>
 </div>
 </section>
 <section class="wrap section" id="workspace">
@@ -279,6 +279,23 @@ const y = height * 0.5 + Math.sin(angle) * height * 0.1;</code></pre>
 <div class="callout"><strong>Important distinction:</strong> the one-frame inspector's SVG and EPS files contain raster image data, not editable vector paths. The Render panel's automated still-image selections for standard renders and full-library batches are a separate path and currently offer PNG, JPG, SVG and EPS; the batch vector recorder may represent supported drawing operations as vector content. Neither vector route can promise fidelity for every Canvas operation.</div>
 </div>
 <div class="callout">Related TRILYVA tools can have their own export capabilities. Do not assume an option available in a separate vector or audio tool is automatically available in the animation renderer.</div>
+</section>
+<section class="wrap section" id="gpu-diagnostics">
+<div class="section-head"><div><div class="eyebrow">11 / GPU RENDERING & DIAGNOSTICS</div><h2>Check which renderer did the work.</h2></div><p class="muted">A supported browser API, an initialised GPU device, a ready shader pipeline, and a GPU-rendered frame are different states. Check them separately.</p></div>
+<div class="steps">
+<div class="step"><div class="n">01</div><div><h3>Compile the current animation</h3><p>Use <strong>Run</strong> so the renderer validates the source and prepares its runtime. A normal project that defines only <code>window.renderFrame(time, frame, fps, ctx, width, height)</code> is still a valid Canvas 2D animation; it does not need a WGSL shader to run.</p></div></div>
+<div class="step"><div class="n">02</div><div><h3>Open Diagnostics and re-check</h3><p>Select <strong>DIAGNOSTICS</strong> in the right-side panel. In the <strong>RUNTIME</strong> section press <strong>re-check</strong>. Then read the separate <strong>GPU RENDERING</strong> section: WebGPU API, Worker GPU helper, WGSL shader, Automatic Canvas 2D → WebGPU, GPU device, Frame backend, Frame source, Last GPU frame, Last attempted frame, and Fallback / note.</p></div></div>
+<div class="step"><div class="n">03</div><div><h3>Let a frame be tested</h3><p>With no WGSL shader declared, TRILYVA attempts automatic Canvas 2D conversion when a preview, still-frame inspection, or export frame is requested. The compatibility recorder accepts only a supported subset of Canvas 2D operations. Re-check after the preview frame has been requested to see whether that frame actually reached WebGPU.</p></div></div>
+<div class="step"><div class="n">04</div><div><h3>Read the result correctly</h3><p><strong>AVAILABLE</strong> means the automatic route can be attempted; it is not proof of GPU rendering. <strong>ACTIVE</strong> means the latest frame was successfully submitted through the GPU primitive route. <strong>FALLBACK</strong> means that frame stayed on Canvas 2D, and the note explains why. A declared WGSL pipeline can be <strong>prepared</strong> before its first frame has completed; Diagnostics reports that separately.</p></div></div>
+</div>
+<div class="grid">
+<article class="card"><small>WEBGPU API / SUPPORTED</small><h3>Capability only</h3><p>The browser exposes WebGPU. No GPU device or rendered frame is implied by this row.</p></article>
+<article class="card"><small>CANVAS 2D → WEBGPU / ACTIVE</small><h3>Automatic acceleration</h3><p>Supported drawing calls from the standard animation function were recorded and sent through the GPU primitive pipeline for the latest frame.</p></article>
+<article class="card"><small>WGSL / PIPELINE PREPARED</small><h3>Explicit shader path</h3><p>The source declared a WGSL renderer and the pipeline was prepared. Wait for a completed frame before treating GPU rendering as active.</p></article>
+</div>
+<div class="callout"><strong>Why can it fall back?</strong> Text, image or pattern drawing, gradients, shadows, filters, clipping, unsupported composite modes, complex paths, and vector-edit overlays can require the native Canvas 2D compositor. This is intentional compatibility behaviour, not a render failure. TRILYVA keeps the normal renderer available and does not silently reduce output resolution.</div>
+<div class="callout"><strong>Remember:</strong> the GPU status reflects the latest reported frame/route, not a guarantee that every frame in a mixed composition used the same backend. Inspect the status during a short test render for export-path behaviour. Browser WebGPU support also does not grant native-level GPU control or guaranteed multi-GPU use.</div>
+<p class="muted">For the complete shader interface and renderer implementation limits, see <a href="/projects/trilyva/docs/#gpu-diagnostics">GPU diagnostics in the documentation</a> and the <a href="/projects/trilyva/renderer/GPU-RENDERING.md">technical WebGPU reference</a>.</p>
 </section>
 <section class="wrap section" id="fixes">
 <div class="section-head"><div><div class="eyebrow">11 / TROUBLESHOOTING</div><h2>Diagnose the actual failure.</h2></div></div>
