@@ -112,7 +112,7 @@
   </div>
   <div class="tu-overview">
     <div><strong>Renderer changelog</strong><small>Major changes / newest first / browser edition</small></div>
-    <div class="tu-current">LATEST VERIFIED UPDATE<br>20 NOV 2026</div>
+    <div class="tu-current">LATEST VERIFIED UPDATE<br>21 NOV 2026</div>
   </div>
 </section>
 
@@ -130,6 +130,20 @@
   </div>
 
   <div class="tu-timeline" aria-live="polite">
+    <article class="tu-entry" data-category="gpu">
+      <div class="tu-entry-date"><strong>21 Nov 2026</strong>Latest update</div>
+      <div class="tu-entry-main">
+        <div class="tu-entry-top"><span class="tu-category">DIAGNOSTICS / GPU</span><span class="tu-state">ADDED</span></div>
+        <h3>Live GPU backend diagnostics</h3>
+        <p>The Diagnostics tab now separates browser WebGPU support from actual rendering activity. It reports whether a WGSL shader is declared, whether the automatic Canvas 2D compatibility route is available or active, whether a GPU device has been initialized, and which backend produced the latest frame.</p>
+        <ul>
+          <li>The Re-check action queries the render worker for its current GPU state instead of relying only on cached interface values.</li>
+          <li>Unsupported Canvas 2D operations, vector-edit overlays, unavailable GPU helpers, and failed GPU initialization are reported as explicit fallback reasons.</li>
+          <li>The main-thread fallback is identified as native Canvas 2D; browser WebGPU support alone is never presented as proof of GPU rendering.</li>
+        </ul>
+        <div class="tu-entry-foot">WORKER-OWNED STATUS / LIVE RE-CHECK / HONEST FALLBACK REPORTING</div>
+      </div>
+    </article>
     <article class="tu-entry" data-category="gpu">
       <div class="tu-entry-date"><strong>20 Nov 2026</strong>Recent engineering</div>
       <div class="tu-entry-main">
