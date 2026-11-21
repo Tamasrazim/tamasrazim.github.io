@@ -82,6 +82,23 @@ The shader receives the frame time, frame index, composition FPS, dimensions, du
 
 The optional descriptor field `opaque: true` is a rendering guarantee: every output pixel must have alpha 1. Declare it only when the shader really writes an opaque frame. This allows TRILYVA to skip the Canvas 2D background/composition pass for eligible GPU-only previews. It does not alter shader output or disable alpha in the WebGPU surface.
 
+## Diagnostics and route selection
+
+The renderer's Diagnostics tab separates browser support from actual GPU frame submission. Use **DIAGNOSTICS → RUNTIME → re-check** to request a fresh status snapshot from the render worker. The **GPU RENDERING** section reports:
+
+- **WebGPU API:** whether the worker exposes `navigator.gpu`; this is capability, not proof of an active GPU frame.
+- **Worker GPU helper:** whether `webgpu-renderer.js` loaded in the worker.
+- **WGSL shader:** whether the current source declares `renderFrameGPU`.
+- **Automatic Canvas 2D → WebGPU:** whether the compatibility route is available, has attempted a frame, successfully converted supported calls, or fell back.
+- **GPU device:** whether the worker has initialized a WebGPU device.
+- **Frame backend / source:** the route used for the latest reported frame.
+- **Last GPU frame:** the latest frame that completed through a GPU route. **Last attempted frame** is separate so an unsupported frame is not mislabeled as GPU-rendered.
+- **Fallback / note:** the most recent reason the GPU route was declined or failed.
+
+An explicit WGSL pipeline can be prepared before the first frame is submitted. Diagnostics labels this as **pipeline prepared; waiting for a rendered frame**; it becomes active only after a GPU frame completes. Likewise, automatic Canvas 2D support is not declared active until captured drawing commands are submitted successfully to WebGPU.
+
+The main-thread fallback has no worker WebGPU renderer and is reported as native Canvas 2D. It must not be confused with WebGPU API support in the page's browser context.
+
 ## Execution and limits
 
 The automatic Canvas 2D compatibility path is attempted for preview, still-frame inspection, and frame export when WebGPU is available. It reports `WebGPU Canvas 2D auto` only after a frame is successfully captured and submitted through the GPU primitive pipeline. Unsupported calls remain on the native Canvas 2D renderer.
