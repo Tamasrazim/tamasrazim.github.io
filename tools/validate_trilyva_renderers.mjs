@@ -8,6 +8,14 @@ const renderer=read('projects/trilyva/renderer/index.html');
 const overview=read('projects/trilyva/index.html');
 const docs=read('projects/trilyva/docs/index.html');
 const tutorial=read('projects/trilyva/tutorial/index.html');
+
+must(renderer.includes('id="diagGPU"') && renderer.includes("case 'gpuStatus'"), 'Diagnostics exposes a dedicated GPU section backed by a live worker status query');
+must(renderer.includes('function gpuStatusSnapshot()') && renderer.includes('gpuAutoAvailable()') && renderer.includes('gpuAutoAttempted'), 'GPU diagnostics distinguish API availability from actual automatic Canvas 2D GPU use');
+must(renderer.includes("backend: 'WebGPU Canvas 2D auto'") && renderer.includes("frameSource: 'Canvas 2D calls → WebGPU primitive batches'"), 'automatic Canvas 2D GPU rendering reports its active frame source');
+must(renderer.includes('function mainGpuStatus()') && renderer.includes('worker-only WebGPU compatibility renderer is not loaded'), 'main-thread fallback reports Canvas 2D instead of claiming WebGPU rendering');
+must(renderer.includes('renderGpuDiagnostics(S.gpuBackend, c)') && renderer.includes('Engine.api.getGPUStatus()'), 'Diagnostics re-check refreshes the renderer-owned GPU status');
+must(renderer.includes('same-origin WebGPU renderer helper when it starts'), 'network diagnostics disclose the same-origin worker helper request');
+
 must(docs.includes('href="/projects/trilyva/tutorial/"'), 'documentation links to the tutorial directory route');
 must(tutorial.includes('href="/projects/trilyva/docs/"'), 'tutorial links to the documentation directory route');
 must(overview.includes('/projects/trilyva/docs/') && overview.includes('/projects/trilyva/tutorial/'), 'TRILYVA overview links to the directory-based docs and tutorial routes');
@@ -78,7 +86,7 @@ must(overview.includes('/projects/trilyva/tutorial/index.html'),'TRILYVA overvie
 must(overview.includes('id="renderer-reference"') && overview.includes('RENDERER REFERENCE / 001'),'TRILYVA overview includes a dedicated renderer-reference section');
 must(overview.includes('8554d996-e226-4cf6-ad87-49624db8392e.png') && overview.includes('alt="TRILYVA Aurora Loop workspace:'),'renderer reference uses the uploaded Aurora Loop screenshot with descriptive alt text');
 must(overview.includes('OPEN THE RENDERER') && overview.includes('loading="lazy"'),'renderer reference links to the live workspace and lazy-loads its screenshot');
-must(serviceWorker.includes('tamasrazim-trilyva-pwa-v168'),'renderer service worker cache version is bumped');
+must(serviceWorker.includes('tamasrazim-trilyva-pwa-v171'),'renderer service worker cache version is bumped');
 must(!/chatgpt-motion-loop|chatgpt-30s-seamless-loop|trilyva-60s-motion-edit/i.test(serviceWorker),'promotional animation assets are removed from offline cache');
 must(!/chatgpt-motion-loop|chatgpt-30s-seamless-loop|trilyva-60s-motion-edit/i.test(overview),'TRILYVA overview no longer links to fixed-length promo animations');
 must(!/story-films|cartoon/i.test(manifest),'cartoon collection is absent from the library manifest');
@@ -103,7 +111,7 @@ const xyzSource = read('projects/trilyva/renderer/library/xyz-library.js');
 const xyzModule = await import('data:text/javascript;charset=utf-8,' + encodeURIComponent(xyzSource));
 const xyzItems = await xyzModule.default.load();
 must(manifest.libraries.includes('./xyz-library.js'), 'XYZ is registered in the TRILYVA library manifest');
-must(serviceWorker.includes('tamasrazim-trilyva-pwa-v168') && serviceWorker.includes('./library/xyz-library.js'), 'XYZ module is included in the bumped offline cache');
+must(serviceWorker.includes('tamasrazim-trilyva-pwa-v171') && serviceWorker.includes('./library/xyz-library.js'), 'XYZ module is included in the bumped offline cache');
 must(xyzItems.length === 50, 'XYZ library contains 50 distinct editable animations');
 must(new Set(xyzItems.map(item => item.title)).size === 50, 'XYZ animation titles are all unique');
 must(xyzItems.every(item => item.code.includes('function renderFrame') && item.code.length > 250), 'all XYZ animations contain editable renderFrame source');
