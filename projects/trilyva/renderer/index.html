@@ -1930,6 +1930,7 @@ body.noui-motion #tabs button,body.noui-motion #tabs button::after,body.noui-mot
             <dl class="kv" id="diagRuntime"></dl>
           </div>
           <div class="sec"><h4>BROWSER CAPABILITIES</h4><dl class="kv" id="diagCaps"></dl></div>
+          <div class="sec"><h4>GPU RENDERING</h4><dl class="kv" id="diagGPU"></dl></div>
           <div class="sec"><h4>ENCODERS</h4><dl class="kv" id="diagEnc"></dl></div>
           <div class="sec"><h4>STORAGE</h4><dl class="kv" id="diagStore"></dl>
             <div class="btn-row"><button class="btn" data-act="exportProject">Export .tmotion</button>
@@ -4013,7 +4014,59 @@ var rt = MotionCore.createRuntime();
 var assets = {}, layers = {}, vectorEdits = {}, vectorBounds = {};
 var gpuRenderer = self.TRILYVAWebGPU && self.TRILYVAWebGPU.createRenderer ? self.TRILYVAWebGPU.createRenderer() : null;
 var gpuUnavailableReason = self.TRILYVAWebGPUImportError || null;
-var gpuBackendStatus = { active: false, backend: 'Canvas 2D', reason: gpuUnavailableReason || 'No WGSL shader declared.' };
+var gpuAutoAttempted = false;
+var gpuAutoSupported = null;
+var gpuAutoLastFrame = null;
+var gpuAutoFallbackReason = null;
+var gpuBackendStatus = {
+  active: false, backend: 'Canvas 2D', mode: 'canvas2d-native',
+  reason: gpuUnavailableReason || 'No WGSL shader declared; automatic Canvas 2D GPU routing has not tested a frame yet.',
+  frameSource: 'Canvas 2D native renderer'
+};
+function gpuAutoAvailable() {
+  return !!(
+    self.navigator && self.navigator.gpu && gpuRenderer &&
+    typeof gpuRenderer.createCanvas2DRecorder === 'function' &&
+    typeof gpuRenderer.renderCanvas2D === 'function' &&
+    !gpuCanvas2DAutoUnavailable
+  );
+}
+function gpuStatusSnapshot() {
+  var rendererStatus = gpuRenderer && typeof gpuRenderer.status === 'function'
+    ? gpuRenderer.status() : {};
+  var webgpuAvailable = !!(self.navigator && self.navigator.gpu);
+  var autoAvailable = gpuAutoAvailable();
+  var unavailableReason = !webgpuAvailable
+    ? 'WebGPU is not exposed in the render worker.'
+    : !gpuRenderer
+      ? (gpuUnavailableReason || 'The worker WebGPU helper did not load.')
+      : !autoAvailable
+        ? (gpuCanvas2DAutoUnavailable || 'The automatic Canvas 2D GPU compatibility path is unavailable.')
+        : null;
+  return Object.assign({}, rendererStatus, gpuBackendStatus, {
+    webgpuAvailable: webgpuAvailable,
+    helperLoaded: !!gpuRenderer,
+    wgslDeclared: !!rt.gpu,
+    autoAvailable: autoAvailable,
+    autoAttempted: gpuAutoAttempted,
+    autoSupported: gpuAutoSupported,
+    autoFallbackReason: gpuAutoFallbackReason,
+    autoUnavailableReason: unavailableReason,
+    deviceReady: !!rendererStatus.active,
+    lastFrame: gpuAutoLastFrame
+  });
+}
+function setCanvas2DFallback(reason, frame) {
+  if (frame !== undefined && frame !== null) gpuAutoLastFrame = frame;
+  gpuAutoFallbackReason = reason || 'The frame stayed on native Canvas 2D.';
+  gpuBackendStatus = {
+    active: false,
+    backend: 'Canvas 2D',
+    mode: 'canvas2d-native',
+    reason: gpuAutoFallbackReason,
+    frameSource: 'Canvas 2D native renderer'
+  };
+}
 
 function gpuFrameInput(frame, comp) {
   return {
@@ -4025,47 +4078,81 @@ function gpuFrameInput(frame, comp) {
 }
 function renderGPUFrame(frame, comp, w, h) {
   if (!rt.gpu || !gpuRenderer || gpuUnavailableReason) return Promise.resolve(null);
+  gpuAutoLastFrame = frame;
   return gpuRenderer.render(rt.gpu, gpuFrameInput(frame, comp), w || comp.width, h || comp.height).then(function (bitmap) {
-    gpuBackendStatus = gpuRenderer.status();
+    var rendererStatus = gpuRenderer.status();
+    gpuBackendStatus = Object.assign({}, rendererStatus, {
+      active: true,
+      backend: 'WebGPU',
+      wgslDeclared: true,
+      frameSource: 'WGSL shader → WebGPU ' + (rendererStatus.mode || rt.gpu.mode || 'fragment') + ' pipeline'
+    });
     return bitmap;
   }).catch(function (error) {
     gpuUnavailableReason = String(error && error.message || error);
-    gpuBackendStatus = { active: false, backend: 'Canvas 2D fallback', reason: gpuUnavailableReason };
+    gpuBackendStatus = {
+      active: false, backend: 'Canvas 2D fallback', mode: 'wgsl-fallback',
+      reason: gpuUnavailableReason, frameSource: 'Canvas 2D native fallback'
+    };
     return null;
   });
 }
 var gpuCanvas2DAutoUnavailable = null;
 function renderAutoCanvas2DFrame(runtime, frame, comp, width, height, rasterScale, isExport) {
-  if (!runtime || runtime.gpu || !gpuRenderer || gpuCanvas2DAutoUnavailable ||
-      !self.navigator || !self.navigator.gpu ||
-      typeof gpuRenderer.createCanvas2DRecorder !== 'function' ||
-      typeof gpuRenderer.renderCanvas2D !== 'function' ||
-      typeof runtime.captureCanvas2D !== 'function') return Promise.resolve(null);
-  if (runtime.vectorEdits && Object.keys(runtime.vectorEdits).length) return Promise.resolve(null);
-  var recorder = gpuRenderer.createCanvas2DRecorder(comp.width, comp.height);
-  var captured = runtime.captureCanvas2D(frame, { isExport: !!isExport }, recorder);
-  if (!captured.ok) return Promise.resolve(null);
-  if (!captured.supported) {
-    gpuBackendStatus = {
-      active: false, backend: 'Canvas 2D compatibility fallback',
-      mode: 'canvas2d-fallback',
-      reason: captured.reason || 'This frame used a Canvas 2D API outside the GPU compatibility subset.'
-    };
+  if (!runtime || runtime.gpu) return Promise.resolve(null);
+  gpuAutoLastFrame = frame;
+  if (!self.navigator || !self.navigator.gpu) {
+    setCanvas2DFallback('WebGPU is not available in the render worker; this frame used native Canvas 2D.', frame);
     return Promise.resolve(null);
   }
+  if (!gpuRenderer || typeof gpuRenderer.createCanvas2DRecorder !== 'function' ||
+      typeof gpuRenderer.renderCanvas2D !== 'function' ||
+      typeof runtime.captureCanvas2D !== 'function') {
+    setCanvas2DFallback(gpuUnavailableReason || 'The worker WebGPU compatibility helper is unavailable; this frame used native Canvas 2D.', frame);
+    return Promise.resolve(null);
+  }
+  if (gpuCanvas2DAutoUnavailable) {
+    setCanvas2DFallback(gpuCanvas2DAutoUnavailable, frame);
+    return Promise.resolve(null);
+  }
+  if (runtime.vectorEdits && Object.keys(runtime.vectorEdits).length) {
+    setCanvas2DFallback('Vector-edit overlays are active; this composition is kept on the native Canvas 2D compositor.', frame);
+    return Promise.resolve(null);
+  }
+  gpuAutoAttempted = true;
+  var recorder = gpuRenderer.createCanvas2DRecorder(comp.width, comp.height);
+  var captured = runtime.captureCanvas2D(frame, { isExport: !!isExport }, recorder);
+  if (!captured || !captured.ok) {
+    setCanvas2DFallback((captured && captured.reason) || 'Canvas 2D command capture did not complete; native Canvas 2D was used.', frame);
+    return Promise.resolve(null);
+  }
+  if (!captured.supported) {
+    gpuAutoSupported = false;
+    setCanvas2DFallback(captured.reason || 'This frame used a Canvas 2D API outside the GPU compatibility subset.', frame);
+    gpuBackendStatus.backend = 'Canvas 2D compatibility fallback';
+    gpuBackendStatus.mode = 'canvas2d-fallback';
+    return Promise.resolve(null);
+  }
+  gpuAutoSupported = true;
+  gpuAutoFallbackReason = null;
   return gpuRenderer.renderCanvas2D(captured.commands, captured.count, width, height, rasterScale).then(function (bitmap) {
-    gpuBackendStatus = Object.assign({}, gpuRenderer.status(), {
+    var rendererStatus = gpuRenderer.status();
+    gpuBackendStatus = Object.assign({}, rendererStatus, {
       active: true, backend: 'WebGPU Canvas 2D auto', mode: 'canvas2d-auto',
+      wgslDeclared: false,
       commands: captured.count,
-      frameSource: 'Canvas 2D calls → GPU primitive batches',
+      frameSource: 'Canvas 2D calls → WebGPU primitive batches',
       captureMs: captured.ms
     });
     return { bitmap: bitmap, ms: captured.ms, count: captured.count, transport: 'webgpu-canvas2d-primitives' };
   }).catch(function (error) {
     gpuCanvas2DAutoUnavailable = String(error && error.message || error);
+    gpuAutoFallbackReason = gpuCanvas2DAutoUnavailable;
     gpuBackendStatus = {
       active: false, backend: 'Canvas 2D compatibility fallback',
-      mode: 'canvas2d-fallback', reason: gpuCanvas2DAutoUnavailable
+      mode: 'canvas2d-fallback',
+      reason: gpuCanvas2DAutoUnavailable,
+      frameSource: 'Canvas 2D native fallback'
     };
     return null;
   });
@@ -4167,6 +4254,10 @@ self.onmessage = function (ev) {
     switch (m.type) {
       case 'ping': send({ type: 'pong', id: id, version: MotionCore.VERSION }); break;
 
+      case 'gpuStatus':
+        send({ type: 'gpuStatus', id: id, status: gpuStatusSnapshot() });
+        break;
+
       case 'assets':
         Promise.all((m.assets || []).map(function (a) {
           return createImageBitmap(a.blob).then(function (bm) { return { name: a.name, bm: bm }; })
@@ -4220,25 +4311,47 @@ self.onmessage = function (ev) {
         rt.setLayers(Object.keys(layers).map(function (key) { return layers[key]; }));
         rt.setVectorState(vectorEdits,vectorBounds);
         gpuUnavailableReason = self.TRILYVAWebGPUImportError || null;
+        gpuAutoAttempted = false;
+        gpuAutoSupported = null;
+        gpuAutoLastFrame = null;
+        gpuAutoFallbackReason = null;
+        gpuCanvas2DAutoUnavailable = null;
         var compileResult = rt.compile(m.code);
         if (!compileResult.ok || !rt.gpu) {
-          gpuBackendStatus = { active: false, backend: rt.gpu ? 'Canvas 2D fallback' : 'Canvas 2D', reason: rt.gpu ? (gpuUnavailableReason || 'WGSL renderer is unavailable.') : 'No WGSL shader declared.' };
-          if (rt.gpu) compileResult.gpu = gpuBackendStatus;
+          gpuBackendStatus = {
+            active: false,
+            backend: 'Canvas 2D',
+            mode: 'canvas2d-native',
+            reason: !compileResult.ok
+              ? 'The source did not compile; no frame backend was selected.'
+              : 'No WGSL shader declared. Compatible Canvas 2D commands will be tested on preview/export.',
+            frameSource: 'Canvas 2D native renderer'
+          };
+          compileResult.gpu = gpuStatusSnapshot();
           send({ type: 'compile', id: id, result: compileResult });
         } else if (!gpuRenderer) {
           gpuUnavailableReason = gpuUnavailableReason || 'The WebGPU helper did not load in the render worker.';
-          gpuBackendStatus = { active: false, backend: 'Canvas 2D fallback', reason: gpuUnavailableReason };
-          compileResult.gpu = gpuBackendStatus;
+          gpuBackendStatus = {
+            active: false, backend: 'Canvas 2D fallback', mode: 'wgsl-fallback',
+            reason: gpuUnavailableReason, frameSource: 'Canvas 2D native fallback'
+          };
+          compileResult.gpu = gpuStatusSnapshot();
           send({ type: 'compile', id: id, result: compileResult });
         } else {
           gpuRenderer.prepare(rt.gpu).then(function (gpuInfo) {
-            gpuBackendStatus = gpuInfo;
-            compileResult.gpu = gpuInfo;
+            gpuBackendStatus = Object.assign({}, gpuInfo, {
+              wgslDeclared: true,
+              frameSource: 'WGSL ' + (gpuInfo.mode || rt.gpu.mode || 'fragment') + ' pipeline'
+            });
+            compileResult.gpu = gpuStatusSnapshot();
             send({ type: 'compile', id: id, result: compileResult });
           }).catch(function (error) {
             gpuUnavailableReason = String(error && error.message || error);
-            gpuBackendStatus = { active: false, backend: 'Canvas 2D fallback', reason: gpuUnavailableReason };
-            compileResult.gpu = gpuBackendStatus;
+            gpuBackendStatus = {
+              active: false, backend: 'Canvas 2D fallback', mode: 'wgsl-fallback',
+              reason: gpuUnavailableReason, frameSource: 'Canvas 2D native fallback'
+            };
+            compileResult.gpu = gpuStatusSnapshot();
             send({ type: 'compile', id: id, result: compileResult });
           });
         }
@@ -4266,7 +4379,7 @@ self.onmessage = function (ev) {
               send({
                 type: 'preview', id: id, ok: true, frame: m.frame,
                 ms: performance.now() - previewStarted,
-                gpuBackend: gpuBackendStatus, directGPUPreview: true,
+                gpuBackend: gpuStatusSnapshot(), directGPUPreview: true,
                 bitmap: gpuBitmap
               }, [gpuBitmap]);
             } catch (transferError) {
@@ -4286,7 +4399,7 @@ self.onmessage = function (ev) {
           var bmp = previewCanvas.transferToImageBitmap();
           send({
             type: 'preview', id: id, ok: true, frame: m.frame,
-            ms: r.ms, gpuBackend: gpuBackendStatus,
+            ms: r.ms, gpuBackend: gpuStatusSnapshot(),
             directGPUPreview: false, bitmap: bmp
           }, [bmp]);
         }).catch(function (error) {
@@ -4306,7 +4419,7 @@ self.onmessage = function (ev) {
           finally { if (gpuBitmap && gpuBitmap.close) gpuBitmap.close(); }
           if (!rr.ok) { send({ type: 'renderOne', id: id, ok: false, error: rr.error }); return; }
           var b2 = o.canvas.transferToImageBitmap();
-          send({ type: 'renderOne', id: id, ok: true, ms: rr.ms, gpuBackend: gpuBackendStatus, bitmap: b2 }, [b2]);
+          send({ type: 'renderOne', id: id, ok: true, ms: rr.ms, gpuBackend: gpuStatusSnapshot(), bitmap: b2 }, [b2]);
         }).catch(function (error) {
           send({ type: 'renderOne', id: id, ok: false, error: { name: error.name || 'RenderError', message: String(error.message || error), stage: 'render' } });
         });
@@ -4404,7 +4517,7 @@ self.onmessage = function (ev) {
           },
           isCancelled: function () { return cancelled; },
           onLog: function (msg) { send({ type: 'log', id: id, message: msg }); },
-          onProgress: function (p) { send({ type: 'progress', id: id, progress: p, gpuBackend: gpuBackendStatus }); }
+          onProgress: function (p) { send({ type: 'progress', id: id, progress: p, gpuBackend: gpuStatusSnapshot() }); }
         }).then(function (r) {
           if (r.blob) send({ type: 'done', id: id, result: r });
           else send({ type: 'done', id: id, result: r });
@@ -8196,7 +8309,15 @@ function mainEngine() {
       rt.setVectorState(vectorEdits,vectorBounds);
       return Promise.resolve(true);
     },
-    compile: function (code, comp) { rt.setComposition(comp); rt.setAssets(assets); return Promise.resolve(rt.compile(code)).then(function (result) { if (result && result.ok && rt.gpu) result.gpu = { active: false, backend: 'Canvas 2D fallback', reason: 'The main-thread compatibility renderer does not execute WGSL. Use the dedicated worker with WebGPU support.' }; return result; }); },
+    getGPUStatus: function () { return Promise.resolve(mainGpuStatus()); },
+    compile: function (code, comp) {
+      rt.setComposition(comp); rt.setAssets(assets);
+      return Promise.resolve(rt.compile(code)).then(function (result) {
+        if (result) result.gpu = mainGpuStatus();
+        return result;
+      });
+    },
+    getGPUStatus: function () { return Promise.resolve(mainGpuStatus()); },
     setComposition: function (comp) { rt.setComposition(comp); return Promise.resolve(); },
     preview: function (frame, w, h, scale) {
       if (!pv || pv.canvas.width !== w || pv.canvas.height !== h) pv = mk(w, h);
@@ -8296,6 +8417,7 @@ function workerEngine() {
       activeVectorState = {edits:edits || {},bounds:bounds || {}};
       return call({type:'vectorState',edits:activeVectorState.edits,bounds:activeVectorState.bounds});
     },
+    getGPUStatus: function () { return call({ type: 'gpuStatus' }).then(function (m) { return m.status; }); },
     compile: function (code, comp) { return call({ type: 'compile', code: code, composition: comp }).then(function (m) { return m.result; }); },
     setComposition: function (comp) { return call({ type: 'composition', composition: comp }); },
     preview: function (frame, rw, rh, scale) { return call({ type: 'preview', frame: frame, rasterW: rw, rasterH: rh, scale: scale }); },
@@ -10946,7 +11068,10 @@ function requestPreview(force) {
   var want = S.frame;
   Engine.api.preview(want, r.w, r.h, r.s).then(function (res) {
     S.previewBusy = false;
-    if (res && res.gpuBackend) S.gpuBackend = res.gpuBackend;
+    if (res && res.gpuBackend) {
+      S.gpuBackend = res.gpuBackend;
+      if (S.tab === 'p-diag') renderGpuDiagnostics(S.gpuBackend, S.caps);
+    }
     if (!res.ok) { showRuntimeError(res.error); return; }
     hideStageMsg();
     S.lastPainted = want;
@@ -11597,6 +11722,7 @@ function run() {
     }
     S.compiled = true;
     S.gpuBackend = res.gpu || null;
+    if (S.tab === 'p-diag') renderGpuDiagnostics(S.gpuBackend, S.caps);
     S.lastError = null;
     hideStageMsg();
     if (vectorSourceChanged && S.canvasEditorOpen) {
@@ -12198,6 +12324,7 @@ function startRenderNow(job, opts) {
   function onProgress(p, gpuBackend) {
     if (gpuBackend) {
       S.gpuBackend = gpuBackend;
+      if (S.tab === 'p-diag') renderGpuDiagnostics(S.gpuBackend, S.caps);
       if (!gpuBackend.active && gpuBackend.reason) $('#stMsg').textContent = 'WebGPU fallback · ' + gpuBackend.reason;
     }
     if (!sawFirstFrame) { sawFirstFrame = true; setStage('RENDERING'); prog.classList.remove('scan'); }
@@ -13037,8 +13164,83 @@ function kvRow(dl, k, v, cls) {
 function yesNo(dl, k, ok, yes, no) {
   kvRow(dl, k, ok ? (yes || 'SUPPORTED') : (no || 'NOT AVAILABLE'), ok ? 'ok' : 'no');
 }
+var diagRefreshSequence = 0;
+function renderGpuDiagnostics(status, caps) {
+  var dl = $('#diagGPU');
+  if (!dl) return;
+  dl.innerHTML = '';
+  var s = status || {};
+  var c = caps || S.caps || {};
+  var webgpu = s.webgpuAvailable !== undefined ? s.webgpuAvailable : !!c.webgpu;
+  var declared = !!s.wgslDeclared;
+  var autoAvailable = !!s.autoAvailable;
+  var autoAttempted = !!s.autoAttempted;
+  var autoSupported = s.autoSupported;
+  var autoActive = !!(s.active && s.mode === 'canvas2d-auto');
+  var explicitActive = !!(s.active && declared && s.mode !== 'canvas2d-auto');
+
+  yesNo(dl, 'WebGPU API', webgpu, 'SUPPORTED — browser exposes navigator.gpu', 'NOT AVAILABLE');
+  yesNo(dl, 'Worker GPU helper', !!s.helperLoaded, 'LOADED', 'NOT LOADED');
+  kvRow(dl, 'WGSL shader', declared
+    ? 'DECLARED' + (s.label ? ' — ' + s.label : '')
+    : 'NOT DECLARED — source uses the standard renderFrame() contract',
+    declared ? 'ok' : 'warn');
+
+  var autoText, autoClass;
+  if (declared) {
+    autoText = 'NOT USED — explicit WGSL rendering takes priority over automatic Canvas 2D conversion.';
+    autoClass = 'warn';
+  } else if (!autoAvailable) {
+    autoText = 'NOT AVAILABLE — ' + (s.autoUnavailableReason || s.reason || 'the worker GPU path is unavailable.');
+    autoClass = 'no';
+  } else if (!autoAttempted) {
+    autoText = 'AVAILABLE FOR SUPPORTED CANVAS 2D PRIMITIVES — waiting for a compatible preview/export frame and lazy GPU-device initialization.';
+    autoClass = 'warn';
+  } else if (autoActive) {
+    autoText = 'ACTIVE — Canvas 2D calls were converted to GPU primitive batches for the latest frame.';
+    autoClass = 'ok';
+  } else if (autoSupported === false) {
+    autoText = 'FALLBACK — this frame used Canvas 2D operations outside the GPU compatibility subset.';
+    autoClass = 'warn';
+  } else {
+    autoText = 'ATTEMPTED, BUT NOT ACTIVE — ' + (s.autoFallbackReason || s.reason || 'the latest frame remained on native Canvas 2D.');
+    autoClass = 'warn';
+  }
+  kvRow(dl, 'Automatic Canvas 2D → WebGPU', autoText, autoClass);
+
+  kvRow(dl, 'GPU device',
+    s.deviceReady
+      ? 'INITIALIZED — ' + (s.adapter || 'adapter selected')
+      : (webgpu && s.helperLoaded
+        ? 'NOT INITIALIZED — the renderer requests an adapter only when a GPU frame is needed.'
+        : 'NOT INITIALIZED — no active WebGPU device.'),
+    s.deviceReady ? 'ok' : 'warn');
+
+  var frameBackend;
+  if (explicitActive) {
+    frameBackend = 'WebGPU — explicit WGSL ' + (s.mode || 'shader') + ' pipeline';
+  } else if (autoActive) {
+    frameBackend = 'WebGPU — automatic Canvas 2D primitive pipeline';
+  } else if (s.mode === 'wgsl-fallback') {
+    frameBackend = 'Canvas 2D fallback — WGSL pipeline did not activate';
+  } else if (s.mode === 'canvas2d-fallback') {
+    frameBackend = 'Canvas 2D fallback — automatic GPU path declined this frame';
+  } else if (!autoAttempted && autoAvailable && !declared) {
+    frameBackend = 'Canvas 2D — automatic GPU path is available but has not been exercised yet';
+  } else {
+    frameBackend = (s.backend || 'Canvas 2D') + ' — native frame path';
+  }
+  kvRow(dl, 'Frame backend', frameBackend,
+    explicitActive || autoActive ? 'ok' : 'warn');
+  kvRow(dl, 'Frame source', s.frameSource || 'No GPU frame submitted yet; native Canvas 2D remains available.');
+  kvRow(dl, 'Last GPU frame', s.lastFrame === undefined || s.lastFrame === null ? 'none' : String(s.lastFrame));
+  kvRow(dl, 'Fallback / note',
+    s.autoFallbackReason || s.reason || s.autoUnavailableReason || 'No GPU fallback has been reported.',
+    s.autoFallbackReason || s.reason || s.autoUnavailableReason ? 'warn' : 'ok');
+}
 function refreshDiag() {
   var c = detectCaps();
+  var diagSequence = ++diagRefreshSequence;
   var dl = $('#diagRuntime'); dl.innerHTML = '';
   kvRow(dl, 'Engine', Engine.mode === 'worker' ? 'worker + OffscreenCanvas' : 'main thread', Engine.mode === 'worker' ? 'ok' : 'warn');
   kvRow(dl, 'Isolation', Engine.mode === 'worker'
@@ -13064,12 +13266,24 @@ function refreshDiag() {
   yesNo(dl, 'Secure context', c.secure);
   yesNo(dl, 'WebGL2', c.webgl2, 'SUPPORTED — usable from your code via a second canvas', 'NOT AVAILABLE');
   yesNo(dl, 'WebGPU', c.webgpu);
-  if (S.gpuBackend) kvRow(dl, 'Frame backend', S.gpuBackend.active ? 'WebGPU · ' + (S.gpuBackend.mode ? S.gpuBackend.mode + ' pipeline · ' : '') + (S.gpuBackend.adapter || 'adapter ready') + (S.gpuBackend.frameSource ? ' · ' + S.gpuBackend.frameSource : '') : (S.gpuBackend.backend || 'Canvas 2D fallback') + ' · ' + (S.gpuBackend.reason || 'shader not active'), S.gpuBackend.active ? 'ok' : 'warn');
-  else kvRow(dl, 'Frame backend', 'Not initialised · compile a WGSL animation to test', 'warn');
   kvRow(dl, 'Logical cores', c.cores ? String(c.cores) : 'not reported');
   kvRow(dl, 'Device memory', c.memoryGB ? c.memoryGB + ' GB (browser estimate)' : 'not reported');
   kvRow(dl, 'Device pixel ratio', c.dpr.toFixed(2));
   kvRow(dl, 'Display mode', c.standalone ? 'standalone (installed)' : 'browser tab');
+
+  renderGpuDiagnostics(S.gpuBackend, c);
+  if (Engine.api && typeof Engine.api.getGPUStatus === 'function') {
+    Engine.api.getGPUStatus().then(function (status) {
+      if (diagSequence !== diagRefreshSequence) return;
+      S.gpuBackend = status || S.gpuBackend;
+      renderGpuDiagnostics(S.gpuBackend, c);
+    }).catch(function (error) {
+      if (diagSequence !== diagRefreshSequence) return;
+      renderGpuDiagnostics(Object.assign({}, S.gpuBackend || {}, {
+        reason: 'Could not query the render worker: ' + String(error && error.message || error)
+      }), c);
+    });
+  }
 
   dl = $('#diagEnc'); dl.innerHTML = '';
   dl.appendChild(el('dt', null, 'H.264 / AVC (WebCodecs)'));
@@ -13121,7 +13335,7 @@ function refreshDiag() {
     ? (S.swNote || 'available — but this page is served from a sandboxed artifact origin, so it cannot register one. Download the app and serve it yourself to get offline install.')
     : 'not supported by this browser', 'warn');
   kvRow(dl, 'Offline use', 'The app is one HTML file with no network calls at runtime — save it and it works offline from the file system. PWA install needs your own origin.', 'warn');
-  kvRow(dl, 'Network', 'This page makes no requests after load: no CDN, no fonts, no telemetry, no backend.', 'ok');
+  kvRow(dl, 'Network', 'No backend, telemetry, or third-party runtime services. The worker loads the same-origin WebGPU renderer helper when it starts.', 'ok');
 }
 
 /* ============================================================
