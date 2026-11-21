@@ -209,10 +209,15 @@ for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
   if (/text\/plain|application\/ld\+json|text\/json/i.test(type)) continue;
   if (match[2].trim()) new Function(match[2]);
 }
+assert.match(html, /id="diagGPU"/, 'Diagnostics has a dedicated GPU rendering section');
+assert.match(html, /case 'gpuStatus'/, 'Diagnostics can query renderer-owned GPU state');
+assert.match(html, /function gpuStatusSnapshot\(\)/, 'worker reports WGSL and automatic Canvas 2D GPU routing separately');
+assert.match(html, /Automatic Canvas 2D → WebGPU/, 'Diagnostics labels the automatic Canvas 2D GPU compatibility path');
+assert.match(html, /function mainGpuStatus\(\)/, 'main-thread fallback is explicitly identified as Canvas 2D');
 assert.match(html, /importScripts\(/);
 assert.match(html, /renderGPUFrame\(/);
 assert.match(html, /gpuBitmap/);
-assert.match(serviceWorker, /tamasrazim-trilyva-pwa-v170-auto-canvas2d-gpu/);
+assert.match(serviceWorker, /tamasrazim-trilyva-pwa-v171-live-gpu-diagnostics/);
 assert.match(serviceWorker, /\.\/webgpu-renderer\.js/);
 assert.match(serviceWorker, /\.\/examples\/singularity-protocol-webgpu\.js/);
 
