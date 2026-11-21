@@ -298,7 +298,7 @@ const y = height * 0.5 + Math.sin(angle) * height * 0.1;</code></pre>
 <p class="muted">For the complete shader interface and renderer implementation limits, see <a href="/projects/trilyva/docs/#gpu-diagnostics">GPU diagnostics in the documentation</a> and the <a href="/projects/trilyva/renderer/GPU-RENDERING.md">technical WebGPU reference</a>.</p>
 </section>
 <section class="wrap section" id="fixes">
-<div class="section-head"><div><div class="eyebrow">11 / TROUBLESHOOTING</div><h2>Diagnose the actual failure.</h2></div></div>
+<div class="section-head"><div><div class="eyebrow">12 / TROUBLESHOOTING</div><h2>Diagnose the actual failure.</h2></div></div>
 <table class="table"><thead><tr><th>SYMPTOM</th><th>WHAT TO CHECK</th></tr></thead><tbody>
 <tr><td>Blank preview</td><td>Read the compile/runtime message; check braces, quotes, variable names, and whether the function is assigned to <code>window.renderFrame</code> as expected.</td></tr>
 <tr><td>Animation jumps or flickers</td><td>Derive each frame from time/frame. Avoid <code>Math.random()</code>, <code>Date.now()</code>, or positions that accumulate on every call.</td></tr>
