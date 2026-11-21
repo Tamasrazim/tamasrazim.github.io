@@ -13252,9 +13252,10 @@ function renderGpuDiagnostics(status, caps) {
     explicitActive || autoActive ? 'ok' : 'warn');
   kvRow(dl, 'Frame source', s.frameSource || 'No GPU frame submitted yet; native Canvas 2D remains available.');
   kvRow(dl, 'Last GPU frame', s.lastFrame === undefined || s.lastFrame === null ? 'none' : String(s.lastFrame));
-  kvRow(dl, 'Fallback / note',
-    s.autoFallbackReason || s.reason || s.autoUnavailableReason || 'No GPU fallback has been reported.',
-    s.autoFallbackReason || s.reason || s.autoUnavailableReason ? 'warn' : 'ok');
+  var gpuNote = s.autoFallbackReason || s.autoUnavailableReason ||
+    (declared && !s.active ? s.reason : null) || 'No GPU fallback has been reported.';
+  kvRow(dl, 'Fallback / note', gpuNote,
+    gpuNote === 'No GPU fallback has been reported.' ? 'ok' : 'warn');
 }
 function refreshDiag() {
   var c = detectCaps();
