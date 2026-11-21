@@ -9,6 +9,13 @@ const overview=read('projects/trilyva/index.html');
 const docs=read('projects/trilyva/docs/index.html');
 const tutorial=read('projects/trilyva/tutorial/index.html');
 
+must(docs.includes('id="gpu-diagnostics"') && docs.includes('Automatic Canvas 2D → WebGPU'), 'documentation explains the live GPU diagnostics panel and route states');
+must(docs.includes('Last GPU frame') && docs.includes('Last attempted frame'), 'documentation distinguishes completed GPU frames from attempted frames');
+must(tutorial.includes('id="gpu-diagnostics"') && tutorial.includes('Open Diagnostics and re-check'), 'complete tutorial includes step-by-step GPU diagnostics instructions');
+must(tutorial.includes('AVAILABLE') && tutorial.includes('ACTIVE') && tutorial.includes('FALLBACK'), 'tutorial explains the meanings of automatic GPU status states');
+must(read('projects/trilyva/renderer/GPU-RENDERING.md').includes('## Diagnostics and route selection'), 'technical WebGPU reference documents live diagnostics semantics');
+
+
 must(renderer.includes('id="diagGPU"') && renderer.includes("case 'gpuStatus'"), 'Diagnostics exposes a dedicated GPU section backed by a live worker status query');
 must(renderer.includes('function gpuStatusSnapshot()') && renderer.includes('gpuAutoAvailable()') && renderer.includes('gpuAutoAttempted'), 'GPU diagnostics distinguish API availability from actual automatic Canvas 2D GPU use');
 must(renderer.includes("backend: 'WebGPU Canvas 2D auto'") && renderer.includes("frameSource: 'Canvas 2D calls → WebGPU primitive batches'"), 'automatic Canvas 2D GPU rendering reports its active frame source');
