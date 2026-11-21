@@ -4017,6 +4017,7 @@ var gpuUnavailableReason = self.TRILYVAWebGPUImportError || null;
 var gpuAutoAttempted = false;
 var gpuAutoSupported = null;
 var gpuAutoLastFrame = null;
+var gpuAutoLastAttemptedFrame = null;
 var gpuAutoFallbackReason = null;
 var gpuBackendStatus = {
   active: false, backend: 'Canvas 2D', mode: 'canvas2d-native',
@@ -4053,11 +4054,13 @@ function gpuStatusSnapshot() {
     autoFallbackReason: gpuAutoFallbackReason,
     autoUnavailableReason: unavailableReason,
     deviceReady: !!rendererStatus.active,
-    lastFrame: gpuAutoLastFrame
+    lastFrame: gpuAutoLastFrame,
+    lastAttemptedFrame: gpuAutoLastAttemptedFrame,
+    pipelineReady: !!gpuBackendStatus.pipelineReady
   });
 }
 function setCanvas2DFallback(reason, frame) {
-  if (frame !== undefined && frame !== null) gpuAutoLastFrame = frame;
+  if (frame !== undefined && frame !== null) gpuAutoLastAttemptedFrame = frame;
   gpuAutoFallbackReason = reason || 'The frame stayed on native Canvas 2D.';
   gpuBackendStatus = {
     active: false,
@@ -4078,8 +4081,9 @@ function gpuFrameInput(frame, comp) {
 }
 function renderGPUFrame(frame, comp, w, h) {
   if (!rt.gpu || !gpuRenderer || gpuUnavailableReason) return Promise.resolve(null);
-  gpuAutoLastFrame = frame;
+  gpuAutoLastAttemptedFrame = frame;
   return gpuRenderer.render(rt.gpu, gpuFrameInput(frame, comp), w || comp.width, h || comp.height).then(function (bitmap) {
+    gpuAutoLastFrame = frame;
     var rendererStatus = gpuRenderer.status();
     gpuBackendStatus = Object.assign({}, rendererStatus, {
       active: true,
@@ -4100,7 +4104,7 @@ function renderGPUFrame(frame, comp, w, h) {
 var gpuCanvas2DAutoUnavailable = null;
 function renderAutoCanvas2DFrame(runtime, frame, comp, width, height, rasterScale, isExport) {
   if (!runtime || runtime.gpu) return Promise.resolve(null);
-  gpuAutoLastFrame = frame;
+  gpuAutoLastAttemptedFrame = frame;
   if (!self.navigator || !self.navigator.gpu) {
     setCanvas2DFallback('WebGPU is not available in the render worker; this frame used native Canvas 2D.', frame);
     return Promise.resolve(null);
@@ -4136,9 +4140,10 @@ function renderAutoCanvas2DFrame(runtime, frame, comp, width, height, rasterScal
   gpuAutoSupported = true;
   gpuAutoFallbackReason = null;
   return gpuRenderer.renderCanvas2D(captured.commands, captured.count, width, height, rasterScale).then(function (bitmap) {
+    gpuAutoLastFrame = frame;
     var rendererStatus = gpuRenderer.status();
     gpuBackendStatus = Object.assign({}, rendererStatus, {
-      active: true, backend: 'WebGPU Canvas 2D auto', mode: 'canvas2d-auto',
+      active: true, pipelineReady: true, backend: 'WebGPU Canvas 2D auto', mode: 'canvas2d-auto',
       wgslDeclared: false,
       commands: captured.count,
       frameSource: 'Canvas 2D calls → WebGPU primitive batches',
@@ -4314,6 +4319,7 @@ self.onmessage = function (ev) {
         gpuAutoAttempted = false;
         gpuAutoSupported = null;
         gpuAutoLastFrame = null;
+        gpuAutoLastAttemptedFrame = null;
         gpuAutoFallbackReason = null;
         gpuCanvas2DAutoUnavailable = null;
         var compileResult = rt.compile(m.code);
@@ -4340,8 +4346,10 @@ self.onmessage = function (ev) {
         } else {
           gpuRenderer.prepare(rt.gpu).then(function (gpuInfo) {
             gpuBackendStatus = Object.assign({}, gpuInfo, {
+              active: false,
+              pipelineReady: true,
               wgslDeclared: true,
-              frameSource: 'WGSL ' + (gpuInfo.mode || rt.gpu.mode || 'fragment') + ' pipeline'
+              frameSource: 'WGSL ' + (gpuInfo.mode || rt.gpu.mode || 'fragment') + ' pipeline prepared; waiting for first rendered frame'
             });
             compileResult.gpu = gpuStatusSnapshot();
             send({ type: 'compile', id: id, result: compileResult });
@@ -4491,11 +4499,16 @@ self.onmessage = function (ev) {
                   }
                 }
                 if (directGpuCanvasProbe) {
+                  gpuAutoLastFrame = frame;
+                  gpuAutoLastAttemptedFrame = frame;
                   gpuBackendStatus = Object.assign({}, gpuRenderer.status(), {
+                    active: true, pipelineReady: true,
                     frameSource: 'WebGPU OffscreenCanvas → VideoFrame'
                   });
                   return { gpuCanvas: gpuCanvas };
                 }
+                gpuAutoLastFrame = frame;
+                gpuAutoLastAttemptedFrame = frame;
                 var fallbackBitmap = gpuCanvas.transferToImageBitmap();
                 gpuBackendStatus = Object.assign({}, gpuRenderer.status(), {
                   frameSource: 'WebGPU OffscreenCanvas → ImageBitmap fallback'
@@ -13196,6 +13209,7 @@ function renderGpuDiagnostics(status, caps) {
   var autoSupported = s.autoSupported;
   var autoActive = !!(s.active && s.mode === 'canvas2d-auto');
   var explicitActive = !!(s.active && declared && s.mode !== 'canvas2d-auto');
+  var explicitPrepared = !!(declared && s.pipelineReady && !explicitActive);
 
   yesNo(dl, 'WebGPU API', webgpu, 'SUPPORTED — browser exposes navigator.gpu', 'NOT AVAILABLE');
   yesNo(dl, 'Worker GPU helper', !!s.helperLoaded, 'LOADED', 'NOT LOADED');
@@ -13239,6 +13253,8 @@ function renderGpuDiagnostics(status, caps) {
     frameBackend = 'WebGPU — explicit WGSL ' + (s.mode || 'shader') + ' pipeline';
   } else if (autoActive) {
     frameBackend = 'WebGPU — automatic Canvas 2D primitive pipeline';
+  } else if (explicitPrepared) {
+    frameBackend = 'WebGPU — explicit WGSL pipeline prepared; waiting for a rendered frame';
   } else if (s.mode === 'wgsl-fallback') {
     frameBackend = 'Canvas 2D fallback — WGSL pipeline did not activate';
   } else if (s.mode === 'canvas2d-fallback') {
@@ -13251,7 +13267,8 @@ function renderGpuDiagnostics(status, caps) {
   kvRow(dl, 'Frame backend', frameBackend,
     explicitActive || autoActive ? 'ok' : 'warn');
   kvRow(dl, 'Frame source', s.frameSource || 'No GPU frame submitted yet; native Canvas 2D remains available.');
-  kvRow(dl, 'Last GPU frame', s.lastFrame === undefined || s.lastFrame === null ? 'none' : String(s.lastFrame));
+  kvRow(dl, 'Last GPU frame', s.lastFrame === undefined || s.lastFrame === null ? 'none — no frame has completed on the GPU yet' : String(s.lastFrame));
+  kvRow(dl, 'Last attempted frame', s.lastAttemptedFrame === undefined || s.lastAttemptedFrame === null ? 'none' : String(s.lastAttemptedFrame));
   var gpuNote = s.autoFallbackReason || s.autoUnavailableReason ||
     (declared && !s.active ? s.reason : null) || 'No GPU fallback has been reported.';
   kvRow(dl, 'Fallback / note', gpuNote,
