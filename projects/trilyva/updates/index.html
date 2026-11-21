@@ -137,7 +137,7 @@
         <h3>Live GPU backend diagnostics</h3>
         <p>The Diagnostics tab now separates browser WebGPU support from actual rendering activity. It reports whether a WGSL shader is declared, whether the automatic Canvas 2D compatibility route is available or active, whether a GPU device has been initialized, and which backend produced the latest frame.</p>
         <ul>
-          <li>The Re-check action queries the render worker for its current GPU state instead of relying only on cached interface values.</li>
+          <li>The Re-check action queries the render worker for its current GPU state instead of relying only on cached interface values. A prepared WGSL pipeline is distinguished from a frame that has actually completed on the GPU.</li>
           <li>Unsupported Canvas 2D operations, vector-edit overlays, unavailable GPU helpers, and failed GPU initialization are reported as explicit fallback reasons.</li>
           <li>The main-thread fallback is identified as native Canvas 2D; browser WebGPU support alone is never presented as proof of GPU rendering.</li>
         </ul>
