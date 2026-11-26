@@ -317,7 +317,7 @@ const constellationStarMarkup=constellationFieldStart>=0&&constellationFieldEnd>
 const constellationStars=(constellationStarMarkup.match(/<i class="id-star/g)||[]).length;
 must(constellationStars===425,'identity card maps 425 detected star points across the constellation artwork');
 must(constellationStarMarkup&&constellationStarMarkup.includes('--x:64.673%;--y:33.493%')&&constellationStarMarkup.includes('--x:64.673%;--y:46.651%'),'identity-card star glints follow the new vertical constellation chain');
-const constellationCoordinates=Array.from(constellationStarMarkup.matchAll(/--x:([\\d.]+)%;--y:([\\d.]+)%/g),match=>[Number(match[1]),Number(match[2])]);
+const constellationCoordinates=Array.from(constellationStarMarkup.matchAll(/--x:([\d.]+)%;--y:([\d.]+)%/g),match=>[Number(match[1]),Number(match[2])]);
 must(constellationCoordinates.length===425&&constellationCoordinates.every(([x,y])=>x>=0&&x<=100&&y>=0&&y<=100),'all detected identity-card stars use valid normalized image coordinates');
 must(identityCss.includes('transform-origin:right center')&&identityCss.includes('translate3d(-1.745%,.6%,0)'),'identity-card star field stays aligned with the right-aligned square image during drift');
 must(identityCss.includes('.id-star-bright::before')&&identityCss.includes('.id-star-bright::after'),'bright constellation nodes retain four-point star glints');
