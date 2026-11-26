@@ -310,6 +310,13 @@ must(site.includes('<body class="home-v2">')&&site.includes('class="v3-hero v3-s
 must(rootSchema['@graph'].some(n=>n['@type']==='SoftwareApplication'&&n.name==='KEYRUN — Typing Lesson')&&hub.includes('href="/projects/typing-lesson/"'),'KEYRUN remains documented in the person schema and project directory');
 must(site.includes('id="secretNode"')&&site.includes('id="secretReveal"'),'homepage still exposes the hidden-origin trigger and dialog');
 must(site.includes('class="id-card tilt reveal"')&&site.includes('id="idAlias"')&&site.includes('class="id-constellation"'),'homepage retains the identity card and its constellation artwork');
+const identityCss=read('assets/css/site.css');
+const constellationStarMarkup=site.match(/<span class="id-star-field" aria-hidden="true">([\\s\\S]*?)<\\/span>/);
+const constellationStars=constellationStarMarkup? [...constellationStarMarkup[1].matchAll(/<i class="id-star/g)].length:0;
+must(constellationStars===48,'identity card has 48 star glints mapped to the new constellation artwork');
+must(constellationStarMarkup&&constellationStarMarkup[1].includes('--x:64.673%;--y:33.493%')&&constellationStarMarkup[1].includes('--x:64.673%;--y:46.651%'),'identity-card star glints follow the new vertical constellation chain');
+must(identityCss.includes('transform-origin:right center')&&identityCss.includes('translate3d(-1.745%,.6%,0)'),'identity-card star field stays aligned with the right-aligned square image during drift');
+must(identityCss.includes('.id-star-bright::before')&&identityCss.includes('.id-star-bright::after'),'bright constellation nodes retain four-point star glints');
 must(!site.includes('project-cinematic-intro.css?v=')&&!site.includes('project-cinematic-intro.js?v='),'homepage does not load the project-page intro overlay');
 const cinematicProjectKeys=['tunrun','webedyts','qalyvyron','trilyva','neo','code-to-svg','code-to-eps','format-forge','asset-vault','kynestra','bncagrocare','repo-token-meter'];
 must(cinematicProjectKeys.every(key=>cinematicIntroJs.includes(key+': {')||cinematicIntroJs.includes('"'+key+'": {')),'cinematic intro has a dedicated animation profile for every featured project');
