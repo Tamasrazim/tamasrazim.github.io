@@ -169,7 +169,7 @@ const knownSchemaIds=new Set(rootSchema['@graph'].map(n=>n['@id']));
 const rootPerson=rootSchema['@graph'].find(n=>n['@type']==='Person');
 must(rootPerson.subjectOf.every(ref=>knownSchemaIds.has(ref['@id'])),'person schema references defined project entities');
 must(!site.includes('BOGURA')&&!site.includes('BANGLADESH'),'homepage omits unwanted location text');
-must((site.match(/<article\\b[^>]*class="[^"]*\\bv3-project-card\\b[^"]*"/g)||[]).length===12,'homepage presents twelve curated project cards');
+must((site.match(/<article\b[^>]*class="[^"]*\bv3-project-card\b[^"]*"/g)||[]).length===12,'homepage presents twelve curated project cards');
 must(!site.includes('PRO_TOOL_MANIFEST'),'homepage omits the generated micro-tool catalogue');
 for(const ref of [
   'href="/projects/trilyva/"','href="/projects/asset-vault/"','href="/projects/bncagrocare/"',
