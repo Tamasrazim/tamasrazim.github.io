@@ -589,7 +589,7 @@
       filter:grayscale(1) contrast(1.12) brightness(.88);mix-blend-mode:screen;opacity:.82;
       -webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.15) 8%,#000 31%,#000 100%);
       mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.15) 8%,#000 31%,#000 100%);
-      animation:idConstellationDrift 10s ease-in-out infinite alternate
+      animation:idConstellationDrift 22s cubic-bezier(.45,0,.55,1) infinite alternate
     }
     @keyframes idConstellationDrift{
       from{transform:scale(1.015) translate3d(0,0,0)}
@@ -599,7 +599,7 @@
       position:absolute;right:0;top:50%;height:100%;aspect-ratio:1/1;
       transform:translateY(-50%) scale(1.015);transform-origin:right center;
       z-index:4;pointer-events:none;mix-blend-mode:screen;will-change:transform;
-      animation:idStarFieldDrift 10s ease-in-out infinite alternate;
+      animation:idStarFieldDrift 22s cubic-bezier(.45,0,.55,1) infinite alternate;
     }
     @keyframes idStarFieldDrift{
       from{transform:translateY(-50%) scale(1.015)}
@@ -607,18 +607,20 @@
     }
     .id-star{
       position:absolute;left:var(--x);top:var(--y);width:var(--s);aspect-ratio:1;
-      border-radius:50%;background:rgba(255,255,255,.98);opacity:.18;
+      border-radius:50%;background:rgba(255,255,255,.98);opacity:.14;
       transform:translate(-50%,-50%) scale(.8);
       box-shadow:0 0 2px rgba(255,255,255,.78),0 0 6px rgba(255,255,255,.28);
-      animation:idStarFlicker var(--t) ease-in-out var(--d) infinite;
+      animation:idStarPulse calc(var(--t,3s) + 1.4s) cubic-bezier(.37,0,.63,1) var(--d,0s) infinite;
     }
     .id-star-bright{
-      opacity:.76;
+      opacity:.68;
       box-shadow:0 0 3px rgba(255,255,255,.98),0 0 9px rgba(255,255,255,.68),0 0 17px rgba(255,255,255,.22);
+      animation-name:idBrightPulse;
     }
     .id-star-bright::before,.id-star-bright::after{
-      content:"";position:absolute;left:50%;top:50%;pointer-events:none;opacity:.42;
+      content:"";position:absolute;left:50%;top:50%;pointer-events:none;opacity:.38;
       transform:translate(-50%,-50%);
+      animation:idBrightGlint calc(var(--t,3s) + 2s) ease-in-out var(--d,0s) infinite alternate;
     }
     .id-star-bright::before{
       width:1px;height:280%;
@@ -628,13 +630,22 @@
       width:280%;height:1px;
       background:linear-gradient(90deg,transparent,rgba(255,255,255,.72),transparent);
     }
-    @keyframes idStarFlicker{
-      0%,100%{opacity:.12;transform:translate(-50%,-50%) scale(.72)}
-      18%{opacity:.48;transform:translate(-50%,-50%) scale(1)}
-      31%{opacity:.22;transform:translate(-50%,-50%) scale(.84)}
-      52%{opacity:.78;transform:translate(-50%,-50%) scale(1.12)}
-      68%{opacity:.28;transform:translate(-50%,-50%) scale(.78)}
-      84%{opacity:.58;transform:translate(-50%,-50%) scale(.98)}
+    @keyframes idStarPulse{
+      0%,100%{opacity:.12}
+      19%{opacity:.34}
+      42%{opacity:.19}
+      64%{opacity:.72}
+      83%{opacity:.27}
+    }
+    @keyframes idBrightPulse{
+      0%,100%{opacity:.48}
+      24%{opacity:.82}
+      51%{opacity:.62}
+      76%{opacity:.96}
+    }
+    @keyframes idBrightGlint{
+      from{opacity:.2}
+      to{opacity:.72}
     }
     .id-image-wash{
       position:absolute;inset:0;
@@ -2007,7 +2018,8 @@ body.is-scrubbing{cursor:ew-resize}
   .id-signal-row span+span::before{margin-right:7px}
 }
 @media(prefers-reduced-motion:reduce){
-  .id-card::before,.id-constellation,.id-image-scan,.id-grid{animation:none}
+  .id-card::before,.id-constellation,.id-image-scan,.id-grid,
+  .id-star-field,.id-star,.id-star-bright::before,.id-star-bright::after{animation:none!important}
 }
 
 
