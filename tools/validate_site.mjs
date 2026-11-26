@@ -147,10 +147,10 @@ for(const file of [
 const site=read('index.html');
 const siteJs=read('assets/js/homepage-v6.js');
 const siteCss=read('assets/css/homepage-v6.css');
-must(site.includes('<body class="home-v6">'),'homepage uses the current v6 spatial visual system');
-must(site.includes('homepage-v6.css?v=20261119-spatial2')&&site.includes('homepage-v6.js?v=20261119-spatial2'),'homepage loads the v6 spatial design and interaction engine');
+must(site.includes('<body class="home-v2">')&&site.includes('class="v3-hero v3-shell"')&&site.includes('class="v3-section v3-shell v3-about"'),'homepage retains the restored v2 identity-led layout');
+must(site.includes('site-redesign.css?v=20261121-tamanna-id1')&&site.includes('site-redesign.js?v=20261121-tamanna-id1'),'homepage loads the restored site redesign stylesheet and interaction engine');
 must(!site.includes('homepage-v5.css')&&!site.includes('homepage-v5.js')&&!site.includes('homepage-v4.css')&&!site.includes('kinetic-story.css')&&!site.includes('homepage-v4.js'),'homepage does not load retired design systems');
-must(site.includes('id="heroCanvas"')&&site.includes('id="projectCanvas"')&&site.includes('id="projectSpotlight"'),'homepage contains both interactive spatial scenes and the project spotlight');
+must(site.includes('id="field"')&&site.includes('id="kineticStage"')&&site.includes('class="id-card tilt reveal"')&&site.includes('class="id-constellation"'),'homepage contains its animated hero, identity card, and constellation image');
 must(site.includes('id="secretReveal"')&&site.includes('id="secretNode"'),'homepage retains the hidden footer story');
 must(site.includes('id="work"')&&site.includes('id="about"')&&site.includes('id="elsewhere"')&&site.includes('id="contact"'),'homepage retains all primary section anchors');
 const schemaOpen='<script type="application/ld+json">',schemaStart=site.indexOf(schemaOpen),schemaEnd=site.indexOf('</script>',schemaStart);
@@ -169,20 +169,19 @@ const knownSchemaIds=new Set(rootSchema['@graph'].map(n=>n['@id']));
 const rootPerson=rootSchema['@graph'].find(n=>n['@type']==='Person');
 must(rootPerson.subjectOf.every(ref=>knownSchemaIds.has(ref['@id'])),'person schema references defined project entities');
 must(!site.includes('BOGURA')&&!site.includes('BANGLADESH'),'homepage omits unwanted location text');
-must((site.match(/class="v6-project-entry"/g)||[]).length===17,'homepage presents seventeen curated project index entries');
+must((site.match(/<article\\b[^>]*class="[^"]*\\bv3-project-card\\b[^"]*"/g)||[]).length===12,'homepage presents twelve curated project cards');
 must(!site.includes('PRO_TOOL_MANIFEST'),'homepage omits the generated micro-tool catalogue');
 for(const ref of [
   'href="/projects/trilyva/"','href="/projects/asset-vault/"','href="/projects/bncagrocare/"',
   'href="/projects/bncagrocare/invoice/"','href="/projects/repo-token-meter/"',
   'href="/projects/code-to-eps/"','href="/projects/code-to-svg/"','href="/projects/webedyts/"',
-  'href="/projects/qalyvyron/"','href="/projects/typing-lesson/"',
-  'href="/projects/trss-sample-recorder/"','href="/projects/trss/"'
+  'href="/projects/qalyvyron/"'
 ]) must(site.includes(ref),'homepage exposes '+ref);
 must(!site.includes('href="/projects/trilyva/renderer/">Open workspace'),'homepage does not send the TRILYVA card straight to the renderer');
 const visibleHomeMarkup=schemaStart>=0&&schemaEnd>schemaStart?site.slice(0,schemaStart)+site.slice(schemaEnd+'</script>'.length):site;
 must(!visibleHomeMarkup.includes('github.com/Tamasrazim/tamasrazim.github.io/tree/main/')&&!visibleHomeMarkup.includes('Source files ')&&!visibleHomeMarkup.includes('SVG source ')&&!visibleHomeMarkup.includes('EPS source '),'homepage omits direct source links in visible markup');
 must(site.includes('href="/projects/tunrun/"')&&!site.includes('href="https://github.com/Tamasrazim/TUNRUN"'),'homepage links to TUNRUN project page');
-must(site.includes('I build software, games, and creative tools.')&&!site.includes('build TUNRUN in C++'),'homepage introduction describes the broader work without centering one project');
+must(site.includes("I'm Robiul Rumman Razim. I use Tamasrazim online.")&&site.includes('I build software across native Windows applications, games, browser tools, and creative work.'),'homepage introduction identifies the person and accurately scopes the work');
 must(!site.includes('work on TUNRUN, a C++ game')&&!site.includes('TUNRUN, a C++ game in development'),'homepage metadata and About copy stay focused on the person');
 must(!site.includes('tamasrazim.dev'),'homepage does not claim a .dev domain');
 must(!site.includes('ProfessionalService')&&!site.includes('13650456762875223511'),'homepage schema avoids unsupported business-profile claims');
@@ -194,7 +193,7 @@ must(siteJs.includes('reduceQuery.addEventListener("change"')&&siteJs.includes('
 must(siteJs.includes('requestAnimationFrame(tick)')&&siteJs.includes('document.hidden'),'homepage animation is frame-driven and checks page visibility');
 must(siteJs.includes('menu.getAttribute("aria-expanded")')&&siteJs.includes('e.key==="Escape"')&&siteJs.includes('menu.focus()'),'homepage navigation supports Escape and focus restoration');
 must(siteCss.includes('@media(max-width:900px)')&&siteCss.includes('@media(max-width:560px)'),'homepage layout has tablet and phone breakpoints');
-for(const route of ['href="#work"','href="#about"','href="/approach/"','href="#elsewhere"','href="/licences/"']) must(site.includes(route),'main header links to '+route);
+for(const route of ['href="/work/"','href="/about/"','href="/approach/"','href="/elsewere/"','href="/licences/"']) must(site.includes(route),'main header links to '+route);
 for(const page of ['work','about','approach']) {
   const pageHtml=read(page+'/index.html');
   must(pageHtml.includes('href="/'+page+'/" aria-current="page"'),'dedicated '+page+' page marks its current navigation route');
@@ -307,10 +306,10 @@ must(!site.includes('data-cinematic-intro="home"')&&!site.includes('project-cine
 const hiddenOriginJs=read('assets/js/hidden-origin.js');
 must(hiddenOriginJs.includes('function alignOriginPaths()')&&hiddenOriginJs.includes("pathFrom(leftName, ['hoFlowA', 'hoFlowCoreA']")&&hiddenOriginJs.includes("pathFrom(rightName, ['hoFlowB', 'hoFlowCoreB']"),'hidden-origin flow paths align dynamically to the Razim and Tamanna text');
 must(site.includes('id="hoFlowA"')&&site.includes('id="hoFlowB"')&&site.includes('id="hoFlowCoreA"')&&site.includes('id="hoFlowCoreB"'),'hidden-origin SVG flow paths expose alignment targets');
-must(site.includes('class="v6-hero"')&&site.includes('class="v6-work"')&&site.includes('class="v6-about"'),'homepage uses the new spatial portfolio section system');
-must(site.includes('data-project-art="keyrun"')&&site.includes('/projects/typing-lesson/'),'homepage keeps KEYRUN in the selected project collection');
+must(site.includes('<body class="home-v2">')&&site.includes('class="v3-hero v3-shell"')&&site.includes('class="v3-about-grid"'),'homepage uses the restored hero, selected-work, and about sections');
+must(rootSchema['@graph'].some(n=>n['@type']==='SoftwareApplication'&&n.name==='KEYRUN — Typing Lesson')&&hub.includes('href="/projects/typing-lesson/"'),'KEYRUN remains documented in the person schema and project directory');
 must(site.includes('id="secretNode"')&&site.includes('id="secretReveal"'),'homepage still exposes the hidden-origin trigger and dialog');
-must(!site.includes('class="id-card tilt reveal"')&&!site.includes('id="idAlias"'),'homepage has retired the previous photo ID-card hero');
+must(site.includes('class="id-card tilt reveal"')&&site.includes('id="idAlias"')&&site.includes('class="id-constellation"'),'homepage retains the identity card and its constellation artwork');
 must(!site.includes('project-cinematic-intro.css?v=')&&!site.includes('project-cinematic-intro.js?v='),'homepage does not load the project-page intro overlay');
 const cinematicProjectKeys=['tunrun','webedyts','qalyvyron','trilyva','neo','code-to-svg','code-to-eps','format-forge','asset-vault','kynestra','bncagrocare','repo-token-meter'];
 must(cinematicProjectKeys.every(key=>cinematicIntroJs.includes(key+': {')||cinematicIntroJs.includes('"'+key+'": {')),'cinematic intro has a dedicated animation profile for every featured project');
