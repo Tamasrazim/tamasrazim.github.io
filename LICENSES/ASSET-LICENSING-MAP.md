@@ -14,7 +14,7 @@ Use the root `LICENSE` for original repository material unless a more specific p
 | Website text and design | Page copy, layout, diagrams, visual treatments | `LICENSES/WEBSITE-CONTENT.md` plus root `LICENSE` |
 | Primary profile / OG image | `og-image.jpg` | `LICENSES/WEBSITE-CONTENT.md`; reuse requires written permission |
 | Profile illustrations | `assets/images/profile/` | `LICENSES/WEBSITE-CONTENT.md`, only to the extent relevant rights are controlled |
-| Personal image asset | `assets/images/tamanna-constellation.jpeg` | `LICENSES/WEBSITE-CONTENT.md`, only to the extent relevant rights are controlled; publication consent/privacy is separate from copyright |
+| Personal image asset | `tamanna-constellation.webp` (served through the website media CDN) | `LICENSES/WEBSITE-CONTENT.md`, only to the extent relevant rights are controlled; publication consent/privacy is separate from copyright |
 | Original SVG, EPS, icon, vector and texture artwork | `assets/`, project asset folders, `prism-*.eps`, code-to-EPS/SVG assets | Root `LICENSE` and `LICENSES/WEBSITE-CONTENT.md`, unless a project notice says otherwise |
 | Animation and procedural libraries | TRILYVA renderer libraries, dot-mesh assets, original animation samples | `LICENSES/TRILYVA-PROPRIETARY.md` and `projects/code-motion/LICENSE.md` where applicable |
 | TRILYVA source, templates, metadata and samples | `projects/trilyva/`, `projects/code-motion/` | TRILYVA project-specific notice plus root `LICENSE` |

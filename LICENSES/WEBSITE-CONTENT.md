@@ -10,7 +10,7 @@ This notice covers original material published in or with the website, including
 
 - Website identity and presentation: original page copy, layouts, design treatments, diagrams, and page-specific styling.
 - Profile and identity images: `og-image.jpg`, original profile illustrations in `assets/images/profile/`, `assets/tamasrazim-abstract-portrait.svg`, and other original Tamasrazim identity artwork.
-- Personal image asset: `assets/images/tamanna-constellation.jpeg`, to the extent the copyright holder owns or controls the relevant rights.
+- Personal image asset: `tamanna-constellation.webp` (served through the website media CDN), to the extent the copyright holder owns or controls the relevant rights.
 - Original graphics: SVG artwork, icons, textures, dot-mesh designs, vector illustrations, EPS files, animation frames, and other original visual assets.
 - Motion and media: original animation code, video previews, storyboards, original audio/visual arrangements, and creative project samples.
 - Project presentation: original screenshots, diagrams, documentation, descriptions, and page content.
@@ -26,7 +26,7 @@ To request permission, contact tamasrazim.public@gmail.com and identify the exac
 
 The official social-sharing / Open Graph image is `og-image.jpg`. Its display in link previews does not grant permission to reuse it as a profile picture, avatar, banner, or promotional image.
 
-The same default applies to original profile illustrations and `assets/images/tamanna-constellation.jpeg): no separate reuse permission is granted unless stated in writing. Copyright ownership in an image is separate from privacy, publicity, or consent rights of any person depicted. This notice does not grant rights that the copyright holder does not control.
+The same default applies to original profile illustrations and `tamanna-constellation.webp`: no separate reuse permission is granted unless stated in writing. Copyright ownership in an image is separate from privacy, publicity, or consent rights of any person depicted. This notice does not grant rights that the copyright holder does not control.
 
 ## Exclusions and priority
 
