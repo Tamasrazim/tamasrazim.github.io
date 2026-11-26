@@ -320,6 +320,9 @@ must(constellationStarMarkup&&constellationStarMarkup.includes('--x:64.673%;--y:
 const constellationCoordinates=Array.from(constellationStarMarkup.matchAll(/--x:([\d.]+)%;--y:([\d.]+)%/g),match=>[Number(match[1]),Number(match[2])]);
 must(constellationCoordinates.length===425&&constellationCoordinates.every(([x,y])=>x>=0&&x<=100&&y>=0&&y<=100),'all detected identity-card stars use valid normalized image coordinates');
 must(identityCss.includes('transform-origin:right center')&&identityCss.includes('translate3d(-1.745%,.6%,0)'),'identity-card star field stays aligned with the right-aligned square image during drift');
+must(identityCss.includes('@keyframes idStarPulse')&&identityCss.includes('@keyframes idBrightPulse')&&identityCss.includes('@keyframes idBrightGlint'),'constellation points use separate soft twinkle and bright-node glint animations');
+must(identityCss.includes('idConstellationDrift 22s')&&identityCss.includes('idStarFieldDrift 22s'),'constellation artwork and mapped star field share the slower coordinated drift cycle');
+must(identityCss.includes('.id-star-field,.id-star,.id-star-bright::before,.id-star-bright::after{animation:none!important}'),'reduced-motion mode disables all constellation star animation');
 must(identityCss.includes('.id-star-bright::before')&&identityCss.includes('.id-star-bright::after'),'bright constellation nodes retain four-point star glints');
 must(!site.includes('project-cinematic-intro.css?v=')&&!site.includes('project-cinematic-intro.js?v='),'homepage does not load the project-page intro overlay');
 const cinematicProjectKeys=['tunrun','webedyts','qalyvyron','trilyva','neo','code-to-svg','code-to-eps','format-forge','asset-vault','kynestra','bncagrocare','repo-token-meter'];
