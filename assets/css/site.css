@@ -611,7 +611,6 @@
       transform:translate(-50%,-50%) scale(.8);
       box-shadow:0 0 2px rgba(255,255,255,.78),0 0 6px rgba(255,255,255,.28);
       animation:idStarFlicker var(--t) ease-in-out var(--d) infinite;
-      will-change:opacity,transform;
     }
     .id-star-bright{
       opacity:.76;
